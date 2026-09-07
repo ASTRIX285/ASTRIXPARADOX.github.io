@@ -1,6 +1,6 @@
 name: Cloudflare Worker Diagnostics
 
-# Permission retry two
+# Service discovery retry three
 
 on:
   push:

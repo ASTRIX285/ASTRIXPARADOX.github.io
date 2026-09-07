@@ -33,19 +33,24 @@ async function query(name, parameters, limit = 2000) {
   return body.result || {};
 }
 
-const serviceFilter = {
-  key: '$metadata.service',
-  operation: 'eq',
-  type: 'string',
-  value: service,
-};
+const services = await query('service-counts', {
+  view: 'calculations',
+  datasets: [],
+  calculations: [
+    { operator: 'count', alias: 'requests' },
+  ],
+  groupBys: [
+    { type: 'string', value: '$metadata.service' },
+  ],
+  orderBy: { value: 'requests', order: 'desc' },
+  limit: 100,
+}, 100);
 
 const slow = await query('slow-events', {
   view: 'events',
   datasets: [],
   filterCombination: 'and',
   filters: [
-    serviceFilter,
     {
       key: '$workers.wallTimeMs',
       operation: 'gte',
@@ -59,8 +64,6 @@ const slow = await query('slow-events', {
 const failures = await query('memory-events', {
   view: 'events',
   datasets: [],
-  filterCombination: 'and',
-  filters: [serviceFilter],
   needle: {
     value: 'Exceeded Memory',
     isRegex: false,
@@ -72,8 +75,6 @@ const failures = await query('memory-events', {
 const percentiles = await query('latency-percentiles', {
   view: 'calculations',
   datasets: [],
-  filterCombination: 'and',
-  filters: [serviceFilter],
   calculations: [
     { operator: 'count', alias: 'requests' },
     { operator: 'p99', alias: 'p99_wall_ms', key: '$workers.wallTimeMs', keyType: 'number' },
@@ -81,6 +82,7 @@ const percentiles = await query('latency-percentiles', {
     { operator: 'max', alias: 'max_wall_ms', key: '$workers.wallTimeMs', keyType: 'number' },
   ],
   groupBys: [
+    { type: 'string', value: '$metadata.service' },
     { type: 'string', value: '$workers.event.request.path' },
   ],
   orderBy: { value: 'max_wall_ms', order: 'desc' },
@@ -119,6 +121,7 @@ function safeEvent(event) {
 console.log(`CLOUDFLARE_DIAGNOSTICS_SERVICE=${service}`);
 console.log(`CLOUDFLARE_DIAGNOSTICS_FROM=${new Date(from).toISOString()}`);
 console.log(`CLOUDFLARE_DIAGNOSTICS_TO=${new Date(now).toISOString()}`);
+console.log(`CLOUDFLARE_SERVICE_COUNTS=${JSON.stringify(services.calculations || [])}`);
 console.log(`CLOUDFLARE_MEMORY_EVENTS=${JSON.stringify(eventRows(failures).map(safeEvent))}`);
 console.log(`CLOUDFLARE_SLOW_EVENTS=${JSON.stringify(eventRows(slow).map(safeEvent))}`);
 console.log(`CLOUDFLARE_LATENCY_PERCENTILES=${JSON.stringify(percentiles.calculations || [])}`);
