@@ -1,6 +1,6 @@
 name: Cloudflare Worker Diagnostics
 
-# Service discovery retry three
+# Telemetry key discovery retry four
 
 on:
   push:
