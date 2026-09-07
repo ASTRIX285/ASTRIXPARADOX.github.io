@@ -30,7 +30,7 @@
   --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
   --apx-icon-selector:4.25rem;
   --apx-icon-inspect:7rem;
-  --apx-icon-weapon-equipped:clamp(5.375rem,8cqi,7rem);
+  --apx-icon-weapon-equipped:clamp(5.375rem,8vw,7rem);
 }
 
 html,body{max-width:100%;overflow-x:hidden}
