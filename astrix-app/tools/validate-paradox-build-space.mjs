@@ -189,7 +189,8 @@ assert.match(css,/\.build-rail\{container-type:inline-size;--build-rail-icon:cla
 assert.match(css,/\.armour-design-section \.gear-columns\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'All five armour cards must remain on one row.');
 assert.match(css,/--build-armour-art:clamp\(88px,6vw,104px\)/,'Build Armour art must use the same readable range as Character.');
 assert.match(css,/--build-armour-mod:var\(--guardian-square\)/,'Build Armour mods must consume the shared Character socket size.');
-assert.match(gearCss,/--gear-weapon-art:clamp\(86px,8cqi,112px\);[\s\S]*?--gear-weapon-socket:clamp\(34px,3\.6cqi,52px\)/,'Character and Build Forge must consume one shared weapon geometry.');
+assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-weapon-equipped\);[\s\S]*?--gear-weapon-socket:clamp\(34px,3\.6cqi,52px\)/,'Character and Build Forge must consume the shared equipped-weapon token.');
+assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-weapon-card\)/,'Recommended weapon cards must consume the shared compact weapon-card token.');
 assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'Build Forge must preserve the shared three-card weapon row.');
 assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
 
@@ -262,7 +263,7 @@ assert.match(advisorRuntime,/item\.weaponRollAdvice=advice/,'Weapon recommendati
 assert.match(runtime,/weaponPerkMatrixMarkup\(item,\{recommendedHashes\}\)/,'Recommended weapons must render the integrated tier-driven perk model.');
 assert.match(runtime,/weaponTraitHierarchyMarkup\(item,\{compact:true\}\)/,'Recommended Exotic weapon traits must remain directly beneath the intrinsic hierarchy.');
 assert.match(runtime,/TIER \$\{tier\}[\s\S]*?\$\{rowCount\} PERK ROW/,'Recommended weapons must identify the exact tier and modeled perk-row count.');
-assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:clamp\(44px,4\.2cqi,56px\);--gear-weapon-socket:clamp\(20px,2\.25cqi,28px\)/,'Build review weapons must use the compact half-scale art and socket geometry.');
+assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-weapon-card\);--gear-weapon-socket:clamp\(20px,2\.25cqi,28px\)/,'Build review weapons must use the shared compact art token and socket geometry.');
 assert.match(css,/\.review-weapon \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--gear-weapon-socket\)\)/,'Build review must reuse the shared weapon socket size across every tier row.');
 assert.match(css,/\.review-weapon em\{[^}]*font:800 13px\/1\.25/,'Owned candidate eligibility must remain prominent inside the compact weapon cards.');
 assert.match(css,/body\.build-forge-page \.review-weapon small\{font-size:11px!important/,'Compact weapon supporting copy must remain readable.');

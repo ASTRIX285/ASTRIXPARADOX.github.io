@@ -109,6 +109,7 @@ assert.match(vaultRuntime,/loadPreparedPagePayload\(session,'vault'/);
 assert.match(vaultRuntime,/guardianManifest\.hydratePayload/);
 assert.match(vaultRuntime,/matchArmourBuilds\(optimiserItems\(\),targets,\{limit:5\}\)/);
 assert.match(vaultCss,/--vault-item-icon:var\(--apx-icon-catalog,8rem\)/,'Vault inventory art must remain anchored to the shared catalogue token instead of filling the grid column.');
+assert.match(vaultCss,/\.vault-candidate-item\{[^}]*grid-template-columns:var\(--apx-icon-card\)[\s\S]*?\.vault-candidate-item img\{width:var\(--apx-icon-card\);height:var\(--apx-icon-card\)/,'Vault optimiser candidates must consume the shared card icon token.');
 assert.match(vaultCss,/\.vault-item-inspect\{position:fixed/,'Exact item stats require the Forge hover inspection card.');
 assert.doesNotMatch(vaultCss,/\.vault-item-inspect\{top:6rem;right:1rem\}/,'Vault inspection must not remain pinned to the top-right corner.');
 assert.match(vaultRuntime,/function positionItemInspect\(panel,anchor\)[\s\S]*?getBoundingClientRect\(\)[\s\S]*?bounds\.right\+gap[\s\S]*?bounds\.left-width-gap/,'Vault inspection must follow its item and flip at the viewport edge.');

@@ -36,7 +36,7 @@
 }
 .paradox-item-card--weapon .paradox-item-header{background:linear-gradient(95deg,rgba(88,49,111,.95),rgba(60,31,69,.78) 58%,rgba(20,16,25,.82))}
 .paradox-item-card--armour .paradox-item-header{background:linear-gradient(95deg,rgba(94,54,118,.95),rgba(52,29,68,.78) 58%,rgba(20,16,25,.82))}
-.paradox-item-header .weapon-detail-icon{width:96px;height:96px;border:2px solid var(--paradox-card-gold);border-radius:8px;background:#17111e;box-shadow:0 0 18px rgba(224,185,79,.16)}
+.paradox-item-header .weapon-detail-icon{border:2px solid var(--paradox-card-gold);border-radius:8px;background:#17111e;box-shadow:0 0 18px rgba(224,185,79,.16)}
 .paradox-item-header .weapon-detail-icon img{display:block;width:100%;height:100%;object-fit:cover}
 .paradox-item-header .weapon-detail-icon>.ph-glyph{display:grid;width:100%;height:100%;place-items:center;font-size:2rem}
 .paradox-item-identity{min-width:0}
@@ -123,7 +123,6 @@
   .weapon-detail-drawer.paradox-item-shell,.armour-drawer.paradox-item-shell{inset:0;width:100%;height:100dvh;padding:10px;border:0;border-radius:0}
   .paradox-item-card{border-radius:10px}
   .paradox-item-header{grid-template-columns:74px minmax(0,1fr);gap:13px;padding:17px 50px 17px 15px}
-  .paradox-item-header .weapon-detail-icon{width:74px;height:74px}
   .paradox-item-header h2{font-size:clamp(1.35rem,6.3vw,1.75rem)}
   .paradox-item-header p{font-size:13px}
   .paradox-kicker{font-size:12px}
@@ -278,8 +277,6 @@ body.weapon-detail-open {
 
 .paradox-item-card--weapon .weapon-detail-icon {
   display: grid;
-  width: 96px;
-  height: 96px;
   place-items: center;
   overflow: hidden;
   border: 2px solid var(--paradox-card-gold);
@@ -739,11 +736,6 @@ body.weapon-detail-open {
     padding: 15px 46px 15px 14px;
   }
 
-  .paradox-item-card--weapon .weapon-detail-icon {
-    width: 64px;
-    height: 64px;
-  }
-
   .paradox-item-card--weapon .paradox-kicker,
   .paradox-item-card--weapon .weapon-detail-power small {
     font-size: 9px;
@@ -875,11 +867,6 @@ body.weapon-detail-open {
 @media (max-width: 350px) {
   .paradox-item-card--weapon .paradox-item-header {
     grid-template-columns: 58px minmax(0, 1fr);
-  }
-
-  .paradox-item-card--weapon .weapon-detail-icon {
-    width: 58px;
-    height: 58px;
   }
 
   .paradox-item-card--weapon .weapon-detail-power {
@@ -1031,8 +1018,6 @@ body.armour-drawer-open {
 
 .paradox-item-card--armour .weapon-detail-icon {
   display: grid;
-  width: 96px;
-  height: 96px;
   place-items: center;
   overflow: hidden;
   border: 2px solid var(--paradox-card-gold);
@@ -1477,11 +1462,6 @@ body.armour-drawer-open {
     padding: 15px 46px 15px 14px;
   }
 
-  .paradox-item-card--armour .weapon-detail-icon {
-    width: 64px;
-    height: 64px;
-  }
-
   .paradox-item-card--armour .paradox-kicker,
   .paradox-item-card--armour .weapon-detail-power small {
     font-size: 9px;
@@ -1611,11 +1591,6 @@ body.armour-drawer-open {
 @media (max-width: 350px) {
   .paradox-item-card--armour .paradox-item-header {
     grid-template-columns: 58px minmax(0, 1fr);
-  }
-
-  .paradox-item-card--armour .weapon-detail-icon {
-    width: 58px;
-    height: 58px;
   }
 
   .paradox-item-card--armour .weapon-detail-power {

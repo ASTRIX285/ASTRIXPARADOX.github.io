@@ -1,7 +1,7 @@
 /* ASTRIX PARADOX interface contract
-   One source of truth for workspace proportions and readable type roles across
-   Journey, Character, Forge Loader, Build Forge, Mission Reports, Vault and
-   Loadout. Page-owned data, interactions and icon geometry remain untouched. */
+   One source of truth for workspace proportions, readable type roles and named
+   item icon tiers across Journey, Character, Forge Loader, Build Forge, Mission
+   Reports, Vault and Loadout. */
 :root{
   --apx-workspace-left:minmax(360px,20%);
   --apx-workspace-centre:minmax(720px,1fr);
@@ -28,6 +28,9 @@
   --apx-icon-record:3rem;
   --apx-icon-catalog:8rem;
   --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
+  --apx-icon-selector:4.25rem;
+  --apx-icon-inspect:7rem;
+  --apx-icon-weapon-equipped:clamp(5.375rem,8cqi,7rem);
 }
 
 html,body{max-width:100%;overflow-x:hidden}

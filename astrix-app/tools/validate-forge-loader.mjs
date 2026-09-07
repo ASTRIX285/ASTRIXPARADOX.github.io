@@ -332,7 +332,7 @@ assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.s
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
 assert.match(html,/forge-loader\.mjs\?v=20260907-item-inspect-scope-1/,'Forge Loader must load the exact matched-item inspection scope without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260907-matrix-item-frame-1/,'Forge Loader must refresh the fixed calculated-load item frame without stale page CSS.');
+assert.match(html,/forge-loader\.css\?v=20260907-icon-token-1/,'Forge Loader must refresh the shared icon-token wiring without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -385,10 +385,14 @@ assert.match(css,/\.forge-hero-card\{[^}]*aspect-ratio:474\/96[^}]*overflow:hidd
 assert.match(css,/\.forge-stat-targets label>span\{[^}]*\.9rem/,'Eligible stat labels must retain the enlarged readable type scale.');
 assert.match(css,/\.forge-matrix-stat small\{font-size:\.92rem\}[\s\S]*?\.forge-matrix-stat b\{font-size:1\.25rem\}/,'Forge Matrix stat labels and values must remain readable at the approved desktop density.');
 assert.match(css,/@container\(max-width:60rem\)[\s\S]*?\.forge-matrix-stats\{grid-column:1\/-1;grid-row:2\}/,'Forge Matrix rows must reflow calculated stats without clipping in a narrow output column.');
-assert.match(css,/\.forge-matrix-row\{grid-template-columns:6\.7rem 40px minmax\(22rem,1fr\)/,'Desktop Forge Matrix rows must reserve the strict 40-pixel item width.');
-assert.match(css,/\.forge-matrix-exotic\{width:40px;height:60px;justify-self:center;align-self:center\}/,'Every matched Exotic frame must remain exactly 40 pixels wide by 60 pixels high.');
-assert.match(css,/@container\(max-width:60rem\)\{\.forge-matrix-row\{grid-template-columns:6\.7rem 40px minmax\(0,1fr\)/,'Compact Forge Matrix rows must preserve the strict 40-pixel item width.');
-assert.match(css,/@media\(max-width:820px\)\{\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) 40px 6\.8rem\}/,'Mobile Forge Matrix rows must preserve the strict 40-pixel item width.');
+assert.match(css,/\.forge-matrix-row\{grid-template-columns:6\.7rem var\(--apx-icon-card\) minmax\(22rem,1fr\)/,'Desktop Forge Matrix rows must reserve the shared card icon width.');
+assert.match(css,/\.forge-matrix-exotic\{width:var\(--apx-icon-card\);height:var\(--apx-icon-card\);justify-self:center;align-self:center\}/,'Every matched Exotic frame must consume the shared square card icon token.');
+assert.match(css,/@container\(max-width:60rem\)\{\.forge-matrix-row\{grid-template-columns:6\.7rem var\(--apx-icon-card\) minmax\(0,1fr\)/,'Compact Forge Matrix rows must preserve the shared card icon width.');
+assert.match(css,/@media\(max-width:820px\)\{\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) var\(--apx-icon-card\) 6\.8rem\}/,'Mobile Forge Matrix rows must preserve the shared card icon width.');
+assert.match(css,/\.forge-set-head\{[^}]*grid-template-columns:var\(--apx-icon-record\)[\s\S]*?\.forge-set-head img\{width:var\(--apx-icon-record\);height:var\(--apx-icon-record\)/,'Set Protocol records must consume the shared record icon token.');
+assert.match(css,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-card\)[\s\S]*?\.forge-staged-slot img,\.forge-stage-empty\{width:var\(--apx-icon-card\);height:var\(--apx-icon-card\)/,'Staged armour must consume the shared card icon token.');
+assert.match(css,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-selector\),1fr\)/,'Exotic selection must consume the shared selector icon token.');
+assert.match(css,/\.forge-inspect-main\{[^}]*grid-template-columns:var\(--apx-icon-inspect\)[\s\S]*?\.forge-inspect-main img\{width:var\(--apx-icon-inspect\);height:var\(--apx-icon-inspect\)/,'Matched item inspection must consume the shared inspect icon token.');
 assert.match(runtime,/document\.documentElement\.append\(panel\)/,'The inspection card must escape the density-scaled body before viewport positioning.');
 assert.match(runtime,/getBoundingClientRect\(\)/,'The inspection card must anchor to the selected item.');
 assert.doesNotMatch(css,/\.forge-item-inspect\{[^}]*right:/,'The inspection card must not be fixed to the top-right dashboard corner.');

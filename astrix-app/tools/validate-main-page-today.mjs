@@ -106,7 +106,7 @@ assert.match(gearModule,/is-set-2-active/,'2-piece active state must reach the c
 assert.match(gearModule,/is-set-4-active/,'4-piece active state must reach the card');
 assert.match(gearCss,/\.gear-slot\.is-set-2-active/,'2-piece card highlight is missing');
 assert.match(gearCss,/\.gear-slot\.is-set-4-active/,'4-piece card highlight is missing');
-assert.match(gearCss,/--gear-weapon-art:clamp\(86px,8cqi,112px\)/,'Weapon art must retain the shared readable square scale');
+assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-weapon-equipped\)/,'Weapon art must consume the shared readable square token');
 assert.match(gearCss,/\.gear-arm-anchor \.arm\{width:clamp\(88px,6vw,104px\)!important;height:clamp\(88px,6vw,104px\)!important/,'Armour art must retain the shared readable scale');
 assert.match(gearCss,/\.gear-mod\.is-masterwork-gold\{[^}]*border:1px solid rgba\(142,34,48,\.94\)[^}]*outline:2px solid #f0d55e!important/,'Level-five masterwork must retain the 2px outer crimson/gold stroke');
 assert.match(gearCss,/weapon-perk-strip\{[^}]*border:0[^}]*background:transparent/,'Selected perks must not sit inside a blue container');
@@ -200,7 +200,7 @@ assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot
 assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWorkingBuildPatch\(state\.workingBuild\|\|state\.originalBuild\)/,'Representative manual edits must use a small mutable patch instead of cloning the full snapshot.');
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
 assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260905-card-space-mods-1'/,'Build Armour must import the same current renderer as the locked Character section');
-assert.match(buildHtml,/paradox-build-space\.css\?v=20260906-review-layout-1/,'Build must load the compact scrollable recommendation layout without a stale cache');
+assert.match(buildHtml,/paradox-build-space\.css\?v=20260907-icon-token-1/,'Build must load the shared icon-token wiring without a stale cache');
 assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260906-live-equip-1/,'Build must load the repaired Apply dependency graph without stale code');
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');
 assert.match(buildModule,/document\.addEventListener\('forge:guardian-loadout-context',event=>recoverMissingBuild\(event\.detail\|\|\{\}\)\)/,'Build must recover a missing handoff from the verified live Guardian context');
