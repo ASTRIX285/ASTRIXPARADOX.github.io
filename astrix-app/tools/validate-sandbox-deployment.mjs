@@ -145,6 +145,8 @@ assert.match(journeyModule,/recordPresentationTree\(payload\)[\s\S]*?resolveReco
 assert.doesNotMatch(journeyModule,/parentNodeHashes/,'Journey must not guess the Records root from an incomplete set of returned progress nodes');
 assert.match(journeyModule,/currentRecordBranch\(root,tree\.nodes\)[\s\S]*?sectionKey==='lore'&&categories\.length/,'Medals, Catalysts and verified Lore must resolve from official child definitions while empty Lore stays hidden');
 assert.match(journeyModule,/destinationRecordSections[\s\S]*?recordPresentationTree\(payload\)[\s\S]*?findDestinationNodes/,'Destination records must use the same verified Records-root hierarchy');
+assert.match(journeyModule,/destinationRecordSections[\s\S]*?const records=\[\][\s\S]*?return \{records,endgame\}/,'Destination progress must retain one canonical Records collection');
+assert.doesNotMatch(journeyModule,/const triumphRows=|return \{triumphs,records,endgame\}|sections:\{triumphs:/,'Destination progress must not duplicate Bungie Record rows under a Triumphs alias');
 assert.match(journeyModule,/characterCraftables\?\.data[\s\S]*?craftingRootNodeHash[\s\S]*?presentationLeafCategories\(rootHash,nodes,'records'\)/,'Weapon patterns must use Bungie’s Craftables root and current Record leaves');
 assert.match(journeyModule,/DestinyRecordDefinition[\s\S]*?DestinyObjectiveDefinition[\s\S]*?titleRequirementRow\(payload,componentCharacterId/,'Pattern rows must join official Record definitions to verified profile objective progress');
 assert.doesNotMatch(journeyModule,/presentationLeafCategories\(rootHash,nodes,'craftables'\)/,'Journey must not read the empty craftables child list from current presentation definitions');

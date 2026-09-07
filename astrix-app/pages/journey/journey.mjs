@@ -695,13 +695,9 @@ async function destinationRecordSections(payload,key,characterId){
     const row=titleRequirementRow(payload,characterId,entry,definition,objectiveDefinitions);
     return row?{entry,definition,row,component:titleRecordFor(payload,characterId,entry.recordHash)}:null;
   }).filter(Boolean)}));
-  const triumphs=[];
   const records=[];
   recordsBySection.forEach(({section,records:sectionRecords})=>{
-    const triumphRows=sectionRecords.filter(item=>!String(item.definition?.recordTypeName||'').trim()||destinationNameKey(item.definition.recordTypeName)==='triumphs');
-    const recordRows=sectionRecords;
-    if(triumphRows.length)triumphs.push(destinationCategoryItem(section,'TRIUMPH SUBCATEGORY'),...triumphRows.map(item=>destinationRecordItem(item.row)));
-    if(recordRows.length)records.push(destinationCategoryItem(section,'RECORD CATEGORY'),...recordRows.map(item=>destinationRecordItem(item.row)));
+    if(sectionRecords.length)records.push(destinationCategoryItem(section,'RECORD CATEGORY'),...sectionRecords.map(item=>destinationRecordItem(item.row)));
   });
   const activityHashes=[...new Set(recordsBySection.flatMap(({records})=>records.flatMap(item=>(item.component?.objectives||[]).map(objective=>finiteNumber(objective?.activityHash)).filter(hash=>hash!==null))))];
   const activityDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',activityHashes);
@@ -740,7 +736,7 @@ async function destinationRecordSections(payload,key,characterId){
     const type=(activity.activityModeTypes||[]).includes(4)?'RAID':'DUNGEON';
     endgame.push({hash:activity.hash,name:`${type} · ${name}`,icon:bungiePresentationIcon(activity),description:'Activity catalogue · Completion progress unavailable',completed:null});
   }
-  return {triumphs,records,endgame};
+  return {records,endgame};
 }
 
 async function destinationQuestRows(payload,key,characterId){
@@ -848,7 +844,7 @@ async function bindDestinationProgress(payload,key=globalThis.ForgeDestinations?
       const regionChests=bindRegionChestProgress(payload,key,characterId,requestId).catch(()=>null);
       const [recordSections,quests]=await Promise.all([destinationRecordSections(payload,key,characterId),destinationQuestRows(payload,key,characterId)]);
       if(requestId!==destinationProgressRequest)return;
-      publishJourneyDestinationData({key,sections:{triumphs:recordSections.triumphs,records:recordSections.records,quests,endgame:recordSections.endgame}});
+      publishJourneyDestinationData({key,sections:{records:recordSections.records,quests,endgame:recordSections.endgame}});
       await regionChests;
     }catch(error){
       if(requestId===destinationProgressRequest)publishJourneyDestinationData({key,error:'Destination records could not be loaded. Select this destination to retry.',sections:{}});
