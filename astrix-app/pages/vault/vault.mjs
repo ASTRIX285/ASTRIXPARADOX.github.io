@@ -1,11 +1,14 @@
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
-import {fetchDisplayProfile} from '../guardian-workspace-v2/guardian-display-profile.mjs?v=20260906-page-payload-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1';
-import {bindPreparedPageRefreshControl,cacheBungieProfile,createPreparedPageRefreshController,markGuardianFastReturn,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
+import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
 import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260905-weapon-audit-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+
+mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 const PAGE_SIZE=48;
 const SELECTED_CHARACTER_KEY='astrix:selected-character-id';
@@ -40,11 +43,6 @@ function setStatus(message,state=''){
   if(node){node.textContent=message;node.className=`vault-runtime-status${state?` is-${state}`:''}`;}
 }
 
-function loaderProgress(percent,label){
-  globalThis.ForgeLoader?.set?.(percent);
-  globalThis.ForgeLoader?.status?.(label);
-}
-
 function characters(){return Object.values(payload?.profile?.characters?.data||{});}
 
 function selectedCharacter(){return characters().find(character=>text(character.characterId)===activeCharacterId)||null;}
@@ -74,30 +72,15 @@ function resolveActiveCharacter(requestedId=''){
 }
 
 async function fetchProfile(){
-  const url=new URL('/bungie/page/vault',AUTH_ORIGIN);
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),60000);
-  try{
-    const payload=await fetchDisplayProfile(url,{signal:controller.signal});
-    assertRenderablePagePayload(payload,'vault');
-    await cacheBungieProfile(session,payload,'vault');
-    markPreparedPageCheckSuccess(session,'vault');
-    return payload;
-  }catch(error){
-    if(error?.name==='AbortError')throw new Error('Bungie inventory request timed out. Refresh or reconnect Bungie.');
-    throw error;
-  }finally{clearTimeout(timer);}
+  return loadPreparedPagePayload(session,'vault',{force:true});
 }
 
 async function loadVerifiedPayload(){
-  loaderProgress(18,'Checking verified Guardian inventory…');
-  const cached=await readCachedBungieProfile(session,'vault');
-  const shared=globalThis.FORGE_HERO_PROFILE_PAYLOAD||(!cached?.profile?await globalThis.FORGE_HERO_PROFILE_PROMISE:null);
-  const next=shared?.pageReady?.page==='vault'?shared:cached?.pageReady?.page==='vault'?cached:await fetchProfile();
+  const shared=globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
+  const next=await loadPreparedPagePayload(session,'vault',{sharedPayload:shared});
   if(!next?.profile)throw new Error('Bungie returned no verified profile inventory.');
   assertRenderablePagePayload(next,'vault');
-  await cacheBungieProfile(session,next,'vault');
-  loaderProgress(46,'Joining private inventory to prepared definitions…');
+  reportPreparedPageStage('join','vault');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,includeReusable:true,allowNetwork:false});
   return next;
 }
@@ -414,7 +397,7 @@ function installEvents(){
     renderAll();
     setStatus(`${activeCharacterClass.toUpperCase()} inventory active${postmasterStatus()}.`,'good');
   });
-  document.addEventListener('forge:manifest-progress',event=>loaderProgress(Math.max(24,Number(event.detail?.percent)||24),event.detail?.label||'Preparing Bungie manifest…'));
+  document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','vault'));
 }
 
 async function settleVisibleImages(){
@@ -441,7 +424,7 @@ async function init(){
     }
     byId('vaultConnectionState').textContent='INVENTORY READY';
     payload=await loadVerifiedPayload();
-    loaderProgress(78,'Building verified armour catalogue…');
+    reportPreparedPageStage('render','vault');
     catalogue=createVaultCatalogue(payload);
     resolveActiveCharacter(activeCharacterId);
     configureOptimiser({reset:true});
@@ -450,7 +433,7 @@ async function init(){
     updateTotals();
     renderAll();
     startVaultRefresh();
-    loaderProgress(92,'Rendering verified armour catalogue…');
+    reportPreparedPageStage('render','vault');
     const unresolved=catalogue.totals.unresolvedDefinitions;
     setStatus(`${catalogue.totals.ownedArmour} verified armour item${catalogue.totals.ownedArmour===1?'':'s'} loaded${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}${postmasterStatus()}.`,'good');
     await settleVisibleImages();

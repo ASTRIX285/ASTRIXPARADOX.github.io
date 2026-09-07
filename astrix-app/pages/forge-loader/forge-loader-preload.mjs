@@ -1,9 +1,7 @@
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
-import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
+import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 
 const PAGE_PATH='/astrix-app/pages/forge-loader/';
-let pageRequest=null;
 
 function forgeLoaderTargetUrl(value=location.href){
   const source=new URL(String(value),location.href);
@@ -15,45 +13,13 @@ function forgeLoaderTargetUrl(value=location.href){
   return target;
 }
 
-async function requestPreparedPayload(){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),60000);
-  try{
-    const response=await fetch(new URL('/bungie/page/loadout',AUTH_ORIGIN),{
-      credentials:'include',
-      headers:{Accept:'application/json'},
-      signal:controller.signal
-    });
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload?.error||`Bungie inventory request failed (${response.status}).`);
-    assertRenderablePagePayload(payload,'loadout');
-    return payload;
-  }catch(error){
-    if(error?.name==='AbortError')throw new Error('Bungie inventory request timed out. Refresh or reconnect Bungie.');
-    throw error;
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
 async function preloadForgeLoaderPayload(session,{force=false,sharedPayload=null}={}){
   if(session?.authenticated!==true)return null;
-  if(!force){
-    if(sharedPayload?.pageReady?.page==='loadout'&&sharedPayload?.profile)return assertRenderablePagePayload(sharedPayload,'loadout');
-    const cached=await readCachedBungieProfile(session,'loadout');
-    if(cached?.pageReady?.page==='loadout'&&cached?.profile)return assertRenderablePagePayload(cached,'loadout');
-    if(pageRequest)return pageRequest;
-  }
-  pageRequest=(async()=>{
-    const payload=await requestPreparedPayload();
-    await cacheBungieProfile(session,payload,'loadout');
-    markPreparedPageCheckSuccess(session,'loadout');
-    globalThis.FORGE_LOADER_PRELOAD_PAYLOAD=payload;
-    return payload;
-  })();
-  globalThis.FORGE_LOADER_PRELOAD_PROMISE=pageRequest;
-  try{return await pageRequest;}
-  finally{pageRequest=null;}
+  const request=loadPreparedPagePayload(session,'loadout',{force,sharedPayload});
+  globalThis.FORGE_LOADER_PRELOAD_PROMISE=request;
+  const payload=await request;
+  globalThis.FORGE_LOADER_PRELOAD_PAYLOAD=payload;
+  return payload;
 }
 
 async function prepareForgeLoaderEntry(target=forgeLoaderTargetUrl(),resolvedSession=null){

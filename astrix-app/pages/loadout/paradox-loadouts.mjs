@@ -1,6 +1,11 @@
 import {listParadoxLoadouts,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
 import {createBuildState} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+
+mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const byId=id=>document.getElementById(id);
@@ -21,7 +26,7 @@ function renderDetail(){
 function render(){
   const list=byId('paradoxLoadoutList'),count=byId('paradoxLoadoutCount');if(count)count.textContent=`${records.length} SAVED`;
   if(list)list.innerHTML=records.length?records.map(record=>`<button type="button" class="paradox-loadout-card${record.id===selectedId?' is-active':''}" data-saved-id="${esc(record.id)}"><span><b>${esc(record.name)}</b><span>${esc(record.summary?.subclass||record.binding.characterClass||'Guardian')} · ${Number(record.summary?.weaponCount||0)} weapons · ${Number(record.summary?.armourCount||0)} armour</span></span><em>R${Number(record.revision||1)}</em></button>`).join(''):'<div class="paradox-loadout-empty"><span><b>NO SAVED PARADOX BUILDS</b>Open Build Forge, edit or generate a Working Build, then choose Save PARADOX.</span></div>';
-  renderDetail();window.ForgeLoader?.set?.(96);window.ForgeLoader?.status?.('Saved loadouts rendered');window.ForgeLoader?.ready?.(document.querySelector('.apx-page-shell'));
+  renderDetail();
 }
 function selectedRecord(){return records.find(row=>row.id===selectedId)||null;}
 function openRecord(record){
@@ -35,4 +40,21 @@ async function removeRecord(record){if(!record||!confirm(`Delete the PARADOX loa
 
 document.addEventListener('click',event=>{const card=event.target.closest?.('[data-saved-id]');if(card){selectedId=card.dataset.savedId;render();return;}const action=event.target.closest?.('[data-saved-action]');if(!action)return;const record=selectedRecord();if(action.dataset.savedAction==='open')openRecord(record);else if(action.dataset.savedAction==='download')downloadRecord(record);else if(action.dataset.savedAction==='delete')void removeRecord(record);});
 
-records=await listParadoxLoadouts();selectedId=records[0]?.id||'';render();
+async function prepareVerifiedLoadoutPage(){
+  reportPreparedPageStage('start','loadout');
+  const session=await getBungieSession();
+  reportPreparedPageStage('session','loadout');
+  if(session?.authenticated!==true)return null;
+  const payload=await loadPreparedPagePayload(session,'loadout',{sharedPayload:globalThis.FORGE_HERO_PROFILE_PAYLOAD});
+  globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
+  return payload;
+}
+
+const [savedResult,preparedResult]=await Promise.allSettled([listParadoxLoadouts(),prepareVerifiedLoadoutPage()]);
+records=savedResult.status==='fulfilled'?savedResult.value:[];
+if(preparedResult.status==='rejected')console.info('[Forge Loadout] verified page data unavailable',preparedResult.reason);
+selectedId=records[0]?.id||'';
+reportPreparedPageStage('render','loadout');
+render();
+reportPreparedPageStage('ready','loadout');
+window.ForgeLoader?.ready?.(document.querySelector('.apx-page-shell'));

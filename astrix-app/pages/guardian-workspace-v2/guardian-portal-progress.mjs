@@ -1,5 +1,6 @@
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1";
 import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
+import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 
 const loader=window.ForgeLoader;
 const manifestReady=guardianManifest.ready();
@@ -13,6 +14,7 @@ const maybeFinishBuild=()=>{
   else if(buildRenderStatus==='pending'&&profileSettled)finishAfterPaint(profileFailed?'Build Forge recovery available':'Guardian selection ready');
 };
 const set=(percent,label)=>{loader?.set(percent);if(label)loader?.status(label);};
+const setStage=stage=>{const row=PREPARED_PAGE_STAGES[stage];set(row.percent,row.label);};
 const sceneBackgroundUrls=()=>{
   const urls=new Set();
   const pattern=/url\((?:"([^"]+)"|'([^']+)'|([^)]*))\)/g;
@@ -46,7 +48,8 @@ const finishAfterPaint=async label=>{
   await manifestReady;
   await sceneBackgroundReady;
   if(revision!==finishRevision)return;
-  set(96,label);
+  void label;
+  setStage('ready');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(revision===finishRevision)loader?.done();}));
 };
 
@@ -56,25 +59,25 @@ try{
   if(transition&&Date.now()-Number(transition.armedAt||0)<30_000)set(0,transition.label||'Opening Build Forge');
 }catch{}
 
-set(8,'Preparing Build Forge');
-document.addEventListener('forge:manifest-progress',event=>set(Number(event.detail?.percent)||12,event.detail?.label||'Preparing Bungie manifest'));
-document.addEventListener('forge:guardian-profile-progress',event=>set(Number(event.detail?.percent)||58,event.detail?.label||'Resolving Guardian profile'));
-document.addEventListener('forge:guardian-loading',()=>{finishRevision++;profileSettled=false;profileFailed=false;set(18,'Connecting to Bungie');});
+setStage('start');
+document.addEventListener('forge:manifest-progress',()=>setStage('request'));
+document.addEventListener('forge:prepared-page-progress',event=>set(Number(event.detail?.percent)||PREPARED_PAGE_STAGES.start.percent,event.detail?.label||PREPARED_PAGE_STAGES.start.label));
+document.addEventListener('forge:guardian-loading',()=>{finishRevision++;profileSettled=false;profileFailed=false;setStage('session');});
 window.addEventListener('forge:bungie-session',event=>{
-  if(event.detail?.authenticated)set(32,'Bungie session ready');
-  else set(8,'Bungie authentication required');
+  if(event.detail?.authenticated)setStage('session');
+  else setStage('start');
 });
 document.addEventListener('forge:bungie-profile-loaded',event=>{
   profileSettled=Boolean(event.detail?.pendingSelection);queueMicrotask(maybeFinishBuild);
   if(event.detail?.pendingSelection&&!isBuildSpace)finishAfterPaint('Guardian selection ready');
-  else set(70,'Guardian profile resolved');
+  else setStage('join');
 });
-document.addEventListener('forge:guardian-selection-changed',()=>set(86,'Painting Guardian build'));
-document.addEventListener('forge:beta-fixture-loaded',()=>set(86,'Painting Guardian profile'));
+document.addEventListener('forge:guardian-selection-changed',()=>setStage('render'));
+document.addEventListener('forge:beta-fixture-loaded',()=>setStage('render'));
 document.addEventListener('forge:guardian-render-complete',()=>{if(!isBuildSpace)finishAfterPaint('Guardian build rendered');},{once:true});
 document.addEventListener('forge:build-render-complete',event=>{
   finishRevision++;buildRenderStatus=event.detail?.status||'';
-  if(buildRenderStatus==='pending')set(20,'Waiting for Guardian build');
+  if(buildRenderStatus==='pending')setStage('session');
   maybeFinishBuild();
 });
 document.addEventListener('forge:bungie-character-roster',()=>queueMicrotask(maybeFinishBuild));
@@ -83,5 +86,5 @@ document.addEventListener('forge:guardian-error',()=>{profileSettled=true;profil
 
 const currentSession=window.FORGE_BUNGIE_SESSION;
 if(!isBuildSpace&&document.documentElement.dataset.guardianRenderComplete==='true')finishAfterPaint('Guardian build rendered');
-else if(currentSession?.authenticated)set(32,'Bungie session ready');
-else if(currentSession)set(8,'Bungie authentication required');
+else if(currentSession?.authenticated)setStage('session');
+else if(currentSession)setStage('start');

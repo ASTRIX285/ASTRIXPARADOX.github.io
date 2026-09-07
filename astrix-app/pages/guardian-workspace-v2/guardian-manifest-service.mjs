@@ -192,8 +192,9 @@ class GuardianManifestService{
     };
     for(const [type,rows] of Object.entries({...fields,...(payload.manifestTables||{})})){
       if(!rows||typeof rows!=="object"||Array.isArray(rows))continue;
-      const existing=this.tables.get(type)||{};
-      this.tables.set(type,{...existing,...rows});
+      const existing=this.tables.get(type);
+      if(existing)Object.assign(existing,rows);
+      else this.tables.set(type,rows);
       this.cachedTypes.add(type);
     }
     const version=String(payload?.pageReady?.manifestVersion||payload?.manifestVersion||payload?.manifestResolution?.version||"");

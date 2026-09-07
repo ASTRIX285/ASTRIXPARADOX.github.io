@@ -6,10 +6,11 @@ const ROOT=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
 const forgeIndexSource=await read('data/forge-armour-index.json').catch(()=>null);
 const forgeIndex=forgeIndexSource?expandForgeArmourIndex(JSON.parse(forgeIndexSource)):null;
-const [service,sessionCache,profile,portal,build,interceptor,resolver,fixture,artifact,beta,recommender,worker,wrapper]=await Promise.all([
+const [service,sessionCache,profile,preparedClient,portal,build,interceptor,resolver,fixture,artifact,beta,recommender,worker,wrapper]=await Promise.all([
   read('pages/guardian-workspace-v2/guardian-manifest-service.mjs'),
   read('pages/guardian-workspace-v2/guardian-session-cache.mjs'),
   read('pages/guardian-workspace-v2/guardian-bungie-profile.mjs'),
+  read('core/prepared-page-client.mjs'),
   read('pages/guardian-workspace-v2/guardian-portal-progress.mjs'),
   read('pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs'),
   read('pages/guardian-workspace-v2/guardian-semantic-interceptor.mjs'),
@@ -69,7 +70,8 @@ assert.match(worker,/definitions"\) === "client-manifest"/,'Profile and loadout 
 assert.match(wrapper,/definitions"\) === "client-manifest"/,'Semantic wrapper must skip per-hash enrichment in client-manifest mode');
 
 assert.match(profile,/guardianManifest\.hydratePayload/,'Profile and loadout payloads must hydrate from the manifest service');
-assert.match(profile,/definitions","client-manifest"/,'IndexedDB mode must demote Worker per-hash enrichment');
+assert.match(profile,/const page=currentPagePayloadKind\(\)[\s\S]*?loadPreparedPagePayload\(session,page/,'Profile loading must delegate to the shared prepared page client');
+assert.match(preparedClient,/new URL\(`\/bungie\/page\/\$\{pageKind\(page\)\}`/,'The shared page client must use the dedicated prepared route that demotes Worker per-hash enrichment');
 assert.match(profile,/Unresolved Destiny item \$\{hash\}/,'Missing item hashes must have a labelled placeholder');
 assert.match(profile,/payload\?\.statDefinitions/,'Stat names and icons must resolve from DestinyStatDefinition');
 assert.match(profile,/socketCategoryDefinitions/,'Socket-category evidence must reach equipped plug resolution');

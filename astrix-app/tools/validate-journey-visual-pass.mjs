@@ -43,7 +43,7 @@ assert.ok(html.includes('src="./journey.mjs?v=20260906-page-data-recovery-1"'),'
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
-assert.match(heroModule,/function heroProfileUrl\(\)[\s\S]*?\/bungie\/page\/\$\{heroProfilePage\(\)\}[\s\S]*?function heroProfilePage\(\)[\s\S]*?'journey'/,'Journey hero cards must resolve the prepared Journey route from the shared page selector');
+assert.match(heroModule,/function heroProfilePage\(\)[\s\S]*?'journey'[\s\S]*?loadPreparedPagePayload\(session,page/,'Journey hero cards must resolve the prepared Journey route through the shared page client');
 assert.match(journey,/waitWithin\(globalThis\.FORGE_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS\)/,'Journey must reuse the hero-card profile instead of issuing a second blocking profile request');
 assert.doesNotMatch(journey,/import\('\.\.\/guardian-workspace-v2\/guardian-bungie-profile\.mjs/,'Journey must not import the heavyweight Character profile resolver');
 assert.doesNotMatch(journey,/guardianManifest\.hydratePayload\(payload\)/,'Journey refresh must not hydrate every vault and equipment definition before showing Triumph data');
@@ -190,12 +190,12 @@ assert.match(vaultHtml,/<span class="apx-visually-hidden" id="vaultConnectionSta
 assert.doesNotMatch(loadoutHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Loadout<\/h1>/,'Loadout must not repeat its page identity below the shared command header');
 assert.doesNotMatch(characterHtml,/class="top-icons"/,'Character must leave only the Bungie account control in the header action position');
 assert.doesNotMatch(missionReportsHtml,/mission-utility-actions/,'Mission Reports must leave only the Bungie account control in the header action position');
-assert.match(heroModule,/function heroProfileUrl\(\)[\s\S]*?new URL\(`\/bungie\/page\/\$\{heroProfilePage\(\)\}`,AUTH_ORIGIN\)[\s\S]*?fetchJson\(heroProfileUrl\(\)\)/,'Shared hero cards must use the dedicated confidential prepared page endpoint');
+assert.match(heroModule,/from ['"][^'"]*prepared-page-client\.mjs[^'"]*['"][\s\S]*?loadPreparedPagePayload\(session,page/,'Shared hero cards must use the confidential prepared page endpoint through the shared client');
 assert.match(heroModule,/function mostRecentCharacterId\(characters\)[\s\S]*?dateLastPlayed[\s\S]*?const selectedId=mostRecentCharacterId\(characters\)/,'Shared hero cards must automatically select Bungie’s newest dateLastPlayed Guardian');
 assert.doesNotMatch(heroModule,/sessionStorage\.getItem\(SELECTED_CHARACTER_KEY\)/,'A prior tab choice must not replace the newest Bungie Guardian during fresh hero-card startup');
 assert.match(missionReportsData,/preferredCharacterId\|\|mostRecentCharacterId\(rawCharacters\)/,'Mission Reports must use latest-played by default while preserving explicit in-page selection');
 assert.match(heroCss,/var\(--character-emblem\) 28px center\/cover no-repeat/,'Shared hero cards must centre the emblem focal icon horizontally and vertically');
-assert.match(heroCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:20px;height:20px;flex:0 0 20px[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Shared Character-format stat cells, icons and values must use the enlarged contained treatment');
+assert.match(heroCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:var\(--apx-icon-stat,1\.25rem\);height:var\(--apx-icon-stat,1\.25rem\);flex:0 0 var\(--apx-icon-stat,1\.25rem\)[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Shared Character-format stat cells, icons and values must use the shared enlarged contained treatment');
 assert.doesNotMatch(heroModule,/from ['"][^'"]*(?:guardian-bungie-profile|guardian-manifest-service|paradox-build)[^'"]*['"]|CLIENT_SECRET|API_KEY/,'Shared hero cards must not import or alter Character, manifest, Build Forge or secret internals');
 for(const page of mapBackgroundPages){
   assert.ok(page.includes('astrix-paradox-background.css?v=20260830-global-map-background'),'Each approved page must load the shared ASTRIX PARADOX map background');

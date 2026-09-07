@@ -24,6 +24,7 @@ import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,sele
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260905-manual-editor-2';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260905-manual-editor-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
 import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1';
@@ -35,7 +36,7 @@ mountForgeShell({rootSelector:'.build-space',gameId:'destiny-2',gameName:'Destin
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';
-const LOAD_STAGES=Object.freeze({SNAPSHOT:20,VALIDATE:40,PROFILE:58,SOCKETS:74,ARTIFACT:88,READY:100});
+const LOAD_STAGES=Object.freeze({SNAPSHOT:'start',VALIDATE:'session',PROFILE:'request',SOCKETS:'join',ARTIFACT:'render',READY:'ready'});
 const BUNGIE='https://www.bungie.net';
 const byId=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -131,15 +132,11 @@ function readState(){
   activeLoadError=activeLoadError||(params.get('baseline')==='bungie-recovery'?'Recovering the protected Original Build from the Bungie profile.':'No current Build Forge snapshot was found. Return to the Guardian page and choose Improve My Guardian again.');
   return null;
 }
-function emitLoad(stage,percent,label,status='loading',message=''){
-  window.ForgeLoader?.set(percent);
-  window.ForgeLoader?.status(message||label);
-  window.dispatchEvent(new CustomEvent('forge:build-load-progress',{detail:{stage,percent,label,status,message}}));
+function emitLoad(stage,preparedStage,label,status='loading',message=''){
+  const shared=reportPreparedPageStage(preparedStage,'build-forge',{buildStage:stage,status});
+  window.dispatchEvent(new CustomEvent('forge:build-load-progress',{detail:{stage,percent:shared.percent,label:shared.label,status,message}}));
 }
-document.addEventListener('forge:manifest-progress',event=>{
-  window.ForgeLoader?.set(Number(event.detail?.percent)||12);
-  window.ForgeLoader?.status(event.detail?.label||'Preparing Bungie manifest');
-});
+document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','build-forge'));
 function tile(item){if(!item)return '<span class="icon-tile empty">◆</span>';const icon=abs(iconOf(item)),name=esc(item.name||'Destiny item');return `<span class="icon-tile" title="${name}">${icon?`<img src="${esc(icon)}" alt="${name}">`:'◆'}</span>`;}
 function weaponCardShell(index){return `<div class="weap"><div class="art ph"><span class="ph-glyph">⌖</span></div><div class="cap"><b>Weapon slot ${index+1}</b><small>Awaiting resolved weapon semantics</small></div></div>`;}
 function gearCard(item,fallback){const index=Math.max(0,(Number(String(fallback).match(/\d+/)?.[0])||1)-1);return String(fallback).startsWith('Weapon')?weaponCardShell(index):armourCard(index,item);}

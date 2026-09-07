@@ -23,6 +23,11 @@
   --apx-type-control:.8125rem;
   --apx-type-label:.75rem;
   --apx-type-meta:.75rem;
+  --apx-icon-stat:1.25rem;
+  --apx-icon-card:3.5rem;
+  --apx-icon-record:3rem;
+  --apx-icon-catalog:8rem;
+  --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
 }
 
 html,body{max-width:100%;overflow-x:hidden}

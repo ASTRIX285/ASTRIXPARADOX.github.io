@@ -31,7 +31,9 @@ JOURNEY_SOURCE_TYPES = {
     'DestinyMetricDefinition',
     'DestinyGuardianRankDefinition',
     'DestinyGuardianRankConstantsDefinition',
+    'DestinyStatDefinition',
 }
+GUARDIAN_STAT_HASHES = (2996146975, 392767087, 1943323491, 1735777505, 144602215, 4244567218)
 
 def fetch(url):
     headers = {'User-Agent': 'ASTRIX-PARADOX/Shared-Manifest'}
@@ -288,6 +290,13 @@ def main():
         activity_hashes = {str(value) for values in endgame.values() for value in values}
         journey_tables['DestinyDestinationDefinition'] = {key: page_rows['DestinyDestinationDefinition'][key] for key in destination_hashes if key in page_rows['DestinyDestinationDefinition']}
         journey_tables['DestinyActivityDefinition'] = {key: page_rows['DestinyActivityDefinition'][key] for key in activity_hashes if key in page_rows['DestinyActivityDefinition']}
+        journey_tables['DestinyStatDefinition'] = {
+            str(hash_value): page_rows['DestinyStatDefinition'][str(hash_value)]
+            for hash_value in GUARDIAN_STAT_HASHES
+            if str(hash_value) in page_rows['DestinyStatDefinition']
+        }
+        if len(journey_tables['DestinyStatDefinition']) != len(GUARDIAN_STAT_HASHES):
+            raise ValueError('Journey Guardian stat definitions are incomplete')
         (pages / 'journey.json').write_bytes(encode({
             'manifestVersion': version,
             'page': 'journey',

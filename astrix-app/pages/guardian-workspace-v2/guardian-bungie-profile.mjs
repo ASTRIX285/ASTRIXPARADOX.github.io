@@ -9,6 +9,7 @@ import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subc
 import {paradoxDefinitionId,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import {
   cacheBungieProfile,
   readCachedBungieProfile,
@@ -17,7 +18,6 @@ import {
   invalidateBungieLoadoutDetail
 } from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
 
-const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||"https://auth.astrixparadox.com";
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const CLASS_NAMES=["titan","hunter","warlock"];
 const BUCKETS={kinetic:1498876634,energy:2465295065,power:953998645,helmet:3448274439,gauntlets:3551918588,chest:14239492,legs:20886954,classItem:1585787867,ghost:4023194814,subclass:3284755031};
@@ -39,7 +39,6 @@ const loadoutCache=new Map();
 const invalidatedLoadoutCacheKeys=new Set();
 let liveProfilePayload=null;
 let liveProfileSession=null;
-const manifestReady=guardianManifest.ready();
 let fixtureProfileDetail=null;
 let latestResolvedBuild=null;
 let authenticatedSession=globalThis.FORGE_BUNGIE_SESSION?.authenticated?globalThis.FORGE_BUNGIE_SESSION:null;
@@ -148,40 +147,16 @@ function blockAuthenticatedFixture(event){
   event.stopImmediatePropagation();
 }
 
-const PROFILE_REQUEST_TIMEOUT_MS=60_000;
 // The profile route returns the definitions required for the initial display.
 // The browser only joins that prepared payload; it must not fan out definition
 // requests while the portal is waiting at the authenticated profile gate.
 const INITIAL_PROFILE_HYDRATION=Object.freeze({equippedOnly:true,allowNetwork:false});
-
-async function fetchJsonWithTimeout(url,timeoutMs=PROFILE_REQUEST_TIMEOUT_MS){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),timeoutMs);
-  try{
-    const response=await fetch(url,{credentials:"include",headers:{Accept:"application/json"},signal:controller.signal});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload.error||`Bungie request failed (${response.status}).`);
-    return payload;
-  }catch(error){
-    if(error?.name==="AbortError")throw new Error("Bungie profile request timed out. Refresh or reconnect Bungie.");
-    throw error;
-  }finally{
-    clearTimeout(timer);
-  }
-}
 
 function currentPagePayloadKind(){
   return location.pathname.includes('/pages/journey/')?'journey':location.pathname.includes('/paradox-build-space/')?'build-forge':'character';
 }
 
 const PROFILE_RUNTIME_ENABLED=location.pathname.includes('/pages/guardian-workspace-v2/');
-
-async function preparedPageRequestUrl(){
-  await manifestReady;
-  const url=new URL(`/bungie/page/${currentPagePayloadKind()}`,AUTH_ORIGIN);
-  if(guardianManifest.status().mode==="indexeddb")url.searchParams.set("definitions","client-manifest");
-  return url;
-}
 
 async function hydrateManifestPayload(payload,options={}){
   await guardianManifest.hydratePayload(payload,options);
@@ -868,15 +843,12 @@ async function loadLiveProfile(session,{background=false}={}){
     setRenderStatus("LOADING CHARACTER PROFILE","Retrieving live Bungie appearance","Equipment, ornaments and shaders");
     document.dispatchEvent(new CustomEvent("forge:guardian-loading"));
   }
-  const profileUrl=await preparedPageRequestUrl();
-  const profilePayload=await fetchJsonWithTimeout(profileUrl);
-  assertRenderablePagePayload(profilePayload,currentPagePayloadKind());
-  document.dispatchEvent(new CustomEvent("forge:guardian-profile-progress",{detail:{percent:64,label:"Bungie profile received"}}));
-  document.dispatchEvent(new CustomEvent("forge:guardian-profile-progress",{detail:{percent:68,label:"Resolving equipped Guardian definitions"}}));
+  const page=currentPagePayloadKind();
+  const profilePayload=await loadPreparedPagePayload(session,page,{force:true});
   const payload=await hydrateManifestPayload(profilePayload,INITIAL_PROFILE_HYDRATION);
-  document.dispatchEvent(new CustomEvent("forge:guardian-profile-progress",{detail:{percent:78,label:"Equipped Guardian resolved"}}));
+  reportPreparedPageStage('render',page);
   const detail=await activateLiveProfile(payload,session);
-  void cacheBungieProfile(session,payload,currentPagePayloadKind()).catch(error=>console.warn("[Forge Bungie profile] profile cache write failed",error));
+  void cacheBungieProfile(session,payload,page).catch(error=>console.warn("[Forge Bungie profile] profile cache write failed",error));
   return detail;
 }
 

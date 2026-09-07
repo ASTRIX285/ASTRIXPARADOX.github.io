@@ -14,6 +14,7 @@ const [workspace,workspaceHtml,loader,profile,auth,sessionCache,formationModule,
 ]);
 const interceptor=await read('guardian-semantic-interceptor.mjs');
 const sharedHeroCss=await read('../../shared/astrix-hero-cards.css');
+const preparedClient=await read('../../core/prepared-page-client.mjs');
 
 assert.match(workspace,/forge:guardian-render-complete/,'Main must publish render completion');
 assert.match(workspace,/Promise\.all\(images\.map\(settleImage\)\)/,'Main render completion must wait for visible images');
@@ -23,7 +24,7 @@ const finalPaintGate=loader.slice(loader.indexOf('const finishAfterPaint'),loade
 assert.doesNotMatch(finalPaintGate,/setTimeout/,'The real render-complete gate must not finish from an arbitrary timeout');
 assert.match(loader,/const BACKGROUND_DECODE_TIMEOUT_MS=5\*1000;[\s\S]*?const timeout=setTimeout\(finish,BACKGROUND_DECODE_TIMEOUT_MS\)/,'Only the decorative scene decode may use a bounded failure wait');
 assert.match(loader,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(\(\)=>\{if\(revision===finishRevision\)loader\?\.done\(\);\}\)\)/,'Main portal must clear only after the render-complete paint');
-assert.match(loader,/else set\(8,'Bungie authentication required'\)/,'An unauthenticated local session must remain behind the Bungie authentication gate');
+assert.match(loader,/else setStage\('start'\)/,'An unauthenticated local session must remain behind the shared start gate');
 assert.match(loader,/currentSession=window\.FORGE_BUNGIE_SESSION[\s\S]*?guardianRenderComplete/,'Main portal must reconcile Guardian state if startup completed before listener registration');
 assert.ok(workspaceHtml.indexOf('guardian-portal-progress.mjs')<workspaceHtml.indexOf('guardian-workspace-v2.mjs'),'Main portal progress must start listening before Guardian modules run');
 assert.match(portalCss,/body\.apx-loading\{overflow:hidden!important\}/,'Shared portal must preserve page scroll locking above page-specific layout rules');
@@ -46,7 +47,7 @@ assert.match(profile,/const BUILD_SPACE_KEY="astrix:paradox-build-space:v1";/,'C
 assert.match(profile,/function persistResolvedBuildSnapshot\(\)\{[\s\S]*?store\.removeItem\(BUILD_SPACE_KEY\);store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Improve My Guardian must free the stale Build snapshot before writing the full current Character payload');
 assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260906-page-data-recovery-1/,'Main must load the authenticated page payload profile without a stale module cache');
 assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260906-page-data-recovery-1/,'Main must load the prepared page payload dependency graph without a stale module cache');
-assert.match(profile,/PROFILE_REQUEST_TIMEOUT_MS=60_000/,'Authenticated Bungie profile resolution must allow manifest enrichment to finish');
+assert.match(preparedClient,/const REQUEST_TIMEOUT_MS=30_000/,'The shared prepared page request must have one bounded network timeout');
 assert.match(profile,/return ensureLiveProfile\(session,\{background:false,silent:false\}\)/,'Authenticated profile recovery must issue one visible request rather than duplicate retries');
 assert.doesNotMatch(profile,/ensureLiveProfile\(globalThis\.FORGE_BUNGIE_SESSION\|\|null/,'Profile bootstrap must not make an unauthenticated profile request before session resolution');
 
@@ -117,7 +118,7 @@ assert.match(characterCss,/\.guardian-character-cards\{[\s\S]*?gap:5px;/,'Deskto
 assert.match(characterCss,/\.guardian-character-card__identity\{[\s\S]*?left:34px;[\s\S]*?right:50px;/,'Character identity text must move another 10px right');
 assert.match(characterCss,/\.guardian-character-card__stats\{[\s\S]*?left:39px;[\s\S]*?right:4px;/,'Character stat overlay must preserve the emblem with the requested additional 15px inset');
 assert.match(characterCss,/\.guardian-character-card__stats\{[\s\S]*?bottom:5px;[\s\S]*?gap:3px/,'The enlarged stat row must stay padded inside the card’s lower boundary');
-assert.match(characterCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:20px;height:20px;flex:0 0 20px[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Stat cells, Bungie icons and values must use the enlarged contained treatment');
+assert.match(characterCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:var\(--apx-icon-stat,1\.25rem\);height:var\(--apx-icon-stat,1\.25rem\);flex:0 0 var\(--apx-icon-stat,1\.25rem\)[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Stat cells, Bungie icons and values must use the shared enlarged treatment');
 assert.match(characterCss,/\.guardian-character-card\.is-selected::after\{[^}]*opacity:\.1/,'Selected character overlay must remain 90 percent transparent');
 assert.match(characterCss,/\.guardian-character-card\.is-selected::before\{opacity:\.48;filter:saturate\(\.48\) brightness\(\.68\)\}/,'Selected card artwork must use the approved passive treatment');
 assert.match(characterCss,/0 18px 34px -14px rgba\(104,190,255,\.72\)/,'Selected card must use a restrained glow behind the card');
@@ -210,7 +211,7 @@ assert.match(buildModule,/Working Build only · currently unlocked and equipped 
 assert.match(buildCss,/\.artifact-perk\.is-recommended-choice\{[^}]*border-color:#d9b84f!important/,'PARADOX-recommended Artifact perks must have a unique gold selection state');
 assert.match(buildModule,/forge:build-render-complete/,'Build Tool must publish render completion');
 assert.match(buildModule,/status=ready\?'ready':'pending'/,'Build Tool must not publish its temporary empty state as ready');
-assert.match(buildModule,/window\.ForgeLoader\?\.set\(percent\)/,'Build milestones must drive the shared portal');
+assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build milestones must drive the shared prepared page controller');
 assert.doesNotMatch(buildModule,/buildLoadingGate|data\.litEdges|data-lit-edges/,'Build must not retain the legacy loader controller');
 assert.match(loadoutsModule,/pendingIndex=index;[\s\S]*?forge:loadout-selected/,'A selected Bungie loadout must show pending state before it loads');
 assert.doesNotMatch(loadoutsModule,/activeIndex=index;[\s\S]*?forge:loadout-selected/,'A loadout must not become active before Bungie returns the exact slot');

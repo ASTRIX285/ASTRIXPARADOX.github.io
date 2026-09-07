@@ -12,7 +12,12 @@ export class JourneyManifestService{
   }
   prime(payload={}){
     const supplied={DestinyInventoryItemDefinition:payload.definitions,DestinyStatDefinition:payload.statDefinitions,...(payload.manifestTables||{})};
-    for(const [type,rows] of Object.entries(supplied))if(rows&&typeof rows==='object'&&!Array.isArray(rows))this.tables.set(type,{...(this.tables.get(type)||{}),...rows});
+    for(const [type,rows] of Object.entries(supplied)){
+      if(!rows||typeof rows!=='object'||Array.isArray(rows))continue;
+      const existing=this.tables.get(type);
+      if(existing)Object.assign(existing,rows);
+      else this.tables.set(type,rows);
+    }
     if(payload.journeyIndex)this.pageIndex=payload.journeyIndex;
     this.primed=true;
     return this;

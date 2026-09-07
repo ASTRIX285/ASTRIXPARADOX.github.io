@@ -57,7 +57,7 @@ assert.match(mainProgress,/document\.querySelectorAll\('\.scene\.immersive'\)/,'
 assert.match(mainProgress,/image\.addEventListener\('load',async\(\)=>\{try\{await image\.decode\(\);\}/,'Portal completion must wait for CSS background decoding');
 assert.match(mainProgress,/const BACKGROUND_DECODE_TIMEOUT_MS=5\*1000;[\s\S]*?const timeout=setTimeout\(finish,BACKGROUND_DECODE_TIMEOUT_MS\)/,'A stalled decorative background must not strand Character and Build Forge at the manifest milestone');
 assert.match(mainProgress,/await manifestReady;[\s\S]*?await sceneBackgroundReady;/,'Portal must retain its cover until manifest and scene background are both ready');
-assert.match(mainProgress,/else set\(8,'Bungie authentication required'\)/,'Main portal must remain gated until Bungie authentication completes');
+assert.match(mainProgress,/else setStage\('start'\)/,'Main portal must remain gated at the shared start stage until Bungie authentication completes');
 assert.match(mainProgress,/currentSession=window\.FORGE_BUNGIE_SESSION[\s\S]*?guardianRenderComplete/,'Main portal must reconcile a session or render that completed before listener registration');
 assert.ok(mainHtml.indexOf('guardian-portal-progress.mjs')<mainHtml.indexOf('guardian-workspace-v2.mjs'),'Main progress listener must load before Guardian startup');
 assert.match(mainHtml,/astrix:guardian-fast-return:v1/,'Main must consume the Build-to-Guardian fast-return marker before the portal mounts');
@@ -69,7 +69,7 @@ assert.match(buildModule,/emitLoad\('render',ready\?LOAD_STAGES\.READY:LOAD_STAG
 assert.match(mainHtml,/guardian-portal-progress\.mjs\?v=20260906-all-page-data-1/,'Character must load the prepared page payload progress module without a stale cache');
 assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260906-live-equip-1/,'Build Forge must refresh its parent module for the repaired Apply and review layout');
 assert.match(buildModule,/guardian-portal-progress\.mjs\?v=20260906-all-page-data-1/,'Build must load the prepared page payload progress module without a stale cache');
-assert.match(buildModule,/window\.ForgeLoader\?\.set\(percent\)/,'Build real milestones must update the shared portal');
+assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build real milestones must update the shared prepared page controller');
 
 assert.match(appModule,/forge:build-catalogue-rendered/,'Build library must publish catalogue render completion');
 assert.match(subclassModule,/forge:subclass-filter-rendered/,'Build library must publish subclass-filter render completion');
@@ -102,7 +102,8 @@ async function loaderHarness({stalledBackground=false,isBuildSpace=true}={}){
   const window={ForgeLoader:{set(){},status(){},done(){completed++;}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
   const source=mainProgress.replace(/^import .*;\n/gm,'').replace('const BACKGROUND_DECODE_TIMEOUT_MS=5*1000;','const BACKGROUND_DECODE_TIMEOUT_MS=1;');
   class HarnessImage{addEventListener(){}set src(value){this.currentSrc=value;}}
-  runInNewContext(source,{window,document,guardianManifest:{ready:()=>Promise.resolve()},PORTAL_TRANSITION_KEY:'test',sessionStorage:{getItem:()=>null,removeItem(){}},requestAnimationFrame:fn=>frames.push(fn),queueMicrotask,setTimeout,clearTimeout,URL,Image:HarnessImage,getComputedStyle:()=>({backgroundImage:stalledBackground?'url("/stalled-scene.webp")':'none'})});
+  const PREPARED_PAGE_STAGES={start:{percent:8,label:'Preparing verified Guardian data'},session:{percent:18,label:'Checking Bungie session'},request:{percent:42,label:'Loading prepared bulk manifest and Guardian data'},join:{percent:72,label:'Joining verified Guardian data to the prepared bulk manifest'},render:{percent:92,label:'Rendering verified page data'},ready:{percent:96,label:'Page ready'}};
+  runInNewContext(source,{window,document,guardianManifest:{ready:()=>Promise.resolve()},PREPARED_PAGE_STAGES,PORTAL_TRANSITION_KEY:'test',sessionStorage:{getItem:()=>null,removeItem(){}},requestAnimationFrame:fn=>frames.push(fn),queueMicrotask,setTimeout,clearTimeout,URL,Image:HarnessImage,getComputedStyle:()=>({backgroundImage:stalledBackground?'url("/stalled-scene.webp")':'none'})});
   return {emit:(name,detail={})=>documentEvents.get(name)?.({detail}),settleHeader:()=>{headerPending=false;},done:()=>completed,flush:async()=>{for(let i=0;i<8;i++){await new Promise(resolve=>setImmediate(resolve));frames.splice(0).forEach(fn=>fn());}}};
 }
 const loading=await loaderHarness();loading.emit('forge:build-render-complete',{status:'pending'});await loading.flush();assert.equal(loading.done(),0,'Empty initial build must stay covered.');

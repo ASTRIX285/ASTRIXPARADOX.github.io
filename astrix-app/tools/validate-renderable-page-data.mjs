@@ -52,9 +52,12 @@ for(const [name,payload] of blockingCases){
 
 for(const path of runtimeFiles){
   const source=await readFile(new URL(path,root),'utf8');
-  assert.match(source,/assertRenderablePagePayload/,`${path} must use the render contract`);
+  assert.match(source,/assertRenderablePagePayload|loadPreparedPagePayload/,`${path} must use the render contract directly or through the shared page client`);
   assert.doesNotMatch(source,/assertPreparedPagePayload/,`${path} must not discard usable prepared data`);
 }
+
+const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
+assert.match(preparedClient,/assertRenderablePagePayload/,`The shared page client must enforce the render contract for every consumer`);
 
 const strictValidator=await readFile(new URL('tools/validate-page-ready-performance.mjs',root),'utf8');
 assert.match(strictValidator,/assertPreparedPagePayload/,`Backend completeness validation must remain strict`);

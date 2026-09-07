@@ -1269,8 +1269,7 @@ function addComponentKeys(target: Map<string, Set<number>>, type: string, compon
 
 async function journeyManifestTables(
   profile: DestinyProfilePayload,
-  env: Env,
-  seedTables: Record<string, Record<string, Record<string, unknown>>> = {}
+  env: Env
 ): Promise<{
   manifestVersion: string;
   tables: Record<string, Record<string, Record<string, unknown>>>;
@@ -1302,10 +1301,7 @@ async function journeyManifestTables(
   addJourneyHash(wanted, "DestinyGuardianRankConstantsDefinition", 1);
   collectJourneyHashes(profile, wanted);
 
-  const tables: Record<string, Record<string, Record<string, unknown>>> = Object.fromEntries(
-    Object.entries(seedTables).map(([type, rows]) => [type, { ...rows }])
-  );
-  collectJourneyHashes(tables, wanted);
+  const tables: Record<string, Record<string, Record<string, unknown>>> = {};
   let manifestVersion = "";
   let currentSeason: Record<string, any> | undefined;
   for (let round = 0; round < 16; round += 1) {
@@ -1319,7 +1315,8 @@ async function journeyManifestTables(
     currentSeason = resolved.currentSeason || currentSeason;
     let added = 0;
     for (const [type, rows] of Object.entries(resolved.tables)) {
-      tables[type] = { ...(tables[type] || {}), ...rows };
+      if (tables[type]) Object.assign(tables[type], rows);
+      else tables[type] = rows;
       added += Object.keys(rows).length;
       collectJourneyHashes(rows, wanted);
     }
@@ -1330,6 +1327,51 @@ async function journeyManifestTables(
     [...hashes].filter(hash => !tables[type]?.[String(hash)])
   ]).filter(([, hashes]) => (hashes as number[]).length));
   return { manifestVersion, tables, currentSeason, coverage: { complete: !Object.keys(unresolved).length, unresolved } };
+}
+
+function preparedPageEnvelope(
+  request: Request,
+  env: Env,
+  account: Record<string, unknown>,
+  prepared: Response
+): Response {
+  const encoder = new TextEncoder();
+  const reader = prepared.body?.getReader();
+  const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":${JSON.stringify(account)},"prepared":`);
+  const suffix = encoder.encode("}");
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      controller.enqueue(prefix);
+      try {
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) controller.enqueue(value);
+          }
+        } else {
+          controller.enqueue(encoder.encode("{}"));
+        }
+        controller.enqueue(suffix);
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+    cancel(reason) {
+      return reader?.cancel(reason);
+    }
+  });
+  return withCors(request, env, new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
+      "X-Forge-Page-Transport": "prepared-page-stream-v1"
+    }
+  }));
 }
 
 async function preparedJourneyAccountData(
@@ -1374,6 +1416,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   profileUrl.search = "";
   profileUrl.searchParams.set("freshness", "display");
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : "forge");
+  if (page === "journey" || page === "loadout") profileUrl.searchParams.set("definitions", "client-manifest");
   const preparedStatusPromise = preparedManifestTables({}, env);
   const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env);
   if (!profileResponse.ok) return profileResponse;
@@ -1382,42 +1425,42 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   const preparedStatus = await preparedStatusPromise;
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
-  let pageBundle: Record<string, any> | null = null;
+  let pageBundleResponse: Response | null = null;
   if (env.MANIFEST_DATA && preparedVersion) {
     const bundleUrl = new URL("https://manifest/page-bundle");
     bundleUrl.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
     bundleUrl.searchParams.set("version", preparedVersion);
     const bundleResponse = await env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null);
-    pageBundle = bundleResponse?.ok ? await bundleResponse.json<Record<string, any>>().catch(() => null) : null;
-    if (pageBundle?.manifestVersion === preparedVersion) {
-      if (page !== "journey") {
-        const forgeArmourIndex = pageBundle.forgeArmourIndex as Record<string, any> | undefined;
-        payload.artifactCatalog = page === "loadout"
-          ? (Array.isArray(forgeArmourIndex?.artifactCatalog) ? forgeArmourIndex.artifactCatalog : [])
-          : (Array.isArray(pageBundle.artifactCatalog) ? pageBundle.artifactCatalog : []);
-        if (page === "loadout") {
-          payload.forgeArmourIndex = forgeArmourIndex || null;
-          payload.collectibleDefinitions = pageBundle.collectibleDefinitions || null;
-          payload.loadoutCoverage = pageBundle.loadoutCoverage || null;
-        }
-      }
-      if (page === "journey") {
-        payload.journeyIndex = pageBundle.journeyIndex || null;
-        payload.journeyCoverage = pageBundle.journeyCoverage || null;
-      }
-    }
+    if (bundleResponse?.ok && bundleResponse.body) pageBundleResponse = bundleResponse;
   }
 
   if (page === "journey") {
-    const prepared = await journeyManifestTables(payload.profile || {}, env, pageBundle?.manifestTables || {});
+    const prepared = await journeyManifestTables(payload.profile || {}, env);
     preparedVersion = prepared.manifestVersion || preparedVersion;
     currentSeason = prepared.currentSeason || currentSeason;
-    payload.manifestTables = prepared.tables;
+    payload.journeyAccountManifestTables = prepared.tables;
     payload.journeyAccountDefinitionCoverage = prepared.coverage;
+    payload.definitionCoverage = {
+      requested: Object.values(prepared.tables).reduce((sum, rows) => sum + Object.keys(rows).length, 0),
+      resolved: Object.values(prepared.tables).reduce((sum, rows) => sum + Object.keys(rows).length, 0),
+      unresolved: Object.values(prepared.coverage.unresolved).flat(),
+      complete: prepared.coverage.complete,
+      source: "prepared-bulk-manifest"
+    };
     const sessionId = cookieValue(request, SESSION_COOKIE);
     payload.preparedAccountData = sessionId
       ? await preparedJourneyAccountData(sessionId, payload.profile || {}, env)
       : { historicalStats: null, activityHistoryByCharacter: {}, coverage: { complete: false, missing: ["session"] } };
+  }
+
+  if (page === "loadout") {
+    payload.definitionCoverage = {
+      requested: 0,
+      resolved: 0,
+      unresolved: [],
+      complete: Boolean(pageBundleResponse),
+      source: "prepared-bulk-manifest"
+    };
   }
 
   if (currentSeason?.season) {
@@ -1427,13 +1470,13 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
 
   const missing: string[] = [];
   if (!preparedVersion) missing.push("manifest-version");
+  if (!pageBundleResponse) missing.push("prepared-page-bundle");
   for (const path of PAGE_REQUIRED_PROFILE_DATA[page]) {
     if (!hasPreparedProfileData(payload.profile || {}, path)) missing.push(`profile:${path}`);
   }
   if (payload.definitionCoverage?.complete !== true) missing.push("owned-item-definitions");
-  if (PROFILE_STAT_HASHES.some(hash => !payload.statDefinitions?.[String(hash)])) missing.push("guardian-stat-definitions");
+  if (page !== "journey" && page !== "loadout" && PROFILE_STAT_HASHES.some(hash => !payload.statDefinitions?.[String(hash)])) missing.push("guardian-stat-definitions");
   if (page === "journey") {
-    if (payload.journeyCoverage?.complete !== true) missing.push("journey-public-catalogue");
     if (payload.journeyAccountDefinitionCoverage?.complete !== true) missing.push("journey-account-definitions");
     if (payload.preparedAccountData?.coverage?.complete !== true) missing.push("journey-account-history");
     if (!payload.profile?.profileRecords?.data) missing.push("records");
@@ -1441,12 +1484,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     if (!payload.profile?.profileCollectibles?.data) missing.push("collectibles");
     if (!payload.profile?.metrics?.data && !payload.profile?.profileMetrics?.data) missing.push("metrics");
   }
-  if ((page === "character" || page === "build-forge") && (!Array.isArray(payload.artifactCatalog) || !payload.artifactCatalog.length)) missing.push("artifact-catalogue");
   if (page === "build-forge" && !Number.isInteger(Number(payload.currentSeasonNumber))) missing.push("current-season");
-  if (page === "loadout") {
-    if (!payload.forgeArmourIndex) missing.push("forge-armour-index");
-    if (payload.loadoutCoverage?.complete !== true) missing.push("loadout-acquisition-sources");
-  }
   payload.pageReady = {
     page,
     manifestVersion: preparedVersion,
@@ -1458,11 +1496,13 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
       characters: Object.keys(payload.profile?.characters?.data || {}).length,
       ownedItems: allProfileItems(payload.profile || {}).length,
       inventoryDefinitions: Object.keys(payload.definitions || {}).length,
-      manifestTables: Object.fromEntries(Object.entries(payload.manifestTables || {}).map(([type, rows]) => [type, Object.keys(rows as object).length]))
+      accountManifestTables: Object.fromEntries(Object.entries(payload.journeyAccountManifestTables || {}).map(([type, rows]) => [type, Object.keys(rows as object).length])),
+      preparedBundle: Boolean(pageBundleResponse)
     },
     coverage: { complete: missing.length === 0, missing }
   };
-  return withCors(request, env, json(payload, 200, { "Cache-Control": "private, no-store" }));
+  const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
+  return preparedPageEnvelope(request, env, payload, prepared);
 }
 
 async function oauthCallback(request: Request, env: Env): Promise<Response> {

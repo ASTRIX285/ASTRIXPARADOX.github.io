@@ -1,9 +1,6 @@
 import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {preloadForgeLoaderPayload} from '../pages/forge-loader/forge-loader-preload.mjs?v=20260906-page-refresh-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
-import {assertRenderablePagePayload} from '../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
+import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 
-const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const CLASS_NAMES=['titan','hunter','warlock'];
 const CLASS_ORDER={hunter:0,warlock:1,titan:2};
@@ -16,7 +13,7 @@ const IS_FORGE_LOADER_PAGE=location.pathname.includes('/pages/forge-loader/');
 const IS_LOADOUT_PAGE=location.pathname.includes('/pages/loadout/');
 const IS_MISSION_REPORTS_PAGE=location.pathname.includes('/pages/mission-reports/');
 const IS_BUILD_FORGE_PAGE=location.pathname.includes('/paradox-build-space/');
-const SHARES_PROFILE=IS_JOURNEY_PAGE||IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE;
+const SHARES_PROFILE=IS_JOURNEY_PAGE||IS_MISSION_REPORTS_PAGE||IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE||IS_LOADOUT_PAGE||IS_BUILD_FORGE_PAGE;
 let journeyProfileSettled=false;
 let settleJourneyProfile=()=>{};
 if(SHARES_PROFILE){
@@ -32,19 +29,6 @@ function renderStatus(message,state='unavailable'){
   const target=host();
   if(!target)return;
   target.innerHTML=`<div class="guardian-character-cards__status is-${escapeHtml(state)}" role="status">${escapeHtml(message)}</div>`;
-}
-
-async function fetchJson(url){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),60000);
-  try{
-    const response=await fetch(url,{credentials:'include',headers:{Accept:'application/json'},signal:controller.signal});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload?.error||`Bungie request failed (${response.status}).`);
-    return payload;
-  }finally{
-    clearTimeout(timer);
-  }
 }
 
 function mostRecentCharacterId(characters){
@@ -69,10 +53,6 @@ function publishJourneyProfile(payload){
   globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload||null;
   settleJourneyProfile(payload||null);
   document.dispatchEvent(new CustomEvent('forge:hero-profile-loaded',{detail:{payload:payload||null}}));
-}
-
-function heroProfileUrl(){
-  return new URL(`/bungie/page/${heroProfilePage()}`,AUTH_ORIGIN);
 }
 
 function heroProfilePage(){return IS_JOURNEY_PAGE||IS_MISSION_REPORTS_PAGE?'journey':IS_VAULT_PAGE?'vault':IS_FORGE_LOADER_PAGE||IS_LOADOUT_PAGE?'loadout':IS_BUILD_FORGE_PAGE?'build-forge':'character';}
@@ -151,15 +131,7 @@ async function initForgeHeroCards(){
       return;
     }
     const page=heroProfilePage();
-    const cached=SHARES_PROFILE?await readCachedBungieProfile(session,page):null;
-    const payload=IS_FORGE_LOADER_PAGE
-      ?await preloadForgeLoaderPayload(session,{sharedPayload:globalThis.FORGE_LOADER_PRELOAD_PAYLOAD})
-      :cached||await fetchJson(heroProfileUrl());
-    assertRenderablePagePayload(payload,page);
-    if(!cached&&!IS_FORGE_LOADER_PAGE&&SHARES_PROFILE){
-      await cacheBungieProfile(session,payload,page);
-      markPreparedPageCheckSuccess(session,page);
-    }
+    const payload=await loadPreparedPagePayload(session,page,{sharedPayload:IS_FORGE_LOADER_PAGE?globalThis.FORGE_LOADER_PRELOAD_PAYLOAD:null});
     const definitions=payload.statDefinitions||{};
     publishJourneyProfile(payload);
     const characters=characterRoster(payload,definitions);

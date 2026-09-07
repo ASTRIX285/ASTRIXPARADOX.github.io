@@ -35,7 +35,7 @@
 .vault-evaluate:disabled{border-color:rgba(201,168,76,.18);color:#716965;background:#0a090a;cursor:not-allowed}
 .vault-runtime-status{margin:.8rem 0;padding:.65rem .8rem;border-left:2px solid var(--apx-gold);color:var(--apx-muted);background:rgba(6,6,6,.56);font-size:.82rem}
 .vault-runtime-status.is-error{border-color:#d72838;color:#ff9aa3}.vault-runtime-status.is-good{border-color:#2ad89a;color:#8af0c7}
-.vault-item-grid{--vault-item-icon:8rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(21rem,1fr));gap:.55rem}
+.vault-item-grid{--vault-item-icon:var(--apx-icon-catalog,8rem);display:grid;grid-template-columns:repeat(auto-fill,minmax(21rem,1fr));gap:.55rem}
 .vault-item{position:relative;display:grid;grid-template-columns:var(--vault-item-icon) minmax(0,1fr);min-width:0;min-height:var(--vault-item-icon);padding:0;border:1px solid rgba(201,168,76,.16);color:var(--apx-text);background:rgba(5,5,6,.82);text-align:left;cursor:pointer;overflow:hidden}
 .vault-item:hover,.vault-item:focus-visible{border-color:rgba(201,168,76,.72);outline:none;box-shadow:0 0 0 1px rgba(178,34,34,.3),0 0 1.25rem rgba(139,0,0,.18)}
 .vault-item.is-selected{border-color:var(--apx-gold);box-shadow:inset 0 -3px var(--apx-gold),0 0 1.1rem rgba(201,168,76,.15)}

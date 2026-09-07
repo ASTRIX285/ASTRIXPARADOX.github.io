@@ -92,9 +92,9 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
   background:linear-gradient(180deg,rgba(15,10,12,.56),rgba(5,5,7,.76))!important;
 }
 html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stat .guardian-stat-icon{
-  width:.75rem!important;
-  height:.75rem!important;
-  flex-basis:.75rem!important;
+  width:var(--apx-icon-stat,1.25rem)!important;
+  height:var(--apx-icon-stat,1.25rem)!important;
+  flex-basis:var(--apx-icon-stat,1.25rem)!important;
 }
 html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stat b{font-size:.5625rem!important}
 .journey-page .apx-destination-ribbon a{font-size:.75rem}
@@ -274,9 +274,9 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-page .journey-identity-stat img,
 .journey-page .journey-identity-stat i{
   display:block;
-  width:.8rem;
-  height:.8rem;
-  flex:0 0 .8rem;
+  width:var(--apx-icon-stat,1.25rem);
+  height:var(--apx-icon-stat,1.25rem);
+  flex:0 0 var(--apx-icon-stat,1.25rem);
   object-fit:contain;
   filter:drop-shadow(0 1px 3px rgba(0,0,0,.8));
 }

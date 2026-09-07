@@ -4,8 +4,17 @@ import {readFile,readdir} from 'node:fs/promises';
 import {gzipSync} from 'node:zlib';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
 import {PAGE_PROFILE_DATA,PAGE_VIEWS,assertPreparedPagePayload} from '../core/page-ready-contract.mjs';
+import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 
 const LIMIT_MS=3000;
+const PAGE_WIRE_LIMITS={
+  character:{wire:2_500_000,gzip:400_000},
+  'build-forge':{wire:2_500_000,gzip:400_000},
+  journey:{wire:8_000_000,gzip:1_200_000},
+  vault:{wire:2_000_000,gzip:350_000},
+  loadout:{wire:10_000_000,gzip:1_400_000}
+};
+const WORKER_ACCOUNT_HEAP_INPUT_LIMIT=2_500_000;
 const JOURNEY_ROOTS=[1163735237,498211331,616318467,1881970629,2642502414,3741753466,1074663644];
 const root=new URL('../',import.meta.url);
 const forge=JSON.parse(await readFile(new URL('data/forge-armour-index.json',root),'utf8'));
@@ -75,6 +84,7 @@ const allInventory={...(forge.definitions||{}),...(forge.plugDefinitions||{})};
 const inventoryEntries=Object.entries(allInventory);
 const inventory=Object.fromEntries(inventoryEntries.slice(0,4000));
 const publicJourney=journeyPublicTables();
+publicJourney.DestinyStatDefinition=forge.statDefinitions;
 const destinationHashes=Object.keys(journeyIndex.endgameByDestination||{});
 publicJourney.DestinyDestinationDefinition=Object.fromEntries(destinationHashes.map(hash=>[hash,sourceTables.DestinyDestinationDefinition?.[hash]]).filter(([,row])=>row));
 const activityHashes=[...new Set(Object.values(journeyIndex.endgameByDestination||{}).flat().map(String))];
@@ -107,12 +117,40 @@ function payloadFor(page){
   return payload;
 }
 
+function streamEnvelopeFor(page,payload){
+  const account={...payload};
+  const prepared={manifestVersion:payload.pageReady.manifestVersion,page:page==='journey'?'journey':page==='loadout'?'loadout':'common'};
+  if(page==='journey'){
+    prepared.manifestTables=account.manifestTables;
+    prepared.journeyIndex=account.journeyIndex;
+    prepared.journeyCoverage=account.journeyCoverage;
+    delete account.manifestTables;
+    delete account.journeyIndex;
+    delete account.journeyCoverage;
+    account.definitions={};
+  }else if(page==='loadout'){
+    prepared.forgeArmourIndex=account.forgeArmourIndex;
+    prepared.collectibleDefinitions=account.collectibleDefinitions;
+    prepared.loadoutCoverage=account.loadoutCoverage;
+    delete account.forgeArmourIndex;
+    delete account.collectibleDefinitions;
+    delete account.loadoutCoverage;
+    delete account.artifactCatalog;
+    account.definitions={};
+    account.statDefinitions={};
+  }else{
+    prepared.artifactCatalog=account.artifactCatalog||[];
+    delete account.artifactCatalog;
+  }
+  return {schemaVersion:2,transport:'prepared-page-stream-v1',account,prepared};
+}
+
 async function measure(page){
-  const payload=payloadFor(page);
-  assertPreparedPagePayload(payload,page);
+  const envelope=streamEnvelopeFor(page,payloadFor(page));
   const start=performance.now();
-  const wire=JSON.stringify(payload);
-  const parsed=JSON.parse(wire);
+  const wire=JSON.stringify(envelope);
+  const parsed=normalizePreparedPagePayload(JSON.parse(wire),page);
+  assertPreparedPagePayload(parsed,page);
   let networkCalls=0;
   const service=new GuardianManifestService({backend:true,fetchImpl:async()=>{networkCalls+=1;throw new Error('page data must not fetch definitions');}});
   service.seedPayload(parsed);
@@ -123,9 +161,14 @@ async function measure(page){
       :{DestinyInventoryItemDefinition:Object.keys(inventory).map(Number)};
   for(const [type,hashes] of Object.entries(requests))await service.getMany(type,hashes);
   const elapsed=performance.now()-start;
+  const wireBytes=Buffer.byteLength(wire),gzipBytes=gzipSync(wire).byteLength,limits=PAGE_WIRE_LIMITS[page];
+  const accountBytes=Buffer.byteLength(JSON.stringify(envelope.account));
   assert.equal(networkCalls,0,`${page} triggered a client definition request`);
   assert.ok(elapsed<LIMIT_MS,`${page} prepared data path took ${elapsed.toFixed(2)}ms`);
-  console.log(`PAGE_READY_TIMING ${page} ${elapsed.toFixed(2)}ms wire ${Buffer.byteLength(wire)} gzip ${gzipSync(wire).byteLength} limit ${LIMIT_MS}ms`);
+  assert.ok(wireBytes<=limits.wire,`${page} wire payload ${wireBytes} exceeds ${limits.wire}`);
+  assert.ok(gzipBytes<=limits.gzip,`${page} compressed payload ${gzipBytes} exceeds ${limits.gzip}`);
+  assert.ok(accountBytes<=WORKER_ACCOUNT_HEAP_INPUT_LIMIT,`${page} Worker account overlay ${accountBytes} exceeds ${WORKER_ACCOUNT_HEAP_INPUT_LIMIT}`);
+  console.log(`PAGE_READY_TIMING ${page} ${elapsed.toFixed(2)}ms wire ${wireBytes} gzip ${gzipBytes} account ${accountBytes} limit ${LIMIT_MS}ms`);
 }
 
 for(const page of Object.keys(PAGE_VIEWS))await measure(page);
@@ -151,7 +194,11 @@ const builder=await readFile(new URL('tools/build-backend-manifest.py',root),'ut
 for(const hash of JOURNEY_ROOTS)assert.match(builder,new RegExp(String(hash)),`Backend Journey bundle is missing real root ${hash}`);
 assert.match(builder,/DestinyInventoryItemDefinition[\s\S]*?DestinyGuardianRankDefinition[\s\S]*?DestinyGuardianRankConstantsDefinition/,'Journey bundle must include collection item and Guardian Rank definitions');
 assert.match(builder,/loadout_collectible_hashes[\s\S]*?loadout_collectibles[\s\S]*?loadout_coverage/,'Loadout bundle must carry every Bungie acquisition source required by a local interaction');
-assert.match(backend,/payload\.collectibleDefinitions = pageBundle\.collectibleDefinitions/,'Loadout route must merge prepared Bungie acquisition sources into its page payload');
+assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'Page routes must stream prepared bundles outside the auth Worker heap');
+assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
+assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy static manifest tables in the auth Worker');
+const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
+assert.match(preparedClient,/prepared\.forgeArmourIndex[\s\S]*?prepared\.collectibleDefinitions[\s\S]*?prepared\.loadoutCoverage/,'The shared client must join the streamed Loadout bundle');
 
 const profileRuntime=pageSources.find(([path])=>path.includes('guardian-bungie-profile'))?.[1]||'';
 assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.includes\('\/pages\/guardian-workspace-v2\/'\)/,'Character runtime side effects must be limited to Character and Build Forge routes');
@@ -160,3 +207,4 @@ assert.match(profileRuntime,/if\(PROFILE_RUNTIME_ENABLED\)\{[\s\S]*?getBungieSes
 console.log('PAGE_READY_DEDICATED_ROUTES=PASS');
 console.log('PAGE_READY_COMPLETE_CONTRACTS=PASS');
 console.log('PAGE_READY_ZERO_CLIENT_FOLLOW_UP_READS=PASS');
+console.log('PAGE_READY_MEMORY_AND_PAYLOAD_CEILINGS=PASS');

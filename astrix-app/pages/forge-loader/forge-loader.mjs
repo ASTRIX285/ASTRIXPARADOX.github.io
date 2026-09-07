@@ -7,6 +7,10 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from '../vault/vau
 import {compatibleWithClass,createOpenProtocolTieBreaker,exoticCatalogueGroups,naturalSetProtocols,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260904-top-50-scan-1';
 import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from './forge-loader-build-handoff.mjs?v=20260906-review-layout-1';
 import {preloadForgeLoaderPayload} from './forge-loader-preload.mjs?v=20260906-page-data-recovery-1';
+import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+
+mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 const CLASS_NAMES=['titan','hunter','warlock'];
 const SELECTED_CHARACTER_KEY='astrix:selected-character-id';
@@ -34,7 +38,6 @@ let forgeRefreshController=null;
 const selectedSlots=new Map();
 const setUpgradeTargetCache=new Map();
 
-function loaderProgress(percent,label){globalThis.ForgeLoader?.set?.(percent);globalThis.ForgeLoader?.status?.(label);}
 function characters(){return Object.values(payload?.profile?.characters?.data||{});}
 function selectedCharacter(){return characters().find(character=>text(character.characterId)===activeCharacterId)||null;}
 function mostRecentCharacter(){return characters().sort((left,right)=>text(right?.dateLastPlayed).localeCompare(text(left?.dateLastPlayed)))[0]||null;}
@@ -58,12 +61,12 @@ function membershipBinding(){
 }
 
 async function loadVerifiedPayload({force=false,showProgress=true}={}){
-  if(showProgress)loaderProgress(18,'Checking verified Guardian armour…');
+  if(showProgress)reportPreparedPageStage('session','loadout');
   const shared=force?null:globalThis.FORGE_LOADER_PRELOAD_PAYLOAD||globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
   const next=await preloadForgeLoaderPayload(session,{force,sharedPayload:shared});
   if(!next?.profile)throw new Error('Bungie returned no verified profile inventory.');
   if(next.forgeArmourIndex)guardianManifest.applyForgeArmourIndex(next,next.forgeArmourIndex);
-  if(showProgress)loaderProgress(46,'Joining private inventory to the prepared armour catalogue…');
+  if(showProgress)reportPreparedPageStage('join','loadout');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,armourOnly:Boolean(next.forgeArmourIndex),includeReusable:true,allowNetwork:false});
   return next;
 }
@@ -457,7 +460,7 @@ function installEvents(){
   document.addEventListener('focusout',event=>{const target=event.target.closest('[data-inspect-exotic-key],[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideInspect();});
   addEventListener('resize',hideInspect,{passive:true});addEventListener('scroll',hideInspect,{passive:true,capture:true});
   document.addEventListener('forge:character-selected',event=>{resolveActiveCharacter(event.detail?.characterId);selectedExoticKey='';setSelections=[];resetResults();renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});byId('forgeRuntimeStatus').textContent=`${classLabel()} active. Select an owned Exotic.`;});
-  document.addEventListener('forge:manifest-progress',event=>loaderProgress(Math.max(24,Number(event.detail?.percent)||24),event.detail?.label||'Preparing Bungie manifest…'));
+  document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','loadout'));
 }
 
 function reconcileForgeRefresh(){
@@ -531,11 +534,11 @@ async function init(){
     session=await getBungieSession();
     if(session?.authenticated!==true){byId('forgeSignedOut').hidden=false;byId('forgeConnectionState').textContent='SIGNED OUT';byId('forgeHeaderState').textContent='CONNECT BUNGIE';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
     byId('forgeConnectionState').textContent='ARMOUR READY';payload=await loadVerifiedPayload();
-    loaderProgress(78,'Building verified Forge Loader inventory…');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);
+    reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);
     renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});
     startForgeRefresh();
     const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=ownedCount?`${ownedCount} owned of ${groups.length} verified ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select an owned piece to begin.`:`${groups.length} verified ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no owned instance can be selected.`;
-    loaderProgress(92,'Rendering Forge Loader selector…');await settleVisibleImages();globalThis.ForgeLoader?.done?.();
+    reportPreparedPageStage('ready','loadout');await settleVisibleImages();globalThis.ForgeLoader?.done?.();
   }catch(error){console.error('[Forge Loader]',error);byId('forgeConnectionState').textContent='ARMOUR UNAVAILABLE';byId('forgeRuntimeStatus').textContent=error?.message||'Verified Bungie armour is unavailable.';globalThis.ForgeLoader?.done?.();}
 }
 

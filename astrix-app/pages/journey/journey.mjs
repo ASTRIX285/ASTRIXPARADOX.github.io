@@ -1,14 +1,17 @@
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
 import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1';
 import {resolveRecordTree,patternTypeKey,seasonRankProgress,findDestinationNodes} from './journey-record-model.mjs?v=20260905-journey-repair-1';
 import {resolveCollectionBadges} from './journey-collection-model.mjs?v=20260905-pattern-badges-1';
-import {PREPARED_PAGE_REFRESH_MS,bindPreparedPageRefreshControl,cacheBungieProfile,createPreparedPageRefreshController,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
+import {PREPARED_PAGE_REFRESH_MS,bindPreparedPageRefreshControl,createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
 import {validateHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
 import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-shooting-range-capture.mjs?v=20260902-journey-data-hooks-1';
 import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1';
 import {initLocationSelector} from '../../shared/astrix-location-selector.mjs';
 import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260905-journey-repair-1';
-import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+
+mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 const resolving=document.getElementById('journeyResolving');
 const signedOut=document.getElementById('journeySignedOut');
@@ -83,7 +86,6 @@ const CLASS_USAGE_COLOURS=['#d3202f','#c9a84c','#4169e1'];
 const STAT_ORDER=[2996146975,392767087,1943323491,1735777505,144602215,4244567218];
 const RECENT_ACTIVITY_PENDING='Recent activity data is not connected.';
 const BUNGIE_ORIGIN='https://www.bungie.net';
-const JOURNEY_REFRESH_TIMEOUT_MS=60*1000;
 const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12*1000;
 const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6*1000;
 const JOURNEY_LOADER_READY_WAIT_MS=6*1000;
@@ -135,8 +137,7 @@ function waitWithin(promise,timeoutMs){
 }
 
 async function finishJourneyLoader(root=document){
-  globalThis.ForgeLoader.set(96);
-  globalThis.ForgeLoader.status('Journey rendered');
+  reportPreparedPageStage('ready','journey');
   let timer=0;
   await Promise.race([
     Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(()=>globalThis.ForgeLoader.done()),
@@ -2222,45 +2223,24 @@ function hasJourneyRecordComponents(payload){
 }
 
 async function readVerifiedProfile(session){
-  const cached=await readCachedBungieProfile(session,'journey');
-  if(cached?.profile?.characters?.data&&hasJourneyRecordComponents(cached)&&cached?.pageReady?.page==='journey'){
-    assertRenderablePagePayload(cached,'journey');
-    guardianManifest.prime(cached);
-    return cached;
-  }
   const sharedProfile=await waitWithin(globalThis.FORGE_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
-  if(sharedProfile?.profile?.characters?.data){
-    assertRenderablePagePayload(sharedProfile,'journey');
-    guardianManifest.prime(sharedProfile);
-    await cacheBungieProfile(session,sharedProfile,'journey');
-    return sharedProfile;
-  }
   try{
-    const refreshed=await fetchJourneyProfileRefresh();
-    return refreshed?.profile?.characters?.data?refreshed:(cached?.profile?.characters?.data?cached:null);
+    const resolved=await loadPreparedPagePayload(session,'journey',{sharedPayload:sharedProfile});
+    if(resolved?.profile?.characters?.data&&hasJourneyRecordComponents(resolved)){
+      guardianManifest.prime(resolved);
+      return resolved;
+    }
+    return null;
   }catch(error){
     console.info('[Forge Journey] verified Bungie profile unavailable',error);
-    return cached?.profile?.characters?.data?cached:null;
+    return null;
   }
 }
 
 async function fetchJourneyProfileRefresh(){
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),JOURNEY_REFRESH_TIMEOUT_MS);
-  try{
-    await manifestReady;
-    const url=new URL('/bungie/page/journey',AUTH_ORIGIN);
-    const response=await fetch(url,{credentials:'include',headers:{Accept:'application/json'},signal:controller.signal});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload?.error||`Journey refresh failed (${response.status}).`);
-    assertRenderablePagePayload(payload,'journey');
-    guardianManifest.prime(payload);
-    await cacheBungieProfile(journeySession,payload,'journey');
-    markPreparedPageCheckSuccess(journeySession,'journey');
-    return payload;
-  }finally{
-    clearTimeout(timeout);
-  }
+  const payload=await loadPreparedPagePayload(journeySession,'journey',{force:true});
+  guardianManifest.prime(payload);
+  return payload;
 }
 
 async function refreshJourneyProfile({reason='poll'}={}){
@@ -2344,15 +2324,14 @@ function showJourney(){
 }
 
 try{
-  globalThis.ForgeLoader.set(12);globalThis.ForgeLoader.status('Connecting Journey');
+  reportPreparedPageStage('start','journey');
   const session=await getBungieSession();
-  globalThis.ForgeLoader.set(28);globalThis.ForgeLoader.status('Opening Journey');
+  reportPreparedPageStage('session','journey');
   const authenticated=session?.authenticated===true&&globalThis.FORGE_BUNGIE_SESSION?.authenticated===true;
   if(authenticated){
     journeySession=session;
     const heroCardsReady=waitForHeroCards();
     const mapReady=showJourney();
-    globalThis.ForgeLoader.set(42);globalThis.ForgeLoader.status('Loading verified Guardian data');
     const profilePromise=readVerifiedProfile(session);
     const profile=await waitWithin(profilePromise,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
     if(profile){
@@ -2368,7 +2347,7 @@ try{
       }).catch(error=>console.info('[Forge Journey] deferred verified profile unavailable',error));
     }
     startJourneyBackgroundRefresh();
-    globalThis.ForgeLoader.set(78);globalThis.ForgeLoader.status('Finalising Journey');
+    reportPreparedPageStage('render','journey');
     await Promise.all([
       waitWithin(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS),
       waitWithin(mapReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS),

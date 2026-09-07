@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  '.github/scripts/cloudflare-worker-diagnostics.mjs',
+  '.github/workflows/cloudflare-worker-diagnostics.yml',
   'ARTWORK_PROVENANCE.md',
   'img/brands/bungie-logo.svg',
   'forge-auth-worker/src/env.d.ts',
@@ -13,6 +15,7 @@ const allowed=new Set([
   'astrix-app/tools/test-backend-data.mjs',
   'astrix-app/tools/validate-prepared-page-refresh.mjs',
   'astrix-app/tools/validate-page-ready-performance.mjs',
+  'astrix-app/tools/validate-shared-page-load.mjs',
   'astrix-app/tools/validate-renderable-page-data.mjs',
   'forge-auth-worker/src/profile-sections.ts',
   'forge-auth-worker/src/profile-snapshot-cache.ts',
@@ -34,6 +37,7 @@ const allowed=new Set([
   'astrix-app/core/bungie-profile-plugs.mjs',
   'astrix-app/core/forge-index-transport.mjs',
   'astrix-app/core/page-ready-contract.mjs',
+  'astrix-app/core/prepared-page-client.mjs',
   'astrix-app/tools/test-forge-index-transport.mjs',
   '.github/workflows/validate-weapon-audit.yml',
   'astrix-app/tools/test-weapon-cards-browser.mjs',

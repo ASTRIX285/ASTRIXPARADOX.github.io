@@ -31,6 +31,7 @@ const validators=[
   'test-backend-data.mjs',
   'validate-prepared-page-refresh.mjs',
   'validate-page-ready-performance.mjs',
+  'validate-shared-page-load.mjs',
   'validate-renderable-page-data.mjs',
   'test-forge-index-transport.mjs',
   'test-weapon-catalogue.mjs',

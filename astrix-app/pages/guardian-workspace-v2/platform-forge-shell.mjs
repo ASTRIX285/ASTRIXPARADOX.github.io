@@ -32,11 +32,21 @@ function mountForgeShell({
   rootSelector='.workspace',
   gameId='destiny-2',
   gameName='Destiny 2',
-  developerName='Bungie'
+  developerName='Bungie',
+  layout='workspace'
 }={}){
   ensureShellStyles();
   const root=document.querySelector(rootSelector);
   if(!root) return null;
+  root.dataset.forgePageShell='true';
+  root.dataset.game=gameId;
+  document.documentElement.dataset.astrixGame=gameId;
+  if(layout==='destination'){
+    document.dispatchEvent(new CustomEvent('forge:forge-shell-mounted',{
+      detail:{gameId,gameName,developerName,shell:root,viewport:root,leftRail:null,rightRail:null}
+    }));
+    return root;
+  }
   const existing=root.closest(`.${SHELL_CLASS}`);
   if(existing) return existing;
 
@@ -56,7 +66,6 @@ function mountForgeShell({
   shell.append(left,viewport,right);
   viewport.appendChild(root);
 
-  document.documentElement.dataset.astrixGame=gameId;
   document.dispatchEvent(new CustomEvent('forge:forge-shell-mounted',{
     detail:{gameId,gameName,developerName,shell,viewport,leftRail:left,rightRail:right}
   }));

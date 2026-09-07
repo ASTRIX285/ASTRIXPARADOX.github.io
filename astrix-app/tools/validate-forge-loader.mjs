@@ -237,12 +237,12 @@ const perkPlanRuntime=read('astrix-app/pages/guardian-workspace-v2/guardian-perk
 const liveActionsRuntime=read('astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs');
 const ribbon=read('astrix-app/shared/astrix-destination-ribbon.js');
 const access=read('astrix-app/pages/guardian-workspace-v2/guardian-vault-access.mjs');
-assert.match(preload,/\/bungie\/page\/loadout/,'The shared Forge Loader preload must request its dedicated merged page payload.');
+assert.match(preload,/loadPreparedPagePayload\(session,'loadout'/,'The shared Forge Loader preload must request its dedicated merged page payload through the shared client.');
 assert.match(runtime,/preloadForgeLoaderPayload/,'Forge Loader must consume the shared intro preload path.');
 assert.doesNotMatch(runtime,/new URL\('\/bungie\/page\/loadout'/,'Forge Loader must not fork its own prepared page request.');
 assert.match(runtime,/if\(next\.forgeArmourIndex\)guardianManifest\.applyForgeArmourIndex/,'Forge Loader must consume the versioned compact armour index from its merged page payload.');
 assert.match(runtime,/hydratePayload\(next,\{waitForManifest:false,armourOnly:Boolean\(next\.forgeArmourIndex\),includeReusable:true,allowNetwork:false\}\)/,'Owned combinations and their legal armour mod options must hydrate without live definition requests.');
-assert.match(runtime,/Joining private inventory to the prepared armour catalogue/,'The 46 percent join must describe the prepared backend catalogue.');
+assert.match(runtime,/reportPreparedPageStage\('join','loadout'\)/,'Forge Loader must report the shared prepared bulk manifest join stage.');
 assert.doesNotMatch(runtime,/await guardianManifest\.ready\(\)/,'Forge Loader must never return to the 58-percent full-manifest startup gate.');
 assert.match(html,/<header class="apx-destination-header forge-command-header">[\s\S]*?<strong>FORGE LOADER<\/strong><small>SELECT AND MAXIMISE VERIFIED ARMOUR<\/small>/,'Forge Loader must present its page identity only in the shared compact command header.');
 assert.doesNotMatch(html,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not retain the oversized duplicate page hero.');
