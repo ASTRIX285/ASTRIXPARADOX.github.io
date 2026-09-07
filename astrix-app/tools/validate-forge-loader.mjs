@@ -332,7 +332,7 @@ assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.s
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
 assert.match(html,/forge-loader\.mjs\?v=20260907-item-inspect-scope-1/,'Forge Loader must load the exact matched-item inspection scope without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260907-item-inspect-scope-1/,'Forge Loader must refresh the calculated-load anchor label without stale page CSS.');
+assert.match(html,/forge-loader\.css\?v=20260907-matrix-item-frame-1/,'Forge Loader must refresh the fixed calculated-load item frame without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -385,6 +385,10 @@ assert.match(css,/\.forge-hero-card\{[^}]*aspect-ratio:474\/96[^}]*overflow:hidd
 assert.match(css,/\.forge-stat-targets label>span\{[^}]*\.9rem/,'Eligible stat labels must retain the enlarged readable type scale.');
 assert.match(css,/\.forge-matrix-stat small\{font-size:\.92rem\}[\s\S]*?\.forge-matrix-stat b\{font-size:1\.25rem\}/,'Forge Matrix stat labels and values must remain readable at the approved desktop density.');
 assert.match(css,/@container\(max-width:60rem\)[\s\S]*?\.forge-matrix-stats\{grid-column:1\/-1;grid-row:2\}/,'Forge Matrix rows must reflow calculated stats without clipping in a narrow output column.');
+assert.match(css,/\.forge-matrix-row\{grid-template-columns:6\.7rem 40px minmax\(22rem,1fr\)/,'Desktop Forge Matrix rows must reserve the strict 40-pixel item width.');
+assert.match(css,/\.forge-matrix-exotic\{width:40px;height:60px;justify-self:center;align-self:center\}/,'Every matched Exotic frame must remain exactly 40 pixels wide by 60 pixels high.');
+assert.match(css,/@container\(max-width:60rem\)\{\.forge-matrix-row\{grid-template-columns:6\.7rem 40px minmax\(0,1fr\)/,'Compact Forge Matrix rows must preserve the strict 40-pixel item width.');
+assert.match(css,/@media\(max-width:820px\)\{\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) 40px 6\.8rem\}/,'Mobile Forge Matrix rows must preserve the strict 40-pixel item width.');
 assert.match(runtime,/document\.documentElement\.append\(panel\)/,'The inspection card must escape the density-scaled body before viewport positioning.');
 assert.match(runtime,/getBoundingClientRect\(\)/,'The inspection card must anchor to the selected item.');
 assert.doesNotMatch(css,/\.forge-item-inspect\{[^}]*right:/,'The inspection card must not be fixed to the top-right dashboard corner.');
