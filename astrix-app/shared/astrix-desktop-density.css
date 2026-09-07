@@ -30,7 +30,8 @@
   --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
   --apx-icon-selector:4.25rem;
   --apx-icon-inspect:7rem;
-  --apx-icon-weapon-equipped:clamp(5.375rem,8vw,7rem);
+  --apx-icon-gear-art-width:clamp(76px,5vw,96px);
+  --apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);
 }
 
 html,body{max-width:100%;overflow-x:hidden}

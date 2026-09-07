@@ -1632,7 +1632,7 @@ body.weapon-detail-open .weapon-detail-backdrop{opacity:1;pointer-events:auto}
 
 /* Shared equipment portrait geometry: the same box for armour and weapons.
    Bungie's square artwork is contained, never stretched or cropped. */
-:root{--paradox-equipment-width:clamp(76px,5vw,96px);--paradox-equipment-height:calc(var(--paradox-equipment-width) * 1.22);--paradox-equipment-socket:clamp(34px,2.6vw,44px)}
+:root{--paradox-equipment-width:var(--apx-icon-gear-art-width);--paradox-equipment-height:var(--apx-icon-gear-art-height);--paradox-equipment-socket:clamp(42px,3.2vw,54px)}
 body .gear-weapons,body .recommended-weapons-summary{--gear-weapon-art:var(--paradox-equipment-width);--gear-weapon-socket:var(--paradox-equipment-socket)}
 body.guardian-main-page .workspace .gear-weapons .weap .art,
 body .design-canvas .weapon-design-section .gear-weapons .weap .art,
@@ -1657,7 +1657,6 @@ body .paradox-item-header{grid-template-columns:var(--paradox-equipment-width) m
 @media(max-width:700px){body .paradox-item-header{grid-template-columns:var(--paradox-equipment-width) minmax(0,1fr)}}
 
 /* Fill the existing card width while preserving socket columns and row alignment. */
-:root{--paradox-equipment-socket:clamp(42px,3.2vw,54px)}
 body .gear-weapons .weap .cap{width:100%!important;max-width:none!important;position:static!important}
 body .gear-weapons .weapon-perk-strip{overflow-x:auto;max-width:100%;padding:3px 2px 7px}
 body .gear-weapons .weapon-perk-matrix.is-compact{width:100%;max-width:none}
