@@ -12,6 +12,7 @@ const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/wor
 const keysEndpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/observability/telemetry/keys`;
 
 async function query(name, parameters, limit = 2000) {
+  const { view = 'calculations', ...queryParameters } = parameters;
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -23,7 +24,8 @@ async function query(name, parameters, limit = 2000) {
       timeframe: { from, to: now },
       dry: true,
       limit,
-      parameters,
+      view,
+      parameters: queryParameters,
     }),
   });
   const body = await response.json().catch(() => ({}));
@@ -119,7 +121,7 @@ const percentiles = await query('latency-percentiles', {
   ],
   groupBys: [
     { type: 'string', value: '$metadata.service' },
-    { type: 'string', value: '$workers.event.request.path' },
+    { type: 'string', value: '$workers.event.path' },
   ],
   orderBy: { value: 'max_wall_ms', order: 'desc' },
   limit: 100,

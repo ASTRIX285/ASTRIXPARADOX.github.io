@@ -1,6 +1,6 @@
 name: Cloudflare Worker Diagnostics
 
-# Telemetry key discovery retry four
+# Event view retry five
 
 on:
   push:
