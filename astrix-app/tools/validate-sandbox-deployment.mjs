@@ -13,6 +13,7 @@ const authWorker=read('forge-auth-worker/src/index.ts');
 const authRecord=read('forge-auth-worker/src/auth-record.ts');
 const guardianAuth=read('astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs');
 const guardianProfile=read('astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs');
+const preparedPageClient=read('astrix-app/core/prepared-page-client.mjs');
 const sessionCache=read('astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs');
 const journeyHtml=read('astrix-app/pages/journey/index.html');
 const journeyModule=read('astrix-app/pages/journey/journey.mjs');
@@ -49,7 +50,8 @@ assert.match(authConfig,/DEFAULT_RETURN_URL = "https:\/\/astrixparadox\.com\/ast
 assert.match(authWorker,/const CHARACTER_PROFILE_COMPONENTS = \[[\s\S]*?310\s+\/\/ ItemReusablePlugs[\s\S]*?const JOURNEY_PROFILE_COMPONENTS = \[[\s\S]*?1300\s+\/\/ Craftables[\s\S]*?const PROFILE_COMPONENTS = \[[\s\S]*?\.\.\.CHARACTER_PROFILE_COMPONENTS/,'Character and Journey profile components must remain independently scoped');
 assert.match(authWorker,/profileScope === "character"[\s\S]*?CHARACTER_PROFILE_COMPONENTS[\s\S]*?profileScope === "journey"[\s\S]*?JOURNEY_PROFILE_COMPONENTS[\s\S]*?: PROFILE_COMPONENTS/,'The auth Worker must select each lightweight page profile scope explicitly');
 assert.match(guardianProfile,/function currentPagePayloadKind\(\)\{[\s\S]*?location\.pathname\.includes\('\/paradox-build-space\/'\)\?'build-forge':'character'/,'Character and Build Forge must resolve their dedicated prepared page route');
-assert.match(guardianProfile,/new URL\(`\/bungie\/page\/\$\{currentPagePayloadKind\(\)\}`,AUTH_ORIGIN\)/,'Character and Build Forge must request only their prepared page route');
+assert.match(guardianProfile,/loadPreparedPagePayload\(session,page,\{force:true\}\)/,'Character and Build Forge must request their prepared page route through the shared client');
+assert.match(preparedPageClient,/new URL\(`\/bungie\/page\/\$\{pageKind\(page\)\}`,authOrigin\)/,'The shared prepared page client must own the only page route URL construction');
 assert.match(guardianAuth,/const JOURNEY_PATH = "\/astrix-app\/pages\/journey\/"[\s\S]*?return new URL\(JOURNEY_PATH,origin\)/,'Bungie connections must return to Journey on the active approved origin');
 assert.match(journeyHtml,/id="journeyConnectButton"[\s\S]*?return=https%3A%2F%2Fastrixparadox\.com%2Fastrix-app%2Fpages%2Fjourney%2F/,'Journey must provide a no-script Bungie connection fallback that returns to Journey');
 assert.match(journeyModule,/function showSignedOut\(\)\{[\s\S]*?signedOut\.hidden=false;[\s\S]*?connectButton\.href=authStartUrl\(\)/,'Signed-out visitors must stay on Journey and connect through the active-origin Bungie return URL');
@@ -127,7 +129,7 @@ assert.match(journeyCss,/\.journey-page \.mission-crest\{[\s\S]*?position:absolu
 assert.match(journeyCss,/\.journey-page \.mission-crest img\{[\s\S]*?width:100%;[\s\S]*?height:100%;[\s\S]*?object-fit:cover;[\s\S]*?transform:none/,'Verified Bungie emblem artwork must fill the whole identity card');
 assert.match(journeyCss,/\.journey-page \.mission-identity-copy\{[\s\S]*?width:66\.667%;[\s\S]*?margin-left:33\.333%/,'Guardian class and subclass must overlay the emblem beginning one third into the card');
 assert.match(sessionCache,/const PREPARED_PAGE_REFRESH_MS=10\*60\*1000;/,'Prepared pages must check their merged Bungie payload every ten minutes');
-assert.match(journeyModule,/new URL\('\/bungie\/page\/journey',AUTH_ORIGIN\)/,'Background refreshes must request the merged Journey page payload');
+assert.match(journeyModule,/loadPreparedPagePayload\(journeySession,'journey',\{force:true\}\)/,'Background refreshes must request the merged Journey page payload through the shared client');
 assert.match(journeyModule,/createPreparedPageRefreshController\(\{[\s\S]*?page:'journey'[\s\S]*?refresh:options=>refreshJourneyProfile\(options\)/,'Journey must use the persistent prepared page refresh schedule');
 assert.match(journeyModule,/journeyRefreshController\.check\(\)[\s\S]*?visibilitychange/,'Journey must immediately check an overdue prepared payload when the page becomes visible');
 assert.match(journeyHtml,/id="journeyRefreshButton"[\s\S]*?>Refresh<\/button>/,'Journey must expose a manual prepared payload refresh');
