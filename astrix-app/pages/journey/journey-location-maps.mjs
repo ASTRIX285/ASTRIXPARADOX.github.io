@@ -50,7 +50,6 @@ const verifiedRegionChestProgress=new Map();
 const verifiedDestinationData=new Map();
 const destinationDataViews=new Set();
 const DESTINATION_DATA_SECTIONS=Object.freeze([
-  Object.freeze({key:'triumphs',label:'TRIUMPHS'}),
   Object.freeze({key:'records',label:'RECORDS'}),
   Object.freeze({key:'quests',label:'QUESTS'}),
   Object.freeze({key:'endgame',label:'DUNGEONS & RAIDS'})
@@ -337,7 +336,7 @@ function createDestinationDataView(key,label,mapFigure){
     button.setAttribute('role','tab');
     button.setAttribute('aria-selected','false');
     button.setAttribute('aria-controls',panel.id);
-    button.tabIndex=section.key==='triumphs'?0:-1;
+    button.tabIndex=section.key==='records'?0:-1;
     button.textContent=section.label;
     button.addEventListener('click',()=>selectSection(section));
     buttons.set(section.key,button);
@@ -348,7 +347,7 @@ function createDestinationDataView(key,label,mapFigure){
     activeSection='';
     for(const [sectionKey,button] of buttons){
       button.setAttribute('aria-selected','false');
-      button.tabIndex=sectionKey==='triumphs'?0:-1;
+      button.tabIndex=sectionKey==='records'?0:-1;
     }
     panel.hidden=true;
     mapFigure.hidden=false;

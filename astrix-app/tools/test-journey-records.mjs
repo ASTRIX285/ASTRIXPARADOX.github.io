@@ -7,6 +7,7 @@ const base=new URL('../data/journey-index/',import.meta.url);
 const index=JSON.parse(await readFile(new URL('index.json',base)));
 const calls=[];
 const service=new JourneyManifestService({fetchImpl:async input=>{const url=new URL(input);calls.push(url.pathname.split('/').at(-1));return Response.json(JSON.parse(await readFile(new URL(url.pathname.split('/').at(-1),base))));},fallback:{checkVersion:async()=>index.manifestVersion,getMany:async()=>{throw new Error('Unexpected full-manifest fallback');}}});
+const officialDestinationRecordCounts=new Map();
 for(const rootHash of [1163735237,1866538467,0]){
  const payload={profile:{profileRecords:{data:{recordCategoriesRootNodeHash:rootHash}},profilePresentationNodes:{data:{nodes:{}}}}};
  const tree=await resolveRecordTree(payload,service);
@@ -19,7 +20,7 @@ for(const rootHash of [1163735237,1866538467,0]){
   while(pending.length){const defs=await service.getMany('DestinyPresentationNodeDefinition',pending);pending=[];for(const n of Object.values(defs)){if(seen.has(n.hash))continue;seen.add(n.hash);for(const r of n.children?.records||[])foundRecords.add(r.recordHash);pending.push(...(n.children?.presentationNodes||[]).map(e=>e.presentationNodeHash));}}
   assert.ok(foundRecords.size,`${name}: catalogue must contain record leaves`);
   const records=await service.getMany('DestinyRecordDefinition',foundRecords);assert.equal(Object.keys(records).length,foundRecords.size,`${name}: all record definitions resolve`);
-  if(rootHash===1163735237)console.log(`${name}: ${foundRecords.size} official records`);
+  if(rootHash===1163735237){officialDestinationRecordCounts.set(name,foundRecords.size);console.log(`${name}: ${foundRecords.size} official records`);}
  }
 }
 assert.equal(patternTypeKey(['Patterns & Catalysts','Primary Weapon Patterns','Auto Rifles']),'primary');
@@ -51,13 +52,21 @@ const {runInNewContext}=await import('node:vm');
 const source=await readFile(new URL('../pages/journey/journey.mjs',import.meta.url),'utf8');
 const names=['titleRecordFor','titleRequirementRow','bungieIconUrl','bungiePresentationIcon','presentationRecordCategories','presentationLeafCategories','recordPresentationTree','journeyCharacterFor','destinationRecordItem','destinationCategoryItem','destinationRecordSections','verifiedCraftablePatternTypes'];
 const functions=names.map(name=>{const start=source.indexOf(`function ${name}(`);assert.ok(start>=0);const end=source.indexOf('\n}',start)+2;return (source.slice(start-6,start)==='async '?'async ':'')+source.slice(start,end);}).join('\n');
-const context={guardianManifest:service,resolveRecordTree,findDestinationNodes,patternTypeKey,selectedCharacterId:'test',BUNGIE_ORIGIN:'https://www.bungie.net',URL,finiteNumber:v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null,recordCategoryKey:v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'),destinationNameKey:v=>String(v||'').toLowerCase(),destinationNameMatches:(k,n)=>n===({'pale-heart':'The Pale Heart',neomuna:'Neomuna',cosmodrome:'Cosmodrome'})[k],PATTERN_CATALYST_TYPE_DEFINITIONS:[{key:'primary'},{key:'special'},{key:'heavy'},{key:'catalysts'}]};
+const destinationNames={'pale-heart':'The Pale Heart',neomuna:'Neomuna',europa:'Europa','throne-world':'Throne World','dreaming-city':'Dreaming City',nessus:'Nessus',edz:'European Dead Zone',moon:'The Moon',cosmodrome:'Cosmodrome'};
+const context={guardianManifest:service,resolveRecordTree,findDestinationNodes,patternTypeKey,selectedCharacterId:'test',BUNGIE_ORIGIN:'https://www.bungie.net',URL,finiteNumber:v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null,recordCategoryKey:v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'),destinationNameKey:v=>String(v||'').toLowerCase(),destinationNameMatches:(k,n)=>n===destinationNames[k],PATTERN_CATALYST_TYPE_DEFINITIONS:[{key:'primary'},{key:'special'},{key:'heavy'},{key:'catalysts'}]};
 runInNewContext(functions+'\nthis.joins={destinationRecordSections,verifiedCraftablePatternTypes,presentationRecordCategories,titleRequirementRow};',context);
 const profile={profile:{characters:{data:{test:{characterId:'test'}}},profileRecords:{data:{recordCategoriesRootNodeHash:1866538467,records:{}}},profilePresentationNodes:{data:{nodes:{}}},characterCraftables:{data:{test:{craftingRootNodeHash:2642502414,craftables:{}}}}}};
-for(const destination of ['pale-heart','neomuna','cosmodrome']){
- const result=await context.joins.destinationRecordSections(profile,destination,'test');assert.ok(result.triumphs.length,`${destination}: production binding must publish Triumph rows`);assert.ok(result.records.length,`${destination}: Records must not be an empty subtype filter`);
- assert.ok(result.triumphs.some(row=>row.hash&&row.completed===null),'Absent profile states must stay unknown');
+let destinationRecordTotal=0;
+for(const [destination,label] of Object.entries(destinationNames)){
+ const result=await context.joins.destinationRecordSections(profile,destination,'test');
+ assert.equal(Object.hasOwn(result,'triumphs'),false,`${destination}: duplicate Triumph destination rows must not be retained`);
+ const recordRows=result.records.filter(row=>row.hash);
+ assert.equal(recordRows.length,officialDestinationRecordCounts.get(label),`${destination}: the single Records view must retain every official destination record`);
+ assert.equal(new Set(recordRows.map(row=>row.hash)).size,recordRows.length,`${destination}: destination Record hashes must be unique`);
+ assert.ok(recordRows.some(row=>row.completed===null),'Absent profile states must stay unknown');
+ destinationRecordTotal+=recordRows.length;
 }
+console.log(`JOURNEY_DESTINATION_RECORD_DEDUP=PASS destinations=${Object.keys(destinationNames).length} records=${destinationRecordTotal}`);
 const patternsJoined=await context.joins.verifiedCraftablePatternTypes(profile,'test');
 for(const type of patternsJoined){assert.ok(type.categories.length,`${type.key} must have real pattern categories`);assert.ok(type.categories.some(c=>c.items.length));}
 const medals=await context.joins.presentationRecordCategories([{presentationNodeHash:4227847809}],{},'test','medals');

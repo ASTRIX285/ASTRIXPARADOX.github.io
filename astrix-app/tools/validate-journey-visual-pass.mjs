@@ -252,7 +252,9 @@ assert.ok(mapModule.includes("const label=globalThis.ForgeDestinations?.labelOf(
 assert.ok(mapModule.includes("viewport.append(stage,createRegionChestOverlay(key,label))"),'Regional chest progress must remain outside the moving map stage and receive the selected destination label');
 assert.ok(mapModule.includes("const REGION_CHEST_EVENT='forge:journey-region-chests'"),'Regional chest progress must accept a verified data event');
 assert.equal((mapModule.match(/<strong data-region-chest-(?:discovered|missing|total)>--<\/strong>/g)??[]).length,3,'Regional chest progress must keep three honest pending placeholders before live records arrive');
-assert.equal((mapModule.match(/Object\.freeze\(\{key:'(?:triumphs|records|quests|endgame)',label:/g)??[]).length,4,'Every destination must expose the four generic data buttons');
+assert.equal((mapModule.match(/Object\.freeze\(\{key:'(?:records|quests|endgame)',label:/g)??[]).length,3,'Every destination must expose one Records button plus Quests and Dungeons & Raids');
+assert.doesNotMatch(mapModule,/Object\.freeze\(\{key:'triumphs',label:'TRIUMPHS'\}\)/,'Destinations must not retain a duplicate Triumphs button over the same Record definitions');
+assert.equal((mapModule.match(/(?:section\.key|sectionKey)==='records'/g)??[]).length,2,'The retained Records section must own initial and restored keyboard focus');
 assert.ok(mapModule.includes("back.textContent='Back to Map'"),'Destination data must provide Back to Map navigation');
 assert.ok(mapModule.includes("heading.textContent=`${label.toLocaleUpperCase('en-GB')} ${section.label}`"),'Destination data headings must retain the selected destination context');
 assert.ok(mapModule.includes('mapFigure.hidden=true')&&mapModule.includes('mapFigure.hidden=false'),'Destination data selection must swap the panel without resetting the map state');
