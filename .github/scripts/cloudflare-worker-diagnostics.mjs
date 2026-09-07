@@ -128,7 +128,38 @@ const percentiles = await query('latency-percentiles', {
 }, 100);
 
 function eventRows(result) {
-  return Array.isArray(result.events) ? result.events : [];
+  const queue = [result.events];
+  const seen = new Set();
+  while (queue.length) {
+    const value = queue.shift();
+    if (!value || typeof value !== 'object' || seen.has(value)) continue;
+    seen.add(value);
+    if (Array.isArray(value)) {
+      const rows = value.filter((entry) => entry && typeof entry === 'object');
+      if (rows.length) return rows;
+      continue;
+    }
+    for (const key of ['events', 'results', 'data', 'rows', 'items']) {
+      if (key in value) queue.push(value[key]);
+    }
+  }
+  return [];
+}
+
+function eventShape(result) {
+  const value = result.events;
+  if (Array.isArray(value)) return { type: 'array', length: value.length };
+  if (!value || typeof value !== 'object') return { type: typeof value };
+  return {
+    type: 'object',
+    keys: Object.keys(value),
+    children: Object.fromEntries(Object.entries(value).map(([key, child]) => [
+      key,
+      Array.isArray(child)
+        ? { type: 'array', length: child.length }
+        : { type: typeof child, keys: child && typeof child === 'object' ? Object.keys(child) : [] },
+    ])),
+  };
 }
 
 function text(value, limit = 240) {
@@ -139,14 +170,19 @@ function text(value, limit = 240) {
 function safeEvent(event) {
   const metadata = event.$metadata || event.metadata || {};
   const workers = event.$workers || event.workers || {};
-  const request = workers.event?.request || event.event?.request || {};
-  const response = workers.event?.response || event.event?.response || {};
+  const workerEvent = workers.event || event.event || {};
+  const request = workerEvent.request || {};
+  const response = workerEvent.response || {};
+  let urlPath = null;
+  try {
+    urlPath = request.url ? new URL(request.url).pathname : null;
+  } catch {}
   return {
     timestamp: metadata.timestamp || event.timestamp || null,
     service: metadata.service || workers.scriptName || service,
     requestId: workers.requestId || metadata.requestId || null,
     method: request.method || null,
-    path: request.path || null,
+    path: workerEvent.path || request.path || urlPath,
     status: response.status || null,
     outcome: workers.outcome || metadata.outcome || null,
     wallTimeMs: workers.wallTimeMs ?? null,
@@ -156,13 +192,34 @@ function safeEvent(event) {
   };
 }
 
+function compactCalculations(result) {
+  const calculations = Array.isArray(result.calculations) ? result.calculations : [];
+  return calculations.map((calculation) => {
+    const compact = {};
+    for (const key of ['alias', 'operator', 'aggregates', 'groups']) {
+      if (calculation[key] !== undefined) compact[key] = calculation[key];
+    }
+    const series = Array.isArray(calculation.series) ? calculation.series : [];
+    if (series.length) {
+      compact.slowSeries = series.filter((entry) => {
+        const value = Number(entry?.value ?? entry?.values?.[0] ?? 0);
+        return Number.isFinite(value) && value >= 5000;
+      });
+    }
+    return compact;
+  });
+}
+
 console.log(`CLOUDFLARE_DIAGNOSTICS_SERVICE=${service}`);
 console.log(`CLOUDFLARE_DIAGNOSTICS_FROM=${new Date(from).toISOString()}`);
 console.log(`CLOUDFLARE_DIAGNOSTICS_TO=${new Date(now).toISOString()}`);
 console.log(`CLOUDFLARE_SERVICE_COUNTS=${JSON.stringify(services.calculations || [])}`);
 console.log(`CLOUDFLARE_RELEVANT_KEYS=${JSON.stringify((keysBody.result || []).filter((entry) => /wall|cpu|duration|path|error|outcome|status|request|response|memory/i.test(entry.key)))}`);
 console.log(`CLOUDFLARE_RECENT_RESULT_KEYS=${JSON.stringify(Object.keys(recent))}`);
+console.log(`CLOUDFLARE_RECENT_EVENT_SHAPE=${JSON.stringify(eventShape(recent))}`);
+console.log(`CLOUDFLARE_MEMORY_EVENT_SHAPE=${JSON.stringify(eventShape(failures))}`);
+console.log(`CLOUDFLARE_SLOW_EVENT_SHAPE=${JSON.stringify(eventShape(slow))}`);
 console.log(`CLOUDFLARE_RECENT_EVENTS=${JSON.stringify(eventRows(recent).map(safeEvent))}`);
 console.log(`CLOUDFLARE_MEMORY_EVENTS=${JSON.stringify(eventRows(failures).map(safeEvent))}`);
 console.log(`CLOUDFLARE_SLOW_EVENTS=${JSON.stringify(eventRows(slow).map(safeEvent))}`);
-console.log(`CLOUDFLARE_LATENCY_PERCENTILES=${JSON.stringify(percentiles.calculations || [])}`);
+console.log(`CLOUDFLARE_LATENCY_PERCENTILES=${JSON.stringify(compactCalculations(percentiles))}`);

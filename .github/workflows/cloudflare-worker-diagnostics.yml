@@ -1,6 +1,6 @@
 name: Cloudflare Worker Diagnostics
 
-# Event view retry five
+# Event shape inspection
 
 on:
   push:
