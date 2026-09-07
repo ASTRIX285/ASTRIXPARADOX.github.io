@@ -1,5 +1,7 @@
 name: Cloudflare Worker Diagnostics
 
+# Permission retry two
+
 on:
   push:
     branches:
