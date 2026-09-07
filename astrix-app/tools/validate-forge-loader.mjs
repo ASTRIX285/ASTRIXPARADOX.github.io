@@ -286,9 +286,11 @@ assert.match(runtime,/fixedExoticHashes:exotic\.hashes/,'The selected Exotic ide
 assert.match(runtime,/matchTopArmourBuilds\(armourItems\(\),targets,\{\.\.\.solverOptions\(\),limit:CANDIDATE_BATCH_SIZE/,'Forge Loader must scan every legal combination while retaining only its top 50 results.');
 assert.match(runtime,/createOpenProtocolTieBreaker\(exotic\)[\s\S]*?secondaryScore/,'The full bounded scan must apply verified Exotic-to-set evidence before lower-ranked combinations are discarded.');
 assert.match(runtime,/exoticCatalogueGroups\(catalogue\.armour,inventoryDefinitions\(\),activeCharacterClass,ARMOUR_BUCKETS\)/,'Forge Loader must add verified class collection definitions without fabricating inventory instances.');
-assert.match(runtime,/aria-disabled="\$\{group\.owned\?'false':'true'\}"/,'Unowned Exotic identities must remain inspectable but visibly unavailable.');
+assert.match(runtime,/aria-disabled="\$\{group\.owned\?'false':'true'\}"/,'Unowned Exotic identities must remain visible but unavailable for selection.');
 assert.match(runtime,/group\.owned&&group\.key===String\(key\|\|''\)/,'The runtime must reject any unowned Exotic selection attempt.');
 assert.match(runtime,/data-exotic-key="\$\{esc\(group\.key\)\}"/,'Only one identity key may activate every owned copy behind an Exotic tile.');
+assert.doesNotMatch(runtime,/data-inspect-exotic-key|inspectExoticKey/,'An Exotic selector tile must never open a fixed instance inspection card.');
+assert.match(runtime,/aria-label="\$\{group\.owned\?'Select':'Unavailable'\}/,'Selector labels must describe selection availability without promising an instance inspection.');
 assert.match(html,/id="forgeExoticStatus" hidden/,'The Exotic definition count must remain available without cluttering the visible selector.');
 assert.doesNotMatch(html,/Every verified Exotic for the selected class/,'The Exotic selector must present the icon list without an explanatory block.');
 assert.doesNotMatch(runtime,/<span>\$\{group\.owned\?`×\$\{group\.instances\.length\}`:'LOCKED'<\/span>/,'Duplicate and ownership labels must not cover the Exotic artwork.');
@@ -309,6 +311,8 @@ assert.match(runtime,/Five exact Bungie armour instances · no mods[\s\S]*?UNMOD
 assert.doesNotMatch(runtime,/ARMOUR_STAT_LABELS\[key\]\.slice/,'Calculated loads must show full stat names rather than unreadable abbreviations.');
 assert.match(html,/<h2 id="forgeResultsTitle">Forge Matrix<\/h2>/,'Calculated combinations must use the independent PARADOX Forge Matrix identity.');
 assert.match(runtime,/class="forge-matrix-row"[\s\S]*?class="forge-matrix-stats"[\s\S]*?class="forge-matrix-total"[\s\S]*?class="forge-matrix-protocol"/,'Each compact load must expose six calculated stats, total and set protocol in one comparison row.');
+assert.match(runtime,/class="forge-matrix-anchor">Anchor Exotic: \$\{esc\(exotic\?\.name\|\|'Verified Exotic'\)\}<\/small>/,'Every calculated load row must name its exact anchor Exotic.');
+assert.match(css,/\.forge-matrix-expand \.forge-matrix-anchor\{[^}]*color:var\(--apx-gold\)[^}]*bahnschrift-semicondensed/,'The anchor Exotic label must reuse the established Forge gold and type system.');
 assert.match(runtime,/maximized=index===0[\s\S]*?is-maximized[\s\S]*?MAXIMIZED/,'The highest-ranked complete owned load must receive the unique PARADOX Maximized state.');
 assert.match(css,/\.forge-candidate\.is-maximized\{[^}]*border:2px solid #e4bd49/,'The Maximized load must use a deliberate gold perimeter rather than a generic selected state.');
 assert.match(runtime,/data-candidate-expand="\$\{index\}"[\s\S]*?aria-controls="forgeLoadBreakdown\$\{index\}"/,'Every Forge Matrix row must provide an accessible expandable breakdown control.');
@@ -327,8 +331,8 @@ assert.doesNotMatch(runtime,/if\(!baselineStored\)\{[^}]*?return;/,'A rejected b
 assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.set\('baseline','bungie-recovery'\)/,'The destination must request authenticated recovery only when the atomic baseline is unavailable.');
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
-assert.match(html,/forge-loader\.mjs\?v=20260906-review-layout-1/,'Forge Loader must load the exact subclass handoff without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260904-open-armour-1/,'Forge Loader must refresh the stronger selected-Exotic state without stale page CSS.');
+assert.match(html,/forge-loader\.mjs\?v=20260907-item-inspect-scope-1/,'Forge Loader must load the exact matched-item inspection scope without stale browser code.');
+assert.match(html,/forge-loader\.css\?v=20260907-item-inspect-scope-1/,'Forge Loader must refresh the calculated-load anchor label without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -384,6 +388,12 @@ assert.match(css,/@container\(max-width:60rem\)[\s\S]*?\.forge-matrix-stats\{gri
 assert.match(runtime,/document\.documentElement\.append\(panel\)/,'The inspection card must escape the density-scaled body before viewport positioning.');
 assert.match(runtime,/getBoundingClientRect\(\)/,'The inspection card must anchor to the selected item.');
 assert.doesNotMatch(css,/\.forge-item-inspect\{[^}]*right:/,'The inspection card must not be fixed to the top-right dashboard corner.');
+assert.match(runtime,/function stagedMarkup[\s\S]*?data-inspect-item="\$\{esc\(itemKey\(item\)\)\}"/,'Every staged Working Load item must expose its exact owned instance to Item Inspect.');
+assert.match(runtime,/class="forge-matrix-exotic" data-inspect-item="\$\{esc\(itemKey\(exotic\)\)\}"/,'Every Forge Matrix Exotic icon must inspect its exact matched roll.');
+assert.match(runtime,/function inspectItemFromTarget\(target\)\{[\s\S]*?catalogue\.armour\.find\(item=>itemKey\(item\)===String\(key\|\|''\)\)\|\|null;/,'Item Inspect must resolve only exact owned catalogue instances.');
+assert.match(runtime,/function showInspect\(target\)\{[\s\S]*?if\(!item\?\.itemInstanceId\|\|!panel\)return;/,'Item Inspect must reject any definition-only or uninstanced item.');
+assert.match(runtime,/ownedExoticGroups\(catalogue\.armour,activeCharacterClass\)[\s\S]*?THIS ROLL · OWNED \$\{ordinal\} OF \$\{instances\.length\} IN VAULT CATALOGUE/,'An inspected Exotic roll must report its position within the real owned-copy group.');
+assert.doesNotMatch(runtime,/VERIFIED DEFINITION|BUNGIE COLLECTION DATA|ownedInstance/,'Item Inspect must not retain its generic collection-definition path.');
 const loaderIndex=ribbon.indexOf("key:'forge-loader'");
 const buildIndex=ribbon.indexOf("key:'build-forge'");
 assert.ok(loaderIndex>=0&&loaderIndex<buildIndex,'Forge Loader must appear immediately before Build Forge.');
