@@ -1,0 +1,25 @@
+name: Cloudflare Worker Diagnostics
+
+on:
+  push:
+    branches:
+      - sandbox
+    paths:
+      - .github/workflows/cloudflare-worker-diagnostics.yml
+      - .github/scripts/cloudflare-worker-diagnostics.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sandbox
+        uses: actions/checkout@v4
+      - name: Query sanitized Worker telemetry
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DIAGNOSTICS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node .github/scripts/cloudflare-worker-diagnostics.mjs
