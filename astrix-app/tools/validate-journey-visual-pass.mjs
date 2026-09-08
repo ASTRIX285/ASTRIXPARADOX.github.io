@@ -153,9 +153,9 @@ assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260906-page-data-recovery-1'),'Loadout must retain its current prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260906-page-data-recovery-1'),'Forge Loader must load the persistent refresh Guardian renderer');
 assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1'),'Character must load the prepared page payload module graph');
-assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260906-live-equip-1'),'Build Forge must load the repaired Apply and review layout module graph');
+assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260908-icon-hover-1'),'Build Forge must load the repaired Apply, review layout and hover module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
-assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260831-fixed-topbar"'),'Mission Reports must load the cache-busted fixed topbar correction');
+assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');
 assert.doesNotMatch(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:relative!important;[\s\S]*?top:auto!important;/,'Mission Reports must not reattach the Guardian ribbon to its report columns');
 assert.match(heroCss,/position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'Every hero-card topbar must remain fixed to the viewport top');

@@ -1,4 +1,4 @@
-import './guardian-gear-layout.mjs?v=20260905-weapon-audit-1';
+import './guardian-gear-layout.mjs?v=20260908-icon-hover-1';
 const SUBCLASS_NAMES={hunter:{void:'Nightstalker',solar:'Gunslinger',arc:'Arcstrider',stasis:'Revenant',strand:'Threadrunner',prismatic:'Prismatic Hunter'},titan:{void:'Sentinel',solar:'Sunbreaker',arc:'Striker',stasis:'Behemoth',strand:'Berserker',prismatic:'Prismatic Titan'},warlock:{void:'Voidwalker',solar:'Dawnblade',arc:'Stormcaller',stasis:'Shadebinder',strand:'Broodweaver',prismatic:'Prismatic Warlock'}};
 const state={characterId:'',characterClass:'hunter',subclass:'void',artifact:null,recommendedArtifactPerks:null,super:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -258,7 +258,7 @@
   box-shadow:0 0 0 1px rgba(var(--guardian-rail-crimson),.58),0 0 14px rgba(var(--guardian-rail-gold),.20)!important;
 }
 .guardian-left-rail .guardian-loadout-slot.is-loading{opacity:.66;cursor:progress}
-.guardian-left-rail .guardian-loadout-icon{width:36px!important;height:36px!important;object-fit:contain!important}
+.guardian-left-rail .guardian-loadout-icon{width:var(--apx-icon-loadout)!important;height:var(--apx-icon-loadout)!important;object-fit:contain!important}
 .guardian-left-rail .guardian-loadout-name,
 .guardian-left-rail .guardian-loadout-empty-label{display:none!important}
 .guardian-left-rail .guardian-loadout-slot small{position:absolute;right:3px;bottom:1px;font-size:.45rem;color:rgba(255,248,226,.74)}
@@ -505,8 +505,8 @@ body.guardian-main-page .workspace>.right{display:none!important}
   }
   body.guardian-main-page .gear-weapons .weap .art{
     width:var(--gear-weapon-art)!important;
-    height:var(--gear-weapon-art)!important;
-    aspect-ratio:1!important;
+    height:var(--apx-icon-gear-art-height)!important;
+    aspect-ratio:100/122!important;
   }
   body.guardian-main-page .workspace>.equip>.stats-block,
   body.guardian-main-page .workspace>.equip>.activity{display:none!important}
@@ -555,7 +555,7 @@ body.guardian-main-page .workspace>.right{display:none!important}
   body.guardian-main-page .equip.gear-layout-active>.gear-combined{order:2!important}
   body.guardian-main-page .equip.gear-layout-active>.gear-weapons{order:3!important}
   body.guardian-main-page .gear-weapons .weap-grid{grid-template-columns:1fr!important}
-  body.guardian-main-page .gear-weapons .weap .art{width:var(--gear-weapon-art)!important;height:var(--gear-weapon-art)!important}
+  body.guardian-main-page .gear-weapons .weap .art{width:var(--gear-weapon-art)!important;height:var(--apx-icon-gear-art-height)!important;aspect-ratio:100/122!important}
   body.guardian-main-page .workspace>.equip>.stats-block,
   body.guardian-main-page .workspace>.equip>.activity{display:none!important}
 }

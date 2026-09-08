@@ -7,6 +7,7 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-sele
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260908-icon-hover-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -98,11 +99,16 @@ function selectedKeySet(){return new Set([...selectedSlots.values()].map(itemKey
 
 function selectionSlotMarkup(slot,index){
   const item=selectedSlots.get(index);
-  return `<div class="vault-selection-slot" data-selection-slot="${index}">${item?.icon?`<img src="${esc(item.icon)}" alt="">`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Owned'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
+  return `<div class="vault-selection-slot" data-selection-slot="${index}"${item?` data-inspect-item="${esc(itemKey(item))}" tabindex="0"`:''}>${item?.icon?`<img src="${esc(item.icon)}" alt="">`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Owned'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
+}
+
+function bindVaultItemHovers(root){
+  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>bindParadoxItemHover(target,inspectedItem(target.dataset.inspectItem),'armour'));
 }
 
 function renderSelection(){
   byId('vaultSelectionSlots').innerHTML=ARMOUR_BUCKETS.map(selectionSlotMarkup).join('');
+  bindVaultItemHovers(byId('vaultSelectionSlots'));
   const count=selectedSlots.size;
   byId('vaultSelectionStatus').textContent=count?`${count} of ${ARMOUR_BUCKETS.length} armour slots staged for ${activeCharacterClass||'selected Guardian'}`:'No armour selected';
   byId('vaultClearSelection').disabled=!count;
@@ -184,6 +190,7 @@ function renderCandidateBuilds(){
   if(!host)return;
   host.hidden=matchedBuilds.length===0;
   host.innerHTML=matchedBuilds.map(candidateMarkup).join('');
+  bindVaultItemHovers(host);
 }
 
 async function findCandidateBuilds(){
@@ -219,44 +226,14 @@ function resetTargets(){
 
 function inspectedItem(key){return catalogue.armour.find(item=>itemKey(item)===String(key||''))||null;}
 
-function inspectStatsMarkup(item){
-  const vector=armourStatVector(item);
-  return `<div class="vault-inspect-stats">${ARMOUR_STAT_KEYS.map(key=>`<span>${esc(ARMOUR_STAT_LABELS[key])}<b>${Number(vector[key]||0)}</b></span>`).join('')}</div>`;
-}
-
-function positionItemInspect(panel,anchor){
-  const gap=12,bounds=anchor.getBoundingClientRect(),width=panel.offsetWidth,height=panel.offsetHeight;
-  let left=bounds.right+gap;
-  if(left+width>innerWidth-gap)left=bounds.left-width-gap;
-  left=Math.max(gap,Math.min(left,innerWidth-width-gap));
-  const top=Math.max(gap,Math.min(bounds.top,innerHeight-height-gap));
-  panel.style.left=`${Math.round(left)}px`;
-  panel.style.top=`${Math.round(top)}px`;
-  panel.style.right='auto';
-}
-
-function showItemInspect(key,anchor){
-  const item=inspectedItem(key),panel=byId('vaultItemInspect');
-  if(!item||!panel||!anchor)return;
-  if(panel.parentElement!==document.documentElement)document.documentElement.append(panel);
-  const setName=item.setBonus?.identity?.name||'';
-  panel.innerHTML=`<div class="vault-inspect-head">${item.icon?`<img src="${esc(item.icon)}" alt="">`:''}<div class="vault-inspect-copy"><h4>${esc(item.name)}</h4><p>${esc(`${item.slotLabel} · ${item.characterClass==='any'?'Any class':item.characterClass}`)}</p><strong>Σ ${item.totalStats} TOTAL${item.power!==null?` · ✦ ${esc(item.power)}`:''}</strong>${setName?`<p class="vault-inspect-set">${esc(setName)}</p>`:''}</div></div>${inspectStatsMarkup(item)}<div class="vault-inspect-foot"><span>${esc(String(item.source?.label||'Owned').toUpperCase())}</span><span>EXACT BUNGIE INSTANCE</span></div>`;
-  panel.hidden=false;
-  panel.setAttribute('aria-hidden','false');
-  requestAnimationFrame(()=>positionItemInspect(panel,anchor));
-}
-
-function hideItemInspect(){
-  const panel=byId('vaultItemInspect');
-  if(panel){panel.hidden=true;panel.setAttribute('aria-hidden','true');}
-}
-
 function itemMarkup(item){
   const compatible=itemCompatible(item);
   const setName=item.setBonus?.identity?.name||'';
+  const seasonIcon=item?.releaseWatermark?.icon||item?.tierIcon||'';
+  const armourTier=Math.max(0,Math.min(5,Number(item?.armourTier)||0));
   const className=['vault-item',item.isExotic?'is-exotic':'',compatible?'':'is-incompatible'].filter(Boolean).join(' ');
-  return `<button type="button" class="${className}" data-inspect-item="${esc(itemKey(item))}" data-armour-slot="${item.slotIndex}" ${compatible?`aria-label="Inspect ${esc(item.name)}"`:`disabled aria-label="${esc(item.name)} is not compatible with the selected ${activeCharacterClass||'Guardian'}"`}>
-    <span class="vault-item-art">${item.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:''}${item.power!==null?`<span class="vault-item-power">✦ ${esc(item.power)}</span>`:''}<span class="vault-item-source">${esc(String(item.source?.label||'Owned').toUpperCase())}</span><span class="vault-item-total">Σ ${item.totalStats}</span></span>
+  return `<button type="button" class="${className}" data-inspect-item="${esc(itemKey(item))}" data-armour-slot="${item.slotIndex}" ${compatible?`aria-label="Inspect ${esc(item.name)}"`:`aria-disabled="true" aria-label="${esc(item.name)} is not compatible with the selected ${activeCharacterClass||'Guardian'}"`}>
+    <span class="vault-item-art">${item.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:''}${seasonIcon||armourTier?`<span class="vault-item-tier-rail">${seasonIcon?`<span class="vault-item-season-icon" title="Bungie season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>`:''}${Array.from({length:armourTier},()=>'<i class="vault-item-tier-diamond" aria-hidden="true"></i>').join('')}</span>`:''}${item.power!==null?`<span class="vault-item-power">✦ ${esc(item.power)}</span>`:''}<span class="vault-item-source">${esc(String(item.source?.label||'Owned').toUpperCase())}</span><span class="vault-item-total">Σ ${item.totalStats}</span></span>
     <span class="vault-item-copy"><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.characterClass==='any'?'Any class':item.characterClass}`)}</small>${setName?`<small class="vault-item-set">${esc(setName)}</small>`:''}${statLineMarkup(item)}</span>
   </button>`;
 }
@@ -266,6 +243,7 @@ function renderInventory(){
   const visible=rows.slice(0,visibleLimit);
   byId('vaultResultCount').textContent=`${rows.length} VERIFIED ITEM${rows.length===1?'':'S'}`;
   byId('vaultItemGrid').innerHTML=visible.length?visible.map(item=>itemMarkup(item)).join(''):'<div class="vault-empty">No verified armour matches these filters.</div>';
+  bindVaultItemHovers(byId('vaultItemGrid'));
   const loadMore=byId('vaultLoadMore');
   loadMore.hidden=visible.length>=rows.length;
   if(!loadMore.hidden)loadMore.textContent=`LOAD ${Math.min(PAGE_SIZE,rows.length-visible.length)} MORE ARMOUR`;
@@ -383,12 +361,6 @@ function installEvents(){
   byId('vaultClearSelection')?.addEventListener('click',()=>{selectedSlots.clear();renderAll();});
   byId('vaultEvaluate')?.addEventListener('click',evaluateInBuildForge);
   byId('vaultLoadMore')?.addEventListener('click',()=>{visibleLimit+=PAGE_SIZE;renderInventory();});
-  document.addEventListener('pointerover',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showItemInspect(target.dataset.inspectItem,target);});
-  document.addEventListener('pointerout',event=>{const target=event.target.closest('[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideItemInspect();});
-  document.addEventListener('focusin',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showItemInspect(target.dataset.inspectItem,target);});
-  document.addEventListener('focusout',event=>{const target=event.target.closest('[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideItemInspect();});
-  addEventListener('resize',hideItemInspect,{passive:true});
-  addEventListener('scroll',hideItemInspect,{passive:true,capture:true});
   document.addEventListener('forge:character-selected',event=>{
     resolveActiveCharacter(event.detail?.characterId);
     clearIncompatibleSelection();

@@ -3,12 +3,15 @@ import {readFile} from 'node:fs/promises';
 
 const ROOT=new URL('../pages/guardian-workspace-v2/',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
-const [weaponUi,armourRuntime,interceptor,buildRuntime,cardCss]=await Promise.all([
+const [weaponUi,armourRuntime,interceptor,buildRuntime,cardCss,gearRuntime,vaultRuntime,hoverRuntime]=await Promise.all([
   read('guardian-semantic-ui.mjs'),
   read('guardian-beta-runtime.mjs'),
   read('guardian-semantic-interceptor.mjs'),
   read('paradox-build-space/paradox-build-space.mjs'),
-  read('paradox-item-cards.css')
+  read('paradox-item-cards.css'),
+  read('guardian-gear-layout.mjs'),
+  read('../vault/vault.mjs'),
+  read('paradox-item-hover.mjs')
 ]);
 
 assert.match(weaponUi,/data-perk-capacity="\$\{capacity\}"/,'Every weapon perk socket must expose its tier-derived column capacity');
@@ -29,8 +32,21 @@ for(const section of ['ARMOUR STATS','ENERGY','ARCHETYPE &amp; TRAITS','ARMOUR C
 assert.match(interceptor,/payload\?\.statDefinitions\?\.\[String\(hash\)\][\s\S]*?name:String\(definition\?\.displayProperties\?\.name/,'Per-item armour stat labels must come from the live Bungie stat definitions');
 assert.match(buildRuntime,/openWeaponDetail\(item\)/,'Build Forge weapon models must open the shared Character weapon inspector');
 assert.match(buildRuntime,/openArmourDrawer\(index,build\.armour\?\.\[index\]\)/,'Build Forge armour models must open the shared Character armour inspector');
-assert.match(cardCss,/\.paradox-item-card \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--paradox-perk-size,60px\)\)/,'Weapon perk rows must use a single aligned column grid');
+assert.match(cardCss,/\.paradox-item-card \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--paradox-perk-size,var\(--apx-icon-detail-identity\)\)\)/,'Weapon perk rows must use one shared-token aligned column grid');
 assert.match(cardCss,/font:550 13px\/1\.45 bahnschrift/,'Item-card supporting copy must remain readable');
+assert.match(cardCss,/\.paradox-item-hover\{position:fixed;[^}]*pointer-events:none/,'Shared item hover must remain a non-blocking viewport layer');
+assert.match(cardCss,/\.paradox-item-hover-card\{--paradox-card-violet:#b51e2a;--paradox-card-teal:var\(--paradox-card-gold\)/,'Compact hover must use the corrected crimson and gold palette');
+assert.match(gearRuntime,/item\?\.releaseWatermark\?\.icon \?\? resolveItemWatermark/,'Armour season art must prefer the version-specific prepared Bungie watermark');
+assert.match(gearRuntime,/bindParadoxItemHover\(art,armour\[idx\],"armour"\)/,'Character armour art must expose the shared hover card');
+assert.match(weaponUi,/item\?\.releaseWatermark\?\.icon\?\?resolveItemWatermark/,'Weapon season art must prefer the version-specific prepared Bungie watermark');
+assert.match(weaponUi,/bindParadoxItemHover\(art\|\|card,item,'weapon'\)/,'Character and Build weapon art must expose the shared hover card');
+assert.match(buildRuntime,/manualEditorItems[\s\S]*?bindParadoxItemHover\(node,rows\[Number\(node\.dataset\.manualItemIndex\)\],manualEditorState\.kind\)/,'Build Forge manual item choices must expose exact-item hover');
+assert.match(buildRuntime,/recommendedArmourSummary[\s\S]*?bindParadoxItemHover\(node,build\.armour\?\.\[index\],'armour'\)/,'Build Forge recommended armour must expose exact-item hover');
+assert.match(buildRuntime,/data-review-weapon[\s\S]*?bindParadoxItemHover\(node,item,'weapon'\)/,'Build Forge recommended weapons must expose exact-item hover');
+assert.match(vaultRuntime,/function bindVaultItemHovers\(root\)[\s\S]*?bindParadoxItemHover\(target,inspectedItem\(target\.dataset\.inspectItem\),'armour'\)/,'Vault must expose exact owned instances through the shared hover card');
+assert.match(hoverRuntime,/resolveItemWatermark\(item\?\?\{\},item\?\.definition\?\?\{\}\)/,'Hover season art must come from Bungie item identity data');
+assert.match(hoverRuntime,/host\.style\.top=`\$\{Math\.max\(pad,Math\.round\(bounds\.top-gap-height\)\)\}px`/,'Shared item hover must anchor directly above its item without crossing the viewport top');
+assert.doesNotMatch(hoverRuntime,/placeholder|mock item|fake/i,'Shared item hover must not invent item data');
 
 console.log('PARADOX_ITEM_CARD_FRAMEWORK=PASS');
 console.log('PARADOX_WEAPON_PERK_HIERARCHY=PASS');

@@ -4,10 +4,11 @@
    with 6 functional mod tiles each without tearing down sibling DOM blocks.
    ========================================================================== */
 
-import "./guardian-semantic-ui.mjs?v=20260905-card-space-mods-1";
+import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1";
 import { openArmourDrawer } from "./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1";
 import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1";
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const bungieIcon = (value) => {
@@ -122,7 +123,7 @@ export function armourCard(index, item) {
   const slotCount = 6;
   const armourTier = Number(item?.armourTier ?? item?.armourSemantics?.tier ?? item?.gearTier);
   const isTierFive = Number.isFinite(armourTier) && armourTier >= 5;
-  const seasonIcon = resolveItemWatermark(item||{},item?.definition||{}).icon;
+  const seasonIcon = bungieIcon(item?.releaseWatermark?.icon ?? resolveItemWatermark(item||{},item?.definition||{}).icon);
   const archetype = resolveArmourArchetype(item, armourTier);
   const mods = armourModSequence(item, armourTier, archetype);
   const archetypeIcon = bungieIcon(archetype?.icon ?? archetype?.displayProperties?.icon);
@@ -164,7 +165,9 @@ export function buildGear(armour = []) {
   columns.innerHTML = Array.from({ length: 5 }, (_, i) => armourCard(i, armour[i])).join("");
 
   columns.querySelectorAll(".gear-slot").forEach((slotEl, idx) => {
-    slotEl.querySelector(".arm")?.addEventListener("click", () => openArmourDrawer(idx, armour[idx]));
+    const art=slotEl.querySelector(".arm");
+    art?.addEventListener("click", () => openArmourDrawer(idx, armour[idx]));
+    bindParadoxItemHover(art,armour[idx],"armour");
   });
 
   requestAnimationFrame(() => {

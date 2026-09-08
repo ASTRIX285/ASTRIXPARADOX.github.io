@@ -139,7 +139,7 @@ assert.doesNotMatch(buildHtml,/guardian-resolution-adaptive\.css/,'Build must no
 assert.match(artifact,/NO ACTIVE PERKS REPORTED BY BUNGIE/,'A resolved zero-perk Artifact must show an explicit Bungie state');
 assert.match(artifact,/ARTIFACT STATE UNAVAILABLE/,'An unresolved Artifact must remain explicit');
 assert.match(loadoutsCss,/background-image:var\(--loadout-color-image/,'Saved loadout must retain its Bungie colour image');
-assert.match(loadoutsCss,/guardian-loadout-icon\{width:var\(--pf-mod-size,36px\)/,'Loadout icon must match armour mod size');
+assert.match(loadoutsCss,/guardian-loadout-icon\{width:var\(--pf-mod-size,var\(--apx-icon-loadout\)\)/,'Loadout icon must consume the shared loadout tier while retaining the armour-mod override');
 assert.match(loadoutsModule,/data-bungie-icon-hash/,'Rendered loadouts must retain Bungie iconHash provenance');
 assert.match(loadoutsModule,/data-bungie-color-hash/,'Rendered loadouts must retain Bungie colorHash provenance');
 assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Build Forge link when JavaScript or storage fails');
@@ -199,9 +199,9 @@ assert.match(buildModule,/cacheBuildForgeState\(binding,snapshot\)[\s\S]*?could 
 assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Build Forge state must persist asynchronously through the IndexedDB session cache.');
 assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWorkingBuildPatch\(state\.workingBuild\|\|state\.originalBuild\)/,'Representative manual edits must use a small mutable patch instead of cloning the full snapshot.');
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
-assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260905-card-space-mods-1'/,'Build Armour must import the same current renderer as the locked Character section');
-assert.match(buildHtml,/paradox-build-space\.css\?v=20260907-icon-token-1/,'Build must load the shared icon-token wiring without a stale cache');
-assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260906-live-equip-1/,'Build must load the repaired Apply dependency graph without stale code');
+assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-icon-hover-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
+assert.match(buildHtml,/paradox-build-space\.css\?v=20260908-icon-hover-1/,'Build must load the completed icon-token wiring without a stale cache');
+assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260908-icon-hover-1/,'Build must load the repaired Apply and hover dependency graph without stale code');
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');
 assert.match(buildModule,/document\.addEventListener\('forge:guardian-loadout-context',event=>recoverMissingBuild\(event\.detail\|\|\{\}\)\)/,'Build must recover a missing handoff from the verified live Guardian context');
 assert.match(buildModule,/const artifactItems=resolvedOptions\(build,'artifact'\)/,'Build Artifact selector must expose the verified Artifact 2.0 catalogue for Forge ranking');

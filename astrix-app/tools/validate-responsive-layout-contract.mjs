@@ -39,7 +39,7 @@ assert.match(sources.shared,/--guardian-square:clamp\(40px,3\.2vw,64px\);[\s\S]*
 assert.match(sources.shared,/guardian-left-rail[\s\S]*?width:var\(--guardian-square\)!important;[\s\S]*?height:var\(--guardian-square\)!important/,'Left-rail sockets must consume the shared square token');
 assert.match(sources.gear,/\.gear-mods\{[^}]*repeat\(3,var\(--guardian-square\)\)[^}]*repeat\(2,var\(--guardian-square\)\)[^}]*gap:var\(--guardian-square-gap\)/,'Armour mods must consume the same square and gap tokens');
 assert.match(sources.gear,/\.gear-columns\{[^}]*repeat\(auto-fit,minmax\(min\(220px,100%\),1fr\)\)/,'Shared armour cards must wrap before their mod grids can overlap');
-assert.match(sources.gear,/\.gear-weapons\{[\s\S]*?--gear-weapon-art:var\(--apx-icon-weapon-equipped\);[\s\S]*?--gear-weapon-socket:clamp\(34px,3\.6cqi,52px\)/,'Weapon art must consume the shared equipped-weapon token while sockets retain their responsive geometry');
+assert.match(sources.gear,/\.gear-weapons\{[\s\S]*?--gear-weapon-art:var\(--apx-icon-gear-art-width\);[\s\S]*?--gear-weapon-socket:var\(--apx-icon-weapon-socket\)/,'Weapon art and sockets must consume the shared equipment tokens');
 assert.match(sources.gear,/\.gear-weapons \.weap\{[\s\S]*?grid-template-areas:"art cap" "art perks" "art support" "art empty"!important/,'Every weapon card must use the shared art, perks and mod composition');
 assert.match(sources.gear,/\.weapon-perk-matrix\.is-compact \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--gear-weapon-socket\)\)/,'Compact weapon models must keep their tier-defined perk columns aligned');
 assert.match(sources.gear,/\.weapon-support-icon\{width:var\(--gear-weapon-socket\)!important;height:var\(--gear-weapon-socket\)!important/,'Weapon mod and masterwork sockets must match perk sizing');
@@ -48,8 +48,8 @@ assert.match(sources.items,/\.paradox-item-card\{[\s\S]*?border:1px solid rgba\(
 assert.match(sources.items,/\.paradox-item-card \.weapon-perk-cell\{[^}]*border:2px solid/,'Detailed weapon perks must retain circular socket emphasis');
 assert.match(sources.items,/\.paradox-socket-icon\{[^}]*border-radius:8px/,'Armour mods and cosmetics must retain square sockets');
 assert.match(sources.items,/@media\(max-width:700px\)\{[\s\S]*?\.weapon-detail-drawer\.paradox-item-shell,\.armour-drawer\.paradox-item-shell\{inset:0;width:100%;height:100dvh/,'Both item-card inspectors must become contained full-screen mobile surfaces');
-assert.match(mainHtml,/paradox-item-cards\.css\?v=20260907-icon-token-1/,'Character must load the shared Paradox item-card framework');
-assert.match(buildHtml,/paradox-item-cards\.css\?v=20260907-icon-token-1/,'Build Forge must load the same Paradox item-card framework');
+assert.match(mainHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Character must load the shared Paradox item-card and hover framework');
+assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build Forge must load the same Paradox item-card and hover framework');
 
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');
 assert.match(sources.shared,/guardian-loadouts-grid\{[\s\S]*?grid-template-columns:repeat\(20,minmax\(32px,1fr\)\)!important;[\s\S]*?min-width:720px!important/,'The Bungie 1–20 loadout row must remain fluid and single-row');
@@ -61,7 +61,21 @@ assert.doesNotMatch(pageLayoutCss,/(?:html|body|\.workspace|\.build-space|\.desi
 assert.doesNotMatch(densityCss,/--forge-desktop-density|(?:^|[;{])\s*zoom\s*:/m,'The shared interface must render at native scale instead of shrinking every tool');
 assert.match(densityCss,/--apx-workspace-left:minmax\(360px,20%\);[\s\S]*?--apx-workspace-centre:minmax\(720px,1fr\);[\s\S]*?--apx-workspace-right:minmax\(420px,24%\);[\s\S]*?--apx-workspace-compact-columns:392px minmax\(0,1fr\);/,'The shared workspace track contract must retain the approved Journey proportions');
 assert.match(densityCss,/--apx-font-copy:"bahnschrift"[\s\S]*?--apx-font-display:"bahnschrift-semicondensed"[\s\S]*?--apx-type-section-title:1rem;[\s\S]*?--apx-type-body:\.875rem;[\s\S]*?--apx-type-label:\.75rem;[\s\S]*?--apx-type-meta:\.75rem;/,'All tools must inherit one readable typography scale');
-assert.match(densityCss,/--apx-icon-stat:1\.25rem;[\s\S]*?--apx-icon-card:3\.5rem;[\s\S]*?--apx-icon-record:3rem;[\s\S]*?--apx-icon-catalog:8rem;[\s\S]*?--apx-icon-weapon-card:clamp\(2\.75rem,4\.2cqi,3\.5rem\);[\s\S]*?--apx-icon-selector:4\.25rem;[\s\S]*?--apx-icon-inspect:7rem;[\s\S]*?--apx-icon-weapon-equipped:clamp\(5\.375rem,8cqi,7rem\);/,'Shared item icon tiers must remain centralized in the desktop density contract');
+for(const token of [
+  '--apx-icon-stat:1.25rem;',
+  '--apx-icon-season:1.125rem;',
+  '--apx-icon-vault-selection:2.5rem;',
+  '--apx-icon-set-head:2.8rem;',
+  '--apx-icon-card:3.5rem;',
+  '--apx-icon-stage:3.8rem;',
+  '--apx-icon-record:3rem;',
+  '--apx-icon-catalog:8rem;',
+  '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
+  '--apx-icon-selector:4.25rem;',
+  '--apx-icon-inspect:7rem;',
+  '--apx-icon-gear-art-width:clamp(76px,5vw,96px);',
+  '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);'
+])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
 assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
 assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
 
@@ -80,9 +94,10 @@ for(const [label,source] of [['Journey',journeyCss],['Build Forge',sources.build
 assert.match(forgeLoaderCss,/grid-template-columns:minmax\(360px,20%\) minmax\(640px,44%\) minmax\(560px,1fr\)/u,'Forge Loader alone must reserve a narrower directive track and a wider output track');
 assert.match(forgeLoaderCss,/grid-template-columns:var\(--apx-workspace-compact-columns,/u,'Forge Loader must retain the shared compact workspace tracks');
 assert.match(forgeLoaderCss,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-selector\),1fr\)/u,'Forge Loader Exotic selection must consume the shared selector icon token');
-assert.match(forgeLoaderCss,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-card\)[\s\S]*?\.forge-matrix-exotic\{width:var\(--apx-icon-card\);height:var\(--apx-icon-card\)/u,'Forge Loader staged and matched items must consume the shared card icon token');
+assert.match(forgeLoaderCss,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-stage\)/u,'Forge Loader staged items must consume the exact shared stage icon tier');
+assert.match(forgeLoaderCss,/\.forge-matrix-exotic\{[^}]*width:var\(--apx-icon-card\);height:var\(--apx-icon-card\)/u,'Forge Loader matched items must consume the shared card icon tier');
 assert.match(forgeLoaderCss,/\.forge-inspect-main\{[^}]*grid-template-columns:var\(--apx-icon-inspect\)[\s\S]*?\.forge-inspect-main img\{width:var\(--apx-icon-inspect\);height:var\(--apx-icon-inspect\)/u,'Forge Loader inspection must consume the shared inspect icon token');
-assert.match(sources.build,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-weapon-card\)/u,'Build Forge recommendations must consume the shared compact weapon-card token');
+assert.match(sources.build,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-gear-art-width\)/u,'Build Forge recommendations must consume the shared portrait gear-art token');
 assert.doesNotMatch(sources.gear,/\.weapon-detail-icon\{[^}]*width:/u,'Guardian gear layout must not override the canonical item-detail icon size');
 assert.match(sources.items,/body \.paradox-item-header \.weapon-detail-icon\{width:var\(--paradox-equipment-width\);height:var\(--paradox-equipment-height\)/u,'Item cards must retain the single canonical detail icon size source');
 assert.match(sources.layout,/grid-template-columns:var\(--apx-workspace-left,[^;]+\) var\(--apx-workspace-centre,[^;]+\)!important/,'Character must consume the shared rail and centre tracks');
