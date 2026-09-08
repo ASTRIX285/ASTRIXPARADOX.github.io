@@ -3,13 +3,13 @@
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1';
+import {weaponStatRows} from './guardian-weapon-stat-definitions.mjs';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
 const text=v=>String(v?.name??v?.displayName??v??"").trim();
 const bungieHash=v=>{const hash=Number(v?.bungieHash??v?.hash??v?.itemHash);return Number.isInteger(hash)&&hash>0?hash:null;};
 const hashAttribute=v=>{const hash=bungieHash(v),type=v?.identitySource||'DestinyInventoryItemDefinition';return hash?` data-bungie-hash="${hash}" data-bungie-definition-type="${esc(type)}" data-paradox-id="${esc(v?.paradoxId||paradoxDefinitionId(type,hash))}"`:"";};
-const WEAPON_STATS=[[4043523819,"Impact"],[1240592695,"Range"],[155624089,"Stability"],[943549884,"Handling"],[4188031367,"Reload Speed"],[1345609583,"Aim Assistance"],[3555269338,"Zoom"],[2715839340,"Airborne Effectiveness"],[4284893193,"Rounds Per Minute"],[3871231066,"Magazine"],[2714457168,"Recoil Direction"]];
 
 function weaponDetailTile(item,label="",{square=false}={}){
   if(!item)return "";
@@ -67,7 +67,7 @@ function openWeaponDetail(item){
   }
   const s=item?.weaponSemantics||{};
   const stats=s.stats||item?.weaponStats||{};
-  const statRows=WEAPON_STATS.map(([hash,name])=>{const raw=stats?.[hash]??stats?.[String(hash)];const value=Number(raw?.value??raw);return Number.isFinite(value)?`<div class="weapon-stat"><span>${esc(name)}</span><i><b style="width:${Math.max(0,Math.min(100,value))}%"></b></i><strong>${esc(value)}</strong></div>`:"";}).join("");
+  const statRows=weaponStatRows(stats).map(({hash,name,value,paradoxId})=>`<div class="weapon-stat" data-bungie-hash="${hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(paradoxId)}"><span>${esc(name)}</span><i><b style="width:${Math.max(0,Math.min(100,value))}%"></b></i><strong>${esc(value)}</strong></div>`).join("");
   const mods=(s.modSockets?.length?s.modSockets:[s.masterwork,s.mod,s.catalyst]).filter(hasResolvedIdentity);
   const supportLabel=plug=>bungieHash(plug)===bungieHash(s.catalyst)?`CATALYST · ${s.catalyst?.progress?.masterworked?"MASTERWORKED":s.catalyst?.progress?.inserted?"INSERTED":"RESOLVED"}`:/masterwork/.test(String(plug?.semanticRole||""))?"MASTERWORK":/weapon-mod|\bmod\b/.test(String(plug?.semanticRole||""))?"WEAPON MOD":"WEAPON SOCKET";
   const perkMatrix=weaponPerkMatrixMarkup(item),perkRows=Number(s.perkModel?.expectedRowCount||s.perkRowCount)||1,weaponTier=Number(s.perkModel?.weaponTier??s.gearTier??item?.gearTier),perkHeading=`WEAPON PERKS${Number.isInteger(weaponTier)&&weaponTier>0?` · TIER ${weaponTier}`:""} · ${perkRows} ROW${perkRows===1?"":"S"}`;
