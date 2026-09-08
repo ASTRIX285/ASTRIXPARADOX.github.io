@@ -49,6 +49,8 @@ const allowed=new Set([
   'astrix-app/pages/journey/journey-collection-model.mjs',
   'astrix-app/tools/build-weapon-catalogue.py',
   'astrix-app/tools/test-weapon-catalogue.mjs',
+  'astrix-app/tools/test-weapon-diagnostics.mjs',
+  'astrix-app/pages/guardian-workspace-v2/guardian-weapon-diagnostics.mjs',
   'astrix-app/tools/test-journey-collections.mjs',
   '.github/workflows/deploy-forge-sandbox.yml',
   '.github/workflows/update-armor-information.yml',
