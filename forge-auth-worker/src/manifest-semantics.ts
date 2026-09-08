@@ -32,6 +32,10 @@ function equipableSetHash(itemDefinition: Record<string, any>): number | null {
 }
 
 async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
+  if (payload?.transport === "prepared-page-stream-v1") {
+    if (payload.account?.definitions) await enrichEquipableSets(payload.account, env);
+    return payload;
+  }
   const inventory = payload?.definitions || {};
   const setHashes = [...new Set(
     Object.values(inventory)

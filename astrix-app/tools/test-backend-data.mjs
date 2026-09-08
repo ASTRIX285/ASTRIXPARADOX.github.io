@@ -5,6 +5,56 @@ import {profileSections} from '../../forge-auth-worker/src/profile-sections.ts';
 import {fetchDisplayProfile} from '../pages/guardian-workspace-v2/guardian-display-profile.mjs';
 import dataWorker from '../../forge-manifest-worker/worker.mjs';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
+import {enrichEquipableSets} from '../../forge-auth-worker/src/manifest-semantics.ts';
+import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
+import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
+import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
+
+// Regression evidence: Miguel's equipped Smoke Jumper Vestment, with its real
+// manifest set and perks. No account identifier, roll or stat is fabricated.
+const armourIndex=expandForgeArmourIndex(JSON.parse(await readFile(new URL('../data/forge-armour-index.json',import.meta.url),'utf8')));
+const smokeDefinition=armourIndex.definitions['3788059976'];
+assert.equal(smokeDefinition.displayProperties.name,'Smoke Jumper Vestment');
+assert.equal(smokeDefinition.classType,2);
+const definitionTables={DestinyEquipableItemSetDefinition:armourIndex.equipableItemSets,DestinySandboxPerkDefinition:armourIndex.sandboxPerks};
+const setReads=[];
+const setEnv={MANIFEST_DATA:{async fetch(request){
+  const path=new URL(request.url).pathname;
+  setReads.push(path);
+  if(path==='/status')return Response.json({manifestVersion:armourIndex.manifestVersion});
+  assert.equal(path,'/resolve');
+  const body=await request.json();
+  assert.equal(body.version,armourIndex.manifestVersion);
+  return Response.json({manifestVersion:armourIndex.manifestVersion,tables:Object.fromEntries(Object.entries(body.requests).map(([type,hashes])=>[type,Object.fromEntries(hashes.filter(hash=>definitionTables[type]?.[hash]).map(hash=>[hash,definitionTables[type][hash]]))]))});
+}}};
+const gearSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-gear-layout.mjs',import.meta.url),'utf8');
+const setIconExpression=gearSource.match(/const setBonusIcon = ([^;]+);/)?.[1];
+assert.ok(setIconExpression);
+const renderSetIcon=new Function('armourSet','bungieIcon',`return ${setIconExpression};`);
+for(const page of ['character','build-forge']){
+  const account={profile:{},definitions:{3788059976:smokeDefinition},pageReady:{page,manifestVersion:armourIndex.manifestVersion}};
+  const prepared={manifestVersion:armourIndex.manifestVersion};
+  const envelope={transport:'prepared-page-stream-v1',account,prepared};
+  const result=await enrichEquipableSets(envelope,setEnv);
+  assert.equal(result,envelope);
+  assert.equal(result.prepared,prepared,'Set enrichment must preserve the prepared manifest bundle.');
+  assert.equal(result.equipableItemSets,undefined,'Do not write set data outside the account envelope.');
+  const merged=normalizePreparedPagePayload(result,page);
+  const set=resolveArmourSet(merged,{definition:smokeDefinition});
+  assert.equal(set.identity.name,'Smoke Jumper Set',`${page}: prepared account sets must survive the client merge`);
+  assert.equal(set.unresolved,false);
+  assert.ok(set.twoPiece?.icon&&set.fourPiece?.icon,`${page}: both adjacent bonus icons must resolve`);
+  assert.equal(set.identity.icon,'','This Bungie set has no separate identity icon.');
+  assert.equal(renderSetIcon(set,value=>value),set.twoPiece.icon,'The existing renderer must use the real perk icon when the set identity icon is empty.');
+  assert.equal(account.armourSetCoverage.complete,true);
+}
+const direct={definitions:{3788059976:smokeDefinition}};
+await enrichEquipableSets(direct,setEnv);
+assert.equal(direct.armourSetCoverage.complete,true,'Legacy direct profile responses must retain set enrichment.');
+const readsBeforeEmpty=setReads.length;
+await enrichEquipableSets({transport:'prepared-page-stream-v1',account:{definitions:{}},prepared:{}},setEnv);
+assert.equal(setReads.length,readsBeforeEmpty,'Client-manifest loadout envelopes must not start per-set network expansion.');
+console.log('PREPARED_ACCOUNT_ARMOUR_SET_ICONS=PASS');
 
 function storage(){
   const rows=new Map();

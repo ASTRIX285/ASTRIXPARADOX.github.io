@@ -132,7 +132,7 @@ export function armourCard(index, item) {
   const setStrip = armourSetStrip(armourSet);
   const twoPieceActive = armourSet?.twoPiece?.active === true;
   const fourPieceActive = armourSet?.fourPiece?.active === true;
-  const setBonusIcon = bungieIcon(armourSet?.identity?.icon ?? armourSet?.twoPiece?.icon ?? armourSet?.fourPiece?.icon);
+  const setBonusIcon = bungieIcon(armourSet?.identity?.icon || armourSet?.twoPiece?.icon || armourSet?.fourPiece?.icon);
   const setBonusTitle = [armourSet?.identity?.name, "Bungie armour set bonus"].filter(Boolean).join(" — ");
   const traitIcon = bungieIcon(trait?.icon ?? trait?.displayProperties?.icon);
   const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(" — ");
