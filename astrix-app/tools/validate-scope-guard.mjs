@@ -34,6 +34,8 @@ const allowed=new Set([
   'astrix-app/tools/test-journey-records.mjs',
   'astrix-app/docs/journey-repair-evidence.md',
   'astrix-app/core/bungie-item-identity.mjs',
+  'astrix-app/pages/guardian-workspace-v2/guardian-weapon-stat-definitions.mjs',
+  'astrix-app/tools/test-weapon-stat-mapping.mjs',
   'astrix-app/core/bungie-profile-plugs.mjs',
   'astrix-app/core/forge-index-transport.mjs',
   'astrix-app/core/page-ready-contract.mjs',

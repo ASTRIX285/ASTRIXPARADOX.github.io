@@ -1,8 +1,8 @@
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {weaponStatRows} from './guardian-weapon-stat-definitions.mjs';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const bindings=new WeakMap();
-const WEAPON_STATS=[[4043523819,'Impact'],[1240592695,'Range'],[155624089,'Stability'],[943549884,'Handling'],[4188031367,'Reload Speed'],[1345609583,'Aim Assistance'],[3555269338,'Zoom'],[2715839340,'Airborne Effectiveness'],[4284893193,'Rounds Per Minute'],[3871231066,'Magazine'],[2714457168,'Recoil Direction']];
 let activeAnchor=null;
 let installed=false;
 
@@ -27,10 +27,7 @@ function uniqueItems(items=[]){
 function normaliseStats(item,kind){
   if(kind==='weapon'){
     const source=item?.weaponSemantics?.stats??item?.weaponStats??{};
-    return WEAPON_STATS.map(([hash,name])=>{
-      const row=source?.[hash]??source?.[String(hash)];
-      return {hash,name,value:finite(row?.value??row)};
-    }).filter(row=>row.value!==null);
+    return weaponStatRows(source);
   }
   const source=item?.armourSemantics?.stats??item?.stats??{};
   const rows=Array.isArray(source)?source:Object.entries(source).map(([hash,row])=>({...(row&&typeof row==='object'?row:{}),hash:Number(hash),value:row?.value??row}));
@@ -46,7 +43,7 @@ function statMarkup(item,kind){
   const rows=normaliseStats(item,kind);
   if(!rows.length)return '<p class="inspector-empty">No item stats were returned for this instance.</p>';
   const body=rows.map(row=>kind==='weapon'
-    ? `<div class="weapon-stat"><span>${esc(row.name)}</span><i><b style="width:${Math.max(0,Math.min(100,row.value))}%"></b></i><strong>${esc(row.value)}</strong></div>`
+    ? `<div class="weapon-stat" data-bungie-hash="${row.hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(row.paradoxId)}"><span>${esc(row.name)}</span><i><b style="width:${Math.max(0,Math.min(100,row.value))}%"></b></i><strong>${esc(row.value)}</strong></div>`
     : `<div class="paradox-stat-row"><span>${row.icon?`<img src="${esc(row.icon)}" alt="">`:''}${esc(row.name)}</span><strong>${esc(row.value)}</strong><i><b style="width:${Math.max(0,Math.min(100,row.value))}%"></b></i></div>`).join('');
   const total=kind==='armour'?`<div class="paradox-stat-total"><span>TOTAL</span><strong>${rows.reduce((sum,row)=>sum+row.value,0)}</strong></div>`:'';
   return `<div class="${kind==='weapon'?'weapon-stats':'paradox-stat-list'}">${body}${total}</div>`;
