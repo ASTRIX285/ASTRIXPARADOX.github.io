@@ -1,5 +1,6 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1';
+import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const VAULT_BUCKET=138197802;
@@ -155,6 +156,8 @@ function normaliseArmourItem(payload,row){
   const plugs=socketPlugs(payload,rawItem);
   const armourSemantics=normaliseArmourSemantics({plugs,instance,stats:statsComponent});
   const stats=armourStats(payload,rawItem,plugs);
+  const versionNumber=Number.isInteger(Number(rawItem?.versionNumber))?Number(rawItem.versionNumber):null;
+  const releaseWatermark=resolveItemWatermark({...rawItem,versionNumber},definition,{powerCapDefinitions:payload?.powerCapDefinitions,currentPowerCap:payload?.currentPowerCap});
   const masterworkSlot=armourSemantics.masterwork?{...armourSemantics.masterwork,semanticRole:'masterwork',energyCost:armourSemantics.tier}:null;
   const functionalMods=[...armourSemantics.generalMods,...armourSemantics.slotMods];
   const base={
@@ -173,6 +176,9 @@ function normaliseArmourItem(payload,row){
     itemLevel:finite(instance?.itemLevel),
     gearTier:finite(instance?.gearTier),
     quality:finite(instance?.quality),
+    versionNumber,
+    releaseWatermark,
+    tierIcon:releaseWatermark.icon,
     state:Number(rawItem.state||0),
     stats,
     totalStats:stats.reduce((sum,stat)=>sum+stat.value,0),

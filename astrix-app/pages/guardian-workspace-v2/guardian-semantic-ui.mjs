@@ -2,6 +2,7 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
@@ -156,7 +157,7 @@ function renderWeapons(weapons=[]){
     const icon=bungieIcon(item.icon);
     const rank=weaponMasterworkRank(item);
     const hasRank=Number.isFinite(rank)&&rank>0;
-    const seasonIcon=resolveItemWatermark(item,item.definition||{}).icon;
+    const seasonIcon=bungieIcon(item?.releaseWatermark?.icon??resolveItemWatermark(item,item.definition||{}).icon);
     const gearTier=Math.max(0,Math.min(5,Number(item.gearTier)||0));
     card.classList.toggle("is-level-gold",hasRank&&rank>=10);
     const semantics=item.weaponSemantics||{};
@@ -179,6 +180,7 @@ function renderWeapons(weapons=[]){
     if(!supportStrip){supportStrip=document.createElement("div");supportStrip.className="weapon-support-icons";supportStrip.setAttribute("aria-label","Equipped weapon mods, masterwork and catalyst");card.append(supportStrip);}
     supportStrip.innerHTML=weaponSupportIconsMarkup(item);
     supportStrip.hidden=!supportStrip.innerHTML;
+    bindParadoxItemHover(art||card,item,'weapon');
   });
 }
 

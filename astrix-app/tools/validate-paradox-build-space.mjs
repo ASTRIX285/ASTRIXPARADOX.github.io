@@ -187,10 +187,10 @@ assert.match(css,/@media\(max-width:1760px\)\{\.build-space\{grid-template-colum
 assert.match(css,/\.build-forge-page \.forge-platform-shell\{grid-template-columns:0 minmax\(0,1fr\) 0!important\}/,'Build Forge must reclaim the obsolete external media rails for the working columns.');
 assert.match(css,/\.build-rail\{container-type:inline-size;--build-rail-icon:clamp\(40px,21cqi,128px\)/,'Build left-rail icons must remain proportional to their column without taking ownership of the shared Character token.');
 assert.match(css,/\.armour-design-section \.gear-columns\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'All five armour cards must remain on one row.');
-assert.match(css,/--build-armour-art:clamp\(88px,6vw,104px\)/,'Build Armour art must use the same readable range as Character.');
+assert.match(css,/--build-armour-art-width:var\(--apx-icon-gear-art-width\);[\s\S]*?--build-armour-art-height:var\(--apx-icon-gear-art-height\)/,'Build Armour art must consume the shared portrait gear-art tokens.');
 assert.match(css,/--build-armour-mod:var\(--guardian-square\)/,'Build Armour mods must consume the shared Character socket size.');
-assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-weapon-equipped\);[\s\S]*?--gear-weapon-socket:clamp\(34px,3\.6cqi,52px\)/,'Character and Build Forge must consume the shared equipped-weapon token.');
-assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-weapon-card\)/,'Recommended weapon cards must consume the shared compact weapon-card token.');
+assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-gear-art-width\);[\s\S]*?--gear-weapon-socket:var\(--apx-icon-weapon-socket\)/,'Character and Build Forge must consume the shared portrait gear-art and socket tokens.');
+assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-gear-art-width\)/,'Recommended weapon cards must consume the shared portrait gear-art token.');
 assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'Build Forge must preserve the shared three-card weapon row.');
 assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
 
@@ -220,7 +220,7 @@ assert.match(artifactSelectionRuntime,/artifactPlanVersion:3/,'The cross-system 
 assert.match(runtime,/PARADOX FULL TARGET PLAN[\s\S]*?currently unlocked and equipped perks remain unchanged/,'The Artifact recommendation must distinguish the complete target plan from the live unlocked and equipped state.');
 assert.match(css,/\.recommended-build-dialog\{display:grid;grid-template-areas:"header" "safety" "status" "content" "actions";grid-template-rows:auto auto auto minmax\(0,1fr\) auto;width:calc\(100vw - 20px\);height:calc\(100dvh - 20px\);max-width:none;min-height:0;border:0/,'The recommendation review must fit the viewport and reserve an independently scrollable content row.');
 assert.match(css,/\.recommended-build-content\{[^}]*min-height:0[^}]*overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable/,'The recommendation body must scroll without pushing the Apply actions outside the viewport.');
-assert.match(css,/\.recommended-armour-summary \.gear-arm-anchor \.arm\{width:clamp\(88px,6vw,104px\)!important;height:clamp\(88px,6vw,104px\)!important\}/,'Recommended armour must retain the same visual scale as Character and Build Design.');
+assert.match(css,/\.recommended-armour-summary \.gear-arm-anchor \.arm\{width:var\(--apx-icon-gear-art-width\)!important;height:var\(--apx-icon-gear-art-height\)!important;aspect-ratio:100\/122!important\}/,'Recommended armour must retain the same shared portrait scale as Character and Build Design.');
 assert.match(html,/id="continueToBuildTest">TEST THIS BUILD/,'The recommendation review must lead into the user-run Build Test.');
 assert.match(runtime,/function renderParadoxTestReview\(capture=readCapture\(\)\)[\s\S]*?Causal perk activation, DPS and uptime remain inference/,'Paradox must review confirmed post-test Bungie evidence without inventing causal telemetry.');
 assert.deepEqual([...html.matchAll(/data-build-objective="([^"]+)"/g)].map(match=>match[1]),['balanced','dps','add-clear','survivability','ability-uptime'],'Build Forge must expose the five deterministic tuning objectives used by weapon and mod ranking.');
@@ -263,7 +263,7 @@ assert.match(advisorRuntime,/item\.weaponRollAdvice=advice/,'Weapon recommendati
 assert.match(runtime,/weaponPerkMatrixMarkup\(item,\{recommendedHashes\}\)/,'Recommended weapons must render the integrated tier-driven perk model.');
 assert.match(runtime,/weaponTraitHierarchyMarkup\(item,\{compact:true\}\)/,'Recommended Exotic weapon traits must remain directly beneath the intrinsic hierarchy.');
 assert.match(runtime,/TIER \$\{tier\}[\s\S]*?\$\{rowCount\} PERK ROW/,'Recommended weapons must identify the exact tier and modeled perk-row count.');
-assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-weapon-card\);--gear-weapon-socket:clamp\(20px,2\.25cqi,28px\)/,'Build review weapons must use the shared compact art token and socket geometry.');
+assert.match(css,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-gear-art-width\);--gear-weapon-socket:var\(--apx-icon-weapon-socket-compact\)/,'Build review weapons must use the shared portrait art and compact socket tokens.');
 assert.match(css,/\.review-weapon \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--gear-weapon-socket\)\)/,'Build review must reuse the shared weapon socket size across every tier row.');
 assert.match(css,/\.review-weapon em\{[^}]*font:800 13px\/1\.25/,'Owned candidate eligibility must remain prominent inside the compact weapon cards.');
 assert.match(css,/body\.build-forge-page \.review-weapon small\{font-size:11px!important/,'Compact weapon supporting copy must remain readable.');

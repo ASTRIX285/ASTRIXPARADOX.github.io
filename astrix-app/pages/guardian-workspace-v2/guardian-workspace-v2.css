@@ -404,8 +404,8 @@ button {
 .armour-mods-grid,
 .mod-sockets-grid {
   display: grid !important;
-  grid-template-columns: repeat(2, 36px) !important;
-  grid-template-rows: repeat(3, 36px) !important;
+  grid-template-columns: repeat(2, var(--apx-icon-loadout)) !important;
+  grid-template-rows: repeat(3, var(--apx-icon-loadout)) !important;
   gap: 4px !important;
   width: fit-content !important;
   margin: 0 auto !important;
@@ -420,12 +420,12 @@ button {
 .mod-grid > div,
 .mods-grid > div,
 .armour-mods-grid > div {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  max-width: 36px !important;
-  max-height: 36px !important;
+  width: var(--apx-icon-loadout) !important;
+  height: var(--apx-icon-loadout) !important;
+  min-width: var(--apx-icon-loadout) !important;
+  min-height: var(--apx-icon-loadout) !important;
+  max-width: var(--apx-icon-loadout) !important;
+  max-height: var(--apx-icon-loadout) !important;
   aspect-ratio: 1 / 1 !important;
   padding: 2px !important;
   border-radius: 6px !important;

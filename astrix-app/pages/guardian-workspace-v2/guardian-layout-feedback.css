@@ -61,13 +61,13 @@ html{font-size:clamp(16px,.52vw,22px)}
     --size:clamp(480px,43cqw,860px)!important;
   }
   .gear-weapons .weap-grid{
-    grid-template-columns:repeat(3,clamp(84px,5vw,118px))!important;
+    grid-template-columns:repeat(3,var(--apx-icon-gear-art-width))!important;
   }
   .gear-weapons .weap,
   .gear-weapons .weap .art,
   .gear-weapons .weap .cap{
-    width:clamp(84px,5vw,118px)!important;
-    max-width:118px!important;
+    width:var(--apx-icon-gear-art-width)!important;
+    max-width:var(--apx-icon-gear-art-width)!important;
   }
-  .gear-weapons .weap .art{height:clamp(84px,5vw,118px)!important}
+  .gear-weapons .weap .art{height:var(--apx-icon-gear-art-height)!important;aspect-ratio:100/122!important}
 }
