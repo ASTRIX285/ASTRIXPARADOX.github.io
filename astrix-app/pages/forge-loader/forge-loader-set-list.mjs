@@ -25,6 +25,7 @@ export function forgeSetListOptions(items,exotic,selections,payload,className){
 export function forgeSetListMarkup(options){
   if(!options.length)return '<div class="forge-empty">No verified armour set definitions are available.</div>';
   const longestName=Math.max(1,...options.map(row=>String(row.name||'').length));
+  const nameSize=Math.max(.78,Math.min(.95,15.6/longestName)).toFixed(3);
   const cards=options.map(row=>{
     const details=[row.description,...[row.twoPiece,row.fourPiece].filter(Boolean).map(effect=>`${effect.requiredSetCount} pieces · ${effect.name}\n${effect.description}`)].filter(Boolean).join('\n\n');
     const state=`${row.owned?'Owned set':'Not owned'} · ${row.usableSlots} compatible slots with this Exotic`;
@@ -35,5 +36,5 @@ export function forgeSetListMarkup(options){
       return `<div class="forge-set-choice${choice.owned?' is-owned':' is-unowned'}${choice.disabled?' is-disabled':''}"><input type="checkbox" aria-label="${esc(`${row.name}: ${label}`)}" data-set-hash="${row.hash}" data-set-count="${count}" ${choice.checked?'checked':''} ${choice.disabled?'disabled':''}><button type="button" class="forge-set-detail" ${perkTooltipAttributes({name:effect?.name||`${count}-piece bonus`,description:effect?.description||'',itemTypeDisplayName:`${row.name} · ${count} pieces`},reason)}>${effect?.icon?`<span class="forge-set-trait-icon"><img src="${esc(effect.icon)}" alt=""></span>`:''}<b>${esc(label)}</b></button></div>`;
     }).join('')}</div></article>`;
   }).join('');
-  return `<div class="forge-set-grid" style="--forge-set-name-width:${longestName}ch">${cards}</div>`;
+  return `<div class="forge-set-grid" style="--forge-set-name-size:${nameSize}rem">${cards}</div>`;
 }
