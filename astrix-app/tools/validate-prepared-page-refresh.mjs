@@ -134,7 +134,7 @@ const preparedClient=read('astrix-app/core/prepared-page-client.mjs');
 const pages={
   journey:[read('astrix-app/pages/journey/index.html'),read('astrix-app/pages/journey/journey.mjs'),/loadPreparedPagePayload\(session,'journey'/],
   vault:[read('astrix-app/pages/vault/index.html'),read('astrix-app/pages/vault/vault.mjs'),/loadPreparedPagePayload\(session,'vault'/],
-  loadout:[read('astrix-app/pages/forge-loader/index.html'),`${read('astrix-app/pages/forge-loader/forge-loader.mjs')}\n${read('astrix-app/pages/forge-loader/forge-loader-preload.mjs')}`,/loadPreparedPagePayload\(session,'loadout'/]
+  loadout:[read('astrix-app/pages/forge-loader/index.html'),`${read('astrix-app/pages/forge-loader/forge-loader.mjs')}\n${read('astrix-app/pages/forge-loader/forge-loader-preload.mjs')}\n${read('astrix-app/pages/forge-loader/forge-loader-refresh.mjs')}`,/loadPreparedPagePayload\(session,'loadout'/]
 };
 assert.match(sessionCache,/PREPARED_PAGE_REFRESH_MS=10\*60\*1000/);
 assert.match(sessionCache,/PREPARED_PAGE_CHECK_PREFIX[\s\S]*?localStorage/,'Successful check timestamps must survive a page reload.');
@@ -142,9 +142,9 @@ assert.match(heroCards,/loadPreparedPagePayload\(session,page/,'Shared Guardian 
 assert.match(preparedClient,/readCachedBungieProfile\(session,page\)[\s\S]*?if\(cached\?\.pageReady/,'The shared page client must not bypass a valid prepared page cache on reload.');
 for(const [page,[html,runtime,requestPattern]] of Object.entries(pages)){
   const control=page==='loadout'?'forgeRefreshButton':`${page}RefreshButton`;
-  assert.match(html,new RegExp(`id="${control}"[\\s\\S]*?>Refresh<`),`${page} must expose the manual Refresh control.`);
+  assert.match(html,new RegExp(`id="${control}"[\\s\\S]*?>${page==='loadout'?'Check for new Exotic':'Refresh'}<`),`${page} must expose the manual Refresh control.`);
   assert.match(runtime,/createPreparedPageRefreshController/);
-  assert.match(runtime,/bindPreparedPageRefreshControl/);
+  assert.match(runtime,page==='loadout'?/bindExoticCheckControl/:/bindPreparedPageRefreshControl/);
   assert.match(runtime,requestPattern);
   assert.doesNotMatch(runtime,/bungie\/manifest\/definitions?|definitions\?type=/,'Refresh paths must never issue per item definition requests.');
 }

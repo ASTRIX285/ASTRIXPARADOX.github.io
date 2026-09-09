@@ -5,11 +5,11 @@ import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weap
    with 6 functional mod tiles each without tearing down sibling DOM blocks.
    ========================================================================== */
 
-import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1";
+import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1";
 import { openArmourDrawer } from "./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1";
 import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const bungieIcon = (value) => {

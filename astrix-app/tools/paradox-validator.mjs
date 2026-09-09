@@ -37,6 +37,7 @@ const validators=[
   'test-weapon-catalogue.mjs',
   'test-weapon-stat-mapping.mjs',
   'test-weapon-stat-apply.mjs',
+  'test-apply-refresh-regressions.mjs',
   'test-weapon-diagnostics.mjs',
   'test-weapon-presentation.mjs',
   'test-journey-collections.mjs',

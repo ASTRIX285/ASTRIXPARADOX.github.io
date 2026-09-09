@@ -1,6 +1,6 @@
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';

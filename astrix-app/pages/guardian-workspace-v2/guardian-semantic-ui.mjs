@@ -2,11 +2,11 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
 import {mountWeaponDiagnostics} from './guardian-weapon-diagnostics.mjs?v=20260909-weapon-presentation-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
