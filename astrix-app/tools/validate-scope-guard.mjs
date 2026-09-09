@@ -177,6 +177,7 @@ const allowed=new Set([
   'astrix-app/tools/validate-guardian-semantics.mjs',
   'astrix-app/tools/validate-main-page-today.mjs',
   'astrix-app/tools/validate-paradox-build-space.mjs',
+  'astrix-app/tools/test-forge-super-synergy.mjs',
   'astrix-app/tools/test-recommended-build-reveal.mjs',
   'astrix-app/tools/validate-paradox-item-cards.mjs',
   'astrix-app/tools/validate-portal-loader.mjs',

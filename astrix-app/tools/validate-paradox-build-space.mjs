@@ -129,9 +129,9 @@ const expandedTierFiveWeapon=exactWeapon(609,'weapon-expanded-tier-five','Expand
 assert.equal(validateWeaponModel({weapons:[expandedTierFiveWeapon]}).ready,true,'Verified Tier 5 weapon columns may exceed the baseline row count without blocking Build Forge generation.');
 const incompleteTierFiveWeapon=structuredClone(currentPrimary);incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].expectedRowCount=1;incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options=incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options.slice(0,1);
 assert.equal(validateWeaponModel({weapons:[incompleteTierFiveWeapon]}).ready,false,'Tier 5 weapon evidence below the Bungie baseline must still block Build Forge generation.');
-assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260906-complete-build-transfer-1/,'Build Forge must load the corrected background preparation graph.');
-assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260906-complete-build-transfer-1/,'Background preparation must start the corrected Forge worker.');
-assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260906-complete-build-transfer-1/,'The Forge worker must load the corrected generation sequence.');
+assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260909-super-evidence-1/,'Build Forge must load the Super evidence background preparation graph.');
+assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260909-super-evidence-1/,'Background preparation must start the Super evidence Forge worker.');
+assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260909-super-evidence-1/,'The Forge worker must load the Super evidence generation sequence.');
 assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260906-complete-build-transfer-1/,'The generation sequence must load the corrected weapon evidence validator.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
 const weaponResult=selectOwnedWeapons({build:{...intelligenceSource,weapons:[currentPrimary,energyWeapon,powerWeapon],ownedWeapons:ownedWeaponCatalogue,vaultWeapons:ownedWeaponCatalogue},objective:'add-clear'});
@@ -235,6 +235,11 @@ assert.doesNotMatch(computationFields,/ownedWeapons|vaultWeapons|inventoryWeapon
 assert.match(runtime,/async function updateForgeGenerationPhase\(message\)[\s\S]*?setTimeout\(resolve,0\)/,'Recommendation phases must yield to the browser so the loader and page remain responsive.');
 assert.match(runtime,/resolvedSubclassOptions\(build\)\.filter\(hasVerifiedSubclassSockets\)/,'Element buttons must enable only complete live Bungie subclass socket sets, not canonical catalogue placeholders.');
 assert.match(runtime,/filterExoticCompatibleSubclasses\(build,verified\)/,'Element buttons must remove subclass options that conflict with an explicitly named selected-Exotic ability.');
+assert.match(html,/id="buildSuperSynergy"[^>]*role="status"/,'Build Forge must expose per-Super Exotic evidence beside the selectable Super formation.');
+assert.match(runtime,/rankExoticSuperSynergy\(build,candidate\?\[candidate\]:\[\]\)/,'The visible Super formation must use the same evidence-backed ranking as generation.');
+assert.match(runtime,/NO DIRECT SYNERGY EVIDENCE/,'Build Forge must state plainly when the staged Exotic does not support a Super.');
+assert.match(css,/\.super-diamond\.is-exotic-super-best\{[^}]*box-shadow/,'Only Supers with the strongest real Exotic evidence may receive the evidence highlight.');
+assert.match(intelligenceRuntime,/status:!description\?'unknown':strongest>0\?'evidenced':'no-direct-super-synergy'/,'Missing Super synergy evidence must remain an explicit no-ranking result.');
 assert.match(sequenceRuntime,/working\.paradoxAnalysis=analyzeLiveGuardian\(working\)[\s\S]*?advise\(working,working\.paradoxAnalysis\|\|\{\}, \{insertSocketPlugFree:false\}\)/,'Generation must re-run directed analysis after Artifact selection before recommendation-only weapon advice.');
 assert.match(sequenceRuntime,/working\.objective=objective[\s\S]*?selectOwnedWeapons\(\{build:working,objective:objective\}\)[\s\S]*?recommendArmourMods\(\{build:working,objective:objective\}\)/,'Generation must rank exact owned weapons before producing the verified per-socket armour-mod plan for the selected tuning objective.');
 assert.match(sequenceRuntime,/recommendArmourMods\(\{build:working,objective:objective\}\)[\s\S]*?validateArmourModLoadout\(working\)[\s\S]*?throw new Error\(generatedModValidation\.reason\)/,'Build Forge must block an invalid single-copy armour-mod plan before opening the review.');

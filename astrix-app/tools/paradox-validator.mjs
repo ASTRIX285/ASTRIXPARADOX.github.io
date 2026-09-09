@@ -26,6 +26,7 @@ const validators=[
   'test-artifact-recommender.mjs',
   'test-forge-artifact-selection.mjs',
   'test-forge-background.mjs',
+  'test-forge-super-synergy.mjs',
   'validate-manifest-service.mjs',
   'test-manifest-service.mjs',
   'test-backend-data.mjs',

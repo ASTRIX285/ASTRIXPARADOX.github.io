@@ -28,6 +28,10 @@ const setEnv={MANIFEST_DATA:{async fetch(request){
   return Response.json({manifestVersion:armourIndex.manifestVersion,tables:Object.fromEntries(Object.entries(body.requests).map(([type,hashes])=>[type,Object.fromEntries(hashes.filter(hash=>definitionTables[type]?.[hash]).map(hash=>[hash,definitionTables[type][hash]]))]))});
 }}};
 const gearSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-gear-layout.mjs',import.meta.url),'utf8');
+const semanticWrapperSource=await readFile(new URL('../../forge-auth-worker/src/semantic-wrapper.ts',import.meta.url),'utf8');
+assert.match(semanticWrapperSource,/const account = payload\?\.transport === "prepared-page-stream-v1" && payload\?\.account[\s\S]*?\? payload\.account[\s\S]*?resolveMissingInventoryDefinitions\(account, requested, env\)/,'Prepared Build Forge account envelopes must resolve live subclass socket definitions inside account data.');
+assert.match(semanticWrapperSource,/account\.subclassCatalogCoverage = \{[\s\S]*?complete: unresolved\.length === 0/,'Prepared Build Forge subclass enrichment must publish exact socket definition coverage on the account payload.');
+assert.match(semanticWrapperSource,/value !== "owned-item-definitions"[\s\S]*?coverage: \{complete: missing\.length === 0, missing\}/,'Resolved subclass definitions must repair the prepared page readiness contract before client validation.');
 const setIconExpression=gearSource.match(/const setBonusIcon = ([^;]+);/)?.[1];
 assert.ok(setIconExpression);
 const renderSetIcon=new Function('armourSet','bungieIcon',`return ${setIconExpression};`);
@@ -55,6 +59,7 @@ const readsBeforeEmpty=setReads.length;
 await enrichEquipableSets({transport:'prepared-page-stream-v1',account:{definitions:{}},prepared:{}},setEnv);
 assert.equal(setReads.length,readsBeforeEmpty,'Client-manifest loadout envelopes must not start per-set network expansion.');
 console.log('PREPARED_ACCOUNT_ARMOUR_SET_ICONS=PASS');
+console.log('PREPARED_ACCOUNT_SUBCLASS_SOCKET_DEFINITIONS=PASS');
 
 function storage(){
   const rows=new Map();
