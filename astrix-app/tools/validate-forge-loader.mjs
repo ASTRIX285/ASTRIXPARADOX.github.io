@@ -226,6 +226,7 @@ assert.ok(validateHandoffEnvelope(JSON.parse(handoffStore.getItem(BUILD_SNAPSHOT
 const html=read('astrix-app/pages/forge-loader/index.html');
 const css=read('astrix-app/pages/forge-loader/forge-loader.css');
 const runtime=read('astrix-app/pages/forge-loader/forge-loader.mjs');
+const forgeArmourIndex=JSON.parse(read('astrix-app/data/forge-armour-index.json'));
 const preload=read('astrix-app/pages/forge-loader/forge-loader-preload.mjs');
 const selectionState=read('astrix-app/pages/vault/vault-selection-state.mjs');
 const buildRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs');
@@ -311,7 +312,15 @@ assert.match(runtime,/Five exact Bungie armour instances · no mods[\s\S]*?UNMOD
 assert.doesNotMatch(runtime,/ARMOUR_STAT_LABELS\[key\]\.slice/,'Calculated loads must show full stat names rather than unreadable abbreviations.');
 assert.match(html,/<h2 id="forgeResultsTitle">Forge Matrix<\/h2>/,'Calculated combinations must use the independent PARADOX Forge Matrix identity.');
 assert.match(runtime,/class="forge-matrix-row"[\s\S]*?class="forge-matrix-stats"[\s\S]*?class="forge-matrix-protocol"[\s\S]*?class="forge-matrix-total"[\s\S]*?class="forge-candidate-select"/,'Each compact load must place real set protocol icons ahead of Raw Total and Stage.');
-assert.match(runtime,/function candidateSetProtocolIconMarkup[\s\S]*?row\?\.trait\?\.icon[\s\S]*?perkTooltipAttributes\(row\.trait,state\)[\s\S]*?forge-set-trait-icon/,'Forge Matrix protocol cells must render only real resolved Bungie trait icons through the existing tooltip component.');
+assert.match(runtime,/function candidateSetProtocolIconMarkup[\s\S]*?earnedTiers=protocols\.flatMap[\s\S]*?Number\(row\.count\)>=2[\s\S]*?row\.set\?\.twoPiece[\s\S]*?Number\(row\.count\)>=4[\s\S]*?row\.set\?\.fourPiece[\s\S]*?perkTooltipAttributes\(row\.trait,state\)[\s\S]*?forge-set-trait-icon/,'Forge Matrix protocol cells must vertically render every earned real tier, including both 2-piece and 4-piece icons for a four-piece set.');
+assert.match(runtime,/ARMOUR_STAT_DEFINITION_HASHES=Object\.freeze\(\{health:392767087,melee:4244567218,grenade:1735777505,super:144602215,class:1943323491,weapon:2996146975\}\)/,'Forge Matrix stats must map the six Armour 3.0 keys to Bungie DestinyStatDefinition hashes.');
+for(const [key,hash,name] of [['health',392767087,'Health'],['melee',4244567218,'Melee'],['grenade',1735777505,'Grenade'],['super',144602215,'Super'],['class',1943323491,'Class'],['weapon',2996146975,'Weapons']]){
+  const definition=forgeArmourIndex.statDefinitions[String(hash)];
+  assert.equal(definition?.displayProperties?.name,name,`${key} must resolve its real Bungie stat definition.`);
+  assert.match(definition?.displayProperties?.icon||'',/^\/common\/destiny2_content\/icons\/[a-f0-9]+\.png$/,`${key} must carry a real Bungie stat icon.`);
+}
+assert.match(runtime,/function armourStatIcon\(key\)[\s\S]*?payload\?\.statDefinitions\?\.\[String\(hash\)\]\?\.displayProperties\?\.icon[\s\S]*?new URL\(icon,'https:\/\/www\.bungie\.net'\)/,'Forge Matrix stat artwork must resolve from the prepared Bungie stat definitions without placeholder icons.');
+assert.match(runtime,/const calculation=target>0\?`TARGET \$\{target\}`:'OPEN'[\s\S]*?forge-matrix-stat-reading[\s\S]*?forge-matrix-stat-icon/,'Compact stat squares must retain the calculated value and selected target state beside each Bungie glyph.');
 assert.match(runtime,/class="forge-matrix-anchor">Anchor Exotic: \$\{esc\(exotic\?\.name\|\|'Verified Exotic'\)\}<\/small>/,'Every calculated load row must name its exact anchor Exotic.');
 assert.match(css,/\.forge-matrix-expand \.forge-matrix-anchor\{[^}]*color:var\(--apx-gold\)[^}]*bahnschrift-semicondensed/,'The anchor Exotic label must reuse the established Forge gold and type system.');
 assert.match(runtime,/maximized=index===0[\s\S]*?is-maximized[\s\S]*?MAXIMIZED/,'The highest-ranked complete owned load must receive the unique PARADOX Maximized state.');
@@ -332,8 +341,8 @@ assert.doesNotMatch(runtime,/if\(!baselineStored\)\{[^}]*?return;/,'A rejected b
 assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.set\('baseline','bungie-recovery'\)/,'The destination must request authenticated recovery only when the atomic baseline is unavailable.');
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
-assert.match(html,/forge-loader\.mjs\?v=20260909-double-box-1/,'Forge Loader must load the Matrix layout structure without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260909-double-box-1/,'Forge Loader must load the grouped set and Matrix layout without stale page CSS.');
+assert.match(html,/forge-loader\.mjs\?v=20260909-matrix-stat-icons-1/,'Forge Loader must load the Matrix stat icon structure without stale browser code.');
+assert.match(html,/forge-loader\.css\?v=20260909-matrix-stat-icons-1/,'Forge Loader must load the compact Matrix layout without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -385,14 +394,15 @@ assert.match(css,/@media\(prefers-reduced-motion:reduce\)\{\.forge-exotic\.is-se
 assert.match(css,/@media\(max-width:1580px\)\{\.forge-loader-workspace\{grid-template-columns:var\(--apx-workspace-compact-columns,392px minmax\(0,1fr\)\)\}\.forge-loader-output\{grid-column:1\/-1\}\}/,'Forge Loader must share the two-column workspace and move output below before compression.');
 assert.match(css,/\.forge-hero-card\{[^}]*aspect-ratio:474\/96[^}]*overflow:hidden/,'The selected Guardian emblem must fit inside its card boundary.');
 assert.match(css,/\.forge-stat-targets label>span\{[^}]*\.9rem/,'Eligible stat labels must retain the enlarged readable type scale.');
-assert.match(css,/\.forge-matrix-stat small\{font-size:\.92rem\}[\s\S]*?\.forge-matrix-stat b\{font-size:1\.25rem\}/,'Forge Matrix stat labels and values must remain readable at the approved desktop density.');
-assert.match(css,/@container\(max-width:60rem\)[\s\S]*?\.forge-matrix-stats\{grid-column:1\/-1;grid-row:2\}/,'Forge Matrix rows must reflow calculated stats without clipping in a narrow output column.');
-assert.match(css,/\.forge-matrix-row\{[^}]*grid-template-columns:6\.7rem 6\.7rem minmax\(26\.5rem,1fr\) 4\.25rem 4\.7rem 7\.8rem/,'Desktop Forge Matrix rows must give the load and Exotic columns identical widths and widen the stat field.');
-assert.match(css,/\.forge-matrix-stats\{[^}]*grid-template-columns:repeat\(6,4\.15rem\)[^}]*justify-content:space-between[\s\S]*?\.forge-matrix-stats>\.forge-matrix-stat\{[^}]*aspect-ratio:1[^}]*padding:\.16rem \.12rem/,'Forge Matrix stat cells must be equal squares with reduced vertical padding.');
+assert.match(css,/\.forge-matrix-stat-reading\{display:flex;align-items:center;justify-content:center;gap:\.16rem\}[\s\S]*?\.forge-matrix-stat-icon\{width:var\(--apx-icon-inline\);height:var\(--apx-icon-inline\)/,'Each compact Matrix square must align the real Bungie stat glyph directly beside its calculated value.');
+assert.match(css,/@container\(max-width:49\.5rem\)[\s\S]*?\.forge-matrix-stats\{grid-column:1\/-1;grid-row:2\}/,'Forge Matrix rows must reflow calculated stats only when the output column cannot hold the single-row layout.');
+assert.match(css,/\.forge-matrix-row\{grid-template-columns:6\.7rem 6\.7rem max-content 3\.3rem 4rem minmax\(5\.6rem,1fr\);gap:\.35rem\}/,'Desktop Forge Matrix rows must keep equal leading columns and place the compact stat strip directly after the Exotic.');
+assert.match(css,/\.forge-matrix-stats\{grid-template-columns:repeat\(6,2\.9rem\);justify-content:start;gap:\.22rem\}[\s\S]*?\.forge-matrix-stats>\.forge-matrix-stat\{width:2\.9rem;height:2\.9rem;aspect-ratio:1;padding:\.16rem \.1rem\}/,'Forge Matrix stat cells must remain six equal compact squares in one row.');
 assert.match(css,/\.forge-matrix-exotic\{[^}]*width:var\(--apx-icon-selector\);height:var\(--apx-icon-selector\);[^}]*justify-self:center;align-self:center[^}]*aspect-ratio:1/,'Every matched Exotic thumbnail must use the same shared selector size as the Exotic picker.');
-assert.match(css,/@container\(max-width:60rem\)\{\.forge-matrix-row\{grid-template-columns:6\.7rem 6\.7rem minmax\(4\.25rem,1fr\) 4\.7rem 7\.8rem[\s\S]*?\.forge-matrix-protocol\{grid-column:3;grid-row:1\}\.forge-matrix-total\{grid-column:4;grid-row:1\}/,'Compact Forge Matrix rows must preserve equal leading columns and keep protocol ahead of Raw Total.');
-assert.match(css,/@media\(max-width:820px\)\{[\s\S]*?\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) 6\.7rem 6\.8rem\}[\s\S]*?\.forge-matrix-stats\{[^}]*grid-template-columns:repeat\(3,4\.15rem\)/,'Mobile Forge Matrix rows must retain compact square stat cells.');
+assert.match(css,/@container\(max-width:49\.5rem\)\{\.forge-matrix-row\{grid-template-columns:6\.7rem 6\.7rem minmax\(4\.25rem,1fr\) 4\.7rem 7\.8rem[\s\S]*?\.forge-matrix-protocol\{grid-column:3;grid-row:1\}\.forge-matrix-total\{grid-column:4;grid-row:1\}/,'Compact Forge Matrix rows must preserve equal leading columns and keep protocol ahead of Raw Total.');
+assert.match(css,/@media\(max-width:820px\)\{[\s\S]*?\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) 6\.7rem 6\.8rem\}[\s\S]*?\.forge-matrix-stats\{[^}]*grid-template-columns:repeat\(3,2\.9rem\)/,'Mobile Forge Matrix rows must retain compact square stat cells.');
 assert.match(css,/\.forge-matrix-protocol-icons\{[^}]*display:grid[^}]*gap:\.24rem[^}]*justify-items:center\}/,'Multiple real set protocol icons must stack vertically in one Matrix column.');
+assert.match(css,/\.forge-matrix-protocol-icon\{width:var\(--apx-icon-record\);padding:0\}/,'Matrix protocol circles must use the same shared record icon size as the Set Protocol panel.');
 assert.match(read('astrix-app/pages/forge-loader/forge-loader-set-list.mjs'),/longestName=Math\.max[\s\S]*?nameSize=Math\.max[\s\S]*?class="forge-set-grid" style="--forge-set-name-size:\$\{nameSize\}rem"/,'The longest verified set name must determine one shared non-wrapping card-label size.');
 assert.match(css,/\.forge-set-grid\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)[^}]*width:100%/,'Wide Set Protocol lists must place two grouped armour sets across each row.');
 assert.match(css,/\/\* Compact set list\.[\s\S]*?\.forge-set-choices\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,'Each armour set must retain its own side-by-side 2-piece and 4-piece bonus boxes, producing four bonus columns across a full row.');
