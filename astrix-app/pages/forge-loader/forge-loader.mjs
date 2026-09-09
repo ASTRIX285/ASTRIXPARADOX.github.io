@@ -1,6 +1,7 @@
+import {startForgeBackgroundRefresh,mergeExoticCheckCatalogue,bindExoticCheckControl,forgeInventorySignature} from './forge-loader-refresh.mjs';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1';
-import {bindPreparedPageRefreshControl,cacheForgeLoaderTransfer,createPreparedPageRefreshController,markGuardianFastReturn,releaseGuardianSessionStorageFallbacks} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
+import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionStorageFallbacks} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../vault/vault-inventory.mjs?v=20260905-weapon-audit-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchTopArmourBuilds} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
@@ -491,6 +492,8 @@ function reconcileForgeRefresh(){
 }
 
 async function applyForgeRefresh(next,{reason='poll'}={}){
+  if(payload&&forgeInventorySignature(payload)===forgeInventorySignature(next)){payload=next;return next;}
+  const recovering=!payload;
   payload=next;
   catalogue=createVaultCatalogue(payload);
   resolveActiveCharacter(activeCharacterId);
@@ -504,27 +507,34 @@ async function applyForgeRefresh(next,{reason='poll'}={}){
   byId('forgeRuntimeStatus').textContent=selectedExotic()
     ?`${reason==='manual'?'Guardian data refreshed.':'Guardian data updated.'} Calculate to update ranked combinations.`
     :`${reason==='manual'?'Guardian data refreshed.':'Guardian data updated.'} Select an owned Exotic.`;
+  if(recovering){byId('forgeConnectionState').textContent='ARMOUR READY';reportPreparedPageStage('ready','loadout');globalThis.ForgeLoader?.done?.();}
   document.dispatchEvent(new CustomEvent('forge:prepared-page-refreshed',{detail:{page:'loadout',payload:next}}));
+  return next;
+}
+
+async function checkForNewExotic(){
+  const next=await loadVerifiedPayload({force:true,showProgress:false});
+  const freshCatalogue=createVaultCatalogue(next);
+  const previous=new Set(catalogue.armour.filter(item=>item.isExotic).map(itemKey));
+  catalogue=mergeExoticCheckCatalogue(catalogue,freshCatalogue);
+  renderExotics();
+  const added=catalogue.armour.filter(item=>item.isExotic&&!previous.has(itemKey(item))).length;
+  byId('forgeRuntimeStatus').textContent=added?`${added} newly detected Exotic armour instance${added===1?'':'s'} available.`:'Exotic check complete. No new Exotic armour found.';
   return next;
 }
 
 function startForgeRefresh(){
   if(forgeRefreshController)return;
-  forgeRefreshController=createPreparedPageRefreshController({
+  forgeRefreshController=startForgeBackgroundRefresh({
     session,
-    page:'loadout',
     refresh:async options=>applyForgeRefresh(await loadVerifiedPayload({force:true,showProgress:false}),options),
     onError:error=>console.info('[Forge Loader] background inventory refresh unavailable',error)
   });
   const button=byId('forgeRefreshButton');
-  bindPreparedPageRefreshControl(button,forgeRefreshController,{
-    onError:error=>{byId('forgeRuntimeStatus').textContent=error?.message||'Guardian data refresh unavailable.';}
+  bindExoticCheckControl(button,checkForNewExotic,{
+    onError:error=>{byId('forgeRuntimeStatus').textContent=error?.message||'Exotic check unavailable.';}
   });
-  if(button){
-    document.getElementById('bungieAuthControl')?.prepend(button);
-    button.hidden=false;
-  }
-  forgeRefreshController.start();
+  if(button)document.getElementById('bungieAuthControl')?.prepend(button);
 }
 
 async function settleVisibleImages(){
@@ -538,10 +548,11 @@ async function init(){
   try{
     session=await getBungieSession();
     if(session?.authenticated!==true){byId('forgeSignedOut').hidden=false;byId('forgeConnectionState').textContent='SIGNED OUT';byId('forgeHeaderState').textContent='CONNECT BUNGIE';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
+    startForgeRefresh();
     byId('forgeConnectionState').textContent='ARMOUR READY';payload=await loadVerifiedPayload();
     reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);
     renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});
-    startForgeRefresh();
+    void forgeRefreshController.refreshNow().catch(()=>{});
     const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=ownedCount?`${ownedCount} owned of ${groups.length} verified ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select an owned piece to begin.`:`${groups.length} verified ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no owned instance can be selected.`;
     reportPreparedPageStage('ready','loadout');await settleVisibleImages();globalThis.ForgeLoader?.done?.();
   }catch(error){console.error('[Forge Loader]',error);byId('forgeConnectionState').textContent='ARMOUR UNAVAILABLE';byId('forgeRuntimeStatus').textContent=error?.message||'Verified Bungie armour is unavailable.';globalThis.ForgeLoader?.done?.();}

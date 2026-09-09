@@ -1,0 +1,718 @@
+{
+  "source": "Unsworn from Miguel diagnostic capture 2026-09-09T03:45:00.635Z. Account and instance identifiers omitted. Raw reusable plug fields preserved.",
+  "itemHash": 3462679024,
+  "gearTier": 5,
+  "sockets": [
+    {
+      "socketIndex": 0,
+      "plugHash": 1294026524,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 1,
+      "plugHash": 111235976,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 2,
+      "plugHash": 3629421851,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 3,
+      "plugHash": 2840833776,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 4,
+      "plugHash": 2939589096,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 5,
+      "plugHash": 4248210736,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 6,
+      "plugHash": 260490301,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 7,
+      "plugHash": 882794620,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 8,
+      "plugHash": 3057611278,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 9,
+      "plugHash": 2302094943,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 10,
+      "plugHash": 355666671,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 11,
+      "plugHash": 1335132356,
+      "isEnabled": true,
+      "isVisible": true
+    },
+    {
+      "socketIndex": 12,
+      "plugHash": 780815822,
+      "isEnabled": true,
+      "isVisible": false
+    }
+  ],
+  "reusablePlugs": {
+    "1": [
+      {
+        "plugItemHash": 111235976,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 1932356121,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "2": [
+      {
+        "plugItemHash": 3629421851,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 3081681954,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "3": [
+      {
+        "plugItemHash": 2840833776,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 4245865861,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 3244229373,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "4": [
+      {
+        "plugItemHash": 2896748467,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 2939589096,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 102912326,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "6": [
+      {
+        "plugItemHash": 285783873,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 1523545668,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 2268413950,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 3656042814,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 4068571787,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 3115937974,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 890612500,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 139132552,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 2057879635,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 260490301,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 2924082573,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 711469637,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 414077027,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 1772241052,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 967505927,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 1350538053,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 325500297,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 3634656993,
+        "enabled": true,
+        "canInsert": true
+      },
+      {
+        "plugItemHash": 1893041875,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "8": [
+      {
+        "plugItemHash": 3057611278,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "10": [
+      {
+        "plugItemHash": 355666671,
+        "enabled": true,
+        "canInsert": true
+      }
+    ],
+    "11": [
+      {
+        "plugItemHash": 1335132356,
+        "enabled": true,
+        "canInsert": true
+      }
+    ]
+  },
+  "definitions": {
+    "102912326": {
+      "hash": 102912326,
+      "displayProperties": {
+        "name": "Hatchling",
+        "icon": "/common/destiny2_content/icons/2f7e898e2231900ac968ffb2080fc02b.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "111235976": {
+      "hash": 111235976,
+      "displayProperties": {
+        "name": "Corkscrew Rifling",
+        "icon": "/common/destiny2_content/icons/7730e1732ed7ef91afce50277639c493.png"
+      },
+      "itemTypeDisplayName": "Enhanced Barrel",
+      "plug": {
+        "plugCategoryIdentifier": "barrels",
+        "uiPlugLabel": ""
+      }
+    },
+    "139132552": {
+      "hash": 139132552,
+      "displayProperties": {
+        "name": "Quick Access Sling",
+        "icon": "/common/destiny2_content/icons/0dce216f76792f3b23167209e39f9878.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "260490301": {
+      "hash": 260490301,
+      "displayProperties": {
+        "name": "Enhanced Range",
+        "icon": "/common/destiny2_content/icons/136b3d98df36ffa41774b7211f623b3b.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "285783873": {
+      "hash": 285783873,
+      "displayProperties": {
+        "name": "Counterbalance Stock",
+        "icon": "/common/destiny2_content/icons/81779a235bdb4695c02ee642d99c4dbc.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "325500297": {
+      "hash": 325500297,
+      "displayProperties": {
+        "name": "Abundant Ammo",
+        "icon": "/common/destiny2_content/icons/26614af76b46d7a5f178eeaeedc79c36.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "355666671": {
+      "hash": 355666671,
+      "displayProperties": {
+        "name": "Unsworn",
+        "icon": "/common/destiny2_content/icons/dd0ae6e8b9aeccfcbec7d5971c48984c.jpg"
+      },
+      "itemTypeDisplayName": "",
+      "plug": {
+        "plugCategoryIdentifier": "v970.weapons.activities.dungeon_sundered.trace_rifle0_skins",
+        "uiPlugLabel": ""
+      }
+    },
+    "414077027": {
+      "hash": 414077027,
+      "displayProperties": {
+        "name": "Ballistics",
+        "icon": "/common/destiny2_content/icons/f5b86c510e6bcfd0f75dff656340b557.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "711469637": {
+      "hash": 711469637,
+      "displayProperties": {
+        "name": "Enhanced Reload",
+        "icon": "/common/destiny2_content/icons/63dc63bf2f473ca0a197738147404d7a.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "780815822": {
+      "hash": 780815822,
+      "displayProperties": {
+        "name": "Empty Gear Tier Upgrade",
+        "icon": "/common/destiny2_content/icons/71dd675f6d9177fddb6be7d0893b92a8.jpg"
+      },
+      "itemTypeDisplayName": "",
+      "plug": {
+        "plugCategoryIdentifier": "weapon_tiering.plugs.mods.enhancers",
+        "uiPlugLabel": ""
+      }
+    },
+    "882794620": {
+      "hash": 882794620,
+      "displayProperties": {
+        "name": "Masterworked: Reload Speed",
+        "icon": "/common/destiny2_content/icons/6083d50d8712b33cda7a3e1d9ae9b93e.jpg"
+      },
+      "itemTypeDisplayName": "",
+      "plug": {
+        "plugCategoryIdentifier": "v400.plugs.weapons.masterworks.stat.reload",
+        "uiPlugLabel": "masterwork"
+      }
+    },
+    "890612500": {
+      "hash": 890612500,
+      "displayProperties": {
+        "name": "Sprint Grip",
+        "icon": "/common/destiny2_content/icons/59bcaa03e458706c2a2a335071ae6e28.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "967505927": {
+      "hash": 967505927,
+      "displayProperties": {
+        "name": "Anti-Flinch",
+        "icon": "/common/destiny2_content/icons/5bf9196ccb47b2d9548fd7f2b7675c89.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "1294026524": {
+      "hash": 1294026524,
+      "displayProperties": {
+        "name": "Adaptive Frame",
+        "icon": "/common/destiny2_content/icons/967fb4abc6ab98f74639d6c08e5f56ee.png"
+      },
+      "itemTypeDisplayName": "Intrinsic",
+      "plug": {
+        "plugCategoryIdentifier": "intrinsics",
+        "uiPlugLabel": ""
+      }
+    },
+    "1335132356": {
+      "hash": 1335132356,
+      "displayProperties": {
+        "name": "Triumphant Pulse",
+        "icon": "/common/destiny2_content/icons/8c28abb43d902b731365e1045f467a95.png"
+      },
+      "itemTypeDisplayName": "Combat Flair",
+      "plug": {
+        "plugCategoryIdentifier": "weapon_tiering_kill_vfx",
+        "uiPlugLabel": ""
+      }
+    },
+    "1350538053": {
+      "hash": 1350538053,
+      "displayProperties": {
+        "name": "Bandolier",
+        "icon": "/common/destiny2_content/icons/1ed77f58367a23694141b29f760940b5.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v900.weapon.mod_mag_adjusting",
+        "uiPlugLabel": ""
+      }
+    },
+    "1523545668": {
+      "hash": 1523545668,
+      "displayProperties": {
+        "name": "Backup Mag",
+        "icon": "/common/destiny2_content/icons/4c3c1b5313ca76fc3064fd47f1694c92.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_magazine",
+        "uiPlugLabel": ""
+      }
+    },
+    "1772241052": {
+      "hash": 1772241052,
+      "displayProperties": {
+        "name": "Tactical",
+        "icon": "/common/destiny2_content/icons/b8f6e3e41a381e4b27f2d50d6f3a9de0.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "1893041875": {
+      "hash": 1893041875,
+      "displayProperties": {
+        "name": "Stunloader",
+        "icon": "/common/destiny2_content/icons/f305d1a8d129e6613575fdf6df8022e8.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "1932356121": {
+      "hash": 1932356121,
+      "displayProperties": {
+        "name": "Extended Barrel",
+        "icon": "/common/destiny2_content/icons/d9e5e8fa07a84c29252b78b0e7b3106d.png"
+      },
+      "itemTypeDisplayName": "Enhanced Barrel",
+      "plug": {
+        "plugCategoryIdentifier": "barrels",
+        "uiPlugLabel": ""
+      }
+    },
+    "2057879635": {
+      "hash": 2057879635,
+      "displayProperties": {
+        "name": "Enhanced Stability",
+        "icon": "/common/destiny2_content/icons/9ddce607dd85d55bef0631473cfbf939.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "2268413950": {
+      "hash": 2268413950,
+      "displayProperties": {
+        "name": "Freehand Grip",
+        "icon": "/common/destiny2_content/icons/668d3ef2d38a103b3cede4c78b20b951.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "2302094943": {
+      "hash": 2302094943,
+      "displayProperties": {
+        "name": "Kill Tracker",
+        "icon": "/common/destiny2_content/icons/2fa9b8e2b358de10643b14a058094f4b.png"
+      },
+      "itemTypeDisplayName": "",
+      "plug": {
+        "plugCategoryIdentifier": "v400.plugs.weapons.masterworks.trackers",
+        "uiPlugLabel": ""
+      }
+    },
+    "2840833776": {
+      "hash": 2840833776,
+      "displayProperties": {
+        "name": "Shoot to Loot",
+        "icon": "/common/destiny2_content/icons/e8c6e23afe3c4215f0dc0c2941500c28.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "2896748467": {
+      "hash": 2896748467,
+      "displayProperties": {
+        "name": "Killing Tally",
+        "icon": "/common/destiny2_content/icons/a64f5d3e972ea35b1789f62999235083.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "2924082573": {
+      "hash": 2924082573,
+      "displayProperties": {
+        "name": "Enhanced Handling",
+        "icon": "/common/destiny2_content/icons/5f01856c47ff0b1fcea5d8f2627f1fc5.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "2939589096": {
+      "hash": 2939589096,
+      "displayProperties": {
+        "name": "Target Lock",
+        "icon": "/common/destiny2_content/icons/72be46e05195a95ae1307a684f68456b.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "3057611278": {
+      "hash": 3057611278,
+      "displayProperties": {
+        "name": "Subjugation",
+        "icon": "/common/destiny2_content/icons/be71992f5cbf2aae9466f4388091e2e9.png"
+      },
+      "itemTypeDisplayName": "Enhanced Origin Trait",
+      "plug": {
+        "plugCategoryIdentifier": "origins",
+        "uiPlugLabel": ""
+      }
+    },
+    "3081681954": {
+      "hash": 3081681954,
+      "displayProperties": {
+        "name": "Particle Repeater",
+        "icon": "/common/destiny2_content/icons/8a273117023794757631a34803314351.png"
+      },
+      "itemTypeDisplayName": "Enhanced Battery",
+      "plug": {
+        "plugCategoryIdentifier": "batteries",
+        "uiPlugLabel": ""
+      }
+    },
+    "3115937974": {
+      "hash": 3115937974,
+      "displayProperties": {
+        "name": "Targeting Adjuster",
+        "icon": "/common/destiny2_content/icons/381eeb3d13126f8604f1cc3c6f2201ba.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "3244229373": {
+      "hash": 3244229373,
+      "displayProperties": {
+        "name": "Tear",
+        "icon": "/common/destiny2_content/icons/0bc7e311bbd47af86a0a30a6e8f41e92.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "3462679024": {
+      "hash": 3462679024,
+      "displayProperties": {
+        "name": "Unsworn",
+        "icon": "/common/destiny2_content/icons/dd0ae6e8b9aeccfcbec7d5971c48984c.jpg"
+      },
+      "itemTypeDisplayName": "Trace Rifle",
+      "plug": {}
+    },
+    "3629421851": {
+      "hash": 3629421851,
+      "displayProperties": {
+        "name": "Ionized Battery",
+        "icon": "/common/destiny2_content/icons/a278b79aba1d341d2a070c0e48d9129a.png"
+      },
+      "itemTypeDisplayName": "Enhanced Battery",
+      "plug": {
+        "plugCategoryIdentifier": "batteries",
+        "uiPlugLabel": ""
+      }
+    },
+    "3634656993": {
+      "hash": 3634656993,
+      "displayProperties": {
+        "name": "Synergy",
+        "icon": "/common/destiny2_content/icons/6d617baf834c3b867c3e1e3558ab97b8.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "3656042814": {
+      "hash": 3656042814,
+      "displayProperties": {
+        "name": "Icarus Grip",
+        "icon": "/common/destiny2_content/icons/3e274d77039a588ef19ab3eb7fe716ed.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_guns",
+        "uiPlugLabel": ""
+      }
+    },
+    "4068571787": {
+      "hash": 4068571787,
+      "displayProperties": {
+        "name": "Radar Tuner",
+        "icon": "/common/destiny2_content/icons/9e0e9697060c30f50a0276cd93321166.png"
+      },
+      "itemTypeDisplayName": "Enhanced Weapon Mod",
+      "plug": {
+        "plugCategoryIdentifier": "v400.weapon.mod_damage",
+        "uiPlugLabel": ""
+      }
+    },
+    "4245865861": {
+      "hash": 4245865861,
+      "displayProperties": {
+        "name": "Subsistence",
+        "icon": "/common/destiny2_content/icons/eaa8f4295a71bf47df7ffd8599f7af4d.png"
+      },
+      "itemTypeDisplayName": "Enhanced Trait",
+      "plug": {
+        "plugCategoryIdentifier": "frames",
+        "uiPlugLabel": ""
+      }
+    },
+    "4248210736": {
+      "hash": 4248210736,
+      "displayProperties": {
+        "name": "Default Shader",
+        "icon": "/common/destiny2_content/icons/96831e244728f0350340bb7d5d05b463.png"
+      },
+      "itemTypeDisplayName": "Restore Defaults",
+      "plug": {
+        "plugCategoryIdentifier": "shader",
+        "uiPlugLabel": ""
+      }
+    }
+  }
+}
