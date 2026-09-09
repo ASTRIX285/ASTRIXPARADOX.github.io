@@ -332,8 +332,8 @@ assert.doesNotMatch(runtime,/if\(!baselineStored\)\{[^}]*?return;/,'A rejected b
 assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.set\('baseline','bungie-recovery'\)/,'The destination must request authenticated recovery only when the atomic baseline is unavailable.');
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
-assert.match(html,/forge-loader\.mjs\?v=20260909-set-grid-hotfix-1/,'Forge Loader must load the Matrix layout structure without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260909-set-grid-hotfix-1/,'Forge Loader must load the responsive set and Matrix layout without stale page CSS.');
+assert.match(html,/forge-loader\.mjs\?v=20260909-double-box-1/,'Forge Loader must load the Matrix layout structure without stale browser code.');
+assert.match(html,/forge-loader\.css\?v=20260909-double-box-1/,'Forge Loader must load the grouped set and Matrix layout without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -394,9 +394,9 @@ assert.match(css,/@container\(max-width:60rem\)\{\.forge-matrix-row\{grid-templa
 assert.match(css,/@media\(max-width:820px\)\{[\s\S]*?\.forge-matrix-row\{grid-template-columns:minmax\(0,1fr\) 6\.7rem 6\.8rem\}[\s\S]*?\.forge-matrix-stats\{[^}]*grid-template-columns:repeat\(3,4\.15rem\)/,'Mobile Forge Matrix rows must retain compact square stat cells.');
 assert.match(css,/\.forge-matrix-protocol-icons\{[^}]*display:grid[^}]*gap:\.24rem[^}]*justify-items:center\}/,'Multiple real set protocol icons must stack vertically in one Matrix column.');
 assert.match(read('astrix-app/pages/forge-loader/forge-loader-set-list.mjs'),/longestName=Math\.max[\s\S]*?nameSize=Math\.max[\s\S]*?class="forge-set-grid" style="--forge-set-name-size:\$\{nameSize\}rem"/,'The longest verified set name must determine one shared non-wrapping card-label size.');
-assert.match(css,/\.forge-set-grid\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)[^}]*width:100%/,'Wide Set Protocol lists must use four equal flexible columns across the available panel width.');
-assert.match(css,/\.forge-set-choices\{[^}]*grid-template-columns:1fr/,'Each compact 2-piece and 4-piece choice must occupy its own row without colliding.');
-assert.match(css,/@container\(max-width:44rem\)[\s\S]*?repeat\(3,[\s\S]*?@container\(max-width:32rem\)[\s\S]*?repeat\(2,[\s\S]*?@container\(max-width:26rem\)[\s\S]*?grid-template-columns:minmax\(0,1fr\)/,'Set Protocol columns must remain four at the supplied desktop width and wrap only as the panel narrows.');
+assert.match(css,/\.forge-set-grid\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)[^}]*width:100%/,'Wide Set Protocol lists must place two grouped armour sets across each row.');
+assert.match(css,/\/\* Compact set list\.[\s\S]*?\.forge-set-choices\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,'Each armour set must retain its own side-by-side 2-piece and 4-piece bonus boxes, producing four bonus columns across a full row.');
+assert.match(css,/@container\(max-width:44rem\)[\s\S]*?\.forge-set-grid\{grid-template-columns:minmax\(0,1fr\)\}[\s\S]*?@container\(max-width:28rem\)[\s\S]*?\.forge-set-choices\{grid-template-columns:minmax\(0,1fr\)\}/,'Grouped Set Protocol pairs must remain intact until the panel is too narrow, then wrap without overlap.');
 assert.match(css,/\.forge-set-icon,[\s\S]*?border-radius:50%/,'Set list icons use round frames.');
 assert.match(css,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-stage\)[\s\S]*?\.forge-staged-slot img,\.forge-stage-empty\{width:var\(--apx-icon-stage\);height:var\(--apx-icon-stage\)/,'Staged armour must consume the exact shared stage icon token.');
 assert.match(css,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-selector\),1fr\)/,'Exotic selection must consume the shared selector icon token.');
