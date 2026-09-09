@@ -4,15 +4,15 @@ import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260906-review-layout-1';
-import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1';
-import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1';
+import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1';
+import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
 import {openArmourDrawer} from '../guardian-beta-runtime.mjs?v=20260905-weapon-audit-1';
-import {renderWeapons,openWeaponDetail,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1';
+import {renderWeapons,openWeaponDetail,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260829-subclass-identity-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260829-subclass-identity-1';
 import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260906-all-page-data-1';
-import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1';
+import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
 import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260905-manual-editor-1';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260906-complete-build-transfer-2';
@@ -27,11 +27,11 @@ import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inv
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1&roll=20260909-apply-1';
 import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
 import '../guardian-portal-progress.mjs?v=20260906-all-page-data-1&loader=2';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
-import {bindParadoxItemHover} from '../paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1';
+import {bindParadoxItemHover} from '../paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
 
 mountForgeShell({rootSelector:'.build-space',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie'});
 

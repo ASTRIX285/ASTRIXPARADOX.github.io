@@ -261,6 +261,7 @@ function normaliseWeaponSemantics({profile=null,item=null,itemDefinition=null,pl
     catalyst:catalyst?{...catalyst,progress:catalystProgress(profile,item?.itemInstanceId,catalyst)}:null,
     champion:(instance?.breakerTypeHash||instance?.breakerType)?{breakerType:instance.breakerType??null,breakerTypeHash:instance.breakerTypeHash??null,source:"bungie-item-instance"}:null,
     socketModel:{schemaVersion:2,source:"bungie-instance-socket-order",socketOrder,sections:{perks:perkModel.columns.map(column=>column.socketIndex),mods:modSockets.map(plug=>Number.isInteger(Number(plug.socketIndex))?Number(plug.socketIndex):null),intrinsic:intrinsicTraits.map(plug=>Number.isInteger(Number(plug.socketIndex))?Number(plug.socketIndex):null),catalyst:catalyst&&Number.isInteger(Number(catalyst.socketIndex))?Number(catalyst.socketIndex):null}},
+    statSockets:plugs.map(plug=>({...plug,semanticRole:classifyWeaponPlug(plug)})),
     stats:stats?.stats||stats||null,discarded:uniq(groups.discarded),unknownPlugs:uniq(groups.unknown),complete:groups.unknown.length===0
   };
 }

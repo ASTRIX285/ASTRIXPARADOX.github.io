@@ -1,10 +1,10 @@
-import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1";
+import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 import {
   normaliseLiveProfile,
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1";
+} from "./guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1&roll=20260909-apply-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 

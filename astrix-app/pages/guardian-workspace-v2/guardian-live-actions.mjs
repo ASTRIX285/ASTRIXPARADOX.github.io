@@ -166,6 +166,7 @@ function freshLivePlanInspection(plan,payload,advertised={}){
   add('ownership','Exact item ownership',ownershipBlockers,{targetCount:targets.length,ownedTargetCount:targets.length-ownershipBlockers.length});
 
   const resolved=freshTransferSteps(plan,payload),locationBlockers=[...resolved.blockers];
+  if(plan.kind==='weapon-perk-only'&&resolved.steps.length)locationBlockers.push('This weapon moved. Refresh its card before changing perks.');
   if(resolved.steps.length&&advertised.transferItems!==true)locationBlockers.push('Fresh inventory state requires item transfer, but the Bungie route does not advertise that capability.');
   add('instance-location','Exact item locations',locationBlockers,{transferCount:resolved.steps.length});
 
@@ -226,7 +227,7 @@ async function waitForItemsReadyToEquip(plan,{fetchImpl=fetch,authOrigin=DEFAULT
 }
 
 function verifyReadback(plan,payload){
-  const equipment=verifyEquippedItems(plan,payload),profile=payload.profile||payload.Response||{};
+  const equipment=plan.kind==='weapon-perk-only'?verifyItemsReadyToEquip(plan,payload):verifyEquippedItems(plan,payload),profile=payload.profile||payload.Response||{};
   const sockets=profile?.itemComponents?.sockets?.data||{},socketMismatches=(plan.socketChanges||[]).filter(change=>Number(sockets?.[change.itemInstanceId]?.sockets?.[change.socketIndex]?.plugHash)!==Number(change.plugHash)).map(change=>({itemInstanceId:change.itemInstanceId,itemName:change.itemName,socketIndex:change.socketIndex,expectedPlugHash:change.plugHash,actualPlugHash:Number(sockets?.[change.itemInstanceId]?.sockets?.[change.socketIndex]?.plugHash)||null}));
   return {...equipment,verified:equipment.verified&&socketMismatches.length===0,socketMismatches};
 }
@@ -281,7 +282,8 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
       record('verify-transfer','complete','Every selected item is ready on the target Guardian for the exact equip request.',transferVerification);
     }
 
-    try{
+    if(plan.kind==='weapon-perk-only')equipmentApplied=true;
+    else try{
       onProgress({phase:'equip',status:'running',label:'Equipping exact Working Build items…'});
       const itemIds=(plan.equipment.targets||[]).map(row=>row.itemInstanceId);
       const payload=await mutate('/bungie/actions/equip-items',{membershipType:Number(plan.membershipType),characterId:plan.characterId,itemIds},{label:'Equip exact Working Build items'});
@@ -290,7 +292,7 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
       else{equipmentApplied=true;record('equip','complete','Exact Working Build equipment request completed.',{itemIds,ErrorCode:payload?.ErrorCode??1});}
     }catch(error){record('equip','failed','Exact Working Build equipment request failed.',{message:error.message,payload:error.payload||null});}
 
-    if(equipmentApplied){
+    if(equipmentApplied&&plan.kind!=='weapon-perk-only'){
       try{
         onProgress({phase:'verify-equipment',status:'running',label:'Verifying equipped items from a fresh Bungie profile…'});
         const equippedProfile=await requestFreshProfile({fetchImpl,authOrigin}),verification=verifyEquippedItems(plan,equippedProfile);

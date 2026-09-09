@@ -36,6 +36,7 @@ const validators=[
   'test-forge-index-transport.mjs',
   'test-weapon-catalogue.mjs',
   'test-weapon-stat-mapping.mjs',
+  'test-weapon-stat-apply.mjs',
   'test-weapon-diagnostics.mjs',
   'test-weapon-presentation.mjs',
   'test-journey-collections.mjs',

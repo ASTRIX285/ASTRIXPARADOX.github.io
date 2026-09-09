@@ -37,7 +37,8 @@ if(typeof document!=='undefined'){
   document.addEventListener('pointerout',event=>{if(target(event)===anchor&&!anchor?.contains(event.relatedTarget)&&!host?.contains(event.relatedTarget))hideTimer=setTimeout(hide,180);});
   document.addEventListener('focusin',event=>{const node=target(event);if(node)show(node);});
   document.addEventListener('focusout',event=>{if(target(event)===anchor)hide();});
-  document.addEventListener('click',event=>{const node=target(event);if(node){event.stopPropagation();show(node);}else if(!host?.contains(event.target))hide();},true);
-  document.addEventListener('keydown',event=>{if(event.key==='Escape')hide();else if(['Enter',' '].includes(event.key)&&target(event)){event.preventDefault();event.stopPropagation();show(target(event));}},true);
+  const activate=node=>{node.dispatchEvent(new CustomEvent('forge:perk-activate',{bubbles:true}));show(node);};
+  document.addEventListener('click',event=>{const node=target(event);if(node){event.stopPropagation();activate(node);}else if(!host?.contains(event.target))hide();},true);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')hide();else if(['Enter',' '].includes(event.key)&&target(event)){event.preventDefault();event.stopPropagation();activate(target(event));}},true);
   addEventListener('resize',hide,{passive:true});addEventListener('scroll',hide,{passive:true,capture:true});
 }

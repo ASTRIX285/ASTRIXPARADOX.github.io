@@ -1,14 +1,15 @@
+import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 /* ==========================================================================
    ASTRIX PARADOX - GEAR & MOD MATRIX LAYOUT
    Builds the 5-column ARMOUR & MODS grid (Helmet, Gauntlets, Chest, Legs, Class Item)
    with 6 functional mod tiles each without tearing down sibling DOM blocks.
    ========================================================================== */
 
-import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1";
+import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1";
 import { openArmourDrawer } from "./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1";
-import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1";
+import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const bungieIcon = (value) => {
@@ -145,11 +146,11 @@ export function armourCard(index, item) {
           <span class="lv">${esc(item?.power ?? "—")}</span>${seasonIcon || Number.isFinite(armourTier) && armourTier > 0 ? `<span class="armour-tier-rail" title="${Number.isFinite(armourTier) && armourTier > 0 ? `Verified armour tier ${esc(armourTier)}` : "Bungie season/source emblem"}">${seasonIcon ? `<span class="armour-season-icon" title="Bungie season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>` : ""}${Number.isFinite(armourTier) && armourTier > 0 ? Array.from({ length: Math.min(5, Math.floor(armourTier)) }, () => '<i class="armour-tier-diamond" aria-hidden="true"></i>').join("") : ""}</span>` : ""}
           ${icon ? `<img src="${esc(icon)}" alt="">` : '<span class="ph-glyph">◇</span>'}
           ${archetypeIcon ? `<span class="armour-archetype-icon" title="${esc(archetypeTitle || "Verified armour archetype")}"><img src="${esc(archetypeIcon)}" alt="${esc(archetype?.name ?? "Armour archetype")}"></span>` : ""}
-          ${isExotic && traitIcon ? `<span class="armour-exotic-overlay" title="${esc(traitTitle || "Verified exotic armour perk")}"><img src="${esc(traitIcon)}" alt="${esc(trait?.name ?? "Exotic armour perk")}"></span>` : ""}
+
           ${setBonusIcon ? `<span class="armour-set-bonus-icon" title="${esc(setBonusTitle)}"><img src="${esc(setBonusIcon)}" alt="${esc(armourSet?.identity?.name ?? "Armour set bonus")}"></span>` : ""}
         </div>
       </div>
-      ${setStrip}
+      ${isExotic && traitIcon ? `<div class="armour-set-strip armour-exotic-trait-strip"><span class="armour-set-thresholds"><span class="armour-set-threshold is-active" ${perkTooltipAttributes(trait,'Exotic armour trait')} data-paradox-id="${esc(trait.paradoxId||'')}" data-bungie-hash="${esc(trait.bungieHash??trait.hash??'')}"><img src="${esc(traitIcon)}" alt=""></span></span></div>` : setStrip}
     </div>
     <div class="gear-slot-divider"></div>
     <div class="gear-mods" data-slot-count="${slotCount}">${Array.from({ length: slotCount }, (_, i) => modTile(mods[i])).join("")}</div>
