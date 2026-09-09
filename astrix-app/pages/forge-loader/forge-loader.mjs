@@ -18,6 +18,7 @@ mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Des
 const CLASS_NAMES=['titan','hunter','warlock'];
 const SELECTED_CHARACTER_KEY='astrix:selected-character-id';
 const CANDIDATE_BATCH_SIZE=50;
+const ARMOUR_STAT_DEFINITION_HASHES=Object.freeze({health:392767087,melee:4244567218,grenade:1735777505,super:144602215,class:1943323491,weapon:2996146975});
 const byId=id=>document.getElementById(id);
 const text=value=>String(value??'').trim();
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
@@ -229,13 +230,22 @@ function candidateSetProtocol(candidate){
 
 function candidateSetProtocolIconMarkup(candidate){
   const protocols=!setSelections.length
-    ?candidate?.openProtocol?.protocols||naturalSetProtocols(candidate)
+    ?(candidate?.openProtocol?.protocols||naturalSetProtocols(candidate)).map(protocol=>{
+      const match=candidate.items.find(item=>Number(item?.setBonus?.hash??item?.armourSemantics?.set?.hash)===Number(protocol.setHash));
+      return {...protocol,set:match?.setBonus||match?.armourSemantics?.set||null};
+    })
     :setSelections.map(selection=>{
       const match=candidate.items.find(item=>Number(item?.setBonus?.hash??item?.armourSemantics?.set?.hash)===Number(selection.setHash));
       const set=match?.setBonus||match?.armourSemantics?.set||null;
-      return {count:selection.count,setName:set?.identity?.name||`SET ${selection.setHash}`,trait:selection.count===4?set?.fourPiece:set?.twoPiece};
+      return {count:selection.count,setName:set?.identity?.name||`SET ${selection.setHash}`,set,trait:selection.count===4?set?.fourPiece:set?.twoPiece};
     });
-  const icons=protocols.filter(row=>row?.trait?.icon).map(row=>{
+  const earnedTiers=protocols.flatMap(row=>{
+    const tiers=[];
+    if(Number(row.count)>=2&&(row.set?.twoPiece?.icon||(Number(row.count)===2&&row.trait?.icon)))tiers.push({...row,count:2,trait:row.set?.twoPiece||row.trait});
+    if(Number(row.count)>=4&&(row.set?.fourPiece?.icon||row.trait?.icon))tiers.push({...row,count:4,trait:row.set?.fourPiece||row.trait});
+    return tiers;
+  });
+  const icons=earnedTiers.map(row=>{
     const state=`${row.count} piece ${row.setName}`;
     return `<button type="button" class="forge-set-detail forge-matrix-protocol-icon" ${perkTooltipAttributes(row.trait,state)}><span class="forge-set-trait-icon"><img src="${esc(row.trait.icon)}" alt=""></span></button>`;
   });
@@ -281,13 +291,21 @@ function forgeLoaderDecision(candidate,index){
   };
 }
 
+function armourStatIcon(key){
+  const hash=ARMOUR_STAT_DEFINITION_HASHES[key],icon=text(payload?.statDefinitions?.[String(hash)]?.displayProperties?.icon);
+  return icon?new URL(icon,'https://www.bungie.net').toString():'';
+}
+
 function candidateStatMarkup(candidate,{itemRow=false}={}){
   const stats=itemRow?armourStatVector(candidate):candidate.stats;
   const targets=itemRow?{}:targetValues();
   return ARMOUR_STAT_KEYS.map(key=>{
     const value=itemRow?Number(stats[key]||0):Math.min(ARMOUR_STAT_CAP,Number(stats[key]||0)),target=Number(targets[key]||0);
     const state=target>0?(value>=target?' is-met':' is-short'):'';
-    return `<span class="forge-matrix-stat${state}"><small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small><b>${value}</b>${itemRow?'':`<em>${target>0?`TARGET ${target}`:'OPEN'}</em>`}</span>`;
+    const icon=itemRow?'':armourStatIcon(key);
+    if(itemRow)return `<span class="forge-matrix-stat"><small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small><b>${value}</b></span>`;
+    const calculation=target>0?`TARGET ${target}`:'OPEN',label=`${ARMOUR_STAT_LABELS[key]} ${value}, ${calculation}`;
+    return `<span class="forge-matrix-stat${state}" aria-label="${esc(label)}" title="${esc(label)}"><span class="forge-matrix-stat-reading">${icon?`<img class="forge-matrix-stat-icon" src="${esc(icon)}" alt="" aria-hidden="true" decoding="async">`:`<small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small>`}<b>${value}</b></span><em>${calculation}</em></span>`;
   }).join('');
 }
 
