@@ -1,10 +1,12 @@
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatRows} from './guardian-weapon-stat-definitions.mjs';
+import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const bindings=new WeakMap();
 let activeAnchor=null;
 let installed=false;
+let hideTimer=null;
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const finite=value=>Number.isFinite(Number(value))?Number(value):null;
@@ -58,12 +60,11 @@ function detailTile(item,label,{circle=false}={}){
 
 function weaponDetails(item){
   const semantics=item?.weaponSemantics??{};
-  const intrinsic=semantics.intrinsic??item?.intrinsic??null;
-  const perks=uniqueItems(semantics.selectedPerks??item?.selectedPerks??[]);
-  const support=uniqueItems((semantics.modSockets?.length?semantics.modSockets:[semantics.masterwork,semantics.mod,semantics.catalyst]).filter(Boolean));
-  const traits=intrinsic?`<section class="paradox-section paradox-hover-traits"><h3>INTRINSIC</h3>${detailTile(intrinsic,'INTRINSIC',{circle:true})}</section>`:'';
-  const perkRows=perks.length?`<section class="paradox-section"><h3>SELECTED PERKS</h3><div class="paradox-hover-perks">${perks.map(perk=>detailTile(perk,'EQUIPPED',{circle:true})).join('')}</div></section>`:'';
-  const supportRows=support.length?`<section class="paradox-section"><h3>WEAPON SOCKETS</h3><div class="paradox-socket-grid">${support.map(plug=>detailTile(plug,'EQUIPPED')).join('')}</div></section>`:'';
+  const support=(semantics.modSockets?.length?semantics.modSockets:[semantics.masterwork,semantics.mod,semantics.catalyst]).filter(Boolean);
+  const hierarchy=weaponTraitHierarchyMarkup(item,{compact:true}),matrix=weaponPerkMatrixMarkup(item);
+  const traits=hierarchy?`<section class="paradox-section paradox-hover-traits"><h3>INTRINSIC</h3>${hierarchy}</section>`:'';
+  const perkRows=matrix?`<section class="paradox-section"><h3>WEAPON PERKS</h3>${matrix}</section>`:'';
+  const supportRows=support.length?`<section class="paradox-section"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${support.map(plug=>weaponDetailTile(plug,'Equipped',{square:true})).join('')}</div></section>`:'';
   return `<section class="paradox-section paradox-section--stats"><h3>WEAPON STATS</h3>${statMarkup(item,'weapon')}</section>${traits}${perkRows}${supportRows}`;
 }
 
@@ -98,11 +99,14 @@ function ensureHost(){
   host.className='paradox-item-hover paradox-item-shell';
   host.hidden=true;
   host.setAttribute('aria-hidden','true');
+  host.addEventListener('pointerenter',()=>clearTimeout(hideTimer));
+  host.addEventListener('pointerleave',event=>{if(!activeAnchor?.contains(event.relatedTarget))hideTimer=setTimeout(hide,180);});
   document.documentElement.append(host);
   return host;
 }
 
 function hide(){
+  clearTimeout(hideTimer);
   const host=typeof document==='undefined'?null:document.getElementById('paradoxItemHover');
   activeAnchor=null;
   if(host){host.hidden=true;host.setAttribute('aria-hidden','true');host.replaceChildren();}
@@ -122,6 +126,7 @@ function position(host,anchor){
 }
 
 function show(anchor){
+  clearTimeout(hideTimer);
   const binding=bindings.get(anchor);
   const host=ensureHost();
   if(!binding||!host)return;
@@ -136,7 +141,7 @@ function install(){
   if(installed||typeof document==='undefined')return;
   installed=true;
   document.addEventListener('pointerover',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&bindings.has(anchor)&&!anchor.contains(event.relatedTarget))show(anchor);});
-  document.addEventListener('pointerout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor===activeAnchor&&!anchor.contains(event.relatedTarget))hide();});
+  document.addEventListener('pointerout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor===activeAnchor&&!anchor.contains(event.relatedTarget)&&!document.getElementById('paradoxItemHover')?.contains(event.relatedTarget))hideTimer=setTimeout(hide,180);});
   document.addEventListener('focusin',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&bindings.has(anchor)&&!anchor.contains(event.relatedTarget))show(anchor);});
   document.addEventListener('focusout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor===activeAnchor&&!anchor.contains(event.relatedTarget))hide();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape')hide();});

@@ -7,7 +7,7 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-sele
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260908-icon-hover-1';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 

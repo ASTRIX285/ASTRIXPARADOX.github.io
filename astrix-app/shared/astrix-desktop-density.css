@@ -71,7 +71,7 @@
   --apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);
   --apx-icon-weapon-socket:clamp(2.125rem,3.6cqi,3.25rem);
   --apx-icon-weapon-socket-compact:clamp(1.25rem,2.25cqi,1.75rem);
-  --apx-icon-weapon-socket-fluid:clamp(2rem,calc((100cqi - var(--gear-weapon-art) - .75rem - (var(--weapon-perk-columns) - 1) * .3125rem) / var(--weapon-perk-columns)),3.375rem);
+  --apx-icon-weapon-socket-fluid:var(--apx-icon-socket-compact);
   --apx-icon-item-card-socket:clamp(2.625rem,3.2vw,3.375rem);
 }
 

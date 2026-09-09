@@ -37,6 +37,7 @@ const validators=[
   'test-weapon-catalogue.mjs',
   'test-weapon-stat-mapping.mjs',
   'test-weapon-diagnostics.mjs',
+  'test-weapon-presentation.mjs',
   'test-journey-collections.mjs',
   'test-journey-records.mjs',
   'validate-paradox-item-cards.mjs',

@@ -108,7 +108,7 @@ try{
   if(invalid.selectedPerks.length||invalid.perkIconHashMap?.['not-a-hash']||invalid.unknownPlugs.length!==1)fail('G3b: hashless weapon perk received a guessed icon identity');
   const audit=JSON.parse(await readFile(new URL('../data/paradox-weapon-audit-report.json',import.meta.url),'utf8'));
   if(!audit.manifestVersion||!audit.counts.weapons||audit.counts.references!==audit.counts.resolvedReferences||audit.unresolvedReferences.length)fail('G3b: current exhaustive weapon manifest audit contains unresolved references');
-  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8');
+  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8')+'\n'+await readFile(new URL('../pages/guardian-workspace-v2/guardian-weapon-presentation.mjs',import.meta.url),'utf8');
   if(!/data-bungie-hash/.test(uiSource)||!/hashAttribute\(perk\)/.test(uiSource)||!/hashAttribute\(semantics\.intrinsic\)/.test(uiSource))fail('G3b: weapon perk/intrinsic DOM icons do not expose their Bungie hash');
 }catch(error){fail(`G3b threw: ${error.message}`);}
 
@@ -151,7 +151,7 @@ try{
   if(semantics.classifyWeaponPlug(levelBoost)!=='weapon-mod'||!separated.modSockets.some(row=>row.name==='Empty Weapon Level Boost Socket'))fail('G3c: Weapon Level Boost was not retained in the weapon-mod row');
   if(semantics.classifyWeaponPlug(killTracker)!=='perk'||!separated.perkModel.columns.some(column=>column.options.some(row=>row.name==='Kill Tracker')))fail('G3c: Kill Tracker did not remain in the weapon perk model');
   if(semantics.classifyWeaponPlug(infuse)!=='infuse'||separated.modSockets.some(row=>row.name==='Infuse')||separated.discarded.length!==1)fail('G3c: Infuse was not excluded from the functional weapon model');
-  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8');
+  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8')+'\n'+await readFile(new URL('../pages/guardian-workspace-v2/guardian-weapon-presentation.mjs',import.meta.url),'utf8');
   if(!/function weaponPerkMatrixMarkup/.test(uiSource)||!/data-perk-row-count/.test(uiSource)||!/EXOTIC WEAPON TRAITS/.test(uiSource)||!/weaponTraitHierarchyMarkup/.test(uiSource))fail('G3c: tier matrix or Exotic trait hierarchy is missing from the semantic UI');
   if(/PARADOX PERK RECOMMENDATION/.test(uiSource)||/Verified Bungie Exotic weapon trait\./.test(uiSource))fail('G3c: redundant recommendation copy or invented generic Exotic trait text remains in the weapon details');
 }catch(error){fail(`G3c threw: ${error.message}`);}
