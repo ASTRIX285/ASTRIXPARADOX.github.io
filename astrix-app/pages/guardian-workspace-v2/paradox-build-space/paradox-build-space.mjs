@@ -1,4 +1,4 @@
-import {ForgePreparationClient,preparationVariants} from './paradox-forge-preparation.mjs?v=20260906-complete-build-transfer-1';
+import {ForgePreparationClient,preparationVariants} from './paradox-forge-preparation.mjs?v=20260909-super-evidence-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
@@ -19,7 +19,7 @@ import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMis
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
 import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendation.mjs';
-import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260904-exotic-anchor-1';
+import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260906-complete-build-transfer-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260905-manual-editor-2';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
@@ -456,7 +456,7 @@ function stageSelection(kind,index){
 }
 
 function renderRecommendationControls(build={}){
-  const verified=resolvedSubclassOptions(build).filter(hasVerifiedSubclassSockets),verifiedElements=new Set(verified.map(elementOf)),compatible=filterExoticCompatibleSubclasses(build,verified),supported=new Map(compatible.map(item=>[elementOf(item),item]).filter(([element])=>BUILD_ELEMENTS.includes(element)));
+  const subclassOptions=resolvedSubclassOptions(build),verified=subclassOptions.filter(hasVerifiedSubclassSockets),verifiedElements=new Set(verified.map(elementOf)),compatible=filterExoticCompatibleSubclasses(build,verified),supported=new Map(compatible.map(item=>[elementOf(item),item]).filter(([element])=>BUILD_ELEMENTS.includes(element)));
   const active=elementOf({element:build.subclass||build.subclassName||''}),hasDecision=Boolean(build.forgeLoaderDecision);
   if(!hasDecision)selectedRecommendationElement='';
   else if(!selectedRecommendationElement||!supported.has(selectedRecommendationElement))selectedRecommendationElement=supported.has(active)?active:(supported.keys().next().value||'');
@@ -466,8 +466,36 @@ function renderRecommendationControls(build={}){
   if(!['balanced','dps','add-clear','survivability','ability-uptime'].includes(selectedRecommendationObjective))selectedRecommendationObjective=build.objective||'balanced';document.querySelectorAll('[data-build-objective]').forEach(button=>{const selected=button.dataset.buildObjective===selectedRecommendationObjective;button.disabled=!hasDecision||recommendationBusy;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));});
   const armourValidation=validateTierFiveArmour(build),exoticValidation=validateExoticLoadout(build,{requireArmourAnchor:true}),hasElement=Boolean(selectedRecommendationElement&&supported.has(selectedRecommendationElement)),ready=hasDecision&&armourValidation.ready&&exoticValidation.ready&&hasElement&&!recommendationBusy,button=byId('generateMaxLoadout'),status=byId('recommendationReadiness');
   if(button){button.disabled=!ready;button.textContent=recommendationBusy?'GENERATING VERIFIED BUILD…':build.recommendationGeneratedAt?'REGENERATE MAX LOADOUT':'GENERATE MAX LOADOUT';}
-  if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact evidence…':recommendationFailure||(!hasDecision?'Stage a verified Forge Loader armour result to unlock compatible build options.':!armourValidation.ready?armourValidation.reason:!exoticValidation.ready?exoticValidation.reason:!hasElement?'Select an available verified elemental build option.':`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one verified Exotic armour anchor · Maximized Forge Loader result.`);}
+  const unresolvedCount=new Set([...(build?.hashCoverage?.subclass?.unresolved||[]),...subclassOptions.flatMap(item=>(item?.subclassBuild||item?.build||{})?.socketCoverage?.unresolved||[])]).size;
+  const subclassBlocker=unresolvedCount?`Bungie subclass socket definitions are incomplete for ${unresolvedCount} resolved profile plug${unresolvedCount===1?'':'s'}. Refresh verified Guardian data before generating.`:verified.length?'The staged Exotic has no explicit compatibility evidence for the available verified elemental options.':'No complete live Bungie subclass socket set is available for this Guardian.';
+  if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact evidence…':recommendationFailure||(!hasDecision?'Stage a verified Forge Loader armour result to unlock compatible build options.':!armourValidation.ready?armourValidation.reason:!exoticValidation.ready?exoticValidation.reason:!hasElement?subclassBlocker:`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one verified Exotic armour anchor · Maximized Forge Loader result.`);}
   scheduleForgePreparation(build);
+}
+
+function renderSuperSynergyEvidence(build={},candidate=null){
+  const host=byId('buildSuperSynergy');if(!host)return;
+  const report=rankExoticSuperSynergy(build,candidate?[candidate]:[]),byHash=new Map(report.entries.map(row=>[String(row.superHash),row]));
+  byId('buildSuperFeatureCluster')?.querySelectorAll('[data-super-slot]').forEach(slot=>{
+    const row=byHash.get(String(slot.dataset.bungieHash||''));
+    slot.classList.toggle('has-exotic-super-evidence',Boolean(row?.evidence?.length));
+    slot.classList.toggle('is-exotic-super-best',Boolean(row?.recommended));
+    slot.classList.toggle('has-no-exotic-super-evidence',Boolean(row&&row.evidenceStatus==='no-direct-evidence'));
+    if(!row){delete slot.dataset.exoticSuperEvidence;return;}
+    slot.dataset.exoticSuperEvidence=row.evidenceStatus;
+    const reason=row.evidence?.[0]?.label||row.limitation;
+    slot.title=[slot.title,reason].filter(Boolean).join(' · ');
+    slot.setAttribute('aria-label',[row.superName,reason].filter(Boolean).join('. '));
+  });
+  if(!build.forgeLoaderDecision){host.className='super-synergy-evidence is-unknown';host.innerHTML='<b>EXOTIC TO SUPER EVIDENCE</b><p>Stage a verified Forge Loader Exotic to evaluate these Supers.</p>';return;}
+  const tied=report.entries.filter(row=>row.recommended).length>1,source=report.anchor.description?`<blockquote>${esc(report.anchor.description)}</blockquote>`:'<blockquote>Verified Exotic effect text unavailable.</blockquote>';
+  const rows=report.entries.map(row=>{
+    const state=row.recommended?`BEST VERIFIED EVIDENCE${tied?' · TIED':''}`:row.evidenceStatus==='evidenced'?`EVIDENCE RANK ${row.rank}`:'NO DIRECT SYNERGY EVIDENCE';
+    const reason=row.evidence?.[0]?.label||row.limitation;
+    return `<li class="${row.recommended?'is-best':row.evidenceStatus==='evidenced'?'is-evidenced':'is-unsupported'}"><b>${esc(row.superName)}</b><em>${esc(state)}</em><span>${esc(reason)}</span></li>`;
+  }).join('');
+  const investment=report.entries[0]?.context?.[0]?.label||'';
+  host.className=`super-synergy-evidence is-${report.status}`;
+  host.innerHTML=`<b>EXOTIC TO SUPER EVIDENCE · ${esc(report.anchor.name)}</b>${source}${rows?`<ol>${rows}</ol>`:`<p>${esc(report.limitation||'No resolved Super definitions are available for this subclass.')}</p>`}${investment?`<small>${esc(investment)}</small>`:''}`;
 }
 
 function reviewIcon(item,label='Verified item'){const icon=abs(iconOf(item)),name=esc(item?.name||item?.displayName||label);return `<span class="review-icon" title="${name}">${icon?`<img src="${esc(icon)}" alt="">`:'◆'}<small>${name}</small></span>`;}
@@ -602,7 +630,7 @@ function renderBuildSurface(){
   const subclassOptions=resolvedSubclassOptions(build),activeElement=elementOf({element:build.subclass||build.subclassName||''}),activeSubclass=subclassOptions.find(item=>elementOf(item)===activeElement)||null;
   renderEquippedSubclass({root:byId('buildEquippedSubclassSummary'),iconNode:byId('buildEquippedSubclassIcon'),nameNode:byId('buildEquippedSubclassName'),metaNode:byId('buildEquippedSubclassMeta'),subclass:build.subclass||'',subclassName:build.subclassName||'',characterClass:build.characterClass||'Guardian',icon:iconOf(activeSubclass)||build.subclassIcon||''});
   renderSubclassPicker({root:byId('buildSubclassPicker'),characterClass:build.characterClass||'Guardian',subclass:build.subclass||build.subclassName||'',subclassOptions:resolvedSubclassOptions(build),selectKind:'subclass'});
-  const prismatic=isPrismaticBuild(build),superItem=build.subclassBuild?.super,supers=resolvedOptions(build,'super'),superNode=byId('buildSuperFeatureCluster');renderSuperFormation({host:superNode,nameNode:byId('buildSuperName'),activeSuper:superItem,superOptions:supers,subclass:build.subclass||build.subclassName||'',subclassCatalog:subclassOptions,characterClass:build.characterClass||'hunter',selectKind:'super'});
+  const prismatic=isPrismaticBuild(build),superItem=build.subclassBuild?.super,supers=resolvedOptions(build,'super'),superNode=byId('buildSuperFeatureCluster');renderSuperFormation({host:superNode,nameNode:byId('buildSuperName'),activeSuper:superItem,superOptions:supers,subclass:build.subclass||build.subclassName||'',subclassCatalog:subclassOptions,characterClass:build.characterClass||'hunter',selectKind:'super'});renderSuperSynergyEvidence(build,activeSubclass||{element:activeElement,subclassBuild:build.subclassBuild});
   const transcendenceSection=byId('transcendenceSection'),transcendenceNode=byId('transcendenceSummary');transcendenceSection.hidden=!prismatic;if(prismatic){const slots=resolvedTranscendenceSlots(build),choices=transcendenceChoices(build);transcendenceNode.innerHTML=Array.from({length:2},(_,slotPosition)=>{const slot=slots[slotPosition],options=Array.isArray(slot?.options)?slot.options:[],equipped=slot?.equipped,cards=options.map(item=>{const index=choices.findIndex(value=>itemKey(value)===itemKey(item)&&Number(value.transcendenceSlotPosition)===slotPosition);return selectorCard(item,{kind:'transcendence',index,selected:itemKey(item)===itemKey(equipped)});});return '<section class="transcendence-slot"><h4>SLOT '+(slotPosition+1)+'</h4><div class="transcendence-options">'+(cards.length?cards.join(''):unavailableCard('Verified slot unavailable'))+'</div></section>';}).join('');}else{transcendenceNode.innerHTML='';}
   const abilities=Array.isArray(build.subclassBuild?.abilities)?build.subclassBuild.abilities:[],aspects=Array.isArray(build.subclassBuild?.aspects)?build.subclassBuild.aspects:[],fragments=Array.isArray(build.subclassBuild?.fragments)?build.subclassBuild.fragments:[];byId('abilityRail').innerHTML=Array.from({length:4},(_,i)=>tile(abilities[i])).join('');byId('aspectRail').innerHTML=Array.from({length:2},(_,i)=>tile(aspects[i])).join('');byId('fragmentRail').innerHTML=Array.from({length:5},(_,i)=>tile(fragments[i])).join('');
   byId('abilityOptions').innerHTML=abilityGroups(build,abilities);

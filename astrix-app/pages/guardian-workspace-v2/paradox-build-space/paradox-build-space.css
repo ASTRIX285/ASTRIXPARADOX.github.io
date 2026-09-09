@@ -311,6 +311,17 @@ html,body{
 .build-rail :is(.lbl,.manual-label,.artifact-copy b,.artifact-copy small,.super-feature__name){font-family:bahnschrift,system-ui,sans-serif!important;letter-spacing:.055em!important}
 .build-rail :is(.lbl,.manual-label,.artifact-copy small){font-size:clamp(.68rem,3.8cqi,1.35rem)!important;color:#d0cad3!important}
 .build-rail :is(.artifact-copy b,.super-feature__name){font-size:clamp(.74rem,4.2cqi,1.55rem)!important;color:#f6f3f7!important}
+.super-synergy-evidence{margin:10px 0 8px;padding:9px;border:1px solid rgba(255,255,255,.12);border-left:2px solid #8b858f;border-radius:6px;background:rgba(5,5,8,.62);text-align:left}
+.super-synergy-evidence>b{display:block;color:#e3c765;font:800 clamp(.58rem,3.1cqi,.9rem)/1.35 bahnschrift,system-ui,sans-serif;letter-spacing:.055em}
+.super-synergy-evidence blockquote{margin:7px 0;padding:0 0 0 7px;border-left:1px solid rgba(227,199,101,.35);color:#c9c3cc;font:500 clamp(.56rem,2.8cqi,.82rem)/1.45 bahnschrift,system-ui,sans-serif}
+.super-synergy-evidence ol{display:grid;gap:6px;margin:7px 0 0;padding:0;list-style:none}
+.super-synergy-evidence li{display:grid;grid-template-columns:1fr auto;gap:2px 6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08)}
+.super-synergy-evidence li b{color:#f5f1f6;font:750 clamp(.57rem,2.9cqi,.84rem)/1.3 bahnschrift,system-ui,sans-serif}
+.super-synergy-evidence li em{color:#9d97a1;font:800 clamp(.48rem,2.4cqi,.72rem)/1.3 bahnschrift,system-ui,sans-serif;letter-spacing:.045em;text-align:right}
+.super-synergy-evidence li span{grid-column:1/-1;color:#bdb7c1;font:500 clamp(.53rem,2.65cqi,.78rem)/1.4 bahnschrift,system-ui,sans-serif}
+.super-synergy-evidence li.is-best em{color:#6fe3b6}.super-synergy-evidence li.is-unsupported em{color:#d18b90}
+.super-synergy-evidence>p,.super-synergy-evidence>small{display:block;margin:7px 0 0;color:#bdb7c1;font:500 clamp(.53rem,2.65cqi,.78rem)/1.4 bahnschrift,system-ui,sans-serif}
+.super-diamond.has-exotic-super-evidence{border-color:rgba(111,227,182,.72)!important}.super-diamond.is-exotic-super-best{box-shadow:0 0 0 2px rgba(111,227,182,.36),0 0 18px rgba(111,227,182,.35)!important}.super-diamond.has-no-exotic-super-evidence{filter:saturate(.72)}
 .build-right-rail :is(.recommendation-copy,.recommendation-readiness,.range-capture-status,.intel-card p,.forge-analysis p,.forge-analysis li){font-family:bahnschrift,system-ui,sans-serif;color:#d0cad3;font-size:clamp(.78rem,1.15cqi,2rem);line-height:1.5}
 .build-right-rail :is(.panel-head h2,.section-title h2,.forge-analysis .ra-head h2){font-size:clamp(.9rem,1.5cqi,2.5rem)!important;line-height:1.2}
 .build-right-rail :is(.panel-head small,.section-title span,.intel-card small,.working-only-chip){font-size:clamp(.68rem,1cqi,1.8rem)!important;color:#e3c765}

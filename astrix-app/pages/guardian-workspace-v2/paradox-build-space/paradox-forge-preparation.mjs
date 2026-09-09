@@ -2,7 +2,7 @@ const keyOf=v=>JSON.stringify([v.element,v.objective||'balanced',Number(v.superH
 const INPUT_FIELDS=['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','artifactRecommendation','artifactValidation','availableArtifacts','artifactOptions','currentSeasonNumber','currentSeason','weapons','ownedWeapons','vaultWeapons','inventoryWeapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','activityProfile','activity','beta','buildFocus','locks'];
 
 export class ForgePreparationClient{
-  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260906-complete-build-transfer-1',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024}={}){
+  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260909-super-evidence-1',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024}={}){
     Object.assign(this,{workerFactory,onStatus,maxEntries,maxBytes});
     this.revision=0;this.cache=new Map();this.pending=new Map();this.bytes=0;this.worker=null;this.input=null;this.runningKey='';
   }

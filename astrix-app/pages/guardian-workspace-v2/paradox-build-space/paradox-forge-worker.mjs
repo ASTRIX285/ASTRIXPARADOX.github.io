@@ -1,4 +1,4 @@
-import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260906-complete-build-transfer-1';
+import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260909-super-evidence-1';
 
 const objectives=new Set(['balanced','dps','add-clear','survivability','ability-uptime']);
 const keyOf=v=>JSON.stringify([v.element,v.objective||'balanced',Number(v.superHash)||0]);

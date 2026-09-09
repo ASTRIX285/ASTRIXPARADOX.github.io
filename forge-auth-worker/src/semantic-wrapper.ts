@@ -41,18 +41,21 @@ function subclassRows(payload: any): Array<{ characterId: string; item: any }> {
 }
 
 async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
-  if (!payload?.profile) return payload;
-  const initialRows = subclassRows(payload);
-  await resolveMissingInventoryDefinitions(payload, initialRows.map(row => Number(row.item?.itemHash)), env);
-  const rows = subclassRows(payload);
+  const account = payload?.transport === "prepared-page-stream-v1" && payload?.account
+    ? payload.account
+    : payload;
+  if (!account?.profile) return payload;
+  const initialRows = subclassRows(account);
+  await resolveMissingInventoryDefinitions(account, initialRows.map(row => Number(row.item?.itemHash)), env);
+  const rows = subclassRows(account);
   const requested = new Set<number>();
   for (const { characterId, item } of rows) {
     if (!item?.itemInstanceId) continue;
-    for (const socket of payload.profile?.itemComponents?.sockets?.data?.[item.itemInstanceId]?.sockets || []) {
+    for (const socket of account.profile?.itemComponents?.sockets?.data?.[item.itemInstanceId]?.sockets || []) {
       const hash = Number(socket?.plugHash);
       if (Number.isInteger(hash)) requested.add(hash);
     }
-    const reusable = payload.profile?.itemComponents?.reusablePlugs?.data?.[item.itemInstanceId]?.plugs || {};
+    const reusable = account.profile?.itemComponents?.reusablePlugs?.data?.[item.itemInstanceId]?.plugs || {};
     for (const plugs of Object.values(reusable)) {
       for (const row of (plugs as any[]) || []) {
         if (row?.canInsert === false || row?.enabled === false) continue;
@@ -60,13 +63,13 @@ async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
         if (Number.isInteger(hash)) requested.add(hash);
       }
     }
-    const definition = payload.definitions?.[String(item.itemHash)] || {};
+    const definition = account.definitions?.[String(item.itemHash)] || {};
     for (const entry of definition?.sockets?.socketEntries || []) {
       const initialHash = Number(entry?.singleInitialItemHash);
       if (Number.isInteger(initialHash)) requested.add(initialHash);
       const plugSetHash = Number(entry?.reusablePlugSetHash);
       if (!Number.isInteger(plugSetHash)) continue;
-      for (const plugSets of [payload.profile?.profilePlugSets?.data?.plugs, payload.profile?.characterPlugSets?.data?.[characterId]?.plugs]) {
+      for (const plugSets of [account.profile?.profilePlugSets?.data?.plugs, account.profile?.characterPlugSets?.data?.[characterId]?.plugs]) {
         for (const row of plugSets?.[String(plugSetHash)] || []) {
           if (row?.canInsert === false || row?.enabled === false) continue;
           const hash = Number(row?.plugItemHash ?? row?.plugHash);
@@ -75,14 +78,31 @@ async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
       }
     }
   }
-  const unresolved = await resolveMissingInventoryDefinitions(payload, requested, env);
-  payload.subclassCatalogCoverage = {
+  const unresolved = await resolveMissingInventoryDefinitions(account, requested, env);
+  account.subclassCatalogCoverage = {
     itemInstances: rows.map(row => String(row.item?.itemInstanceId || "")).filter(Boolean),
     requested: [...requested],
-    resolved: [...requested].filter(hash => Boolean(payload.definitions?.[String(hash)])),
+    resolved: [...requested].filter(hash => Boolean(account.definitions?.[String(hash)])),
     unresolved,
     complete: unresolved.length === 0
   };
+  if (account.definitionCoverage && typeof account.definitionCoverage === "object") {
+    const remaining = (Array.isArray(account.definitionCoverage.unresolved) ? account.definitionCoverage.unresolved : [])
+      .map(Number)
+      .filter((hash: number) => Number.isInteger(hash) && !account.definitions?.[String(hash)]);
+    const requestedCount = Number(account.definitionCoverage.requested) || 0;
+    account.definitionCoverage = {
+      ...account.definitionCoverage,
+      resolved: Math.max(Number(account.definitionCoverage.resolved) || 0, requestedCount - remaining.length),
+      unresolved: remaining,
+      complete: remaining.length === 0
+    };
+    if (account.definitionCoverage.complete === true && account.pageReady?.coverage) {
+      const missing = (Array.isArray(account.pageReady.coverage.missing) ? account.pageReady.coverage.missing : [])
+        .filter((value: unknown) => value !== "owned-item-definitions");
+      account.pageReady = {...account.pageReady, coverage: {complete: missing.length === 0, missing}};
+    }
+  }
   return payload;
 }
 
