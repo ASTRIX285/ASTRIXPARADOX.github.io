@@ -23,4 +23,14 @@ assert.match(density,/--apx-icon-weapon-socket-fluid:var\(--apx-icon-socket-comp
 assert.match(css,/grid-template-areas:"art cap" "perks perks" "support support"/);
 assert.match(css,/outline:2px solid #ef3340/);
 assert.match(css,/border-radius:0;background:#18151b/);
+const compactRules=[...css.matchAll(/([^{}]+)\{([^{}]*var\(--apx-icon-socket-compact\)[^{}]*)\}/g)];
+assert.ok(compactRules.length>0);
+for(const [,selector] of compactRules){
+  assert.ok(selector.includes('.paradox-item-hover-card'),'Compact sizing must explicitly include the root-level hover card');
+  assert.ok(!selector.includes('body '),'Hover sizing cannot require a body ancestor');
+  assert.ok(!selector.includes('.paradox-item-card--weapon'),'Compact sizing must not resize the approved expanded inspector');
+}
+assert.match(css,/\.paradox-item-hover-card \.weapon-perk-cell\.is-selected\{background:#367fa6/,'Equipped hover perks must receive their blue background outside body');
+assert.match(css,/(?:^|\n)\[data-paradox-perk-tooltip\]:is\([^{}]+\)\{outline:2px solid #ef3340/,'Root-level hover perks must receive the red inspection ring');
+assert.match(css,/--paradox-perk-size: var\(--apx-icon-detail-identity\)/,'Expanded inspector keeps its original icon token');
 console.log('WEAPON_PRESENTATION=PASS');

@@ -1716,35 +1716,35 @@ body .gear-arm-anchor .arm>img,body .gear-weapons .weap .art .weapon-art-image,b
 .paradox-hover-foot{display:flex;justify-content:space-between;gap:.5rem;padding:.45rem .75rem;border-top:1px solid rgba(201,168,76,.25);color:#9f978e;font:700 .5rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.06em}
 @media(max-width:560px){.paradox-item-hover-card .paradox-socket-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-/* Shared compact weapon composition, including hover and expanded inspectors. */
+/* Compact page cards and the root-level hover portal only. The expanded inspector keeps its approved scale. */
 body .gear-weapons .weap{
   grid-template-columns:var(--gear-weapon-art) minmax(0,1fr)!important;
   grid-template-rows:auto auto auto!important;
   grid-template-areas:"art cap" "perks perks" "support support"!important;
   height:auto!important;min-height:0!important;align-self:start!important;
 }
-body :is(.gear-weapons,.review-weapon,.paradox-item-card--weapon) .weapon-perk-matrix{
+:is(.gear-weapons,.review-weapon,.paradox-item-hover-card) .weapon-perk-matrix{
   --gear-weapon-socket:var(--apx-icon-socket-compact);
   --paradox-perk-size:var(--apx-icon-socket-compact);
   width:max-content!important;max-width:100%!important;display:grid;gap:8px;padding:8px;overflow-x:auto;
 }
-body :is(.gear-weapons,.review-weapon,.paradox-item-card--weapon) .weapon-perk-row{
+:is(.gear-weapons,.review-weapon,.paradox-item-hover-card) .weapon-perk-row{
   display:grid;grid-template-columns:repeat(var(--weapon-perk-columns),var(--apx-icon-socket-compact))!important;
   gap:8px!important;justify-content:start;align-items:center;
 }
-body :is(.gear-weapons,.review-weapon,.paradox-item-card--weapon) .weapon-perk-row-label{display:none}
-body :is(.gear-weapons,.review-weapon,.paradox-item-card--weapon) :is(.weapon-perk-cell,.weapon-detail-tile,.weapon-support-icon){
+:is(.gear-weapons,.review-weapon,.paradox-item-hover-card) .weapon-perk-row-label{display:none}
+:is(.gear-weapons,.review-weapon,.paradox-item-hover-card) :is(.weapon-perk-cell,.weapon-detail-tile,.weapon-support-icon){
   width:var(--apx-icon-socket-compact)!important;height:var(--apx-icon-socket-compact)!important;
   min-width:var(--apx-icon-socket-compact);display:grid;place-items:center;padding:0;cursor:help;
 }
-body :is(.gear-weapons,.review-weapon,.paradox-item-card--weapon) :is(.weapon-detail-tile,.weapon-support-icon)>img{
+:is(.gear-weapons,.review-weapon,.paradox-item-hover-card) :is(.weapon-detail-tile,.weapon-support-icon)>img{
   width:100%!important;height:100%!important;object-fit:contain;
 }
-body .paradox-item-card--weapon .weapon-detail-tiles{display:flex;gap:8px;flex-wrap:wrap}
-body .paradox-item-card--weapon :is(.weapon-intrinsic-lead,.weapon-exotic-trait){display:flex;gap:8px}
-body [data-paradox-perk-tooltip]:is(:hover,:focus-visible,.is-perk-inspected){outline:2px solid #ef3340;outline-offset:2px;box-shadow:0 0 0 4px #580916!important}
-body .weapon-perk-cell.is-selected{background:#367fa6}
-body .weapon-perk-cell:not(.is-selected){background:#151318}
+.paradox-item-hover-card .weapon-detail-tiles{display:flex;gap:8px;flex-wrap:wrap}
+.paradox-item-hover-card :is(.weapon-intrinsic-lead,.weapon-exotic-trait){display:flex;gap:8px}
+[data-paradox-perk-tooltip]:is(:hover,:focus-visible,.is-perk-inspected){outline:2px solid #ef3340;outline-offset:2px;box-shadow:0 0 0 4px #580916!important}
+.weapon-perk-cell.is-selected{background:#367fa6}
+.weapon-perk-cell:not(.is-selected){background:#151318}
 .paradox-item-hover:has(.paradox-item-card--weapon){pointer-events:auto}
 .paradox-item-hover-card.paradox-item-card--weapon{background:#100d12}
 .paradox-perk-tooltip{
@@ -1764,3 +1764,8 @@ body .weapon-perk-cell:not(.is-selected){background:#151318}
 .weapon-diagnostics button{min-height:44px;padding:10px 14px;border:1px solid #d9b84f;border-radius:4px;background:#390d17;color:#fff;font:600 14px/1.35 var(--apx-font-copy);cursor:pointer;white-space:normal}
 .weapon-diagnostics button:disabled{opacity:.6;cursor:wait}
 .weapon-diagnostics p{flex-basis:100%;margin:0;color:#c8c2b8;font:400 14px/1.4 var(--apx-font-copy)}
+
+.paradox-item-hover-card .weapon-perk-cell.is-selected{background:#367fa6;box-shadow:inset 0 0 0 2px rgba(153,220,255,.35)}
+.paradox-item-hover-card .weapon-perk-cell.is-selected>img{mix-blend-mode:screen}
+.paradox-item-hover-card .weapon-detail-tile{grid-template-columns:1fr;grid-template-rows:1fr;gap:0}
+.paradox-item-hover-card .weapon-detail-tile>img{grid-area:1/1}
