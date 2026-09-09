@@ -49,7 +49,7 @@ assert.equal(smoke.two.disabled,false);assert.equal(smoke.four.disabled,false);
 assert.ok(smoke.icon);assert.ok(smoke.two.effect.description);assert.ok(smoke.four.effect.icon);
 assert.ok(options.some(row=>!row.owned&&row.two.disabled&&row.four.disabled),'Full verified catalogue includes unowned sets without enabling them');
 const markup=forgeSetListMarkup([smoke]);
-assert.match(markup,/^<div class="forge-set-grid" style="--forge-set-name-width:16ch">/);
+assert.match(markup,/^<div class="forge-set-grid" style="--forge-set-name-size:0\.950rem">/);
 assert.match(markup,/forge-set-icon is-owned/);assert.match(markup,/data-paradox-perk-tooltip/);
 assert.match(markup,/data-perk-description=/);
 assert.equal((markup.match(/class="forge-set-choice(?:\s|")/g)||[]).length,2,'The existing 2-piece and 4-piece rows remain unchanged inside the grid card');
