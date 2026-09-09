@@ -359,7 +359,12 @@ class GuardianManifestService{
       const sockets=socketLayouts[definition?.socketLayoutKey];
       return [hash,sockets?{...definition,sockets}:definition];
     }));
-    payload.definitions={...armourDefinitions,...(index.plugDefinitions||{}),...(payload.definitions||{})};
+    // Armour can also be a cosmetic plug. Preserve both projections of the same hash.
+    const mergedDefinitions={};
+    for(const rows of [index.plugDefinitions||{},armourDefinitions,payload.definitions||{}]){
+      for(const [hash,definition] of Object.entries(rows))mergedDefinitions[hash]={...mergedDefinitions[hash],...definition};
+    }
+    payload.definitions=mergedDefinitions;
     payload.equipableItemSets={...(index.equipableItemSets||{}),...(payload.equipableItemSets||{})};
     payload.sandboxPerks={...(index.sandboxPerks||{}),...(payload.sandboxPerks||{})};
     payload.statDefinitions={...(index.statDefinitions||{}),...(payload.statDefinitions||{})};

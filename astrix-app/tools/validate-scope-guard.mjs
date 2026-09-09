@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/pages/forge-loader/forge-loader-set-list.mjs',
+  'astrix-app/tools/test-forge-set-list.mjs',
   '.github/scripts/cloudflare-worker-diagnostics.mjs',
   '.github/workflows/cloudflare-worker-diagnostics.yml',
   'ARTWORK_PROVENANCE.md',
