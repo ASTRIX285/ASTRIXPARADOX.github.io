@@ -95,6 +95,8 @@ function downloadJson(data){
 
 export function installWeaponDiagnostics(button,status,{request=requestPreparedPagePayload,download=downloadJson}={}){
   if(!button||!status)return;
+  if(button.dataset?.diagnosticsBound)return;
+  if(button.dataset)button.dataset.diagnosticsBound='true';
   button.addEventListener('click',async()=>{
     if(button.disabled)return;
     button.disabled=true;
@@ -111,4 +113,14 @@ export function installWeaponDiagnostics(button,status,{request=requestPreparedP
   });
 }
 
-if(typeof document!=='undefined')installWeaponDiagnostics(document.getElementById('downloadWeaponDiagnostics'),document.getElementById('weaponDiagnosticsStatus'));
+export function mountWeaponDiagnostics(root=document.querySelector('.gear-weapons')){
+  if(!root)return;
+  let button=document.getElementById('downloadWeaponDiagnostics'),status=document.getElementById('weaponDiagnosticsStatus');
+  let bar=root.querySelector('.weapon-diagnostics');
+  if(!bar){bar=document.createElement('div');bar.className='weapon-diagnostics';root.prepend(bar);}
+  if(!button){button=document.createElement('button');button.id='downloadWeaponDiagnostics';button.type='button';button.textContent='Download weapon diagnostics';}
+  if(!status){status=document.createElement('p');status.id='weaponDiagnosticsStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Export equipped and carried weapon data. No login credentials are included.';}
+  button.setAttribute('aria-describedby',status.id);bar.append(button,status);
+  installWeaponDiagnostics(button,status);
+}
+if(typeof document!=='undefined')mountWeaponDiagnostics();

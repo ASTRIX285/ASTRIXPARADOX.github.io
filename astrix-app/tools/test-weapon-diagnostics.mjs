@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {weaponDiagnostics,installWeaponDiagnostics} from '../pages/guardian-workspace-v2/guardian-weapon-diagnostics.mjs';
+import {weaponDiagnostics,installWeaponDiagnostics,mountWeaponDiagnostics} from '../pages/guardian-workspace-v2/guardian-weapon-diagnostics.mjs';
 
 // Synthetic transport fixture, not a capture of Miguel's account.
 const secret='DO_NOT_EXPORT_SESSION_OR_ACCOUNT';
@@ -56,4 +56,18 @@ await button.click();
 assert.equal(button.disabled,false);
 assert.match(status.textContent,/No file was downloaded/);
 assert.ok(!status.textContent.includes(secret));
+// Build Forge creates its weapon panel dynamically without the Character HTML button.
+const nodes=new Map();
+function element(){return {dataset:{},children:[],listeners:0,setAttribute(){},addEventListener(){this.listeners++;},append(...children){this.children=children;for(const child of children)if(child.id)nodes.set(child.id,child);}};}
+const panel={bar:null,querySelector(){return this.bar;},prepend(node){this.bar=node;}};
+globalThis.document={getElementById:id=>nodes.get(id),createElement:element};
+try{
+  mountWeaponDiagnostics(panel);
+  const download=nodes.get('downloadWeaponDiagnostics');
+  assert.equal(download.textContent,'Download weapon diagnostics');
+  assert.equal(download.listeners,1);
+  mountWeaponDiagnostics(panel);
+  assert.equal(panel.bar.children.length,2);
+  assert.equal(download.listeners,1,'Re-rendering must not attach duplicate download listeners');
+}finally{delete globalThis.document;}
 console.log('Weapon diagnostics projection and download interaction checks passed.');

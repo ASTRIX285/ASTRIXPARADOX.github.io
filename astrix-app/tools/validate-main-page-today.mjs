@@ -199,7 +199,7 @@ assert.match(buildModule,/cacheBuildForgeState\(binding,snapshot\)[\s\S]*?could 
 assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Build Forge state must persist asynchronously through the IndexedDB session cache.');
 assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWorkingBuildPatch\(state\.workingBuild\|\|state\.originalBuild\)/,'Representative manual edits must use a small mutable patch instead of cloning the full snapshot.');
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
-assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-set-icons-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
+assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-set-icons-1&weapons=20260909-presentation-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
 assert.match(buildHtml,/paradox-build-space\.css\?v=20260908-icon-hover-1/,'Build must load the completed icon-token wiring without a stale cache');
 assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260908-icon-hover-1&amp;sets=20260908-set-icons-1/,'Build must load the repaired shared armour renderer without stale code');
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');

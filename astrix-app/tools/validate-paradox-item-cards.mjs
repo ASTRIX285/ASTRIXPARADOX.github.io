@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const ROOT=new URL('../pages/guardian-workspace-v2/',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
-const [weaponUi,armourRuntime,interceptor,buildRuntime,cardCss,gearRuntime,vaultRuntime,hoverRuntime]=await Promise.all([
+const [weaponRuntime,armourRuntime,interceptor,buildRuntime,cardCss,gearRuntime,vaultRuntime,hoverRuntime]=await Promise.all([
   read('guardian-semantic-ui.mjs'),
   read('guardian-beta-runtime.mjs'),
   read('guardian-semantic-interceptor.mjs'),
@@ -13,6 +13,7 @@ const [weaponUi,armourRuntime,interceptor,buildRuntime,cardCss,gearRuntime,vault
   read('../vault/vault.mjs'),
   read('paradox-item-hover.mjs')
 ]);
+const weaponUi=weaponRuntime+'\n'+await read('guardian-weapon-presentation.mjs');
 
 assert.match(weaponUi,/data-perk-capacity="\$\{capacity\}"/,'Every weapon perk socket must expose its tier-derived column capacity');
 assert.match(weaponUi,/All returned perk choices are shown/,'The inspector must explain complete instance perk choices');
@@ -55,7 +56,7 @@ console.log('PARADOX_ARMOUR_DETAIL_MODEL=PASS');
 // Execute the actual support-socket presentation with multiple equipped mods.
 const {runInNewContext}=await import('node:vm');
 const helperStart=weaponUi.indexOf('function weaponSupportIconsMarkup('),helperEnd=weaponUi.indexOf('\nfunction renderWeapons(',helperStart);
-const scope={bungieHash:v=>Number(v?.bungieHash??v?.hash)||null,bungieIcon:v=>v||'',text:v=>v?.name||'',esc:v=>String(v),hashAttribute:v=>` data-bungie-hash="${v.hash}"`};
+const scope={bungieHash:v=>Number(v?.bungieHash??v?.hash)||null,bungieIcon:v=>v||'',text:v=>v?.name||'',esc:v=>String(v),hashAttribute:v=>` data-bungie-hash="${v.hash}"`,perkTooltipAttributes:()=>''};
 runInNewContext(weaponUi.slice(helperStart,helperEnd)+'this.renderSupport=weaponSupportIconsMarkup;',scope);
 const modFixture={weaponSemantics:{modSockets:[{hash:11,socketIndex:4,name:'Mod A',icon:'/a.png'},{hash:11,socketIndex:5,name:'Mod A',icon:'/a.png'},{hash:12,socketIndex:6,name:'Mod B',definition:{displayProperties:{icon:'/b.png'}}},{hash:13,socketIndex:7,name:'Unresolved icon'}]}};
 const modBefore=JSON.stringify(modFixture),modMarkup=scope.renderSupport(modFixture);
