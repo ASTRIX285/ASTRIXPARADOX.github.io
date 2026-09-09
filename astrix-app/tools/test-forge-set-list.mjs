@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
+import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
+import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
+import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
+import {forgeSetListOptions,forgeSetListMarkup,unresolvedForgeSets} from '../pages/forge-loader/forge-loader-set-list.mjs';
+import {ARMOUR_BUCKETS} from '../pages/vault/vault-inventory.mjs';
+const index=JSON.parse(readFileSync(new URL('../data/forge-armour-index.json',import.meta.url)));
+const expanded=expandForgeArmourIndex(index);
+assert.equal(expanded.definitions['3788059976'].equippingBlock.equipableItemSetHash,2751989785);
+assert.equal(expanded.plugDefinitions['3788059976'].equippingBlock,undefined,'Real cosmetic projection omits the set hash');
+const payload=normalizePreparedPagePayload({transport:'prepared-page-stream-v1',account:{profile:{},pageReady:{manifestVersion:index.manifestVersion}},prepared:{manifestVersion:index.manifestVersion,forgeArmourIndex:index}},'loadout');
+const service=new GuardianManifestService({fetchImpl:()=>{throw Error('Offline Forge list must not fetch');}});
+assert.equal(service.applyForgeArmourIndex(payload,index),false,'Regression: applying before seeding silently rejects the real compact index');
+// Execute the actual initialization statements used by loadVerifiedPayload.
+const runtime=readFileSync(new URL('../pages/forge-loader/forge-loader.mjs',import.meta.url),'utf8');
+const initialization=runtime.slice(runtime.indexOf('  guardianManifest.seedPayload(next);'),runtime.indexOf("  if(showProgress)reportPreparedPageStage('join','loadout');"));
+assert.ok(initialization.includes('applyForgeArmourIndex'));
+new Function('guardianManifest','next',initialization)(service,payload);
+await service.hydratePayload(payload,{waitForManifest:false,armourOnly:true,includeReusable:true,allowNetwork:false});
+const smokeHash=2751989785;
+const vestment=payload.definitions['3788059976'];
+assert.equal(vestment.displayProperties.name,'Smoke Jumper Vestment');
+assert.ok(vestment.plug,'Merging armour must retain cosmetic plug metadata too');
+assert.ok(vestment.sockets,'Merging must preserve reconstructed armour sockets');
+assert.equal(resolveArmourSet(payload,{definition:vestment}).hash,smokeHash);
+const items=[];
+for(const definition of Object.values(payload.definitions)){
+  if(definition.classType!==2||definition.itemType!==2)continue;
+  const set=resolveArmourSet(payload,{definition});
+  const name=definition.displayProperties?.name;
+  if(set?.hash!==smokeHash&&name!=='Nothing Manacles')continue;
+  const slotIndex=ARMOUR_BUCKETS.findIndex(slot=>Number(slot.hash)===Number(definition.inventory?.bucketTypeHash));
+  if(slotIndex<0||items.some(item=>item.slotIndex===slotIndex))continue;
+  items.push({itemHash:definition.hash,definition,slotIndex,isExotic:name==='Nothing Manacles',setBonus:set});
+}
+// Use the actual Warlock Exotic definition and the four Smoke Jumper armour slots
+// shown in Miguel's screenshots. No instance IDs or account stats are invented.
+const exoticDef=Object.values(payload.definitions).find(d=>d.displayProperties?.name==='Nothing Manacles');
+const exotic={itemHash:exoticDef.hash,hashes:[exoticDef.hash],slotIndex:1};
+const owned=items.filter(i=>i.slotIndex!==1);
+owned.push({itemHash:exoticDef.hash,definition:exoticDef,slotIndex:1,isExotic:true});
+assert.equal(owned.length,5);
+const options=forgeSetListOptions(owned,exotic,[],payload,'warlock');
+const smoke=options.find(row=>row.hash===smokeHash);
+assert.equal(smoke.name,'Smoke Jumper Set');assert.equal(smoke.owned,true);
+assert.equal(smoke.two.disabled,false);assert.equal(smoke.four.disabled,false);
+assert.ok(smoke.icon);assert.ok(smoke.two.effect.description);assert.ok(smoke.four.effect.icon);
+assert.ok(options.some(row=>!row.owned&&row.two.disabled&&row.four.disabled),'Full verified catalogue includes unowned sets without enabling them');
+const markup=forgeSetListMarkup([smoke]);
+assert.match(markup,/forge-set-icon is-owned/);assert.match(markup,/data-paradox-perk-tooltip/);
+assert.match(markup,/data-perk-description=/);
+const visible=markup.replace(/<[^>]*>/g,'');
+assert.ok(!visible.includes(smoke.two.effect.description),'Descriptions only belong in the shared hover card');
+assert.match(visible,/Smoke Jumper Set/);
+assert.deepEqual(unresolvedForgeSets([{setBonus:{hash:smokeHash,unresolved:true}},{setBonus:{hash:smokeHash,unresolved:true}}]),[smokeHash]);
+const fewer=forgeSetListOptions(owned.filter(i=>i.slotIndex!==4),exotic,[],payload,'warlock').find(r=>r.hash===smokeHash);
+assert.equal(fewer.four.disabled,true);
+console.log('FORGE_SET_LIST=PASS real Smoke Jumper compact index, cold initialization, ownership gating and shared tooltip');

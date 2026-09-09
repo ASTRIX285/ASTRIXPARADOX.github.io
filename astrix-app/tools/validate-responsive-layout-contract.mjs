@@ -95,7 +95,7 @@ assert.match(forgeLoaderCss,/grid-template-columns:minmax\(360px,20%\) minmax\(6
 assert.match(forgeLoaderCss,/grid-template-columns:var\(--apx-workspace-compact-columns,/u,'Forge Loader must retain the shared compact workspace tracks');
 assert.match(forgeLoaderCss,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-selector\),1fr\)/u,'Forge Loader Exotic selection must consume the shared selector icon token');
 assert.match(forgeLoaderCss,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-stage\)/u,'Forge Loader staged items must consume the exact shared stage icon tier');
-assert.match(forgeLoaderCss,/\.forge-matrix-exotic\{[^}]*width:var\(--apx-icon-card\);height:var\(--apx-icon-card\)/u,'Forge Loader matched items must consume the shared card icon tier');
+assert.match(forgeLoaderCss,/\.forge-matrix-exotic\{[^}]*width:var\(--apx-icon-gear-art-width\);height:var\(--apx-icon-gear-art-height\)/u,'Forge Loader matched armour must consume the shared armour art tokens');
 assert.match(forgeLoaderCss,/\.forge-inspect-main\{[^}]*grid-template-columns:var\(--apx-icon-inspect\)[\s\S]*?\.forge-inspect-main img\{width:var\(--apx-icon-inspect\);height:var\(--apx-icon-inspect\)/u,'Forge Loader inspection must consume the shared inspect icon token');
 assert.match(sources.build,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-gear-art-width\)/u,'Build Forge recommendations must consume the shared portrait gear-art token');
 assert.doesNotMatch(sources.gear,/\.weapon-detail-icon\{[^}]*width:/u,'Guardian gear layout must not override the canonical item-detail icon size');

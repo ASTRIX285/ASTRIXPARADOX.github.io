@@ -1,6 +1,7 @@
+import {forgeSetListOptions,forgeSetListMarkup,unresolvedForgeSets} from './forge-loader-set-list.mjs';
 import {startForgeBackgroundRefresh,mergeExoticCheckCatalogue,bindExoticCheckControl,forgeInventorySignature} from './forge-loader-refresh.mjs';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&fix=20260909-set-list-1';
 import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionStorageFallbacks} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../vault/vault-inventory.mjs?v=20260905-weapon-audit-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchTopArmourBuilds} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
@@ -66,7 +67,9 @@ async function loadVerifiedPayload({force=false,showProgress=true}={}){
   const shared=force?null:globalThis.FORGE_LOADER_PRELOAD_PAYLOAD||globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
   const next=await preloadForgeLoaderPayload(session,{force,sharedPayload:shared});
   if(!next?.profile)throw new Error('Bungie returned no verified profile inventory.');
+  guardianManifest.seedPayload(next);
   if(next.forgeArmourIndex)guardianManifest.applyForgeArmourIndex(next,next.forgeArmourIndex);
+  if(next.forgeArmourIndex&&!next.forgeArmourIndexCoverage)throw new Error('Forge armour index version does not match the prepared account data.');
   if(showProgress)reportPreparedPageStage('join','loadout');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,armourOnly:Boolean(next.forgeArmourIndex),includeReusable:true,allowNetwork:false});
   return next;
@@ -123,11 +126,12 @@ function renderSetBonuses(){
   const exotic=selectedExotic(),host=byId('forgeSetList');
   upgradeRenderSequence+=1;activeSetUpgradeTarget=null;
   if(!exotic){byId('forgeSetStatus').textContent='SELECT EXOTIC';host.innerHTML='<div class="forge-empty">Select an Exotic to calculate compatible set bonuses.</div>';return;}
-  const options=setBonusOptions(armourItems(),exotic,setSelections);
+  const options=forgeSetListOptions(armourItems(),exotic,setSelections,payload,activeCharacterClass);
+  const unresolved=unresolvedForgeSets(armourItems());
   const selectedLabel=setSelections.length?setSelections.map(row=>`${row.count}P`).join(' + '):'OPEN ARMOUR';
-  byId('forgeSetStatus').textContent=`${options.length} VERIFIED SET${options.length===1?'':'S'} · ${selectedLabel}`;
+  byId('forgeSetStatus').textContent=`${options.length} VERIFIED SET${options.length===1?'':'S'} · ${selectedLabel}${unresolved.length?` · ${unresolved.length} SETS NOT YET VERIFIED`:''}`;
   const open=`<button type="button" class="forge-open-protocol${setSelections.length?'':' is-active'}" data-open-set-protocol aria-pressed="${setSelections.length===0}"><span><b>OPEN ARMOUR · NO SET BONUS REQUIRED</b><small>Rank the top 50 exact owned combinations, then use verified Exotic-to-set perk evidence as a tie-break.</small></span><em>${setSelections.length?'SELECT':'ACTIVE'}</em></button><article class="forge-set-upgrade" id="forgeSetUpgrade" hidden></article>`;
-  const cards=options.length?options.map(row=>`<article class="forge-set"><div class="forge-set-head">${row.icon?`<img src="${esc(row.icon)}" alt="">`:'<span></span>'}<span><strong>${esc(row.name)}</strong><small>${esc(row.description||'Verified Bungie armour set')}</small></span><small class="forge-set-count">${row.usableSlots} USABLE SLOTS</small></div><div class="forge-set-choices">${[2,4].map(count=>{const choice=count===2?row.two:row.four,effect=choice.effect;return `<label class="forge-set-choice${choice.owned?' is-owned':' is-unowned'}${choice.disabled?' is-disabled':''}"><input type="checkbox" data-set-hash="${row.hash}" data-set-count="${count}" ${choice.checked?'checked':''} ${choice.disabled?'disabled':''}>${effect?.icon?`<span class="forge-set-trait-icon"><img src="${esc(effect.icon)}" alt=""></span>`:''}<span class="forge-set-trait-copy"><b>${count} PIECE${effect?.name?` · ${esc(effect.name)}`:''}</b><small>${esc(effect?.description||`${count}-piece trait unavailable`)}</small><em>${esc(bonusReason(row,count,choice))}</em></span></label>`;}).join('')}</div></article>`).join(''):'<div class="forge-empty">No verified 2-piece or 4-piece owned set requirement is available around this Exotic.</div>';
+  const cards=forgeSetListMarkup(options);
   host.innerHTML=open+cards;
   if(!setSelections.length)void renderSetUpgradeRecommendation(exotic);
 }
