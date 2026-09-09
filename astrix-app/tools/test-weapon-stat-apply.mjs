@@ -1,10 +1,21 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {weaponStatBreakdown,weaponStatMarkup} from '../pages/guardian-workspace-v2/guardian-weapon-stat-model.mjs';
-import {weaponPerkPlan,bindWeaponSelection} from '../pages/guardian-workspace-v2/guardian-weapon-selection.mjs';
+import {weaponPerkPlan,bindWeaponSelection,loadWeaponStatGroup} from '../pages/guardian-workspace-v2/guardian-weapon-selection.mjs';
+import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
 import {stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 
 const captured=JSON.parse(await readFile(new URL('fixtures/unsworn-stat-capture.json',import.meta.url),'utf8'));
+const requests=[],groupHash=captured.definition.stats.statGroupHash;
+const statService=new GuardianManifestService({backend:false,storage:{available:false},fetchImpl:async url=>{
+  const parsed=new URL(url);requests.push(parsed);
+  return Response.json(parsed.pathname.endsWith('/component')?{[groupHash]:captured.definition.resolvedStatGroup}:{version:'test-manifest',paths:{DestinyStatGroupDefinition:'/common/destiny2_content/json/en/stat-groups.json'}});
+}});
+const [groupA,groupB]=await Promise.all([loadWeaponStatGroup(groupHash,statService),loadWeaponStatGroup(groupHash,statService)]);
+assert.deepEqual(groupA,captured.definition.resolvedStatGroup);assert.deepEqual(groupB,groupA);
+assert.equal(requests.length,2,'Concurrent cards share one metadata and one stat group request');
+assert.equal(requests[1].searchParams.get('type'),'DestinyStatGroupDefinition');
+assert.equal(requests[1].searchParams.get('version'),'test-manifest');
 const rows=weaponStatBreakdown(captured),byName=Object.fromEntries(rows.map(row=>[row.name,row]));
 // This newer captured roll has Enhanced Shoot to Loot (+5 Range). Its expected
 // capped Range is 100, not the 96 from the earlier screenshot's different roll.

@@ -1,6 +1,11 @@
 import {inventoryLocations,sessionBinding,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
+import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
+
+// The page singleton is deliberately backend-only. This deferred reader uses
+// the same manifest service/cache, but only asks for the small stat group table.
+const weaponStatManifest=new GuardianManifestService({backend:false});
+export function loadWeaponStatGroup(hash,service=weaponStatManifest){return service.getAsync('DestinyStatGroupDefinition',hash);}
 
 export function weaponPerkPlan(item,choices,{session,payload}={}){
   const id=String(item.itemInstanceId||''),location=inventoryLocations(payload).locations.get(id);
@@ -74,7 +79,7 @@ export function bindWeaponSelection(root,item){
   // The prepared profile gate deliberately forbids network hydration. Resolve
   // this small shared table only after the card exists, using the manifest cache.
   const groupHash=Number(item.definition.stats?.statGroupHash);
-  if(!item.definition.resolvedStatGroup&&groupHash)void guardianManifest.getAsync('DestinyStatGroupDefinition',groupHash).then(group=>{
+  if(!item.definition.resolvedStatGroup&&groupHash)void loadWeaponStatGroup(groupHash).then(group=>{
     if(group&&!disposed){item.definition.resolvedStatGroup=group;update();}
   }).catch(()=>{});
 }
