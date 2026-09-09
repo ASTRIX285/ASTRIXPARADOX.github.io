@@ -7,7 +7,7 @@ import {
   normaliseWeaponSemantics,
   normaliseGuardianStats,
   validateArtifact
-} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1";
+} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 
 const rawFetch=globalThis.fetch?.bind(globalThis);
 let livePayload=null;

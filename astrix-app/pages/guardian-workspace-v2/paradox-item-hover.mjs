@@ -1,5 +1,6 @@
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {weaponStatRows} from './guardian-weapon-stat-definitions.mjs';
+import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -29,7 +30,7 @@ function uniqueItems(items=[]){
 function normaliseStats(item,kind){
   if(kind==='weapon'){
     const source=item?.weaponSemantics?.stats??item?.weaponStats??{};
-    return weaponStatRows(source);
+    return weaponStatBreakdown(item);
   }
   const source=item?.armourSemantics?.stats??item?.stats??{};
   const rows=Array.isArray(source)?source:Object.entries(source).map(([hash,row])=>({...(row&&typeof row==='object'?row:{}),hash:Number(hash),value:row?.value??row}));
@@ -45,7 +46,7 @@ function statMarkup(item,kind){
   const rows=normaliseStats(item,kind);
   if(!rows.length)return '<p class="inspector-empty">No item stats were returned for this instance.</p>';
   const body=rows.map(row=>kind==='weapon'
-    ? `<div class="weapon-stat" data-bungie-hash="${row.hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(row.paradoxId)}"><span>${esc(row.name)}</span><i><b style="width:${Math.max(0,Math.min(100,row.value))}%"></b></i><strong>${esc(row.value)}</strong></div>`
+    ? weaponStatMarkup([row])
     : `<div class="paradox-stat-row"><span>${row.icon?`<img src="${esc(row.icon)}" alt="">`:''}${esc(row.name)}</span><strong>${esc(row.value)}</strong><i><b style="width:${Math.max(0,Math.min(100,row.value))}%"></b></i></div>`).join('');
   const total=kind==='armour'?`<div class="paradox-stat-total"><span>TOTAL</span><strong>${rows.reduce((sum,row)=>sum+row.value,0)}</strong></div>`:'';
   return `<div class="${kind==='weapon'?'weapon-stats':'paradox-stat-list'}">${body}${total}</div>`;
@@ -132,6 +133,7 @@ function show(anchor){
   if(!binding||!host)return;
   activeAnchor=anchor;
   host.innerHTML=cardMarkup(binding.item,binding.kind);
+  if(binding.kind==='weapon')bindWeaponSelection(host,binding.item);
   host.hidden=false;
   host.setAttribute('aria-hidden','false');
   requestAnimationFrame(()=>position(host,anchor));

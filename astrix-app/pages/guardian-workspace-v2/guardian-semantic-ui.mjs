@@ -2,10 +2,11 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1';
+import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
-import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1';
-import {weaponStatRows} from './guardian-weapon-stat-definitions.mjs';
+import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
+import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs';
 import {mountWeaponDiagnostics} from './guardian-weapon-diagnostics.mjs?v=20260909-weapon-presentation-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -37,7 +38,7 @@ function openWeaponDetail(item){
   }
   const s=item?.weaponSemantics||{};
   const stats=s.stats||item?.weaponStats||{};
-  const statRows=weaponStatRows(stats).map(({hash,name,value,paradoxId})=>`<div class="weapon-stat" data-bungie-hash="${hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(paradoxId)}"><span>${esc(name)}</span><i><b style="width:${Math.max(0,Math.min(100,value))}%"></b></i><strong>${esc(value)}</strong></div>`).join("");
+  const statRows=weaponStatMarkup(weaponStatBreakdown(item));
   const mods=(s.modSockets?.length?s.modSockets:[s.masterwork,s.mod,s.catalyst]).filter(hasResolvedIdentity);
   const supportLabel=plug=>bungieHash(plug)===bungieHash(s.catalyst)?`CATALYST · ${s.catalyst?.progress?.masterworked?"MASTERWORKED":s.catalyst?.progress?.inserted?"INSERTED":"RESOLVED"}`:/masterwork/.test(String(plug?.semanticRole||""))?"MASTERWORK":/weapon-mod|\bmod\b/.test(String(plug?.semanticRole||""))?"WEAPON MOD":"WEAPON SOCKET";
   const perkMatrix=weaponPerkMatrixMarkup(item),perkRows=Number(s.perkModel?.expectedRowCount||s.perkRowCount)||1,weaponTier=Number(s.perkModel?.weaponTier??s.gearTier??item?.gearTier),perkHeading=`WEAPON PERKS${Number.isInteger(weaponTier)&&weaponTier>0?` · TIER ${weaponTier}`:""} · ${perkRows} ROW${perkRows===1?"":"S"}`;
@@ -54,6 +55,7 @@ function openWeaponDetail(item){
       <section class="paradox-section paradox-section--support"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${mods.map(x=>weaponDetailTile(x,supportLabel(x),{square:true})).join("")||'<p class="weapon-detail-empty">No resolved mod evidence.</p>'}</div></section>
     </div>
   </article>`;
+  bindWeaponSelection(content,item);
   host.setAttribute("aria-hidden","false");document.body.classList.add("weapon-detail-open");
 }
 
@@ -115,7 +117,7 @@ function renderWeapons(weapons=[]){
     const item=weapons[index];
     if(!item)return;
     card.classList.add("semantic-live");
-    if(!card.dataset.weaponDetailBound){card.dataset.weaponDetailBound="true";card.tabIndex=0;card.setAttribute("role","button");card.addEventListener("click",event=>{if(event.target.closest("[data-paradox-perk-tooltip]"))return;const current=card._forgeWeapon;if(current)openWeaponDetail(current);});card.addEventListener("keydown",event=>{if(event.target.closest("[data-paradox-perk-tooltip]"))return;if((event.key==="Enter"||event.key===" ")&&card._forgeWeapon){event.preventDefault();openWeaponDetail(card._forgeWeapon);}});}
+    if(!card.dataset.weaponDetailBound){card.dataset.weaponDetailBound="true";card.tabIndex=0;card.setAttribute("role","button");card.addEventListener("click",event=>{if(event.target.closest("[data-paradox-perk-tooltip],.weapon-apply-footer"))return;const current=card._forgeWeapon;if(current)openWeaponDetail(current);});card.addEventListener("keydown",event=>{if(event.target.closest("[data-paradox-perk-tooltip],.weapon-apply-footer"))return;if((event.key==="Enter"||event.key===" ")&&card._forgeWeapon){event.preventDefault();openWeaponDetail(card._forgeWeapon);}});}
     card._forgeWeapon=item;
     const art=card.querySelector(".art");
     const icon=bungieIcon(item.icon);
@@ -144,6 +146,7 @@ function renderWeapons(weapons=[]){
     if(!supportStrip){supportStrip=document.createElement("div");supportStrip.className="weapon-support-icons";supportStrip.setAttribute("aria-label","Equipped weapon mods, masterwork and catalyst");card.append(supportStrip);}
     supportStrip.innerHTML=weaponSupportIconsMarkup(item);
     supportStrip.hidden=!supportStrip.innerHTML;
+    bindWeaponSelection(card,item);
     bindParadoxItemHover(art||card,item,'weapon');
   });
 }

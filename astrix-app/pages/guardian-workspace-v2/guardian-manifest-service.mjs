@@ -23,7 +23,7 @@ const LAZY_COMPONENT_TYPES=new Set([
   'DestinyCollectibleDefinition','DestinyMetricDefinition','DestinyGuardianRankDefinition',
   'DestinyGuardianRankConstantsDefinition','DestinyDestinationDefinition','DestinyActivityDefinition',
   'DestinyChecklistDefinition','DestinyLocationDefinition','DestinySocketTypeDefinition',
-  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition'
+  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition','DestinyStatGroupDefinition'
 ]);
 
 const tableKey=(version,type)=>`manifest:${version}:${type}`;
@@ -288,7 +288,7 @@ class GuardianManifestService{
 
   checkVersion(){
     if(!this.versionPromise)this.versionPromise=(async()=>{
-      const metadata=await this.fetchJson(`${this.authOrigin}/bungie/manifest`);
+      const metadata=await this.fetchJson(`${this.authOrigin}/bungie/manifest?components=weapon-stats-1`);
       const paths=metadata?.jsonWorldComponentContentPaths?.en||metadata?.paths||{};
       const version=String(metadata?.version||"").trim();
       if(!version)throw new Error('Bungie manifest metadata is missing.');
@@ -547,9 +547,12 @@ class GuardianManifestService{
     const damageDefinitions={...existingDamage,...fetchedDamage};
     const breakerDefinitions={...existingBreaker,...fetchedBreaker};
     const socketTypeDefinitions={...(payload.socketTypeDefinitions||{}),...await localOrFetch('DestinySocketTypeDefinition',missingDefinitions(payload.socketTypeDefinitions,socketTypeHashes))};
+    const statGroupHashes=new Set(Object.values(definitions).filter(definition=>definition.itemType===3).map(definition=>numericHash(definition.stats?.statGroupHash)).filter(Boolean));
+    const statGroups=await localOrFetch('DestinyStatGroupDefinition',statGroupHashes);
     definitions=Object.fromEntries(Object.entries(definitions).map(([hash,definition])=>{
       const resolvedSandboxPerks=(definition?.perks||[]).map(perk=>sandboxPerks[String(perk?.perkHash)]).filter(Boolean);
-      return [hash,resolvedSandboxPerks.length?{...definition,resolvedSandboxPerks}:definition];
+      const resolvedStatGroup=statGroups[definition.stats?.statGroupHash];
+      return [hash,{...definition,...(resolvedSandboxPerks.length?{resolvedSandboxPerks}:{}),...(resolvedStatGroup?{resolvedStatGroup}:{})}];
     }));
     const resolveArtifact=options.armourOnly!==true;
     const artifactHash=resolveArtifact?numericHash(payload?.profile?.profileProgression?.data?.seasonalArtifact?.artifactHash):null;
