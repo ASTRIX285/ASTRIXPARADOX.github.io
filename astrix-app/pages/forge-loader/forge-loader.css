@@ -34,18 +34,17 @@
 .forge-stat-targets input[type="range"]{-webkit-appearance:none;appearance:none;height:.42rem;min-height:.42rem;border:1px solid rgba(255,255,255,.38);border-radius:999px;outline:0;background:linear-gradient(90deg,#d9b340 0 var(--forge-slider-fill,0%),rgba(41,199,143,.62) var(--forge-slider-fill,0%) var(--forge-slider-available,0%),rgba(80,80,80,.34) var(--forge-slider-available,0%) 100%)}.forge-stat-targets input[type="range"]::-webkit-slider-runnable-track{height:.42rem;background:transparent}.forge-stat-targets input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:.9rem;height:.9rem;margin-top:-.25rem;border:1px solid #f5d46a;border-radius:50%;background:#d9b340;box-shadow:0 0 .45rem rgba(217,179,64,.48)}.forge-stat-targets input[type="range"]::-moz-range-track{height:.42rem;border-radius:999px;background:transparent}.forge-stat-targets input[type="range"]::-moz-range-progress{height:.42rem;border-radius:999px;background:#d9b340}.forge-stat-targets input[type="range"]::-moz-range-thumb{width:.9rem;height:.9rem;border:1px solid #f5d46a;border-radius:50%;background:#d9b340;box-shadow:0 0 .45rem rgba(217,179,64,.48)}.forge-stat-targets input[type="range"]:focus-visible{outline:2px solid #f5d46a;outline-offset:4px}
 
 /* Compact set list. Details use the shared Paradox perk tooltip. */
-.forge-set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.55rem;align-items:start;width:100%}
+.forge-set-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;align-items:start;width:100%}
 .forge-set{display:grid;gap:.55rem;min-width:0;padding:.6rem}
 .forge-set-head{display:flex;align-items:center;gap:.55rem;min-width:0;width:100%;padding:0;border:0;background:transparent;color:#fff;text-align:left;font:inherit;cursor:pointer}
 .forge-set-head strong{min-width:0;font-size:var(--forge-set-name-size,.9rem);line-height:1.25;white-space:nowrap}
 .forge-set-icon,.forge-set-trait-icon{display:grid;place-items:center;flex:none;width:var(--apx-icon-record);height:var(--apx-icon-record);border:1px solid #aa934f;border-radius:50%;overflow:hidden;background:#151318}
 .forge-set-icon img,.forge-set-trait-icon img{width:100%;height:100%;object-fit:contain;filter:none}
 .forge-set-icon.is-owned,.forge-set-choice.is-owned .forge-set-trait-icon{background:#367fa6}
-.forge-set-choices{display:grid;grid-template-columns:1fr;gap:.45rem;min-width:0}
+.forge-set-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;min-width:0}
 .forge-set-choice{display:flex;align-items:center;gap:.5rem;min-width:0;width:100%;padding:.4rem}
 .forge-set-choice input{flex:none}
 .forge-set-detail{display:flex;flex:1 1 auto;align-items:center;gap:.5rem;min-width:0;width:100%;overflow:hidden;border:0;padding:0;background:transparent;color:#fff;font:inherit;text-align:left;cursor:pointer}
 .forge-set-detail b{min-width:0;font-size:.84rem;line-height:1.25;overflow-wrap:anywhere}
-@container(max-width:44rem){.forge-set-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@container(max-width:32rem){.forge-set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@container(max-width:26rem){.forge-set-grid{grid-template-columns:minmax(0,1fr)}}
+@container(max-width:44rem){.forge-set-grid{grid-template-columns:minmax(0,1fr)}}
+@container(max-width:28rem){.forge-set-choices{grid-template-columns:minmax(0,1fr)}}
