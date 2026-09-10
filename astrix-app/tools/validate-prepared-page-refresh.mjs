@@ -48,6 +48,14 @@ assert.equal(PROFILE_TTL_MS,12*60*60*1000,'The cached payload trust ceiling must
 assert.equal(PREPARED_PAGE_REFRESH_MS,10*60*1000,'Prepared page checks must run every ten minutes.');
 await cacheBungieProfile(session,payload,'journey');
 
+const staleLoadout={pageReady:{page:'loadout'},profile:{characters:{data:{guardian:{characterId:'guardian'}}}}};
+await cacheBungieProfile(session,staleLoadout,'loadout');
+assert.equal(await readCachedBungieProfile(session,'loadout'),null,'A pre weapon coverage Loadout payload must be invalidated instead of painted for twelve hours.');
+const currentLoadout={...staleLoadout,weaponDefinitionCoverage:{schemaVersion:1,itemInstances:[],complete:true}};
+await cacheBungieProfile(session,currentLoadout,'loadout');
+assert.deepEqual(await readCachedBungieProfile(session,'loadout'),currentLoadout,'The current exact weapon coverage payload must remain reloadable.');
+console.log('PAGE_REFRESH_LOADOUT_CONTRACT_INVALIDATION=PASS');
+
 let now=1_000_000;
 markPreparedPageCheckSuccess(session,'journey',{storage:persistent,now:()=>now});
 let backendCalls=0;

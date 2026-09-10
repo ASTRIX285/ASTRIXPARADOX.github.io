@@ -107,7 +107,7 @@ const weaponEnvelope={
     },
     definitions:{}
   },
-  prepared:{manifestVersion:armourIndex.manifestVersion}
+  prepared:{manifestVersion:armourIndex.manifestVersion,weaponDefinitionHashes:[realOwnedWeaponHash],loadoutCoverage:{weaponDefinitions:1,complete:true}}
 };
 const weaponDefinitions={[realOwnedWeaponHash]:realOwnedWeaponDefinition,[realSelectedPlugHash]:realSelectedPlugDefinition};
 const weaponEnv={MANIFEST_DATA:{async fetch(request){

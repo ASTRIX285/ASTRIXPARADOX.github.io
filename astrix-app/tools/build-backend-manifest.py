@@ -169,6 +169,8 @@ def main():
             all(path.exists() for path in page_paths)
             and journey_page.get('journeyCoverage', {}).get('complete') is True
             and loadout_page.get('loadoutCoverage', {}).get('complete') is True
+            and loadout_page.get('loadoutCoverage', {}).get('weaponDefinitions') == len(loadout_page.get('weaponDefinitionHashes') or [])
+            and bool(loadout_page.get('weaponDefinitionHashes'))
         )
         if index.get('schemaVersion') == 1 and index.get('manifestVersion') == version and set(index.get('tables', {})) == set(required) and page_bundles_current:
             print('BACKEND_MANIFEST_CURRENT=' + version)
@@ -258,10 +260,19 @@ def main():
             if hash_value in collectible_source
         }
         unresolved_loadout_collectibles = sorted(loadout_collectible_hashes - set(loadout_collectibles))
+        weapon_bucket_hashes = {1498876634, 2465295065, 953998645}
+        weapon_definition_hashes = sorted(
+            int(hash_value)
+            for hash_value, row in page_rows['DestinyInventoryItemDefinition'].items()
+            if (row.get('inventory') or {}).get('bucketTypeHash') in weapon_bucket_hashes
+        )
+        if not weapon_definition_hashes:
+            raise ValueError('Loadout weapon definition index is empty')
         loadout_coverage = {
             'collectibleHashes': len(loadout_collectible_hashes),
             'collectibleDefinitions': len(loadout_collectibles),
             'unresolvedCollectibleHashes': unresolved_loadout_collectibles,
+            'weaponDefinitions': len(weapon_definition_hashes),
             'complete': not unresolved_loadout_collectibles,
         }
         if not loadout_coverage['complete']:
@@ -270,6 +281,7 @@ def main():
             'manifestVersion': version,
             'page': 'loadout',
             'forgeArmourIndex': forge_payload,
+            'weaponDefinitionHashes': weapon_definition_hashes,
             'collectibleDefinitions': loadout_collectibles,
             'loadoutCoverage': loadout_coverage,
         }))

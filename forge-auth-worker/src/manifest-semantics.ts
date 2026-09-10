@@ -55,29 +55,22 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
   const account = preparedAccountPayload(payload);
   if (!account?.profile) return payload;
   const definitions: Record<string, Record<string, any>> = account.definitions || (account.definitions = {});
-  const preparedArmourDefinitions: Record<string, Record<string, any>> = payload?.prepared?.forgeArmourIndex?.definitions
-    || payload?.forgeArmourIndex?.definitions
-    || {};
-  const hasOwnedItemDefinition = (hash: number): boolean => Boolean(definitions[String(hash)] || preparedArmourDefinitions[String(hash)]);
   const allItems = profileItemRows(account.profile);
-  const ownedItemHashes = bungieDefinitionHashes(allItems.map(item => item?.itemHash));
-  Object.assign(definitions, await preparedDefinitions(
-    "DestinyInventoryItemDefinition",
-    ownedItemHashes.filter(hash => !hasOwnedItemDefinition(hash)),
-    env
+  const preparedWeaponHashes = new Set(bungieDefinitionHashes(
+    payload?.prepared?.weaponDefinitionHashes || payload?.weaponDefinitionHashes || []
   ));
-  const unresolvedOwnedItems = ownedItemHashes.filter(hash => !hasOwnedItemDefinition(hash));
-  account.ownedItemDefinitionCoverage = {
-    requested: ownedItemHashes,
-    resolved: ownedItemHashes.filter(hasOwnedItemDefinition),
-    unresolved: unresolvedOwnedItems,
-    complete: unresolvedOwnedItems.length === 0
-  };
-
+  const expectedWeaponDefinitions = Number(payload?.prepared?.loadoutCoverage?.weaponDefinitions ?? payload?.loadoutCoverage?.weaponDefinitions);
+  const weaponIndexComplete = preparedWeaponHashes.size > 0 && expectedWeaponDefinitions === preparedWeaponHashes.size;
   const uniqueWeapons = new Map<string, any>();
   for (const item of allItems) {
+    const itemHash = bungieDefinitionHash(item?.itemHash);
     const itemDefinition = definitions[String(item?.itemHash)];
-    if (!WEAPON_BUCKET_HASHES.has(Number(itemDefinition?.inventory?.bucketTypeHash))) continue;
+    const isWeapon = itemHash !== null && (
+      preparedWeaponHashes.has(itemHash)
+      || WEAPON_BUCKET_HASHES.has(Number(itemDefinition?.inventory?.bucketTypeHash))
+      || WEAPON_BUCKET_HASHES.has(Number(item?.bucketHash))
+    );
+    if (!isWeapon) continue;
     const instanceId = String(item?.itemInstanceId || "");
     if (instanceId && !uniqueWeapons.has(instanceId)) uniqueWeapons.set(instanceId, item);
   }
@@ -111,7 +104,10 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     resolved: [...requested].filter(hash => Boolean(definitions[String(hash)])),
     unresolved,
     missingSocketInstances,
-    complete: unresolvedOwnedItems.length === 0 && unresolved.length === 0 && missingSocketInstances.length === 0
+    schemaVersion: 1,
+    source: "prepared-owned-weapon-definitions",
+    indexDefinitions: preparedWeaponHashes.size,
+    complete: weaponIndexComplete && unresolved.length === 0 && missingSocketInstances.length === 0
   };
   return payload;
 }
