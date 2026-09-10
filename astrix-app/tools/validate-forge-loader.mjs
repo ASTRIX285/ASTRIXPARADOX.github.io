@@ -341,8 +341,8 @@ for(const [key,hash,name] of [['health',392767087,'Health'],['melee',4244567218,
 }
 assert.match(runtime,/function armourStatIcon\(key\)[\s\S]*?payload\?\.statDefinitions\?\.\[String\(hash\)\]\?\.displayProperties\?\.icon[\s\S]*?new URL\(icon,'https:\/\/www\.bungie\.net'\)/,'Forge Matrix stat artwork must resolve from the prepared Bungie stat definitions without placeholder icons.');
 assert.match(runtime,/const calculation=target>0\?`TARGET \$\{target\}`:'OPEN'[\s\S]*?forge-matrix-stat-reading[\s\S]*?forge-matrix-stat-icon/,'Compact stat squares must retain the calculated value and selected target state beside each Bungie glyph.');
-assert.match(runtime,/class="forge-matrix-anchor">Anchor Exotic: \$\{esc\(exotic\?\.name\|\|'Verified Exotic'\)\}<\/small>/,'Every calculated load row must name its exact anchor Exotic.');
-assert.match(css,/\.forge-matrix-expand \.forge-matrix-anchor\{[^}]*color:var\(--apx-gold\)[^}]*bahnschrift-semicondensed/,'The anchor Exotic label must reuse the established Forge gold and type system.');
+assert.match(runtime,/<span><small>LOAD<\/small><b>\$\{String\(index\+1\)\.padStart\(4,'0'\)\}<\/b><\/span>/,'Every calculated load row must show a LOAD label and a four-digit sequential number.');
+assert.doesNotMatch(runtime,/forge-maximized|forge-matrix-anchor/,'The compact load identity must not retain Maximized or Anchor text.');
 assert.match(runtime,/maximized=index===0[\s\S]*?is-maximized[\s\S]*?MAXIMIZED/,'The highest-ranked complete owned load must receive the unique PARADOX Maximized state.');
 assert.match(css,/\.forge-candidate\.is-maximized\{[^}]*border:2px solid #e4bd49/,'The Maximized load must use a deliberate gold perimeter rather than a generic selected state.');
 assert.match(runtime,/data-candidate-expand="\$\{index\}"[\s\S]*?aria-controls="forgeLoadBreakdown\$\{index\}"/,'Every Forge Matrix row must provide an accessible expandable breakdown control.');
