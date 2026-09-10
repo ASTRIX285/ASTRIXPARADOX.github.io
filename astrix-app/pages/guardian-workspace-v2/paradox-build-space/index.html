@@ -17,7 +17,7 @@
   </script>
   <script src="../../../shared/astrix-portal-loader.js?v=20260831-render-ready"></script>
   <link rel="stylesheet" href="../../../astrix-tokens.css?v=20260824-branch-preview-1">
-  <link rel="stylesheet" href="./paradox-build-space.css?v=20260908-icon-hover-1&amp;super=20260909-evidence-1">
+  <link rel="stylesheet" href="./paradox-build-space.css?v=20260908-icon-hover-1&amp;super=20260909-evidence-1&amp;generate=20260910-termination-1">
   <link rel="stylesheet" href="./build-test-modes.css?v=20260904-post-test-review-1">
   <link rel="stylesheet" href="../guardian-gear-layout.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="../guardian-character-cards.css?v=20260902-recent-guardian-emblem-1">
@@ -153,6 +153,9 @@
   <section class="working-dialog-overlay" id="saveParadoxDialog" role="dialog" aria-modal="true" aria-labelledby="saveParadoxTitle" hidden>
     <form class="working-dialog" id="saveParadoxForm"><header><small>SEPARATE FROM BUNGIE LOADOUT SLOTS</small><h2 id="saveParadoxTitle">SAVE PARADOX LOADOUT</h2></header><label><span>LOADOUT NAME</span><input id="saveParadoxName" name="name" maxlength="80" required></label><label><span>DESCRIPTION</span><textarea id="saveParadoxDescription" name="description" maxlength="400" rows="3"></textarea></label><p id="saveParadoxStatus" role="status"></p><footer><button type="button" class="ghost-btn" id="cancelSaveParadox">CANCEL</button><button type="submit" class="primary">SAVE PARADOX COPY</button></footer></form>
   </section>
+  <section class="working-dialog-overlay" id="forgeActivityDialog" role="dialog" aria-modal="true" aria-labelledby="forgeActivityTitle" hidden>
+    <div class="working-dialog forge-activity-dialog"><header><small>REQUIRED BUILD CONTEXT</small><h2 id="forgeActivityTitle">SELECT ACTIVITY FIT</h2><p>Choose the activity this Working Build should evaluate. Build Forge will not infer it.</p></header><div class="forge-activity-options" role="group" aria-label="Build activity context"><button type="button" data-forge-activity="raid" aria-pressed="false">RAID</button><button type="button" data-forge-activity="dps" aria-pressed="false">DPS</button><button type="button" data-forge-activity="grandmaster" aria-pressed="false">GRANDMASTER</button><button type="button" data-forge-activity="crucible" aria-pressed="false">CRUCIBLE</button><button type="button" data-forge-activity="pve" aria-pressed="false">PVE</button><button type="button" data-forge-activity="pvp" aria-pressed="false">PVP</button></div><p id="forgeActivityStatus" role="status" aria-live="polite">Choose one activity context. No recommendation is claimed until it is selected.</p><footer><button type="button" class="ghost-btn" id="cancelForgeActivity">CANCEL</button><button type="button" class="primary" id="confirmForgeActivity" disabled>CONTINUE TO GENERATE</button></footer></div>
+  </section>
   <section class="working-dialog-overlay" id="applyConfirmationDialog" role="dialog" aria-modal="true" aria-labelledby="applyConfirmationTitle" hidden>
     <div class="working-dialog apply-confirmation"><header><small>LIVE BUNGIE ACTION · FINAL CONFIRMATION</small><h2 id="applyConfirmationTitle">APPLY WORKING BUILD?</h2><p id="applyConfirmationGuardian"></p></header><div id="applyConfirmationSummary"></div><p class="apply-confirmation-warning">Destiny must be in orbit, a social space, or offline. Completed remote steps are not automatically rolled back if a later step fails.</p><footer><button type="button" class="ghost-btn" id="cancelApplyBuild">CANCEL</button><button type="button" class="primary" id="confirmApplyBuild">APPLY TO THIS GUARDIAN</button></footer></div>
   </section>
@@ -170,6 +173,6 @@
       <footer class="recommended-build-actions"><button type="button" class="ghost-btn" id="returnToForge">BACK TO BUILD FORGE</button><div><small id="liveTransferStatus">Test this recommendation first, save it as a PARADOX copy, or explicitly confirm Apply.</small><button type="button" class="primary test-build-review-btn" id="continueToBuildTest">TEST THIS BUILD</button><button type="button" class="ghost-btn" id="applyBuild" disabled>APPLY</button></div></footer>
     </div>
   </section>
-  <script type="module" src="./paradox-build-space.mjs?v=20260908-icon-hover-1&amp;sets=20260908-set-icons-1&amp;weapons=20260909-presentation-1&amp;roll=20260909-apply-1&amp;fix=20260909-apply-refresh-1&amp;super=20260909-evidence-1&amp;gate=20260910-forge-loader-step-1"></script>
+  <script type="module" src="./paradox-build-space.mjs?v=20260908-icon-hover-1&amp;sets=20260908-set-icons-1&amp;weapons=20260909-presentation-1&amp;roll=20260909-apply-1&amp;fix=20260909-apply-refresh-1&amp;super=20260909-evidence-1&amp;gate=20260910-forge-loader-step-1&amp;generate=20260910-termination-1"></script>
 </body>
 </html>

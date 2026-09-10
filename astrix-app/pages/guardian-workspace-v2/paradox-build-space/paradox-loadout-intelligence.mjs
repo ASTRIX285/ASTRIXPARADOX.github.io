@@ -1,4 +1,4 @@
-import {classifyArmourPlug,classifyWeaponPlug,weaponPerkColumnRowCountForTier,weaponPerkRowCountForTier} from '../guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1';
+import {classifyArmourPlug,classifyWeaponPlug,weaponPerkColumnRowCountForTier,weaponPerkRowCountForTier} from '../guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {explicitTokens} from './paradox-forge-intelligence.mjs';
 
 const STAT_KEYS=Object.freeze(['health','melee','grenade','super','class','weapon']);

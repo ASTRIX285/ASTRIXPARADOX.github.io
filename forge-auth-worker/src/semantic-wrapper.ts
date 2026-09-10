@@ -200,6 +200,34 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
   return payload;
 }
 
+function logManifestEvidenceGaps(payload: any, page: string): void {
+  const account = payload?.transport === "prepared-page-stream-v1" && payload?.account
+    ? payload.account
+    : payload;
+  for (const gap of account?.weaponEffectCoverage?.missingEffectDescriptions || []) {
+    console.warn("manifest_effect_evidence_missing", { page, ...gap });
+  }
+  for (const gap of account?.weaponEffectCoverage?.emptySandboxPerkDescriptions || []) {
+    console.info("manifest_effect_evidence_fallback", { page, ...gap });
+  }
+  for (const hash of account?.weaponEffectCoverage?.sandboxPerkUnresolved || []) {
+    console.warn("manifest_definition_unresolved", {
+      page,
+      definitionType: "DestinySandboxPerkDefinition",
+      hash,
+      field: "ownedWeapon.definition.perks.perkHash"
+    });
+  }
+  for (const hash of account?.weaponDefinitionCoverage?.unresolved || []) {
+    console.warn("manifest_definition_unresolved", {
+      page,
+      definitionType: "DestinyInventoryItemDefinition",
+      hash,
+      field: "ownedWeapon.socketDefinition"
+    });
+  }
+}
+
 async function rewriteJsonResponse(response: Response, transform: (payload: any) => Promise<any>): Promise<Response> {
   if (!response.ok) return response;
   const payload = await response.clone().json<any>().catch(() => null);
@@ -242,8 +270,10 @@ export default {
         return await rewriteJsonResponse(response, async payload => {
           await enrichSubclassInventory(payload, env);
           if (pagePayload === "loadout") await enrichOwnedWeaponDefinitions(payload, env);
+          if (pagePayload === "build-forge") await enrichOwnedWeaponDefinitions(payload, env);
           await enrichEquipableSets(payload, env);
           await enrichWeaponReusablePlugs(payload, env);
+          logManifestEvidenceGaps(payload, pagePayload);
           return payload;
         });
       }

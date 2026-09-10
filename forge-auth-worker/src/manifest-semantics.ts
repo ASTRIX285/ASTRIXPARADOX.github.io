@@ -60,7 +60,10 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     payload?.prepared?.weaponDefinitionHashes || payload?.weaponDefinitionHashes || []
   ));
   const expectedWeaponDefinitions = Number(payload?.prepared?.loadoutCoverage?.weaponDefinitions ?? payload?.loadoutCoverage?.weaponDefinitions);
-  const weaponIndexComplete = preparedWeaponHashes.size > 0 && expectedWeaponDefinitions === preparedWeaponHashes.size;
+  const hasPreparedWeaponIndex = Number.isInteger(expectedWeaponDefinitions) && expectedWeaponDefinitions >= 0;
+  const weaponIndexComplete = hasPreparedWeaponIndex
+    ? preparedWeaponHashes.size > 0 && expectedWeaponDefinitions === preparedWeaponHashes.size
+    : account.definitionCoverage?.complete === true;
   const uniqueWeapons = new Map<string, any>();
   for (const item of allItems) {
     const itemHash = bungieDefinitionHash(item?.itemHash);
@@ -97,7 +100,68 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     [...requested].filter(hash => !definitions[String(hash)]),
     env
   ));
+  // Bungie's fixed weapon effect can live on the initial intrinsic socket even
+  // when the instance socket row is absent. Resolve that real manifest mapping
+  // instead of falling back to the item's often empty SandboxPerk row.
+  const intrinsicEvidence = new Map<number, number>();
+  for (const item of uniqueWeapons.values()) {
+    const itemHash = bungieDefinitionHash(item?.itemHash);
+    const itemDefinition = itemHash === null ? null : definitions[String(itemHash)];
+    const intrinsicHash = bungieDefinitionHash(itemDefinition?.sockets?.socketEntries?.[0]?.singleInitialItemHash);
+    if (itemHash !== null && intrinsicHash !== null) {
+      requested.add(intrinsicHash);
+      intrinsicEvidence.set(itemHash, intrinsicHash);
+    }
+  }
+  Object.assign(definitions, await preparedDefinitions(
+    "DestinyInventoryItemDefinition",
+    [...requested].filter(hash => !definitions[String(hash)]),
+    env
+  ));
+  const sandboxPerkHashes = bungieDefinitionHashes([...uniqueWeapons.values()].flatMap(item => {
+    const itemHash = bungieDefinitionHash(item?.itemHash);
+    return itemHash === null ? [] : (definitions[String(itemHash)]?.perks || []).map((perk: any) => perk?.perkHash);
+  }));
+  const sandboxPerks: Record<string, Record<string, any>> = account.sandboxPerks || (account.sandboxPerks = {});
+  Object.assign(sandboxPerks, await preparedDefinitions(
+    "DestinySandboxPerkDefinition",
+    sandboxPerkHashes.filter(hash => !sandboxPerks[String(hash)]),
+    env
+  ));
+  for (const item of uniqueWeapons.values()) {
+    const itemHash = bungieDefinitionHash(item?.itemHash);
+    if (itemHash === null) continue;
+    const itemDefinition = definitions[String(itemHash)];
+    if (!itemDefinition) continue;
+    itemDefinition.resolvedSandboxPerks = (itemDefinition.perks || [])
+      .map((perk: any) => sandboxPerks[String(perk?.perkHash)])
+      .filter(Boolean);
+  }
   const unresolved = [...requested].filter(hash => !definitions[String(hash)]);
+  const missingEffectDescriptions = [...intrinsicEvidence].map(([itemHash, plugHash]) => {
+    const definition = definitions[String(plugHash)];
+    const description = String(definition?.displayProperties?.description || "").trim();
+    return description ? null : {
+      itemHash,
+      plugHash,
+      field: "DestinyInventoryItemDefinition.displayProperties.description",
+      reason: definition ? "empty-description" : "definition-unresolved"
+    };
+  }).filter(Boolean);
+  const emptySandboxPerkDescriptions = sandboxPerkHashes.map(perkHash => {
+    const definition = sandboxPerks[String(perkHash)];
+    if (!definition || String(definition?.displayProperties?.description || "").trim()) return null;
+    const itemHash = [...uniqueWeapons.values()].map(item => bungieDefinitionHash(item?.itemHash)).find(hash => (
+      hash !== null && (definitions[String(hash)]?.perks || []).some((perk: any) => Number(perk?.perkHash) === perkHash)
+    ));
+    return {
+      itemHash: itemHash ?? null,
+      perkHash,
+      field: "DestinySandboxPerkDefinition.displayProperties.description",
+      reason: "empty-description",
+      fallbackPlugHash: typeof itemHash !== "number" ? null : intrinsicEvidence.get(itemHash) ?? null
+    };
+  }).filter(Boolean);
   account.weaponDefinitionCoverage = {
     itemInstances: [...uniqueWeapons.keys()],
     requested: [...requested],
@@ -108,6 +172,16 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     source: "prepared-owned-weapon-definitions",
     indexDefinitions: preparedWeaponHashes.size,
     complete: weaponIndexComplete && unresolved.length === 0 && missingSocketInstances.length === 0
+  };
+  account.weaponEffectCoverage = {
+    schemaVersion: 1,
+    source: "bungie-fixed-intrinsic-socket-and-sandbox-perk",
+    intrinsicEvidence: Object.fromEntries([...intrinsicEvidence].map(([itemHash, plugHash]) => [String(itemHash), plugHash])),
+    sandboxPerkRequested: sandboxPerkHashes,
+    sandboxPerkUnresolved: sandboxPerkHashes.filter(hash => !sandboxPerks[String(hash)]),
+    missingEffectDescriptions,
+    emptySandboxPerkDescriptions,
+    complete: missingEffectDescriptions.length === 0
   };
   return payload;
 }
