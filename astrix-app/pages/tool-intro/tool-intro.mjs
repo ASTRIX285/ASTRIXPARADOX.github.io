@@ -1,4 +1,5 @@
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
+import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260906-page-data-recovery-1&resident=20260910-step-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const JOURNEY_URL='../journey/';
@@ -59,11 +60,21 @@ async function continueToGuardianJourney(){
   }
   const session=await getBungieSession();
   if(session?.authenticated){
+    try{
+      if(status)status.textContent='Preparing verified armour, weapons, subclasses, Artifact and manifest data.';
+      await preloadForgeLoaderPayload(session,{force:true,reason:'tool-intro'});
+    }catch(error){
+      if(status)status.textContent=error?.message||'Verified Forge Loader data could not be made resident. Try again.';
+      document.body.classList.remove('is-transitioning');
+      const button=document.getElementById('toolIntroCta');if(button)button.disabled=false;
+      return false;
+    }
     openJourney();
-    return;
+    return true;
   }
   if(status)status.textContent='Opening Bungie account approval.';
   location.assign(authStartUrl());
+  return true;
 }
 
 if(!config)location.replace('/tools/');

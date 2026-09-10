@@ -87,7 +87,12 @@ async function prepareForgeBackground(build){
   activePreparationKey=JSON.stringify([variant.element,variant.objective,variant.superHash]);
   forgePreparation.warm(preparationVariants(candidates,variant));
 }
-function scheduleForgePreparation(build){clearTimeout(preparationTimer);if(!recommendationBusy&&!build?.recommendationGeneratedAt)preparationTimer=setTimeout(()=>void prepareForgeBackground(build).catch(error=>{const node=byId('forgePreparationStatus');if(node)node.textContent='Background preparation unavailable; Generate will retry.';console.info('[Forge preparation]',error.message);}),200);}
+function scheduleForgePreparation(build,{immediate=false}={}){
+  clearTimeout(preparationTimer);
+  if(recommendationBusy||build?.recommendationGeneratedAt)return;
+  const prepare=()=>void prepareForgeBackground(build).catch(error=>{const node=byId('forgePreparationStatus');if(node)node.textContent='Background preparation unavailable; Generate will retry.';console.info('[Forge preparation]',error.message);});
+  if(immediate)queueMicrotask(prepare);else preparationTimer=setTimeout(prepare,200);
+}
 window.addEventListener('pagehide',()=>{clearTimeout(preparationTimer);forgePreparation.dispose();});
 function validateBuildState(state,expectedBinding={},{protect=true}={}){
   if(!state||state.version!==1||!state.originalBuild||!state.workingBuild)return null;
@@ -457,19 +462,19 @@ function stageSelection(kind,index){
 
 function renderRecommendationControls(build={}){
   const subclassOptions=resolvedSubclassOptions(build),verified=subclassOptions.filter(hasVerifiedSubclassSockets),verifiedElements=new Set(verified.map(elementOf)),compatible=filterExoticCompatibleSubclasses(build,verified),supported=new Map(compatible.map(item=>[elementOf(item),item]).filter(([element])=>BUILD_ELEMENTS.includes(element)));
-  const active=elementOf({element:build.subclass||build.subclassName||''}),hasDecision=Boolean(build.forgeLoaderDecision);
-  if(!hasDecision)selectedRecommendationElement='';
+  const active=elementOf({element:build.subclass||build.subclassName||''}),armourValidation=validateTierFiveArmour(build),exoticValidation=validateExoticLoadout(build,{requireArmourAnchor:true}),hasVerifiedResult=Boolean(build.forgeLoaderDecision)&&armourValidation.ready&&exoticValidation.ready;
+  if(!hasVerifiedResult)selectedRecommendationElement='';
   else if(!selectedRecommendationElement||!supported.has(selectedRecommendationElement))selectedRecommendationElement=supported.has(active)?active:(supported.keys().next().value||'');
   const elementButtons=[...document.querySelectorAll('[data-recommendation-element]')],elementGrid=byId('recommendationElements');
-  elementGrid?.classList.toggle('has-multiple-options',hasDecision&&supported.size>1);
-  elementButtons.forEach(button=>{const element=button.dataset.recommendationElement,available=hasDecision&&supported.has(element),selected=available&&element===selectedRecommendationElement;button.disabled=!available||recommendationBusy;button.classList.toggle('is-available',available);button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));button.title=!hasDecision?'Stage a verified Forge Loader armour result first.':available?`Evaluate a verified ${element} damage build with the staged Exotic armour result.`:verifiedElements.has(element)?`The selected Exotic armour perk is not compatible with the verified ${element} subclass components.`:`No verified ${element} build option is available for this Guardian.`;});
-  if(!['balanced','dps','add-clear','survivability','ability-uptime'].includes(selectedRecommendationObjective))selectedRecommendationObjective=build.objective||'balanced';document.querySelectorAll('[data-build-objective]').forEach(button=>{const selected=button.dataset.buildObjective===selectedRecommendationObjective;button.disabled=!hasDecision||recommendationBusy;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));});
-  const armourValidation=validateTierFiveArmour(build),exoticValidation=validateExoticLoadout(build,{requireArmourAnchor:true}),hasElement=Boolean(selectedRecommendationElement&&supported.has(selectedRecommendationElement)),ready=hasDecision&&armourValidation.ready&&exoticValidation.ready&&hasElement&&!recommendationBusy,button=byId('generateMaxLoadout'),status=byId('recommendationReadiness');
+  elementGrid?.classList.toggle('has-multiple-options',hasVerifiedResult&&supported.size>1);
+  elementButtons.forEach(button=>{const element=button.dataset.recommendationElement,available=hasVerifiedResult&&supported.has(element),selected=available&&element===selectedRecommendationElement;button.disabled=!available||recommendationBusy;button.classList.toggle('is-available',available);button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));button.title=!hasVerifiedResult?'Stage a verified Forge Loader armour result first.':available?`Evaluate a verified ${element} damage build with the staged Exotic armour result.`:verifiedElements.has(element)?`The selected Exotic armour perk is not compatible with the verified ${element} subclass components.`:`No verified ${element} build option is available for this Guardian.`;});
+  if(!['balanced','dps','add-clear','survivability','ability-uptime'].includes(selectedRecommendationObjective))selectedRecommendationObjective=build.objective||'balanced';document.querySelectorAll('[data-build-objective]').forEach(button=>{const selected=button.dataset.buildObjective===selectedRecommendationObjective;button.disabled=!hasVerifiedResult||recommendationBusy;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));});
+  const hasElement=Boolean(selectedRecommendationElement&&supported.has(selectedRecommendationElement)),ready=hasVerifiedResult&&hasElement&&!recommendationBusy,button=byId('generateMaxLoadout'),status=byId('recommendationReadiness');
   if(button){button.disabled=!ready;button.textContent=recommendationBusy?'GENERATING VERIFIED BUILD…':build.recommendationGeneratedAt?'REGENERATE MAX LOADOUT':'GENERATE MAX LOADOUT';}
   const unresolvedCount=new Set([...(build?.hashCoverage?.subclass?.unresolved||[]),...subclassOptions.flatMap(item=>(item?.subclassBuild||item?.build||{})?.socketCoverage?.unresolved||[])]).size;
   const subclassBlocker=unresolvedCount?`Bungie subclass socket definitions are incomplete for ${unresolvedCount} resolved profile plug${unresolvedCount===1?'':'s'}. Refresh verified Guardian data before generating.`:verified.length?'The staged Exotic has no explicit compatibility evidence for the available verified elemental options.':'No complete live Bungie subclass socket set is available for this Guardian.';
-  if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact evidence…':recommendationFailure||(!hasDecision?'Stage a verified Forge Loader armour result to unlock compatible build options.':!armourValidation.ready?armourValidation.reason:!exoticValidation.ready?exoticValidation.reason:!hasElement?subclassBlocker:`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one verified Exotic armour anchor · Maximized Forge Loader result.`);}
-  scheduleForgePreparation(build);
+  if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact evidence…':recommendationFailure||(!hasVerifiedResult?'Stage a verified Forge Loader armour result to unlock compatible build options.':!hasElement?subclassBlocker:`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one verified Exotic armour anchor · Maximized Forge Loader result.`);}
+  if(hasVerifiedResult)scheduleForgePreparation(build);
 }
 
 function renderSuperSynergyEvidence(build={},candidate=null){
@@ -725,6 +730,7 @@ async function initialiseBuildForge(){
     console.error('Build Forge could not complete the protected Forge Loader handoff. Rendering the existing Working Build instead.',error);
   }finally{
     render();
+    const staged=currentBuild();if(new URLSearchParams(location.search).get('prewarm')==='forge-loader')scheduleForgePreparation(staged,{immediate:true});
     queueMicrotask(()=>void refreshForgeArtifactRecommendation());
   }
   const build=currentBuild(),intent=new URLSearchParams(location.search).get('loadoutIntent')||build?.loadoutActionIntent||'';

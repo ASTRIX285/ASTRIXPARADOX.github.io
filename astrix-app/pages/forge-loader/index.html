@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="../guardian-workspace-v2/paradox-item-cards.css?v=20260909-set-list-1">
-  <link rel="stylesheet" href="./forge-loader.css?v=20260909-matrix-small-set-icons-1">
+  <link rel="stylesheet" href="./forge-loader.css?v=20260909-matrix-small-set-icons-1&amp;resident=20260910-step-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
 </head>
@@ -30,6 +30,19 @@
         <section class="forge-panel forge-selected-guardian" aria-labelledby="forgeGuardianTitle">
           <div class="forge-panel-heading"><div><p class="apx-eyebrow">SELECTED GUARDIAN</p><h2 id="forgeGuardianTitle">Guardian</h2></div><span id="forgeGuardianClass">RESOLVING</span></div>
           <div class="forge-hero-card" id="forgeHeroCard"><span>Resolving verified Guardian…</span></div>
+        </section>
+
+        <section class="forge-panel forge-residency" aria-labelledby="forgeResidencyTitle">
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">RESIDENT DATA</p><h2 id="forgeResidencyTitle">Forge staging sources</h2></div><span id="forgeResidencyStatus">VERIFYING</span></div>
+          <ul class="forge-resident-sources" id="forgeResidentSources">
+            <li data-resident-source="equipped" data-state="verifying"><span><b>Equipped loadout</b><small>Awaiting verified Bungie equipment</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="vault-armour" data-state="verifying"><span><b>Vault armour</b><small>Awaiting verified Vault armour</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="weapons" data-state="verifying"><span><b>Weapons</b><small>Awaiting verified weapon instances</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="subclass" data-state="verifying"><span><b>Subclass and fragments</b><small>Awaiting live subclass sockets</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="artifact" data-state="verifying"><span><b>Seasonal Artifact</b><small>Awaiting verified Artifact data</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="manifest" data-state="verifying"><span><b>Manifest</b><small>Awaiting cached manifest</small></span><em>VERIFYING</em></li>
+          </ul>
+          <p class="forge-resident-summary" id="forgeResidentSummary" role="status">Verifying required Bungie sources. No unverified counts are shown.</p>
         </section>
 
         <section class="forge-panel forge-exotic-selector" aria-labelledby="forgeExoticTitle">
@@ -65,7 +78,7 @@
         <section class="forge-panel forge-staged" aria-labelledby="forgeStagedTitle">
           <div class="forge-panel-heading"><div><p class="apx-eyebrow">WORKING LOAD</p><h2 id="forgeStagedTitle">Staged armour</h2></div><span id="forgeStagedStatus">NO COMBINATION</span></div>
           <div class="forge-staged-slots" id="forgeStagedSlots"></div>
-          <button class="forge-evaluate" type="button" id="forgeEvaluate" disabled>EVALUATE IN BUILD FORGE</button>
+          <button class="forge-evaluate" type="button" id="forgeEvaluate" disabled>ENTER BUILD FORGE</button>
         </section>
 
         <section class="forge-panel forge-results" id="forgeResults" hidden aria-labelledby="forgeResultsTitle">
@@ -85,6 +98,6 @@
 
   <aside class="forge-item-inspect" id="forgeItemInspect" hidden aria-hidden="true"></aside>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260906-page-data-recovery-1"></script>
-  <script type="module" src="./forge-loader.mjs?v=20260909-matrix-stat-icons-1"></script>
+  <script type="module" src="./forge-loader.mjs?v=20260909-matrix-stat-icons-1&amp;resident=20260910-step-1"></script>
 </body>
 </html>
