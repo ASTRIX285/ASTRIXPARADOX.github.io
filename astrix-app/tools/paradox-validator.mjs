@@ -19,6 +19,7 @@ const validators=[
   'validate-visible-release-state.mjs',
   'validate-vault-foundation.mjs',
   'validate-forge-loader.mjs',
+  'test-forge-loader-residency.mjs',
   'validate-journey-visual-pass.mjs',
   'validate-public-deep-space.mjs',
   'validate-live-artifact-contract.mjs',

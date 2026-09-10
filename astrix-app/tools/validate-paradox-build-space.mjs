@@ -196,7 +196,7 @@ assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--di
 
 const elementButtons=[...html.matchAll(/data-recommendation-element="([^"]+)"/g)].map(match=>match[1]);
 assert.deepEqual(elementButtons,BUILD_ELEMENTS,'Recommendation buttons must be ARC, SOLAR, STRAND, STASIS, VOID and PRISMATIC only.');
-assert.match(runtime,/elementGrid\?\.classList\.toggle\('has-multiple-options',hasDecision&&supported\.size>1\)/,'Elemental recommendation controls must advertise when multiple verified choices are available.');
+assert.match(runtime,/elementGrid\?\.classList\.toggle\('has-multiple-options',hasVerifiedResult&&supported\.size>1\)/,'Elemental recommendation controls must advertise multiple choices only for a verified Forge Loader result.');
 assert.match(runtime,/button\.classList\.toggle\('is-available',available\)/,'Each elemental recommendation control must retain its explicit verified-availability state.');
 for(const element of BUILD_ELEMENTS)assert.match(css,new RegExp(`data-recommendation-element="${element}"\\]\\{--element-colour:#`),`${element.toUpperCase()} must retain its own elemental colour token.`);
 assert.match(css,/\.element-recommendation-grid\.has-multiple-options button:not\(:disabled\)::after\{animation:elemental-option-pulse/,'Multiple selectable elemental options must receive the restrained pulsing glow.');

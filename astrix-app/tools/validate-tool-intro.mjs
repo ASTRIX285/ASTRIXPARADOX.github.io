@@ -40,9 +40,11 @@ assert.match(runtime,/response\.status===401[\s\S]*?response\.ok[\s\S]*?response
 assert.match(runtime,/location\.hostname===SANDBOX_HOST[\s\S]*?new URL\('\/__astrix\/bungie\/start',location\.origin\)[\s\S]*?start\.searchParams\.set\('return',returnUrl\)/,'Sandbox visitors must use the existing sandbox Bungie start route');
 assert.match(runtime,/function openJourney\(\)\{\s*location\.replace\(JOURNEY_URL\);\s*\}/,'Connected visitors must replace the intro with Journey');
 assert.match(runtime,/const session=await getBungieSession\(\);[\s\S]*?if\(session\?\.authenticated\)[\s\S]*?openJourney\(\)[\s\S]*?location\.assign\(authStartUrl\(\)\)/,'Intro must check the session before choosing Journey or Bungie approval');
+assert.match(runtime,/import \{preloadForgeLoaderPayload\} from '\.\.\/forge-loader\/forge-loader-preload\.mjs[^']*'/,'The tool intro must reuse the shared Forge Loader prepared-page client.');
+assert.ok(runtime.indexOf("await preloadForgeLoaderPayload(session,{force:true,reason:'tool-intro'})")<runtime.indexOf('openJourney();'),'The authenticated intro must make Forge Loader data resident before opening Journey.');
 assert.match(runtime,/rememberIntro\(\)[\s\S]*?classList\.add\('is-transitioning'\)[\s\S]*?continueToGuardianJourney\(\)/,'CTA must remember the game, start the transition and run the real handoff');
 assert.match(runtime,/if\(hasSeenIntro\(\)\)void continueToGuardianJourney\(\)/,'Seen intros must immediately run the Journey handoff');
-assert.doesNotMatch(runtime,/prepareForgeLoaderEntry|preloadForgeLoaderPayload|forgeLoaderTargetUrl/,'The Journey intro must not fork Forge Loader preload behavior');
+assert.doesNotMatch(runtime,/prepareForgeLoaderEntry|forgeLoaderTargetUrl|loadPreparedPagePayload/,'The Journey intro must not fork the shared Forge Loader preload implementation');
 
 assert.match(ribbon,/key:'forge-loader'[\s\S]*?href:'\/astrix-app\/pages\/forge-loader\/'/,'Internal Forge Loader navigation must remain direct');
 assert.match(access,/function forgeLoaderUrl\(slot=null\)\{\s*return forgeLoaderTargetUrl\(slot\);\s*\}/,'Armour entry must remain a direct Forge Loader route');

@@ -178,7 +178,8 @@ const pageSources=await Promise.all([
   'pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs',
   'pages/journey/journey.mjs',
   'pages/vault/vault.mjs',
-  'pages/forge-loader/forge-loader-preload.mjs'
+  'pages/forge-loader/forge-loader-preload.mjs',
+  'pages/tool-intro/tool-intro.mjs'
 ].map(async path=>[path,await readFile(new URL(path,root),'utf8')]));
 for(const [path,source] of pageSources){
   assert.doesNotMatch(source,/bungie\/manifest\/definitions?/,`${path} contains a client definition route`);
