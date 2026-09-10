@@ -229,6 +229,9 @@ const runtime=read('astrix-app/pages/forge-loader/forge-loader.mjs');
 const forgeArmourIndex=JSON.parse(read('astrix-app/data/forge-armour-index.json'));
 const preload=read('astrix-app/pages/forge-loader/forge-loader-preload.mjs');
 const residency=read('astrix-app/pages/forge-loader/forge-loader-residency.mjs');
+const refresh=read('astrix-app/pages/forge-loader/forge-loader-refresh.mjs');
+const manifestSemantics=read('forge-auth-worker/src/manifest-semantics.ts');
+const semanticWrapper=read('forge-auth-worker/src/semantic-wrapper.ts');
 const selectionState=read('astrix-app/pages/vault/vault-selection-state.mjs');
 const buildRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs');
 const buildStateRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs');
@@ -255,6 +258,9 @@ assert.match(runtime,/forgeEvaluate'\);if\(enter\)enter\.disabled=!forgeLoaderEv
 assert.match(runtime,/function renderStaged\(\)[\s\S]*?renderCurrentResidency\(\);/,'Every manual or Forge Matrix staged-slot repaint must re-evaluate the current resident sources.');
 assert.match(runtime,/function stageCandidate\(index\)[\s\S]*?selectedSlots\.set\(item\.slotIndex,item\)[\s\S]*?renderStaged\(\)/,'Forge Matrix staging must pass through the current-residency repaint path after all five exact items are selected.');
 assert.match(runtime,/async function evaluateInBuildForge\(\)\{\s*const residency=renderCurrentResidency\(\);\s*if\(!forgeLoaderEvaluateReady\(residency,selectedSlots,activeCharacterId\)\)return;/,'Forge Loader must re-check current residency at the final handoff boundary even if called outside the button path.');
+assert.match(manifestSemantics,/hash > 0 && hash <= MAX_BUNGIE_DEFINITION_HASH/,'Backend definition resolution must reject nullable or out-of-range values before requesting the manifest worker.');
+assert.match(semanticWrapper,/for \(const socket of[\s\S]*?addDefinitionHash\(requested, socket\?\.plugHash\)/,'A nullable live subclass socket must never become hash 0 and poison the full definition batch.');
+assert.match(refresh,/payload\?\.subclassCatalogCoverage/,'Background Forge refreshes must rebuild residency when subclass definition coverage is repaired.');
 assert.match(runtime,/url\.searchParams\.set\('prewarm','forge-loader'\)/,'The verified handoff must request the existing Build Forge worker pre-warm.');
 assert.match(html,/<header class="apx-destination-header forge-command-header">[\s\S]*?<strong>FORGE LOADER<\/strong><small>SELECT AND MAXIMISE VERIFIED ARMOUR<\/small>/,'Forge Loader must present its page identity only in the shared compact command header.');
 assert.doesNotMatch(html,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not retain the oversized duplicate page hero.');
@@ -352,7 +358,7 @@ assert.doesNotMatch(runtime,/if\(!baselineStored\)\{[^}]*?return;/,'A rejected b
 assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.set\('baseline','bungie-recovery'\)/,'The destination must request authenticated recovery only when the atomic baseline is unavailable.');
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
-assert.match(html,/forge-loader\.mjs\?v=20260910-mobile-ready-1/,'Forge Loader must load the current staging and residency runtime without stale browser code.');
+assert.match(html,/forge-loader\.mjs\?v=20260910-subclass-residency-1/,'Forge Loader must load the repaired subclass residency runtime without stale browser code.');
 assert.match(html,/forge-loader\.css\?v=20260910-mobile-ready-1/,'Forge Loader must load the compact mobile staged-armour grid without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');

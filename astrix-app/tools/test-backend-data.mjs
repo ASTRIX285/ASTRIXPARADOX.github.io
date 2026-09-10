@@ -5,7 +5,7 @@ import {profileSections} from '../../forge-auth-worker/src/profile-sections.ts';
 import {fetchDisplayProfile} from '../pages/guardian-workspace-v2/guardian-display-profile.mjs';
 import dataWorker from '../../forge-manifest-worker/worker.mjs';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
-import {enrichEquipableSets} from '../../forge-auth-worker/src/manifest-semantics.ts';
+import {bungieDefinitionHashes,enrichEquipableSets,preparedDefinitions} from '../../forge-auth-worker/src/manifest-semantics.ts';
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
 import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
@@ -60,6 +60,29 @@ await enrichEquipableSets({transport:'prepared-page-stream-v1',account:{definiti
 assert.equal(setReads.length,readsBeforeEmpty,'Client-manifest loadout envelopes must not start per-set network expansion.');
 console.log('PREPARED_ACCOUNT_ARMOUR_SET_ICONS=PASS');
 console.log('PREPARED_ACCOUNT_SUBCLASS_SOCKET_DEFINITIONS=PASS');
+
+// Captured from Miguel's equipped Prismatic Warlock configuration. A sixth
+// fragment socket is empty, so Bungie reports its plugHash as null.
+const prismaticCache=JSON.parse(await readFile(new URL('../data/paradox-forge/beta/beta-bungie-manifest-cache.json',import.meta.url),'utf8'));
+const realPrismaticSocketHashes=[3893112950,1869939001,124726498,124726504,124726503,2626922120,2626922114];
+assert.equal(prismaticCache.inventoryItems['3893112950'].display.name,'Prismatic Warlock');
+assert.equal(prismaticCache.inventoryItems['1869939001'].display.name,'Needlestorm');
+assert.equal(prismaticCache.inventoryItems['124726498'].display.name,'Facet of Purpose');
+assert.deepEqual(bungieDefinitionHashes([...realPrismaticSocketHashes,null]),realPrismaticSocketHashes,'An empty real subclass socket must not become definition hash 0.');
+let resolvedSubclassHashes=[];
+const subclassEnv={MANIFEST_DATA:{async fetch(request){
+  const path=new URL(request.url).pathname;
+  if(path==='/status')return Response.json({manifestVersion:prismaticCache.manifestVersion});
+  assert.equal(path,'/resolve');
+  const body=await request.json();
+  resolvedSubclassHashes=body.requests.DestinyInventoryItemDefinition;
+  assert.equal(resolvedSubclassHashes.every(hash=>Number.isInteger(hash)&&hash>0),true,'Manifest definition batches must contain only real positive Bungie hashes.');
+  return Response.json({manifestVersion:prismaticCache.manifestVersion,tables:{DestinyInventoryItemDefinition:Object.fromEntries(resolvedSubclassHashes.map(hash=>[hash,prismaticCache.inventoryItems[String(hash)]]).filter(([,definition])=>definition))}});
+}}};
+const resolvedSubclassDefinitions=await preparedDefinitions('DestinyInventoryItemDefinition',[...realPrismaticSocketHashes,null],subclassEnv);
+assert.deepEqual(resolvedSubclassHashes,realPrismaticSocketHashes);
+assert.equal(Object.keys(resolvedSubclassDefinitions).length,realPrismaticSocketHashes.length,'The empty socket must not poison resolution of the real Super and fragment definitions.');
+console.log('BACKEND_NULL_SUBCLASS_SOCKET_FILTER=PASS');
 
 function storage(){
   const rows=new Map();

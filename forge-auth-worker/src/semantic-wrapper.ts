@@ -1,5 +1,5 @@
 import worker, { AuthRecord } from "./index";
-import { preparedDefinitions, enrichEquipableSets } from "./manifest-semantics";
+import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets } from "./manifest-semantics";
 export { AuthRecord };
 
 const SUBCLASS_BUCKET_HASH = 3284755031;
@@ -14,9 +14,14 @@ function isSuperDefinition(definition: Record<string, any> | undefined): boolean
   return category === "super" || category === "supers" || category.includes("super");
 }
 
-async function resolveMissingInventoryDefinitions(payload: any, hashes: Iterable<number>, env: Env): Promise<number[]> {
+function addDefinitionHash(target: Set<number>, value: unknown): void {
+  const hash = bungieDefinitionHash(value);
+  if (hash !== null) target.add(hash);
+}
+
+async function resolveMissingInventoryDefinitions(payload: any, hashes: Iterable<unknown>, env: Env): Promise<number[]> {
   const definitions: Record<string, Record<string, any>> = payload.definitions || (payload.definitions = {});
-  const unique = [...new Set([...hashes].map(Number).filter(Number.isInteger))];
+  const unique = bungieDefinitionHashes(hashes);
   const missing = unique.filter(hash => !definitions[String(hash)]);
   Object.assign(definitions, await preparedDefinitions("DestinyInventoryItemDefinition", missing, env));
   return missing.filter(hash => !definitions[String(hash)]);
@@ -46,34 +51,30 @@ async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
     : payload;
   if (!account?.profile) return payload;
   const initialRows = subclassRows(account);
-  await resolveMissingInventoryDefinitions(account, initialRows.map(row => Number(row.item?.itemHash)), env);
+  await resolveMissingInventoryDefinitions(account, initialRows.map(row => row.item?.itemHash), env);
   const rows = subclassRows(account);
   const requested = new Set<number>();
   for (const { characterId, item } of rows) {
     if (!item?.itemInstanceId) continue;
     for (const socket of account.profile?.itemComponents?.sockets?.data?.[item.itemInstanceId]?.sockets || []) {
-      const hash = Number(socket?.plugHash);
-      if (Number.isInteger(hash)) requested.add(hash);
+      addDefinitionHash(requested, socket?.plugHash);
     }
     const reusable = account.profile?.itemComponents?.reusablePlugs?.data?.[item.itemInstanceId]?.plugs || {};
     for (const plugs of Object.values(reusable)) {
       for (const row of (plugs as any[]) || []) {
         if (row?.canInsert === false || row?.enabled === false) continue;
-        const hash = Number(row?.plugItemHash ?? row?.plugHash);
-        if (Number.isInteger(hash)) requested.add(hash);
+        addDefinitionHash(requested, row?.plugItemHash ?? row?.plugHash);
       }
     }
     const definition = account.definitions?.[String(item.itemHash)] || {};
     for (const entry of definition?.sockets?.socketEntries || []) {
-      const initialHash = Number(entry?.singleInitialItemHash);
-      if (Number.isInteger(initialHash)) requested.add(initialHash);
-      const plugSetHash = Number(entry?.reusablePlugSetHash);
-      if (!Number.isInteger(plugSetHash)) continue;
+      addDefinitionHash(requested, entry?.singleInitialItemHash);
+      const plugSetHash = bungieDefinitionHash(entry?.reusablePlugSetHash);
+      if (plugSetHash === null) continue;
       for (const plugSets of [account.profile?.profilePlugSets?.data?.plugs, account.profile?.characterPlugSets?.data?.[characterId]?.plugs]) {
         for (const row of plugSets?.[String(plugSetHash)] || []) {
           if (row?.canInsert === false || row?.enabled === false) continue;
-          const hash = Number(row?.plugItemHash ?? row?.plugHash);
-          if (Number.isInteger(hash)) requested.add(hash);
+          addDefinitionHash(requested, row?.plugItemHash ?? row?.plugHash);
         }
       }
     }
@@ -87,9 +88,8 @@ async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
     complete: unresolved.length === 0
   };
   if (account.definitionCoverage && typeof account.definitionCoverage === "object") {
-    const remaining = (Array.isArray(account.definitionCoverage.unresolved) ? account.definitionCoverage.unresolved : [])
-      .map(Number)
-      .filter((hash: number) => Number.isInteger(hash) && !account.definitions?.[String(hash)]);
+    const remaining = bungieDefinitionHashes(Array.isArray(account.definitionCoverage.unresolved) ? account.definitionCoverage.unresolved : [])
+      .filter((hash: number) => !account.definitions?.[String(hash)]);
     const requestedCount = Number(account.definitionCoverage.requested) || 0;
     account.definitionCoverage = {
       ...account.definitionCoverage,
@@ -122,7 +122,7 @@ async function enrichWeaponReusablePlugs(payload: any, env: Env): Promise<any> {
     const plugs = reusableData[item.itemInstanceId]?.plugs || {};
     const socketMap: Record<string, number[]> = {};
     for (const [socketIndex, rows] of Object.entries(plugs)) {
-      const hashes = (rows as any[]).map(row => Number(row?.plugItemHash ?? row?.plugHash)).filter(Number.isInteger);
+      const hashes = bungieDefinitionHashes((rows as any[]).map(row => row?.plugItemHash ?? row?.plugHash));
       if (!hashes.length) continue;
       socketMap[String(socketIndex)] = [...new Set(hashes)];
       hashes.forEach(hash => requested.add(hash));
@@ -149,8 +149,8 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
   });
   if (!subclass?.itemInstanceId) return payload;
 
-  const selectedHashes = Array.isArray(subclass.plugItemHashes) ? subclass.plugItemHashes.map(Number) : [];
-  let superSocketIndex = selectedHashes.findIndex((hash: number) => isSuperDefinition(definitions[String(hash)]));
+  const selectedHashes = Array.isArray(subclass.plugItemHashes) ? subclass.plugItemHashes.map((value: unknown) => bungieDefinitionHash(value)) : [];
+  let superSocketIndex = selectedHashes.findIndex((hash: number | null) => hash !== null && isSuperDefinition(definitions[String(hash)]));
   if (superSocketIndex < 0) {
     const currentSockets = payload.profile?.itemComponents?.sockets?.data?.[subclass.itemInstanceId]?.sockets || [];
     superSocketIndex = currentSockets.findIndex((socket: any) => isSuperDefinition(definitions[String(socket?.plugHash)]));
@@ -159,22 +159,19 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
 
   const candidateHashes = new Set<number>();
   const equippedHash = selectedHashes[superSocketIndex];
-  if (Number.isInteger(equippedHash)) candidateHashes.add(equippedHash);
+  if (equippedHash !== null && equippedHash !== undefined) candidateHashes.add(equippedHash);
   const reusable = payload.profile?.itemComponents?.reusablePlugs?.data?.[subclass.itemInstanceId]?.plugs || {};
   for (const row of reusable[String(superSocketIndex)] || reusable[superSocketIndex] || []) {
-    const hash = Number(row?.plugItemHash ?? row?.plugHash);
-    if (Number.isInteger(hash)) candidateHashes.add(hash);
+    addDefinitionHash(candidateHashes, row?.plugItemHash ?? row?.plugHash);
   }
   const subclassDefinition = definitions[String(subclass.itemHash)] || {};
   const manifestSocket = subclassDefinition?.sockets?.socketEntries?.[superSocketIndex];
-  const initialHash = Number(manifestSocket?.singleInitialItemHash);
-  if (Number.isInteger(initialHash)) candidateHashes.add(initialHash);
+  addDefinitionHash(candidateHashes, manifestSocket?.singleInitialItemHash);
   for (const row of manifestSocket?.reusablePlugItems || []) {
-    const hash = Number(row?.plugItemHash);
-    if (Number.isInteger(hash)) candidateHashes.add(hash);
+    addDefinitionHash(candidateHashes, row?.plugItemHash);
   }
-  const plugSetHash = Number(manifestSocket?.reusablePlugSetHash);
-  if (Number.isInteger(plugSetHash)) {
+  const plugSetHash = bungieDefinitionHash(manifestSocket?.reusablePlugSetHash);
+  if (plugSetHash !== null) {
     const plugSets = [
       payload.profile?.profilePlugSets?.data?.plugs,
       payload.profile?.characterPlugSets?.data?.[payload.characterId]?.plugs
@@ -182,8 +179,7 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
     for (const plugs of plugSets) {
       for (const row of plugs?.[String(plugSetHash)] || []) {
         if (row?.canInsert === false || row?.enabled === false) continue;
-        const hash = Number(row?.plugItemHash ?? row?.plugHash);
-        if (Number.isInteger(hash)) candidateHashes.add(hash);
+        addDefinitionHash(candidateHashes, row?.plugItemHash ?? row?.plugHash);
       }
     }
   }
