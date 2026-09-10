@@ -1,5 +1,5 @@
 import worker, { AuthRecord } from "./index";
-import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets } from "./manifest-semantics";
+import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets, enrichOwnedWeaponDefinitions } from "./manifest-semantics";
 export { AuthRecord };
 
 const SUBCLASS_BUCKET_HASH = 3284755031;
@@ -107,11 +107,14 @@ async function enrichSubclassInventory(payload: any, env: Env): Promise<any> {
 }
 
 async function enrichWeaponReusablePlugs(payload: any, env: Env): Promise<any> {
-  const profile = payload?.profile;
+  const account = payload?.transport === "prepared-page-stream-v1" && payload?.account
+    ? payload.account
+    : payload;
+  const profile = account?.profile;
   if (!profile) return payload;
-  const definitions: Record<string, Record<string, any>> = payload.definitions || (payload.definitions = {});
+  const definitions: Record<string, Record<string, any>> = account.definitions || (account.definitions = {});
   const reusableData = profile?.itemComponents?.reusablePlugs?.data || {};
-  const weaponRows = equippedRows(payload).filter((item: any) => {
+  const weaponRows = equippedRows(account).filter((item: any) => {
     const definition = definitions[String(item?.itemHash)];
     return WEAPON_BUCKETS.has(Number(definition?.inventory?.bucketTypeHash));
   });
@@ -129,9 +132,9 @@ async function enrichWeaponReusablePlugs(payload: any, env: Env): Promise<any> {
     }
     byInstance[String(item.itemInstanceId)] = socketMap;
   }
-  const unresolved = await resolveMissingInventoryDefinitions(payload, requested, env);
-  payload.weaponReusablePlugs = byInstance;
-  payload.weaponReusableCoverage = {
+  const unresolved = await resolveMissingInventoryDefinitions(account, requested, env);
+  account.weaponReusablePlugs = byInstance;
+  account.weaponReusableCoverage = {
     requested: [...requested],
     resolved: [...requested].filter(hash => Boolean(definitions[String(hash)])),
     unresolved,
@@ -238,6 +241,7 @@ export default {
       if (request.method === "GET" && ["character", "build-forge", "journey", "vault", "loadout"].includes(pagePayload)) {
         return await rewriteJsonResponse(response, async payload => {
           await enrichSubclassInventory(payload, env);
+          if (pagePayload === "loadout") await enrichOwnedWeaponDefinitions(payload, env);
           await enrichEquipableSets(payload, env);
           await enrichWeaponReusablePlugs(payload, env);
           return payload;

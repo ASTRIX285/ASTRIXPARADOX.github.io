@@ -20,6 +20,11 @@ const payload={
   },
   artifactCatalog:[{hash:4001,name:'Seasonal Artifact'}],
   definitionCoverage:{complete:true,requested:4,resolved:4,unresolved:[]},
+  weaponDefinitionCoverage:{itemInstances:['6917529027641000003'],requested:[2001],resolved:[2001],unresolved:[],missingSocketInstances:[],complete:true},
+  subclassCatalogCoverage:{itemInstances:['6917529027641000005'],requested:[5001,5002,5003],resolved:[5001,5002,5003],unresolved:[],complete:true},
+  artifactCatalogCoverage:{artifactCount:1,complete:true},
+  forgeArmourIndexCoverage:{definitions:2,complete:true},
+  loadoutCoverage:{complete:true},
   pageReady:{page:'loadout',manifestVersion:'2026.09.10.1',coverage:{complete:true,missing:[]}}
 };
 const profileBuild={
@@ -108,7 +113,7 @@ const capturedStagedLoad=new Map([
 ]);
 const capturedBlocked=forgeLoaderResidency(capturedPayload,{characterId,catalogue,profileBuild:capturedIncompleteProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
 assert.equal(capturedBlocked.rows.find(row=>row.key==='subclass').state,'resident','The captured stuck source must be Subclass and fragments.');
-assert.equal(capturedBlocked.rows.filter(row=>row.key!=='subclass').every(row=>row.state==='ready'),true,'No other resident source may be blamed for this captured state.');
+assert.deepEqual(capturedBlocked.rows.filter(row=>row.state!=='ready').map(row=>row.key),['subclass','manifest'],'Manifest readiness must honestly reflect the same unresolved subclass definition source.');
 assert.equal(forgeLoaderEvaluateReady(capturedBlocked,capturedStagedLoad,characterId),false,'Five real staged pieces must stay locked while the live subclass definitions are genuinely unresolved.');
 
 const resolvedCoverage={...capturedPayload.subclassCatalogCoverage,resolved:realSocketHashes,unresolved:[],complete:true};
@@ -138,7 +143,42 @@ const capturedUnlocked=forgeLoaderResidency(resolvedPayload,{characterId,catalog
 assert.equal(capturedUnlocked.rows.every(row=>row.state==='ready'),true);
 assert.equal(forgeLoaderEvaluateReady(capturedUnlocked,capturedStagedLoad,characterId),true,'The exact staged load must unlock as soon as its real Super and fragments resolve.');
 
+// Captured from Miguel's Nothing Manacles and full Smoke Jumper loader state.
+// Account identifiers are redacted. The live Resident Data panel showed only
+// Weapons and Manifest at RESIDENT because owned weapon definitions were not
+// joined into the prepared page account envelope.
+const smokeJumperStagedLoad=new Map([
+  [0,{slotIndex:0,hash:3577550601,name:'Smoke Jumper Hood'}],
+  [1,{slotIndex:1,hash:300502917,name:'Nothing Manacles'}],
+  [2,{slotIndex:2,hash:3788059976,name:'Smoke Jumper Vestment'}],
+  [3,{slotIndex:3,hash:63899322,name:'Smoke Jumper Boots'}],
+  [4,{slotIndex:4,hash:1619647653,name:'Smoke Jumper Bond'}]
+]);
+const realUnswornHash=1303313141;
+const capturedWeaponInstance='captured-owned-weapon-instance';
+const smokeJumperPayload={
+  ...resolvedPayload,
+  definitionCoverage:{requested:91,resolved:84,unresolved:[111,222,333,444,555,666,777],complete:false,source:'prepared-page-payload'},
+  weaponDefinitionCoverage:{itemInstances:[capturedWeaponInstance],requested:[realUnswornHash],resolved:[],unresolved:[realUnswornHash],missingSocketInstances:[],complete:false}
+};
+const smokeJumperBlockedProfile={...capturedReadyProfile,ownedWeapons:[]};
+const smokeJumperBlocked=forgeLoaderResidency(smokeJumperPayload,{characterId,catalogue,profileBuild:smokeJumperBlockedProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+assert.deepEqual(smokeJumperBlocked.rows.filter(row=>row.state!=='ready').map(row=>row.key),['weapons','manifest'],'The exact live stuck rows must be Weapons and Manifest.');
+assert.equal(forgeLoaderEvaluateReady(smokeJumperBlocked,smokeJumperStagedLoad,characterId),false,'Nothing Manacles and four Smoke Jumper pieces must stay locked while owned weapon evidence is genuinely unresolved.');
+
+const smokeJumperResolvedPayload={
+  ...smokeJumperPayload,
+  weaponDefinitionCoverage:{itemInstances:[capturedWeaponInstance],requested:[realUnswornHash],resolved:[realUnswornHash],unresolved:[],missingSocketInstances:[],complete:true}
+};
+const smokeJumperResolvedProfile={...capturedReadyProfile,ownedWeapons:[{hash:realUnswornHash,itemHash:realUnswornHash,itemInstanceId:capturedWeaponInstance,name:'Unsworn'}]};
+assert.notEqual(forgeInventorySignature(smokeJumperPayload),forgeInventorySignature(smokeJumperResolvedPayload),'A repaired owned weapon coverage result must rebuild residency without an inventory mutation.');
+const smokeJumperReady=forgeLoaderResidency(smokeJumperResolvedPayload,{characterId,catalogue,profileBuild:smokeJumperResolvedProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+assert.equal(smokeJumperReady.rows.every(row=>row.state==='ready'),true,'All six real resident sources must reach READY after the owned weapon join completes.');
+assert.equal(forgeLoaderEvaluateReady(smokeJumperReady,smokeJumperStagedLoad,characterId),true,'The exact Nothing Manacles and Smoke Jumper staged load must unlock with verified source coverage.');
+assert.equal(smokeJumperResolvedPayload.definitionCoverage.complete,false,'The armour-only offline hydration flag remains honestly incomplete and is not misused as whole-page manifest coverage.');
+
 console.log('FORGE_LOADER_RESIDENCY_INSTANCE_DEDUPLICATION=PASS');
 console.log('FORGE_LOADER_RESIDENCY_HONEST_INCOMPLETE_STATE=PASS');
 console.log('FORGE_LOADER_CURRENT_HANDOFF_GATE=PASS');
 console.log('FORGE_LOADER_REAL_SUBCLASS_RESIDENCY_RECOVERY=PASS');
+console.log('FORGE_LOADER_NOTHING_MANACLES_SMOKE_JUMPER_RESIDENCY=PASS');
