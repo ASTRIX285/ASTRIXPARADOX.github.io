@@ -45,19 +45,35 @@ function forgeLoaderEvaluateReady(residency={},selectedSlots=new Map(),character
   return residency?.ready===true&&selectedCount===5&&Boolean(text(characterId));
 }
 
+function coverageComplete(coverage={}){
+  return coverage?.complete===true;
+}
+
+function forgeLoaderManifestComplete(payload={}){
+  return coverageComplete(payload?.pageReady?.coverage)
+    &&coverageComplete(payload?.loadoutCoverage)
+    &&coverageComplete(payload?.forgeArmourIndexCoverage)
+    &&coverageComplete(payload?.weaponDefinitionCoverage)
+    &&coverageComplete(payload?.subclassCatalogCoverage)
+    &&coverageComplete(payload?.artifactCatalogCoverage);
+}
+
 function forgeLoaderResidency(payload={},options={}){
   const characterId=text(options.characterId),profile=payload?.profile||{},profileBuild=options.profileBuild||null,catalogue=options.catalogue||{},phase=options.phase||'verifying';
   const equipment=profile?.characterEquipment?.data?.[characterId],profileInventory=profile?.profileInventory?.data;
   const allItems=accountItemRows(payload),armourCount=Number(catalogue?.totals?.armour),weapons=Array.isArray(profileBuild?.ownedWeapons)?profileBuild.ownedWeapons:[];
   const subclasses=liveSubclassRows(profileBuild||{}),fragmentCount=subclassFragmentCount(subclasses),artifactCatalog=Array.isArray(payload?.artifactCatalog)?payload.artifactCatalog:[],artifact=profileBuild?.artifact||null;
-  const manifestVersion=text(payload?.pageReady?.manifestVersion||options.manifestStatus?.version),definitionComplete=payload?.definitionCoverage?.complete===true;
+  const manifestVersion=text(payload?.pageReady?.manifestVersion||options.manifestStatus?.version),weaponCoverage=payload?.weaponDefinitionCoverage||null;
+  const expectedWeaponInstances=new Set(Array.isArray(weaponCoverage?.itemInstances)?weaponCoverage.itemInstances.map(text).filter(Boolean):[]).size;
+  const weaponsComplete=Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons)&&coverageComplete(weaponCoverage)&&weapons.length===expectedWeaponInstances;
+  const manifestComplete=Boolean(manifestVersion)&&forgeLoaderManifestComplete(payload);
   const rows=[
     {key:'equipped',label:'Equipped loadout',resident:Array.isArray(equipment?.items),complete:Array.isArray(equipment?.items),detail:Array.isArray(equipment?.items)?`${equipment.items.length} equipped items resident`:'Awaiting verified Bungie equipment'},
     {key:'vault-armour',label:'Vault armour',resident:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),complete:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),detail:Number.isFinite(armourCount)?`${armourCount} armour items indexed`:'Awaiting verified Vault armour'},
-    {key:'weapons',label:'Weapons',resident:Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons),complete:Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons)&&definitionComplete,detail:profileBuild&&Array.isArray(profileBuild?.ownedWeapons)?`${weapons.length} owned weapons indexed`:'Awaiting verified weapon instances'},
+    {key:'weapons',label:'Weapons',resident:Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons),complete:weaponsComplete,detail:profileBuild&&Array.isArray(profileBuild?.ownedWeapons)?`${weapons.length} owned weapons indexed`:'Awaiting verified weapon instances'},
     {key:'subclass',label:'Subclass and fragments',resident:Boolean(profileBuild)&&subclasses.length>0,complete:subclasses.some(hasVerifiedSubclassSockets),detail:subclasses.length?`${subclasses.length} live subclass${subclasses.length===1?'':'es'} and ${fragmentCount} fragment options resolved`:'Awaiting live subclass sockets'},
     {key:'artifact',label:'Seasonal Artifact',resident:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),complete:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),detail:profileBuild?`${artifact?.name?`${text(artifact.name)} active · `:'No active Artifact reported · '}${artifactCatalog.length} verified definitions resident`:'Awaiting verified Artifact data'},
-    {key:'manifest',label:'Manifest',resident:Boolean(manifestVersion),complete:Boolean(manifestVersion)&&definitionComplete,detail:manifestVersion?`Cached manifest ${manifestVersion}`:'Awaiting cached manifest'}
+    {key:'manifest',label:'Manifest',resident:Boolean(manifestVersion),complete:manifestComplete,detail:manifestVersion?`Cached manifest ${manifestVersion}`:'Awaiting cached manifest'}
   ].map(row=>({...row,state:sourceState(row.resident,row.complete,phase)}));
   const ready=options.combinationsPrewarmed===true&&rows.every(row=>row.state==='ready');
   const durationMs=Math.max(0,Number(options.durationMs)||0);
@@ -69,4 +85,4 @@ function forgeLoaderResidency(payload={},options={}){
   };
 }
 
-export {accountItemRows,forgeLoaderEvaluateReady,forgeLoaderResidency,hasVerifiedSubclassSockets,liveSubclassRows,subclassFragmentCount};
+export {accountItemRows,forgeLoaderEvaluateReady,forgeLoaderManifestComplete,forgeLoaderResidency,hasVerifiedSubclassSockets,liveSubclassRows,subclassFragmentCount};

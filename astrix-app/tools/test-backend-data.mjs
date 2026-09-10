@@ -5,7 +5,7 @@ import {profileSections} from '../../forge-auth-worker/src/profile-sections.ts';
 import {fetchDisplayProfile} from '../pages/guardian-workspace-v2/guardian-display-profile.mjs';
 import dataWorker from '../../forge-manifest-worker/worker.mjs';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
-import {bungieDefinitionHashes,enrichEquipableSets,preparedDefinitions} from '../../forge-auth-worker/src/manifest-semantics.ts';
+import {bungieDefinitionHashes,enrichEquipableSets,enrichOwnedWeaponDefinitions,preparedDefinitions} from '../../forge-auth-worker/src/manifest-semantics.ts';
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
 import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
@@ -83,6 +83,46 @@ const resolvedSubclassDefinitions=await preparedDefinitions('DestinyInventoryIte
 assert.deepEqual(resolvedSubclassHashes,realPrismaticSocketHashes);
 assert.equal(Object.keys(resolvedSubclassDefinitions).length,realPrismaticSocketHashes.length,'The empty socket must not poison resolution of the real Super and fragment definitions.');
 console.log('BACKEND_NULL_SUBCLASS_SOCKET_FILTER=PASS');
+
+// Miguel's live Forge Loader page carried Vault-scoped weapon items, whose
+// component bucket is the Vault rather than a weapon slot. The prepared worker
+// must resolve the real item definition before it can identify and index them.
+const weaponCatalogue=JSON.parse(await readFile(new URL('../data/weapon-catalogue/weapons-trace-rifle.json',import.meta.url),'utf8'));
+const plugCatalogue=JSON.parse(await readFile(new URL('../data/weapon-catalogue/plugDefinitions-006.json',import.meta.url),'utf8'));
+const realOwnedWeaponHash=1303313141;
+const realSelectedPlugHash=1294026524;
+const realOwnedWeaponDefinition=weaponCatalogue.weapons[String(realOwnedWeaponHash)];
+const realSelectedPlugDefinition=plugCatalogue.plugDefinitions[String(realSelectedPlugHash)];
+assert.equal(realOwnedWeaponDefinition.displayProperties.name,'Unsworn');
+assert.equal(realSelectedPlugDefinition.displayProperties.name,'Adaptive Frame');
+const capturedOwnedWeaponInstance='captured-owned-weapon-instance';
+const weaponEnvelope={
+  transport:'prepared-page-stream-v1',
+  account:{
+    profile:{
+      profileInventory:{data:{items:[{itemHash:realOwnedWeaponHash,itemInstanceId:capturedOwnedWeaponInstance,bucketHash:138197802}]}},
+      characterInventories:{data:{}},
+      characterEquipment:{data:{}},
+      itemComponents:{sockets:{data:{[capturedOwnedWeaponInstance]:{sockets:[{plugHash:realSelectedPlugHash}]}}}}
+    },
+    definitions:{}
+  },
+  prepared:{manifestVersion:armourIndex.manifestVersion}
+};
+const weaponDefinitions={[realOwnedWeaponHash]:realOwnedWeaponDefinition,[realSelectedPlugHash]:realSelectedPlugDefinition};
+const weaponEnv={MANIFEST_DATA:{async fetch(request){
+  const path=new URL(request.url).pathname;
+  if(path==='/status')return Response.json({manifestVersion:armourIndex.manifestVersion});
+  assert.equal(path,'/resolve');
+  const body=await request.json();
+  return Response.json({manifestVersion:armourIndex.manifestVersion,tables:{DestinyInventoryItemDefinition:Object.fromEntries(body.requests.DestinyInventoryItemDefinition.filter(hash=>weaponDefinitions[hash]).map(hash=>[hash,weaponDefinitions[hash]]))}});
+}}};
+await enrichOwnedWeaponDefinitions(weaponEnvelope,weaponEnv);
+assert.equal(weaponEnvelope.account.definitions[String(realOwnedWeaponHash)].displayProperties.name,'Unsworn','The prepared account envelope must receive the real Vault weapon definition.');
+assert.equal(weaponEnvelope.account.definitions[String(realSelectedPlugHash)].displayProperties.name,'Adaptive Frame','The exact selected weapon socket must be resident before Forge Loader renders.');
+assert.deepEqual(weaponEnvelope.account.weaponDefinitionCoverage.itemInstances,[capturedOwnedWeaponInstance]);
+assert.equal(weaponEnvelope.account.weaponDefinitionCoverage.complete,true,'Real owned weapon and selected socket definitions must publish complete source coverage.');
+console.log('PREPARED_ACCOUNT_OWNED_WEAPON_DEFINITIONS=PASS');
 
 function storage(){
   const rows=new Map();

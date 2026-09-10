@@ -1,4 +1,5 @@
 const MAX_BUNGIE_DEFINITION_HASH = 0xffffffff;
+const WEAPON_BUCKET_HASHES = new Set([1498876634, 2465295065, 953998645]);
 
 function bungieDefinitionHash(value: unknown): number | null {
   const hash = Number(value);
@@ -34,6 +35,85 @@ async function manifestDefinition(
   if (bungieDefinitionHash(hash) === null) return null;
   const prepared = await preparedDefinitions(definitionType, [hash], env);
   return prepared[String(hash)] || null;
+}
+
+function preparedAccountPayload(payload: any): any {
+  return payload?.transport === "prepared-page-stream-v1" && payload?.account
+    ? payload.account
+    : payload;
+}
+
+function profileItemRows(profile: any): any[] {
+  return [
+    ...(profile?.profileInventory?.data?.items || []),
+    ...Object.values(profile?.characterInventories?.data || {}).flatMap((row: any) => row?.items || []),
+    ...Object.values(profile?.characterEquipment?.data || {}).flatMap((row: any) => row?.items || [])
+  ];
+}
+
+async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any> {
+  const account = preparedAccountPayload(payload);
+  if (!account?.profile) return payload;
+  const definitions: Record<string, Record<string, any>> = account.definitions || (account.definitions = {});
+  const preparedArmourDefinitions: Record<string, Record<string, any>> = payload?.prepared?.forgeArmourIndex?.definitions
+    || payload?.forgeArmourIndex?.definitions
+    || {};
+  const hasOwnedItemDefinition = (hash: number): boolean => Boolean(definitions[String(hash)] || preparedArmourDefinitions[String(hash)]);
+  const allItems = profileItemRows(account.profile);
+  const ownedItemHashes = bungieDefinitionHashes(allItems.map(item => item?.itemHash));
+  Object.assign(definitions, await preparedDefinitions(
+    "DestinyInventoryItemDefinition",
+    ownedItemHashes.filter(hash => !hasOwnedItemDefinition(hash)),
+    env
+  ));
+  const unresolvedOwnedItems = ownedItemHashes.filter(hash => !hasOwnedItemDefinition(hash));
+  account.ownedItemDefinitionCoverage = {
+    requested: ownedItemHashes,
+    resolved: ownedItemHashes.filter(hasOwnedItemDefinition),
+    unresolved: unresolvedOwnedItems,
+    complete: unresolvedOwnedItems.length === 0
+  };
+
+  const uniqueWeapons = new Map<string, any>();
+  for (const item of allItems) {
+    const itemDefinition = definitions[String(item?.itemHash)];
+    if (!WEAPON_BUCKET_HASHES.has(Number(itemDefinition?.inventory?.bucketTypeHash))) continue;
+    const instanceId = String(item?.itemInstanceId || "");
+    if (instanceId && !uniqueWeapons.has(instanceId)) uniqueWeapons.set(instanceId, item);
+  }
+  const socketData = account.profile?.itemComponents?.sockets?.data || {};
+  const requested = new Set<number>();
+  const missingSocketInstances: string[] = [];
+  for (const [instanceId, item] of uniqueWeapons) {
+    const itemHash = bungieDefinitionHash(item?.itemHash);
+    const styleHash = bungieDefinitionHash(item?.overrideStyleItemHash);
+    if (itemHash !== null) requested.add(itemHash);
+    if (styleHash !== null) requested.add(styleHash);
+    const socketRow = socketData[instanceId];
+    if (!socketRow || !Array.isArray(socketRow.sockets)) {
+      missingSocketInstances.push(instanceId);
+      continue;
+    }
+    for (const socket of socketRow.sockets) {
+      const plugHash = bungieDefinitionHash(socket?.plugHash);
+      if (plugHash !== null) requested.add(plugHash);
+    }
+  }
+  Object.assign(definitions, await preparedDefinitions(
+    "DestinyInventoryItemDefinition",
+    [...requested].filter(hash => !definitions[String(hash)]),
+    env
+  ));
+  const unresolved = [...requested].filter(hash => !definitions[String(hash)]);
+  account.weaponDefinitionCoverage = {
+    itemInstances: [...uniqueWeapons.keys()],
+    requested: [...requested],
+    resolved: [...requested].filter(hash => Boolean(definitions[String(hash)])),
+    unresolved,
+    missingSocketInstances,
+    complete: unresolvedOwnedItems.length === 0 && unresolved.length === 0 && missingSocketInstances.length === 0
+  };
+  return payload;
 }
 
 function equipableSetHash(itemDefinition: Record<string, any>): number | null {
@@ -81,4 +161,4 @@ async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
   return payload;
 }
 
-export { bungieDefinitionHash, bungieDefinitionHashes, manifestDefinition, preparedDefinitions, equipableSetHash, enrichEquipableSets };
+export { bungieDefinitionHash, bungieDefinitionHashes, manifestDefinition, preparedDefinitions, equipableSetHash, enrichEquipableSets, enrichOwnedWeaponDefinitions };
