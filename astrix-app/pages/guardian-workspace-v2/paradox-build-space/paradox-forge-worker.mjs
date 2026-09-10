@@ -1,4 +1,4 @@
-import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260909-super-evidence-1';
+import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260910-generate-termination-1';
 
 const objectives=new Set(['balanced','dps','add-clear','survivability','ability-uptime']);
 const keyOf=v=>JSON.stringify([v.element,v.objective||'balanced',Number(v.superHash)||0]);

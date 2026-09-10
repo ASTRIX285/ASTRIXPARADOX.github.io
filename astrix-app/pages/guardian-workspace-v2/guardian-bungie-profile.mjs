@@ -1,7 +1,7 @@
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260905-manual-editor-1";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
-import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
+import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope} from "./paradox-build-binding.mjs";
@@ -272,21 +272,30 @@ function publishFixtureRoster(detail={}){
 function socketResolution(profile,definitions,item,payload={}){
   if(!item?.itemInstanceId)return {plugs:[],requested:[],resolved:[],unresolved:[],complete:true};
   const sockets=profile?.itemComponents?.sockets?.data?.[item.itemInstanceId]?.sockets||[];
-  const socketCategories=definition(definitions,item.itemHash)?.sockets?.socketCategories||[];
+  const itemDefinition=definition(definitions,item.itemHash)||{},socketCategories=itemDefinition?.sockets?.socketCategories||[],entries=itemDefinition?.sockets?.socketEntries||[];
   const requested=sockets.map(socket=>Number(socket.plugHash)).filter(hash=>Number.isInteger(hash)&&hash>0);
   const rows=sockets.map((socket,socketIndex)=>{
     const hash=Number(socket?.plugHash);
     const category=socketCategories.find(row=>(row?.socketIndexes||[]).map(Number).includes(socketIndex))||null;
     const socketCategoryHash=Number(category?.socketCategoryHash);
     const socketCategoryDefinition=Number.isFinite(socketCategoryHash)?payload?.socketCategoryDefinitions?.[String(socketCategoryHash)]||null:null;
-    const entry=definition(definitions,item.itemHash)?.sockets?.socketEntries?.[socketIndex]||{};
+    const entry=entries[socketIndex]||{};
     const plug=Number.isInteger(hash)&&hash>0?displayItem(definitions,hash):null;
-    return plug?{...plug,socketIndex,socketCategoryHash:Number.isFinite(socketCategoryHash)?socketCategoryHash:null,socketCategoryDefinition,socketTypeHash:entry.socketTypeHash??null,socketTypeDefinition:payload?.socketTypeDefinitions?.[String(entry.socketTypeHash)]||null,isEnabled:socket.isEnabled,isVisible:socket.isVisible,statContributions:plugStatContributions(payload,plug.definition)}:null;
+    return plug?{...plug,socketIndex,socketCategoryHash:Number.isFinite(socketCategoryHash)?socketCategoryHash:null,socketCategoryDefinition,socketTypeHash:entry.socketTypeHash??null,socketTypeDefinition:payload?.socketTypeDefinitions?.[String(entry.socketTypeHash)]||null,armourItemTierType:Number.isFinite(Number(itemDefinition?.inventory?.tierType))?Number(itemDefinition.inventory.tierType):null,isEnabled:socket.isEnabled,isVisible:socket.isVisible,statContributions:plugStatContributions(payload,plug.definition)}:null;
   }).filter(Boolean);
-  const plugs=rows;
+  const resolvedSocketIndexes=new Set(rows.map(row=>Number(row.socketIndex)));
+  const fixedIntrinsicRows=entries.map((entry,socketIndex)=>{
+    if(resolvedSocketIndexes.has(socketIndex))return null;
+    const hash=Number(entry?.singleInitialItemHash),plugDefinition=definition(definitions,hash),category=String(plugDefinition?.plug?.plugCategoryIdentifier||'').toLowerCase();
+    if(!Number.isInteger(hash)||hash<=0||!plugDefinition||!category.includes('intrinsic'))return null;
+    const socketCategory=socketCategories.find(row=>(row?.socketIndexes||[]).map(Number).includes(socketIndex))||null,socketCategoryHash=Number(socketCategory?.socketCategoryHash),plug=displayItem(definitions,hash);
+    requested.push(hash);
+    return {...plug,socketIndex,socketCategoryHash:Number.isFinite(socketCategoryHash)?socketCategoryHash:null,socketCategoryDefinition:Number.isFinite(socketCategoryHash)?payload?.socketCategoryDefinitions?.[String(socketCategoryHash)]||null:null,socketTypeHash:entry.socketTypeHash??null,socketTypeDefinition:payload?.socketTypeDefinitions?.[String(entry.socketTypeHash)]||null,armourItemTierType:Number.isFinite(Number(itemDefinition?.inventory?.tierType))?Number(itemDefinition.inventory.tierType):null,isEnabled:true,isVisible:entry?.defaultVisible!==false,source:'bungie-manifest-fixed-intrinsic',statContributions:plugStatContributions(payload,plugDefinition)};
+  }).filter(Boolean);
+  const plugs=[...rows,...fixedIntrinsicRows].sort((left,right)=>Number(left.socketIndex)-Number(right.socketIndex));
   const resolved=plugs.filter(row=>row.definition&&Object.keys(row.definition).length>0).map(row=>Number(row.hash));
-  const unresolved=requested.filter(hash=>!definition(definitions,hash));
-  return {plugs,requested,resolved,unresolved,complete:unresolved.length===0};
+  const uniqueRequested=[...new Set(requested)],unresolved=uniqueRequested.filter(hash=>!definition(definitions,hash));
+  return {plugs,requested:uniqueRequested,resolved,unresolved,complete:unresolved.length===0};
 }
 
 function socketPlugs(profile,definitions,item,payload={}){

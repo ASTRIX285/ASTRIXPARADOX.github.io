@@ -119,7 +119,7 @@ const stackableMod=armourMod(508,'Stackable Grenade Mod','Grenade energy gains s
 assert.equal(stackableResult.recommendation.decisions.filter(row=>row.recommended?.hash===stackableMod.hash).length,2,'Mods without Bungie single-copy evidence must remain eligible to stack.');
 
 const exactWeapon=(hash,instance,name,description,bucketHash,extra={})=>{
-  const {perkColumnCounts,...weaponExtra}=extra,gearTier=Number(weaponExtra.gearTier)||5,capacities=Array.isArray(perkColumnCounts)?perkColumnCounts:gearTier>=5?[2,2,3,3,2]:gearTier>=3?[2,2,2,2,2]:[1,1,1,1,1];
+  const {perkColumnCounts,...weaponExtra}=extra,suppliedTier=Number(weaponExtra.gearTier),gearTier=Number.isInteger(suppliedTier)&&suppliedTier>=0?suppliedTier:5,capacities=Array.isArray(perkColumnCounts)?perkColumnCounts:gearTier>=5?[2,2,3,3,2]:gearTier>=3?[2,2,2,2,2]:[1,1,1,1,1];
   const alternativePerkColumns=capacities.map((count,columnIndex)=>({socketIndex:10+columnIndex,options:Array.from({length:count},(_,rowIndex)=>{const perkHash=hash*100+(columnIndex+1)*10+rowIndex+1,perkName=`${name} perk ${columnIndex+1}.${rowIndex+1}`;return {hash:perkHash,bungieHash:perkHash,name:perkName,socketIndex:10+columnIndex,definition:{displayProperties:{name:perkName,description:'Verified synthetic test perk.'},plug:{plugCategoryIdentifier:'weapon.perks'}}};})}));
   const selectedPerks=alternativePerkColumns.map(column=>column.options[0]),perkModel=normaliseWeaponPerkModel({gearTier,selectedPerks,alternativePerkColumns});
   return {hash,bungieHash:hash,itemInstanceId:instance,name,description,bucketHash,gearTier,definition:{displayProperties:{name,description},traitIds:[],inventory:{tierType:weaponExtra.isExotic?6:5,tierTypeName:weaponExtra.isExotic?'Exotic':'Legendary'}},weaponSemantics:{gearTier,selectedPerks,alternativePerkColumns,perkModel},...weaponExtra};
@@ -129,10 +129,28 @@ const expandedTierFiveWeapon=exactWeapon(609,'weapon-expanded-tier-five','Expand
 assert.equal(validateWeaponModel({weapons:[expandedTierFiveWeapon]}).ready,true,'Verified Tier 5 weapon columns may exceed the baseline row count without blocking Build Forge generation.');
 const incompleteTierFiveWeapon=structuredClone(currentPrimary);incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].expectedRowCount=1;incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options=incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options.slice(0,1);
 assert.equal(validateWeaponModel({weapons:[incompleteTierFiveWeapon]}).ready,false,'Tier 5 weapon evidence below the Bungie baseline must still block Build Forge generation.');
-assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260909-super-evidence-1/,'Build Forge must load the Super evidence background preparation graph.');
-assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260909-super-evidence-1/,'Background preparation must start the Super evidence Forge worker.');
-assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260909-super-evidence-1/,'The Forge worker must load the Super evidence generation sequence.');
-assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260906-complete-build-transfer-1/,'The generation sequence must load the corrected weapon evidence validator.');
+const [praxicCatalogue,praxicIntrinsicCatalogue,praxicBladeCatalogue,praxicGripCatalogue,praxicTraitCatalogue,praxicSandboxCatalogue]=await Promise.all([
+  readFile(new URL('../../data/weapon-catalogue/weapons-sword.json',root),'utf8').then(JSON.parse),
+  readFile(new URL('../../data/weapon-catalogue/plugDefinitions-000.json',root),'utf8').then(JSON.parse),
+  readFile(new URL('../../data/weapon-catalogue/plugDefinitions-016.json',root),'utf8').then(JSON.parse),
+  readFile(new URL('../../data/weapon-catalogue/plugDefinitions-009.json',root),'utf8').then(JSON.parse),
+  readFile(new URL('../../data/weapon-catalogue/plugDefinitions-002.json',root),'utf8').then(JSON.parse),
+  readFile(new URL('../../data/weapon-catalogue/sandboxPerks-004.json',root),'utf8').then(JSON.parse)
+]);
+const praxicDefinition=praxicCatalogue.weapons['3049715579'],praxicIntrinsic=praxicIntrinsicCatalogue.plugDefinitions['89777927'],praxicSandbox=praxicSandboxCatalogue.sandboxPerks['2348883558'];
+assert.equal(praxicDefinition.displayProperties.name,'Praxic Blade');
+assert.equal(praxicDefinition.perks[0].perkHash,2348883558);
+assert.equal(praxicSandbox.displayProperties.description,'','Praxic Blade has a resolved but blank DestinySandboxPerkDefinition description.');
+assert.match(praxicIntrinsic.displayProperties.description,/Throw your Praxic Blade/,'The real effect text must come from Praxic Blade fixed intrinsic plug 89777927.');
+const praxicPerks=[[3514694513,praxicBladeCatalogue],[1958555234,praxicGripCatalogue],[458552176,praxicTraitCatalogue]].map(([hash,catalogue],index)=>{const definition=catalogue.plugDefinitions[String(hash)],display=definition.displayProperties;return {hash,bungieHash:hash,name:display.name,description:display.description,socketIndex:index+1,socketCategoryHash:4241085061,definition};});
+const praxicTierZeroModel=normaliseWeaponPerkModel({gearTier:0,selectedPerks:praxicPerks,alternativePerkColumns:praxicPerks.map(perk=>({socketIndex:perk.socketIndex,options:[perk]}))});
+assert.equal(praxicTierZeroModel.weaponTier,0,'Bungie gearTier 0 must remain Tier 0 instead of being coerced to unknown.');
+assert.equal(validateWeaponModel({weapons:[{itemHash:3049715579,name:'Praxic Blade',gearTier:0,weaponSemantics:{gearTier:0,perkModel:praxicTierZeroModel}}]}).ready,true,'Praxic Blade real Tier 0 one-row perk evidence must be valid.');
+assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260910-generate-termination-1/,'Build Forge must load the terminating background preparation graph.');
+assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260910-generate-termination-1/,'Background preparation must start the terminating Forge worker.');
+assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260910-generate-termination-1/,'The Forge worker must load the terminating generation sequence.');
+assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260910-generate-termination-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
+assert.match(html,/id="forgeActivityDialog"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="pvp"/,'Generate must capture one of the six required activity contexts in an explicit dialog.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
 const weaponResult=selectOwnedWeapons({build:{...intelligenceSource,weapons:[currentPrimary,energyWeapon,powerWeapon],ownedWeapons:ownedWeaponCatalogue,vaultWeapons:ownedWeaponCatalogue},objective:'add-clear'});
 assert.equal(weaponResult.workingBuild.weapons[0].itemInstanceId,'weapon-jolt','Owned-weapon ranking must select the exact verified instance with stronger explicit armour-loop and objective evidence.');

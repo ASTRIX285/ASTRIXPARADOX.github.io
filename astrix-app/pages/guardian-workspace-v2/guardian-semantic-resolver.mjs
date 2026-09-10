@@ -53,7 +53,7 @@ function classifyArmourPlug(plug){
   if(category.includes("archetype")||/armou?r[\s._-]*archetype/.test(text)||armourArchetypeNames.has(norm(plug?.name)))return "archetype";
   if(category.includes("masterwork")||/armou?r[\s._-]*masterwork|masterwork[\s._-]*level/.test(text))return "masterwork";
   if(category.includes("set_bonus")||category.includes("setbonus")||/\b[24][ -]?piece\b|set bonus/.test(text))return "set-bonus";
-  if((category.includes("exotic")&&(category.includes("intrinsic")||category.includes("perk")))||/exotic (armou?r )?(intrinsic|perk)/.test(text))return "exotic-perk";
+  if((Number(plug?.armourItemTierType)===6&&category.includes("intrinsic"))||(category.includes("exotic")&&(category.includes("intrinsic")||category.includes("perk")))||/exotic (armou?r )?(intrinsic|perk)/.test(text))return "exotic-perk";
   if(category.includes("armor.mods.general")||category.includes("armour.mods.general")||/general armou?r mod/.test(text))return "general-mod";
   if((category.includes("armor.mods")||category.includes("armour.mods")||/armou?r mod/.test(text))&&!/general armou?r mod/.test(text))return "slot-mod";
   return "unknown";
@@ -135,7 +135,7 @@ function weaponPerkFamily(plug){
 
 function weaponPerkRowCountForTier(value){
   const tier=Number(value);
-  if(!Number.isInteger(tier)||tier<1)return null;
+  if(!Number.isInteger(tier)||tier<0)return null;
   if(tier>=5)return 3;
   if(tier>=3)return 2;
   return 1;
@@ -143,7 +143,7 @@ function weaponPerkRowCountForTier(value){
 
 function weaponPerkColumnRowCountForTier(value,columnNumber){
   const tier=Number(value),column=Number(columnNumber);
-  if(!Number.isInteger(tier)||tier<1||!Number.isInteger(column)||column<1)return null;
+  if(!Number.isInteger(tier)||tier<0||!Number.isInteger(column)||column<1)return null;
   // Tier 5 adds a third selectable perk only to visual columns 3 and 4.
   // The other columns remain two rows, exactly as Bungie's weapon inspection
   // model presents them. Tier 3 and 4 weapons use two rows throughout.
@@ -153,7 +153,7 @@ function weaponPerkColumnRowCountForTier(value,columnNumber){
 }
 
 function normaliseWeaponPerkModel({gearTier=null,selectedPerks=[],alternativePerkColumns=[]}={}){
-  const weaponTier=Number.isInteger(Number(gearTier))&&Number(gearTier)>0?Math.min(5,Number(gearTier)):null;
+  const weaponTier=Number.isInteger(Number(gearTier))&&Number(gearTier)>=0?Math.min(5,Number(gearTier)):null;
   let expectedRowCount=weaponPerkRowCountForTier(weaponTier)??1;
   const selectedBySocket=new Map((selectedPerks||[]).filter(perk=>Number.isInteger(Number(perk?.socketIndex))).map(perk=>[Number(perk.socketIndex),perk]));
   const alternativesBySocket=new Map((alternativePerkColumns||[]).filter(column=>Number.isInteger(Number(column?.socketIndex))).map(column=>[Number(column.socketIndex),(column.options||[]).filter(option=>classifyWeaponPlug(option)==="perk")]));
@@ -194,7 +194,7 @@ function normaliseWeaponPerkModel({gearTier=null,selectedPerks=[],alternativePer
     source:"bungie-instance-gear-tier-and-reusable-plugs",
     weaponTier,
     expectedRowCount,
-    rowPolicy:{tier1:1,tier2:1,tier3:2,tier4:2,tier5:{default:2,column3:3,column4:3}},
+    rowPolicy:{tier0:1,tier1:1,tier2:1,tier3:2,tier4:2,tier5:{default:2,column3:3,column4:3}},
     columnCount:columns.length,
     columns,
     rows,
@@ -243,7 +243,7 @@ function normaliseWeaponSemantics({profile=null,item=null,itemDefinition=null,pl
   }
   const catalyst=groups.catalyst[0]||null;
   const alternativePerkColumns=normaliseAlternativeColumns(alternativeColumns);
-  const gearTier=Number.isInteger(Number(instance?.gearTier))&&Number(instance.gearTier)>0?Math.min(5,Number(instance.gearTier)):null;
+  const gearTier=Number.isInteger(Number(instance?.gearTier))&&Number(instance.gearTier)>=0?Math.min(5,Number(instance.gearTier)):null;
   const selectedPerks=uniqSockets(groups.perks),perkModel=normaliseWeaponPerkModel({gearTier,selectedPerks,alternativePerkColumns});
   const definitionTraits=(itemDefinition?.resolvedSandboxPerks||item?.definition?.resolvedSandboxPerks||[]).map(definition=>{
     const display=definition?.displayProperties||{},hash=Number(definition?.hash);

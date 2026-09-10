@@ -1,5 +1,5 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
-import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1';
+import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -21,7 +21,7 @@ const clone=value=>{
   try{return structuredClone(value);}
   catch{return JSON.parse(JSON.stringify(value??null));}
 };
-const finite=value=>Number.isFinite(Number(value))?Number(value):null;
+const finite=value=>value===null||value===undefined||value===''?null:(Number.isFinite(Number(value))?Number(value):null);
 const absoluteIcon=path=>path?new URL(path,BUNGIE_ORIGIN).toString():'';
 const definitionFor=(payload,hash)=>payload?.definitions?.[String(hash)]||null;
 const itemKey=item=>String(item?.itemInstanceId||`${item?.itemHash||'unknown'}:${item?.source?.kind||'unknown'}:${item?.source?.characterId||''}`);
@@ -52,7 +52,7 @@ function socketPlugs(payload,rawItem){
   if(!rawItem?.itemInstanceId)return [];
   const states=payload?.profile?.itemComponents?.sockets?.data?.[rawItem.itemInstanceId]?.sockets||[];
   const itemDefinition=definitionFor(payload,rawItem.itemHash)||{};
-  return states.map((state,socketIndex)=>{
+  const rows=states.map((state,socketIndex)=>{
     const hash=finite(state?.plugHash);
     if(hash===null)return null;
     const identity=displayIdentity(payload,hash);
@@ -62,11 +62,20 @@ function socketPlugs(payload,rawItem){
       socketIndex,
       socketCategoryHash:category.hash,
       socketCategoryDefinition:category.definition,
+      armourItemTierType:finite(itemDefinition?.inventory?.tierType),
       isEnabled:state?.isEnabled!==false,
       isVisible:state?.isVisible!==false,
       statContributions:statContributions(payload,identity.definition)
     };
+  }).filter(Boolean),resolvedSocketIndexes=new Set(rows.map(row=>Number(row.socketIndex)));
+  const fixedIntrinsicRows=(itemDefinition?.sockets?.socketEntries||[]).map((entry,socketIndex)=>{
+    if(resolvedSocketIndexes.has(socketIndex))return null;
+    const hash=finite(entry?.singleInitialItemHash),plugDefinition=hash===null?null:definitionFor(payload,hash),plugCategory=String(plugDefinition?.plug?.plugCategoryIdentifier||'').toLowerCase();
+    if(hash===null||!plugDefinition||!plugCategory.includes('intrinsic'))return null;
+    const identity=displayIdentity(payload,hash),category=socketCategory(payload,itemDefinition,socketIndex);
+    return {...identity,socketIndex,socketCategoryHash:category.hash,socketCategoryDefinition:category.definition,armourItemTierType:finite(itemDefinition?.inventory?.tierType),isEnabled:true,isVisible:entry?.defaultVisible!==false,source:'bungie-manifest-fixed-intrinsic',statContributions:statContributions(payload,identity.definition)};
   }).filter(Boolean);
+  return [...rows,...fixedIntrinsicRows].sort((left,right)=>Number(left.socketIndex)-Number(right.socketIndex));
 }
 
 function statContributions(payload,definition){

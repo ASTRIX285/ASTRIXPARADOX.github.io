@@ -9,6 +9,7 @@ import {bungieDefinitionHashes,enrichEquipableSets,enrichOwnedWeaponDefinitions,
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
 import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
+import {createVaultCatalogue} from '../pages/vault/vault-inventory.mjs';
 
 // Regression evidence: Miguel's equipped Smoke Jumper Vestment, with its real
 // manifest set and perks. No account identifier, roll or stat is fabricated.
@@ -32,6 +33,9 @@ const semanticWrapperSource=await readFile(new URL('../../forge-auth-worker/src/
 assert.match(semanticWrapperSource,/const account = payload\?\.transport === "prepared-page-stream-v1" && payload\?\.account[\s\S]*?\? payload\.account[\s\S]*?resolveMissingInventoryDefinitions\(account, requested, env\)/,'Prepared Build Forge account envelopes must resolve live subclass socket definitions inside account data.');
 assert.match(semanticWrapperSource,/account\.subclassCatalogCoverage = \{[\s\S]*?complete: unresolved\.length === 0/,'Prepared Build Forge subclass enrichment must publish exact socket definition coverage on the account payload.');
 assert.match(semanticWrapperSource,/value !== "owned-item-definitions"[\s\S]*?coverage: \{complete: missing\.length === 0, missing\}/,'Resolved subclass definitions must repair the prepared page readiness contract before client validation.');
+assert.match(semanticWrapperSource,/weaponEffectCoverage\?\.missingEffectDescriptions[\s\S]*?manifest_effect_evidence_missing/,'The backend must log an exact missing weapon effect evidence record.');
+assert.match(semanticWrapperSource,/weaponEffectCoverage\?\.sandboxPerkUnresolved[\s\S]*?definitionType: "DestinySandboxPerkDefinition"[\s\S]*?field: "ownedWeapon\.definition\.perks\.perkHash"/,'The backend must log an exact unresolved weapon SandboxPerk hash and field.');
+assert.match(semanticWrapperSource,/manifest_definition_unresolved[\s\S]*?field: "ownedWeapon\.socketDefinition"/,'The backend must log the exact unresolved owned weapon socket hash and field.');
 const setIconExpression=gearSource.match(/const setBonusIcon = ([^;]+);/)?.[1];
 assert.ok(setIconExpression);
 const renderSetIcon=new Function('armourSet','bungieIcon',`return ${setIconExpression};`);
@@ -84,6 +88,25 @@ assert.deepEqual(resolvedSubclassHashes,realPrismaticSocketHashes);
 assert.equal(Object.keys(resolvedSubclassDefinitions).length,realPrismaticSocketHashes.length,'The empty socket must not poison resolution of the real Super and fragment definitions.');
 console.log('BACKEND_NULL_SUBCLASS_SOCKET_FILTER=PASS');
 
+// Miguel's Nothing Manacles handoff can carry a null live socket at the fixed
+// Exotic intrinsic position. The compact manifest still proves the real
+// Scatter Charge plug through singleInitialItemHash 395373724.
+const nothingManaclesDefinition=armourIndex.definitions['3982932616'],nothingManaclesSockets=armourIndex.socketLayouts[nothingManaclesDefinition.socketLayoutKey],nothingManaclesInstance='captured-nothing-manacles-instance';
+const nothingManaclesPayload={
+  profile:{
+    profileInventory:{data:{items:[{itemHash:3982932616,itemInstanceId:nothingManaclesInstance,bucketHash:138197802}]}},
+    characterInventories:{data:{}},characterEquipment:{data:{}},
+    itemComponents:{sockets:{data:{[nothingManaclesInstance]:{sockets:Array.from({length:nothingManaclesSockets.socketEntries.length},()=>({plugHash:null}))}}},instances:{data:{[nothingManaclesInstance]:{gearTier:5}}},stats:{data:{}}}
+  },
+  definitions:{'3982932616':{...nothingManaclesDefinition,sockets:nothingManaclesSockets},'395373724':armourIndex.plugDefinitions['395373724']},
+  statDefinitions:{},socketCategoryDefinitions:{},equipableItemSets:armourIndex.equipableItemSets,sandboxPerks:armourIndex.sandboxPerks
+};
+const capturedNothingManacles=createVaultCatalogue(nothingManaclesPayload).armour.find(item=>item.itemInstanceId===nothingManaclesInstance);
+assert.equal(capturedNothingManacles.exoticPerk.hash,395373724,'A null live Exotic socket must use its resolved fixed Bungie intrinsic plug.');
+assert.match(capturedNothingManacles.exoticPerk.description,/additional Scatter Grenade charge/);
+assert.equal(capturedNothingManacles.exoticPerk.source,'bungie-manifest-fixed-intrinsic');
+console.log('NOTHING_MANACLES_FIXED_INTRINSIC_EFFECT=PASS');
+
 // Miguel's live Forge Loader page carried Vault-scoped weapon items, whose
 // component bucket is the Vault rather than a weapon slot. The prepared worker
 // must resolve the real item definition before it can identify and index them.
@@ -115,7 +138,7 @@ const weaponEnv={MANIFEST_DATA:{async fetch(request){
   if(path==='/status')return Response.json({manifestVersion:armourIndex.manifestVersion});
   assert.equal(path,'/resolve');
   const body=await request.json();
-  return Response.json({manifestVersion:armourIndex.manifestVersion,tables:{DestinyInventoryItemDefinition:Object.fromEntries(body.requests.DestinyInventoryItemDefinition.filter(hash=>weaponDefinitions[hash]).map(hash=>[hash,weaponDefinitions[hash]]))}});
+  return Response.json({manifestVersion:armourIndex.manifestVersion,tables:{DestinyInventoryItemDefinition:Object.fromEntries((body.requests.DestinyInventoryItemDefinition||[]).filter(hash=>weaponDefinitions[hash]).map(hash=>[hash,weaponDefinitions[hash]])),DestinySandboxPerkDefinition:{}}});
 }}};
 await enrichOwnedWeaponDefinitions(weaponEnvelope,weaponEnv);
 assert.equal(weaponEnvelope.account.definitions[String(realOwnedWeaponHash)].displayProperties.name,'Unsworn','The prepared account envelope must receive the real Vault weapon definition.');
@@ -123,6 +146,43 @@ assert.equal(weaponEnvelope.account.definitions[String(realSelectedPlugHash)].di
 assert.deepEqual(weaponEnvelope.account.weaponDefinitionCoverage.itemInstances,[capturedOwnedWeaponInstance]);
 assert.equal(weaponEnvelope.account.weaponDefinitionCoverage.complete,true,'Real owned weapon and selected socket definitions must publish complete source coverage.');
 console.log('PREPARED_ACCOUNT_OWNED_WEAPON_DEFINITIONS=PASS');
+
+// Praxic Blade's real DestinySandboxPerkDefinition 2348883558 is present but
+// blank. Its actual effect description is the fixed intrinsic inventory plug
+// 89777927, which must be hydrated even when live socket zero is null.
+const [swordCatalogue,intrinsicCatalogue,bladeCatalogue,gripCatalogue,traitCatalogue,sandboxCatalogue]=await Promise.all([
+  readFile(new URL('../data/weapon-catalogue/weapons-sword.json',import.meta.url),'utf8').then(JSON.parse),
+  readFile(new URL('../data/weapon-catalogue/plugDefinitions-000.json',import.meta.url),'utf8').then(JSON.parse),
+  readFile(new URL('../data/weapon-catalogue/plugDefinitions-016.json',import.meta.url),'utf8').then(JSON.parse),
+  readFile(new URL('../data/weapon-catalogue/plugDefinitions-009.json',import.meta.url),'utf8').then(JSON.parse),
+  readFile(new URL('../data/weapon-catalogue/plugDefinitions-002.json',import.meta.url),'utf8').then(JSON.parse),
+  readFile(new URL('../data/weapon-catalogue/sandboxPerks-004.json',import.meta.url),'utf8').then(JSON.parse)
+]);
+const praxicHash=3049715579,praxicPerkHash=2348883558,praxicIntrinsicHash=89777927,praxicInstance='captured-praxic-blade-instance',cataloguedPraxic=swordCatalogue.weapons[String(praxicHash)];
+const rawPraxicDefinition={...cataloguedPraxic,sockets:{socketEntries:cataloguedPraxic.socketCatalogue.map(row=>({singleInitialItemHash:row.initialPlugHash,reusablePlugSetHash:row.reusablePlugSetHash,randomizedPlugSetHash:row.randomizedPlugSetHash,socketTypeHash:row.socketTypeHash}))}};
+const praxicInventoryDefinitions={
+  [praxicIntrinsicHash]:intrinsicCatalogue.plugDefinitions[String(praxicIntrinsicHash)],
+  3514694513:bladeCatalogue.plugDefinitions['3514694513'],
+  1958555234:gripCatalogue.plugDefinitions['1958555234'],
+  458552176:traitCatalogue.plugDefinitions['458552176']
+};
+const praxicEnvelope={transport:'prepared-page-stream-v1',account:{profile:{profileInventory:{data:{items:[]}},characterInventories:{data:{}},characterEquipment:{data:{captured:{items:[{itemHash:praxicHash,itemInstanceId:praxicInstance,bucketHash:953998645}]}}},itemComponents:{sockets:{data:{[praxicInstance]:{sockets:[{plugHash:null},{plugHash:3514694513},{plugHash:1958555234},{plugHash:458552176}]}}}}},definitions:{[praxicHash]:rawPraxicDefinition},definitionCoverage:{complete:true}},prepared:{manifestVersion:armourIndex.manifestVersion,weaponDefinitionHashes:[praxicHash],loadoutCoverage:{weaponDefinitions:1,complete:true}}};
+const praxicEnv={MANIFEST_DATA:{async fetch(request){
+  const path=new URL(request.url).pathname;if(path==='/status')return Response.json({manifestVersion:armourIndex.manifestVersion});assert.equal(path,'/resolve');
+  const body=await request.json(),tables={};
+  for(const [type,hashes] of Object.entries(body.requests||{})){
+    const table=type==='DestinyInventoryItemDefinition'?praxicInventoryDefinitions:type==='DestinySandboxPerkDefinition'?sandboxCatalogue.sandboxPerks:{};
+    tables[type]=Object.fromEntries(hashes.filter(hash=>table[String(hash)]).map(hash=>[hash,table[String(hash)]]));
+  }
+  return Response.json({manifestVersion:armourIndex.manifestVersion,tables});
+}}};
+await enrichOwnedWeaponDefinitions(praxicEnvelope,praxicEnv);
+assert.equal(praxicEnvelope.account.sandboxPerks[String(praxicPerkHash)].displayProperties.description,'','The real Praxic sandbox perk is resolved, not missing, but has no effect text.');
+assert.equal(praxicEnvelope.account.weaponEffectCoverage.intrinsicEvidence[String(praxicHash)],praxicIntrinsicHash);
+assert.match(praxicEnvelope.account.definitions[String(praxicIntrinsicHash)].displayProperties.description,/Throw your Praxic Blade/);
+assert.deepEqual(praxicEnvelope.account.weaponEffectCoverage.missingEffectDescriptions,[]);
+assert.ok(praxicEnvelope.account.weaponEffectCoverage.emptySandboxPerkDescriptions.some(row=>row.perkHash===praxicPerkHash&&row.fallbackPlugHash===praxicIntrinsicHash));
+console.log('PRAXIC_BLADE_REAL_EFFECT_FALLBACK=PASS');
 
 function storage(){
   const rows=new Map();
