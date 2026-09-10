@@ -7,7 +7,7 @@
 
 /* ===== LAYOUT / WORKSPACE COLUMNS  ·  the 3-column page grid ===== */
 .forge-loader-shell{width:100%;max-width:none}
-.forge-loader-workspace{display:grid;grid-template-columns:minmax(400px,20%) minmax(600px,44%) minmax(600px,1fr);gap:var(--apx-workspace-gap,.625rem);align-items:stretch}
+.forge-loader-workspace{display:grid;grid-template-columns:minmax(360px,20%) minmax(640px,44%) minmax(560px,1fr);gap:var(--apx-workspace-gap,.625rem);align-items:stretch}
 .forge-loader-selector,.forge-loader-directives,.forge-loader-output{display:grid;gap:1rem;min-width:0;align-content:start}.forge-set-selector,.forge-loader-output{container-type:inline-size}
 
 /* ===== PANELS  ·  crimson-bordered boxes + headings ===== */
