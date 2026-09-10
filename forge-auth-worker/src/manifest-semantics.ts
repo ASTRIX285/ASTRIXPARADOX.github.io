@@ -1,5 +1,16 @@
-async function preparedDefinitions(definitionType: string, hashes: Iterable<number>, env: Env): Promise<Record<string, Record<string, any>>> {
-  const unique = [...new Set([...hashes].map(Number).filter(Number.isInteger))];
+const MAX_BUNGIE_DEFINITION_HASH = 0xffffffff;
+
+function bungieDefinitionHash(value: unknown): number | null {
+  const hash = Number(value);
+  return Number.isInteger(hash) && hash > 0 && hash <= MAX_BUNGIE_DEFINITION_HASH ? hash : null;
+}
+
+function bungieDefinitionHashes(values: Iterable<unknown>): number[] {
+  return [...new Set([...values].map(bungieDefinitionHash).filter((hash): hash is number => hash !== null))];
+}
+
+async function preparedDefinitions(definitionType: string, hashes: Iterable<unknown>, env: Env): Promise<Record<string, Record<string, any>>> {
+  const unique = bungieDefinitionHashes(hashes);
   if (!env.MANIFEST_DATA || !unique.length) return {};
   const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
   const status = statusResponse?.ok ? await statusResponse.json<{ manifestVersion?: string }>().catch(() => null) : null;
@@ -20,15 +31,14 @@ async function manifestDefinition(
   hash: number,
   env: Env
 ): Promise<Record<string, any> | null> {
-  if (!Number.isInteger(hash)) return null;
+  if (bungieDefinitionHash(hash) === null) return null;
   const prepared = await preparedDefinitions(definitionType, [hash], env);
   return prepared[String(hash)] || null;
 }
 
 function equipableSetHash(itemDefinition: Record<string, any>): number | null {
   const value = itemDefinition?.equipableItemSetHash ?? itemDefinition?.equippingBlock?.equipableItemSetHash;
-  const hash = Number(value);
-  return Number.isInteger(hash) && hash > 0 ? hash : null;
+  return bungieDefinitionHash(value);
 }
 
 async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
@@ -51,11 +61,9 @@ async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
   const sets: Record<string, Record<string, any>> = { ...(payload.equipableItemSets || {}) };
   Object.assign(sets, await preparedDefinitions("DestinyEquipableItemSetDefinition", setHashes.filter(hash => !sets[String(hash)]), env));
 
-  const perkHashes = [...new Set(
-    Object.values(sets).flatMap((set: any) => (set?.setPerks || [])
-      .map((perk: any) => Number(perk?.sandboxPerkHash))
-      .filter(Number.isInteger))
-  )];
+  const perkHashes = bungieDefinitionHashes(
+    Object.values(sets).flatMap((set: any) => (set?.setPerks || []).map((perk: any) => perk?.sandboxPerkHash))
+  );
   const sandboxPerks: Record<string, Record<string, any>> = { ...(payload.sandboxPerks || {}) };
   Object.assign(sandboxPerks, await preparedDefinitions("DestinySandboxPerkDefinition", perkHashes.filter(hash => !sandboxPerks[String(hash)]), env));
 
@@ -73,4 +81,4 @@ async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
   return payload;
 }
 
-export { manifestDefinition, preparedDefinitions, equipableSetHash, enrichEquipableSets };
+export { bungieDefinitionHash, bungieDefinitionHashes, manifestDefinition, preparedDefinitions, equipableSetHash, enrichEquipableSets };
