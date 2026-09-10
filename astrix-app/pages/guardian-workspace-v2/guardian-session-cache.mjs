@@ -285,6 +285,9 @@ function profileMarkerKey(page){return `${PROFILE_MARKER_PREFIX}${pageKind(page)
 function profileFallbackKey(page){return `${PROFILE_FALLBACK_PREFIX}${pageKind(page)}`;}
 function loadoutRecordKey(identity,characterId,index){return `loadout:v2:${identity}:${characterId}:${index}`;}
 function isFresh(record){return Boolean(record&&Date.now()-Number(record.savedAt||0)<=PROFILE_TTL_MS);}
+function hasCurrentPreparedProfileContract(payload,scope){
+  return scope!=='loadout'||payload?.weaponDefinitionCoverage?.schemaVersion===1;
+}
 
 async function cacheBungieProfile(session,payload,page=payload?.pageReady?.page){
   const identity=sessionIdentity(session);
@@ -307,12 +310,12 @@ async function readCachedBungieProfile(session,page="shared"){
   const marker=safeSessionRead(profileMarkerKey(scope));
   if(!identity||marker?.identity!==identity||marker?.scope!==scope||!isFresh(marker))return null;
   const stored=await readRecord(marker.key);
-  if(stored?.identity===identity&&stored?.scope===scope&&isFresh(stored)&&stored.payload){
+  if(stored?.identity===identity&&stored?.scope===scope&&isFresh(stored)&&stored.payload&&hasCurrentPreparedProfileContract(stored.payload,scope)){
     if(typeof stored.payload==="object")profileCacheSavedAt.set(stored.payload,Number(stored.savedAt));
     return stored.payload;
   }
   const fallback=safeSessionRead(profileFallbackKey(scope));
-  if(fallback?.identity===identity&&fallback?.scope===scope&&fallback?.key===marker.key&&isFresh(fallback)){
+  if(fallback?.identity===identity&&fallback?.scope===scope&&fallback?.key===marker.key&&isFresh(fallback)&&hasCurrentPreparedProfileContract(fallback.payload,scope)){
     if(fallback.payload&&typeof fallback.payload==="object")profileCacheSavedAt.set(fallback.payload,Number(fallback.savedAt));
     return fallback.payload;
   }

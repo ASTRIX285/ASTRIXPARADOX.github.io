@@ -1,5 +1,5 @@
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&contract=20260910-owned-weapon-1';
 
 const PAGE_PATH='/astrix-app/pages/forge-loader/';
 const FORGE_LOADER_PRELOAD_RECEIPT_KEY='astrix:forge-loader-preload-receipt:v1';

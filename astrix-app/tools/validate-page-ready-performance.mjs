@@ -105,7 +105,8 @@ function payloadFor(page){
     payload.forgeArmourIndex=forge;
     payload.artifactCatalog=forge.artifactCatalog;
     payload.collectibleDefinitions={'8201':{hash:8201,sourceString:'Verified Bungie acquisition source'}};
-    payload.loadoutCoverage={complete:true,collectibleHashes:1,collectibleDefinitions:1,unresolvedCollectibleHashes:[]};
+    payload.weaponDefinitionHashes=[1303313141];
+    payload.loadoutCoverage={complete:true,collectibleHashes:1,collectibleDefinitions:1,unresolvedCollectibleHashes:[],weaponDefinitions:1};
   }
   if(page==='journey')Object.assign(payload,{
     manifestTables:publicJourney,
@@ -130,9 +131,11 @@ function streamEnvelopeFor(page,payload){
     account.definitions={};
   }else if(page==='loadout'){
     prepared.forgeArmourIndex=account.forgeArmourIndex;
+    prepared.weaponDefinitionHashes=account.weaponDefinitionHashes;
     prepared.collectibleDefinitions=account.collectibleDefinitions;
     prepared.loadoutCoverage=account.loadoutCoverage;
     delete account.forgeArmourIndex;
+    delete account.weaponDefinitionHashes;
     delete account.collectibleDefinitions;
     delete account.loadoutCoverage;
     delete account.artifactCatalog;
@@ -191,10 +194,11 @@ for(const page of Object.keys(PAGE_VIEWS))assert.match(backend,new RegExp(`\\b${
 assert.match(backend,/preparedJourneyAccountData[\s\S]*?historical-stats[\s\S]*?activity-history/,'Journey route must merge cached career and activity data');
 const cache=await readFile(new URL('pages/guardian-workspace-v2/guardian-session-cache.mjs',root),'utf8');
 assert.match(cache,/profile:v3:\$\{identity\}:\$\{pageKind\(page\)\}/,'Prepared payload cache must be isolated by page');
+assert.match(cache,/hasCurrentPreparedProfileContract[\s\S]*?weaponDefinitionCoverage\?\.schemaVersion===1/,'A stale Loadout payload must not survive a deployed residency contract change.');
 const builder=await readFile(new URL('tools/build-backend-manifest.py',root),'utf8');
 for(const hash of JOURNEY_ROOTS)assert.match(builder,new RegExp(String(hash)),`Backend Journey bundle is missing real root ${hash}`);
 assert.match(builder,/DestinyInventoryItemDefinition[\s\S]*?DestinyGuardianRankDefinition[\s\S]*?DestinyGuardianRankConstantsDefinition/,'Journey bundle must include collection item and Guardian Rank definitions');
-assert.match(builder,/loadout_collectible_hashes[\s\S]*?loadout_collectibles[\s\S]*?loadout_coverage/,'Loadout bundle must carry every Bungie acquisition source required by a local interaction');
+assert.match(builder,/loadout_collectible_hashes[\s\S]*?loadout_collectibles[\s\S]*?weapon_definition_hashes[\s\S]*?loadout_coverage/,'Loadout bundle must carry acquisition sources and the complete compact weapon definition index');
 assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'Page routes must stream prepared bundles outside the auth Worker heap');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy static manifest tables in the auth Worker');
