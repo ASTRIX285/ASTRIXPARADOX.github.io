@@ -9,7 +9,7 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from '../vault/vau
 import {compatibleWithClass,createOpenProtocolTieBreaker,exoticCatalogueGroups,naturalSetProtocols,ownedExoticGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260904-top-50-scan-1';
 import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from './forge-loader-build-handoff.mjs?v=20260906-review-layout-1';
 import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260906-page-data-recovery-1&resident=20260910-step-1';
-import {forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-resident-staging-1';
+import {forgeLoaderEvaluateReady,forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-mobile-ready-1';
 import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
@@ -84,8 +84,12 @@ function renderResidency(phase='verifying'){
   panel?.classList.toggle('is-ready',view.ready);
   if(status)status.textContent=view.ready?'ALL SOURCES READY':view.rows.some(row=>row.state==='resident')?'DATA RESIDENT':'VERIFYING';
   if(summary)summary.textContent=view.summary;
-  const enter=byId('forgeEvaluate');if(enter)enter.disabled=selectedSlots.size!==5||!activeCharacterId||!residentReady;
+  const enter=byId('forgeEvaluate');if(enter)enter.disabled=!forgeLoaderEvaluateReady(view,selectedSlots,activeCharacterId);
   return view;
+}
+
+function renderCurrentResidency(){
+  return renderResidency(residentProfileBuild&&combinationsPrewarmed?'ready':payload?'resident':'verifying');
 }
 
 async function prepareResidentProfileBuild(){
@@ -264,7 +268,7 @@ function stagedMarkup(slot,index){
 function renderStaged(){
   byId('forgeStagedSlots').innerHTML=ARMOUR_BUCKETS.map(stagedMarkup).join('');
   byId('forgeStagedStatus').textContent=selectedSlots.size===5?'COMPLETE VERIFIED LOAD':`${selectedSlots.size} OF 5 STAGED`;
-  byId('forgeEvaluate').disabled=selectedSlots.size!==5||!activeCharacterId||!residentReady;
+  renderCurrentResidency();
 }
 
 function candidateSetProtocol(candidate){
@@ -495,7 +499,8 @@ function showInspect(target){
 function hideInspect(){const panel=byId('forgeItemInspect');if(panel){panel.hidden=true;panel.setAttribute('aria-hidden','true');}}
 
 async function evaluateInBuildForge(){
-  if(selectedSlots.size!==5||!residentReady)return;
+  const residency=renderCurrentResidency();
+  if(!forgeLoaderEvaluateReady(residency,selectedSlots,activeCharacterId))return;
   const candidate=matchedBuilds[selectedCandidateIndex];if(!candidate)return;
   const binding=membershipBinding();
   byId('forgeRuntimeStatus').textContent='Protecting the verified equipped Guardian before Build Forge opens…';

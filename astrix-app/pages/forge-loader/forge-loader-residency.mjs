@@ -40,6 +40,11 @@ function sourceState(resident,complete,phase){
   return phase==='ready'&&complete?'ready':'resident';
 }
 
+function forgeLoaderEvaluateReady(residency={},selectedSlots=new Map(),characterId=''){
+  const selectedCount=selectedSlots instanceof Map?selectedSlots.size:Array.isArray(selectedSlots)?new Set(selectedSlots.map(row=>Number(row?.slotIndex)).filter(Number.isInteger)).size:0;
+  return residency?.ready===true&&selectedCount===5&&Boolean(text(characterId));
+}
+
 function forgeLoaderResidency(payload={},options={}){
   const characterId=text(options.characterId),profile=payload?.profile||{},profileBuild=options.profileBuild||null,catalogue=options.catalogue||{},phase=options.phase||'verifying';
   const equipment=profile?.characterEquipment?.data?.[characterId],profileInventory=profile?.profileInventory?.data;
@@ -64,4 +69,4 @@ function forgeLoaderResidency(payload={},options={}){
   };
 }
 
-export {accountItemRows,forgeLoaderResidency,hasVerifiedSubclassSockets,liveSubclassRows,subclassFragmentCount};
+export {accountItemRows,forgeLoaderEvaluateReady,forgeLoaderResidency,hasVerifiedSubclassSockets,liveSubclassRows,subclassFragmentCount};

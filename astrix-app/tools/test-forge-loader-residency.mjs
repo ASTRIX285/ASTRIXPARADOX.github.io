@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {accountItemRows,forgeLoaderResidency} from '../pages/forge-loader/forge-loader-residency.mjs';
+import {accountItemRows,forgeLoaderEvaluateReady,forgeLoaderResidency} from '../pages/forge-loader/forge-loader-residency.mjs';
 
 const characterId='2305843009260000001';
 const payload={
@@ -57,6 +57,10 @@ const ready=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,pha
 assert.equal(ready.ready,true);
 assert.equal(ready.rows.every(row=>row.state==='ready'),true);
 assert.equal(ready.summary,'4 items indexed · combinations pre-warmed · ready in 1.3s');
+const fiveSlots=new Map(Array.from({length:5},(_,slotIndex)=>[slotIndex,{slotIndex}]));
+assert.equal(forgeLoaderEvaluateReady(ready,fiveSlots,characterId),true,'A complete staged load must unlock only against the current ready residency result.');
+assert.equal(forgeLoaderEvaluateReady(ready,new Map([...fiveSlots].slice(0,4)),characterId),false,'Four staged slots must remain locked even when every source is resident.');
+assert.equal(forgeLoaderEvaluateReady({...ready,ready:false},fiveSlots,characterId),false,'A five-piece load must not weaken a genuinely incomplete residency gate.');
 
 const incompleteProfile={...profileBuild,subclassCatalog:profileBuild.subclassCatalog.map(row=>({...row,subclassBuild:{...row.subclassBuild,socketsAvailable:false}}))};
 const incomplete=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild:incompleteProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
@@ -70,3 +74,4 @@ assert.equal(unresolvedSockets.rows.find(row=>row.key==='subclass').state,'resid
 
 console.log('FORGE_LOADER_RESIDENCY_INSTANCE_DEDUPLICATION=PASS');
 console.log('FORGE_LOADER_RESIDENCY_HONEST_INCOMPLETE_STATE=PASS');
+console.log('FORGE_LOADER_CURRENT_HANDOFF_GATE=PASS');

@@ -251,8 +251,10 @@ assert.match(html,/data-resident-source="equipped"[\s\S]*?data-resident-source="
 assert.match(residency,/Verifying required Bungie sources\. No unverified counts are shown\./,'Unresolved resident sources must never paint placeholder counts.');
 assert.match(residency,/items indexed · combinations pre-warmed · ready in/,'Ready state must expose the measured DIM-style resident summary.');
 assert.match(runtime,/async function completeResidentPreparation\(\)[\s\S]*?prepareResidentProfileBuild\(\)[\s\S]*?prewarmCombinationPools\(\)[\s\S]*?renderResidency\('ready'\)/,'Forge Loader must normalise and pre-warm verified resident data before enabling the handoff.');
-assert.match(runtime,/forgeEvaluate'\);if\(enter\)enter\.disabled=selectedSlots\.size!==5\|\|!activeCharacterId\|\|!residentReady/,'The primary Build Forge handoff must stay disabled until every resident source is ready.');
-assert.match(runtime,/async function evaluateInBuildForge\(\)\{\s*if\(selectedSlots\.size!==5\|\|!residentReady\)return;/,'Forge Loader must reject an unverified handoff even if called outside the button path.');
+assert.match(runtime,/forgeEvaluate'\);if\(enter\)enter\.disabled=!forgeLoaderEvaluateReady\(view,selectedSlots,activeCharacterId\)/,'The primary Build Forge handoff must use the current residency result and all five staged slots.');
+assert.match(runtime,/function renderStaged\(\)[\s\S]*?renderCurrentResidency\(\);/,'Every manual or Forge Matrix staged-slot repaint must re-evaluate the current resident sources.');
+assert.match(runtime,/function stageCandidate\(index\)[\s\S]*?selectedSlots\.set\(item\.slotIndex,item\)[\s\S]*?renderStaged\(\)/,'Forge Matrix staging must pass through the current-residency repaint path after all five exact items are selected.');
+assert.match(runtime,/async function evaluateInBuildForge\(\)\{\s*const residency=renderCurrentResidency\(\);\s*if\(!forgeLoaderEvaluateReady\(residency,selectedSlots,activeCharacterId\)\)return;/,'Forge Loader must re-check current residency at the final handoff boundary even if called outside the button path.');
 assert.match(runtime,/url\.searchParams\.set\('prewarm','forge-loader'\)/,'The verified handoff must request the existing Build Forge worker pre-warm.');
 assert.match(html,/<header class="apx-destination-header forge-command-header">[\s\S]*?<strong>FORGE LOADER<\/strong><small>SELECT AND MAXIMISE VERIFIED ARMOUR<\/small>/,'Forge Loader must present its page identity only in the shared compact command header.');
 assert.doesNotMatch(html,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not retain the oversized duplicate page hero.');
@@ -350,8 +352,8 @@ assert.doesNotMatch(runtime,/if\(!baselineStored\)\{[^}]*?return;/,'A rejected b
 assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.set\('baseline','bungie-recovery'\)/,'The destination must request authenticated recovery only when the atomic baseline is unavailable.');
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
-assert.match(html,/forge-loader\.mjs\?v=20260909-matrix-stat-icons-1/,'Forge Loader must load the Matrix stat icon structure without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260909-matrix-small-set-icons-1/,'Forge Loader must load the smaller Matrix set icons without stale page CSS.');
+assert.match(html,/forge-loader\.mjs\?v=20260910-mobile-ready-1/,'Forge Loader must load the current staging and residency runtime without stale browser code.');
+assert.match(html,/forge-loader\.css\?v=20260910-mobile-ready-1/,'Forge Loader must load the compact mobile staged-armour grid without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');
@@ -422,6 +424,10 @@ assert.match(css,/\/\* Compact set list\.[\s\S]*?\.forge-set-choices\{[^}]*grid-
 assert.match(css,/@container\(max-width:44rem\)[\s\S]*?\.forge-set-grid\{grid-template-columns:minmax\(0,1fr\)\}[\s\S]*?@container\(max-width:28rem\)[\s\S]*?\.forge-set-choices\{grid-template-columns:minmax\(0,1fr\)\}/,'Grouped Set Protocol pairs must remain intact until the panel is too narrow, then wrap without overlap.');
 assert.match(css,/\.forge-set-icon,[\s\S]*?border-radius:50%/,'Set list icons use round frames.');
 assert.match(css,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-stage\)[\s\S]*?\.forge-staged-slot img,\.forge-stage-empty\{width:var\(--apx-icon-stage\);height:var\(--apx-icon-stage\)/,'Staged armour must consume the exact shared stage icon token.');
+assert.match(css,/@media\(max-width:820px\)\{\.forge-staged-slots\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\);gap:\.4rem\}[\s\S]*?\.forge-staged-slot\{grid-template-columns:var\(--apx-icon-record\) minmax\(0,1fr\)/,'Common phone and compact widths must retain three tight staged-armour columns using the existing compact icon tier.');
+assert.match(css,/@media\(max-width:560px\)\{\.forge-staged-slots\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/,'Narrow phones must retain two staged-armour columns rather than one oversized item per row.');
+assert.doesNotMatch(css,/@media\(max-width:820px\)\{\.forge-staged-slots\{grid-template-columns:1fr\}/,'Mobile Staged armour must never collapse back to one full-width card per piece.');
+assert.match(css,/@media\(max-width:820px\)[\s\S]*?\.forge-staged-slot b,\.forge-staged-slot small\{[^}]*white-space:normal[^}]*overflow-wrap:anywhere\}/,'Compact staged cards must keep the item name, total and source readable without clipping them out.');
 assert.match(css,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-selector\),1fr\)/,'Exotic selection must consume the shared selector icon token.');
 assert.match(css,/\.forge-inspect-main\{[^}]*grid-template-columns:var\(--apx-icon-inspect\)[\s\S]*?\.forge-inspect-main img\{width:var\(--apx-icon-inspect\);height:var\(--apx-icon-inspect\)/,'Matched item inspection must consume the shared inspect icon token.');
 assert.match(runtime,/document\.documentElement\.append\(panel\)/,'The inspection card must escape the density-scaled body before viewport positioning.');
