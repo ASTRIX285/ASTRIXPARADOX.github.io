@@ -77,6 +77,30 @@ jobs:
           await readVersionWindow('before-week-by-version','2026-09-02T00:00:00.000Z','2026-09-05T00:00:00.000Z');
           await readVersionWindow('regression-by-version','2026-09-10T13:15:00.000Z','2026-09-11T09:00:00.000Z');
 
+          const requestQuery=`query WorkerRequests($accountTag: string, $start: string, $end: string, $script: string) {
+            viewer {
+              accounts(filter: {accountTag: $accountTag}) {
+                workersInvocationsAdaptive(limit: 10000, filter: {scriptName: $script, datetime_geq: $start, datetime_leq: $end}) {
+                  sum { requests errors subrequests cpuTimeUs requestDuration responseBodySize wallTime }
+                  quantiles { cpuTimeP50 cpuTimeP99 requestDurationP50 requestDurationP99 responseBodySizeP50 responseBodySizeP99 wallTimeP50 wallTimeP99 }
+                  max { cpuTime requestDuration responseBodySize wallTime }
+                  dimensions { datetime scriptName scriptVersion status }
+                }
+              }
+            }
+          }`;
+          const requestResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
+            method:'POST',
+            headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
+            body:JSON.stringify({query:requestQuery,variables:{accountTag:process.env.CLOUDFLARE_ACCOUNT_ID,start:'2026-09-10T13:15:00.000Z',end:'2026-09-11T09:00:00.000Z',script:'astrix-destiny-backend'}})
+          });
+          const requestBody=await requestResponse.json();
+          if(!requestResponse.ok||requestBody.errors?.length)throw new Error(`Cloudflare request analytics failed ${requestResponse.status}: ${JSON.stringify(requestBody.errors||[])}`);
+          const largeResponses=(requestBody.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive||[])
+            .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>5_000_000)
+            .sort((left,right)=>String(left.dimensions?.datetime).localeCompare(String(right.dimensions?.datetime)));
+          console.log(JSON.stringify({largeResponses}));
+
           const introspectionQuery=`query WorkerSchema {
             account: __type(name: "Account") {
               fields { name description type { kind name ofType { kind name } } }
