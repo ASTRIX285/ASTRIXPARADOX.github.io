@@ -55,7 +55,7 @@ jobs:
             }
           }`;
           const requestStart='2026-09-11T09:42:25.000Z';
-          const requestEnd='2026-09-11T09:50:45.000Z';
+          const requestEnd='2026-09-11T09:53:30.000Z';
           const requestResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
             method:'POST',
             headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
@@ -63,8 +63,8 @@ jobs:
           });
           const requestBody=await requestResponse.json();
           if(!requestResponse.ok||requestBody.errors?.length)throw new Error(`Cloudflare request analytics failed ${requestResponse.status}: ${JSON.stringify(requestBody.errors||[])}`);
-          const largeResponses=(requestBody.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive||[])
-            .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>5_000_000)
+          const notableResponses=(requestBody.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive||[])
+            .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>500_000||Number(row.quantiles?.requestDurationP50||0)>500_000||Number(row.sum?.subrequests||0)>5)
             .sort((left,right)=>String(left.dimensions?.datetime).localeCompare(String(right.dimensions?.datetime)));
-          console.log(JSON.stringify({requestStart,requestEnd,largeResponses}));
+          console.log(JSON.stringify({requestStart,requestEnd,notableResponses}));
           NODE
