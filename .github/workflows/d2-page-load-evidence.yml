@@ -121,4 +121,12 @@ jobs:
             fields:(type.fields||[]).filter(field=>/worker|trace|observ/i.test(field.name))
           })).filter(type=>type.fields.length);
           console.log(JSON.stringify({parentTypes}));
+          const zoneHttpTypes=(schemaBody.data?.types?.types||[]).filter(type=>/ZoneHttpRequestsAdaptiveGroups/.test(type.name));
+          console.log(JSON.stringify({zoneHttpTypes}));
+
+          const zonesResponse=await fetch(`https://api.cloudflare.com/client/v4/zones?name=astrixparadox.com&account.id=${process.env.CLOUDFLARE_ACCOUNT_ID}`,{
+            headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`}
+          });
+          const zonesBody=await zonesResponse.json();
+          console.log(JSON.stringify({zonesStatus:zonesResponse.status,zones:(zonesBody.result||[]).map(zone=>({id:zone.id,name:zone.name,status:zone.status}))}));
           NODE
