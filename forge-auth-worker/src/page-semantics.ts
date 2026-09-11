@@ -15,6 +15,16 @@ const PAGE_INVENTORY_FIELDS = [
   "equipableItemSetHash", "equippingBlock", "sockets", "stats", "quality",
   "resolvedSandboxPerks"
 ] as const;
+const PAGE_PLUG_FIELDS = [
+  "hash", "displayProperties", "displaySource", "sourceString",
+  "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
+  "classType", "inventory", "equippable", "collectibleHash",
+  "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
+  "isFeaturedItem", "isHolofoil", "secondaryIcon", "screenshot",
+  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerTypeHash",
+  "damageTypeHashes", "itemCategoryHashes", "traitIds", "traitHashes",
+  "investmentStats", "plug", "tooltipNotifications", "equipableItemSetHash"
+] as const;
 
 type PreparedPageSemanticContext = {
   manifestVersion?: string;
@@ -160,12 +170,70 @@ async function enrichPageInventory(payload: any, env: Env, page: string, manifes
 function compactPageInventoryDefinitions(payload: any): void {
   const definitions = payload?.definitions;
   if (!definitions || typeof definitions !== "object" || Array.isArray(definitions)) return;
+  const ownedItemHashes = new Set<number>();
+  for (const item of profileRows(payload)) {
+    addDefinitionHash(ownedItemHashes, item?.itemHash);
+    addDefinitionHash(ownedItemHashes, item?.overrideStyleItemHash);
+  }
   payload.definitions = Object.fromEntries(Object.entries(definitions).map(([hash, definition]) => [
     hash,
-    Object.fromEntries(PAGE_INVENTORY_FIELDS
+    Object.fromEntries((ownedItemHashes.has(Number(hash)) ? PAGE_INVENTORY_FIELDS : PAGE_PLUG_FIELDS)
       .filter(field => (definition as any)?.[field] !== undefined)
       .map(field => [field, (definition as any)[field]]))
   ]));
+  if (payload.sandboxPerks && typeof payload.sandboxPerks === "object" && !Array.isArray(payload.sandboxPerks)) {
+    payload.sandboxPerks = Object.fromEntries(Object.entries(payload.sandboxPerks).map(([hash, definition]) => [
+      hash,
+      Object.fromEntries(["hash", "displayProperties"].filter(field => (definition as any)?.[field] !== undefined).map(field => [field, (definition as any)[field]]))
+    ]));
+  }
+}
+
+function compactProfilePlugRows(rows: unknown): unknown[][] {
+  if (!Array.isArray(rows)) return [];
+  return rows.map(row => {
+    const value = row as any;
+    const tuple = [
+      value?.plugItemHash, value?.plugHash, value?.canInsert, value?.enabled,
+      value?.isEnabled, value?.isVisible, value?.enableFailIndexes, value?.insertFailIndexes
+    ];
+    while (tuple.length && tuple.at(-1) === undefined) tuple.pop();
+    return tuple;
+  });
+}
+
+function compactPreparedProfilePlugLists(payload: any): void {
+  const profile = payload?.profile;
+  if (!profile || typeof profile !== "object") return;
+  const dictionary: unknown[][][] = [];
+  const byValue = new Map<string, number>();
+  const reference = (rows: unknown): number => {
+    const compact = compactProfilePlugRows(rows);
+    const key = JSON.stringify(compact);
+    const prior = byValue.get(key);
+    if (prior !== undefined) return prior;
+    const index = dictionary.length;
+    dictionary.push(compact);
+    byValue.set(key, index);
+    return index;
+  };
+  const itemRefs: Record<string, Record<string, number>> = {};
+  for (const [instanceId, component] of Object.entries(profile?.itemComponents?.reusablePlugs?.data || {})) {
+    const plugs = (component as any)?.plugs || {};
+    itemRefs[instanceId] = Object.fromEntries(Object.entries(plugs).map(([socketIndex, rows]) => [socketIndex, reference(rows)]));
+  }
+  const profileSetRefs = Object.fromEntries(Object.entries(profile?.profilePlugSets?.data?.plugs || {}).map(([setHash, rows]) => [setHash, reference(rows)]));
+  const characterSetRefs = Object.fromEntries(Object.entries(profile?.characterPlugSets?.data || {}).map(([characterId, component]) => [
+    characterId,
+    Object.fromEntries(Object.entries((component as any)?.plugs || {}).map(([setHash, rows]) => [setHash, reference(rows)]))
+  ]));
+  if (!Object.keys(itemRefs).length && !Object.keys(profileSetRefs).length && !Object.keys(characterSetRefs).length) return;
+  profile.preparedPlugLists = { schemaVersion: 1, dictionary, itemRefs, profileSetRefs, characterSetRefs };
+  if (profile.itemComponents?.reusablePlugs) profile.itemComponents.reusablePlugs.data = {};
+  if (profile.profilePlugSets?.data) profile.profilePlugSets.data.plugs = {};
+  if (profile.characterPlugSets?.data) {
+    for (const component of Object.values(profile.characterPlugSets.data) as any[]) component.plugs = {};
+  }
 }
 
 function subclassRows(payload: any): Array<{ characterId: string; item: any }> {
@@ -313,4 +381,4 @@ async function enrichPreparedPageAccount(
   return payload;
 }
 
-export { enrichPreparedPageAccount };
+export { compactPreparedProfilePlugLists, enrichPreparedPageAccount };
