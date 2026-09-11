@@ -6,6 +6,7 @@ import {fetchDisplayProfile} from '../pages/guardian-workspace-v2/guardian-displ
 import dataWorker from '../../forge-manifest-worker/worker.mjs';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
 import {bungieDefinitionHashes,enrichEquipableSets,enrichOwnedWeaponDefinitions,preparedDefinitions} from '../../forge-auth-worker/src/manifest-semantics.ts';
+import {enrichPreparedPageAccount} from '../../forge-auth-worker/src/page-semantics.ts';
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
 import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
@@ -65,6 +66,55 @@ await enrichEquipableSets({transport:'prepared-page-stream-v1',account:{definiti
 assert.equal(setReads.length,readsBeforeEmpty,'Client-manifest loadout envelopes must not start per-set network expansion.');
 console.log('PREPARED_ACCOUNT_ARMOUR_SET_ICONS=PASS');
 console.log('PREPARED_ACCOUNT_SUBCLASS_SOCKET_DEFINITIONS=PASS');
+
+// Captured account shape from the authenticated Vault regression, using the
+// real Smoke Jumper item and its real socket graph. The oversized marker
+// represents the full-definition fields that caused 41 MB page responses.
+const capturedVaultInstance='captured-vault-smoke-instance';
+const capturedVaultPayload={
+  profile:{
+    profileInventory:{data:{items:[{itemHash:3788059976,itemInstanceId:capturedVaultInstance,bucketHash:138197802}]}},
+    characterInventories:{data:{}},characterEquipment:{data:{}},characterProgressions:{data:{}},characterLoadouts:{data:{}},
+    profilePlugSets:{data:{plugs:{}}},characterPlugSets:{data:{}},
+    itemComponents:{
+      instances:{data:{[capturedVaultInstance]:{gearTier:5}}},
+      sockets:{data:{[capturedVaultInstance]:{sockets:nothingSafeSockets(smokeDefinition).map(row=>({plugHash:row.singleInitialItemHash||null}))}}},
+      reusablePlugs:{data:{}},stats:{data:{}}
+    }
+  },definitions:{},statDefinitions:{},pageReady:{page:'vault',manifestVersion:armourIndex.manifestVersion,coverage:{complete:false,missing:['owned-item-definitions']}}
+};
+function nothingSafeSockets(definition){
+  return armourIndex.socketLayouts[definition.socketLayoutKey]?.socketEntries||[];
+}
+const capturedTables={
+  DestinyInventoryItemDefinition:{
+    ...armourIndex.plugDefinitions,
+    '3788059976':{...smokeDefinition,sockets:armourIndex.socketLayouts[smokeDefinition.socketLayoutKey],oversizedInternalPayload:'x'.repeat(3_000_000)}
+  },
+  DestinyStatDefinition:armourIndex.statDefinitions,
+  DestinySocketCategoryDefinition:armourIndex.socketCategoryDefinitions,
+  DestinyEquipableItemSetDefinition:armourIndex.equipableItemSets,
+  DestinySandboxPerkDefinition:armourIndex.sandboxPerks,
+  DestinyCollectibleDefinition:{},DestinyDamageTypeDefinition:{},DestinyBreakerTypeDefinition:{}
+};
+const capturedReads=[];
+const capturedEnv={MANIFEST_DATA:{async fetch(request){
+  const path=new URL(request.url).pathname;
+  if(path==='/status')throw new Error('Prepared page enrichment must reuse its supplied manifest version.');
+  assert.equal(path,'/resolve');
+  const body=await request.json();capturedReads.push(body);
+  assert.equal(body.projection,'page');
+  return Response.json({manifestVersion:armourIndex.manifestVersion,tables:Object.fromEntries(Object.entries(body.requests||{}).map(([type,hashes])=>[
+    type,Object.fromEntries(hashes.filter(hash=>capturedTables[type]?.[String(hash)]).map(hash=>[String(hash),capturedTables[type][String(hash)]]))
+  ]))});
+}}};
+await enrichPreparedPageAccount(capturedVaultPayload,capturedEnv,'vault',{manifestVersion:armourIndex.manifestVersion});
+assert.equal(capturedVaultPayload.definitionCoverage.complete,true,'The captured Vault item and socket graph must be complete.');
+assert.equal(capturedVaultPayload.definitions['3788059976'].displayProperties.name,'Smoke Jumper Vestment');
+assert.equal(capturedVaultPayload.definitions['3788059976'].oversizedInternalPayload,undefined,'Full manifest-only fields must not cross the prepared page boundary.');
+assert.ok(Buffer.byteLength(JSON.stringify(capturedVaultPayload))<2_500_000,'The captured Vault account overlay must stay within the Worker budget.');
+assert.ok(capturedReads.length<=4,`Captured Vault enrichment used ${capturedReads.length} manifest batches.`);
+console.log(`CAPTURED_VAULT_COMPACT_PAGE_PROJECTION=PASS batches=${capturedReads.length} bytes=${Buffer.byteLength(JSON.stringify(capturedVaultPayload))}`);
 
 // Captured from Miguel's equipped Prismatic Warlock configuration. A sixth
 // fragment socket is empty, so Bungie reports its plugHash as null.
@@ -224,10 +274,10 @@ await cache.read('account:journey',load);assert.equal(calls,2);
 await new ProfileSnapshotCache(storage()).read('account:character',load);assert.equal(calls,3);
 await assert.rejects(()=>cache.read('account:character',async()=>{throw Error('Bungie unavailable');},Date.now()+DISPLAY_TTL_MS+1),/Bungie unavailable/);
 
-const index={manifestVersion:'verified-test-version',tables:{DestinyInventoryItemDefinition:{shards:2}}};
+const index={schemaVersion:2,manifestVersion:'verified-test-version',tables:{DestinyInventoryItemDefinition:{shards:2}},pageTables:{DestinyInventoryItemDefinition:{shards:2}}};
 const loadoutIndex={manifestVersion:index.manifestVersion,page:'loadout-index',weaponDefinitionHashes:[realOwnedWeaponHash],loadoutCoverage:{weaponDefinitions:1,complete:true}};
 let assets=0;
-const env={ASSETS:{async fetch(request){assets++;const path=new URL(request.url).pathname;return Response.json(path==='/index.json'?index:path==='/pages/loadout-index.json'?loadoutIndex:path.endsWith('/1.json')?{'1':{hash:1},'3':{hash:3}}:{'2':{hash:2}});}}};
+const env={ASSETS:{async fetch(request){assets++;const path=new URL(request.url).pathname;return Response.json(path==='/index.json'?index:path==='/pages/loadout-index.json'?loadoutIndex:path.startsWith('/page/')?(path.endsWith('/1.json')?{'1':{hash:1,projection:'page'},'3':{hash:3,projection:'page'}}:{'2':{hash:2,projection:'page'}}):path.endsWith('/1.json')?{'1':{hash:1},'3':{hash:3}}:{'2':{hash:2}});}}};
 const route='https://data/definitions?type=DestinyInventoryItemDefinition&version=verified-test-version&hashes=';
 let response=await dataWorker.fetch(new Request(route+'1,2,3'),env);
 assert.deepEqual(Object.keys((await response.json()).definitions),['1','2','3']);assert.equal(assets,3);
@@ -235,6 +285,10 @@ assert.equal((await dataWorker.fetch(new Request(route+'0'),env)).status,400);
 assert.equal((await dataWorker.fetch(new Request(route.replace('verified-test-version','old')+'1'),env)).status,409);
 response=await dataWorker.fetch(new Request('https://data/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:index.manifestVersion,requests:{DestinyInventoryItemDefinition:[1,2,3]}})}),env);
 assert.deepEqual(Object.keys((await response.json()).tables.DestinyInventoryItemDefinition),['1','2','3']);
+response=await dataWorker.fetch(new Request('https://data/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:index.manifestVersion,projection:'page',requests:{DestinyInventoryItemDefinition:[1,2,3]}})}),env);
+const compactResolved=await response.json();
+assert.equal(compactResolved.projection,'page');
+assert.ok(Object.values(compactResolved.tables.DestinyInventoryItemDefinition).every(row=>row.projection==='page'),'Prepared page resolution must use compact inventory shards.');
 response=await dataWorker.fetch(new Request(`https://data/page-index?page=loadout&version=${index.manifestVersion}`),env);
 assert.deepEqual(await response.json(),loadoutIndex,'The auth Worker must be able to read the small weapon identity index without parsing the large Loadout bundle.');
 

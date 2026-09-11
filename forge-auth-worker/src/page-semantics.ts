@@ -1,7 +1,20 @@
-import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets, enrichOwnedWeaponDefinitions } from "./manifest-semantics";
+import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, preparedDefinitionTables, enrichEquipableSets, enrichOwnedWeaponDefinitions } from "./manifest-semantics.ts";
 
 const SUBCLASS_BUCKET_HASH = 3284755031;
 const WEAPON_BUCKETS = new Set([1498876634, 2465295065, 953998645]);
+const GUARDIAN_STAT_HASHES = [2996146975, 392767087, 1943323491, 1735777505, 144602215, 4244567218];
+const PAGE_INVENTORY_FIELDS = [
+  "hash", "displayProperties", "displaySource", "sourceString",
+  "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
+  "classType", "inventory", "equippable", "collectibleHash",
+  "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
+  "isFeaturedItem", "isHolofoil", "secondaryIcon", "screenshot",
+  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerTypeHash",
+  "damageTypeHashes", "itemCategoryHashes", "traitIds", "traitHashes",
+  "perks", "investmentStats", "plug", "tooltipNotifications",
+  "equipableItemSetHash", "equippingBlock", "sockets", "stats", "quality",
+  "resolvedSandboxPerks"
+] as const;
 
 type PreparedPageSemanticContext = {
   manifestVersion?: string;
@@ -29,6 +42,130 @@ async function resolveMissingInventoryDefinitions(
 
 function equippedRows(payload: any): any[] {
   return Object.values(payload?.profile?.characterEquipment?.data || {}).flatMap((row: any) => row?.items || []);
+}
+
+function profileRows(payload: any): any[] {
+  return [
+    ...(payload?.profile?.profileInventory?.data?.items || []),
+    ...Object.values(payload?.profile?.characterInventories?.data || {}).flatMap((row: any) => row?.items || []),
+    ...equippedRows(payload)
+  ];
+}
+
+function componentDefinitionHashes(payload: any, rows: any[]): Set<number> {
+  const hashes = new Set<number>();
+  const instances = new Set<string>();
+  for (const item of rows) {
+    addDefinitionHash(hashes, item?.itemHash);
+    addDefinitionHash(hashes, item?.overrideStyleItemHash);
+    if (item?.itemInstanceId) instances.add(String(item.itemInstanceId));
+  }
+  for (const [instanceId, component] of Object.entries(payload?.profile?.itemComponents?.sockets?.data || {})) {
+    if (!instances.has(String(instanceId))) continue;
+    for (const socket of (component as any)?.sockets || []) addDefinitionHash(hashes, socket?.plugHash);
+  }
+  for (const [instanceId, component] of Object.entries(payload?.profile?.itemComponents?.reusablePlugs?.data || {})) {
+    if (!instances.has(String(instanceId))) continue;
+    for (const plugs of Object.values((component as any)?.plugs || {})) {
+      for (const plug of (plugs as any[]) || []) addDefinitionHash(hashes, plug?.plugItemHash ?? plug?.plugHash);
+    }
+  }
+  return hashes;
+}
+
+function addExpandedDefinitionHashes(payload: any, definitions: Record<string, Record<string, any>>, hashes: Set<number>): void {
+  const plugSetHashes = new Set<number>();
+  for (const definition of Object.values(definitions)) {
+    for (const entry of definition?.sockets?.socketEntries || []) {
+      addDefinitionHash(hashes, entry?.singleInitialItemHash);
+      const plugSetHash = bungieDefinitionHash(entry?.reusablePlugSetHash);
+      if (plugSetHash !== null) plugSetHashes.add(plugSetHash);
+    }
+    for (const entry of definition?.sockets?.intrinsicSockets || []) addDefinitionHash(hashes, entry?.plugItemHash);
+  }
+  const plugSets = [
+    payload?.profile?.profilePlugSets?.data?.plugs,
+    ...Object.values(payload?.profile?.characterPlugSets?.data || {}).map((row: any) => row?.plugs)
+  ];
+  for (const plugSetHash of plugSetHashes) {
+    for (const sets of plugSets) {
+      for (const plug of sets?.[String(plugSetHash)] || []) {
+        if (plug?.canInsert === false || plug?.enabled === false) continue;
+        addDefinitionHash(hashes, plug?.plugItemHash ?? plug?.plugHash);
+      }
+    }
+  }
+}
+
+function definitionHashesByField(definitions: Record<string, Record<string, any>>, field: string): number[] {
+  return bungieDefinitionHashes(Object.values(definitions).map(definition => definition?.[field]));
+}
+
+async function enrichPageInventory(payload: any, env: Env, page: string, manifestVersion = ""): Promise<any> {
+  if (!payload?.profile || !["character", "build-forge", "vault"].includes(page)) return payload;
+  const rows = page === "character" ? equippedRows(payload) : profileRows(payload);
+  const requested = componentDefinitionHashes(payload, rows);
+  if (page !== "vault") {
+    for (const progression of Object.values(payload.profile?.characterProgressions?.data || {}) as any[]) {
+      for (const tier of progression?.seasonalArtifact?.tiers || []) {
+        for (const item of tier?.items || []) addDefinitionHash(requested, item?.itemHash);
+      }
+    }
+  }
+  if (page === "build-forge") {
+    for (const row of Object.values(payload.profile?.characterLoadouts?.data || {}) as any[]) {
+      for (const loadout of row?.loadouts || []) {
+        for (const item of [...(loadout?.items || []), ...(loadout?.subclassOverrides || [])]) {
+          for (const hash of item?.plugItemHashes || []) addDefinitionHash(requested, hash);
+        }
+      }
+    }
+  }
+  const instances = Object.values(payload.profile?.itemComponents?.instances?.data || {}) as any[];
+  const first = await preparedDefinitionTables({
+    DestinyInventoryItemDefinition: requested,
+    DestinyStatDefinition: GUARDIAN_STAT_HASHES,
+    DestinyDamageTypeDefinition: instances.map(row => row?.damageTypeHash),
+    DestinyBreakerTypeDefinition: instances.map(row => row?.breakerTypeHash)
+  }, env, manifestVersion);
+  const definitions: Record<string, Record<string, any>> = payload.definitions || (payload.definitions = {});
+  Object.assign(definitions, first.DestinyInventoryItemDefinition || {});
+  addExpandedDefinitionHashes(payload, definitions, requested);
+  const second = await preparedDefinitionTables({
+    DestinyInventoryItemDefinition: [...requested].filter(hash => !definitions[String(hash)]),
+    DestinySocketCategoryDefinition: Object.values(definitions).flatMap(definition => (
+      definition?.sockets?.socketCategories || []
+    ).map((row: any) => row?.socketCategoryHash)),
+    DestinyCollectibleDefinition: definitionHashesByField(definitions, "collectibleHash"),
+    DestinyDamageTypeDefinition: definitionHashesByField(definitions, "defaultDamageTypeHash"),
+    DestinyBreakerTypeDefinition: definitionHashesByField(definitions, "breakerTypeHash")
+  }, env, manifestVersion);
+  Object.assign(definitions, second.DestinyInventoryItemDefinition || {});
+  payload.statDefinitions = { ...(payload.statDefinitions || {}), ...(first.DestinyStatDefinition || {}) };
+  payload.damageDefinitions = { ...(payload.damageDefinitions || {}), ...(first.DestinyDamageTypeDefinition || {}), ...(second.DestinyDamageTypeDefinition || {}) };
+  payload.breakerDefinitions = { ...(payload.breakerDefinitions || {}), ...(first.DestinyBreakerTypeDefinition || {}), ...(second.DestinyBreakerTypeDefinition || {}) };
+  payload.socketCategoryDefinitions = { ...(payload.socketCategoryDefinitions || {}), ...(second.DestinySocketCategoryDefinition || {}) };
+  payload.collectibleDefinitions = { ...(payload.collectibleDefinitions || {}), ...(second.DestinyCollectibleDefinition || {}) };
+  const unresolved = [...requested].filter(hash => !definitions[String(hash)]);
+  payload.definitionCoverage = {
+    requested: requested.size,
+    resolved: requested.size - unresolved.length,
+    unresolved,
+    complete: unresolved.length === 0,
+    source: "prepared-compact-page-projection"
+  };
+  return payload;
+}
+
+function compactPageInventoryDefinitions(payload: any): void {
+  const definitions = payload?.definitions;
+  if (!definitions || typeof definitions !== "object" || Array.isArray(definitions)) return;
+  payload.definitions = Object.fromEntries(Object.entries(definitions).map(([hash, definition]) => [
+    hash,
+    Object.fromEntries(PAGE_INVENTORY_FIELDS
+      .filter(field => (definition as any)?.[field] !== undefined)
+      .map(field => [field, (definition as any)[field]]))
+  ]));
 }
 
 function subclassRows(payload: any): Array<{ characterId: string; item: any }> {
@@ -164,12 +301,14 @@ async function enrichPreparedPageAccount(
   context: PreparedPageSemanticContext = {}
 ): Promise<any> {
   const manifestVersion = String(context.manifestVersion || "");
+  await enrichPageInventory(payload, env, page, manifestVersion);
   await enrichSubclassInventory(payload, env, manifestVersion);
   if (page === "loadout" || page === "build-forge") {
     await enrichOwnedWeaponDefinitions(payload, env, context);
   }
   await enrichEquipableSets(payload, env, manifestVersion);
   await enrichWeaponReusablePlugs(payload, env, manifestVersion);
+  compactPageInventoryDefinitions(payload);
   logManifestEvidenceGaps(payload, page);
   return payload;
 }
