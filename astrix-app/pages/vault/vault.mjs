@@ -1,13 +1,14 @@
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
-import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260905-weapon-audit-1';
+import {ARMOUR_BUCKETS,EQUIPMENT_GROUPS,createVaultCatalogue,filterVaultArmour,groupVaultWorkspaceItems,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260911-live-transfer-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&vault=20260911-live-transfer-1';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260911-vault-live-transfer-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -21,13 +22,16 @@ const params=new URLSearchParams(location.search);
 
 let session=null;
 let payload=null;
-let catalogue={armour:[],totals:{all:0,armour:0,other:0,ownedArmour:0,unresolvedDefinitions:0},postmasterByCharacter:{}};
+let catalogue={items:[],armour:[],postmasterItems:[],totals:{all:0,armour:0,other:0,ownedArmour:0,unresolvedDefinitions:0},postmasterByCharacter:{}};
 let activeCharacterId=text(params.get('characterId'));
 let activeCharacterClass='';
 let visibleLimit=PAGE_SIZE;
 let matchedBuilds=[];
 let targetMaximums=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,0]));
 let vaultRefreshController=null;
+let draggedItemKey='';
+let pendingVaultAction=null;
+let vaultActionBusy=false;
 const selectedSlots=new Map();
 
 function membershipBinding(){
@@ -91,6 +95,147 @@ function updateTotals(){
   byId('vaultArmourCount').textContent=String(catalogue.totals.armour);
   byId('vaultEquipmentCount').textContent=String(catalogue.totals.other);
   byId('vaultOwnedArmourCount').textContent=String(catalogue.totals.ownedArmour);
+}
+
+function characterLabel(characterId){
+  const character=characters().find(row=>text(row.characterId)===text(characterId)),name=characterClass(character);
+  return name?name[0].toUpperCase()+name.slice(1):`Guardian ${characterId}`;
+}
+
+function workspaceCharacters(){
+  const order={hunter:0,warlock:1,titan:2};
+  return characters().sort((left,right)=>(order[characterClass(left)]??9)-(order[characterClass(right)]??9));
+}
+
+function workspaceItem(key){
+  return [...catalogue.items,...catalogue.postmasterItems].find(item=>itemKey(item)===String(key||''))||null;
+}
+
+function transferItemMarkup(item,{draggable=true}={}){
+  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',capabilities=liveActionCapabilities(session),canDrag=draggable&&capabilities.transferItems&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(item?.source?.kind)&&(item?.source?.kind!=='equipped'||capabilities.equipItems),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power">${esc(item.power)}</span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity">${esc(item.quantity)}</span>`:'';
+  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${canDrag?' draggable':''}">
+    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${power}${quantity}</span>
+    <span class="vault-transfer-name">${esc(item.name)}</span>
+  </article>`;
+}
+
+function equipmentGroupsMarkup(items=[]){
+  const groups=groupVaultWorkspaceItems(items).filter(group=>group.items.length);
+  if(!groups.length)return '<p class="vault-transfer-empty">No Weapons or Armour returned by Bungie for this section.</p>';
+  let family='';
+  return groups.map(group=>{
+    const heading=group.kind!==family?(family=group.kind,`<h5 class="vault-transfer-family">${esc(group.kind==='weapon'?'WEAPONS':'ARMOUR')}</h5>`):'';
+    return `${heading}<section class="vault-transfer-group" data-equipment-group="${esc(group.key)}"><header><strong>${esc(group.label)}</strong><span>${group.items.length}</span></header><div class="vault-transfer-items">${group.items.map(item=>transferItemMarkup(item)).join('')}</div></section>`;
+  }).join('');
+}
+
+function postmasterMarkup(characterId){
+  const rows=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)),equipment=rows.filter(item=>item.equipmentGroup),other=rows.filter(item=>!item.equipmentGroup),transferable=rows.filter(item=>/^\d+$/.test(String(item?.itemInstanceId||''))),collectReady=transferable.length&&liveActionCapabilities(session).pullFromPostmaster;
+  const groups=equipmentGroupsMarkup(equipment),otherMarkup=other.length?`<h5 class="vault-transfer-family">OTHER POSTMASTER ITEMS</h5><div class="vault-transfer-items">${other.map(item=>transferItemMarkup(item,{draggable:false})).join('')}</div>`:'';
+  return `<section class="vault-character-section vault-postmaster-section"><header><div><h4>POSTMASTER</h4><span>${rows.length} ITEM${rows.length===1?'':'S'}</span></div><button type="button" data-collect-postmaster="${esc(characterId)}"${collectReady?'':' disabled'}>COLLECT POSTMASTER</button></header>${rows.length?`${groups}${otherMarkup}`:'<p class="vault-transfer-empty">Bungie reports no items in this Postmaster.</p>'}</section>`;
+}
+
+function characterColumnMarkup(character){
+  const characterId=text(character?.characterId),equipped=catalogue.items.filter(item=>item.source?.kind==='equipped'&&text(item.source.characterId)===characterId),carried=catalogue.items.filter(item=>item.source?.kind==='carried'&&text(item.source.characterId)===characterId),active=characterId===activeCharacterId,emblem=character?.emblemBackgroundPath||character?.emblemPath||'',style=emblem?` style="--vault-character-emblem:url('${esc(new URL(emblem,'https://www.bungie.net').toString())}')"`:'';
+  return `<article class="vault-character-column${active?' is-active':''}" data-drop-kind="character" data-drop-character-id="${esc(characterId)}"${style}>
+    <header class="vault-character-header"><div><span>${active?'ACTIVE GUARDIAN':'GUARDIAN'}</span><h3>${esc(characterLabel(characterId).toUpperCase())}</h3></div><strong>${character?.light===undefined?'':`✦ ${esc(character.light)}`}</strong></header>
+    ${postmasterMarkup(characterId)}
+    <section class="vault-character-section"><header><div><h4>EQUIPPED</h4><span>${equipped.length} ITEM${equipped.length===1?'':'S'}</span></div></header>${equipmentGroupsMarkup(equipped)}</section>
+    <section class="vault-character-section"><header><div><h4>CARRIED</h4><span>${carried.length} ITEM${carried.length===1?'':'S'}</span></div></header>${equipmentGroupsMarkup(carried)}</section>
+  </article>`;
+}
+
+function vaultOnlyMarkup(){
+  const items=catalogue.items.filter(item=>item.source?.kind==='vault');
+  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} WEAPON${items.length===1?'':'S'} AND ARMOUR ITEM${items.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. Hover or focus a Vault item for its existing PARADOX Weapon or Armour card.</p>${equipmentGroupsMarkup(items)}</section>`;
+}
+
+function bindVaultWorkspaceHovers(root){
+  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>{
+    const item=workspaceItem(target.dataset.inspectItem),kind=item?.equipmentGroup?.kind;
+    if(kind==='weapon'||kind==='armour')bindParadoxItemHover(target,item,kind,{contextLabel:item.source?.kind==='vault'?'VAULT':''});
+  });
+}
+
+function renderTransferWorkspace(){
+  const host=byId('vaultTransferWorkspace');
+  if(!host)return;
+  host.innerHTML=`<div class="vault-character-columns">${workspaceCharacters().map(characterColumnMarkup).join('')}</div>${vaultOnlyMarkup()}`;
+  bindVaultWorkspaceHovers(host);
+}
+
+function carriedReplacement(item){
+  return catalogue.items.filter(candidate=>candidate.source?.kind==='carried'&&text(candidate.source.characterId)===text(item?.source?.characterId)&&Number(candidate.bucketHash)===Number(item?.bucketHash)&&itemKey(candidate)!==itemKey(item)).sort((left,right)=>Number(Boolean(left.isExotic))-Number(Boolean(right.isExotic))||Number(left.power||0)-Number(right.power||0)||String(left.name).localeCompare(String(right.name)))[0]||null;
+}
+
+function closeVaultActionDialog(){
+  if(vaultActionBusy)return;
+  const dialog=byId('vaultActionDialog');
+  if(dialog?.open)dialog.close();
+  pendingVaultAction=null;
+  byId('vaultActionProgress').textContent='';
+}
+
+function showVaultActionDialog(title,summary,action){
+  pendingVaultAction=action;
+  byId('vaultActionTitle').textContent=title;
+  byId('vaultActionSummary').textContent=summary;
+  byId('vaultActionProgress').textContent='Review the exact account change, then confirm.';
+  const dialog=byId('vaultActionDialog');
+  if(typeof dialog?.showModal==='function')dialog.showModal();
+  else dialog?.setAttribute('open','');
+}
+
+function stageTransfer(item,destination){
+  try{
+    const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
+    showVaultActionDialog('Confirm live item transfer',`Move ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy}`,{kind:'transfer',intent});
+  }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
+}
+
+function stagePostmasterCollection(characterId){
+  try{
+    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))),intent=stagePostmasterCollectionIntent({characterId,items,session});
+    showVaultActionDialog('Confirm Postmaster collection',`Collect ${items.length} exact item${items.length===1?'':'s'} from ${characterLabel(characterId)} Postmaster into each item's Bungie destination inventory. Bungie can reject individual items when inventory space or item rules prevent collection.`,{kind:'postmaster',intent});
+  }catch(error){setStatus(error?.message||'Postmaster collection cannot be staged.','error');}
+}
+
+function actionFailureMessage(result){
+  const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
+  return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
+}
+
+async function refreshAfterLiveAction(){
+  const next=await fetchProfile();
+  await applyVaultRefresh(next,{reason:'mutation'});
+}
+
+async function performPendingVaultAction(){
+  if(!pendingVaultAction||vaultActionBusy)return;
+  const action=pendingVaultAction,confirm=byId('vaultActionConfirm'),cancel=byId('vaultActionCancel'),progress=byId('vaultActionProgress');
+  vaultActionBusy=true;
+  confirm.disabled=true;
+  cancel.disabled=true;
+  progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
+  let result=null;
+  try{
+    const onProgress=row=>{progress.textContent=row.label||'Waiting for Bungie confirmation.';};
+    result=action.kind==='transfer'
+      ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
+      :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
+    if(result.mutationCount>0)await refreshAfterLiveAction();
+    if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
+    else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
+  }catch(error){
+    if(result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
+    setStatus(error?.message||'The Bungie action failed before confirmation.','error');
+  }finally{
+    vaultActionBusy=false;
+    confirm.disabled=false;
+    cancel.disabled=false;
+    if(byId('vaultActionDialog')?.open)byId('vaultActionDialog').close();
+    pendingVaultAction=null;
+  }
 }
 
 function itemCompatible(item){return !activeCharacterClass||item?.characterClass==='any'||item?.characterClass===activeCharacterClass;}
@@ -263,7 +408,7 @@ function renderContext(){
   byId('vaultHeaderState').textContent=character?`${classLabel.toUpperCase()} INVENTORY`:'BUNGIE INVENTORY';
 }
 
-function renderAll(){renderContext();renderSelection();renderInventory();}
+function renderAll(){renderContext();renderTransferWorkspace();renderSelection();renderInventory();}
 
 function reconcileSelectedVaultItems(){
   const refreshedByKey=new Map(catalogue.armour.map(item=>[itemKey(item),item]));
@@ -342,6 +487,65 @@ function clearIncompatibleSelection(){
   for(const [slot,item] of selectedSlots)if(!itemCompatible(item))selectedSlots.delete(slot);
 }
 
+function dropDestination(target){
+  if(!target)return null;
+  return target.dataset.dropKind==='vault'?{kind:'vault',characterId:null}:{kind:'character',characterId:text(target.dataset.dropCharacterId)};
+}
+
+function validDrop(item,destination){
+  if(!item||!destination)return false;
+  if(destination.kind==='vault')return item.source?.kind!=='vault';
+  return destination.characterId&&!(item.source?.kind!=='vault'&&text(item.source?.characterId)===destination.characterId);
+}
+
+function clearDropTargets(){
+  document.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));
+}
+
+function installTransferEvents(){
+  const board=byId('vaultTransferWorkspace');
+  board?.addEventListener('dragstart',event=>{
+    const tile=event.target.closest?.('[data-drag-item]'),item=workspaceItem(tile?.dataset?.dragItem);
+    if(!tile||!item){event.preventDefault();return;}
+    draggedItemKey=itemKey(item);
+    tile.classList.add('is-dragging');
+    event.dataTransfer.effectAllowed='move';
+    event.dataTransfer.setData('text/plain',draggedItemKey);
+  });
+  board?.addEventListener('dragend',event=>{
+    event.target.closest?.('[data-drag-item]')?.classList.remove('is-dragging');
+    draggedItemKey='';
+    clearDropTargets();
+  });
+  board?.addEventListener('dragover',event=>{
+    const target=event.target.closest?.('[data-drop-kind]'),item=workspaceItem(draggedItemKey),destination=dropDestination(target);
+    clearDropTargets();
+    if(!validDrop(item,destination))return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect='move';
+    target.classList.add('is-drop-target');
+  });
+  board?.addEventListener('dragleave',event=>{
+    const target=event.target.closest?.('[data-drop-kind]');
+    if(target&&!target.contains(event.relatedTarget))target.classList.remove('is-drop-target');
+  });
+  board?.addEventListener('drop',event=>{
+    const target=event.target.closest?.('[data-drop-kind]'),key=draggedItemKey||event.dataTransfer.getData('text/plain'),item=workspaceItem(key),destination=dropDestination(target);
+    clearDropTargets();
+    draggedItemKey='';
+    if(!validDrop(item,destination))return;
+    event.preventDefault();
+    stageTransfer(item,destination);
+  });
+  board?.addEventListener('click',event=>{
+    const button=event.target.closest?.('[data-collect-postmaster]');
+    if(button&&!button.disabled)stagePostmasterCollection(button.dataset.collectPostmaster);
+  });
+  byId('vaultActionCancel')?.addEventListener('click',closeVaultActionDialog);
+  byId('vaultActionConfirm')?.addEventListener('click',performPendingVaultAction);
+  byId('vaultActionDialog')?.addEventListener('cancel',event=>{if(vaultActionBusy)event.preventDefault();else{event.preventDefault();closeVaultActionDialog();}});
+}
+
 function installEvents(){
   byId('vaultFilters')?.addEventListener('input',()=>{visibleLimit=PAGE_SIZE;renderInventory();});
   byId('vaultStatTargets')?.addEventListener('input',event=>{
@@ -374,7 +578,7 @@ function installEvents(){
 
 async function settleVisibleImages(){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const images=[...document.querySelectorAll('#vaultItemGrid img')].slice(0,24).filter(image=>!image.complete);
+  const images=[...document.querySelectorAll('#vaultTransferWorkspace img')].slice(0,24).filter(image=>!image.complete);
   await Promise.race([
     Promise.all(images.map(image=>new Promise(resolve=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true});}))),
     new Promise(resolve=>setTimeout(resolve,3500))
@@ -383,6 +587,7 @@ async function settleVisibleImages(){
 
 async function init(){
   installEvents();
+  installTransferEvents();
   byId('vaultConnectButton').href=authStartUrl();
   try{
     session=await getBungieSession();
@@ -407,7 +612,8 @@ async function init(){
     startVaultRefresh();
     reportPreparedPageStage('render','vault');
     const unresolved=catalogue.totals.unresolvedDefinitions;
-    setStatus(`${catalogue.totals.ownedArmour} verified armour item${catalogue.totals.ownedArmour===1?'':'s'} loaded${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}${postmasterStatus()}.`,'good');
+    const capabilities=liveActionCapabilities(session),liveReady=capabilities.transferItems&&capabilities.equipItems&&capabilities.pullFromPostmaster;
+    setStatus(`${catalogue.items.length} exact Weapons and Armour item${catalogue.items.length===1?'':'s'} loaded across ${characters().length} Guardian${characters().length===1?'':'s'} and Vault${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}. Live transfer ${liveReady?'ready':'unavailable for this session'}.`,'good');
     await settleVisibleImages();
     globalThis.ForgeLoader?.done?.();
   }catch(error){
