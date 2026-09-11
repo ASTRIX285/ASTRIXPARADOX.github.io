@@ -10,21 +10,30 @@ function bungieDefinitionHashes(values: Iterable<unknown>): number[] {
   return [...new Set([...values].map(bungieDefinitionHash).filter((hash): hash is number => hash !== null))];
 }
 
-async function preparedDefinitions(definitionType: string, hashes: Iterable<unknown>, env: Env): Promise<Record<string, Record<string, any>>> {
+async function preparedDefinitions(
+  definitionType: string,
+  hashes: Iterable<unknown>,
+  env: Env,
+  preparedVersion = ""
+): Promise<Record<string, Record<string, any>>> {
   const unique = bungieDefinitionHashes(hashes);
   if (!env.MANIFEST_DATA || !unique.length) return {};
-  const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
-  const status = statusResponse?.ok ? await statusResponse.json<{ manifestVersion?: string }>().catch(() => null) : null;
-  if (!status?.manifestVersion) return {};
+  let manifestVersion = preparedVersion;
+  if (!manifestVersion) {
+    const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
+    const status = statusResponse?.ok ? await statusResponse.json<{ manifestVersion?: string }>().catch(() => null) : null;
+    manifestVersion = String(status?.manifestVersion || "");
+  }
+  if (!manifestVersion) return {};
   const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/resolve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ version: status.manifestVersion, requests: { [definitionType]: unique } })
+    body: JSON.stringify({ version: manifestVersion, requests: { [definitionType]: unique } })
   })).catch(() => null);
   const payload = response?.ok
     ? await response.json<{ manifestVersion?: string; tables?: Record<string, Record<string, Record<string, any>>> }>().catch(() => null)
     : null;
-  return payload?.manifestVersion === status.manifestVersion ? (payload.tables?.[definitionType] || {}) : {};
+  return payload?.manifestVersion === manifestVersion ? (payload.tables?.[definitionType] || {}) : {};
 }
 
 async function manifestDefinition(
@@ -51,15 +60,61 @@ function profileItemRows(profile: any): any[] {
   ];
 }
 
-async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any> {
+type OwnedWeaponContext = {
+  manifestVersion?: string;
+  weaponDefinitionHashes?: Iterable<unknown>;
+  expectedWeaponDefinitions?: number;
+};
+
+type OwnedWeaponResolution = {
+  definitions: Record<string, Record<string, any>>;
+  sandboxPerks: Record<string, Record<string, any>>;
+  requested: number[];
+  unresolved: number[];
+  intrinsicEvidence: Record<string, number>;
+  sandboxPerkRequested: number[];
+  sandboxPerkUnresolved: number[];
+  missingEffectDescriptions: any[];
+  emptySandboxPerkDescriptions: any[];
+};
+
+const OWNED_WEAPON_STATE_CACHE_LIMIT = 12;
+const ownedWeaponStateCache = new Map<string, OwnedWeaponResolution>();
+
+async function ownedWeaponStateFingerprint(
+  manifestVersion: string,
+  weapons: Map<string, any>,
+  socketData: Record<string, any>
+): Promise<string> {
+  const rows = [...weapons].map(([instanceId, item]) => [
+    bungieDefinitionHash(item?.itemHash),
+    bungieDefinitionHash(item?.overrideStyleItemHash),
+    (socketData[instanceId]?.sockets || []).map((socket: any) => bungieDefinitionHash(socket?.plugHash))
+  ]).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  const bytes = new TextEncoder().encode(JSON.stringify([manifestVersion, rows]));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, "0")).join("");
+}
+
+function rememberOwnedWeaponState(key: string, resolution: OwnedWeaponResolution): void {
+  ownedWeaponStateCache.delete(key);
+  ownedWeaponStateCache.set(key, resolution);
+  while (ownedWeaponStateCache.size > OWNED_WEAPON_STATE_CACHE_LIMIT) {
+    const oldest = ownedWeaponStateCache.keys().next().value;
+    if (!oldest) break;
+    ownedWeaponStateCache.delete(oldest);
+  }
+}
+
+async function enrichOwnedWeaponDefinitions(payload: any, env: Env, context: OwnedWeaponContext = {}): Promise<any> {
   const account = preparedAccountPayload(payload);
   if (!account?.profile) return payload;
   const definitions: Record<string, Record<string, any>> = account.definitions || (account.definitions = {});
   const allItems = profileItemRows(account.profile);
   const preparedWeaponHashes = new Set(bungieDefinitionHashes(
-    payload?.prepared?.weaponDefinitionHashes || payload?.weaponDefinitionHashes || []
+    context.weaponDefinitionHashes || payload?.prepared?.weaponDefinitionHashes || payload?.weaponDefinitionHashes || []
   ));
-  const expectedWeaponDefinitions = Number(payload?.prepared?.loadoutCoverage?.weaponDefinitions ?? payload?.loadoutCoverage?.weaponDefinitions);
+  const expectedWeaponDefinitions = Number(context.expectedWeaponDefinitions ?? payload?.prepared?.loadoutCoverage?.weaponDefinitions ?? payload?.loadoutCoverage?.weaponDefinitions);
   const hasPreparedWeaponIndex = Number.isInteger(expectedWeaponDefinitions) && expectedWeaponDefinitions >= 0;
   const weaponIndexComplete = hasPreparedWeaponIndex
     ? preparedWeaponHashes.size > 0 && expectedWeaponDefinitions === preparedWeaponHashes.size
@@ -78,6 +133,10 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     if (instanceId && !uniqueWeapons.has(instanceId)) uniqueWeapons.set(instanceId, item);
   }
   const socketData = account.profile?.itemComponents?.sockets?.data || {};
+  const manifestVersion = String(context.manifestVersion || payload?.prepared?.manifestVersion || payload?.manifestVersion || "");
+  const stateKey = manifestVersion && uniqueWeapons.size
+    ? await ownedWeaponStateFingerprint(manifestVersion, uniqueWeapons, socketData)
+    : "";
   const requested = new Set<number>();
   const missingSocketInstances: string[] = [];
   for (const [instanceId, item] of uniqueWeapons) {
@@ -95,10 +154,41 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
       if (plugHash !== null) requested.add(plugHash);
     }
   }
+  const cached = stateKey ? ownedWeaponStateCache.get(stateKey) : null;
+  if (cached) {
+    Object.assign(definitions, cached.definitions);
+    const sandboxPerks: Record<string, Record<string, any>> = account.sandboxPerks || (account.sandboxPerks = {});
+    Object.assign(sandboxPerks, cached.sandboxPerks);
+    account.weaponDefinitionCoverage = {
+      itemInstances: [...uniqueWeapons.keys()],
+      requested: cached.requested,
+      resolved: cached.requested.filter(hash => Boolean(definitions[String(hash)])),
+      unresolved: cached.unresolved,
+      missingSocketInstances,
+      schemaVersion: 1,
+      source: "prepared-owned-weapon-definitions",
+      resolution: "account-state-cache",
+      indexDefinitions: preparedWeaponHashes.size,
+      complete: weaponIndexComplete && cached.unresolved.length === 0 && missingSocketInstances.length === 0
+    };
+    account.weaponEffectCoverage = {
+      schemaVersion: 1,
+      source: "bungie-fixed-intrinsic-socket-and-sandbox-perk",
+      resolution: "account-state-cache",
+      intrinsicEvidence: cached.intrinsicEvidence,
+      sandboxPerkRequested: cached.sandboxPerkRequested,
+      sandboxPerkUnresolved: cached.sandboxPerkUnresolved,
+      missingEffectDescriptions: cached.missingEffectDescriptions,
+      emptySandboxPerkDescriptions: cached.emptySandboxPerkDescriptions,
+      complete: cached.missingEffectDescriptions.length === 0
+    };
+    return payload;
+  }
   Object.assign(definitions, await preparedDefinitions(
     "DestinyInventoryItemDefinition",
     [...requested].filter(hash => !definitions[String(hash)]),
-    env
+    env,
+    manifestVersion
   ));
   // Bungie's fixed weapon effect can live on the initial intrinsic socket even
   // when the instance socket row is absent. Resolve that real manifest mapping
@@ -116,7 +206,8 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
   Object.assign(definitions, await preparedDefinitions(
     "DestinyInventoryItemDefinition",
     [...requested].filter(hash => !definitions[String(hash)]),
-    env
+    env,
+    manifestVersion
   ));
   const sandboxPerkHashes = bungieDefinitionHashes([...uniqueWeapons.values()].flatMap(item => {
     const itemHash = bungieDefinitionHash(item?.itemHash);
@@ -126,7 +217,8 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
   Object.assign(sandboxPerks, await preparedDefinitions(
     "DestinySandboxPerkDefinition",
     sandboxPerkHashes.filter(hash => !sandboxPerks[String(hash)]),
-    env
+    env,
+    manifestVersion
   ));
   for (const item of uniqueWeapons.values()) {
     const itemHash = bungieDefinitionHash(item?.itemHash);
@@ -170,12 +262,14 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     missingSocketInstances,
     schemaVersion: 1,
     source: "prepared-owned-weapon-definitions",
+    resolution: "manifest-resolve",
     indexDefinitions: preparedWeaponHashes.size,
     complete: weaponIndexComplete && unresolved.length === 0 && missingSocketInstances.length === 0
   };
   account.weaponEffectCoverage = {
     schemaVersion: 1,
     source: "bungie-fixed-intrinsic-socket-and-sandbox-perk",
+    resolution: "manifest-resolve",
     intrinsicEvidence: Object.fromEntries([...intrinsicEvidence].map(([itemHash, plugHash]) => [String(itemHash), plugHash])),
     sandboxPerkRequested: sandboxPerkHashes,
     sandboxPerkUnresolved: sandboxPerkHashes.filter(hash => !sandboxPerks[String(hash)]),
@@ -183,6 +277,24 @@ async function enrichOwnedWeaponDefinitions(payload: any, env: Env): Promise<any
     emptySandboxPerkDescriptions,
     complete: missingEffectDescriptions.length === 0
   };
+  if (stateKey && unresolved.length === 0) {
+    const resolvedDefinitions = Object.fromEntries([...requested]
+      .filter(hash => definitions[String(hash)])
+      .map(hash => [String(hash), definitions[String(hash)]]));
+    rememberOwnedWeaponState(stateKey, {
+      definitions: resolvedDefinitions,
+      sandboxPerks: Object.fromEntries(sandboxPerkHashes
+        .filter(hash => sandboxPerks[String(hash)])
+        .map(hash => [String(hash), sandboxPerks[String(hash)]])),
+      requested: [...requested],
+      unresolved,
+      intrinsicEvidence: Object.fromEntries([...intrinsicEvidence].map(([itemHash, plugHash]) => [String(itemHash), plugHash])),
+      sandboxPerkRequested: sandboxPerkHashes,
+      sandboxPerkUnresolved: sandboxPerkHashes.filter(hash => !sandboxPerks[String(hash)]),
+      missingEffectDescriptions,
+      emptySandboxPerkDescriptions
+    });
+  }
   return payload;
 }
 
@@ -191,9 +303,9 @@ function equipableSetHash(itemDefinition: Record<string, any>): number | null {
   return bungieDefinitionHash(value);
 }
 
-async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
+async function enrichEquipableSets(payload: any, env: Env, preparedVersion = ""): Promise<any> {
   if (payload?.transport === "prepared-page-stream-v1") {
-    if (payload.account?.definitions) await enrichEquipableSets(payload.account, env);
+    if (payload.account?.definitions) await enrichEquipableSets(payload.account, env, preparedVersion || payload?.prepared?.manifestVersion || "");
     return payload;
   }
   const inventory = payload?.definitions || {};
@@ -209,13 +321,13 @@ async function enrichEquipableSets(payload: any, env: Env): Promise<any> {
   }
 
   const sets: Record<string, Record<string, any>> = { ...(payload.equipableItemSets || {}) };
-  Object.assign(sets, await preparedDefinitions("DestinyEquipableItemSetDefinition", setHashes.filter(hash => !sets[String(hash)]), env));
+  Object.assign(sets, await preparedDefinitions("DestinyEquipableItemSetDefinition", setHashes.filter(hash => !sets[String(hash)]), env, preparedVersion));
 
   const perkHashes = bungieDefinitionHashes(
     Object.values(sets).flatMap((set: any) => (set?.setPerks || []).map((perk: any) => perk?.sandboxPerkHash))
   );
   const sandboxPerks: Record<string, Record<string, any>> = { ...(payload.sandboxPerks || {}) };
-  Object.assign(sandboxPerks, await preparedDefinitions("DestinySandboxPerkDefinition", perkHashes.filter(hash => !sandboxPerks[String(hash)]), env));
+  Object.assign(sandboxPerks, await preparedDefinitions("DestinySandboxPerkDefinition", perkHashes.filter(hash => !sandboxPerks[String(hash)]), env, preparedVersion));
 
   payload.equipableItemSets = sets;
   payload.sandboxPerks = sandboxPerks;

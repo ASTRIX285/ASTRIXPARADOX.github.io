@@ -30,12 +30,13 @@ const setEnv={MANIFEST_DATA:{async fetch(request){
 }}};
 const gearSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-gear-layout.mjs',import.meta.url),'utf8');
 const semanticWrapperSource=await readFile(new URL('../../forge-auth-worker/src/semantic-wrapper.ts',import.meta.url),'utf8');
+const pageSemanticsSource=await readFile(new URL('../../forge-auth-worker/src/page-semantics.ts',import.meta.url),'utf8');
 assert.match(semanticWrapperSource,/const account = payload\?\.transport === "prepared-page-stream-v1" && payload\?\.account[\s\S]*?\? payload\.account[\s\S]*?resolveMissingInventoryDefinitions\(account, requested, env\)/,'Prepared Build Forge account envelopes must resolve live subclass socket definitions inside account data.');
 assert.match(semanticWrapperSource,/account\.subclassCatalogCoverage = \{[\s\S]*?complete: unresolved\.length === 0/,'Prepared Build Forge subclass enrichment must publish exact socket definition coverage on the account payload.');
 assert.match(semanticWrapperSource,/value !== "owned-item-definitions"[\s\S]*?coverage: \{complete: missing\.length === 0, missing\}/,'Resolved subclass definitions must repair the prepared page readiness contract before client validation.');
-assert.match(semanticWrapperSource,/weaponEffectCoverage\?\.missingEffectDescriptions[\s\S]*?manifest_effect_evidence_missing/,'The backend must log an exact missing weapon effect evidence record.');
-assert.match(semanticWrapperSource,/weaponEffectCoverage\?\.sandboxPerkUnresolved[\s\S]*?definitionType: "DestinySandboxPerkDefinition"[\s\S]*?field: "ownedWeapon\.definition\.perks\.perkHash"/,'The backend must log an exact unresolved weapon SandboxPerk hash and field.');
-assert.match(semanticWrapperSource,/manifest_definition_unresolved[\s\S]*?field: "ownedWeapon\.socketDefinition"/,'The backend must log the exact unresolved owned weapon socket hash and field.');
+assert.match(pageSemanticsSource,/weaponEffectCoverage\?\.missingEffectDescriptions[\s\S]*?manifest_effect_evidence_missing/,'The backend must log an exact missing weapon effect evidence record.');
+assert.match(pageSemanticsSource,/weaponEffectCoverage\?\.sandboxPerkUnresolved[\s\S]*?definitionType: "DestinySandboxPerkDefinition"[\s\S]*?field: "ownedWeapon\.definition\.perks\.perkHash"/,'The backend must log an exact unresolved weapon SandboxPerk hash and field.');
+assert.match(pageSemanticsSource,/manifest_definition_unresolved[\s\S]*?field: "ownedWeapon\.socketDefinition"/,'The backend must log the exact unresolved owned weapon socket hash and field.');
 const setIconExpression=gearSource.match(/const setBonusIcon = ([^;]+);/)?.[1];
 assert.ok(setIconExpression);
 const renderSetIcon=new Function('armourSet','bungieIcon',`return ${setIconExpression};`);
@@ -133,8 +134,10 @@ const weaponEnvelope={
   prepared:{manifestVersion:armourIndex.manifestVersion,weaponDefinitionHashes:[realOwnedWeaponHash],loadoutCoverage:{weaponDefinitions:1,complete:true}}
 };
 const weaponDefinitions={[realOwnedWeaponHash]:realOwnedWeaponDefinition,[realSelectedPlugHash]:realSelectedPlugDefinition};
+const weaponReads=[];
 const weaponEnv={MANIFEST_DATA:{async fetch(request){
   const path=new URL(request.url).pathname;
+  weaponReads.push(path);
   if(path==='/status')return Response.json({manifestVersion:armourIndex.manifestVersion});
   assert.equal(path,'/resolve');
   const body=await request.json();
@@ -145,7 +148,28 @@ assert.equal(weaponEnvelope.account.definitions[String(realOwnedWeaponHash)].dis
 assert.equal(weaponEnvelope.account.definitions[String(realSelectedPlugHash)].displayProperties.name,'Adaptive Frame','The exact selected weapon socket must be resident before Forge Loader renders.');
 assert.deepEqual(weaponEnvelope.account.weaponDefinitionCoverage.itemInstances,[capturedOwnedWeaponInstance]);
 assert.equal(weaponEnvelope.account.weaponDefinitionCoverage.complete,true,'Real owned weapon and selected socket definitions must publish complete source coverage.');
+assert.equal(weaponReads.includes('/status'),false,'A prepared page manifest version must prevent repeated status subrequests during semantic enrichment.');
+const cachedWeaponEnvelope={
+  transport:'prepared-page-stream-v1',
+  account:{
+    profile:structuredClone(weaponEnvelope.account.profile),
+    definitions:{}
+  },
+  prepared:structuredClone(weaponEnvelope.prepared)
+};
+const readsBeforeStateCache=weaponReads.length;
+await enrichOwnedWeaponDefinitions(cachedWeaponEnvelope,weaponEnv);
+assert.equal(weaponReads.length,readsBeforeStateCache,'An unchanged captured owned weapon and socket state must not repeat manifest resolution.');
+assert.equal(cachedWeaponEnvelope.account.weaponDefinitionCoverage.resolution,'account-state-cache');
+const changedWeaponEnvelope=structuredClone(cachedWeaponEnvelope);
+changedWeaponEnvelope.account.definitions={};
+changedWeaponEnvelope.account.sandboxPerks={};
+changedWeaponEnvelope.account.profile.itemComponents.sockets.data[capturedOwnedWeaponInstance].sockets[0].plugHash=realOwnedWeaponHash;
+await enrichOwnedWeaponDefinitions(changedWeaponEnvelope,weaponEnv);
+assert.ok(weaponReads.length>readsBeforeStateCache,'A changed real socket state must recompute its manifest coverage.');
+assert.equal(changedWeaponEnvelope.account.weaponDefinitionCoverage.resolution,'manifest-resolve');
 console.log('PREPARED_ACCOUNT_OWNED_WEAPON_DEFINITIONS=PASS');
+console.log('OWNED_WEAPON_ACCOUNT_STATE_CACHE=PASS');
 
 // Praxic Blade's real DestinySandboxPerkDefinition 2348883558 is present but
 // blank. Its actual effect description is the fixed intrinsic inventory plug
@@ -201,8 +225,9 @@ await new ProfileSnapshotCache(storage()).read('account:character',load);assert.
 await assert.rejects(()=>cache.read('account:character',async()=>{throw Error('Bungie unavailable');},Date.now()+DISPLAY_TTL_MS+1),/Bungie unavailable/);
 
 const index={manifestVersion:'verified-test-version',tables:{DestinyInventoryItemDefinition:{shards:2}}};
+const loadoutIndex={manifestVersion:index.manifestVersion,page:'loadout-index',weaponDefinitionHashes:[realOwnedWeaponHash],loadoutCoverage:{weaponDefinitions:1,complete:true}};
 let assets=0;
-const env={ASSETS:{async fetch(request){assets++;const path=new URL(request.url).pathname;return Response.json(path==='/index.json'?index:path.endsWith('/1.json')?{'1':{hash:1},'3':{hash:3}}:{'2':{hash:2}});}}};
+const env={ASSETS:{async fetch(request){assets++;const path=new URL(request.url).pathname;return Response.json(path==='/index.json'?index:path==='/pages/loadout-index.json'?loadoutIndex:path.endsWith('/1.json')?{'1':{hash:1},'3':{hash:3}}:{'2':{hash:2}});}}};
 const route='https://data/definitions?type=DestinyInventoryItemDefinition&version=verified-test-version&hashes=';
 let response=await dataWorker.fetch(new Request(route+'1,2,3'),env);
 assert.deepEqual(Object.keys((await response.json()).definitions),['1','2','3']);assert.equal(assets,3);
@@ -210,6 +235,8 @@ assert.equal((await dataWorker.fetch(new Request(route+'0'),env)).status,400);
 assert.equal((await dataWorker.fetch(new Request(route.replace('verified-test-version','old')+'1'),env)).status,409);
 response=await dataWorker.fetch(new Request('https://data/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:index.manifestVersion,requests:{DestinyInventoryItemDefinition:[1,2,3]}})}),env);
 assert.deepEqual(Object.keys((await response.json()).tables.DestinyInventoryItemDefinition),['1','2','3']);
+response=await dataWorker.fetch(new Request(`https://data/page-index?page=loadout&version=${index.manifestVersion}`),env);
+assert.deepEqual(await response.json(),loadoutIndex,'The auth Worker must be able to read the small weapon identity index without parsing the large Loadout bundle.');
 
 const requests=[];
 const service=new GuardianManifestService({backend:true,maxFallbackDefinitions:3,maxDefinitionBytes:1024,storage:{available:true,readCurrent(){throw Error('must not load full tables');}},fetchImpl:async input=>{

@@ -162,15 +162,19 @@ def main():
     current = OUT / 'index.json'
     if current.exists():
         index = json.loads(current.read_text())
-        page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'loadout')]
+        page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'loadout', 'loadout-index')]
         journey_page = json.loads((OUT / 'pages/journey.json').read_text()) if (OUT / 'pages/journey.json').exists() else {}
         loadout_page = json.loads((OUT / 'pages/loadout.json').read_text()) if (OUT / 'pages/loadout.json').exists() else {}
+        loadout_index = json.loads((OUT / 'pages/loadout-index.json').read_text()) if (OUT / 'pages/loadout-index.json').exists() else {}
         page_bundles_current = (
             all(path.exists() for path in page_paths)
             and journey_page.get('journeyCoverage', {}).get('complete') is True
             and loadout_page.get('loadoutCoverage', {}).get('complete') is True
             and loadout_page.get('loadoutCoverage', {}).get('weaponDefinitions') == len(loadout_page.get('weaponDefinitionHashes') or [])
             and bool(loadout_page.get('weaponDefinitionHashes'))
+            and loadout_index.get('manifestVersion') == version
+            and loadout_index.get('weaponDefinitionHashes') == loadout_page.get('weaponDefinitionHashes')
+            and loadout_index.get('loadoutCoverage') == loadout_page.get('loadoutCoverage')
         )
         if index.get('schemaVersion') == 1 and index.get('manifestVersion') == version and set(index.get('tables', {})) == set(required) and page_bundles_current:
             print('BACKEND_MANIFEST_CURRENT=' + version)
@@ -283,6 +287,12 @@ def main():
             'forgeArmourIndex': forge_payload,
             'weaponDefinitionHashes': weapon_definition_hashes,
             'collectibleDefinitions': loadout_collectibles,
+            'loadoutCoverage': loadout_coverage,
+        }))
+        (pages / 'loadout-index.json').write_bytes(encode({
+            'manifestVersion': version,
+            'page': 'loadout-index',
+            'weaponDefinitionHashes': weapon_definition_hashes,
             'loadoutCoverage': loadout_coverage,
         }))
         journey_index_path = ROOT / 'astrix-app/data/journey-index/index.json'

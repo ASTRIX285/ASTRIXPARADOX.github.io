@@ -9,6 +9,7 @@ import {
 } from "./auth-record";
 import { allowedOrigins, approvedReturnUrl, handlePreflight, json, withCors } from "./web";
 import { profileSections } from "./profile-sections";
+import { enrichPreparedPageAccount } from "./page-semantics";
 
 export { AuthRecord };
 
@@ -1427,12 +1428,29 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
   let pageBundleResponse: Response | null = null;
+  let loadoutSemanticIndex: {
+    manifestVersion?: string;
+    weaponDefinitionHashes?: number[];
+    loadoutCoverage?: { weaponDefinitions?: number };
+  } | null = null;
   if (env.MANIFEST_DATA && preparedVersion) {
     const bundleUrl = new URL("https://manifest/page-bundle");
     bundleUrl.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
     bundleUrl.searchParams.set("version", preparedVersion);
-    const bundleResponse = await env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null);
+    const indexUrl = new URL("https://manifest/page-index");
+    indexUrl.searchParams.set("page", "loadout");
+    indexUrl.searchParams.set("version", preparedVersion);
+    const [bundleResponse, indexResponse] = await Promise.all([
+      env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null),
+      page === "loadout" || page === "build-forge"
+        ? env.MANIFEST_DATA.fetch(new Request(indexUrl)).catch(() => null)
+        : Promise.resolve(null)
+    ]);
     if (bundleResponse?.ok && bundleResponse.body) pageBundleResponse = bundleResponse;
+    loadoutSemanticIndex = indexResponse?.ok
+      ? await indexResponse.json<typeof loadoutSemanticIndex>().catch(() => null)
+      : null;
+    if (loadoutSemanticIndex?.manifestVersion !== preparedVersion) loadoutSemanticIndex = null;
   }
 
   if (page === "journey") {
@@ -1467,6 +1485,19 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   if (currentSeason?.season) {
     payload.currentSeason = currentSeason.season;
     payload.currentSeasonNumber = currentSeason.season.seasonNumber;
+  }
+
+  try {
+    await enrichPreparedPageAccount(payload, env, page, {
+      manifestVersion: preparedVersion,
+      weaponDefinitionHashes: loadoutSemanticIndex?.weaponDefinitionHashes,
+      expectedWeaponDefinitions: loadoutSemanticIndex?.loadoutCoverage?.weaponDefinitions
+    });
+  } catch (error) {
+    console.error("prepared_page_semantic_enrichment_failed", {
+      page,
+      message: error instanceof Error ? error.message : String(error)
+    });
   }
 
   const missing: string[] = [];
