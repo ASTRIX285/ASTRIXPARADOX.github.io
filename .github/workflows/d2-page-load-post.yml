@@ -67,6 +67,25 @@ jobs:
             .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>500_000||Number(row.quantiles?.requestDurationP50||0)>500_000||Number(row.sum?.subrequests||0)>5)
             .sort((left,right)=>String(left.dimensions?.datetime).localeCompare(String(right.dimensions?.datetime)));
           console.log(JSON.stringify({requestStart,requestEnd,notableResponses}));
+          const observabilityResponse=await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/workers/observability/telemetry/query`,{
+            method:'POST',
+            headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
+            body:JSON.stringify({
+              queryId:'prepared-page-account-budget-live',
+              timeframe:{from:Date.parse(requestStart),to:Date.parse(requestEnd)},
+              view:'events',
+              limit:100,
+              dry:true,
+              parameters:{
+                datasets:[],
+                filterCombination:'and',
+                filters:[{key:'$metadata.service',operation:'eq',type:'string',value:'astrix-destiny-backend'}],
+                needle:{value:'prepared_page_account_budget',isRegex:false,matchCase:true}
+              }
+            })
+          });
+          const observabilityBody=await observabilityResponse.json().catch(()=>({}));
+          console.log(JSON.stringify({observabilityStatus:observabilityResponse.status,observability:observabilityBody}));
           const beforeStart='2026-09-02T00:00:00.000Z';
           const beforeEnd='2026-09-05T23:59:59.999Z';
           const beforeResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
