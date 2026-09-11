@@ -1186,6 +1186,11 @@ async function loadoutRoute(request: Request, env: Env): Promise<Response> {
 }
 
 type PagePayloadKind = "character" | "build-forge" | "journey" | "vault" | "loadout";
+type LoadoutSemanticIndex = {
+  manifestVersion?: string;
+  weaponDefinitionHashes?: number[];
+  loadoutCoverage?: { weaponDefinitions?: number };
+};
 const PAGE_PAYLOAD_KINDS = new Set<PagePayloadKind>(["character", "build-forge", "journey", "vault", "loadout"]);
 const PAGE_READ_VIEWS: Record<PagePayloadKind, readonly string[]> = {
   character: ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact"],
@@ -1428,11 +1433,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
   let pageBundleResponse: Response | null = null;
-  let loadoutSemanticIndex: {
-    manifestVersion?: string;
-    weaponDefinitionHashes?: number[];
-    loadoutCoverage?: { weaponDefinitions?: number };
-  } | null = null;
+  let loadoutSemanticIndex: LoadoutSemanticIndex | null = null;
   if (env.MANIFEST_DATA && preparedVersion) {
     const bundleUrl = new URL("https://manifest/page-bundle");
     bundleUrl.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
@@ -1448,7 +1449,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     ]);
     if (bundleResponse?.ok && bundleResponse.body) pageBundleResponse = bundleResponse;
     loadoutSemanticIndex = indexResponse?.ok
-      ? await indexResponse.json<typeof loadoutSemanticIndex>().catch(() => null)
+      ? await indexResponse.json<LoadoutSemanticIndex>().catch(() => null)
       : null;
     if (loadoutSemanticIndex?.manifestVersion !== preparedVersion) loadoutSemanticIndex = null;
   }
