@@ -78,16 +78,24 @@ function armourDetails(item){
   return `<section class="paradox-section paradox-section--stats"><h3>ARMOUR STATS</h3>${statMarkup(item,'armour')}</section>${identityRows}${modRows}`;
 }
 
-function cardMarkup(item,kind,{contextLabel=''}={}){
+function armourDefinitionDetails(item){
+  const intrinsic=item?.armourSemantics?.exoticPerk??item?.exoticPerk??item?.intrinsicTrait??null;
+  if(!intrinsic)return '<section class="paradox-section"><h3>INTRINSIC EXOTIC PERK</h3><p class="inspector-empty">Bungie did not return an intrinsic perk definition for this Exotic.</p></section>';
+  const icon=itemIcon(intrinsic),description=String(intrinsic?.description??intrinsic?.displayProperties?.description??'').trim();
+  return `<section class="paradox-section"><h3>INTRINSIC EXOTIC PERK</h3><div class="paradox-identity-card"><div class="paradox-identity-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">◆</span>'}</div><div><small>EXOTIC ARMOUR TRAIT</small><b>${esc(itemName(intrinsic,'Intrinsic perk'))}</b>${description?`<p>${esc(description)}</p>`:''}</div></div></section>`;
+}
+
+function cardMarkup(item,kind,{contextLabel='',definitionOnly=false}={}){
   const icon=itemIcon(item);
   const release=item?.releaseWatermark?.icon?{icon:asset(item.releaseWatermark.icon),source:item.releaseWatermark.source??'prepared-item'}:resolveItemWatermark(item??{},item?.definition??{});
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
-  const power=item?.power??item?.primaryStat?.value??'—';
+  const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
+  const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
   const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Verified Bungie item');
   return `<article class="paradox-item-card paradox-item-card--${kind} paradox-item-hover-card" data-item-kind="${kind}">
-    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(power)}</b></div></header>
-    <div class="paradox-card-body">${kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
-    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
+    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>${metricLabel}</small><b>${esc(metricValue)}</b></div></header>
+    <div class="paradox-card-body">${definitionOnly&&kind==='armour'?armourDefinitionDetails(item):kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
+    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${definitionOnly?'TYPE LEVEL BUNGIE DATA':item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
   </article>`;
 }
 
