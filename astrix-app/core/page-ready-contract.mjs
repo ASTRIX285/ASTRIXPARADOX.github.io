@@ -41,6 +41,11 @@ function pagePayloadCoverage(payload,page){
   return {page,views:expected,missing:[...new Set(missing)],complete:missing.length===0};
 }
 
+/* Two gates exist here on purpose, do not collapse them into one.
+ * assertPreparedPagePayload / pagePayloadCoverage is the strict backend completeness gate. It checks every page-specific profile path, every coverage flag, and every page-specific requirement (artifact catalogue, current season, forge armour index, loadout coverage). This is a backend and test-only contract, the frontend must never call it directly, see validate-renderable-page-data.mjs which asserts exactly that.
+ * assertRenderablePagePayload / renderablePagePayloadCoverage is the real frontend render gate, and it is deliberately loose: page name match, a manifest version, the prepared-bulk-manifest definition source, and profile.characters.data. This is intentional, not a bug, so that one incomplete section never blanks an entire page, the same principle already locked in project governance.
+ * The corollary: passing this loose gate proves the page CAN render, it does not prove any one section's own data is complete. Every individual section's own render function is responsible for checking its own specific data path and showing an honest pending or unavailable state when that path is genuinely still incomplete, never for assuming this gate having passed means its own data is present.
+ * Do not tighten assertRenderablePagePayload to match assertPreparedPagePayload, and do not weaken or remove validate-renderable-page-data.mjs's lock on this split without flagging it first, per the no-rogue-code governance rule. */
 function assertPreparedPagePayload(payload,page){
   const coverage=pagePayloadCoverage(payload,page);
   if(!coverage.complete)throw new Error(`Prepared ${page} data is incomplete: ${coverage.missing.join(', ')}`);
