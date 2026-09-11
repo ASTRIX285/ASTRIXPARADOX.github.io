@@ -1,6 +1,6 @@
 // Worker-safe Forge sequence. Selection and Artifact rules are shared with the established UI flow.
 import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
-import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
+import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1';
 import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
 import {validateTierFiveArmour} from './paradox-build-recommendation.mjs';
@@ -61,6 +61,9 @@ export async function prepareForgeSequence({build,candidate,element,objective='b
   catch(error){additionalPending.push({code:'weapon-roll-advice-unavailable',field:'weaponRollAdvice',hash:null,message:`Weapon roll advice remains pending: ${error?.message||'verified perk evidence was unavailable'}.`});}
   working.forgeEvidence=forgeEvidenceAssessment(working,coherence,additionalPending);
   working.recommendationStatus=working.forgeEvidence.status==='partial'?'partial-review-required':'review-required';
+  const refreshedIntelligence=refreshForgeIntelligence({build:forgeComputationProjection(working),element,analyzeBuild:analyzeLiveGuardian,bounded:true});
+  working.forgeIntelligence={...refreshedIntelligence.intelligence,generatedAt:working.recommendationGeneratedAt};
+  working.paradoxAnalysis=refreshedIntelligence.analysis||working.paradoxAnalysis||analyzeLiveGuardian(working)||null;
   if(working.forgeIntelligence&&working.paradoxAnalysis){working.forgeIntelligence.evidence={...working.forgeIntelligence.evidence,directedLinks:working.paradoxAnalysis.buildLoop?.length||0,strengths:working.paradoxAnalysis.strengths?.length||0,weakLinks:working.paradoxAnalysis.weakLinks?.length||0,confidence:working.paradoxAnalysis.confidence?.level||'evidence-limited',ownedWeaponCandidates:working.weaponSelectionRecommendation?.candidateCount||0,artifactSynergyScore:Number(working.artifactRecommendation?.totalScore||0),armourModDecisions:working.armourModRecommendation?.decisions?.length||0,excludedPendingFields:working.forgeEvidence.excludedFromEvidenceScore.length};working.forgeIntelligence.limitations=[...new Set([...(working.forgeIntelligence.limitations||[]),...(working.weaponSelectionRecommendation?.limitations||[]),...(working.armourModRecommendation?.limitations||[]),...working.forgeEvidence.pending.map(row=>row.message)])];}
   working.liveTransferPreflight=createLiveTransferPreflight(working);
   next=protectBuildState({...next,workingBuild:working,recommendation:{...next.recommendation,status:working.recommendationStatus,evidenceStatus:working.forgeEvidence.status}});
