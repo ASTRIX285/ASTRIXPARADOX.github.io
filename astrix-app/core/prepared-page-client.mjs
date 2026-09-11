@@ -41,6 +41,40 @@ function mergeTables(target={},source={}){
   return target;
 }
 
+function expandPreparedPlugLists(profile={}){
+  const compact=profile?.preparedPlugLists;
+  if(compact?.schemaVersion!==1||!Array.isArray(compact.dictionary))return profile;
+  const rows=index=>{
+    const value=compact.dictionary[Number(index)];
+    const fields=['plugItemHash','plugHash','canInsert','enabled','isEnabled','isVisible','enableFailIndexes','insertFailIndexes'];
+    return Array.isArray(value)?value.map(tuple=>Object.fromEntries(fields
+      .map((field,position)=>[field,tuple?.[position]])
+      .filter(([,entry])=>entry!==undefined&&entry!==null))):[];
+  };
+  profile.itemComponents=profile.itemComponents||{};
+  profile.itemComponents.reusablePlugs=profile.itemComponents.reusablePlugs||{data:{}};
+  const reusableData=profile.itemComponents.reusablePlugs.data||{};
+  profile.itemComponents.reusablePlugs.data=Object.fromEntries(Object.entries(compact.itemRefs||{}).map(([instanceId,refs])=>[
+    instanceId,
+    {...(reusableData[instanceId]||{}),plugs:Object.fromEntries(Object.entries(refs||{}).map(([socketIndex,index])=>[socketIndex,rows(index)]))}
+  ]));
+  if(Object.keys(compact.profileSetRefs||{}).length){
+    profile.profilePlugSets=profile.profilePlugSets||{data:{plugs:{}}};
+    profile.profilePlugSets.data=profile.profilePlugSets.data||{plugs:{}};
+    profile.profilePlugSets.data.plugs=Object.fromEntries(Object.entries(compact.profileSetRefs).map(([setHash,index])=>[setHash,rows(index)]));
+  }
+  if(Object.keys(compact.characterSetRefs||{}).length){
+    profile.characterPlugSets=profile.characterPlugSets||{data:{}};
+    const characterData=profile.characterPlugSets.data||{};
+    profile.characterPlugSets.data=Object.fromEntries(Object.entries(compact.characterSetRefs).map(([characterId,refs])=>[
+      characterId,
+      {...(characterData[characterId]||{}),plugs:Object.fromEntries(Object.entries(refs||{}).map(([setHash,index])=>[setHash,rows(index)]))}
+    ]));
+  }
+  delete profile.preparedPlugLists;
+  return profile;
+}
+
 function completeEnvelopeCoverage(payload,page){
   const missing=new Set(Array.isArray(payload?.pageReady?.coverage?.missing)?payload.pageReady.coverage.missing:[]);
   missing.delete('prepared-page-bundle');
@@ -66,6 +100,7 @@ function normalizePreparedPagePayload(raw,pageValue){
   if(raw?.transport!=='prepared-page-stream-v1'||!raw?.account||!raw?.prepared)return raw;
   const prepared=raw.prepared&&typeof raw.prepared==='object'?raw.prepared:{};
   const account=raw.account&&typeof raw.account==='object'?raw.account:{};
+  expandPreparedPlugLists(account.profile);
   const payload={...prepared,...account};
   if(page==='journey'){
     payload.manifestTables=mergeTables(prepared.manifestTables||{},account.journeyAccountManifestTables||{});

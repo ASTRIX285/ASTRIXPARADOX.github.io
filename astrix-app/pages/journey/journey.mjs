@@ -235,8 +235,10 @@ function bindVault(payload){
   const vaultItems=payload?.profile?.profileInventory?.data?.items;
   if(!Array.isArray(vaultItems))return;
   const stored=vaultItems.filter(item=>item?.bucketHash===VAULT_BUCKET);
-  const armourCount=stored.filter(item=>Number(payload?.definitions?.[String(item?.itemHash)]?.itemType)===ARMOUR_ITEM_TYPE).length;
-  const equipmentCount=stored.length-armourCount;
+  const storedDefinitions=stored.map(item=>payload?.definitions?.[String(item?.itemHash)]||null);
+  const classificationComplete=storedDefinitions.every(Boolean);
+  const armourCount=classificationComplete?storedDefinitions.filter(definition=>Number(definition?.itemType)===ARMOUR_ITEM_TYPE).length:null;
+  const equipmentCount=classificationComplete?stored.length-armourCount:null;
   let postmasterMax=0;
   for(const char of Object.values(payload?.profile?.characterInventories?.data||{})){
     const pm=(char?.items||[]).filter(i=>i?.bucketHash===POSTMASTER_BUCKET).length;
@@ -248,7 +250,9 @@ function bindVault(payload){
   total.innerHTML=`<span>ALL</span><strong>${numberFormatter.format(stored.length)}</strong>`;
   const breakdown=document.createElement('dl');
   breakdown.className='journey-vault-breakdown';
-  breakdown.innerHTML=`<div><dt>ARMOUR</dt><dd>${numberFormatter.format(armourCount)}</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>${numberFormatter.format(equipmentCount)}</dd></div>`;
+  breakdown.innerHTML=classificationComplete
+    ?`<div><dt>ARMOUR</dt><dd>${numberFormatter.format(armourCount)}</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>${numberFormatter.format(equipmentCount)}</dd></div>`
+    :'<div><dt>ARMOUR</dt><dd>UNAVAILABLE</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>UNAVAILABLE</dd></div>';
   vaultCard.append(total,breakdown);
   if(postmasterMax>=18){
     const warning=document.createElement('p');

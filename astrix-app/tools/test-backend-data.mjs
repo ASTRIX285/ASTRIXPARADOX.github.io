@@ -6,7 +6,7 @@ import {fetchDisplayProfile} from '../pages/guardian-workspace-v2/guardian-displ
 import dataWorker from '../../forge-manifest-worker/worker.mjs';
 import {GuardianManifestService} from '../pages/guardian-workspace-v2/guardian-manifest-service.mjs';
 import {bungieDefinitionHashes,enrichEquipableSets,enrichOwnedWeaponDefinitions,preparedDefinitions} from '../../forge-auth-worker/src/manifest-semantics.ts';
-import {enrichPreparedPageAccount} from '../../forge-auth-worker/src/page-semantics.ts';
+import {compactPreparedProfilePlugLists,enrichPreparedPageAccount} from '../../forge-auth-worker/src/page-semantics.ts';
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
 import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
@@ -115,6 +115,33 @@ assert.equal(capturedVaultPayload.definitions['3788059976'].oversizedInternalPay
 assert.ok(Buffer.byteLength(JSON.stringify(capturedVaultPayload))<2_500_000,'The captured Vault account overlay must stay within the Worker budget.');
 assert.ok(capturedReads.length<=4,`Captured Vault enrichment used ${capturedReads.length} manifest batches.`);
 console.log(`CAPTURED_VAULT_COMPACT_PAGE_PROJECTION=PASS batches=${capturedReads.length} bytes=${Buffer.byteLength(JSON.stringify(capturedVaultPayload))}`);
+
+// The live account repeats the same reusable socket choices across hundreds of
+// armour instances. Keep that exact evidence, but send each repeated list once
+// so serialising a prepared page cannot exhaust the Worker heap.
+const repeatedPlugRows=[
+  {plugItemHash:395373724,canInsert:true,enabled:true,enableFailIndexes:[],insertFailIndexes:[]},
+  {plugItemHash:1294026524,canInsert:false,enabled:true,insertFailIndexes:[7]}
+];
+const repeatedProfile={
+  itemComponents:{reusablePlugs:{data:Object.fromEntries(Array.from({length:500},(_,index)=>[
+    `captured-reusable-${index}`,
+    {plugs:{0:structuredClone(repeatedPlugRows),1:structuredClone(repeatedPlugRows)}}
+  ]))}},
+  profilePlugSets:{data:{plugs:{100:structuredClone(repeatedPlugRows)}}},
+  characterPlugSets:{data:{captured:{plugs:{200:structuredClone(repeatedPlugRows)}}}}
+};
+const repeatedBytes=Buffer.byteLength(JSON.stringify(repeatedProfile));
+const compactPlugAccount={profile:structuredClone(repeatedProfile),pageReady:{page:'vault',manifestVersion:armourIndex.manifestVersion,coverage:{complete:true,missing:[]}}};
+compactPreparedProfilePlugLists(compactPlugAccount);
+const compactPlugBytes=Buffer.byteLength(JSON.stringify(compactPlugAccount.profile));
+assert.ok(compactPlugBytes<repeatedBytes/8,`Captured reusable plug transport stayed too large: ${compactPlugBytes} of ${repeatedBytes} bytes.`);
+const expandedPlugAccount=normalizePreparedPagePayload({transport:'prepared-page-stream-v1',account:compactPlugAccount,prepared:{}},'vault');
+assert.deepEqual(expandedPlugAccount.profile.itemComponents.reusablePlugs.data['captured-reusable-499'].plugs['1'],repeatedPlugRows);
+assert.deepEqual(expandedPlugAccount.profile.profilePlugSets.data.plugs['100'],repeatedPlugRows);
+assert.deepEqual(expandedPlugAccount.profile.characterPlugSets.data.captured.plugs['200'],repeatedPlugRows);
+assert.equal(expandedPlugAccount.profile.preparedPlugLists,undefined);
+console.log(`CAPTURED_REUSABLE_PLUG_TRANSPORT=PASS raw=${repeatedBytes} compact=${compactPlugBytes}`);
 
 // Captured from Miguel's equipped Prismatic Warlock configuration. A sixth
 // fragment socket is empty, so Bungie reports its plugHash as null.
