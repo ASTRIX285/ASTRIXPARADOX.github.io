@@ -106,7 +106,11 @@ jobs:
               fields { name description type { kind name ofType { kind name } } }
             }
             types: __schema {
-              types { name fields { name description type { kind name ofType { kind name } } } }
+              types {
+                name
+                fields { name description type { kind name ofType { kind name } } }
+                inputFields { name description type { kind name ofType { kind name } } }
+              }
             }
           }`;
           const schemaResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
@@ -121,7 +125,9 @@ jobs:
             fields:(type.fields||[]).filter(field=>/worker|trace|observ/i.test(field.name))
           })).filter(type=>type.fields.length);
           console.log(JSON.stringify({parentTypes}));
-          const zoneHttpTypes=(schemaBody.data?.types?.types||[]).filter(type=>/ZoneHttpRequestsAdaptiveGroups/.test(type.name));
+          const zoneHttpTypes=(schemaBody.data?.types?.types||[])
+            .filter(type=>/ZoneHttpRequestsAdaptiveGroups/.test(type.name))
+            .map(type=>({name:type.name,fields:(type.fields||[]).map(field=>field.name),inputFields:(type.inputFields||[]).map(field=>({name:field.name,type:field.type}))}));
           console.log(JSON.stringify({zoneHttpTypes}));
 
           const zonesResponse=await fetch(`https://api.cloudflare.com/client/v4/zones?name=astrixparadox.com&account.id=${process.env.CLOUDFLARE_ACCOUNT_ID}`,{
