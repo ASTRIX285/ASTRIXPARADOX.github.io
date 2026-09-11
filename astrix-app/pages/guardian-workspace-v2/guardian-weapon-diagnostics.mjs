@@ -1,4 +1,4 @@
-import {requestPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {requestPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import {paradoxDefinitionId} from '../../core/bungie-item-identity.mjs';
 
 const WEAPON_BUCKETS=new Set([1498876634,2465295065,953998645]);

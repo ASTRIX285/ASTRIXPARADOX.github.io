@@ -181,6 +181,8 @@ const pageSources=await Promise.all([
   'pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs',
   'pages/journey/journey.mjs',
   'pages/vault/vault.mjs',
+  'pages/loadout/paradox-loadouts.mjs',
+  'pages/forge-loader/forge-loader.mjs',
   'pages/forge-loader/forge-loader-preload.mjs',
   'pages/tool-intro/tool-intro.mjs'
 ].map(async path=>[path,await readFile(new URL(path,root),'utf8')]));
@@ -209,6 +211,7 @@ assert.match(backend,/profileUrl\.searchParams\.set\("definitions", "client-mani
 assert.match(backend,/journeyManifestTables\([\s\S]*?journeySemanticIndex\?\.definitionHashes/,'Journey account resolution must subtract definitions already present in its streamed public bundle');
 assert.doesNotMatch(backend,/collectJourneyHashes\(profile, wanted\)/,'Journey must not expand every generic account inventory item into a definition closure');
 assert.match(backend,/raw\.characterEquipment[\s\S]*?DestinyInventoryItemDefinition/,'Journey may resolve the small equipped identity set required by its visible Guardian summary');
+assert.match(backend,/projectPreparedProfileComponents\(payload\.profile \|\| \{\}, page\)[\s\S]*?compactPreparedProfilePlugLists\(payload\)/,'Unused item components must be removed before prepared account serialization');
 assert.match(backend,/compactPreparedProfilePlugLists\(payload\)[\s\S]*?preparedPageEnvelope/,'Repeated profile plug lists must be compacted before account serialization');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
 assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", "loadout"\]\.includes\(pagePayload\)\) return response/,'The semantic wrapper must pass every prepared page stream through without cloning or parsing it');
@@ -216,6 +219,21 @@ assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'J
 const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
 assert.match(preparedClient,/prepared\.forgeArmourIndex[\s\S]*?prepared\.collectibleDefinitions[\s\S]*?prepared\.loadoutCoverage/,'The shared client must join the streamed Loadout bundle');
 assert.match(preparedClient,/expandPreparedPlugLists\(account\.profile\)/,'The shared client must restore compact exact plug evidence before page rendering');
+for(const [path,source] of pageSources){
+  if(source.includes('prepared-page-client.mjs'))assert.match(source,/transport=20260911-compact-plugs-1/,`${path} must load the deployed prepared transport client instead of a stale browser cache entry`);
+}
+const browserEntries=await Promise.all([
+  'pages/guardian-workspace-v2/index.html',
+  'pages/guardian-workspace-v2/guardian-workspace-v2.mjs',
+  'pages/guardian-workspace-v2/paradox-build-space/index.html',
+  'pages/journey/index.html',
+  'pages/vault/index.html',
+  'pages/loadout/index.html',
+  'pages/forge-loader/index.html',
+  'pages/tool-intro/index.html',
+  'pages/tool-intro/tool-intro.mjs'
+].map(async path=>[path,await readFile(new URL(path,root),'utf8')]));
+for(const [path,source] of browserEntries)assert.match(source,/transport=20260911-compact-plugs-1/,`${path} must invalidate the prior prepared page module graph`);
 const journeyRuntime=pageSources.find(([path])=>path.includes('/journey/'))?.[1]||'';
 assert.match(journeyRuntime,/classificationComplete[\s\S]*?UNAVAILABLE/,'Journey must not display false Vault category counts when account item definitions are intentionally absent');
 

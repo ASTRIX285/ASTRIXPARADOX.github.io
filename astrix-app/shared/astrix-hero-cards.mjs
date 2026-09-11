@@ -1,5 +1,5 @@
 import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const CLASS_NAMES=['titan','hunter','warlock'];

@@ -133,7 +133,7 @@ const repeatedProfile={
 };
 const repeatedBytes=Buffer.byteLength(JSON.stringify(repeatedProfile));
 const compactPlugAccount={profile:structuredClone(repeatedProfile),pageReady:{page:'vault',manifestVersion:armourIndex.manifestVersion,coverage:{complete:true,missing:[]}}};
-compactPreparedProfilePlugLists(compactPlugAccount);
+assert.equal(compactPreparedProfilePlugLists(compactPlugAccount),true,'A highly repeated captured plug graph must use compact transport.');
 const compactPlugBytes=Buffer.byteLength(JSON.stringify(compactPlugAccount.profile));
 assert.ok(compactPlugBytes<repeatedBytes/8,`Captured reusable plug transport stayed too large: ${compactPlugBytes} of ${repeatedBytes} bytes.`);
 const expandedPlugAccount=normalizePreparedPagePayload({transport:'prepared-page-stream-v1',account:compactPlugAccount,prepared:{}},'vault');
@@ -142,6 +142,18 @@ assert.deepEqual(expandedPlugAccount.profile.profilePlugSets.data.plugs['100'],r
 assert.deepEqual(expandedPlugAccount.profile.characterPlugSets.data.captured.plugs['200'],repeatedPlugRows);
 assert.equal(expandedPlugAccount.profile.preparedPlugLists,undefined);
 console.log(`CAPTURED_REUSABLE_PLUG_TRANSPORT=PASS raw=${repeatedBytes} compact=${compactPlugBytes}`);
+
+// A plug graph with no repeated lists is kept in its original shape. This
+// prevents the dictionary and reference metadata from expanding a real page
+// payload, which was observed immediately after the first compact deployment.
+const uniquePlugProfile={itemComponents:{reusablePlugs:{data:Object.fromEntries(Array.from({length:100},(_,index)=>[
+  `captured-unique-${index}`,
+  {plugs:{0:[{plugItemHash:index+1,canInsert:true,enabled:true}]}}
+]))}}};
+const uniquePlugAccount={profile:structuredClone(uniquePlugProfile)};
+assert.equal(compactPreparedProfilePlugLists(uniquePlugAccount),false,'A unique plug graph must not be dictionary encoded.');
+assert.deepEqual(uniquePlugAccount.profile,uniquePlugProfile,'A rejected compact transport must leave the exact Bungie component intact.');
+console.log('UNIQUE_REUSABLE_PLUG_TRANSPORT_FALLBACK=PASS');
 
 // Captured from Miguel's equipped Prismatic Warlock configuration. A sixth
 // fragment socket is empty, so Bungie reports its plugHash as null.

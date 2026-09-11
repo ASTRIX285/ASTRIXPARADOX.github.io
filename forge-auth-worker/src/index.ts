@@ -1221,6 +1221,16 @@ const PAGE_REQUIRED_PROFILE_DATA: Record<PagePayloadKind, readonly string[]> = {
 function hasPreparedProfileData(profile: Record<string, any>, path: string): boolean {
   return path.split(".").reduce<any>((value, key) => value?.[key], profile) !== undefined;
 }
+
+function projectPreparedProfileComponents(profile: Record<string, any>, page: PagePayloadKind): void {
+  const allowedItemComponents = new Set(PAGE_REQUIRED_PROFILE_DATA[page]
+    .filter(path => path.startsWith("itemComponents."))
+    .map(path => path.split(".")[1]));
+  if (!profile?.itemComponents || typeof profile.itemComponents !== "object") return;
+  for (const key of Object.keys(profile.itemComponents)) {
+    if (!allowedItemComponents.has(key)) delete profile.itemComponents[key];
+  }
+}
 const JOURNEY_HASH_FIELDS: Record<string, string> = {
   presentationNodeHash: "DestinyPresentationNodeDefinition",
   presentationNodeHashes: "DestinyPresentationNodeDefinition",
@@ -1599,6 +1609,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     },
     coverage: { complete: missing.length === 0, missing }
   };
+  projectPreparedProfileComponents(payload.profile || {}, page);
   compactPreparedProfilePlugLists(payload);
   const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
   return preparedPageEnvelope(request, env, payload, prepared);

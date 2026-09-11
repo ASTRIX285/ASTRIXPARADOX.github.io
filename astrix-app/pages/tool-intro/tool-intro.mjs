@@ -1,5 +1,5 @@
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
-import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260906-page-data-recovery-1&resident=20260910-step-1';
+import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260906-page-data-recovery-1&resident=20260910-step-1&transport=20260911-compact-plugs-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const JOURNEY_URL='../journey/';
