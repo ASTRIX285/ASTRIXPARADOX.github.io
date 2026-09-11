@@ -207,11 +207,17 @@ assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\
 assert.match(backend,/await enrichPreparedPageAccount\(payload, env, page,[\s\S]*?return preparedPageEnvelope\(request, env, payload, prepared\)/,'Page account semantics must complete before the public bundle stream is attached');
 assert.match(backend,/profileUrl\.searchParams\.set\("definitions", "client-manifest"\)/,'Every prepared page must bypass the legacy full-definition profile response');
 assert.match(backend,/journeyManifestTables\([\s\S]*?journeySemanticIndex\?\.definitionHashes/,'Journey account resolution must subtract definitions already present in its streamed public bundle');
+assert.doesNotMatch(backend,/collectJourneyHashes\(profile, wanted\)/,'Journey must not expand every generic account inventory item into a definition closure');
+assert.match(backend,/raw\.characterEquipment[\s\S]*?DestinyInventoryItemDefinition/,'Journey may resolve the small equipped identity set required by its visible Guardian summary');
+assert.match(backend,/compactPreparedProfilePlugLists\(payload\)[\s\S]*?preparedPageEnvelope/,'Repeated profile plug lists must be compacted before account serialization');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
 assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", "loadout"\]\.includes\(pagePayload\)\) return response/,'The semantic wrapper must pass every prepared page stream through without cloning or parsing it');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy static manifest tables in the auth Worker');
 const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
 assert.match(preparedClient,/prepared\.forgeArmourIndex[\s\S]*?prepared\.collectibleDefinitions[\s\S]*?prepared\.loadoutCoverage/,'The shared client must join the streamed Loadout bundle');
+assert.match(preparedClient,/expandPreparedPlugLists\(account\.profile\)/,'The shared client must restore compact exact plug evidence before page rendering');
+const journeyRuntime=pageSources.find(([path])=>path.includes('/journey/'))?.[1]||'';
+assert.match(journeyRuntime,/classificationComplete[\s\S]*?UNAVAILABLE/,'Journey must not display false Vault category counts when account item definitions are intentionally absent');
 
 const profileRuntime=pageSources.find(([path])=>path.includes('guardian-bungie-profile'))?.[1]||'';
 assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.includes\('\/pages\/guardian-workspace-v2\/'\)/,'Character runtime side effects must be limited to Character and Build Forge routes');
