@@ -35,6 +35,18 @@ JOURNEY_SOURCE_TYPES = {
 }
 GUARDIAN_STAT_HASHES = (2996146975, 392767087, 1943323491, 1735777505, 144602215, 4244567218)
 
+PAGE_INVENTORY_FIELDS = (
+    'hash', 'displayProperties', 'displaySource', 'sourceString',
+    'itemType', 'itemSubType', 'itemTypeDisplayName', 'itemTypeAndTierDisplayName',
+    'classType', 'inventory', 'equippable', 'collectibleHash',
+    'iconWatermark', 'iconWatermarkFeatured', 'iconWatermarkShelved',
+    'isFeaturedItem', 'isHolofoil', 'secondaryIcon', 'screenshot',
+    'defaultDamageTypeHash', 'defaultDamageTypeName', 'breakerTypeHash',
+    'damageTypeHashes', 'itemCategoryHashes', 'traitIds', 'traitHashes',
+    'perks', 'investmentStats', 'plug', 'tooltipNotifications',
+    'equipableItemSetHash', 'equippingBlock',
+)
+
 def fetch(url):
     headers = {'User-Agent': 'ASTRIX-PARADOX/Shared-Manifest'}
     if os.environ.get('BUNGIE_API_KEY'):
@@ -70,6 +82,48 @@ def shard_table(rows, directory):
     for n, entries in enumerate(groups):
         (directory / f'{n}.json').write_bytes(b'{' + b','.join(entries) + b'}')
     return {'shards': count, 'definitions': len(rows), 'maxShardBytes': max(sizes)}
+
+def page_inventory_projection(definition):
+    projected = {field: definition[field] for field in PAGE_INVENTORY_FIELDS if field in definition}
+    sockets = definition.get('sockets') or {}
+    socket_entries = []
+    for entry in sockets.get('socketEntries') or []:
+        socket_entries.append({
+            field: entry[field]
+            for field in (
+                'singleInitialItemHash', 'reusablePlugSetHash', 'randomizedPlugSetHash',
+                'socketTypeHash', 'defaultVisible', 'preventInitializationOnVendorPurchase'
+            )
+            if field in entry
+        })
+    compact_sockets = {
+        'socketEntries': socket_entries,
+        'intrinsicSockets': [
+            {field: row[field] for field in ('plugItemHash', 'socketTypeHash', 'defaultVisible') if field in row}
+            for row in sockets.get('intrinsicSockets') or []
+        ],
+        'socketCategories': [
+            {field: row[field] for field in ('socketCategoryHash', 'socketIndexes') if field in row}
+            for row in sockets.get('socketCategories') or []
+        ],
+    }
+    if any(compact_sockets.values()):
+        projected['sockets'] = compact_sockets
+    stats = definition.get('stats') or {}
+    if stats:
+        projected['stats'] = {
+            field: stats[field]
+            for field in ('disablePrimaryStatDisplay', 'statGroupHash', 'hasDisplayableStats')
+            if field in stats
+        }
+    quality = definition.get('quality') or {}
+    if quality:
+        projected['quality'] = {
+            field: quality[field]
+            for field in ('currentVersion', 'displayVersionWatermarkIcons', 'versions')
+            if field in quality
+        }
+    return projected
 
 def journey_compact_tables(directory):
     tables = {}
@@ -162,13 +216,19 @@ def main():
     current = OUT / 'index.json'
     if current.exists():
         index = json.loads(current.read_text())
-        page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'loadout', 'loadout-index')]
+        page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'journey-index', 'loadout', 'loadout-index')]
         journey_page = json.loads((OUT / 'pages/journey.json').read_text()) if (OUT / 'pages/journey.json').exists() else {}
+        journey_page_index = json.loads((OUT / 'pages/journey-index.json').read_text()) if (OUT / 'pages/journey-index.json').exists() else {}
         loadout_page = json.loads((OUT / 'pages/loadout.json').read_text()) if (OUT / 'pages/loadout.json').exists() else {}
         loadout_index = json.loads((OUT / 'pages/loadout-index.json').read_text()) if (OUT / 'pages/loadout-index.json').exists() else {}
         page_bundles_current = (
             all(path.exists() for path in page_paths)
             and journey_page.get('journeyCoverage', {}).get('complete') is True
+            and journey_page_index.get('manifestVersion') == version
+            and journey_page_index.get('definitionHashes') == {
+                table: sorted(int(hash_value) for hash_value in rows)
+                for table, rows in (journey_page.get('manifestTables') or {}).items()
+            }
             and loadout_page.get('loadoutCoverage', {}).get('complete') is True
             and loadout_page.get('loadoutCoverage', {}).get('weaponDefinitions') == len(loadout_page.get('weaponDefinitionHashes') or [])
             and bool(loadout_page.get('weaponDefinitionHashes'))
@@ -176,14 +236,16 @@ def main():
             and loadout_index.get('weaponDefinitionHashes') == loadout_page.get('weaponDefinitionHashes')
             and loadout_index.get('loadoutCoverage') == loadout_page.get('loadoutCoverage')
         )
-        if index.get('schemaVersion') == 1 and index.get('manifestVersion') == version and set(index.get('tables', {})) == set(required) and page_bundles_current:
+        page_inventory = (index.get('pageTables') or {}).get('DestinyInventoryItemDefinition') or {}
+        page_projection_current = page_inventory.get('definitions') == index.get('tables', {}).get('DestinyInventoryItemDefinition', {}).get('definitions')
+        if index.get('schemaVersion') == 2 and index.get('manifestVersion') == version and set(index.get('tables', {})) == set(required) and page_projection_current and page_bundles_current:
             print('BACKEND_MANIFEST_CURRENT=' + version)
             return
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=OUT.parent) as temp:
         staging = Path(temp) / 'data'
         staging.mkdir()
-        index = {'schemaVersion': 1, 'manifestVersion': version, 'tables': {}}
+        index = {'schemaVersion': 2, 'manifestVersion': version, 'tables': {}, 'pageTables': {}}
         page_rows = {}
         for table in required:
             path = manifest['jsonWorldComponentContentPaths']['en'][table]
@@ -191,12 +253,15 @@ def main():
                 raise ValueError('Unexpected Bungie manifest path')
             rows = fetch('https://www.bungie.net' + path)
             index['tables'][table] = shard_table(rows, staging / table)
+            if table == 'DestinyInventoryItemDefinition':
+                compact_rows = {hash_value: page_inventory_projection(row) for hash_value, row in rows.items()}
+                index['pageTables'][table] = shard_table(compact_rows, staging / 'page' / table)
             if table in JOURNEY_SOURCE_TYPES or table in ('DestinyActivityDefinition', 'DestinyDestinationDefinition', 'DestinySeasonDefinition', 'DestinySeasonPassDefinition'):
                 page_rows[table] = rows
             print(table, index['tables'][table], flush=True)
             if table not in page_rows:
                 del rows
-        if sum(t['shards'] for t in index['tables'].values()) + 1 > 19000:
+        if sum(t['shards'] for t in index['tables'].values()) + sum(t['shards'] for t in index['pageTables'].values()) + 1 > 19000:
             raise ValueError('Backend catalogue exceeds the static asset count budget')
         # Reject a manifest change during generation rather than publish mixed data.
         if metadata()['version'] != version:
@@ -324,6 +389,15 @@ def main():
             'page': 'journey',
             'journeyIndex': {'endgameByDestination': endgame},
             'manifestTables': journey_tables,
+            'journeyCoverage': journey_coverage,
+        }))
+        (pages / 'journey-index.json').write_bytes(encode({
+            'manifestVersion': version,
+            'page': 'journey-index',
+            'definitionHashes': {
+                table: sorted(int(hash_value) for hash_value in rows)
+                for table, rows in journey_tables.items()
+            },
             'journeyCoverage': journey_coverage,
         }))
         if OUT.exists():

@@ -201,8 +201,12 @@ for(const hash of JOURNEY_ROOTS)assert.match(builder,new RegExp(String(hash)),`B
 assert.match(builder,/DestinyInventoryItemDefinition[\s\S]*?DestinyGuardianRankDefinition[\s\S]*?DestinyGuardianRankConstantsDefinition/,'Journey bundle must include collection item and Guardian Rank definitions');
 assert.match(builder,/loadout_collectible_hashes[\s\S]*?loadout_collectibles[\s\S]*?weapon_definition_hashes[\s\S]*?loadout_coverage/,'Loadout bundle must carry acquisition sources and the complete compact weapon definition index');
 assert.match(builder,/loadout-index\.json[\s\S]*?weaponDefinitionHashes[\s\S]*?loadoutCoverage/,'The backend manifest must publish the small weapon identity index separately from the large Loadout page bundle');
+assert.match(builder,/PAGE_INVENTORY_FIELDS[\s\S]*?page_inventory_projection[\s\S]*?pageTables/,'Prepared account definitions must use a build-time compact inventory projection');
+assert.match(builder,/journey-index\.json[\s\S]*?definitionHashes/,'Journey must publish a small public definition index so account data does not duplicate its streamed bundle');
 assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'Page routes must stream prepared bundles outside the auth Worker heap');
 assert.match(backend,/await enrichPreparedPageAccount\(payload, env, page,[\s\S]*?return preparedPageEnvelope\(request, env, payload, prepared\)/,'Page account semantics must complete before the public bundle stream is attached');
+assert.match(backend,/profileUrl\.searchParams\.set\("definitions", "client-manifest"\)/,'Every prepared page must bypass the legacy full-definition profile response');
+assert.match(backend,/journeyManifestTables\([\s\S]*?journeySemanticIndex\?\.definitionHashes/,'Journey account resolution must subtract definitions already present in its streamed public bundle');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
 assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", "loadout"\]\.includes\(pagePayload\)\) return response/,'The semantic wrapper must pass every prepared page stream through without cloning or parsing it');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy static manifest tables in the auth Worker');

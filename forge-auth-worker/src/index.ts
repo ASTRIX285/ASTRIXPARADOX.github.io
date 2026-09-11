@@ -752,31 +752,38 @@ function ownedDefinitionHashes(profile: DestinyProfilePayload): number[] {
 
 async function preparedManifestTables(
   requests: Record<string, Iterable<number>>,
-  env: Env
+  env: Env,
+  preparedVersion = "",
+  preparedCurrentSeason?: Record<string, any>
 ): Promise<{ manifestVersion: string; tables: Record<string, Record<string, Record<string, unknown>>>; currentSeason?: Record<string, any> }> {
   if (!env.MANIFEST_DATA) return { manifestVersion: "", tables: {} };
-  const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
-  const status = statusResponse?.ok
-    ? await statusResponse.json<{ manifestVersion?: string; currentSeason?: Record<string, unknown> }>().catch(() => null)
-    : null;
-  const manifestVersion = String(status?.manifestVersion || "");
+  let manifestVersion = preparedVersion;
+  let currentSeason = preparedCurrentSeason;
+  if (!manifestVersion) {
+    const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
+    const status = statusResponse?.ok
+      ? await statusResponse.json<{ manifestVersion?: string; currentSeason?: Record<string, any> }>().catch(() => null)
+      : null;
+    manifestVersion = String(status?.manifestVersion || "");
+    currentSeason = status?.currentSeason;
+  }
   if (!manifestVersion) return { manifestVersion, tables: {} };
   const normalized = Object.fromEntries(Object.entries(requests).map(([type, hashes]) => [
     type,
     [...new Set([...hashes].map(Number).filter(hash => Number.isInteger(hash) && hash > 0 && hash <= UINT32_MAX))]
   ]).filter(([, hashes]) => (hashes as number[]).length));
-  if (!Object.keys(normalized).length) return { manifestVersion, tables: {}, currentSeason: status?.currentSeason };
+  if (!Object.keys(normalized).length) return { manifestVersion, tables: {}, currentSeason };
   const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/resolve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ version: manifestVersion, requests: normalized })
+    body: JSON.stringify({ version: manifestVersion, projection: "page", requests: normalized })
   })).catch(() => null);
   const payload = response?.ok
     ? await response.json<{ manifestVersion?: string; tables?: Record<string, Record<string, Record<string, unknown>>> }>().catch(() => null)
     : null;
   return payload?.manifestVersion === manifestVersion
-    ? { manifestVersion, tables: payload.tables || {}, currentSeason: status?.currentSeason }
-    : { manifestVersion, tables: {}, currentSeason: status?.currentSeason };
+    ? { manifestVersion, tables: payload.tables || {}, currentSeason }
+    : { manifestVersion, tables: {}, currentSeason };
 }
 
 async function fetchPreparedManifestDefinitions(
@@ -795,7 +802,7 @@ async function fetchPreparedManifestDefinitions(
   const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/resolve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ version: manifestVersion, requests: { [type]: uniqueHashes } })
+    body: JSON.stringify({ version: manifestVersion, projection: "page", requests: { [type]: uniqueHashes } })
   })).catch(() => null);
   const payload = response?.ok
     ? await response.json<{ manifestVersion?: string; tables?: Record<string, Record<string, Record<string, unknown>>> }>().catch(() => null)
@@ -1191,6 +1198,10 @@ type LoadoutSemanticIndex = {
   weaponDefinitionHashes?: number[];
   loadoutCoverage?: { weaponDefinitions?: number };
 };
+type JourneySemanticIndex = {
+  manifestVersion?: string;
+  definitionHashes?: Record<string, number[]>;
+};
 const PAGE_PAYLOAD_KINDS = new Set<PagePayloadKind>(["character", "build-forge", "journey", "vault", "loadout"]);
 const PAGE_READ_VIEWS: Record<PagePayloadKind, readonly string[]> = {
   character: ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact"],
@@ -1276,7 +1287,10 @@ function addComponentKeys(target: Map<string, Set<number>>, type: string, compon
 
 async function journeyManifestTables(
   profile: DestinyProfilePayload,
-  env: Env
+  env: Env,
+  preparedVersion = "",
+  preparedCurrentSeason?: Record<string, any>,
+  preparedHashes: Record<string, Iterable<number>> = {}
 ): Promise<{
   manifestVersion: string;
   tables: Record<string, Record<string, Record<string, unknown>>>;
@@ -1309,15 +1323,19 @@ async function journeyManifestTables(
   collectJourneyHashes(profile, wanted);
 
   const tables: Record<string, Record<string, Record<string, unknown>>> = {};
-  let manifestVersion = "";
-  let currentSeason: Record<string, any> | undefined;
+  const satisfied = Object.fromEntries(Object.entries(preparedHashes).map(([type, hashes]) => [
+    type,
+    new Set([...hashes].map(Number).filter(hash => Number.isInteger(hash)))
+  ])) as Record<string, Set<number>>;
+  let manifestVersion = preparedVersion;
+  let currentSeason: Record<string, any> | undefined = preparedCurrentSeason;
   for (let round = 0; round < 16; round += 1) {
     const missing = Object.fromEntries([...wanted].map(([type, hashes]) => [
       type,
-      [...hashes].filter(hash => !tables[type]?.[String(hash)])
+      [...hashes].filter(hash => !tables[type]?.[String(hash)] && !satisfied[type]?.has(hash))
     ]).filter(([, hashes]) => (hashes as number[]).length));
     if (!Object.keys(missing).length) break;
-    const resolved = await preparedManifestTables(missing, env);
+    const resolved = await preparedManifestTables(missing, env, manifestVersion, currentSeason);
     manifestVersion = resolved.manifestVersion || manifestVersion;
     currentSeason = resolved.currentSeason || currentSeason;
     let added = 0;
@@ -1331,7 +1349,7 @@ async function journeyManifestTables(
   }
   const unresolved = Object.fromEntries([...wanted].map(([type, hashes]) => [
     type,
-    [...hashes].filter(hash => !tables[type]?.[String(hash)])
+    [...hashes].filter(hash => !tables[type]?.[String(hash)] && !satisfied[type]?.has(hash))
   ]).filter(([, hashes]) => (hashes as number[]).length));
   return { manifestVersion, tables, currentSeason, coverage: { complete: !Object.keys(unresolved).length, unresolved } };
 }
@@ -1344,8 +1362,16 @@ function preparedPageEnvelope(
 ): Response {
   const encoder = new TextEncoder();
   const reader = prepared.body?.getReader();
-  const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":${JSON.stringify(account)},"prepared":`);
+  const accountJson = JSON.stringify(account);
+  const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":${accountJson},"prepared":`);
   const suffix = encoder.encode("}");
+  const accountBytes = encoder.encode(accountJson).byteLength;
+  console.info("prepared_page_account_budget", {
+    page: (account as any)?.pageReady?.page || "unknown",
+    accountBytes,
+    definitions: Object.keys((account as any)?.definitions || {}).length,
+    coverageComplete: (account as any)?.pageReady?.coverage?.complete === true
+  });
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(prefix);
@@ -1376,6 +1402,7 @@ function preparedPageEnvelope(
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer",
+      "X-Forge-Account-Bytes": String(accountBytes),
       "X-Forge-Page-Transport": "prepared-page-stream-v1"
     }
   }));
@@ -1423,7 +1450,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   profileUrl.search = "";
   profileUrl.searchParams.set("freshness", "display");
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : "forge");
-  if (page === "journey" || page === "loadout") profileUrl.searchParams.set("definitions", "client-manifest");
+  profileUrl.searchParams.set("definitions", "client-manifest");
   const preparedStatusPromise = preparedManifestTables({}, env);
   const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env);
   if (!profileResponse.ok) return profileResponse;
@@ -1434,28 +1461,42 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
   let pageBundleResponse: Response | null = null;
   let loadoutSemanticIndex: LoadoutSemanticIndex | null = null;
+  let journeySemanticIndex: JourneySemanticIndex | null = null;
   if (env.MANIFEST_DATA && preparedVersion) {
     const bundleUrl = new URL("https://manifest/page-bundle");
     bundleUrl.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
     bundleUrl.searchParams.set("version", preparedVersion);
     const indexUrl = new URL("https://manifest/page-index");
-    indexUrl.searchParams.set("page", "loadout");
+    indexUrl.searchParams.set("page", page === "journey" ? "journey" : "loadout");
     indexUrl.searchParams.set("version", preparedVersion);
     const [bundleResponse, indexResponse] = await Promise.all([
       env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null),
-      page === "loadout" || page === "build-forge"
+      page === "journey" || page === "loadout" || page === "build-forge"
         ? env.MANIFEST_DATA.fetch(new Request(indexUrl)).catch(() => null)
         : Promise.resolve(null)
     ]);
     if (bundleResponse?.ok && bundleResponse.body) pageBundleResponse = bundleResponse;
-    loadoutSemanticIndex = indexResponse?.ok
-      ? await indexResponse.json<LoadoutSemanticIndex>().catch(() => null)
-      : null;
-    if (loadoutSemanticIndex?.manifestVersion !== preparedVersion) loadoutSemanticIndex = null;
+    if (page === "journey") {
+      journeySemanticIndex = indexResponse?.ok
+        ? await indexResponse.json<JourneySemanticIndex>().catch(() => null)
+        : null;
+      if (journeySemanticIndex?.manifestVersion !== preparedVersion) journeySemanticIndex = null;
+    } else {
+      loadoutSemanticIndex = indexResponse?.ok
+        ? await indexResponse.json<LoadoutSemanticIndex>().catch(() => null)
+        : null;
+      if (loadoutSemanticIndex?.manifestVersion !== preparedVersion) loadoutSemanticIndex = null;
+    }
   }
 
   if (page === "journey") {
-    const prepared = await journeyManifestTables(payload.profile || {}, env);
+    const prepared = await journeyManifestTables(
+      payload.profile || {},
+      env,
+      preparedVersion,
+      currentSeason,
+      journeySemanticIndex?.definitionHashes || {}
+    );
     preparedVersion = prepared.manifestVersion || preparedVersion;
     currentSeason = prepared.currentSeason || currentSeason;
     payload.journeyAccountManifestTables = prepared.tables;

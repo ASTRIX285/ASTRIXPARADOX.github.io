@@ -28,12 +28,41 @@ async function preparedDefinitions(
   const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/resolve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ version: manifestVersion, requests: { [definitionType]: unique } })
+    body: JSON.stringify({ version: manifestVersion, projection: "page", requests: { [definitionType]: unique } })
   })).catch(() => null);
   const payload = response?.ok
     ? await response.json<{ manifestVersion?: string; tables?: Record<string, Record<string, Record<string, any>>> }>().catch(() => null)
     : null;
   return payload?.manifestVersion === manifestVersion ? (payload.tables?.[definitionType] || {}) : {};
+}
+
+async function preparedDefinitionTables(
+  requests: Record<string, Iterable<unknown>>,
+  env: Env,
+  preparedVersion = ""
+): Promise<Record<string, Record<string, Record<string, any>>>> {
+  if (!env.MANIFEST_DATA) return {};
+  const normalized = Object.fromEntries(Object.entries(requests).map(([type, hashes]) => [
+    type,
+    bungieDefinitionHashes(hashes)
+  ]).filter(([, hashes]) => (hashes as number[]).length));
+  if (!Object.keys(normalized).length) return {};
+  let manifestVersion = preparedVersion;
+  if (!manifestVersion) {
+    const statusResponse = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
+    const status = statusResponse?.ok ? await statusResponse.json<{ manifestVersion?: string }>().catch(() => null) : null;
+    manifestVersion = String(status?.manifestVersion || "");
+  }
+  if (!manifestVersion) return {};
+  const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/resolve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ version: manifestVersion, projection: "page", requests: normalized })
+  })).catch(() => null);
+  const payload = response?.ok
+    ? await response.json<{ manifestVersion?: string; tables?: Record<string, Record<string, Record<string, any>>> }>().catch(() => null)
+    : null;
+  return payload?.manifestVersion === manifestVersion ? (payload.tables || {}) : {};
 }
 
 async function manifestDefinition(
@@ -343,4 +372,4 @@ async function enrichEquipableSets(payload: any, env: Env, preparedVersion = "")
   return payload;
 }
 
-export { bungieDefinitionHash, bungieDefinitionHashes, manifestDefinition, preparedDefinitions, equipableSetHash, enrichEquipableSets, enrichOwnedWeaponDefinitions };
+export { bungieDefinitionHash, bungieDefinitionHashes, manifestDefinition, preparedDefinitions, preparedDefinitionTables, equipableSetHash, enrichEquipableSets, enrichOwnedWeaponDefinitions };
