@@ -9,7 +9,7 @@ import {
 } from "./auth-record";
 import { allowedOrigins, approvedReturnUrl, handlePreflight, json, withCors } from "./web";
 import { profileSections } from "./profile-sections";
-import { enrichPreparedPageAccount } from "./page-semantics";
+import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./page-semantics";
 
 export { AuthRecord };
 
@@ -1320,7 +1320,27 @@ async function journeyManifestTables(
     addComponentKeys(wanted, "DestinyChecklistDefinition", component?.checklists);
   }
   addJourneyHash(wanted, "DestinyGuardianRankConstantsDefinition", 1);
-  collectJourneyHashes(profile, wanted);
+  // Account inventory carries thousands of generic itemHash fields that are
+  // unrelated to Journey records. Resolving them recursively rebuilt most of
+  // the inventory manifest and could exhaust the Worker before first paint.
+  // Traverse only Journey state components, then add equipped identities.
+  // Vault category splits remain explicitly unavailable when the public
+  // Journey catalogue does not classify every stored item.
+  for (const component of [
+    raw.profileProgression,
+    raw.characterProgressions,
+    raw.profilePresentationNodes,
+    raw.characterPresentationNodes,
+    raw.profileCollectibles,
+    raw.characterCollectibles,
+    raw.profileRecords,
+    raw.characterRecords,
+    raw.metrics,
+    raw.characterCraftables
+  ]) collectJourneyHashes(component, wanted);
+  for (const equipment of Object.values(raw.characterEquipment?.data || {}) as any[]) {
+    for (const item of equipment?.items || []) addJourneyHash(wanted, "DestinyInventoryItemDefinition", item?.itemHash);
+  }
 
   const tables: Record<string, Record<string, Record<string, unknown>>> = {};
   const satisfied = Object.fromEntries(Object.entries(preparedHashes).map(([type, hashes]) => [
@@ -1363,9 +1383,11 @@ function preparedPageEnvelope(
   const encoder = new TextEncoder();
   const reader = prepared.body?.getReader();
   const accountJson = JSON.stringify(account);
-  const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":${accountJson},"prepared":`);
+  const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":`);
+  const accountChunk = encoder.encode(accountJson);
+  const preparedPrefix = encoder.encode(`,"prepared":`);
   const suffix = encoder.encode("}");
-  const accountBytes = encoder.encode(accountJson).byteLength;
+  const accountBytes = accountChunk.byteLength;
   console.info("prepared_page_account_budget", {
     page: (account as any)?.pageReady?.page || "unknown",
     accountBytes,
@@ -1375,6 +1397,8 @@ function preparedPageEnvelope(
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(prefix);
+      controller.enqueue(accountChunk);
+      controller.enqueue(preparedPrefix);
       try {
         if (reader) {
           while (true) {
@@ -1575,6 +1599,7 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     },
     coverage: { complete: missing.length === 0, missing }
   };
+  compactPreparedProfilePlugLists(payload);
   const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
   return preparedPageEnvelope(request, env, payload, prepared);
 }
