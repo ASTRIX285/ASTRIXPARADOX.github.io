@@ -67,4 +67,31 @@ jobs:
             .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>500_000||Number(row.quantiles?.requestDurationP50||0)>500_000||Number(row.sum?.subrequests||0)>5)
             .sort((left,right)=>String(left.dimensions?.datetime).localeCompare(String(right.dimensions?.datetime)));
           console.log(JSON.stringify({requestStart,requestEnd,notableResponses}));
+          const beforeStart='2026-09-02T00:00:00.000Z';
+          const beforeEnd='2026-09-05T23:59:59.999Z';
+          const beforeResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
+            method:'POST',
+            headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
+            body:JSON.stringify({query:requestQuery,variables:{accountTag:process.env.CLOUDFLARE_ACCOUNT_ID,start:beforeStart,end:beforeEnd,script:'astrix-destiny-backend'}})
+          });
+          const beforeBody=await beforeResponse.json();
+          if(!beforeResponse.ok||beforeBody.errors?.length)throw new Error(`Cloudflare before-week analytics failed ${beforeResponse.status}: ${JSON.stringify(beforeBody.errors||[])}`);
+          const beforeRows=(beforeBody.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive||[])
+            .filter(row=>Number(row.quantiles?.responseBodySizeP50||0)>500_000);
+          const buckets=new Map();
+          for(const row of beforeRows){
+            const size=Number(row.quantiles?.responseBodySizeP50||0);
+            const key=Math.round(size/100_000)*100_000;
+            const prior=buckets.get(key)||{responseBytes:key,seconds:0,requests:0,subrequests:0,cpuTimeUs:0,requestDurationUs:0,minBytes:Number.POSITIVE_INFINITY,maxBytes:0};
+            prior.seconds+=1;
+            prior.requests+=Number(row.sum?.requests||0);
+            prior.subrequests+=Number(row.sum?.subrequests||0);
+            prior.cpuTimeUs+=Number(row.sum?.cpuTimeUs||0);
+            prior.requestDurationUs+=Number(row.sum?.requestDuration||0);
+            prior.minBytes=Math.min(prior.minBytes,size);
+            prior.maxBytes=Math.max(prior.maxBytes,size);
+            buckets.set(key,prior);
+          }
+          const beforeSizeBuckets=[...buckets.values()].map(row=>({...row,subrequestsPerRequest:row.requests?row.subrequests/row.requests:0,averageCpuUs:row.requests?row.cpuTimeUs/row.requests:0,averageDurationUs:row.requests?row.requestDurationUs/row.requests:0})).sort((left,right)=>right.responseBytes-left.responseBytes);
+          console.log(JSON.stringify({beforeStart,beforeEnd,beforeSizeBuckets}));
           NODE
