@@ -135,4 +135,46 @@ jobs:
           });
           const zonesBody=await zonesResponse.json();
           console.log(JSON.stringify({zonesStatus:zonesResponse.status,zones:(zonesBody.result||[]).map(zone=>({id:zone.id,name:zone.name,status:zone.status}))}));
+          const zoneTag=zonesBody.result?.[0]?.id;
+          if(zoneTag){
+            const pageQuery=`query PageTiming($zoneTag: string, $start: Time, $end: Time) {
+              viewer {
+                zones(filter: {zoneTag: $zoneTag}) {
+                  httpRequestsAdaptiveGroups(limit: 1000, filter: {
+                    datetime_geq: $start,
+                    datetime_leq: $end,
+                    clientRequestHTTPHost: "auth.astrixparadox.com",
+                    clientRequestPath_in: [
+                      "/bungie/page/character",
+                      "/bungie/page/build-forge",
+                      "/bungie/page/vault",
+                      "/bungie/page/journey",
+                      "/bungie/page/loadout"
+                    ]
+                  }) {
+                    count
+                    dimensions { clientRequestPath }
+                    quantiles {
+                      edgeResponseBytesP50
+                      edgeResponseBytesP99
+                      edgeTimeToFirstByteMsP50
+                      edgeTimeToFirstByteMsP99
+                    }
+                    sum { edgeResponseBytes edgeTimeToFirstByteMs }
+                  }
+                }
+              }
+            }`;
+            async function readPageWindow(name,start,end){
+              const response=await fetch('https://api.cloudflare.com/client/v4/graphql',{
+                method:'POST',
+                headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
+                body:JSON.stringify({query:pageQuery,variables:{zoneTag,start,end}})
+              });
+              const body=await response.json();
+              console.log(JSON.stringify({name,status:response.status,errors:body.errors||[],pages:body.data?.viewer?.zones?.[0]?.httpRequestsAdaptiveGroups||[]}));
+            }
+            await readPageWindow('before-week-pages','2026-09-02T00:00:00.000Z','2026-09-05T00:00:00.000Z');
+            await readPageWindow('regression-pages','2026-09-10T13:15:00.000Z','2026-09-11T09:00:00.000Z');
+          }
           NODE
