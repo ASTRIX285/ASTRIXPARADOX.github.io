@@ -7,6 +7,7 @@ const web=await readFile(new URL('../../forge-auth-worker/src/web.ts',import.met
 const sessionRecord=await readFile(new URL('../../forge-auth-worker/src/auth-record.ts',import.meta.url),'utf8');
 
 assert.match(worker,/const DESTINY_ACTION_CAPABILITIES = Object\.freeze\(\{[\s\S]*?captureSnapshot: true[\s\S]*?transferItems: true[\s\S]*?equipItems: true[\s\S]*?insertSocketPlugFree: true[\s\S]*?verifyFinalState: true[\s\S]*?clearLoadout: true/,'The Worker must advertise the exact live-action capability contract.');
+assert.match(worker,/transferItems: true[\s\S]*?pullFromPostmaster: true[\s\S]*?equipItems: true/,'The live capability contract must explicitly advertise the approved Postmaster executor beside transfer and equip.');
 assert.match(worker,/async function sessionRoute[\s\S]*?csrfToken: session\.csrfToken[\s\S]*?capabilities: \{ destinyActions: DESTINY_ACTION_CAPABILITIES \}/,'Authenticated sessions must return a CSRF token and explicit route capabilities.');
 assert.match(sessionRecord,/verifiedCharacterIds\?: string\[\][\s\S]*?verifiedCharactersAt\?: number/,'The session record must retain the short-lived verified Guardian binding.');
 
@@ -18,6 +19,7 @@ assert.match(worker,/async function verifySessionCharacter[\s\S]*?VERIFIED_CHARA
 for(const [kind,path] of [
   ['equip-items','/Destiny2/Actions/Items/EquipItems/'],
   ['transfer-item','/Destiny2/Actions/Items/TransferItem/'],
+  ['pull-from-postmaster','/Destiny2/Actions/Items/PullFromPostmaster/'],
   ['socket-plug-free','/Destiny2/Actions/Items/InsertSocketPlugFree/'],
   ['loadout-equip','/Destiny2/Actions/Loadouts/EquipLoadout/'],
   ['loadout-snapshot','/Destiny2/Actions/Loadouts/SnapshotLoadout/'],
@@ -27,6 +29,7 @@ for(const [kind,path] of [
 
 assert.match(worker,/itemIds\.length > 12[\s\S]*?itemIds\.length !== \(body\.itemIds as unknown\[\]\)\.length/,'Equip requests must reject oversized, duplicate or malformed item lists.');
 assert.match(worker,/stackSize !== 1[\s\S]*?typeof body\.transferToVault !== "boolean"/,'Transfer requests must remain exact single-item moves.');
+assert.match(worker,/kind === "pull-from-postmaster"[\s\S]*?stackSize < 1 \|\| stackSize > 9_999[\s\S]*?PullFromPostmaster/,'Postmaster requests must remain exact, bounded, allow-listed mutations.');
 assert.match(worker,/socketIndex < 0 \|\| socketIndex > 99[\s\S]*?!\[0, 1\]\.includes\(socketArrayType\)/,'Socket requests must constrain index and Bungie socket-array type.');
 assert.match(worker,/loadoutIndex < 0 \|\| loadoutIndex > 19/,'Bungie loadout actions must remain inside slots 1–20.');
 assert.match(worker,/const upstream = await fetch\(`\$\{BUNGIE_PLATFORM\}\$\{action\.path\}`[\s\S]*?JSON\.stringify\(action\.body\)/,'Only the validated allow-listed payload may be forwarded upstream.');

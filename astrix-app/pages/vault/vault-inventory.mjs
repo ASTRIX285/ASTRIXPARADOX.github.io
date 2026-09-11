@@ -1,19 +1,27 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
-import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {classifyArmourPlug,normaliseArmourSemantics,normaliseWeaponSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
+import {resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const VAULT_BUCKET=138197802;
 const POSTMASTER_BUCKET=215593132;
 const ARMOUR_ITEM_TYPE=2;
+const WEAPON_ITEM_TYPE=3;
 const CLASS_NAMES=['titan','hunter','warlock'];
-const ARMOUR_BUCKETS=Object.freeze([
-  Object.freeze({hash:3448274439,key:'helmet',label:'Helmet'}),
-  Object.freeze({hash:3551918588,key:'gauntlets',label:'Gauntlets'}),
-  Object.freeze({hash:14239492,key:'chest',label:'Chest'}),
-  Object.freeze({hash:20886954,key:'legs',label:'Legs'}),
-  Object.freeze({hash:1585787867,key:'class-item',label:'Class Item'})
+const WEAPON_BUCKETS=Object.freeze([
+  Object.freeze({hash:1498876634,key:'primary',label:'Primary',kind:'weapon'}),
+  Object.freeze({hash:2465295065,key:'special',label:'Special',kind:'weapon'}),
+  Object.freeze({hash:953998645,key:'heavy',label:'Heavy',kind:'weapon'})
 ]);
+const ARMOUR_BUCKETS=Object.freeze([
+  Object.freeze({hash:3448274439,key:'helmet',label:'Helmet',kind:'armour'}),
+  Object.freeze({hash:3551918588,key:'gauntlets',label:'Gauntlets',kind:'armour'}),
+  Object.freeze({hash:14239492,key:'chest',label:'Chest',kind:'armour'}),
+  Object.freeze({hash:20886954,key:'legs',label:'Legs',kind:'armour'}),
+  Object.freeze({hash:1585787867,key:'class-item',label:'Class Item',kind:'armour'})
+]);
+const EQUIPMENT_GROUPS=Object.freeze([...WEAPON_BUCKETS,...ARMOUR_BUCKETS]);
+const EQUIPMENT_GROUP_BY_HASH=new Map(EQUIPMENT_GROUPS.map((row,index)=>[row.hash,{...row,index}]));
 const ARMOUR_SLOT_BY_HASH=new Map(ARMOUR_BUCKETS.map((row,index)=>[row.hash,{...row,index}]));
 const SOURCE_PRIORITY={profile:0,vault:1,postmaster:2,carried:3,equipped:4};
 
@@ -217,10 +225,52 @@ function normaliseArmourItem(payload,row){
   return base;
 }
 
+function normaliseWeaponItem(payload,row,group){
+  const rawItem=row?.item||{},definition=definitionFor(payload,rawItem.itemHash);
+  if(!definition||Number(definition.itemType)!==WEAPON_ITEM_TYPE)return null;
+  const identity=displayIdentity(payload,rawItem.itemHash),instance=payload?.profile?.itemComponents?.instances?.data?.[rawItem.itemInstanceId]||null,plugs=socketPlugs(payload,rawItem),socketOptions=armourModOptions(payload,rawItem),stats=payload?.profile?.itemComponents?.stats?.data?.[rawItem.itemInstanceId]||null,isExotic=String(identity.tier).toLowerCase()==='exotic',weaponSemantics=normaliseWeaponSemantics({profile:payload?.profile,item:rawItem,itemDefinition:definition,plugs,instance,stats,alternativeColumns:socketOptions,isExotic}),versionNumber=Number.isInteger(Number(rawItem?.versionNumber))?Number(rawItem.versionNumber):null,releaseWatermark=resolveItemWatermark({...rawItem,versionNumber},definition,{powerCapDefinitions:payload?.powerCapDefinitions,currentPowerCap:payload?.currentPowerCap}),weaponType=weaponTypeIdentity(definition);
+  return {
+    ...identity,itemHash:Number(rawItem.itemHash),itemInstanceId:String(rawItem.itemInstanceId||''),bucketHash:group.hash,storageBucketHash:finite(rawItem.bucketHash),source:clone(row.source),quantity:Math.max(1,Number(rawItem.quantity)||1),equipmentGroup:group,
+    power:finite(instance?.primaryStat?.value),itemLevel:finite(instance?.itemLevel),gearTier:finite(instance?.gearTier),quality:finite(instance?.quality),state:Number(rawItem.state||0),versionNumber,releaseWatermark,tierIcon:releaseWatermark.icon,isExotic,
+    weaponType:weaponType.label,weaponTypeId:weaponType.id,damageTypeHash:finite(instance?.damageTypeHash??definition?.defaultDamageTypeHash),elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??definition?.defaultDamageTypeHash)]||null,breakerDefinition:payload?.breakerDefinitions?.[String(instance?.breakerTypeHash??definition?.breakerTypeHash)]||null,
+    socketsAvailable:Boolean(rawItem.itemInstanceId&&payload?.profile?.itemComponents?.sockets?.data?.[rawItem.itemInstanceId]),socketCoverage:{plugs,requested:plugs.map(plug=>Number(plug.hash)).filter(Number.isFinite),resolved:plugs.filter(plug=>plug.definition&&Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),unresolved:plugs.filter(plug=>!plug.definition||!Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),complete:plugs.every(plug=>plug.definition&&Object.keys(plug.definition).length)},socketOptions,
+    weaponSemantics,intrinsic:weaponSemantics.intrinsic,selectedPerks:weaponSemantics.selectedPerks,weaponPerkModel:weaponSemantics.perkModel,weaponPerkRows:weaponSemantics.perkRows,weaponPerkRowCount:weaponSemantics.perkRowCount,exoticWeaponTraits:weaponSemantics.exoticTraits,weaponMasterwork:weaponSemantics.masterwork,weaponMod:weaponSemantics.mod,catalyst:weaponSemantics.catalyst,championCapability:weaponSemantics.champion,weaponStats:weaponSemantics.stats
+  };
+}
+
+function normaliseVaultWorkspaceItem(payload,row){
+  const rawItem=row?.item||{},definition=definitionFor(payload,rawItem.itemHash),equipmentBucket=finite(definition?.inventory?.bucketTypeHash),group=EQUIPMENT_GROUP_BY_HASH.get(equipmentBucket)||null;
+  if(group?.kind==='armour'){
+    const armour=normaliseArmourItem(payload,row);
+    return armour?{...armour,quantity:Math.max(1,Number(rawItem.quantity)||1),equipmentGroup:group}:null;
+  }
+  if(group?.kind==='weapon'){
+    return normaliseWeaponItem(payload,row,group);
+  }
+  if(row?.source?.kind!=='postmaster')return null;
+  const identity=displayIdentity(payload,rawItem.itemHash);
+  return {...identity,itemHash:Number(rawItem.itemHash),itemInstanceId:String(rawItem.itemInstanceId||''),bucketHash:equipmentBucket,storageBucketHash:finite(rawItem.bucketHash),quantity:Math.max(1,Number(rawItem.quantity)||1),source:clone(row.source),equipmentGroup:null,power:finite(payload?.profile?.itemComponents?.instances?.data?.[rawItem.itemInstanceId]?.primaryStat?.value)};
+}
+
+function sortVaultWorkspaceItems(items=[]){
+  return [...(Array.isArray(items)?items:[])].sort((left,right)=>{
+    const leftOrder=left?.equipmentGroup?.index??EQUIPMENT_GROUPS.length,rightOrder=right?.equipmentGroup?.index??EQUIPMENT_GROUPS.length;
+    if(leftOrder!==rightOrder)return leftOrder-rightOrder;
+    if(Boolean(left?.isExotic)!==Boolean(right?.isExotic))return left.isExotic?-1:1;
+    if(Number(right?.power||0)!==Number(left?.power||0))return Number(right?.power||0)-Number(left?.power||0);
+    return String(left?.name||'').localeCompare(String(right?.name||''));
+  });
+}
+
+function groupVaultWorkspaceItems(items=[]){
+  const sorted=sortVaultWorkspaceItems(items);
+  return EQUIPMENT_GROUPS.map(group=>({...group,items:sorted.filter(item=>item?.equipmentGroup?.key===group.key)}));
+}
+
 function createVaultCatalogue(payload={}){
   const profile=payload?.profile||{};
   const rawRows=deduplicateRows(sourceRows(profile));
-  const armour=rawRows.map(row=>normaliseArmourItem(payload,row)).filter(Boolean);
+  const workspaceRows=rawRows.map(row=>normaliseVaultWorkspaceItem(payload,row)).filter(Boolean),items=sortVaultWorkspaceItems(workspaceRows.filter(item=>item.equipmentGroup)),armour=items.filter(item=>item.equipmentGroup?.kind==='armour'),postmasterItems=sortVaultWorkspaceItems(workspaceRows.filter(item=>item.source?.kind==='postmaster'));
   const stored=profile?.profileInventory?.data?.items||[];
   const vaultStored=stored.filter(item=>Number(item?.bucketHash)===VAULT_BUCKET);
   const vaultArmour=vaultStored.filter(item=>Number(definitionFor(payload,item?.itemHash)?.itemType)===ARMOUR_ITEM_TYPE).length;
@@ -228,7 +278,9 @@ function createVaultCatalogue(payload={}){
     String(characterId),(row?.items||[]).filter(item=>Number(item?.bucketHash)===POSTMASTER_BUCKET).length
   ]));
   return {
+    items,
     armour,
+    postmasterItems,
     totals:{
       all:vaultStored.length,
       armour:vaultArmour,
@@ -269,11 +321,16 @@ export {
   ARMOUR_BUCKETS,
   ARMOUR_ITEM_TYPE,
   CLASS_NAMES,
+  EQUIPMENT_GROUPS,
   POSTMASTER_BUCKET,
   VAULT_BUCKET,
+  WEAPON_BUCKETS,
+  WEAPON_ITEM_TYPE,
   createVaultCatalogue,
   filterVaultArmour,
+  groupVaultWorkspaceItems,
   itemKey,
   modFreeArmourStatValue,
-  prepareArmourSelection
+  prepareArmourSelection,
+  sortVaultWorkspaceItems
 };

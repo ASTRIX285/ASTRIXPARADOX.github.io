@@ -78,14 +78,14 @@ function armourDetails(item){
   return `<section class="paradox-section paradox-section--stats"><h3>ARMOUR STATS</h3>${statMarkup(item,'armour')}</section>${identityRows}${modRows}`;
 }
 
-function cardMarkup(item,kind){
+function cardMarkup(item,kind,{contextLabel=''}={}){
   const icon=itemIcon(item);
   const release=item?.releaseWatermark?.icon?{icon:asset(item.releaseWatermark.icon),source:item.releaseWatermark.source??'prepared-item'}:resolveItemWatermark(item??{},item?.definition??{});
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
   const power=item?.power??item?.primaryStat?.value??'—';
   const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Verified Bungie item');
   return `<article class="paradox-item-card paradox-item-card--${kind} paradox-item-hover-card" data-item-kind="${kind}">
-    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(power)}</b></div></header>
+    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(power)}</b></div></header>
     <div class="paradox-card-body">${kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
     <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
   </article>`;
@@ -132,7 +132,7 @@ function show(anchor){
   const host=ensureHost();
   if(!binding||!host)return;
   activeAnchor=anchor;
-  host.innerHTML=cardMarkup(binding.item,binding.kind);
+  host.innerHTML=cardMarkup(binding.item,binding.kind,binding.options);
   if(binding.kind==='weapon')bindWeaponSelection(host,binding.item);
   host.hidden=false;
   host.setAttribute('aria-hidden','false');
@@ -151,9 +151,9 @@ function install(){
   addEventListener('scroll',hide,{passive:true,capture:true});
 }
 
-function bindParadoxItemHover(target,item,kind){
+function bindParadoxItemHover(target,item,kind,options={}){
   if(!target||!item||!['armour','weapon'].includes(kind))return target;
-  bindings.set(target,{item,kind});
+  bindings.set(target,{item,kind,options});
   target.dataset.paradoxItemHover=kind;
   install();
   return target;

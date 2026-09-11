@@ -6,7 +6,7 @@ import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stag
 import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
-import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,executeBungieLoadoutAction,executeLiveTransferPlan,stageBungieLoadoutAction,stageLiveTransferPreflight} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 
 const CHARACTER_ID='9100001';
 const MEMBERSHIP_ID='9200001';
@@ -126,7 +126,7 @@ assert.equal(compactBuild(exactSocketBuild).source,'paradox-saved-loadout');
 
 const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
-  capabilities:{destinyActions:{...capabilities,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
+  capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
 let prematureCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(plan,{session,fetchImpl:async()=>{prematureCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
@@ -301,6 +301,79 @@ assert.equal(dynamicTransferBlocked.status,'blocked','A newly required transfer 
 assert.equal(dynamicTransferPosts,0,'A dynamically required but unadvertised transfer must make zero mutation requests.');
 assert.equal(dynamicTransferReads,2,'A dynamically blocked transfer must still perform its final readback.');
 
+const OTHER_CHARACTER_ID='9100002',TRANSFER_ITEM={...replacement,itemInstanceId:'13103',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}},REPLACEMENT_ITEM={...weapons[1],itemInstanceId:'13106',name:'Exact carried replacement',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}};
+function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false}={}){
+  const transferRaw={itemHash:TRANSFER_ITEM.itemHash,itemInstanceId:TRANSFER_ITEM.itemInstanceId,bucketHash:postmaster?215593132:TRANSFER_ITEM.bucketHash},replacementRaw={itemHash:REPLACEMENT_ITEM.itemHash,itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,bucketHash:REPLACEMENT_ITEM.bucketHash};
+  return {ErrorCode:1,profile:{
+    characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID},[OTHER_CHARACTER_ID]:{characterId:OTHER_CHARACTER_ID}}},
+    profileInventory:{data:{items:location==='vault'?[{...transferRaw,bucketHash:VAULT_BUCKET}]:[]}},
+    characterInventories:{data:{
+      [CHARACTER_ID]:{items:[...(location==='source'&&!equipped?[transferRaw]:[]),...(equipped&&!replacementEquipped?[replacementRaw]:[]),...(equipped&&replacementEquipped?[transferRaw]:[]),...(postmaster?[transferRaw]:[])]},
+      [OTHER_CHARACTER_ID]:{items:location==='target'?[transferRaw]:[]}
+    }},
+    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:[]}}},
+    characterActivities:{data:{[CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0}}}
+  }};
+}
+
+const stagedVaultMove=stageVaultTransferIntent({item:TRANSFER_ITEM,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session});
+let unconfirmedVaultCalls=0;
+await assert.rejects(()=>executeVaultTransferIntent(stagedVaultMove,{session,fetchImpl:async()=>{unconfirmedVaultCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
+assert.equal(unconfirmedVaultCalls,0,'An unconfirmed drag transfer must make zero Bungie requests.');
+let moveLocation='source';
+const movePaths=[];
+const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:moveLocation}));
+  movePaths.push(path);
+  const body=JSON.parse(init.body);
+  moveLocation=body.transferToVault?'vault':'target';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(moved.status,'applied');
+assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
+assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+
+let partialLocation='source',partialAttempts=0;
+const partialMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(_url,init={})=>{
+  if(String(init.method||'GET').toUpperCase()==='GET')return response(vaultActionProfile({location:partialLocation}));
+  partialAttempts+=1;
+  if(partialAttempts===1){partialLocation='vault';return response({ErrorCode:1,Message:'Ok'});}
+  return response({ErrorCode:99,ErrorStatus:'ItemNotTransferable',Message:'Target inventory is full.'},{ok:false,status:409});
+}});
+assert.equal(partialMove.status,'partial','A failed second leg must report a partial live action.');
+assert.equal(partialMove.mutationCount,1,'Only the confirmed first transfer may count as completed.');
+assert.deepEqual(partialMove.readback.actual,{kind:'vault',characterId:null},'Fresh readback must expose the real intermediate Vault location.');
+assert.equal(partialMove.steps.find(row=>row.status==='failed')?.detail?.payload?.Message,'Target inventory is full.','The real Bungie failure message must remain available to the Vault UI.');
+
+const equippedTransfer={...TRANSFER_ITEM,source:{kind:'equipped',characterId:CHARACTER_ID,label:'Equipped'}},stagedEquippedMove=stageVaultTransferIntent({item:equippedTransfer,destination:{kind:'vault'},replacementItem:REPLACEMENT_ITEM,session});
+let equippedState={equipped:true,replacementEquipped:false,location:'source'};
+const equippedPaths=[];
+const equippedMoved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedEquippedMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile(equippedState));
+  equippedPaths.push(path);
+  if(path.endsWith('/equip-items')){equippedState={...equippedState,replacementEquipped:true};return response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,equipStatus:1}]}});}
+  equippedState={equipped:false,replacementEquipped:false,location:'vault'};
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(equippedMoved.status,'applied');
+assert.deepEqual(equippedPaths,['/bungie/actions/equip-items','/bungie/actions/transfer-item'],'Moving an equipped item must first equip the reviewed exact carried replacement.');
+
+const POSTMASTER_ITEM={...TRANSFER_ITEM,itemInstanceId:'13107',name:'Exact Postmaster item',quantity:1,source:{kind:'postmaster',characterId:CHARACTER_ID,label:'Postmaster'}},stagedCollection=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,items:[POSTMASTER_ITEM],session});
+let postmasterPresent=true;
+const postmasterPaths=[];
+const collected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile();
+  base.profile.characterInventories.data[CHARACTER_ID].items=postmasterPresent?[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:215593132}]:[];
+  if(!postmasterPresent)base.profile.profileInventory.data.items=[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash}];
+  if(method==='GET')return response(base);
+  postmasterPaths.push(path);postmasterPresent=false;return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(collected.status,'applied');
+assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
+assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+
 const stagedClear=stageBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,loadoutName:'Nightfall'});
 let loadoutCalls=0;
 await assert.rejects(()=>executeBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,session,confirmation:stagedClear,fetchImpl:async()=>{loadoutCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
@@ -313,4 +386,5 @@ assert.deepEqual(JSON.parse(loadoutRequest.init.body),{membershipType:Number(MEM
 console.log('MANUAL_BUILD_EDITOR=PASS');
 console.log('PARADOX_NAMED_LOADOUT=PASS');
 console.log('GUARDED_LIVE_APPLY=PASS');
+console.log('VAULT_LIVE_TRANSFER=PASS');
 console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');

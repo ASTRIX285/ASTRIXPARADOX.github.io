@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="../guardian-workspace-v2/paradox-item-cards.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1&amp;hover=20260909-scope-1&amp;roll=20260909-apply-1">
-  <link rel="stylesheet" href="./vault.css?v=20260908-icon-hover-1">
+  <link rel="stylesheet" href="./vault.css?v=20260911-live-transfer-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
 </head>
@@ -31,7 +31,14 @@
       <article><span>OWNED ARMOUR</span><strong id="vaultOwnedArmourCount">—</strong><small>Vault, carried and equipped</small></article>
     </section>
 
-    <section class="apx-section vault-workspace" aria-labelledby="vaultArmourTitle">
+    <section class="apx-section vault-transfer-workspace" aria-labelledby="vaultTransferTitle">
+      <div class="apx-section-heading"><div><p class="apx-eyebrow">LIVE BUNGIE INVENTORY</p><h2 id="vaultTransferTitle">Guardian transfer workspace</h2></div><span class="apx-status-chip">REAL ACCOUNT ACTIONS</span></div>
+      <p class="vault-context">Drag an exact owned item between Guardians and Vault. Every drop requires confirmation, calls Bungie, and waits for fresh inventory readback before the page moves the item.</p>
+      <div class="vault-runtime-status" id="vaultRuntimeStatus" role="status">Resolving Bungie inventory...</div>
+      <div class="vault-transfer-board" id="vaultTransferWorkspace" aria-live="polite"></div>
+    </section>
+
+    <section class="apx-section vault-workspace" aria-labelledby="vaultArmourTitle" hidden>
       <div class="apx-section-heading"><div><p class="apx-eyebrow">VISUAL INVENTORY</p><h2 id="vaultArmourTitle">Verified owned armour</h2></div><span class="apx-status-chip" id="vaultResultCount">WAITING FOR BUNGIE</span></div>
       <p class="vault-context" id="vaultReturnContext">Inspect verified owned armour without changing live equipment. Forge Loader now owns armour calculation and Build Forge staging.</p>
 
@@ -62,7 +69,6 @@
         <button class="vault-evaluate" type="button" id="vaultEvaluate" disabled>EVALUATE IN BUILD FORGE</button>
       </div>
 
-      <div class="vault-runtime-status" id="vaultRuntimeStatus" role="status">Resolving Bungie inventory…</div>
       <div class="vault-item-grid" id="vaultItemGrid" aria-live="polite"></div>
       <button class="vault-load-more" type="button" id="vaultLoadMore" hidden>LOAD MORE ARMOUR</button>
     </section>
@@ -73,7 +79,16 @@
       <a class="vault-connect" id="vaultConnectButton" href="https://auth.astrixparadox.com/bungie/start">CONNECT BUNGIE</a>
     </section>
   </main>
+  <dialog class="vault-action-dialog" id="vaultActionDialog" aria-labelledby="vaultActionTitle">
+    <form method="dialog">
+      <header><p class="apx-eyebrow">LIVE BUNGIE ACTION</p><h2 id="vaultActionTitle">Confirm inventory change</h2></header>
+      <p id="vaultActionSummary"></p>
+      <p class="vault-action-warning">This changes the connected Destiny 2 account. The item will remain in its current position here until Bungie confirms the mutation and a fresh profile readback matches.</p>
+      <div class="vault-action-progress" id="vaultActionProgress" role="status"></div>
+      <footer><button type="button" id="vaultActionCancel">CANCEL</button><button type="button" id="vaultActionConfirm">CONFIRM LIVE ACTION</button></footer>
+    </form>
+  </dialog>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1"></script>
-  <script type="module" src="./vault.mjs?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1&amp;roll=20260909-apply-1&amp;fix=20260909-apply-refresh-1&amp;transport=20260911-compact-plugs-1"></script>
+  <script type="module" src="./vault.mjs?v=20260911-live-transfer-1&amp;transport=20260911-compact-plugs-1"></script>
 </body>
 </html>

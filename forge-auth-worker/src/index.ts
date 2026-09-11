@@ -28,6 +28,7 @@ const ACCESS_IDENTITY_PATTERN = /^[a-f0-9]{64}$/;
 const DESTINY_ACTION_CAPABILITIES = Object.freeze({
   captureSnapshot: true,
   transferItems: true,
+  pullFromPostmaster: true,
   equipItems: true,
   verifyEquipment: true,
   insertSocketPlugFree: true,
@@ -1781,7 +1782,7 @@ function bungieHeaders(session: SessionRecord, env: Env): HeadersInit {
   };
 }
 
-type BungieActionKind = "equip-items" | "transfer-item" | "socket-plug-free" | "loadout-equip" | "loadout-snapshot" | "loadout-identifiers" | "loadout-clear";
+type BungieActionKind = "equip-items" | "transfer-item" | "pull-from-postmaster" | "socket-plug-free" | "loadout-equip" | "loadout-snapshot" | "loadout-identifiers" | "loadout-clear";
 type JsonObject = Record<string, unknown>;
 
 const UINT32_MAX = 4_294_967_295;
@@ -1842,6 +1843,11 @@ function actionPayload(kind: BungieActionKind, body: JsonObject): { path: string
     const itemId = decimalId(body.itemId), itemReferenceHash = uint32(body.itemReferenceHash), stackSize = Number(body.stackSize);
     if (!itemId || itemReferenceHash === null || !Number.isInteger(stackSize) || stackSize !== 1 || typeof body.transferToVault !== "boolean") return null;
     return { path: "/Destiny2/Actions/Items/TransferItem/", characterId, body: { itemReferenceHash, stackSize, transferToVault: body.transferToVault, itemId, characterId, membershipType } };
+  }
+  if (kind === "pull-from-postmaster") {
+    const itemId = decimalId(body.itemId), itemReferenceHash = uint32(body.itemReferenceHash), stackSize = Number(body.stackSize);
+    if (!itemId || itemReferenceHash === null || !Number.isInteger(stackSize) || stackSize < 1 || stackSize > 9_999) return null;
+    return { path: "/Destiny2/Actions/Items/PullFromPostmaster/", characterId, body: { itemReferenceHash, stackSize, itemId, characterId, membershipType } };
   }
   if (kind === "socket-plug-free") {
     const itemId = decimalId(body.itemId), plug = body.plug && typeof body.plug === "object" && !Array.isArray(body.plug) ? body.plug as JsonObject : null;
@@ -2116,6 +2122,7 @@ export default {
       }
       if (request.method === "POST" && url.pathname === "/bungie/actions/equip-items") return bungieActionRoute(request, env, "equip-items");
       if (request.method === "POST" && url.pathname === "/bungie/actions/transfer-item") return bungieActionRoute(request, env, "transfer-item");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/pull-from-postmaster") return bungieActionRoute(request, env, "pull-from-postmaster");
       if (request.method === "POST" && url.pathname === "/bungie/actions/socket-plug-free") return bungieActionRoute(request, env, "socket-plug-free");
       if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/equip") return bungieActionRoute(request, env, "loadout-equip");
       if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/snapshot") return bungieActionRoute(request, env, "loadout-snapshot");
