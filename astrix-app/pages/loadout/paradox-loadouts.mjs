@@ -2,7 +2,7 @@ import {listParadoxLoadouts,deleteParadoxLoadout} from '../guardian-workspace-v2
 import {createBuildState} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
 import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260906-tool-intro-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});

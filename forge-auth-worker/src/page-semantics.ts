@@ -202,19 +202,25 @@ function compactProfilePlugRows(rows: unknown): unknown[][] {
   });
 }
 
-function compactPreparedProfilePlugLists(payload: any): void {
+function compactPreparedProfilePlugLists(payload: any): boolean {
   const profile = payload?.profile;
-  if (!profile || typeof profile !== "object") return;
+  if (!profile || typeof profile !== "object") return false;
   const dictionary: unknown[][][] = [];
   const byValue = new Map<string, number>();
+  let referenceCount = 0;
+  let rawRowsBytes = 0;
+  let dictionaryBytes = 2;
   const reference = (rows: unknown): number => {
     const compact = compactProfilePlugRows(rows);
     const key = JSON.stringify(compact);
+    rawRowsBytes += JSON.stringify(rows).length;
+    referenceCount += 1;
     const prior = byValue.get(key);
     if (prior !== undefined) return prior;
     const index = dictionary.length;
     dictionary.push(compact);
     byValue.set(key, index);
+    dictionaryBytes += key.length + 1;
     return index;
   };
   const itemRefs: Record<string, Record<string, number>> = {};
@@ -227,13 +233,22 @@ function compactPreparedProfilePlugLists(payload: any): void {
     characterId,
     Object.fromEntries(Object.entries((component as any)?.plugs || {}).map(([setHash, rows]) => [setHash, reference(rows)]))
   ]));
-  if (!Object.keys(itemRefs).length && !Object.keys(profileSetRefs).length && !Object.keys(characterSetRefs).length) return;
+  if (!Object.keys(itemRefs).length && !Object.keys(profileSetRefs).length && !Object.keys(characterSetRefs).length) return false;
+  // The live payload showed that a mostly unique plug graph can make a
+  // dictionary transport larger than the Bungie component it replaces. Use
+  // this transport only for genuinely repeated lists and retain the exact raw
+  // component otherwise. The captured repeated account path still clears this
+  // gate by a wide margin.
+  const estimatedCompactBytes = dictionaryBytes + (referenceCount * 16);
+  const repeatedEnough = dictionary.length <= Math.max(64, Math.floor(referenceCount / 3));
+  if (!repeatedEnough || estimatedCompactBytes >= rawRowsBytes * 0.8) return false;
   profile.preparedPlugLists = { schemaVersion: 1, dictionary, itemRefs, profileSetRefs, characterSetRefs };
   if (profile.itemComponents?.reusablePlugs) profile.itemComponents.reusablePlugs.data = {};
   if (profile.profilePlugSets?.data) profile.profilePlugSets.data.plugs = {};
   if (profile.characterPlugSets?.data) {
     for (const component of Object.values(profile.characterPlugSets.data) as any[]) component.plugs = {};
   }
+  return true;
 }
 
 function subclassRows(payload: any): Array<{ characterId: string; item: any }> {
