@@ -198,7 +198,7 @@ async function stageLiveTransferPreflight(plan,{session,fetchImpl=fetch,authOrig
   if(!plan?.ready||plan?.status!=='staged')throw new Error(plan?.blockers?.[0]||'A ready staged Working Build is required for live preflight.');
   assertSessionBinding(plan,session);
   const advertised=assertAdvertisedPlanCapabilities(plan,session),fresh=await requestFreshProfile({fetchImpl,authOrigin}),inspection=freshLivePlanInspection(plan,fresh,advertised),ready=inspection.blockers.length===0;
-  return {...clone(plan),status:ready?'staged':'blocked',ready,blockers:[...new Set([...(plan.blockers||[]),...inspection.blockers])],livePreflight:{schemaVersion:1,source:'authenticated-fresh-profile',checkedAt:new Date().toISOString(),status:ready?'passed':'blocked',validationOrder:[...LIVE_PREFLIGHT_ORDER],checks:inspection.checks}};
+  return {...clone(plan),status:ready?'staged':'blocked',ready,blockers:[...new Set([...(plan.blockers||[]),...inspection.blockers])],livePreflight:{schemaVersion:1,source:'authenticated-fresh-profile',checkedAt:new Date().toISOString(),status:ready?'passed':'blocked',validationOrder:[...LIVE_PREFLIGHT_ORDER],checks:inspection.checks,transferSteps:clone(inspection.resolved.steps),remoteSocketChanges:clone(inspection.resolvedSockets.changes),alreadyAppliedSocketChanges:clone(inspection.resolvedSockets.alreadyApplied)}};
 }
 
 function verifyEquippedItems(plan,payload){
@@ -266,14 +266,14 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
     fresh=await requestFreshProfile({fetchImpl,authOrigin});
     const inspection=freshLivePlanInspection(plan,fresh,advertised),{activity,resolved,resolvedSockets}=inspection,freshBlockers=inspection.blockers;
     if(freshBlockers.length){record('snapshot','blocked','Fresh activity, ownership or socket compatibility validation blocked Apply.',freshBlockers);result.status='blocked';result.finishedAt=new Date().toISOString();return result;}
-    record('snapshot','complete','Fresh Bungie activity, ownership, equipment and socket compatibility captured.',{validationOrder:inspection.checks.map(row=>row.key),activityState:activity.state,targetCount:plan.equipment.targets.length,transferCount:resolved.steps.length,socketChangeCount:resolvedSockets.changes.length,socketsAlreadyApplied:resolvedSockets.alreadyApplied.length});
+    record('snapshot','complete','Fresh Bungie activity, ownership, equipment and socket compatibility captured.',{validationOrder:inspection.checks.map(row=>row.key),activityState:activity.state,targetCount:plan.equipment.targets.length,transferCount:resolved.steps.length,socketChangeCount:resolvedSockets.changes.length,socketsAlreadyApplied:resolvedSockets.alreadyApplied.length,alreadyAppliedSocketChanges:clone(resolvedSockets.alreadyApplied)});
 
     for(const step of resolved.steps){
       try{
         onProgress({phase:'transfer',status:'running',label:step.label});
         const payload=await mutate('/bungie/actions/transfer-item',{membershipType:Number(plan.membershipType),characterId:step.characterId,itemId:step.itemInstanceId,itemReferenceHash:step.itemHash,stackSize:1,transferToVault:step.transferToVault},{label:step.label});
-        record('transfer','complete',step.label,{ErrorCode:payload?.ErrorCode??1});
-      }catch(error){record('transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status='partial';result.finishedAt=new Date().toISOString();return result;}
+        record('transfer','complete',step.label,{itemInstanceId:step.itemInstanceId,itemHash:step.itemHash,characterId:step.characterId,transferToVault:step.transferToVault,ErrorCode:payload?.ErrorCode??1});
+      }catch(error){record('transfer','failed',step.label,{itemInstanceId:step.itemInstanceId,itemHash:step.itemHash,characterId:step.characterId,transferToVault:step.transferToVault,message:error.message,payload:error.payload||null});result.status='partial';result.finishedAt=new Date().toISOString();return result;}
     }
 
     if(resolved.steps.length){
@@ -310,8 +310,8 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
           try{
             onProgress({phase,status:'running',label});
             const payload=await mutate('/bungie/actions/socket-plug-free',{membershipType:Number(plan.membershipType),characterId:plan.characterId,itemId:change.itemInstanceId,plug:{socketIndex:change.socketIndex,socketArrayType:change.socketArrayType??0,plugItemHash:change.plugHash}},{gap:SOCKET_THROTTLE_MS,label});
-            record(phase,'complete',label,{ErrorCode:payload?.ErrorCode??1});
-          }catch(error){record(phase,'failed',label,{message:error.message,payload:error.payload||null});return false;}
+            record(phase,'complete',label,{itemInstanceId:change.itemInstanceId,itemHash:change.itemHash,itemName:change.itemName,socketIndex:change.socketIndex,plugHash:change.plugHash,plugName:change.plugName,component:change.component,ErrorCode:payload?.ErrorCode??1});
+          }catch(error){record(phase,'failed',label,{itemInstanceId:change.itemInstanceId,itemHash:change.itemHash,itemName:change.itemName,socketIndex:change.socketIndex,plugHash:change.plugHash,plugName:change.plugName,component:change.component,message:error.message,payload:error.payload||null});return false;}
         }
         return true;
       };

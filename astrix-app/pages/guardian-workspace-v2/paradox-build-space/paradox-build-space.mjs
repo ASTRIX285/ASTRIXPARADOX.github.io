@@ -4,12 +4,12 @@ import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260906-review-layout-1';
-import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1';
+import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1';
 import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 import {openArmourDrawer} from '../guardian-beta-runtime.mjs?v=20260905-weapon-audit-1';
 import {renderWeapons,openWeaponDetail,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
-import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260829-subclass-identity-1';
+import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation,setDiamondFromItem} from '../guardian-super-formation.mjs?v=20260829-subclass-identity-1&review=20260911-super-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260829-subclass-identity-1';
 import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260906-all-page-data-1';
 import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
@@ -71,6 +71,8 @@ let manualInventory=null;
 let manualInventoryRequest=null;
 let manualEditorState={kind:'weapon',slotIndex:0,search:'',visibleItems:[],socketOptions:new Map()};
 let pendingApplyPlan=null;
+let pendingApplyEntries=[];
+let applyDialogMode='idle';
 let liveActionBusy=false;
 let livePreflightBusy=false;
 let livePreflightRequest=0;
@@ -261,7 +263,67 @@ function renderApplyControls(build={}, {preserveBanner=false}={}){
   if(!liveActionBusy&&!preserveBanner&&byId('liveActionBanner'))setLiveActionBanner(plan.ready?`Apply ready · ${plan.equipment.targets.length} exact items · ${plan.socketChanges.length} verified socket change${plan.socketChanges.length===1?'':'s'}${plan.inGameSteps.length?` · ${plan.inGameSteps.length} in-game step${plan.inGameSteps.length===1?'':'s'}`:''}.`:`Apply blocked · ${reason}`,plan.ready?'':'warn');
   return plan;
 }
-function closeApplyConfirmation(){livePreflightRequest+=1;livePreflightBusy=false;const dialog=byId('applyConfirmationDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');pendingApplyPlan=null;}
+function applyEntityIndex(...sources){
+  const byId=new Map(),byHash=new Map(),entities=[],seen=new WeakSet(),stack=[...sources.filter(Boolean)].reverse();
+  while(stack.length){const value=stack.pop();if(!value||typeof value!=='object'||seen.has(value))continue;seen.add(value);if(Array.isArray(value)){stack.push(...value);continue;}const itemInstanceId=String(value.itemInstanceId||value.instanceId||''),hash=Number(value.hash??value.itemHash??value.bungieHash);if(itemInstanceId||Number.isInteger(hash)){entities.push(value);if(itemInstanceId&&!byId.has(itemInstanceId))byId.set(itemInstanceId,value);if(Number.isInteger(hash)&&!byHash.has(String(hash)))byHash.set(String(hash),value);}for(const child of Object.values(value))if(child&&typeof child==='object')stack.push(child);}
+  return {byId,byHash,entities};
+}
+function applyEntity(index,{itemInstanceId='',hash=null}={}){return index.byId.get(String(itemInstanceId||''))||index.byHash.get(String(hash??''))||null;}
+function applyTextEntity(index,text=''){const copy=String(text).toLowerCase(),matches=index.entities.filter(item=>{const name=String(item?.name||item?.displayName||item?.definition?.displayProperties?.name||'').trim();return name.length>3&&copy.includes(name.toLowerCase());}).sort((a,b)=>String(b?.name||b?.displayName||'').length-String(a?.name||a?.displayName||'').length);return matches[0]||null;}
+function applyComponentLabel(component=''){const value=String(component);if(value==='armour-mod')return 'ARMOUR MOD';if(value==='weapon-perk')return 'WEAPON PERK';if(value.includes('super'))return 'SUPER';if(value.includes('aspect'))return 'ASPECT';if(value.includes('fragment'))return 'FRAGMENT';if(value.includes('ability')||value.startsWith('subclass-'))return 'ABILITY';return 'SOCKET CHANGE';}
+function createApplyReviewEntries(plan,state){
+  const build=state?.workingBuild||state?.originalBuild||{},index=applyEntityIndex(build,state?.originalBuild),remoteSockets=plan.livePreflight?.remoteSocketChanges||plan.socketChanges||[],entries=[];
+  for(const target of plan.equipment?.targets||[]){const item=applyEntity(index,{itemInstanceId:target.itemInstanceId,hash:target.itemHash});entries.push({key:`equipment:${target.itemInstanceId}`,type:'equipment',itemInstanceId:String(target.itemInstanceId),itemHash:Number(target.itemHash),name:String(target.name||item?.name||'Destiny item'),detail:`${String(target.kind||'item').toUpperCase()} · EXACT OWNED INSTANCE`,icon:abs(iconOf(item)),state:'ready',status:'READY TO EQUIP'});}
+  for(const change of remoteSockets){const plug=applyEntity(index,{hash:change.plugHash}),component=applyComponentLabel(change.component);entries.push({key:`socket:${change.itemInstanceId}:${change.socketIndex}:${change.plugHash}`,type:'socket',itemInstanceId:String(change.itemInstanceId),itemHash:Number(change.itemHash),socketIndex:Number(change.socketIndex),plugHash:Number(change.plugHash),component:String(change.component||''),name:String(change.plugName||plug?.name||`Plug ${change.plugHash}`),detail:`${component} · ${change.itemName||change.itemInstanceId} · SOCKET ${Number(change.socketIndex)+1}`,icon:abs(iconOf(plug)),state:'ready',status:'READY TO APPLY'});}
+  for(const [indexValue,step] of (plan.inGameSteps||[]).entries()){const item=applyTextEntity(index,step);entries.push({key:`manual:${indexValue}`,type:'manual',name:String(item?.name||'In-game configuration'),detail:String(step),icon:abs(iconOf(item)),state:'unsupported',status:'IN GAME ONLY'});}
+  return entries;
+}
+function applyEntryIcon(entry){return entry.icon?`<img src="${esc(entry.icon)}" alt="">`:'<span class="apply-change-icon-missing">ICON<br>UNAVAILABLE</span>';}
+function applyEntryMarkup(entry){return `<article class="apply-change-card is-${esc(entry.state)}" data-apply-entry="${esc(entry.key)}"><span class="apply-change-icon">${applyEntryIcon(entry)}</span><span class="apply-change-copy"><b>${esc(entry.name)}</b><small>${esc(entry.detail)}</small><em>${esc(entry.message||'')}</em></span><strong>${esc(entry.status)}</strong></article>`;}
+function renderApplyReviewGrid(){const host=byId('applyConfirmationSummary');if(!host)return;const executable=pendingApplyEntries.filter(row=>row.type!=='manual'),manual=pendingApplyEntries.filter(row=>row.type==='manual');host.innerHTML=`<div class="apply-confirmation-summary"><section><h3>${applyDialogMode==='result'?'CONFIRMED BUNGIE RESULT':'MOVING ITEMS AND APPLYING CHANGES'}</h3><div class="apply-change-grid">${executable.map(applyEntryMarkup).join('')||'<p class="apply-change-empty">No remote change was staged.</p>'}</div></section>${manual.length?`<section class="manual-steps"><h3>REMAINS IN DESTINY</h3><div class="apply-change-grid">${manual.map(applyEntryMarkup).join('')}</div></section>`:''}</div>`;}
+function setApplyEntry(entry,state,status,message=''){entry.state=state;entry.status=status;entry.message=String(message||'');}
+function applyFailureMessage(detail,fallback){if(Array.isArray(detail))return detail[0]||fallback;return detail?.payload?.Message||detail?.payload?.error||detail?.message||detail?.reason||fallback;}
+function rowMatchesApplyEntry(row,entry){const detail=row?.detail||{};if(entry.type==='equipment'){if(String(detail.itemInstanceId||'')===entry.itemInstanceId)return true;if(Array.isArray(detail.itemIds)&&detail.itemIds.map(String).includes(entry.itemInstanceId))return true;return String(row?.label||'').toLowerCase().includes(entry.name.toLowerCase());}return entry.type==='socket'&&String(detail.itemInstanceId||'')===entry.itemInstanceId&&Number(detail.socketIndex)===entry.socketIndex&&Number(detail.plugHash)===entry.plugHash;}
+function updateApplyProgress(row={}){
+  const guardian=byId('applyConfirmationGuardian');if(guardian)guardian.textContent=row.label||'Applying exact Working Build changes through Bungie.';
+  const executable=pendingApplyEntries.filter(entry=>entry.type!=='manual');
+  if(row.status==='running'){
+    if(row.phase==='snapshot')executable.forEach(entry=>setApplyEntry(entry,'queued','FRESH CHECK','Waiting for current Bungie evidence.'));
+    else if(row.phase==='equip')executable.filter(entry=>entry.type==='equipment').forEach(entry=>setApplyEntry(entry,'running','EQUIPPING','Bungie equip request in progress.'));
+    else if(row.phase==='readback')executable.filter(entry=>!['failed','blocked'].includes(entry.state)).forEach(entry=>setApplyEntry(entry,'verifying','VERIFYING','Waiting for fresh Bungie readback.'));
+    else executable.filter(entry=>rowMatchesApplyEntry(row,entry)).forEach(entry=>setApplyEntry(entry,'running',row.phase==='transfer'?'MOVING':'APPLYING',row.label));
+  }else if(['failed','blocked','mismatch'].includes(row.status)){
+    const matches=executable.filter(entry=>rowMatchesApplyEntry(row,entry)),targets=matches.length?matches:row.phase==='snapshot'?executable:[];
+    targets.forEach(entry=>setApplyEntry(entry,'failed',row.status==='blocked'?'BLOCKED':'FAILED',applyFailureMessage(row.detail,row.label)));
+  }else if(row.status==='complete'){
+    if(row.phase==='transfer')executable.filter(entry=>rowMatchesApplyEntry(row,entry)).forEach(entry=>setApplyEntry(entry,'verifying','MOVED','Transfer confirmed. Waiting for equip and readback.'));
+    else if(row.phase==='equip')executable.filter(entry=>entry.type==='equipment').forEach(entry=>setApplyEntry(entry,'verifying','EQUIPPED','Equip response accepted. Waiting for readback.'));
+    else if(['weapon-sockets','armour-mods'].includes(row.phase))executable.filter(entry=>rowMatchesApplyEntry(row,entry)).forEach(entry=>setApplyEntry(entry,'verifying','APPLIED','Socket response accepted. Waiting for readback.'));
+  }
+  renderApplyReviewGrid();
+}
+function finaliseApplyEntries(result){
+  const steps=result?.steps||[],readback=result?.readback||{},equipStep=steps.find(row=>row.phase==='equip'),failedEquipIds=new Set((equipStep?.detail?.failures||[]).map(row=>String(row.itemInstanceId||''))),equippedIds=new Set((readback.equippedInstanceIds||[]).map(String)),missingEquipment=new Map((readback.missingEquipment||[]).map(row=>[String(row.itemInstanceId||''),row])),socketMismatches=new Map((readback.socketMismatches||[]).map(row=>[`${row.itemInstanceId}:${row.socketIndex}:${row.expectedPlugHash}`,row])),badStep=steps.find(row=>['failed','mismatch','blocked'].includes(row.status));
+  for(const entry of pendingApplyEntries){
+    if(entry.type==='manual')continue;
+    if(entry.type==='equipment'){
+      const attempted=Boolean(equipStep),missing=missingEquipment.get(entry.itemInstanceId);
+      if(attempted&&!failedEquipIds.has(entry.itemInstanceId)&&equippedIds.has(entry.itemInstanceId))setApplyEntry(entry,'success','CONFIRMED','Fresh Bungie readback confirms this exact item equipped.');
+      else setApplyEntry(entry,'failed',attempted?'NOT CONFIRMED':'NOT APPLIED',missing?`${entry.name} was not equipped in the final Bungie profile.`:failedEquipIds.has(entry.itemInstanceId)?'Bungie rejected this exact equip result.':applyFailureMessage(badStep?.detail,'The equipment phase did not complete.'));
+      continue;
+    }
+    const key=`${entry.itemInstanceId}:${entry.socketIndex}:${entry.plugHash}`,mismatch=socketMismatches.get(key),completed=steps.some(row=>['weapon-sockets','armour-mods'].includes(row.phase)&&row.status==='complete'&&rowMatchesApplyEntry(row,entry)),failed=steps.find(row=>['weapon-sockets','armour-mods'].includes(row.phase)&&row.status==='failed'&&rowMatchesApplyEntry(row,entry));
+    if(completed&&!mismatch&&readback&&Array.isArray(readback.socketMismatches))setApplyEntry(entry,'success','CONFIRMED','Fresh Bungie readback confirms this exact socket value.');
+    else setApplyEntry(entry,'failed',completed?'NOT CONFIRMED':'NOT APPLIED',mismatch?`Bungie reported plug ${mismatch.actualPlugHash||'unresolved'} after Apply.`:applyFailureMessage(failed?.detail||badStep?.detail,'This socket change was not completed.'));
+  }
+}
+function showApplyResult(result,error=null){
+  if(result)finaliseApplyEntries(result);else pendingApplyEntries.filter(entry=>entry.type!=='manual').forEach(entry=>setApplyEntry(entry,'failed','NOT APPLIED',error?.message||'Apply failed before Bungie confirmed a change.'));
+  const successes=pendingApplyEntries.filter(entry=>entry.state==='success').length,failures=pendingApplyEntries.filter(entry=>entry.state==='failed').length,unsupported=pendingApplyEntries.filter(entry=>entry.type==='manual').length,title=byId('applyConfirmationTitle'),kicker=byId('applyConfirmationKicker'),guardian=byId('applyConfirmationGuardian'),warning=byId('applyConfirmationWarning');
+  applyDialogMode='result';if(kicker)kicker.textContent='LIVE BUNGIE ACTION · VERIFIED RESULT';if(title)title.textContent=failures?(successes?'LOADOUT PARTIALLY APPLIED':'LOADOUT NOT APPLIED'):'LOADOUT SUCCEEDED';if(guardian)guardian.textContent=`${successes} change${successes===1?'':'s'} confirmed · ${failures} failed or unconfirmed${unsupported?` · ${unsupported} in-game only`:''}`;if(warning)warning.textContent=failures?'Only entries marked Confirmed were verified by fresh Bungie readback. Completed changes were not rolled back.':unsupported?'Remote changes were confirmed. Entries marked In Game Only were not sent to Bungie.':'Every remote entry shown below was confirmed by fresh Bungie readback.';
+  byId('applyConfirmationPanel')?.setAttribute('aria-busy','false');if(byId('cancelApplyBuild'))byId('cancelApplyBuild').hidden=true;if(byId('confirmApplyBuild'))byId('confirmApplyBuild').hidden=true;if(byId('dismissApplyBuild'))byId('dismissApplyBuild').hidden=false;renderApplyReviewGrid();byId('dismissApplyBuild')?.focus();
+}
+function closeApplyConfirmation(){if(liveActionBusy)return;livePreflightRequest+=1;livePreflightBusy=false;const dialog=byId('applyConfirmationDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');pendingApplyPlan=null;pendingApplyEntries=[];applyDialogMode='idle';byId('applyConfirmationPanel')?.setAttribute('aria-busy','false');}
 async function openApplyConfirmation(){
   if(liveActionBusy||livePreflightBusy)return;
   const sourceState=readState(),plan=buildLivePlan(),dialog=byId('applyConfirmationDialog');if(!plan.ready||!dialog){setLiveActionBanner(`Apply blocked · ${plan.blockers?.[0]||'validation failed.'}`,'bad');return;}
@@ -271,27 +333,26 @@ async function openApplyConfirmation(){
     const staged=await stageLiveTransferPreflight(plan,{session});
     if(request!==livePreflightRequest||readState()!==sourceState){setLiveActionBanner('Apply preflight cancelled because the Working Build changed. Review it and try again.','warn');return;}
     if(!staged.ready){setLiveActionBanner(`Apply blocked · ${staged.blockers?.[0]||'live preflight failed.'}`,'bad');return;}
-    pendingApplyPlan=staged;byId('applyConfirmationGuardian').textContent=`Guardian ${staged.characterId} · membership ${staged.membershipType}:${staged.membershipId} · live preflight passed`;
-    const equipment=staged.equipment.targets.map(row=>`<li>${esc(row.kind.toUpperCase())} · ${esc(row.name)} · ${esc(row.itemInstanceId)}</li>`).join(''),sockets=staged.socketChanges.map(row=>`<li>${esc(row.itemName||row.itemInstanceId)} · socket ${row.socketIndex+1} → ${esc(row.plugName||row.plugHash)}</li>`).join(''),steps=staged.inGameSteps.map(row=>`<li>${esc(row)}</li>`).join('');
-    byId('applyConfirmationSummary').innerHTML=`<div class="apply-confirmation-summary"><section><h3>EXACT EQUIPMENT</h3><ul>${equipment}</ul></section><section><h3>REMOTE SOCKET CHANGES</h3><ul>${sockets||'<li>No remote socket changes staged.</li>'}</ul></section>${steps?`<section class="manual-steps"><h3>AFTER APPLY · IN-GAME STEPS</h3><ul>${steps}</ul></section>`:''}</div>`;
+    pendingApplyPlan=staged;pendingApplyEntries=createApplyReviewEntries(staged,sourceState);applyDialogMode='review';byId('applyConfirmationGuardian').textContent=`Guardian ${staged.characterId} · membership ${staged.membershipType}:${staged.membershipId} · live preflight passed`;
+    byId('applyConfirmationKicker').textContent='LIVE BUNGIE ACTION · FINAL CONFIRMATION';byId('applyConfirmationTitle').textContent='APPLY WORKING BUILD?';byId('applyConfirmationWarning').textContent='Destiny must be in orbit, a social space, or offline. Completed remote steps are not automatically rolled back if a later step fails.';byId('applyConfirmationPanel')?.setAttribute('aria-busy','false');if(byId('cancelApplyBuild'))byId('cancelApplyBuild').hidden=false;if(byId('confirmApplyBuild')){byId('confirmApplyBuild').hidden=false;byId('confirmApplyBuild').disabled=false;}if(byId('dismissApplyBuild'))byId('dismissApplyBuild').hidden=true;renderApplyReviewGrid();
     dialog.hidden=false;document.body.classList.add('working-dialog-open');byId('confirmApplyBuild')?.focus();
   }catch(error){if(request===livePreflightRequest)setLiveActionBanner(`Apply blocked · ${error?.message||'live preflight failed.'}`,'bad');}
   finally{if(request===livePreflightRequest){livePreflightBusy=false;renderApplyControls(currentBuild()||{},{preserveBanner:true});}}
 }
 async function executeConfirmedApply(){
   const plan=pendingApplyPlan;if(!plan||liveActionBusy)return;
-  liveActionBusy=true;const confirm=byId('confirmApplyBuild');if(confirm)confirm.disabled=true;const dialog=byId('applyConfirmationDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');
+  liveActionBusy=true;applyDialogMode='running';const confirm=byId('confirmApplyBuild');if(confirm){confirm.disabled=true;confirm.hidden=true;}if(byId('cancelApplyBuild'))byId('cancelApplyBuild').hidden=true;byId('applyConfirmationPanel')?.setAttribute('aria-busy','true');byId('applyConfirmationKicker').textContent='LIVE BUNGIE ACTION · IN PROGRESS';byId('applyConfirmationTitle').textContent='APPLYING WORKING BUILD';byId('applyConfirmationWarning').textContent='Bungie calls are in progress. Each entry remains pending until a fresh readback confirms its final state.';pendingApplyEntries.filter(entry=>entry.type!=='manual').forEach(entry=>setApplyEntry(entry,'queued','QUEUED','Waiting for the paced executor.'));renderApplyReviewGrid();
   try{
     let session=globalThis.FORGE_BUNGIE_SESSION;if(!session?.csrfToken)session=await getBungieSession({force:true});
-    const result=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{session,onProgress:row=>setLiveActionBanner(row.label||'Applying Working Build…','running')});
+    const result=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{session,onProgress:row=>{setLiveActionBanner(row.label||'Applying Working Build…','running');updateApplyProgress(row);}});
     const state=readState();if(state?.workingBuild)writeState({...state,workingBuild:{...state.workingBuild,liveTransferResult:result}});
     showRangeOutput(result);
     if(result.status==='applied')setLiveActionBanner(`Apply verified · Bungie readback matched all ${plan.equipment.targets.length} exact equipment targets${plan.socketChanges.length?` and ${plan.socketChanges.length} socket change${plan.socketChanges.length===1?'':'s'}`:''}.`,'good');
     else if(result.status==='blocked')setLiveActionBanner(`No live changes made · ${result.steps.find(row=>row.status==='blocked')?.detail?.[0]||'fresh ownership validation blocked Apply.'}`,'bad');
     else setLiveActionBanner('Apply partially completed. Review the detailed result before retrying; no automatic rollback was attempted.','bad');
-    document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'post-apply',characterId:plan.characterId}}));
-  }catch(error){setLiveActionBanner(`${error?.message||'Apply failed.'} No further live steps were attempted.`,'bad');showRangeOutput({status:'failed-before-completion',message:error?.message||String(error),plan});}
-  finally{liveActionBusy=false;pendingApplyPlan=null;if(confirm)confirm.disabled=false;renderApplyControls(currentBuild()||{},{preserveBanner:true});}
+    showApplyResult(result);document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'post-apply',characterId:plan.characterId}}));
+  }catch(error){setLiveActionBanner(`${error?.message||'Apply failed.'} No further live steps were attempted.`,'bad');showRangeOutput({status:'failed-before-completion',message:error?.message||String(error),plan});showApplyResult(null,error);}
+  finally{liveActionBusy=false;if(confirm)confirm.disabled=false;renderApplyControls(currentBuild()||{},{preserveBanner:true});}
 }
 
 function verifiedActivities(build,domain=testDomain){
@@ -557,7 +618,8 @@ function renderRecommendedBuildReview(build={}){
   byId('recommendedBuildTitle').textContent=partial?'PARTIAL WORKING BUILD':'RECOMMENDED BUILD';
   byId('recommendedBuildSubtitle').textContent=`${String(build.characterClass||'Guardian').toUpperCase()} · ${String(build.recommendationElement||build.subclassName||build.subclass||'verified subclass').toUpperCase()} · ${String(build.objective||'balanced').toUpperCase()} · ${activity?.label||'ACTIVITY UNRESOLVED'} · EXOTIC ANCHOR: ${String(anchorName).toUpperCase()}`;
   const safety=byId('recommendedBuildSafety');if(safety){safety.classList.toggle('is-partial',partial);safety.querySelector('b').textContent=partial?'PARTIAL EVIDENCE · LIVE GUARDIAN UNCHANGED':'LIVE GUARDIAN UNCHANGED';safety.querySelector('span').textContent=partial?build.forgeEvidence.statement:'This recommendation exists only in the protected Working Build until you explicitly confirm Apply.';}
-  byId('recommendedSubclassSummary').innerHTML=`<div class="review-subclass-identity">${reviewIcon(subclass,'Subclass')}<div><b>${esc(build.subclassName||build.subclass||'VERIFIED SUBCLASS')}</b><span>${esc(superItem?.name||'SUPER NOT RESOLVED')}</span></div></div><div class="review-socket-group"><b>ABILITIES</b><div>${abilities.map(item=>reviewIcon(item,'Ability')).join('')||'<small>NO VERIFIED ABILITIES</small>'}</div></div><div class="review-socket-group"><b>ASPECTS</b><div>${aspects.map(item=>reviewIcon(item,'Aspect')).join('')||'<small>NO VERIFIED ASPECTS</small>'}</div></div><div class="review-socket-group"><b>FRAGMENTS</b><div>${fragments.map(item=>reviewIcon(item,'Fragment')).join('')||'<small>NO VERIFIED FRAGMENTS</small>'}</div></div>`;
+  byId('recommendedSubclassSummary').innerHTML=`<div class="review-subclass-identity">${reviewIcon(subclass,'Subclass')}<div><b>${esc(build.subclassName||build.subclass||'VERIFIED SUBCLASS')}</b><span>${esc(String(elementOf(subclass||build)).toUpperCase())} SUBCLASS</span></div></div><section class="super-feature review-super-feature" data-super-subclass="${esc(elementOf(superItem||subclass||build))}" aria-label="Recommended Super"><div class="super-feature__cluster"><div class="super-diamond super-diamond--equipped" data-review-super><span>◆</span></div></div><div class="super-feature__name">${esc(superItem?.name||'SUPER NOT RESOLVED')}</div></section><div class="review-socket-group"><b>ABILITIES</b><div>${abilities.map(item=>reviewIcon(item,'Ability')).join('')||'<small>NO VERIFIED ABILITIES</small>'}</div></div><div class="review-socket-group"><b>ASPECTS</b><div>${aspects.map(item=>reviewIcon(item,'Aspect')).join('')||'<small>NO VERIFIED ASPECTS</small>'}</div></div><div class="review-socket-group"><b>FRAGMENTS</b><div>${fragments.map(item=>reviewIcon(item,'Fragment')).join('')||'<small>NO VERIFIED FRAGMENTS</small>'}</div></div>`;
+  const reviewSuperDiamond=byId('recommendedSubclassSummary')?.querySelector('[data-review-super]');setDiamondFromItem(reviewSuperDiamond,superItem,'Recommended Super unavailable');if(reviewSuperDiamond){reviewSuperDiamond.tabIndex=-1;reviewSuperDiamond.removeAttribute('role');}
   const intelligenceHost=byId('recommendedIntelligenceSummary'),decisions=build.forgeIntelligence?.decisions||[],matched=decisions.filter(row=>row.score>0).slice(0,4),reviewRows=matched.length?matched:decisions.slice(0,4),anchorDescription=String(anchorPerk?.description||'').trim(),anchorReason=anchorDescription?`EXOTIC ANCHOR · ${anchorName}${anchorPerk?.name?` · ${anchorPerk.name}`:''} contributes only its verified effect text to the ranking.`:`EXOTIC ANCHOR · ${anchorName} effect text is unresolved and was excluded from the evidence score.`,pendingRows=(build.forgeEvidence?.pending||[]).map(row=>`<li>${esc(row.message)}</li>`).join('');if(intelligenceHost)intelligenceHost.innerHTML=`<li>${esc(anchorReason)}</li>`+pendingRows+(reviewRows.map(row=>`<li>${esc(decisionReasonText(row))}</li>`).join('')||(build.forgeIntelligence?.limitations||[]).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>No additional intelligence claim is available for this snapshot.</li>');
   const armourHost=byId('recommendedArmourSummary')?.querySelector('.gear-columns');if(armourHost){armourHost.innerHTML=Array.from({length:5},(_,index)=>armourCard(index,build.armour?.[index])).join('');armourHost.querySelectorAll('.gear-slot .arm').forEach((node,index)=>{node.addEventListener('click',()=>openArmourDrawer(index,build.armour?.[index]));bindParadoxItemHover(node,build.armour?.[index],'armour');});}
   const armourRule=byId('armourExoticRule');if(armourRule)armourRule.textContent=`DESTINY EQUIP RULE · ${exoticRule.exoticArmourCount}/1 EXOTIC ARMOUR`;
@@ -726,7 +788,7 @@ document.addEventListener('click',event=>{
   const socket=event.target.closest('[data-manual-socket-option]');if(socket){stageManualSocket(socket.dataset.manualSocketOption);}
 });
 document.addEventListener('forge:character-selected',event=>{explicitlySelectedCharacterId=String(event.detail?.characterId||'');},true);
-document.addEventListener('forge:guardian-selection-changed',event=>{const detail=event.detail||{};if(pendingApplyPlan||livePreflightBusy){closeApplyConfirmation();setLiveActionBanner('Apply confirmation cancelled because the selected Guardian or Bungie build changed. Review the current Working Build again.','warn');}if(manualInventory&&manualInventory.key!==manualInventoryKey(detail))manualInventory=null;switchBuildCharacter(detail);});
+document.addEventListener('forge:guardian-selection-changed',event=>{const detail=event.detail||{};if(liveActionBusy){setLiveActionBanner('Apply is still running for the confirmed Guardian. Wait for final Bungie readback before changing Guardians.','running');return;}if(pendingApplyPlan||livePreflightBusy){closeApplyConfirmation();setLiveActionBanner('Apply confirmation cancelled because the selected Guardian or Bungie build changed. Review the current Working Build again.','warn');}if(manualInventory&&manualInventory.key!==manualInventoryKey(detail))manualInventory=null;switchBuildCharacter(detail);});
 document.addEventListener('forge:guardian-loadout-context',event=>recoverMissingBuild(event.detail||{}));
 document.addEventListener('forge:bungie-loadout-loaded',event=>{if(event.detail?.loadoutActionIntent==='save-paradox-copy')openSaveParadoxDialog(`BUNGIE SLOT ${Number(event.detail.selectedLoadoutIndex)+1} · ${String(event.detail.characterClass||'GUARDIAN').toUpperCase()}`);});
 globalThis.addEventListener('forge:bungie-session',()=>renderApplyControls(currentBuild()||{}));
@@ -742,6 +804,7 @@ byId('applyBuild')?.addEventListener('click',openApplyConfirmation);
 byId('applyWorkingBuild')?.addEventListener('click',openApplyConfirmation);
 byId('confirmApplyBuild')?.addEventListener('click',executeConfirmedApply);
 byId('cancelApplyBuild')?.addEventListener('click',closeApplyConfirmation);
+byId('dismissApplyBuild')?.addEventListener('click',closeApplyConfirmation);
 byId('saveParadoxBuild')?.addEventListener('click',()=>openSaveParadoxDialog());
 byId('saveParadoxForm')?.addEventListener('submit',submitParadoxSave);
 byId('cancelSaveParadox')?.addEventListener('click',closeSaveParadoxDialog);
