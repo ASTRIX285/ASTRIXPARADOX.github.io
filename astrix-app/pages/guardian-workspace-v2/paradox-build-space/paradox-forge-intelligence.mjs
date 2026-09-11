@@ -139,6 +139,11 @@ function knownSuperComponents(build={}){
   return uniqueResolved(ELEMENTS.flatMap(element=>superDefinitionsFor(build.characterClass||'hunter',element)));
 }
 
+function selectedSubclassSupport(candidate={}){
+  const sb=candidate.subclassBuild||candidate.build||{};
+  return uniqueResolved([sb.classAbility,sb.movement,sb.melee,sb.grenade,...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])]);
+}
+
 function isSuperComponent(item={}){
   return lower([item?.componentType,item?.abilityType,item?.type,item?.definition?.itemTypeDisplayName,item?.definition?.plug?.plugCategoryIdentifier].filter(Boolean).join(' ')).includes('super');
 }
@@ -150,7 +155,7 @@ function rankExoticSuperSynergy(build={},candidates=[]){
   const genericSuperClauses=lower(description).split(/[.!?;\n]+/).map(clean).filter(clause=>/\bsuper(?:s|'s)?\b/i.test(clause)&&!namedSuperAliases.some(alias=>clause.includes(alias)));
   const unavailableExplicitSupers=catalogueSupers.filter(item=>descriptionNamesComponent(description,item)&&!allSupers.some(candidate=>componentAliases(candidate).some(alias=>componentAliases(item).includes(alias))));
   for(const candidate of rows){
-    const element=elementOf(candidate),components=subclassComponents(candidate),supers=components.filter(isSuperComponent),support=components.filter(item=>!isSuperComponent(item));
+    const element=elementOf(candidate),components=subclassComponents(candidate),supers=components.filter(isSuperComponent),support=selectedSubclassSupport(candidate);
     const namedSupport=support.filter(item=>descriptionNamesComponent(description,item)),namedAbilityKinds=uniq(namedSupport.map(componentKind));
     const superElements=superScopedElements(description);
     const energyBridges=support.filter(item=>{const text=lower(descriptionEvidence(item));return /\bsuper energy\b/.test(text)&&namedAbilityKinds.some(kind=>text.includes(kind));});
