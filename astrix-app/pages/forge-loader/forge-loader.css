@@ -9,6 +9,7 @@
 .forge-loader-shell{--forge-matrix-tile-size:3.5rem;width:100%;max-width:none}
 .forge-loader-workspace{display:grid;grid-template-columns:minmax(360px,20%) minmax(640px,44%) minmax(560px,1fr);grid-template-columns:minmax(320px,1fr) minmax(320px,1fr) minmax(420px,1.5fr);gap:var(--apx-workspace-gap,.625rem);align-items:stretch}
 .forge-loader-selector,.forge-loader-directives,.forge-loader-output{display:grid;gap:1rem;min-width:0;align-content:start}.forge-set-selector,.forge-loader-output{container-type:inline-size}
+@media(min-width:1581px){.forge-loader-workspace{grid-auto-rows:1fr}.forge-loader-selector,.forge-loader-directives,.forge-loader-output{height:100%;align-content:stretch}.forge-loader-selector{grid-template-rows:max-content max-content minmax(0,1fr)}.forge-loader-directives,.forge-loader-output{grid-template-rows:max-content minmax(0,1fr)}.forge-exotic-selector,.forge-set-selector,.forge-results{min-height:0}.forge-results:not([hidden]){display:grid;grid-template-rows:max-content minmax(0,1fr) max-content;overflow:hidden}.forge-candidate-builds{min-height:0;align-content:start;overflow-y:auto;overscroll-behavior:contain}}
 
 /* ===== PANELS  ·  crimson-bordered boxes + headings ===== */
 .forge-panel{position:relative;min-width:0;padding:1rem;border:1px solid rgba(178,34,34,.42);background:linear-gradient(145deg,rgba(18,11,12,.96),rgba(7,7,8,.94));box-shadow:0 1.2rem 3rem rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)}
