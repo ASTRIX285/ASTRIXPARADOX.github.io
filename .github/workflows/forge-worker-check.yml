@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - sandbox
     paths:
       - 'forge-auth-worker/**'
       - '.github/workflows/forge-worker-check.yml'

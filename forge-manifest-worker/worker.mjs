@@ -36,6 +36,11 @@ export default {
       if(url.searchParams.get('version')!==index.manifestVersion||!['common','journey','loadout'].includes(page))return new Response(null,{status:400});
       return env.ASSETS.fetch(new Request(`https://assets/pages/${page}.json`));
     }
+    if(url.pathname==='/page-index'){
+      const page=url.searchParams.get('page');
+      if(url.searchParams.get('version')!==index.manifestVersion||page!=='loadout')return new Response(null,{status:400});
+      return env.ASSETS.fetch(new Request('https://assets/pages/loadout-index.json'));
+    }
     if(url.pathname!=='/definitions')return new Response(null,{status:404});
     if(url.searchParams.get('version')!==index.manifestVersion)return Response.json({error:'manifest_version_changed'},{status:409});
     const type=url.searchParams.get('type'),table=index.tables[type];

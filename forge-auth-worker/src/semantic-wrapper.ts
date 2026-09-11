@@ -1,5 +1,5 @@
 import worker, { AuthRecord } from "./index";
-import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets, enrichOwnedWeaponDefinitions } from "./manifest-semantics";
+import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets } from "./manifest-semantics";
 export { AuthRecord };
 
 const SUBCLASS_BUCKET_HASH = 3284755031;
@@ -200,34 +200,6 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
   return payload;
 }
 
-function logManifestEvidenceGaps(payload: any, page: string): void {
-  const account = payload?.transport === "prepared-page-stream-v1" && payload?.account
-    ? payload.account
-    : payload;
-  for (const gap of account?.weaponEffectCoverage?.missingEffectDescriptions || []) {
-    console.warn("manifest_effect_evidence_missing", { page, ...gap });
-  }
-  for (const gap of account?.weaponEffectCoverage?.emptySandboxPerkDescriptions || []) {
-    console.info("manifest_effect_evidence_fallback", { page, ...gap });
-  }
-  for (const hash of account?.weaponEffectCoverage?.sandboxPerkUnresolved || []) {
-    console.warn("manifest_definition_unresolved", {
-      page,
-      definitionType: "DestinySandboxPerkDefinition",
-      hash,
-      field: "ownedWeapon.definition.perks.perkHash"
-    });
-  }
-  for (const hash of account?.weaponDefinitionCoverage?.unresolved || []) {
-    console.warn("manifest_definition_unresolved", {
-      page,
-      definitionType: "DestinyInventoryItemDefinition",
-      hash,
-      field: "ownedWeapon.socketDefinition"
-    });
-  }
-}
-
 async function rewriteJsonResponse(response: Response, transform: (payload: any) => Promise<any>): Promise<Response> {
   if (!response.ok) return response;
   const payload = await response.clone().json<any>().catch(() => null);
@@ -249,6 +221,10 @@ export default {
     const path = url.pathname;
     const pagePayload = path.startsWith("/bungie/page/") ? path.slice("/bungie/page/".length) : "";
     if (url.searchParams.get("definitions") === "client-manifest" && (path === "/bungie/profile" || path === "/v1/destiny/profile" || path === "/bungie/loadout" || path === "/v1/destiny/loadout")) return response;
+    // Prepared page accounts are enriched inside pagePayloadRoute before the
+    // public bundle stream is attached. Parsing this response here defeats the
+    // stream and held 17 to 42 MB responses until the full body was rewritten.
+    if (request.method === "GET" && ["character", "build-forge", "journey", "vault", "loadout"].includes(pagePayload)) return response;
     try {
       if (request.method === "GET" && (path === "/bungie/profile" || path === "/v1/destiny/profile")) {
         return await rewriteJsonResponse(response, async payload => {
@@ -263,17 +239,6 @@ export default {
           await enrichLoadoutSupers(payload, env);
           await enrichEquipableSets(payload, env);
           await enrichWeaponReusablePlugs(payload, env);
-          return payload;
-        });
-      }
-      if (request.method === "GET" && ["character", "build-forge", "journey", "vault", "loadout"].includes(pagePayload)) {
-        return await rewriteJsonResponse(response, async payload => {
-          await enrichSubclassInventory(payload, env);
-          if (pagePayload === "loadout") await enrichOwnedWeaponDefinitions(payload, env);
-          if (pagePayload === "build-forge") await enrichOwnedWeaponDefinitions(payload, env);
-          await enrichEquipableSets(payload, env);
-          await enrichWeaponReusablePlugs(payload, env);
-          logManifestEvidenceGaps(payload, pagePayload);
           return payload;
         });
       }

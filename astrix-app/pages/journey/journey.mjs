@@ -2297,6 +2297,16 @@ function showSignedOut(){
   void finishJourneyLoader(signedOut);
 }
 
+function showJourneyUnavailable(message='Journey data is unavailable. Retry the page or reconnect Bungie.'){
+  resolving.hidden=false;
+  dashboard.hidden=true;
+  signedOut.hidden=true;
+  status.textContent='JOURNEY DATA UNAVAILABLE';
+  const copy=resolving.querySelector('p:last-child');
+  if(copy)copy.textContent=message;
+  void finishJourneyLoader(resolving);
+}
+
 let locationSelectorReady=false;
 let locationMapReady=Promise.resolve();
 function showJourney(){
@@ -2327,21 +2337,12 @@ try{
   if(authenticated){
     journeySession=session;
     const heroCardsReady=waitForHeroCards();
+    const profile=await readVerifiedProfile(session);
+    if(!profile?.profile?.characters?.data)throw new Error('Prepared Journey data is unavailable. Retry the page or reconnect Bungie.');
+    verifiedProfile=profile;
+    bindProfileCards(profile);
+    void bindDestinationProgress(profile);
     const mapReady=showJourney();
-    const profilePromise=readVerifiedProfile(session);
-    const profile=await waitWithin(profilePromise,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
-    if(profile){
-      verifiedProfile=profile;
-      bindProfileCards(profile);
-      void bindDestinationProgress(profile);
-    }else{
-      void profilePromise.then(lateProfile=>{
-        if(!lateProfile?.profile?.characters?.data){void refreshJourneyProfile().catch(error=>console.info('[Forge Journey] deferred profile refresh unavailable',error));return;}
-        verifiedProfile=lateProfile;
-        bindProfileCards(lateProfile);
-        void bindDestinationProgress(lateProfile);
-      }).catch(error=>console.info('[Forge Journey] deferred verified profile unavailable',error));
-    }
     startJourneyBackgroundRefresh();
     reportPreparedPageStage('render','journey');
     await Promise.all([
@@ -2355,11 +2356,6 @@ try{
 }catch(error){
   console.info('[Forge Journey] existing Bungie session unavailable',error);
   if(journeySession?.authenticated===true){
-    resolving.hidden=true;
-    signedOut.hidden=true;
-    dashboard.hidden=false;
-    status.textContent='JOURNEY REFRESH PENDING';
-    startJourneyBackgroundRefresh();
-    void finishJourneyLoader(document);
+    showJourneyUnavailable(error?.message||'Journey data is unavailable. Retry the page or reconnect Bungie.');
   }else showSignedOut();
 }

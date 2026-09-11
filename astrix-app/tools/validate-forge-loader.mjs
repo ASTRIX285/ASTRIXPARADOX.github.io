@@ -232,6 +232,8 @@ const residency=read('astrix-app/pages/forge-loader/forge-loader-residency.mjs')
 const refresh=read('astrix-app/pages/forge-loader/forge-loader-refresh.mjs');
 const manifestSemantics=read('forge-auth-worker/src/manifest-semantics.ts');
 const semanticWrapper=read('forge-auth-worker/src/semantic-wrapper.ts');
+const pageSemantics=read('forge-auth-worker/src/page-semantics.ts');
+const backend=read('forge-auth-worker/src/index.ts');
 const selectionState=read('astrix-app/pages/vault/vault-selection-state.mjs');
 const buildRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs');
 const buildStateRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs');
@@ -261,7 +263,9 @@ assert.match(runtime,/async function evaluateInBuildForge\(\)\{\s*const residenc
 assert.match(manifestSemantics,/hash > 0 && hash <= MAX_BUNGIE_DEFINITION_HASH/,'Backend definition resolution must reject nullable or out-of-range values before requesting the manifest worker.');
 assert.match(semanticWrapper,/for \(const socket of[\s\S]*?addDefinitionHash\(requested, socket\?\.plugHash\)/,'A nullable live subclass socket must never become hash 0 and poison the full definition batch.');
 assert.match(manifestSemantics,/async function enrichOwnedWeaponDefinitions[\s\S]*?preparedWeaponHashes[\s\S]*?weaponDefinitionCoverage/,'Prepared Forge Loader data must resolve exact owned weapon and selected socket definitions from the compact weapon hash index.');
-assert.match(semanticWrapper,/pagePayload === "loadout"\) await enrichOwnedWeaponDefinitions\(payload, env\)/,'The prepared Loadout route must complete owned weapon enrichment before returning its page envelope.');
+assert.match(pageSemantics,/page === "loadout" \|\| page === "build-forge"[\s\S]*?await enrichOwnedWeaponDefinitions\(payload, env, context\)/,'The prepared Loadout and Build Forge routes must complete owned weapon enrichment before returning their page envelopes.');
+assert.match(backend,/await enrichPreparedPageAccount\(payload, env, page,[\s\S]*?return preparedPageEnvelope\(request, env, payload, prepared\)/,'Prepared page semantics must finish on the account prefix before the public page bundle starts streaming.');
+assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", "loadout"\]\.includes\(pagePayload\)\) return response/,'The semantic wrapper must never parse and rewrite a prepared page bundle after its stream is attached.');
 assert.match(residency,/forgeArmourIndexCoverage[\s\S]*?weaponDefinitionCoverage[\s\S]*?subclassCatalogCoverage[\s\S]*?artifactCatalogCoverage/,'The Manifest row must use exact prepared source coverage rather than the later armour-only hydration flag.');
 assert.match(refresh,/payload\?\.weaponDefinitionCoverage[\s\S]*?payload\?\.subclassCatalogCoverage/,'Background Forge refreshes must rebuild residency when weapon or subclass definition coverage is repaired.');
 assert.match(runtime,/url\.searchParams\.set\('prewarm','forge-loader'\)/,'The verified handoff must request the existing Build Forge worker pre-warm.');

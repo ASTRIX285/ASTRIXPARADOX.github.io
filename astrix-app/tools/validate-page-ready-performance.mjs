@@ -190,6 +190,7 @@ for(const [path,source] of pageSources){
   if(path.includes('/paradox-build-space/'))assert.doesNotMatch(source,/\/bungie\/(?:page\/build-forge|current-season)/,`${path} contains a Build Forge follow up read`);
 }
 const backend=await readFile(new URL('../forge-auth-worker/src/index.ts',root),'utf8');
+const semanticWrapper=await readFile(new URL('../forge-auth-worker/src/semantic-wrapper.ts',root),'utf8');
 for(const page of Object.keys(PAGE_VIEWS))assert.match(backend,new RegExp(`\\b${page.replace('-','\\-')}\\b`));
 assert.match(backend,/preparedJourneyAccountData[\s\S]*?historical-stats[\s\S]*?activity-history/,'Journey route must merge cached career and activity data');
 const cache=await readFile(new URL('pages/guardian-workspace-v2/guardian-session-cache.mjs',root),'utf8');
@@ -199,8 +200,11 @@ const builder=await readFile(new URL('tools/build-backend-manifest.py',root),'ut
 for(const hash of JOURNEY_ROOTS)assert.match(builder,new RegExp(String(hash)),`Backend Journey bundle is missing real root ${hash}`);
 assert.match(builder,/DestinyInventoryItemDefinition[\s\S]*?DestinyGuardianRankDefinition[\s\S]*?DestinyGuardianRankConstantsDefinition/,'Journey bundle must include collection item and Guardian Rank definitions');
 assert.match(builder,/loadout_collectible_hashes[\s\S]*?loadout_collectibles[\s\S]*?weapon_definition_hashes[\s\S]*?loadout_coverage/,'Loadout bundle must carry acquisition sources and the complete compact weapon definition index');
+assert.match(builder,/loadout-index\.json[\s\S]*?weaponDefinitionHashes[\s\S]*?loadoutCoverage/,'The backend manifest must publish the small weapon identity index separately from the large Loadout page bundle');
 assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'Page routes must stream prepared bundles outside the auth Worker heap');
+assert.match(backend,/await enrichPreparedPageAccount\(payload, env, page,[\s\S]*?return preparedPageEnvelope\(request, env, payload, prepared\)/,'Page account semantics must complete before the public bundle stream is attached');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'Page routes must not parse prepared bundles in the auth Worker');
+assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", "loadout"\]\.includes\(pagePayload\)\) return response/,'The semantic wrapper must pass every prepared page stream through without cloning or parsing it');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy static manifest tables in the auth Worker');
 const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
 assert.match(preparedClient,/prepared\.forgeArmourIndex[\s\S]*?prepared\.collectibleDefinitions[\s\S]*?prepared\.loadoutCoverage/,'The shared client must join the streamed Loadout bundle');
