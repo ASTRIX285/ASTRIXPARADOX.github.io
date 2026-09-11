@@ -52,4 +52,25 @@ jobs:
           }
           await readWindow('before-week','2026-09-02T00:00:00.000Z','2026-09-05T00:00:00.000Z');
           await readWindow('regression-window','2026-09-10T13:15:00.000Z','2026-09-11T09:00:00.000Z');
+
+          const introspectionQuery=`query WorkerSchema {
+            account: __type(name: "Account") {
+              fields { name description type { kind name ofType { kind name } } }
+            }
+            types: __schema {
+              types { name fields { name description type { kind name ofType { kind name } } } }
+            }
+          }`;
+          const schemaResponse=await fetch('https://api.cloudflare.com/client/v4/graphql',{
+            method:'POST',
+            headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},
+            body:JSON.stringify({query:introspectionQuery})
+          });
+          const schemaBody=await schemaResponse.json();
+          if(!schemaResponse.ok||schemaBody.errors?.length)throw new Error(`Cloudflare schema query failed ${schemaResponse.status}: ${JSON.stringify(schemaBody.errors||[])}`);
+          const workerFields=(schemaBody.data?.account?.fields||[]).filter(field=>/worker/i.test(field.name));
+          console.log(JSON.stringify({workerFields}));
+          const referencedTypes=new Set(workerFields.flatMap(field=>[field.type?.name,field.type?.ofType?.name]).filter(Boolean));
+          const workerTypes=(schemaBody.data?.types?.types||[]).filter(type=>referencedTypes.has(type.name)||/Workers.*(Invocation|Trace|Event)/i.test(type.name));
+          console.log(JSON.stringify({workerTypes}));
           NODE
