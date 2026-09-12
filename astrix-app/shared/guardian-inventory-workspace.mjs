@@ -76,13 +76,67 @@ function powerIdentity(item={}){
   };
 }
 
+function visualIdentity(definition={}){
+  const display=definition?.displayProperties??definition?.definition?.displayProperties??{};
+  return {
+    icon:asset(definition?.icon??definition?.iconUrl??display.icon??definition?.transparentIconPath),
+    label:text(definition?.name??definition?.displayName??display.name)
+  };
+}
+
+function tileSocketIdentities(item={},kind=''){
+  const season=visualIdentity({icon:item?.releaseWatermark?.icon??item?.tierIcon});
+  if(kind==='armour'){
+    const set=item?.armourSemantics?.set??item?.setBonus??null;
+    return {
+      season,
+      corner:visualIdentity(set?.identity??set?.twoPiece??set?.fourPiece)
+    };
+  }
+  if(kind==='weapon'){
+    return {
+      season,
+      corner:visualIdentity(item?.weaponSemantics?.intrinsic??item?.intrinsic),
+      champion:visualIdentity(item?.breakerDefinition),
+      element:visualIdentity(item?.elementDefinition)
+    };
+  }
+  return {season};
+}
+
+function tileIconMarkup(className,identity,fallbackLabel){
+  if(!identity?.icon)return '';
+  const label=identity.label||fallbackLabel;
+  return `<span class="${className}" aria-label="${esc(label)}"><img src="${esc(identity.icon)}" alt="" loading="lazy" decoding="async"></span>`;
+}
+
+function masterworkPipsMarkup(state,{legacy=false}={}){
+  if(legacy)return state.masterworked?`<span class="vault-transfer-masterwork" aria-label="Masterworked">${Array.from({length:5},()=>'<i aria-hidden="true"></i>').join('')}</span>`:'';
+  return `<span class="tile-tier-strip" aria-label="${state.masterworked?'Masterworked':'Not masterworked'}"></span>${Array.from({length:5},(_,index)=>`<i class="tile-tier-pip tile-tier-pip--${index+1}" aria-hidden="true"></i>`).join('')}`;
+}
+
+function structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}={}){
+  const sockets=tileSocketIdentities(item,kind),rarityClass=item?.isExotic?'item-tile--exotic':'item-tile--legendary',masterworkClass=state.masterworked?' item-tile--masterworked':'',art=item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>',powerMarkup=item?.power===null||item?.power===undefined?'':`<span class="tile-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,lock=state.locked?'<span class="tile-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
+  return `<span class="item-tile item-tile--${esc(kind)} ${rarityClass}${masterworkClass}">
+      <span class="tile-art">${art}</span>
+      <span class="tile-footer" aria-hidden="true"></span>
+      ${powerMarkup}
+      ${kind==='weapon'?tileIconMarkup('tile-intrinsic',sockets.champion,'Champion capability'):''}
+      ${kind==='weapon'?tileIconMarkup('tile-element',sockets.element,'Elemental damage type'):''}
+      ${tileIconMarkup('tile-corner-badge',sockets.corner,kind==='weapon'?'Weapon intrinsic':'Armour set bonus')}
+      ${masterworkPipsMarkup(state)}
+      ${tileIconMarkup('tile-season-icon',sockets.season,'Season or source emblem')}
+      ${quantity}${lock}
+    </span>`;
+}
+
 function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
-  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
-  const masterwork=state.masterworked?`<span class="vault-transfer-masterwork" aria-label="Masterworked">${Array.from({length:5},()=>'<i aria-hidden="true"></i>').join('')}</span>`:'';
+  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',structured=kind==='weapon'||kind==='armour',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
+  const masterwork=masterworkPipsMarkup(state,{legacy:true});
   const lock=state.locked?'<span class="vault-transfer-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
   const directHint=canDirectEquip?' Double click to review equipping this exact item on the active Guardian.':'';
-  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}" title="${esc(item.name)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
-    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${masterwork}${power}${quantity}${lock}</span>
+  return `<article class="vault-transfer-item${structured?' has-item-tile':''}${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}" title="${esc(item.name)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
+    ${structured?structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}):`<span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${masterwork}${power}${quantity}${lock}</span>`}
     ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
   </article>`;
 }

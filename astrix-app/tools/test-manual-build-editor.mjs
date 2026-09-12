@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {createLiveTransferPreflight} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
 import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
@@ -129,15 +130,39 @@ const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
-const sharedTile={...replacement,itemInstanceId:'13109',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
+const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
 assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
 const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
-assert.match(sharedTileMarkup,/class="vault-transfer-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
-assert.match(sharedTileMarkup,/class="vault-transfer-masterwork" aria-label="Masterworked"/,'The shared tile must render the real masterwork state as diamond pips.');
-assert.match(sharedTileMarkup,/class="vault-transfer-power"[^>]*><img[^>]*\/arc\.png[^>]*><b>550<\/b>/,'The power badge must pair the real power value with its resolved Bungie element icon.');
+assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--legendary item-tile--masterworked"/,'Legendary rarity and masterwork must remain independent shared tile classes.');
+assert.match(sharedTileMarkup,/class="tile-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
+assert.match(sharedTileMarkup,/class="tile-tier-strip" aria-label="Masterworked"/,'The shared tile must expose the real masterwork state on the tier strip.');
+assert.equal([...sharedTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d"/g)].length,5,'The shared tile must render all five approved masterwork pip regions.');
+assert.match(sharedTileMarkup,/class="tile-power"[^>]*><img[^>]*\/arc\.png[^>]*><b>550<\/b>/,'The power badge must pair the real power value with its resolved Bungie element icon.');
+assert.match(sharedTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/adaptive\.png/,'The weapon corner badge must use the resolved Bungie intrinsic icon.');
+assert.match(sharedTileMarkup,/class="tile-intrinsic"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
+assert.match(sharedTileMarkup,/class="tile-element"[^>]*><img[^>]*\/arc\.png/,'The weapon element socket must use the resolved Bungie damage definition icon.');
+assert.match(sharedTileMarkup,/class="tile-season-icon"[^>]*><img[^>]*\/season\.png/,'The source socket must use the resolved Bungie release watermark icon.');
+assert.match(sharedTileMarkup,/class="tile-art"><img[^>]*\/weapon\.png/,'The shared tile art must keep the real Bungie item icon source.');
 assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
 assert.doesNotMatch(sharedTileMarkup,/vault-transfer-name|>EQUIPPED<|>LOCK</,'The shared tile must not restore permanent names or plain text state labels.');
 assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
+const exoticTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13112',isExotic:true,state:0},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(exoticTileMarkup,/item-tile--exotic/,'Real Exotic rarity must apply the Exotic tile class.');
+assert.doesNotMatch(exoticTileMarkup,/item-tile--masterworked|class="tile-lock"/,'An unlocked non-masterworked Exotic must not gain either independent state class or overlay.');
+assert.match(exoticTileMarkup,/class="tile-tier-strip" aria-label="Not masterworked"/,'A non-masterworked tile keeps the neutral tier rail required by the shared design.');
+const armourTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13113',equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='helmet'),weaponSemantics:undefined,intrinsic:undefined,breakerDefinition:undefined,elementDefinition:undefined,setBonus:{identity:{name:'Verified Set',icon:'/set.png'}},armourSemantics:{archetype:{name:'Brawler',icon:'/brawler.png'}},isExotic:false},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/set\.png/,'The armour corner badge must use the resolved Bungie equipable set icon.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-intrinsic"|class="tile-element"/,'Weapon-only sockets must be absent from armour tile markup.');
+const unresolvedSocketMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13114',releaseWatermark:null,tierIcon:null,weaponSemantics:{},intrinsic:null,breakerDefinition:null,elementDefinition:null},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-intrinsic"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
+const sharedTileCss=readFileSync(new URL('../shared/item-tile.css',import.meta.url),'utf8');
+for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-intrinsic','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
+assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*object-fit:\s*contain/s,'Real shared item art must render uncropped inside its proportional Figma region.');
+assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
+for(const page of ['../pages/guardian-workspace-v2/index.html','../pages/vault/index.html']){
+  const html=readFileSync(new URL(page,import.meta.url),'utf8'),tileIndex=html.indexOf('../../shared/item-tile.css'),densityIndex=html.indexOf('../../shared/astrix-desktop-density.css');
+  assert.ok(tileIndex>=0&&densityIndex>tileIndex,`${page} must import the shared item tile CSS before the required final density stylesheet.`);
+}
 const equippedFirstMarkup=inventoryGroupsMarkup([{...sharedTile,itemInstanceId:'13110',name:'Carried first in input',source:{kind:'carried',characterId:CHARACTER_ID}},{...sharedTile,itemInstanceId:'13111',name:'Equipped second in input',source:{kind:'equipped',characterId:CHARACTER_ID}}],{equippedFirst:true,capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.ok(equippedFirstMarkup.indexOf('Equipped second in input')<equippedFirstMarkup.indexOf('Carried first in input'),'The shared category renderer must place the equipped exact item first regardless of input order.');
 assert.doesNotMatch(equippedFirstMarkup,/>EQUIPPED</,'Equipped state must remain an icon and border treatment, never permanent tile text.');
