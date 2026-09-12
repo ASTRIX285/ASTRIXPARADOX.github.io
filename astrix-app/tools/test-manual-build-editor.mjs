@@ -9,6 +9,7 @@ import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-worksp
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
 import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
+import {resolveBreakerTypeDefinition} from '../core/bungie-item-identity.mjs';
 
 const CHARACTER_ID='9100001';
 const MEMBERSHIP_ID='9200001';
@@ -131,6 +132,13 @@ const session={
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
 const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
+const breakerDefinitions={
+  '485622768':{hash:485622768,enumValue:1,displayProperties:{name:'Shield Piercing',icon:'/barrier.png'}},
+  '2611060930':{hash:2611060930,enumValue:2,displayProperties:{name:'Disruption',icon:'/overload.png'}},
+  '3178805705':{hash:3178805705,enumValue:3,displayProperties:{name:'Stagger',icon:'/unstoppable.png'}}
+};
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0,breakerType:2},{},breakerDefinitions),breakerDefinitions['2611060930'],'A live breaker enum must resolve the genuine Bungie champion definition when its nullable hash is zero.');
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:485622768},breakerDefinitions),breakerDefinitions['485622768'],'An invalid zero instance hash must not mask a genuine item-definition breaker hash.');
 assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
 const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--legendary item-tile--tier-5 item-tile--masterworked"/,'Legendary rarity, verified T5 and masterwork must remain independent shared tile classes.');
@@ -157,7 +165,9 @@ assert.doesNotMatch(exoticTileMarkup,/tile-tier-pip--gold/,'T4 diamonds must nev
 const tierOneTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13115',state:0,gearTier:1},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.equal([...tierOneTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d tile-tier-pip--purple"/g)].length,1,'A verified T1 tile must render one solid purple diamond.');
 const armourTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13113',equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='helmet'),weaponSemantics:undefined,intrinsic:undefined,breakerDefinition:undefined,elementDefinition:undefined,setBonus:{identity:{name:'Verified Set',icon:'/set.png'}},armourSemantics:{archetype:{name:'Brawler',icon:'/brawler.png'}},isExotic:false},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
-assert.match(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/set\.png/,'The armour corner badge must use the resolved Bungie equipable set icon.');
+assert.match(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/brawler\.png/,'The armour corner badge must use the resolved Bungie armour archetype icon.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/set\.png/,'The armour set identity must not replace the requested archetype corner icon.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-power"[^>]*><img/,'The moved armour archetype must not be duplicated in the footer.');
 assert.doesNotMatch(armourTileMarkup,/class="tile-intrinsic"|class="tile-element"/,'Weapon-only sockets must be absent from armour tile markup.');
 const unresolvedSocketMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13114',state:0,gearTier:null,releaseWatermark:null,tierIcon:null,weaponSemantics:{},intrinsic:null,breakerDefinition:null,elementDefinition:null},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-intrinsic"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
@@ -172,8 +182,10 @@ assert.match(sharedTileCss,/\.tile-tier-pip::before\s*\{[^}]*border:\s*0;[^}]*ba
 assert.match(sharedTileCss,/\.item-tile--tier-5\s*\{[^}]*--tile-tier-fill:\s*#f3ee69/s,'Only verified T5 tiles must switch their five diamonds to gold.');
 assert.match(sharedTileCss,/\.tile-tier-pip--1\s*\{top:21\.50%\}/,'The complete diamond formation must stay in its raised position below the season icon.');
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*border-radius:\s*50%/s,'The real season icon must render inside the circle above the diamonds.');
+assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
 assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
-assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*54%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the enlarged bright green glyph.');
+assert.match(sharedTileCss,/\.tile-intrinsic img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
+assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
 assert.match(sharedTileCss,/\.tile-intrinsic,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
 for(const page of ['../pages/guardian-workspace-v2/index.html','../pages/vault/index.html']){

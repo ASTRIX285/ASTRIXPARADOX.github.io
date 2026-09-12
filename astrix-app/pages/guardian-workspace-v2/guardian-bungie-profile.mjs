@@ -6,7 +6,7 @@ import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-p
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope} from "./paradox-build-binding.mjs";
 import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
-import {paradoxDefinitionId,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs';
+import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260912-tile-identities-1';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
@@ -424,7 +424,7 @@ function normaliseItem(profile,definitions,item,payload={}){
     state:Number(item?.state??0),
     damageTypeHash:instance?.damageTypeHash??base.definition?.defaultDamageTypeHash??null,
     elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??base.definition?.defaultDamageTypeHash)]||null,
-    breakerDefinition:payload?.breakerDefinitions?.[String(instance?.breakerTypeHash??base.definition?.breakerTypeHash)]||null,
+    breakerDefinition:resolveBreakerTypeDefinition(instance,base.definition,payload?.breakerDefinitions),
     isExotic,
     shader,
     ornament,

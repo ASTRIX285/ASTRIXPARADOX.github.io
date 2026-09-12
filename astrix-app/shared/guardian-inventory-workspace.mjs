@@ -85,12 +85,12 @@ function visualIdentity(definition={}){
 }
 
 function tileSocketIdentities(item={},kind=''){
-  const season=visualIdentity({icon:item?.releaseWatermark?.icon??item?.tierIcon});
+  const season=visualIdentity({icon:item?.releaseWatermark?.icon||item?.tierIcon});
   if(kind==='armour'){
-    const set=item?.armourSemantics?.set??item?.setBonus??null;
+    const archetype=item?.armourSemantics?.archetype??item?.archetype??null;
     return {
       season,
-      corner:visualIdentity(set?.identity??set?.twoPiece??set?.fourPiece)
+      corner:visualIdentity(archetype)
     };
   }
   if(kind==='weapon'){
@@ -126,7 +126,7 @@ function tierPipsMarkup(item,state,{legacy=false}={}){
 }
 
 function structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}={}){
-  const sockets=tileSocketIdentities(item,kind),tier=verifiedItemTier(item,state),rarityClass=item?.isExotic?'item-tile--exotic':'item-tile--legendary',tierClass=tier?` item-tile--tier-${tier}`:'',masterworkClass=state.masterworked?' item-tile--masterworked':'',art=item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>',powerIcon=kind==='armour'?powerMark.icon:'',powerMarkup=item?.power===null||item?.power===undefined?'':`<span class="tile-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerIcon?`<img src="${esc(powerIcon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,lock=state.locked?'<span class="tile-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
+  const sockets=tileSocketIdentities(item,kind),tier=verifiedItemTier(item,state),rarityClass=item?.isExotic?'item-tile--exotic':'item-tile--legendary',tierClass=tier?` item-tile--tier-${tier}`:'',masterworkClass=state.masterworked?' item-tile--masterworked':'',art=item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>',powerMarkup=item?.power===null||item?.power===undefined?'':`<span class="tile-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}"><b>${esc(item.power)}</b></span>`,lock=state.locked?'<span class="tile-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
   return `<span class="item-tile item-tile--${esc(kind)} ${rarityClass}${tierClass}${masterworkClass}">
       <span class="tile-art">${art}</span>
       <span class="tile-footer">
@@ -134,7 +134,7 @@ function structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}={})
         ${kind==='weapon'?tileIconMarkup('tile-element',sockets.element,'Elemental damage type'):''}
         ${powerMarkup}
       </span>
-      ${tileIconMarkup('tile-corner-badge',sockets.corner,kind==='weapon'?'Weapon intrinsic':'Armour set bonus')}
+      ${tileIconMarkup('tile-corner-badge',sockets.corner,kind==='weapon'?'Weapon intrinsic':'Armour archetype')}
       ${tierPipsMarkup(item,state)}
       ${tileIconMarkup('tile-season-icon',sockets.season,'Season or source emblem')}
       ${quantity}${lock}

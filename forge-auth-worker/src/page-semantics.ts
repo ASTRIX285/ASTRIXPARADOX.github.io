@@ -3,6 +3,7 @@ import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, prep
 const SUBCLASS_BUCKET_HASH = 3284755031;
 const WEAPON_BUCKETS = new Set([1498876634, 2465295065, 953998645]);
 const GUARDIAN_STAT_HASHES = [2996146975, 392767087, 1943323491, 1735777505, 144602215, 4244567218];
+const DESTINY_BREAKER_TYPE_HASHES = [485622768, 2611060930, 3178805705];
 const PAGE_INVENTORY_FIELDS = [
   "hash", "displayProperties", "displaySource", "sourceString",
   "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
@@ -136,7 +137,7 @@ async function enrichPageInventory(payload: any, env: Env, page: string, manifes
     DestinyInventoryItemDefinition: requested,
     DestinyStatDefinition: GUARDIAN_STAT_HASHES,
     DestinyDamageTypeDefinition: instances.map(row => row?.damageTypeHash),
-    DestinyBreakerTypeDefinition: instances.map(row => row?.breakerTypeHash)
+    DestinyBreakerTypeDefinition: [...instances.map(row => row?.breakerTypeHash), ...DESTINY_BREAKER_TYPE_HASHES]
   }, env, manifestVersion);
   const definitions: Record<string, Record<string, any>> = payload.definitions || (payload.definitions = {});
   Object.assign(definitions, first.DestinyInventoryItemDefinition || {});
