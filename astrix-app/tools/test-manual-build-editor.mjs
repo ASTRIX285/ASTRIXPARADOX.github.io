@@ -129,14 +129,18 @@ const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
-const sharedTile={...replacement,itemInstanceId:'13109',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,source:{kind:'vault',characterId:null}};
+const sharedTile={...replacement,itemInstanceId:'13109',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
 assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
 const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
-assert.match(sharedTileMarkup,/is-locked[^>]*title="Locked"/,'The shared tile must render the real locked state.');
-assert.match(sharedTileMarkup,/is-masterworked[^>]*title="Masterworked"/,'The shared tile must render the real masterwork state.');
+assert.match(sharedTileMarkup,/class="vault-transfer-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
+assert.match(sharedTileMarkup,/class="vault-transfer-masterwork" aria-label="Masterworked"/,'The shared tile must render the real masterwork state as diamond pips.');
+assert.match(sharedTileMarkup,/class="vault-transfer-power"[^>]*><img[^>]*\/arc\.png[^>]*><b>550<\/b>/,'The power badge must pair the real power value with its resolved Bungie element icon.');
+assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
+assert.doesNotMatch(sharedTileMarkup,/vault-transfer-name|>EQUIPPED<|>LOCK</,'The shared tile must not restore permanent names or plain text state labels.');
 assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
 const equippedFirstMarkup=inventoryGroupsMarkup([{...sharedTile,itemInstanceId:'13110',name:'Carried first in input',source:{kind:'carried',characterId:CHARACTER_ID}},{...sharedTile,itemInstanceId:'13111',name:'Equipped second in input',source:{kind:'equipped',characterId:CHARACTER_ID}}],{equippedFirst:true,capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.ok(equippedFirstMarkup.indexOf('Equipped second in input')<equippedFirstMarkup.indexOf('Carried first in input'),'The shared category renderer must place the equipped exact item first regardless of input order.');
+assert.doesNotMatch(equippedFirstMarkup,/>EQUIPPED</,'Equipped state must remain an icon and border treatment, never permanent tile text.');
 let prematureCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(plan,{session,fetchImpl:async()=>{prematureCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
 assert.equal(prematureCalls,0,'An unconfirmed Apply plan must make zero requests.');

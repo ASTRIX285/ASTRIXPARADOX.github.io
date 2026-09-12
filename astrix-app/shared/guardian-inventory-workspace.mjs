@@ -24,6 +24,7 @@ const EQUIPMENT_GROUP_BY_HASH=new Map(INVENTORY_GROUPS.map((row,index)=>[row.has
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const text=value=>String(value??'').trim();
 const itemKey=item=>String(item?.itemInstanceId||`${item?.itemHash||'unknown'}:${item?.source?.kind||'unknown'}:${item?.source?.characterId||''}`);
+const asset=value=>{const path=text(value);return !path?'':path.startsWith('http')?path:`https://www.bungie.net${path.startsWith('/')?'':'/'}${path}`;};
 
 function itemState(item={}){
   const raw=Number(item?.state||0);
@@ -61,17 +62,27 @@ function directEquipAvailable(item,capabilities={},activeCharacterId=''){
   return false;
 }
 
+function powerIdentity(item={}){
+  const kind=item?.equipmentGroup?.kind;
+  const definition=kind==='weapon'
+    ?item?.elementDefinition
+    :kind==='armour'
+      ?item?.armourSemantics?.archetype??item?.archetype
+      :null;
+  const display=definition?.displayProperties??definition?.definition?.displayProperties??{};
+  return {
+    icon:asset(definition?.icon??definition?.iconUrl??display.icon??definition?.transparentIconPath),
+    label:text(definition?.name??definition?.displayName??display.name)
+  };
+}
+
 function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
-  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power">${esc(item.power)}</span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity">${esc(item.quantity)}</span>`:'';
-  const stateBadges=[
-    equipped?'<span class="vault-transfer-state is-equipped" title="Equipped">EQUIPPED</span>':'',
-    state.locked?'<span class="vault-transfer-state is-locked" title="Locked" aria-label="Locked">LOCK</span>':'',
-    state.masterworked?'<span class="vault-transfer-state is-masterworked" title="Masterworked" aria-label="Masterworked">◆</span>':''
-  ].filter(Boolean).join('');
+  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
+  const masterwork=state.masterworked?`<span class="vault-transfer-masterwork" aria-label="Masterworked">${Array.from({length:5},()=>'<i aria-hidden="true"></i>').join('')}</span>`:'';
+  const lock=state.locked?'<span class="vault-transfer-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
   const directHint=canDirectEquip?' Double click to review equipping this exact item on the active Guardian.':'';
-  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
-    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${power}${quantity}${stateBadges?`<span class="vault-transfer-states">${stateBadges}</span>`:''}</span>
-    <span class="vault-transfer-name">${esc(item.name)}</span>
+  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}" title="${esc(item.name)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
+    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${masterwork}${power}${quantity}${lock}</span>
     ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
   </article>`;
 }
