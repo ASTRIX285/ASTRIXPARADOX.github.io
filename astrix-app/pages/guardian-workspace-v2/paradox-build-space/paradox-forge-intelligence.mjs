@@ -1,3 +1,5 @@
+import {superDefinitionsFor} from '../guardian-super-catalog.mjs?v=20260911-evidence-isolation-1';
+
 /* Deterministic Build Forge recommendation composer.
  *
  * The composer is intentionally evidence-bound: it may choose only hashes that
@@ -133,17 +135,27 @@ function superInvestmentEvidence(build={}){
   };
 }
 
+function knownSuperComponents(build={}){
+  return uniqueResolved(ELEMENTS.flatMap(element=>superDefinitionsFor(build.characterClass||'hunter',element)));
+}
+
+function selectedSubclassSupport(candidate={}){
+  const sb=candidate.subclassBuild||candidate.build||{};
+  return uniqueResolved([sb.classAbility,sb.movement,sb.melee,sb.grenade,...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])]);
+}
+
 function isSuperComponent(item={}){
   return lower([item?.componentType,item?.abilityType,item?.type,item?.definition?.itemTypeDisplayName,item?.definition?.plug?.plugCategoryIdentifier].filter(Boolean).join(' ')).includes('super');
 }
 
 function rankExoticSuperSynergy(build={},candidates=[]){
   const perk=build.forgeLoaderDecision?.buildAnchor?.perk,perkName=itemName(perk,'Staged Exotic perk'),description=descriptionEvidence(perk),investment=superInvestmentEvidence(build),entries=[];
-  const rows=Array.isArray(candidates)?candidates:[],allSupers=uniqueResolved(rows.flatMap(candidate=>subclassComponents(candidate).filter(isSuperComponent)));
-  const namedSuperAliases=uniq(allSupers.flatMap(componentAliases));
+  const rows=Array.isArray(candidates)?candidates:[],allSupers=uniqueResolved(rows.flatMap(candidate=>subclassComponents(candidate).filter(isSuperComponent))),catalogueSupers=knownSuperComponents(build);
+  const namedSuperAliases=uniq([...allSupers,...catalogueSupers].flatMap(componentAliases));
   const genericSuperClauses=lower(description).split(/[.!?;\n]+/).map(clean).filter(clause=>/\bsuper(?:s|'s)?\b/i.test(clause)&&!namedSuperAliases.some(alias=>clause.includes(alias)));
+  const unavailableExplicitSupers=catalogueSupers.filter(item=>descriptionNamesComponent(description,item)&&!allSupers.some(candidate=>componentAliases(candidate).some(alias=>componentAliases(item).includes(alias))));
   for(const candidate of rows){
-    const element=elementOf(candidate),components=subclassComponents(candidate),supers=components.filter(isSuperComponent),support=components.filter(item=>!isSuperComponent(item));
+    const element=elementOf(candidate),components=subclassComponents(candidate),supers=components.filter(isSuperComponent),support=selectedSubclassSupport(candidate);
     const namedSupport=support.filter(item=>descriptionNamesComponent(description,item)),namedAbilityKinds=uniq(namedSupport.map(componentKind));
     const superElements=superScopedElements(description);
     const energyBridges=support.filter(item=>{const text=lower(descriptionEvidence(item));return /\bsuper energy\b/.test(text)&&namedAbilityKinds.some(kind=>text.includes(kind));});
@@ -193,6 +205,7 @@ function rankExoticSuperSynergy(build={},candidates=[]){
   return {
     schemaVersion:1,anchor:{hash:Number(itemKey(perk))||null,name:perkName,description},
     status:!description?'unknown':strongest>0?'evidenced':'no-direct-super-synergy',entries,
+    limitations:unavailableExplicitSupers.map(item=>`${perkName} explicitly names ${itemName(item)}, which is not available in the resolved Super options for this subclass.`),
     limitation:description&&strongest===0?`No genuine Super synergy is stated by ${perkName} for the resolved Supers. No Super is ranked as preferred.`:''
   };
 }
@@ -211,17 +224,48 @@ function selectedComponents(build={}){
   return [sb.super,...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])].filter(Boolean);
 }
 
+function selectedArtifactPerks(build={}){
+  const artifact=build.artifact||{},configuration=build.artifactConfiguration||artifact.artifactConfiguration||{},configured=Array.isArray(configuration.selectedPerkHashes)?configuration.selectedPerkHashes:null;
+  const selectedHashes=new Set((configured??(artifact.activePerks||[]).map(itemKey)).map(String));
+  const rows=[...(artifact.perks||[]),...(artifact.activePerks||[]),...(build.artifactRecommendation?.selectionSequence||[]).map(row=>row?.artifactPerk)].filter(Boolean);
+  return uniqueResolved(rows.filter(row=>selectedHashes.has(itemKey(row))));
+}
+
+function currentSelectionSnapshot(build={}){
+  const reference=item=>({hash:Number(itemKey(item))||null,itemInstanceId:clean(item?.itemInstanceId)||null});
+  const subclass=build.subclassBuild||{};
+  return {
+    characterId:clean(build.characterId)||null,
+    weapons:(build.weapons||[]).map(item=>({...reference(item),perkHashes:(item?.weaponSemantics?.selectedPerks||[]).map(perk=>Number(itemKey(perk))).filter(Number.isInteger)})),
+    armour:(build.armour||[]).map(reference),
+    artifact:{hash:Number(itemKey(build.artifact))||null,selectedPerkHashes:selectedArtifactPerks(build).map(perk=>Number(itemKey(perk))).filter(Number.isInteger)},
+    subclass:{superHash:Number(itemKey(subclass.super))||null,abilityHashes:(subclass.abilities||[]).map(item=>Number(itemKey(item))).filter(Number.isInteger),aspectHashes:(subclass.aspects||[]).map(item=>Number(itemKey(item))).filter(Number.isInteger),fragmentHashes:(subclass.fragments||[]).map(item=>Number(itemKey(item))).filter(Number.isInteger)}
+  };
+}
+
 function optionSources(build={}){
-  const decision=build.forgeLoaderDecision||{},sources=[];
-  const add=(kind,item,{name='',weight=1}={})=>{if(item)sources.push({kind,item,name:name||itemName(item,kind),tokens:explicitTokens(item),weight});};
+  const decision=build.forgeLoaderDecision||{},sources=[],seen=new Set();
+  const add=(kind,item,{name='',weight=1}={})=>{
+    if(!item)return;
+    const key=itemKey(item)||`${itemName(item,'')}|${descriptionEvidence(item)}`;
+    if(key&&seen.has(key))return;
+    if(key)seen.add(key);
+    sources.push({kind,item,name:name||itemName(item,kind),tokens:explicitTokens(item),weight});
+  };
   const anchor=decision?.buildAnchor||{},anchorPerk=anchor?.perk;
   add('selected Exotic armour',anchorPerk,{name:[anchor?.name,itemName(anchorPerk,'Exotic perk')].filter(Boolean).join(' · '),weight:5});
   for(const row of decision?.setProtocol||[])add(`${Number(row?.count)||0}-piece armour set`,row?.trait||row);
-  for(const row of build?.paradoxEvidence?.armour||[])if(row?.verified!==false)add('equipped armour evidence',row);
+  for(const armour of build.armour||[]){
+    const semantics=armour?.armourSemantics||{};
+    add(`${itemName(armour,'selected armour')} intrinsic`,semantics.exoticPerk||armour?.exoticPerk||armour?.intrinsicTrait);
+    add(`${itemName(armour,'selected armour')} archetype`,semantics.archetype||armour?.archetype);
+    for(const effect of [semantics.set?.twoPiece,semantics.set?.fourPiece].filter(row=>row?.active!==false))add(`${Number(effect?.requiredSetCount)||0}-piece selected armour set`,effect);
+  }
   for(const weapon of build.weapons||[]){
     add('owned weapon',weapon);
     for(const perk of weapon?.weaponSemantics?.selectedPerks||[])add(`${itemName(weapon,'weapon')} perk`,perk);
   }
+  for(const perk of selectedArtifactPerks(build))add('selected Artifact perk',perk);
   return sources.filter(source=>source.tokens.length||source.weight>1);
 }
 
@@ -373,6 +417,27 @@ function decisionLedger(result,context){
   return {rows,limitations};
 }
 
+function intelligenceRecord({build,result,context,requested,superSynergy}){
+  const ledger=decisionLedger(result,context);
+  return {
+    schemaVersion:1,source:'verified-forge-loader-bungie-catalogue',method:'deterministic-evidence-beam-v1',element:requested,status:'review-required',score:result.score,
+    evidence:{forgeSources:context.sources.map(source=>({kind:source.kind,name:source.name,tokens:source.tokens})),selectionSnapshot:currentSelectionSnapshot(build),directedLinks:result.directed.links,strengths:result.directed.strengths,weakLinks:result.directed.weakLinks,confidence:result.directed.confidence,componentScore:result.componentScore,stabilityScore:result.stabilityScore},
+    superSynergy:{...superSynergy,entries:superSynergy.entries.map(({super:superDefinition,...row})=>row)},
+    prismaticCoverage:requested==='prismatic'?{covered:result.coveredElements,missing:['arc','solar','void','stasis','strand'].filter(value=>!result.coveredElements.includes(value))}:null,
+    decisions:ledger.rows,limitations:[...new Set([...ledger.limitations,...(superSynergy.limitations||[])])],requiresReview:true,liveTransferAuthorized:false
+  };
+}
+
+function refreshForgeIntelligence({build={},element='',analyzeBuild=null,bounded=true}={}){
+  const base=synchroniseSubclassProjection(clone(build)||{}),requested=ELEMENTS.includes(lower(element))?lower(element):elementOf(base.subclass||base.subclassName||'');
+  if(!requested)throw new TypeError('A verified elemental build option is required.');
+  const candidate={element:requested,subclassBuild:base.subclassBuild};
+  const superSynergy=rankExoticSuperSynergy(base,[candidate]);
+  const context={bounded,element:requested,sources:optionSources(base),superSynergy,superEvidence:new Map(superSynergy.entries.map(row=>[String(row.superHash),row])),priorities:base?.forgeLoaderDecision?.statDirective?.priorities||{},baselineKeys:new Set(selectedComponents(base).map(itemKey)),cache:new Map()};
+  const result=evaluate(base,context,analyzeBuild);
+  return {workingBuild:result.build,analysis:result.analysis,intelligence:intelligenceRecord({build:result.build,result,context,requested,superSynergy})};
+}
+
 function composeForgeRecommendation({build={},candidate={},element='',analyzeBuild=null,bounded=false}={}){
   const requested=ELEMENTS.includes(lower(element))?lower(element):elementOf(candidate);
   if(!requested)throw new TypeError('A verified elemental build option is required.');
@@ -409,18 +474,12 @@ function composeForgeRecommendation({build={},candidate={},element='',analyzeBui
     }
   }
 
-  const best=beam[0]||evaluate(base,context,analyzeBuild),ledger=decisionLedger(best,context);
+  const best=beam[0]||evaluate(base,context,analyzeBuild);
   return {
     workingBuild:best.build,
     analysis:best.analysis,
-    intelligence:{
-      schemaVersion:1,source:'verified-forge-loader-bungie-catalogue',method:'deterministic-evidence-beam-v1',element:requested,status:'review-required',score:best.score,
-      evidence:{forgeSources:context.sources.map(source=>({kind:source.kind,name:source.name,tokens:source.tokens})),directedLinks:best.directed.links,strengths:best.directed.strengths,weakLinks:best.directed.weakLinks,confidence:best.directed.confidence,componentScore:best.componentScore,stabilityScore:best.stabilityScore},
-      superSynergy:{...superSynergy,entries:superSynergy.entries.map(({super:superDefinition,...row})=>row)},
-      prismaticCoverage:requested==='prismatic'?{covered:best.coveredElements,missing:['arc','solar','void','stasis','strand'].filter(value=>!best.coveredElements.includes(value))}:null,
-      decisions:ledger.rows,limitations:ledger.limitations,requiresReview:true,liveTransferAuthorized:false
-    }
+    intelligence:intelligenceRecord({build:best.build,result:best,context,requested,superSynergy})
   };
 }
 
-export {ABILITY_SOCKETS,COMBAT_TERMS,ELEMENTS,composeForgeRecommendation,explicitTokens,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,resolvedItem,stageVerifiedSubclassCandidate,subclassCompatibilityEvidence,synchroniseSubclassProjection};
+export {ABILITY_SOCKETS,COMBAT_TERMS,ELEMENTS,composeForgeRecommendation,explicitTokens,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,refreshForgeIntelligence,resolvedItem,stageVerifiedSubclassCandidate,subclassCompatibilityEvidence,synchroniseSubclassProjection};
