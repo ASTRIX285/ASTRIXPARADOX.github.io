@@ -1,7 +1,7 @@
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
-import {ARMOUR_BUCKETS,EQUIPMENT_GROUPS,createVaultCatalogue,filterVaultArmour,groupVaultWorkspaceItems,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260911-live-transfer-1';
+import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,groupInventoryWorkspaceItems,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260912-inventory-structure-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
@@ -111,43 +111,52 @@ function workspaceItem(key){
   return [...catalogue.items,...catalogue.postmasterItems].find(item=>itemKey(item)===String(key||''))||null;
 }
 
-function transferItemMarkup(item,{draggable=true}={}){
-  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',capabilities=liveActionCapabilities(session),canDrag=draggable&&capabilities.transferItems&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(item?.source?.kind)&&(item?.source?.kind!=='equipped'||capabilities.equipItems),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power">${esc(item.power)}</span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity">${esc(item.quantity)}</span>`:'';
-  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${canDrag?' draggable':''}">
+function transferItemMarkup(item,{draggable=true,pullCharacterId=''}={}){
+  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',capabilities=liveActionCapabilities(session),canDrag=draggable&&capabilities.transferItems&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(item?.source?.kind)&&(item?.source?.kind!=='equipped'||capabilities.equipItems),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster&&/^\d+$/.test(String(item?.itemInstanceId||'')),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power">${esc(item.power)}</span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity">${esc(item.quantity)}</span>`:'',equipped=item?.source?.kind==='equipped';
+  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(item?.source?.kind||'')}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${canDrag?' draggable':''}">
     <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${power}${quantity}</span>
     <span class="vault-transfer-name">${esc(item.name)}</span>
+    ${equipped?'<span class="vault-transfer-location">EQUIPPED</span>':''}
+    ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
   </article>`;
 }
 
-function equipmentGroupsMarkup(items=[]){
-  const groups=groupVaultWorkspaceItems(items).filter(group=>group.items.length);
-  if(!groups.length)return '<p class="vault-transfer-empty">No Weapons or Armour returned by Bungie for this section.</p>';
+function workspaceGroupLabel(group){
+  if(group?.key==='special')return 'Secondary';
+  if(group?.key==='legs')return 'Leg';
+  return group?.label||'';
+}
+
+function equipmentGroupsMarkup(items=[],{includeEmpty=false,equippedFirst=false,pullCharacterId=''}={}){
+  const groups=groupInventoryWorkspaceItems(items).filter(group=>includeEmpty||group.items.length);
+  if(!groups.length)return '<p class="vault-transfer-empty">Bungie returned no supported inventory items for this section.</p>';
   let family='';
   return groups.map(group=>{
-    const heading=group.kind!==family?(family=group.kind,`<h5 class="vault-transfer-family">${esc(group.kind==='weapon'?'WEAPONS':'ARMOUR')}</h5>`):'';
-    return `${heading}<section class="vault-transfer-group" data-equipment-group="${esc(group.key)}"><header><strong>${esc(group.label)}</strong><span>${group.items.length}</span></header><div class="vault-transfer-items">${group.items.map(item=>transferItemMarkup(item)).join('')}</div></section>`;
+    const heading=group.kind!==family?(family=group.kind,`<h5 class="vault-transfer-family">${esc(group.kind==='weapon'?'WEAPONS':group.kind==='armour'?'ARMOUR':'EQUIPMENT')}</h5>`):'',ordered=equippedFirst?[...group.items].sort((left,right)=>Number(right?.source?.kind==='equipped')-Number(left?.source?.kind==='equipped')):group.items;
+    return `${heading}<section class="vault-transfer-group" data-equipment-group="${esc(group.key)}"><header><strong>${esc(workspaceGroupLabel(group))}</strong><span>${ordered.length}</span></header><div class="vault-transfer-items">${ordered.length?ordered.map(item=>transferItemMarkup(item,{pullCharacterId})).join(''):'<span class="vault-transfer-row-empty">EMPTY</span>'}</div></section>`;
   }).join('');
 }
 
 function postmasterMarkup(characterId){
   const rows=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)),equipment=rows.filter(item=>item.equipmentGroup),other=rows.filter(item=>!item.equipmentGroup),transferable=rows.filter(item=>/^\d+$/.test(String(item?.itemInstanceId||''))),collectReady=transferable.length&&liveActionCapabilities(session).pullFromPostmaster;
-  const groups=equipmentGroupsMarkup(equipment),otherMarkup=other.length?`<h5 class="vault-transfer-family">OTHER POSTMASTER ITEMS</h5><div class="vault-transfer-items">${other.map(item=>transferItemMarkup(item,{draggable:false})).join('')}</div>`:'';
-  return `<section class="vault-character-section vault-postmaster-section"><header><div><h4>POSTMASTER</h4><span>${rows.length} ITEM${rows.length===1?'':'S'}</span></div><button type="button" data-collect-postmaster="${esc(characterId)}"${collectReady?'':' disabled'}>COLLECT POSTMASTER</button></header>${rows.length?`${groups}${otherMarkup}`:'<p class="vault-transfer-empty">Bungie reports no items in this Postmaster.</p>'}</section>`;
+  const groups=equipmentGroupsMarkup(equipment,{pullCharacterId:characterId}),otherMarkup=other.length?`<h5 class="vault-transfer-family">OTHER POSTMASTER ITEMS</h5><div class="vault-transfer-items">${other.map(item=>transferItemMarkup(item,{draggable:false,pullCharacterId:characterId})).join('')}</div>`:'';
+  return `<section class="vault-character-section vault-postmaster-section"><header><div><h4>${esc(characterLabel(characterId).toUpperCase())} POSTMASTER</h4><span>${rows.length} ITEM${rows.length===1?'':'S'}</span></div><button type="button" data-collect-postmaster="${esc(characterId)}"${collectReady?'':' disabled'}>PULL ALL</button></header>${rows.length?`${groups}${otherMarkup}`:'<p class="vault-transfer-empty">Bungie reports no items in this Postmaster.</p>'}</section>`;
 }
 
 function characterColumnMarkup(character){
   const characterId=text(character?.characterId),equipped=catalogue.items.filter(item=>item.source?.kind==='equipped'&&text(item.source.characterId)===characterId),carried=catalogue.items.filter(item=>item.source?.kind==='carried'&&text(item.source.characterId)===characterId),active=characterId===activeCharacterId,emblem=character?.emblemBackgroundPath||character?.emblemPath||'',style=emblem?` style="--vault-character-emblem:url('${esc(new URL(emblem,'https://www.bungie.net').toString())}')"`:'';
   return `<article class="vault-character-column${active?' is-active':''}" data-drop-kind="character" data-drop-character-id="${esc(characterId)}"${style}>
-    <header class="vault-character-header"><div><span>${active?'ACTIVE GUARDIAN':'GUARDIAN'}</span><h3>${esc(characterLabel(characterId).toUpperCase())}</h3></div><strong>${character?.light===undefined?'':`✦ ${esc(character.light)}`}</strong></header>
     ${postmasterMarkup(characterId)}
-    <section class="vault-character-section"><header><div><h4>EQUIPPED</h4><span>${equipped.length} ITEM${equipped.length===1?'':'S'}</span></div></header>${equipmentGroupsMarkup(equipped)}</section>
-    <section class="vault-character-section"><header><div><h4>CARRIED</h4><span>${carried.length} ITEM${carried.length===1?'':'S'}</span></div></header>${equipmentGroupsMarkup(carried)}</section>
+    <div class="vault-character-inventory">
+      <header class="vault-character-header"><div><span>${active?'ACTIVE GUARDIAN':'GUARDIAN'}</span><h3>${esc(characterLabel(characterId).toUpperCase())}</h3></div><strong>${character?.light===undefined?'':`✦ ${esc(character.light)}`}</strong></header>
+      <section class="vault-character-section vault-equipped-carried-section"><header><div><h4>EQUIPPED AND CARRIED</h4><span>${equipped.length+carried.length} ITEMS</span></div></header>${equipmentGroupsMarkup([...equipped,...carried],{includeEmpty:true,equippedFirst:true})}</section>
+    </div>
   </article>`;
 }
 
 function vaultOnlyMarkup(){
   const items=catalogue.items.filter(item=>item.source?.kind==='vault');
-  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} WEAPON${items.length===1?'':'S'} AND ARMOUR ITEM${items.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. Hover or focus a Vault item for its existing PARADOX Weapon or Armour card.</p>${equipmentGroupsMarkup(items)}</section>`;
+  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
 }
 
 function bindVaultWorkspaceHovers(root){
@@ -193,10 +202,10 @@ function stageTransfer(item,destination){
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
 }
 
-function stagePostmasterCollection(characterId){
+function stagePostmasterCollection(characterId,requestedItemKey=''){
   try{
-    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))),intent=stagePostmasterCollectionIntent({characterId,items,session});
-    showVaultActionDialog('Confirm Postmaster collection',`Collect ${items.length} exact item${items.length===1?'':'s'} from ${characterLabel(characterId)} Postmaster into each item's Bungie destination inventory. Bungie can reject individual items when inventory space or item rules prevent collection.`,{kind:'postmaster',intent});
+    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session}),subject=items.length===1?items[0].name:`${items.length} exact items`;
+    showVaultActionDialog('Confirm Postmaster pull',`Pull ${subject} from ${characterLabel(characterId)} Postmaster into that Guardian's Bungie inventory. If Bungie reports no room or rejects an item, its position will not change here.`,{kind:'postmaster',intent});
   }catch(error){setStatus(error?.message||'Postmaster collection cannot be staged.','error');}
 }
 
@@ -538,6 +547,8 @@ function installTransferEvents(){
     stageTransfer(item,destination);
   });
   board?.addEventListener('click',event=>{
+    const itemButton=event.target.closest?.('[data-pull-postmaster-item]');
+    if(itemButton&&!itemButton.disabled){stagePostmasterCollection(itemButton.dataset.postmasterCharacterId,itemButton.dataset.pullPostmasterItem);return;}
     const button=event.target.closest?.('[data-collect-postmaster]');
     if(button&&!button.disabled)stagePostmasterCollection(button.dataset.collectPostmaster);
   });
@@ -613,7 +624,7 @@ async function init(){
     reportPreparedPageStage('render','vault');
     const unresolved=catalogue.totals.unresolvedDefinitions;
     const capabilities=liveActionCapabilities(session),liveReady=capabilities.transferItems&&capabilities.equipItems&&capabilities.pullFromPostmaster;
-    setStatus(`${catalogue.items.length} exact Weapons and Armour item${catalogue.items.length===1?'':'s'} loaded across ${characters().length} Guardian${characters().length===1?'':'s'} and Vault${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}. Live transfer ${liveReady?'ready':'unavailable for this session'}.`,'good');
+    setStatus(`${catalogue.items.length} exact grouped inventory item${catalogue.items.length===1?'':'s'} loaded across ${characters().length} Guardian${characters().length===1?'':'s'} and Vault${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}. Live transfer ${liveReady?'ready':'unavailable for this session'}.`,'good');
     await settleVisibleImages();
     globalThis.ForgeLoader?.done?.();
   }catch(error){
