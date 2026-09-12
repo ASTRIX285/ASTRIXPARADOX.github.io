@@ -137,7 +137,7 @@ assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--leg
 assert.match(sharedTileMarkup,/class="tile-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
 assert.match(sharedTileMarkup,/class="tile-tier-strip" aria-label="Masterworked"/,'The shared tile must expose the real masterwork state on the tier strip.');
 assert.equal([...sharedTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d"/g)].length,5,'The shared tile must render all five approved masterwork pip regions.');
-assert.match(sharedTileMarkup,/class="tile-power"[^>]*><img[^>]*\/arc\.png[^>]*><b>550<\/b>/,'The power badge must pair the real power value with its resolved Bungie element icon.');
+assert.match(sharedTileMarkup,/class="tile-power"[^>]*><b>550<\/b>/,'The weapon power readout must keep the real power value without duplicating its separate element socket.');
 assert.match(sharedTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/adaptive\.png/,'The weapon corner badge must use the resolved Bungie intrinsic icon.');
 assert.match(sharedTileMarkup,/class="tile-intrinsic"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
 assert.match(sharedTileMarkup,/class="tile-element"[^>]*><img[^>]*\/arc\.png/,'The weapon element socket must use the resolved Bungie damage definition icon.');
@@ -158,6 +158,9 @@ assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="til
 const sharedTileCss=readFileSync(new URL('../shared/item-tile.css',import.meta.url),'utf8');
 for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-intrinsic','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
 assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*object-fit:\s*contain/s,'Real shared item art must render uncropped inside its proportional Figma region.');
+assert.match(sharedTileCss,/height:\s*var\(--apx-icon-gear-art-height\);\s*aspect-ratio:\s*100\/122/,'The implemented tile must retain the compact canonical proportions shown by the approved Figma target.');
+assert.match(sharedTileCss,/\.tile-tier-strip\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'The tier rail must be an open overlay instead of a dark container over the item art.');
+assert.match(sharedTileCss,/\.tile-intrinsic,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
 for(const page of ['../pages/guardian-workspace-v2/index.html','../pages/vault/index.html']){
   const html=readFileSync(new URL(page,import.meta.url),'utf8'),tileIndex=html.indexOf('../../shared/item-tile.css'),densityIndex=html.indexOf('../../shared/astrix-desktop-density.css');
