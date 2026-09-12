@@ -73,9 +73,10 @@ for(const token of [
   '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
   '--apx-icon-selector:4.25rem;',
   '--apx-icon-inspect:7rem;',
-  '--apx-icon-gear-art-width:clamp(76px,5vw,96px);',
+  '--apx-icon-gear-art-width:96px;',
   '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);'
 ])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
+assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:76px/,'Shared gear art must retain the approved fixed 76px phone breakpoint');
 assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
 assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
 
