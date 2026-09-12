@@ -334,7 +334,7 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
 const VAULT_TRANSFER_SOURCE_KINDS=new Set(['equipped','carried','vault']);
 const VAULT_TRANSFER_DESTINATION_KINDS=new Set(['character','vault']);
 
-function stageVaultTransferIntent({item,destination,session,replacementItem=null}={}){
+function stageVaultTransferIntent({item,destination,session,replacementItem=null,equipAfterTransfer=false}={}){
   const binding=sessionBinding(session),source=item?.source||{},sourceKind=String(source.kind||''),sourceCharacterId=String(source.characterId||''),destinationKind=String(destination?.kind||''),destinationCharacterId=String(destination?.characterId||'');
   if(!decimal(item?.itemInstanceId)||!Number.isInteger(Number(item?.itemHash)))throw new TypeError('A live Vault transfer requires an exact Bungie item instance and definition hash.');
   if(!VAULT_TRANSFER_SOURCE_KINDS.has(sourceKind))throw new TypeError('Only equipped, carried, or Vault items can start a live Vault transfer.');
@@ -343,6 +343,7 @@ function stageVaultTransferIntent({item,destination,session,replacementItem=null
   if(destinationKind==='character'&&!decimal(destinationCharacterId))throw new TypeError('The destination Guardian binding is missing.');
   if(destinationKind==='vault'&&sourceKind==='vault')throw new TypeError('This item is already in Vault.');
   if(destinationKind==='character'&&sourceKind!=='vault'&&sourceCharacterId===destinationCharacterId)throw new TypeError('This item is already on that Guardian.');
+  if(equipAfterTransfer&&destinationKind!=='character')throw new TypeError('Direct equip requires a real destination Guardian.');
   const replacement=replacementItem?{
     itemInstanceId:String(replacementItem.itemInstanceId||''),itemHash:Number(replacementItem.itemHash),bucketHash:Number(replacementItem.bucketHash),name:String(replacementItem.name||'replacement item')
   }:null;
@@ -352,7 +353,7 @@ function stageVaultTransferIntent({item,destination,session,replacementItem=null
     schemaVersion:1,kind:'vault-transfer-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,
     membershipId:binding.membershipId,membershipType:binding.membershipType,
     item:{itemInstanceId:String(item.itemInstanceId),itemHash:Number(item.itemHash),bucketHash:Number(item.bucketHash),name:String(item.name||`Destiny item ${item.itemHash}`),source:{kind:sourceKind,characterId:sourceCharacterId||null}},
-    destination:{kind:destinationKind,characterId:destinationCharacterId||null},replacement
+    destination:{kind:destinationKind,characterId:destinationCharacterId||null},replacement,equipAfterTransfer:equipAfterTransfer===true
   };
 }
 
@@ -361,11 +362,13 @@ function confirmVaultTransferIntent(intent){
   return {...clone(intent),status:'confirmed',confirmedAt:new Date().toISOString()};
 }
 
-function stagePostmasterCollectionIntent({characterId,items,session}={}){
-  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)}));
+function stagePostmasterCollectionIntent({characterId,targetCharacterId=null,items,session,equipAfterCollection=false}={}){
+  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),bucketHash:Number(item?.bucketHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)})),equipTarget=String(targetCharacterId||characterId||'');
   if(!decimal(characterId)||!decimal(binding.membershipId)||!decimal(binding.membershipType))throw new TypeError('Reconnect Bungie and choose a valid Guardian before collecting Postmaster.');
   if(!rows.length||rows.some(item=>!decimal(item.itemInstanceId)||!Number.isInteger(item.itemHash)))throw new TypeError('Collect Postmaster requires at least one exact Bungie item instance.');
-  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),items:rows};
+  if(equipAfterCollection&&rows.length!==1)throw new TypeError('Direct Postmaster equip requires one exact Bungie item instance.');
+  if(equipAfterCollection&&!decimal(equipTarget))throw new TypeError('Direct Postmaster equip requires a valid target Guardian.');
+  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),targetCharacterId:equipAfterCollection?equipTarget:String(characterId),equipAfterCollection:equipAfterCollection===true,items:rows};
 }
 
 function confirmPostmasterCollectionIntent(intent){
@@ -415,7 +418,7 @@ function vaultActionActivityBlockers(payload,characterIds=[]){
 }
 
 async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
-  const required=['transferItems',...(intent?.item?.source?.kind==='equipped'?['equipItems']:[])];
+  const required=[...new Set(['transferItems',...(intent?.item?.source?.kind==='equipped'||intent?.equipAfterTransfer?['equipItems']:[])])];
   const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,mutationCount:0};
   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
   let mutationStarted=false;
@@ -468,11 +471,21 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
         record('transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
       }catch(error){record('transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
     }
+    if(intent.equipAfterTransfer){
+      const label=`Equip ${item.name} on ${destination.characterId}`;
+      try{
+        const response=await mutate('/bungie/actions/equip-items',{membershipType:Number(binding.membershipType),characterId:String(destination.characterId),itemIds:[item.itemInstanceId]},label),failures=equipResponseFailures(response,[item.itemInstanceId]);
+        if(failures.length){record('equip-target','failed','Bungie did not confirm the requested exact item equip.',{failures,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
+        const settled=await waitForInventoryLocation(item.itemInstanceId,{kind:'equipped',characterId:destination.characterId},{fetchImpl,authOrigin,waitImpl});
+        if(!settled.verified){record('equip-target','mismatch','Bungie accepted the equip call but fresh inventory did not confirm the exact equipped item.',{actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
+        record('equip-target','complete',label,{ErrorCode:response?.ErrorCode??1});
+      }catch(error){record('equip-target','failed',label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
+    }
     result.status='applied';
     return result;
   }finally{
     try{
-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(result.itemInstanceId)||null,expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:'carried',characterId:intent.destination.characterId};
+      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(result.itemInstanceId)||null,expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
       result.readback={verified:locationMatches(location,expected),expected,actual:location?.source||null};
       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms the requested destination.':'Final Bungie inventory does not match the requested destination.',result.readback);
       if(result.status==='applied'&&!result.readback.verified)result.status='partial';
@@ -482,12 +495,21 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
 }
 
 async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
-  const binding=assertVaultActionSession(intent,session,['pullFromPostmaster']),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),steps:[],readback:null,mutationCount:0};
+  const required=['pullFromPostmaster',...(intent?.equipAfterCollection?['transferItems','equipItems']:[])],binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),targetCharacterId:String(intent.targetCharacterId||intent.characterId||''),steps:[],readback:null,mutationCount:0};
   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
+  let mutationStarted=false;
+  const mutate=async(path,body,label)=>{
+    if(mutationStarted)await waitImpl(ACTION_THROTTLE_MS);
+    mutationStarted=true;
+    const response=await requestActionWithThrottleRetry(path,body,{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
+    result.mutationCount+=1;
+    return response;
+  };
   try{
     const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[];
     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
-    blockers.push(...vaultActionActivityBlockers(fresh,[result.characterId]));
+    if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
+    blockers.push(...vaultActionActivityBlockers(fresh,[result.characterId,result.targetCharacterId]));
     for(const item of intent.items||[]){
       const location=locations.get(String(item.itemInstanceId||''));
       if(!location||!locationMatches(location,{kind:'postmaster',characterId:result.characterId})||Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} is no longer in this Guardian's Postmaster.`);
@@ -497,21 +519,50 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     for(const item of intent.items){
       const label=`Collect ${item.name} from Postmaster`;
       try{
-        if(result.mutationCount)await waitImpl(ACTION_THROTTLE_MS);
-        const response=await requestActionWithThrottleRetry('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
-        result.mutationCount+=1;
+        const response=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},label);
         const settled=await waitForPostmasterExit(item.itemInstanceId,result.characterId,{fetchImpl,authOrigin,waitImpl});
         if(!settled.verified){record('collect','mismatch','Bungie accepted the Postmaster call but fresh inventory did not confirm collection.',{itemInstanceId:item.itemInstanceId,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
         record('collect','complete',label,{itemInstanceId:item.itemInstanceId,ErrorCode:response?.ErrorCode??1});
+        if(intent.equipAfterCollection){
+          let location=settled.location;
+          const transferSteps=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})?[]:
+            locationMatches(location,{kind:'carried',characterId:result.targetCharacterId})?[]:
+            locationMatches(location,{kind:'vault'})?[{characterId:result.targetCharacterId,transferToVault:false,expected:{kind:'carried',characterId:result.targetCharacterId},label:`Move ${item.name} from Vault to ${result.targetCharacterId}`}]:
+            locationMatches(location,{kind:'carried',characterId:result.characterId})&&result.characterId!==result.targetCharacterId?[
+              {characterId:result.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} from ${result.characterId} to Vault`},
+              {characterId:result.targetCharacterId,transferToVault:false,expected:{kind:'carried',characterId:result.targetCharacterId},label:`Move ${item.name} from Vault to ${result.targetCharacterId}`}
+            ]:[];
+          const supported=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})||locationMatches(location,{kind:'carried',characterId:result.targetCharacterId})||locationMatches(location,{kind:'vault'})||locationMatches(location,{kind:'carried',characterId:result.characterId});
+          if(!supported){record('direct-equip','blocked','Fresh Bungie readback returned an unsupported location after Postmaster collection.',{actual:location?.source||null});result.status='partial';return result;}
+          for(const step of transferSteps){
+            try{
+              const transferResponse=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:1,transferToVault:step.transferToVault},step.label);
+              const transferred=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
+              if(!transferred.verified){record('direct-equip-transfer','mismatch','Bungie accepted the transfer call but fresh inventory did not confirm its destination.',{expected:step.expected,actual:transferred.location?.source||null,ErrorCode:transferResponse?.ErrorCode??1});result.status='partial';return result;}
+              location=transferred.location;
+              record('direct-equip-transfer','complete',step.label,{expected:step.expected,ErrorCode:transferResponse?.ErrorCode??1});
+            }catch(error){record('direct-equip-transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
+          }
+          if(!locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})){
+            const equipLabel=`Equip ${item.name} on ${result.targetCharacterId}`;
+            try{
+              const equipResponse=await mutate('/bungie/actions/equip-items',{membershipType:Number(binding.membershipType),characterId:result.targetCharacterId,itemIds:[item.itemInstanceId]},equipLabel),failures=equipResponseFailures(equipResponse,[item.itemInstanceId]);
+              if(failures.length){record('direct-equip','failed','Bungie did not confirm the exact Postmaster item equip.',{failures,ErrorCode:equipResponse?.ErrorCode??1});result.status='partial';return result;}
+              const equipped=await waitForInventoryLocation(item.itemInstanceId,{kind:'equipped',characterId:result.targetCharacterId},{fetchImpl,authOrigin,waitImpl});
+              if(!equipped.verified){record('direct-equip','mismatch','Bungie accepted the equip call but fresh inventory did not confirm the exact equipped item.',{actual:equipped.location?.source||null,ErrorCode:equipResponse?.ErrorCode??1});result.status='partial';return result;}
+              record('direct-equip','complete',equipLabel,{ErrorCode:equipResponse?.ErrorCode??1});
+            }catch(error){record('direct-equip','failed',equipLabel,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
+          }
+        }
       }catch(error){record('collect','failed',label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
     }
     result.status='applied';
     return result;
   }finally{
     try{
-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(fresh),remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId);
-      result.readback={verified:remaining.length===0,remaining};
-      record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms every collected item left Postmaster.':'One or more requested items remain in Postmaster.',result.readback);
+      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(fresh),remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId),notEquipped=intent.equipAfterCollection?(intent.items||[]).filter(item=>!locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'equipped',characterId:result.targetCharacterId})).map(item=>item.itemInstanceId):[];
+      result.readback={verified:remaining.length===0&&notEquipped.length===0,remaining,notEquipped,targetCharacterId:intent.equipAfterCollection?result.targetCharacterId:null};
+      record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?(intent.equipAfterCollection?'Final Bungie inventory confirms the collected item is equipped on the target Guardian.':'Final Bungie inventory confirms every collected item left Postmaster.'):(intent.equipAfterCollection?'The requested Postmaster item is not equipped on the target Guardian.':'One or more requested items remain in Postmaster.'),result.readback);
       if(result.status==='applied'&&!result.readback.verified)result.status='partial';
     }catch(error){record('readback','failed','Final Postmaster readback failed.',{message:error.message});if(result.status==='applied')result.status='partial';}
     result.finishedAt=new Date().toISOString();

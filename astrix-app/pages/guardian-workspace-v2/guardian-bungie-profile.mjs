@@ -1,4 +1,4 @@
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260905-manual-editor-1";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
