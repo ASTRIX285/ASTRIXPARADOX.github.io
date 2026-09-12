@@ -32,7 +32,7 @@ html body header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,
 /* One compact command ribbon across every destination page. Page-owned data,
    selection and authentication hooks remain unchanged. */
 html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand{min-width:0!important}
-html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:46px!important;height:46px!important;object-fit:contain!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand,2.875rem)!important;height:auto!important;aspect-ratio:1;object-fit:contain!important}
 html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand span{display:grid!important;gap:3px!important}
 html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong{color:#f4efe4!important;font:800 1rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.08em!important;white-space:nowrap!important}
 html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong em{color:var(--apx-crimson-bright,#b22222)!important;font-style:normal!important}
@@ -195,7 +195,7 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
   html body header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important}
   html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{position:absolute!important;left:50%!important;bottom:10px!important;grid-column:auto!important;grid-row:auto!important;transform:translateX(-50%)!important}
   body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:186px!important}
-  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:38px!important;height:38px!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong{font-size:.875rem!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand small{font-size:.625rem!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{font-size:1.25rem!important}
@@ -232,7 +232,7 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card::before{background-position:center!important}
   html body header:has(>[data-forge-hero-cards]) .guardian-character-cards__status{min-height:88px;font-size:.78rem;line-height:1.35;padding:12px}
   body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:174px!important}
-  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:38px!important;height:38px!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand span{display:none!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{font-size:.875rem!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{display:none!important}

@@ -31,7 +31,7 @@
   <link rel="stylesheet" href="./guardian-gear-layout.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="./guardian-adaptive-layout.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="./guardian-left-panel-super-feature.css">
-  <link rel="stylesheet" href="./guardian-mobile.css?v=20260908-icon-hover-1">
+  <link rel="stylesheet" href="./guardian-mobile.css?v=20260912-global-icon-audit-1">
   <link rel="stylesheet" href="./guardian-layout-final.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="./guardian-super-formation.css?v=20260828-subclass-header-1">
   <link rel="stylesheet" href="./subclass-picker.css?v=20260829-prismatic-icon-scale-1">
@@ -42,7 +42,7 @@
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;mobile=20260905-wrap-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1">
+  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260912-global-icon-audit-1&amp;inventory=20260912-shared-character-1">
   <script src="../../shared/astrix-destination-theme.js?v=20260824-destination-1"></script>
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
   <style>/* keep the destination ribbon non-sticky here so it never overlaps the topbar */
@@ -113,9 +113,8 @@
     </aside>
 
     <section class="equip">
-      <div class="eq gear-weapons"><div class="eq-head"><h3>WEAPONS</h3><button class="ab-btn" type="button" id="downloadWeaponDiagnostics" aria-describedby="weaponDiagnosticsStatus">Download weapon diagnostics</button></div><p id="weaponDiagnosticsStatus" role="status" aria-live="polite">Export equipped weapon data for the engineer. No login credentials are included.</p><div class="weap-grid"><div class="weap"><div class="art ph"><span class="pw" data-power-cap>550</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Kinetic slot</b><small class="ph-tag">awaiting live data</small></div></div><div class="weap"><div class="art ph"><span class="pw" data-power-cap>550</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Energy slot</b><small class="ph-tag">awaiting live data</small></div></div><div class="weap"><div class="art ph"><span class="pw">—</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Power slot</b><small class="ph-tag">awaiting live data</small></div></div></div></div>
       <section class="eq guardian-loadouts-container" aria-labelledby="guardianLoadoutsTitle"><div class="eq-head"><h3 id="guardianLoadoutsTitle">IN-GAME LOADOUTS</h3><span class="tools">BUNGIE · 1–20</span></div><div class="guardian-loadouts-panel guardian-loadouts-strip"><div class="guardian-loadouts-grid" id="guardianLoadouts" aria-label="Saved in-game loadouts"></div></div></section>
-      <section class="eq gear-combined"><div class="eq-head"><h3>ARMOUR & MODS</h3><span class="tools">EQUIPPED</span></div><div class="gear-subhead"><span>Armour above · 6 functional mod slots below</span><span>Hover any sourced icon for Bungie details</span></div><div class="gear-columns"></div></section>
+      <section class="eq gear-combined"><div class="eq-head"><h3>ACTIVE CHARACTER INVENTORY</h3><span class="tools">LIVE BUNGIE</span></div><p class="vault-runtime-status" id="characterInventoryStatus" role="status">Resolving the active Guardian inventory...</p><div class="vault-transfer-board character-inventory-workspace" id="characterInventoryWorkspace" aria-live="polite"></div></section>
       <div class="eq stats-block"><div class="eq-head"><h3>STATS</h3><span class="tools">⇅</span></div><div class="stats-row" id="statsRow"></div></div>
       <div class="eq activity"><div class="eq-head"><h3>ACTIVITY</h3></div><div class="act-hero"><span class="ic">◈</span><div><b>Grandmaster Nightfall</b><small>The Glassway</small></div></div><div class="act-row"><span>Power Cap</span><b data-power-cap>550</b></div><div class="act-row"><span>Champions</span><b>⚔ ✷</b></div><button class="btn-change">Change Activity</button></div>
     <a class="improve-cta" href="./paradox-build-space/">✦ IMPROVE MY GUARDIAN</a>
@@ -124,9 +123,18 @@
 
   <div class="actionbar"><div class="grp"><button class="ab-btn">▤ LOADOUTS</button><button class="ab-btn">⤬ COMPARE</button></div><div class="grp"><button class="ab-btn">🖫 SAVE LOADOUT</button><button class="ab-btn">⤴ SHARE</button><button class="ab-btn">•••</button></div></div>
 
-  <script type="module" src="./guardian-weapon-diagnostics.mjs?v=20260908-weapon-diagnostics-1&amp;weapons=20260909-presentation-1&amp;transport=20260911-compact-plugs-1"></script>
+  <dialog class="vault-action-dialog" id="characterInventoryActionDialog" aria-labelledby="characterInventoryActionTitle">
+    <form method="dialog">
+      <header><p class="eyebrow">LIVE BUNGIE ACTION</p><h2 id="characterInventoryActionTitle">Confirm inventory change</h2></header>
+      <p id="characterInventoryActionSummary"></p>
+      <p class="vault-action-warning">This changes the connected Destiny 2 account. The item will remain in its current position here until Bungie confirms the mutation and a fresh profile readback matches.</p>
+      <div class="vault-action-progress" id="characterInventoryActionProgress" role="status"></div>
+      <footer><button type="button" id="characterInventoryActionCancel">CANCEL</button><button type="button" id="characterInventoryActionConfirm">CONFIRM LIVE ACTION</button></footer>
+    </form>
+  </dialog>
+
   <script type="module" src="./guardian-portal-progress.mjs?v=20260906-all-page-data-1&amp;transport=20260911-compact-plugs-1"></script>
-  <script type="module" src="./guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1&amp;roll=20260909-apply-1&amp;transport=20260911-compact-plugs-1"></script>
+  <script type="module" src="./guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1&amp;inventory=20260912-shared-character-1&amp;roll=20260909-apply-1&amp;transport=20260911-compact-plugs-1"></script>
   <script type="module" src="./guardian-character-cards.mjs?v=20260824-bungie-icons-3"></script>
   <script type="module" src="./guardian-gear-layout.mjs?v=20260908-set-icons-1&amp;weapons=20260909-presentation-1&amp;roll=20260909-apply-1&amp;fix=20260909-apply-refresh-1"></script>
   <script type="module" src="./guardian-beta-armour-layout.mjs"></script>

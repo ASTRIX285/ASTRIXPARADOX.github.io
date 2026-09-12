@@ -7,6 +7,7 @@ import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,
 import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
 import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
 
 const CHARACTER_ID='9100001';
 const MEMBERSHIP_ID='9200001';
@@ -128,6 +129,14 @@ const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
+const sharedTile={...replacement,itemInstanceId:'13109',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,source:{kind:'vault',characterId:null}};
+assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
+const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(sharedTileMarkup,/is-locked[^>]*title="Locked"/,'The shared tile must render the real locked state.');
+assert.match(sharedTileMarkup,/is-masterworked[^>]*title="Masterworked"/,'The shared tile must render the real masterwork state.');
+assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
+const equippedFirstMarkup=inventoryGroupsMarkup([{...sharedTile,itemInstanceId:'13110',name:'Carried first in input',source:{kind:'carried',characterId:CHARACTER_ID}},{...sharedTile,itemInstanceId:'13111',name:'Equipped second in input',source:{kind:'equipped',characterId:CHARACTER_ID}}],{equippedFirst:true,capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.ok(equippedFirstMarkup.indexOf('Equipped second in input')<equippedFirstMarkup.indexOf('Carried first in input'),'The shared category renderer must place the equipped exact item first regardless of input order.');
 let prematureCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(plan,{session,fetchImpl:async()=>{prematureCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
 assert.equal(prematureCalls,0,'An unconfirmed Apply plan must make zero requests.');
@@ -302,7 +311,7 @@ assert.equal(dynamicTransferPosts,0,'A dynamically required but unadvertised tra
 assert.equal(dynamicTransferReads,2,'A dynamically blocked transfer must still perform its final readback.');
 
 const OTHER_CHARACTER_ID='9100002',TRANSFER_ITEM={...replacement,itemInstanceId:'13103',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}},REPLACEMENT_ITEM={...weapons[1],itemInstanceId:'13106',name:'Exact carried replacement',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}};
-function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false}={}){
+function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false,targetEquipped=false}={}){
   const transferRaw={itemHash:TRANSFER_ITEM.itemHash,itemInstanceId:TRANSFER_ITEM.itemInstanceId,bucketHash:postmaster?215593132:TRANSFER_ITEM.bucketHash},replacementRaw={itemHash:REPLACEMENT_ITEM.itemHash,itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,bucketHash:REPLACEMENT_ITEM.bucketHash};
   return {ErrorCode:1,profile:{
     characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID},[OTHER_CHARACTER_ID]:{characterId:OTHER_CHARACTER_ID}}},
@@ -311,7 +320,7 @@ function vaultActionProfile({location='source',equipped=false,replacementEquippe
       [CHARACTER_ID]:{items:[...(location==='source'&&!equipped?[transferRaw]:[]),...(equipped&&!replacementEquipped?[replacementRaw]:[]),...(equipped&&replacementEquipped?[transferRaw]:[]),...(postmaster?[transferRaw]:[])]},
       [OTHER_CHARACTER_ID]:{items:location==='target'?[transferRaw]:[]}
     }},
-    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:[]}}},
+    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:targetEquipped?[transferRaw]:[]}}},
     characterActivities:{data:{[CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0}}}
   }};
 }
@@ -333,6 +342,21 @@ const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVa
 assert.equal(moved.status,'applied');
 assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
 assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+
+const vaultDirectItem={...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},stagedVaultDirect=stageVaultTransferIntent({item:vaultDirectItem,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session,equipAfterTransfer:true});
+let vaultDirectLocation='vault';
+const vaultDirectPaths=[];
+const vaultDirect=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:vaultDirectLocation,targetEquipped:vaultDirectLocation==='equipped'}));
+  vaultDirectPaths.push(path);
+  if(path.endsWith('/transfer-item')){vaultDirectLocation='target';return response({ErrorCode:1,Message:'Ok'});}
+  vaultDirectLocation='equipped';
+  return response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:vaultDirectItem.itemInstanceId,equipStatus:1}]}});
+}});
+assert.equal(vaultDirect.status,'applied','A reviewed Vault double click must finish only after exact equipped readback.');
+assert.deepEqual(vaultDirectPaths,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Vault direct equip must reuse the exact transfer and equip endpoints in order.');
+assert.deepEqual(vaultDirect.readback.actual,{kind:'equipped',characterId:OTHER_CHARACTER_ID});
 
 let partialLocation='source',partialAttempts=0;
 const partialMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(_url,init={})=>{
@@ -373,6 +397,31 @@ const collected=await executePostmasterCollectionIntent(confirmPostmasterCollect
 assert.equal(collected.status,'applied');
 assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
 assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+
+const stagedPostmasterDirect=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,targetCharacterId:OTHER_CHARACTER_ID,items:[POSTMASTER_ITEM],session,equipAfterCollection:true});
+let postmasterDirectLocation='postmaster';
+const postmasterDirectPaths=[];
+const postmasterDirectProfile=()=>{
+  const base=vaultActionProfile({location:'absent'}),raw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
+  if(postmasterDirectLocation==='postmaster')base.profile.characterInventories.data[CHARACTER_ID].items=[{...raw,bucketHash:215593132}];
+  if(postmasterDirectLocation==='source')base.profile.characterInventories.data[CHARACTER_ID].items=[raw];
+  if(postmasterDirectLocation==='vault')base.profile.profileInventory.data.items=[{...raw,bucketHash:VAULT_BUCKET}];
+  if(postmasterDirectLocation==='target')base.profile.characterInventories.data[OTHER_CHARACTER_ID].items=[raw];
+  if(postmasterDirectLocation==='equipped')base.profile.characterEquipment.data[OTHER_CHARACTER_ID].items=[raw];
+  return base;
+};
+const postmasterDirect=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedPostmasterDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(postmasterDirectProfile());
+  postmasterDirectPaths.push(path);
+  if(path.endsWith('/pull-from-postmaster'))postmasterDirectLocation='source';
+  else if(path.endsWith('/transfer-item'))postmasterDirectLocation=postmasterDirectLocation==='source'?'vault':'target';
+  else postmasterDirectLocation='equipped';
+  return path.endsWith('/equip-items')?response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:POSTMASTER_ITEM.itemInstanceId,equipStatus:1}]}}):response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(postmasterDirect.status,'applied','A reviewed Postmaster double click must wait for collection, transfer, equip, and final exact readback.');
+assert.deepEqual(postmasterDirectPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Cross Guardian Postmaster direct equip must use the existing executor routes in a verified sequence.');
+assert.deepEqual(postmasterDirect.readback.notEquipped,[]);
 
 const stagedClear=stageBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,loadoutName:'Nightfall'});
 let loadoutCalls=0;

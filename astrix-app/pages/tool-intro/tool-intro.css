@@ -7,7 +7,7 @@ body{overflow-x:hidden}
 .tool-intro-art{object-fit:cover;object-position:center}
 .tool-intro-shade{z-index:-1;background:linear-gradient(90deg,rgba(2,4,7,.97) 0%,rgba(3,5,8,.89) 42%,rgba(3,5,8,.42) 70%,rgba(3,5,8,.76) 100%),linear-gradient(0deg,rgba(3,4,6,.94),transparent 42%)}
 .tool-intro-brand{grid-column:2;display:flex;align-items:center;gap:.8rem;width:max-content;margin-top:clamp(1.25rem,3vw,3rem);color:inherit;text-decoration:none}
-.tool-intro-brand>img{width:3.1rem;height:3.1rem;object-fit:contain}
+.tool-intro-brand>img{width:var(--apx-icon-brand,2.875rem);height:auto;aspect-ratio:1;object-fit:contain}
 .tool-intro-brand span{display:grid;gap:.1rem}
 .tool-intro-brand strong{font:700 1rem/1.1 bahnschrift-semicondensed,Bahnschrift,sans-serif;letter-spacing:.16em}
 .tool-intro-brand em{color:var(--gold);font-style:normal}
@@ -24,11 +24,11 @@ body{overflow-x:hidden}
 .tool-intro-cta:disabled{cursor:wait;opacity:.7}
 .tool-intro-status{margin:.9rem 0 0;color:#e5ce88;font-size:.82rem;letter-spacing:.06em}
 .tool-intro-credit{grid-column:2;display:flex;align-items:center;gap:.8rem;margin-bottom:clamp(1.25rem,3vw,2.5rem);color:#d6d8dc;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
-.tool-intro-credit img{width:7rem;height:auto}
+.tool-intro-credit img{width:var(--apx-icon-developer-logo,clamp(6rem,7vw,7rem));height:auto;object-fit:contain}
 .tool-intro-credit small{margin-left:auto;color:#aeb2ba;font-size:.62rem;letter-spacing:.05em;text-transform:none}
 .tool-intro-noscript{position:fixed;inset:auto 1rem 1rem;margin:0;text-align:center}.tool-intro-noscript a{color:#fff}
 body.is-transitioning .tool-intro-panel{animation:toolIntroExit .35s ease forwards}
 @keyframes toolIntroExit{to{opacity:.35;transform:translateY(-.5rem)}}
 @media(prefers-reduced-motion:reduce){body.is-transitioning .tool-intro-panel{animation:none}}
 @media(max-width:800px){.tool-intro{grid-template-columns:1rem minmax(0,1fr) 1rem}.tool-intro-panel{width:100%;margin:2rem 0}.tool-intro-shade{background:linear-gradient(0deg,rgba(2,4,7,.98) 0%,rgba(3,5,8,.8) 72%,rgba(3,5,8,.58) 100%)}.tool-intro-credit{align-items:flex-start;flex-wrap:wrap}.tool-intro-credit small{flex-basis:100%;margin-left:0}}
-@media(max-width:480px){.tool-intro-brand>img{width:2.5rem;height:2.5rem}.tool-intro-panel{padding:1.25rem}.tool-intro-panel h1{font-size:2.3rem}.tool-intro-credit img{width:6rem}}
+@media(max-width:480px){.tool-intro-brand>img{width:var(--apx-icon-brand-compact,2.375rem)}.tool-intro-panel{padding:1.25rem}.tool-intro-panel h1{font-size:2.3rem}}
