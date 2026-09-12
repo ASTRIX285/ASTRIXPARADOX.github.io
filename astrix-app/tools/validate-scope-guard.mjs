@@ -174,6 +174,7 @@ const allowed=new Set([
   'astrix-app/shared/astrix-hero-cards.mjs',
   'astrix-app/shared/astrix-hero-cards.css',
   'astrix-app/shared/guardian-inventory-workspace.mjs',
+  'astrix-app/shared/guardian-inventory-workspace.css',
   'astrix-app/tools/validate-journey-visual-pass.mjs',
   'astrix-app/tools/validate-guardian-character-cards.py',
   'astrix-app/tools/validate-guardian-semantics.mjs',
