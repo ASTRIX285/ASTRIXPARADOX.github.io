@@ -84,7 +84,12 @@ function persistVaultBuildSource(){
   return safeStore(BUILD_SNAPSHOT_KEY,createBuildState(source),{durable:true});
 }
 function armBuildSpacePortal(){globalThis.ForgeLoader?.mount?.();globalThis.ForgeLoader?.set?.(0);globalThis.ForgeLoader?.status?.('Opening Build Forge');}
-const afterPortalPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+const afterPortalPaint=()=>new Promise(resolve=>{
+  let settled=false,timer=0;
+  const finish=()=>{if(settled)return;settled=true;if(timer)clearTimeout(timer);resolve();};
+  timer=setTimeout(finish,160);
+  requestAnimationFrame(()=>requestAnimationFrame(finish));
+});
 async function openBuildSpace(event){
   const button=event.target?.closest?.('.improve-cta');
   if(!button)return;

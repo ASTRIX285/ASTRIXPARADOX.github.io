@@ -501,12 +501,40 @@ body.guardian-main-page .workspace>.right{display:none!important}
   body.guardian-main-page .gear-weapons .weap{
     width:100%!important;
     max-width:none!important;
-    min-height:calc(var(--gear-weapon-art) + 24px)!important;
+    min-height:0!important;
+    padding:8px!important;
+    grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto auto!important;
+    grid-template-areas:"art cap" "art perks" "art support" "apply apply"!important;
+    column-gap:10px!important;
+    row-gap:6px!important;
+    align-content:start!important;
+    align-self:stretch!important;
   }
   body.guardian-main-page .gear-weapons .weap .art{
-    width:var(--gear-weapon-art)!important;
+    grid-area:art!important;
+    width:var(--apx-icon-gear-art-width)!important;
     height:var(--apx-icon-gear-art-height)!important;
     aspect-ratio:100/122!important;
+    align-self:start!important;
+  }
+  body.guardian-main-page .gear-weapons .weap .weapon-art-image{
+    width:100%!important;
+    height:100%!important;
+    object-fit:contain!important;
+    object-position:center!important;
+  }
+  body.guardian-main-page .gear-weapons .weapon-perk-matrix.is-compact{
+    --gear-weapon-socket:var(--apx-icon-weapon-socket-compact);
+  }
+  body.guardian-main-page .gear-weapons .weapon-perk-strip{
+    min-height:0!important;
+    margin:0!important;
+    padding:0 0 2px!important;
+  }
+  body.guardian-main-page .gear-weapons .weapon-support-icons{
+    margin:0!important;
+    padding-top:0!important;
   }
   body.guardian-main-page .workspace>.equip>.stats-block,
   body.guardian-main-page .workspace>.equip>.activity{display:none!important}
