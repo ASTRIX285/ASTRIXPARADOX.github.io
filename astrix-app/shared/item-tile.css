@@ -1,0 +1,254 @@
+/*
+  Shared armour and weapon tile geometry from the approved 540 by 719 Figma
+  frames. Every socket remains proportional to the tile itself. Character and
+  Inventory are the only consumers, so every selector is scoped to the shared
+  inventory article and cannot alter Forge Loader or its inspector.
+
+  Rarity and masterwork are independent states. Rarity controls the outer
+  frame and badge borders. Masterwork controls only the art ring and tier rail.
+*/
+.vault-transfer-item.has-item-tile .item-tile {
+  --tile-accent: rgba(255,255,255,.14);
+  --tile-glow: none;
+  --tile-mw-accent: rgba(255,255,255,.32);
+  --tile-mw-fill: rgba(255,255,255,.08);
+  --tile-mw-glow: none;
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 540px;
+  aspect-ratio: 540/719;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 6px;
+  background: #0a090c;
+  box-shadow: var(--tile-glow);
+  font-family: inherit;
+}
+.vault-transfer-item.has-item-tile .item-tile--exotic {
+  --tile-accent: #e0b94f;
+  --tile-glow: 0 0 14px rgba(224,185,79,.35);
+}
+.vault-transfer-item.has-item-tile .item-tile--masterworked {
+  --tile-mw-accent: #f3d361;
+  --tile-mw-fill: rgba(139,0,0,.88);
+  --tile-mw-glow: 0 0 10px rgba(243,211,97,.45);
+}
+.vault-transfer-item.has-item-tile .item-tile>* {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+/* BUNGIE ARMOUR IMAGE / BUNGIE WEAPON IMAGE */
+.vault-transfer-item.has-item-tile .tile-art {
+  left: 0%;
+  top: 0%;
+  display: grid;
+  width: 100%;
+  height: 83.45%;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid var(--tile-mw-accent);
+  border-radius: 6px 6px 0 0;
+  background: #141118;
+  box-shadow: var(--tile-mw-glow);
+}
+.vault-transfer-item.has-item-tile .tile-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* DATA BG - ARMOUR LEVEL / DATA BG - WEAPONS */
+.vault-transfer-item.has-item-tile .tile-footer {
+  left: 0%;
+  top: 83.31%;
+  width: 100%;
+  height: 16.69%;
+  border-top: 1px solid var(--tile-accent);
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(180deg,#242027,#0c0a0e);
+}
+
+/* POWER LVL */
+.vault-transfer-item.has-item-tile .tile-power {
+  left: 60.19%;
+  top: 85.81%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5%;
+  width: 37.78%;
+  height: 12.38%;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 3px;
+  background: rgba(3,3,5,.9);
+  box-shadow: 0 1px 4px rgba(0,0,0,.68);
+}
+.vault-transfer-item.has-item-tile .tile-power img {
+  display: block;
+  width: 28%;
+  height: 66%;
+  object-fit: contain;
+}
+.vault-transfer-item.has-item-tile[data-item-kind="armour"] .tile-power img {
+  filter: brightness(0) invert(1);
+}
+.vault-transfer-item.has-item-tile .tile-power b {
+  min-width: 0;
+  overflow: hidden;
+  color: #fff3c7;
+  font: 900 .5rem/1 bahnschrift-semicondensed,sans-serif;
+  text-overflow: clip;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+
+/* INTRINSIC - CHAMPION BARRIER, weapon only */
+.vault-transfer-item.has-item-tile .tile-intrinsic {
+  left: 21.30%;
+  top: 85.68%;
+  width: 16.48%;
+  height: 12.38%;
+}
+
+/* ELEMENTAL DAMAGE TYPE, weapon only */
+.vault-transfer-item.has-item-tile .tile-element {
+  left: 39.81%;
+  top: 84.98%;
+  width: 18.33%;
+  height: 13.77%;
+}
+
+/* ARMOUR BONUS SET / INTRINSIC - WEAPON FRAME */
+.vault-transfer-item.has-item-tile .tile-corner-badge {
+  left: 76.85%;
+  top: 2.50%;
+  width: 19.81%;
+  height: 15.02%;
+  box-shadow: var(--tile-glow);
+}
+.vault-transfer-item.has-item-tile .tile-intrinsic,
+.vault-transfer-item.has-item-tile .tile-element,
+.vault-transfer-item.has-item-tile .tile-corner-badge {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 3px;
+  background: rgba(3,3,5,.86);
+}
+.vault-transfer-item.has-item-tile .tile-intrinsic img,
+.vault-transfer-item.has-item-tile .tile-element img,
+.vault-transfer-item.has-item-tile .tile-corner-badge img {
+  display: block;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+}
+
+/* TRIER BACKGROUND */
+.vault-transfer-item.has-item-tile .tile-tier-strip {
+  left: 2.78%;
+  top: 0%;
+  width: 21.11%;
+  height: 83.73%;
+  border: 1px solid var(--tile-mw-accent);
+  background: linear-gradient(90deg,rgba(3,3,5,.82),rgba(3,3,5,.38));
+}
+
+/* TIER 1 to 5 */
+.vault-transfer-item.has-item-tile .tile-tier-pip {
+  left: 7.17%;
+  width: 11.92%;
+  height: 10.94%;
+}
+.vault-transfer-item.has-item-tile .tile-tier-pip::before {
+  content: "";
+  position: absolute;
+  inset: 24%;
+  border: 1.5px solid var(--tile-mw-accent);
+  background: var(--tile-mw-fill);
+  box-shadow: var(--tile-mw-glow);
+  transform: rotate(45deg);
+}
+.vault-transfer-item.has-item-tile .tile-tier-pip--1 {top:24.85%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--2 {top:36.94%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--3 {top:49.03%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--4 {top:61.12%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--5 {top:73.21%}
+
+/* SEASON ICON */
+.vault-transfer-item.has-item-tile .tile-season-icon {
+  left: 1.30%;
+  top: 1.67%;
+  display: grid;
+  width: 24.07%;
+  height: 16.55%;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 50%;
+  background: rgba(3,3,5,.9);
+}
+.vault-transfer-item.has-item-tile .tile-season-icon img {
+  display: block;
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+}
+
+/* LOCKED SYMBOL */
+.vault-transfer-item.has-item-tile .tile-lock {
+  left: 79.07%;
+  top: 69.54%;
+  display: grid;
+  width: 17.59%;
+  height: 12.24%;
+  place-items: center;
+  border: 1px solid var(--tile-accent);
+  border-radius: 3px;
+  background: rgba(3,3,5,.9);
+  filter: drop-shadow(0 1px 2px #000);
+}
+.vault-transfer-item.has-item-tile .tile-lock i {
+  position: relative;
+  display: block;
+  width: 42%;
+  height: 34%;
+  border: 1px solid #fff;
+  border-radius: 1px;
+}
+.vault-transfer-item.has-item-tile .tile-lock i::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 1px);
+  width: 48%;
+  height: 70%;
+  border: 1px solid #fff;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  transform: translateX(-50%);
+}
+
+.vault-transfer-item.has-item-tile>.item-tile>.vault-transfer-quantity {
+  z-index: 4;
+  top: 19%;
+  right: 3%;
+}
+.vault-transfer-item.has-item-tile {
+  border-color: transparent;
+  background: transparent;
+}
+.vault-transfer-item.has-item-tile.is-equipped {
+  border-color: rgba(111,227,182,.48);
+  box-shadow: inset 0 0 0 1px rgba(111,227,182,.12);
+}
+.vault-transfer-item.has-item-tile:hover,
+.vault-transfer-item.has-item-tile:focus-visible {
+  border-color: #c9a84c;
+}
