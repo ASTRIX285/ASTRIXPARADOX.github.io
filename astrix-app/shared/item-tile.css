@@ -5,15 +5,17 @@
   Character and Inventory are the only consumers, so every selector is scoped
   to the shared inventory article and cannot alter Forge Loader or its inspector.
 
-  Rarity and masterwork are independent states. Rarity controls the outer
-  frame and badge borders. Masterwork controls only the art ring and tier rail.
+  Rarity, gear tier and masterwork are independent states. Rarity controls the
+  outer frame, Bungie's verified gear tier controls the diamond count and fill,
+  and masterwork controls only the art ring.
 */
 .vault-transfer-item.has-item-tile .item-tile {
   --tile-accent: rgba(255,255,255,.14);
   --tile-glow: none;
   --tile-mw-accent: rgba(255,255,255,.32);
-  --tile-mw-fill: transparent;
   --tile-mw-glow: none;
+  --tile-tier-fill: #9e60ff;
+  --tile-tier-glow: 0 0 4px rgba(158,96,255,.72);
   position: relative;
   display: block;
   width: 100%;
@@ -33,8 +35,11 @@
 }
 .vault-transfer-item.has-item-tile .item-tile--masterworked {
   --tile-mw-accent: #f3d361;
-  --tile-mw-fill: #f3ee69;
   --tile-mw-glow: 0 0 10px rgba(243,211,97,.45);
+}
+.vault-transfer-item.has-item-tile .item-tile--tier-5 {
+  --tile-tier-fill: #f3ee69;
+  --tile-tier-glow: 0 0 5px rgba(243,238,105,.78);
 }
 .vault-transfer-item.has-item-tile .item-tile>* {
   position: absolute;
@@ -61,6 +66,8 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* DATA BG - ARMOUR LEVEL / DATA BG - WEAPONS */
@@ -72,18 +79,25 @@
   border: 1px solid var(--tile-accent);
   border-radius: 0;
   background: linear-gradient(180deg,#3d4b54,#2d3941);
+  display: flex;
+  align-items: center;
+  gap: 3%;
+  padding: 1.4% 4%;
+}
+.vault-transfer-item.has-item-tile .tile-footer>* {
+  position: relative;
+  box-sizing: border-box;
 }
 
 /* POWER LVL */
 .vault-transfer-item.has-item-tile .tile-power {
-  left: 58.50%;
-  top: 82.75%;
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 4%;
-  width: 39.20%;
-  height: 14.20%;
+  min-width: 0;
+  height: 100%;
   overflow: hidden;
   border: 0;
   background: transparent;
@@ -109,18 +123,14 @@
 
 /* INTRINSIC - CHAMPION BARRIER, weapon only */
 .vault-transfer-item.has-item-tile .tile-intrinsic {
-  left: 21.30%;
-  top: 83.00%;
-  width: 16.48%;
-  height: 13.80%;
+  flex: 0 0 18%;
+  height: 100%;
 }
 
 /* ELEMENTAL DAMAGE TYPE, weapon only */
 .vault-transfer-item.has-item-tile .tile-element {
-  left: 39.81%;
-  top: 82.35%;
-  width: 18.33%;
-  height: 15.10%;
+  flex: 0 0 18%;
+  height: 100%;
 }
 
 /* ARMOUR BONUS SET / INTRINSIC - WEAPON FRAME */
@@ -156,7 +166,7 @@
   left: 2.78%;
   top: 0%;
   width: 21.11%;
-  height: 79.90%;
+  height: 78.50%;
   border: 0;
   background: transparent;
 }
@@ -170,17 +180,17 @@
 .vault-transfer-item.has-item-tile .tile-tier-pip::before {
   content: "";
   position: absolute;
-  inset: 8%;
-  border: 1px solid var(--tile-mw-accent);
-  background: var(--tile-mw-fill);
-  box-shadow: var(--tile-mw-glow);
-  transform: rotate(45deg);
+  inset: 4%;
+  border: 0;
+  background: var(--tile-tier-fill);
+  box-shadow: var(--tile-tier-glow);
+  clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%);
 }
-.vault-transfer-item.has-item-tile .tile-tier-pip--1 {top:24.00%}
-.vault-transfer-item.has-item-tile .tile-tier-pip--2 {top:34.40%}
-.vault-transfer-item.has-item-tile .tile-tier-pip--3 {top:44.80%}
-.vault-transfer-item.has-item-tile .tile-tier-pip--4 {top:55.20%}
-.vault-transfer-item.has-item-tile .tile-tier-pip--5 {top:65.60%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--1 {top:21.50%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--2 {top:32.00%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--3 {top:42.50%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--4 {top:53.00%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--5 {top:63.50%}
 
 /* SEASON ICON */
 .vault-transfer-item.has-item-tile .tile-season-icon {
@@ -188,40 +198,40 @@
   top: 4.00%;
   display: grid;
   width: 22.00%;
-  height: 17.50%;
+  aspect-ratio: 1;
   place-items: center;
   overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--tile-accent);
+  border-radius: 50%;
+  background: rgba(3,3,5,.82);
 }
 .vault-transfer-item.has-item-tile .tile-season-icon img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 82%;
+  height: 82%;
   object-fit: contain;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.95));
 }
 
 /* LOCKED SYMBOL */
 .vault-transfer-item.has-item-tile .tile-lock {
-  left: 80.00%;
-  top: 65.00%;
+  left: 74.00%;
+  top: 60.50%;
   display: grid;
-  width: 16.50%;
-  height: 12.50%;
+  width: 22.50%;
+  height: 17.50%;
   place-items: center;
   border: 0;
   border-radius: 0;
   background: transparent;
-  filter: drop-shadow(0 1px 2px #000);
+  filter: drop-shadow(0 0 4px rgba(111,255,200,.9));
 }
 .vault-transfer-item.has-item-tile .tile-lock i {
   position: relative;
   display: block;
-  width: 42%;
-  height: 34%;
-  border: 1px solid #fff;
+  width: 54%;
+  height: 40%;
+  border: 2px solid #6fffc8;
   border-radius: 1px;
 }
 .vault-transfer-item.has-item-tile .tile-lock i::before {
@@ -231,7 +241,7 @@
   bottom: calc(100% - 1px);
   width: 48%;
   height: 70%;
-  border: 1px solid #fff;
+  border: 2px solid #6fffc8;
   border-bottom: 0;
   border-radius: 50% 50% 0 0;
   transform: translateX(-50%);
