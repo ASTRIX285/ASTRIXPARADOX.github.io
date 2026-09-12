@@ -35,21 +35,6 @@ function modal(title,body,actions=''){
   return wrap;
 }
 
-function equaliseBottomPanels(){
-  const weapons=qs('.gear-weapons');
-  const armour=qs('.gear-combined');
-  if(!weapons||!armour)return;
-  weapons.style.height='';
-  weapons.style.minHeight='';
-  requestAnimationFrame(()=>{
-    const h=Math.ceil(armour.getBoundingClientRect().height);
-    if(h>0){
-      weapons.style.height=`${h}px`;
-      weapons.style.minHeight=`${h}px`;
-    }
-  });
-}
-
 function currentFixture(){
   return globalThis.ForgeBetaFixtures?.current?.()||'PF-BETA-03';
 }
@@ -168,11 +153,6 @@ function wireControls(){
 
   qs('.gtag')?.addEventListener('click',()=>betaUnavailable('Guardian Account'));
 
-  document.addEventListener('forge:guardian-selection-changed',()=>{
-    setTimeout(equaliseBottomPanels,50);
-  });
-  window.addEventListener('resize',equaliseBottomPanels);
-  setTimeout(equaliseBottomPanels,250);
 }
 
 function installStyles(){
@@ -180,7 +160,6 @@ function installStyles(){
   const style=document.createElement('style');
   style.id='astrixBetaReadinessStyle';
   style.textContent=`
-    .gear-weapons{align-self:stretch!important}
     #astrixBetaToast{position:fixed;left:50%;bottom:78px;z-index:300;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:10px 16px;border:1px solid rgba(158,96,255,.5);border-radius:10px;background:#120d20;color:#fff;font:600 13px Rajdhani;box-shadow:0 12px 40px #000;transition:.18s ease}#astrixBetaToast.show{opacity:1;transform:translate(-50%,0)}
     .beta-modal-backdrop{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:24px;background:rgba(2,2,8,.78);backdrop-filter:blur(8px)}.beta-modal{width:min(760px,94vw);max-height:82vh;overflow:auto;border:1px solid rgba(158,96,255,.34);border-radius:16px;background:linear-gradient(180deg,#171022,#09070f);box-shadow:0 30px 80px #000;color:#fff}.beta-modal header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}.beta-modal header small{font:600 9px Orbitron;letter-spacing:.16em;color:#9e60ff}.beta-modal h2{margin:4px 0 0;font:700 18px Orbitron;letter-spacing:.08em}.beta-modal header button{width:36px;height:36px;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#aaa;background:transparent}.beta-modal-body{padding:18px 20px}.beta-modal footer{display:flex;justify-content:flex-end;padding:0 20px 18px}.beta-primary,.beta-menu-item{padding:10px 14px;border:1px solid rgba(158,96,255,.55);border-radius:8px;background:rgba(158,96,255,.14);color:#fff;font:700 11px Orbitron;letter-spacing:.08em}.beta-note{color:#aaa}.beta-loadout-list{display:grid;gap:7px}.beta-loadout-row{display:grid;grid-template-columns:1fr auto;gap:3px 16px;text-align:left;padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.02);color:#fff}.beta-loadout-row span{color:#aaa}.beta-loadout-row small{grid-column:2;grid-row:1/3;color:#7956b8;align-self:center}.beta-loadout-row.active{border-color:#9e60ff}.beta-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.beta-compare-grid label{display:grid;gap:5px;color:#aaa}.beta-compare-grid select{padding:9px;background:#0d0915;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px}.beta-compare-result{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin-top:18px}.beta-compare-result div{display:grid;gap:4px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:9px}.beta-compare-result span{color:#aaa}.beta-rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.beta-rec-grid section,.beta-improvement{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.02)}.beta-rec-grid h3,.beta-improvement small{font:700 10px Orbitron;letter-spacing:.1em;color:#a87aff}.beta-activity-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.beta-activity-list button{padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:8px;background:rgba(255,255,255,.025);color:#fff}.beta-activity-list button.active{border-color:#9e60ff}.beta-share-input{width:100%;padding:10px;background:#08060d;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px}
   `;

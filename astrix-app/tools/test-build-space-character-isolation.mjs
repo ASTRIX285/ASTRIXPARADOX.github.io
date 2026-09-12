@@ -142,4 +142,11 @@ await improveClick({target:{closest:selector=>selector==='.improve-cta'?{}:null}
 assert.match(location.href,/^\.\/paradox-build-space\/\?characterId=warlock-1/,'Improve My Guardian must still navigate when Web Storage rejects the handoff');
 for(const store of [sessionStorage,localStorage])store.rejectWrites=false;
 
+globalThis.requestAnimationFrame=()=>1;
+location.href='';
+const suspendedFrameStartedAt=Date.now();
+await improveClick({target:{closest:selector=>selector==='.improve-cta'?{}:null},preventDefault(){},stopPropagation(){},stopImmediatePropagation(){}});
+assert.match(location.href,/^\.\/paradox-build-space\/\?characterId=warlock-1/,'Improve My Guardian must navigate when animation frames are suspended');
+assert.ok(Date.now()-suspendedFrameStartedAt<1000,'Build Forge navigation must use its bounded paint fallback');
+
 console.log('Build Space character isolation tests passed.');
