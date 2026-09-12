@@ -13,6 +13,8 @@ import {forgeLoaderEvaluateReady,forgeLoaderResidency} from './forge-loader-resi
 import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1';
+import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -153,6 +155,39 @@ function renderHero(){
   host.innerHTML=character?`<strong>${esc(displayName||'BUNGIE IDENTITY UNAVAILABLE')}</strong><span>${esc(label)} · ${esc(subclassName||'Subclass verifying')}</span><b>✦ ${esc(character.light??'—')}</b>`:'<span>Verified Guardian unavailable.</span>';
 }
 
+function definitionIdentity(hash){
+  const definitions=inventoryDefinitions(),definition=definitions?.[String(hash)]||null,display=definition?.displayProperties||{};
+  if(!definition||!text(display.name))return null;
+  return {hash:Number(hash),bungieHash:Number(hash),name:text(display.name),description:text(display.description),icon:display.icon?new URL(display.icon,'https://www.bungie.net').toString():'',definition,identitySource:'DestinyInventoryItemDefinition'};
+}
+
+function selectorExoticIntrinsic(group){
+  const prepared=group?.representative?.armourSemantics?.exoticPerk??group?.representative?.exoticPerk??null;
+  if(prepared)return prepared;
+  const definitions=inventoryDefinitions(),definition=group?.definition??group?.preview?.definition??definitions?.[String(group?.hash)]??null;
+  const intrinsicHashes=(definition?.sockets?.intrinsicSockets||[]).map(row=>Number(row?.plugItemHash)).filter(hash=>Number.isInteger(hash)&&hash>0);
+  const entryPlugs=(definition?.sockets?.socketEntries||[]).map(entry=>{
+    const plug=definitionIdentity(entry?.singleInitialItemHash);
+    return plug?{...plug,armourItemTierType:Number(definition?.inventory?.tierType)}:null;
+  }).filter(plug=>plug&&classifyArmourPlug(plug)==='exotic-perk');
+  return intrinsicHashes.map(definitionIdentity).find(Boolean)||entryPlugs[0]||null;
+}
+
+function selectorExoticHoverItem(group){
+  const definition=group?.definition??group?.preview?.definition??group?.representative?.definition??inventoryDefinitions()?.[String(group?.hash)]??null;
+  const tier=text(definition?.inventory?.tierTypeName||group?.preview?.tier||group?.representative?.tier||'Exotic');
+  const intrinsic=selectorExoticIntrinsic(group),ownedCount=Array.isArray(group?.instances)?group.instances.length:0;
+  return {itemHash:Number(group?.hash),name:text(group?.name),icon:text(group?.icon),slotLabel:text(group?.slotLabel||'Armour'),itemTypeDisplayName:text(group?.slotLabel||'Armour'),tier,isExotic:true,definition,exoticPerk:intrinsic,intrinsicTrait:intrinsic,armourSemantics:{exoticPerk:intrinsic},source:{label:`Owned ${ownedCount} ${ownedCount===1?'copy':'copies'} across account`}};
+}
+
+function bindSelectorExoticHovers(host,groups){
+  const byKey=new Map(groups.map(group=>[group.key,group]));
+  host?.querySelectorAll?.('[data-exotic-hover-key]').forEach(target=>{
+    const group=byKey.get(target.dataset.exoticHoverKey);
+    if(group)bindParadoxItemHover(target,selectorExoticHoverItem(group),'armour',{contextLabel:'BUILD ANCHOR',definitionOnly:true});
+  });
+}
+
 function renderExotics(){
   const groups=exoticGroups(),host=byId('forgeExoticSlots');
   const ownedCount=groups.filter(group=>group.owned).length;
@@ -162,9 +197,10 @@ function renderExotics(){
     return `<section class="forge-exotic-slot"><h3>${esc(slot.label.toUpperCase())}</h3><div class="forge-exotic-grid">${rows.length?rows.map(group=>{
       const selected=group.owned&&group.key===selectedExoticKey;
       const ownership=group.owned?`${group.instances.length} owned ${group.instances.length===1?'copy':'copies'}`:'not owned';
-      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
+      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" data-exotic-hover-key="${esc(group.key)}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
     }).join(''):'<div class="forge-empty">No verified Exotic definitions</div>'}</div></section>`;
   }).join('');
+  bindSelectorExoticHovers(host,groups);
 }
 
 function bonusReason(row,count,choice){
