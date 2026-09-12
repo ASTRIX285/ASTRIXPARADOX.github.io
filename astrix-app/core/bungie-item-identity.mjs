@@ -1,6 +1,7 @@
 // Stable identities and presentation derived from Bungie definitions, never names.
 export const WEAPON_TYPE_LABELS=Object.freeze({6:'Auto-Rifle',7:'Shotgun',8:'Machine Gun',9:'Hand Cannon',10:'Rocket Launcher',11:'Fusion Rifle',12:'Sniper Rifle',13:'Pulse Rifle',14:'Scout Rifle',17:'Sidearm',18:'Sword',22:'Linear Fusion Rifle',23:'Grenade Launcher',24:'Submachine Gun',25:'Trace Rifle',31:'Combat Bow',33:'Glaive'});
 export const WEAPON_SOCKET_CATEGORIES=Object.freeze({perks:4241085061,mods:2685412949,intrinsic:3956125808,cosmetics:2048875504});
+export const DESTINY_BREAKER_TYPE_HASHES=Object.freeze([485622768,2611060930,3178805705]);
 export function bungieDefinitionHash(value){
   if(value===null||value===undefined||value==='')return null;
   const hash=Number(value);
@@ -32,4 +33,14 @@ export function resolveItemWatermark(item={},definition=item.definition||{},cont
   else if(shelved&&definition.iconWatermarkShelved){path=definition.iconWatermarkShelved;source='iconWatermarkShelved';}
   else if(definition.iconWatermark){path=definition.iconWatermark;source='iconWatermark';}
   return {icon:path?new URL(path,'https://www.bungie.net').href:'',path,source,versionNumber,itemHash:bungieDefinitionHash(item.itemHash??item.hash??definition.hash),definitionType:'DestinyInventoryItemDefinition',status:path?'resolved':'not-provided'};
+}
+export function resolveBreakerTypeDefinition(instance={},itemDefinition={},definitions={}){
+  const hashes=[instance?.breakerTypeHash,itemDefinition?.breakerTypeHash].map(bungieDefinitionHash).filter(hash=>hash!==null);
+  for(const hash of hashes){
+    const definition=definitions?.[String(hash)];
+    if(definition)return definition;
+  }
+  const enumValue=Number(instance?.breakerType);
+  if(!Number.isInteger(enumValue)||enumValue<=0)return null;
+  return Object.values(definitions||{}).find(definition=>Number(definition?.enumValue)===enumValue)||null;
 }

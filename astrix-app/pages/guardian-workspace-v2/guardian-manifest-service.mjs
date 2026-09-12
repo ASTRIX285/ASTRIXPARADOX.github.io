@@ -1,7 +1,7 @@
 import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
-import {paradoxDefinitionId} from '../../core/bungie-item-identity.mjs';
+import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260912-tile-identities-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||"https://auth.astrixparadox.com";
 const BUNGIE_ORIGIN="https://www.bungie.net";
@@ -490,7 +490,7 @@ class GuardianManifestService{
     const sandboxPerkHashes=new Set();
     const equipableSetHashes=new Set();
     const damageTypeHashes=new Set();
-    const breakerTypeHashes=new Set();
+    const breakerTypeHashes=new Set(DESTINY_BREAKER_TYPE_HASHES);
     const socketTypeHashes=new Set();
     const expandedHashes=new Set();
     const reusablePlugSetHashes=new Set();
