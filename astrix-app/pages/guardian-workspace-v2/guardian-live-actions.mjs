@@ -95,7 +95,7 @@ async function requestActionWithThrottleRetry(path,body,{session,fetchImpl=fetch
 
 async function requestFreshProfile({fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN}={}){
   const url=new URL('/bungie/profile',authOrigin);url.searchParams.set('scope','character');url.searchParams.set('definitions','client-manifest');url.searchParams.set('freshness','live');url.searchParams.set('readToken',`${Date.now()}-${freshProfileRequestSequence+=1}`);
-  const response=await fetchImpl(url,{credentials:'include',cache:'no-store',headers:{Accept:'application/json','Cache-Control':'no-cache',Pragma:'no-cache'}});
+  const response=await fetchImpl(url,{credentials:'include',cache:'no-store',headers:{Accept:'application/json'}});
   return responsePayload(response);
 }
 

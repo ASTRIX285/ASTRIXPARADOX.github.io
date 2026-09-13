@@ -422,7 +422,7 @@ assert.deepEqual(resumedPaths,['/bungie/actions/transfer-item'],'A stale Guardia
 assert.equal(resumedMove.steps.some(row=>row.phase==='preflight'&&row.status==='resumed'),true,'The audit trail must disclose that fresh Bungie state replaced the staged source.');
 assert.equal(freshReadUrls.every(url=>url.searchParams.get('freshness')==='live'&&Boolean(url.searchParams.get('readToken'))),true,'Every executor verification must carry an uncacheable live read token.');
 assert.equal(new Set(freshReadUrls.map(url=>url.searchParams.get('readToken'))).size,freshReadUrls.length,'Every live verification URL must be unique.');
-assert.equal(freshReadOptions.every(init=>init.cache==='no-store'&&init.headers['Cache-Control']==='no-cache'),true,'Every live verification request must bypass browser caches.');
+assert.equal(freshReadOptions.every(init=>init.cache==='no-store'&&init.headers.Accept==='application/json'&&!Object.hasOwn(init.headers,'Cache-Control')),true,'Every live verification request must bypass browser caches without adding a cross-origin preflight header.');
 
 let ambiguousLocation='source',ambiguousThrown=false;
 const recoveredMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
