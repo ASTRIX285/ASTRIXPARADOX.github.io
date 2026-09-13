@@ -1,0 +1,15 @@
+name: Forge Probe S28 Perks Simple
+on:
+  push:
+    branches: [feature/astrix-multigame-platform]
+    paths: ['.github/workflows/forge-probe-s28-perks-simple.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/astrix-multigame-platform
+      - run: python3 .forge-community/probe-s28-perks-simple.py

@@ -137,8 +137,8 @@ function membershipFromSession(session){
 }
 
 function historyUrl({membershipType,membershipId,characterId,count=25,page=0}){
-  if(typeof globalThis.ASTRIX_ACTIVITY_HISTORY_ENDPOINT==='function'){
-    return globalThis.ASTRIX_ACTIVITY_HISTORY_ENDPOINT({membershipType,membershipId,characterId,count,page});
+  if(typeof globalThis.FORGE_ACTIVITY_HISTORY_ENDPOINT==='function'){
+    return globalThis.FORGE_ACTIVITY_HISTORY_ENDPOINT({membershipType,membershipId,characterId,count,page});
   }
   const url=new URL(`${AUTH_ORIGIN}/bungie/activity-history`);
   url.searchParams.set('membershipType',String(membershipType));
@@ -150,7 +150,7 @@ function historyUrl({membershipType,membershipId,characterId,count=25,page=0}){
 }
 
 function pgcrUrl(instanceId){
-  if(typeof globalThis.ASTRIX_PGCR_ENDPOINT==='function')return globalThis.ASTRIX_PGCR_ENDPOINT(instanceId);
+  if(typeof globalThis.FORGE_PGCR_ENDPOINT==='function')return globalThis.FORGE_PGCR_ENDPOINT(instanceId);
   return `${AUTH_ORIGIN}/bungie/pgcr/${encodeURIComponent(instanceId)}`;
 }
 
@@ -207,7 +207,7 @@ function activityIdentity(activity){
 
 async function pullActivityHistory({session=null,characterId=null,count=25,page=0}={}){
   const liveSession=session||await getBungieSession();
-  if(!liveSession?.authenticated)throw new Error('Bungie session is not authenticated.');
+  if(!liveSession?.authenticated)throw new Error('Reconnect Bungie before collecting activity results.');
   const membership=membershipFromSession(liveSession);
   if(!membership)throw new Error('Active Destiny membership is unavailable from the session.');
   const cid=asString(characterId||selectedCharacterId());

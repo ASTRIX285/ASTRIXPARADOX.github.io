@@ -25,39 +25,39 @@ body.journey-page.apx-destination-page .apx-page-shell{
 .journey-page .apx-page-heading p{font-size:1.125rem}
 /* Journey owns a brighter, emblem-first character rail while retaining the
    shared centred emblem focal point. */
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card{
   border-color:rgba(201,168,76,.22)!important;
   border-radius:.5rem!important;
   background:#0b0809!important;
   filter:saturate(1.02) brightness(1)!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card::before{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card::before{
   opacity:.96!important;
   filter:saturate(1.04) brightness(1)!important;
   background-position:28px center!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card::after{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card::after{
   inset:0 0 0 42%!important;
   background:linear-gradient(90deg,rgba(7,5,7,.08),rgba(7,5,7,.5) 42%,rgba(7,5,7,.82))!important;
   opacity:.72!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected{
   border-color:rgba(232,196,90,.78)!important;
   background:#0b0809!important;
   box-shadow:0 0 0 1px rgba(211,32,47,.48),0 0 2rem rgba(201,168,76,.48),0 0 3.25rem rgba(211,32,47,.2),0 .75rem 1.75rem rgba(0,0,0,.42)!important;
   filter:none!important;
   opacity:1!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected::before{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::before{
   opacity:1!important;
   filter:none!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected::after{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::after{
   inset:0 0 0 42%!important;
   background:linear-gradient(90deg,rgba(82,3,13,.04),rgba(72,4,12,.34) 48%,rgba(15,7,8,.7))!important;
   opacity:.64!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__identity{
   top:50%!important;
   bottom:auto!important;
   left:50%!important;
@@ -71,11 +71,11 @@ html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character
   text-align:center!important;
   transform:translate(-50%,-50%);
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity strong{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__identity strong{
   font-size:.875rem!important;
   line-height:1!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__power{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__power{
   top:50%!important;
   right:.625rem!important;
   bottom:auto!important;
@@ -83,20 +83,20 @@ html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character
   line-height:1!important;
   transform:translateY(-50%);
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__stats{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stats{
   display:none!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__stat{
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stat{
   min-height:1.375rem!important;
   padding:.0625rem!important;
   background:linear-gradient(180deg,rgba(15,10,12,.56),rgba(5,5,7,.76))!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__stat .guardian-stat-icon{
-  width:.75rem!important;
-  height:.75rem!important;
-  flex-basis:.75rem!important;
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stat .guardian-stat-icon{
+  width:var(--apx-icon-stat,1.25rem)!important;
+  height:var(--apx-icon-stat,1.25rem)!important;
+  flex-basis:var(--apx-icon-stat,1.25rem)!important;
 }
-html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__stat b{font-size:.5625rem!important}
+html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__stat b{font-size:.5625rem!important}
 .journey-page .apx-destination-ribbon a{font-size:.75rem}
 .journey-page .apx-eyebrow,
 .journey-page .mission-eyebrow,
@@ -274,9 +274,9 @@ html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character
 .journey-page .journey-identity-stat img,
 .journey-page .journey-identity-stat i{
   display:block;
-  width:.8rem;
-  height:.8rem;
-  flex:0 0 .8rem;
+  width:var(--apx-icon-stat,1.25rem);
+  height:var(--apx-icon-stat,1.25rem);
+  flex:0 0 var(--apx-icon-stat,1.25rem);
   object-fit:contain;
   filter:drop-shadow(0 1px 3px rgba(0,0,0,.8));
 }
@@ -830,7 +830,7 @@ html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character
 }
 
 @media (min-width:981px){
-  .journey-page [data-astrix-destination-ribbon]{
+  .journey-page [data-forge-destination-ribbon]{
     width:min(1180px,calc(100% - 64px));
     height:42px;
     min-height:42px;
@@ -1036,9 +1036,9 @@ html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character
 @media (max-width:720px){
   .journey-page .apx-destination-header-copy strong{font-size:.875rem}
   .journey-page .apx-destination-header-copy small{display:none}
-  html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card::after,
-  html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected::after{inset:0 0 0 38%!important}
-  html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity{left:50%!important;right:auto!important;max-width:calc(100% - 4.25rem)}
-  html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity strong{font-size:.75rem!important}
-  html body.journey-page header:has(>[data-astrix-hero-cards]) .guardian-character-card__power{right:.5rem!important;font-size:.8125rem!important}
+  html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card::after,
+  html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::after{inset:0 0 0 38%!important}
+  html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__identity{left:50%!important;right:auto!important;max-width:calc(100% - 4.25rem)}
+  html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__identity strong{font-size:.75rem!important}
+  html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__power{right:.5rem!important;font-size:.8125rem!important}
 }

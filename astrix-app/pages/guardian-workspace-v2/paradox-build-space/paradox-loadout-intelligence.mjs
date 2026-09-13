@@ -1,4 +1,4 @@
-import {classifyArmourPlug,classifyWeaponPlug,weaponPerkColumnRowCountForTier,weaponPerkRowCountForTier} from '../guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1';
+import {classifyArmourPlug,classifyWeaponPlug,weaponPerkColumnRowCountForTier,weaponPerkRowCountForTier} from '../guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {explicitTokens} from './paradox-forge-intelligence.mjs';
 
 const STAT_KEYS=Object.freeze(['health','melee','grenade','super','class','weapon']);
@@ -296,12 +296,12 @@ function validateWeaponModel(build={}){
   for(const weapon of (build.weapons||[]).filter(Boolean)){
     const semantics=weapon.weaponSemantics||{},model=semantics.perkModel||weapon.weaponPerkModel||{},tier=Number(model.weaponTier??semantics.gearTier??weapon.gearTier),name=itemName(weapon,'Weapon'),columns=model.columns||[];
     const expectedRows=weaponPerkRowCountForTier(tier);
-    if(!expectedRows||Number(model.expectedRowCount)!==expectedRows)violations.push(`${name}: the verified Tier ${Number.isInteger(tier)?tier:'unknown'} perk-row model is incomplete.`);
+    if(!expectedRows||!Number.isFinite(Number(model.expectedRowCount))||Number(model.expectedRowCount)<expectedRows)violations.push(`${name}: the verified Tier ${Number.isInteger(tier)?tier:'unknown'} perk-row model is incomplete.`);
     const ordered=columns.map(column=>Number(column.socketIndex));
     if(ordered.some((socketIndex,index)=>index>0&&socketIndex<ordered[index-1]))violations.push(`${name}: perk columns do not preserve Bungie's socket order.`);
     for(const [index,column] of columns.entries()){
       const columnNumber=index+1,required=weaponPerkColumnRowCountForTier(tier,columnNumber);
-      if(required&&Number(column.expectedRowCount)!==required)violations.push(`${name}: perk column ${columnNumber} must contain ${required} row${required===1?'':'s'} at Tier ${tier}.`);
+      if(required&&(!Number.isFinite(Number(column.expectedRowCount))||Number(column.expectedRowCount)<required))violations.push(`${name}: perk column ${columnNumber} must contain at least ${required} row${required===1?'':'s'} at Tier ${tier}.`);
       if(required&&(column.options||[]).length<required)violations.push(`${name}: Bungie evidence for perk column ${columnNumber} contains fewer than ${required} verified options.`);
       if((column.options||[]).some(option=>classifyWeaponPlug(option)!=='perk'))violations.push(`${name}: a non-perk socket was placed in perk column ${columnNumber}.`);
     }
@@ -330,7 +330,7 @@ function validateLoadoutCoherence(build={}){
 
 function createLiveTransferPreflight(build={}){
   const generated=Boolean(build.recommendationGeneratedAt),coherence=generated?validateLoadoutCoherence(build):{ready:true,reason:'',violations:[]},weapons=(build.weapons||[]).filter(Boolean),armour=(build.armour||[]).filter(Boolean),violations=generated?[...coherence.violations]:[],warnings=[];
-  if(!/^\d+$/.test(String(build.characterId||''))||!/^\d+$/.test(String(build.membershipId||build.bungieMembershipId||''))||!/^\d+$/.test(String(build.membershipType??'')))violations.push('Apply requires an authenticated Guardian and Destiny membership binding.');
+  if(!/^\d+$/.test(String(build.characterId||''))||!/^\d+$/.test(String(build.membershipId||build.bungieMembershipId||''))||!/^\d+$/.test(String(build.membershipType??'')))violations.push('Apply requires a Bungie Guardian and Destiny membership binding.');
   if(weapons.length!==3||weapons.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires three exact owned weapon instance IDs.');
   if(armour.length!==5||armour.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires five exact owned armour instance IDs.');
   const exotic=validateExoticLoadout(build,{requireArmourAnchor:false});if(!exotic.ready)violations.push(exotic.reason);

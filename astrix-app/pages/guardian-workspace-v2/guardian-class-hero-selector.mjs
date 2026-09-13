@@ -21,9 +21,9 @@ function esc(v) {
 }
 
 function installStyles() {
-  if (qs('#astrix-class-selector-style')) return;
+  if (qs('#forge-class-selector-style')) return;
   const style = document.createElement('style');
-  style.id = 'astrix-class-selector-style';
+  style.id = 'forge-class-selector-style';
   style.textContent = `
     .char-switch { cursor: pointer !important; }
     .pf-class-picker-backdrop {
@@ -152,7 +152,7 @@ function renderLoadouts(modal, cls) {
   if (!host) return;
 
   const list = fixtures.filter((f) => className(f.className) === cls);
-  const current = globalThis.ASTRIXBetaFixtures?.current?.();
+  const current = globalThis.ForgeBetaFixtures?.current?.();
 
   if (!list.length) {
     host.innerHTML = '<div class="pf-class-empty">No beta loadouts are available for this class yet.</div>';
@@ -172,8 +172,8 @@ function renderLoadouts(modal, cls) {
 
   qsa('[data-fixture]', host).forEach((btn) =>
     btn.addEventListener('click', async () => {
-      if (globalThis.ASTRIXBetaFixtures?.load) {
-        await globalThis.ASTRIXBetaFixtures.load(btn.dataset.fixture);
+      if (globalThis.ForgeBetaFixtures?.load) {
+        await globalThis.ForgeBetaFixtures.load(btn.dataset.fixture);
       }
       modal.remove();
     })
@@ -221,7 +221,7 @@ async function initialise() {
   installStyles();
 
   for (let i = 0; i < 60; i += 1) {
-    const api = globalThis.ASTRIXBetaFixtures;
+    const api = globalThis.ForgeBetaFixtures;
     if (api?.list) {
       fixtures = await api.list();
       break;
@@ -244,10 +244,10 @@ async function initialise() {
   }
 }
 
-document.addEventListener('astrix:guardian-selection-changed', (e) =>
+document.addEventListener('forge:guardian-selection-changed', (e) =>
   applyHero(e.detail || {})
 );
-document.addEventListener('astrix:beta-fixture-loaded', (e) =>
+document.addEventListener('forge:beta-fixture-loaded', (e) =>
   applyHero(e.detail || {})
 );
 

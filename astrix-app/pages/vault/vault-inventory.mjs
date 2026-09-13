@@ -1,18 +1,14 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
-import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1';
+import {classifyArmourPlug,normaliseArmourSemantics,normaliseWeaponSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
+import {resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
+import {ARMOUR_BUCKETS,CHARACTER_EQUIPMENT_BUCKETS,EQUIPMENT_GROUPS,EQUIPMENT_GROUP_BY_HASH,INVENTORY_GROUPS,WEAPON_BUCKETS,groupInventoryWorkspaceItems,itemKey,sortInventoryWorkspaceItems} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const VAULT_BUCKET=138197802;
 const POSTMASTER_BUCKET=215593132;
 const ARMOUR_ITEM_TYPE=2;
+const WEAPON_ITEM_TYPE=3;
 const CLASS_NAMES=['titan','hunter','warlock'];
-const ARMOUR_BUCKETS=Object.freeze([
-  Object.freeze({hash:3448274439,key:'helmet',label:'Helmet'}),
-  Object.freeze({hash:3551918588,key:'gauntlets',label:'Gauntlets'}),
-  Object.freeze({hash:14239492,key:'chest',label:'Chest'}),
-  Object.freeze({hash:20886954,key:'legs',label:'Legs'}),
-  Object.freeze({hash:1585787867,key:'class-item',label:'Class Item'})
-]);
 const ARMOUR_SLOT_BY_HASH=new Map(ARMOUR_BUCKETS.map((row,index)=>[row.hash,{...row,index}]));
 const SOURCE_PRIORITY={profile:0,vault:1,postmaster:2,carried:3,equipped:4};
 
@@ -20,10 +16,9 @@ const clone=value=>{
   try{return structuredClone(value);}
   catch{return JSON.parse(JSON.stringify(value??null));}
 };
-const finite=value=>Number.isFinite(Number(value))?Number(value):null;
+const finite=value=>value===null||value===undefined||value===''?null:(Number.isFinite(Number(value))?Number(value):null);
 const absoluteIcon=path=>path?new URL(path,BUNGIE_ORIGIN).toString():'';
 const definitionFor=(payload,hash)=>payload?.definitions?.[String(hash)]||null;
-const itemKey=item=>String(item?.itemInstanceId||`${item?.itemHash||'unknown'}:${item?.source?.kind||'unknown'}:${item?.source?.characterId||''}`);
 
 function displayIdentity(payload,hash){
   const definition=definitionFor(payload,hash)||{};
@@ -51,7 +46,7 @@ function socketPlugs(payload,rawItem){
   if(!rawItem?.itemInstanceId)return [];
   const states=payload?.profile?.itemComponents?.sockets?.data?.[rawItem.itemInstanceId]?.sockets||[];
   const itemDefinition=definitionFor(payload,rawItem.itemHash)||{};
-  return states.map((state,socketIndex)=>{
+  const rows=states.map((state,socketIndex)=>{
     const hash=finite(state?.plugHash);
     if(hash===null)return null;
     const identity=displayIdentity(payload,hash);
@@ -61,11 +56,20 @@ function socketPlugs(payload,rawItem){
       socketIndex,
       socketCategoryHash:category.hash,
       socketCategoryDefinition:category.definition,
+      armourItemTierType:finite(itemDefinition?.inventory?.tierType),
       isEnabled:state?.isEnabled!==false,
       isVisible:state?.isVisible!==false,
       statContributions:statContributions(payload,identity.definition)
     };
+  }).filter(Boolean),resolvedSocketIndexes=new Set(rows.map(row=>Number(row.socketIndex)));
+  const fixedIntrinsicRows=(itemDefinition?.sockets?.socketEntries||[]).map((entry,socketIndex)=>{
+    if(resolvedSocketIndexes.has(socketIndex))return null;
+    const hash=finite(entry?.singleInitialItemHash),plugDefinition=hash===null?null:definitionFor(payload,hash),plugCategory=String(plugDefinition?.plug?.plugCategoryIdentifier||'').toLowerCase();
+    if(hash===null||!plugDefinition||!plugCategory.includes('intrinsic'))return null;
+    const identity=displayIdentity(payload,hash),category=socketCategory(payload,itemDefinition,socketIndex);
+    return {...identity,socketIndex,socketCategoryHash:category.hash,socketCategoryDefinition:category.definition,armourItemTierType:finite(itemDefinition?.inventory?.tierType),isEnabled:true,isVisible:entry?.defaultVisible!==false,source:'bungie-manifest-fixed-intrinsic',statContributions:statContributions(payload,identity.definition)};
   }).filter(Boolean);
+  return [...rows,...fixedIntrinsicRows].sort((left,right)=>Number(left.socketIndex)-Number(right.socketIndex));
 }
 
 function statContributions(payload,definition){
@@ -155,6 +159,8 @@ function normaliseArmourItem(payload,row){
   const plugs=socketPlugs(payload,rawItem);
   const armourSemantics=normaliseArmourSemantics({plugs,instance,stats:statsComponent});
   const stats=armourStats(payload,rawItem,plugs);
+  const versionNumber=Number.isInteger(Number(rawItem?.versionNumber))?Number(rawItem.versionNumber):null;
+  const releaseWatermark=resolveItemWatermark({...rawItem,versionNumber},definition,{powerCapDefinitions:payload?.powerCapDefinitions,currentPowerCap:payload?.currentPowerCap});
   const masterworkSlot=armourSemantics.masterwork?{...armourSemantics.masterwork,semanticRole:'masterwork',energyCost:armourSemantics.tier}:null;
   const functionalMods=[...armourSemantics.generalMods,...armourSemantics.slotMods];
   const base={
@@ -173,6 +179,9 @@ function normaliseArmourItem(payload,row){
     itemLevel:finite(instance?.itemLevel),
     gearTier:finite(instance?.gearTier),
     quality:finite(instance?.quality),
+    versionNumber,
+    releaseWatermark,
+    tierIcon:releaseWatermark.icon,
     state:Number(rawItem.state||0),
     stats,
     totalStats:stats.reduce((sum,stat)=>sum+stat.value,0),
@@ -202,10 +211,67 @@ function normaliseArmourItem(payload,row){
   return base;
 }
 
+function normaliseWeaponItem(payload,row,group){
+  const rawItem=row?.item||{},definition=definitionFor(payload,rawItem.itemHash);
+  if(!definition||Number(definition.itemType)!==WEAPON_ITEM_TYPE)return null;
+  const identity=displayIdentity(payload,rawItem.itemHash),instance=payload?.profile?.itemComponents?.instances?.data?.[rawItem.itemInstanceId]||null,plugs=socketPlugs(payload,rawItem),socketOptions=armourModOptions(payload,rawItem),stats=payload?.profile?.itemComponents?.stats?.data?.[rawItem.itemInstanceId]||null,isExotic=String(identity.tier).toLowerCase()==='exotic',weaponSemantics=normaliseWeaponSemantics({profile:payload?.profile,item:rawItem,itemDefinition:definition,plugs,instance,stats,alternativeColumns:socketOptions,isExotic}),versionNumber=Number.isInteger(Number(rawItem?.versionNumber))?Number(rawItem.versionNumber):null,releaseWatermark=resolveItemWatermark({...rawItem,versionNumber},definition,{powerCapDefinitions:payload?.powerCapDefinitions,currentPowerCap:payload?.currentPowerCap}),weaponType=weaponTypeIdentity(definition);
+  return {
+    ...identity,itemHash:Number(rawItem.itemHash),itemInstanceId:String(rawItem.itemInstanceId||''),bucketHash:group.hash,storageBucketHash:finite(rawItem.bucketHash),source:clone(row.source),quantity:Math.max(1,Number(rawItem.quantity)||1),equipmentGroup:group,
+    power:finite(instance?.primaryStat?.value),itemLevel:finite(instance?.itemLevel),gearTier:finite(instance?.gearTier),quality:finite(instance?.quality),state:Number(rawItem.state||0),versionNumber,releaseWatermark,tierIcon:releaseWatermark.icon,isExotic,
+    weaponType:weaponType.label,weaponTypeId:weaponType.id,damageTypeHash:finite(instance?.damageTypeHash??definition?.defaultDamageTypeHash),elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??definition?.defaultDamageTypeHash)]||null,breakerDefinition:resolveBreakerTypeDefinition(instance,definition,payload?.breakerDefinitions),
+    socketsAvailable:Boolean(rawItem.itemInstanceId&&payload?.profile?.itemComponents?.sockets?.data?.[rawItem.itemInstanceId]),socketCoverage:{plugs,requested:plugs.map(plug=>Number(plug.hash)).filter(Number.isFinite),resolved:plugs.filter(plug=>plug.definition&&Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),unresolved:plugs.filter(plug=>!plug.definition||!Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),complete:plugs.every(plug=>plug.definition&&Object.keys(plug.definition).length)},socketOptions,
+    weaponSemantics,intrinsic:weaponSemantics.intrinsic,selectedPerks:weaponSemantics.selectedPerks,weaponPerkModel:weaponSemantics.perkModel,weaponPerkRows:weaponSemantics.perkRows,weaponPerkRowCount:weaponSemantics.perkRowCount,exoticWeaponTraits:weaponSemantics.exoticTraits,weaponMasterwork:weaponSemantics.masterwork,weaponMod:weaponSemantics.mod,catalyst:weaponSemantics.catalyst,championCapability:weaponSemantics.champion,weaponStats:weaponSemantics.stats
+  };
+}
+
+function normaliseCharacterEquipmentItem(payload,row,group){
+  const rawItem=row?.item||{},definition=definitionFor(payload,rawItem.itemHash);
+  if(!definition||group?.kind!=='equipment')return null;
+  const identity=displayIdentity(payload,rawItem.itemHash),instance=payload?.profile?.itemComponents?.instances?.data?.[rawItem.itemInstanceId]||null;
+  return {
+    ...identity,
+    itemHash:Number(rawItem.itemHash),
+    itemInstanceId:String(rawItem.itemInstanceId||''),
+    bucketHash:group.hash,
+    storageBucketHash:finite(rawItem.bucketHash),
+    source:clone(row.source),
+    quantity:Math.max(1,Number(rawItem.quantity)||1),
+    equipmentGroup:group,
+    power:finite(instance?.primaryStat?.value),
+    itemLevel:finite(instance?.itemLevel),
+    gearTier:finite(instance?.gearTier),
+    quality:finite(instance?.quality),
+    state:Number(rawItem.state||0),
+    isExotic:String(identity.tier).toLowerCase()==='exotic'
+  };
+}
+
+function normaliseVaultWorkspaceItem(payload,row){
+  const rawItem=row?.item||{},definition=definitionFor(payload,rawItem.itemHash),equipmentBucket=finite(definition?.inventory?.bucketTypeHash),group=EQUIPMENT_GROUP_BY_HASH.get(equipmentBucket)||null;
+  if(group?.kind==='armour'){
+    const armour=normaliseArmourItem(payload,row);
+    return armour?{...armour,quantity:Math.max(1,Number(rawItem.quantity)||1),equipmentGroup:group}:null;
+  }
+  if(group?.kind==='weapon'){
+    return normaliseWeaponItem(payload,row,group);
+  }
+  if(group?.kind==='equipment')return normaliseCharacterEquipmentItem(payload,row,group);
+  if(row?.source?.kind!=='postmaster')return null;
+  const identity=displayIdentity(payload,rawItem.itemHash);
+  return {...identity,itemHash:Number(rawItem.itemHash),itemInstanceId:String(rawItem.itemInstanceId||''),bucketHash:equipmentBucket,storageBucketHash:finite(rawItem.bucketHash),quantity:Math.max(1,Number(rawItem.quantity)||1),source:clone(row.source),equipmentGroup:null,power:finite(payload?.profile?.itemComponents?.instances?.data?.[rawItem.itemInstanceId]?.primaryStat?.value),state:Number(rawItem.state||0)};
+}
+
+const sortVaultWorkspaceItems=sortInventoryWorkspaceItems;
+
+function groupVaultWorkspaceItems(items=[]){
+  const sorted=sortVaultWorkspaceItems(items);
+  return EQUIPMENT_GROUPS.map(group=>({...group,items:sorted.filter(item=>item?.equipmentGroup?.key===group.key)}));
+}
+
 function createVaultCatalogue(payload={}){
   const profile=payload?.profile||{};
   const rawRows=deduplicateRows(sourceRows(profile));
-  const armour=rawRows.map(row=>normaliseArmourItem(payload,row)).filter(Boolean);
+  const workspaceRows=rawRows.map(row=>normaliseVaultWorkspaceItem(payload,row)).filter(Boolean),items=sortVaultWorkspaceItems(workspaceRows.filter(item=>item.equipmentGroup)),armour=items.filter(item=>item.equipmentGroup?.kind==='armour'),postmasterItems=sortVaultWorkspaceItems(workspaceRows.filter(item=>item.source?.kind==='postmaster'));
   const stored=profile?.profileInventory?.data?.items||[];
   const vaultStored=stored.filter(item=>Number(item?.bucketHash)===VAULT_BUCKET);
   const vaultArmour=vaultStored.filter(item=>Number(definitionFor(payload,item?.itemHash)?.itemType)===ARMOUR_ITEM_TYPE).length;
@@ -213,7 +279,9 @@ function createVaultCatalogue(payload={}){
     String(characterId),(row?.items||[]).filter(item=>Number(item?.bucketHash)===POSTMASTER_BUCKET).length
   ]));
   return {
+    items,
     armour,
+    postmasterItems,
     totals:{
       all:vaultStored.length,
       armour:vaultArmour,
@@ -253,12 +321,20 @@ function filterVaultArmour(items=[],filters={}){
 export {
   ARMOUR_BUCKETS,
   ARMOUR_ITEM_TYPE,
+  CHARACTER_EQUIPMENT_BUCKETS,
   CLASS_NAMES,
+  EQUIPMENT_GROUPS,
+  INVENTORY_GROUPS,
   POSTMASTER_BUCKET,
   VAULT_BUCKET,
+  WEAPON_BUCKETS,
+  WEAPON_ITEM_TYPE,
   createVaultCatalogue,
   filterVaultArmour,
+  groupInventoryWorkspaceItems,
+  groupVaultWorkspaceItems,
   itemKey,
   modFreeArmourStatValue,
-  prepareArmourSelection
+  prepareArmourSelection,
+  sortVaultWorkspaceItems
 };

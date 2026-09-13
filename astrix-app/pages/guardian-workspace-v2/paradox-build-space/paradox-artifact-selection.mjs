@@ -1,4 +1,4 @@
-import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260904-cross-system-loop-1';
+import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260906-complete-build-transfer-1';
 import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 
 const clone=value=>{
@@ -8,6 +8,15 @@ const clone=value=>{
 const integer=value=>value===null||value===undefined||value===''?null:(Number.isInteger(Number(value))?Number(value):null);
 const hashOf=value=>integer(value?.hash??value?.itemHash??value?.bungieHash??value?.artifactHash);
 const sortedHashes=values=>[...new Set((Array.isArray(values)?values:[]).map(integer).filter(value=>value!==null))].sort((a,b)=>a-b);
+function artifactPerkCatalogue(artifact={},recommendation=null){
+  const rows=[
+    ...(artifact?.perks||[]),
+    ...(recommendation?.selectionSequence||[]).map(row=>row?.artifactPerk),
+    ...(recommendation?.recommendations||[]).map(row=>row?.artifactPerk)
+  ].filter(Boolean),catalogue=new Map();
+  for(const row of rows){const hash=hashOf(row);if(hash===null)continue;catalogue.set(hash,{...clone(row),...(catalogue.get(hash)||{}),hash,bungieHash:integer(row?.bungieHash)??hash});}
+  return [...catalogue.values()];
+}
 
 function recommendationFingerprint(build={},currentSeasonNumber=null){
   const artifact=build.artifact||{};
@@ -73,10 +82,11 @@ function applyForgeArtifactRecommendation(state,{currentSeasonNumber=null,force=
   if(!completeSelection)return {state:protectBuildState(next),applied:false,recommendation};
 
   const selectedArtifact=artifactOptions.find(option=>hashOf(option)===recommendation.artifactHash)||effectiveArtifact;
+  const artifactPerks=artifactPerkCatalogue(selectedArtifact,recommendation);
   const prior=build.artifactConfiguration||selectedArtifact?.artifactConfiguration||artifact?.artifactConfiguration||null;
   const configuration=createIntendedArtifactConfiguration(selectedArtifact,prior);
   const selectedPerkHashes=sortedHashes(recommendation.selectedPerkHashes);
-  next.workingBuild.artifact=clone(selectedArtifact);
+  next.workingBuild.artifact={...clone(selectedArtifact),perks:artifactPerks};
   next.workingBuild.artifactConfiguration={
     ...configuration,
     artifactHash:recommendation.artifactHash,
@@ -103,4 +113,4 @@ function applyForgeArtifactRecommendation(state,{currentSeasonNumber=null,force=
   return {state:protectBuildState(next),applied:true,recommendation};
 }
 
-export {applyForgeArtifactRecommendation,currentSeasonOf,recommendationFingerprint};
+export {applyForgeArtifactRecommendation,artifactPerkCatalogue,currentSeasonOf,recommendationFingerprint};

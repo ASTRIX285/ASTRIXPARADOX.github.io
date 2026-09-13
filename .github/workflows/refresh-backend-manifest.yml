@@ -1,0 +1,41 @@
+name: Refresh Shared Backend Manifest
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: forge-shared-manifest
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore prepared public definitions
+        uses: actions/cache/restore@v4
+        with:
+          path: forge-manifest-worker/data
+          key: backend-manifest-v1-${{ github.run_id }}
+          restore-keys: backend-manifest-v1-
+      - name: Check Bungie version and prepare changed data
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+        run: python3 astrix-app/tools/build-backend-manifest.py
+      - name: Retain verified public definitions
+        uses: actions/cache/save@v4
+        with:
+          path: forge-manifest-worker/data
+          key: backend-manifest-v1-${{ github.run_id }}
+      - name: Deploy prepared definitions
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: forge-manifest-worker
+          wranglerVersion: 4.114.0
+          command: deploy

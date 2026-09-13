@@ -166,12 +166,6 @@
   text-transform: uppercase;
 }
 
-.platform-status {
-  padding: 7px 10px;
-  border: 1px solid rgba(201, 168, 76, 0.28);
-  color: var(--gold-light);
-}
-
 .platform-copy h2 {
   margin: 20px 0 16px;
   font-size: clamp(26px, 2.5vw, 38px);
@@ -184,7 +178,7 @@
   line-height: 1.65;
 }
 
-.alpha-entry-link {
+.forge-entry-link {
   align-self: flex-start;
   margin-top: 22px;
 }
@@ -467,7 +461,7 @@ body.tools-mission-open {
 
 @media (prefers-reduced-motion: reduce) {
   .platform-card,
-  .alpha-entry-link,
+  .forge-entry-link,
   .tools-mission-dialog {
     transition: none;
   }

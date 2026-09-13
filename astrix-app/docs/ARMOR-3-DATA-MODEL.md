@@ -1,4 +1,4 @@
-# ASTRIX public v1: Armor 3.0 data model
+# Forge public v1: Armor 3.0 data model
 
 ## Scope
 

@@ -3,13 +3,19 @@ import {readFile} from 'node:fs/promises';
 
 const ROOT=new URL('../pages/guardian-workspace-v2/',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
-const [weaponUi,armourRuntime,interceptor,buildRuntime,cardCss]=await Promise.all([
+const [weaponRuntime,armourRuntime,interceptor,buildRuntime,cardCss,gearRuntime,vaultRuntime,hoverRuntime,sharedTileRuntime,forgeLoaderRuntime]=await Promise.all([
   read('guardian-semantic-ui.mjs'),
   read('guardian-beta-runtime.mjs'),
   read('guardian-semantic-interceptor.mjs'),
   read('paradox-build-space/paradox-build-space.mjs'),
-  read('paradox-item-cards.css')
+  read('paradox-item-cards.css'),
+  read('guardian-gear-layout.mjs'),
+  read('../vault/vault.mjs'),
+  read('paradox-item-hover.mjs'),
+  read('../../shared/guardian-inventory-workspace.mjs'),
+  read('../forge-loader/forge-loader.mjs')
 ]);
+const weaponUi=weaponRuntime+'\n'+await read('guardian-weapon-presentation.mjs');
 
 assert.match(weaponUi,/data-perk-capacity="\$\{capacity\}"/,'Every weapon perk socket must expose its tier-derived column capacity');
 assert.match(weaponUi,/All returned perk choices are shown/,'The inspector must explain complete instance perk choices');
@@ -27,10 +33,35 @@ for(const section of ['ARMOUR STATS','ENERGY','ARCHETYPE &amp; TRAITS','ARMOUR C
   assert.ok(armourRuntime.includes(section),`Armour detail framework is missing ${section}`);
 }
 assert.match(interceptor,/payload\?\.statDefinitions\?\.\[String\(hash\)\][\s\S]*?name:String\(definition\?\.displayProperties\?\.name/,'Per-item armour stat labels must come from the live Bungie stat definitions');
-assert.match(buildRuntime,/openWeaponDetail\(item\)/,'Build Forge weapon models must open the shared Character weapon inspector');
-assert.match(buildRuntime,/openArmourDrawer\(index,build\.armour\?\.\[index\]\)/,'Build Forge armour models must open the shared Character armour inspector');
-assert.match(cardCss,/\.paradox-item-card \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--paradox-perk-size,60px\)\)/,'Weapon perk rows must use a single aligned column grid');
+assert.match(buildRuntime,/renderWeapons\(build\.weapons\|\|\[\]\)/,'Build Forge weapon models must reuse the shared Character weapon renderer');
+assert.match(buildRuntime,/bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Build Forge armour models must open the shared click inspector');
+assert.match(cardCss,/\.paradox-item-card \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--paradox-perk-size,var\(--apx-icon-detail-identity\)\)\)/,'Weapon perk rows must use one shared-token aligned column grid');
 assert.match(cardCss,/font:550 13px\/1\.45 bahnschrift/,'Item-card supporting copy must remain readable');
+assert.match(cardCss,/\.paradox-item-hover\{position:fixed;[^}]*pointer-events:none/,'Shared item hover must remain a non-blocking viewport layer');
+assert.match(cardCss,/\.paradox-item-hover-card\{--paradox-card-violet:#b51e2a;--paradox-card-teal:var\(--paradox-card-gold\)/,'Compact hover must use the corrected crimson and gold palette');
+assert.match(sharedTileRuntime,/item\?\.releaseWatermark\?\.icon\|\|item\?\.tierIcon/,'Shared armour and weapon season art must prefer the prepared Bungie watermark');
+assert.match(gearRuntime,/bindParadoxItemInspect\(art,armour\[idx\],"armour"\)/,'Character armour art must expose the shared click inspector');
+assert.match(weaponUi,/bindParadoxItemInspect\(art\|\|card,item,'weapon'\)/,'Character and Build weapon art must expose the shared click inspector');
+assert.match(buildRuntime,/manualEditorItems[\s\S]*?bindParadoxItemInspect\(node,rows\[Number\(node\.dataset\.manualItemInspect\)\],manualEditorState\.kind\)/,'Build Forge manual item choices must expose exact-item click inspection');
+assert.match(buildRuntime,/recommendedArmourSummary[\s\S]*?bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Build Forge recommended armour must expose exact-item click inspection');
+assert.match(buildRuntime,/data-review-weapon[\s\S]*?bindParadoxItemInspect\(node\.querySelector\('\.review-item-inspect'\),item,'weapon'\)/,'Build Forge recommended weapons must expose exact-item click inspection');
+assert.match(vaultRuntime,/function bindVaultItemInspectors\(root\)[\s\S]*?bindParadoxItemInspect\(target,inspectedItem\(target\.dataset\.inspectItem\),'armour'\)/,'Vault must expose exact owned instances through the shared click inspector');
+assert.match(forgeLoaderRuntime,/function bindSelectorExoticHovers\(host,groups\)[\s\S]*?bindParadoxItemHover\(target,selectorExoticHoverItem\(group\),'armour',\{contextLabel:'BUILD ANCHOR',definitionOnly:true\}\)/,'Forge Loader must retain its intentional type-level hover-only Exotic selector behavior');
+assert.match(hoverRuntime,/resolveItemWatermark\(item\?\?\{\},item\?\.definition\?\?\{\}\)/,'Hover season art must come from Bungie item identity data');
+assert.match(hoverRuntime,/host\.style\.top=`\$\{Math\.max\(pad,Math\.round\(bounds\.top-gap-height\)\)\}px`/,'Shared item hover must anchor directly above its item without crossing the viewport top');
+assert.match(hoverRuntime,/function bindParadoxItemInspect\([\s\S]*?target\.dataset\.paradoxItemInspect=kind/,'Owned-instance tiles must expose the shared click inspector without changing the original hover binder.');
+assert.match(hoverRuntime,/host\.className='forge-item-inspect paradox-inventory-inspect paradox-item-shell'/,'The owned-instance click surface must use the full shared Forge item inspector contract.');
+assert.match(hoverRuntime,/MODS AND COSMETICS/,'The click inspector must place real functional and appearance sockets together at the bottom.');
+assert.match(cardCss,/\.paradox-item-inspect-card\.is-legendary \.paradox-item-header\{background:linear-gradient\(100deg,#5b3470/,'Legendary inspection headers must retain Destiny purple.');
+assert.match(cardCss,/\.paradox-item-inspect-card\.is-exotic \.paradox-item-header\{background:linear-gradient\(100deg,#9d771f/,'Exotic inspection headers must retain Destiny gold.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat i b\.weapon-stat-base\{background:#fff\}/,'Click-inspector base stat bars must remain white.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat\.has-enhanced-value strong\{color:#e6bf48\}/,'Enhanced weapon stat totals must render in gold.');
+assert.match(hoverRuntime,/weaponTraitHierarchyMarkup\(item,\{compact:true,squareIntrinsic:inspect\}\)/,'Only the click inspector must request the square weapon intrinsic socket.');
+assert.match(cardCss,/\.forge-item-inspect\.paradox-inventory-inspect\{[^}]*width:min\(29rem,calc\(100vw - 1rem\)\)/,'The click inspector must use the approved narrower desktop width.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-detail-icon\{[^}]*height:var\(--paradox-inspect-art-width\)!important;[^}]*aspect-ratio:1!important/s,'Weapon and armour header art must use a square box without portrait letterboxing.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-trait-hierarchy>\.weapon-intrinsic-lead\{display:flex;width:100%;justify-content:center\}/,'The weapon intrinsic must sit at the dead centre of its section.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-intrinsic-lead \.weapon-detail-tile img\{border-radius:2px\}/,'The weapon type intrinsic must render as a square, not a circle.');
+assert.doesNotMatch(hoverRuntime,/placeholder|mock item|fake/i,'Shared item hover must not invent item data');
 
 console.log('PARADOX_ITEM_CARD_FRAMEWORK=PASS');
 console.log('PARADOX_WEAPON_PERK_HIERARCHY=PASS');
@@ -39,7 +70,7 @@ console.log('PARADOX_ARMOUR_DETAIL_MODEL=PASS');
 // Execute the actual support-socket presentation with multiple equipped mods.
 const {runInNewContext}=await import('node:vm');
 const helperStart=weaponUi.indexOf('function weaponSupportIconsMarkup('),helperEnd=weaponUi.indexOf('\nfunction renderWeapons(',helperStart);
-const scope={bungieHash:v=>Number(v?.bungieHash??v?.hash)||null,bungieIcon:v=>v||'',text:v=>v?.name||'',esc:v=>String(v),hashAttribute:v=>` data-bungie-hash="${v.hash}"`};
+const scope={bungieHash:v=>Number(v?.bungieHash??v?.hash)||null,bungieIcon:v=>v||'',text:v=>v?.name||'',esc:v=>String(v),hashAttribute:v=>` data-bungie-hash="${v.hash}"`,perkTooltipAttributes:()=>''};
 runInNewContext(weaponUi.slice(helperStart,helperEnd)+'this.renderSupport=weaponSupportIconsMarkup;',scope);
 const modFixture={weaponSemantics:{modSockets:[{hash:11,socketIndex:4,name:'Mod A',icon:'/a.png'},{hash:11,socketIndex:5,name:'Mod A',icon:'/a.png'},{hash:12,socketIndex:6,name:'Mod B',definition:{displayProperties:{icon:'/b.png'}}},{hash:13,socketIndex:7,name:'Unresolved icon'}]}};
 const modBefore=JSON.stringify(modFixture),modMarkup=scope.renderSupport(modFixture);

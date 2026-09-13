@@ -1,0 +1,305 @@
+/*
+  Shared armour and weapon tile geometry matched to the approved rendered
+  Figma concept. The app's canonical 100 by 122 tile box contains square item
+  art and a compact footer. Every socket remains proportional to that box.
+  Exact owned item renderers opt in through the shared tile host. Page-specific
+  selection and inspection behavior remains outside this visual contract.
+
+  Rarity, gear tier and masterwork are independent states. Rarity controls the
+  outer frame, Bungie's verified gear tier controls the diamond count and fill,
+  and masterwork controls only the art ring.
+*/
+.vault-transfer-item.has-item-tile .item-tile {
+  --tile-accent: rgba(255,255,255,.14);
+  --tile-glow: none;
+  --tile-mw-accent: rgba(255,255,255,.32);
+  --tile-mw-glow: none;
+  --tile-tier-fill: #9e60ff;
+  --tile-tier-glow: 0 0 4px rgba(158,96,255,.72);
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 540px;
+  height: var(--apx-icon-gear-art-height);
+  aspect-ratio: 100/122;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 1px;
+  background: #070709;
+  box-shadow: var(--tile-glow);
+  font-family: inherit;
+}
+.vault-transfer-item.has-item-tile .item-tile--exotic {
+  --tile-accent: #e0b94f;
+  --tile-glow: 0 0 14px rgba(224,185,79,.35);
+}
+.vault-transfer-item.has-item-tile .item-tile--masterworked {
+  --tile-mw-accent: #f3d361;
+  --tile-mw-glow: 0 0 10px rgba(243,211,97,.45);
+}
+.vault-transfer-item.has-item-tile .item-tile--tier-5 {
+  --tile-tier-fill: #f3ee69;
+  --tile-tier-glow: 0 0 5px rgba(243,238,105,.78);
+}
+.vault-transfer-item.has-item-tile .item-tile>* {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+/* BUNGIE ARMOUR IMAGE / BUNGIE WEAPON IMAGE */
+.vault-transfer-item.has-item-tile .tile-art {
+  left: 2.30%;
+  top: 2.00%;
+  display: grid;
+  width: 95.40%;
+  height: 77.90%;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--tile-mw-accent);
+  border-radius: 0;
+  background: #141118;
+  box-shadow: var(--tile-mw-glow);
+}
+.vault-transfer-item.has-item-tile .tile-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* DATA BG - ARMOUR LEVEL / DATA BG - WEAPONS */
+.vault-transfer-item.has-item-tile .tile-footer {
+  left: 2.30%;
+  top: 81.20%;
+  width: 95.40%;
+  height: 16.80%;
+  border: 1px solid var(--tile-accent);
+  border-radius: 0;
+  background: linear-gradient(180deg,#3d4b54,#2d3941);
+  display: flex;
+  align-items: center;
+  gap: 3%;
+  padding: 1.4% 4%;
+}
+.vault-transfer-item.has-item-tile .tile-footer>* {
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* POWER LVL */
+.vault-transfer-item.has-item-tile .tile-power {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+}
+.vault-transfer-item.has-item-tile .tile-power img {
+  display: block;
+  width: 34%;
+  height: 86%;
+  object-fit: contain;
+}
+.vault-transfer-item.has-item-tile[data-item-kind="armour"] .tile-power img {
+  filter: brightness(0) invert(1);
+}
+.vault-transfer-item.has-item-tile .tile-power b {
+  min-width: 0;
+  overflow: hidden;
+  color: #fff3c7;
+  font: 900 .92rem/1 bahnschrift-semicondensed,sans-serif;
+  text-overflow: clip;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+
+/* INTRINSIC - CHAMPION BARRIER, weapon only */
+.vault-transfer-item.has-item-tile .tile-breaker {
+  flex: 0 0 18%;
+  height: 100%;
+}
+
+/* ELEMENTAL DAMAGE TYPE, weapon only */
+.vault-transfer-item.has-item-tile .tile-element {
+  flex: 0 0 18%;
+  height: 100%;
+}
+
+/* ARMOUR ARCHETYPE / INTRINSIC - WEAPON FRAME */
+.vault-transfer-item.has-item-tile .tile-corner-badge {
+  left: 75.00%;
+  top: 3.50%;
+  width: 21.50%;
+  height: 17.50%;
+  box-shadow: var(--tile-glow);
+}
+.vault-transfer-item.has-item-tile .tile-breaker,
+.vault-transfer-item.has-item-tile .tile-element,
+.vault-transfer-item.has-item-tile .tile-corner-badge {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.vault-transfer-item.has-item-tile .tile-breaker img,
+.vault-transfer-item.has-item-tile .tile-element img,
+.vault-transfer-item.has-item-tile .tile-corner-badge img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.9));
+}
+.vault-transfer-item.has-item-tile .tile-breaker img {
+  filter: brightness(0) saturate(100%) invert(84%) sepia(79%) saturate(392%) hue-rotate(357deg) brightness(102%) contrast(91%) drop-shadow(0 1px 2px rgba(0,0,0,.9));
+}
+
+/* TRIER BACKGROUND */
+.vault-transfer-item.has-item-tile .tile-tier-strip {
+  left: 2.78%;
+  top: 2.00%;
+  width: 21.11%;
+  height: 77.90%;
+  border: 0;
+  background: linear-gradient(180deg,rgba(5,4,7,.38),rgba(5,4,7,.24));
+}
+
+/* TIER 1 to 5 */
+.vault-transfer-item.has-item-tile .tile-tier-pip {
+  left: 10.00%;
+  width: 11.92%;
+  height: 9.80%;
+}
+.vault-transfer-item.has-item-tile .tile-tier-pip::before {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  border: 0;
+  background: var(--tile-tier-fill);
+  box-shadow: var(--tile-tier-glow);
+  clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%);
+}
+.vault-transfer-item.has-item-tile .tile-tier-pip--1 {top:21.50%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--2 {top:32.00%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--3 {top:42.50%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--4 {top:53.00%}
+.vault-transfer-item.has-item-tile .tile-tier-pip--5 {top:63.50%}
+
+/* SEASON ICON */
+.vault-transfer-item.has-item-tile .tile-season-icon {
+  left: 4.00%;
+  top: 4.00%;
+  display: grid;
+  width: 22.00%;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--tile-accent);
+  border-radius: 50%;
+  background: rgba(3,3,5,.46);
+}
+.vault-transfer-item.has-item-tile .tile-season-icon img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 370%;
+  max-width: none;
+  height: 370%;
+  max-height: none;
+  object-fit: contain;
+  object-position: left top;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.95));
+}
+
+/* LOCKED SYMBOL */
+.vault-transfer-item.has-item-tile .tile-lock {
+  left: 74.00%;
+  top: 60.50%;
+  display: grid;
+  width: 22.50%;
+  height: 17.50%;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  filter: drop-shadow(0 0 4px rgba(111,255,200,.9));
+}
+.vault-transfer-item.has-item-tile .tile-lock i {
+  position: relative;
+  display: block;
+  width: 76%;
+  height: 52%;
+  border: 2px solid #6fffc8;
+  border-radius: 1px;
+  background: rgba(4,28,22,.58);
+}
+.vault-transfer-item.has-item-tile .tile-lock i::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 1px);
+  width: 48%;
+  height: 70%;
+  border: 2px solid #6fffc8;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  transform: translateX(-50%);
+}
+
+.vault-transfer-item.has-item-tile>.item-tile>.vault-transfer-quantity {
+  z-index: 4;
+  top: 19%;
+  right: 3%;
+}
+.vault-transfer-item.has-item-tile {
+  box-sizing: border-box;
+  flex-basis: var(--apx-icon-gear-art-width);
+  width: var(--apx-icon-gear-art-width);
+  min-width: var(--apx-icon-gear-art-width);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.vault-transfer-item.has-item-tile.is-equipped {
+  border: 0;
+  box-shadow: none;
+}
+.vault-transfer-item.has-item-tile.is-equipped .item-tile {
+  outline: 1px solid rgba(111,227,182,.62);
+  outline-offset: 1px;
+}
+.vault-transfer-item.has-item-tile:hover .item-tile,
+.vault-transfer-item.has-item-tile:focus-visible .item-tile {
+  outline: 1px solid #c9a84c;
+  outline-offset: 1px;
+}
+
+.has-shared-item-tile {
+  border-radius: 0!important;
+  background: transparent!important;
+  overflow: visible!important;
+}
+.has-shared-item-tile::after {
+  display: none!important;
+}
+.has-shared-item-tile>.item-tile-display {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  flex-basis: auto;
+}
+.has-shared-item-tile>.item-tile-display>.item-tile {
+  width: 100%;
+  height: 100%;
+}

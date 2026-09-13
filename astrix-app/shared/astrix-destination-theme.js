@@ -1,4 +1,4 @@
-(function installAstrixDestinationTheme(global){
+(function installForgeDestinationTheme(global){
   'use strict';
 
   const STORAGE_KEY='astrix-paradox-destination';
@@ -48,7 +48,7 @@
         else localStorage.removeItem(STORAGE_KEY);
       }catch{}
     }
-    document.dispatchEvent(new CustomEvent('astrix:destination-changed',{detail:{key,label:labelOf(key)}}));
+    document.dispatchEvent(new CustomEvent('forge:destination-changed',{detail:{key,label:labelOf(key)}}));
     return key;
   }
 
@@ -65,6 +65,6 @@
     ];
   }
 
-  global.AstrixDestinations=Object.freeze({DESTINATIONS,STORAGE_KEY,current,keyOf,labelOf,options,restore,set});
+  global.ForgeDestinations=Object.freeze({DESTINATIONS,STORAGE_KEY,current,keyOf,labelOf,options,restore,set});
   restore();
 })(globalThis);

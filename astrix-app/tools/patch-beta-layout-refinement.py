@@ -5,7 +5,7 @@ root = Path("astrix-app/pages/guardian-workspace-v2")
 css = root / "guardian-workspace-v2-beta.css"
 
 block = r"""
-/* ASTRIX beta layout refinement: identity padding + equipment proportions */
+/* Forge beta layout refinement: identity padding + equipment proportions */
 
 .stage .identity {
   padding: 18px 22px 20px 24px !important;
@@ -69,7 +69,7 @@ block = r"""
 """
 
 existing = css.read_text(encoding="utf-8") if css.exists() else ""
-marker = "/* ASTRIX beta layout refinement: identity padding + equipment proportions */"
+marker = "/* Forge beta layout refinement: identity padding + equipment proportions */"
 
 if marker in existing:
     start = existing.index(marker)

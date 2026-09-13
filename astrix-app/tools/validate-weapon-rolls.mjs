@@ -34,6 +34,10 @@ globalThis.document = { readyState: 'complete', addEventListener() {}, dispatchE
   createElement() { return { setAttribute() {}, appendChild() {}, style: {}, addEventListener() {} }; } };
 globalThis.CustomEvent = class { constructor(t, i = {}) { this.type = t; this.detail = i.detail; } };
 globalThis.fetch = async input => {
+  // This authored-roll test has no live definition data. Model the backend's
+  // explicit unresolved response, as the previous single-definition stub did.
+  if(String(input).endsWith('/bungie/manifest'))return Response.json({version:'fixture-test',paths:{}});
+  if(String(input).includes('/bungie/manifest/definitions?'))return Response.json({manifestVersion:'fixture-test',definitions:{}});
   const s = String(input), n = [...routes.keys()].find(k => s.endsWith(k));
   if (!n) return { ok: false, status: 404, json: async () => ({}) };
   const txt = await fs.readFile(routes.get(n), 'utf8');

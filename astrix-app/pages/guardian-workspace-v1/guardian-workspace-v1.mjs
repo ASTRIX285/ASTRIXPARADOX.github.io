@@ -18,9 +18,9 @@ function renderRecommendations(items=[]){return items.map(item=>`<article class=
 function renderInsights(items=[]){return items.map(item=>`<div class="insight-row">${safe(item)}</div>`).join('');}
 function renderArmour(items=[]){return items.map(item=>`<button class="armour-item" data-inspect="${safe(item.id)}" data-description="${safe(item.description||item.name)}" title="${safe(item.name)}">${item.iconUrl?`<img src="${safe(item.iconUrl)}" alt="">`:safe(item.shortLabel||item.slot)}</button>`).join('');}
 function renderStageStats(stats=[]){return stats.map(item=>`<div>${safe(item.value)} · ${safe(item.name)}</div>`).join('');}
-function dockCard(item){return `<article class="dock-card" data-inspect="${safe(item.id)}" data-description="${safe(item.description||item.type||'Preview equipment')}"><h3>${safe(item.slot)}</h3><div class="dock-main">${item.iconUrl?`<img src="${safe(item.iconUrl)}" alt="${safe(item.name)}">`:'<span class="dock-image-fallback"></span>'}<div><strong>${safe(item.name)}</strong><small>${safe(item.type||'Preview equipment')}</small><b>${item.power?safe(item.power):'Preview'}</b></div></div></article>`;}
+function dockCard(item){return `<article class="dock-card" data-inspect="${safe(item.id)}" data-description="${safe(item.description||item.type||'Equipment')}"><h3>${safe(item.slot)}</h3><div class="dock-main">${item.iconUrl?`<img src="${safe(item.iconUrl)}" alt="${safe(item.name)}">`:'<span class="dock-image-fallback"></span>'}<div><strong>${safe(item.name)}</strong><small>${safe(item.type||'Equipment')}</small><b>${item.power?safe(item.power):'Unavailable'}</b></div></div></article>`;}
 function statsCard(stats=[]){return `<article class="dock-card"><h3>Stats</h3>${stats.map(item=>`<div class="stat-row"><span>${safe(item.name)}</span><span><i style="width:${Math.min(100,Number(item.value)||0)}%"></i></span><b>${safe(item.value)}</b></div>`).join('')}</article>`;}
-function modsCard(mods=[]){const values=mods.length?mods:Array.from({length:8},(_,i)=>({name:`Preview mod ${i+1}`}));return `<article class="dock-card"><h3>Armor Mods</h3><div class="mods-grid">${values.map(mod=>`<button class="mod-box" type="button" data-inspect="${safe(mod.id||mod.name)}" data-description="${safe(mod.description||'Mod details load from the connected Guardian.')}" title="${safe(mod.name)}">${mod.iconUrl?`<img src="${safe(mod.iconUrl)}" alt="">`:'◇'}</button>`).join('')}</div></article>`;}
+function modsCard(mods=[]){const values=mods.length?mods:Array.from({length:8},(_,i)=>({name:`Mod ${i+1}`}));return `<article class="dock-card"><h3>Armor Mods</h3><div class="mods-grid">${values.map(mod=>`<button class="mod-box" type="button" data-inspect="${safe(mod.id||mod.name)}" data-description="${safe(mod.description||'Mod details load from Guardian data.')}" title="${safe(mod.name)}">${mod.iconUrl?`<img src="${safe(mod.iconUrl)}" alt="">`:'◇'}</button>`).join('')}</div></article>`;}
 function activityCard(activity){return `<article class="dock-card"><h3>Activity</h3><strong>${safe(activity?.name||'No activity selected')}</strong><p>${activity?`Champions: ${safe((activity.champions||[]).join(', ')||'None')}<br>Surge: ${safe(activity.surge||'None')}<br>${safe(activity.location||'')}`:'Select an activity to adapt recommendations.'}</p></article>`;}
 
 function bindInspection(){
@@ -41,20 +41,20 @@ function render(state){
   document.body.dataset.element=String(state.subclass.element.name||'void').toLowerCase();
 
   setText('[data-account]',`${state.player.displayName}${state.player.membershipCode?`#${state.player.membershipCode}`:''}`);
-  setText('[data-season]',state.player.seasonLabel||'Preview mode');
-  setText('[data-preview-banner]',state.notice||'Preview mode');
+  setText('[data-season]',state.player.seasonLabel||'DESTINY 2');
+  setText('[data-preview-banner]',state.notice||'Guardian data ready');
   setText('[data-subclass-name]',state.subclass.name);
   setText('[data-class-name]',`${state.character.className} SUBCLASS`);
   setText('[data-element]',state.subclass.element.name);
-  setText('[data-power]',state.character.power??'PREVIEW');
-  setText('[data-stage-power]',state.character.power??'PREVIEW');
+  setText('[data-power]',state.character.power??'UNAVAILABLE');
+  setText('[data-stage-power]',state.character.power??'UNAVAILABLE');
   setText('[data-guardian-name]',state.player.displayName);
   setText('[data-guardian-class]',state.character.className);
   setText('[data-guardian-subclass]',state.subclass.name);
   setText('[data-title]',state.character.title||'GUARDIAN');
-  setText('[data-guardian-rank]',state.character.guardianRank??'Preview');
-  setText('[data-triumph-score]',state.character.triumphScore??'Preview');
-  setText('[data-emblem]',state.character.emblemName||'Not connected');
+  setText('[data-guardian-rank]',state.character.guardianRank??'Unavailable');
+  setText('[data-triumph-score]',state.character.triumphScore??'Unavailable');
+  setText('[data-emblem]',state.character.emblemName||'Unavailable');
   setImage('[data-subclass-crest]',state.subclass.element.crestUrl,`${state.subclass.element.name} crest`);
   setImage('[data-fallback-crest]',state.subclass.element.crestUrl,`${state.subclass.element.name} crest`);
 
@@ -101,7 +101,7 @@ function render(state){
 async function init(){
   try{
     const response=await fetch('./guardian-workspace-v1.preview.json',{cache:'no-store'});
-    if(!response.ok)throw new Error(`Preview state request failed: ${response.status}`);
+    if(!response.ok)throw new Error(`Guardian data request failed: ${response.status}`);
     render(await response.json());
   }catch(error){
     console.error(error);

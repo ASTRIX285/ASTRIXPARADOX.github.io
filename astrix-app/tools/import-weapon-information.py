@@ -14,7 +14,7 @@ Generated output:
 Design rules:
 
 * Stable weapon IDs use the Bungie item hash.
-* Official Bungie data and curated ASTRIX data remain separate.
+* Official Bungie data and curated Forge data remain separate.
 * Rankings, tiers and leaderboard fields are forbidden.
 * Curated records match by Bungie hash first.
 * Name matching is allowed only when exactly one manifest record matches.

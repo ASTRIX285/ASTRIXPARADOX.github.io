@@ -1,4 +1,4 @@
-import {bindingOf,bindingsEqual,createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
+import {bindingOf,bindingsEqual,compactBungieLoadouts,createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';
@@ -8,6 +8,7 @@ const text=value=>String(value??'').trim();
 const compactDisplayProperties=value=>({name:text(value?.name),description:text(value?.description),icon:text(value?.icon),highResIcon:text(value?.highResIcon)});
 const compactPlugRules=value=>Array.isArray(value)?value.map(row=>({failureMessage:text(row?.failureMessage)})).filter(row=>row.failureMessage):[];
 const compactTooltipNotifications=value=>Array.isArray(value)?value.map(row=>({displayString:text(row?.displayString??row?.displayText),displayStyle:text(row?.displayStyle)})).filter(row=>row.displayString):[];
+const compactLoadouts=compactBungieLoadouts;
 function compactDefinition(value={}){
   const insertionRules=compactPlugRules(value?.plug?.insertionRules),enabledRules=compactPlugRules(value?.plug?.enabledRules),tooltipNotifications=compactTooltipNotifications(value?.tooltipNotifications),plug=value?.plug?{plugCategoryIdentifier:text(value.plug.plugCategoryIdentifier),energyCost:value.plug.energyCost??null}:null;
   if(plug&&insertionRules.length)plug.insertionRules=insertionRules;if(plug&&enabledRules.length)plug.enabledRules=enabledRules;
@@ -59,6 +60,8 @@ function compactForgeLoaderProfileBuild(profileBuild={},binding={}){
     subclass:profileBuild.subclass||'',
     subclassName:profileBuild.subclassName||'',
     subclassIcon:profileBuild.subclassIcon||'',
+    subclassItemInstanceId:text(profileBuild.subclassItemInstanceId||profileBuild.subclassItem?.itemInstanceId),
+    subclassItem:compactValue(profileBuild.subclassItem||null),
     subclassCatalog:compactValue(profileBuild.subclassCatalog||[]),
     subclassBuild:compactValue(subclassBuild),
     super:compactValue(profileBuild.super??subclassBuild.super??null),
@@ -71,6 +74,8 @@ function compactForgeLoaderProfileBuild(profileBuild={},binding={}){
     artifactOptions:compactValue(profileBuild.artifactOptions||[]),
     currentSeasonNumber:Number.isInteger(Number(profileBuild.currentSeasonNumber))?Number(profileBuild.currentSeasonNumber):null,
     currentSeason:compactValue(profileBuild.currentSeason||null),
+    loadoutsAvailable:profileBuild.loadoutsAvailable===true,
+    loadouts:compactLoadouts(profileBuild.loadouts||[]),
     weapons:compactValue(profileBuild.weapons||[]),
     ownedWeapons:compactValue(profileBuild.ownedWeapons||profileBuild.weapons||[]),
     armour:compactValue(profileBuild.armour||[]),
@@ -130,4 +135,4 @@ function writeForgeLoaderBuildSnapshot(profileBuild,binding,{stores=[],snapshotE
   return stored;
 }
 
-export {BUILD_SNAPSHOT_KEY,BUILD_SPACE_KEY,LAST_LOADOUT_KEY,compactForgeLoaderProfileBuild,createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot};
+export {BUILD_SNAPSHOT_KEY,BUILD_SPACE_KEY,LAST_LOADOUT_KEY,compactLoadouts,compactForgeLoaderProfileBuild,createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot};

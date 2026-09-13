@@ -124,18 +124,18 @@ function renderLiveAnalysis(analysis){
 }
 
 if(typeof document!=='undefined'){
-document.addEventListener("astrix:guardian-selection-changed",event=>{
+document.addEventListener("forge:guardian-selection-changed",event=>{
   if(event.detail?.source!=="bungie-live")return;
   queueMicrotask(()=>{
     try{
       const analysis=analyzeLiveGuardian(event.detail);
       event.detail.paradoxAnalysis=analysis;
       renderLiveAnalysis(analysis);
-      document.dispatchEvent(new CustomEvent("astrix:paradox-live-analysis-changed",{detail:analysis}));
-      adviseLiveWeaponRolls(event.detail,analysis,{insertSocketPlugFree:false}).catch(error=>console.warn("[ASTRIX weapon advisor]",String(error)));
+      document.dispatchEvent(new CustomEvent("forge:paradox-live-analysis-changed",{detail:analysis}));
+      adviseLiveWeaponRolls(event.detail,analysis,{insertSocketPlugFree:false}).catch(error=>console.warn("[Forge weapon advisor]",String(error)));
     }catch(error){
       console.error("[Paradox live adapter]",error);
-      document.dispatchEvent(new CustomEvent("astrix:paradox-live-analysis-error",{detail:{message:error?.message||String(error)}}));
+      document.dispatchEvent(new CustomEvent("forge:paradox-live-analysis-error",{detail:{message:error?.message||String(error)}}));
     }
   });
 });

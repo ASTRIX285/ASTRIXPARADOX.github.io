@@ -30,7 +30,6 @@ const tables={
 
 let version='v1';
 const componentCalls=[];
-const definitionCalls=[];
 const fetchImpl=async input=>{
   const url=new URL(String(input));
   if(url.pathname==='/bungie/manifest')return Response.json({version,jsonWorldComponentContentPaths:{en:Object.fromEntries(COMPONENT_TYPES.map(type=>[type,`/${type}.json`]))}});
@@ -38,11 +37,6 @@ const fetchImpl=async input=>{
     const type=url.searchParams.get('type');
     componentCalls.push(`${version}:${type}`);
     return new Response(JSON.stringify(tables[type]),{headers:{'Content-Type':'application/json','Content-Length':String(JSON.stringify(tables[type]).length)}});
-  }
-  if(url.pathname==='/bungie/manifest/definition'){
-    const type=url.searchParams.get('type'),hash=url.searchParams.get('hash');
-    definitionCalls.push(`${type}:${hash}`);
-    return Response.json({type,hash:Number(hash),definition:{hash:Number(hash),displayProperties:{name:`Live definition ${hash}`,icon:'/live.png'}}});
   }
   return new Response(null,{status:404});
 };
@@ -117,9 +111,8 @@ assert.equal(componentCalls.length,COMPONENT_TYPES.length*2,'new version must do
 const fallback=new GuardianManifestService({fetchImpl,storage:{available:false},authOrigin:'https://auth.test'});
 await fallback.ready();
 assert.equal(fallback.status().mode,'live-fallback');
-assert.equal((await fallback.getAsync('DestinyInventoryItemDefinition',1234)).displayProperties.name,'Live definition 1234');
-assert.equal(fallback.get('DestinyInventoryItemDefinition',1234).displayProperties.name,'Live definition 1234');
-assert.deepEqual(definitionCalls,['DestinyInventoryItemDefinition:1234']);
+assert.equal(await fallback.getAsync('DestinyInventoryItemDefinition',1234),null);
+assert.equal(fallback.get('DestinyInventoryItemDefinition',1234),null);
 
 console.log(`MANIFEST_FIRST_DOWNLOAD=${componentCalls.slice(0,COMPONENT_TYPES.length).join(',')}`);
 console.log('MANIFEST_VERSION_MATCH_SKIP=PASS componentDownloads=0');
@@ -127,7 +120,7 @@ console.log(`MANIFEST_VERSION_CHANGE_DOWNLOAD=${componentCalls.slice(COMPONENT_T
 console.log('MANIFEST_LOCAL_ROLL_RESOLUTION=PASS weapon=Freshly Rolled Weapon perk=Rolled Perk alternative=Alternative Perk');
 console.log('MANIFEST_ARTIFACT_RESOLUTION=PASS artifact=Current Artifact activePerk=Active Artifact Perk');
 console.log('MANIFEST_COMPACT_ARTIFACT_CATALOGUE=PASS artifacts=1');
-console.log('MANIFEST_INDEXEDDB_FALLBACK=PASS source=bungie-single-definition-endpoint');
+console.log('MANIFEST_UNPREPARED_DEFINITION_REJECTION=PASS networkRequests=0');
 
 let lazyDownloads=0,attempts=0;
 const lazyFetch=async input=>{
@@ -153,8 +146,8 @@ assert.equal((await lazyReload.getAsync('DestinyCollectibleDefinition',10)).hash
 assert.equal(lazyDownloads,1,'Journey must reuse the persisted matching component');
 assert.equal(await lazy.getAsync('DestinyInventoryItemDefinition',20),null);
 const retried=await Promise.all(Array.from({length:8},()=>lazy.getAsync('DestinyInventoryItemDefinition',20)));
-assert.ok(retried.every(row=>row.hash===20));assert.equal(attempts,2,'Failures must be retriable and concurrent retries deduplicated');
-console.log('JOURNEY_LAZY_COMPONENT_CACHE_AND_RETRY=PASS');
+assert.ok(retried.every(row=>row===null));assert.equal(attempts,0,'Missing prepared definitions must never trigger a per item request');
+console.log('JOURNEY_LAZY_COMPONENT_CACHE_AND_ZERO_PER_ITEM_REQUESTS=PASS');
 const scoped={characterEquipment:{data:{a:{items:[{itemInstanceId:'owned-a'}]},b:{items:[{itemInstanceId:'owned-b'}]}}},characterPlugSets:{data:{a:{plugs:{1:[{plugItemHash:101}]}},b:{plugs:{1:[{plugItemHash:102}]}}}}};
 assert.equal(characterPlugSetsForItem(scoped,{itemInstanceId:'owned-a'})[0][1][0].plugItemHash,101);
 assert.equal(characterPlugSetsForItem(scoped,{itemInstanceId:'owned-b'})[0][1][0].plugItemHash,102);

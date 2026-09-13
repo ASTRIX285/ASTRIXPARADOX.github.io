@@ -149,11 +149,11 @@ function receiveGuardian(detail){
 }
 
 document.addEventListener(
-  "astrix:guardian-selection-changed",
+  "forge:guardian-selection-changed",
   event=>receiveGuardian(event.detail)
 );
 
 document.addEventListener(
-  "astrix:beta-fixture-loaded",
+  "forge:beta-fixture-loaded",
   event=>receiveGuardian(event.detail)
 );

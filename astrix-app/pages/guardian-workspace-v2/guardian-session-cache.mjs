@@ -1,6 +1,7 @@
 const SESSION_KEY="astrix:bungie-session-cache:v1";
-const PROFILE_MARKER_KEY="astrix:bungie-profile-cache:v2";
-const PROFILE_FALLBACK_KEY="astrix:bungie-profile-cache-fallback:v2";
+const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v3:";
+const PROFILE_FALLBACK_PREFIX="astrix:bungie-page-cache-fallback:v3:";
+const PREPARED_PAGE_CHECK_PREFIX="astrix:bungie-page-check:v1:";
 const LOADOUT_FALLBACK_PREFIX="astrix:bungie-loadout-cache-fallback:v2:";
 const FAST_RETURN_KEY="astrix:guardian-fast-return:v1";
 const PORTAL_TRANSITION_KEY="astrix:guardian-portal-transition:v1";
@@ -14,9 +15,12 @@ const BUILD_FORGE_STATE_PREFIX="build-forge-state:v1";
 // verified Guardian available for a full working session so Main <-> Build
 // navigation never collapses to placeholders while Bungie refreshes.
 const PROFILE_TTL_MS=12*60*60*1000;
+const PREPARED_PAGE_REFRESH_MS=10*60*1000;
+const PREPARED_PAGE_RETRY_MS=60*1000;
 const FORGE_TRANSFER_TTL_MS=30*60*1000;
 const FORGE_TRANSFER_IO_TIMEOUT_MS=4000;
 const BUILD_FORGE_STATE_TTL_MS=12*60*60*1000;
+const profileCacheSavedAt=new WeakMap();
 
 const safeSessionRead=key=>{
   try{return JSON.parse(sessionStorage.getItem(key)||"null");}
@@ -33,6 +37,118 @@ function sessionIdentity(session={}){
   const membershipId=String(membership.membershipId||session.primaryMembershipId||session.bungieMembershipId||"");
   const membershipType=String(membership.membershipType??"");
   return membershipId?`${membershipType}:${membershipId}`:"";
+}
+
+function preparedPageCheckKey(session,page){
+  const identity=sessionIdentity(session);
+  return identity?`${PREPARED_PAGE_CHECK_PREFIX}${identity}:${pageKind(page)}`:"";
+}
+
+function readPreparedPageCheck(session,page,{storage=globalThis.localStorage}={}){
+  const key=preparedPageCheckKey(session,page);
+  if(!key||!storage)return 0;
+  try{
+    const checkedAt=Number(storage.getItem(key)||0);
+    return Number.isFinite(checkedAt)&&checkedAt>0?checkedAt:0;
+  }catch{return 0;}
+}
+
+function markPreparedPageCheckSuccess(session,page,{storage=globalThis.localStorage,now=Date.now}={}){
+  const key=preparedPageCheckKey(session,page);
+  if(!key||!storage)return 0;
+  const checkedAt=Number(now());
+  if(!Number.isFinite(checkedAt)||checkedAt<=0)return 0;
+  try{storage.setItem(key,String(checkedAt));return checkedAt;}
+  catch{return 0;}
+}
+
+function createPreparedPageRefreshController({
+  session,
+  page,
+  refresh,
+  intervalMs=PREPARED_PAGE_REFRESH_MS,
+  retryMs=PREPARED_PAGE_RETRY_MS,
+  storage=globalThis.localStorage,
+  now=Date.now,
+  setTimer=(callback,delay)=>globalThis.setTimeout(callback,delay),
+  clearTimer=timer=>globalThis.clearTimeout(timer),
+  onError=()=>{}
+}={}){
+  if(!sessionIdentity(session))throw new Error("Prepared page refresh requires an authenticated membership.");
+  if(typeof refresh!=="function")throw new TypeError("Prepared page refresh requires a refresh function.");
+  let timer=null;
+  let activeRequest=null;
+  let running=false;
+
+  const cancelTimer=()=>{
+    if(timer===null)return;
+    clearTimer(timer);
+    timer=null;
+  };
+  const schedule=delay=>{
+    cancelTimer();
+    if(!running)return;
+    timer=setTimer(()=>{
+      timer=null;
+      void run("poll").catch(()=>{});
+    },Math.max(0,Number(delay)||0));
+  };
+  const scheduleFromLastSuccess=()=>{
+    const checkedAt=readPreparedPageCheck(session,page,{storage});
+    const elapsed=checkedAt?Math.max(0,Number(now())-checkedAt):intervalMs;
+    schedule(Math.max(0,intervalMs-elapsed));
+  };
+  const run=reason=>{
+    if(activeRequest)return activeRequest;
+    cancelTimer();
+    const request=Promise.resolve().then(()=>refresh({reason,force:true}));
+    activeRequest=request.then(result=>{
+      if(result===null||result===false)throw new Error("Prepared page refresh returned no payload.");
+      markPreparedPageCheckSuccess(session,page,{storage,now});
+      if(running)schedule(intervalMs);
+      return result;
+    }).catch(error=>{
+      if(running)schedule(Math.min(intervalMs,retryMs));
+      onError(error,reason);
+      throw error;
+    }).finally(()=>{
+      activeRequest=null;
+    });
+    return activeRequest;
+  };
+
+  return {
+    start(){if(!running){running=true;scheduleFromLastSuccess();}return this;},
+    stop(){running=false;cancelTimer();},
+    check(){
+      const checkedAt=readPreparedPageCheck(session,page,{storage});
+      if(!checkedAt||Number(now())-checkedAt>=intervalMs)return run("poll");
+      schedule(intervalMs-(Number(now())-checkedAt));
+      return null;
+    },
+    refreshNow(){return run("manual");},
+    lastSuccessfulAt(){return readPreparedPageCheck(session,page,{storage});}
+  };
+}
+
+function bindPreparedPageRefreshControl(button,controller,{onError=()=>{}}={}){
+  if(!button||!controller)return ()=>{};
+  const handleClick=async()=>{
+    if(button.disabled)return;
+    button.disabled=true;
+    button.setAttribute("aria-busy","true");
+    button.textContent="Refreshing";
+    try{await controller.refreshNow();}
+    catch(error){onError(error);}
+    finally{
+      button.textContent="Refresh";
+      button.setAttribute("aria-busy","false");
+      button.disabled=false;
+    }
+  };
+  button.disabled=false;
+  button.addEventListener("click",handleClick);
+  return ()=>button.removeEventListener("click",handleClick);
 }
 
 function cacheBungieSession(session){
@@ -163,37 +279,54 @@ async function readBuildForgeState(binding,{readRecord:readBuildRecord=readRecor
   return record.snapshot||null;
 }
 
-function profileRecordKey(identity){return `profile:v2:${identity}`;}
+function pageKind(value){return String(value||"shared").trim().toLowerCase()||"shared";}
+function profileRecordKey(identity,page){return `profile:v3:${identity}:${pageKind(page)}`;}
+function profileMarkerKey(page){return `${PROFILE_MARKER_PREFIX}${pageKind(page)}`;}
+function profileFallbackKey(page){return `${PROFILE_FALLBACK_PREFIX}${pageKind(page)}`;}
 function loadoutRecordKey(identity,characterId,index){return `loadout:v2:${identity}:${characterId}:${index}`;}
 function isFresh(record){return Boolean(record&&Date.now()-Number(record.savedAt||0)<=PROFILE_TTL_MS);}
+function hasCurrentPreparedProfileContract(payload,scope){
+  return scope!=='loadout'||payload?.weaponDefinitionCoverage?.schemaVersion===1;
+}
 
-async function cacheBungieProfile(session,payload){
+async function cacheBungieProfile(session,payload,page=payload?.pageReady?.page){
   const identity=sessionIdentity(session);
   if(!identity||!payload)return false;
-  const savedAt=Date.now();
-  const key=profileRecordKey(identity);
+  const scope=pageKind(page);
+  const inheritedSavedAt=payload&&typeof payload==="object"?profileCacheSavedAt.get(payload):0;
+  const savedAt=Number(inheritedSavedAt)||Date.now();
+  if(payload&&typeof payload==="object")profileCacheSavedAt.set(payload,savedAt);
+  const key=profileRecordKey(identity,scope);
   cacheBungieSession(session);
-  safeSessionWrite(PROFILE_MARKER_KEY,{key,identity,savedAt});
-  const written=await writeRecord({key,identity,savedAt,payload});
-  if(!written)safeSessionWrite(PROFILE_FALLBACK_KEY,{key,identity,savedAt,payload});
+  safeSessionWrite(profileMarkerKey(scope),{key,identity,scope,savedAt});
+  const written=await writeRecord({key,identity,scope,savedAt,payload});
+  if(!written)safeSessionWrite(profileFallbackKey(scope),{key,identity,scope,savedAt,payload});
   return written;
 }
 
-async function readCachedBungieProfile(session){
+async function readCachedBungieProfile(session,page="shared"){
   const identity=sessionIdentity(session);
-  const marker=safeSessionRead(PROFILE_MARKER_KEY);
-  if(!identity||marker?.identity!==identity||!isFresh(marker))return null;
+  const scope=pageKind(page);
+  const marker=safeSessionRead(profileMarkerKey(scope));
+  if(!identity||marker?.identity!==identity||marker?.scope!==scope||!isFresh(marker))return null;
   const stored=await readRecord(marker.key);
-  if(stored?.identity===identity&&isFresh(stored)&&stored.payload)return stored.payload;
-  const fallback=safeSessionRead(PROFILE_FALLBACK_KEY);
-  return fallback?.identity===identity&&fallback?.key===marker.key&&isFresh(fallback)?fallback.payload:null;
+  if(stored?.identity===identity&&stored?.scope===scope&&isFresh(stored)&&stored.payload&&hasCurrentPreparedProfileContract(stored.payload,scope)){
+    if(typeof stored.payload==="object")profileCacheSavedAt.set(stored.payload,Number(stored.savedAt));
+    return stored.payload;
+  }
+  const fallback=safeSessionRead(profileFallbackKey(scope));
+  if(fallback?.identity===identity&&fallback?.scope===scope&&fallback?.key===marker.key&&isFresh(fallback)&&hasCurrentPreparedProfileContract(fallback.payload,scope)){
+    if(fallback.payload&&typeof fallback.payload==="object")profileCacheSavedAt.set(fallback.payload,Number(fallback.savedAt));
+    return fallback.payload;
+  }
+  return null;
 }
 
 function releaseGuardianSessionStorageFallbacks(storage=globalThis.sessionStorage){
   if(!storage)return 0;
   try{
     const keys=[];
-    for(let index=0;index<storage.length;index+=1){const key=String(storage.key(index)||'');if(key===PROFILE_FALLBACK_KEY||key.startsWith(LOADOUT_FALLBACK_PREFIX))keys.push(key);}
+    for(let index=0;index<storage.length;index+=1){const key=String(storage.key(index)||'');if(key.startsWith(PROFILE_FALLBACK_PREFIX)||key.startsWith(LOADOUT_FALLBACK_PREFIX))keys.push(key);}
     for(const key of keys)storage.removeItem(key);
     return keys.length;
   }catch{return 0;}
@@ -236,9 +369,9 @@ function armGuardianPortalTransition(){
     sessionStorage.setItem(PORTAL_TRANSITION_KEY,JSON.stringify({armedAt:Date.now(),label}));
   }catch{}
   globalThis.APX_SKIP_PORTAL=false;
-  globalThis.AstrixLoader?.mount?.();
-  globalThis.AstrixLoader?.set?.(0);
-  globalThis.AstrixLoader?.status?.(label);
+  globalThis.ForgeLoader?.mount?.();
+  globalThis.ForgeLoader?.set?.(0);
+  globalThis.ForgeLoader?.status?.(label);
 }
 
 function markGuardianFastReturn(){
@@ -252,6 +385,12 @@ export {
   readCachedBungieSession,
   cacheBungieProfile,
   readCachedBungieProfile,
+  PROFILE_TTL_MS,
+  PREPARED_PAGE_REFRESH_MS,
+  readPreparedPageCheck,
+  markPreparedPageCheckSuccess,
+  createPreparedPageRefreshController,
+  bindPreparedPageRefreshControl,
   cacheForgeLoaderTransfer,
   readForgeLoaderTransfer,
   cacheBuildForgeState,

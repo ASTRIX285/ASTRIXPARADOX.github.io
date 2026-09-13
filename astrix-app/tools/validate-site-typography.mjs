@@ -7,7 +7,7 @@ const excludedTopLevel=new Set([
   '.git',
   '.sandbox-dist',
   'ASTRIX285.github.io',
-  'astrix-auth-worker',
+  'forge-auth-worker',
   'node_modules',
 ]);
 const files=[];
@@ -30,7 +30,7 @@ assert.ok(htmlFiles.length>0,'No served HTML pages found');
 for(const path of htmlFiles){
   const source=readFileSync(`${root}${path}`,'utf8');
   assert.match(source,/https:\/\/use\.typekit\.net\/tnp6kbq\.css/,`${path} must load the Adobe Fonts web project`);
-  assert.match(source,/\/css\/astrix-site-typography\.css/,`${path} must load the shared ASTRIX typography layer`);
+  assert.match(source,/\/css\/astrix-site-typography\.css/,`${path} must load the shared Forge typography layer`);
 }
 
 for(const path of files){
@@ -40,7 +40,7 @@ for(const path of files){
 }
 
 const typographyPath=`${root}css/astrix-site-typography.css`;
-assert.ok(existsSync(typographyPath),'Shared ASTRIX typography stylesheet is missing');
+assert.ok(existsSync(typographyPath),'Shared Forge typography stylesheet is missing');
 const typography=readFileSync(typographyPath,'utf8');
 for(const family of ['bahnschrift','bahnschrift-semicondensed','bahnschrift-condensed']){
   assert.ok(typography.includes(`"${family}"`),`Shared typography must define ${family}`);

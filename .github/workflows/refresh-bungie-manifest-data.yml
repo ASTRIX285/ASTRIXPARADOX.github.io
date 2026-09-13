@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-bungie-manifest-refresh-main
+  group: forge-bungie-manifest-refresh-main
   cancel-in-progress: false
 
 jobs:

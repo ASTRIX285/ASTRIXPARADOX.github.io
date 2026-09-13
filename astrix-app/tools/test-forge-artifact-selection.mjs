@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createBuildState} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
-import {applyForgeArtifactRecommendation} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs';
+import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs';
 
 const perk=(hash,name,description,tierIndex,itemIndex,minimumUnlockPointsUsedRequirement,{active=false,visible=true}={})=>({
   hash,
@@ -134,6 +134,10 @@ assert.deepEqual(artifactTwoApplied.state.workingBuild.artifactConfiguration.sel
 assert.equal(artifactTwoApplied.state.workingBuild.artifactConfiguration.provenance.selectionModel,'artifact-2-socket-buckets');
 assert.equal('confirmed' in artifactTwoApplied.state.workingBuild.artifactConfiguration,false);
 assert.equal('liveApplied' in artifactTwoApplied.state.workingBuild.artifactConfiguration,false);
+const sevenPerkRecommendation={selectionSequence:Array.from({length:7},(_,index)=>({artifactPerk:{hash:2301+index,name:`Verified pick ${index+1}`,description:`Verified Artifact effect ${index+1}`,icon:`/perk-${index+1}.png`}}))};
+const completeSevenPerkCatalogue=artifactPerkCatalogue({perks:sevenPerkRecommendation.selectionSequence.slice(0,5).map(row=>row.artifactPerk)},sevenPerkRecommendation);
+assert.equal(completeSevenPerkCatalogue.length,7,'The compact Artifact rail must resolve every verified selected pick from recommendation evidence when a persisted Artifact object is incomplete.');
+assert.equal(completeSevenPerkCatalogue[6].icon,'/perk-7.png','Recovered Artifact picks must retain their verified Bungie icon path.');
 
 console.log('FORGE_ARTIFACT_WORKING_ONLY=PASS');
 console.log('FORGE_ARTIFACT_ORIGINAL_PROTECTED=PASS');

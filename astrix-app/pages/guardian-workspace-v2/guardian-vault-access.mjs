@@ -28,7 +28,7 @@ function mergeContext(detail={}){
   updateRibbonLink();
 }
 
-function forgeLoaderUrl(slot=null){
+function forgeLoaderTargetUrl(slot=null){
   const url=new URL('/astrix-app/pages/forge-loader/',location.origin);
   url.searchParams.set('from',SOURCE);
   const binding={...context,characterId:context.characterId||storedCharacterId()};
@@ -38,6 +38,10 @@ function forgeLoaderUrl(slot=null){
     url.searchParams.set('slot',slotKeys[Number(slot)]||'all');
   }
   return url;
+}
+
+function forgeLoaderUrl(slot=null){
+  return forgeLoaderTargetUrl(slot);
 }
 
 function updateRibbonLink(){
@@ -62,8 +66,8 @@ function mountDrawerLink(slot){
   link.href=forgeLoaderUrl(slot);
   link.textContent='OPEN FORGE LOADER';
   link.addEventListener('click',()=>{
-    globalThis.AstrixLoader?.mount?.();
-    globalThis.AstrixLoader?.status?.('Opening Forge Loader…');
+    globalThis.ForgeLoader?.mount?.();
+    globalThis.ForgeLoader?.status?.('Opening Forge Loader…');
   });
   panel.appendChild(link);
 }
@@ -75,8 +79,8 @@ function handleArmourActivation(event){
   if(!Number.isInteger(slot))return;
   if(SOURCE==='build'){
     event.preventDefault();
-    globalThis.AstrixLoader?.mount?.();
-    globalThis.AstrixLoader?.status?.('Opening Forge Loader…');
+    globalThis.ForgeLoader?.mount?.();
+    globalThis.ForgeLoader?.status?.('Opening Forge Loader…');
     location.href=forgeLoaderUrl(slot);
     return;
   }
@@ -95,7 +99,7 @@ function preserveCharacterBuild(event){
   const link=event.target.closest('a');
   if(!link)return;
   if(new URL(link.href,location.href).pathname!=='/astrix-app/pages/forge-loader/')return;
-  document.dispatchEvent(new CustomEvent('astrix:vault-open'));
+  document.dispatchEvent(new CustomEvent('forge:vault-open'));
 }
 
 function install(){
@@ -105,15 +109,15 @@ function install(){
   document.addEventListener('click',preserveCharacterBuild,true);
   document.addEventListener('click',handleArmourActivation);
   document.addEventListener('keydown',handleArmourKey);
-  document.addEventListener('astrix:character-selected',event=>mergeContext(event.detail||{}));
-  document.addEventListener('astrix:guardian-selection-changed',event=>mergeContext(event.detail||{}));
-  document.addEventListener('astrix:guardian-loadout-context',event=>mergeContext(event.detail||{}));
-  document.addEventListener('astrix:build-render-complete',updateRibbonLink);
-  const ribbon=document.querySelector('[data-astrix-destination-ribbon]');
+  document.addEventListener('forge:character-selected',event=>mergeContext(event.detail||{}));
+  document.addEventListener('forge:guardian-selection-changed',event=>mergeContext(event.detail||{}));
+  document.addEventListener('forge:guardian-loadout-context',event=>mergeContext(event.detail||{}));
+  document.addEventListener('forge:build-render-complete',updateRibbonLink);
+  const ribbon=document.querySelector('[data-forge-destination-ribbon]');
   if(ribbon)new MutationObserver(updateRibbonLink).observe(ribbon,{childList:true,subtree:true});
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
 else install();
 
-export {buildBinding,forgeLoaderUrl};
+export {buildBinding,forgeLoaderTargetUrl,forgeLoaderUrl};

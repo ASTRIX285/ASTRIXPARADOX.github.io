@@ -52,7 +52,7 @@ async function adviseLiveWeaponRolls(detail={},analysis={},capabilities={insertS
   const result={source:"paradox-curated-perk-intelligence",context,recommendations,stagedChanges,remotePerkMutationSupported:Boolean(capabilities.insertSocketPlugFree),requiresUserConfirmation:true};
   analysis.weaponRollAdvice=result;
   detail.weaponRollAdvice=result;
-  document.dispatchEvent(new CustomEvent("astrix:weapon-roll-advice-changed",{detail:result}));
+  if(typeof document!=="undefined")document.dispatchEvent(new CustomEvent("forge:weapon-roll-advice-changed",{detail:result}));
   return result;
 }
 

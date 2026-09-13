@@ -1,12 +1,18 @@
-import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1";
+import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 import {
   normaliseLiveProfile,
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260905-manual-editor-2";
+} from "./guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
+import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
+import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2";
+import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 
 const PLAYER_POWER_CAP = 550;
 const VALID_CLASSES = ["hunter", "titan", "warlock"];
@@ -66,6 +72,165 @@ const workspaceState = {
   ornaments: []
 };
 
+const characterInventoryState={session:null,payload:null,catalogue:{items:[],postmasterItems:[]},activeCharacterId:'',detail:null,pendingAction:null,busy:false};
+
+function characterInventoryStatus(message,state=''){
+  const node=byId('characterInventoryStatus');
+  if(node){node.textContent=message;node.className=`vault-runtime-status${state?` is-${state}`:''}`;}
+}
+
+function characterInventoryItem(key){
+  return [...(characterInventoryState.catalogue.items||[]),...(characterInventoryState.catalogue.postmasterItems||[])].find(item=>itemKey(item)===String(key||''))||null;
+}
+
+function activeCharacterLabel(){
+  const value=String(characterInventoryState.detail?.characterClass||'Guardian');
+  return value.replace(/^./,letter=>letter.toUpperCase());
+}
+
+function renderCharacterInventory(){
+  const host=byId('characterInventoryWorkspace'),payload=characterInventoryState.payload,characterId=String(characterInventoryState.activeCharacterId||'');
+  if(!host)return;
+  if(!payload?.profile||!characterId){
+    host.innerHTML='<p class="vault-transfer-empty">Live Bungie inventory is unavailable for the active Guardian.</p>';
+    return;
+  }
+  const character=payload.profile?.characters?.data?.[characterId]||null;
+  if(!character){
+    host.innerHTML='<p class="vault-transfer-empty">The active Guardian is not present in the latest Bungie profile.</p>';
+    return;
+  }
+  const capabilities=liveActionCapabilities(characterInventoryState.session||{}),emblem=character.emblemBackgroundPath||character.emblemPath||'',style=emblem?` style="--vault-character-emblem:url('${escapeHtml(bungieUrl(emblem))}')"`:'';
+  host.innerHTML=`<article class="vault-character-column is-active character-live-inventory"${style}>
+    ${postmasterMarkup({characterId,items:characterInventoryState.catalogue.postmasterItems,characterLabel:activeCharacterLabel(),capabilities,activeCharacterId:characterId})}
+    <div class="vault-character-inventory">
+      <header class="vault-character-header"><div><span>ACTIVE GUARDIAN</span><h3>${escapeHtml(activeCharacterLabel().toUpperCase())}</h3></div><strong>${character.light===undefined?'':`✦ ${escapeHtml(character.light)}`}</strong></header>
+      ${equippedAndCarriedMarkup({characterId,items:characterInventoryState.catalogue.items,capabilities,activeCharacterId:characterId})}
+    </div>
+  </article>`;
+  bindInventoryWorkspaceHovers(host,{resolveItem:characterInventoryItem,bindInspect:bindParadoxItemInspect});
+}
+
+function updateCharacterInventory(detail={}){
+  const source=String(detail.source||'');
+  if(source!=='bungie-live'&&String(detail.loadoutSource||'')!=='bungie-live'){
+    characterInventoryState.payload=null;
+    characterInventoryState.activeCharacterId='';
+    renderCharacterInventory();
+    characterInventoryStatus('Connect Bungie to inspect the active Guardian inventory.');
+    return;
+  }
+  try{
+    const next=globalThis.FORGE_PAGE_PAYLOAD;
+    assertRenderablePagePayload(next,'character');
+    characterInventoryState.payload=next;
+    characterInventoryState.catalogue=createVaultCatalogue(next);
+    characterInventoryState.activeCharacterId=String(detail.characterId||'');
+    characterInventoryState.detail=detail;
+    renderCharacterInventory();
+    characterInventoryStatus('Showing real equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip.','good');
+  }catch(error){
+    characterInventoryState.payload=null;
+    renderCharacterInventory();
+    characterInventoryStatus(error?.message||'The active Guardian inventory could not be rendered.','error');
+  }
+}
+
+function closeCharacterInventoryAction(){
+  if(characterInventoryState.busy)return;
+  const dialog=byId('characterInventoryActionDialog');
+  if(dialog?.open)dialog.close();
+  characterInventoryState.pendingAction=null;
+  const progress=byId('characterInventoryActionProgress');
+  if(progress)progress.textContent='';
+}
+
+function showCharacterInventoryAction(title,summary,action){
+  characterInventoryState.pendingAction=action;
+  byId('characterInventoryActionTitle').textContent=title;
+  byId('characterInventoryActionSummary').textContent=summary;
+  byId('characterInventoryActionProgress').textContent='Review the exact account change, then confirm.';
+  const dialog=byId('characterInventoryActionDialog');
+  if(typeof dialog?.showModal==='function')dialog.showModal();
+  else dialog?.setAttribute('open','');
+}
+
+async function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
+  if(characterInventoryState.busy)return;
+  let result=null;
+  try{
+    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=confirmPostmasterCollectionIntent(stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}));
+    characterInventoryState.busy=true;
+    characterInventoryStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${activeCharacterLabel()} Postmaster. Waiting for Bungie inventory feedback.`);
+    result=await executePostmasterCollectionIntent(intent,{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
+    if(result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId}}));
+    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
+    else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${characterInventoryFailure(result)}`,'error');
+  }catch(error){
+    if(result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull-recovery',characterId:characterInventoryState.activeCharacterId}}));
+    characterInventoryStatus(error?.message||'The Postmaster pull failed.','error');
+  }finally{characterInventoryState.busy=false;}
+}
+
+function stageCharacterDirectEquip(requestedItemKey){
+  const item=characterInventoryItem(requestedItemKey),characterId=characterInventoryState.activeCharacterId;
+  if(!item||!characterId)return;
+  try{
+    if(item.source?.kind==='vault'){
+      const intent=stageVaultTransferIntent({item,destination:{kind:'character',characterId},session:characterInventoryState.session,equipAfterTransfer:true});
+      showCharacterInventoryAction('Confirm direct live equip',`Move ${item.name} from Vault to ${activeCharacterLabel()}, then equip that exact item. Bungie must confirm transfer and equip before this view changes.`,{kind:'transfer',intent});
+      return;
+    }
+    if(item.source?.kind==='postmaster'){
+      const intent=stagePostmasterCollectionIntent({characterId:String(item.source.characterId||''),targetCharacterId:characterId,items:[item],session:characterInventoryState.session,equipAfterCollection:true});
+      showCharacterInventoryAction('Confirm direct live equip',`Collect ${item.name} from ${activeCharacterLabel()} Postmaster, then equip that exact item. Every step must be confirmed by Bungie.`,{kind:'postmaster',intent});
+    }
+  }catch(error){characterInventoryStatus(error?.message||'This direct live equip cannot be staged.','error');}
+}
+
+function characterInventoryFailure(result){
+  const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
+  return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
+}
+
+async function performCharacterInventoryAction(){
+  const action=characterInventoryState.pendingAction;
+  if(!action||characterInventoryState.busy)return;
+  const confirm=byId('characterInventoryActionConfirm'),cancel=byId('characterInventoryActionCancel'),progress=byId('characterInventoryActionProgress');
+  characterInventoryState.busy=true;
+  confirm.disabled=true;
+  cancel.disabled=true;
+  progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
+  let result=null;
+  try{
+    const onProgress=row=>{progress.textContent=row.label||'Waiting for Bungie confirmation.';};
+    result=action.kind==='transfer'
+      ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session:characterInventoryState.session,onProgress})
+      :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress});
+    if(result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action',characterId:characterInventoryState.activeCharacterId}}));
+    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('The live inventory action was confirmed by Bungie. Refreshing the active Guardian from a fresh profile.','good');
+    else characterInventoryStatus(`${result.status==='partial'?'The live action partially completed':'No live change was confirmed'}: ${characterInventoryFailure(result)}`,'error');
+  }catch(error){
+    if(result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action-recovery',characterId:characterInventoryState.activeCharacterId}}));
+    characterInventoryStatus(error?.message||'The Bungie action failed before confirmation.','error');
+  }finally{
+    characterInventoryState.busy=false;
+    confirm.disabled=false;
+    cancel.disabled=false;
+    if(byId('characterInventoryActionDialog')?.open)byId('characterInventoryActionDialog').close();
+    characterInventoryState.pendingAction=null;
+  }
+}
+
+function installCharacterInventory(){
+  const host=byId('characterInventoryWorkspace');
+  bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection,onDirectEquip:stageCharacterDirectEquip});
+  byId('characterInventoryActionCancel')?.addEventListener('click',closeCharacterInventoryAction);
+  byId('characterInventoryActionConfirm')?.addEventListener('click',performCharacterInventoryAction);
+  byId('characterInventoryActionDialog')?.addEventListener('cancel',event=>{event.preventDefault();if(!characterInventoryState.busy)closeCharacterInventoryAction();});
+  getBungieSession().then(session=>{characterInventoryState.session=session;renderCharacterInventory();}).catch(()=>{});
+}
+
 let stageLoadingTimer = 0;
 let renderSequence = 0;
 
@@ -95,7 +260,7 @@ function setStageState(state, message = "") {
       if (stage) stage.dataset.state = "error";
       if (titleNode) titleNode.textContent = "REQUEST TIMEOUT";
       if (msgNode) msgNode.textContent = "Guardian data took too long. Refresh or reconnect Bungie.";
-      document.dispatchEvent(new CustomEvent("astrix:guardian-load-timeout"));
+      document.dispatchEvent(new CustomEvent("forge:guardian-load-timeout"));
     }, 15000);
   }
 }
@@ -203,13 +368,13 @@ function publishRenderComplete(detail = {}) {
       byId("equippedSubclassSummary"), byId("superFeatureCluster"), byId("abilityList"),
       byId("aspectList"), byId("fragList"), byId("artPerks"),
       document.querySelector(".gear-weapons"), document.querySelector(".gear-combined"),
-      byId("guardianCharacterCards"), byId("guardianLoadouts")
+      byId("characterInventoryWorkspace"), byId("guardianCharacterCards"), byId("guardianLoadouts")
     ].filter(Boolean);
     const images = [...new Set(roots.flatMap(root => [...root.querySelectorAll("img")]))];
     await Promise.all(images.map(settleImage));
     if (sequence !== renderSequence) return;
     document.documentElement.dataset.guardianRenderComplete = "true";
-    document.dispatchEvent(new CustomEvent("astrix:guardian-render-complete", { detail: {
+    document.dispatchEvent(new CustomEvent("forge:guardian-render-complete", { detail: {
       characterId: String(detail.characterId || ""),
       selectedLoadoutIndex: Number.isInteger(detail.selectedLoadoutIndex) ? detail.selectedLoadoutIndex : null,
       superCount: Number(byId("superFeatureCluster")?.dataset.superCount || 0),
@@ -225,28 +390,6 @@ function ensureLayoutPlaceholders() {
     if (!host || host.children.length) return;
     host.innerHTML = Array.from({ length: count }, emptyRailSlot).join("");
   });
-}
-
-function renderWeapons(weapons = []) {
-  const host = byId("weaponList");
-  if (!host) return;
-  host.innerHTML = weapons.map(w => `
-    <div class="slot">
-      <span class="ico-badge">${itemIconMarkup(w)}</span>
-      <div class="meta"><small>${escapeHtml(w?.itemTypeDisplayName || "Weapon")}</small><b>${escapeHtml(w?.name || "Empty")}</b></div>
-    </div>
-  `).join("");
-}
-
-function bindArmourSlots(armour = []) {
-  const host = byId("armourList");
-  if (!host) return;
-  host.innerHTML = armour.map(a => `
-    <div class="slot">
-      <span class="ico-badge">${itemIconMarkup(a)}</span>
-      <div class="meta"><small>${escapeHtml(a?.itemTypeDisplayName || "Armor")}</small><b>${escapeHtml(a?.name || "Empty")}</b></div>
-    </div>
-  `).join("");
 }
 
 function renderStats(stats = []) {
@@ -304,8 +447,6 @@ function applyGuardianSelection(detail) {
     fragments: Array.isArray(next.fragments) ? next.fragments : []
   };
   renderSubclassBuild({...subclassBuild,artifact:next.artifact||null}, next.subclassName);
-  if (Array.isArray(next.weapons)) renderWeapons(next.weapons);
-  if (Array.isArray(next.armour)) bindArmourSlots(next.armour);
   if (Array.isArray(next.stats)) renderStats(next.stats);
   updateIdentityCosmetics(next);
   renderVerifiedPreview(next);
@@ -313,22 +454,23 @@ function applyGuardianSelection(detail) {
   publishRenderComplete(next);
 }
 
-document.addEventListener("astrix:guardian-selection-changed", event => {
+document.addEventListener("forge:guardian-selection-changed", event => {
   try {
     applyGuardianSelection(event.detail);
+    updateCharacterInventory(event.detail);
   } catch (error) {
-    console.error("[ASTRIX Guardian render]", error);
+    console.error("[Forge Guardian render]", error);
     setStageState("error", "Guardian data arrived, but the workspace could not render it.");
   }
 });
 
-document.addEventListener("astrix:guardian-loading", () => setStageState("loading", "Loading Guardian data…"));
-document.addEventListener("astrix:guardian-error", event =>
+document.addEventListener("forge:guardian-loading", () => setStageState("loading", "Loading Guardian data…"));
+document.addEventListener("forge:guardian-error", event =>
   setStageState("error", event.detail?.message || "Guardian data could not be loaded.")
 );
 
-bindArmourSlots([]);
 ensureLayoutPlaceholders();
+installCharacterInventory();
 setStageState("ready");
 
-export { renderSubclassBuild, renderWeapons, bindArmourSlots, renderStats, renderVerifiedPreview, resolvedDisplayIcon };
+export { renderSubclassBuild, renderStats, renderVerifiedPreview, resolvedDisplayIcon };

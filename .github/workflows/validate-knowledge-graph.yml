@@ -1,4 +1,4 @@
-name: Validate ASTRIX Knowledge Graph
+name: Validate Forge Knowledge Graph
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-knowledge-graph-${{ github.ref }}
+  group: forge-knowledge-graph-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

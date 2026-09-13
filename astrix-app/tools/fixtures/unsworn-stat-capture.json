@@ -1,0 +1,1203 @@
+{
+  "source": "Miguel diagnostic capture 2026-09-09T03:45:00.635Z; public definitions and stat group from Bungie manifest. Account and instance identifiers omitted.",
+  "itemHash": 3462679024,
+  "definition": {
+    "hash": 3462679024,
+    "displayProperties": {
+      "description": "",
+      "name": "Unsworn",
+      "icon": "/common/destiny2_content/icons/dd0ae6e8b9aeccfcbec7d5971c48984c.jpg",
+      "iconHash": 3462679024,
+      "hasIcon": true
+    },
+    "investmentStats": [
+      {
+        "statTypeHash": 1480404414,
+        "value": 0,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 1935470627,
+        "value": 0,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 1885944937,
+        "value": 0,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 3555269338,
+        "value": 16,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 4284893193,
+        "value": 100,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 4043523819,
+        "value": 0,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 1240592695,
+        "value": 75,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 155624089,
+        "value": 70,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 3871231066,
+        "value": 80,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 4188031367,
+        "value": 50,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 1931675084,
+        "value": 47,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 943549884,
+        "value": 55,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 1345609583,
+        "value": 100,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 2715839340,
+        "value": 97,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 2714457168,
+        "value": 15,
+        "isConditionallyActive": false
+      },
+      {
+        "statTypeHash": 3209419233,
+        "value": 0,
+        "isConditionallyActive": true
+      }
+    ],
+    "stats": {
+      "disablePrimaryStatDisplay": false,
+      "statGroupHash": 2599662769,
+      "stats": {
+        "155624089": {
+          "statHash": 155624089,
+          "value": 70,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "943549884": {
+          "statHash": 943549884,
+          "value": 55,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1240592695": {
+          "statHash": 1240592695,
+          "value": 75,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1345609583": {
+          "statHash": 1345609583,
+          "value": 100,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1480404414": {
+          "statHash": 1480404414,
+          "value": 0,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1885944937": {
+          "statHash": 1885944937,
+          "value": 0,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1931675084": {
+          "statHash": 1931675084,
+          "value": 47,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "1935470627": {
+          "statHash": 1935470627,
+          "value": 0,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "2714457168": {
+          "statHash": 2714457168,
+          "value": 15,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "2715839340": {
+          "statHash": 2715839340,
+          "value": 97,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "3209419233": {
+          "statHash": 3209419233,
+          "value": 0,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "3555269338": {
+          "statHash": 3555269338,
+          "value": 16,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "3871231066": {
+          "statHash": 3871231066,
+          "value": 98,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "4043523819": {
+          "statHash": 4043523819,
+          "value": 6,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "4188031367": {
+          "statHash": 4188031367,
+          "value": 50,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        },
+        "4284893193": {
+          "statHash": 4284893193,
+          "value": 1000,
+          "minimum": 0,
+          "maximum": 0,
+          "displayMaximum": 100
+        }
+      },
+      "hasDisplayableStats": true,
+      "primaryBaseStatHash": 1480404414
+    },
+    "itemTypeDisplayName": "Trace Rifle",
+    "resolvedStatGroup": {
+      "maximumValue": 100,
+      "uiPosition": 0,
+      "scaledStats": [
+        {
+          "statHash": 4284893193,
+          "maximumValue": 100,
+          "displayAsNumeric": true,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 1000
+            },
+            {
+              "value": 100,
+              "weight": 1000
+            }
+          ]
+        },
+        {
+          "statHash": 4043523819,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 6
+            },
+            {
+              "value": 100,
+              "weight": 10
+            }
+          ]
+        },
+        {
+          "statHash": 1240592695,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 155624089,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 943549884,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 4188031367,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 3871231066,
+          "maximumValue": 100,
+          "displayAsNumeric": true,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 74
+            },
+            {
+              "value": 100,
+              "weight": 104
+            }
+          ]
+        },
+        {
+          "statHash": 1345609583,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 3555269338,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 2715839340,
+          "maximumValue": 100,
+          "displayAsNumeric": true,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 2714457168,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "statHash": 1931675084,
+          "maximumValue": 100,
+          "displayAsNumeric": false,
+          "displayInterpolation": [
+            {
+              "value": 0,
+              "weight": 0
+            },
+            {
+              "value": 100,
+              "weight": 100
+            }
+          ]
+        }
+      ],
+      "overrides": {},
+      "hash": 2599662769,
+      "index": 36,
+      "redacted": false,
+      "blacklisted": false
+    }
+  },
+  "weaponSemantics": {
+    "gearTier": 5,
+    "stats": {
+      "155624089": {
+        "statHash": 155624089,
+        "value": 76
+      },
+      "943549884": {
+        "statHash": 943549884,
+        "value": 60
+      },
+      "1240592695": {
+        "statHash": 1240592695,
+        "value": 96
+      },
+      "1345609583": {
+        "statHash": 1345609583,
+        "value": 100
+      },
+      "1931675084": {
+        "statHash": 1931675084,
+        "value": 47
+      },
+      "2714457168": {
+        "statHash": 2714457168,
+        "value": 15
+      },
+      "2715839340": {
+        "statHash": 2715839340,
+        "value": 97
+      },
+      "3555269338": {
+        "statHash": 3555269338,
+        "value": 16
+      },
+      "3871231066": {
+        "statHash": 3871231066,
+        "value": 104
+      },
+      "4043523819": {
+        "statHash": 4043523819,
+        "value": 6
+      },
+      "4188031367": {
+        "statHash": 4188031367,
+        "value": 42
+      },
+      "4284893193": {
+        "statHash": 4284893193,
+        "value": 1000
+      }
+    },
+    "statSockets": [
+      {
+        "socketIndex": 0,
+        "plugHash": 1294026524,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 1294026524,
+          "displayProperties": {
+            "description": "A well-rounded grip, reliable and sturdy.",
+            "name": "Adaptive Frame",
+            "icon": "/common/destiny2_content/icons/967fb4abc6ab98f74639d6c08e5f56ee.png",
+            "iconHash": 2251942812,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/967fb4abc6ab98f74639d6c08e5f56ee.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/29d2bf2c0944a34e20a88b3f7b796767.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "intrinsics",
+            "plugCategoryHash": 1744546145,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Intrinsic"
+        }
+      },
+      {
+        "socketIndex": 1,
+        "plugHash": 111235976,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 111235976,
+          "displayProperties": {
+            "description": "Balanced barrel. \n  \u2022  Slightly increases range and stability\n  \u2022  Slightly increases handling speed",
+            "name": "Corkscrew Rifling",
+            "icon": "/common/destiny2_content/icons/7730e1732ed7ef91afce50277639c493.png",
+            "iconHash": 1182725310,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/7730e1732ed7ef91afce50277639c493.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/1041bb1c68e0206992ad0ec9ff40ce0a.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [
+            {
+              "statTypeHash": 155624089,
+              "value": 6,
+              "isConditionallyActive": false
+            },
+            {
+              "statTypeHash": 1240592695,
+              "value": 6,
+              "isConditionallyActive": false
+            },
+            {
+              "statTypeHash": 943549884,
+              "value": 5,
+              "isConditionallyActive": false
+            }
+          ],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "barrels",
+            "plugCategoryHash": 2833605196,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Barrel"
+        }
+      },
+      {
+        "socketIndex": 2,
+        "plugHash": 3629421851,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 3629421851,
+          "displayProperties": {
+            "description": "Large heavy battery.\n  \u2022  Greatly increases magazine size\n  \u2022  Greatly decreases reload speed",
+            "name": "Ionized Battery",
+            "icon": "/common/destiny2_content/icons/a278b79aba1d341d2a070c0e48d9129a.png",
+            "iconHash": 3762776514,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/a278b79aba1d341d2a070c0e48d9129a.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/6cb2694ea704b50b9e3035dc056f6d61.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [
+            {
+              "statTypeHash": 3871231066,
+              "value": 40,
+              "isConditionallyActive": false
+            },
+            {
+              "statTypeHash": 4188031367,
+              "value": -18,
+              "isConditionallyActive": false
+            }
+          ],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "batteries",
+            "plugCategoryHash": 1757026848,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Battery"
+        }
+      },
+      {
+        "socketIndex": 3,
+        "plugHash": 2840833776,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 2840833776,
+          "displayProperties": {
+            "description": "Shooting an Orb of Power picks it up. Shooting an ammo brick picks it up and automatically reloads all of your equipped weapons from reserves. Increases range.",
+            "name": "Shoot to Loot",
+            "icon": "/common/destiny2_content/icons/e8c6e23afe3c4215f0dc0c2941500c28.png",
+            "iconHash": 3700496672,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/e8c6e23afe3c4215f0dc0c2941500c28.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/2a02b5bc5762819e65e15e9af1a01d5e.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [
+            {
+              "statTypeHash": 1240592695,
+              "value": 5,
+              "isConditionallyActive": false
+            }
+          ],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "frames",
+            "plugCategoryHash": 7906839,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Trait"
+        }
+      },
+      {
+        "socketIndex": 4,
+        "plugHash": 2939589096,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 2939589096,
+          "displayProperties": {
+            "description": "Damage increases by an improved amount the longer this weapon remains on a target.",
+            "name": "Target Lock",
+            "icon": "/common/destiny2_content/icons/72be46e05195a95ae1307a684f68456b.png",
+            "iconHash": 365154968,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/72be46e05195a95ae1307a684f68456b.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/10e3cc1917f4beef32f3be2ff46ab8cb.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "frames",
+            "plugCategoryHash": 7906839,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Trait"
+        }
+      },
+      {
+        "socketIndex": 5,
+        "plugHash": 4248210736,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 4248210736,
+          "displayProperties": {
+            "description": "Restores your gear to its default colors.",
+            "name": "Default Shader",
+            "icon": "/common/destiny2_content/icons/96831e244728f0350340bb7d5d05b463.png",
+            "iconHash": 549360680,
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "shader",
+            "plugCategoryHash": 2973005342,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Restore Defaults"
+        }
+      },
+      {
+        "socketIndex": 6,
+        "plugHash": 260490301,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 260490301,
+          "displayProperties": {
+            "description": "",
+            "name": "Enhanced Range",
+            "icon": "/common/destiny2_content/icons/136b3d98df36ffa41774b7211f623b3b.png",
+            "iconHash": 769591840,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/136b3d98df36ffa41774b7211f623b3b.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/644e671964d3c9bed407fddc4d769641.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [
+            {
+              "statTypeHash": 1240592695,
+              "value": 10,
+              "isConditionallyActive": false
+            }
+          ],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "v400.weapon.mod_damage",
+            "plugCategoryHash": 974142739,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Weapon Mod"
+        }
+      },
+      {
+        "socketIndex": 7,
+        "plugHash": 882794620,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 882794620,
+          "displayProperties": {
+            "description": "Maximized stats.\n\nApplies additional stats to this weapon equal to the weapon's tier.",
+            "name": "Masterworked: Reload Speed",
+            "icon": "/common/destiny2_content/icons/6083d50d8712b33cda7a3e1d9ae9b93e.jpg",
+            "iconHash": 841687487,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/5512a567b457fa97009924779f3c3655.jpg"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/0d4c6d1a6f32b7aa164df6ea5d3f8ee4.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [
+            {
+              "statTypeHash": 4188031367,
+              "value": 10,
+              "isConditionallyActive": false
+            },
+            {
+              "statTypeHash": 155624089,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 1240592695,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 943549884,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 4188031367,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 3614673599,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 2523465841,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 1591432999,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 447667954,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 1842278586,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 2961396640,
+              "value": 0,
+              "isConditionallyActive": true
+            },
+            {
+              "statTypeHash": 3085395333,
+              "value": 0,
+              "isConditionallyActive": true
+            }
+          ],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "v400.plugs.weapons.masterworks.stat.reload",
+            "plugCategoryHash": 717646604,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 3785659211,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "masterwork",
+            "plugStyle": 1,
+            "plugAvailability": 2,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": ""
+        }
+      },
+      {
+        "socketIndex": 8,
+        "plugHash": 3057611278,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 3057611278,
+          "displayProperties": {
+            "description": "Weapon adapts to targets. When dealing damage:\n\n\u2022 To weak targets: shots create an improved explosion\n\u2022 To strong targets: targets become exhausted\n\u2022 To Guardians: the weapon's flinch resistance increases for an improved duration\n\nExhausted targets deal reduced outgoing damage.",
+            "name": "Subjugation",
+            "icon": "/common/destiny2_content/icons/be71992f5cbf2aae9466f4388091e2e9.png",
+            "iconHash": 1298135794,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/be71992f5cbf2aae9466f4388091e2e9.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/567b152c8e308d66efe26105c93ac743.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "origins",
+            "plugCategoryHash": 164955586,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Enhanced Origin Trait"
+        }
+      },
+      {
+        "socketIndex": 9,
+        "plugHash": 2302094943,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 2302094943,
+          "displayProperties": {
+            "description": "This weapon tracks the number of enemies you defeated with it.",
+            "name": "Kill Tracker",
+            "icon": "/common/destiny2_content/icons/2fa9b8e2b358de10643b14a058094f4b.png",
+            "iconHash": 3879253743,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/2fa9b8e2b358de10643b14a058094f4b.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/d15e8482be759e30fa233cd600a2030c.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "v400.plugs.weapons.masterworks.trackers",
+            "plugCategoryHash": 2947756142,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": ""
+        }
+      },
+      {
+        "socketIndex": 10,
+        "plugHash": 355666671,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 355666671,
+          "displayProperties": {
+            "description": "Equip this tier 5 weapon ornament to change the appearance of this weapon.",
+            "name": "Unsworn",
+            "icon": "/common/destiny2_content/icons/dd0ae6e8b9aeccfcbec7d5971c48984c.jpg",
+            "iconHash": 355666671,
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "v970.weapons.activities.dungeon_sundered.trace_rifle0_skins",
+            "plugCategoryHash": 2140476691,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": ""
+        }
+      },
+      {
+        "socketIndex": 11,
+        "plugHash": 1335132356,
+        "isEnabled": true,
+        "isVisible": true,
+        "definition": {
+          "hash": 1335132356,
+          "displayProperties": {
+            "description": "Apply this weapon mod to add a celebratory visual effect when defeating combatants.\n\nThis mod can only be applied to Tier 5 weapons.",
+            "name": "Triumphant Pulse",
+            "icon": "/common/destiny2_content/icons/8c28abb43d902b731365e1045f467a95.png",
+            "iconHash": 1335132356,
+            "iconSequences": [
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/8c28abb43d902b731365e1045f467a95.png"
+                ]
+              },
+              {
+                "frames": [
+                  "/common/destiny2_content/icons/6c3b20c1e480a42ab70b3ab5c7fa92b4.png"
+                ]
+              }
+            ],
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "weapon_tiering_kill_vfx",
+            "plugCategoryHash": 2339465330,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": "Combat Flair"
+        }
+      },
+      {
+        "socketIndex": 12,
+        "plugHash": 780815822,
+        "isEnabled": true,
+        "isVisible": false,
+        "definition": {
+          "hash": 780815822,
+          "displayProperties": {
+            "description": "This weapon's perks can be enhanced with higher Gear Tier levels.",
+            "name": "Empty Gear Tier Upgrade",
+            "icon": "/common/destiny2_content/icons/71dd675f6d9177fddb6be7d0893b92a8.jpg",
+            "iconHash": 1213734976,
+            "hasIcon": true
+          },
+          "investmentStats": [],
+          "plug": {
+            "insertionRules": [],
+            "plugCategoryIdentifier": "weapon_tiering.plugs.mods.enhancers",
+            "plugCategoryHash": 4274947747,
+            "onActionRecreateSelf": false,
+            "actionRewardSiteHash": 0,
+            "actionRewardItemOverrideHash": 0,
+            "insertionMaterialRequirementHash": 0,
+            "previewItemOverrideHash": 0,
+            "enabledMaterialRequirementHash": 0,
+            "enabledRules": [],
+            "uiPlugLabel": "",
+            "plugStyle": 0,
+            "plugAvailability": 0,
+            "alternateUiPlugLabel": "",
+            "alternatePlugStyle": 0,
+            "isDummyPlug": false,
+            "parentItemOverride": {
+              "additionalEquipRequirementsDisplayStrings": []
+            },
+            "applyStatsToSocketOwnerItem": false
+          },
+          "itemTypeDisplayName": ""
+        }
+      }
+    ]
+  }
+}

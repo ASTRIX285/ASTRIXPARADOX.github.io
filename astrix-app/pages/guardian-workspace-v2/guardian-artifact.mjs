@@ -3,7 +3,7 @@
  * Fixture/DIM test builds fall back to the beta manifest picker.
  */
 import { resolveArtifactViewState,resolveIntendedArtifactConfiguration } from './guardian-artifact-state.mjs';
-import {guardianManifest} from './guardian-manifest-service.mjs?v=20260905-weapon-audit-1';
+import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1';
 
 const MANIFEST_URL='../../data/paradox-forge/beta/beta-bungie-manifest-cache.json';
 const BUNGIE_ROOT='https://www.bungie.net';
@@ -113,7 +113,7 @@ function emitArtifactSelection(id,stateUnavailable,perks){
   const artifactConfiguration=currentMode==='live'
     ?liveArtifact?.artifactConfiguration||currentArtifactConfiguration||null
     :fixtureConfiguration(id);
-  document.dispatchEvent(new CustomEvent('astrix:artifact-selection-changed',{detail:{...currentSelectionContext,artifact:id,perks:stateUnavailable?null:perks,currentFixtureId,artifactConfiguration,state:currentArtifactState,source:currentMode==='live'?'bungie-live-artifact':'paradox-artifact'}}));
+  document.dispatchEvent(new CustomEvent('forge:artifact-selection-changed',{detail:{...currentSelectionContext,artifact:id,perks:stateUnavailable?null:perks,currentFixtureId,artifactConfiguration,state:currentArtifactState,source:currentMode==='live'?'bungie-live-artifact':'paradox-artifact'}}));
 }
 
 function renderArtifactDisplay(){
@@ -184,10 +184,10 @@ function openPicker(){
   if(!tiers.length)return;
   const id=artifactIdentity();
   const draft=selected.slice();
-  const tiersHtml=tiers.map(t=>`<section class="beta-artifact-tier"><h3>TIER ${t.tier}</h3><div class="beta-artifact-grid">${t.perks.map(p=>`<button type="button" class="beta-artifact-choice ${draft.includes(p.hash)?'selected':''} ${p.unresolved?'unresolved':''}" data-perk-hash="${p.hash}" title="${esc([p.name,p.description].filter(Boolean).join(' — '))}"><span class="beta-artifact-icon">${p.icon?`<img src="${esc(p.icon)}" alt="">`:'◆'}</span><b>${esc(p.name)}</b></button>`).join('')}</div></section>`).join('');
+  const tiersHtml=tiers.map(t=>`<section class="beta-artifact-tier"><h3>TIER ${t.tier}</h3><div class="beta-artifact-grid">${t.perks.map(p=>`<button type="button" class="beta-artifact-choice ${draft.includes(p.hash)?'selected':''} ${p.unresolved?'unresolved':''}" data-perk-hash="${p.hash}" title="${esc([p.name,p.description].filter(Boolean).join(': '))}"><span class="beta-artifact-icon">${p.icon?`<img src="${esc(p.icon)}" alt="">`:'◆'}</span><b>${esc(p.name)}</b></button>`).join('')}</div></section>`).join('');
   const wrap=document.createElement('div');
   wrap.id='astrixArtifactModal';wrap.className='beta-modal-backdrop';
-  wrap.innerHTML=`<section class="beta-modal beta-artifact-modal" role="dialog" aria-modal="true"><header><div><small>GUARDIAN BUILD FORGE BETA</small><h2>${esc(id?.name||'Seasonal Artifact')}</h2></div><button type="button" data-close>✕</button></header><div class="beta-modal-body"><p class="beta-note">Fixture/DIM builds can supply Artifact selections here. Live Bungie Guardians are read-only and always use Bungie's active state.</p><div class="beta-artifact-summary"><b>${esc(id?.name||'Seasonal Artifact')}</b><span id="artifactCount">${draft.length}/${MAX_PERKS} selected</span></div><div class="beta-artifact-tiers">${tiersHtml}</div></div><footer><button type="button" class="beta-menu-item" data-artifact-clear>CLEAR</button><button type="button" class="beta-primary" data-artifact-apply>APPLY ARTIFACT</button></footer></section>`;
+  wrap.innerHTML=`<section class="beta-modal beta-artifact-modal" role="dialog" aria-modal="true"><header><div><small>GUARDIAN BUILD FORGE</small><h2>${esc(id?.name||'Seasonal Artifact')}</h2></div><button type="button" data-close>✕</button></header><div class="beta-modal-body"><p class="beta-note">Shared builds can supply Artifact selections here. Current Bungie Guardians always use Bungie's active Artifact state.</p><div class="beta-artifact-summary"><b>${esc(id?.name||'Seasonal Artifact')}</b><span id="artifactCount">${draft.length}/${MAX_PERKS} selected</span></div><div class="beta-artifact-tiers">${tiersHtml}</div></div><footer><button type="button" class="beta-menu-item" data-artifact-clear>CLEAR</button><button type="button" class="beta-primary" data-artifact-apply>APPLY ARTIFACT</button></footer></section>`;
   closePicker();document.body.appendChild(wrap);
   wrap.addEventListener('click',e=>{if(e.target===wrap||e.target.closest('[data-close]'))closePicker();});
   qsa('[data-perk-hash]',wrap).forEach(btn=>btn.addEventListener('click',()=>{const hash=Number(btn.dataset.perkHash);const at=draft.indexOf(hash);if(at>=0){draft.splice(at,1);btn.classList.remove('selected');}else if(draft.length<MAX_PERKS){draft.push(hash);btn.classList.add('selected');}const c=qs('#artifactCount',wrap);if(c)c.textContent=`${draft.length}/${MAX_PERKS} selected`;}));
@@ -235,8 +235,8 @@ async function onSelection(detail={}){
   selected=Array.isArray(view.selectedHashes)?view.selectedHashes:[];currentArtifactConfiguration=view.artifactConfiguration||null;renderArtifactDisplay();wireRow();
 }
 
-document.addEventListener('astrix:guardian-selection-changed',e=>onSelection(e.detail||{}));
-document.addEventListener('astrix:bungie-loadout-loaded',e=>onSelection({...e.detail,source:'bungie-loadout'}));
-document.addEventListener('astrix:beta-fixture-loaded',e=>onSelection(e.detail||{}));
+document.addEventListener('forge:guardian-selection-changed',e=>onSelection(e.detail||{}));
+document.addEventListener('forge:bungie-loadout-loaded',e=>onSelection({...e.detail,source:'bungie-loadout'}));
+document.addEventListener('forge:beta-fixture-loaded',e=>onSelection(e.detail||{}));
 
 (async()=>{installStyles();wireRow();try{await ensureManifest();if(currentMode!=='live')renderArtifactDisplay();}catch(err){console.error('[Paradox artifact]',err);}})();

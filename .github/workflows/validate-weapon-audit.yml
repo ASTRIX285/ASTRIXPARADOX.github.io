@@ -27,7 +27,7 @@ jobs:
       - name: Sandbox deployment contract
         run: node astrix-app/tools/validate-sandbox-deployment.mjs
       - name: Auth Worker build
-        working-directory: astrix-auth-worker
+        working-directory: forge-auth-worker
         run: |
           npm install --ignore-scripts --package-lock=false
           npm run check

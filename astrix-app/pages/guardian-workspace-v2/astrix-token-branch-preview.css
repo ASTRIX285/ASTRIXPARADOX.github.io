@@ -1,7 +1,7 @@
 /* Branch-only bridge for evaluating astrix-tokens.css on Guardian Build Forge.
  * The supplied global token sheet remains unchanged and loads first. This
  * scoped layer exposes its chassis without replacing subclass data colours. */
-body.astrix-token-preview{
+body.forge-token-preview{
   position:relative;
   isolation:isolate;
   background:transparent!important;
@@ -20,7 +20,7 @@ html[data-subclass="stasis"]{--subclass-accent-rgb:77,136,255}
 html[data-subclass="strand"]{--subclass-accent-rgb:53,227,102}
 html[data-subclass="prismatic"]{--subclass-accent-rgb:229,106,223}
 
-body.astrix-token-preview .scene.immersive{
+body.forge-token-preview .scene.immersive{
   --d2-position:50% 46%;
   inset:-2%;
   z-index:0!important;
@@ -35,17 +35,17 @@ body.astrix-token-preview .scene.immersive{
   transform:scale(1.02);
   transform-origin:center;
 }
-body.astrix-token-preview .grain{
+body.forge-token-preview .grain{
   z-index:1!important;
 }
-body.astrix-token-preview>:is(.workspace,.build-character-selector,.build-space){
+body.forge-token-preview>:is(.workspace,.build-character-selector,.build-space){
   position:relative;
   z-index:2;
 }
-body.astrix-token-preview .scene.immersive::before{
+body.forge-token-preview .scene.immersive::before{
   display:none;
 }
-body.astrix-token-preview .scene.immersive::after{
+body.forge-token-preview .scene.immersive::after{
   content:"";
   position:absolute;
   inset:0;
@@ -55,24 +55,24 @@ body.astrix-token-preview .scene.immersive::after{
     linear-gradient(90deg,rgba(5,4,3,.32),rgba(5,4,3,.04) 48%,rgba(5,4,3,.32)),
     linear-gradient(180deg,rgba(4,3,3,.04),rgba(4,3,3,.34));
 }
-body.astrix-token-preview .topbar{
+body.forge-token-preview .topbar{
   border-color:var(--border-strong)!important;
   background:color-mix(in srgb,var(--surface) 86%,#080604 14%)!important;
   backdrop-filter:var(--blur)!important;
 }
-body.astrix-token-preview :is(.panel,.eq,.gear-slot,.summary-card,.intel-card){
+body.forge-token-preview :is(.panel,.eq,.gear-slot,.summary-card,.intel-card){
   border-color:var(--border)!important;
   background:linear-gradient(180deg,var(--surface-2),var(--surface))!important;
   box-shadow:var(--shadow)!important;
   backdrop-filter:var(--blur)!important;
 }
-body.astrix-token-preview :is(.panel-head,.section-title,.rail-section){
+body.forge-token-preview :is(.panel-head,.section-title,.rail-section){
   border-color:var(--border)!important;
 }
 
 /* Main Hero stage: subclass colour is the focal atmosphere; the D2 vista
  * remains visible through the subdued translucent canvas. */
-body.astrix-token-preview .workspace>.stage{
+body.forge-token-preview .workspace>.stage{
   background:
     radial-gradient(58% 52% at 50% 42%,rgba(var(--subclass-accent-rgb,121,187,234),.24),transparent 68%),
     radial-gradient(100% 72% at 50% 112%,rgba(var(--subclass-accent-rgb,121,187,234),.1),transparent 66%),
@@ -84,7 +84,7 @@ body.astrix-token-preview .workspace>.stage{
     0 0 28px rgba(var(--subclass-accent-rgb,121,187,234),.07)!important;
   backdrop-filter:blur(3px)!important;
 }
-body.astrix-token-preview .workspace>.stage .stage-state-card{
+body.forge-token-preview .workspace>.stage .stage-state-card{
   background:linear-gradient(180deg,rgba(20,15,25,.72),rgba(9,7,12,.78))!important;
   border-color:rgba(var(--subclass-accent-rgb,121,187,234),.32)!important;
   box-shadow:
@@ -95,7 +95,7 @@ body.astrix-token-preview .workspace>.stage .stage-state-card{
 
 /* Build Design mirrors the same D2 and subclass atmosphere in its central
  * working canvas, while keeping the data rails calmer and more opaque. */
-body.astrix-token-preview .build-space>.design-canvas{
+body.forge-token-preview .build-space>.design-canvas{
   background:
     radial-gradient(78% 48% at 50% 0%,rgba(var(--subclass-accent-rgb,121,187,234),.16),transparent 72%),
     linear-gradient(180deg,rgba(27,21,17,.54),rgba(12,9,8,.64))!important;
@@ -106,18 +106,18 @@ body.astrix-token-preview .build-space>.design-canvas{
     0 0 26px rgba(var(--subclass-accent-rgb,121,187,234),.06)!important;
   backdrop-filter:blur(10px)!important;
 }
-body.astrix-token-preview .build-space>.design-canvas>.panel-head{
+body.forge-token-preview .build-space>.design-canvas>.panel-head{
   border-color:rgba(var(--subclass-accent-rgb,121,187,234),.2)!important;
 }
 
 @media (min-aspect-ratio:21/9){
-  body.astrix-token-preview .scene.immersive{
+  body.forge-token-preview .scene.immersive{
     --d2-position:50% 48%;
     transform:scale(1.035);
   }
 }
 @media (max-aspect-ratio:4/3){
-  body.astrix-token-preview .scene.immersive{
+  body.forge-token-preview .scene.immersive{
     --d2-position:50% 44%;
     inset:-4%;
     filter:blur(clamp(3px,.5vw,6px)) brightness(.74) saturate(.72) contrast(.92);
@@ -125,12 +125,12 @@ body.astrix-token-preview .build-space>.design-canvas>.panel-head{
   }
 }
 @media (orientation:portrait){
-  body.astrix-token-preview .scene.immersive{
+  body.forge-token-preview .scene.immersive{
     --d2-position:52% 42%;
     filter:blur(clamp(4px,.7vw,7px)) brightness(.7) saturate(.68) contrast(.9);
   }
-  body.astrix-token-preview .workspace>.stage,
-  body.astrix-token-preview .build-space>.design-canvas{
+  body.forge-token-preview .workspace>.stage,
+  body.forge-token-preview .build-space>.design-canvas{
     backdrop-filter:blur(4px)!important;
   }
 }

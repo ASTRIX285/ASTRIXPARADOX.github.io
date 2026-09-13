@@ -22,8 +22,8 @@ def main() -> int:
     assert "const MAX_CHARACTERS = 3" in module
     assert 'class="guardian-stat-icon"' in module
     assert "guardian-character-card__rank" not in module
-    assert 'new CustomEvent("astrix:character-selected"' in module
-    assert '"astrix:bungie-character-roster"' in module
+    assert 'new CustomEvent("forge:character-selected"' in module
+    assert '"forge:bungie-character-roster"' in module
     assert "function characterRoster(" in profile
     assert "function selectLiveCharacter(" in profile
     assert 'publishCharacterRoster(liveProfilePayload,detail.characterId)' in profile
@@ -35,7 +35,7 @@ def main() -> int:
     assert "font:800 13px bahnschrift,sans-serif" in styles
     assert "background:var(--character-emblem) 28px center/cover no-repeat" in styles
     assert "min-height:32px" in styles
-    assert "width:20px;height:20px;flex:0 0 20px" in styles
+    assert "width:var(--apx-icon-stat,1.25rem);height:var(--apx-icon-stat,1.25rem);flex:0 0 var(--apx-icon-stat,1.25rem)" in styles
     assert "gap:5px" in styles
     assert "left:34px;\n  right:50px" in styles
     assert "left:39px;\n  right:4px" in styles

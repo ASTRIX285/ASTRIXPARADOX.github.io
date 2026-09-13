@@ -1,4 +1,4 @@
-name: Update ASTRIX Weapon Information
+name: Update Forge Weapon Information
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-weapon-information-${{ github.ref }}
+  group: forge-weapon-information-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -200,7 +200,7 @@ jobs:
           FILE_CHANGED: ${{ steps.generated.outputs.changed }}
         run: |
           {
-            echo "## ASTRIX weapon information update"
+            echo "## Forge weapon information update"
             echo
             echo "- Manifest version: ${MANIFEST_VERSION:-unavailable}"
             echo "- Raw official records generated: ${WEAPONS:-0}"

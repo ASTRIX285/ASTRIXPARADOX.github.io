@@ -1,4 +1,4 @@
-name: Update ASTRIX Game Components
+name: Update Forge Game Components
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-game-components-${{ github.ref }}
+  group: forge-game-components-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -190,7 +190,7 @@ jobs:
           FILE_CHANGED: ${{ steps.generated.outputs.changed }}
         run: |
           {
-            echo "## ASTRIX game component update"
+            echo "## Forge game component update"
             echo
             echo "- Manifest version: ${MANIFEST_VERSION:-unavailable}"
             echo "- Raw components generated: ${COMPONENTS:-0}"

@@ -139,7 +139,7 @@ def load_definitions(
             aggregate.get("DestinyPlugSetDefinition", {}),
             aggregate.get("DestinySocketCategoryDefinition", {}),
         )
-    proxy_origin = os.environ.get("ASTRIX_AUTH_ORIGIN", "").rstrip("/")
+    proxy_origin = os.environ.get("FORGE_AUTH_ORIGIN", "").rstrip("/")
 
     def load_component(definition_type: str) -> dict[str, Any]:
         path = paths.get(definition_type)
@@ -742,9 +742,9 @@ def write_outputs(values: dict[str, Any]) -> None:
 
 def main() -> int:
     api_key = os.environ.get("BUNGIE_API_KEY")
-    proxy_origin = os.environ.get("ASTRIX_AUTH_ORIGIN", "").rstrip("/")
+    proxy_origin = os.environ.get("FORGE_AUTH_ORIGIN", "").rstrip("/")
     if not api_key and not proxy_origin:
-        raise ImportFailure("BUNGIE_API_KEY or ASTRIX_AUTH_ORIGIN is required")
+        raise ImportFailure("BUNGIE_API_KEY or FORGE_AUTH_ORIGIN is required")
     curated_payload = load_curated()
     curated_rows = curated_payload["armor"]
     curated_digest = digest_json(curated_rows)

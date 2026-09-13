@@ -12,25 +12,25 @@
   <script src="../../shared/astrix-portal-loader.js?v=20260831-render-ready"></script>
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../guardian-workspace-v2/guardian-character-cards.css?v=20260902-recent-guardian-emblem-1">
-  <link rel="stylesheet" href="./mission-reports.css?v=20260831-fixed-topbar">
+  <link rel="stylesheet" href="./mission-reports.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css">
+  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260912-global-icon-audit-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
 </head>
-<body class="apx-destination-page mission-reports-page astrix-paradox-map-background">
-  <header class="mission-topbar topbar apx-destination-header astrix-command-header">
+<body class="apx-destination-page mission-reports-page forge-paradox-map-background">
+  <header class="mission-topbar topbar apx-destination-header forge-command-header">
     <a class="mission-brand brand apx-destination-brand" href="../journey/" aria-label="ASTRIX PARADOX Journey">
       <img src="../../../img/logo.png" alt="ASTRIX PARADOX">
       <span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span>
     </a>
     <div class="mission-workspace-title workspace-title apx-destination-header-copy"><strong>MISSION REPORTS</strong><small>REVIEW VERIFIED GUARDIAN ACTIVITY</small></div>
-    <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-astrix-hero-cards aria-label="Bungie characters">
+    <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters">
       <div class="guardian-character-cards__status is-pending" role="status">CHECKING BUNGIE CHARACTERS</div>
     </div>
     <div class="mission-topbar-actions topbar-actions" aria-label="Bungie account"></div>
   </header>
-  <div data-astrix-destination-ribbon data-active-destination="mission-reports"></div>
+  <div data-forge-destination-ribbon data-active-destination="mission-reports"></div>
 
   <main class="mission-auth-shell" id="missionResolving" aria-live="polite">
     <section class="mission-gate-card">
@@ -44,7 +44,7 @@
     <section class="mission-gate-card">
       <p class="mission-eyebrow">ENTER THE PARADOX</p>
       <h1>Connect your Guardian.</h1>
-      <p>Mission Reports requires an authenticated Bungie session. The approved console remains data-empty until the existing secure connection confirms access.</p>
+      <p>Mission Reports opens after Bungie confirms the current session. No Guardian activity is displayed before that check completes.</p>
       <div class="mission-connect-action" id="missionConnectAction" aria-label="Bungie connection action"></div>
     </section>
   </main>
@@ -239,6 +239,6 @@
     </footer>
   </main>
 
-  <script type="module" src="./mission-reports.mjs?v=20260905-weapon-audit-1"></script>
+  <script type="module" src="./mission-reports.mjs?v=20260906-page-payload-1"></script>
 </body>
 </html>

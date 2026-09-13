@@ -1,19 +1,24 @@
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
-import {guardianManifest} from './journey-manifest.mjs?v=20260905-pattern-badges-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
+import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1';
 import {resolveRecordTree,patternTypeKey,seasonRankProgress,findDestinationNodes} from './journey-record-model.mjs?v=20260905-journey-repair-1';
 import {resolveCollectionBadges} from './journey-collection-model.mjs?v=20260905-pattern-badges-1';
-import {cacheBungieProfile,readCachedBungieProfile} from '../guardian-workspace-v2/guardian-session-cache.mjs';
+import {PREPARED_PAGE_REFRESH_MS,bindPreparedPageRefreshControl,createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1';
 import {validateHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
 import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-shooting-range-capture.mjs?v=20260902-journey-data-hooks-1';
-import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260905-weapon-audit-1';
+import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1';
 import {initLocationSelector} from '../../shared/astrix-location-selector.mjs';
 import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260905-journey-repair-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+
+mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 const resolving=document.getElementById('journeyResolving');
 const signedOut=document.getElementById('journeySignedOut');
 const dashboard=document.getElementById('journeyDashboard');
 const status=document.getElementById('journeyAuthStatus');
 const connectButton=document.getElementById('journeyConnectButton');
+const refreshButton=document.getElementById('journeyRefreshButton');
 const guardianUsage=document.getElementById('journeyGuardianUsage');
 const vaultCard=document.getElementById('journeyVault');
 const seasonRankCard=document.getElementById('journeySeasonRank');
@@ -81,8 +86,6 @@ const CLASS_USAGE_COLOURS=['#d3202f','#c9a84c','#4169e1'];
 const STAT_ORDER=[2996146975,392767087,1943323491,1735777505,144602215,4244567218];
 const RECENT_ACTIVITY_PENDING='Recent activity data is not connected.';
 const BUNGIE_ORIGIN='https://www.bungie.net';
-const JOURNEY_BACKGROUND_REFRESH_MS=5*60*1000;
-const JOURNEY_REFRESH_TIMEOUT_MS=60*1000;
 const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12*1000;
 const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6*1000;
 const JOURNEY_LOADER_READY_WAIT_MS=6*1000;
@@ -102,7 +105,6 @@ let verifiedProfile=null;
 let journeySession=null;
 let journeyActivityRequest=0;
 let profileIdentityRequest=0;
-let historicalStatsRequest=0;
 let titleTriumphRequest=0;
 let triumphSectionRequest=0;
 let recordsCategoryRequest=0;
@@ -117,45 +119,40 @@ let selectedTitle=null;
 let selectedTitleKind='titles';
 let equippedTitleSummary=null;
 let nextTitleSummary=null;
-let currentSeasonPromise=null;
-let currentSeasonFetchedAt=0;
 let titleCatalogueRootHash='';
 let titleCataloguePromise=null;
 let selectedTriumphCategory=null;
 let selectedRecordSection=null;
-let journeyBackgroundRefreshTimer=0;
 let journeyBackgroundRefreshRequest=null;
-let journeyBackgroundRefreshPending=false;
-let journeyLastRefreshAt=0;
+let journeyRefreshController=null;
 const journeyActivityCache=new Map();
 let currentActivityEvidence=null;
 
 function waitWithin(promise,timeoutMs){
   let timer=0;
   return Promise.race([
-    Promise.resolve(promise).catch(error=>{console.info('[ASTRIX Journey] noncritical bootstrap task unavailable',error);return null;}),
+    Promise.resolve(promise).catch(error=>{console.info('[Forge Journey] noncritical bootstrap task unavailable',error);return null;}),
     new Promise(resolve=>{timer=globalThis.setTimeout(()=>resolve(null),timeoutMs);})
   ]).finally(()=>globalThis.clearTimeout(timer));
 }
 
 async function finishJourneyLoader(root=document){
-  globalThis.AstrixLoader.set(96);
-  globalThis.AstrixLoader.status('Journey rendered');
+  reportPreparedPageStage('ready','journey');
   let timer=0;
   await Promise.race([
-    Promise.resolve(globalThis.AstrixLoader.ready(root)).catch(()=>globalThis.AstrixLoader.done()),
-    new Promise(resolve=>{timer=globalThis.setTimeout(()=>{globalThis.AstrixLoader.done();resolve();},JOURNEY_LOADER_READY_WAIT_MS);})
+    Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(()=>globalThis.ForgeLoader.done()),
+    new Promise(resolve=>{timer=globalThis.setTimeout(()=>{globalThis.ForgeLoader.done();resolve();},JOURNEY_LOADER_READY_WAIT_MS);})
   ]).finally(()=>globalThis.clearTimeout(timer));
 }
 
 function waitForHeroCards(){
   if(!heroCards||!heroCards.querySelector('.guardian-character-cards__status.is-pending'))return Promise.resolve();
-  return new Promise(resolve=>document.addEventListener('astrix:hero-cards-render-complete',resolve,{once:true}));
+  return new Promise(resolve=>document.addEventListener('forge:hero-cards-render-complete',resolve,{once:true}));
 }
 
 function waitForJourneyAtmosphere(){
-  const key=globalThis.AstrixDestinations?.current();
-  const src=globalThis.ASTRIX_LOCATION_VISUALS?.[key]?.image;
+  const key=globalThis.ForgeDestinations?.current();
+  const src=globalThis.FORGE_LOCATION_VISUALS?.[key]?.image;
   if(!src)return Promise.resolve();
   return new Promise(resolve=>{
     const image=new Image();
@@ -185,20 +182,16 @@ function createRankBadge(rank,label=`Rank ${rank}`){
   return badge;
 }
 
-async function currentSeasonMetadata(){
-  if(!currentSeasonPromise||Date.now()-currentSeasonFetchedAt>=JOURNEY_BACKGROUND_REFRESH_MS){
-    currentSeasonPromise=fetch(`${AUTH_ORIGIN}/bungie/current-season`,{credentials:'include',headers:{Accept:'application/json'}})
-      .then(response=>{if(!response.ok)throw new Error(`Current season request failed (${response.status}).`);currentSeasonFetchedAt=Date.now();return response.json();})
-      .catch(error=>{currentSeasonPromise=null;throw error;});
-  }
-  return currentSeasonPromise;
+async function currentSeasonMetadata(payload){
+  if(payload?.currentSeason)return {season:payload.currentSeason};
+  throw new Error('Prepared Journey data contains no current season.');
 }
 
 async function bindSeasonRank(payload){
   if(!seasonRankCard)return;
   renderDetailHero(seasonRankCard,{name:'Season Rank unavailable',description:'Current seasonal progression is awaiting verified Bungie data.'});
   try{
-    const metadata=await currentSeasonMetadata();
+    const metadata=await currentSeasonMetadata(payload);
     const {active,rank}=seasonRankProgress(payload,String(journeyCharacterFor(payload)?.characterId||''),metadata);
     if(rank===null||rank===undefined)return;
     const completed=finiteNumber(active?.progressToNextLevel);
@@ -207,7 +200,7 @@ async function bindSeasonRank(payload){
     const seasonName=String(metadata?.season?.name||'CURRENT SEASON').trim();
     const description=[seasonNumber===null?'':`SEASON ${seasonNumber}`,seasonName].filter(Boolean).join(' · ');
     renderDetailHero(seasonRankCard,{name:`RANK ${rank}`,badge:rank,description,completed,total,unit:`XP TO RANK ${rank+1}`});
-  }catch(error){console.info('[ASTRIX Journey] current Season Rank unavailable',error);}
+  }catch(error){console.info('[Forge Journey] current Season Rank unavailable',error);}
 }
 
 function bindGuardianUsage(payload){
@@ -242,8 +235,10 @@ function bindVault(payload){
   const vaultItems=payload?.profile?.profileInventory?.data?.items;
   if(!Array.isArray(vaultItems))return;
   const stored=vaultItems.filter(item=>item?.bucketHash===VAULT_BUCKET);
-  const armourCount=stored.filter(item=>Number(payload?.definitions?.[String(item?.itemHash)]?.itemType)===ARMOUR_ITEM_TYPE).length;
-  const equipmentCount=stored.length-armourCount;
+  const storedDefinitions=stored.map(item=>payload?.definitions?.[String(item?.itemHash)]||null);
+  const classificationComplete=storedDefinitions.every(Boolean);
+  const armourCount=classificationComplete?storedDefinitions.filter(definition=>Number(definition?.itemType)===ARMOUR_ITEM_TYPE).length:null;
+  const equipmentCount=classificationComplete?stored.length-armourCount:null;
   let postmasterMax=0;
   for(const char of Object.values(payload?.profile?.characterInventories?.data||{})){
     const pm=(char?.items||[]).filter(i=>i?.bucketHash===POSTMASTER_BUCKET).length;
@@ -255,7 +250,9 @@ function bindVault(payload){
   total.innerHTML=`<span>ALL</span><strong>${numberFormatter.format(stored.length)}</strong>`;
   const breakdown=document.createElement('dl');
   breakdown.className='journey-vault-breakdown';
-  breakdown.innerHTML=`<div><dt>ARMOUR</dt><dd>${numberFormatter.format(armourCount)}</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>${numberFormatter.format(equipmentCount)}</dd></div>`;
+  breakdown.innerHTML=classificationComplete
+    ?`<div><dt>ARMOUR</dt><dd>${numberFormatter.format(armourCount)}</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>${numberFormatter.format(equipmentCount)}</dd></div>`
+    :'<div><dt>ARMOUR</dt><dd>UNAVAILABLE</dd></div><div><dt>WEAPONS &amp; EQUIPMENT</dt><dd>UNAVAILABLE</dd></div>';
   vaultCard.append(total,breakdown);
   if(postmasterMax>=18){
     const warning=document.createElement('p');
@@ -361,7 +358,7 @@ async function bindGuardianRankSummary(payload){
       const definition=Object.values(definitions).find(item=>finiteNumber(item?.rankNumber)===rank)||definitions[String(rankHash)]||null;
       name=name||String(definition?.displayProperties?.name||'').trim();
       icon=icon||bungiePresentationIcon(definition);
-    }catch(error){console.info('[ASTRIX Journey] Guardian Rank summary definition unavailable',error);}
+    }catch(error){console.info('[Forge Journey] Guardian Rank summary definition unavailable',error);}
   }
   if(requestId!==guardianRankSummaryRequest)return;
   renderGuardianRankSummary({rank,name:name||`Guardian Rank ${rank}`});
@@ -511,7 +508,7 @@ async function titlePresentationCandidates(payload){
   try{
     const catalog=await titlePresentationCatalog(payload);
     if(catalog.length)return catalog;
-  }catch(error){console.info('[ASTRIX Journey] complete title catalogue unavailable',error);}
+  }catch(error){console.info('[Forge Journey] complete title catalogue unavailable',error);}
   return profileTitlePresentationCandidates(payload);
 }
 
@@ -666,7 +663,7 @@ const DESTINATION_NAME_ALIASES=Object.freeze({
 });
 const destinationNameKey=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function destinationNameMatches(key,value){
-  const names=DESTINATION_NAME_ALIASES[key]||[globalThis.AstrixDestinations?.labelOf(key)||key];
+  const names=DESTINATION_NAME_ALIASES[key]||[globalThis.ForgeDestinations?.labelOf(key)||key];
   return names.some(name=>destinationNameKey(name)===destinationNameKey(value));
 }
 
@@ -702,13 +699,9 @@ async function destinationRecordSections(payload,key,characterId){
     const row=titleRequirementRow(payload,characterId,entry,definition,objectiveDefinitions);
     return row?{entry,definition,row,component:titleRecordFor(payload,characterId,entry.recordHash)}:null;
   }).filter(Boolean)}));
-  const triumphs=[];
   const records=[];
   recordsBySection.forEach(({section,records:sectionRecords})=>{
-    const triumphRows=sectionRecords.filter(item=>!String(item.definition?.recordTypeName||'').trim()||destinationNameKey(item.definition.recordTypeName)==='triumphs');
-    const recordRows=sectionRecords;
-    if(triumphRows.length)triumphs.push(destinationCategoryItem(section,'TRIUMPH SUBCATEGORY'),...triumphRows.map(item=>destinationRecordItem(item.row)));
-    if(recordRows.length)records.push(destinationCategoryItem(section,'RECORD CATEGORY'),...recordRows.map(item=>destinationRecordItem(item.row)));
+    if(sectionRecords.length)records.push(destinationCategoryItem(section,'RECORD CATEGORY'),...sectionRecords.map(item=>destinationRecordItem(item.row)));
   });
   const activityHashes=[...new Set(recordsBySection.flatMap(({records})=>records.flatMap(item=>(item.component?.objectives||[]).map(objective=>finiteNumber(objective?.activityHash)).filter(hash=>hash!==null))))];
   const activityDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',activityHashes);
@@ -747,7 +740,7 @@ async function destinationRecordSections(payload,key,characterId){
     const type=(activity.activityModeTypes||[]).includes(4)?'RAID':'DUNGEON';
     endgame.push({hash:activity.hash,name:`${type} · ${name}`,icon:bungiePresentationIcon(activity),description:'Activity catalogue · Completion progress unavailable',completed:null});
   }
-  return {triumphs,records,endgame};
+  return {records,endgame};
 }
 
 async function destinationQuestRows(payload,key,characterId){
@@ -842,7 +835,7 @@ async function bindRegionChestProgress(payload,key,characterId,requestId){
   publishJourneyRegionChestProgress({key,total:chests.length,discovered:chests.filter(chest=>chest.collected).length,chests});
 }
 
-async function bindDestinationProgress(payload,key=globalThis.AstrixDestinations?.current()){
+async function bindDestinationProgress(payload,key=globalThis.ForgeDestinations?.current()){
   if(!payload||!key)return;
   const requestId=++destinationProgressRequest;
   publishJourneyDestinationData({key,loading:true,sections:{}});
@@ -855,11 +848,11 @@ async function bindDestinationProgress(payload,key=globalThis.AstrixDestinations
       const regionChests=bindRegionChestProgress(payload,key,characterId,requestId).catch(()=>null);
       const [recordSections,quests]=await Promise.all([destinationRecordSections(payload,key,characterId),destinationQuestRows(payload,key,characterId)]);
       if(requestId!==destinationProgressRequest)return;
-      publishJourneyDestinationData({key,sections:{triumphs:recordSections.triumphs,records:recordSections.records,quests,endgame:recordSections.endgame}});
+      publishJourneyDestinationData({key,sections:{records:recordSections.records,quests,endgame:recordSections.endgame}});
       await regionChests;
     }catch(error){
       if(requestId===destinationProgressRequest)publishJourneyDestinationData({key,error:'Destination records could not be loaded. Select this destination to retry.',sections:{}});
-      console.info('[ASTRIX Journey] destination records unavailable',error);
+      console.info('[Forge Journey] destination records unavailable',error);
     }
   };
   destinationProgressQueue=destinationProgressQueue.catch(()=>null).then(task);
@@ -1279,7 +1272,7 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
   if(isTitleCollection){
     let profileTitles=[];
     try{profileTitles=await resolvedProfileTitleCollection(payload,character,view);}
-    catch(error){console.info('[ASTRIX Journey] profile title nodes unavailable',error);}
+    catch(error){console.info('[Forge Journey] profile title nodes unavailable',error);}
     if(requestId!==titleTriumphRequest)return;
     if(profileTitles.length){
       renderJourneyRecordList(titleCollectionList,profileTitles,`No verified Destiny ${titleCollectionLabel.toLowerCase()} were returned in the profile nodes.`,titleCollectionSelect);
@@ -1290,7 +1283,7 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
     }
     let titles=[];
     try{titles=await resolvedTitleCollection(payload,character,view);}
-    catch(error){console.info('[ASTRIX Journey] title collection unavailable',error);}
+    catch(error){console.info('[Forge Journey] title collection unavailable',error);}
     if(requestId!==titleTriumphRequest)return;
     renderJourneyRecordList(titleCollectionList,titles,`No Destiny ${titleCollectionLabel.toLowerCase()} definitions were returned from the verified Bungie seal catalogue.`,titleCollectionSelect);
     if(recordsStatus){
@@ -1721,7 +1714,7 @@ function showDestinationPanel(returnFocus=true){
   if(focusStatus)focusStatus.textContent='PERMANENT CENTRE';
   activeRecordView='';
   setRecordSelectorState('');
-  const currentLocation=globalThis.AstrixDestinations?.current();
+  const currentLocation=globalThis.ForgeDestinations?.current();
   locationSelector?.querySelector(`.apx-loc[data-loc="${currentLocation}"]`)?.setAttribute('aria-current','true');
   if(returnFocus)({titles:titlesOpen,badges:badgesOpen,triumphs:triumphsOpen,'guardian-rank':guardianRankOpen,records:recordsOpen}[previousRoot])?.focus();
 }
@@ -1763,22 +1756,18 @@ function setMetric(element,value,label){
   if(tick)tick.hidden=false;
 }
 
-async function bindHistoricalStats(session){
+async function bindHistoricalStats(session,payload=verifiedProfile){
   resetMetric(metricActivities,'Awaiting live history');
   resetMetric(metricCompletion,'Awaiting completion evidence');
   resetMetric(metricPve,'Awaiting PVE evidence');
   resetMetric(metricPvp,'Awaiting PVP evidence');
   if(session?.authenticated!==true)return;
-  const requestId=++historicalStatsRequest;
   try{
-    const response=await fetch(new URL('/bungie/historical-stats',AUTH_ORIGIN),{credentials:'include',headers:{Accept:'application/json'}});
-    if(!response.ok)return;
-    const payload=await response.json();
-    if(requestId!==historicalStatsRequest)return;
-    const results=payload?.Response?.mergedAllCharacters?.results
-      ??payload?.response?.mergedAllCharacters?.results
-      ??payload?.mergedAllCharacters?.results
-      ??payload?.results;
+    const historical=payload?.preparedAccountData?.historicalStats;
+    const results=historical?.Response?.mergedAllCharacters?.results
+      ??historical?.response?.mergedAllCharacters?.results
+      ??historical?.mergedAllCharacters?.results
+      ??historical?.results;
     const pve=results?.allPvE;
     const pvp=results?.allPvP;
     const pveEntered=historicalValue(pve,'activitiesEntered');
@@ -2021,26 +2010,17 @@ async function fetchJourneyActivityEvidence(session,characterId,{force=false}={}
   const key=journeyActivityCacheKey(session,characterId);
   const cached=journeyActivityCache.get(key);
   if(cached?.promise)return cached.promise;
-  if(!force&&cached?.status==='ok'&&Date.now()-cached.fetchedAt<JOURNEY_BACKGROUND_REFRESH_MS)return cached;
+  if(!force&&cached?.status==='ok'&&Date.now()-cached.fetchedAt<PREPARED_PAGE_REFRESH_MS)return cached;
   const promise=(async()=>{
     try{
-      await manifestReady;
-      const url=new URL('/bungie/activity-history',AUTH_ORIGIN);
-      url.searchParams.set('membershipType',String(membership.membershipType));
-      url.searchParams.set('membershipId',String(membership.membershipId));
-      url.searchParams.set('characterId',characterId);
-      url.searchParams.set('count','25');
-      url.searchParams.set('page','0');
-      if(guardianManifest.status().mode==='indexeddb')url.searchParams.set('definitions','client-manifest');
-      const response=await fetch(url,{credentials:'include',headers:{Accept:'application/json'}});
-      if(!response.ok)throw new Error(`Journey activity history failed (${response.status}).`);
-      const payload=await response.json();
-      const activities=await normaliseActivityHistory(payload);
+      const prepared=verifiedProfile?.preparedAccountData?.activityHistoryByCharacter?.[characterId];
+      if(!prepared)throw new Error('Prepared Journey data contains no activity history for this Guardian.');
+      const activities=await normaliseActivityHistory(prepared);
       const evidence={status:'ok',characterId,activities,view:buildMissionReportView(activities),fetchedAt:Date.now()};
       journeyActivityCache.set(key,evidence);
       return evidence;
     }catch(error){
-      console.info('[ASTRIX Journey] activity evidence unavailable',error);
+      console.info('[Forge Journey] activity evidence unavailable',error);
       if(cached?.status==='ok'){journeyActivityCache.set(key,cached);return cached;}
       journeyActivityCache.delete(key);
       return {status:'unavailable',characterId,activities:[],view:null,fetchedAt:Date.now()};
@@ -2101,7 +2081,7 @@ async function bindTitleAndProgression(payload){
 
   let profileTitles=[];
   try{profileTitles=await resolvedProfileTitleCollection(payload,character,'titles');}
-  catch(error){console.info('[ASTRIX Journey] title summary profile nodes unavailable',error);}
+  catch(error){console.info('[Forge Journey] title summary profile nodes unavailable',error);}
   if(requestId!==profileIdentityRequest)return;
   const profileEquipped=titleHash===null?null:profileTitles.find(title=>title.completionRecordHash===titleHash);
   if(profileEquipped)renderEquippedTitleSummary(profileEquipped);
@@ -2111,7 +2091,7 @@ async function bindTitleAndProgression(payload){
 
   let titles=[];
   try{titles=await resolvedTitleCollection(payload,character,'titles');}
-  catch(error){console.info('[ASTRIX Journey] title summary catalogue unavailable',error);}
+  catch(error){console.info('[Forge Journey] title summary catalogue unavailable',error);}
   if(requestId!==profileIdentityRequest)return;
   let equipped=titleHash===null?null:titles.find(title=>title.completionRecordHash===titleHash);
   if(!equipped&&titleHash!==null){
@@ -2130,7 +2110,7 @@ async function bindTitleAndProgression(payload){
 }
 
 function bindProfileCards(payload){
-  bindGuardianUsage(payload);bindVault(payload);bindActiveGuardian(payload);void bindGuardianRankSummary(payload);void bindSeasonRank(payload);void bindTitleAndProgression(payload);
+  bindGuardianUsage(payload);bindVault(payload);bindActiveGuardian(payload);void bindGuardianRankSummary(payload);void bindSeasonRank(payload);void bindTitleAndProgression(payload);void bindHistoricalStats(journeySession,payload);
   if(recordsPanel&&!recordsPanel.hidden){
     const root=recordRootView(activeRecordView);
     if(root==='titles'||root==='badges'||root==='triumphs')void bindTitleTriumphPanel(payload,root);
@@ -2229,10 +2209,10 @@ recordsOpen?.addEventListener('click',()=>showGuardianRecordPanel('records'));
 recordsBack?.addEventListener('click',handleRecordBack);
 locationSelector?.addEventListener('click',event=>{if(event.target.closest('.apx-loc[data-loc]'))showDestinationPanel(false);});
 
-document.addEventListener('astrix:character-selected',event=>{
+document.addEventListener('forge:character-selected',event=>{
   selectJourneyCharacter(event.detail?.characterId,event.detail?.className||event.detail?.characterClass);
 });
-document.addEventListener('astrix:destination-changed',event=>{if(verifiedProfile)void bindDestinationProgress(verifiedProfile,event.detail?.key);});
+document.addEventListener('forge:destination-changed',event=>{if(verifiedProfile)void bindDestinationProgress(verifiedProfile,event.detail?.key);});
 
 if(heroCards){
   new MutationObserver(syncSelectedCharacterFromCards).observe(heroCards,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
@@ -2243,81 +2223,65 @@ function hasJourneyRecordComponents(payload){
 }
 
 async function readVerifiedProfile(session){
-  const cached=await readCachedBungieProfile(session);
-  if(cached?.profile?.characters?.data&&hasJourneyRecordComponents(cached))return cached;
-  const sharedProfile=await waitWithin(globalThis.ASTRIX_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
-  if(sharedProfile?.profile?.characters?.data){
-    await cacheBungieProfile(session,sharedProfile);
-    return sharedProfile;
-  }
+  const sharedProfile=await waitWithin(globalThis.FORGE_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
   try{
-    const refreshed=await fetchJourneyProfileRefresh();
-    return refreshed?.profile?.characters?.data?refreshed:(cached?.profile?.characters?.data?cached:null);
+    const resolved=await loadPreparedPagePayload(session,'journey',{sharedPayload:sharedProfile});
+    if(resolved?.profile?.characters?.data&&hasJourneyRecordComponents(resolved)){
+      guardianManifest.prime(resolved);
+      return resolved;
+    }
+    return null;
   }catch(error){
-    console.info('[ASTRIX Journey] verified Bungie profile unavailable',error);
-    return cached?.profile?.characters?.data?cached:null;
+    console.info('[Forge Journey] verified Bungie profile unavailable',error);
+    return null;
   }
 }
 
 async function fetchJourneyProfileRefresh(){
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),JOURNEY_REFRESH_TIMEOUT_MS);
-  try{
-    await manifestReady;
-    const url=new URL('/bungie/profile',AUTH_ORIGIN);
-    url.searchParams.set('scope','journey');
-    const response=await fetch(url,{credentials:'include',headers:{Accept:'application/json'},signal:controller.signal});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload?.error||`Journey refresh failed (${response.status}).`);
-    const availableStats=payload?.statDefinitions||verifiedProfile?.statDefinitions||globalThis.ASTRIX_HERO_PROFILE_PAYLOAD?.statDefinitions;
-    payload.statDefinitions=availableStats&&Object.keys(availableStats).length
-      ?availableStats
-      :await guardianManifest.getMany('DestinyStatDefinition',STAT_ORDER);
-    await cacheBungieProfile(journeySession,payload);
-    return payload;
-  }finally{
-    clearTimeout(timeout);
-  }
+  const payload=await loadPreparedPagePayload(journeySession,'journey',{force:true});
+  guardianManifest.prime(payload);
+  return payload;
 }
 
-async function refreshJourneyProfile(){
+async function refreshJourneyProfile({reason='poll'}={}){
   if(journeySession?.authenticated!==true)return null;
-  if(document.visibilityState==='hidden'){
-    journeyBackgroundRefreshPending=true;
-    return null;
-  }
   if(journeyBackgroundRefreshRequest)return journeyBackgroundRefreshRequest;
-  journeyBackgroundRefreshPending=false;
   journeyBackgroundRefreshRequest=(async()=>{
-    try{
-      const profile=await fetchJourneyProfileRefresh();
-      if(!profile?.profile?.characters?.data)return null;
-      verifiedProfile=profile;
-      bindProfileCards(profile);
-      await bindDestinationProgress(profile);
-      await bindJourneyActivityEvidence(journeySession,{force:true});
-      bindJourneyCrossPageEvidence();
-      document.dispatchEvent(new CustomEvent('astrix:journey-profile-refreshed',{detail:{refreshedAt:Date.now()}}));
-      return profile;
-    }catch(error){
-      console.info('[ASTRIX Journey] background profile refresh unavailable',error);
-      return null;
-    }finally{
-      journeyLastRefreshAt=Date.now();
-      journeyBackgroundRefreshRequest=null;
-    }
+    const profile=await fetchJourneyProfileRefresh();
+    if(!profile?.profile?.characters?.data)throw new Error('Journey refresh returned no Guardian data.');
+    verifiedProfile=profile;
+    bindProfileCards(profile);
+    await bindDestinationProgress(profile);
+    await bindJourneyActivityEvidence(journeySession,{force:true});
+    bindJourneyCrossPageEvidence();
+    document.dispatchEvent(new CustomEvent('forge:journey-profile-refreshed',{detail:{reason,refreshedAt:Date.now(),payload:profile}}));
+    document.dispatchEvent(new CustomEvent('forge:prepared-page-refreshed',{detail:{page:'journey',payload:profile}}));
+    return profile;
   })();
-  return journeyBackgroundRefreshRequest;
+  try{return await journeyBackgroundRefreshRequest;}
+  finally{journeyBackgroundRefreshRequest=null;}
 }
 
 function startJourneyBackgroundRefresh(){
-  if(journeyBackgroundRefreshTimer)return;
-  journeyLastRefreshAt=Date.now();
-  journeyBackgroundRefreshTimer=globalThis.setInterval(()=>void refreshJourneyProfile(),JOURNEY_BACKGROUND_REFRESH_MS);
+  if(journeyRefreshController)return;
+  journeyRefreshController=createPreparedPageRefreshController({
+    session:journeySession,
+    page:'journey',
+    refresh:options=>refreshJourneyProfile(options),
+    onError:error=>console.info('[Forge Journey] background profile refresh unavailable',error)
+  });
+  bindPreparedPageRefreshControl(refreshButton,journeyRefreshController,{
+    onError:error=>console.info('[Forge Journey] manual profile refresh unavailable',error)
+  });
+  if(refreshButton){
+    document.getElementById('bungieAuthControl')?.prepend(refreshButton);
+    refreshButton.hidden=false;
+  }
+  journeyRefreshController.start();
   const refreshWhenVisible=()=>{
     if(document.visibilityState==='hidden')return;
     bindJourneyCrossPageEvidence();
-    if(journeyBackgroundRefreshPending||Date.now()-journeyLastRefreshAt>=JOURNEY_BACKGROUND_REFRESH_MS)void refreshJourneyProfile();
+    void journeyRefreshController.check();
   };
   document.addEventListener('visibilitychange',refreshWhenVisible);
   globalThis.addEventListener('focus',refreshWhenVisible);
@@ -2331,9 +2295,20 @@ function showSignedOut(){
   dashboard.hidden=true;
   signedOut.hidden=false;
   status.textContent='BUNGIE CONNECTION REQUIRED';
+  if(refreshButton)refreshButton.hidden=true;
   if(connectButton)connectButton.href=authStartUrl();
-  globalThis.AstrixLoader.authResolved();
+  globalThis.ForgeLoader.authResolved();
   void finishJourneyLoader(signedOut);
+}
+
+function showJourneyUnavailable(message='Journey data is unavailable. Retry the page or reconnect Bungie.'){
+  resolving.hidden=false;
+  dashboard.hidden=true;
+  signedOut.hidden=true;
+  status.textContent='JOURNEY DATA UNAVAILABLE';
+  const copy=resolving.querySelector('p:last-child');
+  if(copy)copy.textContent=message;
+  void finishJourneyLoader(resolving);
 }
 
 let locationSelectorReady=false;
@@ -2342,7 +2317,7 @@ function showJourney(){
   resolving.hidden=true;
   signedOut.hidden=true;
   dashboard.hidden=false;
-  status.textContent='AUTHENTICATED JOURNEY';
+  status.textContent='JOURNEY READY';
   renderJourneyContext();
   bindJourneyCrossPageEvidence();
   if(!locationSelectorReady){
@@ -2359,32 +2334,21 @@ function showJourney(){
 }
 
 try{
-  globalThis.AstrixLoader.set(12);globalThis.AstrixLoader.status('Connecting Journey');
+  reportPreparedPageStage('start','journey');
   const session=await getBungieSession();
-  globalThis.AstrixLoader.set(28);globalThis.AstrixLoader.status('Opening Journey');
-  const authenticated=session?.authenticated===true&&globalThis.ASTRIX_BUNGIE_SESSION?.authenticated===true;
+  reportPreparedPageStage('session','journey');
+  const authenticated=session?.authenticated===true&&globalThis.FORGE_BUNGIE_SESSION?.authenticated===true;
   if(authenticated){
     journeySession=session;
-    void bindHistoricalStats(session);
     const heroCardsReady=waitForHeroCards();
+    const profile=await readVerifiedProfile(session);
+    if(!profile?.profile?.characters?.data)throw new Error('Prepared Journey data is unavailable. Retry the page or reconnect Bungie.');
+    verifiedProfile=profile;
+    bindProfileCards(profile);
+    void bindDestinationProgress(profile);
     const mapReady=showJourney();
-    globalThis.AstrixLoader.set(42);globalThis.AstrixLoader.status('Loading verified Guardian data');
-    const profilePromise=readVerifiedProfile(session);
-    const profile=await waitWithin(profilePromise,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
-    if(profile){
-      verifiedProfile=profile;
-      bindProfileCards(profile);
-      void bindDestinationProgress(profile);
-    }else{
-      void profilePromise.then(lateProfile=>{
-        if(!lateProfile?.profile?.characters?.data){void refreshJourneyProfile();return;}
-        verifiedProfile=lateProfile;
-        bindProfileCards(lateProfile);
-        void bindDestinationProgress(lateProfile);
-      }).catch(error=>console.info('[ASTRIX Journey] deferred verified profile unavailable',error));
-    }
     startJourneyBackgroundRefresh();
-    globalThis.AstrixLoader.set(78);globalThis.AstrixLoader.status('Finalising Journey');
+    reportPreparedPageStage('render','journey');
     await Promise.all([
       waitWithin(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS),
       waitWithin(mapReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS),
@@ -2394,13 +2358,8 @@ try{
   }
   else showSignedOut();
 }catch(error){
-  console.info('[ASTRIX Journey] existing Bungie session unavailable',error);
+  console.info('[Forge Journey] existing Bungie session unavailable',error);
   if(journeySession?.authenticated===true){
-    resolving.hidden=true;
-    signedOut.hidden=true;
-    dashboard.hidden=false;
-    status.textContent='AUTHENTICATED JOURNEY · LIVE REFRESH PENDING';
-    startJourneyBackgroundRefresh();
-    void finishJourneyLoader(document);
+    showJourneyUnavailable(error?.message||'Journey data is unavailable. Retry the page or reconnect Bungie.');
   }else showSignedOut();
 }

@@ -455,7 +455,7 @@ def main() -> int:
         "schemaVersion": "1.0.0",
         "purpose": (
             "Beta-only official Bungie manifest cache for Paradox Forge "
-            "reference fixtures. No ASTRIX-authored gameplay inference."
+            "reference fixtures. No Forge authored gameplay inference."
         ),
         "manifestVersion": manifest_version,
         "fixtureCount": len(fixtures),

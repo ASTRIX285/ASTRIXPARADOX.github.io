@@ -20,18 +20,18 @@
     <nav class="gw-nav" aria-label="Guardian Build Forge">
       <a href="#">Activity</a><a href="#">Build</a><a href="#" aria-current="page">Guardian</a><a href="#">Collections</a><a href="#">Fashion</a><a href="#">Vault</a><a href="#">Intelligence</a>
     </nav>
-    <div class="gw-account"><strong data-gw-account>GUARDIAN</strong><small data-gw-season>Season Preview</small></div>
+    <div class="gw-account"><strong data-gw-account>GUARDIAN</strong><small data-gw-season>DESTINY 2</small></div>
   </header>
 
   <main class="gw-main" data-guardian-workspace>
-    <div class="gw-preview" data-gw-notice>Loading verified preview state…</div>
+    <div class="gw-preview" data-gw-notice>Loading Guardian data…</div>
 
     <div class="gw-workspace">
       <aside class="gw-left">
         <section class="gw-identity">
           <img data-gw-crest alt="Subclass crest">
           <div><h1 data-gw-subclass>Subclass</h1><p><span data-gw-class>Character</span> <span data-gw-element></span></p></div>
-          <div class="gw-identity-power"><small>POWER</small><strong data-gw-power>Preview</strong></div>
+          <div class="gw-identity-power"><small>POWER</small><strong data-gw-power>Unavailable</strong></div>
         </section>
 
         <section class="gw-build-section"><header><h2>Super</h2><span data-gw-super-count></span></header><div class="gw-card-grid three" data-gw-supers></div></section>
@@ -43,7 +43,7 @@
 
       <section class="gw-stage" aria-label="Guardian stage">
         <div class="gw-stage-atmosphere"></div>
-        <div class="gw-stage-meta"><span data-gw-preview-label>PREVIEW GUARDIAN</span></div>
+        <div class="gw-stage-meta"><span data-gw-preview-label>GUARDIAN</span></div>
         <div class="gw-render" data-gw-render></div>
         <div class="gw-armour-rail" data-gw-armour-rail></div>
         <div class="gw-stage-stats" data-gw-stage-stats></div>
@@ -68,7 +68,7 @@
     </div>
   </main>
 
-  <footer class="gw-footer"><span>v1.0.0-alpha</span><span>Preview data only · Bungie account not connected</span><span>Guardian Build Forge is not affiliated with Bungie, Inc.</span></footer>
+  <footer class="gw-footer"><span>Guardian Build Forge is not affiliated with Bungie, Inc.</span></footer>
 
   <script type="module">
     import { mountGuardianWorkspace } from './guardian-workspace.mjs?v=20260824-portal-1';
@@ -76,16 +76,16 @@
       image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true});
     });
     mountGuardianWorkspace().then(async({root})=>{
-      AstrixLoader.set(94);AstrixLoader.status('Guardian Journey rendered');
+      ForgeLoader.set(94);ForgeLoader.status('Guardian Journey rendered');
       const images=[...root.querySelectorAll('img')];images.forEach(image=>{image.loading='eager';});
       await Promise.all(images.map(settleImage));
-      requestAnimationFrame(()=>requestAnimationFrame(()=>AstrixLoader.done()));
+      requestAnimationFrame(()=>requestAnimationFrame(()=>ForgeLoader.done()));
     }).catch(error => {
       console.error(error);
       const notice = document.querySelector('[data-gw-notice]');
-      if (notice) notice.textContent = `Unable to load preview: ${error.message}`;
-      AstrixLoader.status('Guardian Journey state rendered');
-      requestAnimationFrame(()=>requestAnimationFrame(()=>AstrixLoader.done()));
+      if (notice) notice.textContent = `Unable to load Guardian data: ${error.message}`;
+      ForgeLoader.status('Guardian Journey state rendered');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>ForgeLoader.done()));
     });
   </script>
 </body>

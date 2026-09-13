@@ -1,10 +1,10 @@
 /* ==========================================================================
    ASTRIX PARADOX - FIXTURE LOADER & MANIFEST BRIDGE
    Normalizes beta fixture payloads, maps Armor 3.0 stats, and exposes
-   globalThis.ASTRIXBetaFixtures without DOM hijacking.
+   globalThis.ForgeBetaFixtures without DOM hijacking.
    ========================================================================== */
 
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260905-weapon-audit-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-page-payload-1";
 
 const FIXTURE_URL = "../../data/paradox-forge/beta/ASTRIX_Paradox_Forge_Beta_Fixtures_v1.json";
 const IDENTITY_URL = "../../data/paradox-forge/beta/beta-component-identities.json";
@@ -64,10 +64,10 @@ function normalizeFixture(fixture){
   const artifactConfiguration={schemaVersion:1,artifactHash:Number.isFinite(Number(artifact?.hash??artifact?.bungieHash))?Number(artifact?.hash??artifact?.bungieHash):null,seasonNumber:Number.isFinite(Number(artifactUnlocks?.seasonNumber??fixture.artifactSeason))?Number(artifactUnlocks?.seasonNumber??fixture.artifactSeason):null,selectedPerkHashes:artifactUnlocks?(artifactUnlocks.unlockedItemHashes??[]).map(Number).filter(Number.isFinite):[],source:"fixture-intent",provenance:{provider:"paradox-fixture",fixtureId:fixture.fixtureId,sourceUrl:fixture.sourceUrl??null}};
   return {source:"paradox-beta-fixture",fixtureId:fixture.fixtureId,dimId:fixture.dimId,sourceUrl:fixture.sourceUrl??null,characterId:fixture.fixtureId,displayName:fixture.displayName,classType:fixture.classType,className:fixture.className,characterClass:String(fixture.className??"").toLowerCase(),subclass:String(fixture.element??"").toLowerCase(),subclassName:fixture.subclassName,subclassHash:fixture.subclassHash,subclassIdentity:resolve(fixture.subclassHash),subclassIcon:resolve(fixture.subclassHash)?.icon??"",super:subclass.super,classAbility:subclass.classAbility,movement:subclass.movement,melee:subclass.melee,grenade:subclass.grenade,abilities:[subclass.classAbility,subclass.movement,subclass.melee,subclass.grenade].filter(Boolean),aspects:subclass.aspects,fragments:subclass.fragments,artifact,artifactConfiguration,weapons,armour,stats,armourModPool:modPool,modAssignmentVerified:false,buildFocus:fixture.buildFocus??null,synergyChains:fixture.synergyChains??[],weaponContribution:fixture.weaponContribution??[],activityProfile:fixture.activityProfile??{},knownStrengths:fixture.knownStrengths??[],knownWeakLinks:fixture.knownWeakLinks??[],mutationCases:fixture.mutationCases??[],beta:{evidenceStatus:fixture.evidenceStatus,resolved:(fixture.allDestinyHashes?.length??0)-unresolvedHashes.length,unresolved:unresolvedHashes.length,unresolvedHashes}};
 }
-export async function loadBetaFixture(id=DEFAULT_FIXTURE_ID){await ensureData();const fixture=(fixtures.fixtures??[]).find(f=>f.fixtureId===id||f.displayName===id);if(!fixture)throw new Error(`Unknown beta fixture: ${id}`);activeFixtureId=fixture.fixtureId;const detail=normalizeFixture(fixture),classLabel=document.querySelector(".char-switch b");if(classLabel)classLabel.textContent=`${detail.className} ▾`;document.dispatchEvent(new CustomEvent("astrix:guardian-selection-changed",{detail}));document.dispatchEvent(new CustomEvent("astrix:beta-fixture-loaded",{detail}));return detail;}
+export async function loadBetaFixture(id=DEFAULT_FIXTURE_ID){await ensureData();const fixture=(fixtures.fixtures??[]).find(f=>f.fixtureId===id||f.displayName===id);if(!fixture)throw new Error(`Unknown beta fixture: ${id}`);activeFixtureId=fixture.fixtureId;const detail=normalizeFixture(fixture),classLabel=document.querySelector(".char-switch b");if(classLabel)classLabel.textContent=`${detail.className} ▾`;document.dispatchEvent(new CustomEvent("forge:guardian-selection-changed",{detail}));document.dispatchEvent(new CustomEvent("forge:beta-fixture-loaded",{detail}));return detail;}
 export async function listBetaFixtures(){await ensureData();return (fixtures.fixtures??[]).map(f=>({fixtureId:f.fixtureId,displayName:f.displayName,className:f.className,subclassName:f.subclassName,element:f.element}));}
 async function start(){try{await ensureData();await loadBetaFixture(DEFAULT_FIXTURE_ID);}catch(error){console.error("[Paradox beta fixture loader]",error);}}
 let started=false;function startOnce(){if(started)return;started=true;start();}
-document.addEventListener("astrix:guardian-workspace-ready",startOnce,{once:true});
+document.addEventListener("forge:guardian-workspace-ready",startOnce,{once:true});
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(startOnce,0),{once:true});else setTimeout(startOnce,0);
-globalThis.ASTRIXBetaFixtures={load:loadBetaFixture,list:listBetaFixtures,current:()=>activeFixtureId};
+globalThis.ForgeBetaFixtures={load:loadBetaFixture,list:listBetaFixtures,current:()=>activeFixtureId};

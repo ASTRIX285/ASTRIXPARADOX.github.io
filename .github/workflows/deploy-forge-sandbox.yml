@@ -1,0 +1,138 @@
+name: Deploy Forge Sandbox
+
+on:
+  push:
+    branches:
+      - sandbox
+  workflow_dispatch:
+
+concurrency:
+  group: forge-paradox-sandbox
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sandbox
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate current compact Forge armour and Artifact index
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+          FORGE_INDEX_ONLY: '1'
+        run: python3 astrix-app/tools/import-armor-information.py
+      - name: Validate generated Forge Artifact catalogue
+        run: |
+          python3 - <<'PYEOF'
+          import json
+          from pathlib import Path
+
+          path = Path("astrix-app/data/forge-armour-index.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          if payload.get("schemaVersion") != 5:
+              raise SystemExit(f"Unsupported Forge index schema: {payload.get('schemaVersion')}")
+          artifacts = payload.get("artifactCatalog") or []
+          if not artifacts:
+              raise SystemExit("Generated Forge index contains no verified Artifact 2.0 catalogue")
+          for artifact in artifacts:
+              slots = artifact.get("selectionSlots") or []
+              perks = artifact.get("perks") or []
+              if artifact.get("availabilityModel") != "artifact-2-socket-buckets":
+                  raise SystemExit(f"Unsupported Artifact selection model: {artifact.get('hash')}")
+              if not slots or not perks or artifact.get("selectionLimit", 0) <= 0:
+                  raise SystemExit(f"Incomplete Artifact catalogue record: {artifact.get('hash')}")
+          print(f"FORGE_ARTIFACT_CATALOGUE=PASS artifacts={len(artifacts)}")
+          PYEOF
+      - name: Refresh compact Journey catalogue
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+        run: python3 astrix-app/tools/build-journey-index.py --download
+      - name: Validate sandbox contract
+        run: |
+          node astrix-app/tools/validate-scope-guard.mjs
+          node astrix-app/tools/validate-sandbox-deployment.mjs
+      - name: Validate weapon catalogue, cards and Journey
+        run: node astrix-app/tools/paradox-validator.mjs
+      - name: Validate auth Worker
+        working-directory: forge-auth-worker
+        run: |
+          npm install
+          npm run check --if-present
+      - name: Validate backend data boundaries
+        run: node astrix-app/tools/test-backend-data.mjs
+      - name: Prepare shared Bungie definitions
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+        run: python3 astrix-app/tools/build-backend-manifest.py
+      - name: Prepare static sandbox
+        run: node forge-sandbox/prepare-deployment.mjs
+      - name: Deploy shared manifest data
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: forge-manifest-worker
+          wranglerVersion: 4.114.0
+          command: deploy
+      - name: Deploy sandbox auth origin
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: forge-auth-worker
+          command: deploy
+      - name: Deploy sandbox Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: forge-sandbox
+          wranglerVersion: 4.114.0
+          command: deploy
+      - name: Verify live sandbox
+        run: |
+          node - <<'NODE'
+          const pageUrl='https://sandbox.astrixparadox.com/astrix-app/pages/journey/';
+          const origin='https://sandbox.astrixparadox.com';
+          let page;
+          for(let attempt=1;attempt<=36;attempt+=1){
+            page=await fetch(pageUrl,{redirect:'manual'}).catch(()=>null);
+            if(page?.ok||[301,302,303,307,308].includes(page?.status))break;
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          if(!page)throw new Error('sandbox page unavailable: network error');
+          const gated=[301,302,303,307,308].includes(page.status);
+          if(gated){
+            const target=new URL(page.headers.get('location')||'',pageUrl);
+            if(!target.hostname.endsWith('.cloudflareaccess.com')||!target.pathname.includes('/cdn-cgi/access/'))throw new Error(`unexpected sandbox redirect: ${target}`);
+          }else{
+            if(!page.ok)throw new Error(`sandbox page unavailable: ${page.status}`);
+            const html=await page.text();
+            if(!html.includes('20260902-character-scope-journey-landing-1'))throw new Error('sandbox is not serving the current Journey build');
+          }
+          const preflight=await fetch('https://auth.astrixparadox.com/bungie/profile',{
+            method:'OPTIONS',
+            headers:{
+              Origin:origin,
+              'Access-Control-Request-Method':'GET',
+              'Access-Control-Request-Headers':'Content-Type',
+            },
+          });
+          if(preflight.status!==204)throw new Error(`sandbox CORS preflight ${preflight.status}`);
+          if(preflight.headers.get('access-control-allow-origin')!==origin)throw new Error('sandbox CORS origin mismatch');
+          if(preflight.headers.get('access-control-allow-credentials')!=='true')throw new Error('sandbox credentialed CORS missing');
+          const profile=await fetch('https://auth.astrixparadox.com/bungie/profile',{headers:{Origin:origin}});
+          const body=await profile.json();
+          if(profile.status!==401||body.error!=='authentication_required')throw new Error(`sandbox profile guard ${profile.status}`);
+          console.log(gated?'SANDBOX_ACCESS_GATE=PASS':'SANDBOX_LIVE_PAGE=PASS');
+          console.log('SANDBOX_AUTH_CORS=PASS');
+          NODE

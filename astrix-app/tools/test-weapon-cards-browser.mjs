@@ -9,7 +9,7 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE_PATH?pathToFileURL(p
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const output=process.env.WEAPON_QA_OUTPUT||'/tmp/paradox-weapon-card-qa';
 await mkdir(output,{recursive:true});
-const fixture=`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.css"><link rel="stylesheet" href="/astrix-app/pages/guardian-workspace-v2/paradox-item-cards.css"><style>*{box-sizing:border-box}body{margin:0;background:#08080c;color:white;font-family:Arial,sans-serif}</style>`;
+const fixture=`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.css"><link rel="stylesheet" href="/astrix-app/pages/guardian-workspace-v2/paradox-item-cards.css"><link rel="stylesheet" href="/astrix-app/shared/astrix-desktop-density.css"><style>*{box-sizing:border-box}body{margin:0;background:#08080c;color:white;font-family:Arial,sans-serif}</style>`;
 const server=createServer(async(req,res)=>{
   const path=new URL(req.url,'http://localhost').pathname;
   if(path==='/weapon-qa.html'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}

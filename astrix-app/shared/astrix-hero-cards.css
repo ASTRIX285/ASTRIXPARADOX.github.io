@@ -1,4 +1,4 @@
-html body header:has(>[data-astrix-hero-cards]){
+html body header:has(>[data-forge-hero-cards]){
   position:fixed!important;
   top:0!important;
   left:0!important;
@@ -16,35 +16,35 @@ html body header:has(>[data-astrix-hero-cards]){
   background:#060606!important;
 }
 
-body:has(header>[data-astrix-hero-cards]){
+body:has(header>[data-forge-hero-cards]){
   padding-top:180px!important;
 }
 
-body:has(>header.astrix-command-header>[data-astrix-hero-cards])>.apx-page-shell{
+body:has(>header.forge-command-header>[data-forge-hero-cards])>.apx-page-shell{
   padding-top:clamp(1rem,2vw,1.75rem)!important;
 }
 
-html body header:has(>[data-astrix-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;grid-row:1!important;justify-self:start!important}
-html body header:has(>[data-astrix-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){grid-column:1!important;grid-row:1!important;justify-self:end!important;text-align:center!important}
-html body header:has(>[data-astrix-hero-cards])>.apx-destination-header-state{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
-html body header:has(>[data-astrix-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important;justify-self:end!important}
+html body header:has(>[data-forge-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;grid-row:1!important;justify-self:start!important}
+html body header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){grid-column:1!important;grid-row:1!important;justify-self:end!important;text-align:center!important}
+html body header:has(>[data-forge-hero-cards])>.apx-destination-header-state{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+html body header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important;justify-self:end!important}
 
 /* One compact command ribbon across every destination page. Page-owned data,
    selection and authentication hooks remain unchanged. */
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand{min-width:0!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand img{width:46px!important;height:46px!important;object-fit:contain!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand span{display:grid!important;gap:3px!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand strong{color:#f4efe4!important;font:800 1rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.08em!important;white-space:nowrap!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand strong em{color:var(--apx-crimson-bright,#b22222)!important;font-style:normal!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand small{color:var(--apx-gold,#c9a84c)!important;font:700 .75rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.12em!important;white-space:nowrap!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy{position:absolute!important;top:50%!important;left:calc(25% - 5rem)!important;display:grid!important;min-width:0!important;max-width:calc(50% - 20rem)!important;justify-items:center!important;gap:.375rem!important;transform:translate(-50%,-50%)!important;white-space:normal!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy strong{display:block!important;color:var(--apx-crimson-bright,#b22222)!important;font:800 1.25rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.14em!important;text-align:center!important;text-shadow:0 0 18px rgba(211,32,47,.3)!important;white-space:nowrap!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy small{display:block!important;max-width:100%!important;margin:0!important;color:var(--apx-gold,#c9a84c)!important;font:800 .75rem/1.2 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.1em!important;text-align:center!important;text-wrap:balance!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .topbar-actions{display:flex!important;min-width:0!important;margin:0!important;align-items:center!important;justify-content:flex-end!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .topbar-actions>:not(.bungie-auth-control){display:none!important}
-html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .bungie-auth-control{margin:0!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand{min-width:0!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand,2.875rem)!important;height:auto!important;aspect-ratio:1;object-fit:contain!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand span{display:grid!important;gap:3px!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong{color:#f4efe4!important;font:800 1rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.08em!important;white-space:nowrap!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong em{color:var(--apx-crimson-bright,#b22222)!important;font-style:normal!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand small{color:var(--apx-gold,#c9a84c)!important;font:700 .75rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.12em!important;white-space:nowrap!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy{position:absolute!important;top:50%!important;left:calc(25% - 5rem)!important;display:grid!important;min-width:0!important;max-width:calc(50% - 20rem)!important;justify-items:center!important;gap:.375rem!important;transform:translate(-50%,-50%)!important;white-space:normal!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{display:block!important;color:var(--apx-crimson-bright,#b22222)!important;font:800 1.25rem/1 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.14em!important;text-align:center!important;text-shadow:0 0 18px rgba(211,32,47,.3)!important;white-space:nowrap!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{display:block!important;max-width:100%!important;margin:0!important;color:var(--apx-gold,#c9a84c)!important;font:800 .75rem/1.2 bahnschrift-semicondensed,sans-serif!important;letter-spacing:.1em!important;text-align:center!important;text-wrap:balance!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .topbar-actions{display:flex!important;min-width:0!important;margin:0!important;align-items:center!important;justify-content:flex-end!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .topbar-actions>:not(.bungie-auth-control){display:none!important}
+html body header.forge-command-header:has(>[data-forge-hero-cards]) .bungie-auth-control{margin:0!important}
 
-html body header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{
+html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
   position:static!important;
   grid-column:2!important;
   grid-row:1!important;
@@ -82,7 +82,7 @@ html body header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian
 .guardian-character-cards__status.is-pending{border-color:rgba(240,191,62,.38);color:#d9c47f}
 .guardian-character-cards__status.is-unavailable{border-color:rgba(255,80,96,.36);color:#e3a1aa}
 
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card{
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card{
   --character-emblem:none;
   position:relative;
   isolation:isolate;
@@ -107,7 +107,7 @@ html body header:has(>[data-astrix-hero-cards]) .guardian-character-card{
   transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,filter .18s ease,opacity .18s ease;
 }
 
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card::before{
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card::before{
   content:"";
   position:absolute;
   z-index:-2;
@@ -118,7 +118,7 @@ html body header:has(>[data-astrix-hero-cards]) .guardian-character-card::before
   transition:opacity .18s ease,filter .18s ease,transform .18s ease;
 }
 
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card::after{
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card::after{
   content:"";
   position:absolute;
   z-index:-1;
@@ -128,11 +128,11 @@ html body header:has(>[data-astrix-hero-cards]) .guardian-character-card::after{
   pointer-events:none;
 }
 
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card:hover{transform:translateY(-1px);border-color:rgba(var(--stage-accent-rgb,180,70,70),.62);filter:none;opacity:1}
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card:hover::before{opacity:1;filter:none;transform:scale(1.005)}
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected{border-color:rgba(201,168,76,.92);background:#0b0809;box-shadow:0 0 0 1px rgba(211,32,47,.62),0 0 2rem rgba(201,168,76,.5),0 0 3.25rem rgba(211,32,47,.22),0 14px 30px rgba(0,0,0,.42);filter:none;opacity:1}
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected::before{opacity:1;filter:none}
-html body header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-selected::after{background:linear-gradient(0deg,rgba(25,5,8,.58) 0 38%,rgba(201,168,76,.06) 100%);opacity:.16}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card:hover{transform:translateY(-1px);border-color:rgba(var(--stage-accent-rgb,180,70,70),.62);filter:none;opacity:1}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card:hover::before{opacity:1;filter:none;transform:scale(1.005)}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected{border-color:rgba(201,168,76,.92);background:#0b0809;box-shadow:0 0 0 1px rgba(211,32,47,.62),0 0 2rem rgba(201,168,76,.5),0 0 3.25rem rgba(211,32,47,.22),0 14px 30px rgba(0,0,0,.42);filter:none;opacity:1}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::before{opacity:1;filter:none}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::after{background:linear-gradient(0deg,rgba(25,5,8,.58) 0 38%,rgba(201,168,76,.06) 100%);opacity:.16}
 .guardian-character-card__head{position:absolute;z-index:1;inset:0;display:block;min-width:0;pointer-events:none}
 .guardian-character-card__identity{position:absolute;top:10px;left:34px;right:50px;min-width:0;padding:0;text-align:left;text-shadow:0 1px 5px #000,0 0 10px rgba(0,0,0,.86)}
 .guardian-character-card__head strong{display:block;overflow:hidden;font:800 12px bahnschrift,sans-serif;letter-spacing:.045em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
@@ -140,11 +140,11 @@ html body header:has(>[data-astrix-hero-cards]) .guardian-character-card.is-sele
 .guardian-character-card__power i{margin-right:3px;font-style:normal;font-size:.65em}
 .guardian-character-card__stats{position:absolute;z-index:1;left:39px;right:4px;bottom:5px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
 .guardian-character-card__stat{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:32px;padding:2px;border:0;border-radius:3px;background:rgba(7,9,14,.52);text-shadow:0 1px 4px #000}
-.guardian-character-card__stat .guardian-stat-icon{display:block;width:20px;height:20px;flex:0 0 20px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.72))}
+.guardian-character-card__stat .guardian-stat-icon{display:block;width:var(--apx-icon-stat,1.25rem);height:var(--apx-icon-stat,1.25rem);flex:0 0 var(--apx-icon-stat,1.25rem);object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.72))}
 .guardian-character-card__stat .guardian-stat-icon.is-unavailable{border:1px solid rgba(255,255,255,.14);transform:rotate(45deg)}
 .guardian-character-card__stat b{color:#fff;font:800 13px bahnschrift,sans-serif}
 
-body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]{
+body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{
   position:fixed!important;
   top:120px!important;
   left:0!important;
@@ -156,16 +156,16 @@ body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]{
   isolation:isolate;
 }
 
-body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon] .apx-destination-ribbon{
+body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon] .apx-destination-ribbon{
   border:0!important;
   background:transparent!important;
 }
 
-body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon] .apx-destination-ribbon a{
+body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon] .apx-destination-ribbon a{
   background:rgba(6,6,6,.8);
 }
 
-body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]::after{
+body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
   content:"";
   position:absolute;
   z-index:-1;
@@ -184,33 +184,33 @@ body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]::afte
 }
 
 @media(min-width:1500px){
-  body:has(header>[data-astrix-hero-cards]){zoom:1}
+  body:has(header>[data-forge-hero-cards]){zoom:1}
 }
 
 @media(max-width:1599px){
-  body:has(header>[data-astrix-hero-cards]){padding-top:246px!important}
-  html body header:has(>[data-astrix-hero-cards]){grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:48px 88px!important;height:174px!important;min-height:174px!important}
-  html body header:has(>[data-astrix-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;grid-row:1!important}
-  html body header:has(>[data-astrix-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){position:static!important;grid-column:2!important;grid-row:1!important;justify-self:center!important;max-width:100%!important;transform:none!important;text-align:center!important}
-  html body header:has(>[data-astrix-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important}
-  html body header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{position:absolute!important;left:50%!important;bottom:10px!important;grid-column:auto!important;grid-row:auto!important;transform:translateX(-50%)!important}
-  body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]{top:186px!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand img{width:38px!important;height:38px!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand strong{font-size:.875rem!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand small{font-size:.625rem!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy strong{font-size:1.25rem!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy small{font-size:.75rem!important}
+  body:has(header>[data-forge-hero-cards]){padding-top:246px!important}
+  html body header:has(>[data-forge-hero-cards]){grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:48px 88px!important;height:174px!important;min-height:174px!important}
+  html body header:has(>[data-forge-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;grid-row:1!important}
+  html body header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){position:static!important;grid-column:2!important;grid-row:1!important;justify-self:center!important;max-width:100%!important;transform:none!important;text-align:center!important}
+  html body header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important}
+  html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{position:absolute!important;left:50%!important;bottom:10px!important;grid-column:auto!important;grid-row:auto!important;transform:translateX(-50%)!important}
+  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:186px!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong{font-size:.875rem!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand small{font-size:.625rem!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{font-size:1.25rem!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{font-size:.75rem!important}
 }
 
 @media(max-width:960px){
-  html body header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:calc(100% - 28px)!important;min-width:0!important;max-width:910px!important}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card{width:100%!important;min-width:0!important;max-width:none!important}
+  html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:calc(100% - 28px)!important;min-width:0!important;max-width:910px!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{width:100%!important;min-width:0!important;max-width:none!important}
 }
 
 @media(max-width:720px){
-  body:has(header>[data-astrix-hero-cards]){padding-top:274px!important}
-  html body header:has(>[data-astrix-hero-cards]){height:174px!important;min-height:174px!important;padding:9px 12px!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{
+  body:has(header>[data-forge-hero-cards]){padding-top:274px!important}
+  html body header:has(>[data-forge-hero-cards]){height:174px!important;min-height:174px!important;padding:9px 12px!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     left:12px!important;
     right:12px!important;
     bottom:10px!important;
@@ -220,44 +220,44 @@ body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]::afte
     gap:6px!important;
     transform:none!important;
   }
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card{
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{
     height:88px!important;
     min-height:88px!important;
     border-radius:10px!important;
   }
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity{top:12px;left:10px;right:42px}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__head strong{font-size:12px;line-height:1.1;letter-spacing:.04em}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__power{top:12px;right:8px;font-size:12px}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__stats{display:none!important}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card::before{background-position:center!important}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-cards__status{min-height:88px;font-size:.78rem;line-height:1.35;padding:12px}
-  body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]{top:174px!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand img{width:38px!important;height:38px!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-brand span{display:none!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy strong{font-size:.875rem!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]) .apx-destination-header-copy small{display:none!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__identity{top:12px;left:10px;right:42px}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head strong{font-size:12px;line-height:1.1;letter-spacing:.04em}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__power{top:12px;right:8px;font-size:12px}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__stats{display:none!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card::before{background-position:center!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-cards__status{min-height:88px;font-size:.78rem;line-height:1.35;padding:12px}
+  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:174px!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand span{display:none!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{font-size:.875rem!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{display:none!important}
 }
 
 @media(max-width:430px){
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__identity{left:8px;right:38px}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__head strong{font-size:11px}
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card__power{right:6px;font-size:11px}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__identity{left:8px;right:38px}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head strong{font-size:11px}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__power{right:6px;font-size:11px}
 }
 
 /* Phone header: wrap banners in normal flow rather than clipping a desktop strip. */
 @media(max-width:720px){
-  html body:has(header>[data-astrix-hero-cards]){padding-top:0!important}
-  html body header.astrix-command-header:has(>[data-astrix-hero-cards]),
-  html body header.topbar:has(>[data-astrix-hero-cards]){position:relative!important;inset:auto!important;height:auto!important;min-height:0!important;grid-template-rows:auto auto!important;row-gap:12px!important}
-  html body header:has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{
+  html body:has(header>[data-forge-hero-cards]){padding-top:0!important}
+  html body header.forge-command-header:has(>[data-forge-hero-cards]),
+  html body header.topbar:has(>[data-forge-hero-cards]){position:relative!important;inset:auto!important;height:auto!important;min-height:0!important;grid-template-rows:auto auto!important;row-gap:12px!important}
+  html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     position:static!important;inset:auto!important;transform:none!important;
     grid-area:auto!important;grid-column:1/-1!important;grid-row:2!important;
     display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;
     width:100%!important;min-width:0!important;max-width:100%!important;gap:8px!important;margin:0!important;padding:0!important;
   }
-  html body header:has(>[data-astrix-hero-cards]) .guardian-character-card{min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
-  html body:has(header>[data-astrix-hero-cards])>[data-astrix-destination-ribbon]{position:relative!important;inset:auto!important;margin:0!important}
-  html body header:is(.topbar,.astrix-command-header):has(>[data-astrix-hero-cards])>#guardianCharacterCards.guardian-character-cards{
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  html body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{position:relative!important;inset:auto!important;margin:0!important}
+  html body header:is(.topbar,.forge-command-header):has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     position:static!important;inset:auto!important;transform:none!important;grid-area:auto!important;grid-column:1/-1!important;grid-row:2!important;
     grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;width:100%!important;min-width:0!important;max-width:100%!important;
   }

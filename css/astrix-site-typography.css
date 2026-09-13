@@ -1,7 +1,7 @@
 :root {
-  --astrix-font-ui: "bahnschrift", "Segoe UI", Arial, sans-serif;
-  --astrix-font-display: "bahnschrift-semicondensed", "Segoe UI", Arial, sans-serif;
-  --astrix-font-condensed: "bahnschrift-condensed", "Arial Narrow", Arial, sans-serif;
+  --forge-font-ui: "bahnschrift", "Segoe UI", Arial, sans-serif;
+  --forge-font-display: "bahnschrift-semicondensed", "Segoe UI", Arial, sans-serif;
+  --forge-font-condensed: "bahnschrift-condensed", "Arial Narrow", Arial, sans-serif;
 }
 
 html,
@@ -10,7 +10,7 @@ button,
 input,
 select,
 textarea {
-  font-family: var(--astrix-font-ui);
+  font-family: var(--forge-font-ui);
 }
 
 h1,
@@ -26,5 +26,5 @@ legend,
 th,
 [role="tab"],
 [role="button"] {
-  font-family: var(--astrix-font-display);
+  font-family: var(--forge-font-display);
 }

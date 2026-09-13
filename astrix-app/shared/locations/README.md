@@ -1,6 +1,6 @@
 # Location art (Journey atmosphere)
 
-Drop each destination's background image here, named by its AstrixDestinations key:
+Drop each destination's background image here, named by its ForgeDestinations key:
 
     pale-heart.jpg  dreaming-city.jpg  neomuna.jpg  europa.jpg  throne-world.jpg
     nessus.jpg  edz.jpg  moon.jpg  cosmodrome.jpg

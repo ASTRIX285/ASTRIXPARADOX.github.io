@@ -1,4 +1,4 @@
-name: Update ASTRIX Armor Information
+name: Update Forge Armor Information
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-armor-information-${{ github.ref }}
+  group: forge-armor-information-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -226,7 +226,7 @@ jobs:
           FILE_CHANGED: ${{ steps.generated.outputs.changed }}
         run: |
           {
-            echo "## ASTRIX armour information update"
+            echo "## Forge armour information update"
             echo
             echo "- Manifest version: ${MANIFEST_VERSION:-unavailable}"
             echo "- Raw official records generated: ${ARMOR:-0}"

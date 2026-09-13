@@ -1,7 +1,7 @@
 /* ==========================================================================
    ASTRIX PARADOX - FIXTURE LOADER & MANIFEST BRIDGE
    Normalizes beta fixture payloads, maps Armor 3.0 stats, and exposes
-   globalThis.ASTRIXBetaFixtures without DOM hijacking.
+   globalThis.ForgeBetaFixtures without DOM hijacking.
    ========================================================================== */
 
 const FIXTURE_URL = "../../data/paradox-forge/beta/ASTRIX_Paradox_Forge_Beta_Fixtures_v1.json";
@@ -273,8 +273,8 @@ export async function loadBetaFixture(id = DEFAULT_FIXTURE_ID) {
   const classLabel = document.querySelector(".char-switch b");
   if (classLabel) classLabel.textContent = `${detail.className} ▾`;
 
-  document.dispatchEvent(new CustomEvent("astrix:guardian-selection-changed", { detail }));
-  document.dispatchEvent(new CustomEvent("astrix:beta-fixture-loaded", { detail }));
+  document.dispatchEvent(new CustomEvent("forge:guardian-selection-changed", { detail }));
+  document.dispatchEvent(new CustomEvent("forge:beta-fixture-loaded", { detail }));
   return detail;
 }
 
@@ -305,11 +305,11 @@ function startOnce() {
   start();
 }
 
-document.addEventListener("astrix:guardian-workspace-ready", startOnce, { once: true });
+document.addEventListener("forge:guardian-workspace-ready", startOnce, { once: true });
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => setTimeout(startOnce, 0), { once: true });
 } else {
   setTimeout(startOnce, 0);
 }
 
-globalThis.ASTRIXBetaFixtures = { load: loadBetaFixture, list: listBetaFixtures, current: () => activeFixtureId };
+globalThis.ForgeBetaFixtures = { load: loadBetaFixture, list: listBetaFixtures, current: () => activeFixtureId };

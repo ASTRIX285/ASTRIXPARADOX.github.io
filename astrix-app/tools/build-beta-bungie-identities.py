@@ -241,7 +241,7 @@ def main() -> int:
         "purpose": (
             "Beta-only official Destiny identity cache from Bungie's "
             "current English DestinyInventoryItemDefinition. "
-            "Contains no ASTRIX-authored gameplay inference."
+            "Contains no Forge authored gameplay inference."
         ),
         "manifestVersion": manifest_version,
         "fixtureHashCount": len(fixture_hashes),

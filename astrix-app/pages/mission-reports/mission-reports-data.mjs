@@ -1,5 +1,5 @@
 import {AUTH_ORIGIN} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260905-weapon-audit-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1';
 
 const REQUEST_TIMEOUT_MS=30_000;
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -59,7 +59,7 @@ const completionValue=values=>{
 async function manifestRequestUrl(path){
   await manifestReady;
   const url=new URL(path,AUTH_ORIGIN);
-  if(guardianManifest.status().mode==='indexeddb')url.searchParams.set('definitions','client-manifest');
+  if(path==='/bungie/profile')url.pathname='/bungie/page/journey';
   return url;
 }
 
@@ -262,12 +262,13 @@ async function resolveCharacterId(session,{fetchImpl}={}){
   if(sessionCharacterId)return {status:'ok',characterId:sessionCharacterId};
   const profileRequest=await fetchJsonWithTimeout(await manifestRequestUrl('/bungie/profile'),{fetchImpl});
   if(profileRequest.status!=='ok')return {status:profileRequest.status,characterId:'',payload:null};
+  guardianManifest.seedPayload(profileRequest.payload);
   const characters=profileCharacters(profileRequest.payload);
   const characterId=rememberedCharacterId(characters)||mostRecentCharacterId(characters);
   return characterId?{status:'ok',characterId,payload:profileRequest.payload}:{status:'unavailable',characterId:'',payload:profileRequest.payload};
 }
 
-async function loadActivityHistory({session=globalThis.ASTRIX_BUNGIE_SESSION,characterId='',mode=null,page=0,fetchImpl}={}){
+async function loadActivityHistory({session=globalThis.FORGE_BUNGIE_SESSION,characterId='',mode=null,page=0,fetchImpl}={}){
   if(session?.authenticated!==true)return {status:'unauthenticated',activities:[]};
   let resolvedCharacterId=String(characterId||'');
   if(!resolvedCharacterId){
@@ -286,10 +287,11 @@ async function loadActivityHistory({session=globalThis.ASTRIX_BUNGIE_SESSION,cha
   return {status:'ok',activities:await normaliseActivityHistory(request.payload),characterId:resolvedCharacterId};
 }
 
-async function loadMissionReports({session=globalThis.ASTRIX_BUNGIE_SESSION,characterId='',fetchImpl}={}){
+async function loadMissionReports({session=globalThis.FORGE_BUNGIE_SESSION,characterId='',fetchImpl}={}){
   if(session?.authenticated!==true)return {status:'unauthenticated',activities:[],context:null,characterId:'',lastSynced:null};
   const profileRequest=await fetchJsonWithTimeout(await manifestRequestUrl('/bungie/profile'),{fetchImpl});
   if(profileRequest.status==='unauthenticated')return {status:'unauthenticated',activities:[],context:null,characterId:'',lastSynced:null};
+  if(profileRequest.status==='ok')guardianManifest.seedPayload(profileRequest.payload);
   const context=profileRequest.status==='ok'?await normaliseMissionProfile(profileRequest.payload,session,characterId):null;
   const resolvedCharacterId=String(context?.selectedCharacterId||characterId||session?.activeDestinyMembership?.characterId||session?.characterId||'');
   if(!resolvedCharacterId)return {status:'unavailable',activities:[],context,characterId:'',lastSynced:null};

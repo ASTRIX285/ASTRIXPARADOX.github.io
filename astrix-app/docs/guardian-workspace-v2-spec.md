@@ -4,7 +4,7 @@
 
 ## 1. Purpose
 
-Guardian Workspace v2 is the flagship Paradox Forge experience for Destiny 2 and the first full reference implementation of the wider ASTRIX multigame platform.
+Guardian Workspace v2 is the flagship Paradox Forge experience for Destiny 2 and the first full reference implementation of the wider Forge multigame platform.
 
 It must feel immediately familiar to an experienced Destiny player while adding something Bungie's interface does not provide: transparent, context-aware reasoning about the player's equipped build, owned inventory and current activity.
 
@@ -21,7 +21,7 @@ The workspace is not a database page, chat window or static loadout viewer. It i
 1. **Destiny familiarity first.** Preserve Destiny's visual and information hierarchy where it is already effective.
 2. **Guardian remains the focal point.** The character render is the dominant visual element.
 3. **Advisor, not database.** Every major surface must support a player decision.
-4. **No invented data.** Official identity and imagery come from Bungie data. ASTRIX intelligence remains verified and source-backed.
+4. **No invented data.** Official identity and imagery come from Bungie data. Forge intelligence remains verified and source-backed.
 5. **No opaque recommendations.** Every recommendation must expose its evidence path.
 6. **Preview and live state must never be confused.** Placeholder values are visibly labelled.
 7. **Additive architecture.** Existing services, pipelines and imports remain valid.

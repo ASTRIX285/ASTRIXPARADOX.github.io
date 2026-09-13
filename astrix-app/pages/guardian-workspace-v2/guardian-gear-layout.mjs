@@ -1,13 +1,14 @@
+import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 /* ==========================================================================
    ASTRIX PARADOX - GEAR & MOD MATRIX LAYOUT
    Builds the 5-column ARMOUR & MODS grid (Helmet, Gauntlets, Chest, Legs, Class Item)
    with 6 functional mod tiles each without tearing down sibling DOM blocks.
    ========================================================================== */
 
-import "./guardian-semantic-ui.mjs?v=20260905-card-space-mods-1";
-import { openArmourDrawer } from "./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1";
-import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1";
-import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1";
+import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const bungieIcon = (value) => {
@@ -122,33 +123,27 @@ export function armourCard(index, item) {
   const slotCount = 6;
   const armourTier = Number(item?.armourTier ?? item?.armourSemantics?.tier ?? item?.gearTier);
   const isTierFive = Number.isFinite(armourTier) && armourTier >= 5;
-  const seasonIcon = resolveItemWatermark(item||{},item?.definition||{}).icon;
   const archetype = resolveArmourArchetype(item, armourTier);
   const mods = armourModSequence(item, armourTier, archetype);
-  const archetypeIcon = bungieIcon(archetype?.icon ?? archetype?.displayProperties?.icon);
-  const archetypeTitle = [archetype?.name ?? archetype?.displayName, archetype?.description].filter(Boolean).join(" — ");
   const armourSet = !isExotic ? item?.armourSemantics?.set ?? item?.setBonus ?? null : null;
   const setStrip = armourSetStrip(armourSet);
   const twoPieceActive = armourSet?.twoPiece?.active === true;
   const fourPieceActive = armourSet?.fourPiece?.active === true;
-  const setBonusIcon = bungieIcon(armourSet?.identity?.icon ?? armourSet?.twoPiece?.icon ?? armourSet?.fourPiece?.icon);
+  const setBonusIcon = bungieIcon(armourSet?.identity?.icon || armourSet?.twoPiece?.icon || armourSet?.fourPiece?.icon);
   const setBonusTitle = [armourSet?.identity?.name, "Bungie armour set bonus"].filter(Boolean).join(" — ");
   const traitIcon = bungieIcon(trait?.icon ?? trait?.displayProperties?.icon);
   const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(" — ");
 
   return `<article class="gear-slot ${isExotic ? "exotic" : ""} ${isTierFive ? "is-level-gold" : ""} ${armourSet?.identity ? "has-set-bonus" : ""} ${twoPieceActive ? "is-set-2-active" : ""} ${fourPieceActive ? "is-set-4-active" : ""}" data-armour-index="${index}">
-    <div class="gear-slot-label">${esc(name)}</div>
+    <div class="gear-slot-label">${esc(armourNames[index]||`Armour slot ${index+1}`)}</div>
     <div class="gear-arm-row">
       <div class="gear-arm-anchor">
-        <div class="arm ${icon ? "" : "ph"}" tabindex="0" role="button" title="${esc(name)}">
-          <span class="lv">${esc(item?.power ?? "—")}</span>${seasonIcon || Number.isFinite(armourTier) && armourTier > 0 ? `<span class="armour-tier-rail" title="${Number.isFinite(armourTier) && armourTier > 0 ? `Verified armour tier ${esc(armourTier)}` : "Bungie season/source emblem"}">${seasonIcon ? `<span class="armour-season-icon" title="Bungie season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>` : ""}${Number.isFinite(armourTier) && armourTier > 0 ? Array.from({ length: Math.min(5, Math.floor(armourTier)) }, () => '<i class="armour-tier-diamond" aria-hidden="true"></i>').join("") : ""}</span>` : ""}
-          ${icon ? `<img src="${esc(icon)}" alt="">` : '<span class="ph-glyph">◇</span>'}
-          ${archetypeIcon ? `<span class="armour-archetype-icon" title="${esc(archetypeTitle || "Verified armour archetype")}"><img src="${esc(archetypeIcon)}" alt="${esc(archetype?.name ?? "Armour archetype")}"></span>` : ""}
-          ${isExotic && traitIcon ? `<span class="armour-exotic-overlay" title="${esc(traitTitle || "Verified exotic armour perk")}"><img src="${esc(traitIcon)}" alt="${esc(trait?.name ?? "Exotic armour perk")}"></span>` : ""}
+        <div class="arm has-shared-item-tile ${icon ? "" : "ph"}" tabindex="0" role="button" title="${esc(name)}">
+          ${itemTileMarkup(item,{kind:'armour'})||'<span class="ph-glyph">◇</span>'}
           ${setBonusIcon ? `<span class="armour-set-bonus-icon" title="${esc(setBonusTitle)}"><img src="${esc(setBonusIcon)}" alt="${esc(armourSet?.identity?.name ?? "Armour set bonus")}"></span>` : ""}
         </div>
       </div>
-      ${setStrip}
+      ${isExotic && traitIcon ? `<div class="armour-set-strip armour-exotic-trait-strip"><span class="armour-set-thresholds"><span class="armour-set-threshold is-active" ${perkTooltipAttributes(trait,'Exotic armour trait')} data-paradox-id="${esc(trait.paradoxId||'')}" data-bungie-hash="${esc(trait.bungieHash??trait.hash??'')}"><img src="${esc(traitIcon)}" alt=""></span></span></div>` : setStrip}
     </div>
     <div class="gear-slot-divider"></div>
     <div class="gear-mods" data-slot-count="${slotCount}">${Array.from({ length: slotCount }, (_, i) => modTile(mods[i])).join("")}</div>
@@ -164,7 +159,8 @@ export function buildGear(armour = []) {
   columns.innerHTML = Array.from({ length: 5 }, (_, i) => armourCard(i, armour[i])).join("");
 
   columns.querySelectorAll(".gear-slot").forEach((slotEl, idx) => {
-    slotEl.querySelector(".arm")?.addEventListener("click", () => openArmourDrawer(idx, armour[idx]));
+    const art=slotEl.querySelector(".arm");
+    bindParadoxItemInspect(art,armour[idx],"armour");
   });
 
   requestAnimationFrame(() => {
@@ -180,7 +176,7 @@ function initialise() {
   buildGear([]);
 }
 
-document.addEventListener("astrix:guardian-selection-changed", (e) => {
+document.addEventListener("forge:guardian-selection-changed", (e) => {
   if (Array.isArray(e.detail?.armour)) buildGear(e.detail.armour);
 });
 

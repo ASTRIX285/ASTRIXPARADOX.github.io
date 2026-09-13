@@ -52,31 +52,34 @@ assert.match(portalJs,/function ready\(root\)[\s\S]*?document\.fonts[\s\S]*?quer
 
 assert.doesNotMatch(mainHtml,/guardian-loading-gate|guardianLoadingProgress|data-lit-edges/,'Main legacy red-diamond gate must be removed');
 assert.doesNotMatch(buildHtml,/build-loading-gate|buildLoadingProgress|data-lit-edges/,'Build legacy hex gate must be removed');
-assert.match(mainProgress,/astrix:guardian-render-complete',\(\)=>\{if\(!isBuildSpace\)finishAfterPaint/,'Character completion must not reveal Build Forge before its own render completes');
+assert.match(mainProgress,/forge:guardian-render-complete',\(\)=>\{if\(!isBuildSpace\)finishAfterPaint/,'Character completion must not reveal Build Forge before its own render completes');
 assert.match(mainProgress,/document\.querySelectorAll\('\.scene\.immersive'\)/,'Portal completion must inspect the shared scene background');
 assert.match(mainProgress,/image\.addEventListener\('load',async\(\)=>\{try\{await image\.decode\(\);\}/,'Portal completion must wait for CSS background decoding');
+assert.match(mainProgress,/const BACKGROUND_DECODE_TIMEOUT_MS=5\*1000;[\s\S]*?const timeout=setTimeout\(finish,BACKGROUND_DECODE_TIMEOUT_MS\)/,'A stalled decorative background must not strand Character and Build Forge at the manifest milestone');
 assert.match(mainProgress,/await manifestReady;[\s\S]*?await sceneBackgroundReady;/,'Portal must retain its cover until manifest and scene background are both ready');
-assert.match(mainProgress,/else set\(8,'Bungie authentication required'\)/,'Main portal must remain gated until Bungie authentication completes');
-assert.match(mainProgress,/currentSession=window\.ASTRIX_BUNGIE_SESSION[\s\S]*?guardianRenderComplete/,'Main portal must reconcile a session or render that completed before listener registration');
+assert.match(mainProgress,/else setStage\('start'\)/,'Main portal must remain gated at the shared start stage until Bungie authentication completes');
+assert.match(mainProgress,/currentSession=window\.FORGE_BUNGIE_SESSION[\s\S]*?guardianRenderComplete/,'Main portal must reconcile a session or render that completed before listener registration');
 assert.ok(mainHtml.indexOf('guardian-portal-progress.mjs')<mainHtml.indexOf('guardian-workspace-v2.mjs'),'Main progress listener must load before Guardian startup');
 assert.match(mainHtml,/astrix:guardian-fast-return:v1/,'Main must consume the Build-to-Guardian fast-return marker before the portal mounts');
 assert.match(buildHtml,/astrix:guardian-fast-return:v1/,'Build must consume the authenticated Main-to-Build fast-return marker before the portal mounts');
 assert.match(buildModule,/markGuardianFastReturn\(\)/,'Build Back must preserve the authenticated Guardian session return path');
-assert.doesNotMatch(mainProgress,/setTimeout|window\.addEventListener\('load'/,'Main progress must not use fake timing or window load');
+assert.doesNotMatch(mainProgress,/window\.addEventListener\('load'/,'Main progress must not use the generic window load event');
 assert.match(buildModule,/const ready=Boolean\(build\),status=ready\?'ready':'pending'/,'An empty initial Build render must remain pending while the live profile resolves');
 assert.match(buildModule,/emitLoad\('render',ready\?LOAD_STAGES\.READY:LOAD_STAGES\.SNAPSHOT,label,status\)/,'Only a populated Build render may report the ready milestone');
-assert.match(buildModule,/guardian-portal-progress\.mjs\?v=20260905-weapon-audit-1/,'Build must load the atomic-transfer portal progress module without a stale cache');
-assert.match(buildModule,/window\.AstrixLoader\?\.set\(percent\)/,'Build real milestones must update the shared portal');
+assert.match(mainHtml,/guardian-portal-progress\.mjs\?v=20260906-all-page-data-1/,'Character must load the prepared page payload progress module without a stale cache');
+assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260908-icon-hover-1/,'Build Forge must refresh its parent module for the repaired Apply, review layout and item hover');
+assert.match(buildModule,/guardian-portal-progress\.mjs\?v=20260906-all-page-data-1/,'Build must load the prepared page payload progress module without a stale cache');
+assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build real milestones must update the shared prepared page controller');
 
-assert.match(appModule,/astrix:build-catalogue-rendered/,'Build library must publish catalogue render completion');
-assert.match(subclassModule,/astrix:subclass-filter-rendered/,'Build library must publish subclass-filter render completion');
-assert.match(journeyModule,/renderGuardian\(root, state\);[\s\S]*?AstrixLoader\?\.set\(88\)/,'Guardian Journey must report progress after its state is painted');
-assert.match(journeyPageModule,/function waitForHeroCards\(\)[\s\S]*?astrix:hero-cards-render-complete/,'Journey loader must wait for the header character cards');
-assert.match(journeyPageModule,/function waitForJourneyAtmosphere\(\)[\s\S]*?ASTRIX_LOCATION_VISUALS[\s\S]*?image\.decode/,'Journey loader must decode the active destination atmosphere');
+assert.match(appModule,/forge:build-catalogue-rendered/,'Build library must publish catalogue render completion');
+assert.match(subclassModule,/forge:subclass-filter-rendered/,'Build library must publish subclass-filter render completion');
+assert.match(journeyModule,/renderGuardian\(root, state\);[\s\S]*?ForgeLoader\?\.set\(88\)/,'Guardian Journey must report progress after its state is painted');
+assert.match(journeyPageModule,/function waitForHeroCards\(\)[\s\S]*?forge:hero-cards-render-complete/,'Journey loader must wait for the header character cards');
+assert.match(journeyPageModule,/function waitForJourneyAtmosphere\(\)[\s\S]*?FORGE_LOCATION_VISUALS[\s\S]*?image\.decode/,'Journey loader must decode the active destination atmosphere');
 assert.match(journeyPageModule,/await Promise\.all\(\[[\s\S]*?waitWithin\(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(mapReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(waitForJourneyAtmosphere\(\),JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?\]\)/,'Journey must settle every independently rendered surface behind bounded waits');
-assert.match(journeyPageModule,/function finishJourneyLoader\(root=document\)[\s\S]*?AstrixLoader\.ready\(root\)[\s\S]*?finishJourneyLoader\(document\)/,'Journey final readiness must include the header and body-level artwork');
-assert.doesNotMatch(journeyPageModule,/AstrixLoader\.ready\(dashboard\)/,'Journey must not limit loader readiness to the dashboard subtree');
-assert.match(journeyMaps,/astrix:journey-location-map-render-complete/,'Journey location map must publish a durable render-complete event');
+assert.match(journeyPageModule,/function finishJourneyLoader\(root=document\)[\s\S]*?ForgeLoader\.ready\(root\)[\s\S]*?finishJourneyLoader\(document\)/,'Journey final readiness must include the header and body-level artwork');
+assert.doesNotMatch(journeyPageModule,/ForgeLoader\.ready\(dashboard\)/,'Journey must not limit loader readiness to the dashboard subtree');
+assert.match(journeyMaps,/forge:journey-location-map-render-complete/,'Journey location map must publish a durable render-complete event');
 assert.match(journeyMaps,/if\(image\.complete\)queueMicrotask\(\(\)=>finish\(image\.naturalWidth>0\?'ready':'unavailable'\)\)/,'Journey map completion must reconcile cached images');
 assert.match(journeyMaps,/try\{if\(status==='ready'&&image\.decode\)await image\.decode\(\);\}catch\{\}/,'Journey map completion must wait for image decoding');
 
@@ -93,17 +96,22 @@ assert.match(buildHtml,/window\.APX_SKIP_PORTAL=false/,'Build entry must retain 
 
 // Exercise the actual progress controller through asynchronous event ordering.
 const {runInNewContext}=await import('node:vm');
-async function loaderHarness(){
+async function loaderHarness({stalledBackground=false,isBuildSpace=true}={}){
   const documentEvents=new Map(),windowEvents=new Map(),frames=[];let headerPending=true,completed=0;
-  const document={querySelector:selector=>selector==='.build-space'?{}:selector.includes('is-pending')&&headerPending?{}:null,querySelectorAll:()=>[],documentElement:{dataset:{}},addEventListener:(name,fn)=>documentEvents.set(name,fn)};
-  const window={AstrixLoader:{set(){},status(){},done(){completed++;}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
-  runInNewContext(mainProgress.replace(/^import .*;\n/gm,''),{window,document,guardianManifest:{ready:()=>Promise.resolve()},PORTAL_TRANSITION_KEY:'test',sessionStorage:{getItem:()=>null,removeItem(){}},requestAnimationFrame:fn=>frames.push(fn),queueMicrotask,URL,Image:class{},getComputedStyle:()=>({backgroundImage:'none'})});
+  const document={querySelector:selector=>selector==='.build-space'?(isBuildSpace?{}:null):selector.includes('is-pending')&&headerPending?{}:null,querySelectorAll:selector=>stalledBackground&&selector==='.scene.immersive'?[{}]:[],documentElement:{dataset:{}},baseURI:'https://sandbox.astrixparadox.com/',addEventListener:(name,fn)=>documentEvents.set(name,fn)};
+  const window={ForgeLoader:{set(){},status(){},done(){completed++;}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
+  const source=mainProgress.replace(/^import .*;\n/gm,'').replace('const BACKGROUND_DECODE_TIMEOUT_MS=5*1000;','const BACKGROUND_DECODE_TIMEOUT_MS=1;');
+  class HarnessImage{addEventListener(){}set src(value){this.currentSrc=value;}}
+  const PREPARED_PAGE_STAGES={start:{percent:8,label:'Preparing verified Guardian data'},session:{percent:18,label:'Checking Bungie session'},request:{percent:42,label:'Loading prepared bulk manifest and Guardian data'},join:{percent:72,label:'Joining verified Guardian data to the prepared bulk manifest'},render:{percent:92,label:'Rendering verified page data'},ready:{percent:96,label:'Page ready'}};
+  runInNewContext(source,{window,document,guardianManifest:{ready:()=>Promise.resolve()},PREPARED_PAGE_STAGES,PORTAL_TRANSITION_KEY:'test',sessionStorage:{getItem:()=>null,removeItem(){}},requestAnimationFrame:fn=>frames.push(fn),queueMicrotask,setTimeout,clearTimeout,URL,Image:HarnessImage,getComputedStyle:()=>({backgroundImage:stalledBackground?'url("/stalled-scene.webp")':'none'})});
   return {emit:(name,detail={})=>documentEvents.get(name)?.({detail}),settleHeader:()=>{headerPending=false;},done:()=>completed,flush:async()=>{for(let i=0;i<8;i++){await new Promise(resolve=>setImmediate(resolve));frames.splice(0).forEach(fn=>fn());}}};
 }
-const loading=await loaderHarness();loading.emit('astrix:build-render-complete',{status:'pending'});await loading.flush();assert.equal(loading.done(),0,'Empty initial build must stay covered.');
-loading.settleHeader();loading.emit('astrix:bungie-character-roster');loading.emit('astrix:guardian-loadout-context');await loading.flush();assert.equal(loading.done(),0,'Resolved profile still needs its populated build render.');
-loading.emit('astrix:build-render-complete',{status:'ready'});await loading.flush();assert.equal(loading.done(),1,'Ready build plus settled header releases the loader.');
-const delayedHeader=await loaderHarness();delayedHeader.emit('astrix:build-render-complete',{status:'ready'});await delayedHeader.flush();assert.equal(delayedHeader.done(),0);delayedHeader.settleHeader();delayedHeader.emit('astrix:bungie-character-roster');await delayedHeader.flush();assert.equal(delayedHeader.done(),1);
-const failed=await loaderHarness();failed.emit('astrix:build-render-complete',{status:'pending'});failed.settleHeader();failed.emit('astrix:guardian-error');await failed.flush();assert.equal(failed.done(),1,'A terminal profile error must expose recovery.');
-const stale=await loaderHarness();stale.settleHeader();stale.emit('astrix:build-render-complete',{status:'ready'});stale.emit('astrix:guardian-loading');await stale.flush();assert.equal(stale.done(),0,'A new load must cancel old completion.');
+const loading=await loaderHarness();loading.emit('forge:build-render-complete',{status:'pending'});await loading.flush();assert.equal(loading.done(),0,'Empty initial build must stay covered.');
+loading.settleHeader();loading.emit('forge:bungie-character-roster');loading.emit('forge:guardian-loadout-context');await loading.flush();assert.equal(loading.done(),0,'Resolved profile still needs its populated build render.');
+loading.emit('forge:build-render-complete',{status:'ready'});await loading.flush();assert.equal(loading.done(),1,'Ready build plus settled header releases the loader.');
+const delayedHeader=await loaderHarness();delayedHeader.emit('forge:build-render-complete',{status:'ready'});await delayedHeader.flush();assert.equal(delayedHeader.done(),0);delayedHeader.settleHeader();delayedHeader.emit('forge:bungie-character-roster');await delayedHeader.flush();assert.equal(delayedHeader.done(),1);
+const failed=await loaderHarness();failed.emit('forge:build-render-complete',{status:'pending'});failed.settleHeader();failed.emit('forge:guardian-error');await failed.flush();assert.equal(failed.done(),1,'A terminal profile error must expose recovery.');
+const stale=await loaderHarness();stale.settleHeader();stale.emit('forge:build-render-complete',{status:'ready'});stale.emit('forge:guardian-loading');await stale.flush();assert.equal(stale.done(),0,'A new load must cancel old completion.');
+const stalledBackground=await loaderHarness({stalledBackground:true});stalledBackground.settleHeader();stalledBackground.emit('forge:build-render-complete',{status:'ready'});await new Promise(resolve=>setTimeout(resolve,10));await stalledBackground.flush();assert.equal(stalledBackground.done(),1,'A decorative background that never loads or errors must release a genuinely ready Build Forge after the bounded decode wait.');
+const stalledCharacterBackground=await loaderHarness({stalledBackground:true,isBuildSpace:false});stalledCharacterBackground.emit('forge:guardian-render-complete');await new Promise(resolve=>setTimeout(resolve,10));await stalledCharacterBackground.flush();assert.equal(stalledCharacterBackground.done(),1,'A decorative background that never loads or errors must release a genuinely rendered Character page after the bounded decode wait.');
 console.log('BUILD_LOADER_EVENT_ORDER=PASS');

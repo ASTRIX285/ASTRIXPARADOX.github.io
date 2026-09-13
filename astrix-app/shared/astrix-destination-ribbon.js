@@ -1,4 +1,4 @@
-(function installAstrixDestinationRibbon(){
+(function installForgeDestinationRibbon(){
   'use strict';
 
   const destinations=Object.freeze([
@@ -49,7 +49,7 @@
     mount.replaceChildren(nav);
   }
 
-  function init(){document.querySelectorAll('[data-astrix-destination-ribbon]').forEach(render);}
+  function init(){document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

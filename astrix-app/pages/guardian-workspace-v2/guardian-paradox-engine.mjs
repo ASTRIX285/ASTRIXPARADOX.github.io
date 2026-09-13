@@ -9,7 +9,7 @@
  */
 
 const ALPHA_SOURCE = 'paradox-beta-fixture';
-const EVENT_ANALYSIS = 'astrix:paradox-analysis-changed';
+const EVENT_ANALYSIS = 'forge:paradox-analysis-changed';
 
 const EFFECT_TERMS = [
   'amplified','blind','cure','devour','freeze','frozen','ignite','ignition',
@@ -487,7 +487,7 @@ function artifactFit(nodes, loop, build) {
 
 function activityCounters(build, nodes) {
   const profile = build?.activityProfile ?? build?.activity ?? null;
-  if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) return { status: 'not-supplied', chains: [], note: 'No activity counter evidence was supplied with this Alpha fixture.' };
+  if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) return { status: 'not-supplied', chains: [], note: 'No activity counter evidence was supplied.' };
   const requirements = Array.isArray(profile.requirements) ? profile.requirements : [];
   const outputs = new Set(nodes.flatMap(n => n.effects.outputs));
   const chains = requirements.map(req => {
@@ -523,7 +523,7 @@ function strengthsFromLoop(loop) {
 function evidenceWeakLinks(nodes, missing, weaponRows) {
   const rows = [...missing];
   for (const node of nodes.filter(n => n.unresolved)) rows.push({ type: 'unresolved-identity', item: { hash: node.hash, name: node.name, type: node.type }, statement: `${node.name} is unresolved, so Paradox will not infer an effect or synergy role.` });
-  for (const weapon of weaponRows.filter(w => w.status === 'insufficient-evidence')) rows.push({ type: 'weapon-evidence-gap', item: { hash: weapon.hash, name: weapon.name, type: 'weapon' }, statement: `${weapon.name} is resolved, but its loop contribution is not proven by the available Alpha evidence.` });
+  for (const weapon of weaponRows.filter(w => w.status === 'insufficient-evidence')) rows.push({ type: 'weapon-evidence-gap', item: { hash: weapon.hash, name: weapon.name, type: 'weapon' }, statement: `${weapon.name} is resolved, but its loop contribution is not proven by the available evidence.` });
   return rows;
 }
 
@@ -916,12 +916,12 @@ function acceptArtifact(detail) {
 }
 
 if(typeof document!=='undefined'){
-document.addEventListener('astrix:guardian-selection-changed', e => acceptFixture(e.detail));
-document.addEventListener('astrix:beta-fixture-loaded', e => acceptFixture(e.detail));
-document.addEventListener('astrix:artifact-selection-changed', e => acceptArtifact(e.detail));
+document.addEventListener('forge:guardian-selection-changed', e => acceptFixture(e.detail));
+document.addEventListener('forge:beta-fixture-loaded', e => acceptFixture(e.detail));
+document.addEventListener('forge:artifact-selection-changed', e => acceptArtifact(e.detail));
 }
 
-globalThis.ASTRIXParadoxEngine = {
+globalThis.ForgeParadoxEngine = {
   analyze: analyzeGuardianBuild,
   compareMutation: compareAnalysisMutation,
   recommendForExotic: recommendBuildForExotic,

@@ -30,7 +30,6 @@
         <button class="nav-tab" data-view="activities">Activities</button>
         <button class="nav-tab nav-ai" data-view="ai">ASTRIX AI</button>
       </nav>
-      <div class="prototype-badge">Public v1</div>
     </header>
 
     <main>
@@ -43,11 +42,11 @@
             <button class="button primary" type="button" data-jump="builds">Explore builds</button>
             <button class="button secondary" type="button" data-jump="guardian">View model</button>
           </div>
-          <div class="prototype-note"><strong>Public static version.</strong> No Bungie login, backend, secrets, live API calls or account data. Build content comes from committed JSON.</div>
+          <div class="prototype-note"><strong>Build catalogue.</strong> Build content comes from committed JSON. Account inventory is available through the Guardian tools.</div>
         </div>
         <aside class="guardian-card glass-panel">
           <div class="guardian-card-top">
-            <div><span class="micro-label">Sandbox baseline</span><h2>Armor 3.0</h2><p>Monument of Triumph · Static catalogue</p></div>
+            <div><span class="micro-label">Build library</span><h2>Armor 3.0</h2><p>Monument of Triumph · Static catalogue</p></div>
             <div class="power-orb"><span>Stat cap</span><strong>200</strong></div>
           </div>
           <div class="guardian-visual" aria-hidden="true"><div class="guardian-silhouette"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div></div>
@@ -92,16 +91,16 @@
 
       <section class="content-section split-section" id="inventory">
         <div class="inventory-panel glass-panel">
-          <div class="section-heading compact"><div><p class="eyebrow">Public data status</p><h2>Clear limits.</h2></div><span class="offline-pill">No login</span></div>
+          <div class="section-heading compact"><div><p class="eyebrow">Build data</p><h2>Clear limits.</h2></div></div>
           <div class="inventory-list">
             <div class="inventory-row"><div class="item-icon exotic">J</div><div><strong>Build catalogue</strong><span>Committed JSON records</span></div><span class="row-status">Static</span></div>
             <div class="inventory-row"><div class="item-icon weapon">R</div><div><strong>Selection rules</strong><span>Five visible deterministic filters</span></div><span class="row-status">Inspectable</span></div>
-            <div class="inventory-row"><div class="item-icon armour">A</div><div><strong>Account inventory</strong><span>Requires future OAuth backend</span></div><span class="row-status warning">Not connected</span></div>
+            <div class="inventory-row"><div class="item-icon armour">A</div><div><strong>Account inventory</strong><span>Available through the Guardian tools</span></div><span class="row-status warning">Guardian tools</span></div>
           </div>
         </div>
         <div class="ai-panel" id="ai">
           <div class="ai-glow"></div><p class="eyebrow">ASTRIX rules</p><h2>Inspectable, not opaque.</h2>
-          <p>Public v1 filters build records through plain JavaScript rules. It does not use machine learning or claim personalized account analysis.</p>
+          <p>The build library filters records through plain JavaScript rules. It does not use machine learning or claim personalized account analysis.</p>
           <div class="prompt-preview"><span>Choose Solar + dungeon</span><button type="button" data-jump="builds" aria-label="Open build filters">→</button></div>
           <small>Personalized reasoning remains outside this static release.</small>
         </div>
@@ -117,7 +116,7 @@
       </section>
     </main>
 
-    <footer><span>ASTRIX Destiny public v1</span><span>Static JSON · Armor 3.0 · No Bungie authentication</span></footer>
+    <footer><span>ASTRIX PARADOX</span><span>Guardian Build Forge is not affiliated with Bungie, Inc.</span></footer>
   </div>
 
   <dialog class="build-dialog" data-build-dialog aria-labelledby="build-detail-title">
@@ -132,12 +131,12 @@
       let catalogueRendered=false,subclassRendered=false;
       const finish=()=>{
         if(!catalogueRendered||!subclassRendered)return;
-        AstrixLoader.set(96);AstrixLoader.status('Build library rendered');
-        requestAnimationFrame(()=>requestAnimationFrame(()=>AstrixLoader.done()));
+        ForgeLoader.set(96);ForgeLoader.status('Build library rendered');
+        requestAnimationFrame(()=>requestAnimationFrame(()=>ForgeLoader.done()));
       };
-      AstrixLoader.set(10);AstrixLoader.status('Loading committed build data');
-      document.addEventListener('astrix:build-catalogue-rendered',()=>{catalogueRendered=true;finish();},{once:true});
-      document.addEventListener('astrix:subclass-filter-rendered',()=>{subclassRendered=true;finish();},{once:true});
+      ForgeLoader.set(10);ForgeLoader.status('Loading committed build data');
+      document.addEventListener('forge:build-catalogue-rendered',()=>{catalogueRendered=true;finish();},{once:true});
+      document.addEventListener('forge:subclass-filter-rendered',()=>{subclassRendered=true;finish();},{once:true});
     })();
   </script>
   <script type="module" src="app.js?v=20260824-portal-1"></script>

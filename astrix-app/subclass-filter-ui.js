@@ -82,8 +82,8 @@ function scheduleEmptyStateUpdate() {
 }
 
 async function loadSubclassCoverage() {
-  window.AstrixLoader?.set(22);
-  window.AstrixLoader?.status('Resolving subclass coverage');
+  window.ForgeLoader?.set(22);
+  window.ForgeLoader?.status('Resolving subclass coverage');
   try {
     const response = await fetch(BUILD_DATA_URL, { cache: 'no-store' });
     if (!response.ok) throw new Error(`Build data returned ${response.status}`);
@@ -97,8 +97,8 @@ async function loadSubclassCoverage() {
     console.error('Unable to load subclass coverage', error);
     renderCanonicalSubclassOptions();
   }
-  window.AstrixLoader?.set(88);
-  document.dispatchEvent(new CustomEvent('astrix:subclass-filter-rendered'));
+  window.ForgeLoader?.set(88);
+  document.dispatchEvent(new CustomEvent('forge:subclass-filter-rendered'));
 }
 
 if (subclassSelect) {

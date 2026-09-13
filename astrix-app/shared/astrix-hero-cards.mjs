@@ -1,6 +1,6 @@
-import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
+import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1';
+import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 
-const AUTH_ORIGIN=globalThis.ASTRIX_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const CLASS_NAMES=['titan','hunter','warlock'];
 const CLASS_ORDER={hunter:0,warlock:1,titan:2};
@@ -10,14 +10,17 @@ const MAX_CHARACTERS=3;
 const IS_JOURNEY_PAGE=location.pathname.includes('/pages/journey/');
 const IS_VAULT_PAGE=location.pathname.includes('/pages/vault/');
 const IS_FORGE_LOADER_PAGE=location.pathname.includes('/pages/forge-loader/');
-const SHARES_PROFILE=IS_JOURNEY_PAGE||IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE;
+const IS_LOADOUT_PAGE=location.pathname.includes('/pages/loadout/');
+const IS_MISSION_REPORTS_PAGE=location.pathname.includes('/pages/mission-reports/');
+const IS_BUILD_FORGE_PAGE=location.pathname.includes('/paradox-build-space/');
+const SHARES_PROFILE=IS_JOURNEY_PAGE||IS_MISSION_REPORTS_PAGE||IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE||IS_LOADOUT_PAGE||IS_BUILD_FORGE_PAGE;
 let journeyProfileSettled=false;
 let settleJourneyProfile=()=>{};
 if(SHARES_PROFILE){
-  globalThis.ASTRIX_HERO_PROFILE_PROMISE=new Promise(resolve=>{settleJourneyProfile=resolve;});
+  globalThis.FORGE_HERO_PROFILE_PROMISE=new Promise(resolve=>{settleJourneyProfile=resolve;});
 }
 
-const host=()=>document.querySelector('[data-astrix-hero-cards]');
+const host=()=>document.querySelector('[data-forge-hero-cards]');
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const classLabel=value=>String(value||'Guardian').replace(/^./,letter=>letter.toUpperCase());
 const absoluteIcon=path=>path?new URL(path,BUNGIE_ORIGIN).toString():'';
@@ -26,34 +29,6 @@ function renderStatus(message,state='unavailable'){
   const target=host();
   if(!target)return;
   target.innerHTML=`<div class="guardian-character-cards__status is-${escapeHtml(state)}" role="status">${escapeHtml(message)}</div>`;
-}
-
-async function fetchJson(url){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),60000);
-  try{
-    const response=await fetch(url,{credentials:'include',headers:{Accept:'application/json'},signal:controller.signal});
-    const payload=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(payload?.error||`Bungie request failed (${response.status}).`);
-    return payload;
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
-async function statDefinitions(){
-  const rows=await Promise.all(STAT_ORDER.map(async hash=>{
-    const url=new URL('/bungie/manifest/definition',AUTH_ORIGIN);
-    url.searchParams.set('type','DestinyStatDefinition');
-    url.searchParams.set('hash',String(hash));
-    try{
-      const payload=await fetchJson(url);
-      return [String(hash),payload?.definition||null];
-    }catch{
-      return [String(hash),null];
-    }
-  }));
-  return Object.fromEntries(rows);
 }
 
 function mostRecentCharacterId(characters){
@@ -75,17 +50,12 @@ function rememberCharacterId(characterId){
 function publishJourneyProfile(payload){
   if(!SHARES_PROFILE||journeyProfileSettled)return;
   journeyProfileSettled=true;
-  globalThis.ASTRIX_HERO_PROFILE_PAYLOAD=payload||null;
+  globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload||null;
   settleJourneyProfile(payload||null);
-  document.dispatchEvent(new CustomEvent('astrix:hero-profile-loaded',{detail:{payload:payload||null}}));
+  document.dispatchEvent(new CustomEvent('forge:hero-profile-loaded',{detail:{payload:payload||null}}));
 }
 
-function heroProfileUrl(){
-  const url=new URL('/bungie/profile',AUTH_ORIGIN);
-  if(IS_JOURNEY_PAGE)url.searchParams.set('scope','journey');
-  else if(IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE)url.searchParams.set('scope','character');
-  return url;
-}
+function heroProfilePage(){return IS_JOURNEY_PAGE||IS_MISSION_REPORTS_PAGE?'journey':IS_VAULT_PAGE?'vault':IS_FORGE_LOADER_PAGE||IS_LOADOUT_PAGE?'loadout':IS_BUILD_FORGE_PAGE?'build-forge':'character';}
 
 function characterRoster(payload,definitions){
   return Object.values(payload?.profile?.characters?.data||{}).map(character=>{
@@ -145,11 +115,11 @@ function render(characters,selectedId){
       card.setAttribute('aria-pressed',String(active));
     });
     rememberCharacterId(characterId);
-    document.dispatchEvent(new CustomEvent('astrix:character-selected',{detail:{characterId,characterClass,className:classLabel(characterClass)}}));
+    document.dispatchEvent(new CustomEvent('forge:character-selected',{detail:{characterId,characterClass,className:classLabel(characterClass)}}));
   }));
 }
 
-async function initAstrixHeroCards(){
+async function initForgeHeroCards(){
   const target=host();
   if(!target)return;
   try{
@@ -160,11 +130,9 @@ async function initAstrixHeroCards(){
       renderStatus('CONNECT BUNGIE TO LOAD CHARACTERS');
       return;
     }
-    const [payload,definitions]=await Promise.all([
-      fetchJson(heroProfileUrl()),
-      statDefinitions()
-    ]);
-    if(SHARES_PROFILE)payload.statDefinitions={...(payload.statDefinitions||{}),...definitions};
+    const page=heroProfilePage();
+    const payload=await loadPreparedPagePayload(session,page,{sharedPayload:IS_FORGE_LOADER_PAGE?globalThis.FORGE_LOADER_PRELOAD_PAYLOAD:null});
+    const definitions=payload.statDefinitions||{};
     publishJourneyProfile(payload);
     const characters=characterRoster(payload,definitions);
     const selectedId=mostRecentCharacterId(characters);
@@ -172,12 +140,21 @@ async function initAstrixHeroCards(){
     rememberCharacterId(pageSelectedId);
     render(characters,pageSelectedId);
   }catch(error){
-    console.info('[ASTRIX Hero Cards] Bungie character cards unavailable',error);
+    console.info('[Forge Hero Cards] Bungie character cards unavailable',error);
     publishJourneyProfile(null);
     renderStatus('BUNGIE CHARACTERS UNAVAILABLE');
   }finally{
-    document.dispatchEvent(new CustomEvent('astrix:hero-cards-render-complete'));
+    document.dispatchEvent(new CustomEvent('forge:hero-cards-render-complete'));
   }
 }
 
-initAstrixHeroCards();
+document.addEventListener('forge:prepared-page-refreshed',event=>{
+  const next=event.detail?.payload;
+  if(!SHARES_PROFILE||event.detail?.page!==heroProfilePage()||!next?.profile)return;
+  globalThis.FORGE_HERO_PROFILE_PAYLOAD=next;
+  const characters=characterRoster(next,next.statDefinitions||{});
+  const selected=String(host()?.querySelector('.guardian-character-card.is-selected')?.dataset?.characterId||initialCharacterId(characters));
+  render(characters,selected);
+});
+
+initForgeHeroCards();

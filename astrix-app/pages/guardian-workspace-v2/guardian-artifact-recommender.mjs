@@ -152,6 +152,7 @@ function perkCitation(perk) {
     sandboxPerkHash: perk.sandboxPerkHash,
     name: perk.name,
     description: perk.description,
+    icon: text(perk?.source?.icon ?? perk?.source?.definition?.displayProperties?.icon),
     tierIndex: perk.tierIndex,
     column: perk.column,
     order: perk.order,

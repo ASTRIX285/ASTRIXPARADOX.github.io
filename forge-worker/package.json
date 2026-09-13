@@ -1,0 +1,15 @@
+{
+  "name": "forge-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Forge Cloudflare Worker edge proxy for Bungie API, OAuth lifecycle, and manifest caching",
+  "main": "src/index.mjs",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.50.0"
+  }
+}

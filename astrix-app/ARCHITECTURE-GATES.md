@@ -1,4 +1,4 @@
-# ASTRIX Destiny architecture gates
+# Forge Destiny architecture gates
 
 This document records the decisions and mandatory gates that apply after the static visual prototype.
 
@@ -15,7 +15,7 @@ Before any authentication code is implemented, the project owner must select and
 Proposed production separation:
 
 - `app.astrixparadox.com` serves the static web application.
-- `api.astrixparadox.com` serves authenticated ASTRIX API endpoints from Cloudflare Workers.
+- `api.astrixparadox.com` serves authenticated Forge API endpoints from Cloudflare Workers.
 - `auth.astrixparadox.com` may serve OAuth-specific routes from the same Worker deployment, or it may redirect to equivalent routes under `api.astrixparadox.com`. The final route arrangement must be fixed before the Bungie redirect URI is registered.
 
 The backend choice is not complete until the Worker account, deployment, environment variables, DNS records and redirect URI are configured.

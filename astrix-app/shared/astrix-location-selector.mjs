@@ -1,8 +1,8 @@
 // astrix-location-selector.mjs
 // Journey location selector + reactive art-backdrop atmosphere.
-// Builds on AstrixDestinations (astrix-destination-theme.js) for the roster,
-// data-location state, persistence and the `astrix:destination-changed` event.
-// Visual data comes from ASTRIX_LOCATION_VISUALS (astrix-location-visuals.js).
+// Builds on ForgeDestinations (astrix-destination-theme.js) for the roster,
+// data-location state, persistence and the `forge:destination-changed` event.
+// Visual data comes from FORGE_LOCATION_VISUALS (astrix-location-visuals.js).
 //
 // No invented data: the selector renders the roster; the checklist shows an honest
 // empty state until a verified data provider is supplied via opts.getChecklist.
@@ -19,9 +19,9 @@
 const FOCUS = ['pale-heart','dreaming-city','neomuna','europa','throne-world','nessus','edz','moon','cosmodrome'];
 
 export function initLocationSelector(opts = {}) {
-  const AD = globalThis.AstrixDestinations;
-  const VIS = globalThis.ASTRIX_LOCATION_VISUALS || {};
-  if (!AD) { console.warn('[ASTRIX] AstrixDestinations not loaded; location selector skipped'); return null; }
+  const AD = globalThis.ForgeDestinations;
+  const VIS = globalThis.FORGE_LOCATION_VISUALS || {};
+  if (!AD) { console.warn('[Forge] ForgeDestinations not loaded; location selector skipped'); return null; }
 
   const html = document.documentElement;
   const labelOf = (k) => AD.labelOf(k) || k;
@@ -131,15 +131,15 @@ export function initLocationSelector(opts = {}) {
     reflectSelection(key);
     renderDetail(key);
   }
-  document.addEventListener('astrix:destination-changed', onChanged);
+  document.addEventListener('forge:destination-changed', onChanged);
 
   // initial selection: restored/last, else first focus destination
   const initial = keys.indexOf(AD.current()) >= 0 ? AD.current() : keys[0];
-  AD.set(initial);           // fires astrix:destination-changed -> onChanged
+  AD.set(initial);           // fires forge:destination-changed -> onChanged
   reflectSelection(initial); // in case the event fired before listener wiring on some engines
   renderDetail(initial);
 
-  return { destroy() { document.removeEventListener('astrix:destination-changed', onChanged); } };
+  return { destroy() { document.removeEventListener('forge:destination-changed', onChanged); } };
 }
 
 function escapeHtml(s) {

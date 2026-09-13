@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a small ASTRIX component icon map from Bungie's English manifest.
+"""Generate a small Forge component icon map from Bungie's English manifest.
 
 The Bungie API key is sent only to the manifest index endpoint. The public
 English aggregate manifest is downloaded without authentication, processed in
@@ -223,7 +223,7 @@ def parse_args() -> argparse.Namespace:
         "--components",
         type=Path,
         default=Path("astrix-app/data/armor-3-components.json"),
-        help="ASTRIX component catalogue path.",
+        help="Forge component catalogue path.",
     )
     parser.add_argument(
         "--output",

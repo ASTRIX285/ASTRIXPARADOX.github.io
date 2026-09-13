@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh ASTRIX Bungie-derived Destiny data when the manifest changes.
+"""Refresh Forge Bungie derived Destiny data when the manifest changes.
 
 This script deliberately updates only machine-generated Bungie identity/data
 caches. It never edits curated Paradox intelligence, synergy rules, rankings,

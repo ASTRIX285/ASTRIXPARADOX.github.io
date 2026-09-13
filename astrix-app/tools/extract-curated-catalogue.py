@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Extract a small served catalogue from a full generated ASTRIX catalogue.
+"""Extract a small served catalogue from a full generated Forge catalogue.
 
 The full Bungie Manifest-expanded catalogue is an ephemeral CI intermediate.
-Only records containing existing ASTRIX-curated information, or records already
+Only records containing existing Forge curated information, or records already
 marked as verified by the existing importer, are written to the committed
 served catalogue.
 
@@ -16,7 +16,7 @@ This tool does not:
 * rank items;
 * modify curated information.
 
-Ranking-field validation is deliberately restricted to ASTRIX-authored content.
+Ranking-field validation is deliberately restricted to Forge authored content.
 Bungie's official manifest structures may legitimately contain fields such as
 "tier", including artifact tier and column information.
 """
@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any
 
 
-FORBIDDEN_ASTRIX_RANKING_FIELDS = {
+FORBIDDEN_FORGE_RANKING_FIELDS = {
     "rank",
     "ranking",
     "tier",
@@ -47,7 +47,7 @@ RECORD_COLLECTION_KEYS = {
     "artifacts",
 }
 
-ASTRIX_TOP_LEVEL_METADATA_KEYS = {
+FORGE_TOP_LEVEL_METADATA_KEYS = {
     "schemaVersion",
     "generatedAt",
     "manifestVersion",
@@ -109,11 +109,11 @@ def write_json(
     )
 
 
-def find_forbidden_astrix_fields(
+def find_forbidden_forge_fields(
     value: Any,
     path: str = "$",
 ) -> list[str]:
-    """Find forbidden ranking keys inside ASTRIX-authored content only.
+    """Find forbidden ranking keys inside Forge authored content only.
 
     Callers must pass only:
 
@@ -131,14 +131,14 @@ def find_forbidden_astrix_fields(
 
             if (
                 key
-                in FORBIDDEN_ASTRIX_RANKING_FIELDS
+                in FORBIDDEN_FORGE_RANKING_FIELDS
             ):
                 findings.append(
                     child_path
                 )
 
             findings.extend(
-                find_forbidden_astrix_fields(
+                find_forbidden_forge_fields(
                     child,
                     child_path,
                 )
@@ -149,7 +149,7 @@ def find_forbidden_astrix_fields(
             value
         ):
             findings.extend(
-                find_forbidden_astrix_fields(
+                find_forbidden_forge_fields(
                     child,
                     f"{path}[{index}]",
                 )
@@ -158,10 +158,10 @@ def find_forbidden_astrix_fields(
     return findings
 
 
-def validate_top_level_astrix_metadata(
+def validate_top_level_forge_metadata(
     payload: dict[str, Any],
 ) -> list[str]:
-    """Validate only ASTRIX-owned top-level metadata.
+    """Validate only Forge owned top-level metadata.
 
     Collection arrays and unknown Bungie-derived metadata are not recursively
     scanned. A forbidden field directly at the top level is still rejected.
@@ -177,7 +177,7 @@ def validate_top_level_astrix_metadata(
 
         if (
             key
-            in FORBIDDEN_ASTRIX_RANKING_FIELDS
+            in FORBIDDEN_FORGE_RANKING_FIELDS
         ):
             findings.append(
                 top_level_path
@@ -185,10 +185,10 @@ def validate_top_level_astrix_metadata(
 
         if (
             key
-            in ASTRIX_TOP_LEVEL_METADATA_KEYS
+            in FORGE_TOP_LEVEL_METADATA_KEYS
         ):
             findings.extend(
-                find_forbidden_astrix_fields(
+                find_forbidden_forge_fields(
                     value,
                     top_level_path,
                 )
@@ -225,7 +225,7 @@ def validate_record_curated_content(
             )
 
         findings.extend(
-            find_forbidden_astrix_fields(
+            find_forbidden_forge_fields(
                 curated,
                 (
                     f"$.{collection_name}"
@@ -237,13 +237,13 @@ def validate_record_curated_content(
     return findings
 
 
-def validate_astrix_authored_content(
+def validate_forge_authored_content(
     payload: dict[str, Any],
 ) -> None:
-    """Reject rankings introduced by ASTRIX without scanning Bungie data."""
+    """Reject rankings introduced by Forge without scanning Bungie data."""
 
     findings = (
-        validate_top_level_astrix_metadata(
+        validate_top_level_forge_metadata(
             payload
         )
     )
@@ -273,7 +273,7 @@ def validate_astrix_authored_content(
     if findings:
         raise ExtractionFailure(
             "Forbidden ranking fields were found "
-            "inside ASTRIX-authored content:\n"
+            "inside Forge authored content:\n"
             + "\n".join(
                 f"  - {path}"
                 for path in findings
@@ -543,7 +543,7 @@ def main() -> int:
         args.input
     )
 
-    validate_astrix_authored_content(
+    validate_forge_authored_content(
         payload
     )
 

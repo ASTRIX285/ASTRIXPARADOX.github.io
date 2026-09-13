@@ -165,7 +165,7 @@ async function cleanImageElement(img, src) {
     img.src = cleaned;
     img.dataset.bungieIconCleaned = 'true';
   } catch (error) {
-    console.warn('[ASTRIX Bungie icon cleaner] using original icon', src, error);
+    console.warn('[Forge Bungie icon cleaner] using original icon', src, error);
     if (img.dataset.bungieOriginalSrc === src) img.src = src;
     img.dataset.bungieIconCleaned = 'false';
   }

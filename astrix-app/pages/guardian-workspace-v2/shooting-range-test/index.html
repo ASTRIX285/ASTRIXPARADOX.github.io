@@ -19,7 +19,6 @@
     <h1>Guardian Build Forge · Shooting Range Capture</h1>
     <p>This diagnostic captures the selected Guardian before a Shooting Range run, then checks Bungie Activity History for new instance IDs and fetches any available PGCR. It does not assume that a candidate activity is the Shooting Range until Bungie data proves it.</p>
     <div class="meta">
-      <div class="pill"><small>Bungie</small><strong id="auth">Checking…</strong></div>
       <div class="pill"><small>Selected character</small><strong id="character">Checking…</strong></div>
       <div class="pill"><small>Capture</small><strong id="capture">Not armed</strong></div>
     </div>
@@ -48,17 +47,16 @@ const pretty=value=>JSON.stringify(value,null,2);
 function show(value,cls=''){out.className=`status ${cls}`;out.textContent=typeof value==='string'?value:pretty(value);}
 function refresh(){const capture=readCapture();$('character').textContent=sessionStorage.getItem('astrix:selected-character-id')||capture?.characterId||'None selected';$('capture').textContent=capture?`${capture.status} · ${capture.testId}`:'Not armed';}
 async function init(){
-  AstrixLoader.set(20);AstrixLoader.status('Checking Bungie session');
+  ForgeLoader.set(20);ForgeLoader.status('Checking Bungie session');
   try{
     const session=await getBungieSession();
-    AstrixLoader.set(72);AstrixLoader.status('Rendering capture state');
-    $('auth').textContent=session?.authenticated?(session.activeDestinyMembership?.displayName||'Connected'):'Not connected';
+    ForgeLoader.set(72);ForgeLoader.status('Rendering capture state');
     refresh();
   }catch(error){
-    $('auth').textContent='Session unavailable';show({error:error.message,code:error.code||null},'bad');
+    show({error:error.message,code:error.code||null},'bad');
   }
-  AstrixLoader.set(94);AstrixLoader.status('Capture console rendered');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>AstrixLoader.done()));
+  ForgeLoader.set(94);ForgeLoader.status('Capture console rendered');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ForgeLoader.done()));
 }
 $('arm').onclick=async()=>{try{$('arm').disabled=true;show('Arming capture and taking a baseline Activity History snapshot…','warn');const capture=await armShootingRangeCapture();refresh();show(capture,capture.baselineError?'warn':'ok');}catch(error){show({error:error.message,code:error.code||null,status:error.status||null,url:error.url||null},'bad');}finally{$('arm').disabled=false;}};
 $('pull').onclick=async()=>{try{$('pull').disabled=true;show('Pulling recent Activity History and candidate PGCRs…','warn');const result=await collectShootingRangeResults();refresh();show(result,result.candidates?.length?'ok':'warn');}catch(error){show({error:error.message,code:error.code||null,status:error.status||null,url:error.url||null},'bad');}finally{$('pull').disabled=false;}};

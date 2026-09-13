@@ -2,7 +2,7 @@
 """Build the Paradox Forge beta identity cache.
 
 Reads the enriched beta fixtures and resolves only identity fields against
-existing ASTRIX manifest-derived catalogues.
+existing Forge manifest-derived catalogues.
 
 This tool does not infer effects, synergy, rankings, recommendations, or
 verification state.

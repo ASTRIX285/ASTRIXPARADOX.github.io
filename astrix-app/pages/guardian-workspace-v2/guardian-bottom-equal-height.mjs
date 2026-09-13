@@ -1,8 +1,8 @@
 function lockBottomPanelHeights(){
-  let style=document.getElementById('astrix-bottom-equal-height');
+  let style=document.getElementById('forge-bottom-equal-height');
   if(!style){
     style=document.createElement('style');
-    style.id='astrix-bottom-equal-height';
+    style.id='forge-bottom-equal-height';
     style.textContent=`
       .equip.gear-layout-active{
         align-items:stretch!important;
@@ -21,4 +21,4 @@ function lockBottomPanelHeights(){
 }
 
 lockBottomPanelHeights();
-document.addEventListener('astrix:guardian-selection-changed',lockBottomPanelHeights);
+document.addEventListener('forge:guardian-selection-changed',lockBottomPanelHeights);

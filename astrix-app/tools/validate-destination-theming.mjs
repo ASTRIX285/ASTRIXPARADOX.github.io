@@ -27,10 +27,10 @@ for(const [name,html] of [['Main',mainHtml],['Build Space',buildHtml]]){
   assert.match(html,/astrix-destination-theme\.js/,`${name} must load the shared destination controller`);
 }
 assert.match(mainControls,/id="betaDestination"/,'Main Change Activity flow must expose the destination dropdown');
-assert.match(mainControls,/AstrixDestinations/,'Main must use the shared destination mapping');
+assert.match(mainControls,/ForgeDestinations/,'Main must use the shared destination mapping');
 assert.match(buildHtml,/id="expectedDestination"/,'Build Space must expose the destination dropdown');
 assert.match(buildControls,/expectedDestination/,'Build Space must wire destination selection');
-assert.match(buildControls,/AstrixDestinations/,'Build Space must use the shared destination mapping');
+assert.match(buildControls,/ForgeDestinations/,'Build Space must use the shared destination mapping');
 
 const storage=new Map();
 const root={dataset:{},removeAttribute(name){if(name==='data-location')delete this.dataset.location;}};
@@ -40,7 +40,7 @@ const context={
   CustomEvent:class CustomEvent{constructor(type,init){this.type=type;this.detail=init?.detail;}}
 };
 vm.runInNewContext(controller,context);
-const api=context.AstrixDestinations;
+const api=context.ForgeDestinations;
 assert.equal(api.DESTINATIONS.length,10,'shared controller must expose exactly the ten briefed destinations');
 assert.deepEqual(Array.from(api.DESTINATIONS,destination=>destination.key),keys,'destination mapping order or keys drifted');
 assert.equal(api.set('The Pale Heart'),'pale-heart');

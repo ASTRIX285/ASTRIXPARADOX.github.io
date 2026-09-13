@@ -1,15 +1,29 @@
-import {GuardianManifestService} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260905-journey-repair-1';
+import {GuardianManifestService} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1';
 
 const BASE=new URL('../../data/journey-index/',import.meta.url);
 const validHash=value=>value!==null&&value!==undefined&&value!==''&&Number.isInteger(Number(value))&&Number(value)>0&&Number(value)<=0xffffffff;
 // Journey owns a small LRU of public definitions. Never load the equipment tables
 // or a cached Character payload into this service. Profile progress stays separate.
 export class JourneyManifestService{
-  constructor({fetchImpl=globalThis.fetch?.bind(globalThis),fallback=new GuardianManifestService({selective:true,maxFallbackDefinitions:768,storage:{available:false}}),maxShards=8,maxBytes=6*1024*1024}={}){
+  constructor({fetchImpl=globalThis.fetch?.bind(globalThis),fallback=new GuardianManifestService({backend:true,selective:true,maxFallbackDefinitions:768,storage:{available:false}}),maxShards=8,maxBytes=6*1024*1024}={}){
     this.fetchImpl=fetchImpl;this.fallback=fallback;this.maxShards=maxShards;this.maxBytes=maxBytes;
     this.cache=new Map();this.pending=new Map();this.indexPromise=null;this.retainedBytes=0;
+    this.tables=new Map();this.primed=false;this.pageIndex=null;
+  }
+  prime(payload={}){
+    const supplied={DestinyInventoryItemDefinition:payload.definitions,DestinyStatDefinition:payload.statDefinitions,...(payload.manifestTables||{})};
+    for(const [type,rows] of Object.entries(supplied)){
+      if(!rows||typeof rows!=='object'||Array.isArray(rows))continue;
+      const existing=this.tables.get(type);
+      if(existing)Object.assign(existing,rows);
+      else this.tables.set(type,rows);
+    }
+    if(payload.journeyIndex)this.pageIndex=payload.journeyIndex;
+    this.primed=true;
+    return this;
   }
   async index(){
+    if(this.primed)return this.pageIndex;
     if(!this.indexPromise)this.indexPromise=(async()=>{
       const response=await this.fetchImpl(new URL('index.json?v=20260905-pattern-badges-1',BASE));
       if(!response.ok)throw new Error('Journey catalogue unavailable');
@@ -42,6 +56,7 @@ export class JourneyManifestService{
   }
   async getMany(type,hashes){
     const unique=[...new Set([...hashes].filter(validHash).map(Number))];if(!unique.length)return {};
+    if(this.primed){const table=this.tables.get(type)||{};return Object.fromEntries(unique.filter(hash=>table[String(hash)]).map(hash=>[String(hash),table[String(hash)]]));}
     const index=await this.index();const table=index?.tables?.[type];
     if(!table)return this.fallback.getMany(type,unique);
     const groups=new Map();for(const hash of unique){const n=table.lookup?.[hash]??hash%table.shards.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(hash);}

@@ -1,9 +1,9 @@
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260902-shared-account-orbit-1';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1';
 import {
   renderGuardianCharacterCards,
   renderGuardianCharacterCardStatus
 } from '../guardian-workspace-v2/guardian-character-cards.mjs';
-import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260905-weapon-audit-1';
+import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1';
 
 const $=id=>document.getElementById(id);
 const resolving=$('missionResolving');
@@ -102,7 +102,7 @@ function renderGuardianContext(context){
     renderGuardianCharacterCardStatus('BUNGIE CHARACTERS UNAVAILABLE','unavailable');
   }
 
-  accountPill.textContent=context?.displayName?`BUNGIE: ${context.displayName}`:'BUNGIE CONNECTED';
+  accountPill.textContent=context?.displayName?`BUNGIE: ${context.displayName}`:'BUNGIE ACCOUNT';
   $('missionGuardianClass').textContent=guardian?.className||'Guardian unavailable';
   $('missionGuardianSubclass').textContent=guardian?.subclassName||'Subclass unavailable';
   $('missionVerifiedGuardian').hidden=guardian?.verified!==true;
@@ -461,36 +461,36 @@ document.querySelectorAll('.mission-section-nav a').forEach(link=>link.addEventL
   });
 }));
 
-document.addEventListener('astrix:character-selected',event=>{
+document.addEventListener('forge:character-selected',event=>{
   const characterId=String(event.detail?.characterId||'');
   if(characterId&&characterId!==reportResult?.characterId)loadReport(characterId).catch(error=>{
-    console.info('[ASTRIX Mission Reports] selected character history unavailable',error);
+    console.info('[Forge Mission Reports] selected character history unavailable',error);
     renderUnavailable();
   });
 });
 
 try{
-  globalThis.AstrixLoader.set(12);globalThis.AstrixLoader.status('Connecting Mission Reports');
+  globalThis.ForgeLoader.set(12);globalThis.ForgeLoader.status('Connecting Mission Reports');
   session=await getBungieSession();
-  const authenticated=session?.authenticated===true&&globalThis.ASTRIX_BUNGIE_SESSION?.authenticated===true;
+  const authenticated=session?.authenticated===true&&globalThis.FORGE_BUNGIE_SESSION?.authenticated===true;
   if(!authenticated){
     showSignedOut();
-    globalThis.AstrixLoader.set(96);globalThis.AstrixLoader.status('Mission Reports connection state rendered');
-    await globalThis.AstrixLoader.ready(signedOut);
+    globalThis.ForgeLoader.set(96);globalThis.ForgeLoader.status('Mission Reports connection state rendered');
+    await globalThis.ForgeLoader.ready(signedOut);
   }else{
     showWorkspace();
     await loadReport();
-    globalThis.AstrixLoader.set(96);globalThis.AstrixLoader.status('Mission Reports rendered');
-    await globalThis.AstrixLoader.ready(workspace);
+    globalThis.ForgeLoader.set(96);globalThis.ForgeLoader.status('Mission Reports rendered');
+    await globalThis.ForgeLoader.ready(workspace);
   }
 }catch(error){
-  console.info('[ASTRIX Mission Reports] live activity history unavailable',error);
+  console.info('[Forge Mission Reports] live activity history unavailable',error);
   showWorkspace();
   accountPill.textContent='BUNGIE STATUS UNAVAILABLE';
   feedStatus.textContent='LIVE FEED UNAVAILABLE';
   sourceState.textContent='WORKER ROUTE REQUIRED';
   renderGuardianCharacterCardStatus('BUNGIE CHARACTERS UNAVAILABLE','unavailable');
   renderUnavailable();
-  globalThis.AstrixLoader.set(96);globalThis.AstrixLoader.status('Mission Reports state rendered');
-  await globalThis.AstrixLoader.ready(workspace);
+  globalThis.ForgeLoader.set(96);globalThis.ForgeLoader.status('Mission Reports state rendered');
+  await globalThis.ForgeLoader.ready(workspace);
 }

@@ -7,7 +7,7 @@ import {
   normaliseWeaponSemantics,
   normaliseGuardianStats,
   validateArtifact
-} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1";
+} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
 
 const rawFetch=globalThis.fetch?.bind(globalThis);
 let livePayload=null;
@@ -23,7 +23,7 @@ function rememberPayload(url,payload){
   }
 }
 
-document.addEventListener("astrix:manifest-payload-hydrated",event=>{
+document.addEventListener("forge:manifest-payload-hydrated",event=>{
   const payload=event.detail;
   rememberPayload(Array.isArray(payload?.selectedItems)?"/bungie/loadout":"/bungie/profile",payload);
 });
@@ -39,7 +39,7 @@ if(rawFetch){
         rememberPayload(url,payload);
       }
     }catch(error){
-      console.warn("[ASTRIX semantics] raw payload capture failed",String(error));
+      console.warn("[Forge semantics] raw payload capture failed",String(error));
     }
     return response;
   };
@@ -325,9 +325,9 @@ function enrich(detail){
   return detail;
 }
 
-document.addEventListener("astrix:guardian-selection-changed",event=>{
+document.addEventListener("forge:guardian-selection-changed",event=>{
   try{enrich(event.detail);}
-  catch(error){console.error("[ASTRIX semantics] enrichment failed",error);}
+  catch(error){console.error("[Forge semantics] enrichment failed",error);}
 });
 
 export {enrich};

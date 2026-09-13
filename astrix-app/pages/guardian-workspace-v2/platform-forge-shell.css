@@ -1,9 +1,9 @@
 :root{
-  --astrix-media-rail-width:0px;
-  --astrix-forge-shell-gap:0px;
+  --forge-media-rail-width:0px;
+  --forge-forge-shell-gap:0px;
 }
 
-.astrix-platform-shell{
+.forge-platform-shell{
   display:grid;
   grid-template-columns:0 minmax(0,1fr) 0;
   width:100%;
@@ -12,7 +12,7 @@
   background:#050507;
 }
 
-.astrix-forge-viewport{
+.forge-viewport{
   grid-column:2;
   min-width:0;
   width:100%;
@@ -20,8 +20,8 @@
   z-index:1;
 }
 
-.astrix-forge-viewport>.workspace,
-.astrix-forge-viewport>.build-space{
+.forge-viewport>.workspace,
+.forge-viewport>.build-space{
   width:100%!important;
   max-width:none!important;
   margin-inline:0!important;
@@ -65,25 +65,25 @@
 .developer-media-rail[data-media-state="empty"] .developer-media-slot{pointer-events:none}
 
 @media (min-width:1800px){
-  :root{--astrix-media-rail-width:clamp(96px,8vw,180px)}
-  .astrix-platform-shell{
-    grid-template-columns:var(--astrix-media-rail-width) minmax(0,1fr) var(--astrix-media-rail-width);
+  :root{--forge-media-rail-width:clamp(96px,8vw,180px)}
+  .forge-platform-shell{
+    grid-template-columns:var(--forge-media-rail-width) minmax(0,1fr) var(--forge-media-rail-width);
   }
   .developer-media-rail{display:block}
-  .astrix-forge-viewport{box-shadow:0 0 0 1px rgba(223,176,58,.10)}
-  body:has(.astrix-platform-shell)>.actionbar{
-    left:var(--astrix-media-rail-width)!important;
-    right:var(--astrix-media-rail-width)!important;
+  .forge-viewport{box-shadow:0 0 0 1px rgba(223,176,58,.10)}
+  body:has(.forge-platform-shell)>.actionbar{
+    left:var(--forge-media-rail-width)!important;
+    right:var(--forge-media-rail-width)!important;
     width:auto!important;
   }
 }
 
 @media (min-width:2400px){
-  :root{--astrix-media-rail-width:clamp(180px,10vw,300px)}
+  :root{--forge-media-rail-width:clamp(180px,10vw,300px)}
 }
 
 @media (min-width:3000px){
-  :root{--astrix-media-rail-width:clamp(300px,13vw,460px)}
+  :root{--forge-media-rail-width:clamp(300px,13vw,460px)}
 }
 
 @media (max-width:1799px){

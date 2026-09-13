@@ -89,14 +89,14 @@ function render(nextCharacters = characters, nextSelectedId = selectedCharacterI
       });
       selectedCharacterId = characterId;
 
-      document.dispatchEvent(new CustomEvent("astrix:character-selected", { detail: { characterId, characterClass, className: classLabel(characterClass) } }));
+      document.dispatchEvent(new CustomEvent("forge:character-selected", { detail: { characterId, characterClass, className: classLabel(characterClass) } }));
     })
   );
 }
 
-document.addEventListener("astrix:bungie-character-roster", (event) => render(event.detail?.characters || [], event.detail?.selectedCharacterId));
+document.addEventListener("forge:bungie-character-roster", (event) => render(event.detail?.characters || [], event.detail?.selectedCharacterId));
 
-document.addEventListener("astrix:guardian-selection-changed", (event) => {
+document.addEventListener("forge:guardian-selection-changed", (event) => {
   const chosenId = String(event.detail?.characterId || "");
   if (!chosenId) return;
 
@@ -111,8 +111,8 @@ document.addEventListener("astrix:guardian-selection-changed", (event) => {
   selectedCharacterId = chosenId;
 });
 
-document.addEventListener('astrix:profile-error',()=>renderStatus('BUNGIE CHARACTERS UNAVAILABLE','unavailable'));
-window.addEventListener('astrix:bungie-session',event=>{if(event.detail?.authenticated===false)renderStatus('CONNECT BUNGIE TO LOAD CHARACTERS','unavailable');});
+document.addEventListener('forge:profile-error',()=>renderStatus('BUNGIE CHARACTERS UNAVAILABLE','unavailable'));
+window.addEventListener('forge:bungie-session',event=>{if(event.detail?.authenticated===false)renderStatus('CONNECT BUNGIE TO LOAD CHARACTERS','unavailable');});
 renderStatus("LOADING BUNGIE CHARACTERS", "pending");
 
 export { render as renderGuardianCharacterCards, renderStatus as renderGuardianCharacterCardStatus };

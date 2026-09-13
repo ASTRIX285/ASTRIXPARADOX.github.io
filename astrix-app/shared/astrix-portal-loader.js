@@ -2,18 +2,18 @@
    ASTRIX PARADOX — GLOBAL PORTAL LOADER controller
    Include on every page AFTER astrix-portal-loader.css.
    API:
-     AstrixLoader.mount()        // shows the portal as soon as <body> exists
-     AstrixLoader.set(pct)       // 0..100, updates ring + %
-     AstrixLoader.status(text)   // optional status line
-     AstrixLoader.done()         // fade out — call when the page is RENDERED
-     AstrixLoader.ready(root)    // wait for fonts/images + final paint, then fade
+     ForgeLoader.mount()        // shows the portal as soon as <body> exists
+     ForgeLoader.set(pct)       // 0..100, updates ring + %
+     ForgeLoader.status(text)   // optional status line
+     ForgeLoader.done()         // fade out — call when the page is RENDERED
+     ForgeLoader.ready(root)    // wait for fonts/images + final paint, then fade
    Set the logo path once:  window.APX_LOGO = '/img/logo.png';
    ===================================================================== */
 (function(){
   if(window.APX_SKIP_PORTAL===true){
     var noop=function(){};
     document.documentElement.classList.remove('apx-booting');
-    window.AstrixLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,skipped:true};
+    window.ForgeLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,skipped:true};
     return;
   }
   document.documentElement.classList.add('apx-booting');
@@ -134,5 +134,5 @@
     bodyObserver.observe(document.documentElement,{childList:true});
     document.addEventListener('DOMContentLoaded',function(){bodyObserver.disconnect();mount();},{once:true});
   }
-  window.AstrixLoader={mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved};
+  window.ForgeLoader={mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved};
 })();

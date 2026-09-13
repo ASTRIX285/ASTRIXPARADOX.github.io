@@ -1,0 +1,17 @@
+name = "forge-worker"
+main = "src/index.mjs"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+BUNGIE_API_ROOT = "https://www.bungie.net/Platform"
+OAUTH_TOKEN_URL = "https://www.bungie.net/Platform/App/OAuth/Token/"
+
+[[kv_namespaces]]
+binding = "FORGE_CACHE"
+id = "forge_manifest_cache_prod"
+preview_id = "forge_manifest_cache_preview"
+
+[env.development]
+vars = { ENVIRONMENT = "development" }

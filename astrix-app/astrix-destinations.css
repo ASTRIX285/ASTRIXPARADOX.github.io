@@ -44,7 +44,7 @@ body{
 /* Main and Build Space already share the developer-provided D2_JB artwork.
    This overlay retints that existing atmosphere without adding or replacing
    any map image and without touching panel, text, button, or subclass tokens. */
-body.astrix-token-preview .scene.immersive::before{
+body.forge-token-preview .scene.immersive::before{
   content:"";
   position:absolute;
   inset:0;

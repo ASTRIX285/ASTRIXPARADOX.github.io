@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-live-activity-${{ github.ref }}
+  group: forge-live-activity-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

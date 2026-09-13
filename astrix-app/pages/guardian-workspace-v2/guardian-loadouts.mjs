@@ -63,20 +63,20 @@ function openMenu(index){if(pendingIndex!==null)return;menuState={index,loadout:
 function selectLoadout(index,intent){
   if(!isSaved(currentLoadouts[index])||pendingIndex!==null)return;
   pendingIndex=index;render(currentLoadouts);closeMenu();
-  document.dispatchEvent(new CustomEvent('astrix:loadout-selected',{detail:{index,characterId:activeCharacterId,loadout:currentLoadouts[index],source:'bungie-live',intent}}));
+  document.dispatchEvent(new CustomEvent('forge:loadout-selected',{detail:{index,characterId:activeCharacterId,loadout:currentLoadouts[index],source:'bungie-live',intent}}));
 }
 
 async function confirmLoadoutMutation(action){
   if(!menuState||menuState.busy)return;
   const index=menuState.index;menuState={...menuState,busy:true,error:''};renderMenu();
   try{
-    let session=globalThis.ASTRIX_BUNGIE_SESSION;if(!session?.csrfToken)session=await getBungieSession({force:true});
+    let session=globalThis.FORGE_BUNGIE_SESSION;if(!session?.csrfToken)session=await getBungieSession({force:true});
     const confirmation=confirmBungieLoadoutAction(menuState.intent);
     await executeBungieLoadoutAction(action,{characterId:activeCharacterId,index,session,confirmation});
     if(action==='clear'){currentLoadouts=[...currentLoadouts];currentLoadouts[index]=null;if(activeIndex===index)activeIndex=null;render(currentLoadouts);}
-    if(action==='equip')document.dispatchEvent(new CustomEvent('astrix:loadout-selected',{detail:{index,characterId:activeCharacterId,loadout:currentLoadouts[index],source:'bungie-live',intent:'equipped-in-game'}}));
-    document.dispatchEvent(new CustomEvent('astrix:bungie-profile-refresh-requested',{detail:{reason:`loadout-${action}`,characterId:activeCharacterId,index}}));
-    document.dispatchEvent(new CustomEvent('astrix:loadout-action-complete',{detail:{action,index,characterId:activeCharacterId}}));
+    if(action==='equip')document.dispatchEvent(new CustomEvent('forge:loadout-selected',{detail:{index,characterId:activeCharacterId,loadout:currentLoadouts[index],source:'bungie-live',intent:'equipped-in-game'}}));
+    document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:`loadout-${action}`,characterId:activeCharacterId,index}}));
+    document.dispatchEvent(new CustomEvent('forge:loadout-action-complete',{detail:{action,index,characterId:activeCharacterId}}));
     menuState={...menuState,busy:false,mode:'result',result:`Bungie slot ${index+1} was ${action==='snapshot'?'overwritten from current in-game equipment':action==='clear'?'cleared':'equipped'}.`,error:''};renderMenu();
   }catch(error){menuState={...menuState,busy:false,mode:'result',error:error?.message||'The Bungie loadout action failed.'};renderMenu();}
 }
@@ -106,19 +106,19 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menuState)closeMenu();});
 
-document.addEventListener('astrix:guardian-selection-changed',event=>{
+document.addEventListener('forge:guardian-selection-changed',event=>{
   if(event.detail?.source!=='bungie-live'){renderStatus('Connect Bungie to load in-game slots','disconnected');return;}
   if(event.detail?.loadoutsAvailable!==true){renderStatus('Bungie loadout component unavailable','unavailable');return;}
   activeCharacterId=String(event.detail?.characterId||activeCharacterId||'');activeGuardianLabel=String(event.detail?.characterClass||event.detail?.displayName||'Guardian').toUpperCase();activeIndex=Number.isInteger(event.detail?.selectedLoadoutIndex)?event.detail.selectedLoadoutIndex:null;pendingIndex=null;render(event.detail?.loadouts||[]);
 });
-document.addEventListener('astrix:guardian-loadout-context',event=>{
+document.addEventListener('forge:guardian-loadout-context',event=>{
   const detail=event.detail||{};activeCharacterId=String(detail.characterId||activeCharacterId||'');activeGuardianLabel=String(detail.characterClass||detail.displayName||activeGuardianLabel||'Guardian').toUpperCase();if(Number.isInteger(detail.selectedLoadoutIndex))activeIndex=detail.selectedLoadoutIndex;pendingIndex=null;if(detail.loadoutsAvailable===true)render(detail.loadouts||[]);else renderStatus('Bungie loadout component unavailable','unavailable');
 });
-document.addEventListener('astrix:guardian-loading',()=>renderStatus('Loading Bungie loadouts…','pending'));
-document.addEventListener('astrix:guardian-error',()=>renderStatus('Loadout data unavailable','unavailable'));
-document.addEventListener('astrix:loadout-loading',event=>{if(Number.isInteger(event.detail?.index))pendingIndex=event.detail.index;if(currentLoadouts.length)render(currentLoadouts);});
-document.addEventListener('astrix:loadout-error',()=>{pendingIndex=null;if(currentLoadouts.length)render(currentLoadouts);else renderStatus('Loadout data unavailable','unavailable');});
-document.addEventListener('astrix:beta-fixture-loaded',()=>renderStatus('Connect Bungie to load in-game slots','disconnected'));
+document.addEventListener('forge:guardian-loading',()=>renderStatus('Loading Bungie loadouts…','pending'));
+document.addEventListener('forge:guardian-error',()=>renderStatus('Loadout data unavailable','unavailable'));
+document.addEventListener('forge:loadout-loading',event=>{if(Number.isInteger(event.detail?.index))pendingIndex=event.detail.index;if(currentLoadouts.length)render(currentLoadouts);});
+document.addEventListener('forge:loadout-error',()=>{pendingIndex=null;if(currentLoadouts.length)render(currentLoadouts);else renderStatus('Loadout data unavailable','unavailable');});
+document.addEventListener('forge:beta-fixture-loaded',()=>renderStatus('Connect Bungie to load in-game slots','disconnected'));
 renderStatus('Connect Bungie to load in-game slots','disconnected');
 
 export {render as renderGuardianLoadouts,isSaved,loadoutIdentity,renderStatus as renderGuardianLoadoutStatus};

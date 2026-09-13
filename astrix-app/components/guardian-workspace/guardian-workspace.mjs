@@ -40,12 +40,12 @@ function renderRecommendations(items = []) {
 }
 
 function weaponCard(item) {
-  return `<article class="gw-dock-card" tabindex="0" data-selection-id="${escapeHtml(item.id || item.name)}" data-selection-name="${escapeHtml(item.name)}" data-selection-detail="${escapeHtml(item.description || item.slot || 'Equipped weapon')}"><header><small>${escapeHtml(item.slot || 'Weapon')}</small></header><div class="gw-weapon-card">${item.iconUrl ? `<img src="${escapeHtml(item.iconUrl)}" alt="" loading="lazy">` : '<span class="gw-weapon-placeholder"></span>'}<div><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.type || 'Preview equipment')}</p><div class="gw-weapon-power">${escapeHtml(item.power ?? 'Preview')}</div></div></div></article>`;
+  return `<article class="gw-dock-card" tabindex="0" data-selection-id="${escapeHtml(item.id || item.name)}" data-selection-name="${escapeHtml(item.name)}" data-selection-detail="${escapeHtml(item.description || item.slot || 'Equipped weapon')}"><header><small>${escapeHtml(item.slot || 'Weapon')}</small></header><div class="gw-weapon-card">${item.iconUrl ? `<img src="${escapeHtml(item.iconUrl)}" alt="" loading="lazy">` : '<span class="gw-weapon-placeholder"></span>'}<div><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.type || 'Equipment')}</p><div class="gw-weapon-power">${escapeHtml(item.power ?? 'Unavailable')}</div></div></div></article>`;
 }
 
 function renderMods(items = []) {
   const visible = items.length ? items : Array.from({length: 8}, (_, index) => ({name:`Mod ${index + 1}`}));
-  return `<div class="gw-mod-grid">${visible.slice(0, 8).map(item => `<button class="gw-mod-dot" type="button" data-selection-id="${escapeHtml(item.id || item.name)}" data-selection-name="${escapeHtml(item.name)}" data-selection-detail="${escapeHtml(item.description || 'Armour mod preview')}">${escapeHtml(item.symbol || '◇')}</button>`).join('')}</div>`;
+  return `<div class="gw-mod-grid">${visible.slice(0, 8).map(item => `<button class="gw-mod-dot" type="button" data-selection-id="${escapeHtml(item.id || item.name)}" data-selection-name="${escapeHtml(item.name)}" data-selection-detail="${escapeHtml(item.description || 'Armour mod')}">${escapeHtml(item.symbol || '◇')}</button>`).join('')}</div>`;
 }
 
 function renderStats(items = []) {
@@ -73,12 +73,12 @@ function renderGuardian(root, state) {
   document.documentElement.style.setProperty('--gw-accent-rgb', rgb);
 
   setText(globalRoot, '[data-gw-account]', `${state.player?.displayName || 'Player'}${state.player?.membershipCode ? `#${state.player.membershipCode}` : ''}`);
-  setText(globalRoot, '[data-gw-season]', state.player?.seasonLabel || 'Season Preview');
-  setText(root, '[data-gw-notice]', state.notice || 'Preview mode');
+  setText(globalRoot, '[data-gw-season]', state.player?.seasonLabel || 'DESTINY 2');
+  setText(root, '[data-gw-notice]', state.notice || 'Guardian data ready');
   setText(root, '[data-gw-subclass]', state.subclass?.name || 'Subclass');
   setText(root, '[data-gw-class]', state.character?.className || 'Character');
   setText(root, '[data-gw-element]', state.subclass?.element?.name ? `· ${state.subclass.element.name}` : '');
-  setText(root, '[data-gw-power]', state.character?.power ?? 'Preview');
+  setText(root, '[data-gw-power]', state.character?.power ?? 'Unavailable');
   setText(root, '[data-gw-title]', state.character?.title || 'Guardian');
   setText(root, '[data-gw-score]', state.analysis?.score ?? '--');
   setText(root, '[data-gw-loop-summary]', state.analysis?.summary || 'Connect a Bungie account to generate a verified personal explanation.');
@@ -129,7 +129,7 @@ function renderGuardian(root, state) {
     queryAll(root, '[data-focused=true]').forEach(node => node.removeAttribute('data-focused'));
     target.setAttribute('data-focused', 'true');
     const name = target.dataset.selectionName || target.dataset.selectionId;
-    const detail = target.dataset.selectionDetail || 'No additional preview detail supplied.';
+    const detail = target.dataset.selectionDetail || 'No additional detail supplied.';
     const selection = query(root, '[data-gw-selection]');
     if (selection) selection.innerHTML = `<strong>${escapeHtml(name)}</strong><p class="gw-analysis-copy">${escapeHtml(detail)}</p>`;
   }, {once:false});
@@ -139,16 +139,16 @@ export async function mountGuardianWorkspace(options = {}) {
   const root = options.root ?? document.querySelector('[data-guardian-workspace]');
   if (!root) throw new Error('Guardian Build Forge root not found.');
   const url = options.previewUrl ?? './guardian-workspace.preview.json';
-  window.AstrixLoader?.set(20);
-  window.AstrixLoader?.status('Loading Guardian Journey data');
+  window.ForgeLoader?.set(20);
+  window.ForgeLoader?.status('Loading Guardian Journey data');
   const response = await fetch(url, {cache:'no-store'});
   if (!response.ok) throw new Error(`Unable to load Guardian Build Forge state: ${response.status}`);
-  window.AstrixLoader?.set(52);
-  window.AstrixLoader?.status('Resolving Guardian Journey state');
+  window.ForgeLoader?.set(52);
+  window.ForgeLoader?.status('Resolving Guardian Journey state');
   const state = await response.json();
-  window.AstrixLoader?.set(72);
-  window.AstrixLoader?.status('Painting Guardian Journey');
+  window.ForgeLoader?.set(72);
+  window.ForgeLoader?.status('Painting Guardian Journey');
   renderGuardian(root, state);
-  window.AstrixLoader?.set(88);
+  window.ForgeLoader?.set(88);
   return {root, state, render(nextState){renderGuardian(root, nextState);}};
 }

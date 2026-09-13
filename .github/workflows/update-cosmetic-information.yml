@@ -1,4 +1,4 @@
-name: Update ASTRIX Cosmetic Information
+name: Update Forge Cosmetic Information
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-cosmetic-information-${{ github.ref }}
+  group: forge-cosmetic-information-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -114,7 +114,7 @@ jobs:
           FILE_CHANGED: ${{ steps.generated.outputs.changed }}
         run: |
           {
-            echo "## ASTRIX cosmetic information update"
+            echo "## Forge cosmetic information update"
             echo
             echo "- Manifest version: ${MANIFEST_VERSION:-unavailable}"
             echo "- Cosmetic records: ${COSMETICS:-0}"

@@ -1,14 +1,14 @@
 /* astrix-location-visuals.js
    Per-destination VISUAL data for the Journey atmosphere/selector, keyed to the same
-   keys as AstrixDestinations (astrix-destination-theme.js).
+   keys as ForgeDestinations (astrix-destination-theme.js).
 
-   Accents are ASTRIX-original values grounded in each destination's official Bungie art
+   Accents are Forge original values grounded in each destination's official Bungie art
    (Bungie's manifest carries no destination colour; these are NOT Braytech's palette).
    Drop art at the image path — a missing image degrades to the colour atmosphere.
    This file holds NO progression data; verified checklist data binds at runtime. */
-(function installAstrixLocationVisuals(global){
+(function installForgeLocationVisuals(global){
   'use strict';
-  global.ASTRIX_LOCATION_VISUALS = Object.freeze({
+  global.FORGE_LOCATION_VISUALS = Object.freeze({
     'pale-heart':   {accent:'201,168,106', image:'/astrix-app/shared/locations/pale-heart.jpeg',   lore:'A surreal domain of memory within the Traveler, corrupted by the Witness.'},
     'dreaming-city':{accent:'138,107,200', image:'/astrix-app/shared/locations/dreaming-city.jpg', lore:'The Awoken’s cursed realm, locked in a three-week cycle of blessing and curse.'},
     'neomuna':      {accent:'64,200,210',  image:'/astrix-app/shared/locations/neomuna.jpg',       lore:'Neptune. A hidden neon metropolis defended by the Cloud Striders.'},

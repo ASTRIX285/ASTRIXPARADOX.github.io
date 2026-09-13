@@ -1,0 +1,23 @@
+name: Forge Probe Damage Types
+on:
+  push:
+    branches: [feature/astrix-multigame-platform]
+    paths: ['.github/workflows/forge-probe-damage-types.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/astrix-multigame-platform
+      - run: python3 .forge-community/probe-current-artifact-v2.py >/dev/null
+      - run: |
+          python3 - <<'PY'
+          import json,sqlite3
+          c=sqlite3.connect('/tmp/world.content').cursor()
+          for raw, in c.execute('select json from DestinyDamageTypeDefinition'):
+            d=json.loads(raw)
+            if d.get('hash') in [3949783978,1847026933]: print('DAMAGE='+json.dumps({'hash':d['hash'],'name':(d.get('displayProperties') or {}).get('name')}))
+          PY

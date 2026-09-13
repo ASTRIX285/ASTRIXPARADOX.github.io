@@ -1,32 +1,32 @@
 :root{
-  --astrix-paradox-map-art:image-set(
+  --forge-paradox-map-art:image-set(
     url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp") 1x,
     url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp") 1.5x
   );
 }
 
-body.astrix-token-preview .scene.immersive{
+body.forge-token-preview .scene.immersive{
   inset:-4px!important;
   background:
     linear-gradient(180deg,rgba(4,5,7,.08),rgba(5,4,3,.28)),
     radial-gradient(78% 62% at 50% 42%,rgba(var(--subclass-accent-rgb,121,187,234),.08),transparent 72%),
-    var(--astrix-paradox-map-art) center/cover no-repeat!important;
+    var(--forge-paradox-map-art) center/cover no-repeat!important;
   filter:blur(2px)!important;
   transform:scale(1.005)!important;
 }
 
-body.astrix-paradox-map-background{
+body.forge-paradox-map-background{
   position:relative;
   isolation:isolate;
   background:transparent!important;
 }
-body.astrix-paradox-map-background::after{
+body.forge-paradox-map-background::after{
   content:"";
   position:fixed;
   inset:-4px;
   z-index:-2;
   pointer-events:none;
-  background:var(--astrix-paradox-map-art) center/cover no-repeat;
+  background:var(--forge-paradox-map-art) center/cover no-repeat;
   filter:blur(2px);
   transform:scale(1.005);
   transform-origin:center;

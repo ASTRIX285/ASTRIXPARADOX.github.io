@@ -322,10 +322,10 @@
 </script>
 
 <script>
-  AstrixLoader.set(42);AstrixLoader.status('Rendering operations hub');
+  ForgeLoader.set(42);ForgeLoader.status('Rendering operations hub');
   window.addEventListener('load',()=>{
-    AstrixLoader.set(94);AstrixLoader.status('Operations hub rendered');
-    requestAnimationFrame(()=>requestAnimationFrame(()=>AstrixLoader.done()));
+    ForgeLoader.set(94);ForgeLoader.status('Operations hub rendered');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>ForgeLoader.done()));
   },{once:true});
 </script>
 <script src="js/main.js"></script>

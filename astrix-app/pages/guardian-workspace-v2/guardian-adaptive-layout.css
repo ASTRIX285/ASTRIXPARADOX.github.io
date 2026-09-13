@@ -144,18 +144,18 @@
   }
 
   .gear-weapons .weap-grid{
-    grid-template-columns:repeat(3,92px)!important;
+    grid-template-columns:repeat(3,var(--apx-icon-gear-art-width))!important;
     gap:8px!important;
     width:max-content!important;
   }
   .gear-weapons .weap,
   .gear-weapons .weap .art{
-    width:92px!important;
-    max-width:92px!important;
+    width:var(--apx-icon-gear-art-width)!important;
+    max-width:var(--apx-icon-gear-art-width)!important;
   }
   .gear-weapons .weap .art{
-    height:92px!important;
-    aspect-ratio:1/1!important;
+    height:var(--apx-icon-gear-art-height)!important;
+    aspect-ratio:100/122!important;
   }
 
   /* Use the full armour panel while preserving five equal Destiny slots. */
@@ -174,9 +174,9 @@
     max-width:none!important;
     padding:8px!important;
   }
-  .gear-combined .gear-arm-row{min-height:82px!important}
-  .gear-combined .gear-arm-anchor .arm{width:92px!important;height:92px!important;aspect-ratio:auto!important}
-  .gear-combined .gear-intrinsic{width:42px!important;height:42px!important}
+  .gear-combined .gear-arm-row{min-height:var(--apx-icon-gear-art-height)!important}
+  .gear-combined .gear-arm-anchor .arm{width:var(--apx-icon-gear-art-width)!important;height:var(--apx-icon-gear-art-height)!important;aspect-ratio:100/122!important}
+  .gear-combined .gear-intrinsic{width:var(--apx-icon-intrinsic)!important;height:var(--apx-icon-intrinsic)!important}
   /* Left-rail frame is now deliberately reserved before the remaining Bungie
    * binding work is completed. Empty runtime containers still hold their place. */
   .workspace>.left{

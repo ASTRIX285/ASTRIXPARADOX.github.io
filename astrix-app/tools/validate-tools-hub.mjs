@@ -38,13 +38,13 @@ assert.ok(tools.includes('aria-controls="toolsMissionDialog"'),'Mission trigger 
 assert.ok(tools.includes('id="toolsMissionDialog" role="dialog" aria-modal="true"'),'Mission message must be exposed as a modal dialog');
 assert.ok(tools.includes('Gaming is better with<br><span>an intelligent partner.</span>'),'Mission popup must carry the approved campaign headline');
 assert.ok(tools.includes('The goal is not to play the game for you.'),'Mission popup must explain the AI partner boundary');
-assert.ok(tools.includes('ENTER DESTINY ALPHA'),'Mission popup must retain a direct Alpha action');
+assert.equal((tools.match(/ENTER FORGE/g)??[]).length,2,'Tools card and mission popup must use the finished Forge action');
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
 assert.ok(tools.includes('<script type="module" src="tools.mjs"></script>'),'Tools page must load its isolated mission controller');
 assert.ok(tools.includes('Destiny 2 Guardian Platform'),'Tools page must identify the current platform');
-assert.ok(tools.includes('Alpha · Invitation Only'),'Tools page must state the current access level');
-assert.ok(tools.includes('../astrix-app/pages/guardian-alpha/'),'Tools page must retain access to the current Alpha page');
-assert.ok(tools.includes('class="btn-primary alpha-entry-link"'),'Tools page must use a clear Enter Alpha button');
+assert.equal((tools.match(/\.\.\/astrix-app\/pages\/tool-intro\/\?game=destiny-2/g)??[]).length,2,'Tools card and mission popup must route through the Destiny 2 intro');
+assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
+assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
 assert.equal((tools.match(/<article class="platform-card /g)??[]).length,2,'Tools catalogue must use one active card and one reusable future card');
 assert.ok(tools.includes('class="platform-card platform-card-active'),'Current tool must use the active platform card');
 assert.ok(tools.includes('class="platform-card platform-card-coming'),'Future slot must use the reusable platform card');
@@ -78,26 +78,10 @@ const games=read('pages/games.html');
 assert.doesNotMatch(games,/guardian-alpha|tools-section|Guardian Build Forge/,'Universes page must remain separate from the Tools catalogue');
 assert.ok(games.includes('Gaming <span class="accent">Universes</span>'),'Universes page must keep its own purpose');
 
-const alpha=read('astrix-app/pages/guardian-alpha/index.html');
-assert.ok(alpha.includes('href="../../../tools/">BACK TO TOOLS</a>'),'Alpha page must return to the Tools hub');
-assert.doesNotMatch(alpha,/tester access code|Alpha access code|alphaAccessForm|alphaAccessCode|ENTER ALPHA/,'Legacy tester access-code controls must remain removed');
-assert.ok(alpha.includes('id="guardianAccessMessage"'),'Guardian entry must expose the Bungie handoff status');
-assert.ok(alpha.includes('src="./guardian-alpha.mjs?v=20260902-access-gate-removed-1"'),'Guardian entry must request the gate-free handoff controller without stale cache reuse');
-assert.doesNotMatch(alpha,/guardianDestinationPopup|destination-backdrop|<a class="destination"/,'Alpha page must not stop at a destination selector');
-assert.ok(alpha.includes('continue directly to the Journey command console.'),'Entry page must describe the direct Journey handoff');
-assert.doesNotMatch(alpha,/—|–|&mdash;|&ndash;/,'Alpha page must not use em or en dashes');
-
-const alphaFlow=read('astrix-app/pages/guardian-alpha/guardian-alpha.mjs');
-assert.doesNotMatch(alphaFlow,/PARADOX285|ACCESS_CODE|ACCESS_STORAGE_KEY|hasAlphaAccess|grantAlphaAccess/,'Legacy tester access-code logic must remain removed');
-assert.ok(alphaFlow.includes("location.assign(authStartUrl())"),'Unauthenticated entry must continue into Bungie authentication');
-assert.ok(alphaFlow.includes("JOURNEY_URL='../journey/'"),'Authenticated entry must target Journey');
-assert.match(alphaFlow,/function openJourney\(\)\{\s*location\.replace\(JOURNEY_URL\);\s*\}/,'Journey handoff must replace the entry page in browser history');
-assert.ok(alphaFlow.includes('continueToGuardianJourney();'),'Guardian entry must start the session handoff automatically');
-assert.doesNotMatch(alphaFlow,/openDestinationSelector|guardianDestinationPopup|OPEN GUARDIAN TOOLS/,'Destination selector fallback must be removed');
-
 const workspaceReadiness=read('astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs');
 assert.doesNotMatch(workspaceReadiness,/PARADOX285|astrix-paradox-beta-access|beta-access-gate|Enter the tester access code|accessGate/,'Workspace must not restore the tester access-code overlay');
 assert.match(workspaceReadiness,/waitForBungieAuthentication\(\)\.then\(wireControls\);/,'Workspace controls must initialise after Bungie authentication without a tester gate');
+assert.doesNotMatch(workspaceReadiness,/GUARDIAN BUILD FORGE (?:ALPHA|BETA)|Alpha Settings|Alpha Help|Beta Loadouts|alpha preview|beta link/i,'Workspace controls must not render test state labels');
 
 console.log('MULTI_GAME_TOOLS_HUB=PASS');
 console.log('COMPACT_TOOLS_INTRO=PASS');
@@ -105,6 +89,5 @@ console.log('REUSABLE_PLATFORM_CARD_GRID=PASS');
 console.log('TOOLS_NATIVE_LARGE_SCREEN_SCALE=PASS');
 console.log('TOOLS_MISSION_POPUP=PASS');
 console.log('TESTER_ACCESS_GATE_REMOVED=PASS');
-console.log('BUNGIE_DIRECT_JOURNEY=PASS');
-console.log('DESTINATION_SELECTOR_REMOVED=PASS');
-console.log('RESPONSIVE_TOOLS_ALPHA_CONTRACT=PASS');
+console.log('TOOLS_INTRO_ROUTE=PASS');
+console.log('RESPONSIVE_TOOLS_FORGE_CONTRACT=PASS');

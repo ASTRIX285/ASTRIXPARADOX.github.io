@@ -1,14 +1,14 @@
 {
   "mode":"preview",
-  "notice":"Verified interface preview. No Bungie account is connected and no personal recommendation has been generated.",
+  "notice":"Interface data loaded. Personal recommendations require current Bungie account data.",
   "theme":{"accent":"#9f66ff","accentRgb":"159,102,255"},
-  "player":{"displayName":"ASTRIX285","membershipCode":"5438","seasonLabel":"Preview mode"},
-  "character":{"className":"Hunter","power":null,"title":"CONQUEROR","guardianRank":null,"triumphScore":null,"emblemName":"Preview emblem","renderUrl":null},
+  "player":{"displayName":"ASTRIX285","membershipCode":"5438","seasonLabel":"DESTINY 2"},
+  "character":{"className":"Hunter","power":null,"title":"CONQUEROR","guardianRank":null,"triumphScore":null,"emblemName":"Emblem unavailable","renderUrl":null},
   "subclass":{
     "name":"NIGHTSTALKER",
     "element":{"name":"VOID","accent":"#9f66ff","crestUrl":"https://www.bungie.net/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png"},
     "supers":[
-      {"id":"super-deadfall","name":"Shadowshot: Deadfall","iconUrl":"https://www.bungie.net/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png","equipped":true,"description":"Selected Super preview."},
+      {"id":"super-deadfall","name":"Shadowshot: Deadfall","iconUrl":"https://www.bungie.net/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png","equipped":true,"description":"Selected Super."},
       {"id":"super-moebius","name":"Shadowshot: Moebius Quiver","iconUrl":"https://www.bungie.net/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png","equipped":false},
       {"id":"super-spectral","name":"Spectral Blades","iconUrl":"https://www.bungie.net/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png","equipped":false}
     ],
@@ -46,18 +46,18 @@
       {"id":"weapon-cataclysmic","slot":"Power Weapon","name":"CATACLYSMIC","type":"Linear Fusion Rifle","power":null,"iconUrl":""}
     ],
     "armour":[
-      {"id":"armour-helmet","slot":"Helmet","shortLabel":"HELM","name":"Preview Helmet"},
-      {"id":"armour-arms","slot":"Gauntlets","shortLabel":"ARMS","name":"Preview Gauntlets"},
-      {"id":"armour-chest","slot":"Chest","shortLabel":"CHEST","name":"Preview Chest"},
-      {"id":"armour-legs","slot":"Legs","shortLabel":"LEGS","name":"Preview Legs"},
-      {"id":"armour-class","slot":"Class Item","shortLabel":"CLASS","name":"Preview Cloak"}
+      {"id":"armour-helmet","slot":"Helmet","shortLabel":"HELM","name":"Helmet"},
+      {"id":"armour-arms","slot":"Gauntlets","shortLabel":"ARMS","name":"Gauntlets"},
+      {"id":"armour-chest","slot":"Chest","shortLabel":"CHEST","name":"Chest Armour"},
+      {"id":"armour-legs","slot":"Legs","shortLabel":"LEGS","name":"Leg Armour"},
+      {"id":"armour-class","slot":"Class Item","shortLabel":"CLASS","name":"Cloak"}
     ],
     "mods":[],
     "stats":[
       {"name":"Mobility","value":100},{"name":"Resilience","value":65},{"name":"Recovery","value":45},{"name":"Discipline","value":100},{"name":"Intellect","value":36},{"name":"Strength","value":70}
     ]
   },
-  "activity":{"name":"Grandmaster Nightfall Preview","location":"Activity context demonstration","champions":["Barrier","Unstoppable"],"surge":"Void"},
+  "activity":{"name":"Grandmaster Nightfall","location":"Activity context demonstration","champions":["Barrier","Unstoppable"],"surge":"Void"},
   "analysis":{
     "buildScore":95,
     "health":{"grade":"A","label":"EXCELLENT","summary":"The interface is ready to explain build health once live identity and verified reasoning are connected."},
@@ -67,10 +67,10 @@
     "coverage":[
       {"label":"Barrier","covered":true},{"label":"Unstoppable","covered":true},{"label":"Overload","covered":false}
     ],
-    "loopSummary":"Illustrative preview only. The live panel will use verified graph edges, equipped instances and selected activity context.",
+    "loopSummary":"This interface example shows how verified graph edges, equipped instances and selected activity context are presented.",
     "primaryLoop":{"nodes":["Dodge","Stylish Executioner","Invisible","Echo of Persistence","Safer repositioning"]},
     "strengths":["Strong ability uptime","Good add-control structure","Clear invisibility pathway"],
-    "weaknesses":["Boss damage remains the weakest preview measure","Overload coverage is not represented"],
+    "weaknesses":["Boss damage remains the weakest measure","Overload coverage is not represented"],
     "recommendations":[
       {"title":"Connect Bungie for verified personal advice","reason":"Live ownership, equipped instances and activity state are required before Guardian Build Forge can improve and deploy this Guardian."}
     ]

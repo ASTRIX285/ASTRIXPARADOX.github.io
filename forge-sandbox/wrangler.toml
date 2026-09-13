@@ -1,0 +1,21 @@
+name = "astrix-paradox-sandbox"
+main = "pages-worker.js"
+compatibility_date = "2026-09-02"
+workers_dev = false
+
+[vars]
+ACCESS_TEAM_DOMAIN = "https://gentle-frost-3778.cloudflareaccess.com"
+ACCESS_ACCOUNT_ID = "248cc0a931a33cf97622b165b7b5755e"
+
+[assets]
+directory = "../.sandbox-dist"
+binding = "ASSETS"
+run_worker_first = true
+
+[[services]]
+binding = "AUTH_API"
+service = "astrix-destiny-backend"
+
+[[routes]]
+pattern = "sandbox.astrixparadox.com"
+custom_domain = true

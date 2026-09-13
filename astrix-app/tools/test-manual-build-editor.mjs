@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {createLiveTransferPreflight} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
 import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
 import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
-import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,executeBungieLoadoutAction,executeLiveTransferPlan,stageBungieLoadoutAction} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
+import {resolveBreakerTypeDefinition} from '../core/bungie-item-identity.mjs';
 
 const CHARACTER_ID='9100001';
 const MEMBERSHIP_ID='9200001';
@@ -15,7 +18,7 @@ const WEAPON_BUCKETS=[1498876634,2465295065,953998645];
 const ARMOUR_BUCKETS=[3448274439,3551918588,14239492,20886954,1585787867];
 const VAULT_BUCKET=138197802;
 const clone=value=>structuredClone(value);
-const response=payload=>({ok:true,status:200,json:async()=>payload});
+const response=(payload,{ok=true,status=200}={})=>({ok,status,json:async()=>payload});
 const perk=(hash,name,{source='bungie-item-reusable-plugs',evidence='exact-item-reusable-plug'}={})=>({
   hash,itemHash:hash,bungieHash:hash,name,socketIndex:3,canInsert:true,enabled:true,source,remoteInsertEvidence:evidence,
   definition:{displayProperties:{name},plug:{plugCategoryIdentifier:'weapon.perks.traits'}}
@@ -90,6 +93,15 @@ const switchedPlan=createLiveTransferPlan({build:switchedSubclassBuild,originalB
 assert.ok(switchedPlan.equipment.targets.some(row=>row.kind==='subclass'&&row.itemInstanceId==='14101'),'A switched exact subclass instance must enter the equipment target set.');
 assert.ok(switchedPlan.socketChanges.some(row=>row.itemInstanceId==='14101'&&row.plugHash===switchedAbility.hash),'Manual sockets edited after a subclass switch must enter the exact Apply ledger.');
 
+const catalogueOnlySubclassBuild={...clone(baseBuild),subclass:'void',subclassName:'Nightstalker',subclassCatalog:[{hash:2328211300,name:'Arcstrider',element:'arc',definition:{itemType:16}},{hash:2453351420,name:'Nightstalker',element:'void',itemInstanceId:'14102',bucketHash:3284755031,classType:1,source:{kind:'carried',characterId:CHARACTER_ID},definition:{itemType:16,inventory:{bucketTypeHash:3284755031}}}],subclassBuild:{abilities:[],aspects:[],fragments:[]}};
+const catalogueOnlySubclassPlan=createLiveTransferPlan({build:catalogueOnlySubclassBuild,originalBuild:catalogueOnlySubclassBuild,capabilities:{captureSnapshot:true,transferItems:true,equipItems:true,verifyEquipment:true,insertSocketPlugFree:true,verifyFinalState:true}});
+assert.equal(catalogueOnlySubclassPlan.ready,true,catalogueOnlySubclassPlan.blockers.join(' | '));
+assert.ok(catalogueOnlySubclassPlan.equipment.targets.some(row=>row.kind==='subclass'&&row.itemInstanceId==='14102'),'Apply must resolve the selected exact subclass from the live catalogue when the compact snapshot lacks a top-level subclass instance field.');
+const placeholderSubclassBuild={...clone(baseBuild),subclass:'void',subclassName:'Nightstalker',subclassCatalog:[{hash:2328211300,name:'Arcstrider',element:'arc',definition:{itemType:16}},{hash:2453351420,name:'Nightstalker',element:'void',definition:{itemType:16}}],subclassBuild:{abilities:[],aspects:[],fragments:[]}};
+const placeholderSubclassPlan=createLiveTransferPlan({build:placeholderSubclassBuild,originalBuild:placeholderSubclassBuild,capabilities:{captureSnapshot:true,transferItems:true,equipItems:true,verifyEquipment:true,insertSocketPlugFree:true,verifyFinalState:true}});
+assert.equal(placeholderSubclassPlan.ready,true,placeholderSubclassPlan.blockers.join(' | '));
+assert.equal(placeholderSubclassPlan.equipment.targets.some(row=>row.kind==='subclass'),false,'A catalogue placeholder without an owned instance must not become a false subclass equipment target or block Apply.');
+
 const preflight=createLiveTransferPreflight(exactSocketBuild);
 assert.equal(preflight.ready,true,preflight.violations.join(' | '));
 assert.equal(preflight.mode,'manual-working-build','Manual Apply must not require a generated recommendation.');
@@ -117,22 +129,94 @@ assert.equal(compactBuild(exactSocketBuild).source,'paradox-saved-loadout');
 
 const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
-  capabilities:{destinyActions:{...capabilities,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
+  capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
+const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{hash:14001,name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{hash:485622768,displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{hash:2302094943,displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
+const breakerDefinitions={
+  '485622768':{hash:485622768,enumValue:1,displayProperties:{name:'Shield Piercing',icon:'/barrier.png'}},
+  '2611060930':{hash:2611060930,enumValue:2,displayProperties:{name:'Disruption',icon:'/overload.png'}},
+  '3178805705':{hash:3178805705,enumValue:3,displayProperties:{name:'Stagger',icon:'/unstoppable.png'}}
+};
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0,breakerType:2},{},breakerDefinitions),breakerDefinitions['2611060930'],'A live breaker enum must resolve the genuine Bungie champion definition when its nullable hash is zero.');
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:485622768},breakerDefinitions),breakerDefinitions['485622768'],'An invalid zero instance hash must not mask a genuine item-definition breaker hash.');
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:0,breakerType:3},breakerDefinitions),breakerDefinitions['3178805705'],'A genuine item-definition breaker enum must resolve the Bungie champion definition when both nullable hashes are zero.');
+assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
+const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--legendary item-tile--tier-5 item-tile--masterworked"/,'Legendary rarity, verified T5 and masterwork must remain independent shared tile classes.');
+assert.match(sharedTileMarkup,/class="tile-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
+assert.match(sharedTileMarkup,/class="tile-tier-strip" aria-label="Tier 5 masterworked"/,'The shared tile must expose its real T5 and masterwork state on the tier strip.');
+assert.equal([...sharedTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d tile-tier-pip--gold"/g)].length,5,'A verified T5 tile must render five solid gold diamonds.');
+assert.match(sharedTileMarkup,/class="tile-power"[^>]*><b>550<\/b>/,'The weapon power readout must keep the real power value without duplicating its separate element socket.');
+assert.match(sharedTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/adaptive\.png/,'The weapon corner badge must use the resolved Bungie intrinsic icon.');
+assert.match(sharedTileMarkup,/class="tile-breaker"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
+assert.match(sharedTileMarkup,/class="tile-breaker"[^>]*data-bungie-hash="485622768"/,'The champion icon must retain its exact Bungie breaker definition hash.');
+const fallbackBreakerMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13116',breakerDefinition:{},championCapability:{definition:breakerDefinitions['2611060930']}},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(fallbackBreakerMarkup,/class="tile-breaker"[^>]*><img[^>]*\/overload\.png/,'An empty earlier breaker object must not mask a later resolved Bungie champion definition icon.');
+assert.match(sharedTileMarkup,/class="tile-element"[^>]*><img[^>]*\/arc\.png/,'The weapon element socket must use the resolved Bungie damage definition icon.');
+assert.match(sharedTileMarkup,/class="tile-footer">[\s\S]*class="tile-breaker"[\s\S]*class="tile-element"[\s\S]*class="tile-power"[\s\S]*<\/span>\s*<span class="tile-corner-badge"/,'Barrier, element and power must share the complete footer region.');
+assert.match(sharedTileMarkup,/class="tile-season-icon"[^>]*><img[^>]*\/season\.png/,'The source socket must use the resolved Bungie release watermark icon.');
+assert.match(sharedTileMarkup,/class="tile-art"><img[^>]*\/weapon\.png/,'The shared tile art must keep the real Bungie item icon source.');
+assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
+assert.doesNotMatch(sharedTileMarkup,/vault-transfer-name|>EQUIPPED<|>LOCK</,'The shared tile must not restore permanent names or plain text state labels.');
+assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
+const exoticTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13112',isExotic:true,state:0,gearTier:4},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(exoticTileMarkup,/item-tile--exotic/,'Real Exotic rarity must apply the Exotic tile class.');
+assert.doesNotMatch(exoticTileMarkup,/item-tile--masterworked|class="tile-lock"/,'An unlocked non-masterworked Exotic must not gain either independent state class or overlay.');
+assert.match(exoticTileMarkup,/item-tile--tier-4/,'A real Bungie T4 value must apply the T4 tile class.');
+assert.match(exoticTileMarkup,/class="tile-tier-strip" aria-label="Tier 4"/,'A non-masterworked T4 item must expose its verified tier.');
+assert.equal([...exoticTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d tile-tier-pip--purple"/g)].length,4,'A verified T4 tile must render four solid purple diamonds.');
+assert.doesNotMatch(exoticTileMarkup,/tile-tier-pip--gold/,'T4 diamonds must never use the T5 gold treatment.');
+const tierOneTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13115',state:0,gearTier:1},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.equal([...tierOneTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d tile-tier-pip--purple"/g)].length,1,'A verified T1 tile must render one solid purple diamond.');
+const armourTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13113',equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='helmet'),weaponSemantics:undefined,intrinsic:undefined,breakerDefinition:undefined,elementDefinition:undefined,setBonus:{identity:{name:'Verified Set',icon:'/set.png'}},armourSemantics:{archetype:{name:'Brawler',icon:'/brawler.png'}},isExotic:false},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/brawler\.png/,'The armour corner badge must use the resolved Bungie armour archetype icon.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/set\.png/,'The armour set identity must not replace the requested archetype corner icon.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-power"[^>]*><img/,'The moved armour archetype must not be duplicated in the footer.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-breaker"|class="tile-element"/,'Weapon-only sockets must be absent from armour tile markup.');
+const unresolvedSocketMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13114',state:0,gearTier:null,releaseWatermark:null,tierIcon:null,weaponSemantics:{},intrinsic:null,breakerDefinition:null,elementDefinition:null},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-breaker"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
+assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-tier-strip"|class="tile-tier-pip/,'An item without a real Bungie tier or masterwork state must not invent diamonds.');
+const sharedTileCss=readFileSync(new URL('../shared/item-tile.css',import.meta.url),'utf8');
+const sharedWorkspaceRuntime=readFileSync(new URL('../shared/guardian-inventory-workspace.mjs',import.meta.url),'utf8');
+for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-breaker','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
+assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*object-fit:\s*contain/s,'Real shared item art must render uncropped inside its proportional Figma region.');
+assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*max-width:\s*100%;[^}]*max-height:\s*100%/s,'Real shared item art must remain fully contained inside its designated region.');
+assert.match(sharedTileCss,/height:\s*var\(--apx-icon-gear-art-height\);\s*aspect-ratio:\s*100\/122/,'The implemented tile must retain the compact canonical proportions shown by the approved Figma target.');
+assert.match(sharedTileCss,/\.tile-tier-strip\s*\{[^}]*top:\s*2\.00%;[^}]*height:\s*77\.90%;[^}]*border:\s*0;[^}]*background:\s*linear-gradient\([^}]*rgba\(5,4,7,\.38\)[^}]*rgba\(5,4,7,\.24\)/s,'The tier rail must restore the translucent Figma strip behind the season circle and complete diamond stack.');
+assert.match(sharedTileCss,/\.tile-tier-pip::before\s*\{[^}]*border:\s*0;[^}]*background:\s*var\(--tile-tier-fill\)/s,'Tier diamonds must use solid fills with no strokes.');
+assert.match(sharedTileCss,/\.item-tile--tier-5\s*\{[^}]*--tile-tier-fill:\s*#f3ee69/s,'Only verified T5 tiles must switch their five diamonds to gold.');
+assert.match(sharedTileCss,/\.tile-tier-pip--1\s*\{top:21\.50%\}/,'The complete diamond formation must stay in its raised position below the season icon.');
+assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*border-radius:\s*50%/s,'The real season icon must render inside the circle above the diamonds.');
+assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*background:\s*rgba\(3,3,5,\.46\)/s,'The season circle must remain translucent over the restored Figma tier strip.');
+assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
+assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
+assert.match(sharedTileCss,/\.tile-breaker img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
+assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
+assert.match(sharedTileCss,/\.tile-breaker,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
+assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
+assert.match(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\(root,\{resolveItem=\(\)=>null,bindInspect=\(\)=>\{\}\}=\{\}\)[\s\S]*?bindInspect\(target,item,kind/,'Character and INVENTORY shared tiles must bind the click inspector instead of the rich hover card.');
+assert.doesNotMatch(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\([^)]*bindHover/,'The shared owned-instance tile binder must not restore rich hover inspection.');
+for(const page of ['../pages/guardian-workspace-v2/index.html','../pages/vault/index.html']){
+  const html=readFileSync(new URL(page,import.meta.url),'utf8'),tileIndex=html.indexOf('../../shared/item-tile.css'),densityIndex=html.indexOf('../../shared/astrix-desktop-density.css');
+  assert.ok(tileIndex>=0&&densityIndex>tileIndex,`${page} must import the shared item tile CSS before the required final density stylesheet.`);
+}
+const equippedFirstMarkup=inventoryGroupsMarkup([{...sharedTile,itemInstanceId:'13110',name:'Carried first in input',source:{kind:'carried',characterId:CHARACTER_ID}},{...sharedTile,itemInstanceId:'13111',name:'Equipped second in input',source:{kind:'equipped',characterId:CHARACTER_ID}}],{equippedFirst:true,capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.ok(equippedFirstMarkup.indexOf('Equipped second in input')<equippedFirstMarkup.indexOf('Carried first in input'),'The shared category renderer must place the equipped exact item first regardless of input order.');
+assert.doesNotMatch(equippedFirstMarkup,/>EQUIPPED</,'Equipped state must remain an icon and border treatment, never permanent tile text.');
 let prematureCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(plan,{session,fetchImpl:async()=>{prematureCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
 assert.equal(prematureCalls,0,'An unconfirmed Apply plan must make zero requests.');
 
-const targetItems=plan.equipment.targets.map(target=>({itemInstanceId:target.itemInstanceId,itemHash:target.itemHash}));
-const initialEquipment=targetItems.filter(item=>item.itemInstanceId!==replacement.itemInstanceId);
+const targetItems=plan.equipment.targets.map(target=>({itemInstanceId:target.itemInstanceId,itemHash:target.itemHash,bucketHash:target.bucketHash}));
 const socketsFor=applied=>({
   [weapons[0].itemInstanceId]:{sockets:Array.from({length:4},(_,index)=>index===3?{plugHash:applied?exactPerk.hash:currentPerk.hash}:{})},
   [armour[0].itemInstanceId]:{sockets:Array.from({length:3},(_,index)=>index===2?{plugHash:applied?exactArmourMod.hash:currentArmourMod.hash}:{})}
 });
-const profilePayload=({equipmentApplied=false,socketsApplied=false,compatible=true,activity='orbit'}={})=>({ErrorCode:1,profile:{
-  profileInventory:{data:{items:equipmentApplied?[]:[{itemInstanceId:replacement.itemInstanceId,itemHash:replacement.itemHash,bucketHash:VAULT_BUCKET}]}},
-  characterInventories:{data:{[CHARACTER_ID]:{items:[]}}},
-  characterEquipment:{data:{[CHARACTER_ID]:{items:equipmentApplied?targetItems:initialEquipment}}},
+const profilePayload=({equipmentApplied=false,transferred=equipmentApplied,socketsApplied=false,compatible=true,activity='orbit',vaultInstanceIds=[replacement.itemInstanceId]}={})=>{const vaultIds=new Set(vaultInstanceIds.map(String)),vaultTargets=targetItems.filter(item=>vaultIds.has(String(item.itemInstanceId))),stationaryEquipment=targetItems.filter(item=>!vaultIds.has(String(item.itemInstanceId))),carriedTargets=transferred&&!equipmentApplied?vaultTargets:[];return {ErrorCode:1,profile:{
+  characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID}}},
+  profileInventory:{data:{items:transferred?[]:vaultTargets.map(item=>({...item,bucketHash:VAULT_BUCKET}))}},
+  characterInventories:{data:{[CHARACTER_ID]:{items:carriedTargets}}},
+  characterEquipment:{data:{[CHARACTER_ID]:{items:equipmentApplied?targetItems:stationaryEquipment}}},
   characterActivities:{data:{[CHARACTER_ID]:activity==='active'?{currentActivityHash:777777,currentActivityModeType:3}:activity==='social'?{currentActivityHash:888888,currentActivityModeType:null,currentActivityModeTypes:[40]}:{currentActivityHash:0,currentActivityModeType:0}}},
   itemComponents:{
     reusablePlugs:{data:{
@@ -141,8 +225,23 @@ const profilePayload=({equipmentApplied=false,socketsApplied=false,compatible=tr
     }},
     sockets:{data:socketsFor(socketsApplied)}
   }
-}});
+}}};
 assert.equal(characterActivityRestriction(plan,profilePayload({activity:'social'})).allowed,true,'Bungie Social mode 40 must remain an allowed Apply state even when exposed through currentActivityModeTypes.');
+
+const preflightRequests=[];
+const liveStaged=await stageLiveTransferPreflight(plan,{session,authOrigin:'https://auth.test',fetchImpl:async(url,init={})=>{preflightRequests.push({url:String(url),method:String(init.method||'GET').toUpperCase()});return response(profilePayload());}});
+assert.equal(liveStaged.status,'staged');
+assert.equal(liveStaged.ready,true,liveStaged.blockers.join(' | '));
+assert.deepEqual(liveStaged.livePreflight.validationOrder,['guardian','ownership','instance-location','compatibility','exotic','socket-legality','activity-state'],'Authenticated live preflight must expose the required validation order.');
+assert.deepEqual(liveStaged.livePreflight.checks.map(row=>row.status),Array(7).fill('passed'));
+assert.deepEqual(preflightRequests.map(row=>[new URL(row.url).pathname,row.method]),[['/bungie/profile','GET']],'Staging a ready live preflight must use one fresh GET and no Bungie mutation route.');
+
+let stagedActivityPosts=0;
+const stagedActivityBlocked=await stageLiveTransferPreflight(plan,{session,authOrigin:'https://auth.test',fetchImpl:async(_url,init={})=>{if(String(init.method||'GET').toUpperCase()==='POST')stagedActivityPosts+=1;return response(profilePayload({activity:'active'}));}});
+assert.equal(stagedActivityBlocked.status,'blocked');
+assert.equal(stagedActivityPosts,0,'An activity-blocked live preflight must make zero mutation requests.');
+assert.equal(stagedActivityBlocked.livePreflight.checks.at(-1).key,'activity-state');
+assert.equal(stagedActivityBlocked.livePreflight.checks.at(-1).status,'blocked');
 
 let profileReads=0;
 const postPaths=[];
@@ -151,9 +250,11 @@ let waitCalls=0;
 const fetchImpl=async(url,init={})=>{
   const parsed=new URL(String(url));
   if(String(init.method||'GET').toUpperCase()==='POST'){
-    postPaths.push(parsed.pathname);postBodies.push(JSON.parse(init.body));return response({ErrorCode:1,Message:'Ok'});
+    postPaths.push(parsed.pathname);postBodies.push(JSON.parse(init.body));
+    if(parsed.pathname.endsWith('/equip-items'))return response({ErrorCode:1,Response:{equipResults:plan.equipment.targets.map(row=>({itemInstanceId:row.itemInstanceId,equipStatus:1}))}});
+    return response({ErrorCode:1,Message:'Ok'});
   }
-  profileReads+=1;return response(profilePayload({equipmentApplied:profileReads>1,socketsApplied:profileReads>2}));
+  profileReads+=1;return response(profilePayload({transferred:profileReads>1,equipmentApplied:profileReads>2,socketsApplied:profileReads>3}));
 };
 const applied=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{session,fetchImpl,authOrigin:'https://auth.test',waitImpl:async()=>{waitCalls+=1;}});
 assert.equal(applied.status,'applied');
@@ -163,9 +264,37 @@ assert.equal(postBodies[0].itemId,replacement.itemInstanceId);
 assert.deepEqual(postBodies[1].itemIds,plan.equipment.targets.map(row=>row.itemInstanceId));
 assert.deepEqual(postBodies[2].plug,{socketIndex:3,socketArrayType:0,plugItemHash:exactPerk.hash});
 assert.deepEqual(postBodies[3].plug,{socketIndex:2,socketArrayType:0,plugItemHash:exactArmourMod.hash});
-assert.deepEqual(applied.steps.map(row=>row.phase),['snapshot','transfer','equip','verify-equipment','weapon-sockets','armour-mods','readback'],'The execution trace must expose distinct post-equip verification, weapon/socket and armour-mod phases.');
-assert.equal(profileReads,3,'Apply must perform an initial read, a fresh post-equip verification read, and a final readback.');
-assert.equal(waitCalls,1,'Two socket phases must retain the inter-request throttle delay.');
+assert.deepEqual(applied.steps.map(row=>row.phase),['snapshot','transfer','verify-transfer','equip','verify-equipment','weapon-sockets','armour-mods','readback'],'The execution trace must confirm every transfer reached the Guardian before the exact equip request.');
+assert.equal(profileReads,4,'Apply must perform initial, post-transfer, post-equip and final profile reads.');
+assert.equal(waitCalls,4,'Transfer settlement and every subsequent Bungie mutation must retain an explicit throttle delay.');
+
+const twoVaultIds=[replacement.itemInstanceId,weapons[2].itemInstanceId];
+let pacedProfileReads=0,transferAttempts=0;
+const pacedPosts=[],pacedWaits=[],pacedProgress=[];
+const pacedApply=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{
+  session,authOrigin:'https://auth.test',waitImpl:async milliseconds=>{pacedWaits.push(milliseconds);},onProgress:row=>pacedProgress.push(row),
+  fetchImpl:async(url,init={})=>{
+    const parsed=new URL(String(url)),method=String(init.method||'GET').toUpperCase();
+    if(method!=='POST'){
+      pacedProfileReads+=1;
+      return response(profilePayload({vaultInstanceIds:twoVaultIds,transferred:pacedProfileReads>2,equipmentApplied:pacedProfileReads>3,socketsApplied:pacedProfileReads>4}));
+    }
+    pacedPosts.push(parsed.pathname);
+    if(parsed.pathname.endsWith('/transfer-item')){
+      transferAttempts+=1;
+      if(transferAttempts===2)return response({ErrorCode:36,ErrorStatus:'ThrottleLimitExceeded',Message:'Please slow down.',ThrottleSeconds:1},{ok:false,status:429});
+    }
+    if(parsed.pathname.endsWith('/equip-items'))return response({ErrorCode:1,Response:{equipResults:plan.equipment.targets.map(row=>({itemInstanceId:row.itemInstanceId,equipStatus:1}))}});
+    return response({ErrorCode:1,Message:'Ok'});
+  }
+});
+assert.equal(pacedApply.status,'applied','A second transfer throttled by Bungie must recover and still reach the exact bulk equip.');
+assert.deepEqual(pacedPosts.slice(0,4),['/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/equip-items'],'The throttled transfer must be retried before one bulk equip request.');
+assert.deepEqual(pacedWaits,[250,1000,250,500,250,550,550],'The Apply sequence must pace actions, honour Bungie throttle seconds and wait for transferred inventory visibility.');
+assert.equal(pacedProgress.some(row=>row.phase==='throttle'&&row.status==='retrying'),true,'Visible progress must report an explicit Bungie throttle retry.');
+assert.equal(pacedApply.steps.filter(row=>row.phase==='transfer'&&row.status==='complete').length,2,'Both Vault items must complete transfer before equip.');
+assert.equal(pacedApply.steps.find(row=>row.phase==='verify-transfer')?.status,'complete','Fresh profile evidence must prove every item reached the target Guardian before equip.');
+assert.equal(pacedApply.steps.find(row=>row.phase==='equip')?.status,'complete','The exact bulk equip must complete after all transfers.');
 
 let partialProfileReads=0;
 const partialPosts=[];
@@ -173,7 +302,7 @@ const partialEquip=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{
   session,authOrigin:'https://auth.test',waitImpl:async()=>{},
   fetchImpl:async(url,init={})=>{
     const parsed=new URL(String(url));
-    if(String(init.method||'GET').toUpperCase()!=='POST'){partialProfileReads+=1;return response(profilePayload({final:false}));}
+    if(String(init.method||'GET').toUpperCase()!=='POST'){partialProfileReads+=1;return response(profilePayload({transferred:partialProfileReads>1}));}
     partialPosts.push(parsed.pathname);
     if(parsed.pathname.endsWith('/equip-items'))return response({ErrorCode:1,Response:{equipResults:plan.equipment.targets.map((row,index)=>({itemInstanceId:row.itemInstanceId,equipStatus:index===0?99:1}))}});
     return response({ErrorCode:1,Message:'Ok'});
@@ -181,7 +310,7 @@ const partialEquip=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{
 });
 assert.equal(partialEquip.status,'partial');
 assert.deepEqual(partialPosts,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'A per-item equip failure must skip every later socket mutation.');
-assert.equal(partialProfileReads,2,'A partial equip must still finish with a Bungie readback.');
+assert.equal(partialProfileReads,3,'A partial equip must still include transfer verification and a final Bungie readback.');
 
 let verificationProfileReads=0;
 const verificationPosts=[];
@@ -189,14 +318,14 @@ const unverifiedEquip=await executeLiveTransferPlan(confirmLiveTransferPlan(plan
   session,authOrigin:'https://auth.test',waitImpl:async()=>{},
   fetchImpl:async(url,init={})=>{
     const parsed=new URL(String(url));
-    if(String(init.method||'GET').toUpperCase()==='POST'){verificationPosts.push(parsed.pathname);return response({ErrorCode:1,Message:'Ok'});}
-    verificationProfileReads+=1;return response(profilePayload({equipmentApplied:false,socketsApplied:false}));
+    if(String(init.method||'GET').toUpperCase()==='POST'){verificationPosts.push(parsed.pathname);if(parsed.pathname.endsWith('/equip-items'))return response({ErrorCode:1,Response:{equipResults:plan.equipment.targets.map(row=>({itemInstanceId:row.itemInstanceId,equipStatus:1}))}});return response({ErrorCode:1,Message:'Ok'});}
+    verificationProfileReads+=1;return response(profilePayload({transferred:verificationProfileReads>1,equipmentApplied:false,socketsApplied:false}));
   }
 });
 assert.equal(unverifiedEquip.status,'partial');
 assert.deepEqual(verificationPosts,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'A successful equip response without matching fresh profile evidence must skip both socket phases.');
 assert.equal(unverifiedEquip.steps.find(row=>row.phase==='verify-equipment')?.status,'mismatch','Post-equip verification must use fresh profile state, not only the equip response.');
-assert.equal(verificationProfileReads,3);
+assert.equal(verificationProfileReads,4);
 
 let unsupportedCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(confirmLiveTransferPlan(plan),{session:{...session,capabilities:{destinyActions:{...session.capabilities.destinyActions,equipItems:false}}},fetchImpl:async()=>{unsupportedCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/no longer supports/);
@@ -247,6 +376,148 @@ assert.equal(dynamicTransferBlocked.status,'blocked','A newly required transfer 
 assert.equal(dynamicTransferPosts,0,'A dynamically required but unadvertised transfer must make zero mutation requests.');
 assert.equal(dynamicTransferReads,2,'A dynamically blocked transfer must still perform its final readback.');
 
+const OTHER_CHARACTER_ID='9100002',TRANSFER_ITEM={...replacement,itemInstanceId:'13103',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}},REPLACEMENT_ITEM={...weapons[1],itemInstanceId:'13106',name:'Exact carried replacement',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}};
+function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false,targetEquipped=false}={}){
+  const transferRaw={itemHash:TRANSFER_ITEM.itemHash,itemInstanceId:TRANSFER_ITEM.itemInstanceId,bucketHash:postmaster?215593132:TRANSFER_ITEM.bucketHash},replacementRaw={itemHash:REPLACEMENT_ITEM.itemHash,itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,bucketHash:REPLACEMENT_ITEM.bucketHash};
+  return {ErrorCode:1,profile:{
+    characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID},[OTHER_CHARACTER_ID]:{characterId:OTHER_CHARACTER_ID}}},
+    profileInventory:{data:{items:location==='vault'?[{...transferRaw,bucketHash:VAULT_BUCKET}]:[]}},
+    characterInventories:{data:{
+      [CHARACTER_ID]:{items:[...(location==='source'&&!equipped?[transferRaw]:[]),...(equipped&&!replacementEquipped?[replacementRaw]:[]),...(equipped&&replacementEquipped?[transferRaw]:[]),...(postmaster?[transferRaw]:[])]},
+      [OTHER_CHARACTER_ID]:{items:location==='target'?[transferRaw]:[]}
+    }},
+    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:targetEquipped?[transferRaw]:[]}}},
+    characterActivities:{data:{[CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0}}}
+  }};
+}
+
+const stagedVaultMove=stageVaultTransferIntent({item:TRANSFER_ITEM,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session});
+let unconfirmedVaultCalls=0;
+await assert.rejects(()=>executeVaultTransferIntent(stagedVaultMove,{session,fetchImpl:async()=>{unconfirmedVaultCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
+assert.equal(unconfirmedVaultCalls,0,'An unconfirmed drag transfer must make zero Bungie requests.');
+let moveLocation='source';
+const movePaths=[];
+const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:moveLocation}));
+  movePaths.push(path);
+  const body=JSON.parse(init.body);
+  moveLocation=body.transferToVault?'vault':'target';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(moved.status,'applied');
+assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
+assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+
+const vaultDirectItem={...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},stagedVaultDirect=stageVaultTransferIntent({item:vaultDirectItem,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session,equipAfterTransfer:true});
+let vaultDirectLocation='vault';
+const vaultDirectPaths=[];
+const vaultDirect=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:vaultDirectLocation,targetEquipped:vaultDirectLocation==='equipped'}));
+  vaultDirectPaths.push(path);
+  if(path.endsWith('/transfer-item')){vaultDirectLocation='target';return response({ErrorCode:1,Message:'Ok'});}
+  vaultDirectLocation='equipped';
+  return response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:vaultDirectItem.itemInstanceId,equipStatus:1}]}});
+}});
+assert.equal(vaultDirect.status,'applied','A reviewed Vault double click must finish only after exact equipped readback.');
+assert.deepEqual(vaultDirectPaths,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Vault direct equip must reuse the exact transfer and equip endpoints in order.');
+assert.deepEqual(vaultDirect.readback.actual,{kind:'equipped',characterId:OTHER_CHARACTER_ID});
+
+let partialLocation='source',partialAttempts=0;
+const partialMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(_url,init={})=>{
+  if(String(init.method||'GET').toUpperCase()==='GET')return response(vaultActionProfile({location:partialLocation}));
+  partialAttempts+=1;
+  if(partialAttempts===1){partialLocation='vault';return response({ErrorCode:1,Message:'Ok'});}
+  return response({ErrorCode:99,ErrorStatus:'ItemNotTransferable',Message:'Target inventory is full.'},{ok:false,status:409});
+}});
+assert.equal(partialMove.status,'partial','A failed second leg must report a partial live action.');
+assert.equal(partialMove.mutationCount,1,'Only the confirmed first transfer may count as completed.');
+assert.deepEqual(partialMove.readback.actual,{kind:'vault',characterId:null},'Fresh readback must expose the real intermediate Vault location.');
+assert.equal(partialMove.steps.find(row=>row.status==='failed')?.detail?.payload?.Message,'Target inventory is full.','The real Bungie failure message must remain available to the Vault UI.');
+
+const equippedTransfer={...TRANSFER_ITEM,source:{kind:'equipped',characterId:CHARACTER_ID,label:'Equipped'}},stagedEquippedMove=stageVaultTransferIntent({item:equippedTransfer,destination:{kind:'vault'},replacementItem:REPLACEMENT_ITEM,session});
+let equippedState={equipped:true,replacementEquipped:false,location:'source'};
+const equippedPaths=[];
+const equippedMoved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedEquippedMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile(equippedState));
+  equippedPaths.push(path);
+  if(path.endsWith('/equip-items')){equippedState={...equippedState,replacementEquipped:true};return response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,equipStatus:1}]}});}
+  equippedState={equipped:false,replacementEquipped:false,location:'vault'};
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(equippedMoved.status,'applied');
+assert.deepEqual(equippedPaths,['/bungie/actions/equip-items','/bungie/actions/transfer-item'],'Moving an equipped item must first equip the reviewed exact carried replacement.');
+
+const POSTMASTER_ITEM={...TRANSFER_ITEM,itemInstanceId:'13107',name:'Exact Postmaster item',quantity:1,source:{kind:'postmaster',characterId:CHARACTER_ID,label:'Postmaster'}},stagedCollection=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,items:[POSTMASTER_ITEM],session});
+assert.equal(stagedCollection.overflowToVault,true,'A normal Postmaster pull must retain the explicit Vault overflow path when the character bucket is full.');
+let postmasterPresent=true;
+const postmasterPaths=[];
+const collected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile();
+  base.profile.characterInventories.data[CHARACTER_ID].items=postmasterPresent?[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:215593132}]:[];
+  if(!postmasterPresent)base.profile.profileInventory.data.items=[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash}];
+  if(method==='GET')return response(base);
+  postmasterPaths.push(path);postmasterPresent=false;return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(collected.status,'applied');
+assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
+assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+
+const OVERFLOW_CANDIDATE={itemHash:13008,itemInstanceId:'13108',bucketHash:POSTMASTER_ITEM.bucketHash},overflowState={postmaster:true,pulled:'postmaster',candidate:'carried'};
+const overflowPaths=[];
+const overflowProfile=()=>{
+  const base=vaultActionProfile({location:'absent'}),pulledRaw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
+  base.profile.characterInventories.data[CHARACTER_ID].items=[...(overflowState.postmaster?[{...pulledRaw,bucketHash:215593132}]:[]),...(overflowState.pulled==='carried'?[pulledRaw]:[]),...(overflowState.candidate==='carried'?[OVERFLOW_CANDIDATE]:[])];
+  base.profile.profileInventory.data.items=[...(overflowState.pulled==='vault'?[{...pulledRaw,bucketHash:VAULT_BUCKET}]:[]),...(overflowState.candidate==='vault'?[{...OVERFLOW_CANDIDATE,bucketHash:VAULT_BUCKET}]:[])];
+  return base;
+};
+let overflowPullAttempts=0;
+const overflowCollected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(overflowProfile());
+  overflowPaths.push(path);
+  const body=JSON.parse(init.body);
+  if(path.endsWith('/pull-from-postmaster')){
+    overflowPullAttempts+=1;
+    if(overflowPullAttempts===1)return response({ErrorCode:99,ErrorStatus:'DestinyNoRoomInDestination',Message:'Target inventory is full.'},{ok:false,status:409});
+    overflowState.postmaster=false;overflowState.pulled='carried';return response({ErrorCode:1,Message:'Ok'});
+  }
+  if(String(body.itemId)===OVERFLOW_CANDIDATE.itemInstanceId)overflowState.candidate=body.transferToVault?'vault':'carried';
+  if(String(body.itemId)===POSTMASTER_ITEM.itemInstanceId)overflowState.pulled=body.transferToVault?'vault':'carried';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(overflowCollected.status,'applied','A full character bucket must complete the requested Postmaster pull through the real Vault transfer route.');
+assert.deepEqual(overflowPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A full character bucket must open one exact slot, pull the Postmaster item, move it to Vault, and restore the displaced item.');
+assert.equal(overflowState.pulled,'vault','The requested Postmaster item must finish in Vault when its character bucket was full.');
+assert.equal(overflowState.candidate,'carried','The exact carried item used to open capacity must be restored to its original Guardian.');
+
+const stagedPostmasterDirect=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,targetCharacterId:OTHER_CHARACTER_ID,items:[POSTMASTER_ITEM],session,equipAfterCollection:true});
+let postmasterDirectLocation='postmaster';
+const postmasterDirectPaths=[];
+const postmasterDirectProfile=()=>{
+  const base=vaultActionProfile({location:'absent'}),raw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
+  if(postmasterDirectLocation==='postmaster')base.profile.characterInventories.data[CHARACTER_ID].items=[{...raw,bucketHash:215593132}];
+  if(postmasterDirectLocation==='source')base.profile.characterInventories.data[CHARACTER_ID].items=[raw];
+  if(postmasterDirectLocation==='vault')base.profile.profileInventory.data.items=[{...raw,bucketHash:VAULT_BUCKET}];
+  if(postmasterDirectLocation==='target')base.profile.characterInventories.data[OTHER_CHARACTER_ID].items=[raw];
+  if(postmasterDirectLocation==='equipped')base.profile.characterEquipment.data[OTHER_CHARACTER_ID].items=[raw];
+  return base;
+};
+const postmasterDirect=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedPostmasterDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(postmasterDirectProfile());
+  postmasterDirectPaths.push(path);
+  if(path.endsWith('/pull-from-postmaster'))postmasterDirectLocation='source';
+  else if(path.endsWith('/transfer-item'))postmasterDirectLocation=postmasterDirectLocation==='source'?'vault':'target';
+  else postmasterDirectLocation='equipped';
+  return path.endsWith('/equip-items')?response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:POSTMASTER_ITEM.itemInstanceId,equipStatus:1}]}}):response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(postmasterDirect.status,'applied','A reviewed Postmaster double click must wait for collection, transfer, equip, and final exact readback.');
+assert.deepEqual(postmasterDirectPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Cross Guardian Postmaster direct equip must use the existing executor routes in a verified sequence.');
+assert.deepEqual(postmasterDirect.readback.notEquipped,[]);
+
 const stagedClear=stageBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,loadoutName:'Nightfall'});
 let loadoutCalls=0;
 await assert.rejects(()=>executeBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,session,confirmation:stagedClear,fetchImpl:async()=>{loadoutCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
@@ -259,4 +530,5 @@ assert.deepEqual(JSON.parse(loadoutRequest.init.body),{membershipType:Number(MEM
 console.log('MANUAL_BUILD_EDITOR=PASS');
 console.log('PARADOX_NAMED_LOADOUT=PASS');
 console.log('GUARDED_LIVE_APPLY=PASS');
+console.log('VAULT_LIVE_TRANSFER=PASS');
 console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');

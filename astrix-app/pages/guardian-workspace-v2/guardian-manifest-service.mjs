@@ -1,9 +1,9 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs";
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
-import {paradoxDefinitionId} from '../../core/bungie-item-identity.mjs';
+import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 
-const AUTH_ORIGIN=globalThis.ASTRIX_AUTH_ORIGIN||"https://auth.astrixparadox.com";
+const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||"https://auth.astrixparadox.com";
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const CURRENT_KEY="manifest:current";
 const COMPONENT_TYPES=Object.freeze([
@@ -23,7 +23,7 @@ const LAZY_COMPONENT_TYPES=new Set([
   'DestinyCollectibleDefinition','DestinyMetricDefinition','DestinyGuardianRankDefinition',
   'DestinyGuardianRankConstantsDefinition','DestinyDestinationDefinition','DestinyActivityDefinition',
   'DestinyChecklistDefinition','DestinyLocationDefinition','DestinySocketTypeDefinition',
-  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition'
+  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition','DestinyStatGroupDefinition'
 ]);
 
 const tableKey=(version,type)=>`manifest:${version}:${type}`;
@@ -35,7 +35,7 @@ const definitionHash=(row,key)=>numericHash(row?.hash??row?.bungieHash??key);
 
 function emitProgress(detail){
   if(typeof document==="undefined"||typeof CustomEvent==="undefined")return;
-  document.dispatchEvent(new CustomEvent("astrix:manifest-progress",{detail}));
+  document.dispatchEvent(new CustomEvent("forge:manifest-progress",{detail}));
 }
 
 function requestValue(request){
@@ -120,8 +120,10 @@ function collectPayloadHashes(payload={},options={}){
   const stats=new Set();
   const profile=payload.profile||{};
   const armourOnly=options.armourOnly===true;
+  const equippedOnly=options.equippedOnly===true;
   const includeReusable=options.includeReusable!==false;
   const armourInstances=new Set();
+  const includedInstances=new Set();
   const addItem=item=>{
     const itemHash=numericHash(item?.itemHash);
     if(armourOnly&&Number(payload?.definitions?.[String(itemHash)]?.itemType)!==2)return;
@@ -129,15 +131,17 @@ function collectPayloadHashes(payload={},options={}){
     if(itemHash!==null)inventory.add(itemHash);
     if(styleHash!==null)inventory.add(styleHash);
     for(const hash of item?.plugItemHashes||[]){const value=numericHash(hash);if(value!==null)inventory.add(value);}
-    if(item?.itemInstanceId)armourInstances.add(String(item.itemInstanceId));
+    if(item?.itemInstanceId){armourInstances.add(String(item.itemInstanceId));includedInstances.add(String(item.itemInstanceId));}
   };
-  for(const item of profile?.profileInventory?.data?.items||[])addItem(item);
-  for(const row of Object.values(profile?.characterInventories?.data||{}))for(const item of row?.items||[])addItem(item);
+  if(!equippedOnly){
+    for(const item of profile?.profileInventory?.data?.items||[])addItem(item);
+    for(const row of Object.values(profile?.characterInventories?.data||{}))for(const item of row?.items||[])addItem(item);
+  }
   for(const row of Object.values(profile?.characterEquipment?.data||{}))for(const item of row?.items||[])addItem(item);
   for(const item of payload.selectedItems||[])addItem(item);
-  for(const [instanceId,row] of Object.entries(profile?.itemComponents?.sockets?.data||{}))if(!armourOnly||armourInstances.has(String(instanceId)))for(const socket of row?.sockets||[]){const hash=numericHash(socket?.plugHash);if(hash!==null)inventory.add(hash);}
-  if(includeReusable)for(const [instanceId,row] of Object.entries(profile?.itemComponents?.reusablePlugs?.data||{}))if(!armourOnly||armourInstances.has(String(instanceId)))for(const plugs of Object.values(row?.plugs||{}))for(const plug of plugs||[]){const hash=numericHash(plug?.plugItemHash??plug?.plugHash);if(hash!==null)inventory.add(hash);}
-  if(includeReusable&&!armourOnly)for(const plugs of [profile?.profilePlugSets?.data?.plugs,...Object.values(profile?.characterPlugSets?.data||{}).map(row=>row?.plugs)])for(const rows of Object.values(plugs||{}))for(const plug of rows||[]){const hash=numericHash(plug?.plugItemHash??plug?.plugHash);if(hash!==null)inventory.add(hash);}
+  for(const [instanceId,row] of Object.entries(profile?.itemComponents?.sockets?.data||{}))if((!equippedOnly||includedInstances.has(String(instanceId)))&&(!armourOnly||armourInstances.has(String(instanceId))))for(const socket of row?.sockets||[]){const hash=numericHash(socket?.plugHash);if(hash!==null)inventory.add(hash);}
+  if(includeReusable)for(const [instanceId,row] of Object.entries(profile?.itemComponents?.reusablePlugs?.data||{}))if((!equippedOnly||includedInstances.has(String(instanceId)))&&(!armourOnly||armourInstances.has(String(instanceId))))for(const plugs of Object.values(row?.plugs||{}))for(const plug of plugs||[]){const hash=numericHash(plug?.plugItemHash??plug?.plugHash);if(hash!==null)inventory.add(hash);}
+  if(includeReusable&&!armourOnly&&!equippedOnly)for(const plugs of [profile?.profilePlugSets?.data?.plugs,...Object.values(profile?.characterPlugSets?.data||{}).map(row=>row?.plugs)])for(const rows of Object.values(plugs||{}))for(const plug of rows||[]){const hash=numericHash(plug?.plugItemHash??plug?.plugHash);if(hash!==null)inventory.add(hash);}
   if(!armourOnly)for(const progression of Object.values(profile?.characterProgressions?.data||{}))for(const tier of progression?.seasonalArtifact?.tiers||[])for(const item of tier?.items||[]){const hash=numericHash(item?.itemHash);if(hash!==null)inventory.add(hash);}
   for(const character of Object.values(profile?.characters?.data||{}))for(const hash of Object.keys(character?.stats||{})){const value=numericHash(hash);if(value!==null)stats.add(value);}
   for(const [instanceId,row] of Object.entries(profile?.itemComponents?.stats?.data||{}))if(!armourOnly||armourInstances.has(String(instanceId)))for(const hash of Object.keys(row?.stats||{})){const value=numericHash(hash);if(value!==null)stats.add(value);}
@@ -145,8 +149,13 @@ function collectPayloadHashes(payload={},options={}){
 }
 
 class GuardianManifestService{
-  constructor({fetchImpl=globalThis.fetch?.bind(globalThis),storage=createIndexedDbStorage(),authOrigin=AUTH_ORIGIN,selective=false,maxFallbackDefinitions=Infinity}={}){
-    this.selective=selective;
+  constructor({fetchImpl=globalThis.fetch?.bind(globalThis),storage=createIndexedDbStorage(),authOrigin=AUTH_ORIGIN,selective=false,maxFallbackDefinitions=Infinity,backend=false,maxDefinitionBytes=12*1024*1024}={}){
+    this.backend=backend;
+    this.selective=selective||backend;
+    this.maxDefinitionBytes=maxDefinitionBytes;
+    this.definitionBytes=0;
+    this.definitionSizes=new Map();
+    this.batchRequests=new Map();
     this.maxFallbackDefinitions=maxFallbackDefinitions;
     this.fetchImpl=fetchImpl;
     this.storage=storage;
@@ -166,7 +175,44 @@ class GuardianManifestService{
     this.versionMatched=false;
   }
 
-  status(){return {mode:this.mode,version:this.version,versionMatched:this.versionMatched,types:[...this.tables.keys()]};}
+  status(){return {mode:this.mode,version:this.version,versionMatched:this.versionMatched,types:[...this.tables.keys()],retainedDefinitionBytes:this.definitionBytes};}
+
+  seedPayload(payload={}){
+    const fields={
+      DestinyInventoryItemDefinition:payload.definitions,
+      DestinySandboxPerkDefinition:payload.sandboxPerks,
+      DestinyArtifactDefinition:payload.artifactDefinition?.hash?{[payload.artifactDefinition.hash]:payload.artifactDefinition}:null,
+      DestinyEquipableItemSetDefinition:payload.equipableItemSets,
+      DestinyStatDefinition:payload.statDefinitions,
+      DestinySocketCategoryDefinition:payload.socketCategoryDefinitions,
+      DestinySocketTypeDefinition:payload.socketTypeDefinitions,
+      DestinyDamageTypeDefinition:payload.damageDefinitions,
+      DestinyBreakerTypeDefinition:payload.breakerDefinitions,
+      DestinyCollectibleDefinition:payload.collectibleDefinitions
+    };
+    for(const [type,rows] of Object.entries({...fields,...(payload.manifestTables||{})})){
+      if(!rows||typeof rows!=="object"||Array.isArray(rows))continue;
+      const existing=this.tables.get(type);
+      if(existing)Object.assign(existing,rows);
+      else this.tables.set(type,rows);
+      this.cachedTypes.add(type);
+    }
+    const version=String(payload?.pageReady?.manifestVersion||payload?.manifestVersion||payload?.manifestResolution?.version||"");
+    if(version){this.version=version;this.versionMatched=true;}
+    this.mode="backend";
+    return this;
+  }
+
+  retainDefinition(key,definition){
+    const bytes=new TextEncoder().encode(JSON.stringify(definition)).byteLength;
+    if(bytes>this.maxDefinitionBytes)return;
+    if(this.fallbackDefinitions.has(key)){this.definitionBytes-=this.definitionSizes.get(key)||0;this.fallbackDefinitions.delete(key);}
+    while(this.fallbackDefinitions.size&&(this.fallbackDefinitions.size>=this.maxFallbackDefinitions||this.definitionBytes+bytes>this.maxDefinitionBytes)){
+      const oldest=this.fallbackDefinitions.keys().next().value;
+      this.definitionBytes-=this.definitionSizes.get(oldest)||0;this.definitionSizes.delete(oldest);this.fallbackDefinitions.delete(oldest);
+    }
+    this.fallbackDefinitions.set(key,definition);this.definitionSizes.set(key,bytes);this.definitionBytes+=bytes;
+  }
 
   async fetchJson(url){
     if(!this.fetchImpl)throw new Error("Manifest network access is unavailable.");
@@ -185,7 +231,7 @@ class GuardianManifestService{
       return this;
     }
     try{
-      emitProgress({status:"checking",percent:12,label:"Checking Bungie manifest version"});
+      emitProgress({status:"checking",percent:12,label:'Checking Bungie manifest'});
       const version=await this.checkVersion();
       const paths=this.manifestPaths;
       const downloadableTypes=COMPONENT_TYPES.filter(type=>paths[type]);
@@ -198,7 +244,7 @@ class GuardianManifestService{
           downloadableTypes.forEach((type,index)=>{this.tables.set(type,records[index].definitions);this.cachedTypes.add(type);});
           this.mode="indexeddb";
           this.versionMatched=true;
-          emitProgress({status:"ready",percent:58,label:`Bungie manifest ${version} loaded from IndexedDB`,version,versionMatched:true});
+          emitProgress({status:"ready",percent:58,label:'Bungie manifest loaded from local cache',version,versionMatched:true});
           return this;
         }
       }
@@ -228,10 +274,10 @@ class GuardianManifestService{
         }
       }
       if(this.cachedTypes.size===0)throw new Error("No manifest component tables could be cached.");
-      if(!await this.storage.commitVersion(version))throw new Error("Manifest version marker could not be stored.");
+      if(!await this.storage.commitVersion(version))throw new Error('Manifest cache could not be stored.');
       await this.storage.removeOtherVersions(version);
       this.mode="indexeddb";
-      emitProgress({status:"ready",percent:58,label:`Bungie manifest ${version} indexed`,version,versionMatched:false});
+      emitProgress({status:"ready",percent:58,label:'Bungie manifest indexed',version,versionMatched:false});
       return this;
     }catch(error){
       this.mode="live-fallback";
@@ -242,10 +288,10 @@ class GuardianManifestService{
 
   checkVersion(){
     if(!this.versionPromise)this.versionPromise=(async()=>{
-      const metadata=await this.fetchJson(`${this.authOrigin}/bungie/manifest`);
+      const metadata=await this.fetchJson(`${this.authOrigin}/bungie/manifest?components=weapon-stats-1`);
       const paths=metadata?.jsonWorldComponentContentPaths?.en||metadata?.paths||{};
       const version=String(metadata?.version||"").trim();
-      if(!version)throw new Error("Bungie manifest version is missing.");
+      if(!version)throw new Error('Bungie manifest metadata is missing.');
       this.version=version;this.manifestPaths=paths;
       return version;
     })().catch(error=>{this.versionPromise=null;throw error;});
@@ -266,7 +312,7 @@ class GuardianManifestService{
         if(records.every(record=>record?.definitions&&typeof record.definitions==="object")){
           downloadableTypes.forEach((type,index)=>{this.tables.set(type,records[index].definitions);this.cachedTypes.add(type);});
           this.mode="indexeddb";this.versionMatched=true;
-          emitProgress({status:"ready",percent:58,label:`Bungie manifest ${version} loaded from IndexedDB`,version,versionMatched:true});
+          emitProgress({status:"ready",percent:58,label:'Bungie manifest loaded from local cache',version,versionMatched:true});
           return this;
         }
       }
@@ -281,6 +327,7 @@ class GuardianManifestService{
   }
 
   cached(){
+    if(this.backend)return this.ready();
     if(!this.cachePromise)this.cachePromise=this.initialiseCached();
     return this.cachePromise;
   }
@@ -312,7 +359,12 @@ class GuardianManifestService{
       const sockets=socketLayouts[definition?.socketLayoutKey];
       return [hash,sockets?{...definition,sockets}:definition];
     }));
-    payload.definitions={...armourDefinitions,...(index.plugDefinitions||{}),...(payload.definitions||{})};
+    // Armour can also be a cosmetic plug. Preserve both projections of the same hash.
+    const mergedDefinitions={};
+    for(const rows of [index.plugDefinitions||{},armourDefinitions,payload.definitions||{}]){
+      for(const [hash,definition] of Object.entries(rows))mergedDefinitions[hash]={...mergedDefinitions[hash],...definition};
+    }
+    payload.definitions=mergedDefinitions;
     payload.equipableItemSets={...(index.equipableItemSets||{}),...(payload.equipableItemSets||{})};
     payload.sandboxPerks={...(index.sandboxPerks||{}),...(payload.sandboxPerks||{})};
     payload.statDefinitions={...(index.statDefinitions||{}),...(payload.statDefinitions||{})};
@@ -338,6 +390,10 @@ class GuardianManifestService{
   }
 
   ready(){
+    if(this.backend){
+      if(!this.readyPromise)this.readyPromise=Promise.resolve().then(()=>{this.mode="backend";emitProgress({status:"ready",percent:58,label:"Prepared page data ready",version:this.version});return this;});
+      return this.readyPromise;
+    }
     if(!this.readyPromise)this.readyPromise=this.cached().then(()=>this.mode==="indexeddb"?this:this.initialise());
     return this.readyPromise;
   }
@@ -372,33 +428,11 @@ class GuardianManifestService{
   async getAsync(type,hash){
     const numeric=numericHash(hash);
     if(numeric===null)return null;
+    if(this.backend)return this.get(type,numeric);
     if(!this.selective&&LAZY_COMPONENT_TYPES.has(type))await this.ensureComponent(type);
     const local=this.get(type,numeric);
     if(local||this.cachedTypes.has(type))return local;
-    const key=`${type}:${numeric}`;
-    if(this.fallbackDefinitions.has(key))return this.fallbackDefinitions.get(key);
-    if(!this.fetchImpl)return null;
-    if(this.definitionRequests.has(key))return this.definitionRequests.get(key);
-    const pending=(async()=>{
-    const url=new URL(`${this.authOrigin}/bungie/manifest/definition`);
-    url.searchParams.set("type",type);
-    url.searchParams.set("hash",String(numeric));
-    if(this.version)url.searchParams.set('version',this.version);
-    try{
-      const payload=await this.fetchJson(url);
-      const definition=payload?.definition||null;
-      if(definition){
-        while(this.fallbackDefinitions.size>=this.maxFallbackDefinitions)this.fallbackDefinitions.delete(this.fallbackDefinitions.keys().next().value);
-        this.fallbackDefinitions.set(key,definition);
-      }
-      return definition;
-    }catch{
-      // A timeout must not permanently poison the next Journey/card lookup.
-      return null;
-    }
-    })();
-    this.definitionRequests.set(key,pending);
-    try{return await pending;}finally{this.definitionRequests.delete(key);}
+    return null;
   }
 
   async ensureComponent(type){
@@ -428,6 +462,10 @@ class GuardianManifestService{
   async getMany(type,hashes){
     const unique=[...new Set([...hashes].map(numericHash).filter(hash=>hash!==null))];
     const rows={};
+    if(this.backend){
+      for(const hash of unique){const hit=this.get(type,hash);if(hit)rows[hash]=hit;}
+      return rows;
+    }
     for(let offset=0;offset<unique.length;offset+=6){
       const batch=unique.slice(offset,offset+6);
       const definitions=await Promise.all(batch.map(hash=>this.getAsync(type,hash)));
@@ -437,9 +475,10 @@ class GuardianManifestService{
   }
 
   async hydratePayload(payload={},options={}){
+    this.seedPayload(payload);
     if(options.waitForManifest!==false)await this.ready();
     const indexedDb=this.mode==="indexeddb";
-    const allowNetwork=options.allowNetwork!==false;
+    const allowNetwork=!this.backend&&options.allowNetwork!==false;
     const profile=payload?.profile||{};
     const {inventory,stats}=collectPayloadHashes(payload,options);
     let definitions=indexedDb?await this.getMany("DestinyInventoryItemDefinition",inventory):{...(payload.definitions||{})};
@@ -451,7 +490,7 @@ class GuardianManifestService{
     const sandboxPerkHashes=new Set();
     const equipableSetHashes=new Set();
     const damageTypeHashes=new Set();
-    const breakerTypeHashes=new Set();
+    const breakerTypeHashes=new Set(DESTINY_BREAKER_TYPE_HASHES);
     const socketTypeHashes=new Set();
     const expandedHashes=new Set();
     const reusablePlugSetHashes=new Set();
@@ -513,19 +552,31 @@ class GuardianManifestService{
     const damageDefinitions={...existingDamage,...fetchedDamage};
     const breakerDefinitions={...existingBreaker,...fetchedBreaker};
     const socketTypeDefinitions={...(payload.socketTypeDefinitions||{}),...await localOrFetch('DestinySocketTypeDefinition',missingDefinitions(payload.socketTypeDefinitions,socketTypeHashes))};
+    const statGroupHashes=new Set(Object.values(definitions).filter(definition=>definition.itemType===3).map(definition=>numericHash(definition.stats?.statGroupHash)).filter(Boolean));
+    const statGroups=await localOrFetch('DestinyStatGroupDefinition',statGroupHashes);
     definitions=Object.fromEntries(Object.entries(definitions).map(([hash,definition])=>{
       const resolvedSandboxPerks=(definition?.perks||[]).map(perk=>sandboxPerks[String(perk?.perkHash)]).filter(Boolean);
-      return [hash,resolvedSandboxPerks.length?{...definition,resolvedSandboxPerks}:definition];
+      const resolvedStatGroup=statGroups[definition.stats?.statGroupHash];
+      return [hash,{...definition,...(resolvedSandboxPerks.length?{resolvedSandboxPerks}:{}),...(resolvedStatGroup?{resolvedStatGroup}:{})}];
     }));
     const resolveArtifact=options.armourOnly!==true;
     const artifactHash=resolveArtifact?numericHash(payload?.profile?.profileProgression?.data?.seasonalArtifact?.artifactHash):null;
     const artifactDefinition=resolveArtifact?(payload.artifactDefinition||(artifactHash===null?null:await this.getAsync("DestinyArtifactDefinition",artifactHash))):(payload.artifactDefinition||null);
-    const artifactCatalog=resolveArtifact?resolveArtifactTwoCatalog({
+    let artifactCatalog=resolveArtifact&&(payload.artifactCatalog||[]).length?payload.artifactCatalog:resolveArtifact?resolveArtifactTwoCatalog({
       inventoryDefinitions:this.tables.get("DestinyInventoryItemDefinition")||definitions,
       plugSetDefinitions:this.tables.get("DestinyPlugSetDefinition")||{},
       sandboxPerkDefinitions:this.tables.get("DestinySandboxPerkDefinition")||sandboxPerks,
       manifestVersion:this.version||null
     }):(payload.artifactCatalog||[]);
+    if(resolveArtifact&&this.backend&&!artifactCatalog.length){
+      // Keep the full Artifact picker available without retaining full manifest tables.
+      if(!this.artifactCatalogPromise)this.artifactCatalogPromise=(async()=>{
+        const index=await this.fetchJson(new URL('../../data/forge-armour-index.json',import.meta.url));
+        if(index.manifestVersion!==this.version||!Array.isArray(index.artifactCatalog))throw new Error('Artifact catalogue does not match the current Bungie manifest.');
+        return index.artifactCatalog;
+      })().catch(error=>{this.artifactCatalogPromise=null;throw error;});
+      artifactCatalog=await this.artifactCatalogPromise;
+    }
     const requested=[...inventory,...expandedHashes];
     const unresolved=requested.filter(hash=>!definitions[String(hash)]);
     const artifactPerkHashes=[...new Set(Object.values(payload?.profile?.characterProgressions?.data||{}).flatMap(progression=>(progression?.seasonalArtifact?.tiers||[]).flatMap(tier=>(tier?.items||[]).map(item=>numericHash(item?.itemHash)).filter(hash=>hash!==null))))];
@@ -545,12 +596,12 @@ class GuardianManifestService{
     const unresolvedArtifactPerks=artifactPerkHashes.filter(hash=>!definitions[String(hash)]);
     payload.artifactCoverage={hash:artifactHash,definitionResolved:Boolean(artifactDefinition),perkHashes:artifactPerkHashes,unresolvedPerkHashes:unresolvedArtifactPerks,complete:(artifactHash===null||Boolean(artifactDefinition))&&unresolvedArtifactPerks.length===0,source:resolutionSource,version:this.version||null};
     payload.artifactCatalogCoverage={model:'artifact-2-socket-buckets',artifactCount:artifactCatalog.length,complete:artifactCatalog.length>0,source:resolutionSource,version:this.version||null};
-    payload.manifestResolution={mode:indexedDb?"indexeddb":"live-fallback",version:this.version||null,versionMatched:indexedDb?this.versionMatched:false,source:indexedDb?"Destiny manifest component tables":"bungie-single-definition-endpoint"};
+    payload.manifestResolution={mode:this.backend?"prepared-page-payload":indexedDb?"indexeddb":"live-fallback",version:this.version||null,versionMatched:indexedDb?this.versionMatched:false,source:this.backend?"prepared-bulk-manifest":indexedDb?"Destiny manifest component tables":"unavailable"};
     return payload;
   }
 }
 
-const sharedKey=Symbol.for('ASTRIX.guardianManifest.20260905');
-const guardianManifest=globalThis[sharedKey]||(globalThis[sharedKey]=new GuardianManifestService());
+const sharedKey=Symbol.for('FORGE.guardianManifest.20260906-page-payload-1');
+const guardianManifest=globalThis[sharedKey]||(globalThis[sharedKey]=new GuardianManifestService({backend:true,maxFallbackDefinitions:4096}));
 
 export {COMPONENT_TYPES,GuardianManifestService,createIndexedDbStorage,collectPayloadHashes,guardianManifest};

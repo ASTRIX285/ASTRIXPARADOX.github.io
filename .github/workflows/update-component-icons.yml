@@ -1,4 +1,4 @@
-name: Update ASTRIX Component Icons
+name: Update Forge Component Icons
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: astrix-component-icons-${{ github.ref }}
+  group: forge-component-icons-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -97,7 +97,7 @@ jobs:
           AMBIGUOUS: ${{ steps.import-icons.outputs.ambiguous }}
         run: |
           {
-            echo "## ASTRIX component icon import"
+            echo "## Forge component icon import"
             echo
             echo "- Manifest version: ${MANIFEST_VERSION:-unavailable}"
             echo "- Generated new map: ${CHANGED:-false}"

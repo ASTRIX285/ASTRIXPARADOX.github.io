@@ -1,4 +1,4 @@
-# ASTRIX Bungie Manifest raw catalogues
+# Forge Bungie Manifest raw catalogues
 astrix-app/data/weapon-information.json
 astrix-app/data/armor-information.json
 astrix-app/data/game-components.json
@@ -9,5 +9,5 @@ astrix-app/.tmp/
 
 # Worker dependencies & build artifacts
 astrix-app/node_modules/
-astrix-worker/node_modules/
-astrix-worker/.wrangler/
+forge-worker/node_modules/
+forge-worker/.wrangler/

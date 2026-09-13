@@ -10,13 +10,13 @@
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260831-paradox-map-crimson-gold">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
   <script src="../../shared/astrix-portal-loader.js?v=20260831-render-ready"></script>
-  <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260904-mobile-crosscheck-1">
+  <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260906-page-refresh-1">
   <link rel="stylesheet" href="../../astrix-destinations.css">
   <link rel="stylesheet" href="../../shared/astrix-location-atmosphere.css">
   <link rel="stylesheet" href="../mission-reports/mission-reports.css">
   <link rel="stylesheet" href="./journey-2560-visual.css?v=20260903-command-header-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css">
+  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1">
   <style>
     .journey-page .journey-focus-selector-column,.journey-page .journey-focus-detail-column{display:grid;gap:12px;min-width:0}
     .journey-page .journey-record-selector-panel .apx-loc-list{max-height:none}
@@ -75,13 +75,14 @@
   <script src="../../shared/astrix-location-visuals.js" defer></script>
 </head>
 <body class="apx-destination-page journey-page">
-  <header class="apx-destination-header topbar astrix-command-header">
+  <header class="apx-destination-header topbar forge-command-header">
     <a class="apx-destination-brand" href="./" aria-label="ASTRIX PARADOX Journey"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a>
     <div class="apx-destination-header-copy"><strong>JOURNEY</strong><small>GUARDIAN COMMAND CONSOLE</small></div>
-    <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-astrix-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div>
+    <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div>
+    <button class="apx-data-refresh" id="journeyRefreshButton" type="button" aria-busy="false" disabled hidden>Refresh</button>
     <span class="apx-destination-header-state" id="journeyAuthStatus" aria-live="polite">CHECKING CONNECTION</span>
   </header>
-  <div data-astrix-destination-ribbon data-active-destination="journey"></div>
+  <div data-forge-destination-ribbon data-active-destination="journey"></div>
 
   <main class="apx-page-shell">
     <section class="apx-auth-resolving" id="journeyResolving" aria-live="polite"><p class="apx-eyebrow">SECURE TRANSMISSION</p><p>Checking the existing Bungie session before selecting the landing state.</p></section>
@@ -89,7 +90,7 @@
     <section class="apx-landing" id="journeySignedOut" hidden>
       <p class="apx-eyebrow">ENTER THE PARADOX</p>
       <h1>Connect your Guardian.</h1>
-      <p>Journey requires an authenticated Bungie session. No Guardian data is displayed until the existing secure connection confirms access.</p>
+      <p>Journey opens after Bungie confirms the current session. No Guardian data is displayed before that check completes.</p>
       <div class="apx-landing-actions" id="journeyConnectAction" aria-label="Bungie connection action"><a class="bungie-auth-btn" id="journeyConnectButton" href="https://auth.astrixparadox.com/bungie/start?return=https%3A%2F%2Fastrixparadox.com%2Fastrix-app%2Fpages%2Fjourney%2F">CONNECT BUNGIE</a></div>
     </section>
 
@@ -241,7 +242,7 @@
       </div>
     </section>
   </main>
-  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260902-vault-shared-profile-1"></script>
-  <script type="module" src="./journey.mjs?v=20260905-forge-responsive-1"></script>
+  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1"></script>
+  <script type="module" src="./journey.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1"></script>
 </body>
 </html>
