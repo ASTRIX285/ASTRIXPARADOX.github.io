@@ -424,6 +424,20 @@ assert.equal(freshReadUrls.every(url=>url.searchParams.get('freshness')==='live'
 assert.equal(new Set(freshReadUrls.map(url=>url.searchParams.get('readToken'))).size,freshReadUrls.length,'Every live verification URL must be unique.');
 assert.equal(freshReadOptions.every(init=>init.cache==='no-store'&&init.headers.Accept==='application/json'&&!Object.hasOwn(init.headers,'Cache-Control')),true,'Every live verification request must bypass browser caches without adding a cross-origin preflight header.');
 
+let delayedAuthoritative='source',delayedVisible='source';
+const delayedPaths=[];
+const delayedInterlegMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:delayedVisible}));
+  const body=JSON.parse(init.body);delayedPaths.push(path);
+  if(body.transferToVault){delayedAuthoritative='vault';return response({ErrorCode:1,Message:'Ok'});}
+  assert.equal(delayedAuthoritative,'vault','The second mutation must rely only on Bungie accepting the first Vault leg.');
+  delayedAuthoritative='target';delayedVisible='target';return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(delayedInterlegMove.status,'applied','A stale profile feed must not prevent the accepted Vault-to-Guardian leg from completing.');
+assert.deepEqual(delayedPaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'Accepted Guardian-to-Vault mutation evidence must allow the exact destination leg while profile readback catches up.');
+assert.equal(delayedInterlegMove.steps.some(row=>row.phase==='transfer-consistency'&&row.status==='continuing'),true,'The audit trail must disclose an accepted inter-leg continuation through stale profile readback.');
+
 let ambiguousLocation='source',ambiguousThrown=false;
 const recoveredMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
   const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();

@@ -444,28 +444,29 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     return payload;
   };
   const destinationExpected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
-  const transferExact=async(item,step)=>{
+  const transferExact=async(item,step,{allowUnverifiedSource=false}={})=>{
     const before=await freshInventoryLocation(item.itemInstanceId,{fetchImpl,authOrigin});
     if(locationMatches(before.location,step.expected)){record(step.phase||'transfer','complete',`${step.label} was already complete in fresh Bungie inventory.`,{expected:step.expected,alreadyComplete:true});return before;}
-    if(step.from&&!locationMatches(before.location,step.from))throw Object.assign(new Error('The exact item moved to a different Bungie location before this transfer step.'),{detail:{expectedSource:step.from,actual:before.location?.source||null}});
+    if(step.from&&!locationMatches(before.location,step.from)&&!allowUnverifiedSource)throw Object.assign(new Error('The exact item moved to a different Bungie location before this transfer step.'),{detail:{expectedSource:step.from,actual:before.location?.source||null}});
+    if(step.from&&!locationMatches(before.location,step.from)&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is continuing from Bungie's accepted previous leg while profile readback catches up.`,{expectedSource:step.from,staleReadback:before.location?.source||null});
     for(let attempt=0;attempt<=AMBIGUOUS_ACTION_RETRY_LIMIT;attempt+=1){
       try{
         const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
-        if(!settled.verified)throw Object.assign(new Error('Bungie accepted the transfer call but fresh inventory did not confirm its destination.'),{accepted:true,detail:{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1}});
+        if(!settled.verified){record(step.phase||'transfer','accepted',`${step.label} was accepted by Bungie; final fresh readback is still required.`,{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});return {accepted:true,...settled};}
         record(step.phase||'transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
         return settled;
       }catch(error){
         if(error?.accepted||!isAmbiguousActionError(error)||attempt===AMBIGUOUS_ACTION_RETRY_LIMIT)throw error;
         const settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
         if(settled.verified){result.mutationCount+=1;record(step.phase||'transfer','complete',`${step.label} completed despite an interrupted response.`,{expected:step.expected,recoveredFromAmbiguousResponse:true});return settled;}
-        if(step.from&&!locationMatches(settled.location,step.from))throw Object.assign(error,{detail:{message:error.message,expectedSource:step.from,actual:settled.location?.source||null}});
+        if(step.from&&!locationMatches(settled.location,step.from)&&!allowUnverifiedSource)throw Object.assign(error,{detail:{message:error.message,expectedSource:step.from,actual:settled.location?.source||null}});
         record('transfer-retry','retrying',`${step.label} will retry once after an interrupted response and an unchanged fresh source.`,{attempt:attempt+1});
       }
     }
     throw new Error('Bungie transfer retry limit reached.');
   };
-  const transferWithCapacityFallback=async(item,step,returnCharacterId='')=>{
-    try{return await transferExact(item,step);}
+  const transferWithCapacityFallback=async(item,step,returnCharacterId='',options={})=>{
+    try{return await transferExact(item,step,options);}
     catch(capacityError){
       if(step.transferToVault||!isExplicitInventoryCapacityError(capacityError))throw capacityError;
       const {locations}=inventoryLocations(await requestFreshProfile({fetchImpl,authOrigin})),candidate=[...locations.values()].filter(location=>locationMatches(location,{kind:'carried',characterId:step.characterId})&&String(location.itemInstanceId)!==String(item.itemInstanceId)&&Number(location.bucketHash)===Number(item.bucketHash)&&Number.isInteger(Number(location.itemHash))).sort((left,right)=>String(left.itemInstanceId).localeCompare(String(right.itemInstanceId)))[0]||null;
@@ -531,8 +532,9 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
           {characterId:destination.characterId,transferToVault:false,from:{kind:'vault'},expected:{kind:'carried',characterId:destination.characterId},label:`Move ${item.name} from Vault to ${destination.characterId}`}
         ];
     const capacityReturnCharacterId=source.kind==='carried'&&String(source.characterId)!==String(destination.characterId||'')?source.characterId:['carried','equipped'].includes(reviewedSource.kind)&&String(reviewedSource.characterId)!==String(destination.characterId||'')?reviewedSource.characterId:'';
+    let allowUnverifiedSource=false;
     for(const step of transferSteps){
-      try{await transferWithCapacityFallback(item,step,capacityReturnCharacterId);}
+      try{const settled=await transferWithCapacityFallback(item,step,capacityReturnCharacterId,{allowUnverifiedSource});allowUnverifiedSource=settled?.accepted===true&&!settled?.verified;}
       catch(error){record('transfer',error?.accepted?'mismatch':'failed',error?.accepted?'Bungie accepted the transfer call but fresh inventory did not confirm its destination.':step.label,{message:error.message,detail:error.detail||null,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
     }
     if(intent.equipAfterTransfer){
