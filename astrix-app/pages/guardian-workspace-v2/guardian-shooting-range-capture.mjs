@@ -1,4 +1,4 @@
-import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260905-manual-editor-1';
+import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {captureMatchesCharacter,mergeCaptureArchive,selectCandidateActivities,chooseCandidateActivity,classifyCandidateEvidence,summarizeCaptureEvidence} from './guardian-shooting-range-evidence.mjs';
 
 const CAPTURE_KEY='astrix:shooting-range-capture:v1';

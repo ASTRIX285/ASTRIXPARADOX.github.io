@@ -1,6 +1,6 @@
 const SESSION_KEY="astrix:bungie-session-cache:v1";
-const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v3:";
-const PROFILE_FALLBACK_PREFIX="astrix:bungie-page-cache-fallback:v3:";
+const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v4:";
+const PROFILE_FALLBACK_PREFIX="astrix:bungie-page-cache-fallback:v4:";
 const PREPARED_PAGE_CHECK_PREFIX="astrix:bungie-page-check:v1:";
 const LOADOUT_FALLBACK_PREFIX="astrix:bungie-loadout-cache-fallback:v2:";
 const FAST_RETURN_KEY="astrix:guardian-fast-return:v1";
@@ -280,13 +280,15 @@ async function readBuildForgeState(binding,{readRecord:readBuildRecord=readRecor
 }
 
 function pageKind(value){return String(value||"shared").trim().toLowerCase()||"shared";}
-function profileRecordKey(identity,page){return `profile:v3:${identity}:${pageKind(page)}`;}
+function profileRecordKey(identity,page){return `profile:v4:${identity}:${pageKind(page)}`;}
 function profileMarkerKey(page){return `${PROFILE_MARKER_PREFIX}${pageKind(page)}`;}
 function profileFallbackKey(page){return `${PROFILE_FALLBACK_PREFIX}${pageKind(page)}`;}
 function loadoutRecordKey(identity,characterId,index){return `loadout:v2:${identity}:${characterId}:${index}`;}
 function isFresh(record){return Boolean(record&&Date.now()-Number(record.savedAt||0)<=PROFILE_TTL_MS);}
 function hasCurrentPreparedProfileContract(payload,scope){
-  return scope!=='loadout'||payload?.weaponDefinitionCoverage?.schemaVersion===1;
+  if(scope==='loadout')return payload?.weaponDefinitionCoverage?.schemaVersion===1;
+  if(scope==='character'||scope==='build-forge')return payload?.characterBuildCoverage?.schemaVersion===2&&payload.characterBuildCoverage.complete===true;
+  return true;
 }
 
 async function cacheBungieProfile(session,payload,page=payload?.pageReady?.page){

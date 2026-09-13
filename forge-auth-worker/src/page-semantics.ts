@@ -4,6 +4,7 @@ const SUBCLASS_BUCKET_HASH = 3284755031;
 const WEAPON_BUCKETS = new Set([1498876634, 2465295065, 953998645]);
 const GUARDIAN_STAT_HASHES = [2996146975, 392767087, 1943323491, 1735777505, 144602215, 4244567218];
 const DESTINY_BREAKER_TYPE_HASHES = [485622768, 2611060930, 3178805705];
+const PREPARED_CHARACTER_DATA_CONTRACT_VERSION = 2;
 const PAGE_INVENTORY_FIELDS = [
   "hash", "displayProperties", "displaySource", "sourceString",
   "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
@@ -276,6 +277,47 @@ function subclassRows(payload: any): Array<{ characterId: string; item: any }> {
   return rows.filter((row, index, all) => all.findIndex(other => String(other.item?.itemInstanceId || other.item?.itemHash) === String(row.item?.itemInstanceId || row.item?.itemHash)) === index);
 }
 
+function preparedCharacterBuildCoverage(payload: any): any {
+  const profile = payload?.profile || {};
+  const definitions: Record<string, Record<string, any>> = payload?.definitions || {};
+  const characters = Object.keys(profile?.characters?.data || {});
+  const rows = Object.fromEntries(characters.map(characterId => {
+    const equipment = profile?.characterEquipment?.data?.[characterId]?.items || [];
+    const subclass = equipment.find((item: any) => Number(
+      item?.bucketHash ?? definitions[String(item?.itemHash)]?.inventory?.bucketTypeHash
+    ) === SUBCLASS_BUCKET_HASH) || null;
+    const instanceId = String(subclass?.itemInstanceId || "");
+    const sockets = instanceId ? profile?.itemComponents?.sockets?.data?.[instanceId]?.sockets : null;
+    const requested = bungieDefinitionHashes((Array.isArray(sockets) ? sockets : []).map((socket: any) => socket?.plugHash));
+    const unresolved = requested.filter(hash => !definitions[String(hash)]);
+    const missing = [
+      ...(!subclass ? ["equipped-subclass"] : []),
+      ...(subclass && !instanceId ? ["subclass-instance"] : []),
+      ...(!Array.isArray(sockets) || !sockets.length ? ["subclass-sockets"] : []),
+      ...(!requested.length ? ["equipped-socket-hashes"] : []),
+      ...unresolved.map(hash => `definition:${hash}`)
+    ];
+    return [characterId, {
+      characterId,
+      subclassItemHash: Number(subclass?.itemHash) || null,
+      subclassInstanceId: instanceId,
+      requested,
+      resolved: requested.filter(hash => Boolean(definitions[String(hash)])),
+      unresolved,
+      missing,
+      complete: missing.length === 0
+    }];
+  }));
+  const missing = characters.flatMap(characterId => (rows[characterId]?.missing || []).map((reason: string) => `${characterId}:${reason}`));
+  return {
+    schemaVersion: PREPARED_CHARACTER_DATA_CONTRACT_VERSION,
+    characterIds: characters,
+    characters: rows,
+    missing,
+    complete: characters.length > 0 && missing.length === 0
+  };
+}
+
 async function enrichSubclassInventory(payload: any, env: Env, manifestVersion = ""): Promise<any> {
   if (!payload?.profile) return payload;
   const initialRows = subclassRows(payload);
@@ -402,9 +444,12 @@ async function enrichPreparedPageAccount(
   }
   await enrichEquipableSets(payload, env, manifestVersion);
   await enrichWeaponReusablePlugs(payload, env, manifestVersion);
+  if (page === "character" || page === "build-forge") {
+    payload.characterBuildCoverage = preparedCharacterBuildCoverage(payload);
+  }
   compactPageInventoryDefinitions(payload);
   logManifestEvidenceGaps(payload, page);
   return payload;
 }
 
-export { compactPreparedProfilePlugLists, enrichPreparedPageAccount };
+export { PREPARED_CHARACTER_DATA_CONTRACT_VERSION, compactPreparedProfilePlugLists, enrichPreparedPageAccount, preparedCharacterBuildCoverage };

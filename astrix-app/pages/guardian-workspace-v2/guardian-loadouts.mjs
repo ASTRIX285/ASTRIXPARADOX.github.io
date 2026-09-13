@@ -1,5 +1,5 @@
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
-import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260905-manual-editor-1';
+import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2';
 
 const SLOT_COUNT=20;

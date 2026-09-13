@@ -1,4 +1,4 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
 import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';

@@ -82,8 +82,8 @@ assert.match(css,/\.super-feature \.super-feature__name\{[\s\S]*?font:700 var\(-
 assert.match(css,/flex:0 0 auto!important;/,'Equipped subclass/Super wrapper must not collapse inside the scroll rail');
 
 for(const [label,html,entryModule] of [
-  ['Main',mainHtml,/guardian-workspace-v2\.mjs\?v=20260913-main-live-repair-1/],
-  ['Build',buildHtml,/paradox-build-space\.mjs\?v=20260913-main-live-repair-1/]
+  ['Main',mainHtml,/guardian-workspace-v2\.mjs\?v=20260913-live-character-2/],
+  ['Build',buildHtml,/paradox-build-space\.mjs\?v=20260913-live-character-2/]
 ]){
   assert.match(html,/guardian-super-formation\.css/,`${label} does not load the shared stylesheet`);
   assert.match(html,entryModule,`${label} does not load the current profile-scoped entry module`);

@@ -54,6 +54,12 @@ assert.equal(await readCachedBungieProfile(session,'loadout'),null,'A pre weapon
 const currentLoadout={...staleLoadout,weaponDefinitionCoverage:{schemaVersion:1,itemInstances:[],complete:true}};
 await cacheBungieProfile(session,currentLoadout,'loadout');
 assert.deepEqual(await readCachedBungieProfile(session,'loadout'),currentLoadout,'The current exact weapon coverage payload must remain reloadable.');
+const staleCharacter={pageReady:{page:'character'},profile:{characters:{data:{guardian:{characterId:'guardian'}}}}};
+await cacheBungieProfile(session,staleCharacter,'character');
+assert.equal(await readCachedBungieProfile(session,'character'),null,'A Character payload without per-Guardian subclass socket proof must never be repainted as current.');
+const currentCharacter={...staleCharacter,characterBuildCoverage:{schemaVersion:2,characterIds:['guardian'],characters:{guardian:{complete:true,missing:[]}},missing:[],complete:true}};
+await cacheBungieProfile(session,currentCharacter,'character');
+assert.deepEqual(await readCachedBungieProfile(session,'character'),currentCharacter,'A verified current Character payload must support the immediate reload paint.');
 console.log('PAGE_REFRESH_LOADOUT_CONTRACT_INVALIDATION=PASS');
 
 let now=1_000_000;

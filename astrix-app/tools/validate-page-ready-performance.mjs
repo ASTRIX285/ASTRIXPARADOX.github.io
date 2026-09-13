@@ -100,6 +100,7 @@ function payloadFor(page){
     pageReady:{page,manifestVersion:forge.manifestVersion,views:PAGE_VIEWS[page],coverage:{complete:true,missing:[]}}
   };
   if(page==='character'||page==='build-forge')payload.artifactCatalog=forge.artifactCatalog;
+  if(page==='character'||page==='build-forge')payload.characterBuildCoverage={schemaVersion:2,characterIds:['1'],characters:{'1':{complete:true,missing:[]}},missing:[],complete:true};
   if(page==='build-forge')payload.currentSeasonNumber=1;
   if(page==='loadout'){
     payload.forgeArmourIndex=forge;
@@ -196,8 +197,8 @@ const semanticWrapper=await readFile(new URL('../forge-auth-worker/src/semantic-
 for(const page of Object.keys(PAGE_VIEWS))assert.match(backend,new RegExp(`\\b${page.replace('-','\\-')}\\b`));
 assert.match(backend,/preparedJourneyAccountData[\s\S]*?historical-stats[\s\S]*?activity-history/,'Journey route must merge cached career and activity data');
 const cache=await readFile(new URL('pages/guardian-workspace-v2/guardian-session-cache.mjs',root),'utf8');
-assert.match(cache,/profile:v3:\$\{identity\}:\$\{pageKind\(page\)\}/,'Prepared payload cache must be isolated by page');
-assert.match(cache,/hasCurrentPreparedProfileContract[\s\S]*?weaponDefinitionCoverage\?\.schemaVersion===1/,'A stale Loadout payload must not survive a deployed residency contract change.');
+assert.match(cache,/profile:v4:\$\{identity\}:\$\{pageKind\(page\)\}/,'Prepared payload cache must be isolated by page and invalidated for the current live Character contract');
+assert.match(cache,/hasCurrentPreparedProfileContract[\s\S]*?weaponDefinitionCoverage\?\.schemaVersion===1[\s\S]*?characterBuildCoverage\?\.schemaVersion===2/,'Stale Loadout and Character payloads must not survive deployed residency contract changes.');
 const builder=await readFile(new URL('tools/build-backend-manifest.py',root),'utf8');
 for(const hash of JOURNEY_ROOTS)assert.match(builder,new RegExp(String(hash)),`Backend Journey bundle is missing real root ${hash}`);
 assert.match(builder,/DestinyInventoryItemDefinition[\s\S]*?DestinyGuardianRankDefinition[\s\S]*?DestinyGuardianRankConstantsDefinition/,'Journey bundle must include collection item and Guardian Rank definitions');
@@ -240,6 +241,10 @@ assert.match(journeyRuntime,/classificationComplete[\s\S]*?UNAVAILABLE/,'Journey
 const profileRuntime=pageSources.find(([path])=>path.includes('guardian-bungie-profile'))?.[1]||'';
 assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.includes\('\/pages\/guardian-workspace-v2\/'\)/,'Character runtime side effects must be limited to Character and Build Forge routes');
 assert.match(profileRuntime,/if\(PROFILE_RUNTIME_ENABLED\)\{[\s\S]*?getBungieSession\(\)\.then\(handleAuthenticatedSession\)/,'Forge Loader must be able to import the profile normalizer without triggering a Character page request');
+const introRuntime=pageSources.find(([path])=>path.includes('/tool-intro/'))?.[1]||'';
+const forgePreload=pageSources.find(([path])=>path.endsWith('/forge-loader-preload.mjs'))?.[1]||'';
+assert.match(introRuntime,/preloadForgeLoaderPayload\(session,\{force:false,reason:'tool-intro'\}\)/,'Tool entry must use the prepared display path instead of blocking navigation on a live Bungie request.');
+assert.match(forgePreload,/prepareForgeLoaderEntry[\s\S]*?preloadForgeLoaderPayload\(session,\{force:false\}\)/,'Forge Loader pre-entry must use the prepared display path.');
 
 console.log('PAGE_READY_DEDICATED_ROUTES=PASS');
 console.log('PAGE_READY_COMPLETE_CONTRACTS=PASS');

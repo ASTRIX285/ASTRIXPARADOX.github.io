@@ -1,5 +1,5 @@
-import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1';
-import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
+import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
 
 const PAGE_PATH='/astrix-app/pages/forge-loader/';
 const FORGE_LOADER_PRELOAD_RECEIPT_KEY='astrix:forge-loader-preload-receipt:v1';
@@ -41,7 +41,7 @@ async function preloadForgeLoaderPayload(session,{force=false,sharedPayload=null
 async function prepareForgeLoaderEntry(target=forgeLoaderTargetUrl(),resolvedSession=null){
   const session=resolvedSession||await getBungieSession();
   if(session?.authenticated!==true)return {kind:'authentication',session,target,authUrl:authStartUrl(target)};
-  return {kind:'payload',session,target,promise:preloadForgeLoaderPayload(session,{force:true})};
+  return {kind:'payload',session,target,promise:preloadForgeLoaderPayload(session,{force:false})};
 }
 
 export {FORGE_LOADER_PRELOAD_RECEIPT_KEY,forgeLoaderTargetUrl,prepareForgeLoaderEntry,preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt,writeForgeLoaderPreloadReceipt};

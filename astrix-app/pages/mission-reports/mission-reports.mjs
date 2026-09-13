@@ -1,4 +1,4 @@
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {
   renderGuardianCharacterCards,
   renderGuardianCharacterCardStatus

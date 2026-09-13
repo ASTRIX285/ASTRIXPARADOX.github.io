@@ -10,9 +10,9 @@ import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '.
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation,setDiamondFromItem} from '../guardian-super-formation.mjs?v=20260829-subclass-identity-1&review=20260911-super-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260829-subclass-identity-1';
-import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260906-all-page-data-1';
+import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2';
 import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
-import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260905-manual-editor-1';
+import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260913-character-isolation-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
@@ -23,10 +23,10 @@ import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,sele
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
-import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-main-live-repair-1&transport=20260911-compact-plugs-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
 import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
 import '../guardian-portal-progress.mjs?v=20260913-three-second-ready-1&loader=2&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';

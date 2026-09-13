@@ -165,6 +165,24 @@ const CHARACTER_PROFILE_COMPONENTS = [
   310  // ItemReusablePlugs
 ] as const;
 
+// Character only needs the exact equipped socket state for its first paint.
+// Reusable plug alternatives are a much larger account component and belong
+// to Build Forge, where the user can actually edit the build.
+const CHARACTER_PAGE_PROFILE_COMPONENTS = [
+  100, // Profiles
+  102, // ProfileInventories
+  104, // ProfileProgression
+  200, // Characters
+  201, // CharacterInventories
+  202, // CharacterProgressions
+  203, // CharacterRenderData
+  205, // CharacterEquipment
+  206, // CharacterLoadouts
+  300, // ItemInstances
+  304, // ItemStats
+  305  // ItemSockets
+] as const;
+
 const JOURNEY_PROFILE_COMPONENTS = [
   100, // Profiles
   102, // ProfileInventories
@@ -894,8 +912,10 @@ async function fetchArtifactDefinition(
 async function profileRoute(request: Request, env: Env): Promise<Response> {
   const requestUrl = new URL(request.url);
   const profileScope = requestUrl.searchParams.get("scope");
-  const requestedComponents = profileScope === "character" || profileScope === "forge"
-    ? CHARACTER_PROFILE_COMPONENTS
+  const requestedComponents = profileScope === "character"
+    ? CHARACTER_PAGE_PROFILE_COMPONENTS
+    : profileScope === "forge"
+      ? CHARACTER_PROFILE_COMPONENTS
     : profileScope === "journey"
       ? JOURNEY_PROFILE_COMPONENTS
       : PROFILE_COMPONENTS;
@@ -1212,7 +1232,7 @@ const PAGE_READ_VIEWS: Record<PagePayloadKind, readonly string[]> = {
   loadout: ["characters", "inventory", "postmaster", "armour", "exotics", "set-bonuses", "saved-loadouts"]
 };
 const PAGE_REQUIRED_PROFILE_DATA: Record<PagePayloadKind, readonly string[]> = {
-  character: ["characters.data", "profileInventory.data", "profileProgression.data", "characterInventories.data", "characterProgressions.data", "characterEquipment.data", "characterLoadouts.data", "itemComponents.instances.data", "itemComponents.stats.data", "itemComponents.sockets.data", "itemComponents.reusablePlugs.data"],
+  character: ["characters.data", "profileInventory.data", "profileProgression.data", "characterInventories.data", "characterProgressions.data", "characterEquipment.data", "characterLoadouts.data", "itemComponents.instances.data", "itemComponents.stats.data", "itemComponents.sockets.data"],
   "build-forge": ["characters.data", "profileInventory.data", "profileProgression.data", "characterInventories.data", "characterProgressions.data", "characterEquipment.data", "characterLoadouts.data", "itemComponents.instances.data", "itemComponents.perks.data", "itemComponents.stats.data", "itemComponents.sockets.data", "itemComponents.plugObjectives.data", "itemComponents.reusablePlugs.data"],
   journey: ["characters.data", "profileInventory.data", "profileProgression.data", "characterInventories.data", "characterProgressions.data", "characterActivities.data", "characterEquipment.data", "profilePresentationNodes.data", "characterPresentationNodes.data", "profileCollectibles.data", "characterCollectibles.data", "profileRecords.data", "characterRecords.data", "metrics.data", "characterCraftables.data"],
   vault: ["characters.data", "profileInventory.data", "characterInventories.data", "characterEquipment.data", "itemComponents.instances.data", "itemComponents.stats.data", "itemComponents.sockets.data", "itemComponents.reusablePlugs.data"],
@@ -1480,11 +1500,13 @@ async function preparedJourneyAccountData(
 }
 
 async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKind): Promise<Response> {
+  const requestUrl = new URL(request.url);
+  const requestedFreshness = requestUrl.searchParams.get("freshness") === "live" ? "live" : "display";
   const profileUrl = new URL(request.url);
   profileUrl.pathname = "/bungie/profile";
   profileUrl.search = "";
-  profileUrl.searchParams.set("freshness", "display");
-  profileUrl.searchParams.set("scope", page === "journey" ? "journey" : "forge");
+  profileUrl.searchParams.set("freshness", requestedFreshness);
+  profileUrl.searchParams.set("scope", page === "journey" ? "journey" : page === "character" ? "character" : "forge");
   profileUrl.searchParams.set("definitions", "client-manifest");
   const preparedStatusPromise = preparedManifestTables({}, env);
   const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env);
@@ -1584,6 +1606,9 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     if (!hasPreparedProfileData(payload.profile || {}, path)) missing.push(`profile:${path}`);
   }
   if (payload.definitionCoverage?.complete !== true) missing.push("owned-item-definitions");
+  if ((page === "character" || page === "build-forge") && payload.characterBuildCoverage?.complete !== true) {
+    missing.push(...(payload.characterBuildCoverage?.missing || ["character-build-coverage"]).map((reason: string) => `character-build:${reason}`));
+  }
   if (page !== "journey" && page !== "loadout" && PROFILE_STAT_HASHES.some(hash => !payload.statDefinitions?.[String(hash)])) missing.push("guardian-stat-definitions");
   if (page === "journey") {
     if (payload.journeyAccountDefinitionCoverage?.complete !== true) missing.push("journey-account-definitions");
@@ -1598,7 +1623,8 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
     page,
     manifestVersion: preparedVersion,
     definitionSource: "prepared-bulk-manifest",
-    accountSource: payload.displaySnapshot?.source || "snapshot",
+    accountSource: payload.displaySnapshot?.source || (requestedFreshness === "live" ? "bungie" : "snapshot"),
+    accountFreshness: requestedFreshness,
     generatedAt: Date.now(),
     views: PAGE_READ_VIEWS[page],
     datasets: {

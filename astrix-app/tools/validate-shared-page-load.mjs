@@ -35,11 +35,19 @@ for(const page of PAGE_KINDS){
   const payload=await requestPreparedPagePayload(page,{fetchImpl:async request=>{
     calls+=1;
     assert.equal(new URL(request).pathname,`/bungie/page/${page}`);
+    assert.equal(new URL(request).searchParams.get('freshness'),'display');
     return Response.json(envelope(page));
   }});
   assert.equal(calls,1);
   assert.equal(payload.pageReady.page,page);
 }
+
+let liveRequest=null;
+await requestPreparedPagePayload('character',{freshness:'live',fetchImpl:async request=>{
+  liveRequest=new URL(request);
+  return Response.json(envelope('character'));
+}});
+assert.equal(liveRequest.searchParams.get('freshness'),'live','A live Character refresh must be explicit on the prepared route.');
 
 const runtimes=[
   'pages/guardian-workspace-v2/guardian-bungie-profile.mjs',

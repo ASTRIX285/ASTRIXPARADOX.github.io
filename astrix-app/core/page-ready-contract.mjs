@@ -6,7 +6,7 @@ const PAGE_VIEWS=Object.freeze({
   loadout:Object.freeze(['characters','inventory','postmaster','armour','exotics','set-bonuses','saved-loadouts'])
 });
 const PAGE_PROFILE_DATA=Object.freeze({
-  character:Object.freeze(['characters.data','profileInventory.data','profileProgression.data','characterInventories.data','characterProgressions.data','characterEquipment.data','characterLoadouts.data','itemComponents.instances.data','itemComponents.stats.data','itemComponents.sockets.data','itemComponents.reusablePlugs.data']),
+  character:Object.freeze(['characters.data','profileInventory.data','profileProgression.data','characterInventories.data','characterProgressions.data','characterEquipment.data','characterLoadouts.data','itemComponents.instances.data','itemComponents.stats.data','itemComponents.sockets.data']),
   'build-forge':Object.freeze(['characters.data','profileInventory.data','profileProgression.data','characterInventories.data','characterProgressions.data','characterEquipment.data','characterLoadouts.data','itemComponents.instances.data','itemComponents.perks.data','itemComponents.stats.data','itemComponents.sockets.data','itemComponents.plugObjectives.data','itemComponents.reusablePlugs.data']),
   journey:Object.freeze(['characters.data','profileInventory.data','profileProgression.data','characterInventories.data','characterProgressions.data','characterActivities.data','characterEquipment.data','profilePresentationNodes.data','characterPresentationNodes.data','profileCollectibles.data','characterCollectibles.data','profileRecords.data','characterRecords.data','metrics.data','characterCraftables.data']),
   vault:Object.freeze(['characters.data','profileInventory.data','characterInventories.data','characterEquipment.data','itemComponents.instances.data','itemComponents.stats.data','itemComponents.sockets.data','itemComponents.reusablePlugs.data']),
@@ -33,6 +33,7 @@ function pagePayloadCoverage(payload,page){
     if(payload?.preparedAccountData?.coverage?.complete!==true)missing.push('journey-account-history');
   }
   if((page==='character'||page==='build-forge')&&(!Array.isArray(payload?.artifactCatalog)||!payload.artifactCatalog.length))missing.push('artifact-catalogue');
+  if((page==='character'||page==='build-forge')&&payload?.characterBuildCoverage?.complete!==true)missing.push('character-build-coverage');
   if(page==='build-forge'&&!Number.isInteger(Number(payload?.currentSeasonNumber)))missing.push('current-season');
   if(page==='loadout'){
     if(!payload?.forgeArmourIndex)missing.push('forge-armour-index');

@@ -70,8 +70,8 @@ assert.match(buildModule,/markGuardianFastReturn\(\)/,'Build Back must preserve 
 assert.doesNotMatch(mainProgress,/window\.addEventListener\('load'/,'Main progress must not use the generic window load event');
 assert.match(buildModule,/const ready=Boolean\(build\),status=ready\?'ready':'pending'/,'An empty initial Build render must remain pending while the live profile resolves');
 assert.match(buildModule,/emitLoad\('render',ready\?LOAD_STAGES\.READY:LOAD_STAGES\.SNAPSHOT,label,status\)/,'Only a populated Build render may report the ready milestone');
-assert.match(mainHtml,/guardian-portal-progress\.mjs\?v=20260913-three-second-ready-1/,'Character must load the non-blocking prepared page progress module without a stale cache');
-assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-main-live-repair-1/,'Build Forge must refresh its live-equipped and non-blocking module graph');
+assert.match(mainHtml,/guardian-portal-progress\.mjs\?v=20260913-live-character-2/,'Character must load the non-blocking prepared page progress module without a stale cache');
+assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-live-character-2/,'Build Forge must refresh its live-equipped and non-blocking module graph');
 assert.match(buildModule,/guardian-portal-progress\.mjs\?v=20260913-three-second-ready-1/,'Build must load the non-blocking prepared page progress module without a stale cache');
 assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build real milestones must update the shared prepared page controller');
 

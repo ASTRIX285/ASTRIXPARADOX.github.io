@@ -1,5 +1,5 @@
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260906-page-refresh-1&contract=20260910-owned-weapon-1';
+import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
 
 const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loadout']);
 const PAGE_KIND_SET=new Set(PAGE_KINDS);
@@ -87,6 +87,7 @@ function completeEnvelopeCoverage(payload,page){
     if(payload?.loadoutCoverage?.complete!==true)missing.add('loadout-acquisition-sources');
   }
   if((page==='character'||page==='build-forge')&&(!Array.isArray(payload?.artifactCatalog)||!payload.artifactCatalog.length))missing.add('artifact-catalogue');
+  if((page==='character'||page==='build-forge')&&payload?.characterBuildCoverage?.complete!==true)missing.add('character-build-coverage');
   payload.pageReady={
     ...(payload.pageReady||{}),
     page,
@@ -120,18 +121,20 @@ function normalizePreparedPagePayload(raw,pageValue){
   return completeEnvelopeCoverage(payload,page);
 }
 
-function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com'}={}){
-  return new URL(`/bungie/page/${pageKind(page)}`,authOrigin);
+function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com',freshness='display'}={}){
+  const url=new URL(`/bungie/page/${pageKind(page)}`,authOrigin);
+  url.searchParams.set('freshness',freshness==='live'?'live':'display');
+  return url;
 }
 
-async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS}={}){
+async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display'}={}){
   if(!fetchImpl)throw new Error('Prepared page network access is unavailable.');
   const controller=signal?null:new AbortController();
   const activeSignal=signal||controller.signal;
   const timer=controller?setTimeout(()=>controller.abort(),timeoutMs):null;
   try{
     reportPreparedPageStage('request',page);
-    const response=await fetchImpl(preparedPageUrl(page),{credentials:'include',headers:{Accept:'application/json'},signal:activeSignal});
+    const response=await fetchImpl(preparedPageUrl(page,{freshness}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
     const raw=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(raw?.error||`Prepared ${page} request failed (${response.status}).`);
     reportPreparedPageStage('join',page);
@@ -176,11 +179,12 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,sharedPayl
       return payload;
     }
   }
-  const active=requests.get(page)||requests.get(`${page}:force`);
+  const freshness=force?'live':'display';
+  const key=`${page}:${freshness}`;
+  const active=requests.get(key);
   if(active)return active;
-  const key=force?`${page}:force`:page;
   if(!requests.has(key))requests.set(key,(async()=>{
-    const payload=await requestPreparedPagePayload(page,{fetchImpl});
+    const payload=await requestPreparedPagePayload(page,{fetchImpl,freshness});
     if(session?.authenticated===true){
       await cacheBungieProfile(session,payload,page);
       markPreparedPageCheckSuccess(session,page);

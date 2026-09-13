@@ -1,5 +1,5 @@
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
-import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260906-page-data-recovery-1&resident=20260910-step-1&transport=20260911-compact-plugs-1';
+import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-live-character-2&resident=20260910-step-1&transport=20260911-compact-plugs-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const JOURNEY_URL='../journey/';
@@ -62,7 +62,7 @@ async function continueToGuardianJourney(){
   if(session?.authenticated){
     try{
       if(status)status.textContent='Preparing verified armour, weapons, subclasses, Artifact and manifest data.';
-      await preloadForgeLoaderPayload(session,{force:true,reason:'tool-intro'});
+      await preloadForgeLoaderPayload(session,{force:false,reason:'tool-intro'});
     }catch(error){
       if(status)status.textContent=error?.message||'Verified Forge Loader data could not be made resident. Try again.';
       document.body.classList.remove('is-transitioning');

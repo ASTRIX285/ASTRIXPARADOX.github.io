@@ -1,22 +1,22 @@
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-live-character-2&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
 import {
   cacheBungieProfile,
   readCachedBungieProfile,
   cacheBungieLoadoutDetail,
   readCachedBungieLoadoutDetail,
   invalidateBungieLoadoutDetail
-} from "./guardian-session-cache.mjs?v=20260906-all-page-data-1";
+} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const CLASS_NAMES=["titan","hunter","warlock"];
@@ -865,7 +865,9 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
 
   forgetLoadoutSelection();
   const detail={...normaliseLiveProfile(payload,session,selectedCharacterId),selectedLoadoutIndex:null,loadoutSource:"currently-equipped"};
-  setRenderStatus("CURRENTLY EQUIPPED LOADOUT","Live equipped items ready","Active Guardian default · saved Bungie slots load only when selected");
+  detail.coverage=loadoutCoverage(detail);
+  if(detail.coverage.complete)setRenderStatus("CURRENTLY EQUIPPED LOADOUT","Live equipped items ready","Active Guardian default · saved Bungie slots load only when selected");
+  else setRenderStatus("LIVE BUILD UPDATING","Equipped items are visible while Bungie data refreshes",detail.coverage.missing.join(" · "));
   document.dispatchEvent(new CustomEvent("forge:guardian-selection-changed",{detail:{...detail,sessionCacheRestored:fromCache}}));
   document.dispatchEvent(new CustomEvent("forge:bungie-profile-loaded",{detail:{...detail,sessionCacheRestored:fromCache}}));
   return detail;
@@ -939,12 +941,23 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
   if(liveProfileReady)return Promise.resolve(null);
   if(liveProfileRequest)return liveProfileRequest;
   liveProfileRequest=(async()=>{
+    let displayedDetail=null;
     const cachedPayload=await readCachedBungieProfile(session,currentPagePayloadKind());
     if(cachedPayload?.profile){
-      try{assertRenderablePagePayload(cachedPayload,currentPagePayloadKind());await activateLiveProfile(await hydrateManifestPayload(cachedPayload,INITIAL_PROFILE_HYDRATION),session,{fromCache:true});}
+      try{assertRenderablePagePayload(cachedPayload,currentPagePayloadKind());displayedDetail=await activateLiveProfile(await hydrateManifestPayload(cachedPayload,INITIAL_PROFILE_HYDRATION),session,{fromCache:true});}
       catch(error){console.warn("[Forge Bungie profile] cached live profile could not render; requesting a fresh profile",error);}
     }
-    return loadLiveProfile(session,{background});
+    if(!displayedDetail){
+      const page=currentPagePayloadKind();
+      const displayPayload=await loadPreparedPagePayload(session,page);
+      displayedDetail=await activateLiveProfile(await hydrateManifestPayload(displayPayload,INITIAL_PROFILE_HYDRATION),session);
+    }
+    liveProfileReady=true;
+    try{return await loadLiveProfile(session,{background:true});}
+    catch(error){
+      console.warn("[Forge Bungie profile] fresh Bungie refresh failed; retaining the verified displayed profile",error);
+      return displayedDetail;
+    }
   })()
     .then(detail=>{
       liveProfileReady=true;
