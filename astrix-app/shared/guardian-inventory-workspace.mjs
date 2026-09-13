@@ -62,8 +62,7 @@ function directEquipAvailable(item,capabilities={},activeCharacterId=''){
   return false;
 }
 
-function powerIdentity(item={}){
-  const kind=item?.equipmentGroup?.kind;
+function powerIdentity(item={},kind=item?.equipmentGroup?.kind){
   const definition=kind==='weapon'
     ?item?.elementDefinition
     :kind==='armour'
@@ -78,10 +77,20 @@ function powerIdentity(item={}){
 
 function visualIdentity(definition={}){
   const display=definition?.displayProperties??definition?.definition?.displayProperties??{};
+  const hash=Number(definition?.bungieHash??definition?.hash??definition?.definition?.hash);
   return {
     icon:asset(definition?.icon??definition?.iconUrl??display.icon??definition?.transparentIconPath),
-    label:text(definition?.name??definition?.displayName??display.name)
+    label:text(definition?.name??definition?.displayName??display.name),
+    hash:Number.isInteger(hash)&&hash>0?hash:null
   };
+}
+
+function firstVisualIdentity(...definitions){
+  for(const definition of definitions){
+    const identity=visualIdentity(definition);
+    if(identity.icon)return identity;
+  }
+  return {icon:'',label:'',hash:null};
 }
 
 function tileSocketIdentities(item={},kind=''){
@@ -97,7 +106,7 @@ function tileSocketIdentities(item={},kind=''){
     return {
       season,
       corner:visualIdentity(item?.weaponSemantics?.intrinsic??item?.intrinsic),
-      champion:visualIdentity(item?.breakerDefinition),
+      champion:firstVisualIdentity(item?.breakerDefinition,item?.weaponSemantics?.breakerDefinition,item?.championCapability?.definition,item?.weaponSemantics?.champion?.definition,item?.championCapability,item?.weaponSemantics?.champion),
       element:visualIdentity(item?.elementDefinition)
     };
   }
@@ -107,7 +116,7 @@ function tileSocketIdentities(item={},kind=''){
 function tileIconMarkup(className,identity,fallbackLabel){
   if(!identity?.icon)return '';
   const label=identity.label||fallbackLabel;
-  return `<span class="${className}" aria-label="${esc(label)}"><img src="${esc(identity.icon)}" alt="" loading="lazy" decoding="async"></span>`;
+  return `<span class="${className}" aria-label="${esc(label)}"${identity.hash?` data-bungie-hash="${identity.hash}"`:''}><img src="${esc(identity.icon)}" alt="" loading="lazy" decoding="async"></span>`;
 }
 
 function verifiedItemTier(item={},state=itemState(item)){
@@ -139,6 +148,12 @@ function structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}={})
       ${tileIconMarkup('tile-season-icon',sockets.season,'Season or source emblem')}
       ${quantity}${lock}
     </span>`;
+}
+
+function itemTileMarkup(item,{kind=item?.equipmentGroup?.kind||'',className=''}={}){
+  if(!item||!['weapon','armour'].includes(kind))return '';
+  const state=itemState(item),powerMark=powerIdentity(item,kind),sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
+  return `<span class="vault-transfer-item has-item-tile item-tile-display${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${className?` ${esc(className)}`:''}" data-item-kind="${esc(kind)}" data-item-state="${state.raw}">${structuredItemTileMarkup(item,{kind,state,powerMark,quantity})}</span>`;
 }
 
 function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
@@ -218,6 +233,7 @@ export {
   groupInventoryWorkspaceItems,
   inventoryGroupsMarkup,
   inventoryItemMarkup,
+  itemTileMarkup,
   itemKey,
   itemState,
   postmasterMarkup,

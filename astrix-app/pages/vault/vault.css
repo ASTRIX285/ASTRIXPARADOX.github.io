@@ -62,3 +62,14 @@
 @media(max-width:1200px){.vault-selection{grid-template-columns:1fr}.vault-evaluate{min-height:3rem}.vault-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.vault-candidate{grid-template-columns:1fr}.vault-candidate-select{min-height:2.8rem}.vault-stat-targets{grid-template-columns:1fr}}
 @media(max-width:880px){.vault-capacity{grid-template-columns:repeat(2,minmax(0,1fr))}.vault-selection-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.vault-candidate-items{grid-template-columns:repeat(2,minmax(0,1fr))}.vault-candidate-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.vault-capacity,.vault-filters,.vault-selection-slots{grid-template-columns:1fr}.vault-item-grid{grid-template-columns:1fr}.vault-selection-slot{grid-template-columns:var(--apx-icon-vault-selection) minmax(0,1fr)}.vault-stat-targets label{grid-template-columns:4.5rem minmax(0,1fr) 5rem}.vault-optimiser-heading,.vault-optimiser-actions{align-items:stretch;flex-direction:column}.vault-optimiser-actions span{margin:0;text-align:left}.vault-candidate-items,.vault-candidate-stats{grid-template-columns:1fr}}
+
+.vault-item-grid{grid-template-columns:repeat(auto-fill,var(--apx-icon-gear-art-width));align-items:start;gap:.62rem}
+.vault-item{display:grid;grid-template-columns:1fr;gap:.3rem;min-height:0;border:0;background:transparent;overflow:visible}
+.vault-item:hover,.vault-item:focus-within{border-color:transparent;box-shadow:none}
+.vault-item.is-selected{border-color:transparent;box-shadow:0 0 0 2px var(--apx-gold)}
+.vault-item-inspect,.vault-selection-inspect,.vault-candidate-inspect{display:block;width:var(--apx-icon-gear-art-width);height:var(--apx-icon-gear-art-height)}
+.vault-item>button{width:100%;border:1px solid rgba(201,168,76,.42);padding:.3rem .2rem;background:#080809;color:var(--apx-gold);font:800 .58rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.06em;cursor:pointer}
+.vault-item>button:disabled{opacity:.4;cursor:not-allowed}
+.vault-selection-slot{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr);min-height:var(--apx-icon-gear-art-height)}
+.vault-candidate-item{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr);gap:.5rem;padding:.3rem}
+@media(max-width:560px){.vault-item-grid{grid-template-columns:repeat(auto-fill,var(--apx-icon-gear-art-width))}.vault-selection-slot{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr)}.vault-candidate-items{grid-template-columns:1fr}}

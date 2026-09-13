@@ -15,6 +15,7 @@ import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-presentation-consistency-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -197,8 +198,9 @@ function renderExotics(){
     return `<section class="forge-exotic-slot"><h3>${esc(slot.label.toUpperCase())}</h3><div class="forge-exotic-grid">${rows.length?rows.map(group=>{
       const selected=group.owned&&group.key===selectedExoticKey;
       const ownership=group.owned?`${group.instances.length} owned ${group.instances.length===1?'copy':'copies'}`:'not owned';
-      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" data-exotic-hover-key="${esc(group.key)}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
-    }).join(''):'<div class="forge-empty">No verified Exotic definitions</div>'}</div></section>`;
+      const tileItem=group.instances?.[0]||group.representative||selectorExoticHoverItem(group);
+      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" data-exotic-hover-key="${esc(group.key)}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}">${itemTileMarkup(tileItem,{kind:'armour'})||`<img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async">`}</button>`;
+    }).join(''):'<div class="forge-empty">No Exotic definitions</div>'}</div></section>`;
   }).join('');
   bindSelectorExoticHovers(host,groups);
 }
@@ -297,7 +299,7 @@ function configureStats({reset=false}={}){
 
 function stagedMarkup(slot,index){
   const item=selectedSlots.get(index);
-  const contents=item?.icon?`<img src="${esc(item.icon)}" alt="">`:'<span class="forge-stage-empty" aria-hidden="true">◇</span>';
+  const contents=item?itemTileMarkup(item,{kind:'armour'}):'<span class="forge-stage-empty" aria-hidden="true">◇</span>';
   return item?`<button type="button" class="forge-staged-slot" data-inspect-item="${esc(itemKey(item))}" aria-label="Inspect staged ${esc(item.name)}, ${Number(item.totalStats||0)} total, ${esc(item.source?.label||'Owned')}">${contents}</button>`:`<div class="forge-staged-slot" aria-label="${esc(slot.label)}, no item staged">${contents}</div>`;
 }
 
@@ -409,7 +411,7 @@ function candidateItemMeta(item){
 }
 
 function candidateItemMarkup(item){
-  return `<div class="forge-breakdown-item"><button type="button" class="forge-breakdown-identity" data-inspect-item="${esc(itemKey(item))}" aria-label="Inspect ${esc(item.name)}"><img src="${esc(item.icon)}" alt=""><span><b>${esc(item.name)}</b><small>${esc(item.slotLabel)} · ${esc(candidateItemMeta(item))}</small></span></button><div class="forge-breakdown-stats" aria-label="${esc(item.name)} armour stats">${candidateStatMarkup(item,{itemRow:true})}</div><span class="forge-breakdown-total"><small>TOTAL</small><b>${Number(item.totalStats||0)}</b></span></div>`;
+  return `<div class="forge-breakdown-item"><button type="button" class="forge-breakdown-identity" data-inspect-item="${esc(itemKey(item))}" aria-label="Inspect ${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}<span><b>${esc(item.name)}</b><small>${esc(item.slotLabel)} · ${esc(candidateItemMeta(item))}</small></span></button><div class="forge-breakdown-stats" aria-label="${esc(item.name)} armour stats">${candidateStatMarkup(item,{itemRow:true})}</div><span class="forge-breakdown-total"><small>TOTAL</small><b>${Number(item.totalStats||0)}</b></span></div>`;
 }
 
 function candidateMarkup(candidate,index){

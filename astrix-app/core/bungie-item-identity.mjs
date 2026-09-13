@@ -40,7 +40,7 @@ export function resolveBreakerTypeDefinition(instance={},itemDefinition={},defin
     const definition=definitions?.[String(hash)];
     if(definition)return definition;
   }
-  const enumValue=Number(instance?.breakerType);
+  const enumValue=[instance?.breakerType,itemDefinition?.breakerType].map(Number).find(value=>Number.isInteger(value)&&value>0);
   if(!Number.isInteger(enumValue)||enumValue<=0)return null;
   return Object.values(definitions||{}).find(definition=>Number(definition?.enumValue)===enumValue)||null;
 }

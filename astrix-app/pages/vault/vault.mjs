@@ -7,9 +7,9 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-sele
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover,bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-compact-inspect-1';
+import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260911-vault-live-transfer-1';
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-5';
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-presentation-consistency-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -176,11 +176,21 @@ function stageTransfer(item,destination){
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
 }
 
-function stagePostmasterCollection(characterId,requestedItemKey=''){
+async function stagePostmasterCollection(characterId,requestedItemKey=''){
+  if(vaultActionBusy)return;
+  let result=null;
   try{
-    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session}),subject=items.length===1?items[0].name:`${items.length} exact items`;
-    showVaultActionDialog('Confirm Postmaster pull',`Pull ${subject} from ${characterLabel(characterId)} Postmaster into that Guardian's Bungie inventory. If Bungie reports no room or rejects an item, its position will not change here.`,{kind:'postmaster',intent});
-  }catch(error){setStatus(error?.message||'Postmaster collection cannot be staged.','error');}
+    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=confirmPostmasterCollectionIntent(stagePostmasterCollectionIntent({characterId,items,session}));
+    vaultActionBusy=true;
+    setStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${characterLabel(characterId)} Postmaster. Waiting for Bungie inventory feedback.`);
+    result=await executePostmasterCollectionIntent(intent,{session,onProgress:row=>setStatus(row.label||'Waiting for Bungie inventory feedback.')});
+    if(result.mutationCount>0)await refreshAfterLiveAction();
+    if(result.status==='applied'&&result.readback?.verified)setStatus('Postmaster pull completed and fresh Bungie inventory confirmed the result.','good');
+    else setStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${actionFailureMessage(result)}`,'error');
+  }catch(error){
+    if(result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
+    setStatus(error?.message||'The Postmaster pull failed.','error');
+  }finally{vaultActionBusy=false;}
 }
 
 function stageDirectEquip(requestedItemKey){
@@ -243,16 +253,16 @@ function selectedKeySet(){return new Set([...selectedSlots.values()].map(itemKey
 
 function selectionSlotMarkup(slot,index){
   const item=selectedSlots.get(index);
-  return `<div class="vault-selection-slot" data-selection-slot="${index}"${item?` data-inspect-item="${esc(itemKey(item))}" tabindex="0"`:''}>${item?.icon?`<img src="${esc(item.icon)}" alt="">`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Owned'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
+  return `<div class="vault-selection-slot" data-selection-slot="${index}">${item?`<span class="vault-selection-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span>`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Owned'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
 }
 
-function bindVaultItemHovers(root){
-  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>bindParadoxItemHover(target,inspectedItem(target.dataset.inspectItem),'armour'));
+function bindVaultItemInspectors(root){
+  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>bindParadoxItemInspect(target,inspectedItem(target.dataset.inspectItem),'armour'));
 }
 
 function renderSelection(){
   byId('vaultSelectionSlots').innerHTML=ARMOUR_BUCKETS.map(selectionSlotMarkup).join('');
-  bindVaultItemHovers(byId('vaultSelectionSlots'));
+  bindVaultItemInspectors(byId('vaultSelectionSlots'));
   const count=selectedSlots.size;
   byId('vaultSelectionStatus').textContent=count?`${count} of ${ARMOUR_BUCKETS.length} armour slots staged for ${activeCharacterClass||'selected Guardian'}`:'No armour selected';
   byId('vaultClearSelection').disabled=!count;
@@ -309,18 +319,12 @@ function configureOptimiser({reset=false}={}){
   if(reset){matchedBuilds=[];renderCandidateBuilds();}
 }
 
-function statLineMarkup(item){
-  const stats=armourStatVector(item);
-  const strongest=ARMOUR_STAT_KEYS.map(key=>({key,value:Number(stats[key]||0)})).filter(row=>row.value>0).sort((left,right)=>right.value-left.value).slice(0,3);
-  return strongest.length?`<span class="vault-item-statline">${strongest.map(row=>`<span>${esc(ARMOUR_STAT_LABELS[row.key].slice(0,3).toUpperCase())}<strong>${row.value}</strong></span>`).join('')}</span>`:'';
-}
-
 function candidateStatsMarkup(stats={}){
   return `<div class="vault-candidate-stats">${ARMOUR_STAT_KEYS.map(key=>`<span>${esc(ARMOUR_STAT_LABELS[key])}<b>${Number(stats[key]||0)}</b></span>`).join('')}</div>`;
 }
 
 function candidateItemMarkup(item){
-  return `<button type="button" class="vault-candidate-item" data-inspect-item="${esc(itemKey(item))}" aria-label="Inspect ${esc(item.name)}"><img src="${esc(item.icon)}" alt="" loading="lazy"><span><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.source?.label||'Owned'}`)}</small></span></button>`;
+  return `<article class="vault-candidate-item"><span class="vault-candidate-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span><span><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.source?.label||'Owned'}`)}</small></span></article>`;
 }
 
 function candidateMarkup(candidate,index){
@@ -334,7 +338,7 @@ function renderCandidateBuilds(){
   if(!host)return;
   host.hidden=matchedBuilds.length===0;
   host.innerHTML=matchedBuilds.map(candidateMarkup).join('');
-  bindVaultItemHovers(host);
+  bindVaultItemInspectors(host);
 }
 
 async function findCandidateBuilds(){
@@ -372,14 +376,8 @@ function inspectedItem(key){return catalogue.armour.find(item=>itemKey(item)===S
 
 function itemMarkup(item){
   const compatible=itemCompatible(item);
-  const setName=item.setBonus?.identity?.name||'';
-  const seasonIcon=item?.releaseWatermark?.icon||item?.tierIcon||'';
-  const armourTier=Math.max(0,Math.min(5,Number(item?.armourTier)||0));
   const className=['vault-item',item.isExotic?'is-exotic':'',compatible?'':'is-incompatible'].filter(Boolean).join(' ');
-  return `<button type="button" class="${className}" data-inspect-item="${esc(itemKey(item))}" data-armour-slot="${item.slotIndex}" ${compatible?`aria-label="Inspect ${esc(item.name)}"`:`aria-disabled="true" aria-label="${esc(item.name)} is not compatible with the selected ${activeCharacterClass||'Guardian'}"`}>
-    <span class="vault-item-art">${item.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:''}${seasonIcon||armourTier?`<span class="vault-item-tier-rail">${seasonIcon?`<span class="vault-item-season-icon" title="Bungie season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>`:''}${Array.from({length:armourTier},()=>'<i class="vault-item-tier-diamond" aria-hidden="true"></i>').join('')}</span>`:''}${item.power!==null?`<span class="vault-item-power">✦ ${esc(item.power)}</span>`:''}<span class="vault-item-source">${esc(String(item.source?.label||'Owned').toUpperCase())}</span><span class="vault-item-total">Σ ${item.totalStats}</span></span>
-    <span class="vault-item-copy"><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.characterClass==='any'?'Any class':item.characterClass}`)}</small>${setName?`<small class="vault-item-set">${esc(setName)}</small>`:''}${statLineMarkup(item)}</span>
-  </button>`;
+  return `<article class="${className}" title="${esc(item.name)}"><span class="vault-item-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0">${itemTileMarkup(item,{kind:'armour'})}</span><button type="button" data-select-armour-item="${esc(itemKey(item))}" ${compatible?'':`disabled aria-label="${esc(item.name)} is not compatible with the selected ${activeCharacterClass||'Guardian'}"`}>${itemKey(selectedSlots.get(item.slotIndex))===itemKey(item)?'SELECTED':'SELECT'}</button></article>`;
 }
 
 function renderInventory(){
@@ -387,7 +385,7 @@ function renderInventory(){
   const visible=rows.slice(0,visibleLimit);
   byId('vaultResultCount').textContent=`${rows.length} VERIFIED ITEM${rows.length===1?'':'S'}`;
   byId('vaultItemGrid').innerHTML=visible.length?visible.map(item=>itemMarkup(item)).join(''):'<div class="vault-empty">No verified armour matches these filters.</div>';
-  bindVaultItemHovers(byId('vaultItemGrid'));
+  bindVaultItemInspectors(byId('vaultItemGrid'));
   const loadMore=byId('vaultLoadMore');
   loadMore.hidden=visible.length>=rows.length;
   if(!loadMore.hidden)loadMore.textContent=`LOAD ${Math.min(PAGE_SIZE,rows.length-visible.length)} MORE ARMOUR`;
@@ -544,6 +542,7 @@ function installTransferEvents(){
 
 function installEvents(){
   byId('vaultFilters')?.addEventListener('input',()=>{visibleLimit=PAGE_SIZE;renderInventory();});
+  byId('vaultItemGrid')?.addEventListener('click',event=>{const button=event.target.closest('[data-select-armour-item]');if(button&&!button.disabled)selectItem(button.dataset.selectArmourItem);});
   byId('vaultStatTargets')?.addEventListener('input',event=>{
     const label=event.target.closest('[data-target-stat]');
     if(!label)return;

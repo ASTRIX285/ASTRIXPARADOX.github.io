@@ -131,7 +131,7 @@ const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
-const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
+const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{hash:14001,name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{hash:485622768,displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{hash:2302094943,displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
 const breakerDefinitions={
   '485622768':{hash:485622768,enumValue:1,displayProperties:{name:'Shield Piercing',icon:'/barrier.png'}},
   '2611060930':{hash:2611060930,enumValue:2,displayProperties:{name:'Disruption',icon:'/overload.png'}},
@@ -139,6 +139,7 @@ const breakerDefinitions={
 };
 assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0,breakerType:2},{},breakerDefinitions),breakerDefinitions['2611060930'],'A live breaker enum must resolve the genuine Bungie champion definition when its nullable hash is zero.');
 assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:485622768},breakerDefinitions),breakerDefinitions['485622768'],'An invalid zero instance hash must not mask a genuine item-definition breaker hash.');
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:0,breakerType:3},breakerDefinitions),breakerDefinitions['3178805705'],'A genuine item-definition breaker enum must resolve the Bungie champion definition when both nullable hashes are zero.');
 assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
 const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--legendary item-tile--tier-5 item-tile--masterworked"/,'Legendary rarity, verified T5 and masterwork must remain independent shared tile classes.');
@@ -148,6 +149,9 @@ assert.equal([...sharedTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--
 assert.match(sharedTileMarkup,/class="tile-power"[^>]*><b>550<\/b>/,'The weapon power readout must keep the real power value without duplicating its separate element socket.');
 assert.match(sharedTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/adaptive\.png/,'The weapon corner badge must use the resolved Bungie intrinsic icon.');
 assert.match(sharedTileMarkup,/class="tile-intrinsic"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
+assert.match(sharedTileMarkup,/class="tile-intrinsic"[^>]*data-bungie-hash="485622768"/,'The champion icon must retain its exact Bungie breaker definition hash.');
+const fallbackBreakerMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13116',breakerDefinition:{},championCapability:{definition:breakerDefinitions['2611060930']}},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(fallbackBreakerMarkup,/class="tile-intrinsic"[^>]*><img[^>]*\/overload\.png/,'An empty earlier breaker object must not mask a later resolved Bungie champion definition icon.');
 assert.match(sharedTileMarkup,/class="tile-element"[^>]*><img[^>]*\/arc\.png/,'The weapon element socket must use the resolved Bungie damage definition icon.');
 assert.match(sharedTileMarkup,/class="tile-footer">[\s\S]*class="tile-intrinsic"[\s\S]*class="tile-element"[\s\S]*class="tile-power"[\s\S]*<\/span>\s*<span class="tile-corner-badge"/,'Barrier, element and power must share the complete footer region.');
 assert.match(sharedTileMarkup,/class="tile-season-icon"[^>]*><img[^>]*\/season\.png/,'The source socket must use the resolved Bungie release watermark icon.');
@@ -447,6 +451,7 @@ assert.equal(equippedMoved.status,'applied');
 assert.deepEqual(equippedPaths,['/bungie/actions/equip-items','/bungie/actions/transfer-item'],'Moving an equipped item must first equip the reviewed exact carried replacement.');
 
 const POSTMASTER_ITEM={...TRANSFER_ITEM,itemInstanceId:'13107',name:'Exact Postmaster item',quantity:1,source:{kind:'postmaster',characterId:CHARACTER_ID,label:'Postmaster'}},stagedCollection=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,items:[POSTMASTER_ITEM],session});
+assert.equal(stagedCollection.overflowToVault,true,'A normal Postmaster pull must retain the explicit Vault overflow path when the character bucket is full.');
 let postmasterPresent=true;
 const postmasterPaths=[];
 const collected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
@@ -459,6 +464,34 @@ const collected=await executePostmasterCollectionIntent(confirmPostmasterCollect
 assert.equal(collected.status,'applied');
 assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
 assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+
+const OVERFLOW_CANDIDATE={itemHash:13008,itemInstanceId:'13108',bucketHash:POSTMASTER_ITEM.bucketHash},overflowState={postmaster:true,pulled:'postmaster',candidate:'carried'};
+const overflowPaths=[];
+const overflowProfile=()=>{
+  const base=vaultActionProfile({location:'absent'}),pulledRaw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
+  base.profile.characterInventories.data[CHARACTER_ID].items=[...(overflowState.postmaster?[{...pulledRaw,bucketHash:215593132}]:[]),...(overflowState.pulled==='carried'?[pulledRaw]:[]),...(overflowState.candidate==='carried'?[OVERFLOW_CANDIDATE]:[])];
+  base.profile.profileInventory.data.items=[...(overflowState.pulled==='vault'?[{...pulledRaw,bucketHash:VAULT_BUCKET}]:[]),...(overflowState.candidate==='vault'?[{...OVERFLOW_CANDIDATE,bucketHash:VAULT_BUCKET}]:[])];
+  return base;
+};
+let overflowPullAttempts=0;
+const overflowCollected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(overflowProfile());
+  overflowPaths.push(path);
+  const body=JSON.parse(init.body);
+  if(path.endsWith('/pull-from-postmaster')){
+    overflowPullAttempts+=1;
+    if(overflowPullAttempts===1)return response({ErrorCode:99,ErrorStatus:'DestinyNoRoomInDestination',Message:'Target inventory is full.'},{ok:false,status:409});
+    overflowState.postmaster=false;overflowState.pulled='carried';return response({ErrorCode:1,Message:'Ok'});
+  }
+  if(String(body.itemId)===OVERFLOW_CANDIDATE.itemInstanceId)overflowState.candidate=body.transferToVault?'vault':'carried';
+  if(String(body.itemId)===POSTMASTER_ITEM.itemInstanceId)overflowState.pulled=body.transferToVault?'vault':'carried';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(overflowCollected.status,'applied','A full character bucket must complete the requested Postmaster pull through the real Vault transfer route.');
+assert.deepEqual(overflowPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A full character bucket must open one exact slot, pull the Postmaster item, move it to Vault, and restore the displaced item.');
+assert.equal(overflowState.pulled,'vault','The requested Postmaster item must finish in Vault when its character bucket was full.');
+assert.equal(overflowState.candidate,'carried','The exact carried item used to open capacity must be restored to its original Guardian.');
 
 const stagedPostmasterDirect=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,targetCharacterId:OTHER_CHARACTER_ID,items:[POSTMASTER_ITEM],session,equipAfterCollection:true});
 let postmasterDirectLocation='postmaster';

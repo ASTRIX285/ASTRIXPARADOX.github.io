@@ -2,8 +2,8 @@
   Shared armour and weapon tile geometry matched to the approved rendered
   Figma concept. The app's canonical 100 by 122 tile box contains square item
   art and a compact footer. Every socket remains proportional to that box.
-  Character and Inventory are the only consumers, so every selector is scoped
-  to the shared inventory article and cannot alter Forge Loader or its inspector.
+  Exact owned item renderers opt in through the shared tile host. Page-specific
+  selection and inspection behavior remains outside this visual contract.
 
   Rarity, gear tier and masterwork are independent states. Rarity controls the
   outer frame, Bungie's verified gear tier controls the diamond count and fill,
@@ -283,4 +283,23 @@
 .vault-transfer-item.has-item-tile:focus-visible .item-tile {
   outline: 1px solid #c9a84c;
   outline-offset: 1px;
+}
+
+.has-shared-item-tile {
+  border-radius: 0!important;
+  background: transparent!important;
+  overflow: visible!important;
+}
+.has-shared-item-tile::after {
+  display: none!important;
+}
+.has-shared-item-tile>.item-tile-display {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  flex-basis: auto;
+}
+.has-shared-item-tile>.item-tile-display>.item-tile {
+  width: 100%;
+  height: 100%;
 }

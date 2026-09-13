@@ -108,8 +108,8 @@ try{
   if(invalid.selectedPerks.length||invalid.perkIconHashMap?.['not-a-hash']||invalid.unknownPlugs.length!==1)fail('G3b: hashless weapon perk received a guessed icon identity');
   const audit=JSON.parse(await readFile(new URL('../data/paradox-weapon-audit-report.json',import.meta.url),'utf8'));
   if(!audit.manifestVersion||!audit.counts.weapons||audit.counts.references!==audit.counts.resolvedReferences||audit.unresolvedReferences.length)fail('G3b: current exhaustive weapon manifest audit contains unresolved references');
-  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8')+'\n'+await readFile(new URL('../pages/guardian-workspace-v2/guardian-weapon-presentation.mjs',import.meta.url),'utf8');
-  if(!/data-bungie-hash/.test(uiSource)||!/hashAttribute\(perk\)/.test(uiSource)||!/hashAttribute\(semantics\.intrinsic\)/.test(uiSource))fail('G3b: weapon perk/intrinsic DOM icons do not expose their Bungie hash');
+  const uiSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-semantic-ui.mjs',import.meta.url),'utf8')+'\n'+await readFile(new URL('../pages/guardian-workspace-v2/guardian-weapon-presentation.mjs',import.meta.url),'utf8'),tileSource=await readFile(new URL('../shared/guardian-inventory-workspace.mjs',import.meta.url),'utf8');
+  if(!/data-bungie-hash/.test(uiSource)||!/hashAttribute\(perk\)/.test(uiSource)||!/data-bungie-hash="\$\{identity\.hash\}"/.test(tileSource)||!/corner:visualIdentity\(item\?\.weaponSemantics\?\.intrinsic/.test(tileSource))fail('G3b: weapon perk/intrinsic DOM icons do not expose their Bungie hash');
 }catch(error){fail(`G3b threw: ${error.message}`);}
 
 // G3c — Weapon perks are modeled in stable socket-column order with the exact
