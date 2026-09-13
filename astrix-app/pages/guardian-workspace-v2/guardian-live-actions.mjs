@@ -441,9 +441,8 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     else if(Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} no longer matches its staged Bungie definition hash.`);
     else if(!locationMatches(location,source))blockers.push(`${item.name} is no longer in the reviewed ${source.kind} location.`);
     if(destination.kind==='character'&&!Object.hasOwn(profile?.characters?.data||{},String(destination.characterId||'')))blockers.push('The destination Guardian is not present in the latest Bungie profile.');
-    blockers.push(...vaultActionActivityBlockers(fresh,[source.characterId,destination.characterId]));
     if(blockers.length){record('preflight','blocked','Fresh Vault transfer preflight blocked all live changes.',blockers);result.status='blocked';return result;}
-    record('preflight','complete','Fresh ownership, location, Guardian, and activity evidence verified.');
+    record('preflight','complete','Fresh ownership, location, and Guardian evidence verified. Bungie remains authoritative for transfer availability.');
 
     if(source.kind==='equipped'){
       const replacement=intent.replacement,replacementLocation=locations.get(String(replacement?.itemInstanceId||''));
@@ -549,7 +548,6 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[];
     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
     if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
-    blockers.push(...vaultActionActivityBlockers(fresh,[result.characterId,result.targetCharacterId]));
     for(const item of intent.items||[]){
       const location=locations.get(String(item.itemInstanceId||''));
       if(!location||!locationMatches(location,{kind:'postmaster',characterId:result.characterId})||Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} is no longer in this Guardian's Postmaster.`);
