@@ -31,6 +31,45 @@ function bindingsEqual(left={},right={}){
   return a.characterId===b.characterId&&a.membershipId===b.membershipId&&a.membershipType===b.membershipType;
 }
 
+const CHARACTER_ARRAY_FIELDS=Object.freeze([
+  'stats','weapons','ownedWeapons','armour','mods','ornaments','subclassCatalog',
+  'superOptions','abilities','availableAbilities','aspects','availableAspects',
+  'fragments','availableFragments','transcendenceOptions','transcendenceSlots',
+  'availableArtifacts','artifactOptions','loadouts'
+]);
+const CHARACTER_NULL_FIELDS=Object.freeze([
+  'subclassBuild','super','artifact','artifactConfiguration','emblem','ghost','shader',
+  'renderData','itemRenderData','hashCoverage','semanticCoverage','coverage',
+  'paradoxAnalysis','weaponRollAdvice'
+]);
+
+/* Partial updates may reuse state for one Guardian, but a character change is
+ * a hard ownership boundary. Missing fields must clear instead of inheriting
+ * the previously painted Guardian's equipped build. */
+function characterScopedSelectionState(previous={},detail={}){
+  const characterId=text(detail?.characterId||detail?.fixtureId);
+  if(!characterId)return null;
+  const sameCharacter=characterId===text(previous?.characterId||previous?.fixtureId);
+  const next=sameCharacter?{...previous}:{characterId};
+  Object.assign(next,detail,{characterId});
+  for(const field of CHARACTER_ARRAY_FIELDS){
+    if(Array.isArray(detail?.[field]))next[field]=[...detail[field]];
+    else if(!sameCharacter)next[field]=[];
+  }
+  for(const field of CHARACTER_NULL_FIELDS){
+    if(Object.prototype.hasOwnProperty.call(detail,field))next[field]=detail[field];
+    else if(!sameCharacter)next[field]=null;
+  }
+  if(!sameCharacter){
+    next.subclassName=text(detail.subclassName);
+    next.subclassIcon=text(detail.subclassIcon);
+    next.power=detail.power??null;
+    next.selectedLoadoutIndex=Number.isInteger(detail.selectedLoadoutIndex)?detail.selectedLoadoutIndex:null;
+    next.loadoutSource=text(detail.loadoutSource);
+  }
+  return next;
+}
+
 function shouldReplaceBuildState(currentState,detail={},options={}){
   if(detail?.source!=="bungie-live"||!detail.characterId)return false;
   if(!currentState?.originalBuild||!currentState?.workingBuild)return true;
@@ -39,6 +78,8 @@ function shouldReplaceBuildState(currentState,detail={},options={}){
   const explicitCharacterChange=Boolean(explicitlySelectedCharacterId)&&explicitlySelectedCharacterId===incomingCharacterId;
   const explicitLoadoutChange=Number.isInteger(detail.selectedLoadoutIndex);
   if(explicitCharacterChange||explicitLoadoutChange)return true;
+  const currentCharacterId=bindingOf(currentState.originalBuild).characterId;
+  if(currentCharacterId&&currentCharacterId!==incomingCharacterId)return false;
   // Automatic profile hydration must never replace an existing protected
   // Working Build. Only an explicit character or Bungie-slot selection may do
   // that; relying on a transient route query loses the build after hydration.
@@ -85,4 +126,4 @@ function validateHandoffEnvelope(envelope,{expectedCharacterId='',expectedMember
   return envelope.payload;
 }
 
-export {HANDOFF_SCHEMA,HANDOFF_TTL_MS,bindingOf,bindingsEqual,compactBungieLoadouts,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,createHandoffEnvelope,validateHandoffEnvelope};
+export {HANDOFF_SCHEMA,HANDOFF_TTL_MS,bindingOf,bindingsEqual,compactBungieLoadouts,characterScopedSelectionState,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,createHandoffEnvelope,validateHandoffEnvelope};

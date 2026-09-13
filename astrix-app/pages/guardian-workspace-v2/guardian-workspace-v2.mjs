@@ -4,7 +4,7 @@ import {
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260906-page-data-recovery-1&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
+} from "./guardian-bungie-profile.mjs?v=20260913-main-live-repair-1&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
@@ -13,6 +13,7 @@ import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePost
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
+import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 
 const PLAYER_POWER_CAP = 550;
 const VALID_CLASSES = ["hunter", "titan", "warlock"];
@@ -257,11 +258,11 @@ function setStageState(state, message = "") {
   if (state === "loading") {
     stageLoadingTimer = setTimeout(() => {
       if (stage && stage.dataset.state !== "loading") return;
-      if (stage) stage.dataset.state = "error";
-      if (titleNode) titleNode.textContent = "REQUEST TIMEOUT";
-      if (msgNode) msgNode.textContent = "Guardian data took too long. Refresh or reconnect Bungie.";
+      if (stage) stage.dataset.state = "deferred";
+      if (titleNode) titleNode.textContent = "LIVE DATA UPDATING";
+      if (msgNode) msgNode.textContent = "The Character page is ready while verified Bungie data continues loading.";
       document.dispatchEvent(new CustomEvent("forge:guardian-load-timeout"));
-    }, 15000);
+    }, 2800);
   }
 }
 
@@ -348,21 +349,9 @@ function renderSubclassBuild(build = {}, subclassName = "Subclass") {
   // perk rendering. This renderer deliberately does not pad or infer that rail.
 }
 
-function settleImage(image) {
-  if (!image?.src || image.hidden || image.closest("[hidden]")) return Promise.resolve();
-  if (image.complete) return Promise.resolve();
-  return Promise.race([
-    typeof image.decode === "function" ? image.decode().catch(() => {}) : new Promise(resolve => {
-      image.addEventListener("load", resolve, { once: true });
-      image.addEventListener("error", resolve, { once: true });
-    }),
-    new Promise(resolve => setTimeout(resolve, 5000))
-  ]);
-}
-
 function publishRenderComplete(detail = {}) {
   const sequence = ++renderSequence;
-  requestAnimationFrame(() => requestAnimationFrame(async () => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     if (sequence !== renderSequence) return;
     const roots = [
       byId("equippedSubclassSummary"), byId("superFeatureCluster"), byId("abilityList"),
@@ -371,8 +360,6 @@ function publishRenderComplete(detail = {}) {
       byId("characterInventoryWorkspace"), byId("guardianCharacterCards"), byId("guardianLoadouts")
     ].filter(Boolean);
     const images = [...new Set(roots.flatMap(root => [...root.querySelectorAll("img")]))];
-    await Promise.all(images.map(settleImage));
-    if (sequence !== renderSequence) return;
     document.documentElement.dataset.guardianRenderComplete = "true";
     document.dispatchEvent(new CustomEvent("forge:guardian-render-complete", { detail: {
       characterId: String(detail.characterId || ""),
@@ -413,12 +400,14 @@ function updateIdentityCosmetics(data = {}) {
 }
 
 function normaliseSelection(detail = {}) {
+  const scoped = characterScopedSelectionState(workspaceState, detail);
+  if (!scoped) return null;
   const characterClass = String(
-    detail.characterClass ?? detail.className ?? detail.classType ?? workspaceState.characterClass
+    scoped.characterClass ?? scoped.className ?? scoped.classType ?? ""
   ).toLowerCase();
-  const subclass = String(detail.subclass ?? workspaceState.subclass).toLowerCase();
+  const subclass = String(scoped.subclass ?? "").toLowerCase();
   if (!VALID_CLASSES.includes(characterClass) || !VALID_SUBCLASSES.includes(subclass)) return null;
-  return { ...workspaceState, ...detail, characterClass, subclass };
+  return { ...scoped, characterClass, subclass };
 }
 
 function applyGuardianSelection(detail) {
@@ -447,7 +436,7 @@ function applyGuardianSelection(detail) {
     fragments: Array.isArray(next.fragments) ? next.fragments : []
   };
   renderSubclassBuild({...subclassBuild,artifact:next.artifact||null}, next.subclassName);
-  if (Array.isArray(next.stats)) renderStats(next.stats);
+  renderStats(next.stats);
   updateIdentityCosmetics(next);
   renderVerifiedPreview(next);
   setStageState("ready");

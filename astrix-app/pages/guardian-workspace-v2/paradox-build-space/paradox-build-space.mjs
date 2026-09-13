@@ -14,7 +14,7 @@ import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,read
 import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
 import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260905-manual-editor-1';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260906-complete-build-transfer-2';
+import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260913-character-isolation-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
 import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendation.mjs';
@@ -26,9 +26,9 @@ import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inv
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260910-fixed-intrinsic-evidence-1&transport=20260911-compact-plugs-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-main-live-repair-1&transport=20260911-compact-plugs-1';
 import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
-import '../guardian-portal-progress.mjs?v=20260906-all-page-data-1&loader=2&transport=20260911-compact-plugs-1';
+import '../guardian-portal-progress.mjs?v=20260913-three-second-ready-1&loader=2&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
 import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
@@ -430,20 +430,14 @@ function switchBuildCharacter(detail={}){
   const next=applyPendingVaultSelection(createBuildState(boundDetail));writeState(next);render();
 }
 function recoverMissingBuild(detail={}){if(detail?.source!=="bungie-live"||!detail.characterId||readState())return;switchBuildCharacter(detail);}
-function settleBuildImage(image){if(!image?.src||image.hidden||image.closest('[hidden]')||image.complete)return Promise.resolve();return Promise.race([typeof image.decode==='function'?image.decode().catch(()=>{}):new Promise(resolve=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true});}),new Promise(resolve=>setTimeout(resolve,5000))]);}
 function completeBuildRender(build){
   const sequence=++buildRenderSequence;
-  requestAnimationFrame(()=>requestAnimationFrame(async()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(sequence!==buildRenderSequence)return;
     const images=[...document.querySelectorAll('.build-space img,.build-character-selector img')].filter(image=>!image.closest('[hidden]'));
-    await Promise.all(images.map(settleBuildImage));
-    if(sequence!==buildRenderSequence)return;
-    guardianManifest.ready().finally(()=>{
-      if(sequence!==buildRenderSequence)return;
-      const ready=Boolean(build),status=ready?'ready':'pending',label=ready?'Build Forge rendered':'Waiting for Guardian build';
-      emitLoad('render',ready?LOAD_STAGES.READY:LOAD_STAGES.SNAPSHOT,label,status);
-      document.dispatchEvent(new CustomEvent('forge:build-render-complete',{detail:{status,characterId:String(build?.characterId||''),selectedLoadoutIndex:Number.isInteger(build?.selectedLoadoutIndex)?build.selectedLoadoutIndex:null,renderedImages:images.filter(image=>image.complete&&image.naturalWidth>0).length}}));
-    });
+    const ready=Boolean(build),status=ready?'ready':'pending',label=ready?'Build Forge rendered':'Waiting for Guardian build';
+    emitLoad('render',ready?LOAD_STAGES.READY:LOAD_STAGES.SNAPSHOT,label,status);
+    document.dispatchEvent(new CustomEvent('forge:build-render-complete',{detail:{status,characterId:String(build?.characterId||''),selectedLoadoutIndex:Number.isInteger(build?.selectedLoadoutIndex)?build.selectedLoadoutIndex:null,renderedImages:images.filter(image=>image.complete&&image.naturalWidth>0).length}}));
   }));
 }
 const list=(...values)=>values.find(Array.isArray)||[];

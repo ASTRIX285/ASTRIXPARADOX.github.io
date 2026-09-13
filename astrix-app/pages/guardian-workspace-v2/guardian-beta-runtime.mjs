@@ -5,6 +5,7 @@
    ========================================================================== */
 
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {characterScopedSelectionState} from './paradox-build-binding.mjs?v=20260913-character-isolation-1';
 
 const PLAYER_POWER_CAP = 550;
 const STAT_CAP = 200;
@@ -103,15 +104,6 @@ function armourCosmeticItems(item) {
   return uniqueDetailItems([item?.shader, item?.ornament, item?.defaultAppearance].filter((entry) => entry && (typeof entry !== "string" || entry.trim())));
 }
 
-const previewStats = [
-  ["Mobility", 100],
-  ["Resilience", 42],
-  ["Recovery", 70],
-  ["Discipline", 101],
-  ["Intellect", 28],
-  ["Strength", 38]
-];
-
 const workspaceState = {
   characterId: null,
   characterClass: "hunter",
@@ -123,10 +115,12 @@ const workspaceState = {
 };
 
 function normaliseSelection(detail = {}) {
-  const characterClass = String(detail.characterClass ?? detail.className ?? detail.classType ?? workspaceState.characterClass).toLowerCase();
-  const subclass = String(detail.subclass ?? workspaceState.subclass).toLowerCase();
+  const scoped = characterScopedSelectionState(workspaceState, detail);
+  if (!scoped) return null;
+  const characterClass = String(scoped.characterClass ?? scoped.className ?? scoped.classType ?? "").toLowerCase();
+  const subclass = String(scoped.subclass ?? "").toLowerCase();
   if (!VALID_CLASSES.includes(characterClass) || !VALID_SUBCLASSES.includes(subclass)) return null;
-  return { ...workspaceState, ...detail, characterClass, subclass };
+  return { ...scoped, characterClass, subclass };
 }
 
 function setStageState(title, message = "") {
@@ -137,9 +131,14 @@ function setStageState(title, message = "") {
 }
 
 function renderStats(stats) {
-  const values = Array.isArray(stats) && stats.length ? stats : previewStats;
+  const values = Array.isArray(stats) ? stats : [];
   const target = byId("statsRow");
   if (!target) return;
+
+  if (!values.length) {
+    target.innerHTML = '<div class="stats-unavailable" role="status">LIVE STATS UNAVAILABLE</div>';
+    return;
+  }
 
   const total = values.reduce((sum, [, value]) => sum + Number(value || 0), 0);
   target.innerHTML =
@@ -298,8 +297,8 @@ function applyGuardianSelection(detail) {
   Object.assign(workspaceState, next);
 
   if (next.power != null) document.querySelectorAll("[data-power-cap]").forEach((el) => (el.textContent = next.power));
-  if (next.stats) renderStats(next.stats);
-  if (Array.isArray(next.weapons)) renderWeapons(next.weapons);
+  renderStats(next.stats);
+  renderWeapons(next.weapons);
 
   setStageState("GUARDIAN PROFILE ACTIVE", `${next.className ? next.className.toUpperCase() : "GUARDIAN"} · ${next.subclassName ? next.subclassName.toUpperCase() : "SUBCLASS"}`);
 }
@@ -313,6 +312,6 @@ document.addEventListener("forge:guardian-selection-changed", (event) => {
 });
 
 createArmourDrawer();
-renderStats(previewStats);
+renderStats([]);
 
 document.dispatchEvent(new CustomEvent("forge:guardian-workspace-ready", { detail: { version: "0.2.0-beta" } }));

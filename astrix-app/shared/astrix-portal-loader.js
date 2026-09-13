@@ -18,7 +18,8 @@
   }
   document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
-  var gate, prog, pct, status, authPanel, authButton, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='';
+  var MAX_BLOCKING_MS=2800,ASSET_WAIT_MS=1800;
+  var gate, prog, pct, status, authPanel, authButton, ceilingTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='';
   function markup(){
     return ''+
     '<div class="apx-gate" role="status" aria-live="polite" aria-label="Loading">'+
@@ -76,6 +77,10 @@
     var wrap=document.createElement('div');wrap.innerHTML=markup();
     gate=wrap.firstElementChild;document.body.appendChild(gate);
     document.body.classList.add('apx-loading');cache();apply();
+    clearTimeout(ceilingTimer);ceilingTimer=setTimeout(function(){
+      if(pendingAuthUrl)return;
+      setStatus('Page ready · live data updating');done();
+    },MAX_BLOCKING_MS);
     document.documentElement.classList.remove('apx-booting');
   }
   function set(v){
@@ -95,11 +100,12 @@
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
-    return new Promise(function(resolve){
+    var load=new Promise(function(resolve){
       var finish=function(){resolve();};
       image.addEventListener('load',finish,{once:true});
       image.addEventListener('error',finish,{once:true});
     }).then(function(){return image.decode?image.decode().catch(function(){}):undefined;});
+    return Promise.race([load,new Promise(function(resolve){setTimeout(resolve,ASSET_WAIT_MS);})]);
   }
   function ready(root){
     var target=root&&root.querySelectorAll?root:document;
@@ -107,13 +113,14 @@
     var images=Array.prototype.slice.call(target.querySelectorAll('img')).filter(function(image){
       return !image.closest('[hidden]')&&getComputedStyle(image).display!=='none';
     });
-    return Promise.all([fonts,Promise.all(images.map(settleImage))]).then(function(){
+    var assets=Promise.all([fonts,Promise.all(images.map(settleImage))]);
+    return Promise.race([assets,new Promise(function(resolve){setTimeout(resolve,ASSET_WAIT_MS);})]).then(function(){
       return new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(function(){done();resolve();});});});
     });
   }
   function finish(){
     if(!gate||gate.classList.contains('is-done'))return;
-    pendingPct=100;
+    clearTimeout(ceilingTimer);pendingPct=100;
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');

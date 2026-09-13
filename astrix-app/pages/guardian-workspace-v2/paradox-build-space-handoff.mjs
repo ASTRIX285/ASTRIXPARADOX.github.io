@@ -1,6 +1,6 @@
 import {clone,createBuildState} from './paradox-build-space/paradox-build-state.mjs';
 import {markGuardianFastReturn} from './guardian-session-cache.mjs?v=20260906-all-page-data-1';
-import {bindingOf,createHandoffEnvelope,validateHandoffEnvelope} from './paradox-build-binding.mjs';
+import {bindingOf,createHandoffEnvelope,validateHandoffEnvelope} from './paradox-build-binding.mjs?v=20260913-character-isolation-1';
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';
@@ -9,6 +9,7 @@ const SELECTED_CHARACTER_KEY='astrix:selected-character-id';
 let latestGuardian=null;
 let latestExplicitLoadout=null;
 let activeCharacterId='';
+const equippedByCharacter=new Map();
 const safeStore=(key,value,{durable=false}={})=>{const json=JSON.stringify(createHandoffEnvelope(value));let stored=false;try{sessionStorage.setItem(key,json);stored=true;}catch{}if(durable)try{localStorage.setItem(key,json);stored=true;}catch{}return stored;};
 const safeRead=(key,options={})=>{for(const [store,durable] of [[sessionStorage,false],[localStorage,true]]){try{const parsed=JSON.parse(store.getItem(key)||'null');const value=validateHandoffEnvelope(parsed,{...options,allowLegacy:!durable});if(value)return value;if(parsed)store.removeItem(key);}catch{}}return null;};
 const clearStored=key=>{for(const store of [sessionStorage,localStorage])try{store.removeItem(key);}catch{}};
@@ -40,7 +41,8 @@ function rememberGuardian(detail={}){
   activeCharacterId=characterId;
   const isExplicit=Number.isInteger(detail.selectedLoadoutIndex);
   if(isExplicit){latestExplicitLoadout=clone(latestGuardian);safeStore(LAST_LOADOUT_KEY,latestExplicitLoadout,{durable:true});return;}
-  if(latestExplicitLoadout&&String(latestExplicitLoadout.characterId)!==String(detail.characterId))latestExplicitLoadout=null;
+  equippedByCharacter.set(characterId,latestGuardian);
+  latestExplicitLoadout=null;
 }
 function rememberExplicitLoadout(detail={}){const characterId=String(detail?.characterId||selectedCharacterId());if(!characterId||!Number.isInteger(detail.selectedLoadoutIndex))return;latestExplicitLoadout=compactBuild({...detail,characterId});activeCharacterId=characterId;safeStore(LAST_LOADOUT_KEY,latestExplicitLoadout,{durable:true});}
 function matchesSelection(build,detail={}){if(!build)return false;const characterId=String(detail.characterId||activeCharacterId||'');if(!characterId||String(build.characterId)!==characterId)return false;if(Object.prototype.hasOwnProperty.call(detail,'selectedLoadoutIndex'))return Number(build.selectedLoadoutIndex??-1)===Number(detail.selectedLoadoutIndex??-1);return true;}
@@ -65,13 +67,10 @@ function bindSourceToCharacter(source,characterId=''){
 }
 function resolveBuildSource(){
   const selectedId=selectedCharacterId();
-  const candidates=[];
-  if(latestGuardian&&Number.isInteger(latestGuardian.selectedLoadoutIndex))candidates.push(latestGuardian);
-  if(latestExplicitLoadout&&latestGuardian&&String(latestExplicitLoadout.characterId)===String(latestGuardian.characterId))candidates.push(latestExplicitLoadout);
-  candidates.push(latestGuardian,latestExplicitLoadout);
+  const candidates=[equippedByCharacter.get(selectedId)];
+  if(latestGuardian&&!Number.isInteger(latestGuardian.selectedLoadoutIndex))candidates.push(latestGuardian);
   for(const candidate of candidates){const bound=bindSourceToCharacter(candidate,selectedId);if(bound)return bound;}
-  const remembered=safeRead(LAST_LOADOUT_KEY);
-  return bindSourceToCharacter(remembered,selectedId);
+  return null;
 }
 function currentProfileBuildSource(){
   const selectedId=selectedCharacterId();

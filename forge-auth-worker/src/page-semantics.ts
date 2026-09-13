@@ -55,6 +55,13 @@ function equippedRows(payload: any): any[] {
   return Object.values(payload?.profile?.characterEquipment?.data || {}).flatMap((row: any) => row?.items || []);
 }
 
+function characterRows(payload: any): any[] {
+  return [
+    ...Object.values(payload?.profile?.characterInventories?.data || {}).flatMap((row: any) => row?.items || []),
+    ...equippedRows(payload)
+  ];
+}
+
 function profileRows(payload: any): any[] {
   return [
     ...(payload?.profile?.profileInventory?.data?.items || []),
@@ -114,7 +121,10 @@ function definitionHashesByField(definitions: Record<string, Record<string, any>
 
 async function enrichPageInventory(payload: any, env: Env, page: string, manifestVersion = ""): Promise<any> {
   if (!payload?.profile || !["character", "build-forge", "vault"].includes(page)) return payload;
-  const rows = page === "character" ? equippedRows(payload) : profileRows(payload);
+  // Character renders equipped, carried, and Postmaster items. Resolving only
+  // equipped definitions produced blank tiles for the other two live sections.
+  // Vault stays excluded from Character to keep the first payload bounded.
+  const rows = page === "character" ? characterRows(payload) : profileRows(payload);
   const requested = componentDefinitionHashes(payload, rows);
   if (page !== "vault") {
     for (const progression of Object.values(payload.profile?.characterProgressions?.data || {}) as any[]) {

@@ -6,7 +6,7 @@ const ROOT=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
 const forgeIndexSource=await read('data/forge-armour-index.json').catch(()=>null);
 const forgeIndex=forgeIndexSource?expandForgeArmourIndex(JSON.parse(forgeIndexSource)):null;
-const [service,sessionCache,profile,preparedClient,portal,build,interceptor,resolver,fixture,artifact,beta,recommender,worker,wrapper]=await Promise.all([
+const [service,sessionCache,profile,preparedClient,portal,build,interceptor,resolver,fixture,artifact,beta,recommender,worker,wrapper,pageSemantics]=await Promise.all([
   read('pages/guardian-workspace-v2/guardian-manifest-service.mjs'),
   read('pages/guardian-workspace-v2/guardian-session-cache.mjs'),
   read('pages/guardian-workspace-v2/guardian-bungie-profile.mjs'),
@@ -20,7 +20,8 @@ const [service,sessionCache,profile,preparedClient,portal,build,interceptor,reso
   read('pages/guardian-workspace-v2/guardian-beta-selection.mjs'),
   read('pages/guardian-workspace-v2/guardian-artifact-recommender.mjs'),
   read('../forge-auth-worker/src/index.ts'),
-  read('../forge-auth-worker/src/semantic-wrapper.ts')
+  read('../forge-auth-worker/src/semantic-wrapper.ts'),
+  read('../forge-auth-worker/src/page-semantics.ts')
 ]);
 
 for(const type of ['DestinyInventoryItemDefinition','DestinySandboxPerkDefinition','DestinyArtifactDefinition','DestinyPlugSetDefinition','DestinyStatDefinition','DestinySocketCategoryDefinition','DestinyEquipableItemSetDefinition']){
@@ -78,8 +79,12 @@ assert.match(profile,/socketCategoryDefinitions/,'Socket-category evidence must 
 assert.match(interceptor,/socketCategoryHash[\s\S]*?socketCategoryDefinition/,'Alternative weapon columns must retain socket-category evidence');
 assert.match(resolver,/socketCategory\(plug\)[\s\S]*?weapon-mod[\s\S]*?perk/,'Weapon perk-versus-mod classification must consult the socket category first');
 assert.match(portal,/forge:manifest-progress/,'Main portal loader must show manifest progress');
-assert.match(portal,/await manifestReady/,'Main portal must not clear before the manifest is ready');
-assert.match(build,/guardianManifest\.ready\(\)\.finally/,'Build portal must not clear before the manifest is ready');
+assert.match(portal,/const manifestReady=guardianManifest\.cached\(\)/,'Main portal may reuse cached manifest state without starting a full blocking index');
+assert.doesNotMatch(portal,/await manifestReady|await sceneBackgroundReady/,'Main portal must not block painted prepared data on manifest or decorative asset completion');
+assert.match(profile,/INITIAL_PROFILE_HYDRATION=Object\.freeze\(\{equippedOnly:true,allowNetwork:false,waitForManifest:false\}\)/,'Initial Character hydration must stay on the prepared payload critical path');
+assert.doesNotMatch(build,/guardianManifest\.ready\(\)\.finally/,'Build render completion must not block on the full manifest index');
+assert.match(pageSemantics,/function characterRows\(payload: any\)[\s\S]*?characterInventories[\s\S]*?equippedRows\(payload\)/,'Character payload enrichment must cover carried and Postmaster rows as well as equipped items');
+assert.match(pageSemantics,/page === "character" \? characterRows\(payload\) : profileRows\(payload\)/,'The Character prepared route must use the complete character-owned item definition set');
 
 for(const [label,source] of [['fixture',fixture],['artifact',artifact],['beta selector',beta]]){
   assert.match(source,/guardianManifest/ ,`${label} must resolve display definitions through the full manifest service`);

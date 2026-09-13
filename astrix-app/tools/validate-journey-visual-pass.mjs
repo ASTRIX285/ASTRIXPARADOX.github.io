@@ -153,8 +153,8 @@ for(const page of globalHeroPages){
 assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1'))).length,4,'Journey, Vault, Forge Loader and Loadout must load the current Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its current prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the persistent refresh Guardian renderer');
-assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1'),'Character must load the prepared page payload module graph');
-assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260908-icon-hover-1'),'Build Forge must load the repaired Apply, review layout and hover module graph');
+assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260913-main-live-repair-1'),'Character must load the isolated live-data module graph');
+assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-main-live-repair-1'),'Build Forge must load the live-equipped non-blocking module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
 assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');

@@ -3,7 +3,7 @@ import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260906-all
 import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 
 const loader=window.ForgeLoader;
-const manifestReady=guardianManifest.ready();
+const manifestReady=guardianManifest.cached();
 const isBuildSpace=Boolean(document.querySelector('.build-space'));
 const BACKGROUND_DECODE_TIMEOUT_MS=5*1000;
 let buildRenderStatus='',profileSettled=false,profileFailed=false,finishRevision=0;
@@ -45,12 +45,12 @@ const decodeBackground=url=>new Promise(resolve=>{
 const sceneBackgroundReady=Promise.all(sceneBackgroundUrls().map(decodeBackground));
 const finishAfterPaint=async label=>{
   const revision=++finishRevision;
-  await manifestReady;
-  await sceneBackgroundReady;
-  if(revision!==finishRevision)return;
   void label;
   setStage('ready');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(revision===finishRevision)loader?.done();}));
+  // Prepared data is already sufficient to paint. Manifest indexing and
+  // decorative background decoding continue without holding interaction.
+  void Promise.allSettled([manifestReady,sceneBackgroundReady]);
 };
 
 try{

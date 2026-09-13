@@ -4,7 +4,7 @@ import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
-import {createHandoffEnvelope} from "./paradox-build-binding.mjs";
+import {createHandoffEnvelope} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
@@ -41,8 +41,9 @@ let liveProfilePayload=null;
 let liveProfileSession=null;
 let fixtureProfileDetail=null;
 let latestResolvedBuild=null;
+const latestEquippedBuilds=new Map();
 let authenticatedSession=globalThis.FORGE_BUNGIE_SESSION?.authenticated?globalThis.FORGE_BUNGIE_SESSION:null;
-let explicitlySelectedCharacterId="";
+let explicitlySelectedCharacterId=location.pathname.includes('/paradox-build-space/')?String(new URLSearchParams(location.search).get('characterId')||''):"";
 let preparedPagePayloadResolved=false;
 let resolvePreparedPagePayload=()=>{};
 if(!globalThis.FORGE_PAGE_PAYLOAD_PROMISE)globalThis.FORGE_PAGE_PAYLOAD_PROMISE=new Promise(resolve=>{resolvePreparedPagePayload=resolve;});
@@ -99,10 +100,18 @@ function resolvedBuildSnapshot(detail={}){
     weaponRollAdvice:cloneBuildValue(detail.weaponRollAdvice||null)
   };
 }
-function rememberResolvedBuild(detail={}){const snapshot=resolvedBuildSnapshot(detail);if(snapshot)latestResolvedBuild=snapshot;return snapshot;}
+function rememberResolvedBuild(detail={}){
+  const snapshot=resolvedBuildSnapshot(detail);
+  if(!snapshot)return null;
+  latestResolvedBuild=snapshot;
+  if(!Number.isInteger(snapshot.selectedLoadoutIndex))latestEquippedBuilds.set(snapshot.characterId,cloneBuildValue(snapshot));
+  return snapshot;
+}
 function persistResolvedBuildSnapshot(){
-  if(!latestResolvedBuild?.characterId)return false;
-  const envelope=createHandoffEnvelope(createBuildState(latestResolvedBuild));
+  const selectedId=currentSelectedCharacterId()||String(latestResolvedBuild?.characterId||"");
+  const source=latestEquippedBuilds.get(selectedId)||(!Number.isInteger(latestResolvedBuild?.selectedLoadoutIndex)?latestResolvedBuild:null);
+  if(!source?.characterId)return false;
+  const envelope=createHandoffEnvelope(createBuildState(source));
   const json=JSON.stringify(envelope);
   let stored=false;
   for(const store of [sessionStorage,localStorage]){try{store.removeItem(BUILD_SPACE_KEY);store.setItem(BUILD_SNAPSHOT_KEY,json);stored=true;}catch{}}
@@ -150,7 +159,7 @@ function blockAuthenticatedFixture(event){
 // The profile route returns the definitions required for the initial display.
 // The browser only joins that prepared payload; it must not fan out definition
 // requests while the portal is waiting at the authenticated profile gate.
-const INITIAL_PROFILE_HYDRATION=Object.freeze({equippedOnly:true,allowNetwork:false});
+const INITIAL_PROFILE_HYDRATION=Object.freeze({equippedOnly:true,allowNetwork:false,waitForManifest:false});
 
 function currentPagePayloadKind(){
   return location.pathname.includes('/pages/journey/')?'journey':location.pathname.includes('/paradox-build-space/')?'build-forge':'character';
@@ -187,6 +196,18 @@ function activeCharacter(profile){
 function rememberCharacterId(characterId){
   try{sessionStorage.setItem(SELECTED_CHARACTER_KEY,String(characterId||""));}
   catch{}
+}
+
+function currentSelectedCharacterId(){
+  const selectedCard=document.querySelector('#guardianCharacterCards [data-character-id].is-selected, #guardianCharacterCards [data-character-id][aria-pressed="true"]');
+  if(explicitlySelectedCharacterId||selectedCard?.dataset?.characterId)return String(explicitlySelectedCharacterId||selectedCard.dataset.characterId);
+  try{return String(sessionStorage.getItem(SELECTED_CHARACTER_KEY)||"");}
+  catch{return "";}
+}
+
+function isCurrentCharacter(characterId){
+  const selected=currentSelectedCharacterId();
+  return !selected||selected===String(characterId||"");
 }
 
 function rememberLoadoutSelection(characterId,index){
@@ -766,9 +787,10 @@ async function loadSelectedLoadout(selection){
   const cacheKey=`${characterId}:${index}`;
   const cacheInvalidated=invalidatedLoadoutCacheKeys.has(cacheKey),cached=cacheInvalidated?null:loadoutCache.get(cacheKey);
   if(cached){
+    const published=forAction(cached);
+    if(!isCurrentCharacter(characterId))return published;
     rememberLoadoutSelection(characterId,index);
     document.documentElement.dataset.guardianSource="bungie-live";
-    const published=forAction(cached);
     document.dispatchEvent(new CustomEvent("forge:guardian-selection-changed",{detail:published}));
     document.dispatchEvent(new CustomEvent("forge:bungie-loadout-loaded",{detail:published}));
     return published;
@@ -776,9 +798,10 @@ async function loadSelectedLoadout(selection){
   const stored=cacheInvalidated?null:await readCachedBungieLoadoutDetail(liveProfileSession||globalThis.FORGE_BUNGIE_SESSION,characterId,index);
   if(stored&&Array.isArray(stored.subclassCatalog)){
     loadoutCache.set(cacheKey,stored);
+    const published=forAction({...stored,sessionCacheRestored:true});
+    if(!isCurrentCharacter(characterId))return published;
     rememberLoadoutSelection(characterId,index);
     document.documentElement.dataset.guardianSource="bungie-live";
-    const published=forAction({...stored,sessionCacheRestored:true});
     document.dispatchEvent(new CustomEvent("forge:guardian-selection-changed",{detail:published}));
     document.dispatchEvent(new CustomEvent("forge:bungie-loadout-loaded",{detail:published}));
     return published;
@@ -787,7 +810,7 @@ async function loadSelectedLoadout(selection){
   document.dispatchEvent(new CustomEvent("forge:loadout-loading",{detail:{characterId,index}}));
   const prepared=preparedLoadoutPayload(characterId,index);
   if(!prepared)throw new Error(`Bungie loadout ${index+1} is not available in the prepared account payload.`);
-  const payload=await hydrateManifestPayload(prepared,{allowNetwork:false});
+  const payload=await hydrateManifestPayload(prepared,{allowNetwork:false,waitForManifest:false});
   payload.profile=profileWithSelectedLoadout(payload);
   const detail={...normaliseLiveProfile(payload,null,characterId),selectedLoadoutIndex:index,loadoutSource:"bungie-live"};
   detail.coverage=loadoutCoverage(detail);
@@ -798,7 +821,8 @@ async function loadSelectedLoadout(selection){
 
   loadoutCache.set(cacheKey,detail);
   invalidatedLoadoutCacheKeys.delete(cacheKey);
-  await cacheBungieLoadoutDetail(liveProfileSession||globalThis.FORGE_BUNGIE_SESSION,characterId,index,detail);
+  void cacheBungieLoadoutDetail(liveProfileSession||globalThis.FORGE_BUNGIE_SESSION,characterId,index,detail);
+  if(!isCurrentCharacter(characterId))return detail;
   rememberCharacterId(characterId);
   rememberLoadoutSelection(characterId,index);
   document.documentElement.dataset.guardianSource="bungie-live";
@@ -883,7 +907,7 @@ function selectLiveCharacter(characterId,expectedClass=""){
     }
     throw new Error("Bungie character roster is not loaded; character selection cannot fall back to last played.");
   }
-  const detail=normaliseLiveProfile(liveProfilePayload,liveProfileSession,characterId);
+  const detail={...normaliseLiveProfile(liveProfilePayload,liveProfileSession,characterId),selectedLoadoutIndex:null,loadoutSource:"currently-equipped"};
   const expected=String(expectedClass||"").trim().toLowerCase();
   if(expected&&detail.characterClass!==expected)throw new Error(`Selected ${expected} card resolved ${detail.characterClass} data for character ${characterId}.`);
   explicitlySelectedCharacterId=detail.characterId;

@@ -110,13 +110,26 @@ const capturedEnv={MANIFEST_DATA:{async fetch(request){
     type,Object.fromEntries(hashes.filter(hash=>capturedTables[type]?.[String(hash)]).map(hash=>[String(hash),capturedTables[type][String(hash)]]))
   ]))});
 }}};
+const capturedCharacterPayload={
+  profile:{
+    profileInventory:{data:{items:[]}},
+    characterInventories:{data:{'character-1':{items:[{itemHash:3788059976,itemInstanceId:'character-carried-smoke'}]}}},
+    characterEquipment:{data:{'character-1':{items:[]}}},characterProgressions:{data:{}},characterLoadouts:{data:{}},
+    profilePlugSets:{data:{plugs:{}}},characterPlugSets:{data:{}},
+    itemComponents:{instances:{data:{}},sockets:{data:{}},reusablePlugs:{data:{}},stats:{data:{}}}
+  },definitions:{},statDefinitions:{},pageReady:{page:'character',manifestVersion:armourIndex.manifestVersion,coverage:{complete:false,missing:['owned-item-definitions']}}
+};
+await enrichPreparedPageAccount(capturedCharacterPayload,capturedEnv,'character',{manifestVersion:armourIndex.manifestVersion});
+assert.equal(capturedCharacterPayload.definitions['3788059976'].displayProperties.name,'Smoke Jumper Vestment','Character carried and Postmaster item instances must receive their genuine Bungie definitions.');
+console.log('CAPTURED_CHARACTER_CARRIED_POSTMASTER_DEFINITIONS=PASS');
+const readsBeforeVault=capturedReads.length;
 await enrichPreparedPageAccount(capturedVaultPayload,capturedEnv,'vault',{manifestVersion:armourIndex.manifestVersion});
 assert.equal(capturedVaultPayload.definitionCoverage.complete,true,'The captured Vault item and socket graph must be complete.');
 assert.equal(capturedVaultPayload.definitions['3788059976'].displayProperties.name,'Smoke Jumper Vestment');
 assert.equal(capturedVaultPayload.definitions['3788059976'].oversizedInternalPayload,undefined,'Full manifest-only fields must not cross the prepared page boundary.');
 assert.ok(Buffer.byteLength(JSON.stringify(capturedVaultPayload))<2_500_000,'The captured Vault account overlay must stay within the Worker budget.');
-assert.ok(capturedReads.length<=4,`Captured Vault enrichment used ${capturedReads.length} manifest batches.`);
-console.log(`CAPTURED_VAULT_COMPACT_PAGE_PROJECTION=PASS batches=${capturedReads.length} bytes=${Buffer.byteLength(JSON.stringify(capturedVaultPayload))}`);
+assert.ok(capturedReads.length-readsBeforeVault<=4,`Captured Vault enrichment used ${capturedReads.length-readsBeforeVault} manifest batches.`);
+console.log(`CAPTURED_VAULT_COMPACT_PAGE_PROJECTION=PASS batches=${capturedReads.length-readsBeforeVault} bytes=${Buffer.byteLength(JSON.stringify(capturedVaultPayload))}`);
 
 // The live account repeats the same reusable socket choices across hundreds of
 // armour instances. Keep that exact evidence, but send each repeated list once

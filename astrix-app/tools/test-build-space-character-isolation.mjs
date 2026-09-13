@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createHandoffEnvelope,repairMissingBuildBinding,mergePreparedLoadoutContext,shouldReplaceBuildState,validateHandoffEnvelope} from '../pages/guardian-workspace-v2/paradox-build-binding.mjs';
+import {characterScopedSelectionState,createHandoffEnvelope,repairMissingBuildBinding,mergePreparedLoadoutContext,shouldReplaceBuildState,validateHandoffEnvelope} from '../pages/guardian-workspace-v2/paradox-build-binding.mjs';
 import {createBuildState} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 
 class MemoryStore{
@@ -41,6 +41,7 @@ const intendedWarlockArtifactConfiguration={
   provenance:{provider:'bungie-manifest',manifestHash:8001,component:202}
 };
 const warlockLoadout={characterId:'warlock-1',membershipId:'membership-1',membershipType:'3',characterClass:'Warlock',selectedLoadoutIndex:2,weapons:[{itemInstanceId:'warlock-weapon'}],artifactConfiguration:intendedWarlockArtifactConfiguration};
+const warlockEquipped={...warlockLoadout,selectedLoadoutIndex:null,weapons:[{itemInstanceId:'warlock-live-weapon'}]};
 const protectedWarlockForge=createBuildState({...warlockLoadout,selectedLoadoutIndex:null,forgeLoaderDecision:{schemaVersion:1}});
 const automaticHunterProfile={source:'bungie-live',characterId:'hunter-1',membershipId:'membership-1',membershipType:'3',selectedLoadoutIndex:null};
 assert.equal(shouldReplaceBuildState(protectedWarlockForge,automaticHunterProfile,{vaultSelection:true}),false,'a background active-character profile cannot replace a different Guardian\'s protected Forge Loader transfer');
@@ -59,9 +60,11 @@ assert.deepEqual(loadoutRepaired.workingBuild.loadouts,preparedLoadouts,'same Gu
 assert.deepEqual(loadoutRepaired.workingBuild.forgeLoaderDecision,protectedWarlockForge.workingBuild.forgeLoaderDecision,'loadout repair must preserve the staged Forge Loader decision');
 assert.equal(mergePreparedLoadoutContext(loadoutRepaired,{...automaticHunterProfile,characterId:'warlock-1',loadoutsAvailable:true,loadouts:preparedLoadouts}),loadoutRepaired,'unchanged prepared loadouts must not rewrite Build Forge state');
 assert.equal(mergePreparedLoadoutContext(protectedWarlockForge,{...automaticHunterProfile,loadoutsAvailable:true,loadouts:preparedLoadouts}),protectedWarlockForge,'a different Guardian cannot repair protected loadout context');
+rememberGuardian(warlockEquipped);
 rememberGuardian(warlockLoadout);
 rememberExplicitLoadout(warlockLoadout);
-assert.equal(resolveBuildSource().selectedLoadoutIndex,2,'selected loadout is preferred while its Guardian remains active');
+assert.equal(resolveBuildSource().selectedLoadoutIndex,null,'generic Improve always uses the selected Guardian current-equipped build');
+assert.equal(resolveBuildSource().weapons[0].itemInstanceId,'warlock-live-weapon','browsing a saved slot cannot replace the selected Guardian live-equipped handoff');
 
 const titanEquipped={characterId:'titan-1',membershipId:'membership-1',membershipType:'3',characterClass:'Titan',selectedLoadoutIndex:null,weapons:[{itemInstanceId:'titan-weapon'}],artifactConfiguration:{selectedPerkHashes:[201]}};
 rememberGuardian(titanEquipped);
@@ -117,6 +120,14 @@ assert.equal(persistedWarlock.weaponRollAdvice,undefined,'Titan weapon advice ca
 
 rememberGuardian({...warlockLoadout,selectedLoadoutIndex:null});
 assert.equal(resolveBuildSource().selectedLoadoutIndex,null,'returning to a character current-equipped view does not silently reopen its old saved loadout');
+
+const hunterPaint={characterId:'hunter-1',characterClass:'hunter',subclass:'void',stats:[['Mobility',100]],weapons:[{itemInstanceId:'hunter-weapon'}],armour:[{itemInstanceId:'hunter-armour'}],abilities:[{hash:1}],aspects:[{hash:2}],fragments:[{hash:3}],artifact:{hash:4},ghost:{hash:5},shader:{hash:6}};
+const warlockPaint=characterScopedSelectionState(hunterPaint,{characterId:'warlock-1',characterClass:'warlock',subclass:'solar'});
+for(const field of ['stats','weapons','armour','abilities','aspects','fragments'])assert.deepEqual(warlockPaint[field],[],`${field} must clear across a Guardian boundary`);
+for(const field of ['artifact','ghost','shader'])assert.equal(warlockPaint[field],null,`${field} must not leak across a Guardian boundary`);
+const sameWarlock=characterScopedSelectionState(warlockPaint,{characterId:'warlock-1',stats:[['Recovery',80]]});
+assert.equal(sameWarlock.subclass,'solar','partial same-Guardian updates may retain that Guardian\'s own subclass');
+assert.deepEqual(sameWarlock.stats,[['Recovery',80]],'partial same-Guardian updates replace supplied fields');
 
 const exactArmourSet={identity:{hash:7001,name:'Seventh Seraph',icon:'/set.png'},twoPiece:{hash:7002,icon:'/two.png',active:true},fourPiece:{hash:7004,icon:'/four.png',active:true}};
 const exactSockets=[1,2,3,4,5].map(hash=>({hash,name:`Armour socket ${hash}`,semanticRole:hash<3?'general-mod':'slot-mod'}));
