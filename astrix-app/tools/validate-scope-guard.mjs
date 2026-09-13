@@ -276,6 +276,7 @@ const allowed=new Set([
   'css/astrix-site-typography.css',
   'css/style.css',
   'index.html',
+  'js/main.js',
   'pages/clips.html',
   'pages/games.html',
   'pages/join.html',

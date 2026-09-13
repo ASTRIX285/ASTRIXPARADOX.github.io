@@ -19,6 +19,34 @@ for(const [path,toolsLink] of publicPages){
   assert.ok(html.includes(toolsLink),`${path} must link to the Tools hub`);
 }
 
+const mobileNavigationPages=[
+  ['index.html',''],
+  ['pages/reviews.html','../'],
+  ['pages/news.html','../'],
+  ['pages/clips.html','../'],
+  ['pages/games.html','../'],
+  ['pages/join.html','../'],
+  ['pages/rebrand.html','../'],
+  ['tools/index.html','../']
+];
+for(const [path,prefix] of mobileNavigationPages){
+  const html=read(path);
+  assert.ok(html.includes(`href="${prefix}css/style.css?v=20260913-mobile-nav-1"`),`${path} must load the current mobile-navigation CSS`);
+  assert.ok(html.includes(`src="${prefix}js/main.js?v=20260913-mobile-nav-1"`),`${path} must load the current mobile-navigation controller`);
+  assert.match(html,/<button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation">/,`${path} hamburger must expose its closed state and controlled menu`);
+  assert.match(html,/<div class="nav-links" id="site-navigation">/,`${path} navigation links must provide the hamburger target`);
+}
+
+const publicHome=read('index.html');
+const publicCss=read('css/style.css');
+const publicJs=read('js/main.js');
+assert.match(publicHome,/<a class="nav-logo" href="index\.html" aria-label="ASTRIX PARADOX home">[\s\S]*?<\/a>[\s\S]*?<button class="nav-toggle"/, 'Homepage logo must close before the mobile navigation button');
+assert.doesNotMatch(publicHome,/class="logo"\s+<span/, 'Homepage must not restore the malformed logo anchor that captures mobile navigation taps');
+assert.match(publicJs,/function setMenuOpen\(open\)[\s\S]*?aria-expanded[\s\S]*?String\(open\)/, 'Mobile navigation controller must keep its expanded state synchronized');
+assert.match(publicJs,/event\.key === 'Escape'[\s\S]*?setMenuOpen\(false\)[\s\S]*?toggle\.focus\(\)/, 'Mobile navigation must close accessibly with Escape');
+assert.match(publicCss,/@media \(max-width: 768px\)[\s\S]*?\.nav-links \{[\s\S]*?position: absolute;[\s\S]*?z-index: 1002;[\s\S]*?pointer-events: auto;/, 'Mobile navigation links must occupy a protected tappable layer');
+assert.match(publicCss,/@media \(max-width: 768px\)[\s\S]*?\.nav-links a \{[\s\S]*?min-height: 48px;[\s\S]*?touch-action: manipulation;/, 'Mobile navigation destinations must provide reliable phone tap targets');
+
 const tools=read('tools/index.html');
 const toolsCss=read('tools/tools.css');
 const toolsMission=read('tools/tools.mjs');
@@ -91,3 +119,4 @@ console.log('TOOLS_MISSION_POPUP=PASS');
 console.log('TESTER_ACCESS_GATE_REMOVED=PASS');
 console.log('TOOLS_INTRO_ROUTE=PASS');
 console.log('RESPONSIVE_TOOLS_FORGE_CONTRACT=PASS');
+console.log('MOBILE_NAVIGATION=PASS');

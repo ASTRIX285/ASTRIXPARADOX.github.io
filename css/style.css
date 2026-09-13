@@ -922,34 +922,45 @@ body.stream-locked .nav {
 /* ── MOBILE ── */
 @media (max-width: 768px) {
   .nav {
-    height: auto;
+    height: var(--nav-height);
     min-height: var(--nav-height);
-
-    flex-wrap: wrap;
+    isolation: isolate;
+    overflow: visible;
     align-items: center;
-
     padding: 0 20px;
   }
 
   .nav-toggle {
     display: flex;
+    order: 3;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    touch-action: manipulation;
   }
 
   .nav-live {
+    order: 2;
     margin-left: auto;
   }
 
   .nav-links {
+    position: absolute;
+    z-index: 1002;
+    top: 100%;
+    right: 0;
+    left: 0;
     display: none;
     flex-direction: column;
-
     width: 100%;
-
+    max-height: calc(100dvh - var(--nav-height));
+    overflow-y: auto;
     background: rgba(6,6,6,0.98);
     border-top: 1px solid rgba(139,0,0,0.3);
-
     padding: 8px 0 16px;
     gap: 0;
+    pointer-events: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-links.open {
@@ -957,16 +968,17 @@ body.stream-locked .nav {
   }
 
   .nav-links a {
+    position: relative;
+    z-index: 1;
     display: block;
-
     width: 100%;
-
+    min-height: 48px;
     padding: 14px 20px;
-
     font-size: 11px;
-
     border-bottom: 1px solid rgba(139,0,0,0.1);
     border-left: none;
+    pointer-events: auto;
+    touch-action: manipulation;
   }
 
   .nav-links a:last-child {

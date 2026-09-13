@@ -620,16 +620,50 @@ function setupMobileNav() {
 
   if (!toggle || !links) return;
 
+  const menuId =
+    links.id || 'site-navigation';
+
+  links.id = menuId;
+  toggle.type = 'button';
+  toggle.setAttribute(
+    'aria-controls',
+    menuId
+  );
+
+  function setMenuOpen(open) {
+
+    links.classList.toggle(
+      'open',
+      open
+    );
+
+    toggle.classList.toggle(
+      'open',
+      open
+    );
+
+    toggle.setAttribute(
+      'aria-expanded',
+      String(open)
+    );
+
+    toggle.setAttribute(
+      'aria-label',
+      open
+        ? 'Close navigation menu'
+        : 'Open navigation menu'
+    );
+
+  }
+
+  setMenuOpen(false);
+
   toggle.addEventListener(
     'click',
     () => {
 
-      links.classList.toggle(
-        'open'
-      );
-
-      toggle.classList.toggle(
-        'open'
+      setMenuOpen(
+        toggle.getAttribute('aria-expanded') !== 'true'
       );
 
     }
@@ -642,13 +676,7 @@ function setupMobileNav() {
         'click',
         () => {
 
-          links.classList.remove(
-            'open'
-          );
-
-          toggle.classList.remove(
-            'open'
-          );
+          setMenuOpen(false);
 
         }
       );
@@ -664,17 +692,40 @@ function setupMobileNav() {
         !links.contains(e.target)
       ) {
 
-        links.classList.remove(
-          'open'
-        );
-
-        toggle.classList.remove(
-          'open'
-        );
+        setMenuOpen(false);
 
       }
 
     }
+  );
+
+  document.addEventListener(
+    'keydown',
+    (event) => {
+
+      if (
+        event.key === 'Escape' &&
+        toggle.getAttribute('aria-expanded') === 'true'
+      ) {
+
+        setMenuOpen(false);
+        toggle.focus();
+
+      }
+
+    }
+  );
+
+  window.addEventListener(
+    'resize',
+    () => {
+
+      if (window.innerWidth > 768) {
+        setMenuOpen(false);
+      }
+
+    },
+    { passive: true }
   );
 
 }
