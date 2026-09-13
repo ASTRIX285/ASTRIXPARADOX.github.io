@@ -9,7 +9,7 @@ globalThis.localStorage=globalThis.sessionStorage;
 globalThis.CustomEvent=class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail;}};
 globalThis.addEventListener=()=>{};
 
-const {normaliseLiveProfile,loadoutCoverage}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
+const {normalisePreparedPagePayload,normaliseLiveProfile,loadoutCoverage}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
 const SUBCLASS_BUCKET=3284755031;
 const KINETIC_BUCKET=1498876634;
 const classes=[
@@ -81,6 +81,18 @@ assert.deepEqual(partialDetail.fragments,[],'Missing optional Bungie socket data
 assert.equal(loadoutCoverage(partialDetail).complete,false,'Partial Character evidence must render as incomplete instead of crashing.');
 assert.deepEqual(loadoutCoverage({}).missing.slice(0,6),['super','abilities','aspects','fragments','weapons','armour']);
 
+const malformedOptionalPayload=structuredClone(payload);
+malformedOptionalPayload.artifactCatalog={stale:true};
+malformedOptionalPayload.profile.characterLoadouts.data['hunter-live']={};
+malformedOptionalPayload.profile.characterProgressions.data['hunter-live']={seasonalArtifact:{tiers:[{}]}};
+malformedOptionalPayload.profile.itemComponents.perks={data:{'hunter-weapon-live':{}}};
+normalisePreparedPagePayload(malformedOptionalPayload);
+assert.deepEqual(malformedOptionalPayload.artifactCatalog,[],'A malformed optional Artifact catalogue must not crash Character startup.');
+assert.deepEqual(malformedOptionalPayload.profile.characterLoadouts.data['hunter-live'].loadouts,[]);
+assert.deepEqual(malformedOptionalPayload.profile.characterProgressions.data['hunter-live'].seasonalArtifact.tiers[0].items,[]);
+assert.deepEqual(malformedOptionalPayload.profile.itemComponents.perks.data['hunter-weapon-live'].perks,[]);
+assert.equal(normaliseLiveProfile(malformedOptionalPayload,null,'hunter-live').characterId,'hunter-live','Partial optional components must still render the selected live Guardian.');
+
 const incomplete=structuredClone(payload);
 delete incomplete.profile.itemComponents.sockets.data['warlock-subclass-live'];
 const incompleteCoverage=preparedCharacterBuildCoverage(incomplete);
@@ -90,3 +102,4 @@ assert.ok(incompleteCoverage.characters['warlock-live'].missing.includes('subcla
 console.log('CHARACTER_LIVE_MULTI_GUARDIAN_DATA=PASS');
 console.log('CHARACTER_LIVE_SUBCLASS_SOCKET_COVERAGE=PASS');
 console.log('CHARACTER_LIVE_PARTIAL_DATA_GUARD=PASS');
+console.log('CHARACTER_LIVE_MALFORMED_OPTIONAL_COMPONENT_GUARD=PASS');

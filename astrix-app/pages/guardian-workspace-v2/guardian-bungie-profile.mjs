@@ -2,7 +2,7 @@ import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-chara
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-live-character-2&roll=20260909-apply-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
@@ -167,8 +167,59 @@ function currentPagePayloadKind(){
 
 const PROFILE_RUNTIME_ENABLED=location.pathname.includes('/pages/guardian-workspace-v2/');
 
+const objectRecord=value=>value&&typeof value==='object'&&!Array.isArray(value)?value:{};
+const arrayValue=value=>Array.isArray(value)?value:[];
+
+/* Bungie may omit optional components, and an older session cache may contain
+ * partially prepared rows. Normalise that boundary once so no optional section
+ * can prevent the live Character shell and equipped items from rendering. */
+function normalisePreparedPagePayload(payload={}){
+  if(!payload||typeof payload!=='object'||Array.isArray(payload))throw new TypeError('Prepared Character payload is unavailable.');
+  payload.profile=objectRecord(payload.profile);
+  const profile=payload.profile;
+  for(const key of ['characters','profileInventory','profileProgression','characterInventories','characterProgressions','characterEquipment','characterLoadouts','profilePlugSets','characterPlugSets']){
+    profile[key]=objectRecord(profile[key]);
+    profile[key].data=objectRecord(profile[key].data);
+  }
+  profile.profileInventory.data.items=arrayValue(profile.profileInventory.data.items);
+  for(const key of ['characterInventories','characterEquipment'])for(const [characterId,row] of Object.entries(profile[key].data)){
+    profile[key].data[characterId]={...objectRecord(row),items:arrayValue(row?.items)};
+  }
+  for(const [characterId,row] of Object.entries(profile.characterLoadouts.data)){
+    profile.characterLoadouts.data[characterId]={...objectRecord(row),loadouts:arrayValue(row?.loadouts)};
+  }
+  for(const [characterId,row] of Object.entries(profile.characterProgressions.data)){
+    const progression=objectRecord(row),seasonalArtifact=objectRecord(progression.seasonalArtifact);
+    seasonalArtifact.tiers=arrayValue(seasonalArtifact.tiers).map(tier=>({...objectRecord(tier),items:arrayValue(tier?.items)}));
+    profile.characterProgressions.data[characterId]={...progression,seasonalArtifact};
+  }
+  profile.itemComponents=objectRecord(profile.itemComponents);
+  for(const key of ['instances','stats','sockets','perks','renderData','plugObjectives','reusablePlugs']){
+    profile.itemComponents[key]=objectRecord(profile.itemComponents[key]);
+    profile.itemComponents[key].data=objectRecord(profile.itemComponents[key].data);
+  }
+  for(const [instanceId,row] of Object.entries(profile.itemComponents.sockets.data))profile.itemComponents.sockets.data[instanceId]={...objectRecord(row),sockets:arrayValue(row?.sockets)};
+  for(const [instanceId,row] of Object.entries(profile.itemComponents.perks.data))profile.itemComponents.perks.data[instanceId]={...objectRecord(row),perks:arrayValue(row?.perks)};
+  for(const [instanceId,row] of Object.entries(profile.itemComponents.reusablePlugs.data)){
+    const plugs=objectRecord(row?.plugs);
+    for(const [socketIndex,rows] of Object.entries(plugs))plugs[socketIndex]=arrayValue(rows);
+    profile.itemComponents.reusablePlugs.data[instanceId]={...objectRecord(row),plugs};
+  }
+  for(const key of ['definitions','sandboxPerks','statDefinitions','socketCategoryDefinitions','socketTypeDefinitions','damageDefinitions','breakerDefinitions','recordDefinitions','gearAssets','equipableItemSets'])payload[key]=objectRecord(payload[key]);
+  payload.artifactCatalog=arrayValue(payload.artifactCatalog);
+  payload.selectedItems=arrayValue(payload.selectedItems);
+  return payload;
+}
+
 async function hydrateManifestPayload(payload,options={}){
-  await guardianManifest.hydratePayload(payload,options);
+  normalisePreparedPagePayload(payload);
+  try{
+    await guardianManifest.hydratePayload(payload,options);
+  }catch(error){
+    console.warn('[Forge Bungie profile] optional manifest enrichment failed; rendering the prepared Character payload',error);
+    payload.manifestHydrationWarning=String(error?.message||error||'Manifest enrichment unavailable');
+  }
+  normalisePreparedPagePayload(payload);
   document.dispatchEvent(new CustomEvent("forge:manifest-payload-hydrated",{detail:payload}));
   return payload;
 }
@@ -1094,4 +1145,4 @@ if(PROFILE_RUNTIME_ENABLED){
   getBungieSession().then(handleAuthenticatedSession);
 }
 
-export {normaliseLiveProfile,loadSelectedLoadout,characterRoster,selectLiveCharacter,profileWithSelectedLoadout,subclassConfiguration,loadoutCoverage,socketResolution,currentArtifact};
+export {normalisePreparedPagePayload,normaliseLiveProfile,loadSelectedLoadout,characterRoster,selectLiveCharacter,profileWithSelectedLoadout,subclassConfiguration,loadoutCoverage,socketResolution,currentArtifact};

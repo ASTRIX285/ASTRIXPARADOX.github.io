@@ -562,12 +562,14 @@ class GuardianManifestService{
     const resolveArtifact=options.armourOnly!==true;
     const artifactHash=resolveArtifact?numericHash(payload?.profile?.profileProgression?.data?.seasonalArtifact?.artifactHash):null;
     const artifactDefinition=resolveArtifact?(payload.artifactDefinition||(artifactHash===null?null:await this.getAsync("DestinyArtifactDefinition",artifactHash))):(payload.artifactDefinition||null);
-    let artifactCatalog=resolveArtifact&&(payload.artifactCatalog||[]).length?payload.artifactCatalog:resolveArtifact?resolveArtifactTwoCatalog({
+    const suppliedArtifactCatalog=Array.isArray(payload.artifactCatalog)?payload.artifactCatalog:[];
+    let artifactCatalog=resolveArtifact&&suppliedArtifactCatalog.length?suppliedArtifactCatalog:resolveArtifact?resolveArtifactTwoCatalog({
       inventoryDefinitions:this.tables.get("DestinyInventoryItemDefinition")||definitions,
       plugSetDefinitions:this.tables.get("DestinyPlugSetDefinition")||{},
       sandboxPerkDefinitions:this.tables.get("DestinySandboxPerkDefinition")||sandboxPerks,
       manifestVersion:this.version||null
-    }):(payload.artifactCatalog||[]);
+    }):suppliedArtifactCatalog;
+    if(!Array.isArray(artifactCatalog))artifactCatalog=[];
     if(resolveArtifact&&this.backend&&!artifactCatalog.length){
       // Keep the full Artifact picker available without retaining full manifest tables.
       if(!this.artifactCatalogPromise)this.artifactCatalogPromise=(async()=>{
@@ -576,6 +578,7 @@ class GuardianManifestService{
         return index.artifactCatalog;
       })().catch(error=>{this.artifactCatalogPromise=null;throw error;});
       artifactCatalog=await this.artifactCatalogPromise;
+      if(!Array.isArray(artifactCatalog))artifactCatalog=[];
     }
     const requested=[...inventory,...expandedHashes];
     const unresolved=requested.filter(hash=>!definitions[String(hash)]);
