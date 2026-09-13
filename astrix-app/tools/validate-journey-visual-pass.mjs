@@ -154,7 +154,7 @@ for(const page of globalHeroPages){
 assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'))).length,4,'Journey, Vault, Forge Loader and Loadout must load the backend-prepared Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its backend-prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the backend-prepared persistent Guardian renderer');
-assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260914-resilient-transfer-1'),'Character must load the resilient transfer module graph');
+assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260914-resilient-transfer-2'),'Character must load the resilient transfer module graph');
 assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-character-safe-2'),'Build Forge must load the partial-data-safe live module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
 assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
