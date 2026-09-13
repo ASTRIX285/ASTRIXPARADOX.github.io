@@ -410,6 +410,50 @@ assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/tra
 assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
 assert.equal(moved.steps.some(row=>row.phase==='preflight'&&row.status==='blocked'),false,'A non-zero activity hash must not pre-block an ordinary item transfer; Bungie decides whether the move is allowed.');
 
+let resumedLocation='vault';
+const resumedPaths=[],freshReadUrls=[],freshReadOptions=[];
+const resumedMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const parsed=new URL(String(url)),path=parsed.pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET'){freshReadUrls.push(parsed);freshReadOptions.push(init);return response(vaultActionProfile({location:resumedLocation}));}
+  resumedPaths.push(path);resumedLocation='target';return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(resumedMove.status,'applied','A retry after a completed first leg must resume from the exact current Vault location.');
+assert.deepEqual(resumedPaths,['/bungie/actions/transfer-item'],'A stale Guardian source must not replay the completed Guardian-to-Vault leg.');
+assert.equal(resumedMove.steps.some(row=>row.phase==='preflight'&&row.status==='resumed'),true,'The audit trail must disclose that fresh Bungie state replaced the staged source.');
+assert.equal(freshReadUrls.every(url=>url.searchParams.get('freshness')==='live'&&Boolean(url.searchParams.get('readToken'))),true,'Every executor verification must carry an uncacheable live read token.');
+assert.equal(new Set(freshReadUrls.map(url=>url.searchParams.get('readToken'))).size,freshReadUrls.length,'Every live verification URL must be unique.');
+assert.equal(freshReadOptions.every(init=>init.cache==='no-store'&&init.headers['Cache-Control']==='no-cache'),true,'Every live verification request must bypass browser caches.');
+
+let ambiguousLocation='source',ambiguousThrown=false;
+const recoveredMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(vaultActionProfile({location:ambiguousLocation}));
+  const body=JSON.parse(init.body);
+  if(body.transferToVault&&!ambiguousThrown){ambiguousThrown=true;ambiguousLocation='vault';throw new TypeError('connection closed after request');}
+  ambiguousLocation=body.transferToVault?'vault':'target';return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(recoveredMove.status,'applied','An interrupted response must recover from exact fresh location evidence without duplicating the mutation.');
+assert.equal(recoveredMove.steps.some(row=>row.detail?.recoveredFromAmbiguousResponse===true),true,'Ambiguous-response recovery must remain explicit in the action audit trail.');
+assert.equal(recoveredMove.attemptCount,2,'The recovered first leg and normal second leg must each make one request.');
+
+const CAPACITY_CANDIDATE={itemHash:13018,itemInstanceId:'13118',bucketHash:TRANSFER_ITEM.bucketHash};
+let capacityItemLocation='vault',capacityCandidateLocation='target',capacityRejected=false;
+const capacityPaths=[],stagedCapacityMove=stageVaultTransferIntent({item:{...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session});
+const capacityMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedCapacityMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile({location:capacityItemLocation});
+  base.profile.characterInventories.data[OTHER_CHARACTER_ID].items.push(...(capacityCandidateLocation==='target'?[CAPACITY_CANDIDATE]:[]));
+  base.profile.profileInventory.data.items.push(...(capacityCandidateLocation==='vault'?[{...CAPACITY_CANDIDATE,bucketHash:VAULT_BUCKET}]:[]));
+  if(method==='GET')return response(base);
+  const body=JSON.parse(init.body);capacityPaths.push(String(body.itemId));
+  if(String(body.itemId)===TRANSFER_ITEM.itemInstanceId&&!capacityRejected){capacityRejected=true;return response({ErrorCode:99,ErrorStatus:'DestinyNoRoomInDestination',Message:'Target inventory is full.'},{ok:false,status:409});}
+  if(String(body.itemId)===CAPACITY_CANDIDATE.itemInstanceId)capacityCandidateLocation=body.transferToVault?'vault':'target';
+  else capacityItemLocation=body.transferToVault?'vault':'target';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(capacityMove.status,'applied','A full Guardian bucket must retry after moving one exact same-bucket item safely into Vault.');
+assert.deepEqual(capacityPaths,[TRANSFER_ITEM.itemInstanceId,CAPACITY_CANDIDATE.itemInstanceId,TRANSFER_ITEM.itemInstanceId],'A capacity retry must attempt the requested move, open one exact slot, then retry the requested item.');
+assert.equal(capacityCandidateLocation,'vault','A Vault-to-Guardian capacity swap must leave the exact displaced item safely in Vault.');
+
 const vaultDirectItem={...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},stagedVaultDirect=stageVaultTransferIntent({item:vaultDirectItem,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session,equipAfterTransfer:true});
 let vaultDirectLocation='vault';
 const vaultDirectPaths=[];
@@ -466,6 +510,22 @@ assert.equal(collected.status,'applied');
 assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
 assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
 assert.equal(collected.steps.some(row=>row.phase==='preflight'&&row.status==='blocked'),false,'A non-zero activity hash must not pre-block a Postmaster pull; Bungie decides whether collection is allowed.');
+
+const SECOND_POSTMASTER_ITEM={...POSTMASTER_ITEM,itemInstanceId:'13117',name:'Second exact Postmaster item'},stagedPullAll=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,items:[POSTMASTER_ITEM,SECOND_POSTMASTER_ITEM],session});
+let secondPostmasterPresent=true;
+const pullAllPaths=[];
+const continuedPullAll=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedPullAll),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile({location:'absent'});
+  base.profile.characterInventories.data[CHARACTER_ID].items=[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:215593132},...(secondPostmasterPresent?[{itemHash:SECOND_POSTMASTER_ITEM.itemHash,itemInstanceId:SECOND_POSTMASTER_ITEM.itemInstanceId,bucketHash:215593132}]:[])];
+  if(!secondPostmasterPresent)base.profile.profileInventory.data.items=[{itemHash:SECOND_POSTMASTER_ITEM.itemHash,itemInstanceId:SECOND_POSTMASTER_ITEM.itemInstanceId,bucketHash:SECOND_POSTMASTER_ITEM.bucketHash}];
+  if(method==='GET')return response(base);
+  pullAllPaths.push(path);const body=JSON.parse(init.body);
+  if(String(body.itemId)===POSTMASTER_ITEM.itemInstanceId)return response({ErrorCode:99,ErrorStatus:'ItemNotTransferable',Message:'First item rejected.'},{ok:false,status:409});
+  secondPostmasterPresent=false;return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(continuedPullAll.status,'partial','PULL ALL must report partial when one exact item remains rejected.');
+assert.deepEqual(pullAllPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/pull-from-postmaster'],'PULL ALL must continue to later exact items after an individual Bungie rejection.');
+assert.deepEqual(continuedPullAll.readback.remaining,[POSTMASTER_ITEM.itemInstanceId],'PULL ALL readback must identify only the exact item Bungie left behind.');
 
 const OVERFLOW_CANDIDATE={itemHash:13008,itemInstanceId:'13108',bucketHash:POSTMASTER_ITEM.bucketHash},overflowState={postmaster:true,pulled:'postmaster',candidate:'carried'};
 const overflowPaths=[];

@@ -20,6 +20,9 @@ const ACTION_THROTTLE_MS=250;
 const SOCKET_THROTTLE_MS=550;
 const THROTTLE_RETRY_LIMIT=2;
 const TRANSFER_READBACK_DELAYS_MS=Object.freeze([250,750,1500,2500,4000]);
+const LIVE_INVENTORY_READBACK_DELAYS_MS=Object.freeze([0,250,500,1000,2000,4000,7000,10000,10000]);
+const AMBIGUOUS_ACTION_RETRY_LIMIT=1;
+let freshProfileRequestSequence=0;
 
 const clone=value=>{try{return structuredClone(value);}catch{return JSON.parse(JSON.stringify(value??null));}};
 const decimal=value=>/^\d+$/.test(String(value??''));
@@ -91,8 +94,8 @@ async function requestActionWithThrottleRetry(path,body,{session,fetchImpl=fetch
 }
 
 async function requestFreshProfile({fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN}={}){
-  const url=new URL('/bungie/profile',authOrigin);url.searchParams.set('scope','character');url.searchParams.set('definitions','client-manifest');url.searchParams.set('freshness','live');
-  const response=await fetchImpl(url,{credentials:'include',headers:{Accept:'application/json'}});
+  const url=new URL('/bungie/profile',authOrigin);url.searchParams.set('scope','character');url.searchParams.set('definitions','client-manifest');url.searchParams.set('freshness','live');url.searchParams.set('readToken',`${Date.now()}-${freshProfileRequestSequence+=1}`);
+  const response=await fetchImpl(url,{credentials:'include',cache:'no-store',headers:{Accept:'application/json','Cache-Control':'no-cache',Pragma:'no-cache'}});
   return responsePayload(response);
 }
 
@@ -396,12 +399,21 @@ function isExplicitInventoryCapacityError(error){
   return /no.?room|not enough (inventory |storage )?space|inventory (?:is )?full|storage (?:is )?full|destination (?:is )?full/.test(detail);
 }
 
+function isAmbiguousActionError(error){
+  return !error?.payload||Number(error?.status)>=500||Number(error?.status)===408;
+}
+
+async function freshInventoryLocation(itemInstanceId,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN}={}){
+  const fresh=await requestFreshProfile({fetchImpl,authOrigin});
+  return {fresh,location:inventoryLocations(fresh).locations.get(String(itemInstanceId||''))||null};
+}
+
 async function waitForInventoryLocation(itemInstanceId,expected,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
   let last=null;
-  for(const delay of TRANSFER_READBACK_DELAYS_MS){
-    await waitImpl(delay);
-    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(String(itemInstanceId||''))||null;
-    last={fresh,location};
+  for(const delay of LIVE_INVENTORY_READBACK_DELAYS_MS){
+    if(delay)await waitImpl(delay);
+    last=await freshInventoryLocation(itemInstanceId,{fetchImpl,authOrigin});
+    const {location}=last;
     if(locationMatches(location,expected))return {verified:true,...last};
   }
   return {verified:false,...last};
@@ -409,10 +421,10 @@ async function waitForInventoryLocation(itemInstanceId,expected,{fetchImpl=fetch
 
 async function waitForPostmasterExit(itemInstanceId,characterId,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
   let last=null;
-  for(const delay of TRANSFER_READBACK_DELAYS_MS){
-    await waitImpl(delay);
-    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(String(itemInstanceId||''))||null,inSamePostmaster=locationMatches(location,{kind:'postmaster',characterId});
-    last={fresh,location};
+  for(const delay of LIVE_INVENTORY_READBACK_DELAYS_MS){
+    if(delay)await waitImpl(delay);
+    last=await freshInventoryLocation(itemInstanceId,{fetchImpl,authOrigin});
+    const {location}=last,inSamePostmaster=locationMatches(location,{kind:'postmaster',characterId});
     if(!inSamePostmaster)return {verified:true,...last};
   }
   return {verified:false,...last};
@@ -420,27 +432,79 @@ async function waitForPostmasterExit(itemInstanceId,characterId,{fetchImpl=fetch
 
 async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
   const required=[...new Set(['transferItems',...(intent?.item?.source?.kind==='equipped'||intent?.equipAfterTransfer?['equipItems']:[])])];
-  const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,mutationCount:0};
+  const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,attemptCount:0,mutationCount:0};
   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
   let mutationStarted=false;
   const mutate=async(path,body,label)=>{
     if(mutationStarted)await waitImpl(ACTION_THROTTLE_MS);
     mutationStarted=true;
+    result.attemptCount+=1;
     const payload=await requestActionWithThrottleRetry(path,body,{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
     result.mutationCount+=1;
     return payload;
   };
+  const destinationExpected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
+  const transferExact=async(item,step)=>{
+    const before=await freshInventoryLocation(item.itemInstanceId,{fetchImpl,authOrigin});
+    if(locationMatches(before.location,step.expected)){record(step.phase||'transfer','complete',`${step.label} was already complete in fresh Bungie inventory.`,{expected:step.expected,alreadyComplete:true});return before;}
+    if(step.from&&!locationMatches(before.location,step.from))throw Object.assign(new Error('The exact item moved to a different Bungie location before this transfer step.'),{detail:{expectedSource:step.from,actual:before.location?.source||null}});
+    for(let attempt=0;attempt<=AMBIGUOUS_ACTION_RETRY_LIMIT;attempt+=1){
+      try{
+        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
+        if(!settled.verified)throw Object.assign(new Error('Bungie accepted the transfer call but fresh inventory did not confirm its destination.'),{accepted:true,detail:{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1}});
+        record(step.phase||'transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
+        return settled;
+      }catch(error){
+        if(error?.accepted||!isAmbiguousActionError(error)||attempt===AMBIGUOUS_ACTION_RETRY_LIMIT)throw error;
+        const settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
+        if(settled.verified){result.mutationCount+=1;record(step.phase||'transfer','complete',`${step.label} completed despite an interrupted response.`,{expected:step.expected,recoveredFromAmbiguousResponse:true});return settled;}
+        if(step.from&&!locationMatches(settled.location,step.from))throw Object.assign(error,{detail:{message:error.message,expectedSource:step.from,actual:settled.location?.source||null}});
+        record('transfer-retry','retrying',`${step.label} will retry once after an interrupted response and an unchanged fresh source.`,{attempt:attempt+1});
+      }
+    }
+    throw new Error('Bungie transfer retry limit reached.');
+  };
+  const transferWithCapacityFallback=async(item,step,returnCharacterId='')=>{
+    try{return await transferExact(item,step);}
+    catch(capacityError){
+      if(step.transferToVault||!isExplicitInventoryCapacityError(capacityError))throw capacityError;
+      const {locations}=inventoryLocations(await requestFreshProfile({fetchImpl,authOrigin})),candidate=[...locations.values()].filter(location=>locationMatches(location,{kind:'carried',characterId:step.characterId})&&String(location.itemInstanceId)!==String(item.itemInstanceId)&&Number(location.bucketHash)===Number(item.bucketHash)&&Number.isInteger(Number(location.itemHash))).sort((left,right)=>String(left.itemInstanceId).localeCompare(String(right.itemInstanceId)))[0]||null;
+      if(!candidate)throw capacityError;
+      record('transfer-capacity','retrying',`Bungie reported a full destination bucket. Moving exact item ${candidate.itemInstanceId} through Vault to open one slot.`,{bucketHash:item.bucketHash,destinationCharacterId:step.characterId});
+      await transferExact(candidate,{phase:'transfer-capacity-open',characterId:step.characterId,transferToVault:true,from:{kind:'carried',characterId:step.characterId},expected:{kind:'vault'},label:`Move exact item ${candidate.itemInstanceId} to Vault to open destination capacity`});
+      let transferred=null;
+      try{transferred=await transferExact(item,step);}
+      catch(error){
+        try{await transferExact(candidate,{phase:'transfer-capacity-recovery',characterId:step.characterId,transferToVault:false,from:{kind:'vault'},expected:{kind:'carried',characterId:step.characterId},label:`Restore exact item ${candidate.itemInstanceId} after the destination retry failed`});}
+        catch(recoveryError){record('transfer-capacity-recovery','failed',`Exact item ${candidate.itemInstanceId} remains safe in Vault after the requested retry failed.`,{message:recoveryError.message,payload:recoveryError.payload||null});}
+        throw error;
+      }
+      if(returnCharacterId&&String(returnCharacterId)!==String(step.characterId)){
+        try{await transferExact(candidate,{phase:'transfer-capacity-restore',characterId:returnCharacterId,transferToVault:false,from:{kind:'vault'},expected:{kind:'carried',characterId:returnCharacterId},label:`Move displaced exact item ${candidate.itemInstanceId} into the source Guardian's open slot`});}
+        catch(error){record('transfer-capacity-restore','failed',`The requested item moved successfully; displaced exact item ${candidate.itemInstanceId} remains safe in Vault.`,{message:error.message,payload:error.payload||null});}
+      }
+      return transferred;
+    }
+  };
   try{
-    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),location=locations.get(result.itemInstanceId),item=intent.item,source=item.source,destination=intent.destination;
+    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),location=locations.get(result.itemInstanceId),item=intent.item,reviewedSource=item.source,destination=intent.destination;
     const blockers=[];
     if(!location)blockers.push(`${item.name} is no longer present in the Bungie account inventory.`);
     else if(Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} no longer matches its staged Bungie definition hash.`);
-    else if(!locationMatches(location,source))blockers.push(`${item.name} is no longer in the reviewed ${source.kind} location.`);
     if(destination.kind==='character'&&!Object.hasOwn(profile?.characters?.data||{},String(destination.characterId||'')))blockers.push('The destination Guardian is not present in the latest Bungie profile.');
     if(blockers.length){record('preflight','blocked','Fresh Vault transfer preflight blocked all live changes.',blockers);result.status='blocked';return result;}
-    record('preflight','complete','Fresh ownership, location, and Guardian evidence verified. Bungie remains authoritative for transfer availability.');
+    if(locationMatches(location,destinationExpected)){
+      result.readback={verified:true,expected:destinationExpected,actual:location.source,alreadyComplete:true};
+      record('preflight','complete',`${item.name} is already at the requested Bungie destination. No duplicate mutation was sent.`,result.readback);
+      result.status='applied';
+      return result;
+    }
+    let source={...location.source};
+    if(!['vault','carried','equipped'].includes(source.kind)){record('preflight','blocked',`${item.name} is in a Bungie location that cannot use the Vault transfer route.`,{actual:source});result.status='blocked';return result;}
+    record('preflight',locationMatches(location,reviewedSource)?'complete':'resumed',locationMatches(location,reviewedSource)?'Fresh ownership, location, and Guardian evidence verified. Bungie remains authoritative for transfer availability.':`Fresh Bungie inventory moved since staging. Resuming ${item.name} from its exact current ${source.kind} location.`,{reviewed:reviewedSource,actual:source});
 
     if(source.kind==='equipped'){
+      if(liveActionCapabilities(session).equipItems!==true){record('equip-replacement','blocked','The live session cannot equip an exact replacement before moving this equipped item.');result.status='blocked';return result;}
       const replacement=intent.replacement,replacementLocation=locations.get(String(replacement?.itemInstanceId||''));
       const replacementValid=replacementLocation&&locationMatches(replacementLocation,{kind:'carried',characterId:source.characterId})&&Number(replacementLocation.itemHash)===Number(replacement.itemHash)&&Number(replacementLocation.bucketHash)===Number(item.bucketHash);
       if(!replacementValid){record('equip-replacement','blocked','The exact carried replacement is no longer available in the equipped item slot.');result.status='blocked';return result;}
@@ -452,24 +516,24 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
         const replacementEquipped=inventoryLocations(settled.fresh||{}).locations.get(String(replacement.itemInstanceId||''));
         if(!settled.verified||!locationMatches(replacementEquipped,{kind:'equipped',characterId:source.characterId})){record('equip-replacement','mismatch','Fresh Bungie readback did not confirm the replacement equip.',{itemLocation:settled.location?.source||null,replacementLocation:replacementEquipped?.source||null});result.status='partial';return result;}
         record('equip-replacement','complete',label,{ErrorCode:response?.ErrorCode??1});
+        source={kind:'carried',characterId:source.characterId};
       }catch(error){record('equip-replacement','failed',label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
     }
 
     const transferSteps=source.kind==='vault'
-      ?[{characterId:destination.characterId,transferToVault:false,expected:{kind:'carried',characterId:destination.characterId},label:`Move ${item.name} from Vault to ${destination.characterId}`}]
+      ?destination.kind==='vault'?[]:[{characterId:destination.characterId,transferToVault:false,from:{kind:'vault'},expected:{kind:'carried',characterId:destination.characterId},label:`Move ${item.name} from Vault to ${destination.characterId}`}]
       :destination.kind==='vault'
-        ?[{characterId:source.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} from ${source.characterId} to Vault`}]
+        ?[{characterId:source.characterId,transferToVault:true,from:{kind:'carried',characterId:source.characterId},expected:{kind:'vault'},label:`Move ${item.name} from ${source.characterId} to Vault`}]
+        :String(source.characterId)===String(destination.characterId)
+          ?[]
         :[
-          {characterId:source.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} from ${source.characterId} to Vault`},
-          {characterId:destination.characterId,transferToVault:false,expected:{kind:'carried',characterId:destination.characterId},label:`Move ${item.name} from Vault to ${destination.characterId}`}
+          {characterId:source.characterId,transferToVault:true,from:{kind:'carried',characterId:source.characterId},expected:{kind:'vault'},label:`Move ${item.name} from ${source.characterId} to Vault`},
+          {characterId:destination.characterId,transferToVault:false,from:{kind:'vault'},expected:{kind:'carried',characterId:destination.characterId},label:`Move ${item.name} from Vault to ${destination.characterId}`}
         ];
+    const capacityReturnCharacterId=source.kind==='carried'&&String(source.characterId)!==String(destination.characterId||'')?source.characterId:['carried','equipped'].includes(reviewedSource.kind)&&String(reviewedSource.characterId)!==String(destination.characterId||'')?reviewedSource.characterId:'';
     for(const step of transferSteps){
-      try{
-        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:1,transferToVault:step.transferToVault},step.label);
-        const settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
-        if(!settled.verified){record('transfer','mismatch','Bungie accepted the transfer call but fresh inventory did not confirm its destination.',{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
-        record('transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
-      }catch(error){record('transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
+      try{await transferWithCapacityFallback(item,step,capacityReturnCharacterId);}
+      catch(error){record('transfer',error?.accepted?'mismatch':'failed',error?.accepted?'Bungie accepted the transfer call but fresh inventory did not confirm its destination.':step.label,{message:error.message,detail:error.detail||null,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
     }
     if(intent.equipAfterTransfer){
       const label=`Equip ${item.name} on ${destination.characterId}`;
@@ -484,25 +548,29 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     result.status='applied';
     return result;
   }finally{
-    if(result.mutationCount===0){
+    if(result.readback?.verified){
+      // An idempotent preflight or a recovered action already supplied exact final evidence.
+    }else if(result.attemptCount===0){
       result.readback={verified:false,skipped:true,reason:'No Bungie mutation was sent.'};
     }else try{
-      const expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId},settled=await waitForInventoryLocation(result.itemInstanceId,expected,{fetchImpl,authOrigin,waitImpl}),location=settled.location||null;
-      result.readback={verified:settled.verified,expected,actual:location?.source||null};
+      const settled=await waitForInventoryLocation(result.itemInstanceId,destinationExpected,{fetchImpl,authOrigin,waitImpl}),location=settled.location||null;
+      result.readback={verified:settled.verified,expected:destinationExpected,actual:location?.source||null};
       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms the requested destination.':'Final Bungie inventory does not match the requested destination.',result.readback);
-      if(result.status==='applied'&&!result.readback.verified)result.status='partial';
+      if(result.readback.verified)result.status='applied';
+      else if(result.status==='applied')result.status='partial';
     }catch(error){record('readback','failed','Final Bungie inventory readback failed.',{message:error.message});if(result.status==='applied')result.status='partial';}
     result.finishedAt=new Date().toISOString();
   }
 }
 
 async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
-  const required=['pullFromPostmaster',...(intent?.equipAfterCollection?['transferItems','equipItems']:[])],binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),targetCharacterId:String(intent.targetCharacterId||intent.characterId||''),steps:[],readback:null,mutationCount:0};
+  const required=['pullFromPostmaster',...(intent?.equipAfterCollection?['transferItems','equipItems']:[])],binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),targetCharacterId:String(intent.targetCharacterId||intent.characterId||''),steps:[],readback:null,attemptCount:0,mutationCount:0};
   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
   let mutationStarted=false;
   const mutate=async(path,body,label)=>{
     if(mutationStarted)await waitImpl(ACTION_THROTTLE_MS);
     mutationStarted=true;
+    result.attemptCount+=1;
     const response=await requestActionWithThrottleRetry(path,body,{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
     result.mutationCount+=1;
     return response;
@@ -540,23 +608,27 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
       return false;
     }
   };
+  let itemFailures=0,completedItems=0;
   try{
-    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[];
+    const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[],collectable=[];
     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
     if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
+    if(blockers.length){record('preflight','blocked','Fresh Postmaster preflight blocked all live changes.',blockers);result.status='blocked';return result;}
     for(const item of intent.items||[]){
       const location=locations.get(String(item.itemInstanceId||''));
-      if(!location||!locationMatches(location,{kind:'postmaster',characterId:result.characterId})||Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} is no longer in this Guardian's Postmaster.`);
+      if(location&&Number(location.itemHash)===Number(item.itemHash)&&locationMatches(location,{kind:'postmaster',characterId:result.characterId})){collectable.push(item);continue;}
+      if(location&&Number(location.itemHash)===Number(item.itemHash)&&!intent.equipAfterCollection){completedItems+=1;record('collect','complete',`${item.name} already left this Guardian's Postmaster. No duplicate pull was sent.`,{itemInstanceId:item.itemInstanceId,actual:location.source,alreadyComplete:true});continue;}
+      itemFailures+=1;record('collect','failed',`${item.name} is no longer an exact item in this Guardian's Postmaster.`,{itemInstanceId:item.itemInstanceId,actual:location?.source||null,actualItemHash:location?.itemHash||null});
     }
-    if(blockers.length){record('preflight','blocked','Fresh Postmaster preflight blocked all live changes.',blockers);result.status='blocked';return result;}
-    record('preflight','complete',`Fresh Postmaster evidence verified for ${intent.items.length} exact item${intent.items.length===1?'':'s'}.`);
-    for(const item of intent.items){
+    record('preflight','complete',`Fresh Postmaster evidence verified for ${collectable.length} exact item${collectable.length===1?'':'s'}${itemFailures?`; ${itemFailures} stale item${itemFailures===1?' was':'s were'} isolated so the remaining pulls can continue`:''}.`);
+    for(const item of collectable){
       const label=`Collect ${item.name} from Postmaster`;
       try{
         const response=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},label);
         const settled=await waitForPostmasterExit(item.itemInstanceId,result.characterId,{fetchImpl,authOrigin,waitImpl});
-        if(!settled.verified){record('collect','mismatch','Bungie accepted the Postmaster call but fresh inventory did not confirm collection.',{itemInstanceId:item.itemInstanceId,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
+        if(!settled.verified){record('collect','mismatch','Bungie accepted the Postmaster call but fresh inventory did not confirm collection. Continuing the remaining exact pulls.',{itemInstanceId:item.itemInstanceId,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});itemFailures+=1;continue;}
         record('collect','complete',label,{itemInstanceId:item.itemInstanceId,ErrorCode:response?.ErrorCode??1});
+        completedItems+=1;
         if(intent.equipAfterCollection){
           let location=settled.location;
           const transferSteps=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})?[]:
@@ -589,19 +661,29 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
           }
         }
       }catch(error){
-        if(isExplicitInventoryCapacityError(error)&&await collectToVaultAfterCapacityError(item,error))continue;
-        if(!result.steps.some(row=>row.phase==='collect-overflow'&&['blocked','failed'].includes(row.status)))record('collect','failed',label,{message:error.message,payload:error.payload||null});
-        result.status=result.mutationCount?'partial':'blocked';return result;
+        if(isExplicitInventoryCapacityError(error)&&await collectToVaultAfterCapacityError(item,error)){completedItems+=1;continue;}
+        record('collect','failed',label,{itemInstanceId:item.itemInstanceId,message:error.message,payload:error.payload||null});
+        itemFailures+=1;
       }
     }
-    result.status='applied';
+    result.status=itemFailures?(completedItems||result.mutationCount?'partial':'blocked'):'applied';
     return result;
   }finally{
     try{
-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(fresh),remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId),notEquipped=intent.equipAfterCollection?(intent.items||[]).filter(item=>!locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'equipped',characterId:result.targetCharacterId})).map(item=>item.itemInstanceId):[];
-      result.readback={verified:remaining.length===0&&notEquipped.length===0,remaining,notEquipped,targetCharacterId:intent.equipAfterCollection?result.targetCharacterId:null};
+      let fresh=null,remaining=[],notEquipped=[],unresolved=[];
+      for(const delay of LIVE_INVENTORY_READBACK_DELAYS_MS){
+        if(delay)await waitImpl(delay);
+        fresh=await requestFreshProfile({fetchImpl,authOrigin});
+        const {locations}=inventoryLocations(fresh);
+        remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId);
+        notEquipped=intent.equipAfterCollection?(intent.items||[]).filter(item=>!locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'equipped',characterId:result.targetCharacterId})).map(item=>item.itemInstanceId):[];
+        unresolved=(intent.items||[]).filter(item=>Number(locations.get(String(item.itemInstanceId||''))?.itemHash)!==Number(item.itemHash)).map(item=>item.itemInstanceId);
+        if(remaining.length===0&&notEquipped.length===0&&unresolved.length===0)break;
+      }
+      result.readback={verified:remaining.length===0&&notEquipped.length===0&&unresolved.length===0,remaining,notEquipped,unresolved,targetCharacterId:intent.equipAfterCollection?result.targetCharacterId:null};
       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?(intent.equipAfterCollection?'Final Bungie inventory confirms the collected item is equipped on the target Guardian.':'Final Bungie inventory confirms every collected item left Postmaster.'):(intent.equipAfterCollection?'The requested Postmaster item is not equipped on the target Guardian.':'One or more requested items remain in Postmaster.'),result.readback);
-      if(result.status==='applied'&&!result.readback.verified)result.status='partial';
+      if(result.readback.verified)result.status='applied';
+      else if(result.status==='applied')result.status='partial';
     }catch(error){record('readback','failed','Final Postmaster readback failed.',{message:error.message});if(result.status==='applied')result.status='partial';}
     result.finishedAt=new Date().toISOString();
   }

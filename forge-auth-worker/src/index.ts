@@ -963,6 +963,11 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
   profileUrl.searchParams.set("components", requestedComponents.join(","));
 
   const displaySnapshot = requestUrl.searchParams.get("freshness") === "display";
+  const profileResponseHeaders = displaySnapshot ? undefined : {
+    "Cache-Control": "private, no-store, no-cache, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0"
+  };
   if (displaySnapshot) await putSession(env, sessionId, session);
   const response = displaySnapshot
     ? await recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/profile-snapshot", { method: "POST", body: JSON.stringify({ components: requestedComponents }) }))
@@ -970,7 +975,9 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
     headers: {
       Authorization: `Bearer ${session.accessToken}`,
       "X-API-Key": env.BUNGIE_API_KEY,
-      "User-Agent": "ASTRIX-PARADOX/alpha (+https://astrixparadox.com)"
+      "User-Agent": "ASTRIX-PARADOX/alpha (+https://astrixparadox.com)",
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache"
     }
   });
   const payload = await response.json<BungieApiResponse<DestinyProfilePayload>>().catch(() => null);
@@ -1012,7 +1019,7 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
       gearAssets: {},
       manifestResolution: { mode: "client" },
       displaySnapshot: displaySnapshot ? { source: response.headers.get("X-Forge-Profile-Source"), fetchedAt: Number(response.headers.get("X-Forge-Profile-Fetched-At")), maxAgeMs: 15000 } : null
-    }));
+    }, 200, profileResponseHeaders));
   }
 
   const baseDefinitionHashes = [...new Set([
@@ -1080,7 +1087,7 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
       fetchedAt: Number(response.headers.get("X-Forge-Profile-Fetched-At")),
       maxAgeMs: 5 * 60_000
     } : null
-  }));
+  }, 200, profileResponseHeaders));
 }
 
 function allProfileItems(profile: DestinyProfilePayload): DestinyItemComponent[] {

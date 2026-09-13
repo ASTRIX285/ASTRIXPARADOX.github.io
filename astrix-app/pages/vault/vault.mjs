@@ -8,8 +8,8 @@ import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260913-orbit-transfer-1';
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-drag-drop-2';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-resilient-transfer-1';
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -33,6 +33,8 @@ let vaultRefreshController=null;
 let draggedItemKey='';
 let pendingVaultAction=null;
 let vaultActionBusy=false;
+const vaultActionQueue=[];
+const queuedVaultActionKeys=new Set();
 const selectedSlots=new Map();
 
 function membershipBinding(){
@@ -154,27 +156,23 @@ function carriedReplacement(item){
 function stageTransfer(item,destination){
   try{
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
-    pendingVaultAction={kind:'transfer',intent};
+    const queueKey=`transfer:${item.itemInstanceId}:${destination.kind}:${destination.characterId||''}`;
+    if(queuedVaultActionKeys.has(queueKey)){setStatus(`${item.name} is already queued for that exact destination.`);return;}
+    queuedVaultActionKeys.add(queueKey);vaultActionQueue.push({kind:'transfer',intent,queueKey});
     setStatus(`Moving ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy} Waiting for Bungie inventory feedback.`);
     void performPendingVaultAction();
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
 }
 
-async function stagePostmasterCollection(characterId,requestedItemKey=''){
-  if(vaultActionBusy)return;
-  let result=null;
+function stagePostmasterCollection(characterId,requestedItemKey=''){
   try{
-    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=confirmPostmasterCollectionIntent(stagePostmasterCollectionIntent({characterId,items,session}));
-    vaultActionBusy=true;
+    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session});
+    const queueKey=`postmaster:${characterId}:${requestedItemKey||'all'}`;
+    if(queuedVaultActionKeys.has(queueKey)){setStatus('That exact Postmaster pull is already queued.');return;}
+    queuedVaultActionKeys.add(queueKey);vaultActionQueue.push({kind:'postmaster',intent,queueKey});
     setStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${characterLabel(characterId)} Postmaster. Waiting for Bungie inventory feedback.`);
-    result=await executePostmasterCollectionIntent(intent,{session,onProgress:row=>setStatus(row.label||'Waiting for Bungie inventory feedback.')});
-    if(result.mutationCount>0)await refreshAfterLiveAction();
-    if(result.status==='applied'&&result.readback?.verified)setStatus('Postmaster pull completed and fresh Bungie inventory confirmed the result.','good');
-    else setStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${actionFailureMessage(result)}`,'error');
-  }catch(error){
-    if(result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
-    setStatus(error?.message||'The Postmaster pull failed.','error');
-  }finally{vaultActionBusy=false;}
+    void performPendingVaultAction();
+  }catch(error){setStatus(error?.message||'The Postmaster pull could not be queued.','error');}
 }
 
 function transferToActiveCharacter(requestedItemKey){
@@ -191,12 +189,14 @@ function actionFailureMessage(result){
 }
 
 async function refreshAfterLiveAction(){
-  const next=await fetchProfile();
+  const live=await requestFreshProfile(),next={...payload,...live,profile:live.profile,definitions:payload?.definitions||{},damageDefinitions:payload?.damageDefinitions||{},breakerDefinitions:payload?.breakerDefinitions||{},statDefinitions:payload?.statDefinitions||{},collectibleDefinitions:payload?.collectibleDefinitions||{},gearAssets:payload?.gearAssets||{}};
   await applyVaultRefresh(next,{reason:'mutation'});
 }
 
 async function performPendingVaultAction(){
-  if(!pendingVaultAction||vaultActionBusy)return;
+  if(vaultActionBusy)return;
+  if(!pendingVaultAction)pendingVaultAction=vaultActionQueue.shift()||null;
+  if(!pendingVaultAction)return;
   const action=pendingVaultAction,confirm=byId('vaultActionConfirm'),cancel=byId('vaultActionCancel'),progress=byId('vaultActionProgress');
   vaultActionBusy=true;
   if(confirm)confirm.disabled=true;
@@ -208,18 +208,19 @@ async function performPendingVaultAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
-    if(result.mutationCount>0)await refreshAfterLiveAction();
+    if(result.attemptCount>0||result.mutationCount>0)await refreshAfterLiveAction();
     if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
   }catch(error){
-    if(result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
+    if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
     setStatus(error?.message||'The Bungie action failed before confirmation.','error');
   }finally{
     vaultActionBusy=false;
     if(confirm)confirm.disabled=false;
     if(cancel)cancel.disabled=false;
     if(byId('vaultActionDialog')?.open)byId('vaultActionDialog').close();
-    pendingVaultAction=null;
+    queuedVaultActionKeys.delete(action.queueKey);pendingVaultAction=null;
+    if(vaultActionQueue.length)void performPendingVaultAction();
   }
 }
 

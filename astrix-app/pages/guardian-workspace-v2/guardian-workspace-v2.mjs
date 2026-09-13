@@ -9,9 +9,9 @@ import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loado
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260913-orbit-transfer-1";
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-resilient-transfer-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-drag-drop-2";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 
@@ -73,7 +73,7 @@ const workspaceState = {
   ornaments: []
 };
 
-const characterInventoryState={session:null,payload:null,catalogue:{items:[],postmasterItems:[]},activeCharacterId:'',detail:null,pendingAction:null,busy:false};
+const characterInventoryState={session:null,payload:null,catalogue:{items:[],postmasterItems:[]},activeCharacterId:'',detail:null,pendingAction:null,busy:false,postmasterQueue:[],queuedPostmasterKeys:new Set()};
 
 function characterInventoryStatus(message,state=''){
   const node=byId('characterInventoryStatus');
@@ -156,21 +156,34 @@ function showCharacterInventoryAction(title,summary,action){
   else dialog?.setAttribute('open','');
 }
 
-async function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
+function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
+  try{
+    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}),queueKey=`${characterId}:${requestedItemKey||'all'}`;
+    if(characterInventoryState.queuedPostmasterKeys.has(queueKey)){characterInventoryStatus('That exact Postmaster pull is already queued.');return;}
+    characterInventoryState.queuedPostmasterKeys.add(queueKey);characterInventoryState.postmasterQueue.push({intent,queueKey});
+    characterInventoryStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${activeCharacterLabel()} Postmaster. Waiting for Bungie inventory feedback.`);
+    void performCharacterPostmasterQueue();
+  }catch(error){characterInventoryStatus(error?.message||'The Postmaster pull could not be queued.','error');}
+}
+
+async function performCharacterPostmasterQueue(){
   if(characterInventoryState.busy)return;
+  const action=characterInventoryState.postmasterQueue.shift();
+  if(!action)return;
   let result=null;
   try{
-    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=confirmPostmasterCollectionIntent(stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}));
     characterInventoryState.busy=true;
-    characterInventoryStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${activeCharacterLabel()} Postmaster. Waiting for Bungie inventory feedback.`);
-    result=await executePostmasterCollectionIntent(intent,{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
-    if(result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId}}));
+    result=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
+    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId}}));
     if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
     else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${characterInventoryFailure(result)}`,'error');
   }catch(error){
-    if(result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull-recovery',characterId:characterInventoryState.activeCharacterId}}));
+    if(result?.attemptCount>0||result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull-recovery',characterId:characterInventoryState.activeCharacterId}}));
     characterInventoryStatus(error?.message||'The Postmaster pull failed.','error');
-  }finally{characterInventoryState.busy=false;}
+  }finally{
+    characterInventoryState.busy=false;characterInventoryState.queuedPostmasterKeys.delete(action.queueKey);
+    if(characterInventoryState.postmasterQueue.length)void performCharacterPostmasterQueue();
+  }
 }
 
 function stageCharacterDirectEquip(requestedItemKey){
@@ -208,11 +221,11 @@ async function performCharacterInventoryAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session:characterInventoryState.session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress});
-    if(result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action',characterId:characterInventoryState.activeCharacterId}}));
+    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action',characterId:characterInventoryState.activeCharacterId}}));
     if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('The live inventory action was confirmed by Bungie. Refreshing the active Guardian from a fresh profile.','good');
     else characterInventoryStatus(`${result.status==='partial'?'The live action partially completed':'No live change was confirmed'}: ${characterInventoryFailure(result)}`,'error');
   }catch(error){
-    if(result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action-recovery',characterId:characterInventoryState.activeCharacterId}}));
+    if(result?.attemptCount>0||result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action-recovery',characterId:characterInventoryState.activeCharacterId}}));
     characterInventoryStatus(error?.message||'The Bungie action failed before confirmation.','error');
   }finally{
     characterInventoryState.busy=false;
@@ -220,6 +233,7 @@ async function performCharacterInventoryAction(){
     cancel.disabled=false;
     if(byId('characterInventoryActionDialog')?.open)byId('characterInventoryActionDialog').close();
     characterInventoryState.pendingAction=null;
+    if(characterInventoryState.postmasterQueue.length)void performCharacterPostmasterQueue();
   }
 }
 

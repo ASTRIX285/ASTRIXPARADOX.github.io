@@ -201,6 +201,7 @@ function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindInspect=()=
 
 function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()=>{},onItemDoubleClick=()=>{}}={}){
   if(!root)return ()=>{};
+  let pointerTap=null,lastTouchTap=null,suppressDoubleClickUntil=0;
   const click=event=>{
     const itemButton=event.target.closest?.('[data-pull-postmaster-item]');
     if(itemButton&&!itemButton.disabled){onPullItem(itemButton.dataset.postmasterCharacterId,itemButton.dataset.pullPostmasterItem);return;}
@@ -208,13 +209,39 @@ function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()
     if(allButton&&!allButton.disabled)onPullAll(allButton.dataset.collectPostmaster);
   };
   const doubleClick=event=>{
+    if(Date.now()<suppressDoubleClickUntil)return;
     if(event.target.closest?.('button'))return;
     const tile=event.target.closest?.('[data-double-click-transfer-item]');
     if(tile){event.preventDefault();onItemDoubleClick(tile.dataset.doubleClickTransferItem);}
   };
+  const keydown=event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    if(event.target.closest?.('button'))return;
+    const tile=event.target.closest?.('[data-double-click-transfer-item]');
+    if(tile){event.preventDefault();onItemDoubleClick(tile.dataset.doubleClickTransferItem);}
+  };
+  const pointerdown=event=>{
+    if(!['touch','pen'].includes(event.pointerType)||event.target.closest?.('button'))return;
+    const tile=event.target.closest?.('[data-double-click-transfer-item]');
+    if(tile)pointerTap={pointerId:event.pointerId,key:tile.dataset.doubleClickTransferItem,x:event.clientX,y:event.clientY,at:Date.now()};
+  };
+  const pointerup=event=>{
+    if(!pointerTap||pointerTap.pointerId!==event.pointerId)return;
+    const tap=pointerTap;pointerTap=null;
+    if(Math.hypot(event.clientX-tap.x,event.clientY-tap.y)>12||Date.now()-tap.at>700){lastTouchTap=null;return;}
+    if(lastTouchTap?.key===tap.key&&Date.now()-lastTouchTap.at<=450){
+      event.preventDefault();lastTouchTap=null;suppressDoubleClickUntil=Date.now()+700;onItemDoubleClick(tap.key);return;
+    }
+    lastTouchTap={key:tap.key,at:Date.now()};
+  };
+  const pointercancel=()=>{pointerTap=null;};
   root.addEventListener('click',click);
   root.addEventListener('dblclick',doubleClick);
-  return ()=>{root.removeEventListener('click',click);root.removeEventListener('dblclick',doubleClick);};
+  root.addEventListener('keydown',keydown);
+  root.addEventListener('pointerdown',pointerdown);
+  root.addEventListener('pointerup',pointerup);
+  root.addEventListener('pointercancel',pointercancel);
+  return ()=>{root.removeEventListener('click',click);root.removeEventListener('dblclick',doubleClick);root.removeEventListener('keydown',keydown);root.removeEventListener('pointerdown',pointerdown);root.removeEventListener('pointerup',pointerup);root.removeEventListener('pointercancel',pointercancel);};
 }
 
 export {
