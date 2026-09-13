@@ -7,7 +7,7 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-sele
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover,bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260912-click-inspect-1';
+import {bindParadoxItemHover,bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-compact-inspect-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260911-vault-live-transfer-1';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-5';
 

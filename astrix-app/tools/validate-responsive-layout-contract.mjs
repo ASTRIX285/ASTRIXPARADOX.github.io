@@ -48,7 +48,7 @@ assert.match(sources.items,/\.paradox-item-card\{[\s\S]*?border:1px solid rgba\(
 assert.match(sources.items,/\.paradox-item-card \.weapon-perk-cell\{[^}]*border:2px solid/,'Detailed weapon perks must retain circular socket emphasis');
 assert.match(sources.items,/\.paradox-socket-icon\{[^}]*border-radius:8px/,'Armour mods and cosmetics must retain square sockets');
 assert.match(sources.items,/@media\(max-width:700px\)\{[\s\S]*?\.weapon-detail-drawer\.paradox-item-shell,\.armour-drawer\.paradox-item-shell\{inset:0;width:100%;height:100dvh/,'Both item-card inspectors must become contained full-screen mobile surfaces');
-assert.match(mainHtml,/paradox-item-cards\.css\?v=20260912-click-inspect-1/,'Character must load the shared Paradox item-card and click-inspect framework');
+assert.match(mainHtml,/paradox-item-cards\.css\?v=20260913-compact-inspect-1/,'Character must load the shared Paradox item-card and click-inspect framework');
 assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build Forge must load the same Paradox item-card and hover framework');
 
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');

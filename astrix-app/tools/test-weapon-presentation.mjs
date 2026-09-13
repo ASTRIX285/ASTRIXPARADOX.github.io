@@ -13,6 +13,7 @@ assert.match(matrix,/data-paradox-id="paradox:bungie:DestinyInventoryItemDefinit
 assert.ok(!matrix.includes(' title='),'Native tooltips must not compete with the Paradox tooltip');
 assert.ok(!matrix.includes('>Description only'),'Descriptions must not occupy icon grid space');
 assert.ok(!weaponTraitHierarchyMarkup(item).includes('<p>'));
+assert.match(weaponTraitHierarchyMarkup(item,{compact:true,squareIntrinsic:true}),/weapon-detail-tile--mod" data-slot-shape="square"/,'The click inspector must request the square weapon intrinsic socket without changing other presentation contexts');
 assert.ok(!weaponDetailTile(perk,'Weapon mod',{square:true}).includes('<small>'));
 assert.match(perkTooltipAttributes(perk),/Enhanced Barrel/);
 assert.match(perkTooltipMarkup({perkName:'<unsafe>',perkDescription:'Readable details'}),/&lt;unsafe&gt;/);

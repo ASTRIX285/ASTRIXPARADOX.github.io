@@ -54,6 +54,11 @@ assert.match(cardCss,/\.paradox-item-inspect-card\.is-legendary \.paradox-item-h
 assert.match(cardCss,/\.paradox-item-inspect-card\.is-exotic \.paradox-item-header\{background:linear-gradient\(100deg,#9d771f/,'Exotic inspection headers must retain Destiny gold.');
 assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat i b\.weapon-stat-base\{background:#fff\}/,'Click-inspector base stat bars must remain white.');
 assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat\.has-enhanced-value strong\{color:#e6bf48\}/,'Enhanced weapon stat totals must render in gold.');
+assert.match(hoverRuntime,/weaponTraitHierarchyMarkup\(item,\{compact:true,squareIntrinsic:inspect\}\)/,'Only the click inspector must request the square weapon intrinsic socket.');
+assert.match(cardCss,/\.forge-item-inspect\.paradox-inventory-inspect\{[^}]*width:min\(29rem,calc\(100vw - 1rem\)\)/,'The click inspector must use the approved narrower desktop width.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-detail-icon\{[^}]*height:var\(--paradox-inspect-art-width\)!important;[^}]*aspect-ratio:1!important/s,'Weapon and armour header art must use a square box without portrait letterboxing.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-trait-hierarchy>\.weapon-intrinsic-lead\{display:flex;width:100%;justify-content:center\}/,'The weapon intrinsic must sit at the dead centre of its section.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-intrinsic-lead \.weapon-detail-tile img\{border-radius:2px\}/,'The weapon type intrinsic must render as a square, not a circle.');
 assert.doesNotMatch(hoverRuntime,/placeholder|mock item|fake/i,'Shared item hover must not invent item data');
 
 console.log('PARADOX_ITEM_CARD_FRAMEWORK=PASS');

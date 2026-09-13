@@ -8,7 +8,7 @@ import {
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
-import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260912-click-inspect-1";
+import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260912-shared-item-tile-5";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-5";
