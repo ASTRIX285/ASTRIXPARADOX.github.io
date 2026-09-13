@@ -134,7 +134,7 @@ assert.match(vaultRuntime,/session=await getBungieSession\(\{force:true\}\)/,'Va
 assert.match(vaultRuntime,/failures\.find\(row=>row\.phase!=='readback'\)/,'Vault must report the operational Bungie blocker instead of masking it with a final readback mismatch.');
 assert.match(vaultRuntime,/guardian-inventory-workspace\.mjs\?v=20260913-drag-drop-2/,'Vault must load the current shared drag-and-drop interaction module instead of a stale cached contract.');
 assert.match(characterRuntime,/guardian-inventory-workspace\.mjs\?v=20260913-drag-drop-2/,'Character must load the same current shared inventory interaction module as Vault.');
-assert.doesNotMatch(liveActionsRuntime,/blockers\.push\(\.\.\.vaultActionActivityBlockers\(fresh,/,'Simple inventory movement must not be blocked by an inferred activity classification; Bungie is authoritative.');
+assert.doesNotMatch(liveActionsRuntime,/vaultActionActivityBlockers/,'Simple inventory movement must not have an inferred activity blocker; Bungie is authoritative.');
 assert.match(vaultRuntime,/function stageTransfer\(item,destination\)[\s\S]*?pendingVaultAction=\{kind:'transfer',intent\}[\s\S]*?void performPendingVaultAction\(\)/,'Dropping a card must execute the exact live transfer immediately without a second confirmation click.');
 assert.doesNotMatch(vaultRuntime,/function stageTransfer\(item,destination\)\{[\s\S]*?showVaultActionDialog\('Confirm live item transfer'/,'Vault movement must not open a redundant confirmation dialog.');
 assert.match(vaultRuntime,/addEventListener\('drop'[\s\S]*?validDrop\(item,destination\)[\s\S]*?stageTransfer\(item,destination\)/,'Dropping a card on a different Guardian or Vault column must immediately dispatch the live transfer.');

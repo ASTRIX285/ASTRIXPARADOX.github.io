@@ -418,10 +418,6 @@ async function waitForPostmasterExit(itemInstanceId,characterId,{fetchImpl=fetch
   return {verified:false,...last};
 }
 
-function vaultActionActivityBlockers(payload,characterIds=[]){
-  return [...new Set(characterIds.filter(decimal))].map(characterId=>({characterId,...characterActivityRestriction({characterId},payload)})).filter(row=>!row.allowed).map(row=>row.reason);
-}
-
 async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
   const required=[...new Set(['transferItems',...(intent?.item?.source?.kind==='equipped'||intent?.equipAfterTransfer?['equipItems']:[])])];
   const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,mutationCount:0};

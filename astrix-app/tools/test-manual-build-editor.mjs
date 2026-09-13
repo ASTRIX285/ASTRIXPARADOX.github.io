@@ -377,7 +377,7 @@ assert.equal(dynamicTransferPosts,0,'A dynamically required but unadvertised tra
 assert.equal(dynamicTransferReads,2,'A dynamically blocked transfer must still perform its final readback.');
 
 const OTHER_CHARACTER_ID='9100002',TRANSFER_ITEM={...replacement,itemInstanceId:'13103',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}},REPLACEMENT_ITEM={...weapons[1],itemInstanceId:'13106',name:'Exact carried replacement',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}};
-function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false,targetEquipped=false}={}){
+function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false,targetEquipped=false,activity='orbit'}={}){
   const transferRaw={itemHash:TRANSFER_ITEM.itemHash,itemInstanceId:TRANSFER_ITEM.itemInstanceId,bucketHash:postmaster?215593132:TRANSFER_ITEM.bucketHash},replacementRaw={itemHash:REPLACEMENT_ITEM.itemHash,itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,bucketHash:REPLACEMENT_ITEM.bucketHash};
   return {ErrorCode:1,profile:{
     characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID},[OTHER_CHARACTER_ID]:{characterId:OTHER_CHARACTER_ID}}},
@@ -387,7 +387,7 @@ function vaultActionProfile({location='source',equipped=false,replacementEquippe
       [OTHER_CHARACTER_ID]:{items:location==='target'?[transferRaw]:[]}
     }},
     characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:targetEquipped?[transferRaw]:[]}}},
-    characterActivities:{data:{[CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0}}}
+    characterActivities:{data:{[CHARACTER_ID]:activity==='active'?{currentActivityHash:82913930,currentActivityModeType:3}:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:activity==='active'?{currentActivityHash:82913930,currentActivityModeType:3}:{currentActivityHash:0,currentActivityModeType:0}}}
   }};
 }
 
@@ -399,7 +399,7 @@ let moveLocation='source';
 const movePaths=[];
 const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
   const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
-  if(method==='GET')return response(vaultActionProfile({location:moveLocation}));
+  if(method==='GET')return response(vaultActionProfile({location:moveLocation,activity:'active'}));
   movePaths.push(path);
   const body=JSON.parse(init.body);
   moveLocation=body.transferToVault?'vault':'target';
@@ -408,6 +408,7 @@ const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVa
 assert.equal(moved.status,'applied');
 assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
 assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+assert.equal(moved.steps.some(row=>row.phase==='preflight'&&row.status==='blocked'),false,'A non-zero activity hash must not pre-block an ordinary item transfer; Bungie decides whether the move is allowed.');
 
 const vaultDirectItem={...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},stagedVaultDirect=stageVaultTransferIntent({item:vaultDirectItem,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session,equipAfterTransfer:true});
 let vaultDirectLocation='vault';
@@ -455,7 +456,7 @@ assert.equal(stagedCollection.overflowToVault,true,'A normal Postmaster pull mus
 let postmasterPresent=true;
 const postmasterPaths=[];
 const collected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
-  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile();
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase(),base=vaultActionProfile({activity:'active'});
   base.profile.characterInventories.data[CHARACTER_ID].items=postmasterPresent?[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:215593132}]:[];
   if(!postmasterPresent)base.profile.profileInventory.data.items=[{itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash}];
   if(method==='GET')return response(base);
@@ -464,6 +465,7 @@ const collected=await executePostmasterCollectionIntent(confirmPostmasterCollect
 assert.equal(collected.status,'applied');
 assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
 assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+assert.equal(collected.steps.some(row=>row.phase==='preflight'&&row.status==='blocked'),false,'A non-zero activity hash must not pre-block a Postmaster pull; Bungie decides whether collection is allowed.');
 
 const OVERFLOW_CANDIDATE={itemHash:13008,itemInstanceId:'13108',bucketHash:POSTMASTER_ITEM.bucketHash},overflowState={postmaster:true,pulled:'postmaster',candidate:'carried'};
 const overflowPaths=[];
