@@ -19,7 +19,7 @@ const EMPTY_LIVE_ACTION_CAPABILITIES=Object.freeze({
 const ACTION_THROTTLE_MS=250;
 const SOCKET_THROTTLE_MS=550;
 const THROTTLE_RETRY_LIMIT=2;
-const TRANSFER_READBACK_DELAYS_MS=Object.freeze([250,500,1000]);
+const TRANSFER_READBACK_DELAYS_MS=Object.freeze([250,750,1500,2500,4000]);
 
 const clone=value=>{try{return structuredClone(value);}catch{return JSON.parse(JSON.stringify(value??null));}};
 const decimal=value=>/^\d+$/.test(String(value??''));
@@ -91,7 +91,7 @@ async function requestActionWithThrottleRetry(path,body,{session,fetchImpl=fetch
 }
 
 async function requestFreshProfile({fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN}={}){
-  const url=new URL('/bungie/profile',authOrigin);url.searchParams.set('scope','character');url.searchParams.set('definitions','client-manifest');
+  const url=new URL('/bungie/profile',authOrigin);url.searchParams.set('scope','character');url.searchParams.set('definitions','client-manifest');url.searchParams.set('freshness','live');
   const response=await fetchImpl(url,{credentials:'include',headers:{Accept:'application/json'}});
   return responsePayload(response);
 }
@@ -489,9 +489,11 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     result.status='applied';
     return result;
   }finally{
-    try{
-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(result.itemInstanceId)||null,expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
-      result.readback={verified:locationMatches(location,expected),expected,actual:location?.source||null};
+    if(result.mutationCount===0){
+      result.readback={verified:false,skipped:true,reason:'No Bungie mutation was sent.'};
+    }else try{
+      const expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId},settled=await waitForInventoryLocation(result.itemInstanceId,expected,{fetchImpl,authOrigin,waitImpl}),location=settled.location||null;
+      result.readback={verified:settled.verified,expected,actual:location?.source||null};
       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms the requested destination.':'Final Bungie inventory does not match the requested destination.',result.readback);
       if(result.status==='applied'&&!result.readback.verified)result.status='partial';
     }catch(error){record('readback','failed','Final Bungie inventory readback failed.',{message:error.message});if(result.status==='applied')result.status='partial';}

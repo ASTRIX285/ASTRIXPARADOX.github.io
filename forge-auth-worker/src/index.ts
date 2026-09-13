@@ -177,6 +177,7 @@ const CHARACTER_PAGE_PROFILE_COMPONENTS = [
   201, // CharacterInventories
   202, // CharacterProgressions
   203, // CharacterRenderData
+  204, // CharacterActivities (required by live inventory mutation preflight)
   205, // CharacterEquipment
   206, // CharacterLoadouts
   300, // ItemInstances

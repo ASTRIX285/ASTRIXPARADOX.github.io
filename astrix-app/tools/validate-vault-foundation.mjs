@@ -98,6 +98,7 @@ assert.equal(result.state.workingBuild.hashCoverage.armour.complete,true);
 
 const vaultHtml=read('astrix-app/pages/vault/index.html');
 const vaultRuntime=read('astrix-app/pages/vault/vault.mjs');
+const characterRuntime=read('astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs');
 const vaultInventory=read('astrix-app/pages/vault/vault-inventory.mjs');
 const vaultCss=read('astrix-app/pages/vault/vault.css');
 const sharedTileCss=read('astrix-app/shared/item-tile.css');
@@ -129,6 +130,9 @@ assert.match(vaultRuntime,/function characterColumnMarkup[\s\S]*?data-drop-kind=
 assert.match(vaultRuntime,/data-drop-kind="vault"[\s\S]*?VAULT ONLY/,'Items outside every Guardian must remain in a distinct Vault-only drop target.');
 assert.match(vaultRuntime,/executeVaultTransferIntent\(confirmVaultTransferIntent\(action\.intent\)[\s\S]*?if\(result\.mutationCount>0\)await refreshAfterLiveAction\(\)/,'The UI must call the confirmed live executor and refresh only after a real mutation was reported.');
 assert.match(vaultRuntime,/session=await getBungieSession\(\{force:true\}\)/,'Vault must refresh the live Worker session, CSRF token, and mutation capabilities before enabling transfers.');
+assert.match(vaultRuntime,/failures\.find\(row=>row\.phase!=='readback'\)/,'Vault must report the operational Bungie blocker instead of masking it with a final readback mismatch.');
+assert.match(vaultRuntime,/guardian-inventory-workspace\.mjs\?v=20260913-drag-drop-2/,'Vault must load the current shared drag-and-drop interaction module instead of a stale cached contract.');
+assert.match(characterRuntime,/guardian-inventory-workspace\.mjs\?v=20260913-drag-drop-2/,'Character must load the same current shared inventory interaction module as Vault.');
 assert.match(vaultRuntime,/function stageTransfer\(item,destination\)[\s\S]*?pendingVaultAction=\{kind:'transfer',intent\}[\s\S]*?void performPendingVaultAction\(\)/,'Dropping a card must execute the exact live transfer immediately without a second confirmation click.');
 assert.doesNotMatch(vaultRuntime,/function stageTransfer\(item,destination\)\{[\s\S]*?showVaultActionDialog\('Confirm live item transfer'/,'Vault movement must not open a redundant confirmation dialog.');
 assert.match(vaultRuntime,/addEventListener\('drop'[\s\S]*?validDrop\(item,destination\)[\s\S]*?stageTransfer\(item,destination\)/,'Dropping a card on a different Guardian or Vault column must immediately dispatch the live transfer.');

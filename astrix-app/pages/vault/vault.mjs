@@ -9,7 +9,7 @@ import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepar
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260911-vault-live-transfer-1';
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-live-transfer-1';
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-drag-drop-2';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -186,7 +186,7 @@ function transferToActiveCharacter(requestedItemKey){
 }
 
 function actionFailureMessage(result){
-  const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
+  const failures=[...(result?.steps||[])].reverse().filter(row=>['failed','mismatch','blocked'].includes(row.status)),failed=failures.find(row=>row.phase!=='readback')||failures[0],detail=failed?.detail;
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
 }
 

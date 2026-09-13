@@ -290,7 +290,7 @@ const pacedApply=await executeLiveTransferPlan(confirmLiveTransferPlan(plan),{
 });
 assert.equal(pacedApply.status,'applied','A second transfer throttled by Bungie must recover and still reach the exact bulk equip.');
 assert.deepEqual(pacedPosts.slice(0,4),['/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/equip-items'],'The throttled transfer must be retried before one bulk equip request.');
-assert.deepEqual(pacedWaits,[250,1000,250,500,250,550,550],'The Apply sequence must pace actions, honour Bungie throttle seconds and wait for transferred inventory visibility.');
+assert.deepEqual(pacedWaits,[250,1000,250,750,250,550,550],'The Apply sequence must pace actions, honour Bungie throttle seconds and wait for transferred inventory visibility.');
 assert.equal(pacedProgress.some(row=>row.phase==='throttle'&&row.status==='retrying'),true,'Visible progress must report an explicit Bungie throttle retry.');
 assert.equal(pacedApply.steps.filter(row=>row.phase==='transfer'&&row.status==='complete').length,2,'Both Vault items must complete transfer before equip.');
 assert.equal(pacedApply.steps.find(row=>row.phase==='verify-transfer')?.status,'complete','Fresh profile evidence must prove every item reached the target Guardian before equip.');

@@ -11,7 +11,7 @@ import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-chara
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-live-transfer-1";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-drag-drop-2";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 
@@ -190,7 +190,7 @@ function stageCharacterDirectEquip(requestedItemKey){
 }
 
 function characterInventoryFailure(result){
-  const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
+  const failures=[...(result?.steps||[])].reverse().filter(row=>['failed','mismatch','blocked'].includes(row.status)),failed=failures.find(row=>row.phase!=='readback')||failures[0],detail=failed?.detail;
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
 }
 
