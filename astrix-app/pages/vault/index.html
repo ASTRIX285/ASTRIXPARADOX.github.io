@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="../guardian-workspace-v2/paradox-item-cards.css?v=20260913-compact-inspect-1">
   <link rel="stylesheet" href="./vault.css?v=20260912-inventory-structure-1">
-  <link rel="stylesheet" href="../../shared/guardian-inventory-workspace.css?v=20260913-live-transfer-1">
+  <link rel="stylesheet" href="../../shared/guardian-inventory-workspace.css?v=20260913-drag-drop-1">
   <link rel="stylesheet" href="../../shared/item-tile.css?v=20260913-breaker-icon-2">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260912-global-icon-audit-1&amp;inventory=20260912-shared-character-1&amp;gear=20260912-fixed-pixels-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
@@ -86,16 +86,7 @@
       <a class="vault-connect" id="vaultConnectButton" href="https://auth.astrixparadox.com/bungie/start">CONNECT BUNGIE</a>
     </section>
   </main>
-  <dialog class="vault-action-dialog" id="vaultActionDialog" aria-labelledby="vaultActionTitle">
-    <form method="dialog">
-      <header><p class="apx-eyebrow">LIVE BUNGIE ACTION</p><h2 id="vaultActionTitle">Confirm inventory change</h2></header>
-      <p id="vaultActionSummary"></p>
-      <p class="vault-action-warning">This changes the connected Destiny 2 account. The item will remain in its current position here until Bungie confirms the mutation and a fresh profile readback matches.</p>
-      <div class="vault-action-progress" id="vaultActionProgress" role="status"></div>
-      <footer><button type="button" id="vaultActionCancel">CANCEL</button><button type="button" id="vaultActionConfirm">CONFIRM LIVE ACTION</button></footer>
-    </form>
-  </dialog>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1"></script>
-  <script type="module" src="./vault.mjs?v=20260913-direct-transfer-1&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1"></script>
+  <script type="module" src="./vault.mjs?v=20260913-drag-drop-1&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1"></script>
 </body>
 </html>

@@ -158,7 +158,7 @@ assert.match(sharedTileMarkup,/class="tile-season-icon"[^>]*><img[^>]*\/season\.
 assert.match(sharedTileMarkup,/class="tile-art"><img[^>]*\/weapon\.png/,'The shared tile art must keep the real Bungie item icon source.');
 assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
 assert.doesNotMatch(sharedTileMarkup,/vault-transfer-name|>EQUIPPED<|>LOCK</,'The shared tile must not restore permanent names or plain text state labels.');
-assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
+assert.match(sharedTileMarkup,/data-double-click-transfer-item="13109"/,'An exact Vault instance must advertise immediate double-click transfer to the active Guardian.');
 const exoticTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13112',isExotic:true,state:0,gearTier:4},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.match(exoticTileMarkup,/item-tile--exotic/,'Real Exotic rarity must apply the Exotic tile class.');
 assert.doesNotMatch(exoticTileMarkup,/item-tile--masterworked|class="tile-lock"/,'An unlocked non-masterworked Exotic must not gain either independent state class or overlay.');

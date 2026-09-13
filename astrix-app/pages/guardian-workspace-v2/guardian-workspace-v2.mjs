@@ -189,18 +189,6 @@ function stageCharacterDirectEquip(requestedItemKey){
   }catch(error){characterInventoryStatus(error?.message||'This direct live equip cannot be staged.','error');}
 }
 
-function stageCharacterVaultTransfer(requestedItemKey){
-  const item=characterInventoryItem(requestedItemKey);
-  if(!item||!characterInventoryState.activeCharacterId||!['equipped','carried'].includes(item.source?.kind))return;
-  try{
-    const replacement=item.source.kind==='equipped'?(characterInventoryState.catalogue.items||[]).filter(candidate=>candidate.source?.kind==='carried'&&String(candidate.source.characterId||'')===String(item.source.characterId||'')&&Number(candidate.bucketHash)===Number(item.bucketHash)&&itemKey(candidate)!==itemKey(item)).sort((left,right)=>Number(Boolean(left.isExotic))-Number(Boolean(right.isExotic))||Number(left.power||0)-Number(right.power||0))[0]||null:null;
-    const intent=stageVaultTransferIntent({item,destination:{kind:'vault',characterId:null},session:characterInventoryState.session,replacementItem:replacement});
-    characterInventoryState.pendingAction={kind:'transfer',intent};
-    characterInventoryStatus(`Moving ${item.name} from ${activeCharacterLabel()} to Vault.${replacement?` ${replacement.name} will be equipped first so Bungie can move the currently equipped item.`:''} Waiting for Bungie inventory feedback.`);
-    void performCharacterInventoryAction();
-  }catch(error){characterInventoryStatus(error?.message||'This live Vault transfer cannot be staged.','error');}
-}
-
 function characterInventoryFailure(result){
   const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
@@ -237,7 +225,7 @@ async function performCharacterInventoryAction(){
 
 function installCharacterInventory(){
   const host=byId('characterInventoryWorkspace');
-  bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection,onDirectEquip:stageCharacterDirectEquip,onMoveItem:stageCharacterVaultTransfer});
+  bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection});
   byId('characterInventoryActionCancel')?.addEventListener('click',closeCharacterInventoryAction);
   byId('characterInventoryActionConfirm')?.addEventListener('click',performCharacterInventoryAction);
   byId('characterInventoryActionDialog')?.addEventListener('cancel',event=>{event.preventDefault();if(!characterInventoryState.busy)closeCharacterInventoryAction();});

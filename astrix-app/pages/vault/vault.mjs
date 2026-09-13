@@ -151,24 +151,6 @@ function carriedReplacement(item){
   return catalogue.items.filter(candidate=>candidate.source?.kind==='carried'&&text(candidate.source.characterId)===text(item?.source?.characterId)&&Number(candidate.bucketHash)===Number(item?.bucketHash)&&itemKey(candidate)!==itemKey(item)).sort((left,right)=>Number(Boolean(left.isExotic))-Number(Boolean(right.isExotic))||Number(left.power||0)-Number(right.power||0)||String(left.name).localeCompare(String(right.name)))[0]||null;
 }
 
-function closeVaultActionDialog(){
-  if(vaultActionBusy)return;
-  const dialog=byId('vaultActionDialog');
-  if(dialog?.open)dialog.close();
-  pendingVaultAction=null;
-  byId('vaultActionProgress').textContent='';
-}
-
-function showVaultActionDialog(title,summary,action){
-  pendingVaultAction=action;
-  byId('vaultActionTitle').textContent=title;
-  byId('vaultActionSummary').textContent=summary;
-  byId('vaultActionProgress').textContent='Review the exact account change, then confirm.';
-  const dialog=byId('vaultActionDialog');
-  if(typeof dialog?.showModal==='function')dialog.showModal();
-  else dialog?.setAttribute('open','');
-}
-
 function stageTransfer(item,destination){
   try{
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
@@ -176,16 +158,6 @@ function stageTransfer(item,destination){
     setStatus(`Moving ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy} Waiting for Bungie inventory feedback.`);
     void performPendingVaultAction();
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
-}
-
-function stageQuickTransfer(requestedItemKey){
-  const item=workspaceItem(requestedItemKey);
-  if(!item||!activeCharacterId)return;
-  const sourceCharacterId=text(item.source?.characterId);
-  const destination=item.source?.kind==='vault'||sourceCharacterId!==activeCharacterId
-    ?{kind:'character',characterId:activeCharacterId}
-    :{kind:'vault',characterId:null};
-  stageTransfer(item,destination);
 }
 
 async function stagePostmasterCollection(characterId,requestedItemKey=''){
@@ -205,20 +177,12 @@ async function stagePostmasterCollection(characterId,requestedItemKey=''){
   }finally{vaultActionBusy=false;}
 }
 
-function stageDirectEquip(requestedItemKey){
+function transferToActiveCharacter(requestedItemKey){
   const item=workspaceItem(requestedItemKey);
   if(!item||!activeCharacterId)return;
-  try{
-    if(item.source?.kind==='vault'){
-      const intent=stageVaultTransferIntent({item,destination:{kind:'character',characterId:activeCharacterId},session,equipAfterTransfer:true});
-      showVaultActionDialog('Confirm direct live equip',`Move ${item.name} from Vault to ${characterLabel(activeCharacterId)}, then equip that exact item. Bungie must confirm the transfer and equip before this page changes.`,{kind:'transfer',intent});
-      return;
-    }
-    if(item.source?.kind==='postmaster'){
-      const sourceCharacterId=text(item.source.characterId),intent=stagePostmasterCollectionIntent({characterId:sourceCharacterId,targetCharacterId:activeCharacterId,items:[item],session,equipAfterCollection:true});
-      showVaultActionDialog('Confirm direct live equip',`Collect ${item.name} from ${characterLabel(sourceCharacterId)} Postmaster, move it to ${characterLabel(activeCharacterId)} if required, then equip that exact item. Every step must be confirmed by Bungie.`,{kind:'postmaster',intent});
-    }
-  }catch(error){setStatus(error?.message||'This direct live equip cannot be staged.','error');}
+  const sourceCharacterId=text(item.source?.characterId);
+  if(item.source?.kind!=='vault'&&sourceCharacterId===activeCharacterId)return;
+  stageTransfer(item,{kind:'character',characterId:activeCharacterId});
 }
 
 function actionFailureMessage(result){
@@ -235,12 +199,12 @@ async function performPendingVaultAction(){
   if(!pendingVaultAction||vaultActionBusy)return;
   const action=pendingVaultAction,confirm=byId('vaultActionConfirm'),cancel=byId('vaultActionCancel'),progress=byId('vaultActionProgress');
   vaultActionBusy=true;
-  confirm.disabled=true;
-  cancel.disabled=true;
-  progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
+  if(confirm)confirm.disabled=true;
+  if(cancel)cancel.disabled=true;
+  if(progress)progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
   let result=null;
   try{
-    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';progress.textContent=label;setStatus(label);};
+    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;setStatus(label);};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
@@ -252,8 +216,8 @@ async function performPendingVaultAction(){
     setStatus(error?.message||'The Bungie action failed before confirmation.','error');
   }finally{
     vaultActionBusy=false;
-    confirm.disabled=false;
-    cancel.disabled=false;
+    if(confirm)confirm.disabled=false;
+    if(cancel)cancel.disabled=false;
     if(byId('vaultActionDialog')?.open)byId('vaultActionDialog').close();
     pendingVaultAction=null;
   }
@@ -513,6 +477,14 @@ function clearDropTargets(){
 
 function installTransferEvents(){
   const board=byId('vaultTransferWorkspace');
+  let pointerDrag=null;
+  const pointerTarget=(x,y)=>document.elementFromPoint(x,y)?.closest?.('[data-drop-kind]')||null;
+  const updatePointerTarget=(x,y)=>{
+    const target=pointerTarget(x,y),item=workspaceItem(pointerDrag?.key),destination=dropDestination(target);
+    clearDropTargets();
+    if(validDrop(item,destination))target.classList.add('is-drop-target');
+    return {target,item,destination};
+  };
   board?.addEventListener('dragstart',event=>{
     const tile=event.target.closest?.('[data-drag-item]'),item=workspaceItem(tile?.dataset?.dragItem);
     if(!tile||!item){event.preventDefault();return;}
@@ -546,10 +518,38 @@ function installTransferEvents(){
     event.preventDefault();
     stageTransfer(item,destination);
   });
-  bindInventoryWorkspaceInteractions(board,{onPullItem:stagePostmasterCollection,onPullAll:stagePostmasterCollection,onDirectEquip:stageDirectEquip,onMoveItem:stageQuickTransfer});
-  byId('vaultActionCancel')?.addEventListener('click',closeVaultActionDialog);
-  byId('vaultActionConfirm')?.addEventListener('click',performPendingVaultAction);
-  byId('vaultActionDialog')?.addEventListener('cancel',event=>{if(vaultActionBusy)event.preventDefault();else{event.preventDefault();closeVaultActionDialog();}});
+  board?.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='mouse'||event.button!==0||event.target.closest?.('button'))return;
+    const tile=event.target.closest?.('[data-drag-item]'),item=workspaceItem(tile?.dataset?.dragItem);
+    if(!tile||!item)return;
+    pointerDrag={pointerId:event.pointerId,key:itemKey(item),tile,startX:event.clientX,startY:event.clientY,active:false};
+    tile.setPointerCapture?.(event.pointerId);
+  });
+  board?.addEventListener('pointermove',event=>{
+    if(!pointerDrag||pointerDrag.pointerId!==event.pointerId)return;
+    if(!pointerDrag.active&&Math.hypot(event.clientX-pointerDrag.startX,event.clientY-pointerDrag.startY)<8)return;
+    pointerDrag.active=true;
+    event.preventDefault();
+    pointerDrag.tile.classList.add('is-dragging');
+    updatePointerTarget(event.clientX,event.clientY);
+  },{passive:false});
+  const finishPointerDrag=event=>{
+    if(!pointerDrag||pointerDrag.pointerId!==event.pointerId)return;
+    const drag=pointerDrag,result=drag.active?updatePointerTarget(event.clientX,event.clientY):null;
+    drag.tile.classList.remove('is-dragging');
+    drag.tile.releasePointerCapture?.(event.pointerId);
+    pointerDrag=null;
+    clearDropTargets();
+    if(result&&validDrop(result.item,result.destination)){event.preventDefault();stageTransfer(result.item,result.destination);}
+  };
+  board?.addEventListener('pointerup',finishPointerDrag);
+  board?.addEventListener('pointercancel',event=>{
+    if(!pointerDrag||pointerDrag.pointerId!==event.pointerId)return;
+    pointerDrag.tile.classList.remove('is-dragging');
+    pointerDrag=null;
+    clearDropTargets();
+  });
+  bindInventoryWorkspaceInteractions(board,{onPullItem:stagePostmasterCollection,onPullAll:stagePostmasterCollection,onItemDoubleClick:transferToActiveCharacter});
 }
 
 function installEvents(){

@@ -31,12 +31,13 @@
 .vault-transfer-items{display:flex;gap:.34rem;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain;padding-bottom:.18rem}
 .vault-transfer-item{position:relative;display:grid;align-content:start;box-sizing:border-box;flex:0 0 calc(var(--apx-icon-gear-art-width) + .6rem);width:calc(var(--apx-icon-gear-art-width) + .6rem);min-width:calc(var(--apx-icon-gear-art-width) + .6rem);margin:0;padding:.24rem;border:1px solid rgba(255,255,255,.09);background:#0a090c;color:#fff;text-align:left}
 .vault-transfer-item.is-draggable{cursor:grab}
+.vault-transfer-workspace .vault-transfer-item.is-draggable{touch-action:none;user-select:none;-webkit-user-select:none}
 .vault-transfer-item.is-draggable:active{cursor:grabbing}
 .vault-transfer-item.is-dragging{opacity:.35}
 .vault-transfer-item:hover,.vault-transfer-item:focus-visible{z-index:2;border-color:#c9a84c;outline:none;box-shadow:0 0 0 1px rgba(201,168,76,.22),0 0 16px rgba(201,168,76,.14)}
 .vault-transfer-item.is-exotic{border-color:rgba(224,185,79,.42)}
 .vault-transfer-item.is-equipped{border-color:rgba(111,227,182,.48);box-shadow:inset 0 0 0 1px rgba(111,227,182,.12)}
-.vault-transfer-item[data-direct-equip-item]{cursor:pointer}
+.vault-transfer-item[data-double-click-transfer-item]{cursor:pointer}
 .vault-transfer-art{position:relative;display:grid;width:var(--apx-icon-gear-art-width);height:var(--apx-icon-gear-art-height);aspect-ratio:100/122;place-items:center;background:#141118;overflow:hidden}
 .vault-transfer-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
 .vault-transfer-icon-unavailable{color:#645d69;font-size:1.4rem}
@@ -52,8 +53,6 @@
 .vault-transfer-lock i::before{content:"";position:absolute;left:50%;bottom:calc(100% - 1px);width:.34rem;height:.3rem;border:1px solid #fff;border-bottom:0;border-radius:.24rem .24rem 0 0;transform:translateX(-50%)}
 .vault-postmaster-pull{width:100%;margin-top:.28rem;padding:.32rem;border:1px solid rgba(255,180,70,.42);color:#ffd18a;background:rgba(54,25,8,.76);font:800 .48rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
 .vault-postmaster-pull:disabled{opacity:.34;cursor:not-allowed}
-.vault-live-move{width:100%;margin-top:.28rem;padding:.32rem;border:1px solid rgba(111,227,182,.5);color:#a9f7d8;background:rgba(8,47,35,.82);font:800 .48rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
-.vault-live-move:hover,.vault-live-move:focus-visible{border-color:#a9f7d8;outline:none;background:rgba(12,72,52,.94)}
 .vault-transfer-row-empty{display:grid;place-items:center;width:var(--apx-icon-gear-art-width);min-height:var(--apx-icon-gear-art-height);border:1px dashed rgba(255,255,255,.08);color:#625c66;font:750 .5rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
 .vault-transfer-empty{margin:.3rem 0;padding:.6rem;border:1px dashed rgba(255,255,255,.1);color:#817b85;font-size:.66rem}
 .vault-only-section{width:100%;max-width:100%;padding-bottom:.8rem;overflow:hidden}
