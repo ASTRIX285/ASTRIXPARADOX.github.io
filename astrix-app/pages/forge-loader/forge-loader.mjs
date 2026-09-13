@@ -8,9 +8,9 @@ import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourSetHash,armour
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {compatibleWithClass,exoticCatalogueGroups,naturalSetProtocols,openProtocolSolverEvidence,ownedExoticGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260913-backend-solver-1';
 import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from './forge-loader-build-handoff.mjs?v=20260906-review-layout-1';
-import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260913-live-character-2&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1';
+import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1';
 import {forgeLoaderEvaluateReady,forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-source-coverage-1';
-import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
+import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1';
@@ -95,7 +95,7 @@ function renderCurrentResidency(){
 }
 
 async function prepareResidentProfileBuild(){
-  const {normaliseLiveProfile}=await import('../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-live-character-3&transport=20260911-compact-plugs-1');
+  const {normaliseLiveProfile}=await import('../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-character-safe-1&transport=20260911-compact-plugs-1');
   residentProfileBuild=normaliseLiveProfile(payload,session,activeCharacterId);
   return residentProfileBuild;
 }

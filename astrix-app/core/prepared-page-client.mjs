@@ -5,6 +5,7 @@ const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loa
 const PAGE_KIND_SET=new Set(PAGE_KINDS);
 const REQUEST_TIMEOUT_MS=30_000;
 const requests=new Map();
+const WORKSPACE_PRELOAD_PAGES=Object.freeze(['character','build-forge','vault','loadout']);
 
 const PREPARED_PAGE_STAGES=Object.freeze({
   start:Object.freeze({percent:8,label:'Preparing verified Guardian data'}),
@@ -127,17 +128,17 @@ function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https:/
   return url;
 }
 
-async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display'}={}){
+async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
   if(!fetchImpl)throw new Error('Prepared page network access is unavailable.');
   const controller=signal?null:new AbortController();
   const activeSignal=signal||controller.signal;
   const timer=controller?setTimeout(()=>controller.abort(),timeoutMs):null;
   try{
-    reportPreparedPageStage('request',page);
+    if(!quiet)reportPreparedPageStage('request',page);
     const response=await fetchImpl(preparedPageUrl(page,{freshness}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
     const raw=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(raw?.error||`Prepared ${page} request failed (${response.status}).`);
-    reportPreparedPageStage('join',page);
+    if(!quiet)reportPreparedPageStage('join',page);
     const payload=normalizePreparedPagePayload(raw,page);
     assertRenderablePagePayload(payload,page);
     return payload;
@@ -158,23 +159,22 @@ function publishCoverage(payload,page,source){
   globalThis.document?.dispatchEvent?.(new CustomEvent('forge:prepared-page-loaded',{detail:{page,payload,source,complete,missing:payload?.pageReady?.coverage?.missing||[]}}));
 }
 
-async function loadPreparedPagePayload(session,pageValue,{force=false,sharedPayload=null,fetchImpl}={}){
+async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=false}={}){
   const page=pageKind(pageValue);
-  reportPreparedPageStage('start',page);
-  reportPreparedPageStage('session',page);
-  if(!force&&sharedPayload?.pageReady?.page===page&&sharedPayload?.profile){
+  if(!quiet){reportPreparedPageStage('start',page);reportPreparedPageStage('session',page);}
+  if(!force&&!preferBackend&&sharedPayload?.pageReady?.page===page&&sharedPayload?.profile){
     const payload=normalizePreparedPagePayload(sharedPayload,page);
     assertRenderablePagePayload(payload,page);
-    reportPreparedPageStage('join',page,{source:'shared'});
+    if(!quiet)reportPreparedPageStage('join',page,{source:'shared'});
     publishCoverage(payload,page,'shared');
     return payload;
   }
-  if(!force&&session?.authenticated===true){
+  if(!force&&!preferBackend&&session?.authenticated===true){
     const cached=await readCachedBungieProfile(session,page);
     if(cached?.pageReady?.page===page&&cached?.profile){
       const payload=normalizePreparedPagePayload(cached,page);
       assertRenderablePagePayload(payload,page);
-      reportPreparedPageStage('join',page,{source:'cache'});
+      if(!quiet)reportPreparedPageStage('join',page,{source:'cache'});
       publishCoverage(payload,page,'cache');
       return payload;
     }
@@ -184,7 +184,7 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,sharedPayl
   const active=requests.get(key);
   if(active)return active;
   if(!requests.has(key))requests.set(key,(async()=>{
-    const payload=await requestPreparedPagePayload(page,{fetchImpl,freshness});
+    const payload=await requestPreparedPagePayload(page,{fetchImpl,freshness,quiet});
     if(session?.authenticated===true){
       await cacheBungieProfile(session,payload,page);
       markPreparedPageCheckSuccess(session,page);
@@ -196,4 +196,23 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,sharedPayl
   finally{requests.delete(key);}
 }
 
-export {PAGE_KINDS,PREPARED_PAGE_STAGES,loadPreparedPagePayload,normalizePreparedPagePayload,preparedPageUrl,reportPreparedPageStage,requestPreparedPagePayload};
+async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,fetchImpl}={}){
+  if(session?.authenticated!==true)return {complete:false,ready:[],failed:[]};
+  const ready=[],failed=[];
+  for(const value of pages){
+    const page=pageKind(value);
+    if(page==='journey')continue;
+    try{
+      await loadPreparedPagePayload(session,page,{preferBackend:true,fetchImpl,quiet:true});
+      ready.push(page);
+      globalThis.document?.dispatchEvent?.(new CustomEvent('forge:workspace-page-prepared',{detail:{page}}));
+    }catch(error){
+      failed.push({page,message:error?.message||String(error)});
+    }
+  }
+  const result={complete:failed.length===0,ready,failed};
+  globalThis.document?.dispatchEvent?.(new CustomEvent('forge:workspace-prepared',{detail:result}));
+  return result;
+}
+
+export {PAGE_KINDS,PREPARED_PAGE_STAGES,WORKSPACE_PRELOAD_PAGES,loadPreparedPagePayload,normalizePreparedPagePayload,preloadPreparedWorkspace,preparedPageUrl,reportPreparedPageStage,requestPreparedPagePayload};

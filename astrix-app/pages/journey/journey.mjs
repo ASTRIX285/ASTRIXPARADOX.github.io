@@ -8,7 +8,7 @@ import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-
 import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1';
 import {initLocationSelector} from '../../shared/astrix-location-selector.mjs';
 import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260905-journey-repair-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
+import {loadPreparedPagePayload,preloadPreparedWorkspace,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
@@ -2343,6 +2343,7 @@ try{
     void bindDestinationProgress(profile);
     const mapReady=showJourney();
     startJourneyBackgroundRefresh();
+    void preloadPreparedWorkspace(session).catch(error=>console.info('[Forge Journey] prepared workspace preload unavailable',error));
     reportPreparedPageStage('render','journey');
     await Promise.all([
       waitWithin(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS),

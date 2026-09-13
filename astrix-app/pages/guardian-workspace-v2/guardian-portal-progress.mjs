@@ -1,6 +1,6 @@
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1";
 import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
-import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
+import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 
 const loader=window.ForgeLoader;
 const manifestReady=guardianManifest.cached();

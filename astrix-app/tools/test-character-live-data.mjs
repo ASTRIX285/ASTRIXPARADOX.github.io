@@ -9,7 +9,7 @@ globalThis.localStorage=globalThis.sessionStorage;
 globalThis.CustomEvent=class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail;}};
 globalThis.addEventListener=()=>{};
 
-const {normaliseLiveProfile}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
+const {normaliseLiveProfile,loadoutCoverage}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
 const SUBCLASS_BUCKET=3284755031;
 const KINETIC_BUCKET=1498876634;
 const classes=[
@@ -72,6 +72,15 @@ for(const [index,detail] of normalized.entries()){
 assert.equal(new Set(normalized.map(detail=>detail.subclassItemInstanceId)).size,3,'Every selected character must retain its own equipped subclass instance.');
 assert.equal(new Set(normalized.flatMap(detail=>detail.weapons.map(item=>item.itemInstanceId))).size,3,'Every selected character must retain its own equipped weapon instance.');
 
+const partialSubclassPayload=structuredClone(payload);
+delete partialSubclassPayload.profile.itemComponents.sockets.data['hunter-subclass-live'];
+const partialDetail=normaliseLiveProfile(partialSubclassPayload,null,'hunter-live');
+assert.deepEqual(partialDetail.abilities,[],'Missing optional Bungie socket data must become an empty ability list.');
+assert.deepEqual(partialDetail.aspects,[],'Missing optional Bungie socket data must become an empty aspect list.');
+assert.deepEqual(partialDetail.fragments,[],'Missing optional Bungie socket data must become an empty fragment list.');
+assert.equal(loadoutCoverage(partialDetail).complete,false,'Partial Character evidence must render as incomplete instead of crashing.');
+assert.deepEqual(loadoutCoverage({}).missing.slice(0,6),['super','abilities','aspects','fragments','weapons','armour']);
+
 const incomplete=structuredClone(payload);
 delete incomplete.profile.itemComponents.sockets.data['warlock-subclass-live'];
 const incompleteCoverage=preparedCharacterBuildCoverage(incomplete);
@@ -80,3 +89,4 @@ assert.ok(incompleteCoverage.characters['warlock-live'].missing.includes('subcla
 
 console.log('CHARACTER_LIVE_MULTI_GUARDIAN_DATA=PASS');
 console.log('CHARACTER_LIVE_SUBCLASS_SOCKET_COVERAGE=PASS');
+console.log('CHARACTER_LIVE_PARTIAL_DATA_GUARD=PASS');

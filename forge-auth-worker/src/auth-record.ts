@@ -1,5 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
+import { PreparedPageCache } from "./prepared-page-cache";
 
 const BUNGIE_TOKEN = "https://www.bungie.net/platform/app/oauth/token/";
 const TOKEN_RENEWAL_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -43,6 +44,7 @@ function nextRenewalAt(session: SessionRecord, now = Date.now()): number | null 
 
 export class AuthRecord extends DurableObject<Env> {
   private snapshots = new ProfileSnapshotCache(this.ctx.storage);
+  private preparedPages = new PreparedPageCache(this.ctx.storage);
   private deferSnapshotWrite(task: Promise<void>): void {
     this.ctx.waitUntil(task.catch(error => console.warn("prepared_account_cache_write_failed", { error: String(error) })));
   }
@@ -90,6 +92,22 @@ export class AuthRecord extends DurableObject<Env> {
 
   async fetch(request: Request): Promise<Response> {
     const path = new URL(request.url).pathname;
+    if ((request.method === "GET" || request.method === "PUT") && path === "/prepared-page") {
+      const record = await this.ctx.storage.get<AuthRecordValue>("record");
+      if (!record || record.kind !== "session" || record.absoluteExpiresAt <= Date.now()) return new Response(null, { status: 401 });
+      const url = new URL(request.url);
+      const page = url.searchParams.get("page") || "";
+      const manifestVersion = url.searchParams.get("manifestVersion") || "";
+      if (request.method === "GET") {
+        const snapshot = await this.preparedPages.read(page, manifestVersion).catch(() => null);
+        return snapshot
+          ? new Response(snapshot.body, { headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Forge-Prepared-At": String(snapshot.generatedAt) } })
+          : new Response(null, { status: 404 });
+      }
+      const body = await request.text();
+      const stored = await this.preparedPages.write(page, manifestVersion, body).catch(() => false);
+      return stored ? new Response(null, { status: 204 }) : new Response(null, { status: 413 });
+    }
     // Internal Durable Object route, never exposed by the public Worker router.
     if (request.method === "POST" && path === "/profile-snapshot") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");

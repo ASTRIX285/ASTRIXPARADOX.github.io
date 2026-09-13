@@ -60,7 +60,7 @@ assert.match(journeyModule,/function showSignedOut\(\)\{[\s\S]*?signedOut\.hidde
 assert.doesNotMatch(journeyModule,/location\.replace\([^\n]*guardian-workspace-v2/,'Journey must not redirect signed-out visitors to Character');
 assert.doesNotMatch(journeyHtml,/>ACTIVE GUARDIAN</,'Journey identity must let the verified emblem lead without a redundant active label');
 assert.match(journeyHtml,/journey-2560-visual\.css\?v=20260903-command-header-1/,'Journey must load the cache-busted command-header cleanup');
-assert.match(journeyHtml,/journey\.mjs\?v=20260913-live-gate-1/,'Journey must load the verified-data gate runtime');
+assert.match(journeyHtml,/journey\.mjs\?v=20260913-workspace-preload-1/,'Journey must load the backend workspace preload runtime');
 assert.match(journeyModule,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey must not block on the full equipment manifest');
 assert.match(journeyModule,/FORGE_HERO_PROFILE_PROMISE/,'Journey must reuse the authenticated hero-card profile request');
 assert.doesNotMatch(journeyModule,/guardianManifest\.hydratePayload\(payload\)/,'Journey must not hydrate every equipment definition before binding records');

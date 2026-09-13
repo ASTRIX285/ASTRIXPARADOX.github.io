@@ -6,6 +6,7 @@ const worker=await readFile(new URL('../../forge-auth-worker/src/index.ts',impor
 const web=await readFile(new URL('../../forge-auth-worker/src/web.ts',import.meta.url),'utf8');
 const sessionRecord=await readFile(new URL('../../forge-auth-worker/src/auth-record.ts',import.meta.url),'utf8');
 const armourSolver=await readFile(new URL('../../forge-auth-worker/src/armour-solver.ts',import.meta.url),'utf8');
+const preparedPageCache=await readFile(new URL('../../forge-auth-worker/src/prepared-page-cache.ts',import.meta.url),'utf8');
 
 assert.match(worker,/const DESTINY_ACTION_CAPABILITIES = Object\.freeze\(\{[\s\S]*?captureSnapshot: true[\s\S]*?transferItems: true[\s\S]*?equipItems: true[\s\S]*?insertSocketPlugFree: true[\s\S]*?verifyFinalState: true[\s\S]*?clearLoadout: true/,'The Worker must advertise the exact live-action capability contract.');
 assert.match(worker,/transferItems: true[\s\S]*?pullFromPostmaster: true[\s\S]*?equipItems: true/,'The live capability contract must explicitly advertise the approved Postmaster executor beside transfer and equip.');
@@ -19,6 +20,8 @@ assert.match(worker,/async function verifySessionCharacter[\s\S]*?VERIFIED_CHARA
 assert.match(worker,/async function armourCombinationsRoute[\s\S]*?mutationOriginAllowed[\s\S]*?authenticatedSession[\s\S]*?csrf_validation_failed[\s\S]*?verifySessionCharacter[\s\S]*?currentPreparedManifestVersion[\s\S]*?manifest_version_changed/,'Backend armour calculation must enforce Origin, session, CSRF, Guardian binding and the current live manifest version.');
 assert.match(worker,/possibleCombinations > 25_000_000/,'The exhaustive backend calculation must retain a defensive account-size ceiling.');
 assert.match(armourSolver,/const visit = \(slot: number, exoticCount: number\)[\s\S]*?combinationsEvaluated \+= 1[\s\S]*?visit\(0, 0\)/,'The backend solver must enumerate every legal owned five-slot combination.');
+assert.match(worker,/WORKSPACE_PREPARED_PAGES[^=]*= \["character", "build-forge", "vault", "loadout"\][\s\S]*?warmPreparedWorkspace/,'Journey must initiate private backend preparation for every downstream page.');
+assert.match(preparedPageCache,/PREPARED_PAGE_MAX_BYTES = 24 \* 1024 \* 1024[\s\S]*?new TextEncoder\(\)\.encode\(body\)\.byteLength/,'The private prepared-page cache must enforce an exact byte limit.');
 
 for(const [kind,path] of [
   ['equip-items','/Destiny2/Actions/Items/EquipItems/'],

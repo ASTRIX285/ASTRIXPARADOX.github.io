@@ -9,7 +9,7 @@ import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subc
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import {
   cacheBungieProfile,
   readCachedBungieProfile,
@@ -588,6 +588,39 @@ function identityCosmetics(profile,definitions,equipment,character,payload={}){
   return {ghost:ghostItem?normaliseItem(profile,definitions,ghostItem,payload):null,shader,emblem:{hash:character.emblemHash??null,icon:absoluteIcon(character.emblemPath),background:absoluteIcon(character.emblemBackgroundPath)}};
 }
 
+function normaliseSubclassBuild(value={}){
+  const source=value&&typeof value==='object'?value:{};
+  const array=key=>Array.isArray(source[key])?source[key]:[];
+  const object=key=>source[key]&&typeof source[key]==='object'&&!Array.isArray(source[key])?source[key]:{};
+  const socketCoverage={plugs:[],requested:[],resolved:[],unresolved:[],complete:true,...object('socketCoverage')};
+  for(const key of ['plugs','requested','resolved','unresolved']){
+    if(!Array.isArray(socketCoverage[key]))socketCoverage[key]=[];
+  }
+  return {
+    ...source,
+    super:source.super||null,
+    superOptions:array('superOptions'),
+    classAbility:source.classAbility||null,
+    movement:source.movement||null,
+    melee:source.melee||null,
+    grenade:source.grenade||null,
+    abilities:array('abilities'),
+    abilityOptionsBySocket:object('abilityOptionsBySocket'),
+    availableAbilities:array('availableAbilities'),
+    aspects:array('aspects'),
+    availableAspects:array('availableAspects'),
+    aspectOptions:array('aspectOptions'),
+    aspectOptionsBySocket:object('aspectOptionsBySocket'),
+    fragments:array('fragments'),
+    availableFragments:array('availableFragments'),
+    fragmentOptions:array('fragmentOptions'),
+    fragmentOptionsBySocket:object('fragmentOptionsBySocket'),
+    socketsAvailable:source.socketsAvailable===true,
+    reusablePlugsAvailable:source.reusablePlugsAvailable===true,
+    socketCoverage
+  };
+}
+
 function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   const profile=payload.profile||{};
   const definitions=payload.definitions||{};
@@ -612,7 +645,7 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   const subclassCatalog=subclassRows.map(row=>{const item=row.item,display=displayItem(definitions,item.itemHash),element=classifySubclass(display);return {...display,itemInstanceId:item.itemInstanceId||null,source:row.source,element,subclass:element,key:element,subclassBuild:subclassConfiguration(profile,definitions,item,payload,character.characterId)}}).filter((item,index,rows)=>rows.findIndex(other=>other.element===item.element)===index);
   const verifiedSubclassCatalog=mergeSubclassCatalog(subclassCatalog,characterClass);
   const normalizedSubclassItem=verifiedSubclassCatalog.find(item=>Number(item.hash)===Number(subclassItem?.itemHash))||null;
-  const subclassBuild=verifiedSubclassCatalog.find(item=>Number(item.hash)===Number(subclassItem?.itemHash))?.subclassBuild||{super:null,superOptions:[],classAbility:null,movement:null,melee:null,grenade:null,abilities:[],abilityOptionsBySocket:{classAbility:[],movement:[],melee:[],grenade:[]},availableAbilities:[],aspects:[],availableAspects:[],aspectOptions:[],aspectOptionsBySocket:{},fragments:[],availableFragments:[],fragmentOptions:[],fragmentOptionsBySocket:{},socketsAvailable:false,reusablePlugsAvailable:false,socketCoverage:{plugs:[],requested:[],resolved:[],unresolved:[],complete:true}};
+  const subclassBuild=normaliseSubclassBuild(verifiedSubclassCatalog.find(item=>Number(item.hash)===Number(subclassItem?.itemHash))?.subclassBuild);
   const cosmetics=identityCosmetics(profile,definitions,equipment,character,payload);
   const legacyArtifact=currentArtifact(payload,character.characterId);
   const availableArtifacts=availableArtifactItems(payload,legacyArtifact);
@@ -762,17 +795,22 @@ function preparedLoadoutPayload(characterId,index){
   return mergeLoadoutContext({...liveProfilePayload,characterId,index,loadout,selectedItems:[...selected.values()]});
 }
 
-function loadoutCoverage(detail){
+function loadoutCoverage(detail={}){
+  const abilities=Array.isArray(detail?.abilities)?detail.abilities:[];
+  const aspects=Array.isArray(detail?.aspects)?detail.aspects:[];
+  const fragments=Array.isArray(detail?.fragments)?detail.fragments:[];
+  const weapons=Array.isArray(detail?.weapons)?detail.weapons:[];
+  const armour=Array.isArray(detail?.armour)?detail.armour:[];
   const missing=[];
   if(!detail.super)missing.push("super");
-  if(detail.abilities.length<4)missing.push("abilities");
-  if(!detail.aspects.length)missing.push("aspects");
-  if(!detail.fragments.length)missing.push("fragments");
-  if(detail.weapons.length<3)missing.push("weapons");
-  if(detail.armour.filter(Boolean).length<5)missing.push("armour");
+  if(abilities.length<4)missing.push("abilities");
+  if(!aspects.length)missing.push("aspects");
+  if(!fragments.length)missing.push("fragments");
+  if(weapons.length<3)missing.push("weapons");
+  if(armour.filter(Boolean).length<5)missing.push("armour");
   if(!detail.subclassBuild?.socketsAvailable)missing.push("subclass sockets");
   if(detail.subclassBuild?.socketCoverage?.unresolved?.length)missing.push(`unresolved subclass hashes: ${detail.subclassBuild.socketCoverage.unresolved.join(",")}`);
-  detail.armour.forEach((item,index)=>{
+  armour.forEach((item,index)=>{
     if(item&&!item.socketsAvailable)missing.push(`armour ${index+1} sockets`);
   });
   return {complete:missing.length===0,missing};

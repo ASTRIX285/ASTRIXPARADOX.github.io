@@ -1225,6 +1225,7 @@ type JourneySemanticIndex = {
   definitionHashes?: Record<string, number[]>;
 };
 const PAGE_PAYLOAD_KINDS = new Set<PagePayloadKind>(["character", "build-forge", "journey", "vault", "loadout"]);
+const WORKSPACE_PREPARED_PAGES: readonly PagePayloadKind[] = ["character", "build-forge", "vault", "loadout"];
 const PAGE_READ_VIEWS: Record<PagePayloadKind, readonly string[]> = {
   character: ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact"],
   "build-forge": ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact", "manual-editor"],
@@ -1464,6 +1465,36 @@ function preparedPageEnvelope(
   }));
 }
 
+async function readPreparedPage(
+  sessionId: string,
+  page: PagePayloadKind,
+  manifestVersion: string,
+  env: Env
+): Promise<Response | null> {
+  if (!sessionId || !manifestVersion) return null;
+  const url = new URL("https://internal/prepared-page");
+  url.searchParams.set("page", page);
+  url.searchParams.set("manifestVersion", manifestVersion);
+  const response = await recordStub(env, `session:${sessionId}`).fetch(new Request(url)).catch(() => null);
+  return response?.ok && response.body ? response : null;
+}
+
+async function storePreparedPage(
+  sessionId: string,
+  page: PagePayloadKind,
+  manifestVersion: string,
+  response: Response,
+  env: Env
+): Promise<boolean> {
+  if (!sessionId || !manifestVersion) return false;
+  const body = await response.clone().text();
+  const url = new URL("https://internal/prepared-page");
+  url.searchParams.set("page", page);
+  url.searchParams.set("manifestVersion", manifestVersion);
+  const stored = await recordStub(env, `session:${sessionId}`).fetch(new Request(url, { method: "PUT", body })).catch(() => null);
+  return stored?.ok === true;
+}
+
 async function preparedJourneyAccountData(
   sessionId: string,
   profile: DestinyProfilePayload,
@@ -1500,21 +1531,39 @@ async function preparedJourneyAccountData(
   return { historicalStats, activityHistoryByCharacter, coverage: { complete: !missing.length, missing } };
 }
 
-async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKind): Promise<Response> {
+async function pagePayloadRoute(
+  request: Request,
+  env: Env,
+  page: PagePayloadKind,
+  context?: ExecutionContext,
+  options: { warmWorkspace?: boolean } = {}
+): Promise<Response> {
   const requestUrl = new URL(request.url);
   const requestedFreshness = requestUrl.searchParams.get("freshness") === "live" ? "live" : "display";
+  const sessionId = cookieValue(request, SESSION_COOKIE);
+  const preparedStatusPromise = preparedManifestTables({}, env);
+  const preparedStatus = await preparedStatusPromise;
+  if (requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
+    const cached = await readPreparedPage(sessionId, page, preparedStatus.manifestVersion, env);
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      headers.set("X-Forge-Prepared-Page-Source", "backend-cache");
+      if (page === "journey" && context && options.warmWorkspace !== false) {
+        context.waitUntil(warmPreparedWorkspace(request, env));
+      }
+      return withCors(request, env, new Response(cached.body, { status: 200, headers }));
+    }
+  }
   const profileUrl = new URL(request.url);
   profileUrl.pathname = "/bungie/profile";
   profileUrl.search = "";
   profileUrl.searchParams.set("freshness", requestedFreshness);
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : page === "character" ? "character" : "forge");
   profileUrl.searchParams.set("definitions", "client-manifest");
-  const preparedStatusPromise = preparedManifestTables({}, env);
   const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env);
   if (!profileResponse.ok) return profileResponse;
   const payload = await profileResponse.json<Record<string, any>>();
 
-  const preparedStatus = await preparedStatusPromise;
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
   let pageBundleResponse: Response | null = null;
@@ -1566,7 +1615,6 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
       complete: prepared.coverage.complete,
       source: "prepared-bulk-manifest"
     };
-    const sessionId = cookieValue(request, SESSION_COOKIE);
     payload.preparedAccountData = sessionId
       ? await preparedJourneyAccountData(sessionId, payload.profile || {}, env)
       : { historicalStats: null, activityHistoryByCharacter: {}, coverage: { complete: false, missing: ["session"] } };
@@ -1640,7 +1688,33 @@ async function pagePayloadRoute(request: Request, env: Env, page: PagePayloadKin
   projectPreparedProfileComponents(payload.profile || {}, page);
   compactPreparedProfilePlugLists(payload);
   const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
-  return preparedPageEnvelope(request, env, payload, prepared);
+  const response = preparedPageEnvelope(request, env, payload, prepared);
+  if (sessionId && preparedVersion) {
+    const cacheTask = storePreparedPage(sessionId, page, preparedVersion, response, env)
+      .catch(error => {
+        console.warn("prepared_page_cache_write_failed", { page, error: String(error) });
+        return false;
+      });
+    if (context) context.waitUntil(cacheTask);
+    else await cacheTask;
+  }
+  if (page === "journey" && context && options.warmWorkspace !== false && sessionId) {
+    context.waitUntil(warmPreparedWorkspace(request, env));
+  }
+  return response;
+}
+
+async function warmPreparedWorkspace(request: Request, env: Env): Promise<void> {
+  for (const page of WORKSPACE_PREPARED_PAGES) {
+    const url = new URL(request.url);
+    url.pathname = `/bungie/page/${page}`;
+    url.search = "";
+    url.searchParams.set("freshness", "display");
+    const response = await pagePayloadRoute(new Request(url, { headers: request.headers }), env, page, undefined, { warmWorkspace: false });
+    if (!response.ok) throw new Error(`prepared_workspace_${page}_failed:${response.status}`);
+    await response.body?.cancel();
+    console.info("prepared_workspace_page_ready", { page });
+  }
 }
 
 async function oauthCallback(request: Request, env: Env): Promise<Response> {
@@ -2177,7 +2251,7 @@ export default {
       });
     }));
   },
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     try {
@@ -2224,7 +2298,7 @@ export default {
       if (request.method === "GET" && url.pathname.startsWith("/bungie/page/")) {
         const page = decodeURIComponent(url.pathname.slice("/bungie/page/".length)) as PagePayloadKind;
         return PAGE_PAYLOAD_KINDS.has(page)
-          ? pagePayloadRoute(request, env, page)
+          ? pagePayloadRoute(request, env, page, context)
           : withCors(request, env, json({ error: "page_payload_not_found" }, 404));
       }
       if (request.method === "GET" && (url.pathname === "/bungie/profile" || url.pathname === "/v1/destiny/profile")) {

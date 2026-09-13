@@ -9,10 +9,12 @@ globalThis.document={documentElement:{dataset:{}},dispatchEvent:event=>{events.p
 globalThis.ForgeLoader={set(){},status(){}};
 
 const root=new URL('../',import.meta.url);
-const {PAGE_KINDS,PREPARED_PAGE_STAGES,normalizePreparedPagePayload,requestPreparedPagePayload}=await import('../core/prepared-page-client.mjs');
+const {PAGE_KINDS,PREPARED_PAGE_STAGES,WORKSPACE_PRELOAD_PAGES,normalizePreparedPagePayload,preloadPreparedWorkspace,requestPreparedPagePayload}=await import('../core/prepared-page-client.mjs');
 
 assert.deepEqual(Object.values(PREPARED_PAGE_STAGES).map(row=>row.percent),[8,18,42,72,92,96]);
 assert.equal(PREPARED_PAGE_STAGES.request.label,'Loading prepared bulk manifest and Guardian data');
+assert.deepEqual(WORKSPACE_PRELOAD_PAGES,['character','build-forge','vault','loadout'],'Journey must prepare every downstream workspace page, Character first.');
+assert.deepEqual(await preloadPreparedWorkspace({authenticated:false}),{complete:false,ready:[],failed:[]},'Anonymous Journey visits must not start private workspace preparation.');
 
 function envelope(page){
   const account={
@@ -65,9 +67,19 @@ for(const path of runtimes){
 }
 
 const backend=await readFile(new URL('../forge-auth-worker/src/index.ts',root),'utf8');
+const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root),'utf8');
+const authRecord=await readFile(new URL('../forge-auth-worker/src/auth-record.ts',root),'utf8');
+const preparedCache=await readFile(new URL('../forge-auth-worker/src/prepared-page-cache.ts',root),'utf8');
 assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'The auth Worker must stream the prepared page bundle');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'The auth Worker must not parse a prepared page bundle');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy public manifest tables on the auth Worker heap');
+assert.match(backend,/WORKSPACE_PREPARED_PAGES[^=]*= \["character", "build-forge", "vault", "loadout"\]/,'The backend must enumerate every downstream workspace page in display order.');
+assert.match(backend,/requestedFreshness === "display"[\s\S]*?readPreparedPage\(sessionId, page, preparedStatus\.manifestVersion/,'Display requests must read a session cache bound to the current live manifest version.');
+assert.match(backend,/page === "journey"[\s\S]*?context\.waitUntil\(warmPreparedWorkspace\(request, env\)\)/,'Journey must trigger backend preparation for its downstream workspace.');
+assert.match(backend,/async function warmPreparedWorkspace[\s\S]*?for \(const page of WORKSPACE_PREPARED_PAGES\)[\s\S]*?freshness", "display"/,'The backend workspace warm must prepare each complete display payload.');
+assert.match(authRecord,/new PreparedPageCache\(this\.ctx\.storage\)[\s\S]*?path === "\/prepared-page"/,'Prepared page data must remain private inside the authenticated session Durable Object.');
+assert.match(preparedCache,/PREPARED_PAGE_TTL_MS = 10 \* 60_000[\s\S]*?meta\.manifestVersion !== manifestVersion/,'Prepared page cache entries must expire and be invalidated by a live manifest change.');
+assert.match(preparedClient,/for\(const value of pages\)[\s\S]*?preferBackend:true[\s\S]*?quiet:true/,'Journey must quietly transfer backend-prepared pages into the existing browser cache in order.');
 
 const shellRuntimes=[
   'pages/guardian-workspace-v2/guardian-character-cards.mjs',
@@ -88,3 +100,4 @@ console.log('SHARED_PAGE_CLIENT=PASS');
 console.log('SHARED_PAGE_PROGRESS=PASS');
 console.log('SHARED_PAGE_SHELL=PASS');
 console.log('WORKER_STREAMING_PAGE_BUNDLE=PASS');
+console.log('BACKEND_PREPARED_WORKSPACE=PASS');

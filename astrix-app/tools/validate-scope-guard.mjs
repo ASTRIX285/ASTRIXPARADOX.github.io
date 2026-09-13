@@ -21,6 +21,8 @@ const allowed=new Set([
   'astrix-app/tools/validate-renderable-page-data.mjs',
   'forge-auth-worker/src/profile-sections.ts',
   'forge-auth-worker/src/profile-snapshot-cache.ts',
+  'forge-auth-worker/src/prepared-page-cache.ts',
+  'forge-auth-worker/test/prepared-page-cache.test.ts',
   'forge-manifest-worker/.gitignore',
   'forge-manifest-worker/worker.mjs',
   'forge-manifest-worker/wrangler.toml',

@@ -215,8 +215,8 @@ export default {
   scheduled(controller: ScheduledController, env: Env, context: ExecutionContext): void {
     worker.scheduled(controller, env, context);
   },
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const response = await worker.fetch(request, env);
+  async fetch(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
+    const response = await worker.fetch(request, env, context);
     const url = new URL(request.url);
     const path = url.pathname;
     const pagePayload = path.startsWith("/bungie/page/") ? path.slice("/bungie/page/".length) : "";
