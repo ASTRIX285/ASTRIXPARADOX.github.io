@@ -40,7 +40,7 @@ assert.equal(weaponStatRows({4284893193:{value:1000}})[0].value,1000,'RPM must n
 
 for(const file of ['guardian-semantic-ui.mjs','paradox-item-hover.mjs']){
   const source=await readFile(new URL(`../pages/guardian-workspace-v2/${file}`,import.meta.url),'utf8');
-  assert.match(source,/import \{weaponStatBreakdown,weaponStatMarkup\} from '\.\/guardian-weapon-stat-model\.mjs'/,`${file} must use the shared mapping`);
+  assert.match(source,/import \{weaponStatBreakdown,weaponStatMarkup\} from '\.\/guardian-weapon-stat-model\.mjs(?:\?[^']+)?'/,`${file} must use the shared mapping`);
   assert.doesNotMatch(source,/const WEAPON_STATS\s*=/,`${file} must not maintain a competing stat table`);
 }
 console.log(`WEAPON_STAT_MAPPING=PASS definitions=${WEAPON_STATS.length} Unsworn_display_stats=${rows.length}`);

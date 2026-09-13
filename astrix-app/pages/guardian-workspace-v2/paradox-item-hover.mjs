@@ -1,13 +1,17 @@
-import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
+import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
+import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
 import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const bindings=new WeakMap();
+const inspectBindings=new WeakMap();
 let activeAnchor=null;
+let inspectAnchor=null;
 let installed=false;
+let inspectInstalled=false;
 let hideTimer=null;
+let inspectTimer=null;
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const finite=value=>Number.isFinite(Number(value))?Number(value):null;
@@ -25,6 +29,52 @@ function uniqueItems(items=[]){
     seen.add(key);
     return true;
   });
+}
+
+function uniqueSocketItems(items=[]){
+  const seen=new Set();
+  return items.filter(item=>{
+    if(!item)return false;
+    const hash=itemHash(item),socket=finite(item?.socketIndex);
+    const key=socket!==null?`socket:${socket}:${hash??itemName(item).toLowerCase()}`:hash?`hash:${hash}`:`name:${itemName(item).toLowerCase()}`;
+    if(seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function appearancePlugs(item={}){
+  const socketPlugs=item?.socketCoverage?.plugs??[];
+  const categoryPlugs=socketPlugs.filter(plug=>Number(plug?.socketCategoryHash)===WEAPON_SOCKET_CATEGORIES.cosmetics);
+  return uniqueSocketItems([...(item?.appearancePlugs??[]),item?.shader,item?.ornament,...categoryPlugs]);
+}
+
+function inspectSocketMarkup(plug,label){
+  const icon=itemIcon(plug);
+  if(!icon)return '';
+  const description=String(plug?.description??plug?.displayProperties?.description??'').trim();
+  const title=[itemName(plug),description].filter(Boolean).join(' · ');
+  return `<span class="paradox-inspect-socket" title="${esc(title)}" aria-label="${esc(`${label}: ${itemName(plug)}`)}"><img src="${esc(icon)}" alt=""><small>${esc(label)}</small></span>`;
+}
+
+function weaponInspectSockets(item={}){
+  const semantics=item?.weaponSemantics??{};
+  const support=(semantics.modSockets?.length?semantics.modSockets:[semantics.masterwork,semantics.mod,semantics.catalyst]).filter(Boolean);
+  const sameIdentity=(left,right)=>Boolean(itemHash(left)&&itemHash(left)===itemHash(right));
+  const rows=[
+    ...support.map(plug=>({plug,label:sameIdentity(plug,semantics.catalyst)?'CATALYST':sameIdentity(plug,semantics.masterwork)?'MASTERWORK':'MOD'})),
+    ...appearancePlugs(item).map(plug=>({plug,label:'COSMETIC'}))
+  ];
+  return uniqueSocketItems(rows.map(row=>row.plug)).map(plug=>{
+    const row=rows.find(candidate=>candidate.plug===plug)||rows.find(candidate=>itemHash(candidate.plug)===itemHash(plug));
+    return inspectSocketMarkup(plug,row?.label||'SOCKET');
+  }).join('');
+}
+
+function armourInspectSockets(item={}){
+  const semantics=item?.armourSemantics??{};
+  const functional=uniqueSocketItems([semantics.masterwork??item?.masterwork,...(semantics.generalMods??item?.generalMods??[]),...(semantics.slotMods??item?.slotMods??[])]);
+  return `${functional.map(plug=>inspectSocketMarkup(plug,plug===semantics.masterwork||plug===item?.masterwork?'MASTERWORK':'MOD')).join('')}${appearancePlugs(item).map(plug=>inspectSocketMarkup(plug,'COSMETIC')).join('')}`;
 }
 
 function normaliseStats(item,kind){
@@ -59,22 +109,28 @@ function detailTile(item,label,{circle=false}={}){
   return `<div class="${circle?'weapon-detail-tile':'paradox-socket-tile'}" title="${esc(title)}">${circle?`${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">◆</span>'}<small>${esc(label)}</small>`:`<div class="paradox-socket-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">◆</span>'}</div><small>${esc(label)}</small>`}<b>${esc(itemName(item))}</b></div>`;
 }
 
-function weaponDetails(item){
+function weaponDetails(item,{inspect=false}={}){
   const semantics=item?.weaponSemantics??{};
   const support=(semantics.modSockets?.length?semantics.modSockets:[semantics.masterwork,semantics.mod,semantics.catalyst]).filter(Boolean);
   const hierarchy=weaponTraitHierarchyMarkup(item,{compact:true}),matrix=weaponPerkMatrixMarkup(item);
   const traits=hierarchy?`<section class="paradox-section paradox-hover-traits"><h3>INTRINSIC</h3>${hierarchy}</section>`:'';
   const perkRows=matrix?`<section class="paradox-section"><h3>WEAPON PERKS</h3>${matrix}</section>`:'';
-  const supportRows=support.length?`<section class="paradox-section"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${support.map(plug=>weaponDetailTile(plug,'Equipped',{square:true})).join('')}</div></section>`:'';
+  const inspectSockets=inspect?weaponInspectSockets(item):'';
+  const supportRows=inspect
+    ?inspectSockets?`<section class="paradox-section paradox-inspect-bottom"><h3>MODS AND COSMETICS</h3><div class="paradox-inspect-socket-strip">${inspectSockets}</div></section>`:''
+    :support.length?`<section class="paradox-section"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${support.map(plug=>weaponDetailTile(plug,'Equipped',{square:true})).join('')}</div></section>`:'';
   return `<section class="paradox-section paradox-section--stats"><h3>WEAPON STATS</h3>${statMarkup(item,'weapon')}</section>${traits}${perkRows}${supportRows}`;
 }
 
-function armourDetails(item){
+function armourDetails(item,{inspect=false}={}){
   const semantics=item?.armourSemantics??{};
   const identities=uniqueItems([semantics.archetype??item?.archetype,semantics.exoticPerk??item?.exoticPerk??item?.intrinsicTrait,semantics.set?.identity??item?.setBonus?.identity]);
   const mods=uniqueItems([semantics.masterwork??item?.masterwork,...(semantics.generalMods??item?.generalMods??[]),...(semantics.slotMods??item?.slotMods??[])]);
   const identityRows=identities.length?`<section class="paradox-section"><h3>ARCHETYPE AND TRAITS</h3><div class="paradox-hover-identities">${identities.map(identity=>detailTile(identity,'VERIFIED')).join('')}</div></section>`:'';
-  const modRows=mods.length?`<section class="paradox-section"><h3>ARMOUR SOCKETS</h3><div class="paradox-socket-grid">${mods.map(mod=>detailTile(mod,'EQUIPPED')).join('')}</div></section>`:'';
+  const inspectSockets=inspect?armourInspectSockets(item):'';
+  const modRows=inspect
+    ?inspectSockets?`<section class="paradox-section paradox-inspect-bottom"><h3>MODS AND COSMETICS</h3><div class="paradox-inspect-socket-strip">${inspectSockets}</div></section>`:''
+    :mods.length?`<section class="paradox-section"><h3>ARMOUR SOCKETS</h3><div class="paradox-socket-grid">${mods.map(mod=>detailTile(mod,'EQUIPPED')).join('')}</div></section>`:'';
   return `<section class="paradox-section paradox-section--stats"><h3>ARMOUR STATS</h3>${statMarkup(item,'armour')}</section>${identityRows}${modRows}`;
 }
 
@@ -85,16 +141,18 @@ function armourDefinitionDetails(item){
   return `<section class="paradox-section"><h3>INTRINSIC EXOTIC PERK</h3><div class="paradox-identity-card"><div class="paradox-identity-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">◆</span>'}</div><div><small>EXOTIC ARMOUR TRAIT</small><b>${esc(itemName(intrinsic,'Intrinsic perk'))}</b>${description?`<p>${esc(description)}</p>`:''}</div></div></section>`;
 }
 
-function cardMarkup(item,kind,{contextLabel='',definitionOnly=false}={}){
+function cardMarkup(item,kind,{contextLabel='',definitionOnly=false,presentation='hover'}={}){
   const icon=itemIcon(item);
   const release=item?.releaseWatermark?.icon?{icon:asset(item.releaseWatermark.icon),source:item.releaseWatermark.source??'prepared-item'}:resolveItemWatermark(item??{},item?.definition??{});
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
   const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
   const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
   const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Verified Bungie item');
-  return `<article class="paradox-item-card paradox-item-card--${kind} paradox-item-hover-card" data-item-kind="${kind}">
+  const rarity=/\bexotic\b/i.test(String(tier))||item?.isExotic===true?'exotic':/\blegendary\b/i.test(String(tier))?'legendary':'standard';
+  const presentationClass=presentation==='inspect'?'paradox-item-inspect-card':'paradox-item-hover-card';
+  return `<article class="paradox-item-card paradox-item-card--${kind} ${presentationClass} is-${rarity}" data-item-kind="${kind}" data-item-rarity="${rarity}">
     <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>${metricLabel}</small><b>${esc(metricValue)}</b></div></header>
-    <div class="paradox-card-body">${definitionOnly&&kind==='armour'?armourDefinitionDetails(item):kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
+    <div class="paradox-card-body">${definitionOnly&&kind==='armour'?armourDefinitionDetails(item):kind==='weapon'?weaponDetails(item,{inspect:presentation==='inspect'}):armourDetails(item,{inspect:presentation==='inspect'})}</div>
     <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${definitionOnly?'TYPE LEVEL BUNGIE DATA':item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
   </article>`;
 }
@@ -167,9 +225,92 @@ function bindParadoxItemHover(target,item,kind,options={}){
   return target;
 }
 
+function closeInspect({restoreFocus=true}={}){
+  clearTimeout(inspectTimer);
+  const host=typeof document==='undefined'?null:document.getElementById('paradoxItemInspect');
+  const backdrop=typeof document==='undefined'?null:document.getElementById('paradoxItemInspectBackdrop');
+  const anchor=inspectAnchor;
+  inspectAnchor=null;
+  document?.body?.classList.remove('paradox-inventory-inspect-open');
+  if(host){host.hidden=true;host.setAttribute('aria-hidden','true');host.replaceChildren();}
+  if(backdrop)backdrop.hidden=true;
+  if(restoreFocus&&anchor?.isConnected)anchor.focus({preventScroll:true});
+}
+
+function ensureInspectHost(){
+  if(typeof document==='undefined')return null;
+  let backdrop=document.getElementById('paradoxItemInspectBackdrop');
+  if(!backdrop){
+    backdrop=document.createElement('div');
+    backdrop.id='paradoxItemInspectBackdrop';
+    backdrop.className='paradox-inventory-inspect-backdrop';
+    backdrop.hidden=true;
+    backdrop.addEventListener('click',()=>closeInspect());
+    document.documentElement.append(backdrop);
+  }
+  let host=document.getElementById('paradoxItemInspect');
+  if(!host){
+    host=document.createElement('aside');
+    host.id='paradoxItemInspect';
+    host.className='forge-item-inspect paradox-inventory-inspect paradox-item-shell';
+    host.hidden=true;
+    host.setAttribute('aria-hidden','true');
+    host.setAttribute('aria-modal','true');
+    host.setAttribute('role','dialog');
+    host.addEventListener('click',event=>{if(event.target.closest?.('[data-close-paradox-inspect]'))closeInspect();});
+    document.documentElement.append(host);
+  }
+  return {host,backdrop};
+}
+
+function openInspect(anchor){
+  clearTimeout(inspectTimer);
+  const binding=inspectBindings.get(anchor),portal=ensureInspectHost();
+  if(!binding||!portal)return;
+  hide();
+  inspectAnchor=anchor;
+  portal.host.innerHTML=`<button class="paradox-inventory-inspect-close" type="button" data-close-paradox-inspect aria-label="Close item details">✕</button>${cardMarkup(binding.item,binding.kind,{...binding.options,presentation:'inspect'})}`;
+  portal.backdrop.hidden=false;
+  portal.host.hidden=false;
+  portal.host.setAttribute('aria-hidden','false');
+  document.body.classList.add('paradox-inventory-inspect-open');
+  portal.host.querySelector('[data-close-paradox-inspect]')?.focus({preventScroll:true});
+}
+
+function installInspect(){
+  if(inspectInstalled||typeof document==='undefined')return;
+  inspectInstalled=true;
+  document.addEventListener('click',event=>{
+    const anchor=event.target.closest?.('[data-paradox-item-inspect]');
+    if(!anchor||!inspectBindings.has(anchor)||event.target.closest?.('button'))return;
+    clearTimeout(inspectTimer);
+    inspectTimer=setTimeout(()=>openInspect(anchor),220);
+  });
+  document.addEventListener('dblclick',event=>{
+    if(event.target.closest?.('[data-paradox-item-inspect]'))clearTimeout(inspectTimer);
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&inspectAnchor){event.preventDefault();closeInspect();return;}
+    const anchor=event.target.closest?.('[data-paradox-item-inspect]');
+    if(anchor&&inspectBindings.has(anchor)&&(event.key==='Enter'||event.key===' ')){
+      event.preventDefault();
+      openInspect(anchor);
+    }
+  });
+}
+
+function bindParadoxItemInspect(target,item,kind,options={}){
+  if(!target||!item||!['armour','weapon'].includes(kind))return target;
+  inspectBindings.set(target,{item,kind,options});
+  delete target.dataset.paradoxItemHover;
+  target.dataset.paradoxItemInspect=kind;
+  installInspect();
+  return target;
+}
+
 function bindParadoxItemHovers(root,items,kind,selector){
   if(!root)return;
   [...root.querySelectorAll(selector)].forEach((target,index)=>bindParadoxItemHover(target,items?.[index],kind));
 }
 
-export {bindParadoxItemHover,bindParadoxItemHovers};
+export {bindParadoxItemHover,bindParadoxItemHovers,bindParadoxItemInspect};

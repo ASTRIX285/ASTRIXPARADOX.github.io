@@ -52,6 +52,7 @@ export function weaponStatMarkup(rows){
   return rows.map(row=>{
     const white=clamp(row.verified?row.barBase:row.value),yellow=row.verified?Math.max(0,clamp(row.value)-white):0;
     const label=row.verified?`Base ${row.base}; net socket change ${row.bonus>=0?'+':''}${row.bonus}; total ${row.value}`:`Bungie total ${row.value}; bonus breakdown unavailable`;
-    return `<div class="weapon-stat" data-bungie-hash="${row.hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(row.paradoxId)}" title="${esc(label)}"><span>${esc(row.name)}</span><i><b class="weapon-stat-base" style="width:${white}%"></b><b class="weapon-stat-bonus" style="left:${white}%;width:${yellow}%"></b></i><strong>${esc(row.value)}</strong></div>`;
+    const enhanced=row.verified&&row.bonus>0;
+    return `<div class="weapon-stat${enhanced?' has-enhanced-value':''}" data-bungie-hash="${row.hash}" data-bungie-definition-type="DestinyStatDefinition" data-paradox-id="${esc(row.paradoxId)}" title="${esc(label)}"><span>${esc(row.name)}</span><i><b class="weapon-stat-base" style="width:${white}%"></b><b class="weapon-stat-bonus" style="left:${white}%;width:${yellow}%"></b></i><strong>${esc(row.value)}</strong></div>`;
   }).join('');
 }

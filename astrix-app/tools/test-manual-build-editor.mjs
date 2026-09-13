@@ -173,21 +173,25 @@ const unresolvedSocketMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'
 assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-intrinsic"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
 assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-tier-strip"|class="tile-tier-pip/,'An item without a real Bungie tier or masterwork state must not invent diamonds.');
 const sharedTileCss=readFileSync(new URL('../shared/item-tile.css',import.meta.url),'utf8');
+const sharedWorkspaceRuntime=readFileSync(new URL('../shared/guardian-inventory-workspace.mjs',import.meta.url),'utf8');
 for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-intrinsic','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
 assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*object-fit:\s*contain/s,'Real shared item art must render uncropped inside its proportional Figma region.');
 assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*max-width:\s*100%;[^}]*max-height:\s*100%/s,'Real shared item art must remain fully contained inside its designated region.');
 assert.match(sharedTileCss,/height:\s*var\(--apx-icon-gear-art-height\);\s*aspect-ratio:\s*100\/122/,'The implemented tile must retain the compact canonical proportions shown by the approved Figma target.');
-assert.match(sharedTileCss,/\.tile-tier-strip\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'The tier rail must be an open overlay instead of a dark container over the item art.');
+assert.match(sharedTileCss,/\.tile-tier-strip\s*\{[^}]*top:\s*2\.00%;[^}]*height:\s*77\.90%;[^}]*border:\s*0;[^}]*background:\s*linear-gradient\([^}]*rgba\(5,4,7,\.38\)[^}]*rgba\(5,4,7,\.24\)/s,'The tier rail must restore the translucent Figma strip behind the season circle and complete diamond stack.');
 assert.match(sharedTileCss,/\.tile-tier-pip::before\s*\{[^}]*border:\s*0;[^}]*background:\s*var\(--tile-tier-fill\)/s,'Tier diamonds must use solid fills with no strokes.');
 assert.match(sharedTileCss,/\.item-tile--tier-5\s*\{[^}]*--tile-tier-fill:\s*#f3ee69/s,'Only verified T5 tiles must switch their five diamonds to gold.');
 assert.match(sharedTileCss,/\.tile-tier-pip--1\s*\{top:21\.50%\}/,'The complete diamond formation must stay in its raised position below the season icon.');
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*border-radius:\s*50%/s,'The real season icon must render inside the circle above the diamonds.');
+assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*background:\s*rgba\(3,3,5,\.46\)/s,'The season circle must remain translucent over the restored Figma tier strip.');
 assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
 assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
 assert.match(sharedTileCss,/\.tile-intrinsic img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
 assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
 assert.match(sharedTileCss,/\.tile-intrinsic,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
+assert.match(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\(root,\{resolveItem=\(\)=>null,bindInspect=\(\)=>\{\}\}=\{\}\)[\s\S]*?bindInspect\(target,item,kind/,'Character and INVENTORY shared tiles must bind the click inspector instead of the rich hover card.');
+assert.doesNotMatch(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\([^)]*bindHover/,'The shared owned-instance tile binder must not restore rich hover inspection.');
 for(const page of ['../pages/guardian-workspace-v2/index.html','../pages/vault/index.html']){
   const html=readFileSync(new URL(page,import.meta.url),'utf8'),tileIndex=html.indexOf('../../shared/item-tile.css'),densityIndex=html.indexOf('../../shared/astrix-desktop-density.css');
   assert.ok(tileIndex>=0&&densityIndex>tileIndex,`${page} must import the shared item tile CSS before the required final density stylesheet.`);
