@@ -444,14 +444,14 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     return payload;
   };
   const destinationExpected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
-  const transferExact=async(item,step,{allowUnverifiedSource=false}={})=>{
+  const transferExact=async(item,step,{allowUnverifiedSource=false,allowAcceptedWithoutReadback=false}={})=>{
     const before=await freshInventoryLocation(item.itemInstanceId,{fetchImpl,authOrigin});
     if(locationMatches(before.location,step.expected)){record(step.phase||'transfer','complete',`${step.label} was already complete in fresh Bungie inventory.`,{expected:step.expected,alreadyComplete:true});return before;}
     if(step.from&&!locationMatches(before.location,step.from)&&!allowUnverifiedSource)throw Object.assign(new Error('The exact item moved to a different Bungie location before this transfer step.'),{detail:{expectedSource:step.from,actual:before.location?.source||null}});
     if(step.from&&!locationMatches(before.location,step.from)&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is continuing from Bungie's accepted previous leg while profile readback catches up.`,{expectedSource:step.from,staleReadback:before.location?.source||null});
     for(let attempt=0;attempt<=AMBIGUOUS_ACTION_RETRY_LIMIT;attempt+=1){
       try{
-        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),settled=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
+        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),settled=allowAcceptedWithoutReadback?{verified:false,...await freshInventoryLocation(item.itemInstanceId,{fetchImpl,authOrigin})}:await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
         if(!settled.verified){record(step.phase||'transfer','accepted',`${step.label} was accepted by Bungie; final fresh readback is still required.`,{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});return {accepted:true,...settled};}
         record(step.phase||'transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
         return settled;
@@ -533,8 +533,9 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
         ];
     const capacityReturnCharacterId=source.kind==='carried'&&String(source.characterId)!==String(destination.characterId||'')?source.characterId:['carried','equipped'].includes(reviewedSource.kind)&&String(reviewedSource.characterId)!==String(destination.characterId||'')?reviewedSource.characterId:'';
     let allowUnverifiedSource=false;
-    for(const step of transferSteps){
-      try{const settled=await transferWithCapacityFallback(item,step,capacityReturnCharacterId,{allowUnverifiedSource});allowUnverifiedSource=settled?.accepted===true&&!settled?.verified;}
+    for(let stepIndex=0;stepIndex<transferSteps.length;stepIndex+=1){
+      const step=transferSteps[stepIndex],allowAcceptedWithoutReadback=stepIndex<transferSteps.length-1||intent.equipAfterTransfer;
+      try{const settled=await transferWithCapacityFallback(item,step,capacityReturnCharacterId,{allowUnverifiedSource,allowAcceptedWithoutReadback});allowUnverifiedSource=settled?.accepted===true&&!settled?.verified;}
       catch(error){record('transfer',error?.accepted?'mismatch':'failed',error?.accepted?'Bungie accepted the transfer call but fresh inventory did not confirm its destination.':step.label,{message:error.message,detail:error.detail||null,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
     }
     if(intent.equipAfterTransfer){
