@@ -1,7 +1,7 @@
 import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
 import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
-import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
+import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260913-square-intrinsic-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const bindings=new WeakMap();
@@ -112,7 +112,7 @@ function detailTile(item,label,{circle=false}={}){
 function weaponDetails(item,{inspect=false}={}){
   const semantics=item?.weaponSemantics??{};
   const support=(semantics.modSockets?.length?semantics.modSockets:[semantics.masterwork,semantics.mod,semantics.catalyst]).filter(Boolean);
-  const hierarchy=weaponTraitHierarchyMarkup(item,{compact:true}),matrix=weaponPerkMatrixMarkup(item);
+  const hierarchy=weaponTraitHierarchyMarkup(item,{compact:true,squareIntrinsic:inspect}),matrix=weaponPerkMatrixMarkup(item);
   const traits=hierarchy?`<section class="paradox-section paradox-hover-traits"><h3>INTRINSIC</h3>${hierarchy}</section>`:'';
   const perkRows=matrix?`<section class="paradox-section"><h3>WEAPON PERKS</h3>${matrix}</section>`:'';
   const inspectSockets=inspect?weaponInspectSockets(item):'';

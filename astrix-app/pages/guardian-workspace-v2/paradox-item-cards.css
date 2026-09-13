@@ -1790,7 +1790,7 @@ body .gear-weapons .weapon-support-icons{margin-top:8px}
 .paradox-inventory-inspect-backdrop[hidden],
 .forge-item-inspect.paradox-inventory-inspect[hidden]{display:none!important}
 .forge-item-inspect.paradox-inventory-inspect{
-  position:fixed;left:50%;top:50%;z-index:1800;width:min(31rem,calc(100vw - 1rem));max-height:calc(100dvh - 1rem);
+  position:fixed;left:50%;top:50%;z-index:1800;width:min(29rem,calc(100vw - 1rem));max-height:calc(100dvh - 1rem);
   overflow:auto;transform:translate(-50%,-50%);border:1px solid rgba(224,185,79,.58);background:#08070a;
   box-shadow:0 1.5rem 4rem rgba(0,0,0,.82);scrollbar-color:#b51e2a #08070a
 }
@@ -1820,8 +1820,8 @@ body.paradox-inventory-inspect-open{overflow:hidden}
 .paradox-item-inspect-card.is-legendary .paradox-item-header{background:linear-gradient(100deg,#5b3470,#42284f 62%,#18131c)}
 .paradox-item-inspect-card.is-exotic .paradox-item-header{background:linear-gradient(100deg,#9d771f,#6c5017 62%,#1c1710)}
 .paradox-item-inspect-card .weapon-detail-icon{
-  width:var(--paradox-inspect-art-width)!important;height:calc(var(--paradox-inspect-art-width) * 1.22)!important;
-  aspect-ratio:100/122!important;border-width:1px;border-radius:2px;box-shadow:none
+  width:var(--paradox-inspect-art-width)!important;height:var(--paradox-inspect-art-width)!important;
+  aspect-ratio:1!important;border-width:1px;border-radius:2px;box-shadow:none
 }
 .paradox-item-inspect-card .weapon-detail-icon>img{width:100%;height:100%;object-fit:contain;object-position:center}
 .paradox-item-inspect-card .paradox-kicker{margin-bottom:.22rem;font-size:.52rem}
@@ -1843,8 +1843,10 @@ body.paradox-inventory-inspect-open{overflow:hidden}
 .paradox-item-inspect-card .weapon-stat.has-enhanced-value strong{color:#e6bf48}
 .paradox-item-inspect-card .weapon-trait-hierarchy{gap:.5rem}
 .paradox-item-inspect-card :is(.weapon-intrinsic-lead,.weapon-exotic-trait){grid-template-columns:var(--apx-icon-record) minmax(0,1fr);gap:.55rem}
+.paradox-item-inspect-card .weapon-trait-hierarchy>.weapon-intrinsic-lead{display:flex;width:100%;justify-content:center}
 .paradox-item-inspect-card .weapon-detail-tile{width:var(--apx-icon-record);gap:.2rem;font-size:.58rem}
 .paradox-item-inspect-card .weapon-detail-tile img{width:var(--apx-icon-record);height:var(--apx-icon-record)}
+.paradox-item-inspect-card .weapon-intrinsic-lead .weapon-detail-tile img{border-radius:2px}
 .paradox-item-inspect-card :is(.weapon-intrinsic-lead,.weapon-exotic-trait) b{font-size:.78rem}
 .paradox-item-inspect-card :is(.weapon-intrinsic-lead,.weapon-exotic-trait) p{margin-top:.25rem;font-size:.68rem;line-height:1.35}
 .paradox-item-inspect-card .weapon-exotic-traits{margin-left:1.15rem;padding:.55rem 0 0 .7rem}

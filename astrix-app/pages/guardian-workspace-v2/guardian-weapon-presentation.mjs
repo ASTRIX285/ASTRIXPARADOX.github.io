@@ -46,10 +46,10 @@ function weaponPerkMatrixMarkup(item,{compact=false,recommendedHashes=[]}={}){
   return `<div class="weapon-perk-matrix ${compact?"is-compact":""}" style="--weapon-perk-columns:${columns.length}" data-weapon-tier="${Number.isInteger(tier)?tier:""}" data-perk-row-count="${expectedRows}" aria-label="${esc(`${tierLabel} weapon perks in ${expectedRows} row${expectedRows===1?"":"s"}`)}">${rowMarkup}</div>`;
 }
 
-function weaponTraitHierarchyMarkup(item,{compact=false}={}){
+function weaponTraitHierarchyMarkup(item,{compact=false,squareIntrinsic=false}={}){
   const semantics=item?.weaponSemantics||{},candidateIntrinsic=semantics.intrinsic||item?.intrinsic||null,intrinsic=hasResolvedIdentity(candidateIntrinsic)?candidateIntrinsic:null,intrinsicTraits=uniqueByHash(semantics.intrinsicTraits||[]).filter(hasResolvedIdentity),exoticTraits=isExoticWeapon(item)?uniqueByHash([...intrinsicTraits.filter(trait=>bungieHash(trait)!==bungieHash(intrinsic)),...(semantics.exoticTraits||item?.exoticWeaponTraits||[])]).filter(hasResolvedIdentity):[];
   if(!intrinsic&&!exoticTraits.length)return "";
-  const lead=intrinsic?`<div class="weapon-intrinsic-lead">${weaponDetailTile(intrinsic)}</div>`:"";
+  const lead=intrinsic?`<div class="weapon-intrinsic-lead">${weaponDetailTile(intrinsic,"",{square:squareIntrinsic})}</div>`:"";
   const traits=exoticTraits.length?`<div class="weapon-exotic-traits"><h4>EXOTIC WEAPON TRAITS</h4>${exoticTraits.map(trait=>`<div class="weapon-exotic-trait">${weaponDetailTile(trait)}</div>`).join("")}</div>`:"";
   return `<div class="weapon-trait-hierarchy ${compact?"is-compact":""}">${lead}${traits}</div>`;
 }
