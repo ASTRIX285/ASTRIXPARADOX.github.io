@@ -8,10 +8,10 @@ import {
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
-import {bindParadoxItemHover} from "./paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&vault=20260911-live-transfer-1";
+import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260912-click-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
-import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260912-shared-item-tile-4";
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-4";
+import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260912-shared-item-tile-5";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-5";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 
 const PLAYER_POWER_CAP = 550;
@@ -108,7 +108,7 @@ function renderCharacterInventory(){
       ${equippedAndCarriedMarkup({characterId,items:characterInventoryState.catalogue.items,capabilities,activeCharacterId:characterId})}
     </div>
   </article>`;
-  bindInventoryWorkspaceHovers(host,{resolveItem:characterInventoryItem,bindHover:bindParadoxItemHover});
+  bindInventoryWorkspaceHovers(host,{resolveItem:characterInventoryItem,bindInspect:bindParadoxItemInspect});
 }
 
 function updateCharacterInventory(detail={}){

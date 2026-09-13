@@ -167,11 +167,11 @@
 /* TRIER BACKGROUND */
 .vault-transfer-item.has-item-tile .tile-tier-strip {
   left: 2.78%;
-  top: 0%;
+  top: 2.00%;
   width: 21.11%;
-  height: 78.50%;
+  height: 77.90%;
   border: 0;
-  background: transparent;
+  background: linear-gradient(180deg,rgba(5,4,7,.38),rgba(5,4,7,.24));
 }
 
 /* TIER 1 to 5 */
@@ -206,7 +206,7 @@
   overflow: hidden;
   border: 1px solid var(--tile-accent);
   border-radius: 50%;
-  background: rgba(3,3,5,.82);
+  background: rgba(3,3,5,.46);
 }
 .vault-transfer-item.has-item-tile .tile-season-icon img {
   position: absolute;

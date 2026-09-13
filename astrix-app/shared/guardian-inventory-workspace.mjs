@@ -178,10 +178,10 @@ function vaultOnlyMarkup({items=[],capabilities={},activeCharacterId=''}={}){
   return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${rows.length} SORTED ITEM${rows.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${inventoryGroupsMarkup(rows,{includeEmpty:true,capabilities,activeCharacterId})}</section>`;
 }
 
-function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindHover=()=>{}}={}){
+function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindInspect=()=>{}}={}){
   root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>{
     const item=resolveItem(target.dataset.inspectItem),kind=item?.equipmentGroup?.kind;
-    if(kind==='weapon'||kind==='armour')bindHover(target,item,kind,{contextLabel:item.source?.kind==='vault'?'VAULT':''});
+    if(kind==='weapon'||kind==='armour')bindInspect(target,item,kind,{contextLabel:item.source?.kind==='vault'?'VAULT':''});
   });
 }
 

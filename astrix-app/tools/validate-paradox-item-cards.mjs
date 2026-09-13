@@ -47,6 +47,13 @@ assert.match(buildRuntime,/data-review-weapon[\s\S]*?bindParadoxItemHover\(node,
 assert.match(vaultRuntime,/function bindVaultItemHovers\(root\)[\s\S]*?bindParadoxItemHover\(target,inspectedItem\(target\.dataset\.inspectItem\),'armour'\)/,'Vault must expose exact owned instances through the shared hover card');
 assert.match(hoverRuntime,/resolveItemWatermark\(item\?\?\{\},item\?\.definition\?\?\{\}\)/,'Hover season art must come from Bungie item identity data');
 assert.match(hoverRuntime,/host\.style\.top=`\$\{Math\.max\(pad,Math\.round\(bounds\.top-gap-height\)\)\}px`/,'Shared item hover must anchor directly above its item without crossing the viewport top');
+assert.match(hoverRuntime,/function bindParadoxItemInspect\([\s\S]*?target\.dataset\.paradoxItemInspect=kind/,'Owned-instance tiles must expose the shared click inspector without changing the original hover binder.');
+assert.match(hoverRuntime,/host\.className='forge-item-inspect paradox-inventory-inspect paradox-item-shell'/,'The owned-instance click surface must use the full shared Forge item inspector contract.');
+assert.match(hoverRuntime,/MODS AND COSMETICS/,'The click inspector must place real functional and appearance sockets together at the bottom.');
+assert.match(cardCss,/\.paradox-item-inspect-card\.is-legendary \.paradox-item-header\{background:linear-gradient\(100deg,#5b3470/,'Legendary inspection headers must retain Destiny purple.');
+assert.match(cardCss,/\.paradox-item-inspect-card\.is-exotic \.paradox-item-header\{background:linear-gradient\(100deg,#9d771f/,'Exotic inspection headers must retain Destiny gold.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat i b\.weapon-stat-base\{background:#fff\}/,'Click-inspector base stat bars must remain white.');
+assert.match(cardCss,/\.paradox-item-inspect-card \.weapon-stat\.has-enhanced-value strong\{color:#e6bf48\}/,'Enhanced weapon stat totals must render in gold.');
 assert.doesNotMatch(hoverRuntime,/placeholder|mock item|fake/i,'Shared item hover must not invent item data');
 
 console.log('PARADOX_ITEM_CARD_FRAMEWORK=PASS');

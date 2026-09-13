@@ -26,6 +26,7 @@ assert.deepEqual(Object.fromEntries(rows.map(row=>[row.name,row.value])),{
 assert.equal(byName.Magazine.base,98);assert.equal(byName.Magazine.bonus,6);
 assert.equal(byName['Reload Speed'].barBase,32);
 assert.match(weaponStatMarkup([byName['Reload Speed']]),/left:32%;width:15%/);
+assert.match(weaponStatMarkup([byName.Range]),/class="weapon-stat has-enhanced-value"/,'A verified positive socket contribution must mark its displayed total for the gold enhanced treatment.');
 const battery=captured.weaponSemantics.statSockets.find(socket=>socket.socketIndex===2);
 const withoutBattery=weaponStatBreakdown(captured,{2:{...battery,definition:{...battery.definition,investmentStats:[]}}});
 assert.equal(withoutBattery.find(row=>row.name==='Magazine').value,98);
