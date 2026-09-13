@@ -82,7 +82,11 @@ document.addEventListener('forge:build-render-complete',event=>{
 });
 document.addEventListener('forge:bungie-character-roster',()=>queueMicrotask(maybeFinishBuild));
 document.addEventListener('forge:guardian-loadout-context',()=>{finishRevision++;profileSettled=false;});
-document.addEventListener('forge:guardian-error',()=>{profileSettled=true;profileFailed=true;if(isBuildSpace)queueMicrotask(maybeFinishBuild);else finishAfterPaint('Guardian state rendered');});
+document.addEventListener('forge:guardian-error',event=>{
+  finishRevision++;profileSettled=true;profileFailed=true;
+  const message=event.detail?.message||'Verified live Guardian data is unavailable. Retry the live request.';
+  loader?.blocked?.(message);
+});
 
 const currentSession=window.FORGE_BUNGIE_SESSION;
 if(!isBuildSpace&&document.documentElement.dataset.guardianRenderComplete==='true')finishAfterPaint('Guardian build rendered');

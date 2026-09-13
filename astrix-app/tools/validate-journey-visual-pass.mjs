@@ -39,7 +39,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260903-command-header-1"'),'Journey must load the shared command-header cleanup without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-2"'),'Journey must load the repaired live-refresh prepared page payload runtime');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-live-gate-1&amp;transport=20260911-compact-plugs-1"'),'Journey must load the repaired verified-data gate runtime');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -48,7 +48,8 @@ assert.match(journey,/waitWithin\(globalThis\.FORGE_HERO_PROFILE_PROMISE,JOURNEY
 assert.doesNotMatch(journey,/import\('\.\.\/guardian-workspace-v2\/guardian-bungie-profile\.mjs/,'Journey must not import the heavyweight Character profile resolver');
 assert.doesNotMatch(journey,/guardianManifest\.hydratePayload\(payload\)/,'Journey refresh must not hydrate every vault and equipment definition before showing Triumph data');
 assert.match(journey,/profilePresentationNodes\?\.data\?\.nodes&&payload\?\.profile\?\.profileRecords\?\.data/,'Journey must accept verified Triumph components without requiring optional Metrics and Craftables data');
-assert.match(journey,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;[\s\S]*?const JOURNEY_LOADER_READY_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile, UI and final-image waits');
+assert.match(journey,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile and noncritical UI waits');
+assert.doesNotMatch(journey,/JOURNEY_LOADER_READY_WAIT_MS|setTimeout\(\(\)=>\{globalThis\.ForgeLoader\.done/,'Journey must never dismiss its portal because an arbitrary final timer expired');
 assert.match(journey,/function showSignedOut\(\)\{[\s\S]*?ForgeLoader\.authResolved\(\);[\s\S]*?finishJourneyLoader\(signedOut\)/,'Disconnected Journey must reveal its own Bungie connection screen instead of trapping the portal at 12 percent');
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?const mapReady=showJourney\(\);/,'Journey must not reveal its dashboard until the prepared profile has passed the renderable data gate');
 assert.match(journey,/waitWithin\(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(mapReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(waitForJourneyAtmosphere\(\),JOURNEY_BOOTSTRAP_UI_WAIT_MS\)/,'Noncritical Hero, map and atmosphere tasks must not hold the Journey loader indefinitely');
@@ -153,8 +154,8 @@ for(const page of globalHeroPages){
 assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-live-character-2&amp;transport=20260911-compact-plugs-1'))).length,4,'Journey, Vault, Forge Loader and Loadout must load the repaired Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260913-live-character-2&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its repaired prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-live-character-2&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the repaired persistent refresh Guardian renderer');
-assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260913-live-character-2'),'Character must load the isolated live-data module graph');
-assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-live-character-2'),'Build Forge must load the live-equipped non-blocking module graph');
+assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260913-live-character-3'),'Character must load the isolated live-data module graph');
+assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-live-character-3'),'Build Forge must load the live-equipped verified-data module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
 assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');

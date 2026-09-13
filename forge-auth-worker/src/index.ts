@@ -10,6 +10,7 @@ import {
 import { allowedOrigins, approvedReturnUrl, handlePreflight, json, withCors } from "./web";
 import { profileSections } from "./profile-sections";
 import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./page-semantics";
+import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
 
 export { AuthRecord };
 
@@ -1835,6 +1836,101 @@ async function actionRequestBody(request: Request): Promise<JsonObject | null> {
   return payload && typeof payload === "object" && !Array.isArray(payload) ? payload as JsonObject : null;
 }
 
+async function solverRequestBody(request: Request): Promise<JsonObject | null> {
+  const maximumBytes = 256 * 1024;
+  const length = Number(request.headers.get("Content-Length") || 0);
+  if (Number.isFinite(length) && length > maximumBytes) return null;
+  if (!String(request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json")) return null;
+  const raw = await request.text().catch(() => "");
+  if (!raw || new TextEncoder().encode(raw).byteLength > maximumBytes) return null;
+  let payload: unknown = null;
+  try { payload = JSON.parse(raw); } catch { return null; }
+  return payload && typeof payload === "object" && !Array.isArray(payload) ? payload as JsonObject : null;
+}
+
+function solverVector(value: unknown, maximum: number): Record<(typeof STAT_KEYS)[number], number> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const source = value as JsonObject;
+  const rows = STAT_KEYS.map(key => [key, Number(source[key])] as const);
+  if (rows.some(([, entry]) => !Number.isFinite(entry) || entry < 0 || entry > maximum)) return null;
+  return Object.fromEntries(rows.map(([key, entry]) => [key, Math.round(entry)])) as Record<(typeof STAT_KEYS)[number], number>;
+}
+
+function armourSolverPayload(body: JsonObject): ArmourSolverRequest | null {
+  const rows = Array.isArray(body.items) ? body.items : [];
+  if (!rows.length || rows.length > 500) return null;
+  const items: ArmourSolverItem[] = [];
+  const identifiers = new Set<string>();
+  for (const raw of rows) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+    const row = raw as JsonObject;
+    const itemInstanceId = decimalId(row.itemInstanceId);
+    const itemHash = uint32(row.itemHash);
+    const slotIndex = Number(row.slotIndex);
+    const stats = solverVector(row.stats, 500);
+    const setHash = row.setHash === null || row.setHash === undefined ? null : uint32(row.setHash);
+    if (!itemInstanceId || identifiers.has(itemInstanceId) || !itemHash || !Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex > 4 || !stats || (row.setHash !== null && row.setHash !== undefined && !setHash) || typeof row.isExotic !== "boolean") return null;
+    identifiers.add(itemInstanceId);
+    items.push({ itemInstanceId, itemHash, slotIndex, isExotic: row.isExotic, stats, setHash });
+  }
+  const fixedExoticHashes = Array.isArray(body.fixedExoticHashes) ? [...new Set(body.fixedExoticHashes.map(uint32).filter((value): value is number => Boolean(value)))] : [];
+  const fixedExoticSlot = Number(body.fixedExoticSlot);
+  if (!fixedExoticHashes.length || fixedExoticHashes.length > 20 || !Number.isInteger(fixedExoticSlot) || fixedExoticSlot < 0 || fixedExoticSlot > 4) return null;
+  const setSelections: ArmourSolverRequest["setSelections"] = [];
+  for (const raw of Array.isArray(body.setSelections) ? body.setSelections : []) {
+    const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as JsonObject : null;
+    const setHash = uint32(row?.setHash), count = Number(row?.count);
+    if (!setHash || (count !== 2 && count !== 4)) return null;
+    setSelections.push({ setHash, count });
+  }
+  if (setSelections.length > 2 || setSelections.filter(row => row.count === 4).length > 1) return null;
+  const targets = solverVector(body.targets, 200), statPriorities = solverVector(body.statPriorities, 6);
+  if (!targets || !statPriorities) return null;
+  const openProtocolMasks: ArmourSolverRequest["openProtocolMasks"] = [];
+  for (const raw of Array.isArray(body.openProtocolMasks) ? body.openProtocolMasks : []) {
+    const row = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as JsonObject : null;
+    const setHash = uint32(row?.setHash), two = Number(row?.two), four = Number(row?.four);
+    if (!setHash || !Number.isInteger(two) || !Number.isInteger(four) || two < -2_147_483_648 || two > UINT32_MAX || four < -2_147_483_648 || four > UINT32_MAX) return null;
+    openProtocolMasks.push({ setHash, two, four });
+  }
+  const limit = Number(body.limit);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) return null;
+  return { items, fixedExoticHashes, fixedExoticSlot, setSelections, targets, statPriorities, openProtocolMasks, limit };
+}
+
+async function currentPreparedManifestVersion(env: Env): Promise<string> {
+  if (!env.MANIFEST_DATA) return "";
+  const response = await env.MANIFEST_DATA.fetch(new Request("https://manifest/status")).catch(() => null);
+  const payload = response?.ok ? await response.json<{ manifestVersion?: string }>().catch(() => null) : null;
+  return String(payload?.manifestVersion || "");
+}
+
+async function armourCombinationsRoute(request: Request, env: Env): Promise<Response> {
+  if (!mutationOriginAllowed(request, env)) return withCors(request, env, json({ error: "origin_not_allowed" }, 403));
+  const auth = await authenticatedSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!request.headers.get("X-CSRF-Token") || request.headers.get("X-CSRF-Token") !== auth.session.csrfToken) return withCors(request, env, json({ error: "csrf_validation_failed" }, 403));
+  const body = await solverRequestBody(request);
+  if (!body) return withCors(request, env, json({ error: "invalid_armour_solver_request" }, 400));
+  const characterId = decimalId(body.characterId), membershipType = Number(body.membershipType);
+  const membership = auth.session.activeDestinyMembership;
+  if (!characterId || !membership || membershipType !== membership.membershipType) return withCors(request, env, json({ error: "membership_mismatch" }, 403));
+  const verifiedSession = await verifySessionCharacter(auth, characterId, env);
+  if (!verifiedSession) return withCors(request, env, json({ error: "character_binding_mismatch" }, 403));
+  const requestedManifestVersion = String(body.manifestVersion || "");
+  const manifestVersion = await currentPreparedManifestVersion(env);
+  if (!manifestVersion) return withCors(request, env, json({ error: "live_manifest_unavailable" }, 503));
+  if (!requestedManifestVersion || requestedManifestVersion !== manifestVersion) return withCors(request, env, json({ error: "manifest_version_changed", manifestVersion }, 409));
+  const solver = armourSolverPayload(body);
+  if (!solver) return withCors(request, env, json({ error: "invalid_armour_solver_request" }, 400));
+  const groupSizes = Array.from({ length: 5 }, (_, slotIndex) => solver.items.filter(item => item.slotIndex === slotIndex && (slotIndex === solver.fixedExoticSlot ? item.isExotic && solver.fixedExoticHashes.includes(item.itemHash) : !item.isExotic)).length);
+  const possibleCombinations = groupSizes.reduce((total, size) => total * size, 1);
+  if (!possibleCombinations || possibleCombinations > 25_000_000) return withCors(request, env, json({ error: "armour_combination_limit", possibleCombinations }, 422));
+  const startedAt = Date.now();
+  const result = solveArmourCombinations(solver);
+  return withCors(request, env, json({ ...result, manifestVersion, worker: "forge-auth-worker", durationMs: Date.now() - startedAt }, 200));
+}
+
 function mutationOriginAllowed(request: Request, env: Env): boolean {
   const origin = request.headers.get("Origin");
   return Boolean(origin && allowedOrigins(env).includes(origin));
@@ -2146,6 +2242,7 @@ export default {
       if (request.method === "GET" && url.pathname.startsWith("/bungie/pgcr/")) {
         return pgcrRoute(request, env, decodeURIComponent(url.pathname.slice("/bungie/pgcr/".length)));
       }
+      if (request.method === "POST" && url.pathname === "/bungie/forge/armour-combinations") return armourCombinationsRoute(request, env);
       if (request.method === "POST" && url.pathname === "/bungie/actions/equip-items") return bungieActionRoute(request, env, "equip-items");
       if (request.method === "POST" && url.pathname === "/bungie/actions/transfer-item") return bungieActionRoute(request, env, "transfer-item");
       if (request.method === "POST" && url.pathname === "/bungie/actions/pull-from-postmaster") return bungieActionRoute(request, env, "pull-from-postmaster");

@@ -38,9 +38,10 @@ assert.match(portalCss,/@media\(prefers-reduced-motion:reduce\)/,'Shared portal 
 assert.match(portalController,/role="status" aria-live="polite"/,'Shared portal must retain its accessible live status');
 assert.match(portalController,/APX_SKIP_PORTAL===true/,'Shared portal must support the explicit cached Guardian fast-return path');
 assert.match(portalController,/authRequired:authRequired/,'Shared portal must expose its full-screen Bungie authentication state');
-assert.match(portalController,/function done\(\)\{if\(pendingAuthUrl\)return/,'The application must not appear before Bungie authentication completes');
-assert.match(portalController,/MAX_BLOCKING_MS=2800,ASSET_WAIT_MS=1800/,'All data pages must expose a usable shell before the three-second target');
-assert.match(portalController,/if\(pendingAuthUrl\)return;[\s\S]*?done\(\);[\s\S]*?MAX_BLOCKING_MS/,'The three-second ceiling must preserve the explicit Bungie authentication gate');
+assert.match(portalController,/function done\(\)\{if\(pendingAuthUrl\|\|pendingBlockedMessage\)return/,'The application must not appear before Bungie authentication and verified rendering complete');
+assert.match(portalController,/SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800/,'All data pages must report when verified data misses the three-second target');
+assert.match(portalController,/Still loading verified Guardian data/,'The three-second target must retain an honest loading state instead of exposing an empty shell');
+assert.doesNotMatch(portalController,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/,'The slow-load notice must not dismiss the live-data gate');
 assert.match(portalCss,/\.apx-auth-panel/,'The shared portal must visibly own the Bungie authentication gate');
 
 assert.match(auth,/readCachedBungieSession/,'Bungie authentication must reuse the current tab session');
@@ -61,12 +62,13 @@ assert.match(binding,/function characterScopedSelectionState\(previous=\{\},deta
 assert.match(workspace,/characterScopedSelectionState\(workspaceState, detail\)/,'The primary Character renderer must enforce the Guardian ownership boundary');
 assert.match(betaRuntime,/characterScopedSelectionState\(workspaceState, detail\)/,'The beta Character renderer must enforce the same Guardian ownership boundary');
 assert.doesNotMatch(betaRuntime,/previewStats/,'The Character renderer must not invent preview stat values when Bungie data is absent');
-assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260913-live-character-2/,'Main must load the repaired authenticated page payload profile without a stale module cache');
-assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260913-live-character-2/,'Main must load the repaired page payload dependency graph without a stale module cache');
+assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260913-live-character-3/,'Main must load the authenticated live-fallback profile without a stale module cache');
+assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260913-live-character-3/,'Main must load the verified-data dependency graph without a stale module cache');
 assert.match(workspaceHtml,/href="\/img\/favicon\/favicon-32x32\.png"[\s\S]*?href="\/img\/favicon\/favicon\.ico"/,'Main Character must publish the canonical favicon assets from its nested route.');
 assert.match(preparedClient,/const REQUEST_TIMEOUT_MS=30_000/,'The shared prepared page request must have one bounded network timeout');
 assert.match(preparedClient,/freshness=force\?'live':'display'[\s\S]*?requestPreparedPagePayload\(page,\{fetchImpl,freshness\}\)/,'A forced profile refresh must bypass the display snapshot without blocking the cached first paint.');
 assert.match(profile,/if\(!displayedDetail\)[\s\S]*?loadPreparedPagePayload\(session,page\)[\s\S]*?liveProfileReady=true[\s\S]*?loadLiveProfile\(session,\{background:true\}\)/,'Character must paint verified cached or display data first, then refresh from live Bungie in the background.');
+assert.match(profile,/prepared display snapshot unavailable[\s\S]*?getBungieSession\(\{force:true\}\)[\s\S]*?loadLiveProfile\(verifiedSession,\{background:false\}\)/,'Character must validate the session and request Bungie live data before declaring the page unavailable.');
 assert.match(profile,/return ensureLiveProfile\(session,\{background:false,silent:false\}\)/,'Authenticated profile recovery must issue one visible request rather than duplicate retries');
 assert.doesNotMatch(profile,/ensureLiveProfile\(globalThis\.FORGE_BUNGIE_SESSION\|\|null/,'Profile bootstrap must not make an unauthenticated profile request before session resolution');
 
@@ -223,7 +225,7 @@ assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWor
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
 assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
 assert.match(buildHtml,/paradox-build-space\.css\?v=20260908-icon-hover-1/,'Build must load the completed icon-token wiring without a stale cache');
-assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-live-character-2/,'Build must load the repaired live-equipped and non-blocking module graph without stale code');
+assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-live-character-3/,'Build must load the repaired live-equipped verified-data module graph without stale code');
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');
 assert.match(buildModule,/document\.addEventListener\('forge:guardian-loadout-context',event=>recoverMissingBuild\(event\.detail\|\|\{\}\)\)/,'Build must recover a missing handoff from the verified live Guardian context');
 assert.match(buildModule,/const artifactItems=resolvedOptions\(build,'artifact'\)/,'Build Artifact selector must expose the verified Artifact 2.0 catalogue for Forge ranking');

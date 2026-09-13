@@ -4,7 +4,7 @@ import {
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260913-live-character-2&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
+} from "./guardian-bungie-profile.mjs?v=20260913-live-character-3&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";

@@ -53,28 +53,28 @@ assert.doesNotMatch(verifying.summary,/\b0 items indexed\b/,'Unresolved account 
 
 assert.equal(accountItemRows(payload).length,4,'Account item totals must deduplicate the same Bungie instance across inventory and equipment components.');
 
-const resident=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,phase:'resident',combinationsPrewarmed:false,durationMs:1200});
+const resident=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,phase:'resident',backendSolverReady:false,durationMs:1200});
 assert.equal(resident.ready,false);
 assert.equal(resident.rows.every(row=>row.state==='resident'),true);
 assert.match(resident.rows.find(row=>row.key==='vault-armour').detail,/2 armour items indexed/);
 assert.match(resident.rows.find(row=>row.key==='weapons').detail,/1 owned weapons indexed/);
 
-const ready=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,phase:'ready',combinationsPrewarmed:true,durationMs:1250});
+const ready=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,phase:'ready',backendSolverReady:true,durationMs:1250});
 assert.equal(ready.ready,true);
 assert.equal(ready.rows.every(row=>row.state==='ready'),true);
-assert.equal(ready.summary,'4 items indexed · combinations pre-warmed · ready in 1.3s');
+assert.equal(ready.summary,'4 items indexed · backend solver ready · ready in 1.3s');
 const fiveSlots=new Map(Array.from({length:5},(_,slotIndex)=>[slotIndex,{slotIndex}]));
 assert.equal(forgeLoaderEvaluateReady(ready,fiveSlots,characterId),true,'A complete staged load must unlock only against the current ready residency result.');
 assert.equal(forgeLoaderEvaluateReady(ready,new Map([...fiveSlots].slice(0,4)),characterId),false,'Four staged slots must remain locked even when every source is resident.');
 assert.equal(forgeLoaderEvaluateReady({...ready,ready:false},fiveSlots,characterId),false,'A five-piece load must not weaken a genuinely incomplete residency gate.');
 
 const incompleteProfile={...profileBuild,subclassCatalog:profileBuild.subclassCatalog.map(row=>({...row,subclassBuild:{...row.subclassBuild,socketsAvailable:false}}))};
-const incomplete=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild:incompleteProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const incomplete=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild:incompleteProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.equal(incomplete.ready,false);
 assert.equal(incomplete.rows.find(row=>row.key==='subclass').state,'resident');
 
 const unresolvedSocketProfile={...profileBuild,subclassCatalog:profileBuild.subclassCatalog.map(row=>({...row,subclassBuild:{...row.subclassBuild,socketCoverage:{complete:false,unresolved:[5004]}}}))};
-const unresolvedSockets=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild:unresolvedSocketProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const unresolvedSockets=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild:unresolvedSocketProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.equal(unresolvedSockets.ready,false);
 assert.equal(unresolvedSockets.rows.find(row=>row.key==='subclass').state,'resident');
 
@@ -111,7 +111,7 @@ const capturedStagedLoad=new Map([
   [3,{slotIndex:3,hash:1829877749,name:'Luminopotent Boots'}],
   [4,{slotIndex:4,hash:1924898304,name:'Luminopotent Bond'}]
 ]);
-const capturedBlocked=forgeLoaderResidency(capturedPayload,{characterId,catalogue,profileBuild:capturedIncompleteProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const capturedBlocked=forgeLoaderResidency(capturedPayload,{characterId,catalogue,profileBuild:capturedIncompleteProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.equal(capturedBlocked.rows.find(row=>row.key==='subclass').state,'resident','The captured stuck source must be Subclass and fragments.');
 assert.deepEqual(capturedBlocked.rows.filter(row=>row.state!=='ready').map(row=>row.key),['subclass','manifest'],'Manifest readiness must honestly reflect the same unresolved subclass definition source.');
 assert.equal(forgeLoaderEvaluateReady(capturedBlocked,capturedStagedLoad,characterId),false,'Five real staged pieces must stay locked while the live subclass definitions are genuinely unresolved.');
@@ -139,7 +139,7 @@ const capturedReadyProfile={
   }]
 };
 assert.notEqual(forgeInventorySignature(capturedPayload),forgeInventorySignature(resolvedPayload),'A background refresh must notice repaired live subclass definition coverage even when inventory is unchanged.');
-const capturedUnlocked=forgeLoaderResidency(resolvedPayload,{characterId,catalogue,profileBuild:capturedReadyProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const capturedUnlocked=forgeLoaderResidency(resolvedPayload,{characterId,catalogue,profileBuild:capturedReadyProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.equal(capturedUnlocked.rows.every(row=>row.state==='ready'),true);
 assert.equal(forgeLoaderEvaluateReady(capturedUnlocked,capturedStagedLoad,characterId),true,'The exact staged load must unlock as soon as its real Super and fragments resolve.');
 
@@ -162,7 +162,7 @@ const smokeJumperPayload={
   weaponDefinitionCoverage:{itemInstances:[capturedWeaponInstance],requested:[realUnswornHash],resolved:[],unresolved:[realUnswornHash],missingSocketInstances:[],complete:false}
 };
 const smokeJumperBlockedProfile={...capturedReadyProfile,ownedWeapons:[]};
-const smokeJumperBlocked=forgeLoaderResidency(smokeJumperPayload,{characterId,catalogue,profileBuild:smokeJumperBlockedProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const smokeJumperBlocked=forgeLoaderResidency(smokeJumperPayload,{characterId,catalogue,profileBuild:smokeJumperBlockedProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.deepEqual(smokeJumperBlocked.rows.filter(row=>row.state!=='ready').map(row=>row.key),['weapons','manifest'],'The exact live stuck rows must be Weapons and Manifest.');
 assert.equal(forgeLoaderEvaluateReady(smokeJumperBlocked,smokeJumperStagedLoad,characterId),false,'Nothing Manacles and four Smoke Jumper pieces must stay locked while owned weapon evidence is genuinely unresolved.');
 
@@ -172,7 +172,7 @@ const smokeJumperResolvedPayload={
 };
 const smokeJumperResolvedProfile={...capturedReadyProfile,ownedWeapons:[{hash:realUnswornHash,itemHash:realUnswornHash,itemInstanceId:capturedWeaponInstance,name:'Unsworn'}]};
 assert.notEqual(forgeInventorySignature(smokeJumperPayload),forgeInventorySignature(smokeJumperResolvedPayload),'A repaired owned weapon coverage result must rebuild residency without an inventory mutation.');
-const smokeJumperReady=forgeLoaderResidency(smokeJumperResolvedPayload,{characterId,catalogue,profileBuild:smokeJumperResolvedProfile,phase:'ready',combinationsPrewarmed:true,durationMs:900});
+const smokeJumperReady=forgeLoaderResidency(smokeJumperResolvedPayload,{characterId,catalogue,profileBuild:smokeJumperResolvedProfile,phase:'ready',backendSolverReady:true,durationMs:900});
 assert.equal(smokeJumperReady.rows.every(row=>row.state==='ready'),true,'All six real resident sources must reach READY after the owned weapon join completes.');
 assert.equal(forgeLoaderEvaluateReady(smokeJumperReady,smokeJumperStagedLoad,characterId),true,'The exact Nothing Manacles and Smoke Jumper staged load must unlock with verified source coverage.');
 assert.equal(smokeJumperResolvedPayload.definitionCoverage.complete,false,'The armour-only offline hydration flag remains honestly incomplete and is not misused as whole-page manifest coverage.');

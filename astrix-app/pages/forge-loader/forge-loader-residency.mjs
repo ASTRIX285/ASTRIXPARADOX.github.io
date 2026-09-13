@@ -75,13 +75,13 @@ function forgeLoaderResidency(payload={},options={}){
     {key:'artifact',label:'Seasonal Artifact',resident:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),complete:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),detail:profileBuild?`${artifact?.name?`${text(artifact.name)} active · `:'No active Artifact reported · '}${artifactCatalog.length} verified definitions resident`:'Awaiting verified Artifact data'},
     {key:'manifest',label:'Manifest',resident:Boolean(manifestVersion),complete:manifestComplete,detail:manifestVersion?`Cached manifest ${manifestVersion}`:'Awaiting cached manifest'}
   ].map(row=>({...row,state:sourceState(row.resident,row.complete,phase)}));
-  const ready=options.combinationsPrewarmed===true&&rows.every(row=>row.state==='ready');
+  const ready=options.backendSolverReady===true&&rows.every(row=>row.state==='ready');
   const durationMs=Math.max(0,Number(options.durationMs)||0);
   return {
     rows,
     itemCount:allItems.length,
     ready,
-    summary:ready?`${allItems.length} items indexed · combinations pre-warmed · ready in ${(durationMs/1000).toFixed(1)}s`:'Verifying required Bungie sources. No unverified counts are shown.'
+    summary:ready?`${allItems.length} items indexed · backend solver ready · ready in ${(durationMs/1000).toFixed(1)}s`:'Verifying required Bungie sources. No unverified counts are shown.'
   };
 }
 

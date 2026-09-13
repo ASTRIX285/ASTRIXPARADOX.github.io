@@ -26,9 +26,9 @@ import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inv
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-live-character-2&transport=20260911-compact-plugs-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-live-character-3&transport=20260911-compact-plugs-1';
 import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
-import '../guardian-portal-progress.mjs?v=20260913-three-second-ready-1&loader=2&transport=20260911-compact-plugs-1';
+import '../guardian-portal-progress.mjs?v=20260913-live-character-3&loader=3&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
 import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';

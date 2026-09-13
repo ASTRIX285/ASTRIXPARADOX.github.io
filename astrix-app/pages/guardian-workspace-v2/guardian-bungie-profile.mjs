@@ -949,8 +949,18 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
     }
     if(!displayedDetail){
       const page=currentPagePayloadKind();
-      const displayPayload=await loadPreparedPagePayload(session,page);
-      displayedDetail=await activateLiveProfile(await hydrateManifestPayload(displayPayload,INITIAL_PROFILE_HYDRATION),session);
+      try{
+        const displayPayload=await loadPreparedPagePayload(session,page);
+        displayedDetail=await activateLiveProfile(await hydrateManifestPayload(displayPayload,INITIAL_PROFILE_HYDRATION),session);
+      }catch(displayError){
+        console.warn("[Forge Bungie profile] prepared display snapshot unavailable; validating the session and requesting live data",displayError);
+        const verifiedSession=await getBungieSession({force:true});
+        if(verifiedSession?.authenticated!==true)return null;
+        authenticatedSession=verifiedSession;
+        displayedDetail=await loadLiveProfile(verifiedSession,{background:false});
+        liveProfileReady=Boolean(liveProfilePayload?.profile);
+        return displayedDetail;
+      }
     }
     liveProfileReady=true;
     try{return await loadLiveProfile(session,{background:true});}
@@ -960,7 +970,7 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
     }
   })()
     .then(detail=>{
-      liveProfileReady=true;
+      liveProfileReady=Boolean(liveProfilePayload?.profile);
       return detail;
     })
     .catch(error=>{

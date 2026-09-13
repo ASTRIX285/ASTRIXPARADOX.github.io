@@ -88,7 +88,6 @@ const RECENT_ACTIVITY_PENDING='Recent activity data is not connected.';
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12*1000;
 const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6*1000;
-const JOURNEY_LOADER_READY_WAIT_MS=6*1000;
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';
 const LAST_LOADOUT_KEY='astrix:paradox-last-bungie-loadout:v1';
@@ -138,11 +137,7 @@ function waitWithin(promise,timeoutMs){
 
 async function finishJourneyLoader(root=document){
   reportPreparedPageStage('ready','journey');
-  let timer=0;
-  await Promise.race([
-    Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(()=>globalThis.ForgeLoader.done()),
-    new Promise(resolve=>{timer=globalThis.setTimeout(()=>{globalThis.ForgeLoader.done();resolve();},JOURNEY_LOADER_READY_WAIT_MS);})
-  ]).finally(()=>globalThis.clearTimeout(timer));
+  await Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(error=>globalThis.ForgeLoader.blocked(error?.message||'Journey could not finish rendering verified data.'));
 }
 
 function waitForHeroCards(){

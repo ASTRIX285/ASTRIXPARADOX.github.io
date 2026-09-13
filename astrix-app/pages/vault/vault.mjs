@@ -616,7 +616,7 @@ async function init(){
     byId('vaultConnectionState').textContent='INVENTORY UNAVAILABLE';
     setStatus(error?.message||'Verified Bungie inventory is unavailable.','error');
     globalThis.ForgeLoader?.status?.(error?.message||'Verified Bungie inventory is unavailable.');
-    globalThis.ForgeLoader?.done?.();
+    globalThis.ForgeLoader?.blocked?.(error?.message||'Verified Bungie inventory is unavailable.');
   }
 }
 

@@ -13,13 +13,13 @@
   if(window.APX_SKIP_PORTAL===true){
     var noop=function(){};
     document.documentElement.classList.remove('apx-booting');
-    window.ForgeLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,skipped:true};
+    window.ForgeLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,blocked:noop,skipped:true};
     return;
   }
   document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
-  var MAX_BLOCKING_MS=2800,ASSET_WAIT_MS=1800;
-  var gate, prog, pct, status, authPanel, authButton, ceilingTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='';
+  var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
+  var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
     '<div class="apx-gate" role="status" aria-live="polite" aria-label="Loading">'+
@@ -45,6 +45,11 @@
           '<span>Connect your Bungie account to load your live Guardian.</span>'+
           '<button class="apx-auth-button" type="button">CONNECT BUNGIE</button>'+
         '</div>'+
+        '<div class="apx-failure-panel" hidden>'+
+          '<strong>LIVE GUARDIAN DATA UNAVAILABLE</strong>'+
+          '<span></span>'+
+          '<button class="apx-auth-button apx-retry-button" type="button">RETRY LIVE DATA</button>'+
+        '</div>'+
         '<p class="apx-status">Opening portal</p>'+
       '</div>'+
     '</div>';
@@ -53,7 +58,8 @@
     gate=document.querySelector('.apx-gate');
     if(!gate)return;
     prog=gate.querySelector('.apx-prog');pct=gate.querySelector('.apx-pct');status=gate.querySelector('.apx-status');
-    authPanel=gate.querySelector('.apx-auth-panel');authButton=gate.querySelector('.apx-auth-button');
+    authPanel=gate.querySelector('.apx-auth-panel');authButton=authPanel&&authPanel.querySelector('.apx-auth-button');
+    failurePanel=gate.querySelector('.apx-failure-panel');failureMessage=failurePanel&&failurePanel.querySelector('span');retryButton=failurePanel&&failurePanel.querySelector('.apx-retry-button');
   }
   function applyAuth(){
     if(!gate||!authPanel||!authButton)return;
@@ -62,11 +68,19 @@
     authPanel.hidden=!required;
     authButton.onclick=required?function(){window.location.href=pendingAuthUrl;}:null;
   }
+  function applyBlocked(){
+    if(!gate||!failurePanel)return;
+    var blocked=Boolean(pendingBlockedMessage);
+    gate.classList.toggle('is-live-blocked',blocked);
+    failurePanel.hidden=!blocked;
+    if(failureMessage)failureMessage.textContent=pendingBlockedMessage;
+    if(retryButton)retryButton.onclick=blocked?function(){window.location.reload();}:null;
+  }
   function apply(){
     if(prog)prog.style.setProperty('--p',pendingPct);
     if(pct)pct.textContent=pendingPct+'%';
     if(status)status.textContent=pendingStatus;
-    applyAuth();
+    applyAuth();applyBlocked();
     if(pendingDone)finish();
   }
   function mount(){
@@ -77,10 +91,10 @@
     var wrap=document.createElement('div');wrap.innerHTML=markup();
     gate=wrap.firstElementChild;document.body.appendChild(gate);
     document.body.classList.add('apx-loading');cache();apply();
-    clearTimeout(ceilingTimer);ceilingTimer=setTimeout(function(){
-      if(pendingAuthUrl)return;
-      setStatus('Page ready · live data updating');done();
-    },MAX_BLOCKING_MS);
+    clearTimeout(noticeTimer);noticeTimer=setTimeout(function(){
+      if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;
+      setStatus('Still loading verified Guardian data');
+    },SLOW_LOAD_NOTICE_MS);
     document.documentElement.classList.remove('apx-booting');
   }
   function set(v){
@@ -94,10 +108,14 @@
     if(status)status.textContent=pendingStatus;
   }
   function authRequired(url){
-    pendingAuthUrl=String(url||'');pendingDone=false;
+    pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
     setStatus('Bungie authentication required');applyAuth();
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
+  function blocked(message){
+    pendingBlockedMessage=String(message||'Verified live Guardian data is unavailable.');pendingDone=false;
+    setStatus('Live Guardian data unavailable');applyBlocked();
+  }
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
     var load=new Promise(function(resolve){
@@ -120,7 +138,7 @@
   }
   function finish(){
     if(!gate||gate.classList.contains('is-done'))return;
-    clearTimeout(ceilingTimer);pendingPct=100;
+    clearTimeout(noticeTimer);pendingPct=100;
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');
@@ -131,7 +149,7 @@
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function done(){if(pendingAuthUrl)return;pendingDone=true;set(100);if(gate)finish();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;pendingDone=true;set(100);if(gate)finish();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
@@ -141,5 +159,5 @@
     bodyObserver.observe(document.documentElement,{childList:true});
     document.addEventListener('DOMContentLoaded',function(){bodyObserver.disconnect();mount();},{once:true});
   }
-  window.ForgeLoader={mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved};
+  window.ForgeLoader={mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
 })();

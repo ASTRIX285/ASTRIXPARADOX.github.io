@@ -74,21 +74,21 @@ body.apx-loading{overflow:hidden!important}
   letter-spacing:.14em;color:var(--apx-loader-text)}
 .apx-brand em{font-style:normal;color:var(--apx-loader-gold)}
 .apx-status{font:600 .7rem bahnschrift-semicondensed,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#f0bc5c}
-.apx-auth-panel{display:grid;justify-items:center;gap:10px;width:min(420px,82vw);padding:18px 22px;
+.apx-auth-panel,.apx-failure-panel{display:grid;justify-items:center;gap:10px;width:min(420px,82vw);padding:18px 22px;
   border:1px solid rgba(255,211,106,.42);border-radius:12px;background:rgba(27,2,5,.9);
   box-shadow:0 18px 54px rgba(0,0,0,.46),inset 0 0 24px rgba(224,169,78,.05);text-align:center}
-.apx-auth-panel[hidden]{display:none}
-.apx-auth-panel strong{font:800 .78rem bahnschrift-semicondensed,sans-serif;letter-spacing:.17em;color:#fff}
-.apx-auth-panel span{font:600 .65rem/1.55 bahnschrift,sans-serif;color:rgba(255,247,228,.72)}
+.apx-auth-panel[hidden],.apx-failure-panel[hidden]{display:none}
+.apx-auth-panel strong,.apx-failure-panel strong{font:800 .78rem bahnschrift-semicondensed,sans-serif;letter-spacing:.17em;color:#fff}
+.apx-auth-panel span,.apx-failure-panel span{font:600 .65rem/1.55 bahnschrift,sans-serif;color:rgba(255,247,228,.72)}
 .apx-auth-button{appearance:none;min-width:210px;margin-top:4px;padding:12px 18px;border:1px solid rgba(224,169,78,.78);
   border-radius:8px;background:linear-gradient(180deg,rgba(224,169,78,.24),rgba(192,67,63,.16));color:#fff;
   font:800 .68rem bahnschrift-semicondensed,sans-serif;letter-spacing:.13em;cursor:pointer;
   box-shadow:0 0 22px rgba(224,169,78,.12),inset 0 0 0 1px rgba(255,255,255,.04)}
 .apx-auth-button:hover{border-color:#ffd17c;background:linear-gradient(180deg,rgba(224,169,78,.34),rgba(192,67,63,.24))}
 .apx-auth-button:focus-visible{outline:2px solid var(--apx-loader-gold);outline-offset:3px}
-.apx-gate.is-auth-required .apx-pct{visibility:hidden}
-.apx-gate.is-auth-required .apx-status{color:var(--apx-loader-gold)}
-.apx-gate.is-auth-required .apx-prog{opacity:.25}
+.apx-gate.is-auth-required .apx-pct,.apx-gate.is-live-blocked .apx-pct{visibility:hidden}
+.apx-gate.is-auth-required .apx-status,.apx-gate.is-live-blocked .apx-status{color:var(--apx-loader-gold)}
+.apx-gate.is-auth-required .apx-prog,.apx-gate.is-live-blocked .apx-prog{opacity:.25}
 
 @keyframes apxSpin{to{transform:rotate(360deg)}}
 @keyframes apxSpinRev{to{transform:rotate(-360deg)}}
@@ -108,5 +108,5 @@ body.apx-loading{overflow:hidden!important}
   .apx-logo{width:55%;height:55%}
   .apx-brand{font-size:.88rem}
   .apx-status{margin:0;font-size:.62rem;letter-spacing:.2em}
-  .apx-auth-panel{box-sizing:border-box;width:min(420px,90vw);padding:14px 16px}
+  .apx-auth-panel,.apx-failure-panel{box-sizing:border-box;width:min(420px,90vw);padding:14px 16px}
 }
