@@ -9,7 +9,7 @@ import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepar
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260911-vault-live-transfer-1';
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-live-transfer-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -174,6 +174,16 @@ function stageTransfer(item,destination){
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
     showVaultActionDialog('Confirm live item transfer',`Move ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy}`,{kind:'transfer',intent});
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
+}
+
+function stageQuickTransfer(requestedItemKey){
+  const item=workspaceItem(requestedItemKey);
+  if(!item||!activeCharacterId)return;
+  const sourceCharacterId=text(item.source?.characterId);
+  const destination=item.source?.kind==='vault'||sourceCharacterId!==activeCharacterId
+    ?{kind:'character',characterId:activeCharacterId}
+    :{kind:'vault',characterId:null};
+  stageTransfer(item,destination);
 }
 
 async function stagePostmasterCollection(characterId,requestedItemKey=''){
@@ -534,7 +544,7 @@ function installTransferEvents(){
     event.preventDefault();
     stageTransfer(item,destination);
   });
-  bindInventoryWorkspaceInteractions(board,{onPullItem:stagePostmasterCollection,onPullAll:stagePostmasterCollection,onDirectEquip:stageDirectEquip});
+  bindInventoryWorkspaceInteractions(board,{onPullItem:stagePostmasterCollection,onPullAll:stagePostmasterCollection,onDirectEquip:stageDirectEquip,onMoveItem:stageQuickTransfer});
   byId('vaultActionCancel')?.addEventListener('click',closeVaultActionDialog);
   byId('vaultActionConfirm')?.addEventListener('click',performPendingVaultAction);
   byId('vaultActionDialog')?.addEventListener('cancel',event=>{if(vaultActionBusy)event.preventDefault();else{event.preventDefault();closeVaultActionDialog();}});
@@ -585,7 +595,7 @@ async function init(){
   installTransferEvents();
   byId('vaultConnectButton').href=authStartUrl();
   try{
-    session=await getBungieSession();
+    session=await getBungieSession({force:true});
     if(session?.authenticated!==true){
       byId('vaultSignedOut').hidden=false;
       byId('vaultConnectionState').textContent='SIGNED OUT';

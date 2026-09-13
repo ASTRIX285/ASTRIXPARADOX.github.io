@@ -157,12 +157,13 @@ function itemTileMarkup(item,{kind=item?.equipmentGroup?.kind||'',className=''}=
 }
 
 function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
-  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',structured=kind==='weapon'||kind==='armour',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
+  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',structured=kind==='weapon'||kind==='armour',sourceKind=String(item?.source?.kind||''),sourceCharacterId=text(item?.source?.characterId),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canMove=canDrag&&/^\d+$/.test(String(activeCharacterId||'')),moveLabel=sourceKind==='vault'||sourceCharacterId!==text(activeCharacterId)?'MOVE HERE':'TO VAULT',canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
   const masterwork=tierPipsMarkup(item,state,{legacy:true});
   const lock=state.locked?'<span class="vault-transfer-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
   const directHint=canDirectEquip?' Double click to review equipping this exact item on the active Guardian.':'';
   return `<article class="vault-transfer-item${structured?' has-item-tile':''}${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}" title="${esc(item.name)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
     ${structured?structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}):`<span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${masterwork}${power}${quantity}${lock}</span>`}
+    ${canMove?`<button class="vault-live-move" type="button" data-move-live-item="${esc(key)}">${moveLabel}</button>`:''}
     ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
   </article>`;
 }
@@ -200,9 +201,11 @@ function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindInspect=()=
   });
 }
 
-function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()=>{},onDirectEquip=()=>{}}={}){
+function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()=>{},onDirectEquip=()=>{},onMoveItem=()=>{}}={}){
   if(!root)return ()=>{};
   const click=event=>{
+    const moveButton=event.target.closest?.('[data-move-live-item]');
+    if(moveButton&&!moveButton.disabled){event.preventDefault();event.stopPropagation();onMoveItem(moveButton.dataset.moveLiveItem);return;}
     const itemButton=event.target.closest?.('[data-pull-postmaster-item]');
     if(itemButton&&!itemButton.disabled){onPullItem(itemButton.dataset.postmasterCharacterId,itemButton.dataset.pullPostmasterItem);return;}
     const allButton=event.target.closest?.('[data-collect-postmaster]');

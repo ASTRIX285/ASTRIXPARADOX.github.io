@@ -128,6 +128,11 @@ assert.match(vaultRuntime,/function bindVaultWorkspaceHovers\(root\)[\s\S]*?bind
 assert.match(vaultRuntime,/function characterColumnMarkup[\s\S]*?data-drop-kind="character"[\s\S]*?\$\{postmasterMarkup\(characterId\)\}[\s\S]*?EQUIPPED[\s\S]*?CARRIED/,'Each real Guardian column must render Postmaster, Equipped, and Carried in order.');
 assert.match(vaultRuntime,/data-drop-kind="vault"[\s\S]*?VAULT ONLY/,'Items outside every Guardian must remain in a distinct Vault-only drop target.');
 assert.match(vaultRuntime,/executeVaultTransferIntent\(confirmVaultTransferIntent\(action\.intent\)[\s\S]*?if\(result\.mutationCount>0\)await refreshAfterLiveAction\(\)/,'The UI must call the confirmed live executor and refresh only after a real mutation was reported.');
+assert.match(vaultRuntime,/session=await getBungieSession\(\{force:true\}\)/,'Vault must refresh the live Worker session, CSRF token, and mutation capabilities before enabling transfers.');
+assert.match(vaultRuntime,/function stageQuickTransfer[\s\S]*?sourceCharacterId!==activeCharacterId[\s\S]*?kind:'character'[\s\S]*?kind:'vault'/,'The explicit MOVE control must route Vault and other-Guardian items to the active Guardian, and active-Guardian items to Vault.');
+assert.match(vaultRuntime,/onMoveItem:stageQuickTransfer/,'Vault must bind the explicit live MOVE control for touch and pointer input.');
+assert.match(sharedTileRuntime,/data-move-live-item/,'Shared inventory tiles must expose an explicit live MOVE button when the Worker advertises transfer capability.');
+assert.match(sharedTileRuntime,/onMoveItem\(moveButton\.dataset\.moveLiveItem\)/,'The shared interaction layer must dispatch explicit MOVE controls.');
 assert.doesNotMatch(vaultRuntime,/catalogue\.items\s*=|\.splice\([^\n]*catalogue|source\.kind\s*=(?!=)/,'Vault drag and drop must not optimistically rewrite owned-item locations.');
 assert.match(vaultRuntime,/itemTileMarkup\(item,\{kind:'armour'\}\)/,'Vault cards must render through the shared item tile contract.');
 assert.match(sharedTileRuntime,/item\?\.releaseWatermark\?\.icon\|\|item\?\.tierIcon/,'Shared Vault cards must render the prepared genuine Bungie season or source icon.');

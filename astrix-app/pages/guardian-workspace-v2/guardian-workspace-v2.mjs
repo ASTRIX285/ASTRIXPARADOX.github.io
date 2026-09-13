@@ -11,7 +11,7 @@ import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-chara
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-live-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
 
@@ -189,6 +189,16 @@ function stageCharacterDirectEquip(requestedItemKey){
   }catch(error){characterInventoryStatus(error?.message||'This direct live equip cannot be staged.','error');}
 }
 
+function stageCharacterVaultTransfer(requestedItemKey){
+  const item=characterInventoryItem(requestedItemKey);
+  if(!item||!characterInventoryState.activeCharacterId||!['equipped','carried'].includes(item.source?.kind))return;
+  try{
+    const replacement=item.source.kind==='equipped'?(characterInventoryState.catalogue.items||[]).filter(candidate=>candidate.source?.kind==='carried'&&String(candidate.source.characterId||'')===String(item.source.characterId||'')&&Number(candidate.bucketHash)===Number(item.bucketHash)&&itemKey(candidate)!==itemKey(item)).sort((left,right)=>Number(Boolean(left.isExotic))-Number(Boolean(right.isExotic))||Number(left.power||0)-Number(right.power||0))[0]||null:null;
+    const intent=stageVaultTransferIntent({item,destination:{kind:'vault',characterId:null},session:characterInventoryState.session,replacementItem:replacement});
+    showCharacterInventoryAction('Confirm live Vault transfer',`Move ${item.name} from ${activeCharacterLabel()} to Vault.${replacement?` ${replacement.name} will be equipped first so Bungie can move the currently equipped item.`:''}`,{kind:'transfer',intent});
+  }catch(error){characterInventoryStatus(error?.message||'This live Vault transfer cannot be staged.','error');}
+}
+
 function characterInventoryFailure(result){
   const failed=[...(result?.steps||[])].reverse().find(row=>['failed','mismatch','blocked'].includes(row.status)),detail=failed?.detail;
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
@@ -225,11 +235,11 @@ async function performCharacterInventoryAction(){
 
 function installCharacterInventory(){
   const host=byId('characterInventoryWorkspace');
-  bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection,onDirectEquip:stageCharacterDirectEquip});
+  bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection,onDirectEquip:stageCharacterDirectEquip,onMoveItem:stageCharacterVaultTransfer});
   byId('characterInventoryActionCancel')?.addEventListener('click',closeCharacterInventoryAction);
   byId('characterInventoryActionConfirm')?.addEventListener('click',performCharacterInventoryAction);
   byId('characterInventoryActionDialog')?.addEventListener('cancel',event=>{event.preventDefault();if(!characterInventoryState.busy)closeCharacterInventoryAction();});
-  getBungieSession().then(session=>{characterInventoryState.session=session;renderCharacterInventory();}).catch(()=>{});
+  getBungieSession({force:true}).then(session=>{characterInventoryState.session=session;renderCharacterInventory();}).catch(()=>{});
 }
 
 let stageLoadingTimer = 0;

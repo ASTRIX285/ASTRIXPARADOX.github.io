@@ -217,7 +217,7 @@ def build_html(sections, total):
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=20260913-mobile-nav-1">
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
@@ -286,12 +286,12 @@ def build_html(sections, total):
 </head>
 <body>
 <nav class="nav">
-  <div class="nav-logo">
+  <a class="nav-logo" href="../index.html" aria-label="ASTRIX PARADOX home">
     <img src="../img/logo.png" alt="ASTRIX PARADOX">
     <span>ASTRIX<span class="accent">285</span></span>
-  </div>
-  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
-  <div class="nav-links">
+  </a>
+  <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span></button>
+  <div class="nav-links" id="site-navigation">
     <a href="../index.html">Home</a>
     <a href="reviews.html">Reviews</a>
     <a href="news.html">News</a>
@@ -380,7 +380,7 @@ __CARDS_HTML__
   </div>
 </div>
 
-<script src="../js/main.js"></script>
+<script src="../js/main.js?v=20260913-mobile-nav-1"></script>
 <script>
   var activeGame='all', activeType='all';
   function filterClips(btn, dim) {
