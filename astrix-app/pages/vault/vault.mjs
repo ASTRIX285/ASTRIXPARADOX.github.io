@@ -208,7 +208,7 @@ async function performPendingVaultAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
-    if(result.attemptCount>0||result.mutationCount>0)await refreshAfterLiveAction();
+    if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction();
     if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
   }catch(error){
@@ -624,6 +624,7 @@ async function init(){
     setStatus(`${catalogue.items.length} exact grouped inventory item${catalogue.items.length===1?'':'s'} loaded across ${characters().length} Guardian${characters().length===1?'':'s'} and Vault${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}. Live transfer ${liveReady?'ready':'unavailable for this session'}.`,'good');
     await settleVisibleImages();
     globalThis.ForgeLoader?.done?.();
+    void refreshAfterLiveAction().catch(error=>console.info('[Forge Vault] initial live inventory overlay unavailable',error));
   }catch(error){
     console.error('[Forge Vault]',error);
     byId('vaultConnectionState').textContent='INVENTORY UNAVAILABLE';

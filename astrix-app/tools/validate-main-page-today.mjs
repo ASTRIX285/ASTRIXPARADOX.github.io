@@ -63,7 +63,7 @@ assert.match(workspace,/characterScopedSelectionState\(workspaceState, detail\)/
 assert.match(betaRuntime,/characterScopedSelectionState\(workspaceState, detail\)/,'The beta Character renderer must enforce the same Guardian ownership boundary');
 assert.doesNotMatch(betaRuntime,/previewStats/,'The Character renderer must not invent preview stat values when Bungie data is absent');
 assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260913-character-safe-2/,'Main must load the partial-data-safe authenticated profile without a stale module cache');
-assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260914-resilient-transfer-4/,'Main must load the resilient transfer dependency graph without a stale module cache');
+assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260914-resilient-transfer-5/,'Main must load the resilient transfer dependency graph without a stale module cache');
 assert.match(workspaceHtml,/href="\/img\/favicon\/favicon-32x32\.png"[\s\S]*?href="\/img\/favicon\/favicon\.ico"/,'Main Character must publish the canonical favicon assets from its nested route.');
 assert.match(preparedClient,/const REQUEST_TIMEOUT_MS=30_000/,'The shared prepared page request must have one bounded network timeout');
 assert.match(preparedClient,/freshness=force\?'live':'display'[\s\S]*?requestPreparedPagePayload\(page,\{fetchImpl,freshness,quiet\}\)/,'A forced profile refresh must bypass the display snapshot without blocking the cached first paint.');
