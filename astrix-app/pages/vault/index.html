@@ -40,7 +40,7 @@
 
     <section class="apx-section vault-transfer-workspace" aria-labelledby="vaultTransferTitle">
       <div class="apx-section-heading"><div><p class="apx-eyebrow">GUARDIAN TRANSFER WORKSPACE</p><h2 id="vaultTransferTitle">INVENTORY</h2></div><span class="apx-status-chip">REAL ACCOUNT ACTIONS</span></div>
-      <p class="vault-context">Drag an exact owned item between Guardians and Vault. Every drop requires confirmation, calls Bungie, and waits for fresh inventory readback before the page moves the item.</p>
+      <p class="vault-context">Move an exact owned item between Guardians and Vault. The selected move calls Bungie immediately and waits for fresh inventory readback before the page changes the item position.</p>
       <div class="vault-runtime-status" id="vaultRuntimeStatus" role="status">Resolving Bungie inventory...</div>
       <div class="vault-transfer-board" id="vaultTransferWorkspace" aria-live="polite"></div>
     </section>
@@ -96,6 +96,6 @@
     </form>
   </dialog>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1"></script>
-  <script type="module" src="./vault.mjs?v=20260913-live-transfer-1&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1"></script>
+  <script type="module" src="./vault.mjs?v=20260913-direct-transfer-1&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1"></script>
 </body>
 </html>

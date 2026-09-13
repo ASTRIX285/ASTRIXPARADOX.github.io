@@ -195,7 +195,9 @@ function stageCharacterVaultTransfer(requestedItemKey){
   try{
     const replacement=item.source.kind==='equipped'?(characterInventoryState.catalogue.items||[]).filter(candidate=>candidate.source?.kind==='carried'&&String(candidate.source.characterId||'')===String(item.source.characterId||'')&&Number(candidate.bucketHash)===Number(item.bucketHash)&&itemKey(candidate)!==itemKey(item)).sort((left,right)=>Number(Boolean(left.isExotic))-Number(Boolean(right.isExotic))||Number(left.power||0)-Number(right.power||0))[0]||null:null;
     const intent=stageVaultTransferIntent({item,destination:{kind:'vault',characterId:null},session:characterInventoryState.session,replacementItem:replacement});
-    showCharacterInventoryAction('Confirm live Vault transfer',`Move ${item.name} from ${activeCharacterLabel()} to Vault.${replacement?` ${replacement.name} will be equipped first so Bungie can move the currently equipped item.`:''}`,{kind:'transfer',intent});
+    characterInventoryState.pendingAction={kind:'transfer',intent};
+    characterInventoryStatus(`Moving ${item.name} from ${activeCharacterLabel()} to Vault.${replacement?` ${replacement.name} will be equipped first so Bungie can move the currently equipped item.`:''} Waiting for Bungie inventory feedback.`);
+    void performCharacterInventoryAction();
   }catch(error){characterInventoryStatus(error?.message||'This live Vault transfer cannot be staged.','error');}
 }
 
@@ -214,7 +216,7 @@ async function performCharacterInventoryAction(){
   progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
   let result=null;
   try{
-    const onProgress=row=>{progress.textContent=row.label||'Waiting for Bungie confirmation.';};
+    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';progress.textContent=label;characterInventoryStatus(label);};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session:characterInventoryState.session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress});

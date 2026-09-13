@@ -172,7 +172,9 @@ function showVaultActionDialog(title,summary,action){
 function stageTransfer(item,destination){
   try{
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
-    showVaultActionDialog('Confirm live item transfer',`Move ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy}`,{kind:'transfer',intent});
+    pendingVaultAction={kind:'transfer',intent};
+    setStatus(`Moving ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy} Waiting for Bungie inventory feedback.`);
+    void performPendingVaultAction();
   }catch(error){setStatus(error?.message||'This live transfer cannot be staged.','error');}
 }
 
@@ -238,7 +240,7 @@ async function performPendingVaultAction(){
   progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
   let result=null;
   try{
-    const onProgress=row=>{progress.textContent=row.label||'Waiting for Bungie confirmation.';};
+    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';progress.textContent=label;setStatus(label);};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
