@@ -10,7 +10,7 @@ const PAGE_INVENTORY_FIELDS = [
   "classType", "inventory", "equippable", "collectibleHash",
   "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
   "isFeaturedItem", "isHolofoil", "secondaryIcon", "screenshot",
-  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerTypeHash",
+  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerType", "breakerTypeHash",
   "damageTypeHashes", "itemCategoryHashes", "traitIds", "traitHashes",
   "perks", "investmentStats", "plug", "tooltipNotifications",
   "equipableItemSetHash", "equippingBlock", "sockets", "stats", "quality",
@@ -22,7 +22,7 @@ const PAGE_PLUG_FIELDS = [
   "classType", "inventory", "equippable", "collectibleHash",
   "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
   "isFeaturedItem", "isHolofoil", "secondaryIcon", "screenshot",
-  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerTypeHash",
+  "defaultDamageTypeHash", "defaultDamageTypeName", "breakerType", "breakerTypeHash",
   "damageTypeHashes", "itemCategoryHashes", "traitIds", "traitHashes",
   "investmentStats", "plug", "tooltipNotifications", "equipableItemSetHash"
 ] as const;

@@ -139,7 +139,7 @@ function structuredItemTileMarkup(item,{kind,state,powerMark,power,quantity}={})
   return `<span class="item-tile item-tile--${esc(kind)} ${rarityClass}${tierClass}${masterworkClass}">
       <span class="tile-art">${art}</span>
       <span class="tile-footer">
-        ${kind==='weapon'?tileIconMarkup('tile-intrinsic',sockets.champion,'Champion capability'):''}
+        ${kind==='weapon'?tileIconMarkup('tile-breaker',sockets.champion,'Champion breaker capability'):''}
         ${kind==='weapon'?tileIconMarkup('tile-element',sockets.element,'Elemental damage type'):''}
         ${powerMarkup}
       </span>

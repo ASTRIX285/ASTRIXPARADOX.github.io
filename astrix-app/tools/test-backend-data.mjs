@@ -39,6 +39,7 @@ assert.match(pageSemanticsSource,/weaponEffectCoverage\?\.missingEffectDescripti
 assert.match(pageSemanticsSource,/weaponEffectCoverage\?\.sandboxPerkUnresolved[\s\S]*?definitionType: "DestinySandboxPerkDefinition"[\s\S]*?field: "ownedWeapon\.definition\.perks\.perkHash"/,'The backend must log an exact unresolved weapon SandboxPerk hash and field.');
 assert.match(pageSemanticsSource,/manifest_definition_unresolved[\s\S]*?field: "ownedWeapon\.socketDefinition"/,'The backend must log the exact unresolved owned weapon socket hash and field.');
 assert.match(pageSemanticsSource,/const DESTINY_BREAKER_TYPE_HASHES = \[485622768, 2611060930, 3178805705\][\s\S]*?DestinyBreakerTypeDefinition: \[\.\.\.instances\.map\(row => row\?\.breakerTypeHash\), \.\.\.DESTINY_BREAKER_TYPE_HASHES\]/,'Character and Vault prepared payloads must carry all genuine Bungie breaker definitions so enum-only live instances can resolve their champion icon.');
+assert.match(pageSemanticsSource,/PAGE_INVENTORY_FIELDS[\s\S]*?"breakerType", "breakerTypeHash"[\s\S]*?PAGE_PLUG_FIELDS[\s\S]*?"breakerType", "breakerTypeHash"/,'Prepared item and plug projections must preserve the real Bungie breaker enum as well as its optional definition hash.');
 const setIconExpression=gearSource.match(/const setBonusIcon = ([^;]+);/)?.[1];
 assert.ok(setIconExpression);
 const renderSetIcon=new Function('armourSet','bungieIcon',`return ${setIconExpression};`);
