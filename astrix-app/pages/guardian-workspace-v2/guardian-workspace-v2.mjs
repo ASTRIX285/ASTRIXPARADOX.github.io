@@ -10,8 +10,8 @@ import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-form
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260912-global-icon-audit-1";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260912-shared-character-inventory-1";
-import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260912-shared-item-tile-5";
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260912-shared-item-tile-5";
+import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 
 const PLAYER_POWER_CAP = 550;
@@ -155,11 +155,21 @@ function showCharacterInventoryAction(title,summary,action){
   else dialog?.setAttribute('open','');
 }
 
-function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
+async function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
+  if(characterInventoryState.busy)return;
+  let result=null;
   try{
-    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}),subject=items.length===1?items[0].name:`${items.length} exact items`;
-    showCharacterInventoryAction('Confirm Postmaster pull',`Pull ${subject} from ${activeCharacterLabel()} Postmaster. Bungie must confirm every collected item before this view refreshes.`,{kind:'postmaster',intent});
-  }catch(error){characterInventoryStatus(error?.message||'Postmaster collection cannot be staged.','error');}
+    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=confirmPostmasterCollectionIntent(stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}));
+    characterInventoryState.busy=true;
+    characterInventoryStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${activeCharacterLabel()} Postmaster. Waiting for Bungie inventory feedback.`);
+    result=await executePostmasterCollectionIntent(intent,{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
+    if(result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId}}));
+    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
+    else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${characterInventoryFailure(result)}`,'error');
+  }catch(error){
+    if(result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull-recovery',characterId:characterInventoryState.activeCharacterId}}));
+    characterInventoryStatus(error?.message||'The Postmaster pull failed.','error');
+  }finally{characterInventoryState.busy=false;}
 }
 
 function stageCharacterDirectEquip(requestedItemKey){

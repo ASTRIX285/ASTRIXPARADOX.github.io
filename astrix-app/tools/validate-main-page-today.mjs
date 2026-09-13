@@ -15,6 +15,7 @@ const [workspace,workspaceHtml,loader,profile,auth,sessionCache,formationModule,
 const interceptor=await read('guardian-semantic-interceptor.mjs');
 const sharedHeroCss=await read('../../shared/astrix-hero-cards.css');
 const preparedClient=await read('../../core/prepared-page-client.mjs');
+const sharedItemTileRuntime=await read('../../shared/guardian-inventory-workspace.mjs');
 
 assert.match(workspace,/forge:guardian-render-complete/,'Main must publish render completion');
 assert.match(workspace,/Promise\.all\(images\.map\(settleImage\)\)/,'Main render completion must wait for visible images');
@@ -90,7 +91,8 @@ assert.match(formationCss,/\.super-diamond>span>img[\s\S]*?object-fit:cover!impo
 assert.match(formationCss,/\.super-diamond--equipped>span\{[\s\S]*?inset:-20\.7107%!important;[\s\S]*?width:141\.4214%!important;[\s\S]*?height:141\.4214%!important/,'Equipped Super artwork must reach the rotated diamond edge');
 
 assert.match(gearModule,/armour-set-bonus-icon/,'Resolved armour set icon must sit with the armour image');
-assert.match(gearModule,/armour-archetype-icon/,'The shared Main armour-type icon overlay is missing');
+assert.match(gearModule,/itemTileMarkup\(item,\{kind:'armour'\}\)/,'Main armour must use the shared item tile overlay contract');
+assert.match(sharedItemTileRuntime,/corner:visualIdentity\(archetype\)/,'The shared Main armour-type icon overlay is missing');
 assert.match(gearModule,/function armourModSequence\(item, armourTier, archetype\)/,'Main and Build must share one exact armour slot contract');
 assert.match(gearModule,/return \[masterwork, \.\.\.clean\(generalSource\)\.slice\(0, 2\), \.\.\.clean\(slotSource\)\.slice\(0, 3\)\]/,'Armour slots must remain one masterwork, two general mods and three armour-type mods');
 assert.match(gearModule,/!isArmourTypeSymbol\(plug\) && !isIgnoredArmourPlug\(plug\)/,'Archetype, Infuse and exotic perk symbols must never enter the mod grid');
@@ -99,7 +101,7 @@ assert.match(gearModule,/rawMatches\.length \? rawMatches : socketPlugs\.filter/
 assert.match(interceptor,/cachedGeneralMods[\s\S]*?generalMods\.length>=cachedGeneralMods\.length[\s\S]*?slotMods\.length>=cachedSlotMods\.length/,'Semantic enrichment must retain the more complete Bungie mod evidence');
 assert.match(interceptor,/resolvedFunctionalMods\.length[\s\S]*?: cachedMods/,'Semantic enrichment must never erase the cached Bungie mod list');
 assert.match(gearModule,/manifestExoticPerk = item\?\.armourSemantics\?\.exoticPerk \?\? item\?\.exoticPerk \?\? item\?\.intrinsicTrait/,'Manifest exotic perk must stay on the armour piece even without a cached rarity flag');
-assert.match(gearModule,/armour-season-icon/,'The shared Main season/source emblem is missing');
+assert.match(sharedItemTileRuntime,/item\?\.releaseWatermark\?\.icon\|\|item\?\.tierIcon/,'The shared Main season/source emblem is missing');
 assert.match(gearModule,/armourTier \?\? item\?\.armourSemantics\?\.tier \?\? item\?\.gearTier/,'Armour tier must retain the Bungie instance fallback');
 assert.match(gearModule,/https:\/\/www\.bungie\.net/,'Relative Bungie armour artwork paths must resolve against Bungie');
 assert.match(gearModule,/is-set-2-active/,'2-piece active state must reach the card');
@@ -182,7 +184,7 @@ assert.match(workspaceHtml,/<section class="eq guardian-loadouts-container"[\s\S
 assert.doesNotMatch(workspaceHtml,/<section class="eq gear-combined">[\s\S]*?id="guardianLoadouts"/,'Main Armour & Mods must not contain the in-game loadout tray');
 assert.match(buildHtml,/<section class="design-section loadouts-design-section"[\s\S]*?id="guardianLoadouts"[\s\S]*?<\/section>\s*<section class="design-section armour-design-section gear-combined"/,'Build in-game loadouts must be a separate container directly above Armour & Mods');
 assert.doesNotMatch(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="guardianLoadouts"/,'Build Armour & Mods must not contain the in-game loadout tray');
-assert.match(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="armourBuildState">STAGED ARMOUR · MOD PLAN PENDING<\/span>[\s\S]*?id="armourBuildInstruction">Choose exact owned armour and verified reusable mods manually, or generate an AI sequence\.<\/span>[\s\S]*?id="armourBuildEvidence">Installed mods retained as evaluation evidence<\/span>[\s\S]*?id="armourGrid" class="gear-columns"/,'Build Armour must start as a clearly labelled manual-or-generated canvas while retaining installed mods as evidence');
+assert.match(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="armourBuildState">STAGED ARMOUR · MOD PLAN PENDING<\/span>[\s\S]*?id="armourBuildInstruction">Choose exact owned armour and reusable mods manually, or generate an AI sequence\.<\/span>[\s\S]*?id="armourBuildEvidence">Installed mods retained as evaluation evidence<\/span>[\s\S]*?id="armourGrid" class="gear-columns"/,'Build Armour must start as a clearly labelled manual-or-generated canvas while retaining installed mods as evidence');
 assert.match(buildHtml,/<section class="design-section loadouts-design-section"[\s\S]*?<section class="design-section armour-design-section gear-combined"[\s\S]*?<section class="design-section weapon-design-section"/,'Build centre column must run from loadouts to armour to weapons.');
 assert.match(buildHtml,/<section class="design-section recommendation-panel"[\s\S]*?ELEMENTAL BUILD OPTIONS[\s\S]*?<\/section>\s*<\/section>\s*<aside class="build-right-rail"[\s\S]*?<section class="panel validation-panel design-section test-loop"[\s\S]*?<section class="panel intelligence" data-paradox-analysis>/,'Elemental Build Options must follow Weapons in the centre while Validation Loop and Intelligence use the right rail.');
 assert.match(buildHtml,/id="artifactPickerPanel"[\s\S]*?hidden/,'Build Artifact catalogue must stay collapsed behind the equipped summary');

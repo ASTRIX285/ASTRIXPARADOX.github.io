@@ -6,10 +6,9 @@ import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weap
    ========================================================================== */
 
 import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1";
-import { openArmourDrawer } from "./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1";
 import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
-import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const bungieIcon = (value) => {
@@ -124,11 +123,8 @@ export function armourCard(index, item) {
   const slotCount = 6;
   const armourTier = Number(item?.armourTier ?? item?.armourSemantics?.tier ?? item?.gearTier);
   const isTierFive = Number.isFinite(armourTier) && armourTier >= 5;
-  const seasonIcon = bungieIcon(item?.releaseWatermark?.icon ?? resolveItemWatermark(item||{},item?.definition||{}).icon);
   const archetype = resolveArmourArchetype(item, armourTier);
   const mods = armourModSequence(item, armourTier, archetype);
-  const archetypeIcon = bungieIcon(archetype?.icon ?? archetype?.displayProperties?.icon);
-  const archetypeTitle = [archetype?.name ?? archetype?.displayName, archetype?.description].filter(Boolean).join(" — ");
   const armourSet = !isExotic ? item?.armourSemantics?.set ?? item?.setBonus ?? null : null;
   const setStrip = armourSetStrip(armourSet);
   const twoPieceActive = armourSet?.twoPiece?.active === true;
@@ -139,14 +135,11 @@ export function armourCard(index, item) {
   const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(" — ");
 
   return `<article class="gear-slot ${isExotic ? "exotic" : ""} ${isTierFive ? "is-level-gold" : ""} ${armourSet?.identity ? "has-set-bonus" : ""} ${twoPieceActive ? "is-set-2-active" : ""} ${fourPieceActive ? "is-set-4-active" : ""}" data-armour-index="${index}">
-    <div class="gear-slot-label">${esc(name)}</div>
+    <div class="gear-slot-label">${esc(armourNames[index]||`Armour slot ${index+1}`)}</div>
     <div class="gear-arm-row">
       <div class="gear-arm-anchor">
-        <div class="arm ${icon ? "" : "ph"}" tabindex="0" role="button" title="${esc(name)}">
-          <span class="lv">${esc(item?.power ?? "—")}</span>${seasonIcon || Number.isFinite(armourTier) && armourTier > 0 ? `<span class="armour-tier-rail" title="${Number.isFinite(armourTier) && armourTier > 0 ? `Verified armour tier ${esc(armourTier)}` : "Bungie season/source emblem"}">${seasonIcon ? `<span class="armour-season-icon" title="Bungie season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>` : ""}${Number.isFinite(armourTier) && armourTier > 0 ? Array.from({ length: Math.min(5, Math.floor(armourTier)) }, () => '<i class="armour-tier-diamond" aria-hidden="true"></i>').join("") : ""}</span>` : ""}
-          ${icon ? `<img src="${esc(icon)}" alt="">` : '<span class="ph-glyph">◇</span>'}
-          ${archetypeIcon ? `<span class="armour-archetype-icon" title="${esc(archetypeTitle || "Verified armour archetype")}"><img src="${esc(archetypeIcon)}" alt="${esc(archetype?.name ?? "Armour archetype")}"></span>` : ""}
-
+        <div class="arm has-shared-item-tile ${icon ? "" : "ph"}" tabindex="0" role="button" title="${esc(name)}">
+          ${itemTileMarkup(item,{kind:'armour'})||'<span class="ph-glyph">◇</span>'}
           ${setBonusIcon ? `<span class="armour-set-bonus-icon" title="${esc(setBonusTitle)}"><img src="${esc(setBonusIcon)}" alt="${esc(armourSet?.identity?.name ?? "Armour set bonus")}"></span>` : ""}
         </div>
       </div>
@@ -167,8 +160,7 @@ export function buildGear(armour = []) {
 
   columns.querySelectorAll(".gear-slot").forEach((slotEl, idx) => {
     const art=slotEl.querySelector(".arm");
-    art?.addEventListener("click", () => openArmourDrawer(idx, armour[idx]));
-    bindParadoxItemHover(art,armour[idx],"armour");
+    bindParadoxItemInspect(art,armour[idx],"armour");
   });
 
   requestAnimationFrame(() => {

@@ -126,7 +126,7 @@ function armourDetails(item,{inspect=false}={}){
   const semantics=item?.armourSemantics??{};
   const identities=uniqueItems([semantics.archetype??item?.archetype,semantics.exoticPerk??item?.exoticPerk??item?.intrinsicTrait,semantics.set?.identity??item?.setBonus?.identity]);
   const mods=uniqueItems([semantics.masterwork??item?.masterwork,...(semantics.generalMods??item?.generalMods??[]),...(semantics.slotMods??item?.slotMods??[])]);
-  const identityRows=identities.length?`<section class="paradox-section"><h3>ARCHETYPE AND TRAITS</h3><div class="paradox-hover-identities">${identities.map(identity=>detailTile(identity,'VERIFIED')).join('')}</div></section>`:'';
+  const identityRows=identities.length?`<section class="paradox-section"><h3>ARCHETYPE AND TRAITS</h3><div class="paradox-hover-identities">${identities.map(identity=>detailTile(identity,'TRAIT')).join('')}</div></section>`:'';
   const inspectSockets=inspect?armourInspectSockets(item):'';
   const modRows=inspect
     ?inspectSockets?`<section class="paradox-section paradox-inspect-bottom"><h3>MODS AND COSMETICS</h3><div class="paradox-inspect-socket-strip">${inspectSockets}</div></section>`:''
@@ -147,7 +147,7 @@ function cardMarkup(item,kind,{contextLabel='',definitionOnly=false,presentation
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
   const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
   const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
-  const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Verified Bungie item');
+  const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Bungie item');
   const rarity=/\bexotic\b/i.test(String(tier))||item?.isExotic===true?'exotic':/\blegendary\b/i.test(String(tier))?'legendary':'standard';
   const presentationClass=presentation==='inspect'?'paradox-item-inspect-card':'paradox-item-hover-card';
   return `<article class="paradox-item-card paradox-item-card--${kind} ${presentationClass} is-${rarity}" data-item-kind="${kind}" data-item-rarity="${rarity}">
@@ -304,6 +304,8 @@ function bindParadoxItemInspect(target,item,kind,options={}){
   inspectBindings.set(target,{item,kind,options});
   delete target.dataset.paradoxItemHover;
   target.dataset.paradoxItemInspect=kind;
+  if(!target.hasAttribute('tabindex'))target.tabIndex=0;
+  if(!target.hasAttribute('role'))target.setAttribute('role','button');
   installInspect();
   return target;
 }

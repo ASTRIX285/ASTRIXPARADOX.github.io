@@ -34,7 +34,7 @@ def read_table(db,name):
     return {int(row['hash']):row for (raw,) in db.execute(f'SELECT json FROM {name}') for row in [json.loads(raw)]}
 def pick(row,keys):return {key:row[key] for key in keys if key in row}
 def compact_item(row):
-    out=pick(row,('hash','displayProperties','itemType','itemSubType','itemTypeDisplayName','itemTypeAndTierDisplayName','inventory','quality','iconWatermark','iconWatermarkShelved','iconWatermarkFeatured','isFeaturedItem','isHolofoil','isAdept','plug','traitIds','traitHashes','itemCategoryHashes','perks','investmentStats','defaultDamageType','defaultDamageTypeHash','damageTypeHashes','breakerTypeHash','equippingBlock','collectibleHash','redacted','blacklisted'))
+    out=pick(row,('hash','displayProperties','itemType','itemSubType','itemTypeDisplayName','itemTypeAndTierDisplayName','inventory','quality','iconWatermark','iconWatermarkShelved','iconWatermarkFeatured','isFeaturedItem','isHolofoil','isAdept','plug','traitIds','traitHashes','itemCategoryHashes','perks','investmentStats','defaultDamageType','defaultDamageTypeHash','damageTypeHashes','breakerType','breakerTypeHash','equippingBlock','collectibleHash','redacted','blacklisted'))
     out['paradoxId']=stable_id('DestinyInventoryItemDefinition',row['hash'])
     if 'inventory' in out:out['inventory']=pick(out['inventory'],('bucketTypeHash','tierType','tierTypeName','tierTypeHash'))
     if 'quality' in out:out['quality']=pick(out['quality'],('currentVersion','versions','displayVersionWatermarkIcons'))

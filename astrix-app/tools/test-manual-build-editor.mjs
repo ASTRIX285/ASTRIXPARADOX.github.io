@@ -131,7 +131,7 @@ const session={
   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
 };
-const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
+const sharedTile={...replacement,itemInstanceId:'13109',icon:'https://www.bungie.net/weapon.png',state:5,gearTier:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,releaseWatermark:{icon:'/season.png'},weaponSemantics:{intrinsic:{hash:14001,name:'Adaptive Frame',icon:'/adaptive.png'}},breakerDefinition:{hash:485622768,displayProperties:{name:'Barrier',icon:'/barrier.png'}},elementDefinition:{hash:2302094943,displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
 const breakerDefinitions={
   '485622768':{hash:485622768,enumValue:1,displayProperties:{name:'Shield Piercing',icon:'/barrier.png'}},
   '2611060930':{hash:2611060930,enumValue:2,displayProperties:{name:'Disruption',icon:'/overload.png'}},
@@ -139,6 +139,7 @@ const breakerDefinitions={
 };
 assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0,breakerType:2},{},breakerDefinitions),breakerDefinitions['2611060930'],'A live breaker enum must resolve the genuine Bungie champion definition when its nullable hash is zero.');
 assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:485622768},breakerDefinitions),breakerDefinitions['485622768'],'An invalid zero instance hash must not mask a genuine item-definition breaker hash.');
+assert.equal(resolveBreakerTypeDefinition({breakerTypeHash:0},{breakerTypeHash:0,breakerType:3},breakerDefinitions),breakerDefinitions['3178805705'],'A genuine item-definition breaker enum must resolve the Bungie champion definition when both nullable hashes are zero.');
 assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
 const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
 assert.match(sharedTileMarkup,/class="item-tile item-tile--weapon item-tile--legendary item-tile--tier-5 item-tile--masterworked"/,'Legendary rarity, verified T5 and masterwork must remain independent shared tile classes.');
@@ -147,9 +148,12 @@ assert.match(sharedTileMarkup,/class="tile-tier-strip" aria-label="Tier 5 master
 assert.equal([...sharedTileMarkup.matchAll(/class="tile-tier-pip tile-tier-pip--\d tile-tier-pip--gold"/g)].length,5,'A verified T5 tile must render five solid gold diamonds.');
 assert.match(sharedTileMarkup,/class="tile-power"[^>]*><b>550<\/b>/,'The weapon power readout must keep the real power value without duplicating its separate element socket.');
 assert.match(sharedTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/adaptive\.png/,'The weapon corner badge must use the resolved Bungie intrinsic icon.');
-assert.match(sharedTileMarkup,/class="tile-intrinsic"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
+assert.match(sharedTileMarkup,/class="tile-breaker"[^>]*><img[^>]*\/barrier\.png/,'The weapon champion socket must use the resolved Bungie breaker definition icon.');
+assert.match(sharedTileMarkup,/class="tile-breaker"[^>]*data-bungie-hash="485622768"/,'The champion icon must retain its exact Bungie breaker definition hash.');
+const fallbackBreakerMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13116',breakerDefinition:{},championCapability:{definition:breakerDefinitions['2611060930']}},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
+assert.match(fallbackBreakerMarkup,/class="tile-breaker"[^>]*><img[^>]*\/overload\.png/,'An empty earlier breaker object must not mask a later resolved Bungie champion definition icon.');
 assert.match(sharedTileMarkup,/class="tile-element"[^>]*><img[^>]*\/arc\.png/,'The weapon element socket must use the resolved Bungie damage definition icon.');
-assert.match(sharedTileMarkup,/class="tile-footer">[\s\S]*class="tile-intrinsic"[\s\S]*class="tile-element"[\s\S]*class="tile-power"[\s\S]*<\/span>\s*<span class="tile-corner-badge"/,'Barrier, element and power must share the complete footer region.');
+assert.match(sharedTileMarkup,/class="tile-footer">[\s\S]*class="tile-breaker"[\s\S]*class="tile-element"[\s\S]*class="tile-power"[\s\S]*<\/span>\s*<span class="tile-corner-badge"/,'Barrier, element and power must share the complete footer region.');
 assert.match(sharedTileMarkup,/class="tile-season-icon"[^>]*><img[^>]*\/season\.png/,'The source socket must use the resolved Bungie release watermark icon.');
 assert.match(sharedTileMarkup,/class="tile-art"><img[^>]*\/weapon\.png/,'The shared tile art must keep the real Bungie item icon source.');
 assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
@@ -168,13 +172,13 @@ const armourTileMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13113'
 assert.match(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/brawler\.png/,'The armour corner badge must use the resolved Bungie armour archetype icon.');
 assert.doesNotMatch(armourTileMarkup,/class="tile-corner-badge"[^>]*><img[^>]*\/set\.png/,'The armour set identity must not replace the requested archetype corner icon.');
 assert.doesNotMatch(armourTileMarkup,/class="tile-power"[^>]*><img/,'The moved armour archetype must not be duplicated in the footer.');
-assert.doesNotMatch(armourTileMarkup,/class="tile-intrinsic"|class="tile-element"/,'Weapon-only sockets must be absent from armour tile markup.');
+assert.doesNotMatch(armourTileMarkup,/class="tile-breaker"|class="tile-element"/,'Weapon-only sockets must be absent from armour tile markup.');
 const unresolvedSocketMarkup=inventoryItemMarkup({...sharedTile,itemInstanceId:'13114',state:0,gearTier:null,releaseWatermark:null,tierIcon:null,weaponSemantics:{},intrinsic:null,breakerDefinition:null,elementDefinition:null},{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
-assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-intrinsic"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
+assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-corner-badge"|class="tile-breaker"|class="tile-element"|class="tile-season-icon"/,'A socket without a proven real icon source must be absent, never replaced with invented content.');
 assert.doesNotMatch(unresolvedSocketMarkup,/class="tile-tier-strip"|class="tile-tier-pip/,'An item without a real Bungie tier or masterwork state must not invent diamonds.');
 const sharedTileCss=readFileSync(new URL('../shared/item-tile.css',import.meta.url),'utf8');
 const sharedWorkspaceRuntime=readFileSync(new URL('../shared/guardian-inventory-workspace.mjs',import.meta.url),'utf8');
-for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-intrinsic','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
+for(const selector of ['tile-art','tile-power','tile-corner-badge','tile-tier-strip','tile-tier-pip','tile-season-icon','tile-lock','tile-breaker','tile-element'])assert.match(sharedTileCss,new RegExp(`\\.vault-transfer-item\\.has-item-tile \\.${selector}`),`${selector} styling must stay scoped to the shared inventory tile.`);
 assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*object-fit:\s*contain/s,'Real shared item art must render uncropped inside its proportional Figma region.');
 assert.match(sharedTileCss,/\.tile-art img\s*\{[^}]*max-width:\s*100%;[^}]*max-height:\s*100%/s,'Real shared item art must remain fully contained inside its designated region.');
 assert.match(sharedTileCss,/height:\s*var\(--apx-icon-gear-art-height\);\s*aspect-ratio:\s*100\/122/,'The implemented tile must retain the compact canonical proportions shown by the approved Figma target.');
@@ -186,9 +190,9 @@ assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*b
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*background:\s*rgba\(3,3,5,\.46\)/s,'The season circle must remain translucent over the restored Figma tier strip.');
 assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
 assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
-assert.match(sharedTileCss,/\.tile-intrinsic img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
+assert.match(sharedTileCss,/\.tile-breaker img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
 assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
-assert.match(sharedTileCss,/\.tile-intrinsic,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
+assert.match(sharedTileCss,/\.tile-breaker,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
 assert.match(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\(root,\{resolveItem=\(\)=>null,bindInspect=\(\)=>\{\}\}=\{\}\)[\s\S]*?bindInspect\(target,item,kind/,'Character and INVENTORY shared tiles must bind the click inspector instead of the rich hover card.');
 assert.doesNotMatch(sharedWorkspaceRuntime,/function bindInventoryWorkspaceHovers\([^)]*bindHover/,'The shared owned-instance tile binder must not restore rich hover inspection.');
@@ -447,6 +451,7 @@ assert.equal(equippedMoved.status,'applied');
 assert.deepEqual(equippedPaths,['/bungie/actions/equip-items','/bungie/actions/transfer-item'],'Moving an equipped item must first equip the reviewed exact carried replacement.');
 
 const POSTMASTER_ITEM={...TRANSFER_ITEM,itemInstanceId:'13107',name:'Exact Postmaster item',quantity:1,source:{kind:'postmaster',characterId:CHARACTER_ID,label:'Postmaster'}},stagedCollection=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,items:[POSTMASTER_ITEM],session});
+assert.equal(stagedCollection.overflowToVault,true,'A normal Postmaster pull must retain the explicit Vault overflow path when the character bucket is full.');
 let postmasterPresent=true;
 const postmasterPaths=[];
 const collected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
@@ -459,6 +464,34 @@ const collected=await executePostmasterCollectionIntent(confirmPostmasterCollect
 assert.equal(collected.status,'applied');
 assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
 assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+
+const OVERFLOW_CANDIDATE={itemHash:13008,itemInstanceId:'13108',bucketHash:POSTMASTER_ITEM.bucketHash},overflowState={postmaster:true,pulled:'postmaster',candidate:'carried'};
+const overflowPaths=[];
+const overflowProfile=()=>{
+  const base=vaultActionProfile({location:'absent'}),pulledRaw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
+  base.profile.characterInventories.data[CHARACTER_ID].items=[...(overflowState.postmaster?[{...pulledRaw,bucketHash:215593132}]:[]),...(overflowState.pulled==='carried'?[pulledRaw]:[]),...(overflowState.candidate==='carried'?[OVERFLOW_CANDIDATE]:[])];
+  base.profile.profileInventory.data.items=[...(overflowState.pulled==='vault'?[{...pulledRaw,bucketHash:VAULT_BUCKET}]:[]),...(overflowState.candidate==='vault'?[{...OVERFLOW_CANDIDATE,bucketHash:VAULT_BUCKET}]:[])];
+  return base;
+};
+let overflowPullAttempts=0;
+const overflowCollected=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedCollection),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
+  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET')return response(overflowProfile());
+  overflowPaths.push(path);
+  const body=JSON.parse(init.body);
+  if(path.endsWith('/pull-from-postmaster')){
+    overflowPullAttempts+=1;
+    if(overflowPullAttempts===1)return response({ErrorCode:99,ErrorStatus:'DestinyNoRoomInDestination',Message:'Target inventory is full.'},{ok:false,status:409});
+    overflowState.postmaster=false;overflowState.pulled='carried';return response({ErrorCode:1,Message:'Ok'});
+  }
+  if(String(body.itemId)===OVERFLOW_CANDIDATE.itemInstanceId)overflowState.candidate=body.transferToVault?'vault':'carried';
+  if(String(body.itemId)===POSTMASTER_ITEM.itemInstanceId)overflowState.pulled=body.transferToVault?'vault':'carried';
+  return response({ErrorCode:1,Message:'Ok'});
+}});
+assert.equal(overflowCollected.status,'applied','A full character bucket must complete the requested Postmaster pull through the real Vault transfer route.');
+assert.deepEqual(overflowPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A full character bucket must open one exact slot, pull the Postmaster item, move it to Vault, and restore the displaced item.');
+assert.equal(overflowState.pulled,'vault','The requested Postmaster item must finish in Vault when its character bucket was full.');
+assert.equal(overflowState.candidate,'carried','The exact carried item used to open capacity must be restored to its original Guardian.');
 
 const stagedPostmasterDirect=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,targetCharacterId:OTHER_CHARACTER_ID,items:[POSTMASTER_ITEM],session,equipAfterCollection:true});
 let postmasterDirectLocation='postmaster';

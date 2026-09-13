@@ -362,13 +362,13 @@ function confirmVaultTransferIntent(intent){
   return {...clone(intent),status:'confirmed',confirmedAt:new Date().toISOString()};
 }
 
-function stagePostmasterCollectionIntent({characterId,targetCharacterId=null,items,session,equipAfterCollection=false}={}){
+function stagePostmasterCollectionIntent({characterId,targetCharacterId=null,items,session,equipAfterCollection=false,overflowToVault=true}={}){
   const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),bucketHash:Number(item?.bucketHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)})),equipTarget=String(targetCharacterId||characterId||'');
   if(!decimal(characterId)||!decimal(binding.membershipId)||!decimal(binding.membershipType))throw new TypeError('Reconnect Bungie and choose a valid Guardian before collecting Postmaster.');
   if(!rows.length||rows.some(item=>!decimal(item.itemInstanceId)||!Number.isInteger(item.itemHash)))throw new TypeError('Collect Postmaster requires at least one exact Bungie item instance.');
   if(equipAfterCollection&&rows.length!==1)throw new TypeError('Direct Postmaster equip requires one exact Bungie item instance.');
   if(equipAfterCollection&&!decimal(equipTarget))throw new TypeError('Direct Postmaster equip requires a valid target Guardian.');
-  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),targetCharacterId:equipAfterCollection?equipTarget:String(characterId),equipAfterCollection:equipAfterCollection===true,items:rows};
+  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),targetCharacterId:equipAfterCollection?equipTarget:String(characterId),equipAfterCollection:equipAfterCollection===true,overflowToVault:overflowToVault===true&&!equipAfterCollection,items:rows};
 }
 
 function confirmPostmasterCollectionIntent(intent){
@@ -389,6 +389,11 @@ function assertVaultActionSession(intent,session,capabilities=[]){
 function locationMatches(location,expected={}){
   if(!location||String(location.source?.kind||'')!==String(expected.kind||''))return false;
   return expected.kind==='vault'||String(location.source?.characterId||'')===String(expected.characterId||'');
+}
+
+function isExplicitInventoryCapacityError(error){
+  const payload=error?.payload||{},status=String(payload?.ErrorStatus||payload?.error||''),message=String(payload?.Message||error?.message||''),detail=`${status} ${message}`.toLowerCase();
+  return /no.?room|not enough (inventory |storage )?space|inventory (?:is )?full|storage (?:is )?full|destination (?:is )?full/.test(detail);
 }
 
 async function waitForInventoryLocation(itemInstanceId,expected,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
@@ -505,6 +510,39 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     result.mutationCount+=1;
     return response;
   };
+  const transferItem=async(item,{characterId,transferToVault,expected,label,phase})=>{
+    const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault},label),settled=await waitForInventoryLocation(item.itemInstanceId,expected,{fetchImpl,authOrigin,waitImpl});
+    if(!settled.verified)throw Object.assign(new Error('Fresh Bungie inventory did not confirm the requested overflow transfer.'),{detail:{expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1}});
+    record(phase,'complete',label,{expected,ErrorCode:response?.ErrorCode??1});
+    return settled;
+  };
+  const collectToVaultAfterCapacityError=async(item,capacityError)=>{
+    if(intent.overflowToVault!==true||intent.equipAfterCollection)return false;
+    if(liveActionCapabilities(session).transferItems!==true){record('collect-overflow','blocked',`Bungie reported no room for ${item.name}, and this session cannot move an exact carried item through Vault.`,{message:capacityError.message,payload:capacityError.payload||null});return false;}
+    const overflowFresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(overflowFresh),candidate=[...locations.values()].filter(location=>locationMatches(location,{kind:'carried',characterId:result.characterId})&&String(location.itemInstanceId)!=='0'&&String(location.itemInstanceId)!==String(item.itemInstanceId)&&Number(location.bucketHash)===Number(item.bucketHash)&&Number.isInteger(Number(location.itemHash))).sort((left,right)=>String(left.itemInstanceId).localeCompare(String(right.itemInstanceId)))[0]||null;
+    if(!candidate){record('collect-overflow','blocked',`Bungie reported no room for ${item.name}, but fresh inventory contains no exact carried item in the same bucket that can be staged through Vault.`,{message:capacityError.message,payload:capacityError.payload||null,bucketHash:item.bucketHash});return false;}
+    let displacedInVault=false;
+    try{
+      await transferItem(candidate,{characterId:result.characterId,transferToVault:true,expected:{kind:'vault'},label:`Temporarily move Bungie item ${candidate.itemInstanceId} to Vault`,phase:'collect-overflow-open'});
+      displacedInVault=true;
+      const pullLabel=`Collect ${item.name} after opening its character bucket`,pullResponse=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},pullLabel),pulled=await waitForPostmasterExit(item.itemInstanceId,result.characterId,{fetchImpl,authOrigin,waitImpl});
+      if(!pulled.verified)throw Object.assign(new Error('Bungie accepted the Postmaster retry but fresh inventory did not confirm collection.'),{detail:{actual:pulled.location?.source||null,ErrorCode:pullResponse?.ErrorCode??1}});
+      record('collect-overflow-pull','complete',pullLabel,{actual:pulled.location?.source||null,ErrorCode:pullResponse?.ErrorCode??1});
+      if(locationMatches(pulled.location,{kind:'carried',characterId:result.characterId}))await transferItem(item,{characterId:result.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} to Vault`,phase:'collect-overflow-vault'});
+      else if(!locationMatches(pulled.location,{kind:'vault'}))throw Object.assign(new Error('Fresh Bungie inventory returned an unsupported destination for the collected Postmaster item.'),{detail:{actual:pulled.location?.source||null}});
+      await transferItem(candidate,{characterId:result.characterId,transferToVault:false,expected:{kind:'carried',characterId:result.characterId},label:`Restore Bungie item ${candidate.itemInstanceId} to its character bucket`,phase:'collect-overflow-restore'});
+      displacedInVault=false;
+      record('collect','complete',`Collect ${item.name} from Postmaster to Vault`,{itemInstanceId:item.itemInstanceId,overflowToVault:true});
+      return true;
+    }catch(error){
+      if(displacedInVault){
+        try{await transferItem(candidate,{characterId:result.characterId,transferToVault:false,expected:{kind:'carried',characterId:result.characterId},label:`Restore Bungie item ${candidate.itemInstanceId} after an incomplete Postmaster pull`,phase:'collect-overflow-recovery'});displacedInVault=false;}
+        catch(recoveryError){record('collect-overflow-recovery','failed','The temporary carried item could not be restored after the Postmaster fallback.',{message:recoveryError.message,detail:recoveryError.detail||null,payload:recoveryError.payload||null});}
+      }
+      record('collect-overflow','failed',`The Vault fallback could not complete for ${item.name}.`,{message:error.message,detail:error.detail||null,payload:error.payload||null});
+      return false;
+    }
+  };
   try{
     const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[];
     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
@@ -554,7 +592,11 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
             }catch(error){record('direct-equip','failed',equipLabel,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
           }
         }
-      }catch(error){record('collect','failed',label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
+      }catch(error){
+        if(isExplicitInventoryCapacityError(error)&&await collectToVaultAfterCapacityError(item,error))continue;
+        if(!result.steps.some(row=>row.phase==='collect-overflow'&&['blocked','failed'].includes(row.status)))record('collect','failed',label,{message:error.message,payload:error.payload||null});
+        result.status=result.mutationCount?'partial':'blocked';return result;
+      }
     }
     result.status='applied';
     return result;

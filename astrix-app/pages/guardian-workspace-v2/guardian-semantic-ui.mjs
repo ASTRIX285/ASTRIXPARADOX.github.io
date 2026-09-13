@@ -2,7 +2,8 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemHover} from './paradox-item-hover.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
@@ -117,26 +118,20 @@ function renderWeapons(weapons=[]){
     const item=weapons[index];
     if(!item)return;
     card.classList.add("semantic-live");
-    if(!card.dataset.weaponDetailBound){card.dataset.weaponDetailBound="true";card.tabIndex=0;card.setAttribute("role","button");card.addEventListener("click",event=>{if(event.target.closest("[data-paradox-perk-tooltip],.weapon-apply-footer"))return;const current=card._forgeWeapon;if(current)openWeaponDetail(current);});card.addEventListener("keydown",event=>{if(event.target.closest("[data-paradox-perk-tooltip],.weapon-apply-footer"))return;if((event.key==="Enter"||event.key===" ")&&card._forgeWeapon){event.preventDefault();openWeaponDetail(card._forgeWeapon);}});}
+    if(!card.dataset.weaponDetailBound){card.dataset.weaponDetailBound="true";card.tabIndex=0;card.setAttribute("role","group");}
     card._forgeWeapon=item;
     const art=card.querySelector(".art");
     const icon=bungieIcon(item.icon);
     const rank=weaponMasterworkRank(item);
     const hasRank=Number.isFinite(rank)&&rank>0;
-    const seasonIcon=bungieIcon(item?.releaseWatermark?.icon??resolveItemWatermark(item,item.definition||{}).icon);
-    const gearTier=Math.max(0,Math.min(5,Number(item.gearTier)||0));
     card.classList.toggle("is-level-gold",hasRank&&rank>=10);
-    const semantics=item.weaponSemantics||{};
-    const intrinsicIcon=bungieHash(semantics.intrinsic)?bungieIcon(semantics.intrinsic?.icon):"";
-    const championIcon=bungieIcon(item.breakerDefinition?.displayProperties?.icon);
-    const elementIcon=bungieIcon(item.elementDefinition?.displayProperties?.icon||item.elementDefinition?.transparentIconPath);
     if(art){
       art.classList.toggle("ph",!icon);
-      const power=Number(item.power)||"—";
-      art.innerHTML=`${icon?`<img class="weapon-art-image" src="${esc(icon)}" alt="${esc(item.name||"Weapon")}">`:'<span class="ph-glyph">⌖</span>'}${seasonIcon||gearTier?`<span class="weapon-tier-rail">${seasonIcon?`<span class="weapon-season-icon" title="Season/source emblem"><img src="${esc(seasonIcon)}" alt=""></span>`:""}${Array.from({length:gearTier},()=>'<i class="weapon-tier-diamond" aria-hidden="true"></i>').join("")}</span>`:""}<span class="weapon-right-rail">${intrinsicIcon?`<span class="weapon-corner-icon is-intrinsic"${hashAttribute(semantics.intrinsic)} title="Intrinsic trait"><img src="${esc(intrinsicIcon)}"${hashAttribute(semantics.intrinsic)} alt=""></span>`:""}${championIcon?`<span class="weapon-corner-icon is-champion" title="Champion capability"><img src="${esc(championIcon)}" alt=""></span>`:""}</span>${hasRank&&rank<10?`<span class="weapon-rank" title="Weapon mod rank">LVL ${esc(rank)}</span>`:""}<span class="weapon-power">${elementIcon?`<img src="${esc(elementIcon)}" alt="">`:""}<b>${esc(power)}</b></span>`;
+      art.classList.add("has-shared-item-tile");
+      art.innerHTML=itemTileMarkup(item,{kind:'weapon'})||'<span class="ph-glyph">⌖</span>';
     }
     const cap=card.querySelector(".cap");
-    if(cap)cap.innerHTML=`<b>${esc(item.name||"Weapon")}</b>`;
+    if(cap)cap.innerHTML=`<b>${esc(item?.equipmentGroup?.label||['Primary','Secondary','Heavy'][index]||`Weapon slot ${index+1}`)}</b>`;
     let perkStrip=card.querySelector(".weapon-perk-strip");
     if(!perkStrip){perkStrip=document.createElement("div");perkStrip.className="weapon-perk-strip";perkStrip.setAttribute("aria-label","Resolved weapon perks");card.append(perkStrip);}
     const recommendedHashes=(item?.weaponRollAdvice?.best?.options||[]).map(option=>option?.hash).filter(Boolean),perkMatrix=weaponPerkMatrixMarkup(item,{compact:true,recommendedHashes});
@@ -147,7 +142,7 @@ function renderWeapons(weapons=[]){
     supportStrip.innerHTML=weaponSupportIconsMarkup(item);
     supportStrip.hidden=!supportStrip.innerHTML;
     bindWeaponSelection(card,item);
-    bindParadoxItemHover(art||card,item,'weapon');
+    bindParadoxItemInspect(art||card,item,'weapon');
   });
 }
 
@@ -183,7 +178,7 @@ function renderCoverage(detail){
   const armour=detail?.hashCoverage?.armour;
   const weapons=detail?.hashCoverage?.weapons;
   const unknown=(armour?.unresolved?.length||0)+(armour?.semanticUnknown?.length||0)+(weapons?.unresolved?.length||0)+(weapons?.semanticUnknown?.length||0);
-  node.textContent=unknown?`PARTIAL EVIDENCE`:`EVIDENCE VERIFIED`;
+  node.textContent=unknown?`PARTIAL EVIDENCE`:`EVIDENCE READY`;
   node.title=unknown?"Unresolved/unclassified evidence is excluded from Paradox claims":"All equipped armour and weapon semantic evidence resolved";
 }
 
