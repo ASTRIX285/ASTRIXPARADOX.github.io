@@ -8,6 +8,7 @@ import {createHandoffEnvelope} from "./paradox-build-binding.mjs?v=20260913-char
 import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
+import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import {
@@ -704,6 +705,7 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   const artifact=equippedArtifactFromCatalog(profile,equipment,availableArtifacts,currentSeasonNumber)||legacyArtifact;
   const characterLoadouts=profile?.characterLoadouts?.data?.[character.characterId];
   const loadoutsAvailable=Array.isArray(characterLoadouts?.loadouts);
+  const equippedLoadoutIndex=loadoutsAvailable?inferEquippedLoadoutIndex(profile,character.characterId):null;
   const rank=guardianRank(profile);
   const title=equippedTitle(payload,character);
   const membership=session?.activeDestinyMembership||payload.membership||{};
@@ -765,6 +767,7 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
     gearAssets:payload.gearAssets||{},
     loadoutsAvailable,
     loadouts:loadoutsAvailable?characterLoadouts.loadouts:[],
+    equippedLoadoutIndex,
     displayName:payload.membership?.displayName||session?.activeDestinyMembership?.displayName||"Guardian"
   };
 }
@@ -953,7 +956,8 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
   }
 
   forgetLoadoutSelection();
-  const detail={...normaliseLiveProfile(payload,session,selectedCharacterId),selectedLoadoutIndex:null,loadoutSource:"currently-equipped"};
+  const resolved=normaliseLiveProfile(payload,session,selectedCharacterId);
+  const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
   detail.coverage=loadoutCoverage(detail);
   if(detail.coverage.complete)setRenderStatus("CURRENTLY EQUIPPED LOADOUT","Live equipped items ready","Active Guardian default · saved Bungie slots load only when selected");
   else setRenderStatus("LIVE BUILD UPDATING","Equipped items are visible while Bungie data refreshes",detail.coverage.missing.join(" · "));
@@ -998,7 +1002,8 @@ function selectLiveCharacter(characterId,expectedClass=""){
     }
     throw new Error("Bungie character roster is not loaded; character selection cannot fall back to last played.");
   }
-  const detail={...normaliseLiveProfile(liveProfilePayload,liveProfileSession,characterId),selectedLoadoutIndex:null,loadoutSource:"currently-equipped"};
+  const resolved=normaliseLiveProfile(liveProfilePayload,liveProfileSession,characterId);
+  const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
   const expected=String(expectedClass||"").trim().toLowerCase();
   if(expected&&detail.characterClass!==expected)throw new Error(`Selected ${expected} card resolved ${detail.characterClass} data for character ${characterId}.`);
   explicitlySelectedCharacterId=detail.characterId;
