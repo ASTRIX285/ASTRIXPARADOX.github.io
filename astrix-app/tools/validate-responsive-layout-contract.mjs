@@ -62,26 +62,26 @@ assert.doesNotMatch(densityCss,/--forge-desktop-density|(?:^|[;{])\s*zoom\s*:/m,
 assert.match(densityCss,/--apx-workspace-left:minmax\(360px,20%\);[\s\S]*?--apx-workspace-centre:minmax\(720px,1fr\);[\s\S]*?--apx-workspace-right:minmax\(420px,24%\);[\s\S]*?--apx-workspace-compact-columns:392px minmax\(0,1fr\);/,'The shared workspace track contract must retain the approved Journey proportions');
 assert.match(densityCss,/--apx-font-copy:"bahnschrift"[\s\S]*?--apx-font-display:"bahnschrift-semicondensed"[\s\S]*?--apx-type-section-title:1rem;[\s\S]*?--apx-type-body:\.875rem;[\s\S]*?--apx-type-label:\.75rem;[\s\S]*?--apx-type-meta:\.75rem;/,'All tools must inherit one readable typography scale');
 for(const token of [
-  '--apx-icon-stat:1.25rem;',
-  '--apx-icon-season:1.125rem;',
-  '--apx-icon-vault-selection:2.5rem;',
-  '--apx-icon-set-head:2.8rem;',
-  '--apx-icon-card:3.5rem;',
-  '--apx-icon-stage:3.8rem;',
-  '--apx-icon-record:3rem;',
-  '--apx-icon-catalog:8rem;',
+  '--apx-icon-stat:calc(20 * var(--apx-icon-unit,1px));',
+  '--apx-icon-season:calc(18 * var(--apx-icon-unit,1px));',
+  '--apx-icon-vault-selection:calc(40 * var(--apx-icon-unit,1px));',
+  '--apx-icon-set-head:calc(44.8 * var(--apx-icon-unit,1px));',
+  '--apx-icon-card:calc(56 * var(--apx-icon-unit,1px));',
+  '--apx-icon-stage:calc(60.8 * var(--apx-icon-unit,1px));',
+  '--apx-icon-record:calc(48 * var(--apx-icon-unit,1px));',
+  '--apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));',
   '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
-  '--apx-icon-selector:4.25rem;',
-  '--apx-icon-inspect:7rem;',
-  '--apx-icon-gear-art-width:96px;',
-  '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);'
+  '--apx-icon-selector:calc(68 * var(--apx-icon-unit,1px));',
+  '--apx-icon-inspect:calc(112 * var(--apx-icon-unit,1px));',
+  '--apx-icon-gear-art-width:var(--apx-inventory-size,96px);',
+  '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * var(--apx-inventory-ratio,1.22));'
 ])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
-assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:76px/,'Shared gear art must retain the approved fixed 76px phone breakpoint');
+assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:var\(--apx-inventory-size,76px\)/,'Excluded pages retain the legacy 76px phone gear size');
 assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
 assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
 
 assert.match(sources.characters,/html body \.topbar\{[\s\S]*?position:sticky!important/,'The character-card ribbon must remain anchored to the tool header');
-assert.match(sources.characters,/@media\s*\(max-width:860px\)\{[\s\S]*?#guardianCharacterCards\.guardian-character-cards\{[^}]*display:grid!important;[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important;[^}]*overflow:hidden!important/,'All three character cards must remain fixed and contained in the phone ribbon');
+assert.doesNotMatch(sources.characters,/\.guardian-character-card\{[^}]*width:300px/,'The shared hero stylesheet must own card sizing');
 assert.doesNotMatch(sources.characters,/scroll-snap-type|overflow-x:auto/,'The fixed character-card ribbon must not become a separate scrolling container');
 assert.match(sharedHeroCss,/@media\(max-width:720px\)\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important;[\s\S]*?\.guardian-character-card__stats\{display:none!important\}/,'Shared phone hero cards must retain all three Guardians without compressing six stat groups into each card');
 assert.match(destinationRibbonCss,/@media\(max-width:720px\)\{[\s\S]*?grid-template-columns:repeat\(4,minmax\(0,1fr\)\);grid-template-rows:repeat\(2,42px\);[\s\S]*?overflow:hidden/,'Phone destination navigation must show every route in a contained two-row grid');
@@ -115,7 +115,7 @@ for(const [label,area] of [['Loadouts','loadouts'],['Armour','armour'],['Weapons
 assert.match(sources.shared,/body\.guardian-main-page>\.actionbar\{[^}]*position:static!important;[^}]*width:100%!important;/,'Character actions must remain in document flow instead of covering equipment');
 assert.match(sources.shared,/\.gear-combined \.gear-columns\{[\s\S]*?grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'Character Armour must retain five equal columns');
 assert.match(sources.shared,/body\.guardian-main-page \.gear-combined \.gear-slot\{[^}]*height:auto!important;[^}]*min-height:calc\(120px \+ \(var\(--guardian-square\) \* 2\) \+ var\(--guardian-square-gap\)\)!important;[^}]*overflow:visible!important;/,'Character Armour cards must reserve both complete mod rows before Weapons');
-assert.match(sources.super,/@media\s*\(max-width:720px\)\{[\s\S]*?\.super-feature \.super-feature__cluster\{width:min\(300px,100%\)!important\}/,'Super geometry must scale inside its container at narrow widths');
+assert.match(sources.super,/width:min\(var\(--apx-super-cluster,300px\),100%\)!important/,'One Super cluster size must fit its container at all widths');
 
 for(const [label,html] of [['Main',mainHtml],['Build',buildHtml]]){
   assert.match(html,/<meta\s+name="viewport"\s+content="[^"]*width=device-width[^"]*initial-scale=1(?:\.0)?[^"]*"\s*\/?>/,label+' must declare a device-width viewport');
@@ -136,3 +136,9 @@ console.log('RESPONSIVE_NO_TRANSFORM_PAGE_SCALE=PASS');
 console.log('RESPONSIVE_NATIVE_SCALE=PASS');
 console.log('RESPONSIVE_LOADOUT_ROW=PASS');
 console.log('RESPONSIVE_TABLET_PHONE_SOURCE=PASS');
+
+// Intentional fluid image contract; the legacy values remain fallbacks only.
+assert.match(densityCss,/:root:has\(>body\.apx-fluid-icons\)\{[\s\S]*?--apx-icon-unit:calc\(clamp\(40px,3\.2vw,64px\) \/ 61\.44\)/,'Only opted-in pages use the shared viewport image unit');
+assert.match(densityCss,/--apx-inventory-size:clamp\(48px,calc\(50 \* var\(--apx-icon-unit\)\)/,'Inventory uses the DIM 50px baseline and 48px floor');
+assert.match(densityCss,/--apx-inventory-ratio:1;/,'DIM-equivalent inventory thumbnails are square');
+for(const [label,html] of appPages.filter(([label])=>['Forge Loader','Journey','Mission Reports'].includes(label)))assert.doesNotMatch(html,/apx-fluid-icons/,label+' remains outside this fluid sizing round');

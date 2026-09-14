@@ -6,18 +6,18 @@ html body header:has(>[data-forge-hero-cards]){
   width:100%!important;
   z-index:90!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) 910px minmax(0,1fr)!important;
-  grid-template-rows:88px!important;
+  grid-template-columns:minmax(0,1fr) var(--apx-hero-row,910px) minmax(0,1fr)!important;
+  grid-template-rows:var(--apx-hero-height,88px)!important;
   align-items:center!important;
   gap:18px!important;
-  height:108px!important;
-  min-height:108px!important;
+  height:var(--apx-hero-header,108px)!important;
+  min-height:var(--apx-hero-header,108px)!important;
   padding:10px 18px!important;
   background:#060606!important;
 }
 
 body:has(header>[data-forge-hero-cards]){
-  padding-top:180px!important;
+  padding-top:calc(var(--apx-hero-header,108px) + 72px)!important;
 }
 
 body:has(>header.forge-command-header>[data-forge-hero-cards])>.apx-page-shell{
@@ -49,13 +49,13 @@ html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-
   grid-column:2!important;
   grid-row:1!important;
   display:grid!important;
-  grid-template-columns:repeat(3,300px)!important;
+  grid-template-columns:repeat(3,var(--apx-hero-width,300px))!important;
   justify-content:center!important;
   justify-self:center!important;
   gap:5px!important;
-  width:910px!important;
-  min-width:910px!important;
-  max-width:910px!important;
+  width:var(--apx-hero-row,910px)!important;
+  min-width:var(--apx-hero-row,910px)!important;
+  max-width:var(--apx-hero-row,910px)!important;
   min-height:0!important;
   padding:0!important;
   overflow:visible!important;
@@ -87,12 +87,12 @@ html body header:has(>[data-forge-hero-cards]) .guardian-character-card{
   position:relative;
   isolation:isolate;
   display:block;
-  width:300px!important;
-  min-width:300px!important;
-  max-width:300px!important;
-  height:88px!important;
-  min-height:88px!important;
-  max-height:88px!important;
+  width:var(--apx-hero-width,300px)!important;
+  min-width:var(--apx-hero-width,300px)!important;
+  max-width:var(--apx-hero-width,300px)!important;
+  height:var(--apx-hero-height,88px)!important;
+  min-height:var(--apx-hero-height,88px)!important;
+  max-height:var(--apx-hero-height,88px)!important;
   padding:0;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.13);
@@ -146,7 +146,7 @@ html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selec
 
 body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{
   position:fixed!important;
-  top:120px!important;
+  top:calc(var(--apx-hero-header,108px) + 12px)!important;
   left:0!important;
   right:0!important;
   z-index:80!important;
@@ -188,13 +188,13 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
 }
 
 @media(max-width:1599px){
-  body:has(header>[data-forge-hero-cards]){padding-top:246px!important}
-  html body header:has(>[data-forge-hero-cards]){grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:48px 88px!important;height:174px!important;min-height:174px!important}
+  body:has(header>[data-forge-hero-cards]){padding-top:calc(var(--apx-hero-header-compact,174px) + 72px)!important}
+  html body header:has(>[data-forge-hero-cards]){grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:48px var(--apx-hero-height,88px)!important;height:var(--apx-hero-header-compact,174px)!important;min-height:var(--apx-hero-header-compact,174px)!important}
   html body header:has(>[data-forge-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;grid-row:1!important}
   html body header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){position:static!important;grid-column:2!important;grid-row:1!important;justify-self:center!important;max-width:100%!important;transform:none!important;text-align:center!important}
   html body header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control){grid-column:3!important;grid-row:1!important}
   html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{position:absolute!important;left:50%!important;bottom:10px!important;grid-column:auto!important;grid-row:auto!important;transform:translateX(-50%)!important}
-  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:186px!important}
+  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:calc(var(--apx-hero-header-compact,174px) + 12px)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand strong{font-size:.875rem!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand small{font-size:.625rem!important}
@@ -203,13 +203,13 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
 }
 
 @media(max-width:960px){
-  html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:calc(100% - 28px)!important;min-width:0!important;max-width:910px!important}
-  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{width:100%!important;min-width:0!important;max-width:none!important}
+  html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:calc(100% - 28px)!important;min-width:0!important;max-width:var(--apx-hero-row,910px)!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{width:min(100%,var(--apx-hero-width,100%))!important;min-width:0!important;max-width:none!important}
 }
 
 @media(max-width:720px){
   body:has(header>[data-forge-hero-cards]){padding-top:274px!important}
-  html body header:has(>[data-forge-hero-cards]){height:174px!important;min-height:174px!important;padding:9px 12px!important}
+  html body header:has(>[data-forge-hero-cards]){height:var(--apx-hero-header-compact,174px)!important;min-height:var(--apx-hero-header-compact,174px)!important;padding:9px 12px!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     left:12px!important;
     right:12px!important;
@@ -221,8 +221,8 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
     transform:none!important;
   }
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card{
-    height:88px!important;
-    min-height:88px!important;
+    height:var(--apx-hero-height,88px)!important;
+    min-height:var(--apx-hero-height,88px)!important;
     border-radius:10px!important;
   }
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card__identity{top:12px;left:10px;right:42px}
@@ -230,8 +230,8 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card__power{top:12px;right:8px;font-size:12px}
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card__stats{display:none!important}
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card::before{background-position:center!important}
-  html body header:has(>[data-forge-hero-cards]) .guardian-character-cards__status{min-height:88px;font-size:.78rem;line-height:1.35;padding:12px}
-  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:174px!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-cards__status{min-height:var(--apx-hero-height,88px);font-size:.78rem;line-height:1.35;padding:12px}
+  body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{top:var(--apx-hero-header-compact,174px)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{width:var(--apx-icon-brand-compact,2.375rem)!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-brand span{display:none!important}
   html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{font-size:.875rem!important}
@@ -252,13 +252,13 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
   html body header:has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     position:static!important;inset:auto!important;transform:none!important;
     grid-area:auto!important;grid-column:1/-1!important;grid-row:2!important;
-    display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;
+    display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--apx-hero-width,220px)),var(--apx-hero-width,1fr)))!important;
     width:100%!important;min-width:0!important;max-width:100%!important;gap:8px!important;margin:0!important;padding:0!important;
   }
-  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card{min-width:0!important;width:min(100%,var(--apx-hero-width,100%))!important;max-width:100%!important;box-sizing:border-box!important}
   html body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]{position:relative!important;inset:auto!important;margin:0!important}
   html body header:is(.topbar,.forge-command-header):has(>[data-forge-hero-cards])>#guardianCharacterCards.guardian-character-cards{
     position:static!important;inset:auto!important;transform:none!important;grid-area:auto!important;grid-column:1/-1!important;grid-row:2!important;
-    grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;width:100%!important;min-width:0!important;max-width:100%!important;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--apx-hero-width,220px)),var(--apx-hero-width,1fr)))!important;width:100%!important;min-width:0!important;max-width:100%!important;
   }
 }

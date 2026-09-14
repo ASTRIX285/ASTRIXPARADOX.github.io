@@ -27,7 +27,7 @@ def main() -> int:
     assert "function characterRoster(" in profile
     assert "function selectLiveCharacter(" in profile
     assert 'publishCharacterRoster(liveProfilePayload,detail.characterId)' in profile
-    assert 'grid-template-columns:repeat(3' in styles
+    assert 'grid-template-columns:repeat(3' in (ROOT / 'astrix-app/shared/astrix-hero-cards.css').read_text()
     assert "scroll-snap-type" not in styles
     assert "overflow-x:auto" not in styles
     assert "border-color:rgba(var(--stage-accent-rgb" in styles

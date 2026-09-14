@@ -23,67 +23,90 @@
   --apx-type-control:.8125rem;
   --apx-type-label:.75rem;
   --apx-type-meta:.75rem;
-  --apx-icon-inline:.8125rem;
-  --apx-icon-brand:2.875rem;
-  --apx-icon-brand-compact:2.375rem;
-  --apx-icon-account-avatar:3.25rem;
-  --apx-icon-account-avatar-compact:2.75rem;
-  --apx-icon-account-avatar-mobile:2.25rem;
-  --apx-icon-mission-crest:3.375rem;
-  --apx-icon-mission-metric:2rem;
-  --apx-icon-portal-logo:7.5rem;
+  --apx-icon-inline:calc(13 * var(--apx-icon-unit,1px));
+  --apx-icon-brand:calc(46 * var(--apx-icon-unit,1px));
+  --apx-icon-brand-compact:calc(38 * var(--apx-icon-unit,1px));
+  --apx-icon-account-avatar:calc(52 * var(--apx-icon-unit,1px));
+  --apx-icon-account-avatar-compact:calc(44 * var(--apx-icon-unit,1px));
+  --apx-icon-account-avatar-mobile:calc(36 * var(--apx-icon-unit,1px));
+  --apx-icon-mission-crest:calc(54 * var(--apx-icon-unit,1px));
+  --apx-icon-mission-metric:calc(32 * var(--apx-icon-unit,1px));
+  --apx-icon-portal-logo:calc(120 * var(--apx-icon-unit,1px));
   --apx-icon-developer-logo:clamp(6rem,7vw,7rem);
-  --apx-icon-tier-pip:.32rem;
-  --apx-icon-tier-pip-armour:.375rem;
-  --apx-icon-tier-pip-weapon:.4375rem;
+  --apx-icon-tier-pip:calc(5.12 * var(--apx-icon-unit,1px));
+  --apx-icon-tier-pip-armour:calc(6 * var(--apx-icon-unit,1px));
+  --apx-icon-tier-pip-weapon:calc(7 * var(--apx-icon-unit,1px));
   --apx-icon-build-armour-tier-pip:clamp(.25rem,.38cqi,1.5rem);
-  --apx-icon-stat-row:1.125rem;
-  --apx-icon-stat-row-compact:.875rem;
-  --apx-icon-stat:1.25rem;
-  --apx-icon-socket-compact:1.875rem;
-  --apx-icon-season:1.125rem;
-  --apx-icon-season-glyph:.9375rem;
-  --apx-icon-corner:1.1875rem;
-  --apx-icon-corner-glyph:1rem;
-  --apx-icon-armour-archetype:1.3125rem;
-  --apx-icon-armour-archetype-glyph:1.0625rem;
-  --apx-icon-armour-exotic:1.4375rem;
-  --apx-icon-review-mod:1.5rem;
-  --apx-icon-set-bonus:1.5625rem;
-  --apx-icon-thumbnail:1.75rem;
-  --apx-icon-manual-socket:2.125rem;
-  --apx-icon-loadout:2.25rem;
-  --apx-icon-appearance:2.375rem;
-  --apx-icon-intrinsic-compact:2.375rem;
-  --apx-icon-vault-selection:2.5rem;
-  --apx-icon-intrinsic:2.625rem;
-  --apx-icon-exotic-trait-expanded:2.875rem;
-  --apx-icon-review:2.75rem;
-  --apx-icon-review-super-cluster:11.25rem;
-  --apx-icon-set-head:2.8rem;
-  --apx-icon-record:3rem;
-  --apx-icon-manual-item:3.125rem;
-  --apx-icon-detail-compact:3.25rem;
-  --apx-icon-detail-tile:5.125rem;
-  --apx-icon-card:3.5rem;
-  --apx-icon-legacy-item:3.625rem;
-  --apx-icon-detail-identity:3.75rem;
-  --apx-icon-stage:3.8rem;
-  --apx-icon-detail-socket:3.875rem;
-  --apx-icon-perk:4rem;
+  --apx-icon-stat-row:calc(18 * var(--apx-icon-unit,1px));
+  --apx-icon-stat-row-compact:calc(14 * var(--apx-icon-unit,1px));
+  --apx-icon-stat:calc(20 * var(--apx-icon-unit,1px));
+  --apx-icon-socket-compact:calc(30 * var(--apx-icon-unit,1px));
+  --apx-icon-season:calc(18 * var(--apx-icon-unit,1px));
+  --apx-icon-season-glyph:calc(15 * var(--apx-icon-unit,1px));
+  --apx-icon-corner:calc(19 * var(--apx-icon-unit,1px));
+  --apx-icon-corner-glyph:calc(16 * var(--apx-icon-unit,1px));
+  --apx-icon-armour-archetype:calc(21 * var(--apx-icon-unit,1px));
+  --apx-icon-armour-archetype-glyph:calc(17 * var(--apx-icon-unit,1px));
+  --apx-icon-armour-exotic:calc(23 * var(--apx-icon-unit,1px));
+  --apx-icon-review-mod:calc(24 * var(--apx-icon-unit,1px));
+  --apx-icon-set-bonus:calc(25 * var(--apx-icon-unit,1px));
+  --apx-icon-thumbnail:calc(28 * var(--apx-icon-unit,1px));
+  --apx-icon-manual-socket:calc(34 * var(--apx-icon-unit,1px));
+  --apx-icon-loadout:calc(36 * var(--apx-icon-unit,1px));
+  --apx-icon-appearance:calc(38 * var(--apx-icon-unit,1px));
+  --apx-icon-intrinsic-compact:calc(38 * var(--apx-icon-unit,1px));
+  --apx-icon-vault-selection:calc(40 * var(--apx-icon-unit,1px));
+  --apx-icon-intrinsic:calc(42 * var(--apx-icon-unit,1px));
+  --apx-icon-exotic-trait-expanded:calc(46 * var(--apx-icon-unit,1px));
+  --apx-icon-review:calc(44 * var(--apx-icon-unit,1px));
+  --apx-icon-review-super-cluster:calc(180 * var(--apx-icon-unit,1px));
+  --apx-icon-set-head:calc(44.8 * var(--apx-icon-unit,1px));
+  --apx-icon-record:calc(48 * var(--apx-icon-unit,1px));
+  --apx-icon-manual-item:calc(50 * var(--apx-icon-unit,1px));
+  --apx-icon-detail-compact:calc(52 * var(--apx-icon-unit,1px));
+  --apx-icon-detail-tile:calc(82 * var(--apx-icon-unit,1px));
+  --apx-icon-card:calc(56 * var(--apx-icon-unit,1px));
+  --apx-icon-legacy-item:calc(58 * var(--apx-icon-unit,1px));
+  --apx-icon-detail-identity:calc(60 * var(--apx-icon-unit,1px));
+  --apx-icon-stage:calc(60.8 * var(--apx-icon-unit,1px));
+  --apx-icon-detail-socket:calc(62 * var(--apx-icon-unit,1px));
+  --apx-icon-perk:calc(64 * var(--apx-icon-unit,1px));
   --apx-icon-perk-responsive:clamp(2.625rem,12vw,3.5rem);
-  --apx-icon-catalog:8rem;
+  --apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));
   --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
-  --apx-icon-selector:4.25rem;
-  --apx-icon-detail-art:4.5rem;
-  --apx-icon-inspect:7rem;
-  --apx-icon-gear-art-width:96px;
-  --apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);
+  --apx-icon-selector:calc(68 * var(--apx-icon-unit,1px));
+  --apx-icon-detail-art:calc(72 * var(--apx-icon-unit,1px));
+  --apx-icon-inspect:calc(112 * var(--apx-icon-unit,1px));
+  --apx-icon-gear-art-width:var(--apx-inventory-size,96px);
+  --apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * var(--apx-inventory-ratio,1.22));
   --apx-icon-weapon-socket:clamp(2.125rem,3.6cqi,3.25rem);
   --apx-icon-weapon-socket-compact:clamp(1.25rem,2.25cqi,1.75rem);
   --apx-icon-weapon-socket-fluid:var(--apx-icon-socket-compact);
   --apx-icon-item-card-socket:clamp(2.625rem,3.2vw,3.375rem);
   --apx-review-weapon-detail-height:clamp(10.5rem,12vw,13rem);
+}
+
+
+/* Fluid images are opt-in per destination. 1920 CSS px is the measured desktop
+   reference: the existing clamp(40px,3.2vw,64px) evaluates to 61.44px there.
+   Dividing by 61.44 preserves every existing pixel baseline at that viewport.
+   Forge Loader, Journey and Mission Reports never opt in, including aliases
+   evaluated on :root. Text and workspace tracks do not use this image unit. */
+:root:has(>body.apx-fluid-icons){
+  --apx-icon-unit:calc(clamp(40px,3.2vw,64px) / 61.44);
+  /* DIM: 50px desktop itemSize, 48px small-screen/slider floor, square tile. */
+  --apx-inventory-size:clamp(48px,calc(50 * var(--apx-icon-unit)),calc(50px * 64 / 61.44));
+  --apx-inventory-ratio:1;
+  --apx-tile-art-height:95.40%;
+  --apx-tile-label-size:calc(var(--apx-inventory-size) * .92 * 16 / 96);
+  --apx-hero-width:calc(300 * var(--apx-icon-unit));
+  --apx-hero-height:calc(88 * var(--apx-icon-unit));
+  --apx-hero-row:calc(3 * var(--apx-hero-width) + 10px);
+  --apx-hero-header:calc(var(--apx-hero-height) + 20px);
+  --apx-hero-header-compact:calc(var(--apx-hero-height) + 86px);
+  --apx-super-cluster:calc(300 * var(--apx-icon-unit));
+  --apx-subclass-crest:calc(68 * var(--apx-icon-unit));
+  --apx-subclass-option:calc(56 * var(--apx-icon-unit));
 }
 
 html,body{max-width:100%;overflow-x:hidden}
@@ -318,5 +341,5 @@ body.apx-destination-page .apx-page-shell{
 }
 
 @media (max-width:720px){
-  :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:76px}
+  :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,76px)}
 }
