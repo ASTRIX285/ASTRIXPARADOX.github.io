@@ -21,7 +21,7 @@
   width: 100%;
   max-width: 540px;
   height: var(--apx-icon-gear-art-height);
-  aspect-ratio: 100/122;
+  aspect-ratio: var(--apx-inventory-ratio,100/122);
   overflow: hidden;
   border: 1px solid var(--tile-accent);
   border-radius: 1px;
@@ -52,7 +52,7 @@
   top: 2.00%;
   display: grid;
   width: 95.40%;
-  height: 77.90%;
+  height: var(--apx-tile-art-height,77.90%);
   place-items: center;
   overflow: hidden;
   border: 1px solid var(--tile-mw-accent);
@@ -115,7 +115,7 @@
   min-width: 0;
   overflow: hidden;
   color: #fff3c7;
-  font: 900 .92rem/1 bahnschrift-semicondensed,sans-serif;
+  font: 900 var(--apx-tile-label-size,.92rem)/1 bahnschrift-semicondensed,sans-serif;
   text-overflow: clip;
   text-shadow: 0 1px 2px #000;
   white-space: nowrap;

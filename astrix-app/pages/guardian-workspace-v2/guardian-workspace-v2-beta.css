@@ -26,8 +26,8 @@
   .workspace{gap:12px;padding-top:10px}
   .left{padding:11px;gap:7px!important;overflow:hidden!important}
   .left .super-focus{padding:8px 8px;gap:3px}.left .super-focus-icon,.left .super-focus-icon .ico-badge{width:66px!important;height:66px!important}.left .super-focus-copy b{font-size:.72rem}.left .super-focus-copy em{margin-top:2px}
-  #abilityList{grid-template-columns:repeat(4,46px)!important;gap:7px!important}#aspectList,#fragList{grid-template-columns:repeat(5,46px)!important;gap:7px!important}.ability-row,.slot,#aspectList .slot,#fragList .slot,.ico-badge,#aspectList .ico-badge,#fragList .ico-badge{width:46px!important;height:46px!important;min-width:46px!important}.grp .lbl,#abilityList::before{margin-bottom:4px!important;font-size:.49rem!important}
-  .artifact-row{grid-template-columns:48px minmax(0,1fr)!important;gap:6px 9px!important;padding:8px!important}.artifact-row .art{width:48px!important;height:48px!important}.artifact-row .perks{grid-template-columns:repeat(7,46px)!important;gap:7px!important;padding-top:6px!important}.artifact-perk{width:46px!important;height:46px!important}.artifact-perk img{width:88%!important;height:88%!important}
+  #abilityList{gap:7px!important}#aspectList,#fragList{gap:7px!important}.grp .lbl,#abilityList::before{margin-bottom:4px!important;font-size:.49rem!important}
+  .artifact-row{gap:6px 9px!important;padding:8px!important}.artifact-row .perks{gap:7px!important;padding-top:6px!important}.artifact-perk img{width:88%!important;height:88%!important}
   .hero-subclass-dock{left:20px;top:18px}.stage .identity{left:20px!important;top:84px!important}.stage .hero-stats{left:20px;top:270px;width:220px}
   .stage > .guardian-platform{--size:clamp(410px,25vw,475px);left:69%}
   .mods-grid{grid-template-columns:repeat(5,var(--apx-icon-socket-compact))!important;grid-auto-rows:var(--apx-icon-socket-compact)}.mod{width:var(--apx-icon-socket-compact)!important;height:var(--apx-icon-socket-compact)!important}

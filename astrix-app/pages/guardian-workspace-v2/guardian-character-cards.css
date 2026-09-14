@@ -22,18 +22,11 @@ html body .topbar{
 .guardian-character-cards{
   position:static;
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,300px));
   justify-content:center;
   gap:5px;
-  width:910px;
-  min-width:910px;
-  max-width:910px;
   pointer-events:auto;
 }
 html body .topbar>#guardianCharacterCards{
-  width:910px!important;
-  min-width:910px!important;
-  max-width:910px!important;
   align-self:center!important;
   justify-self:center!important;
 }
@@ -59,13 +52,6 @@ html body .topbar+:is(.workspace,.build-space){min-height:calc(100vh - 108px)!im
   position:relative;
   isolation:isolate;
   display:block;
-  min-width:0;
-  width:300px;
-  min-width:300px;
-  max-width:300px;
-  height:88px;
-  min-height:88px;
-  max-height:88px;
   padding:0;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.13);
@@ -79,7 +65,6 @@ html body .topbar+:is(.workspace,.build-space){min-height:calc(100vh - 108px)!im
   opacity:1;
   transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,filter .18s ease,opacity .18s ease;
 }
-html body .topbar>#guardianCharacterCards .guardian-character-card{width:300px;min-width:300px;max-width:300px;height:88px;min-height:88px;max-height:88px}
 .guardian-character-card::before{
   content:"";
   position:absolute;
@@ -188,9 +173,8 @@ html body .topbar>#guardianCharacterCards .guardian-character-card{width:300px;m
   .class-super-row{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
 }
 @media(max-width:860px){
-  html body header.topbar>#guardianCharacterCards.guardian-character-cards{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;overflow:hidden!important;padding:0!important}
-  html body header.topbar>#guardianCharacterCards .guardian-character-card{width:100%!important;min-width:0!important;max-width:none!important;height:88px!important;min-height:88px!important;max-height:88px!important;scroll-snap-align:none!important}
+  html body header.topbar>#guardianCharacterCards.guardian-character-cards{display:grid!important;gap:4px!important;overflow:hidden!important;padding:0!important}
+  html body header.topbar>#guardianCharacterCards .guardian-character-card{scroll-snap-align:none!important}
   .guardian-character-cards__status{min-height:86px}
 }
-html body header.topbar>#guardianCharacterCards.guardian-character-cards{grid-template-columns:repeat(3,300px)!important;width:910px!important;min-width:910px!important;max-width:910px!important;gap:5px!important;justify-content:center!important;justify-self:center!important;overflow:visible!important}
-html body header.topbar>#guardianCharacterCards .guardian-character-card{width:300px!important;min-width:300px!important;max-width:300px!important;height:88px!important;min-height:88px!important;max-height:88px!important}
+html body header.topbar>#guardianCharacterCards.guardian-character-cards{gap:5px!important;justify-content:center!important;justify-self:center!important;overflow:visible!important}

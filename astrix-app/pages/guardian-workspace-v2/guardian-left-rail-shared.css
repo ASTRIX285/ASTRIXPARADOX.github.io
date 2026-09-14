@@ -78,6 +78,7 @@
 }
 
 /* Equipped socket geometry is identical on Main and Build. */
+.guardian-left-rail :is(#abilityList,#aspectList,#fragList),
 .guardian-left-rail .build-equipped-slots{
   display:grid!important;
   justify-content:start!important;
@@ -85,9 +86,12 @@
   gap:var(--guardian-square-gap)!important;
   min-height:var(--guardian-square)!important;
 }
+.guardian-left-rail :is(#abilityList,#aspectList,#fragList),
 .guardian-left-rail .build-ability-slots,
 .guardian-left-rail .build-aspect-slots,
 .guardian-left-rail .build-fragment-slots{grid-template-columns:repeat(auto-fit,var(--guardian-square))!important}
+.guardian-left-rail :is(#abilityList,#aspectList,#fragList)>*,
+.guardian-left-rail .artifact-row .perks>:not(.art-empty),
 .guardian-left-rail .build-equipped-slots>.icon-tile,
 .guardian-left-rail .build-artifact-row .perks>*,
 .guardian-left-rail .rail-empty-slot{
@@ -109,6 +113,9 @@
   transform:none!important;
   clip-path:none!important;
 }
+.guardian-left-rail :is(#abilityList,#aspectList,#fragList) .ico-badge,
+.guardian-left-rail :is(#abilityList,#aspectList,#fragList) img,
+.guardian-left-rail .artifact-row .perks img,
 .guardian-left-rail .build-equipped-slots>.icon-tile img{
   width:100%!important;
   height:100%!important;
@@ -634,12 +641,9 @@ body.guardian-main-page .workspace>.right{display:none!important}
   .guardian-left-rail .build-rail-editor{max-height:380px!important}
 }
 
-/* Equipment mods and weapon sockets share the compact card scale. */
-body .gear-mods{--guardian-square:clamp(34px,calc((100cqi - 12px) / 3),54px)}
-
 /* Phone sockets fill horizontal rows; only overflow wraps to another row. */
 @media(max-width:720px){
-  html body .guardian-left-rail{--guardian-square:44px;--guardian-square-gap:8px}
+  html body .guardian-left-rail{--guardian-square-gap:8px}
   html body .workspace .left.guardian-left-rail :is(#abilityList,#aspectList,#fragList),
   html body .guardian-left-rail .build-equipped-slots,
   html body .guardian-left-rail .artifact-row .perks{
@@ -651,9 +655,8 @@ body .gear-mods{--guardian-square:clamp(34px,calc((100cqi - 12px) / 3),54px)}
   html body .workspace .left.guardian-left-rail :is(#abilityList,#aspectList,#fragList)>*,
   html body .guardian-left-rail .build-equipped-slots>*,
   html body .guardian-left-rail .artifact-row .perks>:not(.art-empty){
-    flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;
-    height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;
+    margin:0!important;
   }
   html body .workspace .left.guardian-left-rail :is(#abilityList,#aspectList,#fragList)::before{display:none!important}
-  html body .workspace .left.guardian-left-rail :is(#abilityList,#aspectList,#fragList) .ico-badge{width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important}
+
 }

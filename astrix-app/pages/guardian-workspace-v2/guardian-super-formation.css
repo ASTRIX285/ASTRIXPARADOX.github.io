@@ -20,7 +20,7 @@ html body .workspace .left .subclass-super-shell.equipped-subclass-stack{
   --super-accent:#8B4DFF;
   position:relative;
   display:grid;
-  grid-template-columns:clamp(58px,6vw,68px) minmax(0,1fr);
+  grid-template-columns:var(--apx-subclass-crest,clamp(58px,6vw,68px)) minmax(0,1fr);
   align-items:center;
   gap:14px;
   min-height:82px;
@@ -131,7 +131,7 @@ html body .workspace .left .equipped-subclass-stack>.super-feature{
 
 .super-feature .super-feature__cluster{
   position:relative!important;
-  width:min(300px,100%)!important;
+  width:min(var(--apx-super-cluster,300px),100%)!important;
   aspect-ratio:1 / 1!important;
   height:auto!important;
   margin:4px auto 0!important;
@@ -266,9 +266,8 @@ html body .workspace .left .equipped-subclass-stack>.super-feature{
 @media(max-width:720px){
   .equipped-subclass-stack,
   html body .workspace .left .subclass-super-shell.equipped-subclass-stack{gap:32px!important}
-  .equipped-subclass{grid-template-columns:58px minmax(0,1fr);min-height:76px;padding:8px 10px;gap:12px}
+  .equipped-subclass{grid-template-columns:var(--apx-subclass-crest,58px) minmax(0,1fr);min-height:76px;padding:8px 10px;gap:12px}
   .equipped-subclass__copy strong{font-size:1.08rem}
   .super-feature,
   html body .workspace .left .equipped-subclass-stack>.super-feature{min-height:0!important}
-  .super-feature .super-feature__cluster{width:min(300px,100%)!important}
 }

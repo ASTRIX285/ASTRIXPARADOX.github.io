@@ -9,7 +9,7 @@
    ===================================================================== */
 
 .subclass-picker{
-  --subclass-picker-slot:min(56px,calc(16.666667% - 2.5px));
+  --subclass-picker-slot:min(var(--apx-subclass-option,56px),calc(16.666667% - 2.5px));
   display:flex;
   justify-content:center;
   align-items:center;

@@ -1,9 +1,8 @@
 /* Guardian left rail: fluid sizing across desktop viewports. */
 :root{
-  --rail-icon:clamp(40px,min(5.1vh,3.6vw),68px);
   --rail-gap:clamp(6px,min(.7vh,.48vw),11px);
   --rail-pad:clamp(8px,min(1vh,.7vw),14px);
-  --rail-super:clamp(58px,calc(var(--rail-icon) * 1.38),92px);
+  --rail-super:clamp(58px,calc(var(--guardian-square) * 1.38),92px);
 }
 
 .workspace > .left{min-width:0!important;overflow:hidden!important;padding:var(--rail-pad)!important;gap:clamp(3px,.45vh,7px)!important;scrollbar-width:none!important}
@@ -17,16 +16,15 @@
 .left>.grp{padding-top:clamp(3px,.5vh,7px)!important;margin-top:0!important}
 .grp .lbl,#abilityList::before{margin-bottom:clamp(2px,.35vh,4px)!important;font-size:clamp(.4rem,.6vh,.48rem)!important}
 
-#abilityList{display:grid!important;grid-template-columns:repeat(4,var(--rail-icon))!important;gap:var(--rail-gap)!important;justify-content:start!important}
-#aspectList,#fragList{display:grid!important;grid-template-columns:repeat(5,var(--rail-icon))!important;gap:var(--rail-gap)!important;justify-content:start!important}
-.ability-row,.slot,#aspectList .slot,#fragList .slot,.ico-badge,#aspectList .ico-badge,#fragList .ico-badge,.artifact-perk{width:var(--rail-icon)!important;height:var(--rail-icon)!important;min-width:0!important;aspect-ratio:1!important}
+#abilityList{display:grid!important;gap:var(--rail-gap)!important;justify-content:start!important}
+#aspectList,#fragList{display:grid!important;gap:var(--rail-gap)!important;justify-content:start!important}
+.ability-row,.slot,#aspectList .slot,#fragList .slot,.ico-badge,#aspectList .ico-badge,#fragList .ico-badge,.artifact-perk{min-width:0!important;aspect-ratio:1!important}
 
-.artifact-row{grid-template-columns:var(--rail-icon) minmax(0,1fr)!important;gap:clamp(4px,.5vh,7px) clamp(6px,.65vw,10px)!important;padding:clamp(5px,.62vh,9px)!important;min-width:0!important}
-.artifact-row .art{width:var(--rail-icon)!important;height:var(--rail-icon)!important}
+.artifact-row{gap:clamp(4px,.5vh,7px) clamp(6px,.65vw,10px)!important;padding:clamp(5px,.62vh,9px)!important;min-width:0!important}
 .artifact-row>div:nth-child(2){min-width:0!important;align-self:center!important}
 .artifact-row>div:nth-child(2) b{font-size:clamp(.62rem,.86vh,.76rem)!important}
 .artifact-row>div:nth-child(2) small{font-size:clamp(.5rem,.7vh,.6rem)!important}
-.artifact-row .perks{grid-column:1 / -1!important;display:grid!important;grid-template-columns:repeat(4,var(--rail-icon))!important;grid-auto-rows:var(--rail-icon)!important;gap:var(--rail-gap)!important;justify-content:start!important;width:max-content!important;max-width:100%!important;padding-top:clamp(2px,.4vh,5px)!important}
+.artifact-row .perks{grid-column:1 / -1!important;display:grid!important;gap:var(--rail-gap)!important;justify-content:start!important;max-width:100%!important;padding-top:clamp(2px,.4vh,5px)!important}
 .artifact-row .perks .artifact-perk:nth-child(-n+3){grid-row:1!important}
 .artifact-row .perks .artifact-perk:nth-child(1){grid-column:1!important}
 .artifact-row .perks .artifact-perk:nth-child(2){grid-column:2!important}
@@ -37,12 +35,12 @@
 .artifact-row .perks .artifact-perk:nth-child(7){grid-row:2!important;grid-column:4!important}
 
 @media (min-width:1221px) and (max-height:980px){
-  :root{--rail-icon:clamp(36px,min(4.65vh,3.35vw),52px);--rail-gap:clamp(5px,.48vh,7px);--rail-pad:clamp(7px,.72vh,9px);--rail-super:clamp(52px,calc(var(--rail-icon) * 1.34),70px)}
+  :root{--rail-gap:clamp(5px,.48vh,7px);--rail-pad:clamp(7px,.72vh,9px);--rail-super:clamp(52px,calc(var(--guardian-square) * 1.34),70px)}
   .left>.grp{padding-top:2px!important}.left .super-focus{padding-top:0!important;padding-bottom:2px!important}.artifact-row{padding:4px!important}
 }
 
 @media (min-width:1221px) and (max-height:820px){
-  :root{--rail-icon:clamp(32px,min(4.35vh,3.1vw),44px);--rail-gap:4px;--rail-pad:6px;--rail-super:clamp(46px,calc(var(--rail-icon) * 1.3),58px)}
+  :root{--rail-gap:4px;--rail-pad:6px;--rail-super:clamp(46px,calc(var(--guardian-square) * 1.3),58px)}
   .grp .lbl,#abilityList::before{font-size:.4rem!important;margin-bottom:1px!important}.artifact-row .perks{padding-top:2px!important}
 }
 
@@ -50,8 +48,8 @@
 .guardian-loadouts-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:clamp(4px,.55vh,7px)}
 .guardian-loadouts-head .lbl{margin:0!important}
 .guardian-loadouts-head small{font:600 clamp(.38rem,.58vh,.46rem) bahnschrift,sans-serif;letter-spacing:.08em;color:rgba(201,195,218,.55)}
-.guardian-loadouts-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--rail-gap);max-width:calc((var(--rail-icon) * 5) + (var(--rail-gap) * 4))}
-.guardian-loadouts-status{grid-column:1/-1;display:grid;place-items:center;min-height:calc(var(--rail-icon) * 2 + var(--rail-gap));padding:8px;border:1px dashed rgba(181,174,199,.18);border-radius:7px;color:#8b8499;font:700 clamp(.38rem,.58vh,.46rem) bahnschrift,sans-serif;line-height:1.35;letter-spacing:.045em;text-align:center}
+.guardian-loadouts-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--rail-gap);max-width:calc((var(--guardian-square) * 5) + (var(--rail-gap) * 4))}
+.guardian-loadouts-status{grid-column:1/-1;display:grid;place-items:center;min-height:calc(var(--guardian-square) * 2 + var(--rail-gap));padding:8px;border:1px dashed rgba(181,174,199,.18);border-radius:7px;color:#8b8499;font:700 clamp(.38rem,.58vh,.46rem) bahnschrift,sans-serif;line-height:1.35;letter-spacing:.045em;text-align:center}
 .guardian-loadouts-status.is-pending{border-color:rgba(255,206,64,.28);color:#d4c99b}
 .guardian-loadouts-status.is-unavailable{border-color:rgba(255,92,112,.3);color:#d9a0a8}
 .guardian-loadout-slot{position:relative;display:grid;place-items:center;aspect-ratio:1;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:rgba(255,255,255,.025);color:#595568;cursor:default;min-width:0}
@@ -195,18 +193,15 @@
   html body .workspace .left #fragList{
     position:relative!important;
     align-content:start!important;
-    min-height:58px!important;
   }
   html body .workspace .left #abilityList:empty::after,
   html body .workspace .left #aspectList:empty::after{
     content:"";
     display:block;
-    height:48px;
     opacity:.7;
     background-repeat:no-repeat;
   }
   html body .workspace .left #abilityList:empty::after{
-    width:220px;
     background-image:
       linear-gradient(45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
       linear-gradient(-45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
@@ -216,7 +211,6 @@
     background-position:0 0,55px 0,110px 0,165px 0;
   }
   html body .workspace .left #aspectList:empty::after{
-    width:120px;
     background-image:
       linear-gradient(45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
       linear-gradient(-45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%);

@@ -249,27 +249,17 @@
    * wiring the Supers/abilities/aspects later does not force another layout pass. */
   .workspace>.left>.grp{flex:0 0 auto!important}
   #abilityList{
-    min-height:54px!important;
-    grid-template-columns:repeat(4,46px)!important;
     gap:7px!important;
     align-content:center!important;
   }
   #aspectList{
-    min-height:54px!important;
-    grid-template-columns:repeat(2,54px)!important;
     gap:8px!important;
     align-content:center!important;
   }
   #fragList{
-    min-height:54px!important;
-    grid-template-columns:repeat(5,46px)!important;
     gap:6px!important;
     align-content:center!important;
   }
-  #abilityList .ability-row,
-  #abilityList .ico-badge{width:46px!important;height:46px!important}
-  #aspectList .slot,#aspectList .ico-badge{width:54px!important;height:54px!important}
-  #fragList .slot,#fragList .ico-badge{width:46px!important;height:46px!important}
 
   .guardian-loadouts-panel{min-height:0!important;margin-top:auto!important}
   .guardian-loadouts-grid{overflow:visible!important;max-height:none!important}
@@ -313,7 +303,6 @@
 
 @container (max-width:560px){
   .guardian-character-cards{right:14px!important}
-  .guardian-character-card{flex-basis:min(84cqw,290px)}
   .view3d{top:150px!important}
 }
 

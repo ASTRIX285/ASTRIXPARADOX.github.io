@@ -1,7 +1,7 @@
 /* ASTRIX PARADOX left-rail Super feature frame.
  * Presentation only. No Bungie/runtime binding is changed here. */
 @media (min-width:981px){
-  .left{--rail-slot:54px;--rail-slot-gap:8px}
+  .left{--rail-slot-gap:8px}
 
   .left .subclass-hero{
     min-height:58px!important;
@@ -36,13 +36,13 @@
   }
   .left .grp--abilities,.left .grp--aspects{flex:0 0 auto!important;min-height:70px!important;padding-top:6px!important}
   .left .grp--abilities .lbl,.left .grp--aspects .lbl{margin-bottom:6px!important}
-  #abilityList,#aspectList,#fragList{min-height:54px!important;display:grid!important;grid-auto-flow:row!important;grid-template-columns:repeat(4,var(--rail-slot))!important;gap:var(--rail-slot-gap)!important;align-items:start!important;justify-content:start!important}
-  #abilityList .ability-row,#abilityList .slot,#abilityList .ico-badge,#aspectList .slot,#aspectList .ico-badge,#fragList .slot,#fragList .ico-badge{width:var(--rail-slot)!important;min-width:var(--rail-slot)!important;max-width:var(--rail-slot)!important;height:var(--rail-slot)!important;min-height:var(--rail-slot)!important;max-height:var(--rail-slot)!important;box-sizing:border-box!important}
+  #abilityList,#aspectList,#fragList{display:grid!important;grid-auto-flow:row!important;gap:var(--rail-slot-gap)!important;align-items:start!important;justify-content:start!important}
+  #abilityList .ability-row,#abilityList .slot,#abilityList .ico-badge,#aspectList .slot,#aspectList .ico-badge,#fragList .slot,#fragList .ico-badge{box-sizing:border-box!important}
   #abilityList:empty,#aspectList:empty{position:relative!important}
-  #abilityList:empty::before,#aspectList:empty::before{content:""!important;display:block!important;width:var(--rail-slot)!important;height:var(--rail-slot)!important;border:1px solid rgba(227,178,60,.14)!important;border-radius:7px!important;background:rgba(255,255,255,.012)!important;box-sizing:border-box!important;transform:none!important}
+  #abilityList:empty::before,#aspectList:empty::before{content:""!important;display:block!important;border:1px solid rgba(227,178,60,.14)!important;border-radius:7px!important;background:rgba(255,255,255,.012)!important;box-sizing:border-box!important;transform:none!important}
   #abilityList:empty::after,#aspectList:empty::after{content:none!important;display:none!important}
-  .left .artifact-row .perks{display:grid!important;grid-template-columns:repeat(4,var(--rail-slot))!important;gap:var(--rail-slot-gap)!important}
-  .left .artifact-row .perks>*{width:var(--rail-slot)!important;min-width:var(--rail-slot)!important;height:var(--rail-slot)!important;min-height:var(--rail-slot)!important;box-sizing:border-box!important}
+  .left .artifact-row .perks{display:grid!important;gap:var(--rail-slot-gap)!important}
+  .left .artifact-row .perks>*{box-sizing:border-box!important}
 }
 
 /* Verified subclass presentation uses the canonical Destiny element palette.
