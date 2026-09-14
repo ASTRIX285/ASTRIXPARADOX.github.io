@@ -110,6 +110,21 @@ function inventoryLocations(payload={}){
   return {profile,locations};
 }
 
+function projectAcceptedInventoryLocation(payload,item,expected={}){
+  const next=clone(payload),profile=next?.profile||next?.Response;
+  if(!profile||!item?.itemInstanceId)return null;
+  const itemInstanceId=String(item.itemInstanceId),lists=[profile?.profileInventory?.data?.items,...Object.values(profile?.characterInventories?.data||{}).map(row=>row?.items),...Object.values(profile?.characterEquipment?.data||{}).map(row=>row?.items)].filter(Array.isArray);
+  let raw=null;
+  for(const list of lists)for(let index=list.length-1;index>=0;index-=1)if(String(list[index]?.itemInstanceId||'')===itemInstanceId){raw=raw||list[index];list.splice(index,1);}
+  raw={...(raw||{}),itemInstanceId,itemHash:Number(item.itemHash),bucketHash:expected.kind==='vault'?VAULT_BUCKET:Number(item.bucketHash)};
+  if(expected.kind==='vault'){
+    profile.profileInventory=profile.profileInventory||{};profile.profileInventory.data=profile.profileInventory.data||{};profile.profileInventory.data.items=profile.profileInventory.data.items||[];profile.profileInventory.data.items.push(raw);
+  }else if(['carried','equipped'].includes(expected.kind)&&decimal(expected.characterId)){
+    const component=expected.kind==='equipped'?'characterEquipment':'characterInventories';profile[component]=profile[component]||{};profile[component].data=profile[component].data||{};profile[component].data[expected.characterId]=profile[component].data[expected.characterId]||{};profile[component].data[expected.characterId].items=profile[component].data[expected.characterId].items||[];profile[component].data[expected.characterId].items.push(raw);
+  }else return null;
+  return next;
+}
+
 function freshTransferSteps(plan,payload){
   const {locations}=inventoryLocations(payload),steps=[],blockers=[];
   for(const target of plan?.equipment?.targets||[]){
@@ -430,7 +445,7 @@ async function waitForPostmasterExit(itemInstanceId,characterId,{fetchImpl=fetch
   return {verified:false,...last};
 }
 
-async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
+async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},onAccepted=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
   const required=[...new Set(['transferItems',...(intent?.item?.source?.kind==='equipped'||intent?.equipAfterTransfer?['equipItems']:[])])];
   const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,liveInventory:null,attemptCount:0,mutationCount:0};
   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
@@ -452,7 +467,9 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     else if(step.from&&!locationMatches(before.location,step.from)&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is continuing from Bungie's accepted previous leg while profile readback catches up.`,{expectedSource:step.from,staleReadback:before.location?.source||null});
     for(let attempt=0;attempt<=AMBIGUOUS_ACTION_RETRY_LIMIT;attempt+=1){
       try{
-        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),settled=allowAcceptedWithoutReadback?{verified:false,fresh:null,location:null}:await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
+        const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault:step.transferToVault},step.label),acceptedInventory=projectAcceptedInventoryLocation(result.liveInventory,item,step.expected);
+        if(acceptedInventory){result.liveInventory=acceptedInventory;if(String(item.itemInstanceId)===result.itemInstanceId&&!intent.equipAfterTransfer&&locationMatches({source:step.expected},destinationExpected))await onAccepted({itemInstanceId:result.itemInstanceId,expected:step.expected,liveInventory:acceptedInventory,ErrorCode:response?.ErrorCode??1});}
+        const settled=allowAcceptedWithoutReadback?{verified:false,fresh:null,location:null}:await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
         if(!settled.verified){record(step.phase||'transfer','accepted',`${step.label} was accepted by Bungie; final fresh readback is still required.`,{expected:step.expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});return {accepted:true,...settled};}
         record(step.phase||'transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
         return settled;
@@ -489,7 +506,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     }
   };
   try{
-    const fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'}),{profile,locations}=inventoryLocations(fresh),location=locations.get(result.itemInstanceId),item=intent.item,reviewedSource=item.source,destination=intent.destination;
+    const fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'}),{profile,locations}=inventoryLocations(fresh),location=locations.get(result.itemInstanceId),item=intent.item,reviewedSource=item.source,destination=intent.destination;result.liveInventory=fresh;
     const blockers=[];
     if(!location)blockers.push(`${item.name} is no longer present in the Bungie account inventory.`);
     else if(Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} no longer matches its staged Bungie definition hash.`);
@@ -520,7 +537,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
         if(!settled.verified||!locationMatches(replacementEquipped,{kind:'equipped',characterId:source.characterId})){record('equip-replacement','mismatch','Fresh Bungie readback did not confirm the replacement equip.',{itemLocation:settled.location?.source||null,replacementLocation:replacementEquipped?.source||null});result.status='partial';return result;}
         record('equip-replacement','complete',label,{ErrorCode:response?.ErrorCode??1});
         source={kind:'carried',characterId:source.characterId};
-        transferSourceEvidence=settled.location;
+        transferSourceEvidence=settled.location;result.liveInventory=settled.fresh||result.liveInventory;
       }catch(error){record('equip-replacement','failed',label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
     }
 
@@ -570,7 +587,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     }else try{
       const settled=await waitForInventoryLocation(result.itemInstanceId,destinationExpected,{fetchImpl,authOrigin,waitImpl}),location=settled.location||null;
       result.readback={verified:settled.verified,expected:destinationExpected,actual:location?.source||null};
-      if(settled.verified)result.liveInventory=settled.fresh||null;
+      if(settled.fresh)result.liveInventory=settled.fresh;
       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms the requested destination.':'Final Bungie inventory does not match the requested destination.',result.readback);
       if(result.readback.verified)result.status='applied';
       else if(result.status==='applied')result.status='partial';
