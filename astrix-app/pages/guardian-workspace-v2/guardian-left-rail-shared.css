@@ -324,7 +324,7 @@
   grid-template-rows:1fr!important;
   gap:4px!important;
   width:100%!important;
-  min-width:720px!important;
+  min-width:min(720px,100%)!important;
   max-width:none!important;
   overflow:visible!important;
 }
