@@ -327,11 +327,10 @@
 }
 .guardian-loadouts-strip .guardian-loadouts-grid{
   display:grid!important;
-  grid-template-columns:repeat(20,minmax(32px,1fr))!important;
+  grid-template-columns:repeat(20,var(--apx-icon-loadout,36px))!important;
   grid-template-rows:1fr!important;
   gap:4px!important;
   width:100%!important;
-  min-width:min(720px,100%)!important;
   max-width:none!important;
   overflow:visible!important;
 }
@@ -343,7 +342,7 @@
   min-width:0!important;
   height:auto!important;
   min-height:0!important;
-  aspect-ratio:1!important;
+  aspect-ratio:var(--apx-inventory-ratio,100/122)!important;
   padding:2px!important;
   overflow:hidden!important;
   appearance:none!important;
