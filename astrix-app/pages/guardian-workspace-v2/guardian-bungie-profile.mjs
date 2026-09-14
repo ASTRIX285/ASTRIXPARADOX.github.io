@@ -1137,6 +1137,11 @@ if(PROFILE_RUNTIME_ENABLED){
       const cacheKey=`${characterId}:${index}`;loadoutCache.delete(cacheKey);invalidatedLoadoutCacheKeys.add(cacheKey);
       void invalidateBungieLoadoutDetail(session,characterId,index);
     }
+    if(detail.liveInventory?.profile&&liveProfilePayload?.profile){
+      const overlay={...liveProfilePayload,...detail.liveInventory,profile:{...liveProfilePayload.profile,...detail.liveInventory.profile},definitions:liveProfilePayload.definitions||{},damageDefinitions:liveProfilePayload.damageDefinitions||{},breakerDefinitions:liveProfilePayload.breakerDefinitions||{},statDefinitions:liveProfilePayload.statDefinitions||{},collectibleDefinitions:liveProfilePayload.collectibleDefinitions||{},gearAssets:liveProfilePayload.gearAssets||{}};
+      void activateLiveProfile(overlay,session).then(()=>{liveProfileReady=true;void cacheBungieProfile(session,overlay,currentPagePayloadKind()).catch(error=>console.warn("[Forge Bungie profile] inventory overlay cache write failed",error));}).catch(error=>{console.warn("[Forge Bungie profile] verified inventory overlay could not render; requesting a full profile",error);liveProfileReady=false;liveProfileRequest=null;void ensureLiveProfile(session,{background:true,silent:false});});
+      return;
+    }
     liveProfileReady=false;liveProfileRequest=null;
     void ensureLiveProfile(session,{background:true,silent:false});
   });

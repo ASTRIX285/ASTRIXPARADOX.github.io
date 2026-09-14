@@ -185,6 +185,16 @@ const CHARACTER_PAGE_PROFILE_COMPONENTS = [
   305  // ItemSockets
 ] as const;
 
+// Live inventory mutations only need exact ownership and location evidence.
+// Keeping this profile small makes post-action polling materially faster than
+// repeatedly downloading Character stats, sockets, activities and loadouts.
+const LIVE_INVENTORY_PROFILE_COMPONENTS = [
+  102, // ProfileInventories (Vault)
+  200, // Characters (destination binding)
+  201, // CharacterInventories (carried and Postmaster)
+  205  // CharacterEquipment (equipped-item replacement and verification)
+] as const;
+
 const JOURNEY_PROFILE_COMPONENTS = [
   100, // Profiles
   102, // ProfileInventories
@@ -914,8 +924,10 @@ async function fetchArtifactDefinition(
 async function profileRoute(request: Request, env: Env): Promise<Response> {
   const requestUrl = new URL(request.url);
   const profileScope = requestUrl.searchParams.get("scope");
-  const requestedComponents = profileScope === "character"
-    ? CHARACTER_PAGE_PROFILE_COMPONENTS
+  const requestedComponents = profileScope === "inventory"
+    ? LIVE_INVENTORY_PROFILE_COMPONENTS
+    : profileScope === "character"
+      ? CHARACTER_PAGE_PROFILE_COMPONENTS
     : profileScope === "forge"
       ? CHARACTER_PROFILE_COMPONENTS
     : profileScope === "journey"

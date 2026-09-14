@@ -7,11 +7,14 @@ const web=await readFile(new URL('../../forge-auth-worker/src/web.ts',import.met
 const sessionRecord=await readFile(new URL('../../forge-auth-worker/src/auth-record.ts',import.meta.url),'utf8');
 const armourSolver=await readFile(new URL('../../forge-auth-worker/src/armour-solver.ts',import.meta.url),'utf8');
 const preparedPageCache=await readFile(new URL('../../forge-auth-worker/src/prepared-page-cache.ts',import.meta.url),'utf8');
+const guardianProfile=await readFile(new URL('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs',import.meta.url),'utf8');
 
 assert.match(worker,/const DESTINY_ACTION_CAPABILITIES = Object\.freeze\(\{[\s\S]*?captureSnapshot: true[\s\S]*?transferItems: true[\s\S]*?equipItems: true[\s\S]*?insertSocketPlugFree: true[\s\S]*?verifyFinalState: true[\s\S]*?clearLoadout: true/,'The Worker must advertise the exact live-action capability contract.');
 assert.match(worker,/transferItems: true[\s\S]*?pullFromPostmaster: true[\s\S]*?equipItems: true/,'The live capability contract must explicitly advertise the approved Postmaster executor beside transfer and equip.');
 assert.match(worker,/async function sessionRoute[\s\S]*?csrfToken: session\.csrfToken[\s\S]*?capabilities: \{ destinyActions: DESTINY_ACTION_CAPABILITIES \}/,'Authenticated sessions must return a CSRF token and explicit route capabilities.');
 assert.match(worker,/const profileResponseHeaders = displaySnapshot \? undefined : \{[\s\S]*?"Cache-Control": "private, no-store, no-cache, must-revalidate"[\s\S]*?await fetch\(profileUrl,[\s\S]*?"Cache-Control": "no-cache"/,'Every live profile read must bypass Worker, edge and upstream caches before transfer verification.');
+assert.match(worker,/const LIVE_INVENTORY_PROFILE_COMPONENTS = \[[\s\S]*?102,[\s\S]*?200,[\s\S]*?201,[\s\S]*?205[\s\S]*?profileScope === "inventory"[\s\S]*?LIVE_INVENTORY_PROFILE_COMPONENTS/,'Live transfer polling must use a dedicated minimal Bungie component scope.');
+assert.match(guardianProfile,/detail\.liveInventory\?\.profile&&liveProfilePayload\?\.profile[\s\S]*?activateLiveProfile\(overlay,session\)/,'Character must render a verified final inventory overlay without another blocking Bungie request.');
 assert.match(sessionRecord,/verifiedCharacterIds\?: string\[\][\s\S]*?verifiedCharactersAt\?: number/,'The session record must retain the short-lived verified Guardian binding.');
 
 assert.match(worker,/async function actionRequestBody[\s\S]*?Content-Length[\s\S]*?> 32_768[\s\S]*?request\.text\(\)[\s\S]*?TextEncoder\(\)\.encode\(raw\)\.byteLength > 32_768[\s\S]*?JSON\.parse\(raw\)/,'Action bodies must remain JSON-only and size-bounded even when Content-Length is absent.');

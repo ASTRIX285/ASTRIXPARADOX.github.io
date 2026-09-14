@@ -396,10 +396,10 @@ let unconfirmedVaultCalls=0;
 await assert.rejects(()=>executeVaultTransferIntent(stagedVaultMove,{session,fetchImpl:async()=>{unconfirmedVaultCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
 assert.equal(unconfirmedVaultCalls,0,'An unconfirmed drag transfer must make zero Bungie requests.');
 let moveLocation='source';
-const movePaths=[];
+const movePaths=[],moveReadScopes=[];
 const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
-  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
-  if(method==='GET')return response(vaultActionProfile({location:moveLocation,activity:'active'}));
+  const parsed=new URL(String(url)),path=parsed.pathname,method=String(init.method||'GET').toUpperCase();
+  if(method==='GET'){moveReadScopes.push(parsed.searchParams.get('scope'));return response(vaultActionProfile({location:moveLocation,activity:'active'}));}
   movePaths.push(path);
   const body=JSON.parse(init.body);
   moveLocation=body.transferToVault?'vault':'target';
@@ -407,7 +407,9 @@ const moved=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVa
 }});
 assert.equal(moved.status,'applied');
 assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
+assert.deepEqual(moveReadScopes,['inventory','inventory'],'A normal cross-Guardian move must use one lightweight preflight and one final readback, with no redundant inter-leg profile downloads.');
 assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+assert.equal(moved.liveInventory?.profile?.characterInventories?.data?.[OTHER_CHARACTER_ID]?.items?.[0]?.itemInstanceId,TRANSFER_ITEM.itemInstanceId,'The verified final lightweight profile must be reusable by the UI without another blocking network read.');
 assert.equal(moved.steps.some(row=>row.phase==='preflight'&&row.status==='blocked'),false,'A non-zero activity hash must not pre-block an ordinary item transfer; Bungie decides whether the move is allowed.');
 
 let resumedLocation='vault';

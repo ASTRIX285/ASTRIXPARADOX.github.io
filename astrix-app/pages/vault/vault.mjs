@@ -8,7 +8,7 @@ import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-resilient-transfer-4';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-1';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
@@ -188,8 +188,8 @@ function actionFailureMessage(result){
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
 }
 
-async function refreshAfterLiveAction(){
-  const live=await requestFreshProfile(),next={...payload,...live,profile:live.profile,definitions:payload?.definitions||{},damageDefinitions:payload?.damageDefinitions||{},breakerDefinitions:payload?.breakerDefinitions||{},statDefinitions:payload?.statDefinitions||{},collectibleDefinitions:payload?.collectibleDefinitions||{},gearAssets:payload?.gearAssets||{}};
+async function refreshAfterLiveAction(liveInventory=null){
+  const live=liveInventory||await requestFreshProfile(),next={...payload,...live,profile:{...(payload?.profile||{}),...(live?.profile||{})},definitions:payload?.definitions||{},damageDefinitions:payload?.damageDefinitions||{},breakerDefinitions:payload?.breakerDefinitions||{},statDefinitions:payload?.statDefinitions||{},collectibleDefinitions:payload?.collectibleDefinitions||{},gearAssets:payload?.gearAssets||{}};
   await applyVaultRefresh(next,{reason:'mutation'});
 }
 
@@ -208,7 +208,7 @@ async function performPendingVaultAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
-    if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction();
+    if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
     if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
   }catch(error){

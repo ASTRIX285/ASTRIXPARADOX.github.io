@@ -4,12 +4,12 @@ import {
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
+} from "./guardian-bungie-profile.mjs?v=20260914-fast-transfer-1&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-resilient-transfer-5";
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
@@ -174,7 +174,7 @@ async function performCharacterPostmasterQueue(){
   try{
     characterInventoryState.busy=true;
     result=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
-    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId}}));
+    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId,liveInventory:result.liveInventory}}));
     if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
     else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${characterInventoryFailure(result)}`,'error');
   }catch(error){
@@ -221,8 +221,8 @@ async function performCharacterInventoryAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session:characterInventoryState.session,onProgress})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress});
-    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action',characterId:characterInventoryState.activeCharacterId}}));
-    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('The live inventory action was confirmed by Bungie. Refreshing the active Guardian from a fresh profile.','good');
+    if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action',characterId:characterInventoryState.activeCharacterId,liveInventory:result.liveInventory}}));
+    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('The live inventory action was confirmed by Bungie.','good');
     else characterInventoryStatus(`${result.status==='partial'?'The live action partially completed':'No live change was confirmed'}: ${characterInventoryFailure(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-inventory-action-recovery',characterId:characterInventoryState.activeCharacterId}}));
