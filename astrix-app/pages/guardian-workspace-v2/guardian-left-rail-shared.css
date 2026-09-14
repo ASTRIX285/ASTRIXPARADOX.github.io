@@ -320,11 +320,10 @@
 }
 .guardian-loadouts-strip .guardian-loadouts-grid{
   display:grid!important;
-  grid-template-columns:repeat(20,minmax(32px,1fr))!important;
+  grid-template-columns:repeat(20,minmax(32px,36px))!important;
   grid-template-rows:1fr!important;
   gap:4px!important;
   width:100%!important;
-  min-width:min(720px,100%)!important;
   max-width:none!important;
   overflow:visible!important;
 }
