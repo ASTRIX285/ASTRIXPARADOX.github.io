@@ -52,7 +52,7 @@ assert.match(mainHtml,/paradox-item-cards\.css\?v=20260913-compact-inspect-1/,'C
 assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build Forge must load the same Paradox item-card and hover framework');
 
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');
-assert.match(sources.shared,/guardian-loadouts-grid\{[\s\S]*?grid-template-columns:repeat\(20,minmax\(32px,36px\)\)!important;/,'The Bungie 1–20 loadout row must stay capped at the shared loadout icon size (--apx-icon-loadout, 36px) and never grow unbounded with viewport width');
+assert.match(sources.shared,/guardian-loadouts-grid\{[\s\S]*?grid-template-columns:repeat\(20,minmax\(32px,1fr\)\)!important;[\s\S]*?min-width:min\(720px,100%\)!important/,'The Bungie 1–20 loadout row must remain fluid and single-row');
 assert.match(sources.shared,/guardian-loadout-slot\{[\s\S]*?aspect-ratio:1!important/,'Every loadout slot must remain square');
 
 assert.doesNotMatch(combined,/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden');
