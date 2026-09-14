@@ -54,7 +54,7 @@ assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');
 // Intentional: loadout tracks use the shared fluid size and slots inherit the inventory ratio.
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadouts-grid\{[^}]*grid-template-columns:repeat\(20,var\(--apx-icon-loadout,36px\)\)!important;/,'The Bungie 1–20 loadout row must use the shared fluid loadout baseline instead of container-fill tracks');
-assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadout-slot\{[^}]*aspect-ratio:var\(--apx-inventory-ratio,100\/122\)!important;/,'Loadout slots must share the equipped inventory aspect-ratio token and its portrait fallback');
+assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadout-slot\{[^}]*aspect-ratio:100\/122!important;/,'Intentional: loadout slots use their own literal 100/122 portrait ratio as requested by Miguel; equipped tiles retain the shared DIM-square ratio');
 
 assert.doesNotMatch(combined,/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden');
 const pageLayoutCss=[sources.adaptive,sources.gear,sources.layout,sources.leftLock,sources.mobile,sources.shared,sources.super,sources.build].join('\n');
