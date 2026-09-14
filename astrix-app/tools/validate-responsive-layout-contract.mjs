@@ -52,8 +52,8 @@ assert.match(mainHtml,/paradox-item-cards\.css\?v=20260913-compact-inspect-1/,'C
 assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build Forge must load the same Paradox item-card and hover framework');
 
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');
-// Intentional: loadout tracks use the shared fluid size and slots inherit the inventory ratio.
-assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadouts-grid\{[^}]*grid-template-columns:repeat\(20,var\(--apx-icon-loadout,36px\)\)!important;/,'The Bungie 1–20 loadout row must use the shared fluid loadout baseline instead of container-fill tracks');
+// Intentional: loadout tracks fill the strip and slots retain their own portrait ratio.
+assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadouts-grid\{[^}]*grid-template-columns:repeat\(20,minmax\(32px,1fr\)\)!important;/,'The Bungie 1–20 loadout row must expand across the strip with uncapped fluid tracks');
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadout-slot\{[^}]*aspect-ratio:100\/122!important;/,'Intentional: loadout slots use their own literal 100/122 portrait ratio as requested by Miguel; equipped tiles retain the shared DIM-square ratio');
 
 assert.doesNotMatch(combined,/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden');
