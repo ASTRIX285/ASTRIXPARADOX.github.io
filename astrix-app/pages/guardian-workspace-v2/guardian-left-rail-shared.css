@@ -342,7 +342,7 @@
   min-width:0!important;
   height:auto!important;
   min-height:0!important;
-  aspect-ratio:var(--apx-inventory-ratio,100/122)!important;
+  aspect-ratio:100/122!important;
   padding:2px!important;
   overflow:hidden!important;
   appearance:none!important;
