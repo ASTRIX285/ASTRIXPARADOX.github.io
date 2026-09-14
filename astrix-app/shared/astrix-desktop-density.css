@@ -23,6 +23,7 @@
   --apx-type-control:.8125rem;
   --apx-type-label:.75rem;
   --apx-type-meta:.75rem;
+  --apx-icon-build-health:calc(70 * var(--apx-icon-unit,1px));
   --apx-icon-inline:calc(13 * var(--apx-icon-unit,1px));
   --apx-icon-brand:calc(46 * var(--apx-icon-unit,1px));
   --apx-icon-brand-compact:calc(38 * var(--apx-icon-unit,1px));
