@@ -98,7 +98,8 @@ assert.match(forgeLoaderCss,/\.forge-exotic-grid\{[^}]*minmax\(var\(--apx-icon-s
 assert.match(forgeLoaderCss,/\.forge-staged-slot\{[^}]*grid-template-columns:var\(--apx-icon-stage\)/u,'Forge Loader staged items must consume the exact shared stage icon tier');
 assert.match(forgeLoaderCss,/\.forge-matrix-exotic\{[^}]*width:var\(--apx-icon-selector\);height:var\(--apx-icon-selector\)/u,'Forge Loader Matrix Exotics must match the shared Exotic selector tile size');
 assert.match(forgeLoaderCss,/\.forge-inspect-main\{[^}]*grid-template-columns:var\(--apx-icon-inspect\)[\s\S]*?\.forge-inspect-main img\{width:var\(--apx-icon-inspect\);height:var\(--apx-icon-inspect\)/u,'Forge Loader inspection must consume the shared inspect icon token');
-assert.match(sources.build,/\.recommended-weapons-summary\{--gear-weapon-art:var\(--apx-icon-gear-art-width\)/u,'Build Forge recommendations must consume the shared portrait gear-art token');
+assert.doesNotMatch(sources.build,/--gear-weapon-art:/,'Build recommendations must not override the shared equipment-art size');
+assert.match(sources.items,/body \.gear-weapons,body \.recommended-weapons-summary\{--gear-weapon-art:var\(--paradox-equipment-width\)/,'Equipment and review thumbnails share their canonical art size');
 assert.doesNotMatch(sources.gear,/\.weapon-detail-icon\{[^}]*width:/u,'Guardian gear layout must not override the canonical item-detail icon size');
 assert.match(sources.items,/body \.paradox-item-header \.weapon-detail-icon\{width:var\(--paradox-equipment-width\);height:var\(--paradox-equipment-height\)/u,'Item cards must retain the single canonical detail icon size source');
 assert.match(sources.layout,/grid-template-columns:var\(--apx-workspace-left,[^;]+\) var\(--apx-workspace-centre,[^;]+\)!important/,'Character must consume the shared rail and centre tracks');
