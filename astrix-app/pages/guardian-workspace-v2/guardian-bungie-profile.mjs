@@ -935,7 +935,8 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
   if(!preparedPagePayloadResolved){preparedPagePayloadResolved=true;resolvePreparedPagePayload(payload);}
   liveProfilePayload=payload;
   liveProfileSession=session;
-  const explicitCharacter=payload.profile?.characters?.data?.[explicitlySelectedCharacterId]||null;
+  const preferredCharacterId=explicitlySelectedCharacterId||(location.pathname.includes('/paradox-build-space/')?currentSelectedCharacterId():"");
+  const explicitCharacter=payload.profile?.characters?.data?.[preferredCharacterId]||null;
   const selectedCharacterId=String(explicitCharacter?.characterId||activeCharacter(payload.profile)?.characterId||"");
   if(selectedCharacterId)rememberCharacterId(selectedCharacterId);
   publishCharacterRoster(payload,selectedCharacterId);
@@ -954,7 +955,8 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
   }
 
   if(document.documentElement.dataset.guardianProfileMode==="roster-only"){
-    const detail=normaliseLiveProfile(payload,session,selectedCharacterId);
+    const resolved=normaliseLiveProfile(payload,session,selectedCharacterId);
+    const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
     document.dispatchEvent(new CustomEvent("forge:guardian-loadout-context",{detail:{...detail,sessionCacheRestored:fromCache}}));
     return detail;
   }
@@ -989,6 +991,10 @@ function selectLiveCharacter(characterId,expectedClass=""){
   if(!liveProfilePayload){
     const session=currentAuthenticatedSession();
     if(session){
+      // Keep a card click made while the profile is still loading. Startup
+      // must not fall back to another Guardian when the request completes.
+      explicitlySelectedCharacterId=String(characterId||"");
+      rememberCharacterId(explicitlySelectedCharacterId);
       document.documentElement.dataset.guardianSource="bungie-live-loading";
       setRenderStatus("LOADING CHARACTER PROFILE","Waiting for your live Bungie Guardian","Local selection is unavailable while live Guardian data is active");
       ensureLiveProfile(session,{background:false,silent:false});

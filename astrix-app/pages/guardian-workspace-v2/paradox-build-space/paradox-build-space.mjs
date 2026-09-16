@@ -26,7 +26,7 @@ import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inv
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
@@ -58,6 +58,9 @@ let activeLoadError='';
 let testDomain='pve';
 let buildRenderSequence=0;
 let volatileState=null;
+let initialisingBuild=true;
+let pendingEquippedContext=null;
+let equippedEntryState=null;
 let statePersistenceChain=Promise.resolve(true);
 let statePersistenceRevision=0;
 let selectedRecommendationElement='';
@@ -128,9 +131,11 @@ function decodeState(raw,{durable=false,expectedBinding={}}={}){
 }
 function readState(){
   activeLoadError='';
-  const params=new URLSearchParams(location.search),expectedCharacterId=params.get('characterId')||'',expectedMembershipId=params.get('membershipId')||'',expectedMembershipType=params.get('membershipType')||'';
-  const expectedBinding={characterId:expectedCharacterId,membershipId:expectedMembershipId,membershipType:expectedMembershipType};
+  const params=new URLSearchParams(location.search),expectedBinding=requestedTransferBinding();
   if(volatileState){const state=validateBuildState(volatileState,expectedBinding,{protect:false});if(state)return state;volatileState=null;}
+  // Plain navigation starts from the selected Guardian's equipped profile.
+  // Global handoff keys can still contain a previous Guardian or saved slot.
+  if(!expectedBinding.characterId){activeLoadError='Loading the selected Guardian’s currently equipped loadout.';return null;}
   // The explicit Character -> Build handoff contains the post-enrichment armour
   // state (including resolved set bonuses). The generic profile snapshot is a
   // recovery fallback only and must not replace that selected build.
@@ -383,15 +388,26 @@ function writeState(next){
   void queueStatePersistence(state);
   return true;
 }
-function requestedTransferBinding(){const params=new URLSearchParams(location.search);return {characterId:params.get('characterId')||'',membershipId:params.get('membershipId')||'',membershipType:params.get('membershipType')||''};}
+function requestedTransferBinding(){const params=new URLSearchParams(location.search);return {characterId:explicitlySelectedCharacterId||params.get('characterId')||'',membershipId:params.get('membershipId')||'',membershipType:params.get('membershipType')||''};}
+function bindBuildRoute(build,{characterChange=false}={}){
+  const url=new URL(location.href),binding=bindingOf(build);
+  for(const [key,value] of Object.entries(binding))if(value)url.searchParams.set(key,value);
+  if(characterChange)for(const key of ['vault','loadoutIntent','prewarm','baseline'])url.searchParams.delete(key);
+  history.replaceState(history.state,'',url);
+}
 async function restorePersistedBuildState(){
-  const binding=requestedTransferBinding(),snapshot=await readBuildForgeState(binding),restored=restoreBuildPersistenceSnapshot(snapshot||{}),state=validateBuildState(restored,binding);
+  const binding=requestedTransferBinding(),revision=statePersistenceRevision;
+  if(!binding.characterId)return null;
+  const snapshot=await readBuildForgeState(binding);
+  if(revision!==statePersistenceRevision||!bindingsEqual(binding,requestedTransferBinding())||volatileState)return null;
+  const restored=restoreBuildPersistenceSnapshot(snapshot||{}),state=validateBuildState(restored,binding);
   if(!state)return null;
   volatileState=state;activeLoadError='';return state;
 }
 async function restoreAtomicForgeTransfer(){
   if(new URLSearchParams(location.search).get('vault')!=='selection')return null;
-  const binding=requestedTransferBinding(),transfer=await readForgeLoaderTransfer(binding);
+  const binding=requestedTransferBinding(),revision=statePersistenceRevision,transfer=await readForgeLoaderTransfer(binding);
+  if(revision!==statePersistenceRevision||!bindingsEqual(binding,requestedTransferBinding())||explicitlySelectedCharacterId)return null;
   if(!transfer)return null;
   const source=validateHandoffEnvelope(transfer.snapshotEnvelope,{expectedCharacterId:binding.characterId,expectedMembershipId:binding.membershipId,expectedMembershipType:binding.membershipType});
   const selection=validateVaultArmourSelection(transfer.armourSelection,{expectedBinding:binding});
@@ -422,14 +438,38 @@ function applyPendingVaultSelection(state){
 }
 function switchBuildCharacter(detail={}){
   if(detail?.source!=="bungie-live"||!detail.characterId)return;
+  const requested=requestedTransferBinding();
+  if(requested.characterId&&requested.characterId!==String(detail.characterId))return;
   const current=readState(),params=new URLSearchParams(location.search),incomingCharacterId=String(detail.characterId);
   const replace=shouldReplaceBuildState(current,detail,{vaultSelection:params.get('vault')==='selection',explicitlySelectedCharacterId});
   if(!replace){const repaired=repairMissingBuildBinding(current,detail),hydrated=mergePreparedLoadoutContext(repaired,detail);if(hydrated!==current){writeState(hydrated);render();}return;}
-  if(explicitlySelectedCharacterId===incomingCharacterId)explicitlySelectedCharacterId='';
-  const requested=requestedTransferBinding(),boundDetail={...detail,membershipId:detail.membershipId||requested.membershipId,membershipType:detail.membershipType??requested.membershipType};
-  const next=applyPendingVaultSelection(createBuildState(boundDetail));writeState(next);render();
+  const characterChange=explicitlySelectedCharacterId===incomingCharacterId;
+  const boundDetail={...detail,membershipId:detail.membershipId||requested.membershipId,membershipType:detail.membershipType??requested.membershipType};
+  bindBuildRoute(boundDetail,{characterChange});
+  if(characterChange)explicitlySelectedCharacterId='';
+  for(const store of [sessionStorage,localStorage])for(const key of [BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY])try{store.removeItem(key);}catch{}
+  const next=applyPendingVaultSelection(createBuildState(boundDetail));writeState(next);
+  equippedEntryState=detail.loadoutSource==='currently-equipped'&&!next.workingBuild.forgeLoaderDecision?volatileState:null;
+  render();
 }
-function recoverMissingBuild(detail={}){if(detail?.source!=="bungie-live"||!detail.characterId||readState())return;switchBuildCharacter(detail);}
+function recoverMissingBuild(detail={}){
+  if(detail?.source!=="bungie-live"||!detail.characterId)return;
+  // Profile hydration may finish before the asynchronous explicit transfer.
+  if(initialisingBuild){pendingEquippedContext=detail;return;}
+  const requested=requestedTransferBinding();
+  if(requested.characterId&&requested.characterId!==String(detail.characterId))return;
+  const current=readState();
+  if(current){
+    // Refresh a cached equipped baseline only while it is still untouched.
+    // Any edit writes a new state and ends this permission; render's own
+    // context event is never a new Bungie equipment snapshot.
+    if(current===equippedEntryState&&detail!==current.workingBuild&&detail.loadoutSource==='currently-equipped'&&bindingsEqual(current,detail)){
+      writeState(createBuildState(detail));equippedEntryState=volatileState;render();
+    }
+    return;
+  }
+  switchBuildCharacter(detail);
+}
 function completeBuildRender(build){
   const sequence=++buildRenderSequence;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -842,6 +882,8 @@ async function initialiseBuildForge(){
   }catch(error){
     console.error('Build Forge could not complete the protected Forge Loader handoff. Rendering the existing Working Build instead.',error);
   }finally{
+    initialisingBuild=false;
+    if(pendingEquippedContext){const detail=pendingEquippedContext;pendingEquippedContext=null;recoverMissingBuild(detail);}
     render();
     const staged=currentBuild();if(new URLSearchParams(location.search).get('prewarm')==='forge-loader')scheduleForgePreparation(staged,{immediate:true});
     queueMicrotask(()=>void refreshForgeArtifactRecommendation());
