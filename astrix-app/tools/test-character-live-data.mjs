@@ -125,7 +125,53 @@ for(const [index,row] of classes.entries()){
   saved.profile=profileWithSelectedLoadout(saved);
   const resolved=normaliseLiveProfile(saved,null,row.characterId);
   assert.equal(resolved.super.hash,savedSuper.hash,'An explicitly opened saved loadout must resolve its own Super plug, not the live Super.');
-  assert.equal(resolved.selectionResolutionVersion,2,'Freshly resolved loadouts must carry the current resolution version.');
+  assert.equal(resolved.selectionResolutionVersion,3,'Freshly resolved loadouts must invalidate details classified from display text.');
   assert.equal(normaliseLiveProfile(payload,null,row.characterId).super.hash,live.super.hash,'Returning to live equipment must restore that Guardian’s exact Super.');
 }
 console.log('CHARACTER_SAVED_LOADOUT_SUPER_ISOLATION=PASS');
+
+// Use actual subclass item identities, including names with no element word.
+// The previous three fixtures covered Void/Void/Prismatic and missed Behemoth.
+const {SUBCLASSES}=await import('../pages/guardian-workspace-v2/guardian-super-catalog.mjs');
+function subclassIdentityPayload(row,[hash,element,name,icon],display={name,icon}){
+  const next=structuredClone(payload),equipped=next.profile.characterEquipment.data[row.characterId].items[0];
+  const className=['titan','hunter','warlock'][row.classType];
+  const selectedSuper=superDefinitionsFor(className,element).at(-1);
+  equipped.itemHash=hash;
+  next.definitions[String(hash)]={hash,classType:row.classType,itemType:16,displayProperties:display,inventory:{bucketTypeHash:SUBCLASS_BUCKET}};
+  next.definitions[String(selectedSuper.hash)]={...selectedSuper.definition,hash:selectedSuper.hash,itemType:19};
+  next.profile.itemComponents.sockets.data[row.subclassInstanceId].sockets[2].plugHash=selectedSuper.hash;
+  return {next,selectedSuper};
+}
+
+// Reproduce the screenshot: equipped Behemoth must not become Void and lose sockets.
+const titan=classes.find(row=>row.classType===0),behemoth=SUBCLASSES.titan.find(row=>row[1]==='stasis');
+const stasisTitan=subclassIdentityPayload(titan,behemoth);
+const stasisDetail=normaliseLiveProfile(stasisTitan.next,null,titan.characterId);
+assert.equal(stasisDetail.subclass,'stasis','Behemoth must resolve as Stasis without an element keyword in its name.');
+assert.equal(stasisDetail.super?.hash,2021620139,'The equipped Glacial Quake socket must survive subclass identity resolution.');
+assert.equal(stasisDetail.abilities.length,4,'Resolving the subclass must preserve the supplied equipped ability sockets.');
+assert.equal(stasisDetail.aspects.length,2);
+assert.equal(stasisDetail.fragments.length,1);
+
+for(const row of classes){
+  const className=['titan','hunter','warlock'][row.classType];
+  for(const subclass of SUBCLASSES[className]){
+    const [hash,element,name,icon]=subclass;
+    for(const display of [{name,icon},{name:'Localized subclass',icon},{name,icon,description:'Prismatic Strand Stasis Solar Arc Void'}]){
+      const {next,selectedSuper}=subclassIdentityPayload(row,subclass,display);
+      const result=normaliseLiveProfile(next,null,row.characterId);
+      assert.equal(result.subclass,element,`${className} ${name} identity must follow the equipped hash, not translated/flavour text.`);
+      assert.equal(result.subclassItem?.hash,hash);
+      assert.equal(result.super?.hash,selectedSuper.hash);
+      assert.equal(result.subclassBuild.socketsAvailable,true);
+      assert.deepEqual(result.abilities.map(item=>item.hash),row.plugs.filter((_,index)=>[0,1,3,4].includes(index)).map(([hash])=>hash));
+    }
+  }
+}
+const unknownSubclass=structuredClone(payload),unknownHash=987000001;
+unknownSubclass.profile.characterEquipment.data[titan.characterId].items[0].itemHash=unknownHash;
+unknownSubclass.definitions[String(unknownHash)]={hash:unknownHash,itemType:16,displayProperties:{name:'Unresolved subclass',description:'Void'},inventory:{bucketTypeHash:SUBCLASS_BUCKET}};
+assert.equal(normaliseLiveProfile(unknownSubclass,null,titan.characterId).subclass,'','An unknown subclass must not silently become Void.');
+console.log('TITAN_BEHEMOTH_EQUIPPED_SOCKET_REGRESSION=PASS');
+console.log('ALL_18_SUBCLASS_HASH_IDENTITIES=PASS');
