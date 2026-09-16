@@ -101,11 +101,10 @@ function renderCharacterInventory(){
     host.innerHTML='<p class="vault-transfer-empty">The active Guardian is not present in the latest Bungie profile.</p>';
     return;
   }
-  const capabilities=liveActionCapabilities(characterInventoryState.session||{}),emblem=character.emblemBackgroundPath||character.emblemPath||'',style=emblem?` style="--vault-character-emblem:url('${escapeHtml(bungieUrl(emblem))}')"`:'';
-  host.innerHTML=`<article class="vault-character-column is-active character-live-inventory"${style}>
+  const capabilities=liveActionCapabilities(characterInventoryState.session||{});
+  host.innerHTML=`<article class="vault-character-column is-active character-live-inventory">
     ${postmasterMarkup({characterId,items:characterInventoryState.catalogue.postmasterItems,characterLabel:activeCharacterLabel(),capabilities,activeCharacterId:characterId})}
     <div class="vault-character-inventory">
-      <header class="vault-character-header"><div><span>ACTIVE GUARDIAN</span><h3>${escapeHtml(activeCharacterLabel().toUpperCase())}</h3></div><strong>${character.light===undefined?'':`✦ ${escapeHtml(character.light)}`}</strong></header>
       ${equippedAndCarriedMarkup({characterId,items:characterInventoryState.catalogue.items,capabilities,activeCharacterId:characterId})}
     </div>
   </article>`;
