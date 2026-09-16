@@ -72,9 +72,30 @@
 .vault-action-dialog footer button{padding:.68rem .85rem;border:1px solid rgba(201,168,76,.38);color:#c9a84c;background:#100e12;font:850 .6rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
 .vault-action-dialog footer button:last-child{border-color:rgba(111,227,182,.55);color:#b9f5dd;background:rgba(20,91,68,.28)}
 .vault-action-dialog footer button:disabled{opacity:.4;cursor:wait}
-.character-inventory-workspace{width:100%;overflow:visible}
+/* DIM 4ddd5ec: main.scss, _variables.scss, InventoryItem.m.scss and BadgeInfo.m.scss.
+   Desktop: 50px square icon + (50 / 5 + 4)px badge - 1px overlap = 63px.
+   These are native CSS pixels, independent of the viewport-normalized icon unit.
+   Only Character inventory opts in; other destinations keep their geometry. */
+.character-inventory-workspace{
+  --character-item-size:50px;
+  --apx-icon-gear-art-width:var(--character-item-size);
+  --apx-icon-gear-art-height:var(--character-item-size);
+  --apx-tile-label-size:calc(var(--character-item-size) / 5);
+  --apx-tile-badge-height:calc(var(--apx-tile-label-size) + 4px);
+  --apx-tile-height:calc(var(--character-item-size) + var(--apx-tile-badge-height) - 1px);
+  --apx-tile-border-width:0px;
+  --apx-tile-inset-x:0px;
+  --apx-tile-content-width:100%;
+  --apx-tile-art-top:0px;
+  --apx-tile-art-height:var(--character-item-size);
+  --apx-tile-footer-top:calc(var(--character-item-size) - 1px);
+  --apx-tile-footer-padding:0 2px;
+  width:100%;overflow:visible
+}
 .character-inventory-workspace .vault-character-column{width:100%}
-.character-inventory-workspace .vault-transfer-items{flex-wrap:wrap;overflow:visible}
+.character-inventory-workspace .vault-transfer-items{gap:6px;flex-wrap:wrap;overflow:visible}
+
+@media(max-width:1025px){.character-inventory-workspace{--character-item-size:48px}}
 
 @media(max-width:1200px){.vault-character-columns{grid-template-columns:1fr}.vault-character-column{display:grid}.vault-character-section{border:0}}
 @media(max-width:880px){.vault-character-column{grid-template-columns:1fr}}
