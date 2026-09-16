@@ -127,8 +127,8 @@ const exactWeapon=(hash,instance,name,description,bucketHash,extra={})=>{
 const currentPrimary=exactWeapon(601,'weapon-current','Plain Rifle','A reliable rifle.',1498876634),joltPrimary=exactWeapon(602,'weapon-jolt','Jolt Rifle','Final blows jolt nearby targets and grant grenade energy.',1498876634),energyWeapon=exactWeapon(603,'weapon-energy','Energy Weapon','Verified energy weapon.',2465295065),powerWeapon=exactWeapon(604,'weapon-power','Power Weapon','Verified power weapon.',953998645);
 const expandedTierFiveWeapon=exactWeapon(609,'weapon-expanded-tier-five','Expanded Tier Five Weapon','A verified crafted weapon with an additional perk choice.',1498876634,{perkColumnCounts:[2,3,3,3,2]});
 assert.equal(validateWeaponModel({weapons:[expandedTierFiveWeapon]}).ready,true,'Verified Tier 5 weapon columns may exceed the baseline row count without blocking Build Forge generation.');
-const incompleteTierFiveWeapon=structuredClone(currentPrimary);incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].expectedRowCount=1;incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options=incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].options.slice(0,1);
-assert.equal(validateWeaponModel({weapons:[incompleteTierFiveWeapon]}).ready,false,'Tier 5 weapon evidence below the Bungie baseline must still block Build Forge generation.');
+const incompleteTierFiveWeapon=structuredClone(currentPrimary);incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].expectedRowCount=1;
+assert.equal(validateWeaponModel({weapons:[incompleteTierFiveWeapon]}).ready,false,'Invalid Tier 5 display-row capacity metadata must still be rejected.');
 const [praxicCatalogue,praxicIntrinsicCatalogue,praxicBladeCatalogue,praxicGripCatalogue,praxicTraitCatalogue,praxicSandboxCatalogue]=await Promise.all([
   readFile(new URL('../../data/weapon-catalogue/weapons-sword.json',root),'utf8').then(JSON.parse),
   readFile(new URL('../../data/weapon-catalogue/plugDefinitions-000.json',root),'utf8').then(JSON.parse),
@@ -192,6 +192,36 @@ const applyReadyBuild={
   armour:coherentBuild.armour.map((row,index)=>({...row,itemInstanceId:String(60001+index),bucketHash:[3448274439,3551918588,14239492,20886954,1585787867][index],classType:1,source:{kind:'equipped',characterId:applyCharacterId}}))
 };
 const preflight=createLiveTransferPreflight(applyReadyBuild);assert.equal(preflight.ready,true,preflight.violations.join(' | '));
+
+// Reproduce the Max Loadout blocker with synthetic instance evidence: a Tier 5
+// third column has two real choices, including its selected perk, not three.
+const sparsePerkBuild=structuredClone(applyReadyBuild),sparseWeapon=sparsePerkBuild.weapons[0];
+sparseWeapon.weaponSemantics.alternativePerkColumns[2].options=sparseWeapon.weaponSemantics.alternativePerkColumns[2].options.slice(0,2);
+sparseWeapon.weaponSemantics.perkModel=normaliseWeaponPerkModel(sparseWeapon.weaponSemantics);
+const sparseModelBefore=structuredClone(sparseWeapon.weaponSemantics.perkModel);
+assert.equal(sparseModelBefore.columns[2].missingOptionCount,1);
+assert.equal(sparseModelBefore.complete,true,'The selected perk remains resolved despite an unfilled display row.');
+const sparsePreflight=createLiveTransferPreflight(sparsePerkBuild);
+assert.equal(sparsePreflight.ready,true,sparsePreflight.violations.join(' | '));
+assert.deepEqual(sparseWeapon.weaponSemantics.perkModel,sparseModelBefore,'Validation must not fabricate alternatives or alter the selected roll.');
+for(const gearTier of [3,4,5]){
+  const singleChoiceWeapon=exactWeapon(610,`tier-${gearTier}`,'Single-choice instance','Synthetic selected-perk evidence.',1498876634,{gearTier,perkColumnCounts:[1,1,1,1,1]});
+  const result=validateWeaponModel({weapons:[singleChoiceWeapon]});
+  assert.equal(result.ready,true,`Tier ${gearTier} display capacity must not impose a minimum owned alternative count: ${result.reason}`);
+}
+for(const [label,mutate] of [
+  ['missing selected option',model=>{model.columns[2].options=model.columns[2].options.filter(option=>option.hash!==model.columns[2].selectedPlugHash);}],
+  ['missing selected hash',model=>{model.columns[2].selectedPlugHash=null;}],
+  ['missing perk columns',model=>{model.columns=[];}],
+  ['unindexed selected perk',model=>{model.unindexedPerks=[sparseWeapon.weaponSemantics.selectedPerks[0]];}],
+  ['invalid socket index',model=>{model.columns[0].socketIndex=-1;}],
+  ['duplicate socket index',model=>{model.columns[1].socketIndex=model.columns[0].socketIndex;}],
+  ['non-perk option',model=>{model.columns[2].options.push({name:'Infuse',definition:{displayProperties:{name:'Infuse'},plug:{plugCategoryIdentifier:'infusion'}}});}]
+]){
+  const invalid=structuredClone(sparsePerkBuild);mutate(invalid.weapons[0].weaponSemantics.perkModel);
+  assert.equal(createLiveTransferPreflight(invalid).ready,false,`${label} must still block Apply.`);
+}
+console.log('MAX_LOADOUT_SPARSE_PERK_PREFLIGHT=PASS');
 
 const loadoutsAt=html.indexOf('loadouts-design-section'),armourAt=html.indexOf('armour-design-section'),weaponsAt=html.indexOf('weapon-design-section'),recommendationAt=html.indexOf('recommendation-panel'),rightRailAt=html.indexOf('build-right-rail'),validationAt=html.indexOf('validation-panel'),intelligenceAt=html.indexOf('data-paradox-analysis');
 assert.ok(loadoutsAt>0&&loadoutsAt<armourAt&&armourAt<weaponsAt&&weaponsAt<recommendationAt&&recommendationAt<rightRailAt,'Centre column order must be In-game Loadouts, Armour & Mods, Weapons & Perks, then Elemental Build Options.');
