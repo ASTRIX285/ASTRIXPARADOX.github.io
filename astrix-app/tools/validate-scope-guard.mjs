@@ -209,6 +209,7 @@ const allowed=new Set([
   'astrix-app/tools/validate-weapon-perk-apply.mjs',
   'astrix-app/tools/test-manual-build-editor.mjs',
   'astrix-app/tools/test-build-space-character-isolation.mjs',
+  'astrix-app/tools/test-build-forge-equipped-entry.mjs',
   'astrix-app/tools/test-character-live-data.mjs',
   'astrix-app/tools/validate-live-actions-worker.mjs',
   'astrix-app/tools/validate-forge-loader.mjs',
