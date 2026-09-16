@@ -169,11 +169,11 @@ function blankArmourModCanvas(){
   document.querySelectorAll('#armourGrid .gear-mods').forEach(grid=>{grid.classList.add('is-recommendation-pending');grid.dataset.modPresentation='pending';grid.setAttribute('aria-label','Blank AI mod recommendation canvas');grid.innerHTML=blankSlots;});
 }
 function renderArmourRecommendationState(build={}){
-  const generated=Boolean(build.recommendationGeneratedAt),manual=build.editMode==='manual',state=byId('armourBuildState'),instruction=byId('armourBuildInstruction'),evidence=byId('armourBuildEvidence');
-  if(state)state.textContent=generated?'PARADOX RECOMMENDATION · REVIEW REQUIRED':manual?'MANUAL WORKING BUILD':'STAGED ARMOUR · MOD PLAN PENDING';
-  if(instruction)instruction.textContent=generated?'AI mod plan generated · review the recommendation before live action':manual?'Exact owned armour and reusable mods staged manually.':'Choose exact owned armour manually, or select an elemental build and generate an AI sequence.';
-  if(evidence)evidence.textContent=generated?'Original and installed mods remain protected':manual?'Every manual socket choice retains Bungie instance and reusable-plug evidence.':'Installed mods retained as evaluation evidence';
-  if(!generated&&!manual)blankArmourModCanvas();
+  const generated=Boolean(build.recommendationGeneratedAt),manual=build.editMode==='manual',staged=Boolean(build.forgeLoaderDecision),state=byId('armourBuildState'),instruction=byId('armourBuildInstruction'),evidence=byId('armourBuildEvidence');
+  if(state)state.textContent=generated?'PARADOX RECOMMENDATION · REVIEW REQUIRED':manual?'MANUAL WORKING BUILD':staged?'STAGED ARMOUR · MOD PLAN PENDING':'ARMOUR & INSTALLED MODS';
+  if(instruction)instruction.textContent=generated?'AI mod plan generated · review the recommendation before live action':manual?'Exact owned armour and reusable mods staged manually.':staged?'Choose exact owned armour manually, or select an elemental build and generate an AI sequence.':'Installed mods from this loaded build are shown below.';
+  if(evidence)evidence.textContent=generated?'Original and installed mods remain protected':manual?'Every manual socket choice retains Bungie instance and reusable-plug evidence.':staged?'Installed mods retained as evaluation evidence':'Original build remains protected';
+  if(staged&&!generated&&!manual)blankArmourModCanvas();
 }
 function renderBuildGear(build={}){byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);byId('weaponRecommendationState').textContent=build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'MANUAL OR PARADOX';}
 function currentBuild(){const state=readState();return state?.workingBuild||state?.originalBuild||null;}

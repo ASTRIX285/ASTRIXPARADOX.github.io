@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import * as binding from '../pages/guardian-workspace-v2/paradox-build-binding.mjs';
 import * as state from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
+import {classifyArmourPlug} from '../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
 
 // Execute the production entry/restore/selection functions with controlled I/O.
 // The profile fixture gives each Guardian distinct equipment and Super identity.
@@ -125,3 +126,34 @@ for(const selected of guardians){
   checkBuild(await h.activateLiveProfile(payload,{}),selected);
 }
 console.log('BUILD_FORGE_EQUIPPED_ENTRY=PASS stale caches, all three Guardians, six switches, URL binding, protected staging and delayed restore/selection');
+
+// Run the real armour-card and Build Forge render functions against a small
+// DOM adapter, including the post-render step that used to erase installed mods.
+const gearSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-gear-layout.mjs',import.meta.url),'utf8');
+let modGrids=[];
+const nodes=new Map(['weaponGrid','armourGrid','armourBuildState','armourBuildInstruction','armourBuildEvidence','weaponRecommendationState'].map(id=>[id,{textContent:'',querySelectorAll:()=>[]}]));
+Object.defineProperty(nodes.get('armourGrid'),'innerHTML',{set(markup){
+  modGrids=[...markup.matchAll(/<div class="gear-mods"[^>]*>([\s\S]*?)<\/div>/g)].map(match=>({innerHTML:match[1],dataset:{},classList:{add(){}},setAttribute(){}}));
+}});
+let renderedWeapons=[];
+const display=vm.createContext({classifyArmourPlug,byId:id=>nodes.get(id),document:{querySelectorAll:()=>modGrids},bindParadoxItemInspect(){},renderWeapons:weapons=>{renderedWeapons=weapons;},itemTileMarkup:()=>'',perkTooltipAttributes:()=>''});
+vm.runInContext(between(gearSource,'const esc =','export function buildGear').replace('export function armourCard','function armourCard'),display);
+vm.runInContext(between(runtime,'function weaponCardShell','function currentBuild'),display);
+for(const guardian of guardians){
+  const armour=Array.from({length:5},(_,slot)=>({itemInstanceId:`${guardian.characterId}-armour-${slot}`,armourTier:5,mods:Array.from({length:6},(_,socket)=>({hash:10000+slot*10+socket,name:`Installed ${slot}:${socket}`,icon:`/installed-${slot}-${socket}.png`,semanticRole:socket===0?'masterwork':socket<3?'general-mod':'slot-mod'}))}));
+  const build={...guardian,armour},before=JSON.stringify(build);
+  for(const variant of [build,{...build,source:'bungie-loadout',loadoutSource:'bungie-live',selectedLoadoutIndex:4},{...build,forgeLoaderDecision:{schemaVersion:1},editMode:'manual'},{...build,forgeLoaderDecision:{schemaVersion:1},recommendationGeneratedAt:'2026-09-16T00:00:00Z'}]){
+    display.renderBuildGear(variant);
+    assert.equal(modGrids.length,5);
+    for(let slot=0;slot<5;slot++)for(const mod of armour[slot].mods)assert.ok(modGrids[slot].innerHTML.includes(`https://www.bungie.net${mod.icon}`),`${guardian.characterClass}: installed mod ${mod.name} must survive the complete gear render.`);
+    assert.deepEqual(renderedWeapons,variant.weapons,'Armour presentation must retain the selected build weapons.');
+  }
+  display.renderBuildGear(build);
+  assert.doesNotMatch(nodes.get('armourBuildState').textContent,/STAGED|PENDING/,'The equipped default is not a pending Forge Loader recommendation.');
+  const staged={...build,forgeLoaderDecision:{schemaVersion:1}},stagedBefore=JSON.stringify(staged);
+  display.renderBuildGear(staged);
+  assert.equal(modGrids.every(grid=>(grid.innerHTML.match(/AI recommendation pending/g)||[]).length===12),true,'Only untouched Forge Loader staging keeps six pending recommendation slots per piece.');
+  assert.equal(JSON.stringify(staged),stagedBefore,'Hiding proposed mod slots must never erase installed socket evidence.');
+  assert.equal(JSON.stringify(build),before,'Rendering cannot mutate the original equipped armour, mods or weapons.');
+}
+console.log('BUILD_FORGE_MOD_PRESENTATION=PASS equipped, saved, staged, manual and generated builds for Hunter, Warlock and Titan');
