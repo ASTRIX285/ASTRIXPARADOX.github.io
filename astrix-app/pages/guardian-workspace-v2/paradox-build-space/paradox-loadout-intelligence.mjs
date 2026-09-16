@@ -297,12 +297,17 @@ function validateWeaponModel(build={}){
     const semantics=weapon.weaponSemantics||{},model=semantics.perkModel||weapon.weaponPerkModel||{},tier=Number(model.weaponTier??semantics.gearTier??weapon.gearTier),name=itemName(weapon,'Weapon'),columns=model.columns||[];
     const expectedRows=weaponPerkRowCountForTier(tier);
     if(!expectedRows||!Number.isFinite(Number(model.expectedRowCount))||Number(model.expectedRowCount)<expectedRows)violations.push(`${name}: the verified Tier ${Number.isInteger(tier)?tier:'unknown'} perk-row model is incomplete.`);
+    if(!columns.length||model.complete===false||(model.unindexedPerks||[]).length)violations.push(`${name}: selected perk evidence is incomplete.`);
     const ordered=columns.map(column=>Number(column.socketIndex));
-    if(ordered.some((socketIndex,index)=>index>0&&socketIndex<ordered[index-1]))violations.push(`${name}: perk columns do not preserve Bungie's socket order.`);
+    if(columns.some(column=>column.socketIndex==null)||ordered.some(socketIndex=>!Number.isInteger(socketIndex)||socketIndex<0))violations.push(`${name}: perk columns require verified socket indexes.`);
+    if(ordered.some((socketIndex,index)=>index>0&&socketIndex<=ordered[index-1]))violations.push(`${name}: perk columns do not preserve Bungie's socket order.`);
     for(const [index,column] of columns.entries()){
       const columnNumber=index+1,required=weaponPerkColumnRowCountForTier(tier,columnNumber);
       if(required&&(!Number.isFinite(Number(column.expectedRowCount))||Number(column.expectedRowCount)<required))violations.push(`${name}: perk column ${columnNumber} must contain at least ${required} row${required===1?'':'s'} at Tier ${tier}.`);
-      if(required&&(column.options||[]).length<required)violations.push(`${name}: Bungie evidence for perk column ${columnNumber} contains fewer than ${required} verified options.`);
+      // Tier rows are display capacity, not a minimum number of owned choices.
+      // Require the selected perk; live Apply still verifies each socket change.
+      const selectedHash=Number(column.selectedPlugHash);
+      if(!Number.isInteger(selectedHash)||selectedHash<=0||column.selectedVisible===false||!(column.options||[]).some(option=>Number(option?.hash??option?.itemHash??option?.bungieHash)===selectedHash))violations.push(`${name}: the selected perk in column ${columnNumber} is missing verified option evidence.`);
       if((column.options||[]).some(option=>classifyWeaponPlug(option)!=='perk'))violations.push(`${name}: a non-perk socket was placed in perk column ${columnNumber}.`);
     }
     const modSockets=semantics.modSockets||[];
