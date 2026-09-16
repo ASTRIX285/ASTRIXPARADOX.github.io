@@ -1,7 +1,7 @@
-import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260910-generate-termination-1';
+import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-1';
+import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-1';
 
 const objectives=new Set(['balanced','dps','add-clear','survivability','ability-uptime']);
-const keyOf=v=>JSON.stringify([v.element,v.objective||'balanced',Number(v.superHash)||0]);
 
 // One CPU job at a time; no persistent storage, credentials or live equip calls.
 export function createForgeWorkerHandler(post,{compute=prepareForgeSequence}={}){

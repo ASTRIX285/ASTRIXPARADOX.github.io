@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {Worker} from 'node:worker_threads';
-import {ForgePreparationClient,preparationVariants} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs';
 import {prepareForgeSequence} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs';
-import {voidLoopSource,nothingManaclesCandidate} from './validate-paradox-build-space.mjs';
+import {voidLoopSource,nothingManaclesCandidate,comboSource} from './validate-paradox-build-space.mjs';
 
 const artifact={hash:999,artifactHash:999,name:'Test Artifact',seasonNumber:31,pointsUsed:2,state:'resolved',provenance:'bungie-character-progressions-202',perks:[
   {hash:9101,name:'Void Recovery',description:'Void effects grant overshield.',tierIndex:0,itemIndex:0,column:1,order:1,minimumUnlockPointsUsedRequirement:0},
@@ -22,6 +22,18 @@ assert.equal(result.patch.liveTransferPreflight.ready,true);
 assert.equal(result.patch.artifactRecommendation.selectionStatus,'ready');
 assert.equal(JSON.stringify(build),before,'Preparation cannot change live or staged inputs.');
 assert.equal('ownedWeapons' in result.patch,false,'Prepared results must not duplicate the owned catalogue.');
+const comboBuild={...build,weapons:comboSource.weapons,ownedWeapons:comboSource.ownedWeapons,vaultWeapons:[],inventoryWeapons:[]};
+const comboGenerated=await prepareForgeSequence({build:comboBuild,candidate:nothingManaclesCandidate,...variant,currentSeasonNumber:31},{advise:async()=>{}});
+assert.ok(comboGenerated.patch.weaponSelectionRecommendation.combinations.length>1,'The complete worker sequence must preserve alternative combinations.');
+assert.ok(comboGenerated.patch.weaponSelectionRecommendation.decisions.some(row=>row.action==='REPLACE'),'The second ranking pass must preserve replacement decisions against the generation baseline.');
+const weaponInstanceIds=comboGenerated.patch.weaponSelectionRecommendation.combinations[1].weapons.map(item=>item.itemInstanceId),rollAdviceInputs=[];
+const alternativeGenerated=await prepareForgeSequence({build:comboBuild,candidate:nothingManaclesCandidate,...variant,weaponInstanceIds,currentSeasonNumber:31},{advise:async working=>{rollAdviceInputs.push(working.weapons.map(item=>item.itemInstanceId));}});
+assert.deepEqual(alternativeGenerated.patch.weapons.map(item=>item.itemInstanceId),weaponInstanceIds,'Both ranking passes must honour the selected exact trio.');
+assert.deepEqual(rollAdviceInputs,[weaponInstanceIds],'Perk advice must run on the alternative trio, not the previous weapons.');
+assert.equal(alternativeGenerated.patch.artifactRecommendation.selectionStatus,'ready');
+assert.equal(alternativeGenerated.patch.armourModRecommendation.validation.ready,true);
+assert.equal(alternativeGenerated.patch.liveTransferPreflight.ready,true,'The recomputed alternative must pass the same complete Apply preflight.');
+await assert.rejects(prepareForgeSequence({build:comboBuild,candidate:nothingManaclesCandidate,...variant,weaponInstanceIds:['missing',...weaponInstanceIds.slice(1)]},{advise:async()=>{}}),/complete owned weapon instances/);
 const reviewOnlyResult=await prepareForgeSequence({build:{...build,membershipId:''},candidate:nothingManaclesCandidate,...variant,currentSeasonNumber:31},{advise:async()=>{}});
 assert.ok(reviewOnlyResult.patch.recommendationGeneratedAt,'A coherent generated build must remain reviewable when Apply is unavailable.');
 assert.equal(reviewOnlyResult.patch.liveTransferPreflight.ready,false,'Apply preflight blockers must be retained as review information.');
@@ -43,6 +55,11 @@ const workers=[],client=new ForgePreparationClient({workerFactory:()=>{const w=n
 client.setInput(build,candidates,31);const first=workers.at(-1),rev=client.revision,key=JSON.stringify(['void','dps',102]);
 const pending=client.get(variant);first.emit({type:'ready',revision:rev,key,result,bytes:40});assert.equal(await pending,result);
 const sent=first.sent.length;assert.equal(await client.get(variant),result);assert.equal(first.sent.length,sent,'A ready variant must be reused without another worker job.');
+const alternativeVariant={...variant,weaponInstanceIds},alternativePending=client.get(alternativeVariant),alternativeKey=forgePreparationKey(alternativeVariant);
+assert.notEqual(alternativeKey,forgePreparationKey(variant),'Alternative requests must never reuse the automatically selected trio cache entry.');
+assert.equal(first.sent.length,sent+1,'An uncached alternative must schedule a full generation job.');
+first.emit({type:'ready',revision:rev,key:alternativeKey,result:alternativeGenerated,bytes:40});
+assert.equal(await alternativePending,alternativeGenerated);
 for(const [key,bytes] of [['b',50],['c',60]])first.emit({type:'ready',revision:rev,key,result:{key},bytes});
 assert.ok(client.cache.size<=2&&client.bytes<=100,'Cache must obey entry and byte budgets.');
 const oldRequest=client.get({...variant,objective:'balanced'});const rejected=assert.rejects(oldRequest,/inputs changed/);
@@ -65,7 +82,14 @@ try{
   const ready=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('worker test timeout')),10000);thread.on('message',m=>{if(m.type==='ready'){clearTimeout(timer);resolve(m);}if(m.type==='error'){clearTimeout(timer);reject(new Error(m.message));}});});
   thread.postMessage({type:'init',revision:7,build,candidates,season:31});thread.postMessage({type:'prepare',revision:7,jobs:[variant]});
   const message=await ready;assert.equal(message.revision,7);assert.equal(message.result.patch.super.hash,102);assert.equal(message.result.patch.liveTransferPreflight.ready,true);assert.ok(message.bytes>0);
+  const alternativeReady=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('alternative worker test timeout')),10000);thread.on('message',m=>{if(m.revision!==8)return;if(m.type==='ready'){clearTimeout(timer);resolve(m);}if(m.type==='error'){clearTimeout(timer);reject(new Error(m.message));}});});
+  thread.postMessage({type:'init',revision:8,build:comboBuild,candidates,season:31});thread.postMessage({type:'prepare',revision:8,jobs:[{...variant,weaponInstanceIds}],requested:true});
+  const alternativeMessage=await alternativeReady;
+  assert.equal(alternativeMessage.key,forgePreparationKey({...variant,weaponInstanceIds}));
+  assert.deepEqual(alternativeMessage.result.patch.weapons.map(item=>item.itemInstanceId),weaponInstanceIds,'The real worker must carry alternative IDs through the full generation and cache protocol.');
+  assert.equal(alternativeMessage.result.patch.liveTransferPreflight.ready,true);
 }finally{await thread.terminate();}
 console.log('FORGE_BACKGROUND_THREAD_AND_ISOLATION=PASS');
 console.log('FORGE_BACKGROUND_SUPERS_ARTIFACT_AND_CACHE=PASS');
 console.log('FORGE_BACKGROUND_PARTIAL_TIMEOUT_AND_ACTIVITY=PASS');
+console.log('FORGE_BACKGROUND_WEAPON_COMBINATION_SWITCH=PASS');

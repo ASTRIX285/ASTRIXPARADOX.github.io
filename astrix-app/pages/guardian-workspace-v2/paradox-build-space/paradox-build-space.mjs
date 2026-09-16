@@ -1,4 +1,4 @@
-import {ForgePreparationClient,preparationVariants} from './paradox-forge-preparation.mjs?v=20260910-generate-termination-1';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
@@ -19,7 +19,7 @@ import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelec
 import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
 import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendation.mjs';
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260910-generate-termination-1';
+import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
@@ -27,7 +27,7 @@ import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
 import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1';
-import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
+import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
 import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
@@ -97,7 +97,7 @@ async function prepareForgeBackground(build){
   const supplied=build.currentSeasonNumber??build.currentSeason?.seasonNumber,season=supplied!==null&&supplied!==undefined&&Number.isInteger(Number(supplied))?Number(supplied):await fetchCurrentArtifactSeason();
   if(currentBuild()!==build)return;
   forgePreparation.setInput(build,candidates,season);
-  activePreparationKey=JSON.stringify([variant.element,variant.objective,variant.superHash]);
+  activePreparationKey=forgePreparationKey(variant);
   forgePreparation.warm(preparationVariants(candidates,variant));
 }
 function scheduleForgePreparation(build,{immediate=false}={}){
@@ -625,10 +625,19 @@ function renderRecommendedBuildReview(build={}){
   const weaponReviewHost=byId('recommendedWeaponsSummary');weaponReviewHost.innerHTML=Array.from({length:3},(_,index)=>{
     const item=build.weapons?.[index];
     if(!item)return '<article class="review-weapon is-unresolved"><b>WEAPON SLOT '+(index+1)+'</b><small>Item instance unavailable</small></article>';
-    const key=String(item.itemInstanceId||item.hash||item.bungieHash||''),row=item.weaponRollAdvice||recommendations.get(key),options=row?.best?.options||[],recommendedHashes=options.map(option=>Number(option?.hash)).filter(Number.isInteger),selection=weaponSelections.get(String(item.bucketHash)),decisionLabel=selection?.action==='KEEP'?'CURRENT BEST FIT':(selection?.action||'CURRENT BEST FIT'),model=item.weaponSemantics?.perkModel||item.weaponPerkModel||{},tier=Number(model.weaponTier??item.weaponSemantics?.gearTier??item.gearTier),rowCount=Math.max(1,Number(model.expectedRowCount||item.weaponPerkRowCount)||1),perkMatrix=weaponPerkMatrixMarkup(item,{recommendedHashes}),traitHierarchy=weaponTraitHierarchyMarkup(item,{compact:true});
+    const key=String(item.itemInstanceId||item.hash||item.bungieHash||''),row=item.weaponRollAdvice||recommendations.get(key),options=row?.best?.options||[],recommendedHashes=options.map(option=>Number(option?.hash)).filter(Number.isInteger),selection=weaponSelections.get(String(item.bucketHash)),decisionLabel=selection?.action==='KEEP'?'UNCHANGED':(selection?.action||'NOT COMPARED'),model=item.weaponSemantics?.perkModel||item.weaponPerkModel||{},tier=Number(model.weaponTier??item.weaponSemantics?.gearTier??item.gearTier),rowCount=Math.max(1,Number(model.expectedRowCount||item.weaponPerkRowCount)||1),perkMatrix=weaponPerkMatrixMarkup(item,{recommendedHashes}),traitHierarchy=weaponTraitHierarchyMarkup(item,{compact:true});
     return `<article class="review-weapon paradox-model-card" data-review-weapon="${index}" data-weapon-tier="${Number.isInteger(tier)?tier:''}"><div><span class="review-item-inspect" tabindex="0" title="${esc(item.name||`Weapon ${index+1}`)}">${itemTileMarkup(item,{kind:'weapon'})}</span><span><b>${esc(item.name||`Weapon ${index+1}`)}</b><small>${esc(item.itemTypeDisplayName||item.weaponType||'Owned weapon')}</small><em>${esc(decisionLabel)} · ${Number(selection?.candidateCount||0)} OWNED CANDIDATES</em></span></div><div class="review-weapon-tier-model"><b>${Number.isInteger(tier)?`TIER ${tier}`:'TIER UNRESOLVED'} · ${rowCount} PERK ROW${rowCount===1?'':'S'}</b>${perkMatrix||'<small>PERK MODEL UNAVAILABLE</small>'}${traitHierarchy}</div><p>${esc(selection?.reasons?.[0]?.label||'Exact owned instance retained; no stronger explicit synergy evidence was proven.')}</p></article>`;
   }).join('');
   weaponReviewHost.querySelectorAll('[data-review-weapon]').forEach(node=>{const item=build.weapons?.[Number(node.dataset.reviewWeapon)];bindParadoxItemInspect(node.querySelector('.review-item-inspect'),item,'weapon');});
+  const combinationsHost=byId('recommendedWeaponCombinations');
+  if(combinationsHost){
+    combinationsHost.innerHTML=weaponCombinationsMarkup(build.weaponSelectionRecommendation);
+    combinationsHost.querySelectorAll('[data-weapon-combination]').forEach(button=>button.addEventListener('click',()=>{
+      if(recommendationBusy||currentBuild()!==build)return;
+      const combination=build.weaponSelectionRecommendation?.combinations?.[Number(button.dataset.weaponCombination)];
+      if(combination){closeRecommendedBuild();void generateMaxLoadout({weaponInstanceIds:combination.weapons.map(item=>item.itemInstanceId)});}
+    }));
+  }
   const artifact=build.artifact,recommendation=build.artifactRecommendation,selected=new Set((build.artifactConfiguration?.selectedPerkHashes||recommendation?.selectedPerkHashes||[]).map(String)),perkByHash=new Map((artifact?.perks||[]).map(perk=>[String(perk?.hash??perk?.itemHash??perk?.bungieHash),perk])),sequence=(recommendation?.selectionSequence||[]).filter(row=>selected.has(String(row?.artifactPerk?.hash))).sort((a,b)=>Number(a.order)-Number(b.order)),perks=sequence.length?sequence.map(row=>perkByHash.get(String(row.artifactPerk?.hash))||row.artifactPerk):(artifact?.perks||[]).filter(perk=>selected.has(String(perk?.hash??perk?.itemHash??perk?.bungieHash))),selectedRecommendations=(recommendation?.recommendations||[]).filter(row=>row.selected||selected.has(String(row?.artifactPerk?.hash))),artifactReasons=[...new Set(selectedRecommendations.flatMap(row=>(row.reasons||[]).map(reason=>reason.label)).filter(Boolean))].slice(0,6),artifactBlockers=(recommendation?.blockers||[]).slice(0,3),artifactReady=recommendation?.selectionStatus==='ready';
   const artifactSynergyRows=(artifactReady?artifactReasons:artifactBlockers).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>No Artifact synergy claim is available from the supplied Bungie evidence.</li>';
   const artifactPlanLabel=recommendation?.planMode==='full-build-target'?'PARADOX FULL TARGET PLAN':'PARADOX BEST FIT';
@@ -658,7 +667,7 @@ const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIc
 function forgeComputationProjection(build={}){return Object.fromEntries(FORGE_COMPUTATION_FIELDS.filter(key=>Object.hasOwn(build,key)).map(key=>[key,build[key]]));}
 function mergeComposedRecommendation(build={},composed={}){const next={...build};for(const key of FORGE_COMPOSED_FIELDS)if(Object.hasOwn(composed,key))next[key]=composed[key];return next;}
 async function updateForgeGenerationPhase(message){const status=byId('forgeGenerationStatus');if(status)status.textContent=message;await new Promise(resolve=>setTimeout(resolve,0));}
-async function generateMaxLoadout(){
+async function generateMaxLoadout({weaponInstanceIds=[]}={}){
   if(recommendationBusy)return;
   const stagedBuild=currentBuild();
   if(stagedBuild?.forgeLoaderDecision&&!forgeActivityOption(stagedBuild.activityContext)){recommendationFailure='Select an activity context before generating.';renderRecommendationControls(stagedBuild);openForgeActivityDialog();return;}
@@ -680,7 +689,8 @@ async function generateMaxLoadout(){
     clearTimeout(preparationTimer);
     await prepareForgeBackground(build);
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
-    const prepared=await forgePreparation.get(requestedForgeVariant(build));
+    activePreparationKey=forgePreparationKey({...requestedForgeVariant(build),weaponInstanceIds});
+    const prepared=await forgePreparation.get({...requestedForgeVariant(build),weaponInstanceIds});
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
     let working={...build,...prepared.patch};
     // Recheck the prepared selection at the point of review; never execute live actions here.
