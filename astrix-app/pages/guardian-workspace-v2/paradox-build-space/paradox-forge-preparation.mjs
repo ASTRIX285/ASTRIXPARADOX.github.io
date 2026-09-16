@@ -3,7 +3,7 @@ const keyOf=forgePreparationKey;
 const INPUT_FIELDS=['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','artifactRecommendation','artifactValidation','availableArtifacts','artifactOptions','currentSeasonNumber','currentSeason','weapons','ownedWeapons','vaultWeapons','inventoryWeapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','activityProfile','activity','beta','buildFocus','locks'];
 
 export class ForgePreparationClient{
-  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260916-weapon-combinations-1',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024,timeoutMs=120000}={}){
+  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260916-weapon-combinations-2',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024,timeoutMs=120000}={}){
     Object.assign(this,{workerFactory,onStatus,maxEntries,maxBytes,timeoutMs});
     this.revision=0;this.cache=new Map();this.pending=new Map();this.bytes=0;this.worker=null;this.input=null;this.runningKey='';
   }

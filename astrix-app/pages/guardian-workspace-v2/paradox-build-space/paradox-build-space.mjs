@@ -1,4 +1,4 @@
-import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-1';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
@@ -16,7 +16,7 @@ import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-char
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260913-character-isolation-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
-import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
+import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1';
 import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendation.mjs';
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
@@ -628,6 +628,9 @@ function renderRecommendedBuildReview(build={}){
     const key=String(item.itemInstanceId||item.hash||item.bungieHash||''),row=item.weaponRollAdvice||recommendations.get(key),options=row?.best?.options||[],recommendedHashes=options.map(option=>Number(option?.hash)).filter(Number.isInteger),selection=weaponSelections.get(String(item.bucketHash)),decisionLabel=selection?.action==='KEEP'?'UNCHANGED':(selection?.action||'NOT COMPARED'),model=item.weaponSemantics?.perkModel||item.weaponPerkModel||{},tier=Number(model.weaponTier??item.weaponSemantics?.gearTier??item.gearTier),rowCount=Math.max(1,Number(model.expectedRowCount||item.weaponPerkRowCount)||1),perkMatrix=weaponPerkMatrixMarkup(item,{recommendedHashes}),traitHierarchy=weaponTraitHierarchyMarkup(item,{compact:true});
     return `<article class="review-weapon paradox-model-card" data-review-weapon="${index}" data-weapon-tier="${Number.isInteger(tier)?tier:''}"><div><span class="review-item-inspect" tabindex="0" title="${esc(item.name||`Weapon ${index+1}`)}">${itemTileMarkup(item,{kind:'weapon'})}</span><span><b>${esc(item.name||`Weapon ${index+1}`)}</b><small>${esc(item.itemTypeDisplayName||item.weaponType||'Owned weapon')}</small><em>${esc(decisionLabel)} · ${Number(selection?.candidateCount||0)} OWNED CANDIDATES</em></span></div><div class="review-weapon-tier-model"><b>${Number.isInteger(tier)?`TIER ${tier}`:'TIER UNRESOLVED'} · ${rowCount} PERK ROW${rowCount===1?'':'S'}</b>${perkMatrix||'<small>PERK MODEL UNAVAILABLE</small>'}${traitHierarchy}</div><p>${esc(selection?.reasons?.[0]?.label||'Exact owned instance retained; no stronger explicit synergy evidence was proven.')}</p></article>`;
   }).join('');
+  // Use the actual shared renderer's column count, including fallback perk models.
+  const perkColumns=[...weaponReviewHost.querySelectorAll('.weapon-perk-matrix')].map(node=>Number(node.style.getPropertyValue('--weapon-perk-columns'))||1);
+  weaponReviewHost.style.setProperty('--review-perk-columns',String(Math.max(1,...perkColumns)));
   weaponReviewHost.querySelectorAll('[data-review-weapon]').forEach(node=>{const item=build.weapons?.[Number(node.dataset.reviewWeapon)];bindParadoxItemInspect(node.querySelector('.review-item-inspect'),item,'weapon');});
   const combinationsHost=byId('recommendedWeaponCombinations');
   if(combinationsHost){

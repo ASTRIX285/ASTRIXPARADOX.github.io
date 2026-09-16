@@ -336,8 +336,13 @@ function selectSocketBucketConfiguration(rows, slots) {
     const capacity=Math.max(0,finiteInteger(slot?.capacity)??0);
     const permitted=new Set((slot?.perkHashes||[]).map(finiteInteger).filter(hash=>hash!==null));
     const candidates=rows.filter(row=>permitted.has(row.perk.hash)&&!selectedHashes.has(row.perk.hash)).sort(compareRanked);
-    const chosen=candidates.slice(0,capacity);
-    chosen.forEach(row=>{selected.push(row);selectedHashes.add(row.perk.hash);});
+    const chosen=[];
+    for(const row of candidates){
+      if(chosen.length>=capacity)break;
+      // Catalogue rows may repeat a hash within a bucket. Count each legal perk once.
+      if(selectedHashes.has(row.perk.hash))continue;
+      chosen.push(row);selected.push(row);selectedHashes.add(row.perk.hash);
+    }
     if(chosen.length<capacity)shortages.push({tierIndex:finiteInteger(slot?.tierIndex),capacity,resolved:chosen.length});
   }
   return {selected,shortages,selectionLimit:slots.reduce((sum,slot)=>sum+Math.max(0,finiteInteger(slot?.capacity)??0),0)};

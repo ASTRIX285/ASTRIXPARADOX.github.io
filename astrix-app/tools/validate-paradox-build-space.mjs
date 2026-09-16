@@ -146,9 +146,9 @@ const praxicPerks=[[3514694513,praxicBladeCatalogue],[1958555234,praxicGripCatal
 const praxicTierZeroModel=normaliseWeaponPerkModel({gearTier:0,selectedPerks:praxicPerks,alternativePerkColumns:praxicPerks.map(perk=>({socketIndex:perk.socketIndex,options:[perk]}))});
 assert.equal(praxicTierZeroModel.weaponTier,0,'Bungie gearTier 0 must remain Tier 0 instead of being coerced to unknown.');
 assert.equal(validateWeaponModel({weapons:[{itemHash:3049715579,name:'Praxic Blade',gearTier:0,weaponSemantics:{gearTier:0,perkModel:praxicTierZeroModel}}]}).ready,true,'Praxic Blade real Tier 0 one-row perk evidence must be valid.');
-assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260916-weapon-combinations-1/,'Build Forge must load the terminating background preparation graph.');
-assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260916-weapon-combinations-1/,'Background preparation must start the terminating Forge worker.');
-assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260916-weapon-combinations-1/,'The Forge worker must load the terminating generation sequence.');
+assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260916-weapon-combinations-2/,'Build Forge must load the terminating background preparation graph.');
+assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260916-weapon-combinations-2/,'Background preparation must start the terminating Forge worker.');
+assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260916-weapon-combinations-2/,'The Forge worker must load the terminating generation sequence.');
 assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260916-weapon-combinations-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
 assert.match(html,/id="forgeActivityDialog"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="pvp"/,'Generate must capture one of the six required activity contexts in an explicit dialog.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
@@ -319,7 +319,7 @@ assert.match(runtime,/EXOTIC ANCHOR: \$\{String\(anchorName\)\.toUpperCase\(\)\}
 assert.match(runtime,/changedItems=\(plan\.items\|\|\[\]\)[\s\S]*?filter\(row=>row\.action!=='KEEP'\)/,'The review must omit unchanged mod sockets and present only proposed changes.');
 assert.match(runtime,/review-artifact-synergy[\s\S]*?ARTIFACT SYNERGY/,'The review must expose the evidence behind the Artifact recommendation.');
 assert.match(artifactSelectionRuntime,/recommendArtifactPerks\(build,effectiveArtifact,\{currentSeasonNumber:season,planFullBuild:true\}\)/,'Build Forge must produce a complete target Artifact plan when only the current CharacterProgressions tree is available.');
-assert.match(artifactSelectionRuntime,/artifactPlanVersion:3/,'The cross-system Artifact-plan release must invalidate previously cached recommendation fingerprints.');
+assert.match(artifactSelectionRuntime,/artifactPlanVersion:4/,'The cross-system Artifact-plan release must invalidate previously cached recommendation fingerprints.');
 assert.match(runtime,/PARADOX FULL TARGET PLAN[\s\S]*?currently unlocked and equipped perks remain unchanged/,'The Artifact recommendation must distinguish the complete target plan from the live unlocked and equipped state.');
 assert.match(css,/\.recommended-build-dialog\{display:grid;grid-template-areas:"header" "safety" "status" "content" "actions";grid-template-rows:auto auto auto minmax\(0,1fr\) auto;width:calc\(100vw - 20px\);height:calc\(100dvh - 20px\);max-width:none;min-height:0;border:0/,'The recommendation review must fit the viewport and reserve an independently scrollable content row.');
 assert.match(css,/\.recommended-build-content\{[^}]*min-height:0[^}]*overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable/,'The recommendation body must scroll without pushing the Apply actions outside the viewport.');
