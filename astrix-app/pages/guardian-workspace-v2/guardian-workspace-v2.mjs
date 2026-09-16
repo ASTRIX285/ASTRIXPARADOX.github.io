@@ -4,16 +4,16 @@ import {
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260914-live-equipped-1&roll=20260909-apply-1&transport=20260911-compact-plugs-1&tile=20260912-identities-1";
+} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
-import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260829-subclass-identity-1";
+import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
-import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
+import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
 
 const PLAYER_POWER_CAP = 550;
 const VALID_CLASSES = ["hunter", "titan", "warlock"];
@@ -311,7 +311,7 @@ function renderSubclassBuild(build = {}, subclassName = "Subclass") {
     icon: resolvedDisplayIcon(subclassIdentity) || workspaceState.subclassIcon || resolvedDisplayIcon(build.subclassDefinition || build.subclass || workspaceState.subclassDefinition || workspaceState.subclassItem)
   });
 
-  const activeSuper = build.super || workspaceState.super || null;
+  const activeSuper = Object.hasOwn(build,'super') ? build.super : workspaceState.super || null;
   const superOptions = Array.isArray(build.superOptions) && build.superOptions.length
     ? build.superOptions
     : (Array.isArray(workspaceState.superOptions) && workspaceState.superOptions.length

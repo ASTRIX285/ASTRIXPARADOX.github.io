@@ -161,3 +161,21 @@ assert.match(location.href,/^\.\/paradox-build-space\/\?characterId=warlock-1/,'
 assert.ok(Date.now()-suspendedFrameStartedAt<1000,'Build Forge navigation must use its bounded paint fallback');
 
 console.log('Build Space character isolation tests passed.');
+
+const matchedEquipped={...warlockEquipped,source:'bungie-live',loadoutSource:'currently-equipped',selectedLoadoutIndex:7,super:{hash:1656118682},weapons:[{itemInstanceId:'latest-equipped-weapon'}]};
+rememberGuardian(matchedEquipped);
+assert.equal(resolveBuildSource().weapons[0].itemInstanceId,'latest-equipped-weapon','Matching a saved slot must not exclude the current equipped build from the handoff.');
+assert.equal(resolveBuildSource().source,'bungie-live','A highlighted matching slot is still live equipment.');
+assert.equal(resolveBuildSource().selectedLoadoutIndex,7,'Keep the exact matching slot highlighted.');
+assert.equal(shouldReplaceBuildState(protectedWarlockForge,{...automaticHunterProfile,loadoutSource:'currently-equipped',selectedLoadoutIndex:7}),false,'A background exact slot match is not an explicit loadout selection.');
+rememberGuardian({...matchedEquipped,loadoutSource:'subclass-preview',selectedLoadoutIndex:null,super:{hash:1656118680},weapons:[{itemInstanceId:'preview-weapon'}]});
+assert.equal(resolveBuildSource().super.hash,1656118682,'A subclass preview must not replace the equipped handoff baseline.');
+console.log('MATCHED_LIVE_LOADOUT_HANDOFF=PASS');
+
+const previousSuper={...hunterPaint,super:{hash:11},subclassBuild:{super:{hash:11}}};
+const clearedSuper=characterScopedSelectionState(previousSuper,{characterId:'hunter-1',subclassBuild:{super:null}});
+assert.equal(clearedSuper.super,null,'an explicit missing socket must clear the top-level stale Super');
+assert.equal(clearedSuper.subclassBuild.super,null);
+assert.equal(characterScopedSelectionState(previousSuper,{characterId:'hunter-1',subclassBuild:null}).super,null,'clearing subclass evidence must also clear the stale Super');
+assert.equal(characterScopedSelectionState(previousSuper,{characterId:'hunter-1',super:{hash:22}}).subclassBuild.super.hash,22,'top-level-only Super refresh must update the nested selection too');
+console.log('EQUIPPED_SUPER_PARTIAL_REFRESH=PASS');

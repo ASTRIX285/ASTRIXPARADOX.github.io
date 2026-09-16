@@ -366,7 +366,8 @@ assert.match(advisorRuntime,/if\(typeof document!=="undefined"\)document\.dispat
 assert.match(html,/id="recommendedBuildReveal"[\s\S]*?aria-modal="true"[\s\S]*?hidden/,'The complete recommended build must open in a hidden review layer.');
 assert.match(html,/id="recommendedBuildRenderStatus" role="alert" hidden/,'The recommendation review must expose a visible render failure state.');
 assert.match(runtime,/revealRecommendedBuild\([\s\S]*?paint:\(\)=>new Promise[\s\S]*?onRenderError:/,'The review must become visible and paint before account specific sections render.');
-assert.match(html,/id="recommendedArmourSummary"[\s\S]*?id="recommendedWeaponsSummary"[\s\S]*?id="recommendedArtifactSummary"/,'The review must expose armour, weapon and Artifact sections.');
+// Intentional: the review now follows Character's subclass/Artifact rail and equipment column.
+assert.match(html,/class="recommended-build-rail guardian-left-rail"[\s\S]*?id="recommendedSubclassSummary"[\s\S]*?id="recommendedArtifactSummary"[\s\S]*?class="recommended-build-equipment"[\s\S]*?id="recommendedArmourSummary"[\s\S]*?id="recommendedWeaponsSummary"/,'The review must reuse Character rail and equipment grouping.');
 assert.match(html,/id="recommendedModPlan"/,'The review must expose installed-versus-recommended armour-mod decisions.');
 assert.match(runtime,/RAW → CURRENT → RECOMMENDED/,'The review must distinguish mod-free raw stats from installed and recommended projections.');
 assert.doesNotMatch(runtime,/decorateRecommendedWeaponPerks|weapon-recommended-perks/,'Build weapons must not duplicate recommendation icons outside the canonical perk matrix.');

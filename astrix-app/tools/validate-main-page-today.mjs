@@ -54,7 +54,7 @@ assert.match(sessionCache,/PROFILE_TTL_MS=12\*60\*60\*1000/,'Cached Guardian evi
 assert.match(sessionCache,/async function invalidateBungieLoadoutDetail[\s\S]*?deleteRecord\(key\)/,'Bungie loadout mutations must invalidate the exact durable slot cache.');
 assert.match(profile,/const BUILD_SPACE_KEY="astrix:paradox-build-space:v1";/,'Character must identify the stale explicit Build snapshot before securing a fresh handoff');
 assert.match(profile,/function persistResolvedBuildSnapshot\(\)\{[\s\S]*?store\.removeItem\(BUILD_SPACE_KEY\);store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Improve My Guardian must free the stale Build snapshot before writing the full current Character payload');
-assert.match(profile,/latestEquippedBuilds\.get\(selectedId\)[\s\S]*?!Number\.isInteger\(latestResolvedBuild\?\.selectedLoadoutIndex\)/,'The persisted Build Forge source must be the selected Guardian’s live equipped build, never a viewed saved slot');
+assert.match(profile,/latestEquippedBuilds\.get\(selectedId\)[\s\S]*?isEquippedSelection\(latestResolvedBuild\)/,'The persisted Build Forge source must be the selected Guardian’s live equipped build, including an automatically matched slot, never a viewed saved slot');
 assert.match(profile,/INITIAL_PROFILE_HYDRATION=Object\.freeze\(\{equippedOnly:true,allowNetwork:false,waitForManifest:false\}\)/,'Initial Character paint must use its prepared payload without waiting for a full manifest index');
 assert.match(profile,/location\.pathname\.includes\('\/paradox-build-space\/'\)\?String\(new URLSearchParams\(location\.search\)\.get\('characterId'\)/,'Build Forge recovery must honour the character bound in its route');
 assert.match(profile,/if\(!isCurrentCharacter\(characterId\)\)return/,'Late saved-loadout responses must not repaint a different selected Guardian');
@@ -62,8 +62,8 @@ assert.match(binding,/function characterScopedSelectionState\(previous=\{\},deta
 assert.match(workspace,/characterScopedSelectionState\(workspaceState, detail\)/,'The primary Character renderer must enforce the Guardian ownership boundary');
 assert.match(betaRuntime,/characterScopedSelectionState\(workspaceState, detail\)/,'The beta Character renderer must enforce the same Guardian ownership boundary');
 assert.doesNotMatch(betaRuntime,/previewStats/,'The Character renderer must not invent preview stat values when Bungie data is absent');
-assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260914-fast-transfer-1/,'Main must load the partial-data-safe authenticated profile with the verified fast inventory overlay');
-assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260914-fast-transfer-2/,'Main must load the response-driven fast transfer dependency graph without a stale module cache');
+assert.match(workspace,/guardian-bungie-profile\.mjs\?v=20260916-equipped-source-1/,'Main must load the partial-data-safe authenticated profile with the verified fast inventory overlay');
+assert.match(workspaceHtml,/guardian-workspace-v2\.mjs\?v=20260916-equipped-source-1/,'Main must load the response-driven fast transfer dependency graph without a stale module cache');
 assert.match(workspaceHtml,/href="\/img\/favicon\/favicon-32x32\.png"[\s\S]*?href="\/img\/favicon\/favicon\.ico"/,'Main Character must publish the canonical favicon assets from its nested route.');
 assert.match(preparedClient,/const REQUEST_TIMEOUT_MS=30_000/,'The shared prepared page request must have one bounded network timeout');
 assert.match(preparedClient,/freshness=force\?'live':'display'[\s\S]*?requestPreparedPagePayload\(page,\{fetchImpl,freshness,quiet\}\)/,'A forced profile refresh must bypass the display snapshot without blocking the cached first paint.');
@@ -167,7 +167,7 @@ assert.match(loadoutsModule,/data-bungie-color-hash/,'Rendered loadouts must ret
 assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Build Forge link when JavaScript or storage fails');
 assert.match(workspaceHtml,/guardian-workspace-v2-compact\.css\?v=20260829-build-cta-anchor-1/,'Main must load the native Build Forge link styling without stale button CSS');
 assert.match(await read('guardian-workspace-v2-compact.css'),/\.improve-cta\{[^}]*display:inline-flex;[^}]*text-decoration:none/,'The native Build Forge link must preserve the approved button presentation');
-assert.match(workspaceHtml,/paradox-build-space-handoff\.mjs\?v=20260913-live-character-2/,'Main must load the live-equipped Bungie-to-PARADOX handoff without stale code');
+assert.match(workspaceHtml,/paradox-build-space-handoff\.mjs\?v=20260916-equipped-source-1/,'Main must load the live-equipped Bungie-to-PARADOX handoff without stale code');
 const genericBuildSource=handoff.slice(handoff.indexOf('function resolveBuildSource()'),handoff.indexOf('function currentProfileBuildSource()'));
 assert.match(genericBuildSource,/equippedByCharacter\.get\(selectedId\)/,'Improve My Guardian must prefer the selected Guardian’s live equipped snapshot');
 assert.doesNotMatch(genericBuildSource,/LAST_LOADOUT_KEY|latestExplicitLoadout/,'A previously viewed saved slot must not become the generic Improve source');

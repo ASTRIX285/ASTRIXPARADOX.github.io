@@ -58,6 +58,9 @@ const allowed=new Set([
   '.github/workflows/validate-weapon-audit.yml',
   'astrix-app/tools/test-weapon-cards-browser.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-super-feature-sync.mjs',
+  // Character equipped-Super correction: canonical options must not impersonate live selection.
+  'astrix-app/pages/guardian-workspace-v2/guardian-super-catalog.mjs',
+  'astrix-app/pages/guardian-workspace-v2/guardian-super-formation.mjs',
   'astrix-app/data/paradox-weapon-audit-report.json',
   'astrix-app/docs/paradox-weapon-audit.md',
   'astrix-app/pages/journey/journey-collection-model.mjs',

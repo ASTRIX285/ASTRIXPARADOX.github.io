@@ -60,6 +60,9 @@ function characterScopedSelectionState(previous={},detail={}){
     if(Object.prototype.hasOwnProperty.call(detail,field))next[field]=detail[field];
     else if(!sameCharacter)next[field]=null;
   }
+  if(Object.hasOwn(detail,'subclassBuild')&&detail.subclassBuild===null)next.super=null;
+  else if(detail.subclassBuild&&Object.hasOwn(detail.subclassBuild,'super'))next.super=detail.subclassBuild.super;
+  else if(Object.hasOwn(detail,'super'))next.subclassBuild={...(next.subclassBuild||{}),super:detail.super};
   if(!sameCharacter){
     next.subclassName=text(detail.subclassName);
     next.subclassIcon=text(detail.subclassIcon);
@@ -70,13 +73,21 @@ function characterScopedSelectionState(previous={},detail={}){
   return next;
 }
 
+// A saved-slot highlight describes a match, not a user selection.
+function isEquippedSelection(detail={}){
+  return detail.loadoutSource==='currently-equipped'||(!Number.isInteger(detail.selectedLoadoutIndex)&&detail.loadoutSource!=='subclass-preview');
+}
+function isExplicitLoadoutSelection(detail={}){
+  return Number.isInteger(detail.selectedLoadoutIndex)&&!isEquippedSelection(detail);
+}
+
 function shouldReplaceBuildState(currentState,detail={},options={}){
   if(detail?.source!=="bungie-live"||!detail.characterId)return false;
   if(!currentState?.originalBuild||!currentState?.workingBuild)return true;
   const incomingCharacterId=String(detail.characterId||'');
   const explicitlySelectedCharacterId=String(options.explicitlySelectedCharacterId||'');
   const explicitCharacterChange=Boolean(explicitlySelectedCharacterId)&&explicitlySelectedCharacterId===incomingCharacterId;
-  const explicitLoadoutChange=Number.isInteger(detail.selectedLoadoutIndex);
+  const explicitLoadoutChange=isExplicitLoadoutSelection(detail);
   if(explicitCharacterChange||explicitLoadoutChange)return true;
   const currentCharacterId=bindingOf(currentState.originalBuild).characterId;
   if(currentCharacterId&&currentCharacterId!==incomingCharacterId)return false;
@@ -126,4 +137,4 @@ function validateHandoffEnvelope(envelope,{expectedCharacterId='',expectedMember
   return envelope.payload;
 }
 
-export {HANDOFF_SCHEMA,HANDOFF_TTL_MS,bindingOf,bindingsEqual,compactBungieLoadouts,characterScopedSelectionState,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,createHandoffEnvelope,validateHandoffEnvelope};
+export {isEquippedSelection,isExplicitLoadoutSelection,HANDOFF_SCHEMA,HANDOFF_TTL_MS,bindingOf,bindingsEqual,compactBungieLoadouts,characterScopedSelectionState,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,createHandoffEnvelope,validateHandoffEnvelope};
