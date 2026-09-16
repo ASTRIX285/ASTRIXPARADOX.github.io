@@ -5,7 +5,7 @@ import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
-import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
+import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
@@ -20,8 +20,9 @@ import {
 } from "./guardian-session-cache.mjs?v=20260913-live-character-2";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
-const SELECTION_RESOLUTION_VERSION=2; // Discard saved details resolved with catalogue-default Supers.
+const SELECTION_RESOLUTION_VERSION=3; // Rebuild saved details classified from display text instead of the equipped hash.
 const CLASS_NAMES=["titan","hunter","warlock"];
+const SUBCLASS_ELEMENTS=new Map(Object.values(SUBCLASSES).flat().map(([hash,element])=>[hash,element]));
 const BUCKETS={kinetic:1498876634,energy:2465295065,power:953998645,helmet:3448274439,gauntlets:3551918588,chest:14239492,legs:20886954,classItem:1585787867,ghost:4023194814,subclass:3284755031};
 const ARMOUR_ORDER=[BUCKETS.helmet,BUCKETS.gauntlets,BUCKETS.chest,BUCKETS.legs,BUCKETS.classItem];
 const WEAPON_ORDER=[BUCKETS.kinetic,BUCKETS.energy,BUCKETS.power];
@@ -237,9 +238,9 @@ const displayItem=(definitions,hash)=>{
 };
 
 function classifySubclass(item){
-  const text=[item?.name,item?.description,...(item?.definition?.traitIds||[])].join(" ").toLowerCase();
-  for(const name of ["prismatic","strand","stasis","solar","arc","void"]){if(text.includes(name))return name;}
-  return "void";
+  // Names such as Behemoth and localized/flavour text do not identify an element.
+  // Use the existing manifest-backed catalogue and keep unknown identities unresolved.
+  return SUBCLASS_ELEMENTS.get(Number(item?.hash??item?.itemHash??item?.bungieHash))||"";
 }
 
 function activeCharacter(profile){

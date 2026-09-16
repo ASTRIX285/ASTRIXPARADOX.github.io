@@ -26,7 +26,7 @@ import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inv
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
