@@ -9,7 +9,7 @@ globalThis.localStorage=globalThis.sessionStorage;
 globalThis.CustomEvent=class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail;}};
 globalThis.addEventListener=()=>{};
 
-const {normalisePreparedPagePayload,normaliseLiveProfile,loadoutCoverage}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
+const {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout,loadoutCoverage}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?test=character-live-data');
 const SUBCLASS_BUCKET=3284755031;
 const KINETIC_BUCKET=1498876634;
 const classes=[
@@ -61,6 +61,7 @@ const normalized=classes.map(row=>normaliseLiveProfile(payload,null,row.characte
 for(const [index,detail] of normalized.entries()){
   const expected=classes[index];
   assert.equal(detail.characterId,expected.characterId);
+  assert.equal(detail.super.hash,expected.plugs[2][0],'The equipped Super must come from this character’s socket, not catalogue order.');
   assert.equal(detail.subclassItemInstanceId,expected.subclassInstanceId);
   assert.deepEqual(detail.weapons.map(item=>item.itemInstanceId),[expected.weaponInstanceId]);
   assert.equal(detail.abilities.length,4,`${expected.characterId} must resolve four equipped abilities`);
@@ -75,6 +76,7 @@ assert.equal(new Set(normalized.flatMap(detail=>detail.weapons.map(item=>item.it
 const partialSubclassPayload=structuredClone(payload);
 delete partialSubclassPayload.profile.itemComponents.sockets.data['hunter-subclass-live'];
 const partialDetail=normaliseLiveProfile(partialSubclassPayload,null,'hunter-live');
+assert.equal(partialDetail.super,null,'Missing live Super sockets must not invent a catalogue default.');
 assert.deepEqual(partialDetail.abilities,[],'Missing optional Bungie socket data must become an empty ability list.');
 assert.deepEqual(partialDetail.aspects,[],'Missing optional Bungie socket data must become an empty aspect list.');
 assert.deepEqual(partialDetail.fragments,[],'Missing optional Bungie socket data must become an empty fragment list.');
@@ -103,3 +105,27 @@ console.log('CHARACTER_LIVE_MULTI_GUARDIAN_DATA=PASS');
 console.log('CHARACTER_LIVE_SUBCLASS_SOCKET_COVERAGE=PASS');
 console.log('CHARACTER_LIVE_PARTIAL_DATA_GUARD=PASS');
 console.log('CHARACTER_LIVE_MALFORMED_OPTIONAL_COMPONENT_GUARD=PASS');
+
+const newerSuperPayload=structuredClone(payload),newSuperHash=987654321;
+newerSuperPayload.definitions[String(newSuperHash)]={hash:newSuperHash,itemType:19,displayProperties:{name:'New manifest Super',icon:'/new-super.png'},plug:{plugCategoryIdentifier:'hunter.void.supers'}};
+newerSuperPayload.profile.itemComponents.sockets.data['hunter-subclass-live'].sockets[2].plugHash=newSuperHash;
+assert.equal(normaliseLiveProfile(newerSuperPayload,null,'hunter-live').super.hash,newSuperHash,'A live class/subclass-compatible Super must survive an older bundled catalogue.');
+console.log('CHARACTER_EQUIPPED_SUPER_SOURCE=PASS');
+
+const {superDefinitionsFor}=await import('../pages/guardian-workspace-v2/guardian-super-catalog.mjs');
+for(const [index,row] of classes.entries()){
+  const live=normalized[index],element=live.subclass;
+  const savedSuper=superDefinitionsFor(live.characterClass,element).find(item=>item.hash!==live.super.hash);
+  assert.ok(savedSuper);
+  const saved=structuredClone(payload),plugs=row.plugs.map(([hash])=>hash);
+  plugs[2]=savedSuper.hash;
+  saved.definitions[String(savedSuper.hash)]={...savedSuper.definition,hash:savedSuper.hash,itemType:19,plug:{plugCategoryIdentifier:row.plugs[2][2]}};
+  saved.characterId=row.characterId;
+  saved.selectedItems=saved.profile.characterEquipment.data[row.characterId].items.map(item=>item.bucketHash===SUBCLASS_BUCKET?{...item,plugItemHashes:plugs}:item);
+  saved.profile=profileWithSelectedLoadout(saved);
+  const resolved=normaliseLiveProfile(saved,null,row.characterId);
+  assert.equal(resolved.super.hash,savedSuper.hash,'An explicitly opened saved loadout must resolve its own Super plug, not the live Super.');
+  assert.equal(resolved.selectionResolutionVersion,2,'Freshly resolved loadouts must carry the current resolution version.');
+  assert.equal(normaliseLiveProfile(payload,null,row.characterId).super.hash,live.super.hash,'Returning to live equipment must restore that Guardian’s exact Super.');
+}
+console.log('CHARACTER_SAVED_LOADOUT_SUPER_ISOLATION=PASS');

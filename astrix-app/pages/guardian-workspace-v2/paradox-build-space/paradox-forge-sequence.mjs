@@ -2,9 +2,9 @@
 import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1';
 import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
-import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
+import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1';
 import {validateTierFiveArmour} from './paradox-build-recommendation.mjs';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260910-generate-termination-1';
+import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);
 const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments']);
@@ -26,7 +26,7 @@ function forgeEvidenceAssessment(build={},coherence={violations:[]},additional=[
   return {schemaVersion:1,status:pending.length?'partial':'complete',critical:{stagedArmour:true,verifiedSubclass:true,activityContext:forgeActivityKey(build.activityContext)},pending,excludedFromEvidenceScore:[...new Set(pending.map(row=>row.field))],statement:pending.length?`Partial Working Build generated with ${pending.length} unresolved evidence field${pending.length===1?'':'s'} excluded from scoring.`:'All required and optional generation evidence resolved.'};
 }
 
-export async function prepareForgeSequence({build,candidate,element,objective='balanced',currentSeasonNumber=null,superHash=0},{onProgress=()=>{},advise=adviseLiveWeaponRolls}={}){
+export async function prepareForgeSequence({build,candidate,element,objective='balanced',currentSeasonNumber=null,superHash=0,weaponInstanceIds=[]},{onProgress=()=>{},advise=adviseLiveWeaponRolls}={}){
   if(!build?.forgeLoaderDecision||!validateTierFiveArmour(build).ready||!validateExoticLoadout(build,{requireArmourAnchor:true}).ready)throw new Error('Stage a verified Forge Loader armour result first.');
   if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the verified Forge Loader result.');
   if(!hasForgeActivityContext(build))throw new Error('Select Raid, DPS, Grandmaster, Crucible, PVE or PVP before generating this build.');
@@ -44,13 +44,13 @@ export async function prepareForgeSequence({build,candidate,element,objective='b
   next={...next,workingBuild:working,recommendation:{status:'review-required',generatedAt:working.recommendationGeneratedAt,element,source:'verified-forge-loader-working-build',intelligenceMethod:working.forgeIntelligence.method}};
   working.objective=objective;working.loadoutIntent=deriveLoadoutIntent(working);
   await updateForgeGenerationPhase('RANKING ALL VERIFIED OWNED WEAPONS…');
-  const initialWeaponResult=selectOwnedWeapons({build:working,objective:objective});working=initialWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
+  const initialWeaponResult=selectOwnedWeapons({build:working,objective,baselineWeapons:build.weapons,weaponInstanceIds});working=initialWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
   await updateForgeGenerationPhase('BUILDING GRENADE, ORB AND SUPER MOD LOOP…');
   const provisionalModResult=recommendArmourMods({build:working,objective:objective});working=provisionalModResult.workingBuild;
   await updateForgeGenerationPhase('MATCHING ARTIFACT SYNERGY…');
   next=protectBuildState({...next,workingBuild:working});const artifactResult=applyForgeArtifactRecommendation(next,{currentSeasonNumber,force:true});next=artifactResult.state;working={...next.workingBuild};
   await updateForgeGenerationPhase('RE-RANKING OWNED WEAPONS WITH ARTIFACT FIT…');
-  const artifactAwareWeaponResult=selectOwnedWeapons({build:working,objective:objective});working=artifactAwareWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
+  const artifactAwareWeaponResult=selectOwnedWeapons({build:working,objective,baselineWeapons:build.weapons,weaponInstanceIds});working=artifactAwareWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
   const generatedExoticValidation=validateExoticLoadout(working,{requireArmourAnchor:true});if(!generatedExoticValidation.ready)throw new Error(generatedExoticValidation.reason);
   await updateForgeGenerationPhase('OPTIMISING VERIFIED ARMOUR MOD CHANGES…');
   const modResult=recommendArmourMods({build:working,objective:objective});working=modResult.workingBuild;const generatedModValidation=validateArmourModLoadout(working);if(!generatedModValidation.ready)throw new Error(generatedModValidation.reason);working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;

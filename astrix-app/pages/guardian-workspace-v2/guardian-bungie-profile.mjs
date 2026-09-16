@@ -4,8 +4,8 @@ import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
 import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
-import {createHandoffEnvelope} from "./paradox-build-binding.mjs?v=20260913-character-isolation-1";
-import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260829-subclass-identity-1";
+import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
+import {mergeSubclassCatalog} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
 import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
@@ -20,6 +20,7 @@ import {
 } from "./guardian-session-cache.mjs?v=20260913-live-character-2";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
+const SELECTION_RESOLUTION_VERSION=2; // Discard saved details resolved with catalogue-default Supers.
 const CLASS_NAMES=["titan","hunter","warlock"];
 const BUCKETS={kinetic:1498876634,energy:2465295065,power:953998645,helmet:3448274439,gauntlets:3551918588,chest:14239492,legs:20886954,classItem:1585787867,ghost:4023194814,subclass:3284755031};
 const ARMOUR_ORDER=[BUCKETS.helmet,BUCKETS.gauntlets,BUCKETS.chest,BUCKETS.legs,BUCKETS.classItem];
@@ -57,7 +58,7 @@ function resolvedBuildSnapshot(detail={}){
   const characterId=String(detail.characterId||detail.fixtureId||"");
   if(!characterId)return null;
   const sourceBuild=detail.subclassBuild&&typeof detail.subclassBuild==="object"?detail.subclassBuild:{};
-  const superItem=detail.super??sourceBuild.super??null;
+  const superItem=Object.hasOwn(sourceBuild,'super')?sourceBuild.super:detail.super??null;
   const abilities=Array.isArray(detail.abilities)?detail.abilities:Array.isArray(sourceBuild.abilities)?sourceBuild.abilities:[];
   const aspects=Array.isArray(detail.aspects)?detail.aspects:Array.isArray(sourceBuild.aspects)?sourceBuild.aspects:[];
   const fragments=Array.isArray(detail.fragments)?detail.fragments:Array.isArray(sourceBuild.fragments)?sourceBuild.fragments:[];
@@ -73,6 +74,7 @@ function resolvedBuildSnapshot(detail={}){
     characterClass:detail.characterClass||detail.className||"",
     displayName:detail.displayName||"Guardian",
     selectedLoadoutIndex:Number.isInteger(detail.selectedLoadoutIndex)?detail.selectedLoadoutIndex:null,
+    loadoutSource:detail.loadoutSource||"",
     subclass:detail.subclass||"",
     subclassName:detail.subclassName||"",
     subclassIcon:detail.subclassIcon||"",
@@ -105,12 +107,12 @@ function rememberResolvedBuild(detail={}){
   const snapshot=resolvedBuildSnapshot(detail);
   if(!snapshot)return null;
   latestResolvedBuild=snapshot;
-  if(!Number.isInteger(snapshot.selectedLoadoutIndex))latestEquippedBuilds.set(snapshot.characterId,cloneBuildValue(snapshot));
+  if(isEquippedSelection(snapshot))latestEquippedBuilds.set(snapshot.characterId,cloneBuildValue(snapshot));
   return snapshot;
 }
 function persistResolvedBuildSnapshot(){
   const selectedId=currentSelectedCharacterId()||String(latestResolvedBuild?.characterId||"");
-  const source=latestEquippedBuilds.get(selectedId)||(!Number.isInteger(latestResolvedBuild?.selectedLoadoutIndex)?latestResolvedBuild:null);
+  const source=latestEquippedBuilds.get(selectedId)||(latestResolvedBuild&&isEquippedSelection(latestResolvedBuild)?latestResolvedBuild:null);
   if(!source?.characterId)return false;
   const envelope=createHandoffEnvelope(createBuildState(source));
   const json=JSON.stringify(envelope);
@@ -719,6 +721,7 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   }
   return {
     source:"bungie-live",
+    selectionResolutionVersion:SELECTION_RESOLUTION_VERSION,
     characterId:character.characterId,
     membershipId:String(membership.membershipId||session?.primaryMembershipId||session?.bungieMembershipId||""),
     membershipType:String(membership.membershipType??""),
@@ -888,7 +891,7 @@ async function loadSelectedLoadout(selection){
     return published;
   }
   const stored=cacheInvalidated?null:await readCachedBungieLoadoutDetail(liveProfileSession||globalThis.FORGE_BUNGIE_SESSION,characterId,index);
-  if(stored&&Array.isArray(stored.subclassCatalog)){
+  if(stored?.selectionResolutionVersion===SELECTION_RESOLUTION_VERSION&&Array.isArray(stored.subclassCatalog)){
     loadoutCache.set(cacheKey,stored);
     const published=forAction({...stored,sessionCacheRestored:true});
     if(!isCurrentCharacter(characterId))return published;

@@ -122,7 +122,7 @@ const exactWeapon=(hash,instance,name,description,bucketHash,extra={})=>{
   const {perkColumnCounts,...weaponExtra}=extra,suppliedTier=Number(weaponExtra.gearTier),gearTier=Number.isInteger(suppliedTier)&&suppliedTier>=0?suppliedTier:5,capacities=Array.isArray(perkColumnCounts)?perkColumnCounts:gearTier>=5?[2,2,3,3,2]:gearTier>=3?[2,2,2,2,2]:[1,1,1,1,1];
   const alternativePerkColumns=capacities.map((count,columnIndex)=>({socketIndex:10+columnIndex,options:Array.from({length:count},(_,rowIndex)=>{const perkHash=hash*100+(columnIndex+1)*10+rowIndex+1,perkName=`${name} perk ${columnIndex+1}.${rowIndex+1}`;return {hash:perkHash,bungieHash:perkHash,name:perkName,socketIndex:10+columnIndex,definition:{displayProperties:{name:perkName,description:'Verified synthetic test perk.'},plug:{plugCategoryIdentifier:'weapon.perks'}}};})}));
   const selectedPerks=alternativePerkColumns.map(column=>column.options[0]),perkModel=normaliseWeaponPerkModel({gearTier,selectedPerks,alternativePerkColumns});
-  return {hash,bungieHash:hash,itemInstanceId:instance,name,description,bucketHash,gearTier,definition:{displayProperties:{name,description},traitIds:[],inventory:{tierType:weaponExtra.isExotic?6:5,tierTypeName:weaponExtra.isExotic?'Exotic':'Legendary'}},weaponSemantics:{gearTier,selectedPerks,alternativePerkColumns,perkModel},...weaponExtra};
+  return {hash,bungieHash:hash,itemInstanceId:instance,name,description,bucketHash,gearTier,definition:{displayProperties:{name,description},traitIds:[],inventory:{tierType:weaponExtra.isExotic?6:5,tierTypeName:weaponExtra.isExotic?'Exotic':'Legendary'}},weaponSemantics:{gearTier,intrinsic:{hash:hash*1000,name:'Synthetic intrinsic',description},selectedPerks,alternativePerkColumns,perkModel},...weaponExtra};
 };
 const currentPrimary=exactWeapon(601,'weapon-current','Plain Rifle','A reliable rifle.',1498876634),joltPrimary=exactWeapon(602,'weapon-jolt','Jolt Rifle','Final blows jolt nearby targets and grant grenade energy.',1498876634),energyWeapon=exactWeapon(603,'weapon-energy','Energy Weapon','Verified energy weapon.',2465295065),powerWeapon=exactWeapon(604,'weapon-power','Power Weapon','Verified power weapon.',953998645);
 const expandedTierFiveWeapon=exactWeapon(609,'weapon-expanded-tier-five','Expanded Tier Five Weapon','A verified crafted weapon with an additional perk choice.',1498876634,{perkColumnCounts:[2,3,3,3,2]});
@@ -146,10 +146,10 @@ const praxicPerks=[[3514694513,praxicBladeCatalogue],[1958555234,praxicGripCatal
 const praxicTierZeroModel=normaliseWeaponPerkModel({gearTier:0,selectedPerks:praxicPerks,alternativePerkColumns:praxicPerks.map(perk=>({socketIndex:perk.socketIndex,options:[perk]}))});
 assert.equal(praxicTierZeroModel.weaponTier,0,'Bungie gearTier 0 must remain Tier 0 instead of being coerced to unknown.');
 assert.equal(validateWeaponModel({weapons:[{itemHash:3049715579,name:'Praxic Blade',gearTier:0,weaponSemantics:{gearTier:0,perkModel:praxicTierZeroModel}}]}).ready,true,'Praxic Blade real Tier 0 one-row perk evidence must be valid.');
-assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260910-generate-termination-1/,'Build Forge must load the terminating background preparation graph.');
-assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260910-generate-termination-1/,'Background preparation must start the terminating Forge worker.');
-assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260910-generate-termination-1/,'The Forge worker must load the terminating generation sequence.');
-assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260910-generate-termination-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
+assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260916-weapon-combinations-2/,'Build Forge must load the terminating background preparation graph.');
+assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260916-weapon-combinations-2/,'Background preparation must start the terminating Forge worker.');
+assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260916-weapon-combinations-2/,'The Forge worker must load the terminating generation sequence.');
+assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260916-weapon-combinations-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
 assert.match(html,/id="forgeActivityDialog"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="pvp"/,'Generate must capture one of the six required activity contexts in an explicit dialog.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
 const weaponResult=selectOwnedWeapons({build:{...intelligenceSource,weapons:[currentPrimary,energyWeapon,powerWeapon],ownedWeapons:ownedWeaponCatalogue,vaultWeapons:ownedWeaponCatalogue},objective:'add-clear'});
@@ -223,6 +223,59 @@ for(const [label,mutate] of [
 }
 console.log('MAX_LOADOUT_SPARSE_PERK_PREFLIGHT=PASS');
 
+const comboWeapon=(hash,id,name,description,bucket,ammo,extra={})=>{
+  const item=exactWeapon(hash,id,name,description,bucket,extra);
+  item.definition.equippingBlock={ammoType:ammo};item.source={kind:'vault'};return item;
+};
+const comboWeapons=[
+  comboWeapon(701,'70101','Synthetic Grenade Launcher','Grenade final blows grant grenade energy.',1498876634,2),
+  comboWeapon(702,'70201','Synthetic Precision Rifle','Precision hits increase damage and reload speed.',1498876634,1),
+  comboWeapon(703,'70301','Synthetic Backup Rifle','Weapon final blows improve handling.',1498876634,1),
+  comboWeapon(704,'70401','Synthetic Void Glaive','Grenade final blows grant grenade energy.',2465295065,2,{element:'void'}),
+  comboWeapon(705,'70501','Synthetic Void SMG','Reload speed increases after final blows.',2465295065,1,{element:'void'}),
+  comboWeapon(706,'70601','Synthetic Machine Gun','Grenade final blows grant grenade energy.',953998645,3),
+  comboWeapon(707,'70701','Synthetic Rocket Launcher','Damage and reload speed increase after precision hits.',953998645,3),
+  comboWeapon(708,'70801','Synthetic Exotic Heavy','Damage and reload speed increase after precision hits.',953998645,3,{isExotic:true})
+];
+const comboSource={...voidLoopSource,activityContext:{key:'dps'},weapons:[comboWeapons[0],comboWeapons[3],comboWeapons[5]],ownedWeapons:comboWeapons,vaultWeapons:[],inventoryWeapons:[]};
+const comboBefore=JSON.stringify(comboSource),comboResult=selectOwnedWeapons({build:comboSource,objective:'dps'}),comboRecommendation=comboResult.recommendation;
+assert.equal(comboRecommendation.combinations.length,4,'Review must expose a selected trio and three distinct owned alternatives.');
+assert.equal(comboRecommendation.legalCombinationCount,18,'All 3 × 2 × 3 legal owned trios must be considered.');
+assert.equal(comboResult.workingBuild.weapons[0].itemInstanceId,'70201','A lower individual score with the needed Primary role must survive combination ranking.');
+assert.equal(comboRecommendation.decisions[0].action,'REPLACE');
+assert.equal(JSON.stringify(comboSource),comboBefore,'Ranking must preserve the source loadout and owned catalogue.');
+const secondPass=selectOwnedWeapons({build:comboResult.workingBuild,objective:'dps',baselineWeapons:comboSource.weapons});
+assert.equal(secondPass.recommendation.decisions[0].action,'REPLACE','Artifact-aware ranking must not relabel its previous replacement as current best fit.');
+const selectedAlternative=comboRecommendation.combinations[1].weapons.map(item=>item.itemInstanceId),alternativeResult=selectOwnedWeapons({build:comboSource,objective:'dps',weaponInstanceIds:selectedAlternative});
+assert.deepEqual(alternativeResult.workingBuild.weapons.map(item=>item.itemInstanceId),selectedAlternative,'The chosen trio must be used as exact instances.');
+assert.throws(()=>selectOwnedWeapons({build:comboSource,weaponInstanceIds:['missing',...selectedAlternative.slice(1)]}),/complete owned weapon instances/,'A stale or unowned choice must fail rather than silently substitute another item.');
+const brokenCandidate=structuredClone(comboWeapons[1]);brokenCandidate.itemInstanceId='broken';brokenCandidate.weaponSemantics.perkModel.columns[0].selectedPlugHash=null;
+const evidenceResult=selectOwnedWeapons({build:{...comboSource,ownedWeapons:[...comboWeapons,brokenCandidate]}});
+assert.ok(evidenceResult.recommendation.excluded.some(item=>item.itemInstanceId==='broken'));
+assert.ok(evidenceResult.recommendation.combinations.every(combo=>combo.weapons.every(item=>item.itemInstanceId!=='broken')));
+const unselectedPerkSource=structuredClone(comboSource),unselectedWeapon=unselectedPerkSource.ownedWeapons[2];
+unselectedWeapon.weaponSemantics.alternativePerkColumns[2].options[1].description='Grenade damage grants super energy, health, precision, reload and overshield.';
+assert.deepEqual(selectOwnedWeapons({build:unselectedPerkSource,objective:'dps'}).recommendation.combinations,comboRecommendation.combinations,'Unselected alternative perks must not be scored as simultaneously active.');
+const typeOnly=comboWeapon(709,'70901','Grenade Launcher','',1498876634,2);typeOnly.itemTypeDisplayName='Grenade Launcher';typeOnly.definition.itemTypeDisplayName='Grenade Launcher';
+typeOnly.weaponSemantics.intrinsic.description='This Grenade Launcher fires projectiles.';
+const typeOnlyResult=selectOwnedWeapons({build:{...comboSource,weapons:[typeOnly,...comboSource.weapons.slice(1)],ownedWeapons:[typeOnly,...comboSource.weapons.slice(1)]}});
+assert.equal(typeOnlyResult.recommendation.decisions[0].score,0,'Grenade Launcher type text is not grenade-ability synergy.');
+const pvpResult=selectOwnedWeapons({build:{...comboSource,activityContext:{key:'pvp'}},objective:'dps'});
+assert.ok(pvpResult.recommendation.combinations.some(combo=>combo.score!==comboRecommendation.combinations.find(other=>other.id===combo.id)?.score),'The selected activity must influence fit scores.');
+for(const combo of constrainedWeaponResult.recommendation.combinations)assert.ok(combo.exoticCount<=1,'Every alternative must obey the one-Exotic weapon rule.');
+const exhaustive=[];
+for(const kinetic of comboWeapons.slice(0,3))for(const energy of comboWeapons.slice(3,5))for(const heavy of comboWeapons.slice(5)){
+  const result=selectOwnedWeapons({build:{...comboSource,weapons:[kinetic,energy,heavy],ownedWeapons:[kinetic,energy,heavy]},objective:'dps',baselineWeapons:comboSource.weapons});exhaustive.push(result.recommendation.combinations[0]);
+}
+exhaustive.sort((a,b)=>b.score-a.score||a.changedSlots-b.changedSlots||a.id.localeCompare(b.id));
+assert.deepEqual(comboRecommendation.combinations.map(combo=>combo.id),exhaustive.slice(0,4).map(combo=>combo.id),'Bounded state pruning must preserve the same best four complete trios as exhaustive ranking.');
+const largeOwned=[205,211,97].flatMap((count,bucket)=>Array.from({length:count},(_,i)=>{const item=structuredClone(comboWeapons[[0,3,5][bucket]]);item.hash=90000+bucket*1000+i;item.itemInstanceId=String(990000+bucket*1000+i);return item;}));
+const largeResult=selectOwnedWeapons({build:{...comboSource,weapons:[],ownedWeapons:largeOwned},objective:'dps'});
+assert.equal(largeResult.recommendation.candidateCount,513);
+assert.equal(largeResult.recommendation.legalCombinationCount,205*211*97,'The screenshot-sized inventory must be fully counted without a top-rarity shortcut.');
+assert.equal(largeResult.workingBuild.ownedWeapons,largeOwned,'Large catalogues must remain structurally shared.');
+console.log('OWNED_WEAPON_COMBINATIONS_AND_ALTERNATIVES=PASS');
+
 const loadoutsAt=html.indexOf('loadouts-design-section'),armourAt=html.indexOf('armour-design-section'),weaponsAt=html.indexOf('weapon-design-section'),recommendationAt=html.indexOf('recommendation-panel'),rightRailAt=html.indexOf('build-right-rail'),validationAt=html.indexOf('validation-panel'),intelligenceAt=html.indexOf('data-paradox-analysis');
 assert.ok(loadoutsAt>0&&loadoutsAt<armourAt&&armourAt<weaponsAt&&weaponsAt<recommendationAt&&recommendationAt<rightRailAt,'Centre column order must be In-game Loadouts, Armour & Mods, Weapons & Perks, then Elemental Build Options.');
 assert.ok(rightRailAt<validationAt&&validationAt<intelligenceAt,'The right rail must contain the Validation Loop above Paradox Intelligence.');
@@ -266,7 +319,7 @@ assert.match(runtime,/EXOTIC ANCHOR: \$\{String\(anchorName\)\.toUpperCase\(\)\}
 assert.match(runtime,/changedItems=\(plan\.items\|\|\[\]\)[\s\S]*?filter\(row=>row\.action!=='KEEP'\)/,'The review must omit unchanged mod sockets and present only proposed changes.');
 assert.match(runtime,/review-artifact-synergy[\s\S]*?ARTIFACT SYNERGY/,'The review must expose the evidence behind the Artifact recommendation.');
 assert.match(artifactSelectionRuntime,/recommendArtifactPerks\(build,effectiveArtifact,\{currentSeasonNumber:season,planFullBuild:true\}\)/,'Build Forge must produce a complete target Artifact plan when only the current CharacterProgressions tree is available.');
-assert.match(artifactSelectionRuntime,/artifactPlanVersion:3/,'The cross-system Artifact-plan release must invalidate previously cached recommendation fingerprints.');
+assert.match(artifactSelectionRuntime,/artifactPlanVersion:4/,'The cross-system Artifact-plan release must invalidate previously cached recommendation fingerprints.');
 assert.match(runtime,/PARADOX FULL TARGET PLAN[\s\S]*?currently unlocked and equipped perks remain unchanged/,'The Artifact recommendation must distinguish the complete target plan from the live unlocked and equipped state.');
 assert.match(css,/\.recommended-build-dialog\{display:grid;grid-template-areas:"header" "safety" "status" "content" "actions";grid-template-rows:auto auto auto minmax\(0,1fr\) auto;width:calc\(100vw - 20px\);height:calc\(100dvh - 20px\);max-width:none;min-height:0;border:0/,'The recommendation review must fit the viewport and reserve an independently scrollable content row.');
 assert.match(css,/\.recommended-build-content\{[^}]*min-height:0[^}]*overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable/,'The recommendation body must scroll without pushing the Apply actions outside the viewport.');
@@ -275,7 +328,10 @@ assert.match(html,/id="continueToBuildTest">TEST THIS BUILD/,'The recommendation
 assert.match(runtime,/function renderParadoxTestReview\(capture=readCapture\(\)\)[\s\S]*?Causal perk activation, DPS and uptime remain inference/,'Paradox must review confirmed post-test Bungie evidence without inventing causal telemetry.');
 assert.deepEqual([...html.matchAll(/data-build-objective="([^"]+)"/g)].map(match=>match[1]),['balanced','dps','add-clear','survivability','ability-uptime'],'Build Forge must expose the five deterministic tuning objectives used by weapon and mod ranking.');
 assert.match(html,/id="generateMaxLoadout" disabled>GENERATE MAX LOADOUT/,'Generation must begin locked until verified inputs pass.');
-assert.match(runtime,/function generateMaxLoadout\(\)/,'Build Forge must expose an explicit recommendation generation boundary.');
+assert.match(runtime,/function generateMaxLoadout\(\{weaponInstanceIds=\[\]\}=\{\}\)/,'Generation must accept an exact owned combination for full build recalculation.');
+assert.match(runtime,/forgePreparation\.get\(\{\.\.\.requestedForgeVariant\(build\),weaponInstanceIds\}\)/,'The selected combination must reach the background generation request.');
+assert.match(html,/id="recommendedWeaponCombinations"/,'The full review must expose owned weapon alternatives.');
+assert.doesNotMatch(runtime,/CURRENT BEST FIT/,'Keeping an item is not proof of measured superiority.');
 assert.match(runtime,/function blankArmourModCanvas\(\)[\s\S]*?Array\.from\(\{length:6\}[\s\S]*?AI recommendation pending[\s\S]*?grid\.innerHTML=blankSlots/,'Every staged armour item must present six blank AI recommendation slots before generation.');
 assert.match(runtime,/function renderArmourRecommendationState\(build=\{\}\)[\s\S]*?Boolean\(build\.recommendationGeneratedAt\)[\s\S]*?MANUAL WORKING BUILD[\s\S]*?if\(!generated&&!manual\)blankArmourModCanvas\(\)/,'The armour canvas must distinguish pending, manual and generated recommendation states.');
 assert.match(runtime,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderArmourRecommendationState\(build\)[\s\S]*?renderWeapons/,'Build Forge must apply the blank-or-generated mod presentation on every gear render.');
@@ -291,7 +347,7 @@ assert.match(runtime,/NO DIRECT SYNERGY EVIDENCE/,'Build Forge must state plainl
 assert.match(css,/\.super-diamond\.is-exotic-super-best\{[^}]*box-shadow/,'Only Supers with the strongest real Exotic evidence may receive the evidence highlight.');
 assert.match(intelligenceRuntime,/status:!description\?'unknown':strongest>0\?'evidenced':'no-direct-super-synergy'/,'Missing Super synergy evidence must remain an explicit no-ranking result.');
 assert.match(sequenceRuntime,/working\.paradoxAnalysis=analyzeLiveGuardian\(working\)[\s\S]*?advise\(working,working\.paradoxAnalysis\|\|\{\}, \{insertSocketPlugFree:false\}\)/,'Generation must re-run directed analysis after Artifact selection before recommendation-only weapon advice.');
-assert.match(sequenceRuntime,/working\.objective=objective[\s\S]*?selectOwnedWeapons\(\{build:working,objective:objective\}\)[\s\S]*?recommendArmourMods\(\{build:working,objective:objective\}\)/,'Generation must rank exact owned weapons before producing the verified per-socket armour-mod plan for the selected tuning objective.');
+assert.match(sequenceRuntime,/working\.objective=objective[\s\S]*?selectOwnedWeapons\(\{build:working,objective,baselineWeapons:build\.weapons,weaponInstanceIds\}\)[\s\S]*?recommendArmourMods\(\{build:working,objective:objective\}\)/,'Generation must rank exact owned weapons before producing the verified per-socket armour-mod plan for the selected tuning objective.');
 assert.match(sequenceRuntime,/recommendArmourMods\(\{build:working,objective:objective\}\)[\s\S]*?validateArmourModLoadout\(working\)[\s\S]*?throw new Error\(generatedModValidation\.reason\)/,'Build Forge must block an invalid single-copy armour-mod plan before opening the review.');
 assert.match(sequenceRuntime,/applyForgeArtifactRecommendation\(next,\{currentSeasonNumber,force:true\}\)/,'Generation must refresh the verified legal Artifact fit.');
 assert.match(sequenceRuntime,/validateExoticLoadout\(working,\{requireArmourAnchor:true\}\)[\s\S]*?throw new Error\(generatedExoticValidation\.reason\)/,'Generation must stop before review if any recommendation violates the Destiny Exotic equip rule.');
@@ -310,7 +366,8 @@ assert.match(advisorRuntime,/if\(typeof document!=="undefined"\)document\.dispat
 assert.match(html,/id="recommendedBuildReveal"[\s\S]*?aria-modal="true"[\s\S]*?hidden/,'The complete recommended build must open in a hidden review layer.');
 assert.match(html,/id="recommendedBuildRenderStatus" role="alert" hidden/,'The recommendation review must expose a visible render failure state.');
 assert.match(runtime,/revealRecommendedBuild\([\s\S]*?paint:\(\)=>new Promise[\s\S]*?onRenderError:/,'The review must become visible and paint before account specific sections render.');
-assert.match(html,/id="recommendedArmourSummary"[\s\S]*?id="recommendedWeaponsSummary"[\s\S]*?id="recommendedArtifactSummary"/,'The review must expose armour, weapon and Artifact sections.');
+// Intentional: the review now follows Character's subclass/Artifact rail and equipment column.
+assert.match(html,/class="recommended-build-rail guardian-left-rail"[\s\S]*?id="recommendedSubclassSummary"[\s\S]*?id="recommendedArtifactSummary"[\s\S]*?class="recommended-build-equipment"[\s\S]*?id="recommendedArmourSummary"[\s\S]*?id="recommendedWeaponsSummary"/,'The review must reuse Character rail and equipment grouping.');
 assert.match(html,/id="recommendedModPlan"/,'The review must expose installed-versus-recommended armour-mod decisions.');
 assert.match(runtime,/RAW → CURRENT → RECOMMENDED/,'The review must distinguish mod-free raw stats from installed and recommended projections.');
 assert.doesNotMatch(runtime,/decorateRecommendedWeaponPerks|weapon-recommended-perks/,'Build weapons must not duplicate recommendation icons outside the canonical perk matrix.');
@@ -351,4 +408,4 @@ console.log('BUILD_FORGE_REVIEW_REVEAL=PASS');
 console.log('BUILD_MY_GUARDIAN_CONFIRMATION_GATE=PASS');
 console.log('VANGUARD_VALIDATION_RECORD=PASS');
 
-export {voidLoopSource,nothingManaclesCandidate};
+export {voidLoopSource,nothingManaclesCandidate,comboSource,comboRecommendation};

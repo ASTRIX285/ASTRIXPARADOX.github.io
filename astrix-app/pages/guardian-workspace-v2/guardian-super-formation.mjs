@@ -1,6 +1,6 @@
 import {cleanImageElement} from './guardian-bungie-icon-cleaner.mjs?v=20260824-icon-cleaner-2';
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
-import {mergeSuperOptions} from './guardian-super-catalog.mjs?v=20260829-subclass-identity-1';
+import {mergeSuperOptions} from './guardian-super-catalog.mjs?v=20260916-equipped-source-1';
 
 const BUNGIE='https://www.bungie.net';
 const SUBCLASS_KEYS=Object.freeze(['void','arc','solar','strand','stasis','prismatic']);
@@ -44,7 +44,6 @@ function detectedSubclassKey(value,activeSuper){
 function subclassKey(value,activeSuper){return detectedSubclassKey(value,null)||detectedSubclassKey('',activeSuper)||'void';}
 function uniqueItems(items){return items.filter(Boolean).filter((item,index,rows)=>rows.findIndex(other=>itemKey(other)===itemKey(item))===index);}
 function subclassBuild(item){return item?.subclassBuild||item?.build||{};}
-function equippedSuper(build,options=[]){return build?.super||options.find(item=>item?.isEquipped===true||item?.equipped===true)||null;}
 
 function resolveSuperFormationSlots({activeSuper=null,superOptions=[],subclass='',subclassCatalog=[],characterClass='hunter'}={}){
   const activeElement=subclassKey(subclass,activeSuper);
@@ -59,8 +58,8 @@ function resolveSuperFormationSlots({activeSuper=null,superOptions=[],subclass='
     ...(Array.isArray(superOptions)?superOptions:[]),
     ...(Array.isArray(activeBuild?.superOptions)?activeBuild.superOptions:[])
   ]));
-  const requestedActive=[activeSuper,equippedSuper(activeBuild,currentOptions)].find(candidate=>currentOptions.some(item=>itemKey(item)===itemKey(candidate)))||null;
-  const resolvedActive=currentOptions.find(item=>itemKey(item)===itemKey(requestedActive))||currentOptions[0]||null;
+  const requestedActive=currentOptions.some(item=>itemKey(item)===itemKey(activeSuper))?activeSuper:null;
+  const resolvedActive=currentOptions.find(item=>itemKey(item)===itemKey(requestedActive))||null;
   const activeId=itemKey(resolvedActive);
   const entries=[{slot:'equipped',item:resolvedActive,role:'equipped-super-large',element:activeElement,selected:false}];
   const alternatives=currentOptions.filter(item=>itemKey(item)!==activeId).slice(0,4);
@@ -196,6 +195,7 @@ function renderSuperFormation({host,nameNode=null,activeSuper=null,superOptions=
     slot?.classList.toggle('is-selected',selected);
     slot?.classList.toggle('is-selected-super',selected);
     slot?.setAttribute('aria-current',selected?'true':'false');
+    if(slot){slot.onclick=null;slot.onkeydown=null;delete slot.dataset.selectKind;delete slot.dataset.selectIndex;}
     if(!slot||!item)return;
     const optionIndex=options.findIndex(option=>itemKey(option)===itemKey(item));
     if(selectKind&&optionIndex>=0){slot.dataset.selectKind=selectKind;slot.dataset.selectIndex=String(optionIndex);}
@@ -210,7 +210,7 @@ function renderSuperFormation({host,nameNode=null,activeSuper=null,superOptions=
     }
   });
 
-  if(nameNode)nameNode.textContent=resolvedActive?.name||resolvedActive?.displayName||'SELECTED SUPER';
+  if(nameNode)nameNode.textContent=resolvedActive?.name||resolvedActive?.displayName||'EQUIPPED SUPER UNAVAILABLE';
 }
 
 export {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation,resolveSuperFormationSlots,resolvedSuperIcon,setDiamondFromItem};

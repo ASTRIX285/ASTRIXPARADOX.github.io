@@ -243,43 +243,93 @@ function recommendArmourMods({build={},objective='balanced'}={}){
   return {workingBuild:working,recommendation:plan};
 }
 
-function weaponEvidence(weapon){const semantics=weapon?.weaponSemantics||{},catalyst=semantics.catalyst||weapon?.catalyst,catalystMasterworked=Boolean(catalyst?.progress?.masterworked||catalyst?.progress?.active);return [weapon,semantics.intrinsic,...(semantics.exoticTraits||[]),...(semantics.selectedPerks||[]),...(semantics.alternativePerkColumns||[]).flatMap(column=>column.options||[]),...(catalystMasterworked?[catalyst]:[])].filter(Boolean);}
-function scoreWeapon(weapon,objective,currentIds,sources,intent){
-  const evidence=weaponEvidence(weapon),tokens=[...new Set(evidence.flatMap(explicitTokens))],text=evidence.map(itemText).join(' · '),reasons=[];
-  let score=currentIds.has(itemIdentity(weapon))?2:0;
-  const element=itemElement(weapon);
-  if(intent?.requiresMatchingWeapon&&element===intent.element){score+=180;reasons.push({kind:'required-element-fit',label:`${itemName(weapon,'Weapon')} is a verified ${String(element).toUpperCase()} weapon that enables matching Siphon and Artifact effects.`,score:180,element});}
-  for(const source of sources){for(const token of tokens.filter(value=>source.tokens.includes(value)).slice(0,3)){const points=12*Math.max(1,Number(source.weight)||1);score+=points;reasons.push({kind:source.weight>1?'exotic-anchor-synergy':'synergy',label:`${itemName(weapon,'Weapon')} has verified ${token} evidence matching ${source.kind} · ${source.name}.`,score:points,token});}}
-  for(const term of OBJECTIVE_TERMS[objectiveName(objective)].filter(term=>text.includes(term)).slice(0,5)){score+=7;reasons.push({kind:'objective',label:`Explicit ${term} wording supports the ${objectiveName(objective)} objective.`,score:7,term});}
-  reasons.sort((left,right)=>right.score-left.score||left.label.localeCompare(right.label));
-  return {weapon,score,reasons,tokens};
+const WEAPON_COMBINATION_LIMIT=4;
+// These are transparent fit heuristics, not measured DPS or simulated combat.
+const ACTIVITY_WEAPON_TERMS=Object.freeze({
+  raid:['damage','precision','reload'],dps:['damage','precision','reload'],
+  grandmaster:['stun','champion','barrier','overload','unstoppable','health'],
+  crucible:['handling','accuracy','range','stability'],pvp:['handling','accuracy','range','stability'],
+  pve:['final blows','reload','area']
+});
+function weaponEvidence(weapon){
+  const semantics=weapon?.weaponSemantics||{},catalyst=semantics.catalyst||weapon?.catalyst,model=semantics.perkModel||weapon?.weaponPerkModel;
+  const selected=model?.columns?.map(column=>(column.options||[]).find(option=>itemHash(option)===Number(column.selectedPlugHash))).filter(Boolean)||semantics.selectedPerks||[];
+  // Score active effects, never the weapon's name/type/flavour text or every
+  // mutually exclusive alternative perk as if they were equipped together.
+  return [semantics.intrinsic,...(semantics.exoticTraits||[]),...selected,...(catalyst?.progress?.masterworked||catalyst?.progress?.active?[catalyst]:[])].filter(item=>item&&!item.unresolved);
 }
-
-function selectOwnedWeapons({build={},objective='balanced'}={}){
-  // Weapon selection changes three exact instances only. Deep-cloning the full
-  // Vault here multiplies memory use and can stall Chrome on larger accounts.
-  const working={...(build||{})},resolvedObjective=objectiveName(objective||working.objective);working.loadoutIntent=working.loadoutIntent||deriveLoadoutIntent(working);const ownedSources=[...(working.ownedWeapons||[]),...(working.vaultWeapons||[]),...(working.inventoryWeapons||[]),...(working.weapons||[])],seenOwned=new Set(),owned=ownedSources.filter(item=>item?.itemInstanceId&&item?.definition&&Object.keys(item.definition).length).filter(item=>{const key=itemIdentity(item);if(!key||seenOwned.has(key))return false;seenOwned.add(key);return true;}),currentIds=new Set((working.weapons||[]).map(itemIdentity)),sources=buildEvidence({...working,weapons:[]}),decisions=[],selected=[];
-  const rankedByBucket=WEAPON_BUCKETS.map(bucketHash=>owned.filter(item=>Number(item.bucketHash)===bucketHash).map(item=>scoreWeapon(item,resolvedObjective,currentIds,sources,working.loadoutIntent)).sort((left,right)=>right.score-left.score||itemName(left.weapon).localeCompare(itemName(right.weapon))||itemIdentity(left.weapon).localeCompare(itemIdentity(right.weapon))));
-  let plans=[{rows:[],score:0,exoticCount:0,signature:''}];
+function scoreWeapon(weapon,objective,sources,activity){
+  const text=weaponEvidence(weapon).map(item=>clean(item.description||item.definition?.displayProperties?.description)).join(' · ').toLowerCase().replace(/grenade launchers?/g,'launcher'),tokens=explicitTokens(text).filter(token=>token!=='weapon'),reasons=[];
+  let score=0;
+  for(const token of tokens){
+    const source=sources.filter(row=>row.tokens.includes(token)).sort((a,b)=>b.weight-a.weight)[0];
+    if(!source)continue;
+    const points=12*Math.max(1,Number(source.weight)||1);score+=points;
+    reasons.push({kind:'perk-synergy',label:`${itemName(weapon,'Weapon')}: active perk ${token} wording supports ${source.kind} · ${source.name}.`,score:points,token});
+  }
+  const matches=terms=>terms.filter(term=>term!=='weapon'&&new RegExp(`\\b${term}\\b`).test(text));
+  for(const term of matches(OBJECTIVE_TERMS[objectiveName(objective)])){score+=7;reasons.push({kind:'objective',label:`Active perk ${term} wording supports ${objectiveName(objective)}.`,score:7,term});}
+  for(const term of matches(ACTIVITY_WEAPON_TERMS[activity]||[])){score+=7;reasons.push({kind:'activity',label:`Active perk ${term} wording supports ${activity.toUpperCase()}.`,score:7,term});}
+  reasons.sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label));
+  const ammo=Number(weapon.ammoType??weapon.definition?.equippingBlock?.ammoType);
+  return {weapon,score,reasons,tokens,ammo:[1,2,3].includes(ammo)?ammo:0};
+}
+const compareWeaponPlans=(a,b)=>b.score-a.score||a.changes-b.changes||a.signature.localeCompare(b.signature);
+function extendWeaponPlan(plan,row,currentIds,intent){
+  const weapon=row.weapon,ammo=[...plan.ammo];ammo[row.ammo]++;
+  return {rows:[...plan.rows,row],score:plan.score+row.score,exoticCount:plan.exoticCount+Number(isExoticItem(weapon)),matching:plan.matching||Boolean(intent.element&&itemElement(weapon)===intent.element),ammo,changes:plan.changes+Number(!currentIds.has(itemIdentity(weapon))),signature:`${plan.signature}|${itemIdentity(weapon)}`,typeSignature:`${plan.typeSignature}|${itemHash(weapon)}`};
+}
+const emptyWeaponPlan=()=>({rows:[],score:0,exoticCount:0,matching:false,ammo:[0,0,0,0],changes:0,signature:'',typeSignature:''});
+function finishWeaponPlan(plan,intent,activity){
+  let score=plan.score;const reasons=[];
+  if(plan.matching){score+=180;reasons.push({kind:'element-coverage',label:`Includes ${intent.element.toUpperCase()} weapon coverage for matching Siphon and Artifact effects.`,score:180});}
+  if(plan.ammo[1]&&plan.ammo[2]){const points=['grandmaster','crucible','pvp'].includes(activity)?90:60;score+=points;reasons.push({kind:'ammo-coverage',label:'Primary and Special ammo roles are both covered.',score:points});}
+  if(plan.ammo[3]){score+=20;reasons.push({kind:'ammo-coverage',label:'Includes a Heavy-ammo weapon.',score:20});}
+  return {...plan,score,reasons};
+}
+function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build.weapons||[],weaponInstanceIds=[]}={}){
+  const working={...build},resolvedObjective=objectiveName(objective||build.objective),intent=build.loadoutIntent||deriveLoadoutIntent(build),activity=lower(build.activityContext?.key||build.activityContext?.activityKey||build.activityContext?.name),currentIds=new Set(baselineWeapons.map(itemIdentity));
+  const seen=new Set(),owned=[...(build.weapons||[]),...(build.ownedWeapons||[]),...(build.vaultWeapons||[]),...(build.inventoryWeapons||[])].filter(item=>{
+    const key=itemIdentity(item);if(!item?.itemInstanceId||!item?.definition||!Object.keys(item.definition).length||!WEAPON_BUCKETS.includes(Number(item.bucketHash))||seen.has(key))return false;seen.add(key);return true;
+  });
+  const excluded=[],sources=buildEvidence({...working,weapons:[]}),rankedByBucket=WEAPON_BUCKETS.map(bucketHash=>owned.filter(item=>Number(item.bucketHash)===bucketHash).flatMap(weapon=>{
+    const validation=validateWeaponModel({weapons:[weapon]});
+    if(!validation.ready){excluded.push({itemInstanceId:itemIdentity(weapon),name:itemName(weapon),reason:validation.reason});return [];}
+    return [scoreWeapon(weapon,resolvedObjective,sources,activity)];
+  }));
+  // Keep the best four distinct weapon sets per equivalent coverage state.
+  // Every owned candidate is evaluated; no top-Legendary/Exotic preselection.
+  // Future scores depend only on this state, so dominated prefixes can be
+  // discarded without enumerating millions of full three-item combinations.
+  let states=new Map([['initial',{count:1,plans:[emptyWeaponPlan()]}]]);
   for(const candidates of rankedByBucket){
-    const options=[candidates.find(row=>!isExoticItem(row.weapon)),candidates.find(row=>isExoticItem(row.weapon))].filter(Boolean);
-    const choices=options.length?options:[null],next=[];
-    for(const plan of plans)for(const row of choices){const exoticCount=plan.exoticCount+Number(isExoticItem(row?.weapon));if(exoticCount>1)continue;const identity=itemIdentity(row?.weapon);next.push({rows:[...plan.rows,row],score:plan.score+Number(row?.score||0),exoticCount,signature:`${plan.signature}|${identity}`});}
-    plans=next.sort((left,right)=>right.score-left.score||left.signature.localeCompare(right.signature));
+    const next=new Map();
+    for(const state of states.values())for(const row of candidates){
+      const sample=extendWeaponPlan(state.plans[0],row,currentIds,intent);if(sample.exoticCount>1)continue;
+      const key=JSON.stringify([sample.exoticCount,sample.matching,sample.ammo]),target=next.get(key)||{count:0,plans:[]};target.count+=state.count;
+      for(const plan of state.plans)target.plans.push(extendWeaponPlan(plan,row,currentIds,intent));
+      const distinct=new Set();target.plans.sort(compareWeaponPlans);target.plans=target.plans.filter(plan=>{if(distinct.has(plan.typeSignature))return false;distinct.add(plan.typeSignature);return true;}).slice(0,WEAPON_COMBINATION_LIMIT);next.set(key,target);
+    }
+    states=next;
   }
-  const chosenPlan=plans[0]||{rows:[null,null,null],exoticCount:0};
-  for(const [index,bucketHash] of WEAPON_BUCKETS.entries()){
-    const candidates=rankedByBucket[index],best=chosenPlan.rows[index]||null,current=(working.weapons||[]).find(item=>Number(item?.bucketHash)===bucketHash)||null,choice=best?.weapon||current;
-    if(choice)selected.push(clone(choice));
-    const exoticExcluded=candidates.find(row=>isExoticItem(row.weapon)&&itemIdentity(row.weapon)!==itemIdentity(choice)),reasons=(best?.reasons||[]).slice(0,4);
-    if(exoticExcluded&&chosenPlan.exoticCount===1&&!isExoticItem(choice))reasons.push({kind:'equip-rule',label:`${itemName(exoticExcluded.weapon,'Exotic weapon')} was excluded because Destiny permits only one Exotic weapon in a loadout.`,score:0});
-    decisions.push({bucketHash,current:clone(current),recommended:clone(choice),action:current&&choice&&itemIdentity(current)===itemIdentity(choice)?'KEEP':current&&choice?'REPLACE':choice?'ADD':'UNRESOLVED',score:best?.score||0,reasons,candidateCount:candidates.length,isExotic:isExoticItem(choice)});
+  const allPlans=[...states.values()].flatMap(state=>state.plans.map(plan=>finishWeaponPlan(plan,intent,activity))),hasMatching=allPlans.some(plan=>plan.matching),eligible=allPlans.filter(plan=>!intent.requiresMatchingWeapon||!hasMatching||plan.matching).sort(compareWeaponPlans),distinct=new Set(),ranked=eligible.filter(plan=>{if(distinct.has(plan.typeSignature))return false;distinct.add(plan.typeSignature);return true;}).slice(0,WEAPON_COMBINATION_LIMIT);
+  let chosen=ranked[0]||null;
+  if(weaponInstanceIds.length){
+    const ids=new Set(weaponInstanceIds.map(String)),rows=rankedByBucket.map(candidates=>candidates.find(row=>ids.has(itemIdentity(row.weapon))));
+    if(weaponInstanceIds.length!==3||ids.size!==3||rows.some(row=>!row))throw new Error('This combination no longer has three complete owned weapon instances. Generate fresh alternatives.');
+    chosen=finishWeaponPlan(rows.reduce((plan,row)=>extendWeaponPlan(plan,row,currentIds,intent),emptyWeaponPlan()),intent,activity);
+    if(chosen.exoticCount>1||intent.requiresMatchingWeapon&&hasMatching&&!chosen.matching)throw new Error('This combination violates the Exotic or matching-element build requirement. Generate fresh alternatives.');
   }
-  working.weapons=selected;working.objective=resolvedObjective;
-  const limitations=[];if(!(working.ownedWeapons||[]).length)limitations.push('A broader owned-weapon catalogue was unavailable; current equipped weapons were retained.');for(const row of decisions)if(!row.candidateCount)limitations.push(`Weapon bucket ${row.bucketHash}: no verified exact owned instance was resolved.`);
-  const selectedExoticWeaponCount=selected.filter(isExoticItem).length,matchingElementCount=working.loadoutIntent.element?selected.filter(item=>itemElement(item)===working.loadoutIntent.element).length:0;if(working.loadoutIntent.requiresMatchingWeapon&&!matchingElementCount)limitations.push(`No exact owned ${String(working.loadoutIntent.element).toUpperCase()} weapon instance could be selected; matching Siphon and Artifact effects are blocked.`);const recommendation={schemaVersion:1,source:'bungie-owned-exact-weapon-instances',inventoryScope:(working.ownedWeapons||[]).length?'vault-character-and-equipped':'equipped-fallback',method:'deterministic-owned-weapon-evidence-rank-v3-element-loop-exotic-constrained',objective:resolvedObjective,status:'review-required',decisions,candidateCount:owned.length,constraints:{maxExoticWeapons:1,selectedExoticWeaponCount,requiredElement:working.loadoutIntent.element,matchingElementCount},limitations,requiresReview:true,liveTransferAuthorized:false};
-  working.weaponSelectionRecommendation=recommendation;
-  return {workingBuild:working,recommendation};
+  const plans=chosen?[chosen,...ranked.filter(plan=>plan.typeSignature!==chosen.typeSignature)].slice(0,WEAPON_COMBINATION_LIMIT):[],decisions=WEAPON_BUCKETS.map((bucketHash,index)=>{
+    const current=baselineWeapons.find(item=>Number(item?.bucketHash)===bucketHash)||null,row=chosen?.rows[index],choice=row?.weapon||current;
+    return {bucketHash,current:clone(current),recommended:clone(choice),action:!row?'UNRESOLVED':current&&itemIdentity(current)===itemIdentity(choice)?'KEEP':current?'REPLACE':'ADD',score:row?.score||0,reasons:row?.reasons.slice(0,4)||[],candidateCount:owned.filter(item=>Number(item.bucketHash)===bucketHash).length,eligibleCandidateCount:rankedByBucket[index].length,isExotic:isExoticItem(choice)};
+  });
+  const combinations=plans.map((plan,index)=>({id:plan.signature,selected:index===0,score:plan.score,changedSlots:plan.changes,exoticCount:plan.exoticCount,reasons:[...plan.reasons,...plan.rows.flatMap(row=>row.reasons.slice(0,1))],weapons:plan.rows.map(row=>({itemInstanceId:itemIdentity(row.weapon),hash:itemHash(row.weapon),name:itemName(row.weapon),icon:row.weapon.icon||row.weapon.definition?.displayProperties?.icon||'',bucketHash:Number(row.weapon.bucketHash),element:itemElement(row.weapon),ammoType:row.ammo,source:row.weapon.source||null,isExotic:isExoticItem(row.weapon)}))}));
+  working.weapons=decisions.map(row=>row.recommended).filter(Boolean);working.objective=resolvedObjective;working.loadoutIntent=intent;
+  const limitations=[];if(!chosen)limitations.push('No complete legal owned weapon combination could be resolved; the existing selections require review.');if(excluded.length)limitations.push(`${excluded.length} owned weapon instance(s) lack selected-perk evidence and were excluded from alternatives.`);if(!(build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length))limitations.push('The broader owned inventory is unavailable; only the supplied equipped instances could be compared.');
+  if(intent.requiresMatchingWeapon&&!chosen?.matching)limitations.push(`No complete owned ${String(intent.element).toUpperCase()} weapon combination was resolved; matching effects require review.`);
+  const recommendation={schemaVersion:2,source:'bungie-owned-exact-weapon-instances',inventoryScope:build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length?'vault-character-and-equipped':'equipped-fallback',method:'owned-active-perk-combination-rank-v4',objective:resolvedObjective,activity,status:chosen?'review-required':'incomplete',decisions,combinations,candidateCount:owned.length,eligibleCandidateCount:rankedByBucket.flat().length,legalCombinationCount:[...states.values()].reduce((sum,state)=>sum+state.count,0),excluded,constraints:{maxExoticWeapons:1,selectedExoticWeaponCount:working.weapons.filter(isExoticItem).length,requiredElement:intent.element,matchingElementCount:intent.element?working.weapons.filter(item=>itemElement(item)===intent.element).length:0},limitations,requiresReview:true,liveTransferAuthorized:false,scoreBasis:'Active perk descriptions, selected objective/activity, element coverage and ammo roles; not measured damage.'};
+  working.weaponSelectionRecommendation=recommendation;return {workingBuild:working,recommendation};
 }
 
 function validateExoticLoadout(build={}, {requireArmourAnchor=false}={}){

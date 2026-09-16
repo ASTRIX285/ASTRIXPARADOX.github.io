@@ -1,4 +1,4 @@
-import {ForgePreparationClient,preparationVariants} from './paradox-forge-preparation.mjs?v=20260910-generate-termination-1';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
@@ -8,26 +8,26 @@ import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPla
 import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
-import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation,setDiamondFromItem} from '../guardian-super-formation.mjs?v=20260829-subclass-identity-1&review=20260911-super-1';
-import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260829-subclass-identity-1';
+import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260916-equipped-source-1';
+import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260916-equipped-source-1';
 import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2';
 import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
 import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260913-character-isolation-1';
+import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260916-equipped-source-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
-import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260906-complete-build-transfer-1';
+import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1';
 import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendation.mjs';
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260910-generate-termination-1';
+import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1';
-import {revealRecommendedBuild} from './recommended-build-reveal.mjs?v=20260906-max-loadout-popup-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1';
+import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
 import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1';
@@ -97,7 +97,7 @@ async function prepareForgeBackground(build){
   const supplied=build.currentSeasonNumber??build.currentSeason?.seasonNumber,season=supplied!==null&&supplied!==undefined&&Number.isInteger(Number(supplied))?Number(supplied):await fetchCurrentArtifactSeason();
   if(currentBuild()!==build)return;
   forgePreparation.setInput(build,candidates,season);
-  activePreparationKey=JSON.stringify([variant.element,variant.objective,variant.superHash]);
+  activePreparationKey=forgePreparationKey(variant);
   forgePreparation.warm(preparationVariants(candidates,variant));
 }
 function scheduleForgePreparation(build,{immediate=false}={}){
@@ -609,12 +609,19 @@ function renderForgeDecision(build={}){
   listNode.innerHTML=(partial?pending.slice(0,3).map(row=>`<li>${esc(row.message)}</li>`).join(''):'')||(rows.length?rows:(decision.decisions||[]).slice(0,3)).map(row=>`<li>${esc(decisionReasonText(row))}</li>`).join('')||(decision.limitations||[]).slice(0,2).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>The verified equipped configuration remains the safest evidence-bound result.</li>';
 }
 function renderRecommendedBuildReview(build={}){
-  const subclass=resolvedSubclassOptions(build).find(item=>elementOf(item)===elementOf({element:build.subclass||build.subclassName||''})),superItem=build.subclassBuild?.super||build.super,abilities=build.subclassBuild?.abilities||[],aspects=build.subclassBuild?.aspects||[],fragments=build.subclassBuild?.fragments||[],anchor=build.forgeLoaderDecision?.buildAnchor||{},anchorName=anchor.name||'EXOTIC',anchorPerk=anchor.perk||null,exoticRule=validateExoticLoadout(build,{requireArmourAnchor:true}),partial=build.forgeEvidence?.status==='partial',activity=forgeActivityOption(build.activityContext);
+  const subclass=resolvedSubclassOptions(build).find(item=>elementOf(item)===elementOf({element:build.subclass||build.subclassName||''})),superItem=Object.hasOwn(build.subclassBuild||{},'super')?build.subclassBuild.super:build.super,abilities=build.subclassBuild?.abilities||[],aspects=build.subclassBuild?.aspects||[],fragments=build.subclassBuild?.fragments||[],anchor=build.forgeLoaderDecision?.buildAnchor||{},anchorName=anchor.name||'EXOTIC',anchorPerk=anchor.perk||null,exoticRule=validateExoticLoadout(build,{requireArmourAnchor:true}),partial=build.forgeEvidence?.status==='partial',activity=forgeActivityOption(build.activityContext);
   byId('recommendedBuildTitle').textContent=partial?'PARTIAL WORKING BUILD':'RECOMMENDED BUILD';
   byId('recommendedBuildSubtitle').textContent=`${String(build.characterClass||'Guardian').toUpperCase()} · ${String(build.recommendationElement||build.subclassName||build.subclass||'verified subclass').toUpperCase()} · ${String(build.objective||'balanced').toUpperCase()} · ${activity?.label||'ACTIVITY UNRESOLVED'} · EXOTIC ANCHOR: ${String(anchorName).toUpperCase()}`;
   const safety=byId('recommendedBuildSafety');if(safety){safety.classList.toggle('is-partial',partial);safety.querySelector('b').textContent=partial?'PARTIAL EVIDENCE · LIVE GUARDIAN UNCHANGED':'LIVE GUARDIAN UNCHANGED';safety.querySelector('span').textContent=partial?build.forgeEvidence.statement:'This recommendation exists only in the protected Working Build until you explicitly confirm Apply.';}
-  byId('recommendedSubclassSummary').innerHTML=`<div class="review-subclass-identity">${reviewIcon(subclass,'Subclass')}<div><b>${esc(build.subclassName||build.subclass||'VERIFIED SUBCLASS')}</b><span>${esc(String(elementOf(subclass||build)).toUpperCase())} SUBCLASS</span></div></div><section class="super-feature review-super-feature" data-super-subclass="${esc(elementOf(superItem||subclass||build))}" aria-label="Recommended Super"><div class="super-feature__cluster"><div class="super-diamond super-diamond--equipped" data-review-super><span>◆</span></div></div><div class="super-feature__name">${esc(superItem?.name||'SUPER NOT RESOLVED')}</div></section><div class="review-socket-group"><b>ABILITIES</b><div>${abilities.map(item=>reviewIcon(item,'Ability')).join('')||'<small>NO VERIFIED ABILITIES</small>'}</div></div><div class="review-socket-group"><b>ASPECTS</b><div>${aspects.map(item=>reviewIcon(item,'Aspect')).join('')||'<small>NO VERIFIED ASPECTS</small>'}</div></div><div class="review-socket-group"><b>FRAGMENTS</b><div>${fragments.map(item=>reviewIcon(item,'Fragment')).join('')||'<small>NO VERIFIED FRAGMENTS</small>'}</div></div>`;
-  const reviewSuperDiamond=byId('recommendedSubclassSummary')?.querySelector('[data-review-super]');setDiamondFromItem(reviewSuperDiamond,superItem,'Recommended Super unavailable');if(reviewSuperDiamond){reviewSuperDiamond.tabIndex=-1;reviewSuperDiamond.removeAttribute('role');}
+  const subclassHost=byId('recommendedSubclassSummary');
+  subclassHost.innerHTML=`<section class="subclass-super-shell equipped-subclass-stack"><div class="equipped-subclass" aria-label="Working Build subclass"><span class="equipped-subclass__crest"><img alt="" hidden></span><span class="equipped-subclass__copy"><strong></strong><small></small></span></div><section class="super-feature" aria-label="Working Build Super and compatible alternatives"><div class="super-feature__cluster"><div class="super-diamond super-diamond--equipped" data-super-slot="equipped"><span>◆</span></div>${[1,2,3,4,5].map(index=>`<div class="super-diamond super-diamond--alt super-diamond--alt${index}" data-super-slot="alternate-${index}"><span>◆</span></div>`).join('')}</div><div class="super-feature__name"></div></section></section><p class="review-super-baseline" hidden></p><div class="review-socket-group"><b>ABILITIES</b><div class="build-equipped-slots build-ability-slots">${abilities.map(tile).join('')||'<small>NO VERIFIED ABILITIES</small>'}</div></div><div class="review-socket-group"><b>ASPECTS</b><div class="build-equipped-slots build-aspect-slots">${aspects.map(tile).join('')||'<small>NO VERIFIED ASPECTS</small>'}</div></div><div class="review-socket-group"><b>FRAGMENTS</b><div class="build-equipped-slots build-fragment-slots">${fragments.map(tile).join('')||'<small>NO VERIFIED FRAGMENTS</small>'}</div></div>`;
+  const identity=subclassHost.querySelector('.equipped-subclass');
+  renderEquippedSubclass({root:identity,iconNode:identity.querySelector('img'),nameNode:identity.querySelector('strong'),metaNode:identity.querySelector('small'),subclass:build.subclass||'',subclassName:build.subclassName||'',characterClass:build.characterClass||'Guardian',icon:iconOf(subclass)||build.subclassIcon||''});
+  renderSuperFormation({host:subclassHost.querySelector('.super-feature__cluster'),nameNode:subclassHost.querySelector('.super-feature__name'),activeSuper:superItem,superOptions:build.subclassBuild?.superOptions||[],subclass:build.subclass||build.subclassName||'',subclassCatalog:resolvedSubclassOptions(build),characterClass:build.characterClass||'Guardian'});
+  // The review displays the Working Build without turning compatible choices into live edits.
+  subclassHost.querySelectorAll('[data-super-slot]').forEach(node=>{node.tabIndex=-1;node.removeAttribute('role');});
+  const original=readState()?.originalBuild,originalSuper=Object.hasOwn(original?.subclassBuild||{},'super')?original.subclassBuild.super:original?.super,baseline=subclassHost.querySelector('.review-super-baseline');
+  if(originalSuper&&String(originalSuper.hash??originalSuper.itemHash)!==String(superItem?.hash??superItem?.itemHash)){baseline.hidden=false;baseline.textContent=`Starting loadout Super: ${originalSuper.name||originalSuper.displayName||'verified Super'}. The recommendation above changes only the Working Build.`;}
   const intelligenceHost=byId('recommendedIntelligenceSummary'),decisions=build.forgeIntelligence?.decisions||[],matched=decisions.filter(row=>row.score>0).slice(0,4),reviewRows=matched.length?matched:decisions.slice(0,4),anchorDescription=String(anchorPerk?.description||'').trim(),anchorReason=anchorDescription?`EXOTIC ANCHOR · ${anchorName}${anchorPerk?.name?` · ${anchorPerk.name}`:''} contributes only its verified effect text to the ranking.`:`EXOTIC ANCHOR · ${anchorName} effect text is unresolved and was excluded from the evidence score.`,pendingRows=(build.forgeEvidence?.pending||[]).map(row=>`<li>${esc(row.message)}</li>`).join(''),superLimitations=(build.forgeIntelligence?.superSynergy?.limitations||[]).map(row=>`<li>${esc(row)}</li>`).join('');if(intelligenceHost)intelligenceHost.innerHTML=`<li>${esc(anchorReason)}</li>`+pendingRows+superLimitations+(reviewRows.map(row=>`<li>${esc(decisionReasonText(row))}</li>`).join('')||(build.forgeIntelligence?.limitations||[]).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>No additional intelligence claim is available for this snapshot.</li>');
   const armourHost=byId('recommendedArmourSummary')?.querySelector('.gear-columns');if(armourHost){armourHost.innerHTML=Array.from({length:5},(_,index)=>armourCard(index,build.armour?.[index])).join('');armourHost.querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));}
   const armourRule=byId('armourExoticRule');if(armourRule)armourRule.textContent=`DESTINY EQUIP RULE · ${exoticRule.exoticArmourCount}/1 EXOTIC ARMOUR`;
@@ -625,10 +632,22 @@ function renderRecommendedBuildReview(build={}){
   const weaponReviewHost=byId('recommendedWeaponsSummary');weaponReviewHost.innerHTML=Array.from({length:3},(_,index)=>{
     const item=build.weapons?.[index];
     if(!item)return '<article class="review-weapon is-unresolved"><b>WEAPON SLOT '+(index+1)+'</b><small>Item instance unavailable</small></article>';
-    const key=String(item.itemInstanceId||item.hash||item.bungieHash||''),row=item.weaponRollAdvice||recommendations.get(key),options=row?.best?.options||[],recommendedHashes=options.map(option=>Number(option?.hash)).filter(Number.isInteger),selection=weaponSelections.get(String(item.bucketHash)),decisionLabel=selection?.action==='KEEP'?'CURRENT BEST FIT':(selection?.action||'CURRENT BEST FIT'),model=item.weaponSemantics?.perkModel||item.weaponPerkModel||{},tier=Number(model.weaponTier??item.weaponSemantics?.gearTier??item.gearTier),rowCount=Math.max(1,Number(model.expectedRowCount||item.weaponPerkRowCount)||1),perkMatrix=weaponPerkMatrixMarkup(item,{recommendedHashes}),traitHierarchy=weaponTraitHierarchyMarkup(item,{compact:true});
+    const key=String(item.itemInstanceId||item.hash||item.bungieHash||''),row=item.weaponRollAdvice||recommendations.get(key),options=row?.best?.options||[],recommendedHashes=options.map(option=>Number(option?.hash)).filter(Number.isInteger),selection=weaponSelections.get(String(item.bucketHash)),decisionLabel=selection?.action==='KEEP'?'UNCHANGED':(selection?.action||'NOT COMPARED'),model=item.weaponSemantics?.perkModel||item.weaponPerkModel||{},tier=Number(model.weaponTier??item.weaponSemantics?.gearTier??item.gearTier),rowCount=Math.max(1,Number(model.expectedRowCount||item.weaponPerkRowCount)||1),perkMatrix=weaponPerkMatrixMarkup(item,{recommendedHashes}),traitHierarchy=weaponTraitHierarchyMarkup(item,{compact:true});
     return `<article class="review-weapon paradox-model-card" data-review-weapon="${index}" data-weapon-tier="${Number.isInteger(tier)?tier:''}"><div><span class="review-item-inspect" tabindex="0" title="${esc(item.name||`Weapon ${index+1}`)}">${itemTileMarkup(item,{kind:'weapon'})}</span><span><b>${esc(item.name||`Weapon ${index+1}`)}</b><small>${esc(item.itemTypeDisplayName||item.weaponType||'Owned weapon')}</small><em>${esc(decisionLabel)} · ${Number(selection?.candidateCount||0)} OWNED CANDIDATES</em></span></div><div class="review-weapon-tier-model"><b>${Number.isInteger(tier)?`TIER ${tier}`:'TIER UNRESOLVED'} · ${rowCount} PERK ROW${rowCount===1?'':'S'}</b>${perkMatrix||'<small>PERK MODEL UNAVAILABLE</small>'}${traitHierarchy}</div><p>${esc(selection?.reasons?.[0]?.label||'Exact owned instance retained; no stronger explicit synergy evidence was proven.')}</p></article>`;
   }).join('');
+  // Use the actual shared renderer's column count, including fallback perk models.
+  const perkColumns=[...weaponReviewHost.querySelectorAll('.weapon-perk-matrix')].map(node=>Number(node.style.getPropertyValue('--weapon-perk-columns'))||1);
+  weaponReviewHost.style.setProperty('--review-perk-columns',String(Math.max(1,...perkColumns)));
   weaponReviewHost.querySelectorAll('[data-review-weapon]').forEach(node=>{const item=build.weapons?.[Number(node.dataset.reviewWeapon)];bindParadoxItemInspect(node.querySelector('.review-item-inspect'),item,'weapon');});
+  const combinationsHost=byId('recommendedWeaponCombinations');
+  if(combinationsHost){
+    combinationsHost.innerHTML=weaponCombinationsMarkup(build.weaponSelectionRecommendation);
+    combinationsHost.querySelectorAll('[data-weapon-combination]').forEach(button=>button.addEventListener('click',()=>{
+      if(recommendationBusy||currentBuild()!==build)return;
+      const combination=build.weaponSelectionRecommendation?.combinations?.[Number(button.dataset.weaponCombination)];
+      if(combination){closeRecommendedBuild();void generateMaxLoadout({weaponInstanceIds:combination.weapons.map(item=>item.itemInstanceId)});}
+    }));
+  }
   const artifact=build.artifact,recommendation=build.artifactRecommendation,selected=new Set((build.artifactConfiguration?.selectedPerkHashes||recommendation?.selectedPerkHashes||[]).map(String)),perkByHash=new Map((artifact?.perks||[]).map(perk=>[String(perk?.hash??perk?.itemHash??perk?.bungieHash),perk])),sequence=(recommendation?.selectionSequence||[]).filter(row=>selected.has(String(row?.artifactPerk?.hash))).sort((a,b)=>Number(a.order)-Number(b.order)),perks=sequence.length?sequence.map(row=>perkByHash.get(String(row.artifactPerk?.hash))||row.artifactPerk):(artifact?.perks||[]).filter(perk=>selected.has(String(perk?.hash??perk?.itemHash??perk?.bungieHash))),selectedRecommendations=(recommendation?.recommendations||[]).filter(row=>row.selected||selected.has(String(row?.artifactPerk?.hash))),artifactReasons=[...new Set(selectedRecommendations.flatMap(row=>(row.reasons||[]).map(reason=>reason.label)).filter(Boolean))].slice(0,6),artifactBlockers=(recommendation?.blockers||[]).slice(0,3),artifactReady=recommendation?.selectionStatus==='ready';
   const artifactSynergyRows=(artifactReady?artifactReasons:artifactBlockers).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>No Artifact synergy claim is available from the supplied Bungie evidence.</li>';
   const artifactPlanLabel=recommendation?.planMode==='full-build-target'?'PARADOX FULL TARGET PLAN':'PARADOX BEST FIT';
@@ -658,7 +677,7 @@ const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIc
 function forgeComputationProjection(build={}){return Object.fromEntries(FORGE_COMPUTATION_FIELDS.filter(key=>Object.hasOwn(build,key)).map(key=>[key,build[key]]));}
 function mergeComposedRecommendation(build={},composed={}){const next={...build};for(const key of FORGE_COMPOSED_FIELDS)if(Object.hasOwn(composed,key))next[key]=composed[key];return next;}
 async function updateForgeGenerationPhase(message){const status=byId('forgeGenerationStatus');if(status)status.textContent=message;await new Promise(resolve=>setTimeout(resolve,0));}
-async function generateMaxLoadout(){
+async function generateMaxLoadout({weaponInstanceIds=[]}={}){
   if(recommendationBusy)return;
   const stagedBuild=currentBuild();
   if(stagedBuild?.forgeLoaderDecision&&!forgeActivityOption(stagedBuild.activityContext)){recommendationFailure='Select an activity context before generating.';renderRecommendationControls(stagedBuild);openForgeActivityDialog();return;}
@@ -680,7 +699,8 @@ async function generateMaxLoadout(){
     clearTimeout(preparationTimer);
     await prepareForgeBackground(build);
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
-    const prepared=await forgePreparation.get(requestedForgeVariant(build));
+    activePreparationKey=forgePreparationKey({...requestedForgeVariant(build),weaponInstanceIds});
+    const prepared=await forgePreparation.get({...requestedForgeVariant(build),weaponInstanceIds});
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
     let working={...build,...prepared.patch};
     // Recheck the prepared selection at the point of review; never execute live actions here.
@@ -718,7 +738,7 @@ function renderBuildSurface(){
   }
   const armButton=byId('armRangeTest');if(armButton)armButton.disabled=!String(build.characterId||'').trim();
   emitLoad('validation',LOAD_STAGES.VALIDATE,'Validating character-bound snapshot…');
-  const changes=diffBuilds(original,build),loadoutNumber=Number.isInteger(build.selectedLoadoutIndex)?build.selectedLoadoutIndex+1:null,sourceName=loadoutNumber?`BUNGIE LOADOUT ${loadoutNumber}`:'CURRENT EQUIPPED GUARDIAN';
+  const changes=diffBuilds(original,build),loadoutNumber=Number.isInteger(build.selectedLoadoutIndex)?build.selectedLoadoutIndex+1:null,sourceName=loadoutNumber?(build.loadoutSource==='currently-equipped'?`CURRENT EQUIPPED GUARDIAN · MATCHES SLOT ${loadoutNumber}`:`BUNGIE LOADOUT ${loadoutNumber}`):'CURRENT EQUIPPED GUARDIAN';
   byId('sourcePill').textContent=`BUILD SOURCE · ${sourceName}`;byId('sourceLabel').textContent=sourceName;byId('buildStateLabel').textContent='ORIGINAL SNAPSHOT CAPTURED';byId('buildStateDetail').textContent='Recommendations mutate a separate Working Build so the protected source can always be restored.';emitLoad('profile',LOAD_STAGES.PROFILE,'Resolving Guardian profile…');byId('sourceDetail').textContent=loadoutNumber?`Character ${build.characterClass||''} · Bungie slot ${loadoutNumber} · exact resolved loadout snapshot.`:`Character ${build.characterClass||''} · current equipped state captured at entry.`;byId('guardianHeading').textContent=String(build.characterClass||'Guardian').toUpperCase();
   const notice=byId('buildStateNotice'),restore=byId('restoreOriginal'),vaultCount=Array.isArray(build.vaultArmourSelection?.slots)?build.vaultArmourSelection.slots.length:0;if(notice)notice.innerHTML=changes.length?`<b>${changes.length} working change${changes.length===1?'':'s'}${vaultCount?` · ${vaultCount} from Vault`:''}.</b> Original build remains protected and can be restored.`:'<b>Baseline protected.</b> Working build currently matches the immutable original snapshot.';if(restore){restore.disabled=!changes.length;restore.title=changes.length?'Discard Working Build changes and restore the protected Original snapshot.':'Working Build already matches Original.';}
   try{

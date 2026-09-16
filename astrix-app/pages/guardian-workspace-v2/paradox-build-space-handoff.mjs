@@ -1,6 +1,6 @@
 import {clone,createBuildState} from './paradox-build-space/paradox-build-state.mjs';
 import {markGuardianFastReturn} from './guardian-session-cache.mjs?v=20260913-live-character-2';
-import {bindingOf,createHandoffEnvelope,validateHandoffEnvelope} from './paradox-build-binding.mjs?v=20260913-character-isolation-1';
+import {isEquippedSelection,isExplicitLoadoutSelection,bindingOf,createHandoffEnvelope,validateHandoffEnvelope} from './paradox-build-binding.mjs?v=20260916-equipped-source-1';
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';
@@ -18,13 +18,14 @@ function compactBuild(detail={}){
   const subclassBuild=detail.subclassBuild&&typeof detail.subclassBuild==='object'?detail.subclassBuild:{
     super:detail.super||null,superOptions:detail.superOptions||[],abilities:detail.abilities||[],abilityOptionsBySocket:detail.abilityOptionsBySocket||{},availableAbilities:detail.availableAbilities||[],aspects:detail.aspects||[],availableAspects:detail.availableAspects||[],fragments:detail.fragments||[],availableFragments:detail.availableFragments||[],transcendenceOptions:detail.transcendenceOptions||[],transcendenceSlots:detail.transcendenceSlots||[]
   };
-  const superItem=detail.super??subclassBuild.super??null;
+  const superItem=Object.hasOwn(subclassBuild,'super')?subclassBuild.super:detail.super??null;
   const abilities=Array.isArray(detail.abilities)?detail.abilities:(Array.isArray(subclassBuild.abilities)?subclassBuild.abilities:[]);
   const aspects=Array.isArray(detail.aspects)?detail.aspects:(Array.isArray(subclassBuild.aspects)?subclassBuild.aspects:[]);
   const fragments=Array.isArray(detail.fragments)?detail.fragments:(Array.isArray(subclassBuild.fragments)?subclassBuild.fragments:[]);
   return {
     version:1,capturedAt:new Date().toISOString(),
-    source:detail.selectedLoadoutIndex!=null?'bungie-loadout':(detail.source||'current-guardian'),
+    source:isExplicitLoadoutSelection(detail)?'bungie-loadout':(detail.source||'current-guardian'),
+    loadoutSource:detail.loadoutSource||'',
     characterId:String(detail.characterId||''),membershipId:String(detail.membershipId||detail.bungieMembershipId||detail.membership?.membershipId||''),membershipType:String(detail.membershipType||detail.membership?.membershipType||''),characterClass:detail.characterClass||'',displayName:detail.displayName||'Guardian',
     selectedLoadoutIndex:Number.isInteger(detail.selectedLoadoutIndex)?detail.selectedLoadoutIndex:null,
     subclass:detail.subclass||'',subclassName:detail.subclassName||'',subclassIcon:detail.subclassIcon||'',subclassCatalog:clone(detail.subclassCatalog||[]),
@@ -39,9 +40,9 @@ function rememberGuardian(detail={}){
   if(!characterId)return;
   latestGuardian=compactBuild({...detail,characterId});
   activeCharacterId=characterId;
-  const isExplicit=Number.isInteger(detail.selectedLoadoutIndex);
+  const isExplicit=isExplicitLoadoutSelection(detail);
   if(isExplicit){latestExplicitLoadout=clone(latestGuardian);safeStore(LAST_LOADOUT_KEY,latestExplicitLoadout,{durable:true});return;}
-  equippedByCharacter.set(characterId,latestGuardian);
+  if(isEquippedSelection(detail))equippedByCharacter.set(characterId,latestGuardian);
   latestExplicitLoadout=null;
 }
 function rememberExplicitLoadout(detail={}){const characterId=String(detail?.characterId||selectedCharacterId());if(!characterId||!Number.isInteger(detail.selectedLoadoutIndex))return;latestExplicitLoadout=compactBuild({...detail,characterId});activeCharacterId=characterId;safeStore(LAST_LOADOUT_KEY,latestExplicitLoadout,{durable:true});}
@@ -68,7 +69,7 @@ function bindSourceToCharacter(source,characterId=''){
 function resolveBuildSource(){
   const selectedId=selectedCharacterId();
   const candidates=[equippedByCharacter.get(selectedId)];
-  if(latestGuardian&&!Number.isInteger(latestGuardian.selectedLoadoutIndex))candidates.push(latestGuardian);
+  if(latestGuardian&&isEquippedSelection(latestGuardian))candidates.push(latestGuardian);
   for(const candidate of candidates){const bound=bindSourceToCharacter(candidate,selectedId);if(bound)return bound;}
   return null;
 }

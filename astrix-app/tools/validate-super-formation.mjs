@@ -82,7 +82,7 @@ assert.match(css,/\.super-feature \.super-feature__name\{[\s\S]*?font:700 var\(-
 assert.match(css,/flex:0 0 auto!important;/,'Equipped subclass/Super wrapper must not collapse inside the scroll rail');
 
 for(const [label,html,entryModule] of [
-  ['Main',mainHtml,/guardian-workspace-v2\.mjs\?v=20260914-fast-transfer-2/],
+  ['Main',mainHtml,/guardian-workspace-v2\.mjs\?v=20260916-equipped-source-1/],
   ['Build',buildHtml,/paradox-build-space\.mjs\?v=20260913-character-safe-2/]
 ]){
   assert.match(html,/guardian-super-formation\.css/,`${label} does not load the shared stylesheet`);
@@ -91,8 +91,8 @@ for(const [label,html,entryModule] of [
   assert.equal((html.match(/data-super-slot=/g)||[]).length,6,`${label} must expose six fixed Super slots`);
   assert.doesNotMatch(html,/class="subclass-rail"|id="subclassSummary"|data-subclass-option=/,`${label} still contains the removed subclass selector panel`);
 }
-assert.match(mainModule,/guardian-super-formation\.mjs\?v=20260829-subclass-identity-1/,'Main does not load the strict subclass identity mapper');
-assert.match(buildModule,/guardian-super-formation\.mjs\?v=20260829-subclass-identity-1/,'Build does not load the strict subclass identity mapper');
+assert.match(mainModule,/guardian-super-formation\.mjs\?v=20260916-equipped-source-1/,'Main does not load the strict subclass identity mapper');
+assert.match(buildModule,/guardian-super-formation\.mjs\?v=20260916-equipped-source-1/,'Build does not load the strict subclass identity mapper');
 
 assert.match(moduleSource,/function renderEquippedSubclass/,'Shared equipped subclass renderer is missing');
 assert.equal(LOADOUT_DEFINITIONS.icons?.[814121290]?.iconImagePath,'/common/destiny2_content/icons/8f8283c4f518dbd2239ba1f60b91d14f.png','Prismatic header icon hash 814121290 drifted');
@@ -211,10 +211,10 @@ const corruptedTitanVoid=mergeSubclassCatalog([{
 }],'titan').find(item=>item.element==='void');
 assert.equal(corruptedTitanVoid.hash,2842471112,'Titan Void accepted the stale Arc subclass hash');
 assert.equal(corruptedTitanVoid.icon,'/common/destiny2_content/icons/32b112a9460e6f0e2b9ee15dc53fe1c1.png','Titan Void accepted the stale Arc subclass icon');
-assert.equal(corruptedTitanVoid.subclassBuild.super.hash,4260353952,'Titan Void accepted Thundercrash as its equipped Super');
+assert.equal(corruptedTitanVoid.subclassBuild.super,null,'Reject a foreign Super without inventing another equipped choice.');
 assert.deepEqual(corruptedTitanVoid.subclassBuild.superOptions.map(item=>item.hash),expectedSuperHashes.titan.void,'Titan Void alternatives contain a cross-subclass Super');
 const correctedTitanVoid=resolveSuperFormationSlots({activeSuper:titanThundercrash,superOptions:[titanThundercrash],subclass:'void',subclassCatalog:[corruptedTitanVoid],characterClass:'titan'});
-assert.equal(correctedTitanVoid.activeSuper.hash,4260353952,'Arc-to-Void switch can still leave Thundercrash in the large and bottom diamonds');
+assert.equal(correctedTitanVoid.activeSuper,null,'An incompatible supplied Super must stay unresolved.');
 assert.ok(correctedTitanVoid.superOptions.every(item=>expectedSuperHashes.titan.void.includes(item.hash)),'Titan Void formation still contains an Arc Super');
 
 const everySuper=CLASS_NAMES.flatMap(characterClass=>ELEMENT_ORDER.flatMap(element=>superDefinitionsFor(characterClass,element)));
@@ -226,7 +226,7 @@ for(const characterClass of CLASS_NAMES){
     const compatible=mergeSuperOptions(characterClass,element,[foreign]);
     assert.deepEqual(compatible.map(item=>item.hash),expected,`${characterClass} ${element} accepted a foreign Super hash`);
     const mapped=resolveSuperFormationSlots({activeSuper:foreign,superOptions:[foreign],subclass:element,subclassCatalog,characterClass});
-    assert.ok(expected.includes(mapped.activeSuper.hash),`${characterClass} ${element} rendered a foreign Super as active`);
+    assert.equal(mapped.activeSuper,null,`${characterClass} ${element} must not replace a foreign Super with a catalogue default`);
     assert.ok(mapped.superOptions.every(item=>expected.includes(item.hash)),`${characterClass} ${element} rendered a foreign alternate Super`);
   }
 }

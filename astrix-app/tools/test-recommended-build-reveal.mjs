@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import {revealRecommendedBuild} from '../pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs';
+import {revealRecommendedBuild,weaponCombinationsMarkup} from '../pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs';
+import {comboRecommendation} from './validate-paradox-build-space.mjs';
 
 function harness(){
   const order=[];
@@ -51,3 +52,11 @@ function harness(){
 
 console.log('RECOMMENDED_BUILD_REVEAL=PASS');
 console.log('RECOMMENDED_BUILD_RENDER_FAILURE_VISIBLE=PASS');
+const combinationsHtml=weaponCombinationsMarkup(comboRecommendation);
+assert.match(combinationsHtml,/OWNED WEAPON COMBINATIONS/);
+assert.equal((combinationsHtml.match(/data-weapon-combination=/g)||[]).length,3,'All three alternatives must be selectable in the review.');
+for(const combo of comboRecommendation.combinations)for(const weapon of combo.weapons)assert.ok(combinationsHtml.includes(weapon.name),'Each alternative must name all three owned weapons.');
+assert.match(combinationsHtml,/recalculates Artifact picks, armour mods and perk advice/);
+assert.doesNotMatch(weaponCombinationsMarkup({...comboRecommendation,combinations:[{...comboRecommendation.combinations[0],weapons:[{name:'<script>bad</script>',icon:'javascript:alert(1)'}]}]}),/<script>|javascript:/,'Item evidence must be escaped and image URLs restricted.');
+assert.match(weaponCombinationsMarkup(),/No complete owned weapon alternatives/);
+console.log('OWNED_WEAPON_COMBINATIONS_REVIEW=PASS');

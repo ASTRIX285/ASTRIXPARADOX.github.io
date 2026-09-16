@@ -1,4 +1,4 @@
-import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260906-complete-build-transfer-1';
+import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260916-unique-artifact-picks-1';
 import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 
 const clone=value=>{
@@ -21,7 +21,7 @@ function artifactPerkCatalogue(artifact={},recommendation=null){
 function recommendationFingerprint(build={},currentSeasonNumber=null){
   const artifact=build.artifact||{};
   return JSON.stringify({
-    artifactPlanVersion:3,
+    artifactPlanVersion:4,
     characterId:String(build.characterId||''),
     currentSeasonNumber:integer(currentSeasonNumber),
     artifactHash:hashOf(artifact),

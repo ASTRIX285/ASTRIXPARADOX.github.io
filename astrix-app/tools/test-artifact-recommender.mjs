@@ -144,6 +144,23 @@ assert.equal(artifactTwoResult.artifactHash,2001,'the best Artifact must be sele
 assert.deepEqual(artifactTwoResult.selectedPerkHashes,[2101,2102]);
 assert.equal(artifactTwoResult.artifactCandidateCount,2);
 
+// Repeated catalogue entries must not fill two picks in the same bucket.
+const duplicateCatalogue={...artifactTwoCatalog[0],
+  perks:[artifactTwoCatalog[0].perks[0],artifactTwoCatalog[0].perks[0],artifactTwoCatalog[0].perks[1]],
+  selectionSlots:[{tierIndex:0,bucket:0,capacity:2,perkHashes:[2101,2102]}]
+};
+const duplicateResult=recommendArtifactPerks(forgeBuild,duplicateCatalogue,{currentSeasonNumber:99});
+assert.equal(duplicateResult.selectionStatus,'ready');
+assert.deepEqual([...duplicateResult.selectedPerkHashes].sort(),[2101,2102],'Duplicate entries must yield a different legal perk, not a repeated pick.');
+assert.deepEqual(duplicateResult.selectionSequence.map(row=>row.order),[1,2]);
+assert.equal(duplicateResult.totalScore,duplicateResult.selectionSequence.reduce((sum,row)=>sum+row.score,0));
+const shortCatalogue={...duplicateCatalogue,perks:duplicateCatalogue.perks.slice(0,2)};
+const shortResult=recommendArtifactPerks(forgeBuild,shortCatalogue,{currentSeasonNumber:99});
+assert.equal(shortResult.selectionStatus,'partial','Duplicate evidence cannot make an underfilled bucket ready.');
+assert.deepEqual(shortResult.selectedPerkHashes,[2101]);
+assert.ok(shortResult.blockers.length>0);
+console.log('ARTIFACT_DUPLICATE_BUCKET_PICKS=PASS');
+
 const aspectMentioningFragments={definition:{plug:{plugCategoryIdentifier:'v500.plugs.aspects'},displayProperties:{name:'Aspect Test',description:'Adds two Fragment slots.'}},name:'Aspect Test'};
 const fragmentMentioningAspects={definition:{plug:{plugCategoryIdentifier:'v500.plugs.fragments'},displayProperties:{name:'Fragment Test',description:'Improves equipped Aspects.'}},name:'Fragment Test'};
 assert.equal(subclassPlugComponent(aspectMentioningFragments),'aspect','Aspect category must win over descriptive Fragment text');
