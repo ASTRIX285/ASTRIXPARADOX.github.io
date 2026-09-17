@@ -8,7 +8,6 @@ import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnh
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
 import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
-import {mountWeaponDiagnostics} from './guardian-weapon-diagnostics.mjs?v=20260909-weapon-presentation-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
@@ -112,7 +111,6 @@ function weaponSupportIconsMarkup(item){
 }
 
 function renderWeapons(weapons=[]){
-  mountWeaponDiagnostics();
   const cards=[...document.querySelectorAll(".gear-weapons .weap-grid .weap")];
   cards.forEach((card,index)=>{
     const item=weapons[index];
