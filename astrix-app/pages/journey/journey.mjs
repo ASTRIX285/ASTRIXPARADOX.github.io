@@ -314,7 +314,7 @@ function bindActiveGuardian(payload){
 
   guardianClass.textContent=CLASS_NAMES[Number(selected.classType)]||'Guardian';
   bindGuardianStats(payload,selected);
-  const emblemArtwork=selected.emblemBackgroundPath||selected.emblemPath;
+  const emblemArtwork=selected.emblemPath||selected.emblemBackgroundPath;
   if(emblemArtwork){
     guardianCrest.src=new URL(emblemArtwork,BUNGIE_ORIGIN).toString();
     guardianCrest.hidden=false;
