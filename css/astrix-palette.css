@@ -1,0 +1,15 @@
+/* Approved ASTRIX chrome palette. Game artwork, element and rarity colours
+   remain data-owned; never map them to these interface tokens. */
+:root {
+  color-scheme: dark;
+  --apx-colour-canvas: #060606;
+  --apx-colour-panel: #111111;
+  --apx-colour-raised: #1a1a1a;
+  --apx-colour-text: #f4f6fa;
+  --apx-colour-secondary: #b8c0cc;
+  --apx-colour-action: #b22222;
+  --apx-colour-focus: #82c9ff;
+  --apx-colour-success: #62d6ad;
+  --apx-colour-border: rgb(184 192 204 / 24%);
+  --apx-colour-border-strong: rgb(184 192 204 / 42%);
+}

@@ -129,7 +129,7 @@ for(const [label,html] of appPages){
   assert.match(html,/\/css\/astrix-site-typography\.css/,label+' must load the shared Forge typography layer');
   assert.doesNotMatch(html,/fonts\.(?:googleapis|gstatic)\.com/,label+' must not load a competing interface font service');
   assert.match(styles.at(-1)||'',/astrix-desktop-density\.css(?:\?[^"']*)?$/,label+' must load the shared desktop density layer last');
-  assert.match(html,/astrix-destination-ribbon\.css\?v=(?:20260904-mobile-crosscheck-1|20260906-page-refresh-1)/,label+' must load the current contained mobile destination navigation');
+  assert.match(html,/astrix-destination-ribbon\.css\?v=(?:20260904-mobile-crosscheck-1|20260906-page-refresh-1|20260917-approved-palette-1)/,label+' must load the current contained mobile destination navigation');
   assert.match(html,/astrix-hero-cards\.css\?v=20260904-mobile-crosscheck-1/,label+' must load the current shared mobile hero cards');
 }
 
