@@ -16,12 +16,43 @@ let records=[];
 let selectedId='';
 
 function component(title,rows,{wide=false}={}){return `<section class="paradox-loadout-component${wide?' wide':''}"><h3>${esc(title)}</h3><ul>${rows.length?rows.map(row=>`<li>${esc(row)}</li>`).join(''):'<li>Not staged</li>'}</ul></section>`;}
+// Render the saved snapshot, never substitute the currently equipped Guardian.
+function savedIcon(item){
+  const value=item?.icon||item?.displayProperties?.icon||item?.definition?.displayProperties?.icon||'';
+  if(typeof value!=='string')return '';
+  if(value.startsWith('/')&&!value.startsWith('//'))return `https://www.bungie.net${value}`;
+  try{const url=new URL(value);return url.protocol==='https:'?url.href:'';}catch{return '';}
+}
+function savedTile(item,{label='',compact=false}={}){
+  if(!item)return '';
+  const name=item.name||item.displayName||item.displayProperties?.name||item.definition?.displayProperties?.name||`Unresolved item ${hashOf(item)||''}`,icon=savedIcon(item);
+  return `<figure class="saved-build-tile${compact?' is-compact':''}" title="${esc(name)}"><div class="saved-build-art">${icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:'<span class="saved-build-missing">No icon</span>'}</div><figcaption>${label?`<small>${esc(label)}</small>`:''}${esc(name)}</figcaption></figure>`;
+}
+function savedGroup(title,items,{compact=false}={}){
+  return `<section class="saved-build-group"><h3>${esc(title)}</h3><div class="saved-build-icons">${items.filter(Boolean).map(item=>savedTile(item,{compact})).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></section>`;
+}
+function savedEquipment(title,items){
+  return `<section class="saved-build-group"><h3>${esc(title)}</h3><div class="saved-build-equipment">${items.filter(Boolean).map(item=>{
+    const model=item.weaponSemantics?.perkModel||item.weaponPerkModel;
+    const perks=(model?.columns||[]).map(column=>(column.options||[]).find(option=>hashOf(option)===Number(column.selectedPlugHash))).filter(Boolean);
+    const mods=[...(item.generalMods||item.armourSemantics?.generalMods||[]),...(item.slotMods||item.armourSemantics?.slotMods||[])];
+    const sockets=title==='WEAPONS'?perks:mods.length?mods:(item.mods||[]).filter(Boolean);
+    return `<div class="saved-build-equipment-item">${savedTile(item)}${sockets.length?`<div class="saved-build-sockets" aria-label="${esc(nameOf(item))} ${title==='WEAPONS'?'selected perks':'mods'}">${sockets.map(mod=>savedTile(mod,{compact:true})).join('')}</div>`:''}</div>`;
+  }).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></section>`;
+}
+export function savedBuildOverview(build={}){
+  const sb=build.subclassBuild||{};
+  const perks=build.artifact?.perks||build.artifact?.activePerks||[];
+  const hashes=build.artifactConfiguration?.selectedPerkHashes;
+  const selected=Array.isArray(hashes)?hashes.map(hash=>perks.find(perk=>hashOf(perk)===Number(hash))||{hash,name:`Unresolved Artifact perk ${hash}`}):perks.filter(perk=>perk.isActive===true);
+  return `<div class="saved-build-overview"><div class="saved-build-subclass">${savedGroup('SUBCLASS & SUPER',[{name:build.subclassName||build.subclass||'Subclass',icon:build.subclassIcon},sb.super])}${savedGroup('ABILITIES',sb.abilities||[])}${savedGroup('ASPECTS',sb.aspects||[])}${savedGroup('FRAGMENTS',sb.fragments||[])}</div><div class="saved-build-gear">${savedEquipment('WEAPONS',build.weapons||[])}${savedEquipment('ARMOUR',build.armour||[])}</div>${savedGroup('ARTIFACT',[build.artifact,...selected],{compact:true})}</div>`;
+}
 function artifactRequiresInGameStep(build={}){const intended=[...new Set((build.artifactConfiguration?.selectedPerkHashes||[]).map(Number).filter(Number.isInteger))].sort((a,b)=>a-b),active=[...new Set((build.artifact?.activePerks||[]).filter(row=>row?.isActive!==false).map(hashOf).filter(Number.isInteger))].sort((a,b)=>a-b);return intended.length>0&&JSON.stringify(intended)!==JSON.stringify(active);}
 function renderDetail(){
   const host=byId('paradoxLoadoutDetail'),record=records.find(row=>row.id===selectedId)||records[0];if(!host)return;
   if(!record){host.innerHTML='<div class="paradox-loadout-empty"><span><b>NO PARADOX LOADOUT SELECTED</b>Save a named Working Build from Build Forge. Bungie’s 20 in-game slots remain separate.</span></div>';return;}
-  selectedId=record.id;const build=record.build||{},sb=build.subclassBuild||{},artifactHashes=build.artifactConfiguration?.selectedPerkHashes||[],manualSteps=(build.manualSocketChanges||[]).filter(change=>change?.remoteSupported===false).map(change=>`In game: set ${change.plugName||change.plugHash} on ${change.itemName||change.itemInstanceId}`).concat(artifactRequiresInGameStep(build)?'Artifact choices remain an in-game step.':[]);
-  host.innerHTML=`<div class="paradox-loadout-detail-head"><div><small>PARADOX SAVED BUILD · REVISION ${Number(record.revision||1)}</small><h2>${esc(record.name)}</h2></div><div class="paradox-loadout-detail-actions"><button type="button" data-saved-action="open">OPEN IN BUILD FORGE</button><button type="button" data-saved-action="download">DOWNLOAD JSON</button><button type="button" class="is-danger" data-saved-action="delete">DELETE</button></div></div><p class="paradox-loadout-description">${esc(record.description||'No description supplied.')}</p><div class="paradox-loadout-component-grid">${component('WEAPONS',(build.weapons||[]).filter(Boolean).map(item=>`${nameOf(item)} · ${item.itemInstanceId||'instance unavailable'}`))}${component('ARMOUR',(build.armour||[]).filter(Boolean).map(item=>`${nameOf(item)} · ${item.itemInstanceId||'instance unavailable'}`))}${component('SUBCLASS & ABILITIES',[build.subclassName||build.subclass||'Subclass',sb.super&&`Super: ${nameOf(sb.super)}`,...(sb.abilities||[]).map(item=>nameOf(item)),...(sb.aspects||[]).map(item=>`Aspect: ${nameOf(item)}`),...(sb.fragments||[]).map(item=>`Fragment: ${nameOf(item)}`)].filter(Boolean),{wide:true})}${component('ARTIFACT',[build.artifact?.name||'Artifact',`${artifactHashes.length} intended perk${artifactHashes.length===1?'':'s'}`].filter(Boolean))}${component('PROVENANCE',[`${record.summary?.manualEditCount||0} manual edit${record.summary?.manualEditCount===1?'':'s'}`,record.source?.bungieLoadoutIndex==null?'Current equipped source':`Copied from Bungie slot ${record.source.bungieLoadoutIndex+1}`,...manualSteps])}</div><div class="paradox-loadout-binding">GUARDIAN ${esc(record.binding.characterId)} · MEMBERSHIP ${esc(record.binding.membershipType)}:${esc(record.binding.membershipId)} · UPDATED ${esc(new Date(record.updatedAt).toLocaleString())}</div>`;
+  selectedId=record.id;const build=record.build||{},manualSteps=(build.manualSocketChanges||[]).filter(change=>change?.remoteSupported===false).map(change=>`In game: set ${change.plugName||change.plugHash} on ${change.itemName||change.itemInstanceId}`).concat(artifactRequiresInGameStep(build)?'Artifact choices remain an in-game step.':[]);
+  host.innerHTML=`<div class="paradox-loadout-detail-head"><div><small>PARADOX SAVED BUILD · REVISION ${Number(record.revision||1)}</small><h2>${esc(record.name)}</h2></div><div class="paradox-loadout-detail-actions"><button type="button" data-saved-action="open">OPEN IN BUILD FORGE</button><button type="button" data-saved-action="download">DOWNLOAD JSON</button><button type="button" class="is-danger" data-saved-action="delete">DELETE</button></div></div><p class="paradox-loadout-description">${esc(record.description||'No description supplied.')}</p><div class="paradox-loadout-component-grid">${savedBuildOverview(build)}${component('PROVENANCE',[`${record.summary?.manualEditCount||0} manual edit${record.summary?.manualEditCount===1?'':'s'}`,record.source?.bungieLoadoutIndex==null?'Current equipped source':`Copied from Bungie slot ${record.source.bungieLoadoutIndex+1}`,...manualSteps])}</div><div class="paradox-loadout-binding">GUARDIAN ${esc(record.binding.characterId)} · MEMBERSHIP ${esc(record.binding.membershipType)}:${esc(record.binding.membershipId)} · UPDATED ${esc(new Date(record.updatedAt).toLocaleString())}</div>`;
 }
 function render(){
   const list=byId('paradoxLoadoutList'),count=byId('paradoxLoadoutCount');if(count)count.textContent=`${records.length} SAVED`;

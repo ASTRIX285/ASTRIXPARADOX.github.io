@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
 import {createLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {createLiveTransferPreflight} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
 import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
@@ -614,3 +615,19 @@ console.log('PARADOX_NAMED_LOADOUT=PASS');
 console.log('GUARDED_LIVE_APPLY=PASS');
 console.log('VAULT_LIVE_TRANSFER=PASS');
 console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');
+
+// Exercise the saved overview independently of auth, DOM boot and the live Guardian.
+const overviewSource=readFileSync(new URL('../pages/loadout/paradox-loadouts.mjs',import.meta.url),'utf8');
+const overviewHelpers=overviewSource.slice(overviewSource.indexOf('const esc='),overviewSource.indexOf('function artifactRequiresInGameStep')).replace('export function savedBuildOverview','function savedBuildOverview');
+const overviewContext={URL};
+runInNewContext(overviewHelpers+';this.renderOverview=savedBuildOverview;',overviewContext);
+const overviewBuild={subclassName:'Saved Titan',subclassIcon:'/subclass.png',subclassBuild:{super:{name:'Saved Super',icon:'/super.png'},abilities:[{name:'Saved ability',icon:'/ability.png'}],aspects:[{name:'Saved aspect',icon:'/aspect.png'}],fragments:[{name:'Saved fragment',icon:'/fragment.png'}]},weapons:[{name:'Saved weapon',icon:'/weapon.png',weaponPerkModel:{columns:[{selectedPlugHash:2,options:[{hash:1,name:'Unselected perk'},{hash:2,name:'Selected perk',icon:'/perk.png'}]}]}}],armour:[{name:'Saved armour',icon:'/armour.png',generalMods:[{name:'Saved mod',icon:'/mod.png'}]}],artifact:{name:'Saved Artifact',perks:[{hash:7,name:'Selected Artifact',icon:'/artifact.png'},{hash:8,name:'Unselected Artifact'}]},artifactConfiguration:{selectedPerkHashes:[7,9]}};
+const unchangedOverview=JSON.stringify(overviewBuild),overviewMarkup=overviewContext.renderOverview(overviewBuild);
+for(const label of ['Saved Super','Saved ability','Saved aspect','Saved fragment','Saved weapon','Saved armour','Saved mod','Selected perk','Selected Artifact','Unresolved Artifact perk 9'])assert.ok(overviewMarkup.includes(label),label+' must be visible from the saved snapshot');
+assert.doesNotMatch(overviewMarkup,/Unselected perk|Unselected Artifact/);
+assert.match(overviewMarkup,/https:\/\/www.bungie.net\/super.png/);
+assert.equal(JSON.stringify(overviewBuild),unchangedOverview,'Rendering must never alter the saved build');
+const unsafeOverview=overviewContext.renderOverview({weapons:[{name:'<script>bad</script>',icon:'javascript:alert(1)'}]});
+assert.doesNotMatch(unsafeOverview,/<script>|javascript:/);
+assert.match(unsafeOverview,/No icon/);
+console.log('SAVED_BUILD_OVERVIEW=PASS selected gear, sockets, subclass, Artifact, escaping and immutable snapshots');

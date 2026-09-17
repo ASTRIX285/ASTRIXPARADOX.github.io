@@ -43,7 +43,8 @@ export function bindWeaponSelection(root,item){
   footer.innerHTML='<p role="status" aria-live="polite"></p><button type="button">APPLY</button>';
   root.append(footer);
   const button=footer.querySelector('button'),status=footer.querySelector('p');
-  status.hidden=true;root.append(status,footer);
+  status.hidden=true;status.className='weapon-apply-status';root.append(status,footer);
+  function setStatus(message){status.textContent=message;status.hidden=false;button.title=message;}
   function update(){
     root.querySelectorAll('.weapon-perk-cell[data-socket-index]').forEach(node=>{
       const index=Number(node.dataset.socketIndex),column=columns.find(value=>Number(value.socketIndex)===index);
@@ -74,18 +75,18 @@ export function bindWeaponSelection(root,item){
     else{
       let availability=weaponPerkAvailability(item,index,option,eligibilityPayload);
       if(availability==='unknown'){
-        status.textContent='Checking this owned perk with Bungie…';
+        setStatus('Checking this owned perk with Bungie…');
         try{eligibilityPayload=await requestFreshProfile();}
-        catch{status.textContent='Perk availability could not be verified. Try selecting it again.';return;}
+        catch{setStatus('Perk availability could not be verified. Try selecting it again.');return;}
         if(disposed||busy||request!==selectionRequest)return;
         const owned=inventoryLocations(eligibilityPayload).locations.get(String(item.itemInstanceId));
         if(!owned||owned.itemHash!==Number(item.itemHash??item.hash))return;
         availability=weaponPerkAvailability(item,index,option,eligibilityPayload);
       }
-      if(availability!=='allowed'){status.textContent='Bungie does not currently allow this perk in that weapon socket.';return;}
+      if(availability!=='allowed'){setStatus('Bungie does not currently allow this perk in that weapon socket.');return;}
       choices[index]=option;
     }
-    status.textContent='Perk preview. APPLY changes this weapon in game.';update();
+    setStatus('Perk preview. APPLY changes this weapon in game.');update();
   };
   root.addEventListener('forge:perk-activate',select);
   button.addEventListener('click',async event=>{
@@ -93,16 +94,16 @@ export function bindWeaponSelection(root,item){
     try{
       const session=globalThis.FORGE_BUNGIE_SESSION;
       const plan=weaponPerkPlan(item,choices,{session,payload:eligibilityPayload||globalThis.FORGE_PAGE_PAYLOAD});
-      status.textContent='Checking this weapon with Bungie…';
+      setStatus('Checking this weapon with Bungie…');
       const staged=await stageLiveTransferPreflight(plan,{session});
-      const result=await executeLiveTransferPlan(confirmLiveTransferPlan(staged),{session,onProgress:row=>{status.textContent=row.label;}});
+      const result=await executeLiveTransferPlan(confirmLiveTransferPlan(staged),{session,onProgress:row=>{setStatus(row.label);}});
       if(result.status!=='applied')throw new Error('Bungie did not confirm every selected perk. Refreshing the weapon to show its actual state.');
       confirmed=true;update();
-      status.textContent='Applied and verified with Bungie.';
+      setStatus('Applied and verified with Bungie.');
       button.hidden=true;
       root.querySelectorAll('[data-perk-selectable]').forEach(node=>{node.dataset.perkSelectable='false';});
       // Keep this snapshot immutable. The normal profile refresh supplies the new roll.
-    }catch(error){status.textContent=error.message;button.disabled=false;busy=false;}
+    }catch(error){setStatus(error.message);button.disabled=false;busy=false;}
     finally{document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'weapon-perks'}}));}
   });
   root._weaponSelectionDispose=()=>{disposed=true;root.removeEventListener('forge:perk-activate',select);status.remove?.();footer.remove();};
