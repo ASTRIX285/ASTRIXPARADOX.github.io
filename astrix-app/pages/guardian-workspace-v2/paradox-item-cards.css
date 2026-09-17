@@ -1774,7 +1774,21 @@ body .gear-weapons .weap{
 .paradox-item-card--weapon .weapon-stat i{position:relative}
 .paradox-item-card--weapon .weapon-stat i b.weapon-stat-base{background:#fff}
 .paradox-item-card--weapon .weapon-stat i b.weapon-stat-bonus{position:absolute;top:0;background:#e6bf48}
-.weapon-apply-footer{grid-area:apply;padding-top:8px;color:#fff;font:500 14px/1.4 var(--apx-font-copy)}
+/* Status is a sibling of the footer so blocked selections remain readable
+   even while Apply is hidden. Both span the actual card grid, not a named
+   area that creates implicit tracks on compact weapon cards. */
+:has(>.weapon-apply-footer)>p[role="status"]{
+  grid-column:1/-1;
+  min-width:0;
+  width:auto;
+  max-width:none;
+  margin:8px 0 0;
+  white-space:normal;
+  overflow-wrap:break-word;
+  color:var(--apx-colour-secondary,#b8c0cc);
+  font:400 14px/1.4 var(--apx-font-copy);
+}
+.weapon-apply-footer{grid-column:1/-1;min-width:0;padding-top:8px;color:#fff;font:500 14px/1.4 var(--apx-font-copy)}
 .weapon-apply-footer[hidden]{display:none}
 .weapon-apply-footer button{min-height:44px;padding:8px 24px;background:#790c18;border:1px solid #d9b84f;color:#fff;font:700 14px/1.3 var(--apx-font-copy);cursor:pointer}
 .weapon-apply-footer button:disabled{opacity:.6;cursor:wait}
