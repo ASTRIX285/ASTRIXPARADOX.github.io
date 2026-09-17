@@ -344,3 +344,34 @@ body.apx-destination-page .apx-page-shell{
 @media (max-width:720px){
   :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,76px)}
 }
+
+/* Weapon and armour artwork only: Character's 50px baseline on every page.
+   Power-strip cards retain 13px below the square artwork. Do not use this
+   token for mods, perks, subclass abilities, Supers or navigation imagery. */
+:root{
+  --apx-equipment-icon-size:50px;
+  --apx-inventory-size:var(--apx-equipment-icon-size)!important;
+  --apx-icon-gear-art-width:var(--apx-equipment-icon-size)!important;
+  --apx-icon-gear-art-height:calc(var(--apx-equipment-icon-size) + 13px)!important;
+  --apx-tile-label-size:10px;
+  --apx-tile-badge-height:14px;
+  --apx-tile-height:calc(var(--apx-equipment-icon-size) + 13px);
+  --apx-tile-border-width:0px;
+  --apx-tile-inset-x:0px;
+  --apx-tile-content-width:100%;
+  --apx-tile-art-top:0px;
+  --apx-tile-art-height:var(--apx-equipment-icon-size)!important;
+  --apx-tile-footer-top:calc(var(--apx-equipment-icon-size) - 1px);
+  --apx-tile-footer-padding:0 2px;
+}
+body .character-inventory-workspace{--character-item-size:var(--apx-equipment-icon-size)}
+body .forge-exotic-grid{grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size))}
+body :is(.forge-exotic,.forge-matrix-exotic){
+  width:var(--apx-equipment-icon-size)!important;
+  height:var(--apx-equipment-icon-size)!important;
+}
+body .saved-build-equipment-item>.saved-build-tile{--saved-icon-size:var(--apx-equipment-icon-size)}
+body :is(.vault-candidate-item img,.vault-selection-slot>img){
+  width:var(--apx-equipment-icon-size);
+  height:var(--apx-equipment-icon-size);
+}
