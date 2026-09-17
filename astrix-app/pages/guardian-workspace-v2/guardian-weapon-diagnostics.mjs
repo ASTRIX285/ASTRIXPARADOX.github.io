@@ -123,4 +123,4 @@ export function mountWeaponDiagnostics(root=document.querySelector('.gear-weapon
   button.setAttribute('aria-describedby',status.id);bar.append(button,status);
   installWeaponDiagnostics(button,status);
 }
-if(typeof document!=='undefined')mountWeaponDiagnostics();
+// Engineering diagnostics are explicitly invoked; importing must not add page UI.
