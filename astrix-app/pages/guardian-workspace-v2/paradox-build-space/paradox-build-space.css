@@ -249,8 +249,8 @@ html,body{
 .design-canvas .weapon-design-section,
 .design-canvas .recommendation-panel{container-type:inline-size}
 .design-canvas .armour-design-section{
-  --build-armour-mod:var(--guardian-square);
-  --build-armour-gap:var(--guardian-square-gap);
+  --build-armour-mod:var(--apx-icon-socket-compact);
+  --build-armour-gap:8px;
   --build-armour-art-width:var(--apx-icon-gear-art-width);
   --build-armour-art-height:var(--apx-icon-gear-art-height);
   --build-armour-rail-icon:var(--apx-icon-season);
@@ -259,7 +259,7 @@ html,body{
   --build-armour-intrinsic:var(--apx-icon-intrinsic);
   --build-armour-appearance:var(--apx-icon-appearance)
 }
-.design-canvas .armour-design-section .gear-columns{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:clamp(7px,.55cqi,16px)}
+.design-canvas .armour-design-section .gear-columns{grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))!important;gap:12px}
 .design-canvas .armour-design-section .gear-slot{width:auto!important;min-width:0!important;max-width:none!important;padding:clamp(7px,.65cqi,16px)}
 .design-canvas .armour-design-section .gear-arm-row{min-height:var(--build-armour-art-height)}
 .design-canvas .armour-design-section .gear-arm-anchor .arm{width:var(--build-armour-art-width)!important;height:var(--build-armour-art-height)!important;aspect-ratio:100/122!important}
@@ -277,7 +277,7 @@ html,body{
 .design-canvas .armour-design-section .armour-set-bonus-icon,
 .design-canvas .armour-design-section .armour-set-threshold{width:var(--build-armour-bonus-icon);height:var(--build-armour-bonus-icon)}
 .design-canvas .armour-design-section .armour-exotic-overlay img{width:82%!important;height:82%!important}
-.design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;width:100%!important}
+.design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))!important;gap:12px!important;width:100%!important}
 .design-canvas .weapon-design-section .gear-weapons .weap{width:100%!important;max-width:none!important;min-height:calc(var(--gear-weapon-art) + 24px)!important}
 .design-canvas .weapon-design-section .gear-weapons .weap .art{width:var(--gear-weapon-art)!important;height:var(--apx-icon-gear-art-height)!important;aspect-ratio:100/122!important}
 .design-canvas .weapon-design-section .gear-weapons .weap .cap{min-height:0!important}
@@ -333,7 +333,7 @@ html,body{
 .design-canvas .loadouts-design-section,
 .design-canvas .armour-design-section,
 .design-canvas .weapon-design-section,
-.design-canvas .recommendation-panel{margin:0 0 14px;padding:14px;border:1px solid rgba(180,132,45,.28);border-radius:12px;background:linear-gradient(180deg,rgba(18,15,23,.88),rgba(9,8,12,.9))}
+.design-canvas .recommendation-panel{margin:0 0 14px;padding:14px;border:1px solid var(--apx-colour-border);border-radius:12px;background:var(--apx-colour-panel)}
 .section-guidance{margin:-3px 0 12px;color:#96949c;font-size:10px;line-height:1.5}
 .forge-decision-card{border-color:rgba(111,227,182,.28);background:linear-gradient(145deg,rgba(21,75,61,.12),rgba(255,255,255,.018))}
 .forge-decision-card ul{margin:10px 0 0}
@@ -466,7 +466,7 @@ body.recommended-build-open{overflow:hidden!important}
 
 @media(max-width:1760px){.build-space{grid-template-columns:var(--apx-workspace-compact-columns,392px minmax(0,1fr))}.build-right-rail{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start}.build-space>.build-rail,.build-space>.design-canvas,.build-space>.build-right-rail,.build-right-rail>.intelligence{height:auto}.build-right-rail>.intelligence{grid-column:1/-1}}
 @media(max-width:1100px){.recommended-build-content{grid-template-columns:1fr}}
-@media(max-width:1100px){.build-space{grid-template-columns:1fr}.build-rail,.design-canvas,.build-right-rail{grid-column:1}.build-right-rail{grid-template-columns:1fr}.design-canvas .armour-design-section{overflow-x:auto}.design-canvas .armour-design-section .gear-columns{min-width:900px}.design-canvas .recommendation-panel .element-recommendation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.recommended-build-safety{align-items:stretch;flex-direction:column}.recommended-build-actions{align-items:end}.recommended-build-actions>div{grid-template-columns:minmax(0,1fr) auto}.recommended-build-actions small{grid-column:1/-1;justify-self:start}.recommended-build-actions small{text-align:left}.recommended-build-actions .primary{width:100%}.review-mod-items{grid-template-columns:repeat(2,minmax(0,1fr))}.review-mod-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1100px){.build-space{grid-template-columns:1fr}.build-rail,.design-canvas,.build-right-rail{grid-column:1}.build-right-rail{grid-template-columns:1fr}.design-canvas .armour-design-section{min-width:0}.design-canvas .armour-design-section .gear-columns{min-width:0}.design-canvas .recommendation-panel .element-recommendation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.recommended-build-safety{align-items:stretch;flex-direction:column}.recommended-build-actions{align-items:end}.recommended-build-actions>div{grid-template-columns:minmax(0,1fr) auto}.recommended-build-actions small{grid-column:1/-1;justify-self:start}.recommended-build-actions small{text-align:left}.recommended-build-actions .primary{width:100%}.review-mod-items{grid-template-columns:repeat(2,minmax(0,1fr))}.review-mod-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.recommended-build-actions{grid-template-columns:1fr 1fr auto;gap:8px;padding:8px}.recommended-build-actions>div{display:contents}.recommended-build-actions small{grid-column:1/-1;grid-row:1;max-width:none}.recommended-build-actions>button,.recommended-build-actions .primary,.recommended-build-actions #applyBuild{grid-row:2;min-width:0;padding:10px 8px}.recommended-build-actions .primary{font-size:var(--apx-type-meta)}.validation-panel .test-configuration{grid-template-columns:1fr}.validation-panel .destination-control{grid-column:1}.validation-panel .test-flow{grid-template-columns:1fr}.design-canvas .recommendation-panel .element-recommendation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.recommendation-objectives{grid-template-columns:repeat(2,minmax(0,1fr))}.recommendation-objectives>span{grid-column:1/-1}.recommended-build-content{padding:8px}.recommended-build-header,.recommended-build-safety{padding:10px}.recommended-build-dialog{width:calc(100vw - 16px);height:calc(100dvh - 16px)}.recommended-armour-summary .gear-columns{grid-template-columns:1fr}.review-mod-items,.review-mod-stats{grid-template-columns:1fr}.review-mod-summary>div:first-child{display:grid}.recommended-build-reveal{padding:8px}.design-canvas .gear-weapons .weap-grid{grid-template-columns:1fr!important}.design-canvas .gear-weapons .weap{min-height:0!important}}
 
 /* Manual editor and live-action controls are overlays/actions only. They do not

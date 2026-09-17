@@ -287,14 +287,14 @@ assert.match(css,/\.build-space>\.build-rail,\.build-space>\.design-canvas,\.bui
 assert.match(css,/@media\(max-width:1760px\)\{\.build-space\{grid-template-columns:var\(--apx-workspace-compact-columns,392px minmax\(0,1fr\)\)\}/,'Build Forge must share Journey\'s compact workspace before the right rail moves below.');
 assert.match(css,/\.build-forge-page \.forge-platform-shell\{grid-template-columns:0 minmax\(0,1fr\) 0!important\}/,'Build Forge must reclaim the obsolete external media rails for the working columns.');
 assert.match(css,/\.build-rail\{container-type:inline-size;--build-rail-icon:clamp\(40px,21cqi,128px\)/,'Build left-rail icons must remain proportional to their column without taking ownership of the shared Character token.');
-assert.match(css,/\.armour-design-section \.gear-columns\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'All five armour cards must remain on one row.');
+assert.match(css,/\.armour-design-section \.gear-columns\{grid-template-columns:repeat\(auto-fit,minmax\(min\(180px,100%\),1fr\)\)!important/,'Armour cards must wrap instead of forcing five cards into a narrow column.');
 assert.match(css,/--build-armour-art-width:var\(--apx-icon-gear-art-width\);[\s\S]*?--build-armour-art-height:var\(--apx-icon-gear-art-height\)/,'Build Armour art must consume the shared portrait gear-art tokens.');
-assert.match(css,/--build-armour-mod:var\(--guardian-square\)/,'Build Armour mods must consume the shared Character socket size.');
+assert.match(css,/--build-armour-mod:var\(--apx-icon-socket-compact\)/,'Build Armour mods must consume the shared compact equipment socket size.');
 assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-gear-art-width\);[\s\S]*?--gear-weapon-socket:var\(--apx-icon-weapon-socket\)/,'Character and Build Forge must consume the shared portrait gear-art and socket tokens.');
 const itemCardCss=await readFile(new URL('paradox-item-cards.css',root),'utf8');
 assert.match(itemCardCss,/body \.gear-weapons,body \.recommended-weapons-summary\{--gear-weapon-art:var\(--paradox-equipment-width\)/,'Recommended weapon cards must consume the canonical shared equipment-art owner');
 assert.doesNotMatch(css,/--gear-weapon-art:/,'Build must not reintroduce a competing review thumbnail size');
-assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'Build Forge must preserve the shared three-card weapon row.');
+assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{grid-template-columns:repeat\(auto-fit,minmax\(min\(300px,100%\),1fr\)\)!important/,'Build Forge must wrap weapon cards using the shared minimum readable width.');
 assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
 
 const elementButtons=[...html.matchAll(/data-recommendation-element="([^"]+)"/g)].map(match=>match[1]);
