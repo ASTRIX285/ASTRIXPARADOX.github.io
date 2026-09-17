@@ -39,7 +39,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260903-command-header-1"'),'Journey must load the shared command-header cleanup without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1"'),'Journey must load the backend workspace preload runtime');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-1&amp;transport=20260911-compact-plugs-1"'),'Journey must load the backend workspace preload runtime');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -47,7 +47,7 @@ assert.match(heroModule,/function heroProfilePage\(\)[\s\S]*?'journey'[\s\S]*?lo
 assert.match(journey,/waitWithin\(globalThis\.FORGE_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS\)/,'Journey must reuse the hero-card profile instead of issuing a second blocking profile request');
 assert.doesNotMatch(journey,/import\('\.\.\/guardian-workspace-v2\/guardian-bungie-profile\.mjs/,'Journey must not import the heavyweight Character profile resolver');
 assert.doesNotMatch(journey,/guardianManifest\.hydratePayload\(payload\)/,'Journey refresh must not hydrate every vault and equipment definition before showing Triumph data');
-assert.match(journey,/profilePresentationNodes\?\.data\?\.nodes&&payload\?\.profile\?\.profileRecords\?\.data/,'Journey must accept verified Triumph components without requiring optional Metrics and Craftables data');
+assert.doesNotMatch(journey,/hasJourneyRecordComponents/,'Journey entry deliberately uses the shared renderable gate; missing records must not blank available characters');
 assert.match(journey,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile and noncritical UI waits');
 assert.doesNotMatch(journey,/JOURNEY_LOADER_READY_WAIT_MS|setTimeout\(\(\)=>\{globalThis\.ForgeLoader\.done/,'Journey must never dismiss its portal because an arbitrary final timer expired');
 assert.match(journey,/function showSignedOut\(\)\{[\s\S]*?ForgeLoader\.authResolved\(\);[\s\S]*?finishJourneyLoader\(signedOut\)/,'Disconnected Journey must reveal its own Bungie connection screen instead of trapping the portal at 12 percent');

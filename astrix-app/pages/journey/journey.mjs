@@ -2213,23 +2213,14 @@ if(heroCards){
   new MutationObserver(syncSelectedCharacterFromCards).observe(heroCards,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 }
 
-function hasJourneyRecordComponents(payload){
-  return payload?.profile?.profilePresentationNodes?.data?.nodes&&payload?.profile?.profileRecords?.data;
-}
-
 async function readVerifiedProfile(session){
   const sharedProfile=await waitWithin(globalThis.FORGE_HERO_PROFILE_PROMISE,JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS);
-  try{
-    const resolved=await loadPreparedPagePayload(session,'journey',{sharedPayload:sharedProfile});
-    if(resolved?.profile?.characters?.data&&hasJourneyRecordComponents(resolved)){
-      guardianManifest.prime(resolved);
-      return resolved;
-    }
-    return null;
-  }catch(error){
-    console.info('[Forge Journey] verified Bungie profile unavailable',error);
-    return null;
-  }
+  // The shared client enforces the renderable contract. Missing record sections
+  // must not discard an available Guardian roster or blank the whole dashboard.
+  // Propagate request errors so the existing unavailable state shows the cause.
+  const resolved=await loadPreparedPagePayload(session,'journey',{sharedPayload:sharedProfile});
+  guardianManifest.prime(resolved);
+  return resolved;
 }
 
 async function fetchJourneyProfileRefresh(){
