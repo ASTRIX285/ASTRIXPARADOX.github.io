@@ -7,22 +7,23 @@
                           Destiny map. Contextual only.
    ===================================================================== */
 :root{
-  --text:#f2ece2; --muted:#b3a48f; --dim:#7d7160;
-  --gold:#e0a94e; --gold-soft:rgba(224,169,78,.14);   /* hero accent, one per area */
-  --crimson:#c0433f; --crimson-hover:#cf4b46;          /* single primary action */
-  --ok:#7ec26a; --warn:#d9a24a; --danger:#cf5a54;      /* small status only */
-  --surface:rgba(24,19,15,.58); --surface-2:rgba(38,29,21,.55);
-  --border:rgba(226,190,130,.12); --border-strong:rgba(226,190,130,.22);
+  --text:var(--apx-colour-text); --muted:var(--apx-colour-secondary); --dim:var(--apx-colour-secondary);
+  /* Legacy chrome aliases; item rarity colours are not defined here. */
+  --gold:var(--apx-colour-focus); --gold-soft:rgb(130 201 255 / 14%);
+  --crimson:var(--apx-colour-action); --crimson-hover:#cf4b46;
+  --ok:var(--apx-colour-success); --warn:#f0c060; --danger:#ff8585;
+  --surface:var(--apx-colour-panel); --surface-2:var(--apx-colour-raised);
+  --border:var(--apx-colour-border); --border-strong:var(--apx-colour-border-strong);
   --blur:blur(14px); --radius:8px; --shadow:0 18px 44px rgba(0,0,0,.34);
   --font:bahnschrift,system-ui,sans-serif; --brand:bahnschrift-semicondensed,sans-serif;
 }
 
-/* COHERENT SHELL — calm warm-neutral dark. The chassis for every tool/page. */
+/* COHERENT SHELL — neutral black and charcoal. The chassis for every tool/page. */
 .scene{position:fixed;inset:0;z-index:-2;background-size:cover;background-position:center;
   background:
-    radial-gradient(1200px 820px at 70% 6%, rgba(120,74,40,.20), transparent 60%),
-    radial-gradient(1000px 720px at 8% 100%, rgba(30,40,58,.15), transparent 56%),
-    linear-gradient(160deg,#17120e 0%,#0d0a08 76%);}
+    radial-gradient(1200px 820px at 70% 6%, rgb(184 192 204 / 6%), transparent 60%),
+    radial-gradient(1000px 720px at 8% 100%, rgb(130 201 255 / 4%), transparent 56%),
+    linear-gradient(160deg,var(--apx-colour-panel) 0%,var(--apx-colour-canvas) 76%);}
 .scene::after{content:"";position:absolute;inset:0;
   background:radial-gradient(130% 130% at 50% 34%,transparent 58%,rgba(0,0,0,.5));}
 
@@ -30,10 +31,10 @@
 .scene.immersive{
   background:
     var(--loc-img,none),
-    radial-gradient(1300px 860px at 72% 12%, rgba(178,102,46,.5), transparent 56%),
-    radial-gradient(1100px 720px at 8% 96%, rgba(40,52,78,.32), transparent 54%),
-    radial-gradient(820px 620px at 96% 92%, rgba(150,78,42,.28), transparent 58%),
-    linear-gradient(158deg,#20140c 0%,#0b0806 74%);}
+    radial-gradient(1300px 860px at 72% 12%, rgb(184 192 204 / 12%), transparent 56%),
+    radial-gradient(1100px 720px at 8% 96%, rgb(130 201 255 / 8%), transparent 54%),
+    radial-gradient(820px 620px at 96% 92%, rgb(184 192 204 / 6%), transparent 58%),
+    linear-gradient(158deg,var(--apx-colour-panel) 0%,var(--apx-colour-canvas) 74%);}
 
 .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}

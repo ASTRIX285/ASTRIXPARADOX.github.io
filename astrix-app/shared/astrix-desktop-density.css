@@ -12,9 +12,9 @@
   --apx-page-gutter:.625rem;
   --apx-font-copy:"bahnschrift",system-ui,-apple-system,"Segoe UI",sans-serif;
   --apx-font-display:"bahnschrift-semicondensed",var(--apx-font-copy);
-  --apx-text-primary:#f4efe4;
-  --apx-text-readable:#c8c2b8;
-  --apx-text-muted:#aaa294;
+  --apx-text-primary:var(--apx-colour-text);
+  --apx-text-readable:var(--apx-colour-secondary);
+  --apx-text-muted:var(--apx-colour-secondary);
   --apx-type-page-title:1.25rem;
   --apx-type-page-subtitle:.75rem;
   --apx-type-section-title:1rem;

@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'css/astrix-palette.css',
   'astrix-app/pages/guardian-workspace-v2/guardian-left-panel-super-feature.css',
   'astrix-app/pages/guardian-workspace-v2/subclass-picker.css',
   'astrix-app/docs/fluid-image-sizing.md',

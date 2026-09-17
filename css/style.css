@@ -3,21 +3,21 @@
    ============================================================ */
 
 :root {
-  --crimson:      #8b0000;
-  --crimson-mid:  #b22222;
+  --crimson:      var(--apx-colour-action);
+  --crimson-mid:  var(--apx-colour-action);
   --crimson-glow: #ff1a1a;
   --crimson-dark: #3d0000;
-  --gold:         #c9a84c;
-  --gold-light:   #f0c060;
-  --gold-dim:     rgba(201,168,76,0.3);
+  --gold:         var(--apx-colour-focus);
+  --gold-light:   var(--apx-colour-focus);
+  --gold-dim:     rgb(130 201 255 / 30%);
   --black:        #000000;
-  --dark:         #060606;
-  --dark-1:       #060606;
+  --dark:         var(--apx-colour-canvas);
+  --dark-1:       var(--apx-colour-canvas);
   --dark-2:       #0a0a0a;
-  --dark-3:       #111111;
-  --dark-4:       #1a1a1a;
-  --white:        #ffffff;
-  --grey:         #aaaaaa;
+  --dark-3:       var(--apx-colour-panel);
+  --dark-4:       var(--apx-colour-raised);
+  --white:        var(--apx-colour-text);
+  --grey:         var(--apx-colour-secondary);
   --grey-dark:    #555555;
   --nav-height:   70px;
 }
