@@ -1721,7 +1721,7 @@ body .gear-weapons .weap{
   grid-template-columns:var(--gear-weapon-art) minmax(0,1fr)!important;
   grid-template-rows:auto auto auto auto!important;
   grid-template-areas:"art cap" "perks perks" "support support" "apply apply"!important;
-  height:auto!important;min-height:0!important;align-self:start!important;
+  height:auto!important;min-height:0!important;align-self:stretch!important;
 }
 :is(.gear-weapons,.review-weapon,.paradox-item-hover-card) .weapon-perk-matrix{
   --gear-weapon-socket:var(--apx-icon-socket-compact);
@@ -1878,4 +1878,59 @@ body.paradox-inventory-inspect-open{overflow:hidden}
   .paradox-item-inspect-card .weapon-detail-power{grid-column:2;display:flex;justify-content:flex-end;gap:.4rem;margin:0}
   .paradox-item-inspect-card .weapon-stat{grid-template-columns:5.6rem minmax(6rem,1fr) 1.8rem}
   .paradox-item-inspect-card .paradox-stat-row{grid-template-columns:minmax(6rem,1fr) 1.8rem}.paradox-item-inspect-card .paradox-stat-row>i{grid-column:1/-1}
+}
+
+/* Canonical equipment presentation for Character and Build Forge.
+   Armour mods and weapon perks consume the same compact socket token;
+   subclass artwork retains the Character rail's separate, approved size. */
+body .gear-combined .gear-mods{
+  grid-template-columns:repeat(3,var(--apx-icon-socket-compact));
+  grid-template-rows:repeat(2,var(--apx-icon-socket-compact));
+  gap:8px;
+}
+body .gear-combined .gear-mod{
+  width:var(--apx-icon-socket-compact)!important;
+  min-width:var(--apx-icon-socket-compact)!important;
+  max-width:var(--apx-icon-socket-compact)!important;
+  height:var(--apx-icon-socket-compact)!important;
+  min-height:var(--apx-icon-socket-compact)!important;
+  max-height:var(--apx-icon-socket-compact)!important;
+  border-radius:4px!important;
+}
+body .gear-weapons .weap-grid{
+  grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))!important;
+  align-items:stretch!important;
+}
+body .gear-weapons .weap{
+  background:var(--apx-colour-raised)!important;
+  border-color:var(--apx-colour-border)!important;
+  grid-template-rows:auto auto 1fr auto!important;
+}
+body .gear-weapons .weap .cap b{
+  font-size:var(--apx-type-label)!important;
+  line-height:1.4!important;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body .gear-weapons .weapon-support-icons{align-self:end}
+body :is(.gear-slot-label,.gear-subhead){
+  font-family:var(--apx-font-copy)!important;
+  font-size:var(--apx-type-label)!important;
+  line-height:1.4!important;
+  color:var(--apx-colour-secondary)!important;
+  letter-spacing:.04em;
+}
+body .gear-subhead{flex-wrap:wrap}
+body.build-forge-page .design-canvas :is(.section-title h2,.eq-head h3){
+  font-size:var(--apx-type-subsection-title)!important;
+  color:var(--apx-colour-text)!important;
+}
+body.build-forge-page .design-canvas :is(.section-guidance,.section-title span,.eq-head .tools,.manual-edit-btn,.working-only-chip,.panel-head small,.gear-slot-label,.gear-subhead){
+  font-size:var(--apx-type-label)!important;
+  line-height:1.4!important;
+  color:var(--apx-colour-secondary)!important;
+}
+body.build-forge-page .design-canvas :is(.section-title,.eq-head,.section-actions){
+  flex-wrap:wrap;
+  gap:8px;
 }
