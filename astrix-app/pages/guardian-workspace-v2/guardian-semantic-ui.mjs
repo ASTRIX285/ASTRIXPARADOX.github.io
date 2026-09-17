@@ -7,7 +7,7 @@ import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260909-apply-refresh-1';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
