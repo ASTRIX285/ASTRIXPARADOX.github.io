@@ -345,9 +345,11 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-page .journey-account-summary .journey-rank-badge strong,
 .journey-page .journey-left-summaries .journey-rank-badge strong{font-size:1.45rem}
 
-.journey-page .journey-triumph-summary{margin-top:.625rem;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);border-bottom:1px solid var(--apx-colour-border)}
+.journey-page .journey-triumph-summary{margin-top:.625rem;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised)}
+.journey-page .journey-triumph-total{padding:.8rem .85rem;border-bottom:1px solid var(--apx-colour-border)}
 .journey-page .journey-triumph-total span{display:block;color:var(--apx-colour-secondary);font:700 .75rem/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.09em;text-transform:uppercase}
-.journey-page .journey-triumph-total strong{display:block;margin-top:.4rem;color:var(--apx-colour-text);font:800 1.55rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.03em;grid-template-columns:repeat(2,minmax(0,1fr));margin:0}
+.journey-page .journey-triumph-total strong{display:block;margin-top:.4rem;color:var(--apx-colour-text);font:800 1.55rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.03em}
+.journey-page .journey-triumph-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0}
 .journey-page .journey-triumph-breakdown div{min-width:0;padding:.7rem .85rem}
 .journey-page .journey-triumph-breakdown div+div{border-left:1px solid var(--apx-colour-border)}
 .journey-page .journey-triumph-breakdown dt{color:var(--apx-colour-secondary);font:700 .75rem/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.09em;text-transform:uppercase}
@@ -356,14 +358,16 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-page .journey-vault-summary{margin-top:.625rem;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);box-shadow:inset 3px 0 0 rgba(211,32,47,.72)}
 .journey-page .journey-vault-total{padding:.8rem .85rem;border-bottom:1px solid var(--apx-colour-border)}
 .journey-page .journey-vault-total span{display:block;color:var(--apx-colour-secondary);font:700 .75rem/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.11em}
-.journey-page .journey-vault-total strong{display:block;margin-top:.4rem;color:var(--apx-colour-text);font:800 1.55rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.03em;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);margin:0}
+.journey-page .journey-vault-total strong{display:block;margin-top:.4rem;color:var(--apx-colour-text);font:800 1.55rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.03em}
+.journey-page .journey-vault-breakdown{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);margin:0}
 .journey-page .journey-vault-breakdown div{min-width:0;padding:.7rem .85rem}
 .journey-page .journey-vault-breakdown div+div{border-left:1px solid var(--apx-colour-border)}
-.journey-page .journey-vault-breakdown dt{overflow:hidden;color:var(--apx-colour-secondary);font:700 .75rem/1.4.15 bahnschrift-semicondensed,sans-serif;letter-spacing:.07em;text-overflow:ellipsis;text-transform:uppercase;white-space:normal}
+.journey-page .journey-vault-breakdown dt{overflow:hidden;color:var(--apx-colour-secondary);font:700 .75rem/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.07em;text-overflow:ellipsis;text-transform:uppercase;white-space:normal}
 .journey-page .journey-vault-breakdown dd{margin:.35rem 0 0;color:var(--apx-colour-text);font:800 1rem/1 bahnschrift-semicondensed,sans-serif}
-.journey-page .journey-vault-warning{margin:0;padding:.55rem .85rem;border-top:1px solid rgba(211,32,47,.32);background:rgba(139,0,0,.18);color:#f0b6bc;font:700 .75rem/1.4.3 bahnschrift-semicondensed,sans-serif;letter-spacing:.055em}
+.journey-page .journey-vault-warning{margin:0;padding:.55rem .85rem;border-top:1px solid rgba(211,32,47,.32);background:rgba(139,0,0,.18);color:#f0b6bc;font:700 .75rem/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.055em}
 
-.journey-page .journey-usage-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:.75rem;align-items:center;margin-top:.625rem;padding:.75rem;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);display:grid;place-items:center;width:7rem;height:7rem;margin:auto;border-radius:50%;background:conic-gradient(#d3202f 0 var(--titan-end),#c9a84c var(--titan-end) var(--hunter-end),#4169e1 var(--hunter-end) 100%);box-shadow:0 0 0 1px var(--apx-colour-border),0 0 22px rgba(139,0,0,.2)}
+.journey-page .journey-usage-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:.75rem;align-items:center;margin-top:.625rem;padding:.75rem;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised)}
+.journey-page .journey-usage-chart{position:relative;display:grid;place-items:center;width:7rem;height:7rem;margin:auto;border-radius:50%;background:conic-gradient(#d3202f 0 var(--titan-end),#c9a84c var(--titan-end) var(--hunter-end),#4169e1 var(--hunter-end) 100%);box-shadow:0 0 0 1px var(--apx-colour-border),0 0 22px rgba(139,0,0,.2)}
 .journey-page .journey-usage-chart::after{content:"";position:absolute;inset:1.15rem;border:1px solid var(--apx-colour-border);border-radius:50%;background:var(--apx-colour-panel)}
 .journey-page .journey-usage-chart span{position:relative;z-index:1;display:grid;gap:.22rem;text-align:center}
 .journey-page .journey-usage-chart small{color:var(--apx-colour-secondary);font:700 .75rem/1.2 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
@@ -375,7 +379,6 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-page .journey-usage-table td strong{color:var(--apx-gold);font-family:bahnschrift-semicondensed,sans-serif;font-size:.875rem}
 .journey-page .journey-usage-dot{display:inline-block;width:.5rem;height:.5rem;margin-right:.38rem;border-radius:50%;background:var(--usage-colour);box-shadow:0 0 8px color-mix(in srgb,var(--usage-colour) 60%,transparent)}
 
-@media(max-width:400px){.journey-page .journey-usage-layout{grid-template-columns:1fr}}
 
 @media(min-width:1761px){
   .journey-console{align-items:stretch}
