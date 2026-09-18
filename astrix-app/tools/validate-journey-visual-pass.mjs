@@ -39,7 +39,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260917-identity-card-2"'),'Journey must load the shared command-header cleanup without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1"'),'Journey must load the backend workspace preload runtime');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260918-activity-startup-1&amp;transport=20260911-compact-plugs-1"'),'Journey must load the activity startup recovery runtime');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');

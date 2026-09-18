@@ -85,3 +85,130 @@ assert.deepEqual(fullBadges.coverage.unresolved,[],'All badge collectible identi
 assert.ok(fullBadges.badges.every(b=>b.requirements.length&&b.completed===null),'Unknown badge progress must remain unknown');
 assert.ok(service.status().retainedBytes<=service.status().maxBytes);
 console.log('JOURNEY_BADGE_CATALOGUE=PASS badges='+fullBadges.badges.length+' requirements='+fullBadges.badges.reduce((sum,b)=>sum+b.requirements.length,0));
+
+// Prepared activity records must survive either bootstrap arrival order.
+{
+const vm=await import('node:vm');
+
+const source=await readFile(process.argv[2]||new URL('../pages/journey/journey.mjs',import.meta.url),'utf8');
+const between=(start,end)=>{
+  const first=source.indexOf(start),last=source.indexOf(end,first);
+  assert.ok(first>=0&&last>first,`Missing production section: ${start}`);
+  return source.slice(first,last);
+};
+const bootstrap=source.slice(source.indexOf("\ntry{\n  reportPreparedPageStage('start','journey');"));
+assert.ok(bootstrap.includes('const profile=await readVerifiedProfile(session)'));
+const session={authenticated:true,activeDestinyMembership:{membershipType:3,membershipId:'account'}};
+const profile=(rows={titan:[{instanceId:'titan-activity'}],warlock:[{instanceId:'warlock-activity'}]})=>({
+  profile:{characters:{data:{titan:{},warlock:{}}}},
+  preparedAccountData:{activityHistoryByCharacter:Object.fromEntries(Object.entries(rows).map(([id,activities])=>[id,{activities}]))}
+});
+const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};};
+function harness(){
+  const h=vm.createContext({
+    console:{info(){}},Date,Promise,Map,
+    verifiedProfile:null,journeySession:null,selectedCharacterId:'',selectedClassName:'',
+    currentActivityEvidence:null,journeyActivityRequest:0,journeyActivityCache:new Map(),
+    PREPARED_PAGE_REFRESH_MS:600000,JOURNEY_BOOTSTRAP_UI_WAIT_MS:6000,
+    card:{dataset:{characterId:'titan',class:'Titan'}},
+    rendered:[],normaliseCalls:0,unavailable:[],
+    FORGE_BUNGIE_SESSION:session,document:{},
+    getBungieSession:async()=>session,
+    readVerifiedProfile:async()=>profile(),
+    reportPreparedPageStage(){},waitForHeroCards:async()=>{},
+    bindProfileCards(){},bindDestinationProgress:async()=>{},
+    showJourney:async()=>{},startJourneyBackgroundRefresh(){},
+    preloadPreparedWorkspace:async()=>{},waitForJourneyAtmosphere:async()=>{},
+    waitWithin:promise=>promise,finishJourneyLoader:async()=>{},
+    showSignedOut(){throw new Error('Unexpected signed-out state');},
+    renderJourneyContext(){},bindJourneyCrossPageEvidence(){},renderJourneyContextStatus(){},
+    renderCurrentForm(){},renderEvidenceConfidence(){},renderMissionHighlights(){},renderMostUsed(){},
+    buildMissionReportView:activities=>({count:activities.length})
+  });
+  h.heroCards={querySelector:()=>h.card};
+  h.renderRecentActivity=activities=>{h.rendered=activities;};
+  h.showJourneyUnavailable=message=>h.unavailable.push(message);
+  h.normaliseActivityHistory=async prepared=>{h.normaliseCalls++;return prepared.activities;};
+  vm.runInContext([
+    between('function journeyActivityCacheKey','async function bindTitleAndProgression'),
+    between('function selectJourneyCharacter','function selectJourneyView'),
+    `async function bootstrapJourney(){${bootstrap}\n}`
+  ].join('\n'),h);
+  return h;
+}
+
+// Real bootstrap runs after the hero selection has arrived but before its
+// shared profile request completes. Activity must recover without another click.
+const early=harness(),ready=deferred(),selected=deferred();
+early.readVerifiedProfile=async()=>{
+  early.syncSelectedCharacterFromCards();
+  selected.resolve();
+  await ready.promise;
+  return profile();
+};
+const starting=early.bootstrapJourney();
+await selected.promise;
+assert.equal(early.selectedCharacterId,'titan');
+assert.equal(early.journeyActivityCache.size,0,'Selecting a Guardian before profile readiness must not cache a failed request');
+ready.resolve();await starting;
+assert.equal(early.currentActivityEvidence?.status,'ok','Bootstrap must bind the initial Guardian without a second selection');
+assert.equal(early.rendered[0].instanceId,'titan-activity');
+assert.equal(early.normaliseCalls,1,'Bootstrap and later selection must share the same resolved evidence');
+assert.equal(early.unavailable.length,0);
+
+// The reverse arrival order is valid too: the observer binds a later roster.
+const late=harness();late.card=null;
+await late.bootstrapJourney();
+assert.equal(late.normaliseCalls,0);
+late.card={dataset:{characterId:'warlock',class:'Warlock'}};
+late.syncSelectedCharacterFromCards();
+await late.bindJourneyActivityEvidence(session);
+assert.equal(late.rendered[0].instanceId,'warlock-activity');
+
+// A genuinely missing history must remain retryable after the payload refreshes.
+const retry=harness();retry.verifiedProfile=profile({});
+assert.equal((await retry.fetchJourneyActivityEvidence(session,'titan')).status,'unavailable');
+assert.equal(retry.journeyActivityCache.size,0,'A settled missing-history failure must not leave a pending entry');
+retry.verifiedProfile=profile();
+assert.equal((await retry.fetchJourneyActivityEvidence(session,'titan',{force:true})).status,'ok');
+assert.equal(retry.normaliseCalls,1);
+
+// Concurrent callers normalize only once. A late result cannot replace the
+// displayed evidence after the user has selected another Guardian.
+const switching=harness(),slow=deferred();
+switching.verifiedProfile=profile();switching.journeySession=session;
+switching.normaliseActivityHistory=async prepared=>{
+  switching.normaliseCalls++;
+  if(prepared.activities[0]?.instanceId==='titan-activity')await slow.promise;
+  return prepared.activities;
+};
+switching.selectJourneyCharacter('titan','Titan');
+const oldSelection=switching.bindJourneyActivityEvidence(session);
+switching.selectJourneyCharacter('warlock','Warlock');
+await switching.bindJourneyActivityEvidence(session);
+assert.equal(switching.rendered[0].instanceId,'warlock-activity');
+slow.resolve();await oldSelection;
+assert.equal(switching.rendered[0].instanceId,'warlock-activity','The previous Guardian must not overwrite the current selection');
+assert.equal(switching.normaliseCalls,2,'Each Guardian must be normalized once across overlapping callers');
+
+// Failed refresh preserves previously verified evidence without pinning the
+// failure; the next refresh can still replace it with the new payload.
+const refresh=harness();refresh.verifiedProfile=profile();
+const original=await refresh.fetchJourneyActivityEvidence(session,'titan');
+refresh.verifiedProfile=profile({});
+assert.equal(await refresh.fetchJourneyActivityEvidence(session,'titan',{force:true}),original);
+refresh.verifiedProfile=profile({titan:[{instanceId:'new-activity'}]});
+assert.equal((await refresh.fetchJourneyActivityEvidence(session,'titan',{force:true})).activities[0].instanceId,'new-activity');
+refresh.normaliseActivityHistory=async()=>{throw new Error('Unusable returned history');};
+refresh.verifiedProfile=profile();
+assert.equal((await refresh.fetchJourneyActivityEvidence(session,'warlock')).status,'unavailable');
+assert.equal(refresh.journeyActivityCache.has(refresh.journeyActivityCacheKey(session,'warlock')),false);
+
+const empty=harness();empty.verifiedProfile=profile({titan:[]});
+const noActivities=await empty.fetchJourneyActivityEvidence(session,'titan');
+assert.equal(noActivities.status,'ok','A returned empty history is valid evidence, not a missing payload');
+assert.equal(noActivities.activities.length,0);
+assert.equal(await empty.fetchJourneyActivityEvidence({authenticated:false},'titan'),null);
+
+console.log('JOURNEY_ACTIVITY_STARTUP=PASS early/late roster, retry, concurrency, Guardian switch, refresh recovery and empty history');
+}
