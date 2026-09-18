@@ -1880,23 +1880,7 @@ body.paradox-inventory-inspect-open{overflow:hidden}
   .paradox-item-inspect-card .paradox-stat-row{grid-template-columns:minmax(6rem,1fr) 1.8rem}.paradox-item-inspect-card .paradox-stat-row>i{grid-column:1/-1}
 }
 
-/* Canonical equipment presentation for Character and Build Forge.
-   Armour mods and weapon perks consume the same compact socket token;
-   subclass artwork retains the Character rail's separate, approved size. */
-body .gear-combined .gear-mods{
-  grid-template-columns:repeat(3,var(--apx-icon-socket-compact));
-  grid-template-rows:repeat(2,var(--apx-icon-socket-compact));
-  gap:8px;
-}
-body .gear-combined .gear-mod{
-  width:var(--apx-icon-socket-compact)!important;
-  min-width:var(--apx-icon-socket-compact)!important;
-  max-width:var(--apx-icon-socket-compact)!important;
-  height:var(--apx-icon-socket-compact)!important;
-  min-height:var(--apx-icon-socket-compact)!important;
-  max-height:var(--apx-icon-socket-compact)!important;
-  border-radius:4px!important;
-}
+/* Shared equipment chrome. Socket geometry remains owned by Character. */
 body .gear-weapons .weap-grid{
   grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))!important;
   align-items:stretch!important;
