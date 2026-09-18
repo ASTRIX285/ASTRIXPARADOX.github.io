@@ -12,6 +12,101 @@ import {normalizePreparedPagePayload} from '../core/prepared-page-client.mjs';
 import {resolveArmourSet} from '../pages/guardian-workspace-v2/guardian-armour-set-resolver.mjs';
 import {createVaultCatalogue} from '../pages/vault/vault-inventory.mjs';
 
+// These five hashes were displayed without names in the live Warlock Journey
+// history on 18 September. Resolve their identities from the Bungie catalogue;
+// do not fabricate activity times, results, account identifiers or statistics.
+{
+  const {runInNewContext}=await import('node:vm');
+  // Execute the real data module without its browser-only OAuth UI import.
+  const missionSource=await readFile(new URL('../pages/mission-reports/mission-reports-data.mjs',import.meta.url),'utf8');
+  const missionContext={guardianManifest:new GuardianManifestService({backend:true}),URL};
+  runInNewContext(missionSource.slice(0,missionSource.indexOf('\nexport {')).replace(/^import .*;\n/gm,''),missionContext);
+  const normaliseActivityHistory=async payload=>structuredClone(await missionContext.normaliseActivityHistory(payload));
+  const buildMissionReportView=activities=>structuredClone(missionContext.buildMissionReportView(activities));
+  const catalogueBase=new URL('../data/journey-index/',import.meta.url);
+  const catalogue=JSON.parse(await readFile(new URL('index.json',catalogueBase),'utf8'));
+  const hashes=[1661676672,2054035351,631573424,6513096,2041930080];
+  const expectedNames=['The Sunless Cell','The Corrupted: Matchmade','Battleground: Core','Warden of Nothing: Matchmade','The Dark Priestess'];
+  const table=catalogue.tables.DestinyActivityDefinition;
+  const definitions={};
+  for(const hash of hashes){
+    const shard=table.lookup?.[hash]??hash%table.shards.length;
+    const rows=JSON.parse(await readFile(new URL(table.shards[shard],catalogueBase),'utf8'));
+    definitions[hash]=rows.definitions[hash];
+  }
+  assert.deepEqual(hashes.map(hash=>definitions[hash].displayProperties.name),expectedNames);
+  const history={Response:{activities:hashes.map(referenceId=>({activityDetails:{referenceId}}))}};
+  const accountFixture=()=>({
+    profile:{},
+    preparedAccountData:{activityHistoryByCharacter:{
+      'fixture-warlock':structuredClone(history),
+      'fixture-titan':{response:{activities:[{activityDetails:{referenceId:hashes[0]}}]}},
+      'fixture-hunter':{activities:[
+        {activityDetails:{directorActivityHash:hashes[4]}},
+        ...[null,0,-1,'',undefined,0x100000000].map(referenceId=>({activityDetails:{referenceId}}))
+      ]}
+    }},
+    journeyAccountManifestTables:{DestinyActivityDefinition:{[hashes[0]]:structuredClone(definitions[hashes[0]])}}
+  });
+  const requests=[];
+  const env={MANIFEST_DATA:{async fetch(request){
+    assert.equal(new URL(request.url).pathname,'/resolve');
+    const body=await request.json();requests.push(body);
+    assert.equal(body.version,catalogue.manifestVersion);
+    assert.deepEqual(Object.keys(body.requests),['DestinyActivityDefinition']);
+    assert.deepEqual(body.requests.DestinyActivityDefinition,hashes.slice(1),'Only missing, unique, valid history hashes may be requested');
+    return Response.json({manifestVersion:catalogue.manifestVersion,tables:{DestinyActivityDefinition:definitions}});
+  }}};
+  const journeySource=await readFile(new URL('../pages/journey/journey.mjs',import.meta.url),'utf8');
+  const activityFunctions=journeySource.slice(journeySource.indexOf('function journeyActivityCacheKey'),journeySource.indexOf('function renderJourneyActivityEvidence'));
+  assert.ok(activityFunctions.includes('async function fetchJourneyActivityEvidence'));
+  const renderEvidence=async payload=>{
+    const context={verifiedProfile:payload,journeyActivityCache:new Map(),PREPARED_PAGE_REFRESH_MS:600000,normaliseActivityHistory,buildMissionReportView,Date,Promise,console};
+    runInNewContext(activityFunctions,context);
+    return context.fetchJourneyActivityEvidence({authenticated:true,activeDestinyMembership:{membershipType:2,membershipId:'fixture-account'}},'fixture-warlock');
+  };
+  for(const wrapped of [false,true]){
+    const account=accountFixture(),before=JSON.stringify(account.preparedAccountData);
+    const prepared={manifestVersion:catalogue.manifestVersion,manifestTables:{DestinyActivityDefinition:{}}};
+    const envelope={transport:'prepared-page-stream-v1',account,prepared};
+    const input=wrapped?envelope:account;
+    await enrichPreparedPageAccount(input,env,'journey',{manifestVersion:catalogue.manifestVersion});
+    assert.equal(JSON.stringify(account.preparedAccountData),before,'Definition enrichment must not rewrite activity evidence');
+    assert.deepEqual(account.journeyActivityDefinitionCoverage,{requested:5,resolved:5,unresolved:[],complete:true});
+    assert.deepEqual(account.journeyAccountManifestTables.DestinyActivityDefinition[hashes[0]],definitions[hashes[0]],'Existing destination/activity fields must survive');
+    for(const hash of hashes.slice(1)){
+      assert.deepEqual(Object.keys(account.journeyAccountManifestTables.DestinyActivityDefinition[hash]).sort(),['displayProperties','hash'],'New history definitions carry labels without reward or inventory expansion');
+    }
+    assert.equal(envelope.journeyActivityDefinitionCoverage,undefined,'Stream enrichment belongs inside account');
+    assert.deepEqual(prepared.manifestTables.DestinyActivityDefinition,{},'The streamed public bundle is not modified by enrichment');
+    const merged=normalizePreparedPagePayload(envelope,'journey');
+    const evidence=await renderEvidence(merged);
+    assert.equal(evidence.status,'ok');
+    assert.deepEqual(evidence.activities.map(row=>row.activityName),expectedNames,'The production Journey join must use its prepared definitions');
+    const withoutName=({activityName,...row})=>row;
+    assert.deepEqual(evidence.activities.map(withoutName),(await normaliseActivityHistory(history)).map(withoutName),'Naming must preserve the normalised activity values and absent fields');
+    assert.ok(evidence.view.mastery.some(row=>row.activityName===expectedNames[0]),'Mission highlights must share the resolved labels');
+    const count=requests.length;
+    await enrichPreparedPageAccount(input,env,'journey',{manifestVersion:catalogue.manifestVersion});
+    assert.equal(requests.length,count,'Already resolved history labels require no further reads');
+  }
+  const partial=accountFixture();
+  await enrichPreparedPageAccount(partial,{MANIFEST_DATA:{async fetch(){return new Response(null,{status:503});}}},'journey',{manifestVersion:catalogue.manifestVersion});
+  assert.deepEqual(partial.journeyActivityDefinitionCoverage.unresolved,hashes.slice(1));
+  assert.equal(partial.journeyActivityDefinitionCoverage.complete,false);
+  const partialEvidence=await renderEvidence(normalizePreparedPagePayload({transport:'prepared-page-stream-v1',account:partial,prepared:{manifestTables:{}}},'journey'));
+  assert.equal(partialEvidence.status,'ok','An unavailable name must not discard returned activity evidence');
+  assert.equal(partialEvidence.activities.length,5);
+  assert.equal(partialEvidence.activities[0].activityName,expectedNames[0]);
+  assert.equal(partialEvidence.activities[1].activityName,`Activity hash ${hashes[1]}`);
+  const count=requests.length;
+  const empty={profile:{},preparedAccountData:{activityHistoryByCharacter:{'fixture-warlock':{Response:{activities:[]}}}}};
+  await enrichPreparedPageAccount(empty,env,'journey',{manifestVersion:catalogue.manifestVersion});
+  assert.equal(requests.length,count);
+  assert.deepEqual(empty.journeyActivityDefinitionCoverage,{requested:0,resolved:0,unresolved:[],complete:true});
+  console.log('JOURNEY_PREPARED_ACTIVITY_NAMES=PASS live hashes, direct/stream payloads, bounded requests, missing labels and unchanged activity evidence');
+}
+
 // Regression evidence: Miguel's equipped Smoke Jumper Vestment, with its real
 // manifest set and perks. No account identifier, roll or stat is fabricated.
 const armourIndex=expandForgeArmourIndex(JSON.parse(await readFile(new URL('../data/forge-armour-index.json',import.meta.url),'utf8')));

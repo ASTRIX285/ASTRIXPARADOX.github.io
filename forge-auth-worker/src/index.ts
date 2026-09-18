@@ -1681,6 +1681,7 @@ async function pagePayloadRoute(
   if (page !== "journey" && page !== "loadout" && PROFILE_STAT_HASHES.some(hash => !payload.statDefinitions?.[String(hash)])) missing.push("guardian-stat-definitions");
   if (page === "journey") {
     if (payload.journeyAccountDefinitionCoverage?.complete !== true) missing.push("journey-account-definitions");
+    if (payload.journeyActivityDefinitionCoverage?.complete !== true) missing.push("journey-activity-definitions");
     if (payload.preparedAccountData?.coverage?.complete !== true) missing.push("journey-account-history");
     if (!payload.profile?.profileRecords?.data) missing.push("records");
     if (!payload.profile?.profilePresentationNodes?.data) missing.push("presentation-nodes");

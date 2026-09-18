@@ -2011,6 +2011,11 @@ async function fetchJourneyActivityEvidence(session,characterId,{force=false}={}
       const prepared=verifiedProfile?.preparedAccountData?.activityHistoryByCharacter?.[characterId];
       if(!prepared)throw new Error('Prepared Journey data contains no activity history for this Guardian.');
       const activities=await normaliseActivityHistory(prepared);
+      const definitions=verifiedProfile?.manifestTables?.DestinyActivityDefinition||{};
+      for(const activity of activities){
+        const name=definitions[String(activity.activityHash)]?.displayProperties?.name;
+        if(typeof name==='string'&&name.trim())activity.activityName=name.trim();
+      }
       const evidence={status:'ok',characterId,activities,view:buildMissionReportView(activities),fetchedAt:Date.now()};
       journeyActivityCache.set(key,evidence);
       return evidence;
