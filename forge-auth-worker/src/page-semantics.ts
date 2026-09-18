@@ -437,6 +437,7 @@ async function enrichPreparedPageAccount(
   context: PreparedPageSemanticContext = {}
 ): Promise<any> {
   const manifestVersion = String(context.manifestVersion || "");
+  if (page === "journey") await enrichJourneyActivityDefinitions(payload, env, manifestVersion);
   await enrichPageInventory(payload, env, page, manifestVersion);
   await enrichSubclassInventory(payload, env, manifestVersion);
   if (page === "loadout" || page === "build-forge") {
@@ -450,6 +451,44 @@ async function enrichPreparedPageAccount(
   compactPageInventoryDefinitions(payload);
   logManifestEvidenceGaps(payload, page);
   return payload;
+}
+
+async function enrichJourneyActivityDefinitions(payload: any, env: Env, manifestVersion = ""): Promise<void> {
+  const account = payload?.transport === "prepared-page-stream-v1" && payload?.account
+    ? payload.account : payload;
+  if (!account) return;
+  const requested = new Set<number>();
+  for (const history of Object.values(account.preparedAccountData?.activityHistoryByCharacter || {}) as any[]) {
+    const rows = history?.Response?.activities ?? history?.response?.activities ?? history?.activities;
+    if (!Array.isArray(rows)) continue;
+    for (const activity of rows) {
+      addDefinitionHash(requested, activity?.activityDetails?.referenceId ?? activity?.activityDetails?.directorActivityHash);
+    }
+  }
+  const tables = account.journeyAccountManifestTables || (account.journeyAccountManifestTables = {});
+  const definitions = tables.DestinyActivityDefinition || (tables.DestinyActivityDefinition = {});
+  const hasName = (hash: number) => typeof definitions[String(hash)]?.displayProperties?.name === "string"
+    && definitions[String(hash)].displayProperties.name.trim().length > 0;
+  const missing = [...requested].filter(hash => !hasName(hash));
+  const resolved = await preparedDefinitions("DestinyActivityDefinition", missing, env, manifestVersion);
+  // History is already bounded to 25 rows per Guardian. Return just the label
+  // needed by Journey, without expanding activity rewards or inventory graphs.
+  for (const hash of missing) {
+    const name = resolved[String(hash)]?.displayProperties?.name;
+    if (typeof name !== "string" || !name.trim()) continue;
+    definitions[String(hash)] = {
+      ...(definitions[String(hash)] || {}),
+      hash,
+      displayProperties: { ...(definitions[String(hash)]?.displayProperties || {}), name }
+    };
+  }
+  const unresolved = [...requested].filter(hash => !hasName(hash));
+  account.journeyActivityDefinitionCoverage = {
+    requested: requested.size,
+    resolved: requested.size - unresolved.length,
+    unresolved,
+    complete: unresolved.length === 0
+  };
 }
 
 export { PREPARED_CHARACTER_DATA_CONTRACT_VERSION, compactPreparedProfilePlugLists, enrichPreparedPageAccount, preparedCharacterBuildCoverage };
