@@ -38,8 +38,8 @@ const placeholderMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/a
 const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp`);
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
-assert.ok(html.includes('href="./journey-2560-visual.css?v=20260917-identity-card-2"'),'Journey must load the shared command-header cleanup without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1"'),'Journey must load the backend workspace preload runtime');
+assert.ok(html.includes('href="./journey-2560-visual.css?v=20260918-emblem-card-1"'),'Journey must load the requested full-emblem card without stale page CSS');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -105,7 +105,10 @@ assert.match(journey,/journey-triumph-total[\s\S]*?journey-triumph-breakdown[\s\
 assert.match(html,/id="journeyGuardianStats"[\s\S]*?aria-label="Selected Guardian statistics"/,'The identity panel must own the selected Guardian stat strip');
 assert.doesNotMatch(html,/VERIFIED GUARDIAN|id="journeyVerifiedGuardian"/,'Journey must remove the redundant visible verified-Guardian label');
 assert.match(journey,/const STAT_ORDER=\[2996146975,392767087,1943323491,1735777505,144602215,4244567218\];[\s\S]*?function bindGuardianStats[\s\S]*?payload\?\.statDefinitions[\s\S]*?character\?\.stats/,'The identity stat strip must bind all six official Bungie stats for the selected Guardian');
-assert.match(css,/\.journey-page \.journey-identity-stats\{[\s\S]*?grid-column:1\/-1;[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/,'Selected Guardian stats deliberately use the full card width in two readable rows');
+assert.match(css,/\.journey-page \.journey-identity-stats\{[^}]*grid-column:1\/-1;[^}]*grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/,'Miguel requested all six selected-Guardian stats in one row on 18 September');
+assert.match(css,/\.journey-page \.mission-crest\{[^}]*position:absolute;[^}]*inset:0;[^}]*width:100%;[^}]*height:100%/,'The selected Guardian emblem must fill the identity card');
+assert.match(css,/\.journey-page \.mission-crest img\{[^}]*object-fit:cover/,'Emblem artwork must cover the entire identity card');
+assert.match(journey,/const emblemArtwork=selected\.emblemBackgroundPath\|\|selected\.emblemPath/,'The identity background must prefer the selected Guardian banner over the square icon');
 assert.match(html,/journey-vault-card[\s\S]*?>Vault inventory<[\s\S]*?id="journeyVault"/,'Journey must present Vault inventory as a dedicated data card');
 assert.match(journey,/function bindVault[\s\S]*?ARMOUR_ITEM_TYPE[\s\S]*?journey-vault-total[\s\S]*?>ALL<[\s\S]*?journey-vault-breakdown[\s\S]*?>ARMOUR<[\s\S]*?WEAPONS &amp; EQUIPMENT/,'Vault inventory must split its verified total into Armour and Weapons & Equipment');
 assert.match(journey,/if\(postmasterMax>=18\)[\s\S]*?POSTMASTER NEAR CAPACITY/,'Postmaster must appear only as a conditional near-capacity warning');
