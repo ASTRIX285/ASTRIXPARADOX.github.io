@@ -375,7 +375,7 @@ assert.match(runtime,/if\(!baselineStored&&!transferStored\)url\.searchParams\.s
 assert.match(buildHandoff,/store\.removeItem\(BUILD_SPACE_KEY\);[\s\S]*?store\.removeItem\(BUILD_SNAPSHOT_KEY\);[\s\S]*?store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Stale Build Forge state must be cleared before writing the newly verified compact Guardian snapshot.');
 assert.doesNotMatch(buildHandoff,/createBuildState/,'Forge Loader must not expand the compact source into duplicate Original and Working builds before navigation.');
 assert.match(html,/forge-loader\.mjs\?v=20260913-workspace-preload-1/,'Forge Loader must load the backend-prepared solver runtime without stale browser code.');
-assert.match(html,/forge-loader\.css\?v=20260913-selector-image-1/,'Forge Loader must load the image-only Exotic selector layout without stale page CSS.');
+assert.match(html,/forge-loader\.css\?v=20260918-selector-artwork-1/,'Forge Loader must load the image-only Exotic selector layout without stale page CSS.');
 assert.match(runtime,/forge-loader-build-handoff\.mjs\?v=20260906-review-layout-1/,'Forge Loader must refresh the protected baseline writer with exact subclass and in-game loadout transfer.');
 assert.match(runtime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Forge Loader must refresh the legal one-Exotic armour selection writer.');
 assert.match(buildRuntime,/vault-selection-state\.mjs\?v=20260904-exotic-equip-rule-1/,'Build Forge must refresh the legal one-Exotic armour selection reader.');

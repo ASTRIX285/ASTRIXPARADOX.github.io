@@ -29,7 +29,7 @@
 
 /* ===== EXOTIC PICKER GRID  ·  owned-exotic selector tiles ===== */
 .forge-exotic-slots{display:grid;gap:.9rem}.forge-exotic-slot{display:grid;grid-template-columns:1fr;gap:.5rem}.forge-exotic-slot>h3{margin:0;padding:0 0 .35rem;border-left:0;border-bottom:2px solid rgba(201,168,76,.52);color:#ded7cc;font:800 .78rem/1.25 bahnschrift-semicondensed,sans-serif;letter-spacing:.065em}.forge-exotic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--apx-icon-selector),1fr));gap:.42rem}
-.forge-exotic{position:relative;display:grid;place-items:center;aspect-ratio:1;padding:0;overflow:hidden;border:1px solid rgba(201,168,76,.32);background:#141016;cursor:pointer}.forge-exotic img{width:100%;height:100%;object-fit:contain}.forge-exotic:hover,.forge-exotic:focus-visible{border-color:#f2d36c;outline:none;box-shadow:0 0 1.1rem rgba(201,168,76,.24)}.forge-exotic.is-selected{z-index:1;border:1px solid #d62d3a;box-shadow:inset 0 0 0 3px #d62d3a,inset 0 0 0 4px #ffd965,0 0 0 2px rgba(116,0,10,.94),0 0 1.4rem rgba(214,45,58,.72);animation:forge-exotic-selected-pulse 1.55s ease-in-out infinite}.forge-exotic.is-unowned{border-color:rgba(150,143,134,.22);cursor:not-allowed}.forge-exotic.is-unowned img{filter:grayscale(1) brightness(.42)}.forge-exotic:disabled{opacity:1}
+.forge-exotic{position:relative;display:grid;place-items:center;aspect-ratio:1;padding:0;overflow:hidden;border:1px solid rgba(201,168,76,.32);background:#141016;cursor:pointer}.forge-exotic img{width:100%;height:100%;object-fit:contain}.forge-exotic:hover,.forge-exotic:focus-visible{border-color:#f2d36c;outline:none;box-shadow:0 0 1.1rem rgba(201,168,76,.24)}.forge-exotic.is-selected{z-index:1;border:0 solid #d62d3a;box-shadow:inset 0 0 0 3px #d62d3a,inset 0 0 0 4px #ffd965,0 0 0 2px rgba(116,0,10,.94),0 0 1.4rem rgba(214,45,58,.72);animation:forge-exotic-selected-pulse 1.55s ease-in-out infinite}.forge-exotic.is-unowned{border-color:rgba(150,143,134,.22);cursor:not-allowed}.forge-exotic.is-unowned img{filter:grayscale(1) brightness(.42)}.forge-exotic:disabled{opacity:1}
 @keyframes forge-exotic-selected-pulse{0%,100%{box-shadow:inset 0 0 0 3px #d62d3a,inset 0 0 0 4px #ffd965,0 0 0 2px rgba(116,0,10,.94),0 0 .65rem rgba(214,45,58,.44)}50%{box-shadow:inset 0 0 0 3px #d62d3a,inset 0 0 0 4px #fff0a6,0 0 0 3px rgba(158,8,22,.98),0 0 1.55rem rgba(255,55,73,.92)}}
 @media(prefers-reduced-motion:reduce){.forge-exotic.is-selected{animation:none}}
 
@@ -69,7 +69,9 @@
 @media(max-width:560px){.forge-staged-slots{grid-template-columns:repeat(2,var(--apx-icon-stage))}.forge-exotic-slot{grid-template-columns:1fr}.forge-set-choices{grid-template-columns:1fr}.forge-stat-actions{grid-template-columns:1fr}.forge-stat-targets label{grid-template-columns:minmax(0,1fr) 3.8rem 5.5rem}}
 
 .forge-exotic-grid{grid-template-columns:repeat(auto-fill,var(--apx-icon-selector));align-items:start}
-.forge-exotic{width:var(--apx-icon-selector);height:var(--apx-icon-selector);aspect-ratio:1;overflow:hidden;border:1px solid rgba(201,168,76,.32);background:#141016}
+/* Draw the selector border over its artwork so the image retains all 50 CSS pixels. */
+.forge-exotic{width:var(--apx-icon-selector);height:var(--apx-icon-selector);aspect-ratio:1;overflow:hidden;border:0 solid rgba(201,168,76,.32);background:#141016}
+.forge-exotic::after{content:"";position:absolute;inset:0;border:1px solid;border-color:inherit;pointer-events:none}
 .forge-staged-slots{grid-template-columns:repeat(5,var(--apx-icon-gear-art-width));align-items:start}
 .forge-staged-slot{grid-template-columns:var(--apx-icon-gear-art-width);width:var(--apx-icon-gear-art-width);height:var(--apx-icon-gear-art-height);aspect-ratio:100/122;overflow:visible;border:0;background:transparent}
 .forge-staged-slot>.item-tile-display{width:100%;height:100%;min-width:0;flex-basis:auto}
