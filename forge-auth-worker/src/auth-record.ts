@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
 import { PreparedPageCache } from "./prepared-page-cache";
+import { storedParadoxLoadouts } from "./paradox-loadouts";
 
 const BUNGIE_TOKEN = "https://www.bungie.net/platform/app/oauth/token/";
 const TOKEN_RENEWAL_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -92,6 +93,7 @@ export class AuthRecord extends DurableObject<Env> {
 
   async fetch(request: Request): Promise<Response> {
     const path = new URL(request.url).pathname;
+    if (path === "/paradox-loadouts") return storedParadoxLoadouts(request, this.ctx.storage);
     if ((request.method === "GET" || request.method === "PUT") && path === "/prepared-page") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");
       if (!record || record.kind !== "session" || record.absoluteExpiresAt <= Date.now()) return new Response(null, { status: 401 });

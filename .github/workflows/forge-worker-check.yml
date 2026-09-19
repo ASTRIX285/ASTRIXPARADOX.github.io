@@ -31,6 +31,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Backend and PARADOX sync tests
+        run: npm test
       - name: TypeScript check
         run: npx tsc --noEmit
       - name: Wrangler dry run

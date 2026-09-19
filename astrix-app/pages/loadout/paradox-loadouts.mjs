@@ -1,4 +1,4 @@
-import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
+import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1';
@@ -240,12 +240,12 @@ async function runBusy(work){
 }
 function draftFor(id){if(id==='equipped'){if(!equipped)throw new Error('Current equipment is unavailable.');return {build:copy(equipped),name:`${equipped.characterClass.toUpperCase()} · ${equipped.subclassName}`,description:''};}const record=recordById(id);if(!record)throw new Error('This saved build is not for the selected Guardian.');return copy(record);}
 function nameFields(record){return `<label>Loadout name<input id="paradoxEditName" maxlength="80" required value="${esc(record.name)}"></label><label>Description<textarea id="paradoxEditDescription" maxlength="400">${esc(record.description||'')}</textarea></label>`;}
-function openSave(record){showDialog('SAVE PARADOX LOADOUT',`${nameFields(record)}<p class="paradox-dialog-note">Saved in this browser. PARADOX copies are separate from Bungie’s 20 slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE PARADOX COPY</button>',{kind:'save',record:{...copy(record),id:null},check:guardContext()});}
+function openSave(record){showDialog('SAVE PARADOX LOADOUT',`${nameFields(record)}<p class="paradox-dialog-note">Saved locally, then synced to your Bungie account in the background. PARADOX copies are separate from Bungie’s 20 slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE PARADOX COPY</button>',{kind:'save',record:{...copy(record),id:null},check:guardContext()});}
 async function saveDialogRecord(){
   const state=dialogState;state.check();
   const name=byId('paradoxEditName').value.trim();if(!name)throw new Error('Enter a loadout name.');
   // Saving an editable draft does not equip it; Apply performs compatibility checks.
-  const saved=await saveParadoxLoadout({id:state.record.id||null,name,description:byId('paradoxEditDescription').value,build:state.record.build});
+  const saved=await saveParadoxLoadout({id:state.record.id||null,expectedRevision:state.record.revision,name,description:byId('paradoxEditDescription').value,build:state.record.build});
   if(!saved)throw new Error('This browser could not store the loadout. Free some browser storage and try again.');
   records=await listParadoxLoadouts();selectedId=saved.id;dialog().close();dialogState=null;status(`Saved ${saved.name}.`);
 }
@@ -418,7 +418,7 @@ async function handleDialogAction(action){
   if(action==='execute-build')return executeBuildAction();
   if(action==='execute-slot')return executeSlotAction();
   if(action==='delete-record'){
-    if(!await deleteParadoxLoadout(state.record.id))throw new Error('This browser could not delete the saved build.');
+    if(!await deleteParadoxLoadout(state.record.id,state.record.revision))throw new Error('This browser could not delete the saved build.');
     records=await listParadoxLoadouts();selectedId='equipped';dialog().close();dialogState=null;return;
   }
   if(action==='equip-slot'||action==='clear-slot')return confirmSlotAction(action==='equip-slot'?'equip':'clear',state);
@@ -456,6 +456,14 @@ window.addEventListener('forge:bungie-session',event=>{
   if(next.authenticated===true&&before.membershipId===after.membershipId&&before.membershipType===after.membershipType)return;
   session=next;payload=null;equipped=null;characterId='';selectionVersion++;loading=false;
   closeDialog();render();status('Bungie membership changed. Reload to view this account’s loadouts.');
+});
+window.addEventListener('forge:paradox-loadouts-changed',()=>{void listParadoxLoadouts().then(rows=>{records=rows;if(!busy&&!loading)render();}).catch(reportError);});
+window.addEventListener('forge:paradox-sync',event=>{
+  const node=byId('paradoxSyncStatus');if(!node)return;
+  const {state,conflicts,message}=event.detail||{};
+  const messages={syncing:'Syncing builds...',synced:'Builds synced',pending:'Saved locally. Sync pending.',offline:'Offline. Builds will sync when connected.','signed-out':'Sign in to sync saved builds.'};
+  node.textContent=conflicts?'Sync conflict: both versions kept, or a newer edit prevented deletion. Review your builds.':message||messages[state]||'';
+  node.hidden=!node.textContent;
 });
 window.addEventListener('storage',event=>{if(event.key==='astrix:paradox-saved-loadouts:v1'&&!busy)void listParadoxLoadouts().then(rows=>{records=rows;render();}).catch(reportError);});
 window.addEventListener('focus',()=>{if(!busy&&!dialog().open&&!loading&&session?.authenticated)void runBusy(async()=>{records=await listParadoxLoadouts();await refreshProfile();});});
