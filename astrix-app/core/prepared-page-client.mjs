@@ -169,7 +169,7 @@ function publishCoverage(payload,page,source){
   globalThis.document?.dispatchEvent?.(new CustomEvent('forge:prepared-page-loaded',{detail:{page,payload,source,complete,missing:payload?.pageReady?.coverage?.missing||[]}}));
 }
 
-async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=force}={}){
+async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=force,publish=true}={}){
   const page=pageKind(pageValue);
   if(!quiet){reportPreparedPageStage('start',page);reportPreparedPageStage('session',page);}
   if(!force&&!preferBackend&&sharedPayload?.pageReady?.page===page&&sharedPayload?.profile){
@@ -177,7 +177,7 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
     assertCurrentAccount(session,payload);
     assertRenderablePagePayload(payload,page);
     if(!quiet)reportPreparedPageStage('join',page,{source:'shared'});
-    publishCoverage(payload,page,'shared');
+    if(publish)publishCoverage(payload,page,'shared');
     return payload;
   }
   if(!force&&!preferBackend&&session?.authenticated===true){
@@ -188,7 +188,7 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
         assertCurrentAccount(session,payload);
         assertRenderablePagePayload(payload,page);
         if(!quiet)reportPreparedPageStage('join',page,{source:'cache'});
-        publishCoverage(payload,page,'cache');
+        if(publish)publishCoverage(payload,page,'cache');
         return payload;
       }catch(error){console.info('[Forge] Cached page needs a new display snapshot',error);}
     }
@@ -198,7 +198,7 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
   assertCurrentAccount(session);
   const key=`${membershipIdentity(session)}:${page}:${freshness}`;
   const active=requests.get(key);
-  if(active)return active;
+  if(active){const payload=await active;if(publish)publishCoverage(payload,page,'backend');return payload;}
   if(!requests.has(key))requests.set(key,(async()=>{
     const payload=await requestPreparedPagePayload(page,{fetchImpl,freshness,quiet});
     assertCurrentAccount(session,payload);
@@ -207,7 +207,7 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
       markPreparedPageCheckSuccess(session,page);
     }
     assertCurrentAccount(session,payload);
-    publishCoverage(payload,page,'backend');
+    if(publish)publishCoverage(payload,page,'backend');
     return payload;
   })());
   try{return await requests.get(key);}

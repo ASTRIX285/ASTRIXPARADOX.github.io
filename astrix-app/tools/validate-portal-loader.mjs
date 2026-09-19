@@ -126,7 +126,7 @@ console.log('BUILD_LOADER_EVENT_ORDER=PASS');
 
 // Synthetic DOM: the actual shared loader must not mount on a warm page,
 // but authentication and missing/corrupt caches must still be recoverable.
-function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astrix-app/pages/loadout/',storageError=false}={}){
+function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astrix-app/pages/loadout/',storageError=false,preparedEntry=false}={}){
   const classes=()=>{const names=new Set();return {add:name=>names.add(name),remove:name=>names.delete(name),contains:name=>names.has(name),toggle:(name,on)=>on?names.add(name):names.delete(name)};};
   const node=()=>({classList:classes(),style:{setProperty(){}},hidden:true,textContent:'',addEventListener(){},removeEventListener(){},querySelector(){return node();}});
   let mounts=0,gate=null,markup='',assetReads=0;
@@ -134,8 +134,9 @@ function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astr
   const session={authenticated:true,csrfToken:'synthetic',capabilities:{destinyActions:{}},activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};
   const records={'astrix:bungie-session-cache:v1':JSON.stringify({session})};
   if(warm)records['astrix:bungie-page-cache:v4:loadout']=JSON.stringify({scope:'loadout',identity,savedAt:Date.now()-age});
+  if(preparedEntry)records['astrix:prepared-navigation:v1']=JSON.stringify({path,at:Date.now()});
   const window={location:{pathname:path}};
-  runInNewContext(portalJs,{window,document,sessionStorage:{getItem(key){if(storageError)throw new Error('denied');return records[key]||null;}},Date,Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()});
+  runInNewContext(portalJs,{window,document,sessionStorage:{getItem(key){if(storageError)throw new Error('denied');return records[key]||null;},removeItem(key){delete records[key];}},Date,Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()});
   return {loader:window.ForgeLoader,document,mounts:()=>mounts,markup:()=>markup,assetReads:()=>assetReads};
 }
 const warmPortal=warmPortalHarness();assert.equal(warmPortal.mounts(),0,'Warm page entry must not replay the portal');
@@ -152,3 +153,89 @@ assert.equal(warmPortalHarness({storageError:true}).mounts(),1,'Unavailable stor
 assert.equal(warmPortalHarness({warm:false}).mounts(),1);
 console.log('WARM_NAVIGATION_NO_PORTAL_OR_ASSET_WAIT=PASS');
 console.log('WARM_NAVIGATION_AUTH_AND_CACHE_RECOVERY=PASS');
+
+// Synthetic transition: keep the old page until the real render milestone
+// AND a delayed visible image finish, not merely a cached account marker.
+function transitionHarness({headerPending=false}={}){
+  const documentEvents=new Map();
+  const events=new Map(),timers=new Map(),classes=new Set();let timerId=0,gate=null,finishImage;
+  const classList={add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)};
+  const item=()=>({classList:{add(){},remove(){},contains:()=>false,toggle(){}},style:{setProperty(){}},querySelector:()=>item(),addEventListener(){},removeEventListener(){},remove(){if(this===gate)gate=null;}});
+  const image={complete:false,closest:()=>null,getBoundingClientRect:()=>({width:50,height:50,top:10,left:10,right:60,bottom:60}),decode:()=>Promise.resolve(),addEventListener(name,fn){if(name==='load')finishImage=fn;},removeEventListener(){}};
+  const document={documentElement:{classList,dataset:{}},body:{classList,appendChild:node=>{gate=node;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:selector==='[data-forge-hero-cards]'&&headerPending?{}:null,querySelectorAll:selector=>selector==='img'?[image]:[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return item();}}),addEventListener(name,fn){documentEvents.set(name,[...(documentEvents.get(name)||[]),fn]);}};
+  const window={innerWidth:400,innerHeight:800,location:{pathname:'/astrix-app/pages/loadout/'},addEventListener:(name,fn)=>events.set(name,fn)};
+  runInNewContext(portalJs,{window,document,sessionStorage:{getItem:()=>null,removeItem(){}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>fn(),Promise,Date});
+  let finishTransition;
+  const transition={finished:new Promise(resolve=>{finishTransition=resolve;})};
+  return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===30000).fn(),gate:()=>gate};
+}
+const settleMicrotasks=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+const reveal=transitionHarness();reveal.emit();
+assert.ok(reveal.classes.has('apx-navigation-waiting'));
+await settleMicrotasks();assert.ok(reveal.classes.has('apx-navigation-waiting'),'Cache availability alone must not reveal an unfinished destination');
+reveal.loader.done();await settleMicrotasks();
+assert.ok(reveal.classes.has('apx-navigation-waiting'),'Data rendering must not reveal a still-loading viewport image');
+assert.equal(reveal.gate(),null,'The portal must be removed behind the outgoing snapshot, without a second portal fade');
+reveal.image();await settleMicrotasks();
+assert.ok(reveal.classes.has('apx-navigation-ready'));assert.equal(reveal.document.documentElement.dataset.navigationState,'ready');
+reveal.finish();await settleMicrotasks();assert.equal(reveal.classes.has('apx-navigation-waiting'),false);
+const recover=transitionHarness();recover.emit();recover.loader.blocked('Synthetic failure');await settleMicrotasks();assert.equal(recover.document.documentElement.dataset.navigationState,'recovery');
+const stalled=transitionHarness();stalled.emit();stalled.timeout();await settleMicrotasks();assert.equal(stalled.document.documentElement.dataset.navigationState,'recovery','A stalled page must release to retry instead of permanently freezing the old view');
+assert.match(portalCss,/@view-transition\{navigation:auto\}/);
+assert.match(portalCss,/apx-navigation-waiting::view-transition-old\(root\)\{animation:apxNavigationHold 1s both paused/);
+assert.match(portalCss,/prefers-reduced-motion:reduce[\s\S]*?apx-navigation-ready[\s\S]*?animation-duration:\.001s/);
+console.log('DESTINATION_RENDER_AND_VISIBLE_ASSET_REVEAL=PASS');
+
+const ribbonSource=await read('astrix-app/shared/astrix-destination-ribbon.js');
+function navigationHarness(){
+  const events=new Map(),requests=[],assigned=[],pending=new Map(),storage=new Map();let indicators=0;
+  storage.set('astrix:bungie-session-cache:v1',JSON.stringify({session:{authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}}}));
+  const makeLink=path=>({href:`https://astrixparadox.com${path}`,target:'',hasAttribute:()=>false,setAttribute(){},removeAttribute(){},closest(){return this;}});
+  const location={href:'https://astrixparadox.com/astrix-app/pages/journey/',origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/journey/',assign:path=>assigned.push(path)};
+  const document={currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
+  const window={addEventListener:(name,fn)=>events.set(name,fn)};
+  const fixturePrepare=destination=>{requests.push(destination.key);return new Promise((resolve,reject)=>pending.set(destination.key,{resolve,reject}));};
+  const source=ribbonSource.replace('  function init(){','  prepareData=fixturePrepare;prepareResources=async()=>{};window.testNavigation={navigatePrepared,prepare};\n  function init(){');
+  runInNewContext(source,{window,document,location,navigator:{},sessionStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},URL,Date,Promise,fixturePrepare,setTimeout,clearTimeout});
+  const click=(path,extra={})=>{let prevented=false;const link=makeLink(path);const event={button:0,target:link,preventDefault(){prevented=true;},...extra};const task=window.testNavigation.navigatePrepared(event);return {task,prevented:()=>prevented};};
+  return {click,assigned,requests,pending,storage,events,indicators:()=>indicators};
+}
+const navigation=navigationHarness();
+const firstNavigation=navigation.click('/astrix-app/pages/vault/');
+assert.equal(firstNavigation.prevented(),true);assert.equal(navigation.assigned.length,0,'Current page must remain until destination preparation completes');
+const replacementNavigation=navigation.click('/astrix-app/pages/loadout/');
+navigation.pending.get('vault').resolve();await firstNavigation.task;
+assert.equal(navigation.assigned.length,0,'A superseded click must not navigate when its old request completes');
+navigation.pending.get('loadout').resolve();await replacementNavigation.task;
+assert.deepEqual(navigation.assigned,['/astrix-app/pages/loadout/']);assert.equal(navigation.indicators(),0);
+assert.equal(JSON.parse(navigation.storage.get('astrix:prepared-navigation:v1')).path,'/astrix-app/pages/loadout/');
+const modified=navigation.click('/astrix-app/pages/vault/',{ctrlKey:true});await modified.task;assert.equal(modified.prevented(),false,'Modified clicks must keep native new-tab behavior');
+const changed=navigationHarness();const changing=changed.click('/astrix-app/pages/vault/');changed.storage.delete('astrix:bungie-session-cache:v1');changed.pending.get('vault').resolve();await changing.task;assert.equal(changed.assigned.length,0,'Account changes cancel pending navigation');
+const cancelled=navigationHarness();const cancelling=cancelled.click('/astrix-app/pages/vault/');cancelled.events.get('keydown')({key:'Escape'});cancelled.pending.get('vault').resolve();await cancelling.task;assert.equal(cancelled.assigned.length,0,'Escape leaves the current page usable');
+const failedPreparation=navigationHarness();const failing=failedPreparation.click('/astrix-app/pages/vault/');failedPreparation.pending.get('vault').reject(new Error('Synthetic offline'));await failing.task;assert.deepEqual(failedPreparation.assigned,['/astrix-app/pages/vault/'],'Preparation failure must retain the destination normal sign-in/retry path');
+assert.doesNotMatch(ribbonSource,/createElement\(['"]iframe|type=['"]speculationrules/,'Preparation must not execute another page or duplicate its account actions');
+console.log('PREPARED_NAVIGATION_ORDER_CANCEL_ACCOUNT_AND_NATIVE_LINKS=PASS');
+
+const delayedNavigationHeader=transitionHarness({headerPending:true});delayedNavigationHeader.emit();delayedNavigationHeader.loader.done();await settleMicrotasks();
+assert.ok(delayedNavigationHeader.classes.has('apx-navigation-waiting'),'Header completion is part of page readiness');
+delayedNavigationHeader.header();await settleMicrotasks();delayedNavigationHeader.image();await settleMicrotasks();
+assert.equal(delayedNavigationHeader.document.documentElement.dataset.navigationState,'ready');
+assert.equal(warmPortalHarness({preparedEntry:true}).mounts(),1,'Without native transitions a prepared click must retain its gate until the destination renderer finishes');
+console.log('HEADER_READINESS_AND_NON_TRANSITION_FALLBACK=PASS');
+const resourceCalls=[],consumed=[];
+const resourceSource=ribbonSource.slice(ribbonSource.indexOf('  async function prepareResources('),ribbonSource.indexOf('  async function prepareData('));
+const resourceContext={URL,AbortController,location:{origin:'https://astrixparadox.com'},setTimeout:()=>1,clearTimeout(){},
+  DOMParser:class {parseFromString(markup){assert.equal(markup,'synthetic page');return {querySelectorAll:()=>[
+    {getAttribute:key=>key==='href'?'./screen.css':null},
+    {getAttribute:key=>key==='src'?'./screen.js':null},
+    {getAttribute:key=>key==='src'?'./screen.js':null},
+    {getAttribute:key=>key==='src'?'https://other.example/private.js':null}
+  ]};}},
+  fetch:async(url,options)=>{resourceCalls.push({url:String(url),options});return {ok:true,text:async()=> 'synthetic page',arrayBuffer:async()=>{consumed.push(String(url));return new ArrayBuffer(0);}};}
+};
+runInNewContext(resourceSource,resourceContext);
+await resourceContext.prepareResources({href:'/astrix-app/pages/loadout/'});
+assert.equal(resourceCalls.length,3,'Preparation requests only the document and distinct same-origin resources');
+assert.equal(consumed.length,2,'Resource bodies must finish downloading before preparation resolves');
+assert.ok(resourceCalls.every(row=>!row.options.method||row.options.method==='GET'),'Preparing a destination must perform no account mutations');
+console.log('DESTINATION_RESOURCES_READ_ONLY_AND_FULLY_DOWNLOADED=PASS');

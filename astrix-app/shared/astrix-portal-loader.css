@@ -110,3 +110,19 @@ body.apx-loading{overflow:hidden!important}
   .apx-status{margin:0;font-size:.62rem;letter-spacing:.2em}
   .apx-auth-panel,.apx-failure-panel{box-sizing:border-box;width:min(420px,90vw);padding:14px 16px}
 }
+
+/* Native cross-document transitions retain the outgoing rendered page while
+   the destination resolves. No page geometry or equipment sizes change. */
+@view-transition{navigation:auto}
+@keyframes apxNavigationHold{from{opacity:1}to{opacity:1}}
+@keyframes apxNavigationOut{from{opacity:1}to{opacity:0}}
+@keyframes apxNavigationIn{from{opacity:0}to{opacity:1}}
+.apx-navigation-waiting::view-transition-old(root){animation:apxNavigationHold 1s both paused;mix-blend-mode:normal}
+.apx-navigation-waiting::view-transition-new(root){animation:none;opacity:0;mix-blend-mode:normal}
+.apx-navigation-ready::view-transition-old(root){animation:apxNavigationOut .12s both;mix-blend-mode:normal}
+.apx-navigation-ready::view-transition-new(root){animation:apxNavigationIn .12s both;mix-blend-mode:normal}
+@media(prefers-reduced-motion:reduce){
+  .apx-navigation-ready::view-transition-old(root),.apx-navigation-ready::view-transition-new(root){animation-duration:.001s}
+}
+
+.apx-navigation-progress{position:fixed;right:16px;bottom:16px;z-index:100000;padding:8px 12px;border:1px solid var(--apx-loader-gold);background:#100d10;color:#fff;font:700 14px sans-serif;pointer-events:none}

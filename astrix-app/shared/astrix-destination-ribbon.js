@@ -11,6 +11,97 @@
     Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
   ]);
 
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
+  const prepared=new Map();
+  let navigationRevision=0,intentTimer=null,progress=null;
+  const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey'};
+  function accountIdentity(){
+    try{
+      const session=window.FORGE_BUNGIE_SESSION||JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session;
+      const membership=session?.activeDestinyMembership;
+      return session?.authenticated&&membership?.membershipId?`${membership.membershipType}:${membership.membershipId}`:'';
+    }catch{return '';}
+  }
+  function destinationFor(link){
+    if(!link||link.hasAttribute('download')||link.target&&link.target!=='_self')return null;
+    const url=new URL(link.href,location.href);
+    if(url.origin!==location.origin||url.search||url.hash)return null;
+    return destinations.find(row=>row.href===url.pathname&&row.href!==location.pathname)||null;
+  }
+  async function prepareResources(destination){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+    try{
+      const response=await fetch(destination.href,{credentials:'same-origin',cache:'force-cache',signal:controller.signal});
+      if(!response.ok)throw new Error('Page resources unavailable');
+      const markup=new DOMParser().parseFromString(await response.text(),'text/html');
+      const seen=new Set();
+      const resources=[...markup.querySelectorAll('link[rel="stylesheet"][href],script[src]')];
+      await Promise.all(resources.map(node=>{
+        const url=new URL(node.getAttribute('href')||node.getAttribute('src'),new URL(destination.href,location.origin));
+        if(url.origin!==location.origin||seen.has(url.href))return;
+        seen.add(url.href);
+        // Warm public resources without executing another page's scripts or
+        // mounting duplicate account handlers, editors or Bungie actions.
+        return fetch(url,{credentials:'same-origin',cache:'force-cache',signal:controller.signal}).then(resource=>resource.arrayBuffer()).catch(()=>{});
+      }));
+    }finally{clearTimeout(timer);}
+  }
+  async function prepareData(destination){
+    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2',scriptUrl).href);
+    const session=readCachedBungieSession();
+    if(!session?.authenticated)return;
+    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1',scriptUrl).href);
+    await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
+  }
+  function prepare(destination){
+    const identity=accountIdentity(),key=`${identity}:${destination.key}`;
+    const existing=prepared.get(key);
+    if(existing&&Date.now()-existing.startedAt<60000)return existing.promise;
+    const promise=Promise.all([prepareResources(destination),prepareData(destination)]);
+    prepared.set(key,{startedAt:Date.now(),promise});
+    promise.catch(()=>{if(prepared.get(key)?.promise===promise)prepared.delete(key);});
+    return promise;
+  }
+  function showProgress(value){
+    if(!progress){
+      progress=document.createElement('output');progress.className='apx-navigation-progress';
+      progress.setAttribute('role','status');progress.setAttribute('aria-live','polite');
+      document.body.append(progress);
+    }
+    progress.textContent=`${value}%`;
+  }
+  function clearNavigation(){
+    navigationRevision++;progress?.remove();progress=null;
+    document.querySelectorAll('.apx-destination-ribbon [aria-busy]').forEach(link=>link.removeAttribute('aria-busy'));
+  }
+  function prepareIntent(event){
+    clearTimeout(intentTimer);
+    if(navigator.connection?.saveData||document.visibilityState==='hidden')return;
+    const destination=destinationFor(event.target.closest('a'));
+    if(!destination)return;
+    intentTimer=setTimeout(()=>{void prepare(destination).catch(()=>{});},event.type==='pointerdown'?0:120);
+  }
+  async function navigatePrepared(event){
+    if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+    const link=event.target.closest('a'),destination=destinationFor(link);
+    if(!destination)return;
+    event.preventDefault();clearTimeout(intentTimer);clearNavigation();
+    const revision=navigationRevision,identity=accountIdentity();
+    link.setAttribute('aria-busy','true');showProgress(8);
+    try{await prepare(destination);}catch{/* Normal navigation retains sign-in and retry recovery. */}
+    if(revision!==navigationRevision)return;
+    if(identity!==accountIdentity()){clearNavigation();return;}
+    try{sessionStorage.setItem('astrix:prepared-navigation:v1',JSON.stringify({path:destination.href,at:Date.now()}));}catch{}
+    clearNavigation();location.assign(destination.href);
+  }
+  window.addEventListener('pageshow',clearNavigation);
+  let observedIdentity=accountIdentity();
+  window.addEventListener('forge:bungie-session',()=>{
+    const next=accountIdentity();
+    if(next!==observedIdentity){observedIdentity=next;prepared.clear();clearNavigation();}
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){clearTimeout(intentTimer);clearNavigation();}});
+
   function handleKeyboard(event){
     const current=event.target.closest('a');
     if(!current)return;
@@ -45,6 +136,11 @@
       list.append(item);
     });
     list.addEventListener('keydown',handleKeyboard);
+    list.addEventListener('click',navigatePrepared);
+    list.addEventListener('pointerover',prepareIntent);
+    list.addEventListener('focusin',prepareIntent);
+    list.addEventListener('pointerdown',prepareIntent);
+    list.addEventListener('pointerleave',()=>clearTimeout(intentTimer));
     nav.append(list);
     mount.replaceChildren(nav);
   }
