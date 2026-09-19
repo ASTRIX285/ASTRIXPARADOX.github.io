@@ -84,7 +84,7 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 @media(max-width:900px){.paradox-loadout-shell{grid-template-columns:minmax(0,1fr)}.paradox-loadout-list{position:static;max-height:220px}.paradox-loadout-list-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}}
 @media(max-width:600px){.paradox-editor-grid{grid-template-columns:minmax(0,1fr)}}
 
-/* Existing in-game slot geometry: viewport scaling and 100/122 ratio. */
+/* Loadout-only balance: match 50px gear width and keep the 100/122 rectangle. */
 .guardian-loadouts-strip{
   display:grid!important;
   gap:6px!important;
@@ -118,14 +118,15 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 }
 .guardian-loadouts-strip .guardian-loadouts-grid{
   display:grid!important;
-  grid-template-columns:repeat(20,minmax(32px,1fr))!important;
+  grid-template-columns:repeat(20,50px)!important;
   grid-template-rows:1fr!important;
   gap:4px!important;
-  width:100%!important;
+  width:max-content!important;
   max-width:none!important;
   overflow:visible!important;
 }
 .guardian-loadouts-strip .guardian-loadout-slot{
+  box-sizing:border-box!important;
   position:relative!important;
   display:grid!important;
   place-items:center!important;
