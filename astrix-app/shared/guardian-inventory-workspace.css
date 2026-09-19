@@ -95,6 +95,18 @@
 .character-inventory-workspace .vault-character-column{width:100%}
 .character-inventory-workspace .vault-transfer-items{gap:6px;flex-wrap:wrap;overflow:visible}
 
+/* Character weapon cards match the requested 75 by 91.5 loadout reference. */
+body.guardian-main-page .character-inventory-workspace .vault-transfer-item[data-item-kind="weapon"]{
+  --character-weapon-size:75px;
+  --apx-icon-gear-art-width:var(--character-weapon-size);
+  --apx-icon-gear-art-height:calc(var(--character-weapon-size) * 1.22);
+  --apx-tile-height:calc(var(--character-weapon-size) * 1.22);
+  --apx-tile-art-height:var(--character-weapon-size);
+  --apx-tile-footer-top:calc(var(--character-weapon-size) - 1px);
+  --apx-tile-badge-height:calc(var(--character-weapon-size) * .22 + 1px);
+  --apx-tile-label-size:calc(var(--character-weapon-size) * .18);
+}
+
 @media(max-width:1025px){.character-inventory-workspace{--character-item-size:48px}}
 
 @media(max-width:1200px){.vault-character-columns{grid-template-columns:1fr}.vault-character-column{display:grid}.vault-character-section{border:0}}
