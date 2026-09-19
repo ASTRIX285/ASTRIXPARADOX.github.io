@@ -101,3 +101,63 @@ console.log('SHARED_PAGE_PROGRESS=PASS');
 console.log('SHARED_PAGE_SHELL=PASS');
 console.log('WORKER_STREAMING_PAGE_BUNDLE=PASS');
 console.log('BACKEND_PREPARED_WORKSPACE=PASS');
+
+// Synthetic browser storage: exercise warm navigation through the real client.
+const {loadPreparedPagePayload}=await import('../core/prepared-page-client.mjs');
+const {cacheBungieProfile}=await import('../pages/guardian-workspace-v2/guardian-session-cache.mjs');
+const memoryStorage=()=>{const rows=new Map();return {getItem:key=>rows.get(key)||null,setItem:(key,value)=>rows.set(key,String(value)),removeItem:key=>rows.delete(key)};};
+globalThis.sessionStorage=memoryStorage();globalThis.localStorage=memoryStorage();
+const account={authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};
+const journeyCache=normalizePreparedPagePayload(envelope('journey'),'journey');
+await cacheBungieProfile(account,journeyCache,'journey');
+let gateRequests=0,foregroundProgress=0;
+globalThis.ForgeLoader={requireData(){gateRequests++;},set(){foregroundProgress++;},status(){}};
+const cached=await loadPreparedPagePayload(account,'journey',{fetchImpl:()=>{throw new Error('Warm navigation must not wait for the network');}});
+assert.equal(cached.pageReady.page,'journey');assert.equal(gateRequests,0);
+const oldProgress=foregroundProgress;
+let liveRelease;
+const refreshing=loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:request=>{
+  assert.equal(new URL(request).searchParams.get('freshness'),'live');
+  return new Promise(resolve=>{liveRelease=()=>resolve(Response.json(envelope('journey')));});
+}});
+assert.equal(foregroundProgress,oldProgress,'Background live requests must not emit loader progress');
+assert.equal(gateRequests,0,'Background live requests must not reopen the gate');
+assert.ok(liveRelease,'A forced refresh must still reach the live backend');
+liveRelease();await refreshing;
+await assert.rejects(loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>{throw new Error('synthetic offline');}}),/synthetic offline/);
+assert.equal((await loadPreparedPagePayload(account,'journey',{fetchImpl:()=>{throw new Error('Cache lost after refresh failure');}})).pageReady.page,'journey');
+
+// Different memberships must never share an in-flight response.
+const otherAccount={authenticated:true,activeDestinyMembership:{membershipId:'synthetic-b',membershipType:3}};
+const releases=[];
+const fetchPending=async()=>new Promise(resolve=>releases.push(()=>resolve(Response.json(envelope('vault')))));
+const first=loadPreparedPagePayload(account,'vault',{force:true,fetchImpl:fetchPending});
+const second=loadPreparedPagePayload(otherAccount,'vault',{force:true,fetchImpl:fetchPending});
+assert.equal(releases.length,2,'Requests must be deduplicated within a membership, never across accounts');
+releases.forEach(release=>release());await Promise.all([first,second]);
+
+await cacheBungieProfile(account,{...journeyCache,pageReady:{...journeyCache.pageReady,manifestVersion:null}},'journey');
+const priorGates=gateRequests;
+let recovered=0;
+await loadPreparedPagePayload(account,'journey',{fetchImpl:async()=>{recovered++;return Response.json(envelope('journey'));}});
+assert.equal(recovered,1,'An invalid cached render contract must fetch a new display snapshot');
+assert.equal(gateRequests,priorGates+1,'A warm hint with missing usable data must restore the cold loader');
+
+for(const page of WORKSPACE_PRELOAD_PAGES){
+  const entry=normalizePreparedPagePayload(envelope(page),page);
+  entry.characterBuildCoverage={schemaVersion:2,complete:true};
+  entry.weaponDefinitionCoverage={schemaVersion:1};
+  await cacheBungieProfile(account,entry,page);
+}
+const warmed=await preloadPreparedWorkspace(account,{fetchImpl:()=>{throw new Error('Repeat Journey navigation must reuse already prepared pages');}});
+assert.deepEqual(warmed.ready,WORKSPACE_PRELOAD_PAGES);assert.deepEqual(warmed.failed,[]);
+console.log('WARM_PAGE_CACHE_AND_QUIET_REFRESH=PASS');
+console.log('PAGE_REQUEST_MEMBERSHIP_ISOLATION=PASS');
+let releaseSwitched;
+globalThis.FORGE_BUNGIE_SESSION=account;
+const switchedRequest=loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>new Promise(resolve=>{releaseSwitched=()=>resolve(Response.json(envelope('journey')));})});
+globalThis.FORGE_BUNGIE_SESSION=otherAccount;
+releaseSwitched();await assert.rejects(switchedRequest,/membership changed/,'A late response must not be cached or published after switching accounts');
+delete globalThis.FORGE_BUNGIE_SESSION;
+await assert.rejects(loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>Response.json({...journeyCache,membership:{membershipId:'another-account',membershipType:3}})}),/different Bungie membership/);
+console.log('LATE_RESPONSE_ACCOUNT_GUARD=PASS');

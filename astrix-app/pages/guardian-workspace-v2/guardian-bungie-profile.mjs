@@ -10,7 +10,7 @@ import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,we
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
 import {
   cacheBungieProfile,
   readCachedBungieProfile,
@@ -980,7 +980,7 @@ async function loadLiveProfile(session,{background=false}={}){
   const page=currentPagePayloadKind();
   const profilePayload=await loadPreparedPagePayload(session,page,{force:true});
   const payload=await hydrateManifestPayload(profilePayload,INITIAL_PROFILE_HYDRATION);
-  reportPreparedPageStage('render',page);
+  if(!background)reportPreparedPageStage('render',page);
   const detail=await activateLiveProfile(payload,session);
   void cacheBungieProfile(session,payload,page).catch(error=>console.warn("[Forge Bungie profile] profile cache write failed",error));
   return detail;
@@ -1067,11 +1067,10 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
       }
     }
     liveProfileReady=true;
-    try{return await loadLiveProfile(session,{background:true});}
-    catch(error){
-      console.warn("[Forge Bungie profile] fresh Bungie refresh failed; retaining the verified displayed profile",error);
-      return displayedDetail;
-    }
+    void loadLiveProfile(session,{background:true}).catch(error=>{
+      console.warn("[Forge Bungie profile] fresh Bungie refresh failed; retaining the displayed profile",error);
+    });
+    return displayedDetail;
   })()
     .then(detail=>{
       liveProfileReady=Boolean(liveProfilePayload?.profile);

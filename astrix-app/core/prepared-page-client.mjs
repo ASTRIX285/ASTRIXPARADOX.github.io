@@ -150,6 +150,16 @@ async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind
   }
 }
 
+function membershipIdentity(session){
+  const membership=session?.activeDestinyMembership||{};
+  return `${membership.membershipType??''}:${membership.membershipId||session?.primaryMembershipId||session?.bungieMembershipId||''}`;
+}
+function assertCurrentAccount(session,payload){
+  const current=globalThis.FORGE_BUNGIE_SESSION;
+  if(current&&(current.authenticated!==true||membershipIdentity(current)!==membershipIdentity(session)))throw new Error('Bungie membership changed while loading this page.');
+  if(payload?.membership?.membershipId&&`${payload.membership.membershipType}:${payload.membership.membershipId}`!==membershipIdentity(session))throw new Error('Prepared data belongs to a different Bungie membership.');
+}
+
 function publishCoverage(payload,page,source){
   const complete=payload?.pageReady?.coverage?.complete===true;
   if(globalThis.document?.documentElement){
@@ -159,11 +169,12 @@ function publishCoverage(payload,page,source){
   globalThis.document?.dispatchEvent?.(new CustomEvent('forge:prepared-page-loaded',{detail:{page,payload,source,complete,missing:payload?.pageReady?.coverage?.missing||[]}}));
 }
 
-async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=false}={}){
+async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=force}={}){
   const page=pageKind(pageValue);
   if(!quiet){reportPreparedPageStage('start',page);reportPreparedPageStage('session',page);}
   if(!force&&!preferBackend&&sharedPayload?.pageReady?.page===page&&sharedPayload?.profile){
     const payload=normalizePreparedPagePayload(sharedPayload,page);
+    assertCurrentAccount(session,payload);
     assertRenderablePagePayload(payload,page);
     if(!quiet)reportPreparedPageStage('join',page,{source:'shared'});
     publishCoverage(payload,page,'shared');
@@ -172,23 +183,30 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
   if(!force&&!preferBackend&&session?.authenticated===true){
     const cached=await readCachedBungieProfile(session,page);
     if(cached?.pageReady?.page===page&&cached?.profile){
-      const payload=normalizePreparedPagePayload(cached,page);
-      assertRenderablePagePayload(payload,page);
-      if(!quiet)reportPreparedPageStage('join',page,{source:'cache'});
-      publishCoverage(payload,page,'cache');
-      return payload;
+      try{
+        const payload=normalizePreparedPagePayload(cached,page);
+        assertCurrentAccount(session,payload);
+        assertRenderablePagePayload(payload,page);
+        if(!quiet)reportPreparedPageStage('join',page,{source:'cache'});
+        publishCoverage(payload,page,'cache');
+        return payload;
+      }catch(error){console.info('[Forge] Cached page needs a new display snapshot',error);}
     }
   }
+  if(!quiet)globalThis.ForgeLoader?.requireData?.();
   const freshness=force?'live':'display';
-  const key=`${page}:${freshness}`;
+  assertCurrentAccount(session);
+  const key=`${membershipIdentity(session)}:${page}:${freshness}`;
   const active=requests.get(key);
   if(active)return active;
   if(!requests.has(key))requests.set(key,(async()=>{
     const payload=await requestPreparedPagePayload(page,{fetchImpl,freshness,quiet});
+    assertCurrentAccount(session,payload);
     if(session?.authenticated===true){
       await cacheBungieProfile(session,payload,page);
       markPreparedPageCheckSuccess(session,page);
     }
+    assertCurrentAccount(session,payload);
     publishCoverage(payload,page,'backend');
     return payload;
   })());
@@ -203,7 +221,12 @@ async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,f
     const page=pageKind(value);
     if(page==='journey')continue;
     try{
-      await loadPreparedPagePayload(session,page,{preferBackend:true,fetchImpl,quiet:true});
+      // Revisiting Journey must not download the entire workspace again.
+      // Active pages retain their existing background freshness controllers.
+      const cached=await readCachedBungieProfile(session,page);
+      let usable=false;
+      try{assertRenderablePagePayload(cached,page);usable=true;}catch{}
+      if(!usable)await loadPreparedPagePayload(session,page,{preferBackend:true,fetchImpl,quiet:true});
       ready.push(page);
       globalThis.document?.dispatchEvent?.(new CustomEvent('forge:workspace-page-prepared',{detail:{page}}));
     }catch(error){
