@@ -40,6 +40,20 @@
         const url=new URL(node.getAttribute('href')||node.getAttribute('src'),new URL(destination.href,location.origin));
         if(url.origin!==location.origin||seen.has(url.href))return;
         seen.add(url.href);
+        if(node.getAttribute('type')==='module'){
+          const preload=document.createElement('link');
+          if(preload.relList?.supports('modulepreload'))return new Promise(resolve=>{
+            const finish=()=>{
+              preload.removeEventListener('load',finish);preload.removeEventListener('error',finish);
+              controller.signal.removeEventListener('abort',finish);preload.remove();resolve();
+            };
+            preload.rel='modulepreload';preload.href=url.href;
+            preload.addEventListener('load',finish,{once:true});preload.addEventListener('error',finish,{once:true});
+            controller.signal.addEventListener('abort',finish,{once:true});
+            if(controller.signal.aborted){finish();return;}
+            document.head.append(preload);
+          });
+        }
         // Warm public resources without executing another page's scripts or
         // mounting duplicate account handlers, editors or Bungie actions.
         return fetch(url,{credentials:'same-origin',cache:'force-cache',signal:controller.signal}).then(resource=>resource.arrayBuffer()).catch(()=>{});

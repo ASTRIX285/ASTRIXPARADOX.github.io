@@ -239,3 +239,13 @@ assert.equal(resourceCalls.length,3,'Preparation requests only the document and 
 assert.equal(consumed.length,2,'Resource bodies must finish downloading before preparation resolves');
 assert.ok(resourceCalls.every(row=>!row.options.method||row.options.method==='GET'),'Preparing a destination must perform no account mutations');
 console.log('DESTINATION_RESOURCES_READ_ONLY_AND_FULLY_DOWNLOADED=PASS');
+const modulePreloads=[];
+resourceContext.DOMParser=class {parseFromString(){return {querySelectorAll:()=>[{getAttribute:key=>key==='type'?'module':key==='src'?'./screen.mjs':null}]};}};
+resourceContext.document={
+  createElement:tag=>{assert.equal(tag,'link');const handlers=new Map();return {relList:{supports:value=>value==='modulepreload'},addEventListener:(name,fn)=>handlers.set(name,fn),removeEventListener:name=>handlers.delete(name),remove(){},loaded:()=>handlers.get('load')()};},
+  head:{append:link=>{modulePreloads.push(link);queueMicrotask(()=>link.loaded());}}
+};
+await resourceContext.prepareResources({href:'/astrix-app/pages/loadout/'});
+assert.equal(modulePreloads.length,1);assert.equal(modulePreloads[0].rel,'modulepreload');
+assert.equal(modulePreloads[0].href,'https://astrixparadox.com/astrix-app/pages/loadout/screen.mjs');
+console.log('DESTINATION_MODULES_PREPARED_WITHOUT_EXECUTION=PASS');
