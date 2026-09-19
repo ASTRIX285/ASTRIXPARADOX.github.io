@@ -9,6 +9,7 @@ import {
 } from "./auth-record";
 import { allowedOrigins, approvedReturnUrl, handlePreflight, json, withCors } from "./web";
 import { profileSections } from "./profile-sections";
+import { paradoxLoadoutsRoute } from "./paradox-loadouts";
 import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./page-semantics";
 import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
 
@@ -2309,6 +2310,7 @@ export default {
       }
       if (request.method === "GET" && url.pathname === "/bungie/callback") return oauthCallback(request, env);
       if (request.method === "GET" && url.pathname === "/session") return sessionRoute(request, env);
+      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/paradox/loadouts") return paradoxLoadoutsRoute(request, env, authenticatedSession);
       if (request.method === "GET" && url.pathname === "/session/recover") return sessionRecoveryRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/account") return bungieAccountRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/manifest") return manifestMetadataRoute(request, env);

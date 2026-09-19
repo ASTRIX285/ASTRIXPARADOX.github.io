@@ -21,7 +21,7 @@ import {BUILD_ELEMENTS,validateTierFiveArmour} from './paradox-build-recommendat
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
-import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260905-manual-editor-1';
+import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
@@ -246,12 +246,12 @@ function openSaveParadoxDialog(suggestedName=''){
   const updating=Boolean(build.savedParadoxLoadoutId),title=byId('saveParadoxTitle'),submit=byId('saveParadoxForm')?.querySelector('[type="submit"]');
   if(title)title.textContent=updating?'UPDATE PARADOX LOADOUT':'SAVE PARADOX LOADOUT';if(submit)submit.textContent=updating?'UPDATE PARADOX COPY':'SAVE PARADOX COPY';
   byId('saveParadoxName').value=suggestedName||build.savedParadoxLoadoutName||`${String(build.characterClass||'Guardian').toUpperCase()} · ${build.subclassName||build.subclass||'BUILD'}`;
-  byId('saveParadoxDescription').value=build.savedParadoxLoadoutDescription||'';byId('saveParadoxStatus').textContent=updating?'This updates the named browser-only PARADOX record. Its Bungie source slot remains untouched.':'This creates a named copy in this browser only. It does not sync across devices or overwrite a Bungie slot.';dialog.hidden=false;document.body.classList.add('working-dialog-open');queueMicrotask(()=>byId('saveParadoxName')?.select());
+  byId('saveParadoxDescription').value=build.savedParadoxLoadoutDescription||'';byId('saveParadoxStatus').textContent=updating?'This updates your PARADOX build and syncs it to your account in the background.':'This saves a named PARADOX build locally and syncs it to your account in the background. It is separate from Bungie slots.';dialog.hidden=false;document.body.classList.add('working-dialog-open');queueMicrotask(()=>byId('saveParadoxName')?.select());
 }
 function closeSaveParadoxDialog(){const dialog=byId('saveParadoxDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');byId('saveParadoxBuild')?.focus();}
 async function submitParadoxSave(event){
   event.preventDefault();const status=byId('saveParadoxStatus'),button=event.currentTarget.querySelector('[type="submit"]');if(button)button.disabled=true;
-  try{const build=currentBuild(),record=await saveParadoxLoadout({id:build?.savedParadoxLoadoutId||null,name:byId('saveParadoxName').value,description:byId('saveParadoxDescription').value,build});if(!record)throw new Error('The browser could not persist this PARADOX loadout.');const state=readState();if(state?.workingBuild)writeState({...state,workingBuild:{...state.workingBuild,savedParadoxLoadoutId:record.id,savedParadoxLoadoutName:record.name,savedParadoxLoadoutDescription:record.description}});closeSaveParadoxDialog();setLiveActionBanner(`PARADOX loadout “${record.name}” saved separately from Bungie slots.`,'good');}
+  try{const build=currentBuild(),record=await saveParadoxLoadout({id:build?.savedParadoxLoadoutId||null,expectedRevision:build?.savedParadoxLoadoutRevision,name:byId('saveParadoxName').value,description:byId('saveParadoxDescription').value,build});if(!record)throw new Error('The browser could not persist this PARADOX loadout.');const state=readState();if(state?.workingBuild)writeState({...state,workingBuild:{...state.workingBuild,savedParadoxLoadoutId:record.id,savedParadoxLoadoutRevision:record.revision,savedParadoxLoadoutName:record.name,savedParadoxLoadoutDescription:record.description}});closeSaveParadoxDialog();setLiveActionBanner(`PARADOX loadout “${record.name}” saved separately from Bungie slots.`,'good');}
   catch(error){if(status){status.className='is-bad';status.textContent=error?.message||'Unable to save this PARADOX loadout.';}}
   finally{if(button)button.disabled=false;}
 }
