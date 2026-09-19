@@ -16,7 +16,30 @@
     window.ForgeLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,blocked:noop,skipped:true};
     return;
   }
-  document.documentElement.classList.add('apx-booting');
+  // A matching page cache lets navigation paint without replaying the portal.
+  // This is only a presentation hint. The page client still validates the
+  // cached payload and reopens the gate if it has to fetch missing data.
+  function hasWarmPage(){
+    try{
+      var path=window.location.pathname;
+      var page=path.includes('/paradox-build-space/')?'build-forge':
+        /\/pages\/guardian-workspace-v2\/(?:index\.html)?$/.test(path)?'character':
+        path.includes('/pages/journey/')||path.includes('/pages/mission-reports/')?'journey':
+        path.includes('/pages/vault/')?'vault':
+        path.includes('/pages/loadout/')||path.includes('/pages/forge-loader/')?'loadout':'';
+      if(!page)return false;
+      var session=JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session;
+      var membership=session?.activeDestinyMembership;
+      if(!session?.authenticated||!session?.csrfToken||!session?.capabilities?.destinyActions||!membership?.membershipId)return false;
+      var identity=String(membership.membershipType)+':'+String(membership.membershipId);
+      var marker=JSON.parse(sessionStorage.getItem('astrix:bungie-page-cache:v4:'+page)||'null');
+      var age=Date.now()-Number(marker?.savedAt||0);
+      return marker?.identity===identity&&marker?.scope===page&&age>=0&&age<=12*60*60*1000;
+    }catch{return false;}
+  }
+  var warmNavigation=hasWarmPage();
+  if(!warmNavigation)document.documentElement.classList.add('apx-booting');
+  else document.documentElement.classList.remove('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
@@ -50,7 +73,7 @@
           '<span></span>'+
           '<button class="apx-auth-button apx-retry-button" type="button">RETRY LIVE DATA</button>'+
         '</div>'+
-        '<p class="apx-status">Opening portal</p>'+
+        // Loading copy is percentage-only. Status calls remain API-compatible.
       '</div>'+
     '</div>';
   }
@@ -84,8 +107,9 @@
     if(pendingDone)finish();
   }
   function mount(){
+    if(warmNavigation||pendingDone)return;
     if(document.querySelector('.apx-gate')){
-      cache();apply();document.documentElement.classList.remove('apx-booting');return;
+      cache();gate.classList.remove('is-done');document.body.classList.add('apx-loading');apply();document.documentElement.classList.remove('apx-booting');return;
     }
     if(!document.body)return;
     var wrap=document.createElement('div');wrap.innerHTML=markup();
@@ -107,14 +131,18 @@
     pendingStatus=String(t||'Opening portal');
     if(status)status.textContent=pendingStatus;
   }
+  function requireData(){
+    if(pendingDone)return;
+    warmNavigation=false;mount();
+  }
   function authRequired(url){
     pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
-    setStatus('Bungie authentication required');applyAuth();
+    warmNavigation=false;mount();setStatus('Bungie authentication required');applyAuth();
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
     pendingBlockedMessage=String(message||'Verified live Guardian data is unavailable.');pendingDone=false;
-    setStatus('Live Guardian data unavailable');applyBlocked();
+    warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();
   }
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
@@ -126,6 +154,7 @@
     return Promise.race([load,new Promise(function(resolve){setTimeout(resolve,ASSET_WAIT_MS);})]);
   }
   function ready(root){
+    if(warmNavigation){done();return Promise.resolve();}
     var target=root&&root.querySelectorAll?root:document;
     var fonts=document.fonts&&document.fonts.ready?document.fonts.ready.catch(function(){}):Promise.resolve();
     var images=Array.prototype.slice.call(target.querySelectorAll('img')).filter(function(image){
@@ -143,7 +172,7 @@
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');
     var removeGate=function(event){
-      if(event.target!==gate)return;
+      if(event.target!==gate||!pendingDone)return;
       gate.removeEventListener('transitionend',removeGate);
       if(gate&&gate.parentNode)gate.remove();
     };
@@ -159,5 +188,5 @@
     bodyObserver.observe(document.documentElement,{childList:true});
     document.addEventListener('DOMContentLoaded',function(){bodyObserver.disconnect();mount();},{once:true});
   }
-  window.ForgeLoader={mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
+  window.ForgeLoader={requireData:requireData,mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
 })();

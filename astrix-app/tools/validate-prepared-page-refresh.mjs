@@ -164,3 +164,48 @@ for(const [page,[html,runtime,requestPattern]] of Object.entries(pages)){
 }
 
 console.log('PREPARED_PAGE_REFRESH_VALIDATOR=PASS');
+
+// Character startup must resolve its cached display while live Bungie is stalled.
+const {runInNewContext}=await import('node:vm');
+const profileSource=read('astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs');
+const startupSource=profileSource.slice(profileSource.indexOf('function ensureLiveProfile('),profileSource.indexOf('async function handleAuthenticatedSession('));
+let releaseLive,startupActivations=0,backgroundStarts=0;
+const syntheticDisplay={characterId:'synthetic-guardian'};
+const startupContext={
+  liveProfileReady:false,liveProfileRequest:null,liveProfilePayload:{profile:{}},console,
+  readCachedBungieProfile:async()=>({profile:{}}),currentPagePayloadKind:()=> 'character',
+  assertRenderablePagePayload(){},hydrateManifestPayload:async value=>value,INITIAL_PROFILE_HYDRATION:{},
+  activateLiveProfile:async()=>{startupActivations++;return syntheticDisplay;},
+  loadLiveProfile:async(_session,options)=>{assert.equal(options.background,true);backgroundStarts++;return new Promise(resolve=>{releaseLive=resolve;});},
+  reportProfileError:error=>{throw error;}
+};
+runInNewContext(startupSource,startupContext);
+let startupFinished=false;
+const initialDisplay=startupContext.ensureLiveProfile(session).then(value=>{startupFinished=true;return value;});
+for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));
+assert.equal(startupFinished,true,'Character must return its cached display before the background network request completes');
+assert.equal(await initialDisplay,syntheticDisplay);assert.equal(startupActivations,1);assert.equal(backgroundStarts,1);
+releaseLive(syntheticDisplay);
+console.log('CHARACTER_CACHED_STARTUP_DOES_NOT_AWAIT_REFRESH=PASS');
+
+const loadoutSource=read('astrix-app/pages/loadout/paradox-loadouts.mjs');
+const displayRefreshSource=loadoutSource.slice(loadoutSource.indexOf('async function refreshDisplayedLoadout('),loadoutSource.indexOf('function checkDisplayRefresh('));
+for(const scenario of ['idle','action-started','editor-open','account-changed']){
+  let resolveFetch,rendered=0;
+  const ctx={busy:false,loading:false,session:{authenticated:true},refreshVersion:0,characterId:'synthetic-guardian',payload:{old:true},dialogOpen:false,changed:false,
+    dialog:()=>({open:ctx.dialogOpen}),guardContext:()=>()=>{if(ctx.changed)throw new Error('Synthetic account changed');},
+    loadPreparedPagePayload:async(_session,page,options)=>{assert.equal(page,'loadout');assert.equal(options.force,true);assert.equal(options.quiet,true);return new Promise(resolve=>{resolveFetch=resolve;});},
+    preparePayload:async value=>value,normaliseLiveProfile:()=>({}),emit(){},render(){rendered++;}
+  };
+  runInNewContext(displayRefreshSource,ctx);
+  const refresh=ctx.refreshDisplayedLoadout();
+  if(scenario==='action-started')ctx.refreshVersion++;
+  if(scenario==='editor-open')ctx.dialogOpen=true;
+  if(scenario==='account-changed')ctx.changed=true;
+  assert.equal(ctx.busy,false,'Background loading must not disable user controls');
+  resolveFetch({fresh:true});
+  if(scenario==='account-changed')await assert.rejects(refresh,/account changed/);
+  else await refresh;
+  assert.equal(rendered,scenario==='idle'?1:0,'Late display refreshes must not interrupt an action, editor or account switch');
+}
+console.log('LOADOUT_BACKGROUND_REFRESH_PRESERVES_INTERACTION=PASS');

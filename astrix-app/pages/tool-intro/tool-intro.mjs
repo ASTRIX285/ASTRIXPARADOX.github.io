@@ -1,3 +1,4 @@
+import {readCachedBungieSession,cacheBungieSession} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
 import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-step-1&transport=20260911-compact-plugs-1';
 
@@ -27,6 +28,8 @@ function authStartUrl(){
 }
 
 async function getBungieSession(){
+  const cached=readCachedBungieSession();
+  if(cached)return cached;
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),12000);
   try{
@@ -37,13 +40,20 @@ async function getBungieSession(){
     });
     if(response.status===401)return {authenticated:false};
     if(!response.ok)return {authenticated:false};
-    return await response.json();
+    const session=await response.json();
+    cacheBungieSession(session);
+    return session;
   }catch{
     return {authenticated:false};
   }finally{
     clearTimeout(timer);
   }
 }
+
+document.addEventListener('forge:prepared-page-progress',event=>{
+  const status=document.getElementById('toolIntroStatus');
+  if(status&&Number.isFinite(event.detail?.percent))status.textContent=`${event.detail.percent}%`;
+});
 
 function hasSeenIntro(){try{return localStorage.getItem(seenKey)==='1';}catch{return false;}}
 function rememberIntro(){try{localStorage.setItem(seenKey,'1');}catch{}}
@@ -56,15 +66,15 @@ async function continueToGuardianJourney(){
   const status=document.getElementById('toolIntroStatus');
   if(status){
     status.hidden=false;
-    status.textContent=config?.loadingLabel||'Forge is preparing your Guardian data and opening Journey.';
+    status.textContent='8%';
   }
   const session=await getBungieSession();
   if(session?.authenticated){
     try{
-      if(status)status.textContent='Preparing verified armour, weapons, subclasses, Artifact and manifest data.';
+      if(status)status.textContent='18%';
       await preloadForgeLoaderPayload(session,{force:false,reason:'tool-intro'});
     }catch(error){
-      if(status)status.textContent=error?.message||'Verified Forge Loader data could not be made resident. Try again.';
+      if(status)status.textContent=error?.message||'Guardian data could not be loaded. Try again.';
       document.body.classList.remove('is-transitioning');
       const button=document.getElementById('toolIntroCta');if(button)button.disabled=false;
       return false;
@@ -97,7 +107,7 @@ else{
     button.disabled=true;
     document.body.classList.add('is-transitioning');
     status.hidden=false;
-    status.textContent=config.loadingLabel;
+    status.textContent='8%';
     await continueToGuardianJourney();
   },{once:true});
 

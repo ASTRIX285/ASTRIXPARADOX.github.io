@@ -123,3 +123,32 @@ const stale=await loaderHarness();stale.settleHeader();stale.emit('forge:build-r
 const stalledBackground=await loaderHarness({stalledBackground:true});stalledBackground.settleHeader();stalledBackground.emit('forge:build-render-complete',{status:'ready'});await stalledBackground.flush();assert.equal(stalledBackground.done(),1,'A decorative background that never loads or errors must not delay a genuinely ready Build Forge.');
 const stalledCharacterBackground=await loaderHarness({stalledBackground:true,isBuildSpace:false});stalledCharacterBackground.emit('forge:guardian-render-complete');await stalledCharacterBackground.flush();assert.equal(stalledCharacterBackground.done(),1,'A decorative background that never loads or errors must not delay a genuinely rendered Character page.');
 console.log('BUILD_LOADER_EVENT_ORDER=PASS');
+
+// Synthetic DOM: the actual shared loader must not mount on a warm page,
+// but authentication and missing/corrupt caches must still be recoverable.
+function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astrix-app/pages/loadout/',storageError=false}={}){
+  const classes=()=>{const names=new Set();return {add:name=>names.add(name),remove:name=>names.delete(name),contains:name=>names.has(name),toggle:(name,on)=>on?names.add(name):names.delete(name)};};
+  const node=()=>({classList:classes(),style:{setProperty(){}},hidden:true,textContent:'',addEventListener(){},removeEventListener(){},querySelector(){return node();}});
+  let mounts=0,gate=null,markup='',assetReads=0;
+  const document={documentElement:{classList:classes()},body:{classList:classes(),appendChild(value){gate=value;mounts++;}},querySelector:()=>gate,createElement(){return {set innerHTML(value){markup=value;},get firstElementChild(){return node();}};},addEventListener(){},get fonts(){assetReads++;throw new Error('Warm render must not wait for fonts');}};
+  const session={authenticated:true,csrfToken:'synthetic',capabilities:{destinyActions:{}},activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};
+  const records={'astrix:bungie-session-cache:v1':JSON.stringify({session})};
+  if(warm)records['astrix:bungie-page-cache:v4:loadout']=JSON.stringify({scope:'loadout',identity,savedAt:Date.now()-age});
+  const window={location:{pathname:path}};
+  runInNewContext(portalJs,{window,document,sessionStorage:{getItem(key){if(storageError)throw new Error('denied');return records[key]||null;}},Date,Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()});
+  return {loader:window.ForgeLoader,document,mounts:()=>mounts,markup:()=>markup,assetReads:()=>assetReads};
+}
+const warmPortal=warmPortalHarness();assert.equal(warmPortal.mounts(),0,'Warm page entry must not replay the portal');
+assert.equal(warmPortal.document.documentElement.classList.contains('apx-booting'),false,'Warm page body must remain visible');
+await warmPortal.loader.ready({querySelectorAll(){throw new Error('Warm render must not wait for images');}});
+assert.equal(warmPortal.assetReads(),0);warmPortal.loader.mount();assert.equal(warmPortal.mounts(),0,'Completed navigation must not remount for background work');
+const missingCache=warmPortalHarness();missingCache.loader.requireData();assert.equal(missingCache.mounts(),1,'A stale cache hint must fall back to a real data gate');
+assert.doesNotMatch(missingCache.markup(),/apx-status|Opening portal|verified/i,'Loading copy must contain only the existing percentage, without status prose');
+const reauth=warmPortalHarness();reauth.loader.authRequired('/connect');assert.equal(reauth.mounts(),1,'Warm navigation must retain account sign-in recovery');
+const warmFailure=warmPortalHarness();warmFailure.loader.blocked('Synthetic unavailable data');assert.equal(warmFailure.mounts(),1,'A genuine first-render failure must still expose retry');
+assert.equal(warmPortalHarness({identity:'3:another-account'}).mounts(),1,'Another account cache must never suppress the gate');
+assert.equal(warmPortalHarness({age:12*60*60*1000+1}).mounts(),1,'An expired cache must use the cold path');
+assert.equal(warmPortalHarness({storageError:true}).mounts(),1,'Unavailable storage must use the cold path');
+assert.equal(warmPortalHarness({warm:false}).mounts(),1);
+console.log('WARM_NAVIGATION_NO_PORTAL_OR_ASSET_WAIT=PASS');
+console.log('WARM_NAVIGATION_AUTH_AND_CACHE_RECOVERY=PASS');
