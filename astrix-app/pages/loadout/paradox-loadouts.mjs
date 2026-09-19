@@ -324,6 +324,9 @@ function slotOptions(){return Array.from({length:20},(_,index)=>{const slot=equi
 async function reviewBuildAction(id,toGame){
   const check=guardContext(),record=draftFor(id);await refreshProfile();check();
   const build=restoreSavedSocketIntent(id==='equipped'?equipped:record.build,payload);
+  // Compare intended Artifact perks with fresh live perks, not the saved
+  // snapshot's old active list. Artifact changes always remain in game.
+  build.artifact={...build.artifact,activePerks:copy(equipped.artifact?.activePerks||[])};
   if(!build.subclassItemInstanceId||!build.subclassItem)throw new Error('This build has no exact saved subclass instance. Edit or resave it from verified equipment before Apply.');
   let plan=createLiveTransferPlan({build,originalBuild:build,capabilities:liveActionCapabilities(session)});
   if(!plan.ready)throw new Error(plan.blockers.join('\n'));
