@@ -630,4 +630,10 @@ assert.equal(JSON.stringify(overviewBuild),unchangedOverview,'Rendering must nev
 const unsafeOverview=overviewContext.renderOverview({weapons:[{name:'<script>bad</script>',icon:'javascript:alert(1)'}]});
 assert.doesNotMatch(unsafeOverview,/<script>|javascript:/);
 assert.match(unsafeOverview,/No icon/);
+assert.doesNotMatch(overviewMarkup,/<figcaption|class="saved-build-group"/,'The compact build must not restore name captions or separate section panels');
+assert.equal((overviewMarkup.match(/class="saved-build-row"/g)||[]).length,1,'All saved equipment must share one outer row');
+assert.match(overviewMarkup,/<figure[^>]+title="Saved Super/,'Icon names must remain available on hover');
+assert.match(overviewMarkup,/class="saved-build-mods"[^>]*>[\s\S]*title="Saved mod/,'Armour mods must occupy the shared socket grid');
+assert.match(overviewMarkup,/Stats not saved/,'Absent saved stats must not be replaced with live or invented values');
+assert.match(overviewMarkup,/Power unavailable/,'An absent saved power value must remain unknown');
 console.log('SAVED_BUILD_OVERVIEW=PASS selected gear, sockets, subclass, Artifact, escaping and immutable snapshots');
