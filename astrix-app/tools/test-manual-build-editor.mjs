@@ -2,13 +2,14 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {createLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
+import {classifyArmourPlug,normaliseArmourSemantics} from '../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
+import {createLiveTransferPlan,subclassCompatibilityViolations} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {createLiveTransferPreflight} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
-import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
+import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,recordManualEdit,socketGroups} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
 import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
-import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,inventoryLocations,verifyReadback,sessionBinding,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
 import {resolveBreakerTypeDefinition} from '../core/bungie-item-identity.mjs';
 
@@ -619,7 +620,7 @@ console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');
 // Exercise the saved overview independently of auth, DOM boot and the live Guardian.
 const overviewSource=readFileSync(new URL('../pages/loadout/paradox-loadouts.mjs',import.meta.url),'utf8');
 const overviewHelpers=overviewSource.slice(overviewSource.indexOf('const esc='),overviewSource.indexOf('function artifactRequiresInGameStep')).replace('export function savedBuildOverview','function savedBuildOverview');
-const overviewContext={URL};
+const overviewContext={URL,classifyArmourPlug};
 runInNewContext(overviewHelpers+';this.renderOverview=savedBuildOverview;',overviewContext);
 const overviewBuild={subclassName:'Saved Titan',subclassIcon:'/subclass.png',subclassBuild:{super:{name:'Saved Super',icon:'/super.png'},abilities:[{name:'Saved ability',icon:'/ability.png'}],aspects:[{name:'Saved aspect',icon:'/aspect.png'}],fragments:[{name:'Saved fragment',icon:'/fragment.png'}]},weapons:[{name:'Saved weapon',icon:'/weapon.png',weaponPerkModel:{columns:[{selectedPlugHash:2,options:[{hash:1,name:'Unselected perk'},{hash:2,name:'Selected perk',icon:'/perk.png'}]}]}}],armour:[{name:'Saved armour',icon:'/armour.png',generalMods:[{name:'Saved mod',icon:'/mod.png'}]}],artifact:{name:'Saved Artifact',perks:[{hash:7,name:'Selected Artifact',icon:'/artifact.png'},{hash:8,name:'Unselected Artifact'}]},artifactConfiguration:{selectedPerkHashes:[7,9]}};
 const unchangedOverview=JSON.stringify(overviewBuild),overviewMarkup=overviewContext.renderOverview(overviewBuild);
@@ -637,3 +638,101 @@ assert.match(overviewMarkup,/class="saved-build-mods"[^>]*>[\s\S]*title="Saved m
 assert.match(overviewMarkup,/Stats not saved/,'Absent saved stats must not be replaced with live or invented values');
 assert.match(overviewMarkup,/Power unavailable/,'An absent saved power value must remain unknown');
 console.log('SAVED_BUILD_OVERVIEW=PASS selected gear, sockets, subclass, Artifact, escaping and immutable snapshots');
+
+
+// Loadout page regressions. These are synthetic contract inputs, not live-account evidence.
+const pageSource=overviewSource.slice(overviewSource.indexOf('const byId='),overviewSource.indexOf("document.addEventListener('click'"))
+  .replace(/export (async )?function /g,(_,asyncPart)=>`${asyncPart||''}function `);
+const pageNodes=new Map();
+const pageNode=id=>{
+  if(!pageNodes.has(id))pageNodes.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,value:'',classList:{toggle(){}},querySelector(){return null;},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
+  return pageNodes.get(id);
+};
+const pageContext={URL,structuredClone,classifyArmourPlug,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
+runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editorSelect,editableSnapshotItem,editChoice,closeDialog,draftFor,
+  setEditor(state){dialogState=state;renderEditor(state);},
+  setState(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload||{definitions:{}};loading=false;},
+  openDraft(record){dialogState={kind:'edit',record:copy(record)};dialog().showModal();return dialogState.record;},
+  getDialogState(){return dialogState;}};`,pageContext);
+const pageApi=pageContext.loadoutTest;
+const binding={characterId:CHARACTER_ID,membershipId:MEMBERSHIP_ID,membershipType:MEMBERSHIP_TYPE,characterClass:'titan'};
+const manyRecords=Array.from({length:125},(_,index)=>({id:`saved-${index}`,name:`Saved ${index}`,binding,revision:1,updatedAt:new Date(Date.UTC(2026,8,1,0,index)).toISOString(),build:clone(overviewBuild)}));
+const otherRows=[{...manyRecords[0],id:'other-character',binding:{...binding,characterId:'9100002'}},{...manyRecords[0],id:'other-membership',binding:{...binding,membershipId:'9200002'}},{...manyRecords[0],id:'other-platform',binding:{...binding,membershipType:'1'}}];
+const visible=pageApi.matchingLoadouts([...manyRecords,...otherRows],CHARACTER_ID,binding);
+assert.equal(visible.length,125,'PARADOX builds have no app-imposed count cap');
+assert.equal(visible[0].id,'saved-124','The latest saved record comes first');
+assert.equal(visible.at(-1).id,'saved-0');
+assert.equal(pageApi.matchingLoadouts(manyRecords,'',binding).length,0,'No selection must not expose all Guardians');
+assert.equal(pageApi.matchingLoadouts(manyRecords,CHARACTER_ID,{}).length,0,'No account must not expose stored builds');
+const modsMarkup=overviewContext.renderOverview({armour:[{name:'Helmet',mods:[{name:'Paragon',icon:'/archetype.png'},{name:'Real slot mod',icon:'/mod.png',definition:{plug:{plugCategoryIdentifier:'armor.mods.helmet'}}},{name:'Unknown raw socket',icon:'/unknown.png'},{name:'Masterwork Level',icon:'/masterwork.png'}]}]});
+assert.match(modsMarkup,/Real slot mod/);
+assert.doesNotMatch(modsMarkup,/Paragon|archetype.png|Unknown raw socket|Masterwork Level/,'Only positively classified raw mods enter the mod grid');
+const contaminatedMarkup=overviewContext.renderOverview({armour:[{name:'Helmet',generalMods:[{name:'Grenadier',icon:'/archetype.png'},{name:'Trusted legacy mod',icon:'/legacy.png'}]}]});
+assert.match(contaminatedMarkup,/Trusted legacy mod/);
+assert.doesNotMatch(contaminatedMarkup,/Grenadier|archetype.png/,'Archetypes must be removed even from a classified legacy list');
+pageApi.setState({records:[...manyRecords,...otherRows],characterId:CHARACTER_ID,session:{authenticated:true,activeDestinyMembership:binding},equipped:{...clone(overviewBuild),subclassName:'LIVE SELECTED GUARDIAN',loadoutsAvailable:true,loadouts:[]}});
+pageApi.render();
+const stacked=pageNode('paradoxLoadoutDetail').innerHTML,navigation=pageNode('paradoxLoadoutList').innerHTML;
+assert.equal((stacked.match(/data-build-record=/g)||[]).length,126,'Every matching saved build is rendered below Equipped');
+assert.ok(stacked.indexOf('#1 EQUIPPED')<stacked.indexOf('#2 Saved 124'));
+assert.ok(stacked.indexOf('#2 Saved 124')<stacked.indexOf('#3 Saved 123'));
+assert.match(stacked,/#126 Saved 0/);
+assert.match(navigation,/#2 Saved 124/);
+assert.doesNotMatch(stacked,/other-character|other-membership|other-platform|DOWNLOAD JSON|OPEN IN BUILD FORGE/);
+assert.match(stacked,/data-build-action="edit" data-build-id="saved-124"/,'Each action binds to its own saved record');
+assert.match(stacked,/class="is-danger paradox-trash"[^>]+aria-label="Delete Saved 124"/);
+assert.equal((pageNode('guardianLoadouts').innerHTML.match(/data-in-game-slot=/g)||[]).length,20);
+const draft=pageApi.openDraft(manyRecords[0]);draft.name='Unsaved rename';draft.build.weapons[0].name='Unsaved weapon';pageApi.closeDialog();
+assert.equal(pageApi.getDialogState(),null);
+assert.equal(manyRecords[0].name,'Saved 0');assert.equal(manyRecords[0].build.weapons[0].name,'Saved weapon','Cancelling edits cannot mutate stored snapshots');
+const selectedCopy=pageApi.draftFor('saved-124');selectedCopy.build.weapons[0].name='Changed copy';assert.equal(manyRecords[124].build.weapons[0].name,'Saved weapon');
+
+const socketBuild={...binding,weapons:[{itemInstanceId:'101',hash:1001,name:'Saved weapon',socketCoverage:{plugs:[{hash:501,name:'Saved trait',socketIndex:3}]}}],armour:[{itemInstanceId:'102',hash:1002,name:'Saved armour',generalMods:[{hash:601,name:'Saved mod',socketIndex:0}]}],subclassItem:{itemInstanceId:'103',hash:1003,name:'Saved subclass'},subclassItemInstanceId:'103',subclassBuild:{super:{hash:701,name:'Saved super',socketIndex:1}}};
+const socketPayload={profile:{profileInventory:{data:{items:[{itemInstanceId:'101',itemHash:1001,bucketHash:VAULT_BUCKET}]}},characterEquipment:{data:{[CHARACTER_ID]:{items:[{itemInstanceId:'102',itemHash:1002},{itemInstanceId:'103',itemHash:1003}]}}},itemComponents:{sockets:{data:{'101':{sockets:[{},{},{},{plugHash:500}]},'102':{sockets:[{plugHash:601}]},'103':{sockets:[{},{plugHash:700}]}}},reusablePlugs:{data:{'101':{plugs:{'3':[{plugItemHash:501,canInsert:true,enabled:true}]}},'103':{plugs:{'1':[{plugItemHash:701,canInsert:true,enabled:true}]}}}}}}};
+const restored=pageApi.restoreSavedSocketIntent(socketBuild,socketPayload);
+assert.equal(restored.manualSocketChanges.length,3,'Restore saved gear, armour and subclass sockets even without manual-edit history');
+assert.ok(restored.manualSocketChanges.every(row=>row.remoteSupported));
+assert.equal(restored.weapons[0].source.kind,'vault','Apply must use the current location, not a saved location');
+assert.equal(socketBuild.manualSocketChanges,undefined,'Building an Apply plan must not change a saved record');
+const unsupportedPayload=clone(socketPayload);unsupportedPayload.profile.itemComponents.reusablePlugs.data['103']={plugs:{}};
+assert.equal(pageApi.restoreSavedSocketIntent(socketBuild,unsupportedPayload).manualSocketChanges.find(row=>row.plugHash===701).remoteSupported,false,'Unverified subclass insertion remains an in-game step');
+const simplePlan={ready:true,status:'staged',characterId:CHARACTER_ID,equipment:{targets:[{itemInstanceId:'101'}]},socketChanges:[{itemInstanceId:'101',socketIndex:0,plugHash:501}]};
+const verifiedProfile={profile:{
+  characterEquipment:{data:{[CHARACTER_ID]:{items:[{itemInstanceId:'101'}]}}},
+  itemComponents:{sockets:{data:{'101':{sockets:[{plugHash:501}]}}}},
+  characterLoadouts:{data:{[CHARACTER_ID]:{loadouts:[null,null,{items:[{itemInstanceId:'101',plugItemHashes:[501]}]}]}}}
+}};
+let steps=[];
+await pageApi.applyThenSaveSlot({plan:simplePlan,index:2,session:{},assertCurrent:()=>{},executeApply:async()=>{steps.push('apply');return {status:'applied',readback:{verified:true}};},readFresh:async()=>{steps.push('read');return verifiedProfile;},executeSlot:async(action,options)=>{steps.push(`snapshot:${options.index}`);assert.equal(options.confirmation.status,'confirmed');}});
+assert.deepEqual(steps,['apply','read','snapshot:2','read'],'Save to in-game must apply, verify, save only the selected slot, then verify the slot');
+for(const result of [{status:'partial',readback:{verified:true}},{status:'applied',readback:{verified:false}},{status:'blocked'}]){
+  let saves=0;
+  await assert.rejects(()=>pageApi.applyThenSaveSlot({plan:simplePlan,index:2,session:{},assertCurrent:()=>{},executeApply:async()=>result,executeSlot:async()=>{saves++;}}),/not overwritten/);
+  assert.equal(saves,0,'A partial or unverified Apply must never overwrite a slot');
+}
+let staleSaves=0,checks=0;
+await assert.rejects(()=>pageApi.applyThenSaveSlot({plan:simplePlan,index:2,session:{},assertCurrent:()=>{if(++checks>1)throw new Error('Guardian changed');},executeApply:async()=>({status:'applied',readback:{verified:true}}),executeSlot:async()=>{staleSaves++;}}),/Guardian changed/);
+assert.equal(staleSaves,0);
+const changed=clone(verifiedProfile);changed.profile.itemComponents.sockets.data['101'].sockets[0].plugHash=999;
+await assert.rejects(()=>pageApi.applyThenSaveSlot({plan:simplePlan,index:2,session:{},assertCurrent:()=>{},executeApply:async()=>({status:'applied',readback:{verified:true}}),readFresh:async()=>changed,executeSlot:async()=>{staleSaves++;}}),/Equipment changed/);
+assert.equal(staleSaves,0);
+assert.equal(pageApi.verifySavedSlot(simplePlan,verifiedProfile,2),true);
+assert.equal(pageApi.verifySavedSlot(simplePlan,verifiedProfile,1),false,'A matching different slot must not count as success');
+const wrongSlot=clone(verifiedProfile);wrongSlot.profile.characterLoadouts.data[CHARACTER_ID].loadouts[2].items[0].plugItemHashes=[999];
+assert.equal(pageApi.verifySavedSlot(simplePlan,wrongSlot,2),false,'A saved equipment match with wrong sockets is not success');
+console.log('LOADOUT_PAGE=PASS character/account filtering, 125 stacked saves, pinned equipped, immutable editor, real mod classification, socket replay and verified save ordering');
+
+const retainedMod={...currentArmourMod,hash:8299,name:'Retained second mod',socketIndex:4};
+const rawSavedArmour={...clone(armour[0]),slotMods:undefined,armourSemantics:undefined,mods:[currentArmourMod,retainedMod],socketCoverage:{plugs:[currentArmourMod,retainedMod]}};
+const editorArmour=pageApi.editableSnapshotItem(rawSavedArmour,armour[0],'armour');
+const editorDraft={id:'edited',name:'Quick edit',description:'',build:{...clone(baseBuild),armour:[editorArmour,...clone(armour.slice(1))],subclassBuild:{}}};
+pageApi.setEditor({kind:'edit',record:editorDraft,catalogue:[],subclasses:[],check:()=>{}});
+pageNode('paradoxEditName').value='Quick edit';pageNode('paradoxEditDescription').value='';
+const options=pageApi.getDialogState().choices.get('socket:armour:0:2');
+pageApi.editChoice({dataset:{editorChoice:'socket:armour:0:2'},value:String(options.findIndex(row=>row.hash===exactArmourMod.hash))});
+const afterEditor=pageApi.getDialogState().record.build;
+assert.ok(afterEditor.armour[0].slotMods.some(row=>row.hash===exactArmourMod.hash));
+assert.ok(afterEditor.armour[0].slotMods.some(row=>row.hash===retainedMod.hash),'Editing one socket must preserve the other saved mods, including legacy raw snapshots');
+assert.ok(rawSavedArmour.mods.some(row=>row.hash===currentArmourMod.hash));
+assert.equal(afterEditor.stats.length,0,'An edited build must not retain captured totals as if they were recalculated');
+console.log('LOADOUT_QUICK_EDITOR=PASS selected socket changes preserve other saved sockets and original records');

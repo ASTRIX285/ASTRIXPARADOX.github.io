@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Review and reopen named browser-only ASTRIX PARADOX Guardian loadouts.">
+  <meta name="description" content="Review, edit and apply saved ASTRIX PARADOX Guardian loadouts.">
   <title>Loadout — ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
@@ -19,15 +19,29 @@
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;fluid=20260914-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
-  <link rel="stylesheet" href="./paradox-loadouts.css?v=20260919-dim-row-1">
+  <link rel="stylesheet" href="./paradox-loadouts.css?v=20260919-character-actions-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
 </head>
 <body class="apx-destination-page forge-paradox-map-background apx-fluid-icons">
   <header class="apx-destination-header forge-command-header"><a class="apx-destination-brand" href="../journey/"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a><div class="apx-destination-header-copy"><strong>LOADOUT</strong><small>REVIEW SAVED GUARDIAN BUILDS</small></div><div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div><span class="apx-destination-header-state">SAVED</span></header>
   <div data-forge-destination-ribbon data-active-destination="loadout"></div>
-  <main class="apx-page-shell paradox-loadout-shell"><section class="apx-section paradox-loadout-list" aria-labelledby="savedLoadout"><div class="apx-section-heading"><h2 id="savedLoadout">PARADOX LOADOUTS</h2><span class="apx-status-chip" id="paradoxLoadoutCount">0 SAVED</span></div><div class="paradox-loadout-list-grid" id="paradoxLoadoutList"></div></section><section class="apx-section paradox-loadout-detail" id="paradoxLoadoutDetail" aria-live="polite"></section></main>
+  <main class="apx-page-shell paradox-loadout-shell">
+    <aside class="apx-section paradox-loadout-list" aria-labelledby="savedLoadout">
+      <div class="apx-section-heading"><h2 id="savedLoadout">PARADOX LOADOUTS</h2><span class="apx-status-chip" id="paradoxLoadoutCount">0 SAVED</span></div>
+      <nav class="paradox-loadout-list-grid" id="paradoxLoadoutList" aria-label="Selected Guardian loadouts"></nav>
+    </aside>
+    <div class="paradox-loadout-main">
+      <section class="apx-section guardian-loadouts-container" aria-labelledby="inGameLoadoutsTitle">
+        <div class="apx-section-heading"><h2 id="inGameLoadoutsTitle">IN-GAME LOADOUTS</h2><span class="apx-status-chip">BUNGIE · 1-20</span></div>
+        <div class="guardian-loadouts-strip"><div class="guardian-loadouts-grid" id="guardianLoadouts"><p role="status">Loading selected Guardian...</p></div></div>
+      </section>
+      <p id="paradoxLoadoutStatus" class="paradox-loadout-status" role="status" hidden></p>
+      <div class="paradox-loadout-stack" id="paradoxLoadoutDetail" aria-live="polite"></div>
+    </div>
+  </main>
+  <dialog id="paradoxLoadoutDialog" class="paradox-loadout-dialog" aria-labelledby="paradoxDialogTitle"></dialog>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1"></script>
-  <script type="module" src="./paradox-loadouts.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;overview=20260919-dim-row-1"></script>
+  <script type="module" src="./paradox-loadouts.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;overview=20260919-character-actions-1"></script>
 </body>
 </html>
