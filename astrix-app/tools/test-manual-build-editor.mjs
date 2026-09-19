@@ -649,7 +649,7 @@ const pageNode=id=>{
   return pageNodes.get(id);
 };
 const pageContext={URL,structuredClone,classifyArmourPlug,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
-runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editorSelect,editableSnapshotItem,editChoice,closeDialog,draftFor,
+runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editorSelect,editableSnapshotItem,editChoice,closeDialog,draftFor,preparePayload,setCharacter,
   setEditor(state){dialogState=state;renderEditor(state);},
   setState(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload||{definitions:{}};loading=false;},
   openDraft(record){dialogState={kind:'edit',record:copy(record)};dialog().showModal();return dialogState.record;},
@@ -736,3 +736,66 @@ assert.ok(afterEditor.armour[0].slotMods.some(row=>row.hash===retainedMod.hash),
 assert.ok(rawSavedArmour.mods.some(row=>row.hash===currentArmourMod.hash));
 assert.equal(afterEditor.stats.length,0,'An edited build must not retain captured totals as if they were recalculated');
 console.log('LOADOUT_QUICK_EDITOR=PASS selected socket changes preserve other saved sockets and original records');
+
+// Synthetic prepared transport: armour and its plugs arrive only in the index.
+// Use the real manifest expansion and live profile normalizer, with no network.
+globalThis.location={pathname:'/test/',search:'',href:'https://example.test/test/'};
+const testElement=()=>({dataset:{},style:{},appendChild(){},append(){},setAttribute(){},addEventListener(){},querySelector:()=>null,insertAdjacentElement(){},removeAttribute(){}});
+globalThis.document={head:testElement(),documentElement:{dataset:{}},getElementById:()=>null,querySelector:()=>null,createElement:testElement,addEventListener(){},dispatchEvent(){}};
+globalThis.sessionStorage={getItem:()=>null,setItem(){},removeItem(){}};
+globalThis.localStorage=globalThis.sessionStorage;
+globalThis.addEventListener=()=>{};
+globalThis.CustomEvent=class{constructor(type,options={}){this.type=type;this.detail=options.detail;}};
+const {GuardianManifestService}=await import('../pages/guardian-workspace-v2/guardian-manifest-service.mjs');
+const {normalisePreparedPagePayload,normaliseLiveProfile}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs');
+const equippedManifest=new GuardianManifestService({backend:true,fetchImpl:async()=>{throw new Error('Equipped preparation must use supplied definitions');}});
+Object.assign(pageContext,{guardianManifest:equippedManifest,normalisePreparedPagePayload,normaliseLiveProfile});
+const transport={manifestVersion:'test-equipped-v1',membership:{membershipId:MEMBERSHIP_ID,membershipType:3},definitions:{},artifactCatalog:[{hash:999,name:'Test Artifact',perks:[]}],profile:{characters:{data:{}},characterEquipment:{data:{}},itemComponents:{instances:{data:{}},sockets:{data:{}}}},forgeArmourIndex:{schemaVersion:5,transportEncoding:'shared-definitions-v1',manifestVersion:'test-equipped-v1',definitionTemplates:[],definitions:{},plugDefinitions:{},socketEntryDefinitions:[{},{},{},{},{}],socketLayouts:{armour:{socketEntryIds:[0,1,2,3,4]}}}};
+const index=transport.forgeArmourIndex;
+const testPlugs=[['Test general mod','armor.mods.general'],['Test slot mod','armor.mods.helmet'],['Paragon','armor.archetype'],['Test Shader','shader'],['Test Ornament','armor.skins']];
+for(const [offset,[name,category]] of testPlugs.entries()){
+  index.plugDefinitions[8000+offset]={templateId:index.definitionTemplates.length,hash:8000+offset,displayProperties:{name,icon:`/test-plug-${offset}.png`}};
+  index.definitionTemplates.push({itemType:19,plug:{plugCategoryIdentifier:category}});
+}
+const expectedArmour=new Map();
+for(const classType of [0,1,2]){
+  const id=String(9300000+classType),items=[],expected=[];
+  transport.profile.characters.data[id]={characterId:id,classType,light:550,stats:{}};
+  transport.profile.characterEquipment.data[id]={items};
+  for(const [slot,bucketHash] of ARMOUR_BUCKETS.entries()){
+    const hash=10000+classType*10+slot,itemInstanceId=String(9400000+classType*10+slot);
+    items.push({itemHash:hash,itemInstanceId,bucketHash});expected.push(itemInstanceId);
+    index.definitions[hash]={templateId:index.definitionTemplates.length,hash,displayProperties:{name:`Test class ${classType} armour ${slot}`,icon:`/test-armour-${hash}.png`}};
+    index.definitionTemplates.push({itemType:2,classType,inventory:{bucketTypeHash:bucketHash,tierTypeName:'Legendary'},socketLayoutKey:'armour'});
+    transport.profile.itemComponents.instances.data[itemInstanceId]={primaryStat:{value:550-slot}};
+    transport.profile.itemComponents.sockets.data[itemInstanceId]={sockets:testPlugs.map((_,offset)=>({plugHash:8000+offset,isEnabled:true,isVisible:true}))};
+  }
+  expectedArmour.set(id,expected);
+}
+const preparedEquipped=await pageApi.preparePayload(clone(transport));
+assert.ok(preparedEquipped.definitions['10000']?.inventory,'The supplied armour index must be expanded before live equipment is normalized');
+pageApi.setState({records:[],characterId:'',session:{authenticated:true,activeDestinyMembership:transport.membership},equipped:null,payload:preparedEquipped});
+for(const [id,expected] of expectedArmour){
+  pageApi.setCharacter(id);
+  const current=pageApi.draftFor('equipped').build;
+  assert.deepEqual(Array.from(current.armour,item=>item?.itemInstanceId),expected,'Equipped and Save PARADOX must use all five items from the selected character');
+  assert.deepEqual(Array.from(current.armour,item=>item.power),[550,549,548,547,546]);
+  const rendered=pageNode('paradoxLoadoutDetail').innerHTML;
+  assert.equal((rendered.match(/class="saved-build-tile is-equipment/g)||[]).length,5);
+  const mods=rendered.split('aria-label="Armour mods">')[1].split('<div class="saved-build-artifact"')[0];
+  assert.equal((mods.match(/<figure /g)||[]).length,10,'Render both installed mods on each of the five armour pieces');
+  assert.doesNotMatch(mods,/Paragon|Test Shader|Test Ornament|Mods not saved/,'Archetypes and cosmetics must remain outside the mod grid');
+  assert.match(rendered,/Test Shader/);assert.match(rendered,/Test Ornament/);
+  assert.doesNotMatch(rendered,/>Not saved<\/p><\/div><div class="saved-build-stats"/);
+}
+const refreshed=clone(transport),selectedCharacter='9300002';
+refreshed.profile.characterEquipment.data[selectedCharacter].items.shift();
+const refreshedEquipped=await pageApi.preparePayload(refreshed);
+pageApi.setState({records:[],characterId:selectedCharacter,session:{authenticated:true,activeDestinyMembership:transport.membership},equipped:null,payload:refreshedEquipped});
+pageApi.setCharacter(selectedCharacter);
+assert.equal(pageApi.draftFor('equipped').build.armour[0],null,'A refreshed missing item must not be borrowed from a saved build, another character or the previous profile');
+const mismatched=clone(transport);mismatched.forgeArmourIndex.manifestVersion='stale-test-index';
+await assert.rejects(pageApi.preparePayload(mismatched),/armour index/i,'Reject an index that does not match the prepared profile manifest');
+const alreadyResolved=clone(preparedEquipped);delete alreadyResolved.forgeArmourIndex;
+assert.ok((await pageApi.preparePayload(alreadyResolved)).definitions['10000'],'Fresh profiles with resolved definitions must also remain supported');
+console.log('LOADOUT_EQUIPPED_ARMOUR=PASS prepared index, three Guardians, five slots, live mods, appearance, fresh profile and version guard');
