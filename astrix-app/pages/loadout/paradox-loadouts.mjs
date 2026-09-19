@@ -204,6 +204,9 @@ function setCharacter(id){
 }
 async function preparePayload(raw){
   const normalized=normalisePreparedPagePayload(raw);
+  // Loadout carries armour definitions and plugs in its separate prepared index.
+  guardianManifest.seedPayload(normalized);
+  if(normalized.forgeArmourIndex&&!guardianManifest.applyForgeArmourIndex(normalized,normalized.forgeArmourIndex))throw new Error('The armour index does not match this profile. Refresh Loadout to retry.');
   return guardianManifest.hydratePayload(normalized,{allowNetwork:false,waitForManifest:false});
 }
 async function refreshProfile({force=true}={}){
