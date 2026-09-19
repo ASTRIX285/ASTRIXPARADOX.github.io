@@ -10,10 +10,93 @@
    Set the logo path once:  window.APX_LOGO = '/img/logo.png';
    ===================================================================== */
 (function(){
+  // Keep the outgoing browser snapshot visible until the destination has
+  // rendered its data and decoded the images actually inside the viewport.
+  var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
+  function navigationImageReady(image){
+    if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
+    return new Promise(function(resolve){
+      var finish=function(){
+        image.removeEventListener('load',finish);image.removeEventListener('error',finish);
+        resolve(image.decode?image.decode().catch(function(){}):undefined);
+      };
+      image.addEventListener('load',finish,{once:true});image.addEventListener('error',finish,{once:true});
+    });
+  }
+  document.addEventListener?.('forge:hero-cards-render-complete',function(){headerRendered=true;});
+  function navigationVisibleAssets(){
+    if(navigationAssets)return navigationAssets;
+    var headerReady=headerRendered||!document.querySelector('[data-forge-hero-cards]')||document.querySelector('[data-forge-hero-cards] .guardian-character-card')
+      ?Promise.resolve():new Promise(function(resolve){document.addEventListener('forge:hero-cards-render-complete',resolve,{once:true});});
+    navigationAssets=headerReady.then(function(){
+    var images=Array.prototype.slice.call(document.querySelectorAll('img')).filter(function(image){
+      if(image.closest('[hidden],.apx-gate'))return false;
+      var rect=image.getBoundingClientRect();
+      return rect.width>0&&rect.height>0&&rect.bottom>0&&rect.right>0&&rect.top<window.innerHeight&&rect.left<window.innerWidth;
+    });
+    var backgrounds=[];
+    if(typeof Image==='function'){
+      var urls=new Set();
+      [document.body].concat(Array.prototype.slice.call(document.querySelectorAll('.scene.immersive,[data-forge-hero-cards] .guardian-character-card'))).forEach(function(node){
+        if(!node)return;
+        [null,'::before','::after'].forEach(function(pseudo){
+          var value=getComputedStyle(node,pseudo).backgroundImage||'';
+          var densities=Array.from(value.matchAll(/url\(["']?([^"')]+)["']?\)\s*([0-9.]+)(?:dppx|x)/g));
+          if(value.includes('image-set(')&&densities.length){
+            densities.sort(function(a,b){return Number(a[2])-Number(b[2]);});
+            var choice=densities.find(function(row){return Number(row[2])>=(window.devicePixelRatio||1);})||densities[densities.length-1];
+            urls.add(choice[1]);return;
+          }
+          var pattern=/url\(["']?([^"')]+)["']?\)/g,match;
+          while((match=pattern.exec(value)))urls.add(match[1]);
+        });
+      });
+      urls.forEach(function(url){var image=new Image();image.src=url;backgrounds.push(navigationImageReady(image));});
+    }
+    var fonts=document.fonts&&document.fonts.ready?document.fonts.ready.catch(function(){}):Promise.resolve();
+    return Promise.race([
+      Promise.all([fonts,Promise.all(images.map(navigationImageReady)),Promise.all(backgrounds)]),
+      new Promise(function(resolve){setTimeout(resolve,1800);})
+    ]);
+    });
+    return navigationAssets;
+  }
+  function revealNavigation(terminal){
+    if(!navigationTransition)return;
+    var transition=navigationTransition;
+    if(terminal)navigationRecovering=true;
+    Promise.resolve(terminal?undefined:navigationVisibleAssets()).then(function(){
+      if(navigationTransition!==transition||(!terminal&&navigationRecovering))return;
+      clearTimeout(navigationTimer);
+      document.documentElement.classList.remove('apx-navigation-waiting');
+      document.documentElement.classList.add('apx-navigation-ready');
+      document.documentElement.dataset.navigationState=terminal?'recovery':'ready';
+    });
+  }
+  function navigationRenderComplete(){navigationRendered=true;revealNavigation(false);}
+  if(typeof window.addEventListener==='function')window.addEventListener('pagereveal',function(event){
+    if(!event.viewTransition)return;
+    navigationTransition=event.viewTransition;navigationRecovering=false;
+    document.documentElement.classList.remove('apx-navigation-ready');
+    document.documentElement.classList.add('apx-navigation-waiting');
+    document.documentElement.dataset.navigationState='rendering';
+    navigationTimer=setTimeout(function(){
+      window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
+      revealNavigation(true);
+    },30000);
+    var cleanup=function(){
+      clearTimeout(navigationTimer);navigationTransition=null;
+      if(!navigationRendered)window.ForgeLoader?.requireData?.();
+      document.documentElement.classList.remove('apx-navigation-waiting');
+      document.documentElement.classList.remove('apx-navigation-ready');
+    };
+    event.viewTransition.finished.then(cleanup,cleanup);
+    if(navigationRendered)revealNavigation(false);
+  });
   if(window.APX_SKIP_PORTAL===true){
     var noop=function(){};
     document.documentElement.classList.remove('apx-booting');
-    window.ForgeLoader={mount:noop,set:noop,status:noop,done:noop,ready:function(){return Promise.resolve();},authRequired:noop,authResolved:noop,blocked:noop,skipped:true};
+    window.ForgeLoader={mount:noop,set:noop,status:noop,done:navigationRenderComplete,ready:function(){navigationRenderComplete();return Promise.resolve();},authRequired:noop,authResolved:noop,blocked:noop,skipped:true};
     return;
   }
   // A matching page cache lets navigation paint without replaying the portal.
@@ -37,7 +120,15 @@
       return marker?.identity===identity&&marker?.scope===page&&age>=0&&age<=12*60*60*1000;
     }catch{return false;}
   }
-  var warmNavigation=hasWarmPage();
+  var preparedNavigation=false;
+  try{
+    var incoming=JSON.parse(sessionStorage.getItem('astrix:prepared-navigation:v1')||'null');
+    sessionStorage.removeItem('astrix:prepared-navigation:v1');
+    preparedNavigation=incoming?.path===window.location.pathname&&Date.now()-Number(incoming?.at||0)<30000;
+  }catch{}
+  // Unsupported/aborted view transitions retain a real loading gate. A cache
+  // marker alone must never expose the destination before its renderer ends.
+  var warmNavigation=hasWarmPage()&&!preparedNavigation;
   if(!warmNavigation)document.documentElement.classList.add('apx-booting');
   else document.documentElement.classList.remove('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
@@ -137,12 +228,12 @@
   }
   function authRequired(url){
     pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
-    warmNavigation=false;mount();setStatus('Bungie authentication required');applyAuth();
+    warmNavigation=false;mount();setStatus('Bungie authentication required');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
     pendingBlockedMessage=String(message||'Verified live Guardian data is unavailable.');pendingDone=false;
-    warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();
+    warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
   }
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
@@ -171,6 +262,7 @@
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');
+    if(navigationTransition){gate.remove();gate=null;return;}
     var removeGate=function(event){
       if(event.target!==gate||!pendingDone)return;
       gate.removeEventListener('transitionend',removeGate);
@@ -178,7 +270,7 @@
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;pendingDone=true;set(100);if(gate)finish();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){

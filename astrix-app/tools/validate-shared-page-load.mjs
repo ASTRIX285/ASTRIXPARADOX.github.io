@@ -161,3 +161,9 @@ releaseSwitched();await assert.rejects(switchedRequest,/membership changed/,'A l
 delete globalThis.FORGE_BUNGIE_SESSION;
 await assert.rejects(loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>Response.json({...journeyCache,membership:{membershipId:'another-account',membershipType:3}})}),/different Bungie membership/);
 console.log('LATE_RESPONSE_ACCOUNT_GUARD=PASS');
+const eventsBeforePreparation=events.length;
+const currentPage=globalThis.document.documentElement.dataset.preparedPageKind;
+await loadPreparedPagePayload(account,'journey',{quiet:true,publish:false});
+assert.equal(events.length,eventsBeforePreparation,'Preparing another destination must not publish events into the visible page');
+assert.equal(globalThis.document.documentElement.dataset.preparedPageKind,currentPage,'Preparation must not replace the visible page identity');
+console.log('BACKGROUND_DESTINATION_PREPARATION_ISOLATED=PASS');
