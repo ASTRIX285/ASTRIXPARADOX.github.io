@@ -16,7 +16,7 @@
 
 // Focus roster for Journey — patrol destinations only (Tower is a social space and
 // never a focusable destination / never drives the tint).
-const FOCUS = ['pale-heart','dreaming-city','neomuna','europa','throne-world','nessus','edz','moon','cosmodrome'];
+const FOCUS = ['pale-heart','dreaming-city','neomuna','europa','throne-world','nessus','edz','moon','cosmodrome','kepler'];
 
 export function initLocationSelector(opts = {}) {
   const AD = globalThis.ForgeDestinations;

@@ -12,6 +12,7 @@
     Object.freeze({key:'neomuna',label:'Neomuna',aliases:['neomuna']}),
     Object.freeze({key:'nessus',label:'Nessus',aliases:['nessus']}),
     Object.freeze({key:'throne-world',label:'Throne World',aliases:['throne world','savathun throne world','savathuns throne world']}),
+    Object.freeze({key:'kepler',label:'Kepler',aliases:['kepler']}),
     Object.freeze({key:'tower',label:'Tower',aliases:['tower','the tower']})
   ]);
   const byKey=new Map(DESTINATIONS.map(destination=>[destination.key,destination]));

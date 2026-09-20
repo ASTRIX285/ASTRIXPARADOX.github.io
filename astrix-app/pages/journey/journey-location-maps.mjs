@@ -1,21 +1,23 @@
 // Journey-owned interactive map registry and viewer.
-// Real destination maps replace the shared placeholder one approved location at a time.
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-1';
 
-const JOURNEY_PLACEHOLDER_MAP=Object.freeze({
-  src:'./assets/maps/astrix-paradox-map-placeholder-4k.webp',
-  detailSrc:'./assets/maps/astrix-paradox-map-placeholder-6k.webp',
+const destinationMap=(key,name)=>Object.freeze({
+  src:`./assets/maps/${key}-director-map-4k.webp`,
+  detailSrc:`./assets/maps/${key}-director-map-6k.webp`,
+  alt:`${name} Director map. Select an activity or point of interest for details.`,
   markers:Object.freeze([])
 });
 
 const JOURNEY_LOCATION_MAPS=Object.freeze({
-  'pale-heart':JOURNEY_PLACEHOLDER_MAP,
-  'dreaming-city':JOURNEY_PLACEHOLDER_MAP,
-  'neomuna':JOURNEY_PLACEHOLDER_MAP,
-  'europa':JOURNEY_PLACEHOLDER_MAP,
-  'throne-world':JOURNEY_PLACEHOLDER_MAP,
-  'nessus':JOURNEY_PLACEHOLDER_MAP,
-  'edz':JOURNEY_PLACEHOLDER_MAP,
-  'moon':JOURNEY_PLACEHOLDER_MAP,
+  'pale-heart':destinationMap('pale-heart','The Pale Heart'),
+  'dreaming-city':destinationMap('dreaming-city','The Dreaming City'),
+  'neomuna':destinationMap('neomuna','Neomuna'),
+  'europa':destinationMap('europa','Europa'),
+  'throne-world':destinationMap('throne-world',"Savathun's Throne World"),
+  'nessus':destinationMap('nessus','Nessus'),
+  'edz':destinationMap('edz','EDZ'),
+  'moon':destinationMap('moon','Moon'),
+  'kepler':destinationMap('kepler','Kepler'),
   cosmodrome:Object.freeze({
     src:'./assets/maps/cosmodrome-director-map-4k.webp',
     detailSrc:'./assets/maps/cosmodrome-director-map-6k.webp',
@@ -35,18 +37,12 @@ const JOURNEY_LOCATION_MAPS=Object.freeze({
   })
 });
 
-const MARKER_TYPE_LABELS=Object.freeze({
-  landing:'Landing zone',
-  'lost-sector':'Lost Sector',
-  strike:'Strike',
-  dungeon:'Dungeon',
-  vendor:'Vendor'
-});
-
 const REGION_CHEST_EVENT='forge:journey-region-chests';
 const DESTINATION_DATA_EVENT='forge:journey-destination-data';
 const MAP_RENDER_EVENT='forge:journey-location-map-render-complete';
 const verifiedRegionChestProgress=new Map();
+const regionChestViews=new Set();
+const mapExplorerViews=new Set();
 const verifiedDestinationData=new Map();
 const destinationDataViews=new Set();
 const DESTINATION_DATA_SECTIONS=Object.freeze([
@@ -93,7 +89,10 @@ function createRegionChestOverlay(key,label){
 
   function render(value){
     const progress=normaliseRegionChestProgress(key,value);
-    if(!progress)return;
+    if(!progress){
+      discovered.textContent='--';missing.textContent='--';total.textContent='--';
+      list.replaceChildren();list.hidden=true;return;
+    }
     discovered.textContent=String(progress.discovered);
     missing.textContent=String(progress.missing);
     total.textContent=String(progress.total);
@@ -119,10 +118,22 @@ function createRegionChestOverlay(key,label){
 
   overlay.addEventListener('pointerdown',event=>event.stopPropagation());
   overlay.addEventListener('wheel',event=>event.stopPropagation(),{passive:true});
-  document.addEventListener(REGION_CHEST_EVENT,event=>render(event.detail));
+  regionChestViews.add({key,overlay,render});
   render(verifiedRegionChestProgress.get(key));
   return overlay;
 }
+
+document.addEventListener(REGION_CHEST_EVENT,event=>{
+  const progress=event.detail;
+  for(const view of [...regionChestViews]){
+    if(!view.overlay.isConnected){regionChestViews.delete(view);continue;}
+    if(view.key===progress?.key)view.render(progress);
+  }
+  for(const view of [...mapExplorerViews]){
+    if(!view.figure.isConnected){mapExplorerViews.delete(view);continue;}
+    if(view.key===progress?.key)view.explorer.setChests(progress);
+  }
+});
 
 export function publishJourneyRegionChestProgress(progress){
   const key=String(progress?.key||'');
@@ -184,6 +195,10 @@ export function publishJourneyDestinationData(value){
   const key=String(value?.key||'');
   const verified=normaliseDestinationData(key,value);
   if(!key||!verified)return false;
+  if(verified.loading||verified.error){
+    verifiedRegionChestProgress.delete(key);
+    document.dispatchEvent(new CustomEvent(REGION_CHEST_EVENT,{detail:{key,reset:true}}));
+  }
   verifiedDestinationData.clear();
   verifiedDestinationData.set(key,verified);
   document.dispatchEvent(new CustomEvent(DESTINATION_DATA_EVENT,{detail:verified}));
@@ -381,39 +396,8 @@ function markerIcon(type){
     dungeon:'<circle cx="16" cy="16" r="13"/><path d="M10 22V9h12v13M13 9v13m6-13v13M9 13h14M9 18h14"/>',
     vendor:'<path d="M7 4h18v18l-9 6-9-6z"/><circle cx="16" cy="12" r="4"/><path d="M10 22c1-4 3-6 6-6s5 2 6 6z"/>'
   };
-  svg.innerHTML=paths[type]||'';
+  svg.innerHTML=paths[type]||'<circle cx="16" cy="16" r="13" fill="#17242e" stroke="#d4c397" stroke-width="1.5"/><path d="m16 8 8 8-8 8-8-8z" fill="none" stroke="#f1eee6" stroke-width="1.5"/>';
   return svg;
-}
-
-function createStaticMarkers(markers,label){
-  const layer=document.createElement('div');
-  layer.className='journey-map-marker-layer';
-  layer.setAttribute('aria-label',`${label} activity locations`);
-  for(const marker of markers||[]){
-    const item=document.createElement('span');
-    item.className='journey-map-marker';
-    item.dataset.markerKey=marker.key;
-    item.dataset.markerType=marker.type;
-    item.style.left=`${marker.x}%`;
-    item.style.top=`${marker.y}%`;
-    item.setAttribute('role','img');
-    item.setAttribute('aria-label',`${MARKER_TYPE_LABELS[marker.type]}: ${marker.name}`);
-
-    const icon=document.createElement('span');
-    icon.className='journey-map-marker-icon';
-    icon.append(markerIcon(marker.type));
-
-    const copy=document.createElement('span');
-    copy.className='journey-map-marker-copy';
-    const name=document.createElement('strong');
-    name.textContent=marker.name;
-    const type=document.createElement('small');
-    type.textContent=MARKER_TYPE_LABELS[marker.type];
-    copy.append(name,type);
-    item.append(icon,copy);
-    layer.append(item);
-  }
-  return layer;
 }
 
 function createLocationMap(key,spec){
@@ -467,13 +451,23 @@ function createLocationMap(key,spec){
   const image=document.createElement('img');
   image.className='journey-map-image';
   image.src=spec.src;
-  image.alt=spec.alt||`ASTRIX PARADOX placeholder awaiting ${label} Director map.`;
+  image.alt=spec.alt||`${label} Director map.`;
   image.draggable=false;
   const stage=document.createElement('div');
   stage.className='journey-map-stage';
-  stage.append(image,createStaticMarkers(spec.markers,label));
-  viewport.append(stage,createRegionChestOverlay(key,label));
-  figure.append(toolbar,viewport);
+  const explorer=createJourneyMapExplorer({key,label,staticMarkers:spec.markers,viewport,markerIcon,onFocus(position){
+    setScale(2);
+    state.x=(.5-position.x/100)*viewport.clientWidth*state.scale;
+    state.y=(.5-position.y/100)*viewport.clientHeight*state.scale;
+    applyMapPosition();
+  }});
+  const support=document.createElement('div');support.className='journey-map-support';
+  support.append(createRegionChestOverlay(key,label));
+  stage.append(image,explorer.layer);
+  viewport.append(stage);
+  figure.append(toolbar,viewport,explorer.root,support);
+  mapExplorerViews.add({key,figure,explorer});
+  explorer.setChests(verifiedRegionChestProgress.get(key));
 
   const state={scale:1,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0};
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
@@ -501,10 +495,11 @@ function createLocationMap(key,spec){
     if(state.scale>1)requestDetailSource();
     if(state.scale===1){state.x=0;state.y=0;}
     applyMapPosition();
+    explorer.refreshMarkers(state.scale);
   }
 
   viewport.addEventListener('pointerdown',(event)=>{
-    if(event.button!==0)return;
+    if(event.button!==0||event.target.closest('button'))return;
     state.dragging=true;
     state.startX=event.clientX;
     state.startY=event.clientY;
@@ -532,6 +527,7 @@ function createLocationMap(key,spec){
     setScale(state.scale+(event.deltaY<0?.25:-.25));
   },{passive:false});
   viewport.addEventListener('keydown',(event)=>{
+    if(event.target!==viewport)return;
     const step=32;
     if(event.key==='ArrowLeft')state.x+=step;
     else if(event.key==='ArrowRight')state.x-=step;
@@ -568,11 +564,17 @@ function createLocationMap(key,spec){
       image.addEventListener('error',()=>finish('unavailable'),{once:true});
     }
   });
+  const resizeObserver=new ResizeObserver(()=>{
+    if(!figure.isConnected){resizeObserver.disconnect();return;}
+    applyMapPosition();explorer.refreshMarkers(state.scale);
+  });
+  resizeObserver.observe(viewport);
   applyMapPosition();
-  return {figure,ready};
+  return {figure,ready:Promise.all([ready,explorer.ready]).then(([result])=>result),destroy(){resizeObserver.disconnect();}};
 }
 
 export function initJourneyLocationMaps(detail){
+  let activeMap=null;
   const render=(event)=>{
     const key=event?.detail?.key||globalThis.ForgeDestinations?.current();
     const spec=JOURNEY_LOCATION_MAPS[key];
@@ -587,13 +589,18 @@ export function initJourneyLocationMaps(detail){
       };
       document.addEventListener(MAP_RENDER_EVENT,onReady);
     });
+    activeMap?.destroy();
     const map=createLocationMap(key,spec);
+    activeMap=map;
     const label=globalThis.ForgeDestinations?.labelOf(key)||key;
     const dataView=createDestinationDataView(key,label,map.figure);
     for(const child of [...detail.children]){
       if(!child.matches('.apx-loc-band,.apx-loc-desc'))child.remove();
     }
     detail.append(dataView.actions,map.figure,dataView.panel);
+    for(const view of [...regionChestViews])if(!view.overlay.isConnected)regionChestViews.delete(view);
+    for(const view of [...mapExplorerViews])if(!view.figure.isConnected)mapExplorerViews.delete(view);
+    for(const view of [...destinationDataViews])if(!view.panel.isConnected)destinationDataViews.delete(view);
     return map.ready;
   };
   document.addEventListener('forge:destination-changed',render);
