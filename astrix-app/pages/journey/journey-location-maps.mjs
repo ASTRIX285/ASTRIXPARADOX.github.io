@@ -1,6 +1,6 @@
 // Journey-owned interactive map registry and viewer.
-import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-director-2';
-import {directorViewBox,directorViewPosition} from './journey-map-model.mjs?v=20260920-director-2';
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3';
+import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs?v=20260920-zoom-chests-3';
 
 const destinationMap=(key,name)=>Object.freeze({
   src:`./assets/maps/${key}-director-map-4k.webp`,
@@ -52,19 +52,6 @@ const DESTINATION_DATA_SECTIONS=Object.freeze([
   Object.freeze({key:'endgame',label:'DUNGEONS & RAIDS'})
 ]);
 
-function normaliseRegionChestProgress(key,value){
-  if(!value||value.key!==key)return null;
-  const total=Number(value.total);
-  const discovered=Number(value.discovered);
-  if(!Number.isInteger(total)||total<0||!Number.isInteger(discovered)||discovered<0||discovered>total)return null;
-  const chests=Array.isArray(value.chests)?value.chests.map(chest=>({
-    name:String(chest?.name||'').trim(),
-    location:String(chest?.location||'').trim(),
-    collected:typeof chest?.collected==='boolean'?chest.collected:null
-  })).filter(chest=>chest.name&&chest.location&&chest.collected!==null):[];
-  return {total,discovered,missing:total-discovered,chests};
-}
-
 function createRegionChestOverlay(key,label){
   const destinationName=String(label||key).trim()||key;
   const overlay=document.createElement('aside');
@@ -81,25 +68,30 @@ function createRegionChestOverlay(key,label){
       <span><strong data-region-chest-missing>--</strong><small>MISSING</small></span>
       <span><strong data-region-chest-total>--</strong><small>TOTAL</small></span>
     </div>
+    <p class="journey-map-position-note" data-region-chest-unknown hidden></p>
     <div class="journey-region-chests-list" data-region-chest-list hidden></div>`;
 
   const discovered=overlay.querySelector('[data-region-chest-discovered]');
   const missing=overlay.querySelector('[data-region-chest-missing]');
   const total=overlay.querySelector('[data-region-chest-total]');
   const list=overlay.querySelector('[data-region-chest-list]');
+  const unknown=overlay.querySelector('[data-region-chest-unknown]');
 
   function render(value){
     const progress=normaliseRegionChestProgress(key,value);
     if(!progress){
       discovered.textContent='--';missing.textContent='--';total.textContent='--';
-      list.replaceChildren();list.hidden=true;return;
+      unknown.hidden=true;list.replaceChildren();list.hidden=true;return;
     }
-    discovered.textContent=String(progress.discovered);
-    missing.textContent=String(progress.missing);
+    const allUnknown=progress.total>0&&progress.unknown===progress.total;
+    discovered.textContent=allUnknown?'--':String(progress.discovered);
+    missing.textContent=allUnknown?'--':String(progress.missing);
     total.textContent=String(progress.total);
+    unknown.hidden=progress.unknown===0;
+    unknown.textContent=`${progress.unknown} ${progress.unknown===1?'chest has':'chests have'} unknown collection status.`;
     list.replaceChildren(...progress.chests.map(chest=>{
       const row=document.createElement('div');
-      row.className=`journey-region-chest ${chest.collected?'is-collected':'is-missing'}`;
+      row.className=`journey-region-chest ${chest.collected===true?'is-collected':chest.collected===false?'is-missing':'is-unknown'}`;
       const tick=document.createElement('span');
       tick.className='journey-region-chest-tick';
       tick.textContent=chest.collected?'✓':'';
@@ -109,7 +101,7 @@ function createRegionChestOverlay(key,label){
       const name=document.createElement('b');
       const location=document.createElement('small');
       name.textContent=chest.name;
-      location.textContent=chest.location;
+      location.textContent=`${chest.location} · ${chest.collected===true?'Collected':chest.collected===false?'Not collected':'Collection status unavailable'}`;
       copy.append(name,location);
       row.append(tick,copy);
       return row;
@@ -196,7 +188,7 @@ export function publishJourneyDestinationData(value){
   const key=String(value?.key||'');
   const verified=normaliseDestinationData(key,value);
   if(!key||!verified)return false;
-  if(verified.loading||verified.error){
+  if(verified.loading){
     verifiedRegionChestProgress.delete(key);
     document.dispatchEvent(new CustomEvent(REGION_CHEST_EVENT,{detail:{key,reset:true}}));
   }
@@ -388,6 +380,7 @@ document.addEventListener(DESTINATION_DATA_EVENT,event=>{
 function createLocationMap(key,spec){
   const label=globalThis.ForgeDestinations?.labelOf(key)||key;
   const viewBox=directorViewBox(key);
+  const initialScale=key==='pale-heart'?2:1;
   const figure=document.createElement('figure');
   figure.className='journey-location-map';
   figure.dataset.mapKey=key;
@@ -412,7 +405,7 @@ function createLocationMap(key,spec){
   const zoomStatus=document.createElement('output');
   zoomStatus.className='journey-map-zoom';
   zoomStatus.setAttribute('aria-live','polite');
-  zoomStatus.textContent='100%';
+  zoomStatus.textContent=`${initialScale*100}%`;
 
   const zoomIn=document.createElement('button');
   zoomIn.type='button';
@@ -455,7 +448,8 @@ function createLocationMap(key,spec){
 
   const image=document.createElement('img');
   image.className='journey-map-image';
-  image.src=spec.src;
+  image.src=initialScale>1&&spec.detailSrc?spec.detailSrc:spec.src;
+  if(initialScale>1&&spec.detailSrc)image.dataset.detailRequested='true';
   image.alt=spec.alt||`${label} Director map.`;
   image.draggable=false;
   image.style.width=`${3840/viewBox.width*100}%`;
@@ -479,7 +473,7 @@ function createLocationMap(key,spec){
   mapExplorerViews.add({key,figure,explorer});
   explorer.setChests(verifiedRegionChestProgress.get(key));
 
-  const state={scale:1,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0};
+  const state={scale:initialScale,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0};
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
 
   function requestDetailSource(){
@@ -545,7 +539,7 @@ function createLocationMap(key,spec){
     else if(event.key==='ArrowDown')state.y-=step;
     else if(event.key==='+'||event.key==='=')setScale(state.scale+.25);
     else if(event.key==='-')setScale(state.scale-.25);
-    else if(event.key==='0'){state.x=0;state.y=0;setScale(1);}
+    else if(event.key==='0'){state.x=0;state.y=0;setScale(initialScale);}
     else return;
     event.preventDefault();
     applyMapPosition();
@@ -554,7 +548,7 @@ function createLocationMap(key,spec){
     const action=event.target.closest('button')?.dataset.mapAction;
     if(action==='in')setScale(state.scale+.25);
     if(action==='out')setScale(state.scale-.25);
-    if(action==='reset'){state.x=0;state.y=0;setScale(1);}
+    if(action==='reset'){state.x=0;state.y=0;setScale(initialScale);}
   });
   const ready=new Promise(resolve=>{
     let settled=false;

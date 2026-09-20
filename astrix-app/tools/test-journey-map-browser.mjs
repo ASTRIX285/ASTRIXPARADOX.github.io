@@ -65,7 +65,18 @@ try{
     await page.waitForFunction(()=>!document.querySelector('.journey-map-point-count')?.textContent.includes('loading'));
     assert.equal(await page.locator('.journey-location-map').count(),1);
     assert(await page.locator('.journey-map-point-list button').count()>0);
-    assert.equal(await page.locator('.journey-map-image').evaluate(image=>image.naturalWidth),3840);
+    assert.equal(await page.locator('.journey-map-image').evaluate(image=>image.naturalWidth),key==='pale-heart'?5760:3840);
+    assert.equal(await page.locator('.journey-map-zoom').innerText(),key==='pale-heart'?'200%':'100%');
+    if(key==='pale-heart'){
+      const ratio=await page.locator('.journey-map-viewport').evaluate(node=>node.clientWidth/node.clientHeight);
+      assert(Math.abs(ratio-16/9)<.01,'Pale Heart frame must match the other maps');
+      await page.getByRole('button',{name:'Zoom in',exact:true}).click();
+      await page.getByRole('button',{name:'RESET',exact:true}).click();
+      assert.equal(await page.locator('.journey-map-zoom').innerText(),'200%');
+      await page.locator('.journey-map-viewport').press('-');
+      await page.locator('.journey-map-viewport').press('0');
+      assert.equal(await page.locator('.journey-map-zoom').innerText(),'200%');
+    }
   }
   await page.evaluate(()=>publishChests({key:'cosmodrome',total:1,discovered:0,chests:[{name:'Test regional chest',location:'The Steppes',collected:false}]}));
   await page.getByRole('combobox').selectOption('chest');

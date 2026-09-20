@@ -1,4 +1,4 @@
-import {destinationNameMatches,destinationActivityMatches,destinationObjectiveMatches} from './journey-destination-model.mjs?v=20260920-locations-1';
+import {destinationNameMatches,destinationActivityMatches,destinationObjectiveMatches,REGION_CHEST_CHECKLIST_HASH,resolveRegionChestProgress} from './journey-destination-model.mjs?v=20260920-zoom-chests-3';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1';
 import {resolveRecordTree,patternTypeKey,seasonRankProgress,findDestinationNodes} from './journey-record-model.mjs?v=20260905-journey-repair-1';
@@ -8,7 +8,7 @@ import {validateHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-bi
 import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-shooting-range-capture.mjs?v=20260902-journey-data-hooks-1';
 import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1';
 import {initLocationSelector} from '../../shared/astrix-location-selector.mjs?v=20260920-map-links-1';
-import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260920-director-2';
+import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260920-zoom-chests-3';
 import {loadPreparedPagePayload,preloadPreparedWorkspace,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
@@ -773,50 +773,22 @@ async function destinationQuestRows(payload,key,characterId){
 }
 
 async function bindRegionChestProgress(payload,key,characterId,requestId){
-  const checklistStates={...(payload?.profile?.profileProgression?.data?.checklists||{}),...(payload?.profile?.characterProgressions?.data?.[characterId]?.checklists||{})};
-  const checklistHashes=Object.keys(checklistStates);
-  if(!checklistHashes.length)return;
-  const checklistDefinitions=await guardianManifest.getMany('DestinyChecklistDefinition',checklistHashes);
-  if(!Object.keys(checklistDefinitions).length)return;
-  const entries=[];
-  let regionChecklistFound=false;
-  checklistHashes.forEach(hash=>{
-    const definition=checklistDefinitions[hash];
-    const label=`${definition?.displayProperties?.name||''} ${definition?.viewActionString||''}`;
-    if(!/region chests?/i.test(label))return;
-    regionChecklistFound=true;
-    (definition?.entries||[]).forEach(entry=>entries.push({entry,state:checklistStates[hash]?.[String(entry?.hash)]}));
-  });
-  if(!regionChecklistFound)return;
-  const activityDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',entries.map(item=>item.entry?.activityHash));
-  const locationDefinitions=await guardianManifest.getMany('DestinyLocationDefinition',entries.map(item=>item.entry?.locationHash));
-  const destinationDefinitions=await guardianManifest.getMany('DestinyDestinationDefinition',[
-    ...entries.map(item=>item.entry?.destinationHash),
-    ...Object.values(activityDefinitions).map(definition=>definition?.destinationHash),
-    ...Object.values(locationDefinitions).flatMap(definition=>(definition?.locationReleases||[]).map(release=>release?.destinationHash))
+  const profileStates=payload?.profile?.profileProgression?.data?.checklists||{};
+  const characterStates=payload?.profile?.characterProgressions?.data?.[characterId]?.checklists||{};
+  const checklistHashes=[...new Set([REGION_CHEST_CHECKLIST_HASH,...Object.keys(profileStates),...Object.keys(characterStates)])];
+  const checklists=await guardianManifest.getMany('DestinyChecklistDefinition',checklistHashes);
+  const entries=Object.values(checklists).filter(definition=>/region chests?/i.test(`${definition?.displayProperties?.name||''} ${definition?.viewActionString||''}`)).flatMap(definition=>definition.entries||[]);
+  const [activities,locations]=await Promise.all([
+    guardianManifest.getMany('DestinyActivityDefinition',entries.map(entry=>entry.activityHash)),
+    guardianManifest.getMany('DestinyLocationDefinition',entries.map(entry=>entry.locationHash))
   ]);
-  const matching=entries.filter(({entry})=>{
-    const direct=destinationDefinitions[String(entry?.destinationHash||'')];
-    const activity=activityDefinitions[String(entry?.activityHash||'')];
-    const activityDestination=destinationDefinitions[String(activity?.destinationHash||'')];
-    const location=locationDefinitions[String(entry?.locationHash||'')];
-    return destinationNameMatches(key,direct?.displayProperties?.name)
-      ||destinationNameMatches(key,activityDestination?.displayProperties?.name)
-      ||(location?.locationReleases||[]).some(release=>destinationNameMatches(key,destinationDefinitions[String(release?.destinationHash||'')]?.displayProperties?.name));
-  });
-  const chests=matching.map(({entry,state})=>{
-    const direct=destinationDefinitions[String(entry?.destinationHash||'')];
-    const activity=activityDefinitions[String(entry?.activityHash||'')];
-    const activityDestination=destinationDefinitions[String(activity?.destinationHash||'')];
-    const locationDefinition=locationDefinitions[String(entry?.locationHash||'')];
-    const locationDestination=(locationDefinition?.locationReleases||[]).map(release=>destinationDefinitions[String(release?.destinationHash||'')]).find(definition=>destinationNameMatches(key,definition?.displayProperties?.name));
-    const destination=direct||activityDestination||locationDestination;
-    const bubble=(destination?.bubbles||[]).find(item=>String(item?.hash)===String(entry?.bubbleHash));
-    const location=String(bubble?.displayProperties?.name||locationDefinition?.displayProperties?.name||entry?.displayProperties?.description||activity?.displayProperties?.name||'').trim();
-    return {name:String(entry?.displayProperties?.name||'').trim(),location,collected:typeof state==='boolean'?state:null};
-  });
-  if(requestId!==destinationProgressRequest||entries.length>0&&!matching.length||chests.some(chest=>!chest.name||!chest.location||chest.collected===null))return;
-  publishJourneyRegionChestProgress({key,total:chests.length,discovered:chests.filter(chest=>chest.collected).length,chests});
+  const destinations=await guardianManifest.getMany('DestinyDestinationDefinition',[
+    ...entries.map(entry=>entry.destinationHash),
+    ...Object.values(activities).map(definition=>definition.destinationHash),
+    ...Object.values(locations).flatMap(definition=>(definition.locationReleases||[]).map(release=>release.destinationHash))
+  ]);
+  const progress=resolveRegionChestProgress({key,checklists,profileStates,characterStates,activities,locations,destinations});
+  if(progress&&requestId===destinationProgressRequest)publishJourneyRegionChestProgress(progress);
 }
 
 async function bindDestinationProgress(payload,key=globalThis.ForgeDestinations?.current()){
