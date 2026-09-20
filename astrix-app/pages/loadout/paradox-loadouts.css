@@ -38,7 +38,8 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 .saved-build-art{display:grid;place-items:center;width:var(--saved-icon-size);height:var(--saved-icon-size);border:1px solid #777;background:var(--apx-colour-raised,#1a1a1a);box-sizing:border-box;overflow:hidden}
 .saved-build-art img{display:block;width:100%;height:100%;object-fit:contain;aspect-ratio:1}
 .saved-build-tile:focus-visible,.saved-build-overview:focus-visible{outline:2px solid var(--apx-colour-focus,#82c9ff);outline-offset:2px}
-.saved-build-tile:focus-visible::after{content:attr(aria-label);position:absolute;top:0;left:0;z-index:2;width:max-content;max-width:230px;padding:6px;background:#111;color:#fff;border:1px solid #777;font-size:12px;line-height:1.4;white-space:pre-line;pointer-events:none}
+.saved-item-tooltip{position:fixed;inset:auto;margin:0;width:max-content;max-width:min(280px,calc(100vw - 16px));box-sizing:border-box;padding:8px 10px;background:#111;color:#fff;border:1px solid #b99850;border-radius:3px;font:13px/1.45 var(--apx-font-copy,sans-serif);white-space:pre-line;overflow-wrap:anywhere;pointer-events:none;z-index:10000;box-shadow:0 4px 16px #0009}
+.saved-item-tooltip[hidden]{display:none}
 .saved-build-power{display:flex;align-items:center;justify-content:flex-end;gap:3px;height:13px;padding:0 3px;box-sizing:border-box;background:#34434b;color:#fff;font-size:11px;line-height:1}
 .saved-build-power img{width:11px;height:11px;object-fit:contain;margin-right:auto}
 .saved-build-tile.is-exotic .saved-build-art{border-color:#e0b94f}
