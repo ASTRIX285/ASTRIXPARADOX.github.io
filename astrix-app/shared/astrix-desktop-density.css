@@ -375,3 +375,151 @@ body :is(.vault-candidate-item img,.vault-selection-slot>img){
   width:var(--apx-equipment-icon-size);
   height:var(--apx-equipment-icon-size);
 }
+
+/* Approved dark-grey chrome. Presentation only; item art and rarity colours
+   continue to come from Bungie, with existing sizing and interaction rules. */
+html:root{
+  --apx-colour-canvas:#161616;
+  --apx-colour-panel:#222222;
+  --apx-colour-raised:#2b2b2b;
+  --apx-colour-text:#ededed;
+  --apx-colour-secondary:#b8b8b8;
+  --apx-colour-border:#414141;
+  --apx-colour-border-strong:#616161;
+}
+/* Neutralise the decorative page backdrop without filtering maps or item art. */
+html body.forge-token-preview .scene.immersive,
+html body.forge-paradox-map-background::after{filter:grayscale(1) blur(2px)!important}
+html body[class]{
+  --surface:var(--apx-colour-panel);
+  --surface-2:var(--apx-colour-raised);
+  --mission-panel:var(--apx-colour-panel);
+  --mission-panel-soft:var(--apx-colour-raised);
+  --mission-line:var(--apx-colour-border);
+}
+html body[class] :is(
+  .apx-section,.apx-subpanel,.apx-scaffold-card,.apx-destination-link,
+  .panel,.eq,.design-section,.build-space>.design-canvas,.summary-card,
+  .build-rail-editor,.option-panel,.recommended-build-panel,.recommended-build-review,
+  .review-section,.review-intelligence-card,.intel-card,.forge-panel,.forge-set,
+  .forge-candidate,.forge-load-breakdown,.forge-resident-summary,.forge-empty,
+  .vault-capacity article,.vault-optimiser,.vault-candidate,.vault-selection,
+  .vault-character-inventory,.vault-postmaster-section,.vault-only-section,
+  .paradox-loadout-list,.paradox-loadout-detail,.paradox-loadout-card,
+  .saved-build-overview,.paradox-loadout-component,
+  .journey-panel,.journey-card,.journey-destination-detail,.journey-record-detail,
+  .journey-evidence-list,.journey-summary-card,.journey-guardian-rank-summary,
+  .journey-equipped-title-summary,.journey-next-title-summary,.journey-season-rank-summary,
+  .journey-destination-data-panel,.journey-destination-data-body,.journey-map-explorer,.journey-map-support,
+  .mission-panel,.mission-metric-card,.mission-build-card,.mission-evidence-card,
+  .mission-history-card,.mission-mastery-summary,.mission-left-rail,.mission-gate-card,
+  .tool-intro-panel,
+  .guardian-loadout-menu-dialog,.vault-action-dialog,.paradox-loadout-dialog,
+  .manual-editor-dialog,.live-apply-dialog
+){
+  background-color:var(--apx-colour-panel)!important;
+  background-image:none!important;
+  border-color:var(--apx-colour-border)!important;
+  box-shadow:none!important;
+  color:var(--apx-colour-text)!important;
+}
+html body[class] :is(
+  .apx-destination-header,.topbar,.apx-destination-ribbon,
+  .vault-character-header,.vault-only-section>header,
+  .vault-postmaster-section>header,.panel-head,.eq-head,.section-title,
+  .forge-panel-heading,.forge-breakdown-heading,.recommended-build-header,
+  .paradox-loadout-detail-head,.guardian-loadout-menu-dialog>header,
+  .mission-identity-card,.mission-tabs,.mission-panel-heading,.journey-map-toolbar
+){
+  background-color:var(--apx-colour-raised)!important;
+  background-image:none!important;
+  border-color:var(--apx-colour-border)!important;
+}
+html body[class] .vault-character-header::before{filter:grayscale(1)}
+html body[class] :is(.apx-destination-ribbon a,.build-rail-nav button,.journey-nav button,.mission-section-nav a){
+  background-color:var(--apx-colour-panel)!important;
+  background-image:none!important;
+  border-color:var(--apx-colour-border)!important;
+  color:var(--apx-colour-secondary)!important;
+  box-shadow:none!important;
+}
+html body[class] .apx-destination-ribbon a[aria-current="page"]{
+  color:var(--apx-colour-text)!important;
+  background-color:var(--apx-colour-raised)!important;
+  box-shadow:inset 0 -2px var(--apx-colour-focus)!important;
+}
+html body[class] :is(
+  [data-build-action],[data-dialog-action],[data-dialog-close],
+  [data-collect-postmaster],.vault-postmaster-pull,.apx-data-refresh,
+  .vault-optimiser-actions button,.vault-candidate-select,.vault-evaluate,
+  .vault-selection-head button,.vault-load-more,.vault-connect,
+  .forge-stat-targets button,.forge-stat-actions button,.forge-evaluate,
+  .forge-candidate-select,.forge-candidate-evaluate,.forge-connect,.forge-show-more,
+  .forge-matrix-expand,.forge-open-protocol,.forge-set-choice,
+  .working-build-actions button,.recommended-build-actions button,
+  .manual-edit-btn,.restore-btn,.generate-build-btn,.primary,
+  .guardian-loadout-menu-dialog button,.vault-action-dialog button,
+  .paradox-loadout-dialog button,.mission-history-action,.mission-analyse-link,.mission-build-link,
+  .mission-tabs button,.journey-destination-action,.journey-map-controls button,.journey-map-locate,
+  .tool-intro-cta
+){
+  background-color:#303030!important;
+  background-image:none!important;
+  color:var(--apx-colour-text)!important;
+  border-color:var(--apx-colour-border-strong)!important;
+}
+html body[class] :is(
+  .apx-destination-ribbon a:hover,.apx-data-refresh:hover,
+  [data-build-action]:hover,[data-dialog-action]:hover,
+  .guardian-loadout-menu-dialog button:hover,.vault-action-dialog button:hover,
+  .vault-optimiser-actions button:hover,.forge-stat-actions button:hover,
+  .forge-candidate-select:hover,.forge-candidate-evaluate:hover,
+  .working-build-actions button:hover,.recommended-build-actions button:hover
+){background-color:#414141!important}
+html body[class] :is(
+  .vault-filters input,.vault-filters select,.forge-stat-targets select,
+  .paradox-loadout-dialog input,.paradox-loadout-dialog textarea,.paradox-loadout-dialog select,
+  .mission-panel-heading select,.journey-search input,.journey-map-filters input,.journey-map-filters select
+){
+  background-color:var(--apx-colour-raised)!important;
+  color:var(--apx-colour-text)!important;
+  border-color:var(--apx-colour-border-strong)!important;
+}
+html body[class] :is(
+  .vault-character-header span,.vault-character-header strong,.vault-only-section>header span,
+  .vault-only-section>header strong,.vault-transfer-family,.vault-transfer-group>header strong,
+  .vault-character-section>header span,.vault-transfer-group>header span,
+  .forge-panel-heading>span,.forge-open-protocol small,.forge-open-protocol em,
+  .forge-matrix-expand b,.forge-matrix-expand small,.forge-matrix-total small,
+  .forge-breakdown-heading div span,.paradox-loadout-detail-head small
+){color:var(--apx-colour-secondary)!important}
+html body[class] :is(.vault-transfer-empty,.vault-transfer-row-empty){
+  background-color:transparent!important;
+  color:var(--apx-colour-secondary)!important;
+  border-color:var(--apx-colour-border)!important;
+}
+html body[class] :is(.vault-character-column.is-active .vault-character-inventory,.vault-character-column.is-active .vault-postmaster-section){
+  border-color:var(--apx-colour-focus)!important;
+  box-shadow:inset 0 2px var(--apx-colour-focus)!important;
+}
+html body[class] :is(.vault-character-column.is-drop-target .vault-character-inventory,.vault-character-column.is-drop-target .vault-postmaster-section,.vault-only-section.is-drop-target){
+  border-color:var(--apx-colour-success)!important;
+  box-shadow:inset 0 0 0 2px var(--apx-colour-success)!important;
+}
+html body[class] :is(.paradox-loadout-card.is-active,.forge-candidate.is-selected,.forge-candidate.is-maximized,.mission-section-nav a.is-active,.mission-tabs button[aria-selected="true"],.journey-destination-action[aria-selected="true"],.forge-open-protocol.is-active,.forge-set-choice:has(input:checked)){
+  border-color:var(--apx-colour-focus)!important;
+  box-shadow:inset 2px 0 var(--apx-colour-focus)!important;
+}
+html body[class] :is([data-build-action="delete"],.is-danger,[data-loadout-menu-action="clear"]){border-color:var(--apx-colour-action)!important}
+html body[class] .vault-postmaster-section:has(.vault-transfer-item)>header [data-collect-postmaster]:not(:disabled){
+  border-color:#e44d56!important;
+  background-color:#303030!important;
+  animation:apx-postmaster-pull-glow 2s ease-in-out infinite;
+}
+@keyframes apx-postmaster-pull-glow{
+  0%,100%{box-shadow:0 0 2px #e44d5622}
+  50%{box-shadow:0 0 10px #e44d5688}
+}
+@media(prefers-reduced-motion:reduce){
+  html body[class] .vault-postmaster-section>header [data-collect-postmaster]{animation:none!important}
+}
