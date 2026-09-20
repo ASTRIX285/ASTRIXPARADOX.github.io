@@ -7,6 +7,24 @@ export const POINT_TYPES=Object.freeze({
 const normalise=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[’']/g,'').trim();
 export const hasMapPosition=entry=>Number.isFinite(entry?.position?.x)&&Number.isFinite(entry?.position?.y)&&entry.position.x>=0&&entry.position.x<=100&&entry.position.y>=0&&entry.position.y<=100;
 
+// Only use artwork attached to this definition. Never substitute a type glyph,
+// another activity's icon, or Bungie's missing-icon placeholder.
+export function directorIconUrl(entry){
+  const path=[entry?.icon,...(entry?.variants||[]).map(variant=>variant.icon)]
+    .find(value=>typeof value==='string'&&/^\/common\/destiny2_content\/icons\/[a-zA-Z0-9_]+\.png$/.test(value));
+  return path?`https://www.bungie.net${path}`:null;
+}
+
+// Source coordinates stay relative to the full 4K/6K export. The viewer crops
+// only canvas padding, transforming both image and points through this rectangle.
+export const DIRECTOR_VIEW_BOXES=Object.freeze({
+  'pale-heart':Object.freeze({x:0,y:472,width:3840,height:1216})
+});
+export const directorViewBox=key=>DIRECTOR_VIEW_BOXES[key]||{x:0,y:0,width:3840,height:2160};
+export function directorViewPosition(position,view){
+  return {x:(position.x*38.4-view.x)/view.width*100,y:(position.y*21.6-view.y)/view.height*100};
+}
+
 export function mapCatalogueEntries(catalogue,staticMarkers=[]){
   const entries=(catalogue?.entries||[]).map(entry=>({...entry,variants:[...(entry.variants||[])]}));
   // Retain the approved Cosmodrome pin coordinates and join their public definitions.

@@ -582,7 +582,7 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-map-viewport{
   position:relative;
   width:100%;
-  aspect-ratio:16/9;
+  aspect-ratio:var(--journey-map-aspect,16/9);
   overflow:hidden;
   background:#020506;
   cursor:grab;
@@ -590,6 +590,8 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 }
 
 .journey-map-viewport.is-dragging{cursor:grabbing}
+.journey-location-map:fullscreen{box-sizing:border-box;margin:0;padding:16px;border:0;background:#06090e;overflow:auto}
+.journey-map-controls{flex-wrap:wrap}
 
 .journey-map-viewport:focus-visible{
   outline:2px solid rgba(201,168,76,.75);
@@ -729,8 +731,8 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 
 /* Map points stay anchored to the image; their labels do not shift the pin. */
 button.journey-map-marker{
-  width:36px;
-  height:36px;
+  width:42px;
+  height:42px;
   min-width:0;
   padding:3px;
   border:0;
@@ -756,13 +758,6 @@ button.journey-map-marker .journey-map-marker-copy{
 }
 button.journey-map-marker:hover .journey-map-marker-copy,
 button.journey-map-marker:focus-visible .journey-map-marker-copy{visibility:visible}
-.journey-map-marker-icon.is-cluster{
-  border:1px solid #d9bb6b;
-  border-radius:50%;
-  background:#16212c;
-  color:#fff;
-  font:700 14px/1 bahnschrift,sans-serif;
-}
 .journey-map-explorer{padding:18px;border-top:1px solid rgba(201,168,76,.25);background:rgba(5,9,14,.92);color:#eee9dc}
 .journey-map-explorer h3{margin:0;font-size:1rem;letter-spacing:.1em;color:#dac58d}
 .journey-map-catalogue-note,.journey-map-point-count,.journey-map-position-note,.journey-map-availability{color:#b7bac3;font-size:.8125rem;line-height:1.5}
@@ -813,9 +808,9 @@ button.journey-map-locate{min-height:40px;padding:8px 12px;border:1px solid #9c8
 
 .journey-map-marker-icon{
   display:grid;
-  width:30px;
-  height:30px;
-  flex:0 0 30px;
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
   place-items:center;
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.9));
 }
@@ -852,60 +847,9 @@ button.journey-map-locate{min-height:40px;padding:8px 12px;border:1px solid #9c8
   text-transform:uppercase;
 }
 
-.journey-map-marker[data-marker-type="landing"] circle{
-  fill:rgba(3,5,6,.94);
-  stroke:rgba(241,238,230,.9);
-  stroke-width:1.5;
-}
-
-.journey-map-marker[data-marker-type="landing"] path{
-  fill:#f1eee6;
-}
-
-.journey-map-marker[data-marker-type="lost-sector"] .journey-map-marker-glyph>path:first-child{
-  fill:rgba(60,48,82,.94);
-  stroke:#c5b8e8;
-  stroke-width:1.2;
-}
-
-.journey-map-marker[data-marker-type="lost-sector"] .journey-map-marker-glyph>path:not(:first-child){
-  fill:none;
-  stroke:#f0eaff;
-  stroke-width:1.4;
-}
-
-.journey-map-marker[data-marker-type="strike"] .journey-map-marker-glyph>path:first-child{
-  fill:#e8edf3;
-  stroke:#58739a;
-  stroke-width:1.2;
-}
-
-.journey-map-marker[data-marker-type="strike"] .journey-map-marker-glyph>path:last-child{
-  fill:#203c65;
-}
-
-.journey-map-marker[data-marker-type="dungeon"] circle{
-  fill:rgba(102,86,72,.96);
-  stroke:#ded4c5;
-  stroke-width:1.2;
-}
-
-.journey-map-marker[data-marker-type="dungeon"] path{
-  fill:none;
-  stroke:#f4eee5;
-  stroke-width:1.5;
-}
-
-.journey-map-marker[data-marker-type="vendor"] .journey-map-marker-glyph>path:first-child{
-  fill:#536a3d;
-  stroke:#e7e4d8;
-  stroke-width:1.2;
-}
-
-.journey-map-marker[data-marker-type="vendor"] circle,
-.journey-map-marker[data-marker-type="vendor"] .journey-map-marker-glyph>path:last-child{
-  fill:#f2efe7;
-}
+.journey-map-director-icon{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+button.journey-map-marker.is-selected .journey-map-marker-copy{visibility:visible}
+button.journey-map-marker.has-no-icon:not(:focus-visible):not(.is-selected){outline:none;z-index:1}
 
 @media(max-width:720px){
   .journey-destination-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -914,7 +858,6 @@ button.journey-map-locate{min-height:40px;padding:8px 12px;border:1px solid #9c8
   .journey-destination-data-heading{text-align:left}
   .journey-map-controls{width:100%}
   .journey-map-controls .journey-map-reset{margin-left:auto}
-  .journey-map-marker-icon{width:24px;height:24px;flex-basis:24px}
   .journey-map-marker-copy{padding:4px 5px 3px}
   .journey-map-marker-copy strong{font-size:.75rem}
   .journey-map-marker-copy small{display:none}

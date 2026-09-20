@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries} from '../pages/journey/journey-map-model.mjs';
+import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries,directorIconUrl,directorViewBox,directorViewPosition} from '../pages/journey/journey-map-model.mjs';
 import {destinationNameMatches} from '../pages/journey/journey-destination-model.mjs';
 
 const dataRoot=new URL('../pages/journey/assets/map-data/',import.meta.url);
@@ -38,6 +38,22 @@ assert.equal(filterMapEntries(nessus.entries,'inverted spire','vendor').length,0
 assert.equal(filterMapEntries(nessus.entries,'a name that does not exist').length,0);
 assert.equal(filterMapEntries([{name:'Límíng Harbor',type:'landing'}],'liming').length,1);
 assert(!hasMapPosition({position:{x:NaN,y:2}}));assert(!hasMapPosition({position:{x:102,y:2}}));
+assert.equal(directorIconUrl({type:'strike',variants:[{icon:'/img/misc/missing_icon_d2.png'}]}),null,'Missing artwork must not become a fabricated type icon');
+assert.equal(directorIconUrl({icon:'https://untrusted.example/icon.png'}),null);
+const official='/common/destiny2_content/icons/3642cf9e2acd174dcab5b5f9e3a3a45d.png';
+assert.equal(directorIconUrl({variants:[{icon:'/img/misc/missing_icon_d2.png'},{icon:official}]}),`https://www.bungie.net${official}`);
+const paleView=directorViewBox('pale-heart');
+const {default:pale}=await import(new URL('pale-heart.mjs',dataRoot));
+for(const entry of pale.entries.filter(hasMapPosition)){
+  const viewPosition=directorViewPosition(entry.position,paleView);
+  assert(hasMapPosition({position:viewPosition}),`${entry.name}: cropped position outside artwork`);
+  for(const resolution of [1,1.5]){
+    // Round-trip every actual point through crop coordinates at both asset sizes.
+    assert(Math.abs((viewPosition.x/100*paleView.width+paleView.x)*resolution-entry.position.x/100*3840*resolution)<1e-8);
+    assert(Math.abs((viewPosition.y/100*paleView.height+paleView.y)*resolution-entry.position.y/100*2160*resolution)<1e-8);
+  }
+}
+assert.deepEqual(directorViewPosition({x:25,y:75},directorViewBox('edz')),{x:25,y:75});
 const points=[{id:'a',position:{x:40,y:50}},{id:'b',position:{x:42,y:50}},{id:'unknown',position:null}];
 assert.equal(clusterMapEntries(points,1000,500,1).length,1);
 assert.equal(clusterMapEntries(points,1000,500,3).length,2);
