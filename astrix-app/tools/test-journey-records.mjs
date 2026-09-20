@@ -1,3 +1,4 @@
+import {destinationNameMatches,destinationActivityMatches} from '../pages/journey/journey-destination-model.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JourneyManifestService} from '../pages/journey/journey-manifest.mjs';
@@ -13,7 +14,7 @@ for(const rootHash of [1163735237,1866538467,0]){
  const tree=await resolveRecordTree(payload,service);
  assert.equal(tree.hash,'1163735237');assert.equal(tree.triumphs.hash,'1866538467');
  assert.ok(tree.roots.some(row=>row.definition.displayProperties.name==='Medals'));
- for(const name of ['The Pale Heart','Neomuna','Europa','Throne World','Dreaming City','Nessus','European Dead Zone','The Moon','Cosmodrome']){
+ for(const name of ['Kepler','The Lawless Frontier','The Pale Heart','Neomuna','Europa','Throne World','Dreaming City','Nessus','European Dead Zone','The Moon','Cosmodrome']){
   const nodes=await findDestinationNodes(tree.triumphs,service,label=>label===name);
   assert.ok(nodes.length,`${name}: official destination branch must resolve from root ${rootHash}`);
   const foundRecords=new Set();const seen=new Set();let pending=nodes.map(n=>Number(n.hash));
@@ -52,8 +53,8 @@ const {runInNewContext}=await import('node:vm');
 const source=await readFile(new URL('../pages/journey/journey.mjs',import.meta.url),'utf8');
 const names=['titleRecordFor','titleRequirementRow','bungieIconUrl','bungiePresentationIcon','presentationRecordCategories','presentationLeafCategories','recordPresentationTree','journeyCharacterFor','destinationRecordItem','destinationCategoryItem','destinationRecordSections','verifiedCraftablePatternTypes'];
 const functions=names.map(name=>{const start=source.indexOf(`function ${name}(`);assert.ok(start>=0);const end=source.indexOf('\n}',start)+2;return (source.slice(start-6,start)==='async '?'async ':'')+source.slice(start,end);}).join('\n');
-const destinationNames={'pale-heart':'The Pale Heart',neomuna:'Neomuna',europa:'Europa','throne-world':'Throne World','dreaming-city':'Dreaming City',nessus:'Nessus',edz:'European Dead Zone',moon:'The Moon',cosmodrome:'Cosmodrome'};
-const context={guardianManifest:service,resolveRecordTree,findDestinationNodes,patternTypeKey,selectedCharacterId:'test',BUNGIE_ORIGIN:'https://www.bungie.net',URL,finiteNumber:v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null,recordCategoryKey:v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'),destinationNameKey:v=>String(v||'').toLowerCase(),destinationNameMatches:(k,n)=>n===destinationNames[k],PATTERN_CATALYST_TYPE_DEFINITIONS:[{key:'primary'},{key:'special'},{key:'heavy'},{key:'catalysts'}]};
+const destinationNames={kepler:'Kepler','lawless-frontier':'The Lawless Frontier','pale-heart':'The Pale Heart',neomuna:'Neomuna',europa:'Europa','throne-world':'Throne World','dreaming-city':'Dreaming City',nessus:'Nessus',edz:'European Dead Zone',moon:'The Moon',cosmodrome:'Cosmodrome'};
+const context={guardianManifest:service,resolveRecordTree,findDestinationNodes,patternTypeKey,selectedCharacterId:'test',BUNGIE_ORIGIN:'https://www.bungie.net',URL,finiteNumber:v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null,recordCategoryKey:v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'),destinationNameKey:v=>String(v||'').toLowerCase(),destinationNameMatches,destinationActivityMatches,PATTERN_CATALYST_TYPE_DEFINITIONS:[{key:'primary'},{key:'special'},{key:'heavy'},{key:'catalysts'}]};
 runInNewContext(functions+'\nthis.joins={destinationRecordSections,verifiedCraftablePatternTypes,presentationRecordCategories,titleRequirementRow};',context);
 const profile={profile:{characters:{data:{test:{characterId:'test'}}},profileRecords:{data:{recordCategoriesRootNodeHash:1866538467,records:{}}},profilePresentationNodes:{data:{nodes:{}}},characterCraftables:{data:{test:{craftingRootNodeHash:2642502414,craftables:{}}}}}};
 let destinationRecordTotal=0;
