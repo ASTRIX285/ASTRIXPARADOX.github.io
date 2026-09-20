@@ -1,4 +1,4 @@
-import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries} from './journey-map-model.mjs?v=20260920-1';
+import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-director-2';
 
 const loaders=Object.freeze({
   edz:()=>import('./assets/map-data/edz.mjs?v=20260920-1'),
@@ -22,7 +22,7 @@ const button=(className,text)=>{
   const node=make('button',className,text);node.type='button';return node;
 };
 
-export function createJourneyMapExplorer({key,label,staticMarkers,viewport,markerIcon,onFocus}){
+export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewBox,onFocus}){
   const layer=make('div','journey-map-marker-layer');
   layer.setAttribute('aria-label',`${label} map points`);
   const root=make('section','journey-map-explorer');
@@ -43,7 +43,7 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,marke
   details.setAttribute('aria-label','Selected point');details.setAttribute('aria-live','polite');
   details.append(make('p',null,'Select a map symbol or a point from the list.'));
   columns.append(list,details);root.append(heading,note,filters,count,columns);
-  let baseEntries=mapCatalogueEntries(null,staticMarkers),chests=[],entries=baseEntries,visible=entries,scale=1,selected='',loaded=false;
+  let baseEntries=mapCatalogueEntries(null,staticMarkers),chests=[],entries=baseEntries,visible=entries,selected='',loaded=false;
 
   function select(entry,{focusMap=false}={}){
     selected=entry.id;
@@ -51,6 +51,7 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,marke
     if(entry.description)details.append(make('p',null,entry.description));
     const positionNote=hasMapPosition(entry)?entry.position.approximate?'Approximate Director position.':'Director position.':'Map position unavailable.';
     details.append(make('p','journey-map-position-note',positionNote));
+    if(hasMapPosition(entry)&&!directorIconUrl(entry))details.append(make('p','journey-map-icon-note','An official icon is not available in this catalogue. Its name appears when you focus or hover over its map position.'));
     if(hasMapPosition(entry)){
       const locate=button('journey-map-locate','Show on map');
       locate.addEventListener('click',()=>{onFocus(entry.position);viewport.focus({preventScroll:true});});
@@ -76,27 +77,28 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,marke
   function renderMarkers(){
     const oldFocus=document.activeElement?.closest?.('.journey-map-marker');
     const focusId=oldFocus&&layer.contains(oldFocus)?oldFocus._pointIds[0]:null;
-    const groups=clusterMapEntries(visible,viewport.clientWidth||1000,viewport.clientHeight||562,scale);
-    layer.replaceChildren(...groups.map(group=>{
-      const entry=group.entries[0],multiple=group.entries.length>1;
+    layer.replaceChildren(...visible.filter(hasMapPosition).map(entry=>{
+      const position=directorViewPosition(entry.position,viewBox);
       const item=button('journey-map-marker');
       item.dataset.markerKey=entry.markerKey||entry.id;
       item.dataset.markerType=entry.type;
-      item._pointIds=group.entries.map(point=>point.id);
-      item.style.left=`${group.x}%`;item.style.top=`${group.y}%`;
-      const name=multiple?`${group.entries.length} nearby points`:entry.name;
+      item._pointIds=[entry.id];
+      item.style.left=`${position.x}%`;item.style.top=`${position.y}%`;
+      const name=entry.name;
       item.setAttribute('aria-label',name);item.setAttribute('aria-controls',details.id);
       item.classList.toggle('is-selected',item._pointIds.includes(selected));
       const icon=make('span','journey-map-marker-icon');
-      if(multiple){icon.textContent=String(group.entries.length);icon.classList.add('is-cluster');}
-      else icon.append(markerIcon(entry.type));
+      const iconUrl=directorIconUrl(entry);
+      item.classList.toggle('has-no-icon',!iconUrl);
+      if(iconUrl){
+        const image=make('img','journey-map-director-icon');
+        image.src=iconUrl;image.alt='';image.draggable=false;
+        image.addEventListener('error',()=>{image.remove();item.classList.add('has-no-icon');},{once:true});
+        icon.append(image);
+      }
       const copy=make('span','journey-map-marker-copy');copy.append(make('strong',null,name));
       item.append(icon,copy);
-      item.addEventListener('click',()=>{
-        if(!multiple){select(entry);return;}
-        details.replaceChildren(make('h4',null,'Nearby points'));
-        for(const point of group.entries){const choice=button('journey-map-point-result',point.name);choice.addEventListener('click',()=>select(point));details.append(choice);}
-      });
+      item.addEventListener('click',()=>select(entry));
       return item;
     }));
     if(focusId)[...layer.children].find(item=>item._pointIds.includes(focusId))?.focus({preventScroll:true});
@@ -138,5 +140,5 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,marke
       return {key,status:'unavailable',entries:baseEntries.length};
     }
   })();
-  return {root,layer,ready,refreshMarkers(next=scale){scale=next;renderMarkers();},setChests(progress){chests=regionChestEntries(progress);refreshTypes();render();const active=chests.find(entry=>entry.id===selected);if(active)select(active);}};
+  return {root,layer,ready,refreshMarkers(){renderMarkers();},setChests(progress){chests=regionChestEntries(progress);refreshTypes();render();const active=chests.find(entry=>entry.id===selected);if(active)select(active);}};
 }

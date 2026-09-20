@@ -1,5 +1,6 @@
 // Journey-owned interactive map registry and viewer.
-import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-1';
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-director-2';
+import {directorViewBox,directorViewPosition} from './journey-map-model.mjs?v=20260920-director-2';
 
 const destinationMap=(key,name)=>Object.freeze({
   src:`./assets/maps/${key}-director-map-4k.webp`,
@@ -384,24 +385,9 @@ document.addEventListener(DESTINATION_DATA_EVENT,event=>{
   }
 });
 
-function markerIcon(type){
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 32 32');
-  svg.setAttribute('aria-hidden','true');
-  svg.classList.add('journey-map-marker-glyph');
-  const paths={
-    landing:'<circle cx="16" cy="16" r="13"/><path d="M9 12h14l-7 9z"/>',
-    'lost-sector':'<path d="M7 4h18v18l-9 6-9-6z"/><path d="M11 21v-7a5 5 0 0 1 10 0v7M14 21v-7a2 2 0 0 1 4 0v7"/>',
-    strike:'<path d="M6 4h20v17l-10 7-10-7z"/><path d="m9 12 7-4 7 4v3l-7-4-7 4zm0 6 7-4 7 4v3l-7-4-7 4z"/>',
-    dungeon:'<circle cx="16" cy="16" r="13"/><path d="M10 22V9h12v13M13 9v13m6-13v13M9 13h14M9 18h14"/>',
-    vendor:'<path d="M7 4h18v18l-9 6-9-6z"/><circle cx="16" cy="12" r="4"/><path d="M10 22c1-4 3-6 6-6s5 2 6 6z"/>'
-  };
-  svg.innerHTML=paths[type]||'<circle cx="16" cy="16" r="13" fill="#17242e" stroke="#d4c397" stroke-width="1.5"/><path d="m16 8 8 8-8 8-8-8z" fill="none" stroke="#f1eee6" stroke-width="1.5"/>';
-  return svg;
-}
-
 function createLocationMap(key,spec){
   const label=globalThis.ForgeDestinations?.labelOf(key)||key;
+  const viewBox=directorViewBox(key);
   const figure=document.createElement('figure');
   figure.className='journey-location-map';
   figure.dataset.mapKey=key;
@@ -441,10 +427,29 @@ function createLocationMap(key,spec){
   reset.textContent='RESET';
 
   controls.append(zoomOut,zoomStatus,zoomIn,reset);
+  const expand=document.createElement('button');
+  expand.type='button';
+  expand.className='journey-map-expand';
+  expand.textContent='EXPAND MAP';
+  expand.setAttribute('aria-pressed','false');
+  if(document.fullscreenEnabled)controls.append(expand);
+  expand.addEventListener('click',async()=>{
+    try{
+      if(document.fullscreenElement===figure)await document.exitFullscreen();
+      else await figure.requestFullscreen();
+    }catch{expand.textContent='FULL SCREEN UNAVAILABLE';}
+  });
+  const updateExpanded=()=>{
+    const expanded=document.fullscreenElement===figure;
+    expand.textContent=expanded?'CLOSE MAP':'EXPAND MAP';
+    expand.setAttribute('aria-pressed',String(expanded));
+  };
+  document.addEventListener('fullscreenchange',updateExpanded);
   toolbar.append(instruction,controls);
 
   const viewport=document.createElement('div');
   viewport.className='journey-map-viewport';
+  viewport.style.setProperty('--journey-map-aspect',`${viewBox.width} / ${viewBox.height}`);
   viewport.tabIndex=0;
   viewport.setAttribute('aria-label',`Interactive ${label} map. Drag to move, use the mouse wheel or controls to zoom, and use arrow keys to pan.`);
 
@@ -453,12 +458,17 @@ function createLocationMap(key,spec){
   image.src=spec.src;
   image.alt=spec.alt||`${label} Director map.`;
   image.draggable=false;
+  image.style.width=`${3840/viewBox.width*100}%`;
+  image.style.height=`${2160/viewBox.height*100}%`;
+  image.style.left=`${-viewBox.x/viewBox.width*100}%`;
+  image.style.top=`${-viewBox.y/viewBox.height*100}%`;
   const stage=document.createElement('div');
   stage.className='journey-map-stage';
-  const explorer=createJourneyMapExplorer({key,label,staticMarkers:spec.markers,viewport,markerIcon,onFocus(position){
+  const explorer=createJourneyMapExplorer({key,label,staticMarkers:spec.markers,viewport,viewBox,onFocus(position){
+    const display=directorViewPosition(position,viewBox);
     setScale(2);
-    state.x=(.5-position.x/100)*viewport.clientWidth*state.scale;
-    state.y=(.5-position.y/100)*viewport.clientHeight*state.scale;
+    state.x=(.5-display.x/100)*viewport.clientWidth*state.scale;
+    state.y=(.5-display.y/100)*viewport.clientHeight*state.scale;
     applyMapPosition();
   }});
   const support=document.createElement('div');support.className='journey-map-support';
@@ -570,7 +580,7 @@ function createLocationMap(key,spec){
   });
   resizeObserver.observe(viewport);
   applyMapPosition();
-  return {figure,ready:Promise.all([ready,explorer.ready]).then(([result])=>result),destroy(){resizeObserver.disconnect();}};
+  return {figure,ready:Promise.all([ready,explorer.ready]).then(([result])=>result),destroy(){resizeObserver.disconnect();document.removeEventListener('fullscreenchange',updateExpanded);}};
 }
 
 export function initJourneyLocationMaps(detail){
