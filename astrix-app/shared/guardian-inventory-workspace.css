@@ -104,3 +104,20 @@
   body.guardian-main-page .equip.gear-layout-active>.gear-combined{grid-area:inventory!important}
   body.guardian-main-page .workspace>.equip>.improve-cta{grid-row:3!important}
 }
+
+/* Shared row tracks align all existing Postmaster panels and character panels.
+   The original markup, item dimensions, controls and Vault section stay intact. */
+@media(min-width:1201px){
+  @supports(grid-template-rows:subgrid){
+    .vault-character-columns{align-items:stretch}
+    .vault-character-columns>.vault-character-column{
+      grid-template-rows:subgrid;
+      grid-row:span 2;
+    }
+    .vault-character-columns>.vault-character-column>.vault-postmaster-section{
+      min-height:206px;
+      align-self:stretch;
+    }
+    .vault-character-columns>.vault-character-column>.vault-character-inventory{align-self:stretch}
+  }
+}
