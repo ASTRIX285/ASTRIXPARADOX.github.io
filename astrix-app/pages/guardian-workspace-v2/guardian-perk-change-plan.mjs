@@ -147,8 +147,16 @@ function intendedArtifactStep(build={}){
   return `Configure ${intended.length} intended perk${intended.length===1?'':'s'} on ${build.artifact?.name||'the Seasonal Artifact'} in Destiny. Artifact unlocks are preserved as an explicit in-game step.`;
 }
 
+function emptySubclassSocket(item){
+  // Bungie repeats the same empty plug in unused slots. Keep those plugs in
+  // socket plans (they can clear a socket), but do not count them as selections.
+  const name=item?.definition?.displayProperties?.name||item?.name||item?.displayName||'';
+  return /^Empty (?:Fragment|Aspect) Socket$/i.test(String(name).trim());
+}
+
 function subclassCompatibilityViolations(build={}){
-  const sb=build.subclassBuild||{},violations=[],aspects=(sb.aspects||[]).filter(Boolean),fragments=(sb.fragments||[]).filter(Boolean),abilities=(sb.abilities||[]).filter(Boolean),unique=rows=>new Set(rows.map(hashOf).filter(Number.isInteger)).size===rows.length;
+  const selected=rows=>(rows||[]).filter(item=>item&&!emptySubclassSocket(item));
+  const sb=build.subclassBuild||{},violations=[],aspects=selected(sb.aspects),fragments=selected(sb.fragments),abilities=(sb.abilities||[]).filter(Boolean),unique=rows=>new Set(rows.map(hashOf).filter(Number.isInteger)).size===rows.length;
   if(aspects.length>2)violations.push('The Working Build contains more than two subclass Aspects.');
   if(!unique(aspects))violations.push('The Working Build contains the same Aspect more than once.');
   if(!unique(fragments))violations.push('The Working Build contains the same Fragment more than once.');

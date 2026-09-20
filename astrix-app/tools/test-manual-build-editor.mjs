@@ -112,6 +112,31 @@ const overCapacityPreflight=createLiveTransferPreflight(overCapacityBuild);
 assert.equal(overCapacityPreflight.ready,false,'A manual armour-mod selection above the item energy capacity must block Apply.');
 assert.match(overCapacityPreflight.violations.join(' | '),/uses 7\/5 armour energy/);
 const capabilities={captureSnapshot:true,transferItems:true,equipItems:true,verifyEquipment:true,insertSocketPlugFree:true,verifyFinalState:true};
+// Real subclass shape: four equipped Fragments and two identical unused plugs.
+// The hash values here are synthetic; the empty-plug label is Bungie's label.
+const emptyFragment={hash:8500,name:'Empty Fragment Socket'};
+const fragmentBuild={...clone(switchedSubclassBuild),subclassBuild:{
+  aspects:[{hash:8501,name:'Aspect A',fragmentSlots:2},{hash:8502,name:'Aspect B',fragmentSlots:2}],
+  fragments:[...Array.from({length:4},(_,i)=>({hash:8510+i,name:`Fragment ${i}`,socketIndex:10+i})),{...emptyFragment,socketIndex:14},{...emptyFragment,socketIndex:15}]
+}};
+assert.deepEqual(subclassCompatibilityViolations(fragmentBuild),[],'Unused plugs are neither duplicate Fragments nor occupied Fragment slots');
+const fragmentPlan=createLiveTransferPlan({build:fragmentBuild,originalBuild:fragmentBuild,capabilities});
+assert.equal(fragmentPlan.ready,true,fragmentPlan.blockers.join(' | '));
+assert.equal(fragmentBuild.subclassBuild.fragments.length,6,'Validation must preserve exact saved sockets');
+const duplicateFragmentBuild=clone(fragmentBuild);duplicateFragmentBuild.subclassBuild.fragments[1].hash=8510;
+assert.match(subclassCompatibilityViolations(duplicateFragmentBuild).join(' '),/same Fragment more than once/,'A real duplicate must still block Apply');
+const overfilledFragments=clone(fragmentBuild);overfilledFragments.subclassBuild.fragments[4]={hash:8514,name:'Fifth Fragment',socketIndex:14};
+assert.match(subclassCompatibilityViolations(overfilledFragments).join(' '),/4 Fragment slots, but 5 Fragments/,'Real occupied slots must still respect Aspect capacity');
+const unknownDuplicate=clone(fragmentBuild);for(const plug of unknownDuplicate.subclassBuild.fragments.slice(4))plug.name='Unresolved plug';
+assert.match(subclassCompatibilityViolations(unknownDuplicate).join(' '),/same Fragment/,'Unknown duplicate hashes must not be silently treated as empty');
+const mislabelledDuplicate=clone(fragmentBuild);for(const plug of mislabelledDuplicate.subclassBuild.fragments.slice(4))plug.definition={displayProperties:{name:'Actual Fragment'}};
+assert.match(subclassCompatibilityViolations(mislabelledDuplicate).join(' '),/same Fragment/,'An official Fragment name must override a stale empty label');
+assert.deepEqual(subclassCompatibilityViolations({subclassBuild:{aspects:[{hash:8520,name:'Empty Aspect Socket'},{hash:8520,name:'Empty Aspect Socket'}]}}),[]);
+const duplicateAspectBuild=clone(fragmentBuild);duplicateAspectBuild.subclassBuild.aspects[1].hash=8501;
+assert.match(subclassCompatibilityViolations(duplicateAspectBuild).join(' '),/same Aspect/);
+const clearingBuild=clone(fragmentBuild);
+clearingBuild.manualSocketChanges=[{itemInstanceId:clearingBuild.subclassItemInstanceId,socketIndex:14,plugHash:emptyFragment.hash,plugName:emptyFragment.name,remoteSupported:true,reversible:true}];
+assert.ok(createLiveTransferPlan({build:clearingBuild,originalBuild:fragmentBuild,capabilities}).socketChanges.some(row=>row.plugHash===emptyFragment.hash),'An explicitly selected empty plug must remain actionable to clear its exact socket');
 const plan=createLiveTransferPlan({build:exactSocketBuild,originalBuild:baseBuild,capabilities});
 assert.equal(plan.ready,true,plan.blockers.join(' | '));
 assert.equal(plan.status,'staged');
@@ -639,9 +664,38 @@ assert.match(overviewMarkup,/Stats not saved/,'Absent saved stats must not be re
 assert.match(overviewMarkup,/Power unavailable/,'An absent saved power value must remain unknown');
 console.log('SAVED_BUILD_OVERVIEW=PASS selected gear, sockets, subclass, Artifact, escaping and immutable snapshots');
 
+// Exercise the actual hover/focus handlers, including scroller-independent placement.
+const tooltipHandlers=new Map(),tooltipAttrs=new Map();
+const tooltipNode={id:'',style:{},hidden:true,textContent:'',open:false,setAttribute(key,value){tooltipAttrs.set(key,value);},matches(){return this.open;},showPopover(){this.open=true;},hidePopover(){this.open=false;},getBoundingClientRect(){return {width:200,height:100};}};
+let tooltipParent=null;
+const tooltipHost={append(node){tooltipParent=this;assert.equal(node,tooltipNode);}};
+const tileAttrs=new Map([['aria-label','Saved weapon\nSelected perk'],['title','Saved weapon\nSelected perk']]);
+const tooltipTile={getAttribute(key){return tileAttrs.get(key);},setAttribute(key,value){tileAttrs.set(key,value);},removeAttribute(key){tileAttrs.delete(key);},closest(selector){return selector==='dialog'?null:this;},contains(node){return node===this;},getBoundingClientRect(){return {left:480,top:350,bottom:400};}};
+const tooltipContext={innerWidth:500,innerHeight:440,document:{body:tooltipHost,createElement:()=>tooltipNode,addEventListener:(type,fn)=>tooltipHandlers.set(type,fn)},window:{addEventListener:(type,fn)=>tooltipHandlers.set(type,fn)}};
+runInNewContext(overviewSource.slice(overviewSource.indexOf('let itemTooltip='),overviewSource.indexOf("document.addEventListener('click'")),tooltipContext);
+tooltipHandlers.get('pointerover')({target:tooltipTile});
+assert.equal(tooltipNode.textContent,'Saved weapon\nSelected perk');assert.equal(tooltipNode.open,true);assert.equal(tooltipParent,tooltipHost);
+assert.equal(tooltipNode.style.left,'292px','Hover names must fit the right viewport edge');
+assert.equal(tooltipNode.style.top,'242px','A tooltip near the bottom must open above its tile');
+assert.equal(tileAttrs.get('aria-describedby'),'savedItemTooltip');
+assert.equal(tileAttrs.has('title'),false,'Do not display a second native tooltip over the immediate name');
+tooltipHandlers.get('keydown')({key:'Escape'});assert.equal(tooltipNode.hidden,true);assert.equal(tileAttrs.has('aria-describedby'),false);
+assert.equal(tileAttrs.get('title'),'Saved weapon\nSelected perk','Restore the fallback name after dismissal');
+tooltipHandlers.get('focusin')({target:tooltipTile});assert.equal(tooltipNode.hidden,false,'Keyboard focus must show the same item name immediately');
+tooltipHandlers.get('scroll')();assert.equal(tooltipNode.hidden,true,'Scrolling must clear a tooltip tied to an old tile position');
+console.log('LOADOUT_ITEM_NAMES=PASS immediate hover, keyboard focus, viewport edges and dismissal');
+
+const reviewCalls=[];
+const reviewContext={guardContext:()=>()=>{},draftFor:()=>({name:'Saved build'}),esc:value=>value,showDialog:(...args)=>reviewCalls.push(['dialog',...args]),refreshProfile:async()=>{reviewCalls.push(['refresh']);throw new Error('Profile unavailable');}};
+runInNewContext(overviewSource.slice(overviewSource.indexOf('async function reviewBuildAction('),overviewSource.indexOf('async function executeBuildAction('))+';this.review=reviewBuildAction;',reviewContext);
+await assert.rejects(()=>reviewContext.review('saved',false),/Profile unavailable/);
+assert.equal(reviewCalls[0][0],'dialog','Saved Apply must show feedback before waiting on the network');
+assert.equal(reviewCalls[0][1],'CHECKING LOADOUT');assert.equal(reviewCalls[1][0],'refresh');
+assert.equal(reviewCalls[0][3],'','The checking dialog cannot expose a premature confirmation button');
+
 
 // Loadout page regressions. These are synthetic contract inputs, not live-account evidence.
-const pageSource=overviewSource.slice(overviewSource.indexOf('const byId='),overviewSource.indexOf("document.addEventListener('click'"))
+const pageSource=overviewSource.slice(overviewSource.indexOf('const byId='),overviewSource.indexOf('let itemTooltip='))
   .replace(/export (async )?function /g,(_,asyncPart)=>`${asyncPart||''}function `);
 const pageNodes=new Map();
 const pageNode=id=>{
@@ -655,6 +709,7 @@ runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTa
   openDraft(record){dialogState={kind:'edit',record:copy(record)};dialog().showModal();return dialogState.record;},
   getDialogState(){return dialogState;}};`,pageContext);
 const pageApi=pageContext.loadoutTest;
+pageContext.hideItemTooltip=()=>{};
 const binding={characterId:CHARACTER_ID,membershipId:MEMBERSHIP_ID,membershipType:MEMBERSHIP_TYPE,characterClass:'titan'};
 const manyRecords=Array.from({length:125},(_,index)=>({id:`saved-${index}`,name:`Saved ${index}`,binding,revision:1,updatedAt:new Date(Date.UTC(2026,8,1,0,index)).toISOString(),build:clone(overviewBuild)}));
 const otherRows=[{...manyRecords[0],id:'other-character',binding:{...binding,characterId:'9100002'}},{...manyRecords[0],id:'other-membership',binding:{...binding,membershipId:'9200002'}},{...manyRecords[0],id:'other-platform',binding:{...binding,membershipType:'1'}}];
@@ -694,6 +749,12 @@ assert.equal(restored.manualSocketChanges.length,3,'Restore saved gear, armour a
 assert.ok(restored.manualSocketChanges.every(row=>row.remoteSupported));
 assert.equal(restored.weapons[0].source.kind,'vault','Apply must use the current location, not a saved location');
 assert.equal(socketBuild.manualSocketChanges,undefined,'Building an Apply plan must not change a saved record');
+const legacyFragments=clone(socketBuild);legacyFragments.subclassBuild.fragments=[{hash:8500,socketIndex:14},{hash:8500,socketIndex:15}];
+const legacyPayload={...socketPayload,definitions:{8500:{displayProperties:{name:'Empty Fragment Socket'}}}};
+const restoredLegacy=pageApi.restoreSavedSocketIntent(legacyFragments,legacyPayload);
+assert.deepEqual(subclassCompatibilityViolations(restoredLegacy),[],'Saved snapshots missing names must resolve empty placeholders by their exact manifest hash');
+assert.deepEqual(Array.from(restoredLegacy.subclassBuild.fragments,row=>row.socketIndex),[14,15]);
+assert.equal(legacyFragments.subclassBuild.fragments[0].name,undefined,'Refreshing empty-plug evidence cannot rewrite the stored record');
 const unsupportedPayload=clone(socketPayload);unsupportedPayload.profile.itemComponents.reusablePlugs.data['103']={plugs:{}};
 assert.equal(pageApi.restoreSavedSocketIntent(socketBuild,unsupportedPayload).manualSocketChanges.find(row=>row.plugHash===701).remoteSupported,false,'Unverified subclass insertion remains an in-game step');
 const simplePlan={ready:true,status:'staged',characterId:CHARACTER_ID,equipment:{targets:[{itemInstanceId:'101'}]},socketChanges:[{itemInstanceId:'101',socketIndex:0,plugHash:501}]};

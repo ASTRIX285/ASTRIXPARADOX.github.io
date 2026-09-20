@@ -5,7 +5,7 @@ import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-servi
 import {LOADOUT_DEFINITIONS} from '../guardian-workspace-v2/guardian-loadout-definitions.mjs';
 import {createVaultCatalogue} from '../vault/vault-inventory.mjs';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
-import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs';
+import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1';
 import {liveActionCapabilities,sessionBinding,inventoryLocations,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,requestFreshProfile,verifyReadback,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1';
 import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
 import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
@@ -103,6 +103,16 @@ export function selectedSocketTargets(build){
 }
 export function restoreSavedSocketIntent(build,payload){
   const next=copy(build),{profile,locations}=inventoryLocations(payload);
+  // Older saved snapshots can lack the empty-plug name. Resolve the same hash
+  // from fresh definitions, without replacing the saved socket selection.
+  const enrich=plug=>{
+    const definition=payload?.definitions?.[String(hashOf(plug))];
+    return plug&&definition?{...plug,definition,name:definition.displayProperties?.name||plug.name}:plug;
+  };
+  if(next.subclassBuild){
+    next.subclassBuild.super=enrich(next.subclassBuild.super);
+    for(const key of ['abilities','aspects','fragments'])next.subclassBuild[key]=(next.subclassBuild[key]||[]).map(enrich);
+  }
   for(const key of ['weapons','armour'])next[key]=(next[key]||[]).map(item=>item?{...item,source:locations.get(itemId(item))?.source||{}}:item);
   if(next.subclassItem)next.subclassItem={...next.subclassItem,source:locations.get(itemId(next.subclassItem))?.source||{}};
   // Old catalogues must not override the chosen subclass's fresh location.
@@ -187,6 +197,7 @@ function renderSlots(){
   }).join('');
 }
 function render(){
+  hideItemTooltip();
   const rows=visibleRecords();byId('paradoxLoadoutCount').textContent=`${rows.length} SAVED`;
   byId('paradoxLoadoutList').innerHTML=[{id:'equipped',name:'EQUIPPED',summary:{subclass:equipped?.subclassName||'Selected Guardian'}},...rows].map((record,index)=>`<button type="button" class="paradox-loadout-card${record.id===selectedId?' is-active':''}" data-jump-id="${esc(record.id)}"${record.id===selectedId?' aria-current="true"':''}><span><b>#${index+1} ${esc(record.name)}</b><span>${esc(record.summary?.subclass||'')}</span></span>${index?`<em>R${Number(record.revision||1)}</em>`:''}</button>`).join('');
   const current=equipped?buildArticle({build:equipped},1,{current:true}):`<article class="apx-section paradox-loadout-detail" id="loadout-equipped"><div class="paradox-loadout-detail-head"><h2>#1 EQUIPPED</h2></div><p>${loading?'Loading the selected Guardian...':session?.authenticated?'Current equipment is unavailable. Refresh to try again.':'Connect Bungie to view this Guardian’s builds.'}</p></article>`;
@@ -326,7 +337,9 @@ function editChoice(node){
 }
 function slotOptions(){return Array.from({length:20},(_,index)=>{const slot=equipped?.loadouts?.[index],saved=Boolean(slot?.items?.length||slot?.subclassOverrides?.length);return `<option value="${index}">${index+1} · ${saved?`${esc(slotIdentity(slot).name)} (overwrite)`:'Empty'}</option>`;}).join('');}
 async function reviewBuildAction(id,toGame){
-  const check=guardContext(),record=draftFor(id);await refreshProfile();check();
+  const check=guardContext(),record=draftFor(id);
+  showDialog(toGame?'CHECKING IN-GAME SAVE':'CHECKING LOADOUT',`<p>Checking ${esc(record.name)} against your current Guardian, owned items and socket permissions.</p><p class="paradox-dialog-note">Your in-game equipment stays unchanged until you confirm.</p>`,'',{kind:'checking',check});
+  await refreshProfile();check();
   const build=restoreSavedSocketIntent(id==='equipped'?equipped:record.build,payload);
   // Compare intended Artifact perks with fresh live perks, not the saved
   // snapshot's old active list. Artifact changes always remain in game.
@@ -430,6 +443,37 @@ async function handleDialogAction(action){
   if(action==='edit-slot')return openEditor(record,{asCopy:true});
   if(action==='view-slot')showDialog(`BUNGIE SLOT ${state.index+1} · ${record.name}`,`<div class="paradox-loadout-detail">${savedBuildOverview(record.build)}</div><p class="paradox-dialog-note">Saved Bungie slot. Equipped stays unchanged above your PARADOX builds.</p>`,'<button type="button" data-dialog-action="copy-slot">SAVE PARADOX COPY</button><button type="button" data-dialog-action="edit-slot">EDIT COPY</button>',{kind:'slot',index:state.index,check:state.check});
 }
+
+let itemTooltip=null,itemTooltipTarget=null,itemTooltipTitle=null;
+function hideItemTooltip(){
+  if(itemTooltipTarget){itemTooltipTarget.removeAttribute('aria-describedby');if(itemTooltipTitle!=null)itemTooltipTarget.setAttribute('title',itemTooltipTitle);itemTooltipTarget=null;itemTooltipTitle=null;}
+  if(itemTooltip){if(itemTooltip.hidePopover&&itemTooltip.matches(':popover-open'))itemTooltip.hidePopover();itemTooltip.hidden=true;}
+}
+function showItemTooltip(tile){
+  if(tile===itemTooltipTarget)return;
+  hideItemTooltip();
+  if(!tile?.getAttribute('aria-label'))return;
+  if(!itemTooltip){
+    itemTooltip=document.createElement('div');itemTooltip.id='savedItemTooltip';itemTooltip.className='saved-item-tooltip';
+    itemTooltip.setAttribute('role','tooltip');itemTooltip.setAttribute('popover','manual');
+  }
+  (tile.closest('dialog')||document.body).append(itemTooltip);
+  itemTooltipTarget=tile;itemTooltip.textContent=tile.getAttribute('aria-label');itemTooltip.hidden=false;
+  itemTooltipTitle=tile.getAttribute('title');tile.removeAttribute('title');
+  tile.setAttribute('aria-describedby',itemTooltip.id);
+  // Top-layer placement prevents the horizontal equipment scroller clipping names.
+  if(itemTooltip.showPopover)itemTooltip.showPopover();
+  const anchor=tile.getBoundingClientRect(),tip=itemTooltip.getBoundingClientRect(),gap=8;
+  itemTooltip.style.left=`${Math.max(gap,Math.min(anchor.left,innerWidth-tip.width-gap))}px`;
+  itemTooltip.style.top=`${Math.max(gap,anchor.bottom+gap+tip.height<=innerHeight?anchor.bottom+gap:anchor.top-tip.height-gap)}px`;
+}
+document.addEventListener('pointerover',event=>{const tile=event.target.closest?.('.saved-build-tile');if(tile)showItemTooltip(tile);});
+document.addEventListener('focusin',event=>{const tile=event.target.closest?.('.saved-build-tile');if(tile)showItemTooltip(tile);});
+document.addEventListener('pointerout',event=>{if(itemTooltipTarget?.contains(event.target)&&!itemTooltipTarget.contains(event.relatedTarget))hideItemTooltip();});
+document.addEventListener('focusout',event=>{if(itemTooltipTarget?.contains(event.target))hideItemTooltip();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')hideItemTooltip();});
+document.addEventListener('scroll',hideItemTooltip,true);
+window.addEventListener('resize',hideItemTooltip);
 
 document.addEventListener('click',event=>{
   const jump=event.target.closest?.('[data-jump-id]');if(jump){selectedId=jump.dataset.jumpId;render();byId(`loadout-${selectedId}`)?.scrollIntoView({behavior:'smooth',block:'start'});return;}
