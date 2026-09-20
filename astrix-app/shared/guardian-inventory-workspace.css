@@ -97,6 +97,32 @@
 
 @media(max-width:1025px){.character-inventory-workspace{--character-item-size:48px}}
 
+/* Character inventory fills ten equal tracks like the loadout strip. Keep
+   square art, proportional badges and horizontal scrolling on small screens. */
+body.guardian-main-page .character-inventory-workspace .vault-postmaster-section{display:none}
+body.guardian-main-page .character-inventory-workspace .vault-transfer-items{
+  display:grid;
+  grid-template-columns:repeat(10,minmax(48px,1fr));
+  gap:6px;
+  overflow-x:auto;
+}
+body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
+  container-type:inline-size;
+  width:100%;
+  min-width:0;
+  padding:0;
+  border:0;
+  --character-item-size:100cqw;
+  --apx-icon-gear-art-width:var(--character-item-size);
+  --apx-icon-gear-art-height:var(--character-item-size);
+  --apx-tile-label-size:calc(var(--character-item-size) / 5);
+  --apx-tile-badge-height:calc(var(--apx-tile-label-size) + 4px);
+  --apx-tile-height:calc(var(--character-item-size) + var(--apx-tile-badge-height) - 1px);
+  --apx-tile-art-height:var(--character-item-size);
+  --apx-tile-footer-top:calc(var(--character-item-size) - 1px);
+}
+body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspect-ratio:1}
+
 @media(max-width:1200px){.vault-character-columns{grid-template-columns:1fr}.vault-character-column{display:grid}.vault-character-section{border:0}}
 @media(max-width:880px){.vault-character-column{grid-template-columns:1fr}}
 @media(min-width:981px){

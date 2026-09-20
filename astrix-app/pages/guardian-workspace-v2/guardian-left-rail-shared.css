@@ -413,12 +413,13 @@ body.guardian-main-page .workspace>.right{display:none!important}
     overflow-x:hidden!important;
     overflow-y:auto!important;
   }
-  body.guardian-main-page>.workspace{
+  /* The platform shell wraps .workspace after load; keep this rule active. */
+  body.guardian-main-page .workspace{
     display:grid!important;
-    width:calc(100vw - 20px)!important;
+    width:100%!important;
     max-width:none!important;
     height:auto!important;
-    min-height:calc(100vh - 64px)!important;
+    min-height:0!important;
     max-height:none!important;
     margin:0 auto!important;
     padding:10px 0 18px!important;
@@ -426,7 +427,7 @@ body.guardian-main-page .workspace>.right{display:none!important}
     grid-template-rows:auto!important;
     grid-template-areas:"rail equipment"!important;
     gap:12px!important;
-    align-items:start!important;
+    align-items:stretch!important;
     overflow:visible!important;
   }
   body.guardian-main-page .workspace>.left{
@@ -437,7 +438,7 @@ body.guardian-main-page .workspace>.right{display:none!important}
     height:auto!important;
     min-height:0!important;
     max-height:none!important;
-    align-self:start!important;
+    align-self:stretch!important;
     overflow:visible!important;
   }
   body.guardian-main-page .workspace>.equip>.improve-cta{
