@@ -1,3 +1,4 @@
+import {destinationNameMatches,destinationActivityMatches,destinationObjectiveMatches} from './journey-destination-model.mjs?v=20260920-locations-1';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1';
 import {resolveRecordTree,patternTypeKey,seasonRankProgress,findDestinationNodes} from './journey-record-model.mjs?v=20260905-journey-repair-1';
@@ -650,17 +651,6 @@ async function currentRecordBranch(root,nodes){
   return {entry,hash,definition:definitions[hash],node:nodes?.[hash]};
 }
 
-const DESTINATION_NAME_ALIASES=Object.freeze({
-  'pale-heart':['Pale Heart','The Pale Heart'],
-  'dreaming-city':['Dreaming City','The Dreaming City'],
-  neomuna:['Neomuna'],europa:['Europa'],'throne-world':['Throne World',"Savathûn's Throne World","Savathun's Throne World"],
-  nessus:['Nessus'],edz:['EDZ','European Dead Zone'],moon:['Moon','The Moon'],cosmodrome:['Cosmodrome','The Cosmodrome']
-});
-const destinationNameKey=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-function destinationNameMatches(key,value){
-  const names=DESTINATION_NAME_ALIASES[key]||[globalThis.ForgeDestinations?.labelOf(key)||key];
-  return names.some(name=>destinationNameKey(name)===destinationNameKey(value));
-}
 
 function journeyCharacterFor(payload){
   const characters=payload?.profile?.characters?.data||{};
@@ -710,7 +700,7 @@ async function destinationRecordSections(payload,key,characterId){
       const type=modes.includes(4)?'RAID':modes.includes(82)?'DUNGEON':'';
       const destination=activityDestinationDefinitions[String(activity?.destinationHash||'')];
       const name=String(activity?.displayProperties?.name||'').trim();
-      if(!type||!name||!destinationNameMatches(key,destination?.displayProperties?.name))return;
+      if(!type||!name||!destinationActivityMatches(key,activity,destination))return;
       const groupKey=`${type}:${name}`;
       if(!groups.has(groupKey))groups.set(groupKey,{type,name,icon:bungiePresentationIcon(activity),records:new Map()});
       const group=groups.get(groupKey);
@@ -727,7 +717,7 @@ async function destinationRecordSections(payload,key,characterId){
   const catalogue=await guardianManifest.index();
   const destinationHashes=Object.keys(catalogue?.endgameByDestination||{});
   const officialDestinations=await guardianManifest.getMany('DestinyDestinationDefinition',destinationHashes);
-  const endgameHashes=destinationHashes.filter(hash=>destinationNameMatches(key,officialDestinations[hash]?.displayProperties?.name)).flatMap(hash=>catalogue.endgameByDestination[hash]);
+  const endgameHashes=key==='lawless-frontier'?[]:destinationHashes.filter(hash=>destinationNameMatches(key,officialDestinations[hash]?.displayProperties?.name)).flatMap(hash=>catalogue.endgameByDestination[hash]);
   const endgameDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',endgameHashes);
   const seenActivities=new Set([...groups.values()].map(group=>group.name));
   for(const activity of Object.values(endgameDefinitions)){
@@ -746,18 +736,17 @@ async function destinationQuestRows(payload,key,characterId){
   const questHashes=statuses.map(item=>item.questHash??finiteNumber(itemDefinitions[String(item.stepHash)]?.objectives?.questlineItemHash)).filter(hash=>hash!==null);
   Object.assign(itemDefinitions,await guardianManifest.getMany('DestinyInventoryItemDefinition',questHashes));
   const objectiveDefinitions=await guardianManifest.getMany('DestinyObjectiveDefinition',statuses.flatMap(item=>item.objectives.map(objective=>objective?.objectiveHash)));
-  const activityDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',statuses.flatMap(item=>item.objectives.map(objective=>objective?.activityHash)));
+  const activityDefinitions=await guardianManifest.getMany('DestinyActivityDefinition',statuses.flatMap(item=>item.objectives.map(objective=>objective?.activityHash||objectiveDefinitions[String(objective?.objectiveHash)]?.activityHash)));
   const destinationDefinitions=await guardianManifest.getMany('DestinyDestinationDefinition',[
-    ...statuses.flatMap(item=>item.objectives.map(objective=>objective?.destinationHash)),
+    ...statuses.flatMap(item=>item.objectives.map(objective=>objective?.destinationHash||objectiveDefinitions[String(objective?.objectiveHash)]?.destinationHash)),
     ...Object.values(activityDefinitions).map(definition=>definition?.destinationHash)
   ]);
   const groups=new Map();
   statuses.forEach(item=>{
     const destinationObjectives=item.objectives.filter(objective=>objective?.visible!==false).filter(objective=>{
-      const direct=destinationDefinitions[String(objective?.destinationHash||'')];
-      const activity=activityDefinitions[String(objective?.activityHash||'')];
-      const activityDestination=destinationDefinitions[String(activity?.destinationHash||'')];
-      return destinationNameMatches(key,direct?.displayProperties?.name)||destinationNameMatches(key,activityDestination?.displayProperties?.name);
+      const definition=objectiveDefinitions[String(objective?.objectiveHash)];
+      const activity=activityDefinitions[String(objective?.activityHash||definition?.activityHash||'')];
+      return destinationObjectiveMatches(key,objective,definition,activity,destinationDefinitions);
     });
     if(!destinationObjectives.length)return;
     const stepDefinition=itemDefinitions[String(item.stepHash)];
