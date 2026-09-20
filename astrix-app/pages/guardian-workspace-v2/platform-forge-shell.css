@@ -89,3 +89,9 @@
 @media (max-width:1799px){
   .developer-media-rail{display:none!important}
 }
+
+/* Character uses the full width while its optional media rails are empty. */
+body.guardian-main-page .forge-platform-shell:has(>.developer-media-rail--left[data-media-state="empty"]):has(>.developer-media-rail--right[data-media-state="empty"]){
+  grid-template-columns:0 minmax(0,1fr) 0;
+}
+body.guardian-main-page .developer-media-rail[data-media-state="empty"]{display:none}
