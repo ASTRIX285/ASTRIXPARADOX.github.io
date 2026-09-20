@@ -33,6 +33,14 @@ for(const [label,path] of Object.entries(pages)){
   assert.match(html,/window\.APX_LOGO=/,`${label} must configure the real site logo`);
   assert.match(html,/astrix-portal-loader\.js/,`${label} must load the shared portal controller early`);
 }
+// Every destination must opt into the same prepared navigation asset generation.
+for(const label of ['Guardian Main','Build Space','Journey','Mission Reports','Vault','Forge Loader','Loadout']){
+  const html=await read(pages[label]);
+  for(const resource of ['astrix-portal-loader.css','astrix-portal-loader.js','astrix-destination-ribbon.js']){
+    const url=html.match(new RegExp(resource.replaceAll('.', '\\.')+'\\?[^"<>]+'))?.[0];
+    assert.ok(url?.includes('ready=20260920-1'),`${label} must refresh ${resource} for prepared navigation`);
+  }
+}
 assert.doesNotMatch(operationsHtml,/astrix-portal-loader\.(?:css|js)|window\.APX_LOGO=/,'Public homepage must not mount the tool portal loader');
 
 assert.match(portalCss,/body\.apx-loading\{overflow:hidden!important\}/,'Portal must lock body scroll above page-specific layout rules');
