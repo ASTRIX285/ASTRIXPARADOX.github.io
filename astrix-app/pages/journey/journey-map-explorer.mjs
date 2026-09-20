@@ -1,4 +1,4 @@
-import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-director-2';
+import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-zoom-chests-3';
 
 const loaders=Object.freeze({
   edz:()=>import('./assets/map-data/edz.mjs?v=20260920-1'),

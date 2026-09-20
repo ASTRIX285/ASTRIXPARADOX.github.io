@@ -15,10 +15,10 @@ export function directorIconUrl(entry){
   return path?`https://www.bungie.net${path}`:null;
 }
 
-// Source coordinates stay relative to the full 4K/6K export. The viewer crops
-// only canvas padding, transforming both image and points through this rectangle.
+// Source coordinates stay relative to the full 4K/6K export. Keep every map in
+// the same 16:9 frame; Pale Heart fills it through its 200% opening zoom.
 export const DIRECTOR_VIEW_BOXES=Object.freeze({
-  'pale-heart':Object.freeze({x:0,y:472,width:3840,height:1216})
+  'pale-heart':Object.freeze({x:0,y:0,width:3840,height:2160})
 });
 export const directorViewBox=key=>DIRECTOR_VIEW_BOXES[key]||{x:0,y:0,width:3840,height:2160};
 export function directorViewPosition(position,view){
@@ -56,7 +56,20 @@ export function clusterMapEntries(entries,width,height,scale=1){
 
 export function regionChestEntries(progress){
   return (progress?.chests||[]).map((chest,index)=>({
-    id:`chest-${index}`,type:'chest',name:chest.name,description:chest.location,
+    id:`chest-${chest.id||index}`,type:'chest',name:chest.name,description:chest.location,
     completed:typeof chest.collected==='boolean'?chest.collected:null,variants:[],position:null
   }));
+}
+
+export function normaliseRegionChestProgress(key,value){
+  if(!value||value.key!==key||!Array.isArray(value.chests))return null;
+  const chests=value.chests.map(chest=>({
+    id:chest.id,name:String(chest.name||'').trim(),location:String(chest.location||'').trim(),
+    collected:typeof chest.collected==='boolean'?chest.collected:null
+  }));
+  if(chests.some(chest=>!chest.name||!chest.location)||value.total!==chests.length)return null;
+  const discovered=chests.filter(chest=>chest.collected===true).length;
+  if(value.discovered!==discovered)return null;
+  const missing=chests.filter(chest=>chest.collected===false).length;
+  return {total:chests.length,discovered,missing,unknown:chests.length-discovered-missing,chests};
 }

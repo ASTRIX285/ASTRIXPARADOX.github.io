@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries,directorIconUrl,directorViewBox,directorViewPosition} from '../pages/journey/journey-map-model.mjs';
-import {destinationNameMatches} from '../pages/journey/journey-destination-model.mjs';
+import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries,directorIconUrl,directorViewBox,directorViewPosition,normaliseRegionChestProgress} from '../pages/journey/journey-map-model.mjs';
+import {destinationNameMatches,resolveRegionChestProgress,REGION_CHEST_CHECKLIST_HASH} from '../pages/journey/journey-destination-model.mjs';
 
 const dataRoot=new URL('../pages/journey/assets/map-data/',import.meta.url);
 const provenance=JSON.parse(await readFile(new URL('../data/journey-map-provenance.json',import.meta.url),'utf8'));
@@ -43,6 +43,7 @@ assert.equal(directorIconUrl({icon:'https://untrusted.example/icon.png'}),null);
 const official='/common/destiny2_content/icons/3642cf9e2acd174dcab5b5f9e3a3a45d.png';
 assert.equal(directorIconUrl({variants:[{icon:'/img/misc/missing_icon_d2.png'},{icon:official}]}),`https://www.bungie.net${official}`);
 const paleView=directorViewBox('pale-heart');
+assert.equal(paleView.width/paleView.height,16/9,'Pale Heart must retain the same frame shape as the other destinations');
 const {default:pale}=await import(new URL('pale-heart.mjs',dataRoot));
 for(const entry of pale.entries.filter(hasMapPosition)){
   const viewPosition=directorViewPosition(entry.position,paleView);
@@ -70,6 +71,38 @@ assert.equal(cosmodrome.entries.filter(hasMapPosition).length,0,'Merging must no
 const chests=regionChestEntries({chests:[{name:'Region chest',location:'Trostland',collected:false}]});
 assert.equal(chests[0].completed,false);assert.equal(chests[0].position,null);
 assert.deepEqual(regionChestEntries(null),[]);
+
+// Real public checklist IDs, with representative profile states. Bungie supplies
+// blank location releases for these chests; those blanks must not hide the list.
+const checklistHash=String(REGION_CHEST_CHECKLIST_HASH);
+const checklist={displayProperties:{name:'Region Chests'},scope:0,entries:[
+  {hash:4166997609,displayProperties:{name:'109. The Pale Heart'},destinationHash:3998251206,locationHash:2257004215,scope:0},
+  {hash:2008208662,displayProperties:{name:'110. The Pale Heart'},destinationHash:3998251206,locationHash:2257004212,scope:0},
+  {hash:1505906871,displayProperties:{name:'111. The Pale Heart'},destinationHash:3998251206,locationHash:2257004213,scope:0},
+  {hash:3156467474,displayProperties:{name:'1. European Dead Zone'},destinationHash:697502628,locationHash:3698639472,scope:0}
+]};
+const chestInputs={key:'pale-heart',checklists:{[checklistHash]:checklist},
+  profileStates:{[checklistHash]:{4166997609:true,2008208662:false}},
+  characterStates:{[checklistHash]:{4166997609:false,2008208662:true,1505906871:true}},
+  destinations:{3998251206:{hash:3998251206,displayProperties:{name:'The Pale Heart'}},697502628:{hash:697502628,displayProperties:{name:'European Dead Zone'}}},
+  locations:{2257004215:{locationReleases:[{destinationHash:3998251206,displayProperties:{name:'',description:''},worldPosition:[]}]}}
+};
+const chestProgress=resolveRegionChestProgress(chestInputs);
+assert.deepEqual([chestProgress.total,chestProgress.discovered,chestProgress.missing,chestProgress.unknown],[3,1,1,1]);
+assert.deepEqual(chestProgress.chests.map(chest=>chest.collected),[true,false,null],'Profile-scoped chests must not inherit another character state');
+assert(chestProgress.chests.every(chest=>chest.location==='The Pale Heart'),'Nameless releases must retain the official destination');
+const normalisedChests=normaliseRegionChestProgress('pale-heart',chestProgress);
+assert.equal(normalisedChests.chests.length,3);
+assert.equal(normalisedChests.missing,1,'Unknown is not missing');
+assert.equal(normalisedChests.unknown,1);
+assert(regionChestEntries(normalisedChests).every(chest=>chest.position===null),'Checklist location hashes do not establish map coordinates');
+const unknownChests=resolveRegionChestProgress({...chestInputs,profileStates:{}});
+assert.deepEqual([unknownChests.total,unknownChests.discovered,unknownChests.missing,unknownChests.unknown],[3,0,0,3]);
+assert(normaliseRegionChestProgress('pale-heart',unknownChests));
+assert.equal(normaliseRegionChestProgress('edz',chestProgress),null);
+assert.equal(normaliseRegionChestProgress('pale-heart',{...chestProgress,total:4}),null);
+assert.equal(resolveRegionChestProgress({...chestInputs,destinations:{}}),null,'Missing definitions must not become a false zero total');
+assert.equal(resolveRegionChestProgress({...chestInputs,checklists:{}}),null);
 
 const manifest=JSON.parse(await readFile(new URL('../data/journey-map-assets.json',import.meta.url),'utf8'));
 assert.equal(manifest.assets.length,18);

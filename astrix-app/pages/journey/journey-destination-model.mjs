@@ -33,3 +33,38 @@ export function destinationObjectiveMatches(key,objective,objectiveDefinition,ac
   return destinationNameMatches(key,destinations[String(hash)]?.displayProperties?.name)
     ||destinationActivityMatches(key,activity,destinations[String(activity?.destinationHash)]);
 }
+
+// Bungie's Region Chests checklist, from the same pinned manifest as the maps.
+export const REGION_CHEST_CHECKLIST_HASH=1697465175;
+
+export function resolveRegionChestProgress({key,checklists={},profileStates={},characterStates={},activities={},locations={},destinations={}}){
+  const definitions=Object.entries(checklists).filter(([,definition])=>/region chests?/i.test(`${definition?.displayProperties?.name||''} ${definition?.viewActionString||''}`));
+  if(!definitions.length)return null;
+  const chests=[];
+  const seen=new Set();
+  for(const [checklistHash,definition] of definitions){
+    for(const entry of definition.entries||[]){
+      const location=locations[String(entry.locationHash)];
+      const releases=location?.locationReleases||[];
+      const activity=activities[String(entry.activityHash)];
+      const destination=[destinations[String(entry.destinationHash)],destinations[String(activity?.destinationHash)],...releases.map(release=>destinations[String(release.destinationHash)])]
+        .find(row=>destinationNameMatches(key,row?.displayProperties?.name));
+      if(!destination)continue;
+      const id=`${checklistHash}-${entry.hash}`;
+      if(seen.has(id))continue;
+      seen.add(id);
+      const release=releases.find(row=>String(row.destinationHash)===String(destination.hash));
+      const bubble=(destination.bubbles||[]).find(row=>String(row.hash)===String(entry.bubbleHash));
+      // Public region-chest locations often contain neither a name nor coordinates.
+      // A verified destination is still sufficient to display the checklist entry.
+      const place=[bubble?.displayProperties?.name,release?.displayProperties?.name,location?.displayProperties?.name,entry.displayProperties?.description,activity?.displayProperties?.name,destination.displayProperties.name]
+        .map(value=>String(value||'').trim()).find(Boolean);
+      const scope=entry.scope??definition.scope;
+      const states=scope===0?profileStates:scope===1?characterStates:{};
+      const state=states[checklistHash]?.[String(entry.hash)];
+      chests.push({id,hash:entry.hash,checklistHash:Number(checklistHash),name:String(entry.displayProperties?.name||'Region chest').trim(),location:place,collected:typeof state==='boolean'?state:null});
+    }
+  }
+  if(!chests.length)return null;
+  return {key,total:chests.length,discovered:chests.filter(chest=>chest.collected===true).length,missing:chests.filter(chest=>chest.collected===false).length,unknown:chests.filter(chest=>chest.collected===null).length,chests};
+}

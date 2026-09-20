@@ -8,12 +8,21 @@ Original branch: `codex/journey-map-node-links`, merged as PR #272.
 Follow-up branch: `codex/journey-director-fidelity`, from main
 `4b90b17239d7c4007c838d7e201da70402a297fd`.
 
-Pale Heart's visible artwork uses the 4K canvas rectangle x=0, y=472,
-width=3840, height=1216. The viewer crops the export's broad black padding with
-CSS. The image and every point share the same coordinate transform at both
-resolutions. The source images and original coordinates are unchanged.
-Expand Map uses native full screen where supported to make the panorama easier
-to read. Escape or Close Map returns to the Journey page.
+Pale Heart now uses the same full 16:9 frame as the other destinations and opens
+at 200%, as requested after the panorama review. Reset and the 0 key restore
+200% for Pale Heart; other maps continue to open and reset at 100%. Pale Heart
+starts with its 6K image. The artwork, original coordinates and uniform image
+scaling are unchanged. Expand Map still uses native full screen where supported.
+
+The region chest binder previously rejected every entry when Bungie's location
+release had no area name. It now uses the verified destination as that entry's
+location, retains unknown collection states, and reads the correct profile or
+character checklist scope. The existing Region Chests summary and explorer
+receive the same entries. An unrelated Records error does not clear chest data;
+a new destination or Guardian load still clears the previous progress first.
+All 117 entries in the official regional chest checklist survive this resolution,
+including nine for Pale Heart. No geographic coordinates are inferred from a
+checklist location hash. Kepler Ability Chests are a separate checklist.
 
 Hand-drawn symbols and numbered clusters are removed. The renderer uses only
 official Bungie icon URLs attached to the point's own definition or activity
@@ -25,7 +34,8 @@ manifest does not publish artwork for many campaign, landing and vendor points.
 Those need original icon assets before an exact in-game visual match is possible.
 
 The map test verifies all 18 asset hashes, catalogue coverage and every Pale
-Heart point's coordinate round-trip at 4K and 6K. Scope guard still rejects the
+Heart point's coordinate round-trip at 4K and 6K. Regression checks cover blank
+location releases, unknown completion and profile/character scope isolation. Scope guard still rejects the
 previously introduced map model, explorer, map test and this documentation path.
 Its allowlist is unchanged; this correction must not be reported as release-ready
 on the strength of the unrelated Guardian workflow.
