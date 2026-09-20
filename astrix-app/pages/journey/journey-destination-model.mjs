@@ -4,7 +4,7 @@ const DESTINATION_NAME_ALIASES=Object.freeze({
   'pale-heart':['Pale Heart','The Pale Heart'],
   'dreaming-city':['Dreaming City','The Dreaming City'],
   neomuna:['Neomuna'],europa:['Europa'],'throne-world':['Throne World',"Savathûn's Throne World","Savathun's Throne World"],
-  nessus:['Nessus'],edz:['EDZ','European Dead Zone'],moon:['Moon','The Moon'],cosmodrome:['Cosmodrome','The Cosmodrome']
+  nessus:['Nessus','Arcadian Valley'],edz:['EDZ','European Dead Zone'],moon:['Moon','The Moon'],cosmodrome:['Cosmodrome','The Cosmodrome']
 });
 const destinationNameKey=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 export function destinationNameMatches(key,value){

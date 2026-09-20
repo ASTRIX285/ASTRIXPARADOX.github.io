@@ -1,0 +1,470 @@
+{
+  "manifestVersion": "244213.26.06.29.2000-1-bnet.65864",
+  "sources": [
+    {
+      "table": "DestinyDestinationDefinition",
+      "url": "https://www.bungie.net/common/destiny2_content/json/en/DestinyDestinationDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+      "sha256": "b52f0e0e2b28f1273e4f3058ef6896b6127352e30fb5b0030ed4d4fdb490ec72"
+    },
+    {
+      "table": "DestinyActivityGraphDefinition",
+      "url": "https://www.bungie.net/common/destiny2_content/json/en/DestinyActivityGraphDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+      "sha256": "8e694abb8670dc77b1f8b984b504243838e3d78d4f5f217372389c1546baf191"
+    },
+    {
+      "table": "DestinyLocationDefinition",
+      "url": "https://www.bungie.net/common/destiny2_content/json/en/DestinyLocationDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+      "sha256": "8fcdca25e96cf10156a4a880b1cfce84d1f4c15c8f9aaf34d4d3117f71deb3a2"
+    },
+    {
+      "table": "DestinyActivityTypeDefinition",
+      "url": "https://www.bungie.net/common/destiny2_content/json/en/DestinyActivityTypeDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+      "sha256": "93e994de71d86709e2c42af40b42f77122c93fa844be3eca304373108c564628"
+    }
+  ],
+  "destinations": {
+    "edz": {
+      "destinationHash": 697502628,
+      "graphHashes": [
+        "697502628"
+      ],
+      "graphNodeCount": 5,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 249,
+      "registrationMedianErrorPx": 0.76,
+      "graphMaxControlErrorPx": 0.0,
+      "previewSize": [
+        1672,
+        898
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.6873948601838822,
+          -0.0005554556323201787,
+          391.40004443645114
+        ],
+        [
+          -0.00818371298284955,
+          0.7020483087698508,
+          217.26383613529862
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.0010158969803384,
+          0.0009201797817722871,
+          -0.39743554253725943
+        ],
+        [
+          0.00014211392516824665,
+          1.0011293477752383,
+          21.041069934248174
+        ]
+      ],
+      "sourceReferenceSha256": "445f97a1eae65641805f0bf3d40968add15135e3506f211ee0cd2ed49421313d",
+      "masterSha256": "901e767ab51cffd9db0ec1b499577dbd41f8429e6e2b6fa2aec7ea2c461277b4",
+      "entries": 50,
+      "positioned": 12
+    },
+    "nessus": {
+      "destinationHash": 3607432451,
+      "graphHashes": [
+        "3607432451"
+      ],
+      "graphNodeCount": 4,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 46,
+      "registrationMedianErrorPx": 1.37,
+      "graphMaxControlErrorPx": 0.3,
+      "previewSize": [
+        1672,
+        979
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.605505044417815,
+          -0.0016390698950585758,
+          470.37987016533003
+        ],
+        [
+          -8.287733348727561e-05,
+          0.6061356874473234,
+          294.0969850573889
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.1566288640501858,
+          0.008943946657253751,
+          -137.16020902873453
+        ],
+        [
+          0.007185754571914198,
+          1.1657854489120314,
+          -117.14272029444837
+        ]
+      ],
+      "sourceReferenceSha256": "918f271353062e860ae3f633def9e087388fd650db78828d4b9078769ea5f20e",
+      "masterSha256": "549bd56fbdeaac0a508aafb8d7d30eda2eb272a1bd7577034895debefc0e2106",
+      "entries": 61,
+      "positioned": 10
+    },
+    "dreaming-city": {
+      "destinationHash": 1416096592,
+      "graphHashes": [
+        "1416096592"
+      ],
+      "graphNodeCount": 7,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 78,
+      "registrationMedianErrorPx": 1.45,
+      "graphMaxControlErrorPx": 2.74,
+      "previewSize": [
+        1672,
+        964
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.7177061065643668,
+          -0.0045319684521700765,
+          330.09997274869164
+        ],
+        [
+          0.01732199391188112,
+          0.7558426051493257,
+          214.119053417763
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.0717386067135666,
+          -0.002443154049518042,
+          -50.323771524316605
+        ],
+        [
+          0.032171343221406794,
+          1.0415899465203138,
+          -34.38889775435391
+        ]
+      ],
+      "sourceReferenceSha256": "a9bd4a40bfa8b9736baaafaaff97cfa15857fe5944f8dffca72ea200cd5c0ad5",
+      "masterSha256": "2ced7c061713ba0c64c8e854d962a70bb5fba914d1065cf1a5615cbc0ff69b7c",
+      "entries": 30,
+      "positioned": 8
+    },
+    "moon": {
+      "destinationHash": 677774031,
+      "graphHashes": [
+        "677774031"
+      ],
+      "graphNodeCount": 17,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 37,
+      "registrationMedianErrorPx": 1.39,
+      "graphMaxControlErrorPx": 2.08,
+      "previewSize": [
+        1667,
+        1100
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.729065613990837,
+          -0.0017013674381733956,
+          318.5740297167052
+        ],
+        [
+          0.011044603625323349,
+          0.738203222164115,
+          288.5167284270845
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.1135922461057945,
+          0.02213679460695273,
+          -49.10860398217789
+        ],
+        [
+          0.029140130299025464,
+          1.0817987375726106,
+          -172.39038772675494
+        ]
+      ],
+      "sourceReferenceSha256": "2dfd925d17311d3aed49da4f5e5f2bc4165cb5969bf5200c7ada5cbb6fcfa859",
+      "masterSha256": "8292558d8d089558e7a502945606ee456f2b93789b9a728e79c7fae565ca1fdd",
+      "entries": 54,
+      "positioned": 22
+    },
+    "throne-world": {
+      "destinationHash": 2244580325,
+      "graphHashes": [
+        "2244580325"
+      ],
+      "graphNodeCount": 20,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 88,
+      "registrationMedianErrorPx": 1.35,
+      "graphMaxControlErrorPx": 2.72,
+      "previewSize": [
+        1665,
+        1100
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.5719290749236605,
+          -0.0002967036000205425,
+          398.1331290454708
+        ],
+        [
+          -0.0013667680181134463,
+          0.5676363527940484,
+          356.90822694385247
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.0865423293398344,
+          0.0038253306187485507,
+          -10.006971405455081
+        ],
+        [
+          -0.0015823286809949634,
+          1.059473266656227,
+          -3.947261155284693
+        ]
+      ],
+      "sourceReferenceSha256": "14566aadc071617dc8ca5005136aafbaa773cd4a947980ba1680fd1bf5b75431",
+      "masterSha256": "b529d8c73eef0f605ba23f75e55f7600d1005c551f4e2858151eb24785966696",
+      "entries": 51,
+      "positioned": 23
+    },
+    "neomuna": {
+      "destinationHash": 2481646875,
+      "graphHashes": [
+        "2481646875"
+      ],
+      "graphNodeCount": 10,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 66,
+      "registrationMedianErrorPx": 1.38,
+      "graphMaxControlErrorPx": 4.59,
+      "previewSize": [
+        1629,
+        1100
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.598333078024307,
+          -0.0009555670307719311,
+          305.7386133166839
+        ],
+        [
+          -0.008368898853583868,
+          0.5937686649584033,
+          309.462012815043
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.0216502568667876,
+          -0.019485879487167432,
+          82.39205299378115
+        ],
+        [
+          0.023740290564843666,
+          0.9962264157473325,
+          -116.66202584310413
+        ]
+      ],
+      "sourceReferenceSha256": "bb8f211de92de026225bd27161eada5773379b6c96a38485d2d9003dae51c956",
+      "masterSha256": "fcc46e294ff4343fda427cc496a13568c975ce86161f4bc8ad95c5e3bb9d8cf5",
+      "entries": 47,
+      "positioned": 17
+    },
+    "europa": {
+      "destinationHash": 1729879943,
+      "graphHashes": [
+        "1729879943"
+      ],
+      "graphNodeCount": 13,
+      "unnamedNodes": [],
+      "registrationMaxControlErrorPx": 35.9,
+      "registrationMethod": "manual label controls; approximate",
+      "graphMaxControlErrorPx": 1.09,
+      "previewSize": [
+        1619,
+        1100
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.5539502956899858,
+          0.00142595426991865,
+          257.8275319752008
+        ],
+        [
+          0.009856413876524004,
+          0.5726406812221584,
+          364.92456718095997
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.200947694237314,
+          -0.026330549640981273,
+          19.820944097836843
+        ],
+        [
+          -0.050392964725699166,
+          0.9306464768218015,
+          45.90520543258245
+        ]
+      ],
+      "sourceReferenceSha256": "c4a2375601ad058da7658a12672a66213e397eabe299fe300586182f12877d6b",
+      "masterSha256": "554de815ca1028dceb7847deddfb3e2003c4328990207d2ca9b501123104e7e2",
+      "entries": 51,
+      "positioned": 20
+    },
+    "pale-heart": {
+      "destinationHash": 3998251206,
+      "graphHashes": [
+        "3998251206"
+      ],
+      "graphNodeCount": 17,
+      "unnamedNodes": [
+        1753109658
+      ],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 112,
+      "registrationMedianErrorPx": 0.91,
+      "graphMaxControlErrorPx": 0.76,
+      "previewSize": [
+        1672,
+        556
+      ],
+      "masterSize": [
+        2032,
+        774
+      ],
+      "graphToPreview": [
+        [
+          0.329980020476556,
+          -0.00047839117321357705,
+          738.3914996657439
+        ],
+        [
+          0.0027770669469705297,
+          0.320344669790132,
+          170.42893044289727
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.7179639811336789,
+          0.004113760310213955,
+          -106.22673335256194
+        ],
+        [
+          -0.0002635307173263013,
+          1.7243679081295926,
+          -101.9053780557907
+        ]
+      ],
+      "sourceReferenceSha256": "585d35d2643dbe4f47cf040d88fe94f9f7f26a6e2088a6cf4b98cd97aae43844",
+      "masterSha256": "bd5ace26aa1652fb430f4f985a83ec6f095f9e156b32d3d51bc119f89b52077b",
+      "entries": 52,
+      "positioned": 18
+    },
+    "kepler": {
+      "destinationHash": 4076196532,
+      "graphHashes": [
+        "4076196532"
+      ],
+      "graphNodeCount": 10,
+      "unnamedNodes": [],
+      "registrationMethod": "SIFT affine RANSAC; approximate",
+      "registrationInliers": 41,
+      "registrationMedianErrorPx": 1.37,
+      "graphMaxControlErrorPx": 0.86,
+      "previewSize": [
+        1672,
+        1012
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "graphToPreview": [
+        [
+          0.5396857956354159,
+          -0.0011155246247444017,
+          538.2720943330802
+        ],
+        [
+          -0.0010051350880016597,
+          0.5425388568763727,
+          320.6284133863207
+        ]
+      ],
+      "previewToMaster": [
+        [
+          1.2369510655345148,
+          -0.01910103072069597,
+          -213.45396614109848
+        ],
+        [
+          0.016635086809244547,
+          1.1712084844380075,
+          -87.20976274024906
+        ]
+      ],
+      "sourceReferenceSha256": "a70dc709c327c0a05f7eca18925c93e282c955beeb1b8c8fba1c92b7f22bdbea",
+      "masterSha256": "9941090dacd886b87af4deeed3a070d234a1a6a062a32a6d69c9d617ea627fdd",
+      "entries": 26,
+      "positioned": 19
+    },
+    "cosmodrome": {
+      "destinationHash": 3990611421,
+      "graphHashes": [
+        "3990611421"
+      ],
+      "graphNodeCount": 6,
+      "unnamedNodes": [],
+      "entries": 25,
+      "positioned": 0
+    }
+  }
+}

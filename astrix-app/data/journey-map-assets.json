@@ -1,0 +1,168 @@
+{
+  "approval": "Approved for Journey integration by the user on 2026-09-20. Release review is separate.",
+  "native4KOr6K": false,
+  "assets": [
+    {
+      "file": "edz-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "822234d36856e5bf2f4dfcb6156b6274bc1d2d7f15d1b311251ee3a97b4f2534",
+      "masterSha256": "901e767ab51cffd9db0ec1b499577dbd41f8429e6e2b6fa2aec7ea2c461277b4"
+    },
+    {
+      "file": "edz-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "3df0d2ba824a4e4b2c344edad2eb3770148f5856b0d4b0a89b4fbe803f0162a0",
+      "masterSha256": "901e767ab51cffd9db0ec1b499577dbd41f8429e6e2b6fa2aec7ea2c461277b4"
+    },
+    {
+      "file": "pale-heart-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "89764c5a5b43675d739c06710d476bb3123351ed1f570f090e66f6b385db612f",
+      "masterSha256": "bd5ace26aa1652fb430f4f985a83ec6f095f9e156b32d3d51bc119f89b52077b"
+    },
+    {
+      "file": "pale-heart-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "50d414d4a7768933b3b1f7489f8fcd1b5b04ddba19125e3185b7e927b9a4f5e1",
+      "masterSha256": "bd5ace26aa1652fb430f4f985a83ec6f095f9e156b32d3d51bc119f89b52077b"
+    },
+    {
+      "file": "throne-world-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "2c6c1c50caa329899913ad4213ef702d06bba7b83eddf2fd9ba4de230fcab291",
+      "masterSha256": "b529d8c73eef0f605ba23f75e55f7600d1005c551f4e2858151eb24785966696"
+    },
+    {
+      "file": "throne-world-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "336f5d55e898857a8c2191d9864e3dd034c5e41a9dfc5d241edd12d13a05d616",
+      "masterSha256": "b529d8c73eef0f605ba23f75e55f7600d1005c551f4e2858151eb24785966696"
+    },
+    {
+      "file": "kepler-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "0c3d589418e922b07e548270e5d169d946c3eb4f88788658d9fb1d0339ad18d9",
+      "masterSha256": "9941090dacd886b87af4deeed3a070d234a1a6a062a32a6d69c9d617ea627fdd"
+    },
+    {
+      "file": "kepler-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "0a2e311fbc18f95c331ef0118d68e5cad5fabf75a0e402a7916fee60beb88c85",
+      "masterSha256": "9941090dacd886b87af4deeed3a070d234a1a6a062a32a6d69c9d617ea627fdd"
+    },
+    {
+      "file": "dreaming-city-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "5ab4b8912069a967cf74293397afa601d261dd1b4d73e105299628f27dbeba7f",
+      "masterSha256": "2ced7c061713ba0c64c8e854d962a70bb5fba914d1065cf1a5615cbc0ff69b7c"
+    },
+    {
+      "file": "dreaming-city-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "93f8697a25454bf9091b6ece0e2938e2a08be88cf71c30a67bdd58f1602a995b",
+      "masterSha256": "2ced7c061713ba0c64c8e854d962a70bb5fba914d1065cf1a5615cbc0ff69b7c"
+    },
+    {
+      "file": "moon-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "bccc2d933ac741737430ca24eff5f4a83ccd28ffc761ad2bc0b81967bfea0af5",
+      "masterSha256": "8292558d8d089558e7a502945606ee456f2b93789b9a728e79c7fae565ca1fdd"
+    },
+    {
+      "file": "moon-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "dea2acb42c9b77fecf296cce6bbf450a001e867f0d823d549bfe013723bfbc0a",
+      "masterSha256": "8292558d8d089558e7a502945606ee456f2b93789b9a728e79c7fae565ca1fdd"
+    },
+    {
+      "file": "neomuna-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "251218518bc1bb072edad2592486857b263441c559aab04a16fc4ca588d73997",
+      "masterSha256": "fcc46e294ff4343fda427cc496a13568c975ce86161f4bc8ad95c5e3bb9d8cf5"
+    },
+    {
+      "file": "neomuna-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "44e11314cf016409c328606bd568a857ee89ac6568da2c816dfdb5c9c5823d77",
+      "masterSha256": "fcc46e294ff4343fda427cc496a13568c975ce86161f4bc8ad95c5e3bb9d8cf5"
+    },
+    {
+      "file": "europa-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "2fdbaaed5473330ba7a08d8114c029ed6a7c4895fe53895560471a33d68c7b66",
+      "masterSha256": "554de815ca1028dceb7847deddfb3e2003c4328990207d2ca9b501123104e7e2"
+    },
+    {
+      "file": "europa-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "28800386dbbb008cb2cc44d349860c6842b71740ad99912a2307cf85267c0803",
+      "masterSha256": "554de815ca1028dceb7847deddfb3e2003c4328990207d2ca9b501123104e7e2"
+    },
+    {
+      "file": "nessus-director-map-4k.webp",
+      "size": [
+        3840,
+        2160
+      ],
+      "sha256": "a3c5722a8ea78b7e115db5f5bc45c59585a4b787987ec9c7be937a764d9861d4",
+      "masterSha256": "549bd56fbdeaac0a508aafb8d7d30eda2eb272a1bd7577034895debefc0e2106"
+    },
+    {
+      "file": "nessus-director-map-6k.webp",
+      "size": [
+        5760,
+        3240
+      ],
+      "sha256": "ebe6eee02f35fa241f7e02a2a1fbba3ffdc4b797e5ab30db372e1ea321216ae6",
+      "masterSha256": "549bd56fbdeaac0a508aafb8d7d30eda2eb272a1bd7577034895debefc0e2106"
+    }
+  ]
+}

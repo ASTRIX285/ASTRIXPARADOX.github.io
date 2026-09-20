@@ -1,0 +1,608 @@
+{
+  "edz": {
+    "destinationHash": 697502628,
+    "graphAnchors": [
+      [
+        1540899845,
+        537,
+        377
+      ],
+      [
+        731687386,
+        1209,
+        713
+      ],
+      [
+        110155855,
+        1258,
+        466
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Sunken Isles",
+        582,
+        99
+      ],
+      [
+        "landing",
+        "The Gulch",
+        680,
+        420
+      ],
+      [
+        "landing",
+        "The Sludge",
+        984,
+        403
+      ],
+      [
+        "landing",
+        "Winding Cove",
+        620,
+        717
+      ],
+      [
+        "landing",
+        "Trostland",
+        1040,
+        676
+      ],
+      [
+        "vendor",
+        "Devrim Kay",
+        1047,
+        630
+      ]
+    ],
+    "areaLabels": [
+      [
+        1094980045,
+        "Sunken Isles",
+        516.67,
+        151.67
+      ]
+    ]
+  },
+  "nessus": {
+    "destinationHash": 3607432451,
+    "graphAnchors": [
+      [
+        3740293834,
+        485,
+        476
+      ],
+      [
+        1372391539,
+        1088,
+        294
+      ],
+      [
+        1226499397,
+        834,
+        218
+      ],
+      [
+        1860024718,
+        946,
+        150
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Watcher's Grave",
+        1012,
+        274
+      ],
+      [
+        "landing",
+        "Artifact's Edge",
+        900,
+        423
+      ],
+      [
+        "landing",
+        "Exodus Black",
+        1167,
+        536
+      ],
+      [
+        "landing",
+        "The Cistern",
+        862,
+        647
+      ],
+      [
+        "vendor",
+        "Failsafe",
+        1146,
+        445
+      ]
+    ],
+    "areaLabels": [
+      [
+        537009175,
+        "Chamber of Water",
+        1031.17,
+        127.83
+      ]
+    ]
+  },
+  "dreaming-city": {
+    "destinationHash": 1416096592,
+    "graphAnchors": [
+      [
+        2054571835,
+        617,
+        222
+      ],
+      [
+        2523654476,
+        800,
+        222
+      ],
+      [
+        4141693847,
+        940,
+        204
+      ],
+      [
+        3726879016,
+        382,
+        533
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Divalian Mists",
+        588,
+        534
+      ]
+    ],
+    "areaLabels": []
+  },
+  "moon": {
+    "destinationHash": 677774031,
+    "graphAnchors": [
+      [
+        1487753697,
+        1035,
+        540
+      ],
+      [
+        1147858346,
+        951,
+        285
+      ],
+      [
+        4081978654,
+        350,
+        825
+      ],
+      [
+        3977287635,
+        531,
+        293
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Sanctuary",
+        724,
+        865
+      ],
+      [
+        "landing",
+        "Sorrow's Harbor",
+        926,
+        360
+      ],
+      [
+        "vendor",
+        "Eris Morn",
+        727,
+        823
+      ],
+      [
+        "vendor",
+        "Lectern of Enchantment",
+        764,
+        844
+      ]
+    ],
+    "areaLabels": [
+      [
+        417490937,
+        "Sorrow's Harbor",
+        1104.83,
+        253.5
+      ]
+    ]
+  },
+  "throne-world": {
+    "destinationHash": 2244580325,
+    "graphAnchors": [
+      [
+        3467963914,
+        970,
+        398
+      ],
+      [
+        530979733,
+        655,
+        288
+      ],
+      [
+        1717605924,
+        484,
+        185
+      ],
+      [
+        1227874634,
+        1113,
+        480
+      ],
+      [
+        1260974001,
+        370,
+        558
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Quagmire",
+        637,
+        646
+      ],
+      [
+        "vendor",
+        "Fynch",
+        655,
+        655
+      ]
+    ],
+    "areaLabels": [
+      [
+        13604068,
+        "Disciple's Bog",
+        420.17,
+        128.67
+      ]
+    ]
+  },
+  "neomuna": {
+    "destinationHash": 2481646875,
+    "graphAnchors": [
+      [
+        3878837543,
+        437,
+        561
+      ],
+      [
+        1855498778,
+        415,
+        458
+      ],
+      [
+        3212131476,
+        470,
+        458
+      ],
+      [
+        2128745250,
+        380,
+        267
+      ],
+      [
+        992844927,
+        245,
+        868
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Hall of Heroes",
+        582,
+        266
+      ],
+      [
+        "landing",
+        "Striders' Gate",
+        603,
+        346
+      ],
+      [
+        "landing",
+        "Límíng Harbor",
+        860,
+        810
+      ],
+      [
+        "vendor",
+        "Nimbus",
+        611,
+        385
+      ],
+      [
+        "vendor",
+        "Quinn Laghari",
+        566,
+        236
+      ]
+    ],
+    "areaLabels": [
+      [
+        473462131,
+        "Zephyr Concourse",
+        677.33,
+        488.0
+      ],
+      [
+        50825255,
+        "Hall of Heroes",
+        678.0,
+        204.17
+      ]
+    ]
+  },
+  "europa": {
+    "destinationHash": 1729879943,
+    "graphAnchors": [
+      [
+        1043740986,
+        755,
+        329
+      ],
+      [
+        1162322578,
+        690,
+        222
+      ],
+      [
+        2680526835,
+        824,
+        223
+      ],
+      [
+        1242600699,
+        269,
+        468
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Charon's Crossing",
+        568,
+        690
+      ],
+      [
+        "landing",
+        "Beyond",
+        611,
+        904
+      ],
+      [
+        "landing",
+        "Eventide Ruins",
+        503,
+        288
+      ],
+      [
+        "vendor",
+        "Variks the Loyal",
+        561,
+        654
+      ],
+      [
+        "vendor",
+        "Exo Stranger",
+        641,
+        889
+      ]
+    ],
+    "manualRegistration": [
+      [
+        300,
+        484,
+        367,
+        461
+      ],
+      [
+        442,
+        284,
+        535,
+        303
+      ],
+      [
+        678,
+        409,
+        823,
+        372
+      ],
+      [
+        698,
+        886,
+        823,
+        825
+      ],
+      [
+        1135,
+        420,
+        1375,
+        384
+      ],
+      [
+        490,
+        672,
+        608,
+        678
+      ]
+    ],
+    "registrationNote": "Manual label controls replace the weak automatic feature fit. Positions are approximate on the cleaned artwork.",
+    "areaLabels": [
+      [
+        2379681761,
+        "Technocrat's Iron",
+        436.17,
+        94.17
+      ]
+    ]
+  },
+  "pale-heart": {
+    "destinationHash": 3998251206,
+    "graphAnchors": [
+      [
+        3677353907,
+        1052,
+        125
+      ],
+      [
+        1855498778,
+        1041,
+        334
+      ],
+      [
+        3212131476,
+        1075,
+        334
+      ],
+      [
+        2325332559,
+        1019,
+        362
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "The Lost City",
+        527,
+        290
+      ],
+      [
+        "landing",
+        "The Landing",
+        557,
+        282
+      ],
+      [
+        "landing",
+        "The Blooming",
+        797,
+        261
+      ],
+      [
+        "landing",
+        "The Impasse",
+        1001,
+        193
+      ]
+    ],
+    "areaLabels": []
+  },
+  "kepler": {
+    "destinationHash": 4076196532,
+    "graphAnchors": [
+      [
+        1090985902,
+        425,
+        338
+      ],
+      [
+        4121776547,
+        398,
+        422
+      ],
+      [
+        4121776544,
+        453,
+        422
+      ],
+      [
+        1531094110,
+        970,
+        375
+      ],
+      [
+        451035165,
+        1140,
+        722
+      ],
+      [
+        3833324,
+        1325,
+        726
+      ]
+    ],
+    "points": [
+      [
+        "landing",
+        "Assimilated Easement",
+        635,
+        503
+      ],
+      [
+        "landing",
+        "The Stacks",
+        609,
+        207
+      ],
+      [
+        "landing",
+        "Curtilage Divide",
+        1156,
+        432
+      ],
+      [
+        "landing",
+        "Aionian Campus",
+        976,
+        274
+      ],
+      [
+        "landing",
+        "Caldera",
+        851,
+        385
+      ],
+      [
+        "vendor",
+        "Altar of Relativity",
+        824,
+        402
+      ],
+      [
+        "vendor",
+        "Post Box",
+        883,
+        372
+      ]
+    ],
+    "areaLabels": [
+      [
+        2788217022,
+        "Augur's Bethel",
+        1363.33,
+        388.83
+      ],
+      [
+        1834394558,
+        "Outer Wastes",
+        317.0,
+        161.0
+      ]
+    ]
+  },
+  "cosmodrome": {
+    "destinationHash": 3990611421,
+    "graphAnchors": [],
+    "points": []
+  }
+}
