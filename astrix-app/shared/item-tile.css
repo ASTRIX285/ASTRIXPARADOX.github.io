@@ -276,11 +276,21 @@
   box-shadow: none;
 }
 .vault-transfer-item.has-item-tile.is-equipped .item-tile {
-  outline: 1px solid rgba(111,227,182,.62);
-  outline-offset: 1px;
+  outline: none;
 }
-.vault-transfer-item.has-item-tile:hover .item-tile,
-.vault-transfer-item.has-item-tile:focus-visible .item-tile {
+/* Shared equipped marker for Character, Vault and embedded Build Forge tiles.
+   Draw inside the card so row overflow cannot clip it, including on hover. */
+.vault-transfer-item.has-item-tile.is-equipped::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  box-sizing: border-box;
+  border: var(--apx-equipped-stroke,3px solid #49adff);
+  pointer-events: none;
+}
+.vault-transfer-item.has-item-tile:not(.is-equipped):hover .item-tile,
+.vault-transfer-item.has-item-tile:not(.is-equipped):focus-visible .item-tile {
   outline: 1px solid #c9a84c;
   outline-offset: 1px;
 }
