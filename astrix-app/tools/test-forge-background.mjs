@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {Worker} from 'node:worker_threads';
 import {ForgePreparationClient,preparationVariants,forgePreparationKey} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs';
 import {prepareForgeSequence} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs';
+import {createDirectGenerationBuild,validateTierFiveArmour} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs';
 import {voidLoopSource,nothingManaclesCandidate,comboSource} from './validate-paradox-build-space.mjs';
 
 const artifact={hash:999,artifactHash:999,name:'Test Artifact',seasonNumber:31,pointsUsed:2,state:'resolved',provenance:'bungie-character-progressions-202',perks:[
@@ -50,6 +51,23 @@ assert.ok(partialResult.patch.forgeEvidence.pending.some(row=>row.code==='weapon
 assert.ok(partialResult.patch.forgeEvidence.pending.some(row=>row.code==='weapon-roll-advice-unavailable'));
 assert.equal(partialResult.patch.recommendationStatus,'partial-review-required');
 
+const ownedArmour=build.armour.map((item,index)=>({...item,itemHash:85001+index,classType:2,armourTier:1+index%3,energy:{capacity:5},stats:[{name:'Health',value:10}],socketsAvailable:true,socketCoverage:{complete:true,unresolved:[]},exoticPerk:item.isExotic?build.forgeLoaderDecision.buildAnchor.perk:null}));
+const ownedWeapon=item=>({...item,definition:{...item.definition,classType:3},socketsAvailable:true,socketCoverage:{complete:true,unresolved:[]}});
+const directBuild=createDirectGenerationBuild({...build,characterClass:'warlock',weapons:build.weapons.map(ownedWeapon)},{mode:'owned',armour:ownedArmour,ownedArmour,ownedWeapons:build.ownedWeapons.map(ownedWeapon)});
+const directBefore=JSON.stringify(directBuild);
+assert.equal(validateTierFiveArmour(directBuild).ready,false,'The direct fixture must not satisfy the legacy entry gate.');
+const directResult=await prepareForgeSequence({build:directBuild,candidate:nothingManaclesCandidate,...variant,currentSeasonNumber:31},{advise:async()=>{}});
+assert.equal(directResult.patch.liveTransferPreflight.ready,true,'Low-tier owned entry must still satisfy the unchanged complete Apply preflight.');
+assert.equal(directResult.patch.armourModRecommendation.validation.ready,true);
+assert.equal(directResult.patch.subclassBuild.grenade.hash,114,'The existing Exotic-specific socket compatibility requirement must survive direct entry.');
+assert.equal(directResult.recommendation.source,'verified-owned-instance-working-build');
+assert.equal(JSON.stringify(directBuild),directBefore,'Direct generation cannot mutate the original inventory.');
+await assert.rejects(prepareForgeSequence({build:{...directBuild,forgeLoaderDecision:{...build.forgeLoaderDecision,ranking:{maximized:true}}},candidate:nothingManaclesCandidate,...variant}),/T5/,'The optional Forge Loader path retains its Tier 5 check.');
+await assert.rejects(prepareForgeSequence({build:{...directBuild,armour:directBuild.armour.map(item=>({...item,isExotic:false}))},candidate:nothingManaclesCandidate,...variant}),/owned Exotic/);
+await assert.rejects(prepareForgeSequence({build:directBuild,candidate:{...nothingManaclesCandidate,subclassBuild:{...nothingManaclesCandidate.subclassBuild,socketCoverage:{complete:false}}},...variant}),/subclass/);
+const overBudget=structuredClone(directBuild);overBudget.armour[0].generalMods=[{name:'Over budget',energyCost:6}];
+await assert.rejects(prepareForgeSequence({build:overBudget,candidate:nothingManaclesCandidate,...variant}),/energy/);
+
 class FakeWorker{constructor(){this.sent=[];this.dead=false;}postMessage(message){this.sent.push(message);}terminate(){this.dead=true;}emit(message){this.onmessage({data:message});}}
 const workers=[],client=new ForgePreparationClient({workerFactory:()=>{const w=new FakeWorker();workers.push(w);return w;},maxEntries:2,maxBytes:100});
 client.setInput(build,candidates,31);const first=workers.at(-1),rev=client.revision,key=JSON.stringify(['void','dps',102]);
@@ -73,6 +91,11 @@ const retry=client.get({...variant,objective:'survivability'});workers.at(-1).em
 const timeoutStatus=[],timeoutWorkers=[],timeoutClient=new ForgePreparationClient({workerFactory:()=>{const worker=new FakeWorker();timeoutWorkers.push(worker);return worker;},onStatus:message=>timeoutStatus.push(message),timeoutMs:10});
 timeoutClient.setInput(build,candidates,31);await assert.rejects(timeoutClient.get(variant),/10 millisecond worker budget/,'A silent worker must terminate through the explicit client budget.');assert.equal(timeoutWorkers.at(-1).dead,true);assert.equal(timeoutStatus.at(-1).type,'unavailable');timeoutClient.dispose();
 const variants=preparationVariants(candidates,variant);assert.deepEqual(variants[0],variant);assert.ok(variants.length<=12);assert.ok(variants.some(v=>v.superHash===101));assert.ok(variants.some(v=>v.objective==='ability-uptime'));
+const directClient=new ForgePreparationClient({workerFactory:()=>new FakeWorker()});
+directClient.setInput(directBuild,candidates,31);
+const directInput=directClient.input;
+assert.equal(directInput.build.ownedArmour,directBuild.ownedArmour,'The worker projection must retain owned-armour evidence for its entry gate.');
+directClient.dispose();
 
 // Execute the actual worker handler and sequence on another thread without a DOM.
 const workerURL=new URL('../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-worker.mjs',import.meta.url).href;
@@ -88,8 +111,15 @@ try{
   assert.equal(alternativeMessage.key,forgePreparationKey({...variant,weaponInstanceIds}));
   assert.deepEqual(alternativeMessage.result.patch.weapons.map(item=>item.itemInstanceId),weaponInstanceIds,'The real worker must carry alternative IDs through the full generation and cache protocol.');
   assert.equal(alternativeMessage.result.patch.liveTransferPreflight.ready,true);
+  const directReady=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('direct entry worker test timeout')),10000);thread.on('message',m=>{if(m.revision!==9)return;if(m.type==='ready'){clearTimeout(timer);resolve(m);}if(m.type==='error'){clearTimeout(timer);reject(new Error(m.message));}});});
+  thread.postMessage({...directInput,revision:9});thread.postMessage({type:'prepare',revision:9,jobs:[variant],requested:true});
+  const directMessage=await directReady;
+  assert.equal(directMessage.result.recommendation.source,'verified-owned-instance-working-build');
+  assert.equal(directMessage.result.patch.liveTransferPreflight.ready,true);
+  assert.equal(directMessage.result.patch.armourModRecommendation.validation.ready,true);
 }finally{await thread.terminate();}
 console.log('FORGE_BACKGROUND_THREAD_AND_ISOLATION=PASS');
 console.log('FORGE_BACKGROUND_SUPERS_ARTIFACT_AND_CACHE=PASS');
 console.log('FORGE_BACKGROUND_PARTIAL_TIMEOUT_AND_ACTIVITY=PASS');
 console.log('FORGE_BACKGROUND_WEAPON_COMBINATION_SWITCH=PASS');
+console.log('FORGE_BACKGROUND_DIRECT_ENTRY=PASS low-tier owned inventory, unchanged legality checks and real worker handoff');

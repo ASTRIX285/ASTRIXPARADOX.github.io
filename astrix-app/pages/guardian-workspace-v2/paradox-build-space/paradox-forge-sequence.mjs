@@ -3,7 +3,7 @@ import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20
 import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1';
 import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1';
-import {validateTierFiveArmour} from './paradox-build-recommendation.mjs';
+import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);
@@ -27,8 +27,8 @@ function forgeEvidenceAssessment(build={},coherence={violations:[]},additional=[
 }
 
 export async function prepareForgeSequence({build,candidate,element,objective='balanced',currentSeasonNumber=null,superHash=0,weaponInstanceIds=[]},{onProgress=()=>{},advise=adviseLiveWeaponRolls}={}){
-  if(!build?.forgeLoaderDecision||!validateTierFiveArmour(build).ready||!validateExoticLoadout(build,{requireArmourAnchor:true}).ready)throw new Error('Stage a verified Forge Loader armour result first.');
-  if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the verified Forge Loader result.');
+  const entry=validateForgeGenerationEntry(build);if(!entry.ready)throw new Error(entry.reason);
+  if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the verified armour selection.');
   if(!hasForgeActivityContext(build))throw new Error('Select Raid, DPS, Grandmaster, Crucible, PVE or PVP before generating this build.');
   if(superHash){
     const sb=candidate.subclassBuild||candidate.build,selected=[sb.super,...(sb.superOptions||[])].find(item=>Number(item?.hash??item?.bungieHash)===Number(superHash));
@@ -41,7 +41,7 @@ export async function prepareForgeSequence({build,candidate,element,objective='b
   const composed=composeForgeRecommendation({build:forgeComputationProjection(working),candidate,element:element,analyzeBuild:analyzeLiveGuardian,bounded:true});
   working=mergeComposedRecommendation(working,composed.workingBuild);
   working.recommendationGeneratedAt=new Date().toISOString();working.recommendationElement=element;working.recommendationStatus='review-required';working.forgeIntelligence={...composed.intelligence,generatedAt:working.recommendationGeneratedAt};working.paradoxAnalysis=composed.analysis||analyzeLiveGuardian(working)||null;
-  next={...next,workingBuild:working,recommendation:{status:'review-required',generatedAt:working.recommendationGeneratedAt,element,source:'verified-forge-loader-working-build',intelligenceMethod:working.forgeIntelligence.method}};
+  next={...next,workingBuild:working,recommendation:{status:'review-required',generatedAt:working.recommendationGeneratedAt,element,source:directEntryMode(build)?'verified-owned-instance-working-build':'verified-forge-loader-working-build',intelligenceMethod:working.forgeIntelligence.method}};
   working.objective=objective;working.loadoutIntent=deriveLoadoutIntent(working);
   await updateForgeGenerationPhase('RANKING ALL VERIFIED OWNED WEAPONS…');
   const initialWeaponResult=selectOwnedWeapons({build:working,objective,baselineWeapons:build.weapons,weaponInstanceIds});working=initialWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
