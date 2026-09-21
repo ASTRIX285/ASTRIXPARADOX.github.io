@@ -345,35 +345,85 @@ body.apx-destination-page .apx-page-shell{
   :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,76px)}
 }
 
-/* Weapon and armour artwork only: Character's 50px baseline on every page.
-   Power-strip cards retain 13px below the square artwork. Do not use this
-   token for mods, perks, subclass abilities, Supers or navigation imagery. */
-:root{
-  --apx-equipment-icon-size:50px;
+/* Weapon and armour artwork only: use the approved Character strip proportions
+   on every page. Twenty slots, nineteen 4px gaps, a 20%/360px rail, a 12px
+   column gap and 30px panel inset. Power strips retain the 100:122 ratio.
+   Do not use this token for mods, perks, subclass abilities, Supers or
+   navigation imagery. */
+:root,
+:root:has(>body.apx-fluid-icons){
+  --apx-equipment-reference-inset:calc(max(360px,20vw) + 42px);
+  --apx-equipment-icon-size:max(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20));
+  --apx-equipped-stroke:3px solid #49adff;
   --apx-inventory-size:var(--apx-equipment-icon-size)!important;
   --apx-icon-gear-art-width:var(--apx-equipment-icon-size)!important;
-  --apx-icon-gear-art-height:calc(var(--apx-equipment-icon-size) + 13px)!important;
-  --apx-tile-label-size:10px;
-  --apx-tile-badge-height:14px;
-  --apx-tile-height:calc(var(--apx-equipment-icon-size) + 13px);
+  --apx-icon-gear-art-height:calc(var(--apx-equipment-icon-size) * 1.22)!important;
+  --apx-tile-label-size:calc(var(--apx-equipment-icon-size) / 5);
+  --apx-tile-badge-height:calc(var(--apx-equipment-icon-size) * .22);
+  --apx-tile-height:calc(var(--apx-equipment-icon-size) * 1.22);
   --apx-tile-border-width:0px;
   --apx-tile-inset-x:0px;
   --apx-tile-content-width:100%;
   --apx-tile-art-top:0px;
   --apx-tile-art-height:var(--apx-equipment-icon-size)!important;
-  --apx-tile-footer-top:calc(var(--apx-equipment-icon-size) - 1px);
+  --apx-tile-footer-top:var(--apx-equipment-icon-size);
   --apx-tile-footer-padding:0 2px;
+}
+@media(max-width:980px){
+  :root,
+  :root:has(>body.apx-fluid-icons){--apx-equipment-reference-inset:30px}
 }
 body .character-inventory-workspace{--character-item-size:var(--apx-equipment-icon-size)}
 body .forge-exotic-grid{grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size))}
 body :is(.forge-exotic,.forge-matrix-exotic){
   width:var(--apx-equipment-icon-size)!important;
+  min-width:var(--apx-equipment-icon-size)!important;
   height:var(--apx-equipment-icon-size)!important;
+}
+/* Let only the exotic column accommodate the shared artwork width; the
+   existing matrix controls, stat tiles and responsive row order keep theirs. */
+body .forge-matrix-row{
+  --apx-matrix-exotic-track:max(var(--forge-matrix-tile-size),var(--apx-equipment-icon-size));
+  grid-template-columns:var(--forge-matrix-tile-size) var(--apx-matrix-exotic-track) max-content minmax(2.2rem,max-content) 3.4rem var(--forge-matrix-tile-size);
+}
+@container(max-width:38.75rem){
+  body .forge-matrix-row{grid-template-columns:var(--forge-matrix-tile-size) var(--apx-matrix-exotic-track) minmax(4.25rem,1fr) 4.2rem var(--forge-matrix-tile-size)}
+}
+@media(max-width:820px){
+  body .forge-matrix-row{grid-template-columns:var(--forge-matrix-tile-size) var(--apx-matrix-exotic-track) var(--forge-matrix-tile-size)}
 }
 body .saved-build-equipment-item>.saved-build-tile{--saved-icon-size:var(--apx-equipment-icon-size)}
 body :is(.vault-candidate-item img,.vault-selection-slot>img){
   width:var(--apx-equipment-icon-size);
   height:var(--apx-equipment-icon-size);
+}
+/* Saved weapon/armour rows consume the shared size without resizing Supers,
+   mods, appearance items or Artifact icons. */
+body .saved-build-equipment{--saved-gear-size:var(--apx-equipment-icon-size)}
+body .saved-build-equipment-item .saved-build-power{
+  height:calc(var(--apx-equipment-icon-size) * .22);
+  font-size:calc(var(--apx-equipment-icon-size) / 5);
+}
+body .saved-build-equipment-item .saved-build-power img{
+  width:calc(var(--apx-equipment-icon-size) / 5);
+  height:calc(var(--apx-equipment-icon-size) / 5);
+}
+/* Non-weapon/armour inventory items retain their existing dimensions. */
+body .vault-transfer-item:not(.has-item-tile){
+  --apx-icon-gear-art-width:50px;
+  --apx-icon-gear-art-height:63px;
+}
+
+/* The current-equipment Loadout section already identifies live equipped
+   items. Saved or generated proposals do not acquire an equipped border. */
+body #loadout-equipped .saved-build-tile.is-equipment::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:6;
+  box-sizing:border-box;
+  border:var(--apx-equipped-stroke);
+  pointer-events:none;
 }
 
 /* Approved dark-grey chrome. Presentation only; item art and rarity colours

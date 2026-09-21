@@ -423,7 +423,8 @@ body.guardian-main-page .workspace>.right{display:none!important}
     max-height:none!important;
     margin:0 auto!important;
     padding:10px 0 18px!important;
-    grid-template-columns:clamp(310px,20vw,390px) minmax(0,1fr)!important;
+    /* Keep the rail proportional when zooming out instead of capping it at 390px. */
+    grid-template-columns:var(--apx-workspace-left,minmax(360px,20%)) minmax(0,1fr)!important;
     grid-template-rows:auto!important;
     grid-template-areas:"rail equipment"!important;
     gap:12px!important;

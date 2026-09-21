@@ -124,18 +124,7 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
   --apx-tile-footer-top:var(--character-item-size);
 }
 body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspect-ratio:1}
-/* Draw inside the card so the first item cannot lose its equipped stroke to
-   row overflow. The overlay stays blue on hover and never intercepts input. */
-body.guardian-main-page .character-inventory-workspace .vault-transfer-item.is-equipped::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:6;
-  box-sizing:border-box;
-  border:3px solid #49adff;
-  pointer-events:none;
-}
-body.guardian-main-page .character-inventory-workspace .vault-transfer-item.is-equipped .item-tile{outline:none}
+/* Equipped strokes are owned by shared/item-tile.css on every page. */
 
 @media(max-width:1200px){.vault-character-columns{grid-template-columns:1fr}.vault-character-column{display:grid}.vault-character-section{border:0}}
 @media(max-width:880px){.vault-character-column{grid-template-columns:1fr}}
