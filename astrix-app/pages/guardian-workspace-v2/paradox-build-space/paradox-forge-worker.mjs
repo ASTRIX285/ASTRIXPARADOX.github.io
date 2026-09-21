@@ -1,5 +1,5 @@
-import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-2';
-import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2';
+import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
+import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
 
 const objectives=new Set(['balanced','dps','add-clear','survivability','ability-uptime']);
 

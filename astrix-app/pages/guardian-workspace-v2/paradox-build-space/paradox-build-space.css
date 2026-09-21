@@ -248,6 +248,11 @@ html,body{
 .design-canvas .armour-design-section,
 .design-canvas .weapon-design-section,
 .design-canvas .recommendation-panel{container-type:inline-size}
+.generation-entry-actions{flex-wrap:wrap;margin:10px 0;gap:8px}
+.generation-entry-actions [aria-pressed="true"]{border-color:var(--apx-colour-accent,#bd3346)}
+#directOwnedArmour .manual-socket-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+#directOwnedArmour label{display:grid;gap:4px;color:#f2edf3;font-size:12px}
+#directOwnedArmour select{width:100%;min-width:0;background:#15171c;color:#f2edf3;border:1px solid var(--apx-colour-border);padding:8px}
 .design-canvas .armour-design-section{
   --build-armour-mod:var(--guardian-square);
   --build-armour-gap:var(--guardian-square-gap);
