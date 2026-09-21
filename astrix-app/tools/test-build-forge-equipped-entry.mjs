@@ -7,6 +7,7 @@ import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../pages/guardian-workspace-v2/guar
 import {recordManualEdit} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
 import * as state from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {classifyArmourPlug} from '../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
+import {ForgePreparationClient,forgePreparationKey} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs';
 
 // Execute the production entry/restore/selection functions with controlled I/O.
 // The profile fixture gives each Guardian distinct equipment and Super identity.
@@ -176,7 +177,7 @@ const equipped={characterId:source.characterId,characterClass:'hunter',membershi
 const inventory={armour:[...directArmour,vaultHelmet,otherGuardianHelmet,wrongClassHelmet,unknownClassHelmet]};
 const node=dataset=>({dataset,textContent:'',innerHTML:'',hidden:false,disabled:false,classList:{toggle(){}},setAttribute(){},scrollIntoView(){}});
 function directHarness(){
-  const ui=new Map(['directOwnedArmour','recommendationElements','generateMaxLoadout','recommendationReadiness'].map(id=>[id,node({})]));
+  const ui=new Map(['directOwnedArmour','recommendationElements','generateMaxLoadout','recommendationReadiness','forgePreparationStatus','forgeGenerationStatus'].map(id=>[id,node({})]));
   const buttons=[node({generationEntry:'equipped'}),node({generationEntry:'owned'})],elements=[node({recommendationElement:'void'})],objectives=[node({buildObjective:'balanced'})];
   const h=vm.createContext({...entry,...binding,...state,console,recordManualEdit,structuredClone,
     byId:id=>ui.get(id),document:{querySelectorAll:selector=>selector==='[data-generation-entry]'?buttons:selector==='[data-recommendation-element]'?elements:selector==='[data-build-objective]'?objectives:[]},
@@ -251,3 +252,41 @@ const wrongAccount=directHarness();wrongAccount.FORGE_PAGE_PAYLOAD.membership.me
 const originalAccountState=wrongAccount.readState();await wrongAccount.startDirectGeneration('owned');
 assert.equal(wrongAccount.readState(),originalAccountState,'Prepared inventory from another account must not be staged.');
 console.log('BUILD_FORGE_DIRECT_ENTRY=PASS equipped baseline, full owned armour, lower tiers, controls, legality and stale account/Guardian guards');
+
+// Replay the live timeout through the real preparation callback and generation
+// catch/finally, with controlled worker I/O and the exact captured error text.
+const timeoutMessage='Build preparation exceeded the 120 second worker budget. No recommendation was generated. Retry this selection.';
+const failureUI=directHarness();
+Object.assign(failureUI,{ForgePreparationClient,forgePreparationKey,setTimeout,clearTimeout,
+  console:{...console,error(){}},forgeActivityOption:()=>({key:'pve'}),
+  refreshForgeArtifactRecommendation:async()=>{},showForgeGenerationLoader:async()=>{},hideForgeGenerationLoader(){},
+  prepareForgeBackground:async()=>{},requestedForgeVariant:()=>({element:'void',objective:'balanced'}),setLiveActionBanner(){},
+});
+vm.runInContext(`let activePreparationKey='',preparationTimer=null;
+  ${between(runtime,'const forgePreparation=new ForgePreparationClient','function forgeVariants')}
+  ${between(runtime,'async function generateMaxLoadout','function renderBuildSurface')}
+`,failureUI);
+await failureUI.startDirectGeneration('owned');
+const preparationClient=vm.runInContext('forgePreparation',failureUI);
+preparationClient.input={};preparationClient.worker={postMessage(){},terminate(){}};
+const failedGeneration=failureUI.generateMaxLoadout();
+// Allow the production async entry to reach its actual pending worker request.
+for(let turn=0;turn<10&&!preparationClient.pending.size;turn++)await Promise.resolve();
+assert.equal(preparationClient.pending.size,1,'The reproduction must reach the real pending worker request.');
+preparationClient.fail(timeoutMessage);
+await failedGeneration;
+const readinessNode=failureUI.ui.get('recommendationReadiness'),preparationNode=failureUI.ui.get('forgePreparationStatus');
+assert.equal(readinessNode.textContent,timeoutMessage,'The complete timeout explanation must remain in the primary error box.');
+assert.equal([readinessNode,preparationNode].filter(node=>!node.hidden&&node.textContent===timeoutMessage).length,1,'A generation timeout must be visible once, not in both the error box and preparation status.');
+assert.equal(failureUI.ui.get('generateMaxLoadout').disabled,false,'The timeout must still allow retry.');
+preparationClient.onStatus({type:'unavailable',message:timeoutMessage});
+assert.equal(preparationNode.hidden,true,'A late preparation notification must not restore the duplicate.');
+vm.runInContext("recommendationFailure='';",failureUI);failureUI.render();
+assert.equal(preparationNode.hidden,false,'Clearing the generation failure must restore background status visibility.');
+preparationClient.fail('Background preparation could not start. Try Generate Max Loadout again.');
+assert.match(preparationNode.textContent,/Background preparation could not start/,'A background-only failure must remain visible.');
+for(const [type,message,expected] of [['progress','Preparing next option','Preparing build options…'],['ready','', 'Build option ready']]){
+  preparationClient.onStatus({type,key:forgePreparationKey({element:'void',objective:'balanced'}),message});
+  assert.equal(preparationNode.hidden,false);assert.equal(preparationNode.textContent,expected);
+}
+console.log('BUILD_FORGE_TIMEOUT_PRESENTATION=PASS one visible error, late notifications, retry and background-only status');
