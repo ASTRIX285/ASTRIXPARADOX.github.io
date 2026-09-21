@@ -798,6 +798,87 @@ assert.ok(rawSavedArmour.mods.some(row=>row.hash===currentArmourMod.hash));
 assert.equal(afterEditor.stats.length,0,'An edited build must not retain captured totals as if they were recalculated');
 console.log('LOADOUT_QUICK_EDITOR=PASS selected socket changes preserve other saved sockets and original records');
 
+// Run the actual page startup, event handlers and renderer with deferred reads.
+// Strip imports so this VM cannot start persistence, background sync or live requests.
+const bootSource=overviewSource.replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'');
+const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};};
+const settleReads=()=>new Promise(resolve=>setImmediate(resolve));
+const raceRows=clone(manyRecords.slice(0,3));
+function startLoadoutRace(){
+  const reads=[],nodes=new Map(),listeners=new Map(),preparing=deferred(),profileReady=deferred();
+  const node=id=>{
+    if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,open:false,classList:{toggle(){}},addEventListener(){}});
+    return nodes.get(id);
+  };
+  const forbidden=()=>{throw new Error('Unexpected persistence or network call in Loadout ordering test');};
+  const context={URL,structuredClone,sessionBinding,classifyArmourPlug,LOADOUT_DEFINITIONS:{},
+    document:{getElementById:node,querySelector:()=>null,addEventListener(){}},
+    window:{addEventListener(type,handler){listeners.set(type,handler);}},
+    mountForgeShell(){},reportPreparedPageStage(){},
+    getBungieSession:async()=>({authenticated:true,activeDestinyMembership:binding}),
+    loadPreparedPagePayload:async()=>({}),normalisePreparedPagePayload:value=>value,normaliseLiveProfile:()=>null,
+    guardianManifest:{seedPayload(){},hydratePayload(){preparing.resolve();return profileReady.promise;}},
+    createPreparedPageRefreshController:()=>({start(){}}),
+    listParadoxLoadouts(){const read=deferred();reads.push(read);return read.promise;},
+    saveParadoxLoadout:forbidden,deleteParadoxLoadout:forbidden,fetch:forbidden,
+    localStorage:{getItem:forbidden,setItem:forbidden,removeItem:forbidden},indexedDB:{open:forbidden}
+  };
+  const done=runInNewContext(`(async()=>{${bootSource}\n})()`,context);
+  return {reads,node,done,preparing:preparing.promise,
+    ready(){profileReady.resolve({profile:{characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID}}}}});},
+    change(type='forge:paradox-loadouts-changed'){listeners.get(type)({key:'astrix:paradox-saved-loadouts:v1'});}
+  };
+}
+function assertThreeRendered(race,label){
+  assert.equal(race.node('paradoxLoadoutCount').textContent,'3 SAVED',label);
+  assert.equal((race.node('paradoxLoadoutList').innerHTML.match(/data-jump-id="saved-/g)||[]).length,3,label);
+  assert.equal((race.node('paradoxLoadoutDetail').innerHTML.match(/data-build-record="saved-/g)||[]).length,3,label);
+}
+// Exact reported race: the early empty snapshot is held until preparation finishes.
+{
+  const race=startLoadoutRace();await race.preparing;
+  race.reads[0].resolve([]);await settleReads();
+  race.change();race.reads[1].resolve(clone(raceRows));await settleReads();
+  assert.equal(race.node('paradoxLoadoutCount').textContent,'','The change event must still respect initial loading');
+  race.ready();await race.done;
+  assertThreeRendered(race,'A newer three-row event read must survive the profile-ready assignment');
+}
+// The startup promise itself may also finish after the newer change-event read.
+{
+  const race=startLoadoutRace();await race.preparing;
+  race.change();race.reads[1].resolve(clone(raceRows));await settleReads();
+  race.ready();await settleReads();race.reads[0].resolve([]);await race.done;
+  assertThreeRendered(race,'A late empty startup read must not replace the newer list');
+}
+// Normal startup must render its rows, and later changes must still replace them.
+{
+  const race=startLoadoutRace();await race.preparing;
+  race.reads[0].resolve(clone(raceRows));race.ready();await race.done;
+  assertThreeRendered(race,'Startup without an event must render saved rows');
+  race.change();race.reads[1].resolve([]);await settleReads();
+  assert.equal(race.node('paradoxLoadoutCount').textContent,'0 SAVED','A newer empty list must replace older rows');
+  race.change();race.reads[2].resolve(clone(raceRows));await settleReads();
+  assertThreeRendered(race,'Changes after startup must render immediately');
+}
+// Overlapping change and cross-tab reads obey the same ordering rule.
+for(const type of ['forge:paradox-loadouts-changed','storage']){
+  const race=startLoadoutRace();await race.preparing;
+  race.reads[0].resolve([]);race.ready();await race.done;
+  race.change(type);race.change();
+  race.reads[2].resolve(clone(raceRows));await settleReads();
+  race.reads[1].resolve([]);await settleReads();
+  assertThreeRendered(race,`An older ${type} read must not clobber a newer completed read`);
+}
+// A failed newer read must not discard the last successful snapshot.
+{
+  const race=startLoadoutRace();await race.preparing;
+  race.change();race.reads[1].reject(new Error('Synthetic read failure'));await settleReads();
+  race.reads[0].resolve(clone(raceRows));race.ready();await race.done;
+  assertThreeRendered(race,'A rejected read must not supersede a successful snapshot');
+  assert.equal(race.node('paradoxLoadoutStatus').textContent,'Synthetic read failure');
+}
+console.log('LOADOUT_READ_ORDERING=PASS startup, change events and cross-tab reads preserve the latest successful snapshot');
+
 // Synthetic prepared transport: armour and its plugs arrive only in the index.
 // Use the real manifest expansion and live profile normalizer, with no network.
 globalThis.location={pathname:'/test/',search:'',href:'https://example.test/test/'};

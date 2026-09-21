@@ -157,6 +157,14 @@ function editableSnapshotItem(item,fresh,kind){
 
 let records=[],session=null,payload=null,equipped=null,characterId='',selectedId='equipped',loading=true,busy=false;
 let selectionVersion=0,refreshVersion=0,dialogState=null;
+let savedReadSequence=0,appliedSavedReadSequence=0;
+async function refreshSavedRecords(){
+  const sequence=++savedReadSequence;
+  const rows=await listParadoxLoadouts();
+  // Read order, not completion order: a late older result cannot replace newer rows.
+  if(sequence<appliedSavedReadSequence)return;
+  appliedSavedReadSequence=sequence;records=rows;
+}
 const trashIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg>';
 const dialog=()=>byId('paradoxLoadoutDialog');
 const visibleRecords=()=>matchingLoadouts(records,characterId,sessionBinding(session||{}));
@@ -259,7 +267,7 @@ async function saveDialogRecord(){
   // Saving an editable draft does not equip it; Apply performs compatibility checks.
   const saved=await saveParadoxLoadout({id:state.record.id||null,expectedRevision:state.record.revision,name,description:byId('paradoxEditDescription').value,build:state.record.build});
   if(!saved)throw new Error('This browser could not store the loadout. Free some browser storage and try again.');
-  records=await listParadoxLoadouts();selectedId=saved.id;dialog().close();dialogState=null;status(`Saved ${saved.name}.`);
+  await refreshSavedRecords();selectedId=saved.id;dialog().close();dialogState=null;status(`Saved ${saved.name}.`);
 }
 
 function editorSelect(key,label,current,options,state){
@@ -433,7 +441,7 @@ async function handleDialogAction(action){
   if(action==='execute-slot')return executeSlotAction();
   if(action==='delete-record'){
     if(!await deleteParadoxLoadout(state.record.id,state.record.revision))throw new Error('This browser could not delete the saved build.');
-    records=await listParadoxLoadouts();selectedId='equipped';dialog().close();dialogState=null;return;
+    await refreshSavedRecords();selectedId='equipped';dialog().close();dialogState=null;return;
   }
   if(action==='equip-slot'||action==='clear-slot')return confirmSlotAction(action==='equip-slot'?'equip':'clear',state);
   if(action==='snapshot-slot'){await reviewBuildAction('equipped',true);byId('paradoxTargetSlot').value=String(state.index);return;}
@@ -502,7 +510,7 @@ window.addEventListener('forge:bungie-session',event=>{
   session=next;payload=null;equipped=null;characterId='';selectionVersion++;loading=false;
   closeDialog();render();status('Bungie membership changed. Reload to view this account’s loadouts.');
 });
-window.addEventListener('forge:paradox-loadouts-changed',()=>{void listParadoxLoadouts().then(rows=>{records=rows;if(!busy&&!loading)render();}).catch(reportError);});
+window.addEventListener('forge:paradox-loadouts-changed',()=>{void refreshSavedRecords().then(()=>{if(!busy&&!loading)render();}).catch(reportError);});
 window.addEventListener('forge:paradox-sync',event=>{
   const node=byId('paradoxSyncStatus');if(!node)return;
   const {state,conflicts,message}=event.detail||{};
@@ -510,7 +518,7 @@ window.addEventListener('forge:paradox-sync',event=>{
   node.textContent=conflicts?'Sync conflict: both versions kept, or a newer edit prevented deletion. Review your builds.':message||messages[state]||'';
   node.hidden=!node.textContent;
 });
-window.addEventListener('storage',event=>{if(event.key==='astrix:paradox-saved-loadouts:v1'&&!busy)void listParadoxLoadouts().then(rows=>{records=rows;render();}).catch(reportError);});
+window.addEventListener('storage',event=>{if(event.key==='astrix:paradox-saved-loadouts:v1'&&!busy)void refreshSavedRecords().then(()=>{render();}).catch(reportError);});
 let displayRefreshController=null;
 async function refreshDisplayedLoadout(){
   if(busy||dialog().open||loading||!session?.authenticated)return null;
@@ -533,7 +541,7 @@ window.addEventListener('focus',checkDisplayRefresh);
 document.addEventListener('visibilitychange',checkDisplayRefresh);
 
 reportPreparedPageStage('start','loadout');
-const savedPromise=listParadoxLoadouts();
+const savedPromise=refreshSavedRecords();
 try{
   session=await getBungieSession();reportPreparedPageStage('session','loadout');
   if(session?.authenticated){
@@ -543,7 +551,7 @@ try{
     if(characterId)equipped=normaliseLiveProfile(payload,session,characterId);
   }
 }catch(error){reportError(error);}
-try{records=await savedPromise;}catch(error){reportError(error);}
+try{await savedPromise;}catch(error){reportError(error);}
 loading=false;reportPreparedPageStage('render','loadout');render();reportPreparedPageStage('ready','loadout');
 window.ForgeLoader?.ready?.(document.querySelector('.apx-page-shell'));
 
