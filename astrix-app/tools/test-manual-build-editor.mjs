@@ -386,6 +386,28 @@ assert.equal(incompatible.status,'blocked');
 assert.equal(incompatiblePosts,0,'Fresh exact-item socket incompatibility must block before every mutation request.');
 assert.equal(incompatibleProfileReads,2,'A blocked attempt must still perform its final readback.');
 
+// Names shown on the build screen must survive into the fresh safety check.
+const applyPageSource=readFileSync(new URL('../pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs',import.meta.url),'utf8');
+const applyNamesContext={};
+runInNewContext(applyPageSource.slice(applyPageSource.indexOf('function applyEntityIndex('),applyPageSource.indexOf('function applyTextEntity('))+';this.nameChanges=nameApplySocketChanges;',applyNamesContext);
+const unnamedPlan=clone(plan),namedState={workingBuild:{weapons:[{itemInstanceId:plan.socketChanges[0].itemInstanceId,name:'Test Legendary',sockets:[{hash:plan.socketChanges[0].plugHash,name:'Test Trait'}]}]}};
+for(const change of unnamedPlan.socketChanges){change.itemName='';change.plugName=String(change.plugHash);}
+const identitiesBefore=unnamedPlan.socketChanges.map(({itemName,plugName,...identity})=>identity);
+applyNamesContext.nameChanges(unnamedPlan,namedState);
+assert.equal(unnamedPlan.socketChanges[0].itemName,'Test Legendary');
+assert.equal(unnamedPlan.socketChanges[0].plugName,'Test Trait');
+assert.deepEqual(unnamedPlan.socketChanges.map(({itemName,plugName,...identity})=>identity),identitiesBefore,'Display naming must not change socket identity or eligibility.');
+let readableBlockPosts=0;
+const readableBlocked=await stageLiveTransferPreflight(unnamedPlan,{session,authOrigin:'https://auth.test',fetchImpl:async(_url,init={})=>{if(init.method==='POST')readableBlockPosts+=1;return response(profilePayload({compatible:false}));}});
+assert.equal(readableBlocked.ready,false,'Fresh loss of insertion evidence remains a hard block.');
+assert.equal(readableBlockPosts,0);
+assert.match(readableBlocked.blockers[0],/Test Trait on Test Legendary \(socket 4\)/);
+assert.match(readableBlocked.blockers[0],/No changes were made.*Refresh your inventory.*available in Destiny/);
+assert.ok(readableBlocked.blockers.every(message=>!message.includes(unnamedPlan.socketChanges[0].itemInstanceId)&&!message.includes(String(unnamedPlan.socketChanges[0].plugHash))),'Player errors must not fall back to raw identities.');
+const namedAllowed=await stageLiveTransferPreflight(unnamedPlan,{session,authOrigin:'https://auth.test',fetchImpl:async()=>response(profilePayload())});
+assert.equal(namedAllowed.ready,true,'Naming must preserve allowed free socket changes.');
+assert.deepEqual(namedAllowed.inGameSteps,plan.inGameSteps,'Known unsupported changes retain their existing in-game handling.');
+
 const noTransferPlan=clone(plan);
 noTransferPlan.transfers=[];
 const transferPhase=noTransferPlan.phases.find(phase=>phase.capability==='transferItems');
