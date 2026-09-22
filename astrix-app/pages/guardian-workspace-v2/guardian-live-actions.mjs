@@ -146,14 +146,17 @@ function freshSocketChanges(plan,payload){
   const {profile,locations}=inventoryLocations(payload),targetIds=new Set((plan?.equipment?.targets||[]).map(row=>String(row.itemInstanceId||''))),changes=[],alreadyApplied=[],blockers=[];
   const reusable=profile?.itemComponents?.reusablePlugs?.data||{},sockets=profile?.itemComponents?.sockets?.data||{};
   for(const change of plan?.socketChanges||[]){
-    const itemInstanceId=String(change?.itemInstanceId||''),socketIndex=Number(change?.socketIndex),plugHash=Number(change?.plugHash),label=`${change?.plugName||plugHash} on ${change?.itemName||itemInstanceId}`;
+    const itemInstanceId=String(change?.itemInstanceId||''),socketIndex=Number(change?.socketIndex),plugHash=Number(change?.plugHash);
+    const readable=value=>{const name=String(value||'').trim();return name&&!/^\d+$/.test(name)?name:'';};
+    const target=plan?.equipment?.targets?.find(row=>String(row.itemInstanceId)===itemInstanceId);
+    const itemName=readable(change?.itemName)||readable(target?.name)||'the selected item',plugName=readable(change?.plugName)||'the selected mod or perk',label=`${plugName} on ${itemName} (socket ${socketIndex+1})`;
     if(!targetIds.has(itemInstanceId)){blockers.push(`${label} is not attached to an exact equipment target in this Working Build.`);continue;}
     if(!locations.has(itemInstanceId)){blockers.push(`${label} cannot be checked because its exact item instance is no longer owned.`);continue;}
     const current=Number(sockets?.[itemInstanceId]?.sockets?.[socketIndex]?.plugHash);
     if(current===plugHash){alreadyApplied.push(change);continue;}
     const options=reusable?.[itemInstanceId]?.plugs?.[String(socketIndex)]||[];
     const compatible=(Array.isArray(options)?options:[]).some(option=>Number(option?.plugItemHash??option?.plugHash)===plugHash&&option?.canInsert===true&&option?.enabled!==false);
-    if(!compatible){blockers.push(`${label} is not currently exposed as a free, reversible choice for that exact item socket.`);continue;}
+    if(!compatible){blockers.push(`Bungie is not currently allowing ${label} to be applied automatically. No changes were made. Refresh your inventory and review the build before retrying. If this choice is available in Destiny, set it there, then refresh and try Apply again.`);continue;}
     changes.push(change);
   }
   return {changes,alreadyApplied,blockers};

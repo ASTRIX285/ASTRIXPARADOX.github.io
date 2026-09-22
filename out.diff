@@ -1,0 +1,361 @@
+diff --git a/astrix-app/shared/guardian-inventory-workspace.css b/astrix-app/shared/guardian-inventory-workspace.css
+new file mode 100644
+index 0000000..637dc86
+--- /dev/null
++++ b/astrix-app/shared/guardian-inventory-workspace.css
+@@ -0,0 +1,84 @@
++/* Shared live Guardian inventory treatment. Character and Inventory render the
++   same item markup and consume this single visual contract. */
++.vault-transfer-workspace{position:relative;overflow:visible}
++.vault-transfer-workspace>.apx-section-heading>div{display:grid;gap:.25rem}
++.vault-transfer-board{display:grid;gap:1rem;width:100%;max-width:100%;min-width:0}
++.vault-character-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;align-items:start;width:100%;max-width:100%;min-width:0}
++.vault-character-column,.vault-only-section{position:relative;min-width:0}
++.vault-character-column{display:grid;gap:.75rem}
++.vault-character-inventory,.vault-postmaster-section,.vault-only-section{min-width:0;border:1px solid rgba(201,168,76,.2);background:linear-gradient(155deg,rgba(18,14,18,.97),rgba(5,5,7,.96));box-shadow:0 18px 40px rgba(0,0,0,.2);transition:border-color .15s ease,box-shadow .15s ease}
++.vault-character-column.is-active .vault-character-inventory,.vault-character-column.is-active .vault-postmaster-section{border-color:rgba(201,168,76,.72);box-shadow:inset 0 0 0 1px rgba(201,168,76,.2),0 18px 48px rgba(0,0,0,.32)}
++.vault-character-column.is-drop-target .vault-character-inventory,.vault-character-column.is-drop-target .vault-postmaster-section,.vault-only-section.is-drop-target{border-color:#6fe3b6;box-shadow:inset 0 0 0 2px rgba(111,227,182,.38),0 0 28px rgba(111,227,182,.18)}
++.vault-character-header,.vault-only-section>header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:.8rem;min-height:4.3rem;padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.08);overflow:hidden;background:linear-gradient(90deg,rgba(84,10,21,.88),rgba(12,10,14,.9))}
++.vault-character-header::before{content:"";position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(8,7,9,.35),rgba(8,7,9,.9)),var(--vault-character-emblem);background-position:center;background-size:cover;opacity:.45;pointer-events:none}
++.vault-character-header>*{position:relative;z-index:1}
++.vault-character-header span,.vault-only-section>header span{display:block;color:#d8c887;font:800 .56rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.14em}
++.vault-character-header h3,.vault-only-section>header h3{margin:.2rem 0 0;color:#fff;font:900 1rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.06em}
++.vault-character-header strong,.vault-only-section>header strong{color:#fff3c7;font:800 .72rem/1.25 bahnschrift-semicondensed,sans-serif;text-align:right}
++.vault-character-section{padding:.72rem}
++.vault-character-section>header{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
++.vault-character-section>header>div{display:flex;align-items:baseline;gap:.45rem}
++.vault-character-section h4{margin:0;color:#fff;font:850 .7rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em}
++.vault-character-section>header span,.vault-transfer-group>header span{color:#8f8892;font:700 .55rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
++.vault-postmaster-section{background:linear-gradient(145deg,rgba(112,41,9,.13),rgba(5,5,7,.96))}
++.vault-postmaster-section>header button{padding:.42rem .5rem;border:1px solid rgba(255,180,70,.42);color:#ffd18a;background:rgba(54,25,8,.76);font:800 .53rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.07em;cursor:pointer}
++.vault-postmaster-section>header button:disabled{opacity:.34;cursor:not-allowed}
++.vault-transfer-family{margin:.62rem 0 .35rem;color:#c9a84c;font:850 .56rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.13em}
++.vault-transfer-family:first-of-type{margin-top:0}
++.vault-transfer-group{min-width:0;margin-bottom:.55rem}
++.vault-transfer-group>header{display:flex;justify-content:space-between;gap:.5rem;margin-bottom:.28rem;padding-bottom:.22rem;border-bottom:1px solid rgba(255,255,255,.055)}
++.vault-transfer-group>header strong{color:#c9c4ce;font:750 .6rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.06em}
++.vault-transfer-items{display:flex;gap:.34rem;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain;padding-bottom:.18rem}
++.vault-transfer-item{position:relative;display:grid;align-content:start;box-sizing:border-box;flex:0 0 calc(var(--apx-icon-gear-art-width) + .6rem);width:calc(var(--apx-icon-gear-art-width) + .6rem);min-width:calc(var(--apx-icon-gear-art-width) + .6rem);margin:0;padding:.24rem;border:1px solid rgba(255,255,255,.09);background:#0a090c;color:#fff;text-align:left}
++.vault-transfer-item.is-draggable{cursor:grab}
++.vault-transfer-item.is-draggable:active{cursor:grabbing}
++.vault-transfer-item.is-dragging{opacity:.35}
++.vault-transfer-item:hover,.vault-transfer-item:focus-visible{z-index:2;border-color:#c9a84c;outline:none;box-shadow:0 0 0 1px rgba(201,168,76,.22),0 0 16px rgba(201,168,76,.14)}
++.vault-transfer-item.is-exotic{border-color:rgba(224,185,79,.42)}
++.vault-transfer-item.is-equipped{border-color:rgba(111,227,182,.48);box-shadow:inset 0 0 0 1px rgba(111,227,182,.12)}
++.vault-transfer-item[data-direct-equip-item]{cursor:pointer}
++.vault-transfer-art{position:relative;display:grid;width:var(--apx-icon-gear-art-width);height:var(--apx-icon-gear-art-height);aspect-ratio:100/122;place-items:center;background:#141118;overflow:hidden}
++.vault-transfer-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
++.vault-transfer-icon-unavailable{color:#645d69;font-size:1.4rem}
++.vault-transfer-masterwork{position:absolute;z-index:3;top:.26rem;left:50%;display:flex;gap:.24rem;transform:translateX(-50%);filter:drop-shadow(0 1px 2px #000)}
++.vault-transfer-masterwork i{width:var(--apx-icon-tier-pip);height:var(--apx-icon-tier-pip);border:1px solid #f5d46a;background:#8b0000;transform:rotate(45deg)}
++.vault-transfer-power{position:absolute;z-index:3;left:.18rem;bottom:.18rem;display:flex;align-items:center;gap:.16rem;padding:.16rem .24rem;border:1px solid rgba(255,255,255,.32);border-radius:.2rem;background:rgba(3,3,5,.88);box-shadow:0 1px 4px rgba(0,0,0,.68)}
++.vault-transfer-power img{width:var(--apx-icon-inline);height:var(--apx-icon-inline);object-fit:contain}
++.vault-transfer-item[data-item-kind="armour"] .vault-transfer-power img{filter:brightness(0) invert(1)}
++.vault-transfer-power b{color:#fff3c7;font:900 .52rem/1 bahnschrift-semicondensed,sans-serif;text-shadow:0 1px 2px #000}
++.vault-transfer-quantity{position:absolute;z-index:3;top:.14rem;right:.14rem;padding:.15rem .2rem;background:rgba(3,3,5,.88);color:#fff;font:800 .47rem/1 bahnschrift-semicondensed,sans-serif}
++.vault-transfer-lock{position:absolute;z-index:3;right:.24rem;bottom:.24rem;display:grid;width:var(--apx-icon-inline);height:var(--apx-icon-inline);place-items:end center;filter:drop-shadow(0 1px 2px #000)}
++.vault-transfer-lock i{position:relative;display:block;width:.62rem;height:.48rem;border:1px solid #fff;border-radius:.08rem;background:rgba(3,3,5,.9)}
++.vault-transfer-lock i::before{content:"";position:absolute;left:50%;bottom:calc(100% - 1px);width:.34rem;height:.3rem;border:1px solid #fff;border-bottom:0;border-radius:.24rem .24rem 0 0;transform:translateX(-50%)}
++.vault-postmaster-pull{width:100%;margin-top:.28rem;padding:.32rem;border:1px solid rgba(255,180,70,.42);color:#ffd18a;background:rgba(54,25,8,.76);font:800 .48rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
++.vault-postmaster-pull:disabled{opacity:.34;cursor:not-allowed}
++.vault-transfer-row-empty{display:grid;place-items:center;width:var(--apx-icon-gear-art-width);min-height:var(--apx-icon-gear-art-height);border:1px dashed rgba(255,255,255,.08);color:#625c66;font:750 .5rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
++.vault-transfer-empty{margin:.3rem 0;padding:.6rem;border:1px dashed rgba(255,255,255,.1);color:#817b85;font-size:.66rem}
++.vault-only-section{width:100%;max-width:100%;padding-bottom:.8rem;overflow:hidden}
++.vault-only-section>p{margin:.7rem .85rem;color:#96909a;font-size:.72rem}
++.vault-only-section>.vault-transfer-family,.vault-only-section>.vault-transfer-group{margin-left:.85rem;margin-right:.85rem}
++.vault-only-section>.vault-transfer-empty{margin-left:.85rem;margin-right:.85rem}
++.vault-postmaster-section .vault-transfer-items,.vault-only-section .vault-transfer-items{flex-wrap:wrap;overflow:visible}
++.vault-action-dialog{width:min(34rem,calc(100vw - 2rem));padding:0;border:1px solid rgba(201,168,76,.56);background:#0a090c;color:#fff;box-shadow:0 28px 90px rgba(0,0,0,.72)}
++.vault-action-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(5px)}
++.vault-action-dialog form{display:grid;gap:.85rem;padding:1.1rem}
++.vault-action-dialog header{padding-bottom:.7rem;border-bottom:1px solid rgba(201,168,76,.2)}
++.vault-action-dialog h2{margin:.2rem 0 0;font:900 1.2rem/1.1 bahnschrift-semicondensed,sans-serif}
++.vault-action-dialog p{margin:0;color:#c5bec9;font-size:.82rem;line-height:1.45}
++.vault-action-dialog .vault-action-warning{padding:.72rem;border-left:2px solid #e1bb4e;background:rgba(94,63,10,.16);color:#efd983}
++.vault-action-progress{min-height:2.45rem;padding:.65rem;border:1px solid rgba(111,227,182,.2);color:#a9f3d5;background:rgba(20,91,68,.1);font-size:.74rem;line-height:1.4}
++.vault-action-dialog footer{display:flex;justify-content:flex-end;gap:.55rem}
++.vault-action-dialog footer button{padding:.68rem .85rem;border:1px solid rgba(201,168,76,.38);color:#c9a84c;background:#100e12;font:850 .6rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
++.vault-action-dialog footer button:last-child{border-color:rgba(111,227,182,.55);color:#b9f5dd;background:rgba(20,91,68,.28)}
++.vault-action-dialog footer button:disabled{opacity:.4;cursor:wait}
++.character-inventory-workspace{width:100%;overflow:visible}
++.character-inventory-workspace .vault-character-column{width:100%}
++.character-inventory-workspace .vault-transfer-items{flex-wrap:wrap;overflow:visible}
++
++@media(max-width:1200px){.vault-character-columns{grid-template-columns:1fr}.vault-character-column{display:grid}.vault-character-section{border:0}}
++@media(max-width:880px){.vault-character-column{grid-template-columns:1fr}}
++@media(min-width:981px){
++  body.guardian-main-page .equip.gear-layout-active{grid-template-rows:repeat(3,max-content)!important;grid-template-areas:"loadouts" "inventory" "action"!important}
++  body.guardian-main-page .equip.gear-layout-active>.gear-combined{grid-area:inventory!important}
++  body.guardian-main-page .workspace>.equip>.improve-cta{grid-row:3!important}
++}
+diff --git a/astrix-app/shared/guardian-inventory-workspace.mjs b/astrix-app/shared/guardian-inventory-workspace.mjs
+new file mode 100644
+index 0000000..e4c67dd
+--- /dev/null
++++ b/astrix-app/shared/guardian-inventory-workspace.mjs
+@@ -0,0 +1,162 @@
++const DESTINY_ITEM_STATE=Object.freeze({locked:1,masterwork:4});
++
++const WEAPON_BUCKETS=Object.freeze([
++  Object.freeze({hash:1498876634,key:'primary',label:'Primary',kind:'weapon'}),
++  Object.freeze({hash:2465295065,key:'special',label:'Special',kind:'weapon'}),
++  Object.freeze({hash:953998645,key:'heavy',label:'Heavy',kind:'weapon'})
++]);
++const ARMOUR_BUCKETS=Object.freeze([
++  Object.freeze({hash:3448274439,key:'helmet',label:'Helmet',kind:'armour'}),
++  Object.freeze({hash:3551918588,key:'gauntlets',label:'Gauntlets',kind:'armour'}),
++  Object.freeze({hash:14239492,key:'chest',label:'Chest',kind:'armour'}),
++  Object.freeze({hash:20886954,key:'legs',label:'Legs',kind:'armour'}),
++  Object.freeze({hash:1585787867,key:'class-item',label:'Class Item',kind:'armour'})
++]);
++const CHARACTER_EQUIPMENT_BUCKETS=Object.freeze([
++  Object.freeze({hash:4023194814,key:'ghost',label:'Ghost',kind:'equipment'}),
++  Object.freeze({hash:284967655,key:'ship',label:'Ship',kind:'equipment'}),
++  Object.freeze({hash:2025709351,key:'sparrow',label:'Sparrow',kind:'equipment'})
++]);
++const EQUIPMENT_GROUPS=Object.freeze([...WEAPON_BUCKETS,...ARMOUR_BUCKETS]);
++const INVENTORY_GROUPS=Object.freeze([...EQUIPMENT_GROUPS,...CHARACTER_EQUIPMENT_BUCKETS]);
++const EQUIPMENT_GROUP_BY_HASH=new Map(INVENTORY_GROUPS.map((row,index)=>[row.hash,{...row,index}]));
++
++const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
++const text=value=>String(value??'').trim();
++const itemKey=item=>String(item?.itemInstanceId||`${item?.itemHash||'unknown'}:${item?.source?.kind||'unknown'}:${item?.source?.characterId||''}`);
++const asset=value=>{const path=text(value);return !path?'':path.startsWith('http')?path:`https://www.bungie.net${path.startsWith('/')?'':'/'}${path}`;};
++
++function itemState(item={}){
++  const raw=Number(item?.state||0);
++  return {raw,locked:(raw&DESTINY_ITEM_STATE.locked)!==0,masterworked:(raw&DESTINY_ITEM_STATE.masterwork)!==0};
++}
++
++function sortInventoryWorkspaceItems(items=[]){
++  return [...(Array.isArray(items)?items:[])].sort((left,right)=>{
++    const leftOrder=left?.equipmentGroup?.index??INVENTORY_GROUPS.length,rightOrder=right?.equipmentGroup?.index??INVENTORY_GROUPS.length;
++    if(leftOrder!==rightOrder)return leftOrder-rightOrder;
++    if(Boolean(left?.isExotic)!==Boolean(right?.isExotic))return left.isExotic?-1:1;
++    if(Number(right?.power||0)!==Number(left?.power||0))return Number(right?.power||0)-Number(left?.power||0);
++    return String(left?.name||'').localeCompare(String(right?.name||''));
++  });
++}
++
++function groupInventoryWorkspaceItems(items=[],groups=INVENTORY_GROUPS){
++  const sorted=sortInventoryWorkspaceItems(items);
++  return groups.map(group=>({...group,items:sorted.filter(item=>item?.equipmentGroup?.key===group.key)}));
++}
++
++function workspaceGroupLabel(group){
++  if(group?.key==='special')return 'Secondary';
++  if(group?.key==='legs')return 'Leg';
++  return group?.label||'';
++}
++
++function directEquipAvailable(item,capabilities={},activeCharacterId=''){
++  if(!/^\d+$/.test(String(item?.itemInstanceId||''))||!/^\d+$/.test(String(activeCharacterId||''))||!item?.equipmentGroup)return false;
++  if(capabilities.equipItems!==true)return false;
++  if(item?.source?.kind==='vault')return capabilities.transferItems===true;
++  if(item?.source?.kind==='postmaster'){
++    return capabilities.pullFromPostmaster===true&&capabilities.transferItems===true;
++  }
++  return false;
++}
++
++function powerIdentity(item={}){
++  const kind=item?.equipmentGroup?.kind;
++  const definition=kind==='weapon'
++    ?item?.elementDefinition
++    :kind==='armour'
++      ?item?.armourSemantics?.archetype??item?.archetype
++      :null;
++  const display=definition?.displayProperties??definition?.definition?.displayProperties??{};
++  return {
++    icon:asset(definition?.icon??definition?.iconUrl??display.icon??definition?.transparentIconPath),
++    label:text(definition?.name??definition?.displayName??display.name)
++  };
++}
++
++function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
++  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),powerMark=powerIdentity(item),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power" aria-label="Power ${esc(item.power)}${powerMark.label?` ${esc(powerMark.label)}`:''}">${powerMark.icon?`<img src="${esc(powerMark.icon)}" alt="">`:''}<b>${esc(item.power)}</b></span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity" aria-label="Quantity ${esc(item.quantity)}">${esc(item.quantity)}</span>`:'';
++  const masterwork=state.masterworked?`<span class="vault-transfer-masterwork" aria-label="Masterworked">${Array.from({length:5},()=>'<i aria-hidden="true"></i>').join('')}</span>`:'';
++  const lock=state.locked?'<span class="vault-transfer-lock" aria-label="Locked"><i aria-hidden="true"></i></span>':'';
++  const directHint=canDirectEquip?' Double click to review equipping this exact item on the active Guardian.':'';
++  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}" title="${esc(item.name)}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
++    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${masterwork}${power}${quantity}${lock}</span>
++    ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
++  </article>`;
++}
++
++function inventoryGroupsMarkup(items=[],{includeEmpty=false,equippedFirst=false,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
++  const groups=groupInventoryWorkspaceItems(items).filter(group=>includeEmpty||group.items.length);
++  if(!groups.length)return '<p class="vault-transfer-empty">Bungie returned no supported inventory items for this section.</p>';
++  let family='';
++  return groups.map(group=>{
++    const heading=group.kind!==family?(family=group.kind,`<h5 class="vault-transfer-family">${esc(group.kind==='weapon'?'WEAPONS':group.kind==='armour'?'ARMOUR':'EQUIPMENT')}</h5>`):'',ordered=equippedFirst?[...group.items].sort((left,right)=>Number(right?.source?.kind==='equipped')-Number(left?.source?.kind==='equipped')):group.items;
++    return `${heading}<section class="vault-transfer-group" data-equipment-group="${esc(group.key)}"><header><strong>${esc(workspaceGroupLabel(group))}</strong><span>${ordered.length}</span></header><div class="vault-transfer-items">${ordered.length?ordered.map(item=>inventoryItemMarkup(item,{pullCharacterId,capabilities,activeCharacterId})).join(''):'<span class="vault-transfer-row-empty">EMPTY</span>'}</div></section>`;
++  }).join('');
++}
++
++function postmasterMarkup({characterId,items=[],characterLabel='Guardian',capabilities={},activeCharacterId=''}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>text(item?.source?.characterId)===text(characterId)),equipment=rows.filter(item=>item.equipmentGroup),other=rows.filter(item=>!item.equipmentGroup),transferable=rows.filter(item=>/^\d+$/.test(String(item?.itemInstanceId||''))),collectReady=Boolean(transferable.length)&&capabilities.pullFromPostmaster===true;
++  const groups=inventoryGroupsMarkup(equipment,{pullCharacterId:characterId,capabilities,activeCharacterId}),otherMarkup=other.length?`<h5 class="vault-transfer-family">OTHER POSTMASTER ITEMS</h5><div class="vault-transfer-items">${other.map(item=>inventoryItemMarkup(item,{draggable:false,pullCharacterId:characterId,capabilities,activeCharacterId})).join('')}</div>`:'';
++  return `<section class="vault-character-section vault-postmaster-section"><header><div><h4>${esc(String(characterLabel).toUpperCase())} POSTMASTER</h4><span>${rows.length} ITEM${rows.length===1?'':'S'}</span></div><button type="button" data-collect-postmaster="${esc(characterId)}"${collectReady?'':' disabled'}>PULL ALL</button></header>${rows.length?`${groups}${otherMarkup}`:'<p class="vault-transfer-empty">Bungie reports no items in this Postmaster.</p>'}</section>`;
++}
++
++function equippedAndCarriedMarkup({characterId,items=[],capabilities={},activeCharacterId='',sectionLabel='EQUIPPED AND CARRIED'}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>['equipped','carried'].includes(item?.source?.kind)&&text(item?.source?.characterId)===text(characterId));
++  return `<section class="vault-character-section vault-equipped-carried-section"><header><div><h4>${esc(sectionLabel)}</h4><span>${rows.length} ITEMS</span></div></header>${inventoryGroupsMarkup(rows,{includeEmpty:true,equippedFirst:true,capabilities,activeCharacterId})}</section>`;
++}
++
++function vaultOnlyMarkup({items=[],capabilities={},activeCharacterId=''}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>item?.source?.kind==='vault');
++  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${rows.length} SORTED ITEM${rows.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${inventoryGroupsMarkup(rows,{includeEmpty:true,capabilities,activeCharacterId})}</section>`;
++}
++
++function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindHover=()=>{}}={}){
++  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>{
++    const item=resolveItem(target.dataset.inspectItem),kind=item?.equipmentGroup?.kind;
++    if(kind==='weapon'||kind==='armour')bindHover(target,item,kind,{contextLabel:item.source?.kind==='vault'?'VAULT':''});
++  });
++}
++
++function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()=>{},onDirectEquip=()=>{}}={}){
++  if(!root)return ()=>{};
++  const click=event=>{
++    const itemButton=event.target.closest?.('[data-pull-postmaster-item]');
++    if(itemButton&&!itemButton.disabled){onPullItem(itemButton.dataset.postmasterCharacterId,itemButton.dataset.pullPostmasterItem);return;}
++    const allButton=event.target.closest?.('[data-collect-postmaster]');
++    if(allButton&&!allButton.disabled)onPullAll(allButton.dataset.collectPostmaster);
++  };
++  const doubleClick=event=>{
++    if(event.target.closest?.('button'))return;
++    const tile=event.target.closest?.('[data-direct-equip-item]');
++    if(tile){event.preventDefault();onDirectEquip(tile.dataset.directEquipItem);}
++  };
++  root.addEventListener('click',click);
++  root.addEventListener('dblclick',doubleClick);
++  return ()=>{root.removeEventListener('click',click);root.removeEventListener('dblclick',doubleClick);};
++}
++
++export {
++  ARMOUR_BUCKETS,
++  CHARACTER_EQUIPMENT_BUCKETS,
++  DESTINY_ITEM_STATE,
++  EQUIPMENT_GROUPS,
++  EQUIPMENT_GROUP_BY_HASH,
++  INVENTORY_GROUPS,
++  WEAPON_BUCKETS,
++  bindInventoryWorkspaceHovers,
++  bindInventoryWorkspaceInteractions,
++  directEquipAvailable,
++  equippedAndCarriedMarkup,
++  groupInventoryWorkspaceItems,
++  inventoryGroupsMarkup,
++  inventoryItemMarkup,
++  itemKey,
++  itemState,
++  postmasterMarkup,
++  sortInventoryWorkspaceItems,
++  vaultOnlyMarkup,
++  workspaceGroupLabel
++};
+diff --git a/astrix-app/tools/test-manual-build-editor.mjs b/astrix-app/tools/test-manual-build-editor.mjs
+index 5df8e51..bc61b58 100644
+--- a/astrix-app/tools/test-manual-build-editor.mjs
++++ b/astrix-app/tools/test-manual-build-editor.mjs
+@@ -7,6 +7,7 @@ import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,
+ import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
+ import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
+ import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
++import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
+ 
+ const CHARACTER_ID='9100001';
+ const MEMBERSHIP_ID='9200001';
+@@ -128,6 +129,18 @@ const session={
+   authenticated:true,csrfToken:'csrf-test',activeDestinyMembership:{membershipId:MEMBERSHIP_ID,membershipType:Number(MEMBERSHIP_TYPE)},
+   capabilities:{destinyActions:{...capabilities,pullFromPostmaster:true,equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}
+ };
++const sharedTile={...replacement,itemInstanceId:'13109',state:5,equipmentGroup:INVENTORY_GROUPS.find(group=>group.key==='special'),power:550,quantity:2,elementDefinition:{displayProperties:{name:'Arc',icon:'/arc.png'}},source:{kind:'vault',characterId:null}};
++assert.deepEqual(itemState(sharedTile),{raw:5,locked:true,masterworked:true},'The shared tile must derive locked and masterwork overlays from Bungie item state bits.');
++const sharedTileMarkup=inventoryItemMarkup(sharedTile,{capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
++assert.match(sharedTileMarkup,/class="vault-transfer-lock" aria-label="Locked"/,'The shared tile must render the real locked state as an icon-only art overlay.');
++assert.match(sharedTileMarkup,/class="vault-transfer-masterwork" aria-label="Masterworked"/,'The shared tile must render the real masterwork state as diamond pips.');
++assert.match(sharedTileMarkup,/class="vault-transfer-power"[^>]*><img[^>]*\/arc\.png[^>]*><b>550<\/b>/,'The power badge must pair the real power value with its resolved Bungie element icon.');
++assert.match(sharedTileMarkup,/title="Vault Energy Weapon"/,'The shared tile must expose only its item name through the native hover tooltip.');
++assert.doesNotMatch(sharedTileMarkup,/vault-transfer-name|>EQUIPPED<|>LOCK</,'The shared tile must not restore permanent names or plain text state labels.');
++assert.match(sharedTileMarkup,/data-direct-equip-item="13109"/,'An exact Vault instance must advertise reviewed direct equip when the live capabilities allow it.');
++const equippedFirstMarkup=inventoryGroupsMarkup([{...sharedTile,itemInstanceId:'13110',name:'Carried first in input',source:{kind:'carried',characterId:CHARACTER_ID}},{...sharedTile,itemInstanceId:'13111',name:'Equipped second in input',source:{kind:'equipped',characterId:CHARACTER_ID}}],{equippedFirst:true,capabilities:session.capabilities.destinyActions,activeCharacterId:CHARACTER_ID});
++assert.ok(equippedFirstMarkup.indexOf('Equipped second in input')<equippedFirstMarkup.indexOf('Carried first in input'),'The shared category renderer must place the equipped exact item first regardless of input order.');
++assert.doesNotMatch(equippedFirstMarkup,/>EQUIPPED</,'Equipped state must remain an icon and border treatment, never permanent tile text.');
+ let prematureCalls=0;
+ await assert.rejects(()=>executeLiveTransferPlan(plan,{session,fetchImpl:async()=>{prematureCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);
+ assert.equal(prematureCalls,0,'An unconfirmed Apply plan must make zero requests.');
+@@ -302,7 +315,7 @@ assert.equal(dynamicTransferPosts,0,'A dynamically required but unadvertised tra
+ assert.equal(dynamicTransferReads,2,'A dynamically blocked transfer must still perform its final readback.');
+ 
+ const OTHER_CHARACTER_ID='9100002',TRANSFER_ITEM={...replacement,itemInstanceId:'13103',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}},REPLACEMENT_ITEM={...weapons[1],itemInstanceId:'13106',name:'Exact carried replacement',source:{kind:'carried',characterId:CHARACTER_ID,label:'Carried'}};
+-function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false}={}){
++function vaultActionProfile({location='source',equipped=false,replacementEquipped=false,postmaster=false,targetEquipped=false}={}){
+   const transferRaw={itemHash:TRANSFER_ITEM.itemHash,itemInstanceId:TRANSFER_ITEM.itemInstanceId,bucketHash:postmaster?215593132:TRANSFER_ITEM.bucketHash},replacementRaw={itemHash:REPLACEMENT_ITEM.itemHash,itemInstanceId:REPLACEMENT_ITEM.itemInstanceId,bucketHash:REPLACEMENT_ITEM.bucketHash};
+   return {ErrorCode:1,profile:{
+     characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID},[OTHER_CHARACTER_ID]:{characterId:OTHER_CHARACTER_ID}}},
+@@ -311,7 +324,7 @@ function vaultActionProfile({location='source',equipped=false,replacementEquippe
+       [CHARACTER_ID]:{items:[...(location==='source'&&!equipped?[transferRaw]:[]),...(equipped&&!replacementEquipped?[replacementRaw]:[]),...(equipped&&replacementEquipped?[transferRaw]:[]),...(postmaster?[transferRaw]:[])]},
+       [OTHER_CHARACTER_ID]:{items:location==='target'?[transferRaw]:[]}
+     }},
+-    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:[]}}},
++    characterEquipment:{data:{[CHARACTER_ID]:{items:equipped&&!replacementEquipped?[transferRaw]:replacementEquipped?[replacementRaw]:[]},[OTHER_CHARACTER_ID]:{items:targetEquipped?[transferRaw]:[]}}},
+     characterActivities:{data:{[CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0},[OTHER_CHARACTER_ID]:{currentActivityHash:0,currentActivityModeType:0}}}
+   }};
+ }
+@@ -334,6 +347,21 @@ assert.equal(moved.status,'applied');
+ assert.deepEqual(movePaths,['/bungie/actions/transfer-item','/bungie/actions/transfer-item'],'A Guardian to Guardian drop must move through Vault using the existing exact transfer endpoint.');
+ assert.deepEqual(moved.readback.actual,{kind:'carried',characterId:OTHER_CHARACTER_ID});
+ 
++const vaultDirectItem={...TRANSFER_ITEM,source:{kind:'vault',characterId:null,label:'Vault'}},stagedVaultDirect=stageVaultTransferIntent({item:vaultDirectItem,destination:{kind:'character',characterId:OTHER_CHARACTER_ID},session,equipAfterTransfer:true});
++let vaultDirectLocation='vault';
++const vaultDirectPaths=[];
++const vaultDirect=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
++  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
++  if(method==='GET')return response(vaultActionProfile({location:vaultDirectLocation,targetEquipped:vaultDirectLocation==='equipped'}));
++  vaultDirectPaths.push(path);
++  if(path.endsWith('/transfer-item')){vaultDirectLocation='target';return response({ErrorCode:1,Message:'Ok'});}
++  vaultDirectLocation='equipped';
++  return response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:vaultDirectItem.itemInstanceId,equipStatus:1}]}});
++}});
++assert.equal(vaultDirect.status,'applied','A reviewed Vault double click must finish only after exact equipped readback.');
++assert.deepEqual(vaultDirectPaths,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Vault direct equip must reuse the exact transfer and equip endpoints in order.');
++assert.deepEqual(vaultDirect.readback.actual,{kind:'equipped',characterId:OTHER_CHARACTER_ID});
++
+ let partialLocation='source',partialAttempts=0;
+ const partialMove=await executeVaultTransferIntent(confirmVaultTransferIntent(stagedVaultMove),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(_url,init={})=>{
+   if(String(init.method||'GET').toUpperCase()==='GET')return response(vaultActionProfile({location:partialLocation}));
+@@ -374,6 +402,31 @@ assert.equal(collected.status,'applied');
+ assert.deepEqual(postmasterPaths,['/bungie/actions/pull-from-postmaster'],'Collect Postmaster must use Bungie PullFromPostmaster, not the Vault transfer route.');
+ assert.equal(collected.readback.verified,true,'Postmaster readback must accept the real Bungie destination bucket when an item leaves Postmaster.');
+ 
++const stagedPostmasterDirect=stagePostmasterCollectionIntent({characterId:CHARACTER_ID,targetCharacterId:OTHER_CHARACTER_ID,items:[POSTMASTER_ITEM],session,equipAfterCollection:true});
++let postmasterDirectLocation='postmaster';
++const postmasterDirectPaths=[];
++const postmasterDirectProfile=()=>{
++  const base=vaultActionProfile({location:'absent'}),raw={itemHash:POSTMASTER_ITEM.itemHash,itemInstanceId:POSTMASTER_ITEM.itemInstanceId,bucketHash:POSTMASTER_ITEM.bucketHash};
++  if(postmasterDirectLocation==='postmaster')base.profile.characterInventories.data[CHARACTER_ID].items=[{...raw,bucketHash:215593132}];
++  if(postmasterDirectLocation==='source')base.profile.characterInventories.data[CHARACTER_ID].items=[raw];
++  if(postmasterDirectLocation==='vault')base.profile.profileInventory.data.items=[{...raw,bucketHash:VAULT_BUCKET}];
++  if(postmasterDirectLocation==='target')base.profile.characterInventories.data[OTHER_CHARACTER_ID].items=[raw];
++  if(postmasterDirectLocation==='equipped')base.profile.characterEquipment.data[OTHER_CHARACTER_ID].items=[raw];
++  return base;
++};
++const postmasterDirect=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(stagedPostmasterDirect),{session,authOrigin:'https://auth.test',waitImpl:async()=>{},fetchImpl:async(url,init={})=>{
++  const path=new URL(String(url)).pathname,method=String(init.method||'GET').toUpperCase();
++  if(method==='GET')return response(postmasterDirectProfile());
++  postmasterDirectPaths.push(path);
++  if(path.endsWith('/pull-from-postmaster'))postmasterDirectLocation='source';
++  else if(path.endsWith('/transfer-item'))postmasterDirectLocation=postmasterDirectLocation==='source'?'vault':'target';
++  else postmasterDirectLocation='equipped';
++  return path.endsWith('/equip-items')?response({ErrorCode:1,Response:{equipResults:[{itemInstanceId:POSTMASTER_ITEM.itemInstanceId,equipStatus:1}]}}):response({ErrorCode:1,Message:'Ok'});
++}});
++assert.equal(postmasterDirect.status,'applied','A reviewed Postmaster double click must wait for collection, transfer, equip, and final exact readback.');
++assert.deepEqual(postmasterDirectPaths,['/bungie/actions/pull-from-postmaster','/bungie/actions/transfer-item','/bungie/actions/transfer-item','/bungie/actions/equip-items'],'Cross Guardian Postmaster direct equip must use the existing executor routes in a verified sequence.');
++assert.deepEqual(postmasterDirect.readback.notEquipped,[]);
++
+ const stagedClear=stageBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,loadoutName:'Nightfall'});
+ let loadoutCalls=0;
+ await assert.rejects(()=>executeBungieLoadoutAction('clear',{characterId:CHARACTER_ID,index:4,session,confirmation:stagedClear,fetchImpl:async()=>{loadoutCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/Final user confirmation/);

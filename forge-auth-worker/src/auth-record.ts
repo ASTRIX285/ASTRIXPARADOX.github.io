@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
 import { PreparedPageCache } from "./prepared-page-cache";
 import { storedParadoxLoadouts } from "./paradox-loadouts";
+import { fetchProfileSnapshot, snapshotDiagnostics } from "./profile-snapshot-error";
 
 const BUNGIE_TOKEN = "https://www.bungie.net/platform/app/oauth/token/";
 const TOKEN_RENEWAL_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -122,14 +123,12 @@ export class AuthRecord extends DurableObject<Env> {
         const snapshot = await this.snapshots.read(key, async () => {
           const url = new URL(`https://www.bungie.net/Platform/Destiny2/${membership.membershipType}/Profile/${encodeURIComponent(membership.membershipId)}/`);
           url.searchParams.set("components", components.join(","));
-          const response = await fetch(url, { headers: { Authorization: `Bearer ${record.accessToken}`, "X-API-Key": this.env.BUNGIE_API_KEY }, signal: AbortSignal.timeout(30_000) });
-          const body = await response.text();
-          const payload = JSON.parse(body);
-          if (!response.ok || !payload?.Response || payload.ErrorCode !== 1) throw new Error("snapshot_upstream_failed");
-          return body;
+          return fetchProfileSnapshot(url, { Authorization: `Bearer ${record.accessToken}`, "X-API-Key": this.env.BUNGIE_API_KEY });
         }, Date.now(), task => this.deferSnapshotWrite(task));
         return new Response(snapshot.body, { headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Forge-Profile-Source": snapshot.source, "X-Forge-Profile-Fetched-At": String(snapshot.fetchedAt) } });
-      } catch { return Response.json({ error: "profile_snapshot_unavailable" }, { status: 502 }); }
+      } catch (error) {
+        return Response.json({ error: "profile_snapshot_unavailable", diagnostics: snapshotDiagnostics(error) }, { status: 502, headers: { "Cache-Control": "no-store" } });
+      }
     }
     if (request.method === "POST" && path === "/prepared-read") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");

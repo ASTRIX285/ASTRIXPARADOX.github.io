@@ -1,0 +1,317 @@
+diff --git a/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs b/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs
+index 8378518..b99ef24 100644
+--- a/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs
++++ b/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs
+@@ -334,7 +334,7 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
+ const VAULT_TRANSFER_SOURCE_KINDS=new Set(['equipped','carried','vault']);
+ const VAULT_TRANSFER_DESTINATION_KINDS=new Set(['character','vault']);
+ 
+-function stageVaultTransferIntent({item,destination,session,replacementItem=null}={}){
++function stageVaultTransferIntent({item,destination,session,replacementItem=null,equipAfterTransfer=false}={}){
+   const binding=sessionBinding(session),source=item?.source||{},sourceKind=String(source.kind||''),sourceCharacterId=String(source.characterId||''),destinationKind=String(destination?.kind||''),destinationCharacterId=String(destination?.characterId||'');
+   if(!decimal(item?.itemInstanceId)||!Number.isInteger(Number(item?.itemHash)))throw new TypeError('A live Vault transfer requires an exact Bungie item instance and definition hash.');
+   if(!VAULT_TRANSFER_SOURCE_KINDS.has(sourceKind))throw new TypeError('Only equipped, carried, or Vault items can start a live Vault transfer.');
+@@ -343,6 +343,7 @@ function stageVaultTransferIntent({item,destination,session,replacementItem=null
+   if(destinationKind==='character'&&!decimal(destinationCharacterId))throw new TypeError('The destination Guardian binding is missing.');
+   if(destinationKind==='vault'&&sourceKind==='vault')throw new TypeError('This item is already in Vault.');
+   if(destinationKind==='character'&&sourceKind!=='vault'&&sourceCharacterId===destinationCharacterId)throw new TypeError('This item is already on that Guardian.');
++  if(equipAfterTransfer&&destinationKind!=='character')throw new TypeError('Direct equip requires a real destination Guardian.');
+   const replacement=replacementItem?{
+     itemInstanceId:String(replacementItem.itemInstanceId||''),itemHash:Number(replacementItem.itemHash),bucketHash:Number(replacementItem.bucketHash),name:String(replacementItem.name||'replacement item')
+   }:null;
+@@ -352,7 +353,7 @@ function stageVaultTransferIntent({item,destination,session,replacementItem=null
+     schemaVersion:1,kind:'vault-transfer-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,
+     membershipId:binding.membershipId,membershipType:binding.membershipType,
+     item:{itemInstanceId:String(item.itemInstanceId),itemHash:Number(item.itemHash),bucketHash:Number(item.bucketHash),name:String(item.name||`Destiny item ${item.itemHash}`),source:{kind:sourceKind,characterId:sourceCharacterId||null}},
+-    destination:{kind:destinationKind,characterId:destinationCharacterId||null},replacement
++    destination:{kind:destinationKind,characterId:destinationCharacterId||null},replacement,equipAfterTransfer:equipAfterTransfer===true
+   };
+ }
+ 
+@@ -361,11 +362,13 @@ function confirmVaultTransferIntent(intent){
+   return {...clone(intent),status:'confirmed',confirmedAt:new Date().toISOString()};
+ }
+ 
+-function stagePostmasterCollectionIntent({characterId,items,session}={}){
+-  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)}));
++function stagePostmasterCollectionIntent({characterId,targetCharacterId=null,items,session,equipAfterCollection=false}={}){
++  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),bucketHash:Number(item?.bucketHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)})),equipTarget=String(targetCharacterId||characterId||'');
+   if(!decimal(characterId)||!decimal(binding.membershipId)||!decimal(binding.membershipType))throw new TypeError('Reconnect Bungie and choose a valid Guardian before collecting Postmaster.');
+   if(!rows.length||rows.some(item=>!decimal(item.itemInstanceId)||!Number.isInteger(item.itemHash)))throw new TypeError('Collect Postmaster requires at least one exact Bungie item instance.');
+-  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),items:rows};
++  if(equipAfterCollection&&rows.length!==1)throw new TypeError('Direct Postmaster equip requires one exact Bungie item instance.');
++  if(equipAfterCollection&&!decimal(equipTarget))throw new TypeError('Direct Postmaster equip requires a valid target Guardian.');
++  return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),targetCharacterId:equipAfterCollection?equipTarget:String(characterId),equipAfterCollection:equipAfterCollection===true,items:rows};
+ }
+ 
+ function confirmPostmasterCollectionIntent(intent){
+@@ -415,7 +418,7 @@ function vaultActionActivityBlockers(payload,characterIds=[]){
+ }
+ 
+ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
+-  const required=['transferItems',...(intent?.item?.source?.kind==='equipped'?['equipItems']:[])];
++  const required=[...new Set(['transferItems',...(intent?.item?.source?.kind==='equipped'||intent?.equipAfterTransfer?['equipItems']:[])])];
+   const binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'vault-transfer-result',status:'running',startedAt:new Date().toISOString(),itemInstanceId:String(intent?.item?.itemInstanceId||''),steps:[],readback:null,mutationCount:0};
+   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
+   let mutationStarted=false;
+@@ -468,11 +471,21 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
+         record('transfer','complete',step.label,{expected:step.expected,ErrorCode:response?.ErrorCode??1});
+       }catch(error){record('transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
+     }
++    if(intent.equipAfterTransfer){
++      const label=`Equip ${item.name} on ${destination.characterId}`;
++      try{
++        const response=await mutate('/bungie/actions/equip-items',{membershipType:Number(binding.membershipType),characterId:String(destination.characterId),itemIds:[item.itemInstanceId]},label),failures=equipResponseFailures(response,[item.itemInstanceId]);
++        if(failures.length){record('equip-target','failed','Bungie did not confirm the requested exact item equip.',{failures,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
++        const settled=await waitForInventoryLocation(item.itemInstanceId,{kind:'equipped',characterId:destination.characterId},{fetchImpl,authOrigin,waitImpl});
++        if(!settled.verified){record('equip-target','mismatch','Bungie accepted the equip call but fresh inventory did not confirm the exact equipped item.',{actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
++        record('equip-target','complete',label,{ErrorCode:response?.ErrorCode??1});
++      }catch(error){record('equip-target','failed',label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
++    }
+     result.status='applied';
+     return result;
+   }finally{
+     try{
+-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(result.itemInstanceId)||null,expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:'carried',characterId:intent.destination.characterId};
++      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),location=inventoryLocations(fresh).locations.get(result.itemInstanceId)||null,expected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
+       result.readback={verified:locationMatches(location,expected),expected,actual:location?.source||null};
+       record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms the requested destination.':'Final Bungie inventory does not match the requested destination.',result.readback);
+       if(result.status==='applied'&&!result.readback.verified)result.status='partial';
+@@ -482,12 +495,21 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
+ }
+ 
+ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,onProgress=()=>{},waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
+-  const binding=assertVaultActionSession(intent,session,['pullFromPostmaster']),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),steps:[],readback:null,mutationCount:0};
++  const required=['pullFromPostmaster',...(intent?.equipAfterCollection?['transferItems','equipItems']:[])],binding=assertVaultActionSession(intent,session,required),result={schemaVersion:1,kind:'postmaster-collection-result',status:'running',startedAt:new Date().toISOString(),characterId:String(intent.characterId||''),targetCharacterId:String(intent.targetCharacterId||intent.characterId||''),steps:[],readback:null,mutationCount:0};
+   const record=(phase,status,label,detail=null)=>{const row={phase,status,label,at:new Date().toISOString(),detail};result.steps.push(row);onProgress(row);return row;};
++  let mutationStarted=false;
++  const mutate=async(path,body,label)=>{
++    if(mutationStarted)await waitImpl(ACTION_THROTTLE_MS);
++    mutationStarted=true;
++    const response=await requestActionWithThrottleRetry(path,body,{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
++    result.mutationCount+=1;
++    return response;
++  };
+   try{
+     const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{profile,locations}=inventoryLocations(fresh),blockers=[];
+     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
+-    blockers.push(...vaultActionActivityBlockers(fresh,[result.characterId]));
++    if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
++    blockers.push(...vaultActionActivityBlockers(fresh,[result.characterId,result.targetCharacterId]));
+     for(const item of intent.items||[]){
+       const location=locations.get(String(item.itemInstanceId||''));
+       if(!location||!locationMatches(location,{kind:'postmaster',characterId:result.characterId})||Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} is no longer in this Guardian's Postmaster.`);
+@@ -497,21 +519,50 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
+     for(const item of intent.items){
+       const label=`Collect ${item.name} from Postmaster`;
+       try{
+-        if(result.mutationCount)await waitImpl(ACTION_THROTTLE_MS);
+-        const response=await requestActionWithThrottleRetry('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
+-        result.mutationCount+=1;
++        const response=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},label);
+         const settled=await waitForPostmasterExit(item.itemInstanceId,result.characterId,{fetchImpl,authOrigin,waitImpl});
+         if(!settled.verified){record('collect','mismatch','Bungie accepted the Postmaster call but fresh inventory did not confirm collection.',{itemInstanceId:item.itemInstanceId,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
+         record('collect','complete',label,{itemInstanceId:item.itemInstanceId,ErrorCode:response?.ErrorCode??1});
++        if(intent.equipAfterCollection){
++          let location=settled.location;
++          const transferSteps=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})?[]:
++            locationMatches(location,{kind:'carried',characterId:result.targetCharacterId})?[]:
++            locationMatches(location,{kind:'vault'})?[{characterId:result.targetCharacterId,transferToVault:false,expected:{kind:'carried',characterId:result.targetCharacterId},label:`Move ${item.name} from Vault to ${result.targetCharacterId}`}]:
++            locationMatches(location,{kind:'carried',characterId:result.characterId})&&result.characterId!==result.targetCharacterId?[
++              {characterId:result.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} from ${result.characterId} to Vault`},
++              {characterId:result.targetCharacterId,transferToVault:false,expected:{kind:'carried',characterId:result.targetCharacterId},label:`Move ${item.name} from Vault to ${result.targetCharacterId}`}
++            ]:[];
++          const supported=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})||locationMatches(location,{kind:'carried',characterId:result.targetCharacterId})||locationMatches(location,{kind:'vault'})||locationMatches(location,{kind:'carried',characterId:result.characterId});
++          if(!supported){record('direct-equip','blocked','Fresh Bungie readback returned an unsupported location after Postmaster collection.',{actual:location?.source||null});result.status='partial';return result;}
++          for(const step of transferSteps){
++            try{
++              const transferResponse=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:1,transferToVault:step.transferToVault},step.label);
++              const transferred=await waitForInventoryLocation(item.itemInstanceId,step.expected,{fetchImpl,authOrigin,waitImpl});
++              if(!transferred.verified){record('direct-equip-transfer','mismatch','Bungie accepted the transfer call but fresh inventory did not confirm its destination.',{expected:step.expected,actual:transferred.location?.source||null,ErrorCode:transferResponse?.ErrorCode??1});result.status='partial';return result;}
++              location=transferred.location;
++              record('direct-equip-transfer','complete',step.label,{expected:step.expected,ErrorCode:transferResponse?.ErrorCode??1});
++            }catch(error){record('direct-equip-transfer','failed',step.label,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
++          }
++          if(!locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})){
++            const equipLabel=`Equip ${item.name} on ${result.targetCharacterId}`;
++            try{
++              const equipResponse=await mutate('/bungie/actions/equip-items',{membershipType:Number(binding.membershipType),characterId:result.targetCharacterId,itemIds:[item.itemInstanceId]},equipLabel),failures=equipResponseFailures(equipResponse,[item.itemInstanceId]);
++              if(failures.length){record('direct-equip','failed','Bungie did not confirm the exact Postmaster item equip.',{failures,ErrorCode:equipResponse?.ErrorCode??1});result.status='partial';return result;}
++              const equipped=await waitForInventoryLocation(item.itemInstanceId,{kind:'equipped',characterId:result.targetCharacterId},{fetchImpl,authOrigin,waitImpl});
++              if(!equipped.verified){record('direct-equip','mismatch','Bungie accepted the equip call but fresh inventory did not confirm the exact equipped item.',{actual:equipped.location?.source||null,ErrorCode:equipResponse?.ErrorCode??1});result.status='partial';return result;}
++              record('direct-equip','complete',equipLabel,{ErrorCode:equipResponse?.ErrorCode??1});
++            }catch(error){record('direct-equip','failed',equipLabel,{message:error.message,payload:error.payload||null});result.status='partial';return result;}
++          }
++        }
+       }catch(error){record('collect','failed',label,{message:error.message,payload:error.payload||null});result.status=result.mutationCount?'partial':'blocked';return result;}
+     }
+     result.status='applied';
+     return result;
+   }finally{
+     try{
+-      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(fresh),remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId);
+-      result.readback={verified:remaining.length===0,remaining};
+-      record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?'Final Bungie inventory confirms every collected item left Postmaster.':'One or more requested items remain in Postmaster.',result.readback);
++      const fresh=await requestFreshProfile({fetchImpl,authOrigin}),{locations}=inventoryLocations(fresh),remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId),notEquipped=intent.equipAfterCollection?(intent.items||[]).filter(item=>!locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'equipped',characterId:result.targetCharacterId})).map(item=>item.itemInstanceId):[];
++      result.readback={verified:remaining.length===0&&notEquipped.length===0,remaining,notEquipped,targetCharacterId:intent.equipAfterCollection?result.targetCharacterId:null};
++      record('readback',result.readback.verified?'complete':'mismatch',result.readback.verified?(intent.equipAfterCollection?'Final Bungie inventory confirms the collected item is equipped on the target Guardian.':'Final Bungie inventory confirms every collected item left Postmaster.'):(intent.equipAfterCollection?'The requested Postmaster item is not equipped on the target Guardian.':'One or more requested items remain in Postmaster.'),result.readback);
+       if(result.status==='applied'&&!result.readback.verified)result.status='partial';
+     }catch(error){record('readback','failed','Final Postmaster readback failed.',{message:error.message});if(result.status==='applied')result.status='partial';}
+     result.finishedAt=new Date().toISOString();
+diff --git a/astrix-app/shared/guardian-inventory-workspace.mjs b/astrix-app/shared/guardian-inventory-workspace.mjs
+new file mode 100644
+index 0000000..1b94016
+--- /dev/null
++++ b/astrix-app/shared/guardian-inventory-workspace.mjs
+@@ -0,0 +1,151 @@
++const DESTINY_ITEM_STATE=Object.freeze({locked:1,masterwork:4});
++
++const WEAPON_BUCKETS=Object.freeze([
++  Object.freeze({hash:1498876634,key:'primary',label:'Primary',kind:'weapon'}),
++  Object.freeze({hash:2465295065,key:'special',label:'Special',kind:'weapon'}),
++  Object.freeze({hash:953998645,key:'heavy',label:'Heavy',kind:'weapon'})
++]);
++const ARMOUR_BUCKETS=Object.freeze([
++  Object.freeze({hash:3448274439,key:'helmet',label:'Helmet',kind:'armour'}),
++  Object.freeze({hash:3551918588,key:'gauntlets',label:'Gauntlets',kind:'armour'}),
++  Object.freeze({hash:14239492,key:'chest',label:'Chest',kind:'armour'}),
++  Object.freeze({hash:20886954,key:'legs',label:'Legs',kind:'armour'}),
++  Object.freeze({hash:1585787867,key:'class-item',label:'Class Item',kind:'armour'})
++]);
++const CHARACTER_EQUIPMENT_BUCKETS=Object.freeze([
++  Object.freeze({hash:4023194814,key:'ghost',label:'Ghost',kind:'equipment'}),
++  Object.freeze({hash:284967655,key:'ship',label:'Ship',kind:'equipment'}),
++  Object.freeze({hash:2025709351,key:'sparrow',label:'Sparrow',kind:'equipment'})
++]);
++const EQUIPMENT_GROUPS=Object.freeze([...WEAPON_BUCKETS,...ARMOUR_BUCKETS]);
++const INVENTORY_GROUPS=Object.freeze([...EQUIPMENT_GROUPS,...CHARACTER_EQUIPMENT_BUCKETS]);
++const EQUIPMENT_GROUP_BY_HASH=new Map(INVENTORY_GROUPS.map((row,index)=>[row.hash,{...row,index}]));
++
++const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
++const text=value=>String(value??'').trim();
++const itemKey=item=>String(item?.itemInstanceId||`${item?.itemHash||'unknown'}:${item?.source?.kind||'unknown'}:${item?.source?.characterId||''}`);
++
++function itemState(item={}){
++  const raw=Number(item?.state||0);
++  return {raw,locked:(raw&DESTINY_ITEM_STATE.locked)!==0,masterworked:(raw&DESTINY_ITEM_STATE.masterwork)!==0};
++}
++
++function sortInventoryWorkspaceItems(items=[]){
++  return [...(Array.isArray(items)?items:[])].sort((left,right)=>{
++    const leftOrder=left?.equipmentGroup?.index??INVENTORY_GROUPS.length,rightOrder=right?.equipmentGroup?.index??INVENTORY_GROUPS.length;
++    if(leftOrder!==rightOrder)return leftOrder-rightOrder;
++    if(Boolean(left?.isExotic)!==Boolean(right?.isExotic))return left.isExotic?-1:1;
++    if(Number(right?.power||0)!==Number(left?.power||0))return Number(right?.power||0)-Number(left?.power||0);
++    return String(left?.name||'').localeCompare(String(right?.name||''));
++  });
++}
++
++function groupInventoryWorkspaceItems(items=[],groups=INVENTORY_GROUPS){
++  const sorted=sortInventoryWorkspaceItems(items);
++  return groups.map(group=>({...group,items:sorted.filter(item=>item?.equipmentGroup?.key===group.key)}));
++}
++
++function workspaceGroupLabel(group){
++  if(group?.key==='special')return 'Secondary';
++  if(group?.key==='legs')return 'Leg';
++  return group?.label||'';
++}
++
++function directEquipAvailable(item,capabilities={},activeCharacterId=''){
++  if(!/^\d+$/.test(String(item?.itemInstanceId||''))||!/^\d+$/.test(String(activeCharacterId||''))||!item?.equipmentGroup)return false;
++  if(capabilities.equipItems!==true)return false;
++  if(item?.source?.kind==='vault')return capabilities.transferItems===true;
++  if(item?.source?.kind==='postmaster'){
++    return capabilities.pullFromPostmaster===true&&capabilities.transferItems===true;
++  }
++  return false;
++}
++
++function inventoryItemMarkup(item,{draggable=true,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
++  const key=itemKey(item),kind=item?.equipmentGroup?.kind||'',sourceKind=String(item?.source?.kind||''),equipped=sourceKind==='equipped',state=itemState(item),canDrag=draggable&&capabilities.transferItems===true&&Boolean(item?.itemInstanceId)&&['equipped','carried','vault'].includes(sourceKind)&&(!equipped||capabilities.equipItems===true),canPull=Boolean(pullCharacterId)&&capabilities.pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||'')),canDirectEquip=directEquipAvailable(item,capabilities,activeCharacterId),power=item?.power===null||item?.power===undefined?'':`<span class="vault-transfer-power">${esc(item.power)}</span>`,quantity=Number(item?.quantity||1)>1?`<span class="vault-transfer-quantity">${esc(item.quantity)}</span>`:'';
++  const stateBadges=[
++    equipped?'<span class="vault-transfer-state is-equipped" title="Equipped">EQUIPPED</span>':'',
++    state.locked?'<span class="vault-transfer-state is-locked" title="Locked" aria-label="Locked">LOCK</span>':'',
++    state.masterworked?'<span class="vault-transfer-state is-masterworked" title="Masterworked" aria-label="Masterworked">◆</span>':''
++  ].filter(Boolean).join('');
++  const directHint=canDirectEquip?' Double click to review equipping this exact item on the active Guardian.':'';
++  return `<article class="vault-transfer-item${item?.isExotic?' is-exotic':''}${equipped?' is-equipped':''}${canDrag?' is-draggable':''}" data-inspect-item="${esc(key)}" data-item-kind="${esc(kind)}" data-item-source="${esc(sourceKind)}" data-item-state="${state.raw}"${canDrag?` draggable="true" data-drag-item="${esc(key)}"`:''}${canDirectEquip?` data-direct-equip-item="${esc(key)}"`:''} tabindex="0" aria-label="${esc(item.name)}${equipped?' equipped':''}${state.locked?' locked':''}${state.masterworked?' masterworked':''}${canDrag?' draggable':''}.${esc(directHint)}">
++    <span class="vault-transfer-art">${item?.icon?`<img src="${esc(item.icon)}" alt="" loading="lazy" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}${power}${quantity}${stateBadges?`<span class="vault-transfer-states">${stateBadges}</span>`:''}</span>
++    <span class="vault-transfer-name">${esc(item.name)}</span>
++    ${pullCharacterId?`<button class="vault-postmaster-pull" type="button" data-pull-postmaster-item="${esc(key)}" data-postmaster-character-id="${esc(pullCharacterId)}"${canPull?'':' disabled'}>PULL</button>`:''}
++  </article>`;
++}
++
++function inventoryGroupsMarkup(items=[],{includeEmpty=false,equippedFirst=false,pullCharacterId='',capabilities={},activeCharacterId=''}={}){
++  const groups=groupInventoryWorkspaceItems(items).filter(group=>includeEmpty||group.items.length);
++  if(!groups.length)return '<p class="vault-transfer-empty">Bungie returned no supported inventory items for this section.</p>';
++  let family='';
++  return groups.map(group=>{
++    const heading=group.kind!==family?(family=group.kind,`<h5 class="vault-transfer-family">${esc(group.kind==='weapon'?'WEAPONS':group.kind==='armour'?'ARMOUR':'EQUIPMENT')}</h5>`):'',ordered=equippedFirst?[...group.items].sort((left,right)=>Number(right?.source?.kind==='equipped')-Number(left?.source?.kind==='equipped')):group.items;
++    return `${heading}<section class="vault-transfer-group" data-equipment-group="${esc(group.key)}"><header><strong>${esc(workspaceGroupLabel(group))}</strong><span>${ordered.length}</span></header><div class="vault-transfer-items">${ordered.length?ordered.map(item=>inventoryItemMarkup(item,{pullCharacterId,capabilities,activeCharacterId})).join(''):'<span class="vault-transfer-row-empty">EMPTY</span>'}</div></section>`;
++  }).join('');
++}
++
++function postmasterMarkup({characterId,items=[],characterLabel='Guardian',capabilities={},activeCharacterId=''}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>text(item?.source?.characterId)===text(characterId)),equipment=rows.filter(item=>item.equipmentGroup),other=rows.filter(item=>!item.equipmentGroup),transferable=rows.filter(item=>/^\d+$/.test(String(item?.itemInstanceId||''))),collectReady=Boolean(transferable.length)&&capabilities.pullFromPostmaster===true;
++  const groups=inventoryGroupsMarkup(equipment,{pullCharacterId:characterId,capabilities,activeCharacterId}),otherMarkup=other.length?`<h5 class="vault-transfer-family">OTHER POSTMASTER ITEMS</h5><div class="vault-transfer-items">${other.map(item=>inventoryItemMarkup(item,{draggable:false,pullCharacterId:characterId,capabilities,activeCharacterId})).join('')}</div>`:'';
++  return `<section class="vault-character-section vault-postmaster-section"><header><div><h4>${esc(String(characterLabel).toUpperCase())} POSTMASTER</h4><span>${rows.length} ITEM${rows.length===1?'':'S'}</span></div><button type="button" data-collect-postmaster="${esc(characterId)}"${collectReady?'':' disabled'}>PULL ALL</button></header>${rows.length?`${groups}${otherMarkup}`:'<p class="vault-transfer-empty">Bungie reports no items in this Postmaster.</p>'}</section>`;
++}
++
++function equippedAndCarriedMarkup({characterId,items=[],capabilities={},activeCharacterId='',sectionLabel='EQUIPPED AND CARRIED'}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>['equipped','carried'].includes(item?.source?.kind)&&text(item?.source?.characterId)===text(characterId));
++  return `<section class="vault-character-section vault-equipped-carried-section"><header><div><h4>${esc(sectionLabel)}</h4><span>${rows.length} ITEMS</span></div></header>${inventoryGroupsMarkup(rows,{includeEmpty:true,equippedFirst:true,capabilities,activeCharacterId})}</section>`;
++}
++
++function vaultOnlyMarkup({items=[],capabilities={},activeCharacterId=''}={}){
++  const rows=(Array.isArray(items)?items:[]).filter(item=>item?.source?.kind==='vault');
++  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${rows.length} SORTED ITEM${rows.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${inventoryGroupsMarkup(rows,{includeEmpty:true,capabilities,activeCharacterId})}</section>`;
++}
++
++function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindHover=()=>{}}={}){
++  root?.querySelectorAll?.('[data-inspect-item]').forEach(target=>{
++    const item=resolveItem(target.dataset.inspectItem),kind=item?.equipmentGroup?.kind;
++    if(kind==='weapon'||kind==='armour')bindHover(target,item,kind,{contextLabel:item.source?.kind==='vault'?'VAULT':''});
++  });
++}
++
++function bindInventoryWorkspaceInteractions(root,{onPullItem=()=>{},onPullAll=()=>{},onDirectEquip=()=>{}}={}){
++  if(!root)return ()=>{};
++  const click=event=>{
++    const itemButton=event.target.closest?.('[data-pull-postmaster-item]');
++    if(itemButton&&!itemButton.disabled){onPullItem(itemButton.dataset.postmasterCharacterId,itemButton.dataset.pullPostmasterItem);return;}
++    const allButton=event.target.closest?.('[data-collect-postmaster]');
++    if(allButton&&!allButton.disabled)onPullAll(allButton.dataset.collectPostmaster);
++  };
++  const doubleClick=event=>{
++    if(event.target.closest?.('button'))return;
++    const tile=event.target.closest?.('[data-direct-equip-item]');
++    if(tile){event.preventDefault();onDirectEquip(tile.dataset.directEquipItem);}
++  };
++  root.addEventListener('click',click);
++  root.addEventListener('dblclick',doubleClick);
++  return ()=>{root.removeEventListener('click',click);root.removeEventListener('dblclick',doubleClick);};
++}
++
++export {
++  ARMOUR_BUCKETS,
++  CHARACTER_EQUIPMENT_BUCKETS,
++  DESTINY_ITEM_STATE,
++  EQUIPMENT_GROUPS,
++  EQUIPMENT_GROUP_BY_HASH,
++  INVENTORY_GROUPS,
++  WEAPON_BUCKETS,
++  bindInventoryWorkspaceHovers,
++  bindInventoryWorkspaceInteractions,
++  directEquipAvailable,
++  equippedAndCarriedMarkup,
++  groupInventoryWorkspaceItems,
++  inventoryGroupsMarkup,
++  inventoryItemMarkup,
++  itemKey,
++  itemState,
++  postmasterMarkup,
++  sortInventoryWorkspaceItems,
++  vaultOnlyMarkup,
++  workspaceGroupLabel
++};

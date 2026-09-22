@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Journey availability preview | ASTRIX PARADOX</title>
+  <style>
+    :root { color-scheme: dark; font-family: Bahnschrift, "Segoe UI", sans-serif; background: #0b0c0f; color: #f2f2f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { padding: 24px clamp(20px, 5vw, 72px); border-bottom: 1px solid #292b33; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; }
+    .brand { font-weight: 800; letter-spacing: .12em; }
+    .brand span { color: #ec485b; }
+    .tag, .eyebrow { font-size: 12px; letter-spacing: .13em; font-weight: 700; }
+    .tag { color: #b8bac4; }
+    main { max-width: 1100px; padding: 48px 24px; margin: auto; }
+    h1 { font-size: clamp(32px, 6vw, 56px); margin: 10px 0 16px; letter-spacing: -.03em; }
+    p { line-height: 1.65; }
+    .intro { max-width: 760px; color: #babdc9; }
+    .eyebrow { color: #ee6674; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 22px; }
+    button { border: 1px solid #424550; border-radius: 6px; background: #181a21; color: #e8e9ef; padding: 12px 16px; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { background: #72202e; border-color: #ef6073; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+    .workspace { border: 1px solid #333540; border-radius: 12px; overflow: hidden; background: #13151b; }
+    .bungie-art { margin: 0; background: #fff; }
+    .bungie-art img { display: block; width: 100%; height: auto; }
+    .bungie-art figcaption { padding: 10px 24px; background: #13151b; color: #babdc9; font-size: 12px; line-height: 1.6; }
+    .workspace-head { padding: 20px 26px; border-bottom: 1px solid #333540; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+    .status { padding: clamp(24px, 5vw, 48px); border-left: 4px solid #d8485d; }
+    h2 { font-size: clamp(22px, 4vw, 32px); max-width: 760px; margin: 12px 0; }
+    .status p { max-width: 760px; color: #c7c9d3; }
+    .return { display: inline-block; padding: 12px 16px; background: #242630; border-radius: 6px; font-weight: 600; }
+    a { color: #ff9fab; text-underline-offset: 4px; }
+    .schedule { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+    .schedule article { padding: 20px; background: #14161c; border: 1px solid #30323b; border-radius: 8px; }
+    .schedule h3 { margin: 0 0 10px; font-size: 17px; }
+    .schedule p { color: #babdc9; margin: 0; font-size: 14px; }
+    .note { color: #aeb2c0; font-size: 14px; border-top: 1px solid #30323b; padding-top: 20px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 640px) { main { padding-top: 28px; } .schedule { grid-template-columns: 1fr; } .controls button { flex: 1 1 45%; } }
+  </style>
+</head>
+<body>
+  <header><div class="brand">ASTRIX <span>PARADOX</span></div><div class="tag">JOURNEY / MESSAGE PREVIEW</div></header>
+  <main>
+    <div class="eyebrow">AVAILABILITY MESSAGES</div>
+    <h1>Tell the player what is known.</h1>
+    <p class="intro">Preview the supplied maintenance schedule and the existing timeout message. These are demonstration states, not live Bungie status. No account requests are made.</p>
+    <div class="controls" role="group" aria-label="Preview scenario">
+      <button type="button" data-state="offline" aria-pressed="true">During maintenance</button>
+      <button type="button" data-state="restoring" aria-pressed="false">Services returning</button>
+      <button type="button" data-state="outside" aria-pressed="false">Outside maintenance</button>
+      <button type="button" data-state="unknown" aria-pressed="false">Schedule unverified</button>
+    </div>
+    <section class="workspace" aria-labelledby="workspace-title">
+      <figure class="bungie-art">
+        <img src="./assets/bungie-destiny-player-support.gif" width="1164" height="224" alt="Bungie's Destiny Player Support emblem on a blue technical-pattern banner">
+        <figcaption>Destiny Player Support artwork &copy; Bungie. <a href="https://www.bungie.net/7/en/News/Article/twab_02_02_2023" target="_blank" rel="noopener noreferrer">Official source</a>. ASTRIX message preview, not an official Bungie status notice.</figcaption>
+      </figure>
+      <div class="workspace-head"><strong id="workspace-title">JOURNEY</strong><span class="tag" id="scenario">PREVIEW: CONFIRMED MAINTENANCE SCENARIO</span></div>
+      <div class="status" role="status" aria-live="polite" aria-atomic="true">
+        <div class="eyebrow" id="status-label">BUNGIE CHARACTERS UNAVAILABLE</div>
+        <h2 id="message-title">Bungie maintenance is in progress.</h2>
+        <p id="message-body">Character data is unavailable while Bungie's Destiny 2 API is offline for scheduled maintenance.</p>
+        <p class="return" id="return-time">API expected back around 17:00 UTC (10:00 AM PDT).</p>
+        <p id="message-detail">Maintenance is expected to conclude around 18:00 UTC (11:00 AM PDT). These are Bungie's estimates, not guaranteed return times.</p>
+        <a href="https://help.bungie.net/hc/en-us/articles/360049199271-Destiny-Server-and-Update-Status" target="_blank" rel="noopener noreferrer">Check Bungie's maintenance updates</a>
+      </div>
+    </section>
+    <section class="schedule" aria-label="Times from the supplied schedule">
+      <article><h3>15:30 UTC / 8:30 AM PDT</h3><p>Destiny 2 and its APIs go offline in the supplied maintenance notice.</p></article>
+      <article><h3>About 17:00 UTC / 10:00 AM PDT</h3><p>API expected online. Queues and sign-on issues may continue.</p></article>
+      <article><h3>About 18:00 UTC / 11:00 AM PDT</h3><p>Maintenance expected to conclude. Check Bungie for extensions.</p></article>
+    </section>
+    <p class="note" id="preview-note">The supplied notice has no date heading, and the failed Journey attempt has no confirmed timestamp. This preview does not establish that today's failure was maintenance-related. Tuesday's 17:00 UTC weekly reset alone does not prove an outage or provide a return time. The notice's first time is unclear and is not used here.</p>
+  </main>
+  <script>
+    const scenarios = {
+      offline: {
+        scenario: 'PREVIEW: CONFIRMED MAINTENANCE SCENARIO',
+        title: 'Bungie maintenance is in progress.',
+        body: "Character data is unavailable while Bungie's Destiny 2 API is offline for scheduled maintenance.",
+        time: 'API expected back around 17:00 UTC (10:00 AM PDT).',
+        detail: "Maintenance is expected to conclude around 18:00 UTC (11:00 AM PDT). These are Bungie's estimates, not guaranteed return times."
+      },
+      restoring: {
+        scenario: 'PREVIEW: ANNOUNCED RESTORATION PERIOD',
+        title: 'Bungie services may still be affected by maintenance.',
+        body: "Bungie's announced API return time has passed, but Journey character data is still unavailable. Sign-on issues may continue while background maintenance finishes.",
+        time: 'Maintenance expected to end around 18:00 UTC (11:00 AM PDT).',
+        detail: "This is an estimate from the supplied notice. Check Bungie's updates for any extension."
+      },
+      outside: {
+        scenario: 'PREVIEW: OUTSIDE THE ANNOUNCED WINDOW',
+        title: 'BUNGIE CHARACTERS UNAVAILABLE',
+        body: 'Prepared journey request timed out.',
+        time: '',
+        detail: ''
+      },
+      unknown: {
+        scenario: 'PREVIEW: NO VERIFIED MAINTENANCE WINDOW',
+        title: 'BUNGIE CHARACTERS UNAVAILABLE',
+        body: 'Prepared journey request timed out.',
+        time: '',
+        detail: ''
+      }
+    };
+    document.querySelectorAll('[data-state]').forEach(button => {
+      button.addEventListener('click', () => {
+        const state = scenarios[button.dataset.state];
+        document.querySelectorAll('[data-state]').forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+        document.getElementById('scenario').textContent = state.scenario;
+        document.getElementById('message-title').textContent = state.title;
+        document.getElementById('message-body').textContent = state.body;
+        for (const [id, value] of [['return-time', state.time], ['message-detail', state.detail]]) {
+          const element = document.getElementById(id);
+          element.textContent = value;
+          element.hidden = !value;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
