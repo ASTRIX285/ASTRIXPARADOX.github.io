@@ -4,7 +4,7 @@ import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1';
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1';
-import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1';
+import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&copy=20260922-readable-block-1';
 import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
 import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2&ui=20260917-no-diagnostics-1&status=20260917-compact-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
@@ -300,6 +300,7 @@ async function submitParadoxSave(event){
 
 function buildLivePlan(){
   const state=readState(),build=state?.workingBuild||state?.originalBuild||{},advice=build.weaponRollAdvice||build.paradoxAnalysis?.weaponRollAdvice,preflight=createLiveTransferPreflight(build),capabilities=liveActionCapabilities(globalThis.FORGE_BUNGIE_SESSION),plan=createLiveTransferPlan({build,originalBuild:state?.originalBuild||{},advice,capabilities});
+  nameApplySocketChanges(plan,state);
   if(!preflight.ready)plan.blockers=[...new Set([...(preflight.violations||[]),...(plan.blockers||[])])];
   plan.ready=preflight.ready&&plan.blockers.length===0;plan.status=plan.ready?'staged':'blocked';plan.preflight=preflight;return plan;
 }
@@ -316,6 +317,17 @@ function applyEntityIndex(...sources){
   return {byId,byHash,entities};
 }
 function applyEntity(index,{itemInstanceId='',hash=null}={}){return index.byId.get(String(itemInstanceId||''))||index.byHash.get(String(hash??''))||null;}
+function nameApplySocketChanges(plan,state){
+  const index=applyEntityIndex(state?.workingBuild,state?.originalBuild);
+  const readable=value=>{const name=String(value||'').trim();return name&&!/^\d+$/.test(name)?name:'';};
+  const nameOf=item=>readable(item?.name)||readable(item?.displayName)||readable(item?.definition?.displayProperties?.name);
+  for(const change of plan.socketChanges||[]){
+    const item=index.entities.find(row=>String(row.itemInstanceId||row.instanceId||'')===String(change.itemInstanceId)&&nameOf(row));
+    const plug=index.entities.find(row=>Number(row.hash??row.itemHash??row.bungieHash)===Number(change.plugHash)&&nameOf(row));
+    change.itemName=readable(change.itemName)||nameOf(item)||'the selected item';
+    change.plugName=readable(change.plugName)||nameOf(plug)||'the selected mod or perk';
+  }
+}
 function applyTextEntity(index,text=''){const copy=String(text).toLowerCase(),matches=index.entities.filter(item=>{const name=String(item?.name||item?.displayName||item?.definition?.displayProperties?.name||'').trim();return name.length>3&&copy.includes(name.toLowerCase());}).sort((a,b)=>String(b?.name||b?.displayName||'').length-String(a?.name||a?.displayName||'').length);return matches[0]||null;}
 function applyComponentLabel(component=''){const value=String(component);if(value==='armour-mod')return 'ARMOUR MOD';if(value==='weapon-perk')return 'WEAPON PERK';if(value.includes('super'))return 'SUPER';if(value.includes('aspect'))return 'ASPECT';if(value.includes('fragment'))return 'FRAGMENT';if(value.includes('ability')||value.startsWith('subclass-'))return 'ABILITY';return 'SOCKET CHANGE';}
 function createApplyReviewEntries(plan,state){

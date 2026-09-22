@@ -1,0 +1,142 @@
+diff --git a/astrix-app/pages/guardian-workspace-v2/index.html b/astrix-app/pages/guardian-workspace-v2/index.html
+index 4653677..d5a398d 100644
+--- a/astrix-app/pages/guardian-workspace-v2/index.html
++++ b/astrix-app/pages/guardian-workspace-v2/index.html
+@@ -31,18 +31,19 @@
+   <link rel="stylesheet" href="./guardian-gear-layout.css?v=20260908-icon-hover-1">
+   <link rel="stylesheet" href="./guardian-adaptive-layout.css?v=20260908-icon-hover-1">
+   <link rel="stylesheet" href="./guardian-left-panel-super-feature.css">
+-  <link rel="stylesheet" href="./guardian-mobile.css?v=20260908-icon-hover-1">
++  <link rel="stylesheet" href="./guardian-mobile.css?v=20260912-global-icon-audit-1">
+   <link rel="stylesheet" href="./guardian-layout-final.css?v=20260908-icon-hover-1">
+   <link rel="stylesheet" href="./guardian-super-formation.css?v=20260828-subclass-header-1">
+   <link rel="stylesheet" href="./subclass-picker.css?v=20260829-prismatic-icon-scale-1">
+-  <link rel="stylesheet" href="./guardian-left-rail-shared.css?v=20260908-icon-hover-1">
++  <link rel="stylesheet" href="./guardian-left-rail-shared.css?v=20260908-icon-hover-1&amp;fix=20260912-character-weapons-1">
+   <link rel="stylesheet" href="./paradox-item-cards.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1&amp;hover=20260909-scope-1&amp;roll=20260909-apply-1">
+   <link rel="stylesheet" href="./astrix-token-branch-preview.css?v=20260824-d2-background-4">
+   <link rel="stylesheet" href="../../astrix-destinations.css?v=20260824-destination-1">
+   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260904-mobile-crosscheck-1">
+   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;mobile=20260905-wrap-1">
+   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
+-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1">
++  <link rel="stylesheet" href="../../shared/guardian-inventory-workspace.css?v=20260912-character-style-fix-1">
++  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260912-global-icon-audit-1&amp;inventory=20260912-shared-character-1&amp;gear=20260912-fixed-pixels-1">
+   <script src="../../shared/astrix-destination-theme.js?v=20260824-destination-1"></script>
+   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
+   <style>/* keep the destination ribbon non-sticky here so it never overlaps the topbar */
+@@ -113,9 +114,8 @@
+     </aside>
+ 
+     <section class="equip">
+-      <div class="eq gear-weapons"><div class="eq-head"><h3>WEAPONS</h3><button class="ab-btn" type="button" id="downloadWeaponDiagnostics" aria-describedby="weaponDiagnosticsStatus">Download weapon diagnostics</button></div><p id="weaponDiagnosticsStatus" role="status" aria-live="polite">Export equipped weapon data for the engineer. No login credentials are included.</p><div class="weap-grid"><div class="weap"><div class="art ph"><span class="pw" data-power-cap>550</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Kinetic slot</b><small class="ph-tag">awaiting live data</small></div></div><div class="weap"><div class="art ph"><span class="pw" data-power-cap>550</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Energy slot</b><small class="ph-tag">awaiting live data</small></div></div><div class="weap"><div class="art ph"><span class="pw">—</span><span class="ph-glyph">⌖</span></div><div class="cap"><b>Power slot</b><small class="ph-tag">awaiting live data</small></div></div></div></div>
+       <section class="eq guardian-loadouts-container" aria-labelledby="guardianLoadoutsTitle"><div class="eq-head"><h3 id="guardianLoadoutsTitle">IN-GAME LOADOUTS</h3><span class="tools">BUNGIE · 1–20</span></div><div class="guardian-loadouts-panel guardian-loadouts-strip"><div class="guardian-loadouts-grid" id="guardianLoadouts" aria-label="Saved in-game loadouts"></div></div></section>
+-      <section class="eq gear-combined"><div class="eq-head"><h3>ARMOUR & MODS</h3><span class="tools">EQUIPPED</span></div><div class="gear-subhead"><span>Armour above · 6 functional mod slots below</span><span>Hover any sourced icon for Bungie details</span></div><div class="gear-columns"></div></section>
++      <section class="eq gear-combined"><div class="eq-head"><h3>ACTIVE CHARACTER INVENTORY</h3><span class="tools">LIVE BUNGIE</span></div><p class="vault-runtime-status" id="characterInventoryStatus" role="status">Resolving the active Guardian inventory...</p><div class="vault-transfer-board character-inventory-workspace" id="characterInventoryWorkspace" aria-live="polite"></div></section>
+       <div class="eq stats-block"><div class="eq-head"><h3>STATS</h3><span class="tools">⇅</span></div><div class="stats-row" id="statsRow"></div></div>
+       <div class="eq activity"><div class="eq-head"><h3>ACTIVITY</h3></div><div class="act-hero"><span class="ic">◈</span><div><b>Grandmaster Nightfall</b><small>The Glassway</small></div></div><div class="act-row"><span>Power Cap</span><b data-power-cap>550</b></div><div class="act-row"><span>Champions</span><b>⚔ ✷</b></div><button class="btn-change">Change Activity</button></div>
+     <a class="improve-cta" href="./paradox-build-space/">✦ IMPROVE MY GUARDIAN</a>
+@@ -124,17 +124,26 @@
+ 
+   <div class="actionbar"><div class="grp"><button class="ab-btn">▤ LOADOUTS</button><button class="ab-btn">⤬ COMPARE</button></div><div class="grp"><button class="ab-btn">🖫 SAVE LOADOUT</button><button class="ab-btn">⤴ SHARE</button><button class="ab-btn">•••</button></div></div>
+ 
+-  <script type="module" src="./guardian-weapon-diagnostics.mjs?v=20260908-weapon-diagnostics-1&amp;weapons=20260909-presentation-1&amp;transport=20260911-compact-plugs-1"></script>
++  <dialog class="vault-action-dialog" id="characterInventoryActionDialog" aria-labelledby="characterInventoryActionTitle">
++    <form method="dialog">
++      <header><p class="eyebrow">LIVE BUNGIE ACTION</p><h2 id="characterInventoryActionTitle">Confirm inventory change</h2></header>
++      <p id="characterInventoryActionSummary"></p>
++      <p class="vault-action-warning">This changes the connected Destiny 2 account. The item will remain in its current position here until Bungie confirms the mutation and a fresh profile readback matches.</p>
++      <div class="vault-action-progress" id="characterInventoryActionProgress" role="status"></div>
++      <footer><button type="button" id="characterInventoryActionCancel">CANCEL</button><button type="button" id="characterInventoryActionConfirm">CONFIRM LIVE ACTION</button></footer>
++    </form>
++  </dialog>
++
+   <script type="module" src="./guardian-portal-progress.mjs?v=20260906-all-page-data-1&amp;transport=20260911-compact-plugs-1"></script>
+-  <script type="module" src="./guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1&amp;roll=20260909-apply-1&amp;transport=20260911-compact-plugs-1"></script>
++  <script type="module" src="./guardian-workspace-v2.mjs?v=20260906-page-data-recovery-1&amp;inventory=20260912-shared-character-1&amp;roll=20260909-apply-1&amp;transport=20260911-compact-plugs-1"></script>
+   <script type="module" src="./guardian-character-cards.mjs?v=20260824-bungie-icons-3"></script>
+   <script type="module" src="./guardian-gear-layout.mjs?v=20260908-set-icons-1&amp;weapons=20260909-presentation-1&amp;roll=20260909-apply-1&amp;fix=20260909-apply-refresh-1"></script>
+   <script type="module" src="./guardian-beta-armour-layout.mjs"></script>
+   <script type="module" src="./guardian-advisor-layer.mjs?v=20260908-icon-hover-1"></script>
+   <script type="module" src="./guardian-super-feature-sync.mjs?v=20260906-all-page-data-1"></script>
+-  <script type="module" src="./guardian-beta-readiness.mjs?v=20260902-access-gate-removed-1"></script>
++  <script type="module" src="./guardian-beta-readiness.mjs?v=20260902-access-gate-removed-1&amp;fix=20260912-character-weapons-1"></script>
+   <script type="module" src="./guardian-beta-runtime.mjs?v=20260905-weapon-audit-1"></script>
+-  <script type="module" src="./paradox-build-space-handoff.mjs?v=20260905-loadout-actions-2"></script>
++  <script type="module" src="./paradox-build-space-handoff.mjs?v=20260905-loadout-actions-2&amp;fix=20260912-character-improve-1"></script>
+   <script type="module" src="./guardian-vault-access.mjs?v=20260902-forge-loader-1"></script>
+ </body>
+ </html>
+diff --git a/astrix-app/pages/vault/index.html b/astrix-app/pages/vault/index.html
+index 7b96592..035e6fe 100644
+--- a/astrix-app/pages/vault/index.html
++++ b/astrix-app/pages/vault/index.html
+@@ -3,8 +3,8 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+-  <meta name="description" content="ASTRIX PARADOX verified Destiny 2 armour Vault">
+-  <title>Vault — ASTRIX PARADOX</title>
++  <meta name="description" content="ASTRIX PARADOX live Destiny 2 inventory workspace">
++  <title>Inventory | ASTRIX PARADOX</title>
+   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
+   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
+   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260831-paradox-map-crimson-gold">
+@@ -14,8 +14,9 @@
+   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
+   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
+   <link rel="stylesheet" href="../guardian-workspace-v2/paradox-item-cards.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1&amp;hover=20260909-scope-1&amp;roll=20260909-apply-1">
+-  <link rel="stylesheet" href="./vault.css?v=20260911-live-transfer-1">
+-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260908-icon-hover-1&amp;weapons=20260909-presentation-1">
++  <link rel="stylesheet" href="./vault.css?v=20260912-inventory-structure-1">
++  <link rel="stylesheet" href="../../shared/guardian-inventory-workspace.css?v=20260912-character-style-fix-1">
++  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?v=20260912-global-icon-audit-1&amp;inventory=20260912-shared-character-1&amp;gear=20260912-fixed-pixels-1">
+   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1" defer></script>
+ </head>
+ <body class="apx-destination-page forge-paradox-map-background">
+@@ -32,7 +33,7 @@
+     </section>
+ 
+     <section class="apx-section vault-transfer-workspace" aria-labelledby="vaultTransferTitle">
+-      <div class="apx-section-heading"><div><p class="apx-eyebrow">LIVE BUNGIE INVENTORY</p><h2 id="vaultTransferTitle">Guardian transfer workspace</h2></div><span class="apx-status-chip">REAL ACCOUNT ACTIONS</span></div>
++      <div class="apx-section-heading"><div><p class="apx-eyebrow">GUARDIAN TRANSFER WORKSPACE</p><h2 id="vaultTransferTitle">INVENTORY</h2></div><span class="apx-status-chip">REAL ACCOUNT ACTIONS</span></div>
+       <p class="vault-context">Drag an exact owned item between Guardians and Vault. Every drop requires confirmation, calls Bungie, and waits for fresh inventory readback before the page moves the item.</p>
+       <div class="vault-runtime-status" id="vaultRuntimeStatus" role="status">Resolving Bungie inventory...</div>
+       <div class="vault-transfer-board" id="vaultTransferWorkspace" aria-live="polite"></div>
+@@ -89,6 +90,6 @@
+     </form>
+   </dialog>
+   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1"></script>
+-  <script type="module" src="./vault.mjs?v=20260911-live-transfer-1&amp;transport=20260911-compact-plugs-1"></script>
++  <script type="module" src="./vault.mjs?v=20260912-shared-character-inventory-1&amp;transport=20260911-compact-plugs-1"></script>
+ </body>
+ </html>
+diff --git a/astrix-app/tools/validate-responsive-layout-contract.mjs b/astrix-app/tools/validate-responsive-layout-contract.mjs
+index dcac729..8fff94f 100644
+--- a/astrix-app/tools/validate-responsive-layout-contract.mjs
++++ b/astrix-app/tools/validate-responsive-layout-contract.mjs
+@@ -73,9 +73,10 @@ for(const token of [
+   '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
+   '--apx-icon-selector:4.25rem;',
+   '--apx-icon-inspect:7rem;',
+-  '--apx-icon-gear-art-width:clamp(76px,5vw,96px);',
++  '--apx-icon-gear-art-width:96px;',
+   '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * 1.22);'
+ ])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
++assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:76px/,'Shared gear art must retain the approved fixed 76px phone breakpoint');
+ assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
+ assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
+ 
+diff --git a/astrix-app/tools/validate-scope-guard.mjs b/astrix-app/tools/validate-scope-guard.mjs
+index 9aa7b22..6b89be7 100644
+--- a/astrix-app/tools/validate-scope-guard.mjs
++++ b/astrix-app/tools/validate-scope-guard.mjs
+@@ -173,6 +173,8 @@ const allowed=new Set([
+   'astrix-app/shared/astrix-desktop-density.css',
+   'astrix-app/shared/astrix-hero-cards.mjs',
+   'astrix-app/shared/astrix-hero-cards.css',
++  'astrix-app/shared/guardian-inventory-workspace.mjs',
++  'astrix-app/shared/guardian-inventory-workspace.css',
+   'astrix-app/tools/validate-journey-visual-pass.mjs',
+   'astrix-app/tools/validate-guardian-character-cards.py',
+   'astrix-app/tools/validate-guardian-semantics.mjs',

@@ -1,0 +1,111 @@
+diff --git a/astrix-app/pages/forge-loader/forge-loader.mjs b/astrix-app/pages/forge-loader/forge-loader.mjs
+index 62ca2c4..79a3439 100644
+--- a/astrix-app/pages/forge-loader/forge-loader.mjs
++++ b/astrix-app/pages/forge-loader/forge-loader.mjs
+@@ -13,6 +13,8 @@ import {forgeLoaderEvaluateReady,forgeLoaderResidency} from './forge-loader-resi
+ import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260907-shared-page-load-1&contract=20260910-owned-weapon-1&transport=20260911-compact-plugs-1';
+ import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+ import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
++import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1';
++import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
+ 
+ mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
+ 
+@@ -153,6 +155,39 @@ function renderHero(){
+   host.innerHTML=character?`<strong>${esc(displayName||'BUNGIE IDENTITY UNAVAILABLE')}</strong><span>${esc(label)} · ${esc(subclassName||'Subclass verifying')}</span><b>✦ ${esc(character.light??'—')}</b>`:'<span>Verified Guardian unavailable.</span>';
+ }
+ 
++function definitionIdentity(hash){
++  const definitions=inventoryDefinitions(),definition=definitions?.[String(hash)]||null,display=definition?.displayProperties||{};
++  if(!definition||!text(display.name))return null;
++  return {hash:Number(hash),bungieHash:Number(hash),name:text(display.name),description:text(display.description),icon:display.icon?new URL(display.icon,'https://www.bungie.net').toString():'',definition,identitySource:'DestinyInventoryItemDefinition'};
++}
++
++function selectorExoticIntrinsic(group){
++  const prepared=group?.representative?.armourSemantics?.exoticPerk??group?.representative?.exoticPerk??null;
++  if(prepared)return prepared;
++  const definitions=inventoryDefinitions(),definition=group?.definition??group?.preview?.definition??definitions?.[String(group?.hash)]??null;
++  const intrinsicHashes=(definition?.sockets?.intrinsicSockets||[]).map(row=>Number(row?.plugItemHash)).filter(hash=>Number.isInteger(hash)&&hash>0);
++  const entryPlugs=(definition?.sockets?.socketEntries||[]).map(entry=>{
++    const plug=definitionIdentity(entry?.singleInitialItemHash);
++    return plug?{...plug,armourItemTierType:Number(definition?.inventory?.tierType)}:null;
++  }).filter(plug=>plug&&classifyArmourPlug(plug)==='exotic-perk');
++  return intrinsicHashes.map(definitionIdentity).find(Boolean)||entryPlugs[0]||null;
++}
++
++function selectorExoticHoverItem(group){
++  const definition=group?.definition??group?.preview?.definition??group?.representative?.definition??inventoryDefinitions()?.[String(group?.hash)]??null;
++  const tier=text(definition?.inventory?.tierTypeName||group?.preview?.tier||group?.representative?.tier||'Exotic');
++  const intrinsic=selectorExoticIntrinsic(group),ownedCount=Array.isArray(group?.instances)?group.instances.length:0;
++  return {itemHash:Number(group?.hash),name:text(group?.name),icon:text(group?.icon),slotLabel:text(group?.slotLabel||'Armour'),itemTypeDisplayName:text(group?.slotLabel||'Armour'),tier,isExotic:true,definition,exoticPerk:intrinsic,intrinsicTrait:intrinsic,armourSemantics:{exoticPerk:intrinsic},source:{label:`Owned ${ownedCount} ${ownedCount===1?'copy':'copies'} across account`}};
++}
++
++function bindSelectorExoticHovers(host,groups){
++  const byKey=new Map(groups.map(group=>[group.key,group]));
++  host?.querySelectorAll?.('[data-exotic-hover-key]').forEach(target=>{
++    const group=byKey.get(target.dataset.exoticHoverKey);
++    if(group)bindParadoxItemHover(target,selectorExoticHoverItem(group),'armour',{contextLabel:'BUILD ANCHOR',definitionOnly:true});
++  });
++}
++
+ function renderExotics(){
+   const groups=exoticGroups(),host=byId('forgeExoticSlots');
+   const ownedCount=groups.filter(group=>group.owned).length;
+@@ -162,9 +197,10 @@ function renderExotics(){
+     return `<section class="forge-exotic-slot"><h3>${esc(slot.label.toUpperCase())}</h3><div class="forge-exotic-grid">${rows.length?rows.map(group=>{
+       const selected=group.owned&&group.key===selectedExoticKey;
+       const ownership=group.owned?`${group.instances.length} owned ${group.instances.length===1?'copy':'copies'}`:'not owned';
+-      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
++      return `<button type="button" class="forge-exotic${selected?' is-selected':''}${group.owned?'':' is-unowned'}" data-exotic-hover-key="${esc(group.key)}" ${group.owned?`data-exotic-key="${esc(group.key)}"`:''} aria-pressed="${selected}" aria-disabled="${group.owned?'false':'true'}" aria-label="${group.owned?'Select':'Unavailable'} ${esc(group.name)}, ${ownership}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
+     }).join(''):'<div class="forge-empty">No verified Exotic definitions</div>'}</div></section>`;
+   }).join('');
++  bindSelectorExoticHovers(host,groups);
+ }
+ 
+ function bonusReason(row,count,choice){
+diff --git a/astrix-app/pages/forge-loader/index.html b/astrix-app/pages/forge-loader/index.html
+index c696aa9..9aac2cb 100644
+--- a/astrix-app/pages/forge-loader/index.html
++++ b/astrix-app/pages/forge-loader/index.html
+@@ -98,6 +98,6 @@
+ 
+   <aside class="forge-item-inspect" id="forgeItemInspect" hidden aria-hidden="true"></aside>
+   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260906-page-data-recovery-1&amp;transport=20260911-compact-plugs-1"></script>
+-  <script type="module" src="./forge-loader.mjs?v=20260910-source-coverage-2&amp;effect=20260910-fixed-intrinsic-1&amp;transport=20260911-compact-plugs-1"></script>
++  <script type="module" src="./forge-loader.mjs?v=20260910-source-coverage-2&amp;effect=20260910-fixed-intrinsic-1&amp;transport=20260911-compact-plugs-1&amp;hover=20260911-type-level-1"></script>
+ </body>
+ </html>
+diff --git a/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs b/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs
+index e7023cd..2c34107 100644
+--- a/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs
++++ b/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs
+@@ -78,16 +78,24 @@ function armourDetails(item){
+   return `<section class="paradox-section paradox-section--stats"><h3>ARMOUR STATS</h3>${statMarkup(item,'armour')}</section>${identityRows}${modRows}`;
+ }
+ 
+-function cardMarkup(item,kind,{contextLabel=''}={}){
++function armourDefinitionDetails(item){
++  const intrinsic=item?.armourSemantics?.exoticPerk??item?.exoticPerk??item?.intrinsicTrait??null;
++  if(!intrinsic)return '<section class="paradox-section"><h3>INTRINSIC EXOTIC PERK</h3><p class="inspector-empty">Bungie did not return an intrinsic perk definition for this Exotic.</p></section>';
++  const icon=itemIcon(intrinsic),description=String(intrinsic?.description??intrinsic?.displayProperties?.description??'').trim();
++  return `<section class="paradox-section"><h3>INTRINSIC EXOTIC PERK</h3><div class="paradox-identity-card"><div class="paradox-identity-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">◆</span>'}</div><div><small>EXOTIC ARMOUR TRAIT</small><b>${esc(itemName(intrinsic,'Intrinsic perk'))}</b>${description?`<p>${esc(description)}</p>`:''}</div></div></section>`;
++}
++
++function cardMarkup(item,kind,{contextLabel='',definitionOnly=false}={}){
+   const icon=itemIcon(item);
+   const release=item?.releaseWatermark?.icon?{icon:asset(item.releaseWatermark.icon),source:item.releaseWatermark.source??'prepared-item'}:resolveItemWatermark(item??{},item?.definition??{});
+   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
+-  const power=item?.power??item?.primaryStat?.value??'—';
++  const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
++  const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
+   const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Verified Bungie item');
+   return `<article class="paradox-item-card paradox-item-card--${kind} paradox-item-hover-card" data-item-kind="${kind}">
+-    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(power)}</b></div></header>
+-    <div class="paradox-card-body">${kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
+-    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
++    <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>${metricLabel}</small><b>${esc(metricValue)}</b></div></header>
++    <div class="paradox-card-body">${definitionOnly&&kind==='armour'?armourDefinitionDetails(item):kind==='weapon'?weaponDetails(item):armourDetails(item)}</div>
++    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${definitionOnly?'TYPE LEVEL BUNGIE DATA':item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
+   </article>`;
+ }
+ 

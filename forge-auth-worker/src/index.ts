@@ -9,6 +9,7 @@ import {
 } from "./auth-record";
 import { allowedOrigins, approvedReturnUrl, handlePreflight, json, withCors } from "./web";
 import { profileSections } from "./profile-sections";
+import { profileFailureDetails, type SnapshotDiagnostics } from "./profile-snapshot-error";
 import { paradoxLoadoutsRoute } from "./paradox-loadouts";
 import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./page-semantics";
 import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
@@ -993,18 +994,13 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
       Pragma: "no-cache"
     }
   });
-  const payload = await response.json<BungieApiResponse<DestinyProfilePayload>>().catch(() => null);
+  const payload = await response.json<BungieApiResponse<DestinyProfilePayload> & { diagnostics?: SnapshotDiagnostics }>().catch(() => null);
   if (!response.ok || !payload?.Response) {
-    console.error("bungie_profile_failed", {
-      status: response.status,
-      errorCode: payload?.ErrorCode,
-      errorStatus: payload?.ErrorStatus
-    });
+    const details = profileFailureDetails(response.status, payload);
+    console.error("bungie_profile_failed", details);
     return withCors(request, env, json({
       error: "bungie_profile_failed",
-      status: response.status,
-      errorCode: payload?.ErrorCode ?? null,
-      errorStatus: payload?.ErrorStatus ?? null
+      ...details
     }, response.status >= 400 && response.status < 500 ? response.status : 502));
   }
 
