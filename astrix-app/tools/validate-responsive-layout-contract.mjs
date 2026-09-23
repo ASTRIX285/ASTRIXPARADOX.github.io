@@ -67,16 +67,22 @@ for(const token of [
   '--apx-icon-season:calc(18 * var(--apx-icon-unit,1px));',
   '--apx-icon-vault-selection:calc(40 * var(--apx-icon-unit,1px));',
   '--apx-icon-set-head:calc(44.8 * var(--apx-icon-unit,1px));',
-  '--apx-icon-card:calc(56 * var(--apx-icon-unit,1px));',
+  '--apx-icon-card:50px;',
   '--apx-icon-stage:calc(60.8 * var(--apx-icon-unit,1px));',
   '--apx-icon-record:calc(48 * var(--apx-icon-unit,1px));',
-  '--apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));',
-  '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
+  '--apx-icon-catalog:44px;',
+  '--apx-icon-weapon-card:50px;',
   '--apx-icon-selector:calc(68 * var(--apx-icon-unit,1px));',
   '--apx-icon-inspect:calc(112 * var(--apx-icon-unit,1px));',
   '--apx-icon-gear-art-width:var(--apx-inventory-size,96px);',
   '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * var(--apx-inventory-ratio,1.22));'
 ])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
+const forgeLoaderIconTokens=densityCss.match(/:root:has\(>body\.forge-loader-page\)\{([^}]+)\}/)?.[1]||'';
+for(const token of [
+  '--apx-icon-card:calc(56 * var(--apx-icon-unit,1px));',
+  '--apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));',
+  '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);'
+])assert.ok(forgeLoaderIconTokens.includes(token),`Forge Loader icon token must remain unchanged: ${token}`);
 assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:var\(--apx-inventory-size,76px\)/,'Excluded pages retain the legacy 76px phone gear size');
 assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
 assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
