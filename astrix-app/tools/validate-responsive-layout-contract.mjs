@@ -74,16 +74,17 @@ for(const token of [
   '--apx-icon-weapon-card:50px;',
   '--apx-icon-selector:calc(68 * var(--apx-icon-unit,1px));',
   '--apx-icon-inspect:calc(112 * var(--apx-icon-unit,1px));',
-  '--apx-icon-gear-art-width:var(--apx-inventory-size,96px);',
+  '--apx-icon-gear-art-width:var(--apx-inventory-size,50px);',
   '--apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * var(--apx-inventory-ratio,1.22));'
 ])assert.ok(densityCss.includes(token),`Shared item icon token drifted: ${token}`);
 const forgeLoaderIconTokens=densityCss.match(/:root:has\(>body\.forge-loader-page\)\{([^}]+)\}/)?.[1]||'';
 for(const token of [
   '--apx-icon-card:calc(56 * var(--apx-icon-unit,1px));',
   '--apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));',
-  '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);'
+  '--apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);',
+  '--apx-equipment-icon-size:max(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20));'
 ])assert.ok(forgeLoaderIconTokens.includes(token),`Forge Loader icon token must remain unchanged: ${token}`);
-assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:var\(--apx-inventory-size,76px\)/,'Excluded pages retain the legacy 76px phone gear size');
+assert.match(densityCss,/@media \(max-width:720px\)\{[\s\S]*?--apx-icon-gear-art-width:var\(--apx-inventory-size,50px\)/,'Gear fallback stays at 50px on phones');
 assert.match(densityCss,/body\.apx-destination-page \.apx-page-shell\{width:100%;max-width:none\}/,'Scaffold destinations must use the full desktop monitor');
 assert.doesNotMatch(densityCss,/transform\s*:\s*scale\(/,'The shared density layer must not use transform scaling');
 
@@ -145,8 +146,34 @@ console.log('RESPONSIVE_NATIVE_SCALE=PASS');
 console.log('RESPONSIVE_LOADOUT_ROW=PASS');
 console.log('RESPONSIVE_TABLET_PHONE_SOURCE=PASS');
 
-// Intentional fluid image contract; the legacy values remain fallbacks only.
+// Non-gear images retain their existing fluid contract. Gear is fixed.
 assert.match(densityCss,/:root:has\(>body\.apx-fluid-icons\)\{[\s\S]*?--apx-icon-unit:calc\(clamp\(40px,3\.2vw,64px\) \/ 61\.44\)/,'Only opted-in pages use the shared viewport image unit');
-assert.match(densityCss,/--apx-inventory-size:clamp\(48px,calc\(50 \* var\(--apx-icon-unit\)\)/,'Inventory uses the DIM 50px baseline and 48px floor');
+assert.match(densityCss,/--apx-inventory-size:var\(--apx-equipment-icon-size\)/,'Inventory must use the fixed equipment standard');
+assert.match(densityCss,/:root,\s*:root:has\(>body\.apx-fluid-icons\)\{[^}]*--apx-equipment-icon-size:50px;/,'Equipment must remain 50px independently of viewport size');
 assert.match(densityCss,/--apx-inventory-ratio:1;/,'DIM-equivalent inventory thumbnails are square');
 for(const [label,html] of appPages.filter(([label])=>['Forge Loader','Journey','Mission Reports'].includes(label)))assert.doesNotMatch(html,/apx-fluid-icons/,label+' remains outside this fluid sizing round');
+
+// Prompt 7b: gear geometry is independent of viewport and container width.
+const inventoryCss=await readFile(new URL('../../shared/guardian-inventory-workspace.css',ROOT),'utf8');
+assert.match(inventoryCss,/grid-template-columns:repeat\(10,var\(--apx-equipment-icon-size\)\)/,'Character must retain ten fixed-width carried-item tracks');
+assert.doesNotMatch(inventoryCss,/(?:100|22|122)cqw|--character-item-size:48px/,'Character gear must not shrink or stretch with its container');
+assert.match(inventoryCss,/--apx-tile-height:calc\(var\(--character-item-size\) \* 1\.22\)/,'Fixed art must retain its separate power footer');
+assert.match(sources.build,/\.manual-item-grid\{--apx-icon-gear-art-width:var\(--apx-icon-catalog,44px\)/,'The owned-item browse grid must use the catalogue tier');
+for(const property of ['--apx-tile-art-height','--apx-tile-footer-top'])assert.ok(sources.build.includes(`${property}:var(--apx-icon-catalog,44px)`),'Picker art and footer must both inherit the catalogue tier');
+assert.match(sources.items,/--paradox-inspect-art-width:var\(--apx-equipment-icon-size\)/,'Gear inspection must use the equipment standard');
+assert.match(sources.items,/body\.forge-loader-page \.paradox-item-inspect-card\{--paradox-inspect-art-width:calc\(var\(--apx-icon-gear-art-width\) \* \.8\)\}/,'Forge Loader inspection must retain its original scale');
+assert.match(densityCss,/body\.forge-loader-page \.vault-transfer-item:not\(\.has-item-tile\)\{\s*--apx-icon-gear-art-width:50px;\s*--apx-icon-gear-art-height:63px;/,'Forge Loader non-structured items must retain their original dimensions');
+const gearSizeOwners=[...densityCss.matchAll(/([^{}]+)\{([^{}]*--apx-equipment-icon-size:[^{}]*)\}/g)];
+assert.equal(gearSizeOwners.length,2,'Only the fixed default and protected Forge Loader exception may own equipment sizing');
+assert.equal(gearSizeOwners.filter(match=>/--apx-equipment-icon-size:50px;/.test(match[2])).length,1);
+assert.equal(gearSizeOwners.filter(match=>match[1].includes('body.forge-loader-page')).length,1);
+const journeyRenderer=await readFile(new URL('../journey/journey.mjs',ROOT),'utf8');
+assert.ok(journeyRenderer.includes("Number(itemHash)>0?' is-gear':''"),'Only item-backed records opt into collection gear styling');
+assert.match(journeyCss,/\.journey-record-row\.is-gear \.journey-record-icon,[\s\S]*?width:var\(--apx-icon-catalog,44px\);height:var\(--apx-icon-catalog,44px\)/,'Collection gear icons must use the fixed catalogue tier');
+for(const prefix of ['','ASTRIX285.github.io/']){
+  const repositoryRoot=new URL('../../',import.meta.url);
+  const compact=await readFile(new URL(`${prefix}astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2-compact.css`,repositoryRoot),'utf8');
+  assert.match(compact,/\.weap \.art\{width:var\(--apx-equipment-icon-size,50px\);height:var\(--apx-equipment-icon-size,50px\)/,'Legacy weapon artwork must retain fixed square geometry');
+  assert.match(compact,/\.arm\{width:var\(--apx-equipment-icon-size,50px\);height:var\(--apx-equipment-icon-size,50px\)/,'Legacy armour artwork must retain fixed square geometry');
+}
+console.log('GEAR_FIXED_STANDARDS_AND_FORGE_LOADER_GUARDS=PASS');

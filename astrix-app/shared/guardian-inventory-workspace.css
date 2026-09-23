@@ -77,7 +77,7 @@
    These are native CSS pixels, independent of the viewport-normalized icon unit.
    Only Character inventory opts in; other destinations keep their geometry. */
 .character-inventory-workspace{
-  --character-item-size:50px;
+  --character-item-size:var(--apx-equipment-icon-size);
   --apx-icon-gear-art-width:var(--character-item-size);
   --apx-icon-gear-art-height:var(--character-item-size);
   --apx-tile-label-size:calc(var(--character-item-size) / 5);
@@ -95,16 +95,13 @@
 .character-inventory-workspace .vault-character-column{width:100%}
 .character-inventory-workspace .vault-transfer-items{gap:6px;flex-wrap:wrap;overflow:visible}
 
-@media(max-width:1025px){.character-inventory-workspace{--character-item-size:48px}}
-
-/* The board and the loadout strip share the same panel content width. Size
-   each inventory card from the strip's twenty slots and nineteen 4px gaps;
-   ten carried-item slots must not stretch to fill that entire width. */
+/* Keep ten carried-item tracks at the fixed gear size. Narrow panels scroll
+   instead of shrinking gear; the separate in-game loadout strip is unchanged. */
 body.guardian-main-page .character-inventory-workspace{container-type:inline-size}
 body.guardian-main-page .character-inventory-workspace .vault-postmaster-section{display:none}
 body.guardian-main-page .character-inventory-workspace .vault-transfer-items{
   display:grid;
-  grid-template-columns:repeat(10,max(32px,calc((100cqw - 76px) / 20)));
+  grid-template-columns:repeat(10,var(--apx-equipment-icon-size));
   gap:4px;
   overflow-x:auto;
 }
@@ -114,12 +111,12 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
   min-width:0;
   padding:0;
   border:0;
-  --character-item-size:100cqw;
+  --character-item-size:var(--apx-equipment-icon-size);
   --apx-icon-gear-art-width:var(--character-item-size);
   --apx-icon-gear-art-height:var(--character-item-size);
   --apx-tile-label-size:calc(var(--character-item-size) / 5);
-  --apx-tile-badge-height:22cqw;
-  --apx-tile-height:122cqw;
+  --apx-tile-badge-height:calc(var(--character-item-size) * .22);
+  --apx-tile-height:calc(var(--character-item-size) * 1.22);
   --apx-tile-art-height:var(--character-item-size);
   --apx-tile-footer-top:var(--character-item-size);
 }

@@ -827,11 +827,11 @@ const PATTERN_CATALYST_TYPE_DEFINITIONS=[
   {key:'heavy',name:'Heavy Weapon Patterns',shortName:'Heavy',categories:['Grenade Launchers','Linear Fusion Rifles','Machine Guns','Rocket Launchers','Swords']},
   {key:'catalysts',name:'Exotic Catalysts',shortName:'Catalysts',categories:['Kinetic Weapons','Energy Weapons','Power Weapons']}
 ];
-function makeJourneyRecordRow({hash,name,icon,description='',completed=null,total=null,threshold=null,unit='',gilded=false,complete=false,crafted=false,claimed=false,value=null,onSelect=null,objectives=[]}){
+function makeJourneyRecordRow({hash,itemHash=null,name,icon,description='',completed=null,total=null,threshold=null,unit='',gilded=false,complete=false,crafted=false,claimed=false,value=null,onSelect=null,objectives=[]}){
   const interactive=typeof onSelect==='function';
   const row=document.createElement(interactive?'button':'article');
   if(interactive){row.type='button';row.addEventListener('click',onSelect);}
-  row.className=`journey-record-row${gilded?' is-gilded':''}${complete?' is-complete':''}${crafted?' is-crafted':''}${icon?'':' has-no-icon'}`;
+  row.className=`journey-record-row${Number(itemHash)>0?' is-gear':''}${gilded?' is-gilded':''}${complete?' is-complete':''}${crafted?' is-crafted':''}${icon?'':' has-no-icon'}`;
   if(hash!==null&&hash!==undefined)row.dataset.presentationNodeHash=String(hash);
   if(icon){
     const image=document.createElement('img');

@@ -72,7 +72,7 @@
   }
   .stage .identity{
     left:18px!important;
-    top:82px!important;
+    top:var(--apx-equipment-icon-size,50px)!important;
     width:calc(100% - 36px)!important;
     max-width:none!important;
   }
@@ -117,7 +117,7 @@
     width:100%!important;
   }
   .gear-weapons .weap{width:100%!important;min-width:0!important;max-width:none!important}
-  .gear-weapons .weap .art{width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important}
+  .gear-weapons .weap .art{width:var(--apx-equipment-icon-size,50px)!important;height:var(--apx-equipment-icon-size,50px)!important;min-height:0!important;aspect-ratio:1/1!important}
   .gear-weapons .weap .cap{width:100%!important}
 
   .gear-combined{padding:14px!important;min-height:0!important;overflow:visible!important}
@@ -129,7 +129,7 @@
   }
   .gear-slot{
     display:grid!important;
-    grid-template-columns:82px minmax(0,1fr)!important;
+    grid-template-columns:var(--apx-equipment-icon-size,50px) minmax(0,1fr)!important;
     grid-template-areas:"label label" "arm mods" "appearance mods"!important;
     gap:7px 12px!important;
     width:100%!important;
@@ -137,8 +137,8 @@
     padding:12px!important;
   }
   .gear-slot-label{grid-area:label!important}
-  .gear-arm-row{grid-area:arm!important;min-height:82px!important;align-self:start!important}
-  .gear-arm-anchor .arm{width:82px!important;height:82px!important;min-width:82px!important;min-height:82px!important}
+  .gear-arm-row{grid-area:arm!important;min-height:var(--apx-equipment-icon-size,50px)!important;align-self:start!important}
+  .gear-arm-anchor .arm{width:var(--apx-equipment-icon-size,50px)!important;height:var(--apx-equipment-icon-size,50px)!important;min-width:var(--apx-equipment-icon-size,50px)!important;min-height:var(--apx-equipment-icon-size,50px)!important}
   .gear-appearance-row{grid-area:appearance!important;min-height:34px!important;margin:0!important}
   .gear-slot-divider{display:none!important}
   .gear-mods{

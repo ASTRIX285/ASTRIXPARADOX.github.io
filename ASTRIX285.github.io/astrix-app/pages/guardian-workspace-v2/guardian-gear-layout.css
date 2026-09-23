@@ -10,9 +10,9 @@
 .equip.gear-layout-active>.gear-combined{grid-column:2}
 
 .gear-weapons{min-height:0!important;height:max-content!important;align-self:start!important;overflow:hidden}
-.gear-weapons .weap-grid{display:grid!important;grid-template-columns:repeat(3,82px)!important;gap:7px!important;align-items:start;justify-content:start}
-.gear-weapons .weap{min-width:0!important;width:82px!important;max-width:82px!important}
-.gear-weapons .weap .art{width:82px!important;height:82px!important;aspect-ratio:1/1!important;min-height:0!important;border-radius:9px!important}
+.gear-weapons .weap-grid{display:grid!important;grid-template-columns:repeat(3,var(--apx-equipment-icon-size,50px))!important;gap:7px!important;align-items:start;justify-content:start}
+.gear-weapons .weap{min-width:0!important;width:var(--apx-equipment-icon-size,50px)!important;max-width:var(--apx-equipment-icon-size,50px)!important}
+.gear-weapons .weap .art{width:var(--apx-equipment-icon-size,50px)!important;height:var(--apx-equipment-icon-size,50px)!important;aspect-ratio:1/1!important;min-height:0!important;border-radius:9px!important}
 .gear-weapons .weap .art img{width:100%;height:100%;object-fit:cover}
 .gear-weapons .weap .cap{padding:5px 2px 0!important;background:transparent!important;border:0!important}
 .gear-weapons .weap .cap b{display:block;font-size:.54rem!important;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -28,9 +28,9 @@
 .gear-slot-label{margin-bottom:clamp(4px,.45vh,7px);color:var(--dim);font-family:Orbitron;font-size:clamp(.42rem,.35vw,.48rem);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* Armour + Exotic intrinsic sit on the same visual row. */
-.gear-arm-row{display:flex;align-items:center;justify-content:center;gap:clamp(6px,.45vw,10px);min-height:clamp(72px,7.8vh,112px)}
+.gear-arm-row{display:flex;align-items:center;justify-content:center;gap:clamp(6px,.45vw,10px);min-height:var(--apx-equipment-icon-size,50px)}
 .gear-arm-anchor{display:grid;place-items:center;margin:0}
-.gear-arm-anchor .arm{width:min(100%,clamp(66px,7vh,100px))!important;height:auto!important;aspect-ratio:1;margin:0!important;position:relative}
+.gear-arm-anchor .arm{width:var(--apx-equipment-icon-size,50px)!important;height:var(--apx-equipment-icon-size,50px)!important;aspect-ratio:1;margin:0!important;position:relative}
 .gear-arm-anchor .arm img{width:100%;height:100%;object-fit:cover}
 .gear-slot.exotic .gear-arm-anchor{transform:translateX(-4px)}
 
@@ -91,7 +91,7 @@
   .left .super-focus-icon,.left .super-focus-icon .ico-badge{width:clamp(60px,7.2vh,80px)!important;height:clamp(60px,7.2vh,80px)!important}
   .artifact-row{padding:clamp(7px,.75vh,11px)!important}
   .stage .hero-stats{top:clamp(220px,27vh,310px)!important}
-  .identity{top:clamp(82px,10vh,125px)!important}
+  .identity{top:clamp(var(--apx-equipment-icon-size,50px),10vh,125px)!important}
 }
 
 @media(max-width:1350px){

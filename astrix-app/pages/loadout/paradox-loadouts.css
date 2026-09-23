@@ -24,7 +24,7 @@
 .paradox-loadout-binding{margin-top:12px;color:var(--apx-colour-secondary,#b8c0cc);font-size:12px;overflow-wrap:anywhere}
 .paradox-loadout-provenance{margin-top:10px;color:var(--apx-colour-secondary,#b8c0cc);font-size:12px}
 .paradox-loadout-provenance summary{cursor:pointer;width:max-content}
-.saved-build-overview{--saved-gear-size:50px;--saved-socket-size:46px;--saved-gap:4px;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;background:var(--apx-colour-canvas,#060606)}
+.saved-build-overview{--saved-gear-size:var(--apx-equipment-icon-size);--saved-socket-size:46px;--saved-gap:4px;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;background:var(--apx-colour-canvas,#060606)}
 .saved-build-row{display:flex;align-items:flex-start;gap:20px;width:max-content;min-width:100%;padding:10px 4px 12px;box-sizing:border-box}
 .saved-build-subclass{display:flex;align-items:flex-start;gap:10px;flex:none}
 .saved-build-super{padding:5px 0}

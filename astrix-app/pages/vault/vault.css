@@ -27,7 +27,7 @@
 .vault-selection-head button:disabled{opacity:.38;cursor:not-allowed}
 .vault-selection-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.45rem;min-width:0}
 .vault-selection-slot{display:grid;align-items:center;gap:.5rem;padding:.35rem;border:1px solid rgba(201,168,76,.15);background:rgba(4,4,5,.66)}
-.vault-selection-slot img,.vault-selection-slot .vault-slot-empty{width:var(--apx-icon-vault-selection);height:var(--apx-icon-vault-selection);object-fit:cover;background:rgba(255,255,255,.035)}
+.vault-selection-slot img,.vault-selection-slot .vault-slot-empty{width:var(--apx-equipment-icon-size);height:var(--apx-equipment-icon-size);object-fit:cover;background:rgba(255,255,255,.035)}
 .vault-selection-slot .vault-slot-empty{display:grid;place-items:center;color:#5e5650}
 .vault-selection-slot span{min-width:0}.vault-selection-slot b,.vault-selection-slot small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vault-selection-slot b{font-size:.78rem}.vault-selection-slot small{color:var(--apx-muted);font-size:.68rem}
