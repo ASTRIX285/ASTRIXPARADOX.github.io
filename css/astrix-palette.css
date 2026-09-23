@@ -33,7 +33,7 @@
   --apx-button-disabled-opacity: .5;
 }
 @layer astrix-button-tiers {
-  body.apx-button-system :is(button, [role="button"], .improve-cta,
+  body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
     .mission-build-link, .mission-analyse-link, a.btn) {
     --apx-button-background: var(--apx-button-secondary-background);
@@ -48,7 +48,7 @@
     text-shadow: none !important;
   }
   /* Each page has one main action. Dialogs define their own active task. */
-  body.apx-button-system :is(.improve-cta, [data-improve], #toolIntroCta,
+  body[data-apx-button-system] :is(.improve-cta, [data-improve], #toolIntroCta,
     #applyWorkingBuild, #applyBuild, #confirmForgeActivity, #confirmApplyBuild,
     #dismissApplyBuild, #doneManualEditor, #characterInventoryActionConfirm, #vaultActionConfirm,
     #missionViewHistory, .mission-connect-action .bungie-auth-btn,
@@ -70,9 +70,9 @@
     --apx-button-border: var(--apx-button-primary-border);
     --apx-button-weight: var(--apx-button-primary-weight);
   }
-  body.apx-button-system.journey-page .apx-data-refresh,
-  body.apx-button-system #vaultRefreshButton,
-  body.apx-button-system :is(#journeyConnectButton, #vaultConnectButton) {
+  body[data-apx-button-system].journey-page .apx-data-refresh,
+  body[data-apx-button-system] #vaultRefreshButton,
+  body[data-apx-button-system] :is(#journeyConnectButton, #vaultConnectButton) {
     --apx-button-background: var(--apx-button-primary-background);
     --apx-button-hover: var(--apx-button-primary-hover);
     --apx-button-text: var(--apx-button-primary-text);
@@ -81,7 +81,7 @@
   }
   /* Button-shaped game content retains Bungie's artwork and state identity.
      These are secondary selectors, never a third action tier. */
-  body.apx-button-system :is(button, [role="button"], .improve-cta,
+  body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
     .mission-build-link, .mission-analyse-link, a.btn):not(
       .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
@@ -90,7 +90,7 @@
     background-image: none !important;
     box-shadow: none !important;
   }
-  body.apx-button-system :is(button, [role="button"], .improve-cta,
+  body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
     .mission-build-link, .mission-analyse-link, a.btn):hover:not(:disabled):not([aria-disabled="true"]):not(
       .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
@@ -98,19 +98,19 @@
       .gw-tile, .gw-mod-dot, .gw-armour-chip) {
     background-color: var(--apx-button-hover) !important;
   }
-  body.apx-button-system :is(button, [role="button"], .improve-cta,
+  body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
     .mission-build-link, .mission-analyse-link, a.btn):focus-visible {
     outline: 2px solid var(--apx-button-focus) !important;
     outline-offset: 3px !important;
   }
-  body.apx-button-system :is(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
+  body[data-apx-button-system] :is(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
     opacity: var(--apx-button-disabled-opacity) !important;
     cursor: not-allowed !important;
   }
   /* Preserve data-owned selection art and identity, including Journey's
      location accents. Tier rules apply to actions, not the artwork they select. */
-  body.apx-button-system :is(.guardian-loadout-slot, .guardian-character-card,
+  body[data-apx-button-system] :is(.guardian-loadout-slot, .guardian-character-card,
     .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
     .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip) {
     background-color: revert-layer !important;
@@ -119,7 +119,7 @@
     font-weight: revert-layer !important;
     text-shadow: revert-layer !important;
   }
-  body.apx-button-system button:not(.guardian-loadout-slot, .guardian-character-card,
+  body[data-apx-button-system] button:not(.guardian-loadout-slot, .guardian-character-card,
     .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
     .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip):is([aria-pressed="true"], [aria-selected="true"]) {
     border-color: var(--apx-button-focus) !important;
