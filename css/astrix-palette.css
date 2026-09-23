@@ -35,7 +35,10 @@
 @layer astrix-button-tiers {
   body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
-    .mission-build-link, .mission-analyse-link, a.btn) {
+    .mission-build-link, .mission-analyse-link, a.btn):not(
+      .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
+      .el, .selector-card, [data-recommendation-element], .apx-loc,
+      .gw-tile, .gw-mod-dot, .gw-armour-chip) {
     --apx-button-background: var(--apx-button-secondary-background);
     --apx-button-hover: var(--apx-button-secondary-hover);
     --apx-button-text: var(--apx-button-secondary-text);
@@ -107,17 +110,6 @@
   body[data-apx-button-system] :is(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
     opacity: var(--apx-button-disabled-opacity) !important;
     cursor: not-allowed !important;
-  }
-  /* Preserve data-owned selection art and identity, including Journey's
-     location accents. Tier rules apply to actions, not the artwork they select. */
-  body[data-apx-button-system] :is(.guardian-loadout-slot, .guardian-character-card,
-    .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
-    .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip) {
-    background-color: revert-layer !important;
-    border-color: revert-layer !important;
-    color: revert-layer !important;
-    font-weight: revert-layer !important;
-    text-shadow: revert-layer !important;
   }
   body[data-apx-button-system] button:not(.guardian-loadout-slot, .guardian-character-card,
     .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
