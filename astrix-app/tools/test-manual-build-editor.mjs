@@ -409,6 +409,57 @@ const namedAllowed=await stageLiveTransferPreflight(unnamedPlan,{session,authOri
 assert.equal(namedAllowed.ready,true,'Naming must preserve allowed free socket changes.');
 assert.deepEqual(namedAllowed.inGameSteps,plan.inGameSteps,'Known unsupported changes retain their existing in-game handling.');
 
+// Snapshot eligibility must not claim that the fresh Bungie check has passed.
+function applyReadinessHarness({fresh=async()=>profilePayload()}={}){
+  const nodes=new Map(),requests=[],state={workingBuild:baseBuild},snapshot=clone(unnamedPlan);
+  const node=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',hidden:id==='applyConfirmationDialog',disabled:false,setAttribute(){},focus(){}});return nodes.get(id);};
+  const context={
+    byId:node,buildLivePlan:()=>clone(snapshot),readState:()=>state,currentBuild:()=>baseBuild,
+    liveActionBusy:false,livePreflightBusy:false,livePreflightRequest:0,
+    FORGE_BUNGIE_SESSION:session,pendingApplyPlan:null,pendingApplyEntries:[],applyDialogMode:'idle',
+    document:{body:{classList:{add(){}}}},
+    setLiveActionBanner:message=>{node('liveActionBanner').textContent=message;},
+    stageLiveTransferPreflight:(staged,options)=>stageLiveTransferPreflight(staged,{...options,authOrigin:'https://auth.test',fetchImpl:async(url,init={})=>{requests.push({url:String(url),method:String(init.method||'GET').toUpperCase()});return response(await fresh());}}),
+    createApplyReviewEntries:()=>[],renderApplyReviewGrid(){}
+  };
+  runInNewContext(applyPageSource.slice(applyPageSource.indexOf('function renderApplyControls('),applyPageSource.indexOf('function applyEntityIndex('))+applyPageSource.slice(applyPageSource.indexOf('async function openApplyConfirmation('),applyPageSource.indexOf('async function executeConfirmedApply('))+';this.renderControls=renderApplyControls;this.openConfirmation=openApplyConfirmation;',context);
+  return {context,nodes,node,requests,snapshot};
+}
+let finishReadinessCheck;
+const readinessCheck=applyReadinessHarness({fresh:()=>new Promise(resolve=>{finishReadinessCheck=resolve;})});
+readinessCheck.context.renderControls(baseBuild);
+assert.match(readinessCheck.node('liveActionBanner').textContent,/Ready for a live check/,'A snapshot-only plan must describe readiness for checking, not readiness for writes.');
+assert.equal(readinessCheck.node('liveTransferStatus').textContent,readinessCheck.node('liveActionBanner').textContent,'Both Apply entry surfaces must communicate the same snapshot status.');
+assert.match(readinessCheck.node('liveTransferStatus').textContent,/staged socket changes/);
+assert.ok(readinessCheck.node('liveTransferStatus').textContent.includes(`${plan.inGameSteps.length} in-game`),'Known manual steps must remain explicit before the fresh check.');
+const checkingPromise=readinessCheck.context.openConfirmation();
+assert.match(readinessCheck.node('liveTransferStatus').textContent,/checking fresh Guardian/);
+assert.equal(readinessCheck.node('applyWorkingBuild').disabled,true,'The live check must still prevent overlapping Apply attempts.');
+finishReadinessCheck(profilePayload({compatible:false}));await checkingPromise;
+assert.match(readinessCheck.node('liveActionBanner').textContent,/Apply blocked.*Test Trait on Test Legendary/);
+assert.equal(readinessCheck.node('liveTransferStatus').textContent,readinessCheck.node('liveActionBanner').textContent,'Fresh socket rejection must replace the footer status, including after finally re-renders controls.');
+assert.equal(readinessCheck.node('applyConfirmationDialog').hidden,true);
+assert.equal(readinessCheck.context.pendingApplyPlan,null,'A blocked fresh check must never prepare a confirmation for writes.');
+assert.equal(readinessCheck.node('applyWorkingBuild').disabled,false,'The player can retry after resolving the current Bungie block.');
+assert.deepEqual(readinessCheck.requests.map(row=>row.method),['GET'],'A blocked readiness check must remain read-only.');
+assert.deepEqual(readinessCheck.snapshot,unnamedPlan,'Status rendering cannot reclassify an automatic socket change as a manual step.');
+readinessCheck.context.renderControls(baseBuild);
+assert.match(readinessCheck.node('liveTransferStatus').textContent,/Ready for a live check/,'A newly rendered Working Build must not retain the previous live failure.');
+
+const allowedReadiness=applyReadinessHarness();
+allowedReadiness.context.renderControls(baseBuild);await allowedReadiness.context.openConfirmation();
+assert.match(allowedReadiness.node('liveTransferStatus').textContent,/Live check passed.*Review and confirm/);
+assert.equal(allowedReadiness.node('applyConfirmationDialog').hidden,false);
+assert.equal(allowedReadiness.context.pendingApplyPlan.livePreflight.status,'passed');
+assert.deepEqual(allowedReadiness.context.pendingApplyPlan.inGameSteps,plan.inGameSteps,'Successful checks must preserve all explicit in-game steps.');
+assert.deepEqual(allowedReadiness.requests.map(row=>row.method),['GET'],'Passing a live check must not perform Apply without final confirmation.');
+
+const failedReadiness=applyReadinessHarness({fresh:async()=>{throw new Error('Profile connection failed');}});
+failedReadiness.context.renderControls(baseBuild);await failedReadiness.context.openConfirmation();
+assert.match(failedReadiness.node('liveActionBanner').textContent,/Apply blocked.*Profile connection failed/);
+assert.equal(failedReadiness.node('liveTransferStatus').textContent,failedReadiness.node('liveActionBanner').textContent,'A profile-fetch failure must also replace the snapshot footer claim.');
+assert.equal(failedReadiness.node('applyConfirmationDialog').hidden,true);
+
 const noTransferPlan=clone(plan);
 noTransferPlan.transfers=[];
 const transferPhase=noTransferPlan.phases.find(phase=>phase.capability==='transferItems');
