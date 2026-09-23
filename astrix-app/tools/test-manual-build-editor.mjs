@@ -218,7 +218,8 @@ assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*b
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*background:\s*rgba\(3,3,5,\.46\)/s,'The season circle must remain translucent over the restored Figma tier strip.');
 assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
 assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
-assert.match(sharedTileCss,/\.tile-breaker img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
+assert.match(sharedTileCss,/\.tile-breaker img\s*\{\s*filter: drop-shadow\(0 1px 2px rgba\(0,0,0,\.9\)\);\s*\}/s,'The real Bungie champion icon must preserve its native colours with only a legibility shadow.');
+assert.doesNotMatch(sharedTileCss,/\.tile-breaker img\s*\{[^}]*(?:sepia|saturate|hue-rotate|invert|brightness|contrast)\(/s,'Champion artwork must never acquire a brand-colour filter.');
 assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
 assert.match(sharedTileCss,/\.tile-breaker,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
