@@ -218,7 +218,8 @@ assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1;[^}]*b
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*background:\s*rgba\(3,3,5,\.46\)/s,'The season circle must remain translucent over the restored Figma tier strip.');
 assert.match(sharedTileCss,/\.tile-season-icon img\s*\{[^}]*width:\s*370%;[^}]*height:\s*370%;[^}]*object-position:\s*left top/s,'The genuine Bungie watermark canvas must be cropped to its top-left season emblem inside the circle.');
 assert.match(sharedTileCss,/\.tile-footer\s*\{[^}]*display:\s*flex;[^}]*padding:/s,'The footer must distribute its real traits and power across the complete grey section.');
-assert.match(sharedTileCss,/\.tile-breaker img\s*\{[^}]*filter:[^}]*sepia\(79%\)[^}]*drop-shadow/s,'The real Bungie champion trait icon must use the approved gold footer treatment.');
+assert.match(sharedTileCss,/\.tile-breaker img\s*\{\s*filter: drop-shadow\(0 1px 2px rgba\(0,0,0,\.9\)\);\s*\}/s,'The real Bungie champion icon must preserve its native colours with only a legibility shadow.');
+assert.doesNotMatch(sharedTileCss,/\.tile-breaker img\s*\{[^}]*(?:sepia|saturate|hue-rotate|invert|brightness|contrast)\(/s,'Champion artwork must never acquire a brand-colour filter.');
 assert.match(sharedTileCss,/\.tile-lock i\s*\{[^}]*width:\s*76%;[^}]*height:\s*52%;[^}]*border:\s*2px solid #6fffc8/s,'The real locked state must use the clearly enlarged bright green glyph.');
 assert.match(sharedTileCss,/\.tile-breaker,[\s\S]*\.tile-corner-badge\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent/s,'Footer and corner icons must remain unboxed overlays.');
 assert.doesNotMatch(sharedTileCss,/PLACEHOLDER|^\.item-tile\s*\{/m,'The shipped shared tile CSS must contain neither placeholder fills nor unscoped tile selectors.');
@@ -1014,3 +1015,21 @@ await assert.rejects(pageApi.preparePayload(mismatched),/armour index/i,'Reject 
 const alreadyResolved=clone(preparedEquipped);delete alreadyResolved.forgeArmourIndex;
 assert.ok((await pageApi.preparePayload(alreadyResolved)).definitions['10000'],'Fresh profiles with resolved definitions must also remain supported');
 console.log('LOADOUT_EQUIPPED_ARMOUR=PASS prepared index, three Guardians, five slots, live mods, appearance, fresh profile and version guard');
+
+// Prompt 8: the recommended result has one committing action, with Back/Test
+// secondary, and every app entry point opts into the same action tokens.
+const actionPalette=readFileSync(new URL('../../css/astrix-palette.css',import.meta.url),'utf8');
+const actionBuildHtml=readFileSync(new URL('../pages/guardian-workspace-v2/paradox-build-space/index.html',import.meta.url),'utf8');
+assert.match(actionBuildHtml,/<button[^>]*class="primary"[^>]*id="applyBuild"/,'Apply must be the primary Recommended Build action.');
+assert.match(actionBuildHtml,/<button[^>]*class="ghost-btn test-build-review-btn"[^>]*id="continueToBuildTest"/,'Test must be secondary to Apply.');
+assert.match(actionBuildHtml,/<button[^>]*class="ghost-btn"[^>]*id="returnToForge"/,'Back must be secondary to Apply.');
+assert.match(actionPalette,/@layer astrix-button-tiers/,'Shared action tokens must outrank legacy important page cosmetics.');
+assert.deepEqual([...new Set([...actionPalette.matchAll(/--apx-button-(\w+)-background:/g)].map(match=>match[1]))].sort(),['primary','secondary'],'Only primary and secondary action tiers may be defined.');
+assert.doesNotMatch(actionPalette,/--apx-icon-|(?:^|[;{])\s*(?:width|height|font-size|transform|filter)\s*:/m,'Action hierarchy must not resize or recolour game artwork.');
+for(const page of ['index.html','components/guardian-workspace/guardian-workspace.html','pages/guardian-workspace-v1/index.html','pages/guardian-workspace-v2/index.html','pages/guardian-workspace-v2/paradox-build-space/index.html','pages/guardian-workspace-v2/shooting-range-test/index.html','pages/journey/index.html','pages/vault/index.html','pages/loadout/index.html','pages/mission-reports/index.html','pages/tool-intro/index.html']){
+  const html=readFileSync(new URL(`../${page}`,import.meta.url),'utf8');
+  assert.match(html,/<body\b[^>]*\bdata-apx-button-system(?:\s|>)/,`${page} must opt into the shared button system.`);
+  assert.match(html,/href="\/css\/astrix-palette\.css\?v=20260923-button-tiers-1"/,`${page} must load the current shared action tokens.`);
+}
+assert.doesNotMatch(readFileSync(new URL('../pages/forge-loader/index.html',import.meta.url),'utf8'),/apx-button-system/,'Forge Loader must retain its existing presentation.');
+console.log('SHARED_BUTTON_HIERARCHY=PASS one primary review action, two shared tiers, eleven entry points, Forge Loader and artwork excluded');

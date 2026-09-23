@@ -657,6 +657,7 @@ function renderRecommendationControls(build={}){
   const unresolvedCount=new Set([...(build?.hashCoverage?.subclass?.unresolved||[]),...subclassOptions.flatMap(item=>(item?.subclassBuild||item?.build||{})?.socketCoverage?.unresolved||[])]).size;
   const subclassBlocker=unresolvedCount?`Bungie subclass socket definitions are incomplete for ${unresolvedCount} resolved profile plug${unresolvedCount===1?'':'s'}. Refresh verified Guardian data before generating.`:verified.length?'The staged Exotic has no explicit compatibility evidence for the available verified elemental options.':'No complete live Bungie subclass socket set is available for this Guardian.';
   if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact evidence…':recommendationFailure||(!hasVerifiedResult?entry.reason:!hasElement?subclassBlocker:`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one verified Exotic armour anchor · ${directEntryMode(build)==='equipped'?'Current equipped gear':directEntryMode(build)==='owned'?'Owned inventory':'Maximized Forge Loader result'}.`);}
+  const preparationStatus=byId('forgePreparationStatus');if(preparationStatus)preparationStatus.hidden=Boolean(recommendationFailure);
   if(hasVerifiedResult)scheduleForgePreparation(build);
 }
 
