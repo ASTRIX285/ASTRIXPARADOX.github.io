@@ -13,3 +13,115 @@
   --apx-colour-border: #414141;
   --apx-colour-border-strong: #616161;
 }
+
+
+/* Two action tiers. Pages opt in explicitly; Forge Loader keeps its existing UI.
+   Important declarations in this named layer outrank legacy unlayered page
+   cosmetics, including their important rules, without changing icon geometry. */
+:root {
+  --apx-button-primary-background: var(--apx-colour-action);
+  --apx-button-primary-hover: color-mix(in srgb, var(--apx-colour-action) 84%, white);
+  --apx-button-primary-text: #ffffff;
+  --apx-button-primary-border: var(--apx-colour-action);
+  --apx-button-primary-weight: 800;
+  --apx-button-secondary-background: var(--apx-colour-raised);
+  --apx-button-secondary-hover: var(--apx-colour-border);
+  --apx-button-secondary-text: var(--apx-colour-text);
+  --apx-button-secondary-border: var(--apx-colour-border-strong);
+  --apx-button-secondary-weight: 600;
+  --apx-button-focus: var(--apx-colour-focus);
+  --apx-button-disabled-opacity: .5;
+}
+@layer astrix-button-tiers {
+  body.apx-button-system :is(button, [role="button"], .improve-cta,
+    .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
+    .mission-build-link, .mission-analyse-link, a.btn) {
+    --apx-button-background: var(--apx-button-secondary-background);
+    --apx-button-hover: var(--apx-button-secondary-hover);
+    --apx-button-text: var(--apx-button-secondary-text);
+    --apx-button-border: var(--apx-button-secondary-border);
+    --apx-button-weight: var(--apx-button-secondary-weight);
+    background-color: var(--apx-button-background) !important;
+    color: var(--apx-button-text) !important;
+    border-color: var(--apx-button-border) !important;
+    font-weight: var(--apx-button-weight) !important;
+    text-shadow: none !important;
+  }
+  /* Each page has one main action. Dialogs define their own active task. */
+  body.apx-button-system :is(.improve-cta, [data-improve], #toolIntroCta,
+    #applyWorkingBuild, #applyBuild, #confirmForgeActivity, #confirmApplyBuild,
+    #dismissApplyBuild, #doneManualEditor, #characterInventoryActionConfirm, #vaultActionConfirm,
+    #missionViewHistory, .mission-connect-action .bungie-auth-btn,
+    #saveParadoxDialog button[type="submit"], #arm,
+    .hero-actions [data-jump="builds"],
+    [data-gw-recommendations] > .gw-rec:first-child button,
+    [data-build-action="save"][data-build-id="equipped"],
+    .paradox-loadout-dialog .is-primary, .beta-modal .beta-primary,
+    [data-loadout-confirm-action],
+    .guardian-loadout-menu-actions [data-loadout-menu-action="equip"],
+    .guardian-loadout-menu-actions:not(:has([data-loadout-menu-action="equip"])) [data-loadout-menu-action="snapshot"],
+    .guardian-loadout-menu-dialog:not(:has(.guardian-loadout-menu-actions, [data-loadout-confirm-action])) [data-loadout-menu-close],
+    .paradox-loadout-dialog:not(:has(.is-primary)) [data-dialog-action="equip-slot"],
+    .paradox-loadout-dialog:not(:has(.is-primary, [data-dialog-action="equip-slot"])) [data-dialog-action="copy-slot"],
+    .paradox-loadout-dialog:not(:has(.is-primary, [data-dialog-action="equip-slot"], [data-dialog-action="copy-slot"])) [data-dialog-action="snapshot-slot"]) {
+    --apx-button-background: var(--apx-button-primary-background);
+    --apx-button-hover: var(--apx-button-primary-hover);
+    --apx-button-text: var(--apx-button-primary-text);
+    --apx-button-border: var(--apx-button-primary-border);
+    --apx-button-weight: var(--apx-button-primary-weight);
+  }
+  body.apx-button-system.journey-page .apx-data-refresh,
+  body.apx-button-system #vaultRefreshButton,
+  body.apx-button-system :is(#journeyConnectButton, #vaultConnectButton) {
+    --apx-button-background: var(--apx-button-primary-background);
+    --apx-button-hover: var(--apx-button-primary-hover);
+    --apx-button-text: var(--apx-button-primary-text);
+    --apx-button-border: var(--apx-button-primary-border);
+    --apx-button-weight: var(--apx-button-primary-weight);
+  }
+  /* Button-shaped game content retains Bungie's artwork and state identity.
+     These are secondary selectors, never a third action tier. */
+  body.apx-button-system :is(button, [role="button"], .improve-cta,
+    .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
+    .mission-build-link, .mission-analyse-link, a.btn):not(
+      .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
+      .el, .selector-card, [data-recommendation-element], .apx-loc,
+      .gw-tile, .gw-mod-dot, .gw-armour-chip) {
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+  body.apx-button-system :is(button, [role="button"], .improve-cta,
+    .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
+    .mission-build-link, .mission-analyse-link, a.btn):hover:not(:disabled):not([aria-disabled="true"]):not(
+      .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
+      .el, .selector-card, [data-recommendation-element], .apx-loc,
+      .gw-tile, .gw-mod-dot, .gw-armour-chip) {
+    background-color: var(--apx-button-hover) !important;
+  }
+  body.apx-button-system :is(button, [role="button"], .improve-cta,
+    .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
+    .mission-build-link, .mission-analyse-link, a.btn):focus-visible {
+    outline: 2px solid var(--apx-button-focus) !important;
+    outline-offset: 3px !important;
+  }
+  body.apx-button-system :is(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
+    opacity: var(--apx-button-disabled-opacity) !important;
+    cursor: not-allowed !important;
+  }
+  /* Preserve data-owned selection art and identity, including Journey's
+     location accents. Tier rules apply to actions, not the artwork they select. */
+  body.apx-button-system :is(.guardian-loadout-slot, .guardian-character-card,
+    .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
+    .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip) {
+    background-color: revert-layer !important;
+    border-color: revert-layer !important;
+    color: revert-layer !important;
+    font-weight: revert-layer !important;
+    text-shadow: revert-layer !important;
+  }
+  body.apx-button-system button:not(.guardian-loadout-slot, .guardian-character-card,
+    .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
+    .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip):is([aria-pressed="true"], [aria-selected="true"]) {
+    border-color: var(--apx-button-focus) !important;
+  }
+}

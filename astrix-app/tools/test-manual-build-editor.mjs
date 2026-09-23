@@ -963,3 +963,21 @@ await assert.rejects(pageApi.preparePayload(mismatched),/armour index/i,'Reject 
 const alreadyResolved=clone(preparedEquipped);delete alreadyResolved.forgeArmourIndex;
 assert.ok((await pageApi.preparePayload(alreadyResolved)).definitions['10000'],'Fresh profiles with resolved definitions must also remain supported');
 console.log('LOADOUT_EQUIPPED_ARMOUR=PASS prepared index, three Guardians, five slots, live mods, appearance, fresh profile and version guard');
+
+// Prompt 8: the recommended result has one committing action, with Back/Test
+// secondary, and every app entry point opts into the same action tokens.
+const actionPalette=readFileSync(new URL('../../css/astrix-palette.css',import.meta.url),'utf8');
+const actionBuildHtml=readFileSync(new URL('../pages/guardian-workspace-v2/paradox-build-space/index.html',import.meta.url),'utf8');
+assert.match(actionBuildHtml,/<button[^>]*class="primary"[^>]*id="applyBuild"/,'Apply must be the primary Recommended Build action.');
+assert.match(actionBuildHtml,/<button[^>]*class="ghost-btn test-build-review-btn"[^>]*id="continueToBuildTest"/,'Test must be secondary to Apply.');
+assert.match(actionBuildHtml,/<button[^>]*class="ghost-btn"[^>]*id="returnToForge"/,'Back must be secondary to Apply.');
+assert.match(actionPalette,/@layer astrix-button-tiers/,'Shared action tokens must outrank legacy important page cosmetics.');
+assert.deepEqual([...new Set([...actionPalette.matchAll(/--apx-button-(\w+)-background:/g)].map(match=>match[1]))].sort(),['primary','secondary'],'Only primary and secondary action tiers may be defined.');
+assert.doesNotMatch(actionPalette,/--apx-icon-|(?:^|[;{])\s*(?:width|height|font-size|transform|filter)\s*:/m,'Action hierarchy must not resize or recolour game artwork.');
+for(const page of ['index.html','components/guardian-workspace/guardian-workspace.html','pages/guardian-workspace-v1/index.html','pages/guardian-workspace-v2/index.html','pages/guardian-workspace-v2/paradox-build-space/index.html','pages/guardian-workspace-v2/shooting-range-test/index.html','pages/journey/index.html','pages/vault/index.html','pages/loadout/index.html','pages/mission-reports/index.html','pages/tool-intro/index.html']){
+  const html=readFileSync(new URL(`../${page}`,import.meta.url),'utf8');
+  assert.match(html,/<body[^>]*class="[^"]*\bapx-button-system\b/,`${page} must opt into the shared button system.`);
+  assert.match(html,/href="\/css\/astrix-palette\.css\?v=20260923-button-tiers-1"/,`${page} must load the current shared action tokens.`);
+}
+assert.doesNotMatch(readFileSync(new URL('../pages/forge-loader/index.html',import.meta.url),'utf8'),/apx-button-system/,'Forge Loader must retain its existing presentation.');
+console.log('SHARED_BUTTON_HIERARCHY=PASS one primary review action, two shared tiers, eleven entry points, Forge Loader and artwork excluded');
