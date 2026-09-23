@@ -308,8 +308,12 @@ function renderApplyControls(build={}, {preserveBanner=false}={}){
   const plan=buildLivePlan(),reason=plan.blockers?.[0]||'The exact Working Build is not ready for Apply.';
   for(const id of ['applyBuild','applyWorkingBuild']){const button=byId(id);if(button){button.disabled=!plan.ready||liveActionBusy||livePreflightBusy;button.title=plan.ready?'Run a non-mutating live preflight, then review the exact transfer, equip, socket and readback sequence.':reason;}}
   const save=byId('saveParadoxBuild');if(save){save.disabled=!/^\d+$/.test(String(build.characterId||''));save.title=save.disabled?'Load a Bungie Guardian build first.':'Save a separate named PARADOX copy.';}
-  if(!liveActionBusy&&!preserveBanner&&byId('liveActionBanner'))setLiveActionBanner(plan.ready?`Apply ready · ${plan.equipment.targets.length} exact items · ${plan.socketChanges.length} verified socket change${plan.socketChanges.length===1?'':'s'}${plan.inGameSteps.length?` · ${plan.inGameSteps.length} in-game step${plan.inGameSteps.length===1?'':'s'}`:''}.`:`Apply blocked · ${reason}`,plan.ready?'':'warn');
+  if(!liveActionBusy&&!preserveBanner)setApplyPreflightStatus(plan.ready?`Ready for a live check · ${plan.equipment.targets.length} exact items · ${plan.socketChanges.length} staged socket change${plan.socketChanges.length===1?'':'s'}${plan.inGameSteps.length?` · ${plan.inGameSteps.length} in-game step${plan.inGameSteps.length===1?'':'s'}`:''}. Apply checks current Bungie permissions before you review and confirm.`:`Apply blocked · ${reason}`,plan.ready?'':'warn');
   return plan;
+}
+function setApplyPreflightStatus(message,state=''){
+  setLiveActionBanner(message,state);
+  const footer=byId('liveTransferStatus');if(footer)footer.textContent=message;
 }
 function applyEntityIndex(...sources){
   const byId=new Map(),byHash=new Map(),entities=[],seen=new WeakSet(),stack=[...sources.filter(Boolean)].reverse();
@@ -385,17 +389,18 @@ function showApplyResult(result,error=null){
 function closeApplyConfirmation(){if(liveActionBusy)return;livePreflightRequest+=1;livePreflightBusy=false;const dialog=byId('applyConfirmationDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');pendingApplyPlan=null;pendingApplyEntries=[];applyDialogMode='idle';byId('applyConfirmationPanel')?.setAttribute('aria-busy','false');}
 async function openApplyConfirmation(){
   if(liveActionBusy||livePreflightBusy)return;
-  const sourceState=readState(),plan=buildLivePlan(),dialog=byId('applyConfirmationDialog');if(!plan.ready||!dialog){setLiveActionBanner(`Apply blocked · ${plan.blockers?.[0]||'validation failed.'}`,'bad');return;}
-  const request=++livePreflightRequest;livePreflightBusy=true;renderApplyControls(currentBuild()||{},{preserveBanner:true});setLiveActionBanner('Apply preflight · checking fresh Guardian, ownership, location, compatibility, Exotic, socket and activity evidence. No live changes are being made.','running');
+  const sourceState=readState(),plan=buildLivePlan(),dialog=byId('applyConfirmationDialog');if(!plan.ready||!dialog){setApplyPreflightStatus(`Apply blocked · ${plan.blockers?.[0]||'validation failed.'}`,'bad');return;}
+  const request=++livePreflightRequest;livePreflightBusy=true;renderApplyControls(currentBuild()||{},{preserveBanner:true});setApplyPreflightStatus('Apply preflight · checking fresh Guardian, ownership, location, compatibility, Exotic, socket and activity evidence. No live changes are being made.','running');
   try{
     let session=globalThis.FORGE_BUNGIE_SESSION;if(!session?.csrfToken)session=await getBungieSession({force:true});
     const staged=await stageLiveTransferPreflight(plan,{session});
-    if(request!==livePreflightRequest||readState()!==sourceState){setLiveActionBanner('Apply preflight cancelled because the Working Build changed. Review it and try again.','warn');return;}
-    if(!staged.ready){setLiveActionBanner(`Apply blocked · ${staged.blockers?.[0]||'live preflight failed.'}`,'bad');return;}
+    if(request!==livePreflightRequest||readState()!==sourceState){setApplyPreflightStatus('Apply preflight cancelled because the Working Build changed. Review it and try again.','warn');return;}
+    if(!staged.ready){setApplyPreflightStatus(`Apply blocked · ${staged.blockers?.[0]||'live preflight failed.'}`,'bad');return;}
     pendingApplyPlan=staged;pendingApplyEntries=createApplyReviewEntries(staged,sourceState);applyDialogMode='review';byId('applyConfirmationGuardian').textContent=`Guardian ${staged.characterId} · membership ${staged.membershipType}:${staged.membershipId} · live preflight passed`;
     byId('applyConfirmationKicker').textContent='LIVE BUNGIE ACTION · FINAL CONFIRMATION';byId('applyConfirmationTitle').textContent='APPLY WORKING BUILD?';byId('applyConfirmationWarning').textContent='Destiny must be in orbit, a social space, or offline. Completed remote steps are not automatically rolled back if a later step fails.';byId('applyConfirmationPanel')?.setAttribute('aria-busy','false');if(byId('cancelApplyBuild'))byId('cancelApplyBuild').hidden=false;if(byId('confirmApplyBuild')){byId('confirmApplyBuild').hidden=false;byId('confirmApplyBuild').disabled=false;}if(byId('dismissApplyBuild'))byId('dismissApplyBuild').hidden=true;renderApplyReviewGrid();
     dialog.hidden=false;document.body.classList.add('working-dialog-open');byId('confirmApplyBuild')?.focus();
-  }catch(error){if(request===livePreflightRequest)setLiveActionBanner(`Apply blocked · ${error?.message||'live preflight failed.'}`,'bad');}
+    setApplyPreflightStatus('Live check passed. Review and confirm the exact changes before Apply.','good');
+  }catch(error){if(request===livePreflightRequest)setApplyPreflightStatus(`Apply blocked · ${error?.message||'live preflight failed.'}`,'bad');}
   finally{if(request===livePreflightRequest){livePreflightBusy=false;renderApplyControls(currentBuild()||{},{preserveBanner:true});}}
 }
 async function executeConfirmedApply(){
@@ -747,7 +752,7 @@ function renderRecommendedBuildReview(build={}){
   const artifactSynergyRows=(artifactReady?artifactReasons:artifactBlockers).map(row=>`<li>${esc(row)}</li>`).join('')||'<li>No Artifact synergy claim is available from the supplied Bungie evidence.</li>';
   const artifactPlanLabel=recommendation?.planMode==='full-build-target'?'PARADOX FULL TARGET PLAN':'PARADOX BEST FIT';
   const pickOrder=new Map(sequence.map(row=>[String(row.artifactPerk?.hash),Number(row.order)]));byId('recommendedArtifactSummary').innerHTML=artifact?`<div class="review-artifact-identity">${reviewIcon(artifact,'Artifact')}<div><b>${esc(artifact.name||'ARTIFACT')}</b><span>${artifactReady?`${artifactPlanLabel} · ${Number(recommendation.selectionLimit||0)} LEGAL PICKS · ${Number(recommendation.totalScore||0)} SYNERGY SCORE`:'EVIDENCE LIMITED · CURRENT CONFIGURATION SHOWN'}</span><small>${artifactReady?'RECOMMENDED WORKING PLAN · APPLY PICKS IN NUMBERED ORDER':'No complete legal recommendation was resolved from the supplied Bungie evidence.'}</small></div></div><div class="review-artifact-perks">${perks.map((perk,index)=>`<span class="review-artifact-pick"><em>PICK ${pickOrder.get(String(perk?.hash??perk?.itemHash??perk?.bungieHash))||index+1}</em>${reviewIcon(perk,'Artifact perk')}</span>`).join('')||'<small>NO LEGAL PERK CHANGE RESOLVED</small>'}</div><div class="review-artifact-synergy"><b>ARTIFACT SYNERGY</b><ul>${artifactSynergyRows}</ul></div>`:'<small>ARTIFACT STATE UNAVAILABLE</small>';
-  const transfer=byId('liveTransferStatus'),plan=renderApplyControls(build),canApply=plan.ready;if(transfer)transfer.textContent=canApply?`Apply is ready for ${plan.equipment.targets.length} exact items and ${plan.socketChanges.length} verified free socket change${plan.socketChanges.length===1?'':'s'}.${plan.inGameSteps.length?` ${plan.inGameSteps.length} unsupported change${plan.inGameSteps.length===1?' remains':'s remain'} as explicit in-game steps.`:''}`:`Apply blocked · ${plan.blockers?.[0]||'exact Working Build validation failed.'}`;
+  renderApplyControls(build);
 }
 async function openRecommendedBuild(){
   const build=currentBuild(),dialog=byId('recommendedBuildReveal'),status=byId('recommendedBuildRenderStatus');
