@@ -16,6 +16,7 @@ const validators=[
   'validate-portal-loader.mjs',
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',
+  'validate-auth-session.mjs',
   'validate-visible-release-state.mjs',
   'validate-vault-foundation.mjs',
   'validate-forge-loader.mjs',

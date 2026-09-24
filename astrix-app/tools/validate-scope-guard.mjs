@@ -4,6 +4,10 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'forge-auth-worker/src/refresh-failure.ts',
+  'forge-auth-worker/test/auth-session.test.ts',
+  'astrix-app/tools/validate-auth-session.mjs',
+
   'astrix-app/tools/test-journey-summary-css.mjs',
   'css/astrix-palette.css',
   'astrix-app/pages/guardian-workspace-v2/guardian-left-panel-super-feature.css',

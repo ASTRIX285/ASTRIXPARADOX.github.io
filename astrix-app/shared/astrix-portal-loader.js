@@ -227,6 +227,7 @@
     warmNavigation=false;mount();
   }
   function authRequired(url){
+    if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
     pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
     warmNavigation=false;mount();setStatus('Bungie authentication required');applyAuth();revealNavigation(true);
   }

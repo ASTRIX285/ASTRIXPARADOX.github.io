@@ -13,6 +13,7 @@ function authReturnUrl(){
 }
 
 function authStartUrl(returnTarget=null){
+  if(globalThis.FORGE_BUNGIE_SESSION?.authenticated!==false)return null;
   const fallback=authReturnUrl();
   let destination=fallback;
   if(returnTarget){
@@ -93,8 +94,8 @@ function makeControl(){
   button.dataset.state="checking";
   button.textContent="CHECKING BUNGIE…";
   button.addEventListener("click",()=>{
-    if(button.dataset.state==="connected") return;
-    location.href=authStartUrl();
+    if(button.dataset.state==="disconnected") location.href=authStartUrl();
+    else if(button.dataset.state==="unknown") void refreshAuthState({wrap,button,visual,image,fallback},true);
   });
   const visual=document.createElement("div");
   visual.id="bungieAccountVisual";
@@ -186,34 +187,34 @@ async function requestSession(){
       headers:{Accept:"application/json"},
       signal:controller.signal
     });
-    const session=await response.json().catch(()=>({authenticated:false}));
-    if(response.status===401){
+    const session=await response.json();
+    if(response.status===401&&session?.authenticated===false){
       const recoveryUrl=await requestAccessRecovery();
       if(recoveryUrl){
         location.replace(recoveryUrl);
-        return {authenticated:false,recovering:true};
+        return {authenticated:null,recovering:true};
       }
       return {authenticated:false};
     }
     if(!response.ok)throw new Error(session?.error||`session:${response.status}`);
-    return session;
+    return session?.authenticated===true?session:{authenticated:null,error:"bungie_unavailable"};
   }finally{
     clearTimeout(timer);
   }
 }
 
 function publishSession(session){
-  if(session?.recovering){
-    globalThis.FORGE_BUNGIE_SESSION=session;
-    return;
-  }
-  if(session?.authenticated){
+  globalThis.FORGE_BUNGIE_SESSION=session;
+  if(session?.recovering)return;
+  if(session?.authenticated===true){
     cacheBungieSession(session);
     globalThis.ForgeLoader?.authResolved?.();
-  }else{
+  }else if(session?.authenticated===false){
     globalThis.ForgeLoader?.authRequired?.(authStartUrl());
+  }else{
+    globalThis.ForgeLoader?.authResolved?.();
+    globalThis.ForgeLoader?.blocked?.("Bungie is not responding. Retry");
   }
-  globalThis.FORGE_BUNGIE_SESSION=session;
   globalThis.dispatchEvent(new CustomEvent("forge:bungie-session",{detail:session}));
 }
 
@@ -234,8 +235,8 @@ function getBungieSession({force=false}={}){
       return session;
     })
     .catch(error=>{
-      console.info("[Forge Bungie auth] no active session",error);
-      const session={authenticated:false,error:error?.message||"session_unavailable"};
+      console.info("[Forge Bungie auth] session check unavailable",error);
+      const session={authenticated:null,error:"bungie_unavailable"};
       publishSession(session);
       return session;
     });
@@ -243,10 +244,10 @@ function getBungieSession({force=false}={}){
   return sessionRequest;
 }
 
-async function refreshAuthState(control){
-  const session=await getBungieSession();
+async function refreshAuthState(control,force=false){
+  const session=await getBungieSession({force});
   if(session?.recovering)return;
-  if(session?.authenticated){
+  if(session?.authenticated===true){
     control.wrap.hidden=false;
     control.button.hidden=true;
     control.visual.hidden=false;
@@ -256,8 +257,8 @@ async function refreshAuthState(control){
   control.wrap.hidden=false;
   control.visual.hidden=true;
   control.button.hidden=false;
-  control.button.dataset.state="disconnected";
-  control.button.textContent="CONNECT BUNGIE";
+  control.button.dataset.state=session?.authenticated===false?"disconnected":"unknown";
+  control.button.textContent=session?.authenticated===false?"CONNECT BUNGIE":"Bungie is not responding. Retry";
 }
 
 installStyles();

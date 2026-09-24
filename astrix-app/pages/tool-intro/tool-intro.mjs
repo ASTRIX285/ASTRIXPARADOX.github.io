@@ -38,13 +38,13 @@ async function getBungieSession(){
       headers:{Accept:'application/json'},
       signal:controller.signal
     });
-    if(response.status===401)return {authenticated:false};
-    if(!response.ok)return {authenticated:false};
     const session=await response.json();
+    if(response.status===401&&session?.authenticated===false)return {authenticated:false};
+    if(!response.ok||session?.authenticated!==true)return {authenticated:null,error:"bungie_unavailable"};
     cacheBungieSession(session);
     return session;
   }catch{
-    return {authenticated:false};
+    return {authenticated:null,error:"bungie_unavailable"};
   }finally{
     clearTimeout(timer);
   }
@@ -69,7 +69,7 @@ async function continueToGuardianJourney(){
     status.textContent='8%';
   }
   const session=await getBungieSession();
-  if(session?.authenticated){
+  if(session?.authenticated===true){
     try{
       if(status)status.textContent='18%';
       await preloadForgeLoaderPayload(session,{force:false,reason:'tool-intro'});
@@ -81,6 +81,13 @@ async function continueToGuardianJourney(){
     }
     openJourney();
     return true;
+  }
+  if(session?.authenticated!==false){
+    if(status)status.textContent='Bungie is not responding. Retry';
+    document.body.classList.remove('is-transitioning');
+    const button=document.getElementById('toolIntroCta');
+    if(button){button.disabled=false;button.textContent='Retry';}
+    return false;
   }
   if(status)status.textContent='Opening Bungie account approval.';
   location.assign(authStartUrl());
@@ -109,7 +116,7 @@ else{
     status.hidden=false;
     status.textContent='8%';
     await continueToGuardianJourney();
-  },{once:true});
+  });
 
   if(hasSeenIntro())void continueToGuardianJourney();
 }

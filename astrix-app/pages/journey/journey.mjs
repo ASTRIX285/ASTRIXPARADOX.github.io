@@ -2309,10 +2309,11 @@ try{
     ]);
     await finishJourneyLoader(document);
   }
-  else showSignedOut();
+  else if(session?.authenticated===false)showSignedOut();
+  else showJourneyUnavailable("Bungie is not responding. Retry");
 }catch(error){
   console.info('[Forge Journey] existing Bungie session unavailable',error);
   if(journeySession?.authenticated===true){
     showJourneyUnavailable(error?.message||'Journey data is unavailable. Retry the page or reconnect Bungie.');
-  }else showSignedOut();
+  }else showJourneyUnavailable("Bungie is not responding. Retry");
 }
