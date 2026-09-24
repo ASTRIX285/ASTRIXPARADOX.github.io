@@ -62,7 +62,8 @@ def main() -> int:
         css = css_path.read_text(encoding="utf-8")
         if any("grid-template-columns" in block for block in workspace_blocks(css)):
             competing.append(css_path.name)
-    expected_layers = ["guardian-layout-final.css", "guardian-left-panel-lock.css"]
+    # PR #278 (99b131b) added the Character-scoped workspace owner in the shared rail.
+    expected_layers = ["guardian-layout-final.css", "guardian-left-panel-lock.css", "guardian-left-rail-shared.css"]
     assert competing == expected_layers, f"Workspace grid layer drift: {', '.join(competing)}"
 
     for marker in (
@@ -86,7 +87,7 @@ def main() -> int:
         assert css.count("{") == css.count("}"), f"Unbalanced CSS blocks: {css_path.name}"
 
     print("PARADOX_ADAPTIVE_LAYOUT=PASS")
-    print("WORKSPACE_COLUMN_LAYERS=guardian-adaptive-layout.css,guardian-layout-final.css,guardian-left-panel-lock.css")
+    print("WORKSPACE_COLUMN_LAYERS=guardian-adaptive-layout.css,guardian-layout-final.css,guardian-left-panel-lock.css,guardian-left-rail-shared.css")
     print("DESKTOP_LIVE_EQUIPMENT_LAYOUT=PASS")
     print("MOBILE_STACK_ORDER=PASS")
     print("GUARDIAN_STAGE_CONTAINMENT=PASS")

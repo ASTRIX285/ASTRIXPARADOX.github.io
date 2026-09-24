@@ -41,8 +41,9 @@ const context={
 };
 vm.runInNewContext(controller,context);
 const api=context.ForgeDestinations;
-assert.equal(api.DESTINATIONS.length,10,'shared controller must expose exactly the ten briefed destinations');
-assert.deepEqual(Array.from(api.DESTINATIONS,destination=>destination.key),keys,'destination mapping order or keys drifted');
+// PR #272 (381a8e2) added Kepler to the registry, without changing the ten colour tokens above.
+assert.equal(api.DESTINATIONS.length,11,'shared controller must expose exactly the eleven approved destinations');
+assert.deepEqual(Array.from(api.DESTINATIONS,destination=>destination.key),['pale-heart','europa','dreaming-city','edz','cosmodrome','moon','neomuna','nessus','throne-world','kepler','tower'],'destination mapping order or keys drifted');
 assert.equal(api.set('The Pale Heart'),'pale-heart');
 assert.equal(root.dataset.location,'pale-heart');
 assert.equal(api.set('The Glassway'),'europa','known in-app destination aliases must map deterministically');

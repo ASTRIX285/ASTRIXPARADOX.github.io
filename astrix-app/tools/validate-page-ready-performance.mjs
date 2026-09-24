@@ -234,7 +234,13 @@ const browserEntries=await Promise.all([
   'pages/tool-intro/index.html',
   'pages/tool-intro/tool-intro.mjs'
 ].map(async path=>[path,await readFile(new URL(path,root),'utf8')]));
-for(const [path,source] of browserEntries)assert.match(source,/transport=20260911-compact-plugs-1/,`${path} must invalidate the prior prepared page module graph`);
+for(const [path,source] of browserEntries){
+  // PR #241 (ef57dff) refreshed the Character profile import; #243 and #268 extended that graph.
+  const version=path==='pages/guardian-workspace-v2/guardian-workspace-v2.mjs'
+    ?/guardian-bungie-profile\.mjs\?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1/
+    :/transport=20260911-compact-plugs-1/;
+  assert.match(source,version,`${path} must invalidate the prior prepared page module graph`);
+}
 const journeyRuntime=pageSources.find(([path])=>path.includes('/journey/'))?.[1]||'';
 assert.match(journeyRuntime,/classificationComplete[\s\S]*?UNAVAILABLE/,'Journey must not display false Vault category counts when account item definitions are intentionally absent');
 
