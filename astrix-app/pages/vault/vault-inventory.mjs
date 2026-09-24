@@ -1,6 +1,6 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
 import {classifyArmourPlug,normaliseArmourSemantics,normaliseWeaponSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
+import {resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
 import {ARMOUR_BUCKETS,CHARACTER_EQUIPMENT_BUCKETS,EQUIPMENT_GROUPS,EQUIPMENT_GROUP_BY_HASH,INVENTORY_GROUPS,WEAPON_BUCKETS,groupInventoryWorkspaceItems,itemKey,sortInventoryWorkspaceItems} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';

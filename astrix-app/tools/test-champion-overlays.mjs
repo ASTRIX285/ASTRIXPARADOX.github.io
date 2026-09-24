@@ -57,3 +57,15 @@ const profileSource=readFileSync(new URL('../pages/guardian-workspace-v2/guardia
 assert.match(profileSource,/breakerDefinition:resolveWeaponBreakerTypeDefinition\(instance,base\.definition,payload\?\.breakerDefinitions,\{plugs,sandboxPerks:payload\?\.sandboxPerks,activePerks:profile\?\.itemComponents\?\.perks/,'Character and Build Forge must use the same attached-perk resolver');
 console.log('CHAMPION_OVERLAYS=PASS all '+Object.keys(WEAPON_TYPE_LABELS).length+' archetypes, three champion types, actual Praxic Blade definitions');
 console.log('MANIFEST_CHAMPION_COVERAGE='+JSON.stringify(audit));
+
+// A new named export must never be requested through the previous cached URL.
+const championModuleTag='20260924-champion-export-1';
+for(const path of [
+  '../pages/guardian-workspace-v2/guardian-bungie-profile.mjs',
+  '../pages/guardian-workspace-v2/guardian-manifest-service.mjs',
+  '../pages/vault/vault-inventory.mjs'
+]){
+  const source=readFileSync(new URL(path,import.meta.url),'utf8');
+  const tags=[...source.matchAll(/bungie-item-identity\.mjs\?v=([^'"&]+)/g)].map(match=>match[1]);
+  assert.deepEqual(tags,[championModuleTag],`${path} must share the current champion export tag`);
+}

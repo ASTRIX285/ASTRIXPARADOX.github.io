@@ -1,6 +1,6 @@
 import {inventoryLocations,sessionBinding,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
+import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 
 // The page singleton is deliberately backend-only. This deferred reader uses
 // the same manifest service/cache, but only asks for the small stat group table.
