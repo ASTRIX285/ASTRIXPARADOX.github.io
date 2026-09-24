@@ -269,3 +269,37 @@ html body:not(.forge-loader-page) header:has(>[data-forge-hero-cards]){overflow:
 body:not(.forge-loader-page):has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::before{
   content:"";position:absolute;z-index:-1;inset:-12px calc((100% - 100vw) / 2) 0;background:var(--apx-colour-raised,#060606);
 }
+
+/* Prompt 12b: the page title and subtitle must never sit under the hero cards
+   or the brand. Wide header: centre the copy in the free gap between the brand
+   (ends about 266px) and the hero row, with 8px clearance each side, scale the
+   title to that gap and let it wrap. The subtitle shows only where it fits on
+   the line beside the hero (2000px and wider). Compact header (below 1600px):
+   restore the intended row-1 placement, which the absolute rule above
+   previously overrode. */
+@media(min-width:1600px){
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy{
+    --apx-header-copy-gap:calc(50vw - var(--apx-hero-row,910px) / 2 - 282px);
+    /* left is measured from the header box, which starts 18px in. */
+    left:calc(256px + var(--apx-header-copy-gap) / 2)!important;
+    width:var(--apx-header-copy-gap)!important;
+    max-width:var(--apx-header-copy-gap)!important;
+  }
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy strong{
+    font-size:clamp(10px,calc(var(--apx-header-copy-gap) / 8),1.25rem)!important;
+    white-space:normal!important;text-wrap:balance!important;
+  }
+}
+@media(min-width:1600px) and (max-width:1999px){
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{display:none!important}
+}
+@media(max-width:1599px){
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy{
+    position:static!important;top:auto!important;left:auto!important;transform:none!important;
+    grid-column:2!important;grid-row:1!important;justify-self:center!important;align-self:center!important;
+    max-width:100%!important;display:flex!important;align-items:baseline!important;gap:.75rem!important;
+  }
+}
+@media(max-width:1599px) and (min-width:721px){
+  html body header.forge-command-header:has(>[data-forge-hero-cards]) .apx-destination-header-copy small{white-space:nowrap!important}
+}

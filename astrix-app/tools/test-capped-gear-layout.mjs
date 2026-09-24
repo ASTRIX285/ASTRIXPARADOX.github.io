@@ -76,8 +76,13 @@ try{
     const p=box(parent);if(r.x<p.x-1||r.right>p.right+1)violations.push(`${tile.className} exceeds ${parent.className}`);
    }
   }
+  const hit=(a,c)=>a.width&&c.width&&a.x<c.right-1&&c.x<a.right-1&&a.y<c.bottom-1&&c.y<a.bottom-1;
+  const heroBox=box(document.querySelector('[data-forge-hero-cards]')),brandEl=document.querySelector('.apx-destination-brand');
+  const copyOverlaps=[...document.querySelectorAll('header .apx-destination-header-copy>*')].filter(e=>getComputedStyle(e).display!=='none').filter(e=>hit(box(e),heroBox)||(brandEl&&hit(box(e),box(brandEl)))).map(e=>e.textContent.trim());
+  const heavy=document.querySelector('.character-inventory-workspace [data-equipment-group="heavy"]'),equipmentHeading=[...document.querySelectorAll('.character-inventory-workspace .vault-transfer-family')].find(e=>/EQUIPMENT/.test(e.textContent));
+  const equipmentGap=heavy&&equipmentHeading?Math.round(box(equipmentHeading).y-box(heavy).bottom):null;
   const primary=document.querySelector('.character-inventory-workspace [data-equipment-group="primary"]'),helmet=document.querySelector('.character-inventory-workspace [data-equipment-group="helmet"]');
-  return {page:name,viewport:innerWidth,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
+  return {page:name,viewport:innerWidth,copyOverlaps,equipmentGap,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
  },name);}
  for(const [width,height] of [[1363,936],[1920,1080],[2560,1440]]){
   await load('ForgeLoader',width,height,true);const before=await measure('ForgeLoader');
@@ -90,7 +95,12 @@ try{
    await page.screenshot({path:resolve(output,`${name}-${width}.png`)});captures.push({name,width,file:`${name}-${width}.png`});
    assert.ok(row.gear.length>=8,`${name} ${width}: fixture gear rendered`);
    if(name==='ForgeLoader')assert.deepEqual(row.gear.map(r=>r.width),before.gear.map(r=>r.width),'Forge Loader unchanged from main');
-   else for(const art of row.gear)assert.ok(Math.abs(art.width-(width===1363?44:64))<=(width===1363?1:.1),`${name} ${width}: art ${art.width}`);
+   else for(const art of row.gear)assert.ok(Math.abs(art.width-(width===1363?44:66))<=(width===1363?1:.1),`${name} ${width}: art ${art.width}`);
+   // Prompt 12b: Miguel's measured DIM pitch is tile + 6px on Character and Vault rows and the loadout strip.
+   if(name==='Character'||name==='Vault'){const first=row.gear[0],next=row.gear.find(r=>Math.abs(r.y-first.y)<1&&r.x>first.x+1);assert.ok(next,`${name} ${width}: second tile in row`);assert.ok(Math.abs(next.x-first.x-(first.width+6))<=.1,`${name} ${width}: pitch ${next.x-first.x} for tile ${first.width}`);}
+   if(name==='Character'&&row.strip.length>1)assert.ok(Math.abs(row.strip[1].x-row.strip[0].x-(row.strip[0].width+6))<=.1,`Character ${width}: strip pitch`);
+   assert.deepEqual(row.copyOverlaps,[],`${name} ${width}: header title and subtitle clear of hero cards and brand`);
+   if(row.columns===2&&row.equipmentGap!==null)assert.ok(row.equipmentGap<=16,`Character ${width}: no empty row between Heavy and Equipment (${row.equipmentGap}px)`);
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);
    assert.ok(row.scrollWidth<=width&&row.bodyScroll<=width,`${name} ${width}: no horizontal page scroll`);
    if(name==='Character'){
@@ -123,6 +133,6 @@ try{
  }
  await writeFile(resolve(output,'measurements.json'),JSON.stringify(results,null,2));
  const figures=[];for(const capture of captures){const png=await readFile(resolve(output,capture.file));figures.push(`<figure><figcaption>${capture.name} ${capture.width}px, synthetic fixtures</figcaption><img src="data:image/png;base64,${png.toString('base64')}" alt="${capture.name} fixture layout"></figure>`);}
- await writeFile(resolve(output,'review.html'),`<!doctype html><meta charset="utf-8"><title>Prompt 12 layout evidence</title><style>body{background:#15151a;color:#fff;font:16px system-ui;margin:24px}img{max-width:100%}figure{margin:24px 0}pre{white-space:pre-wrap}</style><h1>Prompt 12: capped gear layout</h1><p>Real Chromium render with explicitly synthetic gear. No live account actions. Forge Loader compared against ${baseline}. Screenshots at DPR 1.</p><pre>${JSON.stringify(results.map(r=>({page:r.page,width:r.viewport,gear:r.gear[0].width,strip:r.strip[0]?.width,catalogue:r.catalogue?.[0]??null,columns:r.columns})),null,2)}</pre>${figures.join('')}`);
+ await writeFile(resolve(output,'review.html'),`<!doctype html><meta charset="utf-8"><title>Prompt 12 layout evidence</title><style>body{background:#15151a;color:#fff;font:16px system-ui;margin:24px}img{max-width:100%}figure{margin:24px 0}pre{white-space:pre-wrap}</style><h1>Prompt 12b: capped gear layout, DIM 66px match</h1><p>Real Chromium render with explicitly synthetic gear. No live account actions. Forge Loader compared against ${baseline}. Screenshots at DPR 1.</p><pre>${JSON.stringify(results.map(r=>({page:r.page,width:r.viewport,gear:r.gear[0].width,strip:r.strip[0]?.width,catalogue:r.catalogue?.[0]??null,columns:r.columns})),null,2)}</pre>${figures.join('')}`);
  console.log('CAPPED_GEAR_LAYOUT=PASS '+JSON.stringify(results.map(r=>({page:r.page,width:r.viewport,gear:r.gear[0].width,strip:r.strip[0]?.width,catalogue:r.catalogue?.[0],columns:r.columns}))));
 }finally{await browser?.close();await new Promise(done=>server.close(done));}

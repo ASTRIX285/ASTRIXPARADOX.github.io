@@ -354,7 +354,8 @@ body.apx-destination-page .apx-page-shell{
   :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,50px)}
 }
 
-/* Prompt 12: weapon and armour artwork follows the viewport, capped at 64px.
+/* Prompt 12b: weapon and armour artwork follows the viewport, capped at 66px
+   (Miguel's measured DIM tile at 2560: 66px art, 6px gap, 72px pitch).
    Forge Loader alone retains its original strip-derived size via the scoped
    override above. Power strips retain the 100:122 ratio.
    Do not use this token for mods, perks, subclass abilities, Supers or
@@ -362,7 +363,7 @@ body.apx-destination-page .apx-page-shell{
 :root,
 :root:has(>body.apx-fluid-icons){
   --apx-equipment-reference-inset:calc(max(360px,20vw) + 42px);
-  --apx-equipment-icon-size:clamp(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20),64px);
+  --apx-equipment-icon-size:clamp(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20),66px);
   --apx-equipped-stroke:3px solid #49adff;
   --apx-inventory-size:var(--apx-equipment-icon-size)!important;
   --apx-icon-gear-art-width:var(--apx-equipment-icon-size)!important;
