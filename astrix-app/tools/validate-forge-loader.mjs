@@ -244,6 +244,7 @@ const backend=read('forge-auth-worker/src/index.ts');
 const backendSolver=read('forge-auth-worker/src/armour-solver.ts');
 const selectionState=read('astrix-app/pages/vault/vault-selection-state.mjs');
 const buildRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs');
+const buildRecommendationRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs');
 const buildStateRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs');
 const artifactSelectionRuntime=read('astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs');
 const buildHandoff=read('astrix-app/pages/forge-loader/forge-loader-build-handoff.mjs');
@@ -392,9 +393,13 @@ assert.match(selectionState,/delete next\.workingBuild\.recommendationGeneratedA
 assert.match(buildRuntime,/const payload=validateHandoffEnvelope\(raw\);[\s\S]*?payload\?\.characterId\?createBuildState\(payload\):null/,'Build Forge must expand the single protected source into immutable Original and separate Working builds only after reading it.');
 assert.match(buildRuntime,/async function restoreAtomicForgeTransfer\(\)[\s\S]*?readForgeLoaderTransfer\(binding\)[\s\S]*?validateHandoffEnvelope\(transfer\.snapshotEnvelope[\s\S]*?validateVaultArmourSelection\(transfer\.armourSelection[\s\S]*?applyVaultArmourSelection\(baseline,selection\)/,'Build Forge must validate and apply the complete atomic transfer before rendering.');
 assert.match(buildRuntime,/writeState\(applied\.state\)/,'An expanded atomic transfer must enter the durable async Working Build state path.');
-assert.match(buildRuntime,/hasVerifiedResult=Boolean\(build\.forgeLoaderDecision\)&&armourValidation\.ready&&exoticValidation\.ready/,'Elemental options and Build Objectives must share the verified armour and Exotic result gate.');
-assert.match(buildRuntime,/button\.disabled=!hasVerifiedResult\|\|recommendationBusy/,'Build Objectives must remain disabled outside a verified Forge Loader Working Build.');
-assert.match(buildRuntime,/Stage a verified Forge Loader armour result to unlock compatible build options\./,'Build Forge must state the exact missing verified-result requirement.');
+// PR #282 (24df19a) moved Build Forge entry gating and its reason into the shared validator.
+assert.match(buildRuntime,/entry=validateForgeGenerationEntry\(build\),hasVerifiedResult=entry\.ready/,'Elemental options and Build Objectives must share the verified generation-entry gate.');
+assert.match(buildRuntime,/button\.disabled=!hasVerifiedResult\|\|recommendationBusy/,'Build Objectives must remain disabled outside a verified generation entry.');
+assert.match(buildRecommendationRuntime,/Choose a direct entry or stage a verified Forge Loader armour result\./,'Build Forge must state the exact missing verified-result requirement.');
+assert.match(buildRuntime,/button\.title=!hasVerifiedResult\?entry\.reason/,'Blocked build options must expose the shared entry validator reason.');
+assert.match(buildRuntime,/!hasVerifiedResult\?entry\.reason:!hasElement\?subclassBlocker/,'Build status must expose the same shared entry validator reason.');
+assert.match(buildRecommendationRuntime,/if\(!mode\)\{\s*const tier=validateTierFiveArmour\(build\);\s*return \{ready:Boolean\(build\.forgeLoaderDecision\)&&tier\.ready&&exotic\.ready/,'The Forge Loader path must retain its verified Tier 5 armour and Exotic gate.');
 assert.match(buildRuntime,/scheduleForgePreparation\(staged,\{immediate:true\}\)/,'A verified Forge Loader entry must start the existing PARADOX worker pre-warm immediately.');
 assert.match(buildRuntime,/validateBuildState\(volatileState,expectedBinding,\{protect:false\}\)/,'Repeated Build Forge reads must validate the protected in-memory state without deep-cloning it.');
 assert.doesNotMatch(buildRuntime,/volatileStateMemoryOnly|memoryOnly:true/,'Atomic and Vault edits must not silently remain memory-only.');

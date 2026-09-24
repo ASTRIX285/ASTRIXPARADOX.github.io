@@ -149,7 +149,8 @@ assert.doesNotMatch(characterCss,/guardian-stat-icons\.png/,'Guardian cards must
 assert.match(characterModule,/class="guardian-stat-icon" src="\$\{escapeHtml\(icon\)\}"/,'Guardian cards must render the Bungie-provided stat icon URL');
 assert.match(profile,/payload\?\.statDefinitions\?\.\[String\(hash\)\]/,'Guardian stat identities and artwork must resolve from the full DestinyStatDefinition table');
 assert.doesNotMatch(characterModule,/guardian-character-card__head[^\n]*<small>/,'Guardian cards must not render a title subtitle');
-assert.match(characterCss,/grid-template-columns:repeat\(3,minmax\(0,300px\)\)/,'Main and Build must share the contained character-card ribbon');
+// PR #234 (3ac9e57) consolidated ribbon geometry in the shared hero stylesheet.
+assert.match(sharedHeroCss,/grid-template-columns:repeat\(3,var\(--apx-hero-width,300px\)\)!important/,'Main and Build must share the contained character-card ribbon');
 assert.match(characterCss,/topbar>#guardianCharacterCards\{[\s\S]*?justify-self:center!important;/,'Guardian character-card ribbon must remain centred inside the header');
 assert.match(buildHtml,/id="armRangeTest" disabled/,'Build Test must start disabled until a verified character-bound snapshot resolves');
 assert.match(buildModule,/if\(arm\)arm\.disabled=!characterId/,'Shooting Range refresh must reject missing Guardian identity');
@@ -185,7 +186,8 @@ assert.match(handoff,/await afterPortalPaint\(\);[\s\S]*?markGuardianFastReturn\
 assert.doesNotMatch(superSync,/paradox-build-space-handoff\.mjs/,'The subclass bridge must not register a duplicate Build handoff owner');
 
 assert.match(buildHtml,/data-guardian-profile-mode="roster-only"/,'Build Tool must load the roster without replacing its protected snapshot');
-assert.match(buildHtml,/<body class="forge-token-preview build-forge-page">/,'Build Forge must own a page-scoped Journey-style header presentation');
+// PR #237 (ed5ffcf) added fluid icons; PR #291 (693c952) added the shared button opt-in.
+assert.match(buildHtml,/<body data-apx-button-system class="forge-token-preview build-forge-page apx-fluid-icons">/,'Build Forge must own a page-scoped Journey-style header presentation');
 assert.match(buildHtml,/<header class="apx-destination-header topbar build-forge-header forge-command-header">/,'Build Forge header must use the shared command-header structure');
 assert.match(buildHtml,/<div class="apx-destination-header-copy workspace-title build-forge-header-copy"><strong>BUILD FORGE<\/strong><small>OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD<\/small><\/div>/,'Build Forge must show its centred page name and plain-language purpose');
 assert.match(buildHtml,/<span class="visually-hidden build-source-state" id="sourcePill"/,'Build Source must remain available to runtime logic without showing beside the Bungie avatar');
@@ -196,7 +198,7 @@ assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-her
 assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__power\{[^}]*top:50%!important;[^}]*right:\.625rem!important;[^}]*translateY\(-50%\)/,'Build Forge Power must be vertically centred on the right edge');
 assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card\.is-selected\{[^}]*border-color:rgba\(201,168,76,\.92\)!important;[^}]*box-shadow:[^}]*rgba\(201,168,76,\.5\)[^}]*opacity:1!important\}/,'Build Forge must give the selected Working Build Guardian a fully opaque glow-backed card');
 assert.match(buildCss,/\.guardian-character-card\.is-selected::before\{opacity:1!important;filter:none!important\}/,'Build Forge must remove selected-card emblem opacity and filtering');
-assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) 910px minmax\(0,1fr\)!important/,'Build Forge must keep the three-card Guardian rail centred in the page');
+assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) var\(--apx-hero-row,910px\) minmax\(0,1fr\)!important/,'Build Forge must keep the three-card Guardian rail centred in the page');
 assert.match(sharedHeroCss,/\.apx-destination-header-copy\{position:absolute!important;top:50%!important;left:calc\(25% - 5rem\)!important;[^}]*transform:translate\(-50%,-50%\)!important/,'Build Forge page identity must be centred between the brand and the first Guardian card');
 assert.doesNotMatch(buildModule,/balanceBuildForgeHeader|--build-forge-command-centre|--build-forge-command-width/,'Build Forge must not retain a page-specific header positioning layer');
 assert.match(buildHtml,/id="guardianCharacterCards"/,'Build Tool character cards are missing');
