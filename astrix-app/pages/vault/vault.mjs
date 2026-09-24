@@ -597,10 +597,19 @@ async function settleVisibleImages(){
 async function init(){
   installEvents();
   installTransferEvents();
-  byId('vaultConnectButton').href=authStartUrl();
+
   try{
     session=await getBungieSession({force:true});
-    if(session?.authenticated!==true){
+    if(session?.authenticated==null){
+      byId('vaultSignedOut').hidden=true;
+      byId('vaultConnectionState').textContent='CONNECTION UNAVAILABLE';
+      setStatus('Bungie is not responding. Retry');
+      globalThis.ForgeLoader?.authResolved?.();
+      globalThis.ForgeLoader?.done?.();
+      return;
+    }
+    if(session?.authenticated===false){
+      byId('vaultConnectButton').href=authStartUrl();
       byId('vaultSignedOut').hidden=false;
       byId('vaultConnectionState').textContent='SIGNED OUT';
       byId('vaultHeaderState').textContent='CONNECT BUNGIE';

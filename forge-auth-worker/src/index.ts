@@ -506,14 +506,24 @@ async function deleteAccessBinding(env: Env, accessIdentityKey: string, sessionI
 }
 
 async function getSession(env: Env, sessionId: string): Promise<SessionRecord | null> {
-  const response = await recordStub(env, `session:${sessionId}`).fetch("https://auth-record/record");
-  if (!response.ok) return null;
-  const value = await response.json<AuthRecordValue>();
-  return value.kind === "session" ? value : null;
+  try {
+    const response = await recordStub(env, `session:${sessionId}`).fetch("https://auth-record/record");
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error("bungie_unavailable");
+    const value = await response.json<AuthRecordValue>();
+    if (!value || value.kind !== "session") throw new Error("bungie_unavailable");
+    return value;
+  } catch {
+    throw new Error("bungie_unavailable");
+  }
 }
 
 async function putSession(env: Env, sessionId: string, session: SessionRecord): Promise<void> {
-  await putRecord(env, `session:${sessionId}`, session);
+  const response = await recordStub(env, `session:${sessionId}`).fetch("https://auth-record/metadata", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lastUsedAt: session.lastUsedAt, verifiedCharacterIds: session.verifiedCharacterIds, verifiedCharactersAt: session.verifiedCharactersAt })
+  });
+  if (!response.ok) throw new Error("bungie_unavailable");
 }
 
 async function deleteSession(env: Env, sessionId: string): Promise<void> {
@@ -527,12 +537,12 @@ async function revokeSession(env: Env, sessionId: string, session: SessionRecord
 
 async function renewSession(env: Env, sessionId: string, session: SessionRecord): Promise<SessionRecord> {
   const now = Date.now();
-  const renewed: SessionRecord = {
-    ...session,
-    lastUsedAt: now,
-    absoluteExpiresAt: now + SESSION_TTL_MS
-  };
-  await putSession(env, sessionId, renewed);
+  const response = await recordStub(env, `session:${sessionId}`).fetch("https://auth-record/renew", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lastUsedAt: now, absoluteExpiresAt: now + SESSION_TTL_MS })
+  });
+  if (!response.ok) throw new Error("bungie_unavailable");
+  const renewed = await response.json<SessionRecord>();
   if (renewed.accessIdentityKey) {
     await putAccessBinding(env, renewed.accessIdentityKey, sessionId, renewed.absoluteExpiresAt);
   }
@@ -612,40 +622,10 @@ async function fetchMemberships(accessToken: string, env: Env): Promise<BungieMe
 }
 
 async function refreshAccessToken(sessionId: string, session: SessionRecord, env: Env): Promise<SessionRecord> {
-  if (session.accessExpiresAt > Date.now() + 60_000) return session;
-  if (!session.refreshToken || (session.refreshExpiresAt !== null && session.refreshExpiresAt <= Date.now())) {
-    throw new Error("bungie_reauthentication_required");
-  }
-
-  const body = new URLSearchParams({
-    grant_type: "refresh_token",
-    refresh_token: session.refreshToken,
-    client_id: env.BUNGIE_CLIENT_ID,
-    client_secret: env.BUNGIE_CLIENT_SECRET
-  });
-  const response = await fetch(BUNGIE_TOKEN, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  if (response.status === 400 || response.status === 401) throw new Error("bungie_reauthentication_required");
-  if (!response.ok) throw new Error(`bungie_token_refresh_failed:${response.status}`);
-
-  const token = await response.json<TokenResponse>();
-  if (!token.access_token || !Number.isFinite(token.expires_in) || token.expires_in <= 0) {
-    throw new Error("bungie_token_refresh_invalid");
-  }
-  const now = Date.now();
-  const refreshed: SessionRecord = {
-    ...session,
-    lastUsedAt: now,
-    accessToken: token.access_token,
-    refreshToken: token.refresh_token || session.refreshToken,
-    accessExpiresAt: now + token.expires_in * 1000,
-    refreshExpiresAt: token.refresh_expires_in ? now + token.refresh_expires_in * 1000 : session.refreshExpiresAt
-  };
-  await putSession(env, sessionId, refreshed);
-  return refreshed;
+  const response = await recordStub(env, `session:${sessionId}`).fetch("https://auth-record/refresh", { method: "POST" });
+  if (response.status === 401) throw new Error("bungie_reauthentication_required");
+  if (!response.ok) throw new Error("bungie_unavailable");
+  return response.json<SessionRecord>();
 }
 
 function internalAccessIdentity(url: URL): string | null {
@@ -668,10 +648,6 @@ async function accessRecoveryTicketRoute(request: Request, env: Env): Promise<Re
     if (session) await revokeSession(env, binding.sessionId, session);
     else await deleteAccessBinding(env, accessIdentityKey, binding.sessionId);
     return json({ error: "bungie_session_not_bound" }, 404, { "Cache-Control": "no-store" });
-  }
-  if (!session.refreshToken || (session.refreshExpiresAt !== null && session.refreshExpiresAt <= Date.now())) {
-    await revokeSession(env, binding.sessionId, session);
-    return json({ error: "bungie_reauthentication_required" }, 401, { "Cache-Control": "no-store" });
   }
 
   const ticket = randomToken();
@@ -2281,7 +2257,7 @@ export default {
             : json({ error: "invalid_access_identity" }, 400, { "Cache-Control": "no-store" });
         }
         if (request.method === "GET" && url.pathname === "/internal/access/recovery-ticket") {
-          return accessRecoveryTicketRoute(request, env);
+          return await accessRecoveryTicketRoute(request, env);
         }
         return json({ error: "not_found" }, 404, { "Cache-Control": "no-store" });
       }
@@ -2305,48 +2281,51 @@ export default {
         return withCors(request, env, json({ prepared: Boolean(prepared), manifestVersion: manifest.version, preparedVersion: prepared?.manifestVersion || null, tables: Object.keys(prepared?.tables || {}), current: prepared?.manifestVersion === manifest.version }, 200, { "Cache-Control": "no-store" }));
       }
       if (request.method === "GET" && url.pathname === "/bungie/callback") return oauthCallback(request, env);
-      if (request.method === "GET" && url.pathname === "/session") return sessionRoute(request, env);
-      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/paradox/loadouts") return paradoxLoadoutsRoute(request, env, authenticatedSession);
-      if (request.method === "GET" && url.pathname === "/session/recover") return sessionRecoveryRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/account") return bungieAccountRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/manifest") return manifestMetadataRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/manifest/component") return manifestComponentRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/manifest/definition") return manifestDefinitionRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/manifest/definitions") return manifestDefinitionsRoute(request, env);
-      if (request.method === "GET" && url.pathname === "/bungie/current-season") return currentSeasonRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/session") return await sessionRoute(request, env);
+      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/paradox/loadouts") return await paradoxLoadoutsRoute(request, env, authenticatedSession);
+      if (request.method === "GET" && url.pathname === "/session/recover") return await sessionRecoveryRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/account") return await bungieAccountRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/manifest") return await manifestMetadataRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/manifest/component") return await manifestComponentRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/manifest/definition") return await manifestDefinitionRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/manifest/definitions") return await manifestDefinitionsRoute(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/current-season") return await currentSeasonRoute(request, env);
       if (request.method === "GET" && url.pathname.startsWith("/bungie/page/")) {
         const page = decodeURIComponent(url.pathname.slice("/bungie/page/".length)) as PagePayloadKind;
         return PAGE_PAYLOAD_KINDS.has(page)
-          ? pagePayloadRoute(request, env, page, context)
+          ? await pagePayloadRoute(request, env, page, context)
           : withCors(request, env, json({ error: "page_payload_not_found" }, 404));
       }
       if (request.method === "GET" && (url.pathname === "/bungie/profile" || url.pathname === "/v1/destiny/profile")) {
-        return profileRoute(request, env);
+        return await profileRoute(request, env);
       }
       if (request.method === "GET" && (url.pathname === "/bungie/loadout" || url.pathname === "/v1/destiny/loadout")) {
-        return loadoutRoute(request, env);
+        return await loadoutRoute(request, env);
       }
       if (request.method === "GET" && url.pathname === "/bungie/activity-history") {
-        return activityHistoryRoute(request, env);
+        return await activityHistoryRoute(request, env);
       }
       if (request.method === "GET" && url.pathname === "/bungie/historical-stats") {
-        return historicalStatsRoute(request, env);
+        return await historicalStatsRoute(request, env);
       }
       if (request.method === "GET" && url.pathname.startsWith("/bungie/pgcr/")) {
-        return pgcrRoute(request, env, decodeURIComponent(url.pathname.slice("/bungie/pgcr/".length)));
+        return await pgcrRoute(request, env, decodeURIComponent(url.pathname.slice("/bungie/pgcr/".length)));
       }
-      if (request.method === "POST" && url.pathname === "/bungie/forge/armour-combinations") return armourCombinationsRoute(request, env);
-      if (request.method === "POST" && url.pathname === "/bungie/actions/equip-items") return bungieActionRoute(request, env, "equip-items");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/transfer-item") return bungieActionRoute(request, env, "transfer-item");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/pull-from-postmaster") return bungieActionRoute(request, env, "pull-from-postmaster");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/socket-plug-free") return bungieActionRoute(request, env, "socket-plug-free");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/equip") return bungieActionRoute(request, env, "loadout-equip");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/snapshot") return bungieActionRoute(request, env, "loadout-snapshot");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/identifiers") return bungieActionRoute(request, env, "loadout-identifiers");
-      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/clear") return bungieActionRoute(request, env, "loadout-clear");
-      if (request.method === "POST" && url.pathname === "/logout") return logoutRoute(request, env);
+      if (request.method === "POST" && url.pathname === "/bungie/forge/armour-combinations") return await armourCombinationsRoute(request, env);
+      if (request.method === "POST" && url.pathname === "/bungie/actions/equip-items") return await bungieActionRoute(request, env, "equip-items");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/transfer-item") return await bungieActionRoute(request, env, "transfer-item");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/pull-from-postmaster") return await bungieActionRoute(request, env, "pull-from-postmaster");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/socket-plug-free") return await bungieActionRoute(request, env, "socket-plug-free");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/equip") return await bungieActionRoute(request, env, "loadout-equip");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/snapshot") return await bungieActionRoute(request, env, "loadout-snapshot");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/identifiers") return await bungieActionRoute(request, env, "loadout-identifiers");
+      if (request.method === "POST" && url.pathname === "/bungie/actions/loadout/clear") return await bungieActionRoute(request, env, "loadout-clear");
+      if (request.method === "POST" && url.pathname === "/logout") return await logoutRoute(request, env);
       return withCors(request, env, json({ error: "not_found" }, 404));
     } catch (error) {
+      if (error instanceof Error && error.message === "bungie_unavailable") {
+        return withCors(request, env, json({ authenticated: "unknown", error: "bungie_unavailable" }, 503, { "Cache-Control": "no-store" }));
+      }
       console.error("worker_request_failed", {
         path: url.pathname,
         message: error instanceof Error ? error.message : String(error)

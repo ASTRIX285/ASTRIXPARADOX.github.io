@@ -1,3 +1,4 @@
+import { refreshFailure } from "./refresh-failure";
 import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
 import { PreparedPageCache } from "./prepared-page-cache";
@@ -9,6 +10,7 @@ const TOKEN_RENEWAL_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
 const TOKEN_RENEWAL_LEEWAY_MS = 7 * 24 * 60 * 60 * 1000;
 const MIN_ALARM_DELAY_MS = 5 * 60 * 1000;
 const OAUTH_RECORD_TTL_MS = 15 * 60 * 1000;
+const TEMPORARY_RETRY_MS = 15 * 60 * 1000;
 const RECOVERY_RECORD_TTL_MS = 5 * 60 * 1000;
 
 export type Membership = { membershipType: number; membershipId: string; displayName?: string };
@@ -45,6 +47,23 @@ function nextRenewalAt(session: SessionRecord, now = Date.now()): number | null 
 }
 
 export class AuthRecord extends DurableObject<Env> {
+  private mutations: Promise<unknown> = Promise.resolve();
+  private refreshFlight: Promise<SessionRecord> | null = null;
+
+  private exclusive<T>(operation: () => Promise<T>): Promise<T> {
+    const task = this.mutations.then(operation);
+    this.mutations = task.catch(() => undefined);
+    return task;
+  }
+
+  private refresh(): Promise<SessionRecord> {
+    if (!this.refreshFlight) {
+      this.refreshFlight = this.exclusive(() => this.refreshStoredSession())
+        .finally(() => { this.refreshFlight = null; });
+    }
+    return this.refreshFlight;
+  }
+
   private snapshots = new ProfileSnapshotCache(this.ctx.storage);
   private preparedPages = new PreparedPageCache(this.ctx.storage);
   private deferSnapshotWrite(task: Promise<void>): void {
@@ -94,6 +113,40 @@ export class AuthRecord extends DurableObject<Env> {
 
   async fetch(request: Request): Promise<Response> {
     const path = new URL(request.url).pathname;
+    if (request.method === "POST" && path === "/refresh") {
+      try {
+        return Response.json(await this.refresh(), { headers: { "Cache-Control": "no-store" } });
+      } catch (error) {
+        const invalid = error instanceof Error && error.message === "bungie_reauthentication_required";
+        return Response.json({ authenticated: invalid ? false : "unknown", error: invalid ? "bungie_reauthentication_required" : "bungie_unavailable" }, { status: invalid ? 401 : 503 });
+      }
+    }
+    if (request.method === "POST" && (path === "/renew" || path === "/metadata")) {
+      const input = await request.json<Partial<SessionRecord>>();
+      return this.exclusive(async () => {
+        const stored = await this.ctx.storage.get<AuthRecordValue>("record");
+        if (!stored || stored.kind !== "session") return new Response(null, { status: 401 });
+        const updated = { ...stored };
+        if (path === "/renew") {
+          if (!Number.isFinite(input.lastUsedAt) || !Number.isFinite(input.absoluteExpiresAt)) return new Response(null, { status: 400 });
+          updated.lastUsedAt = Math.max(stored.lastUsedAt, input.lastUsedAt!);
+          updated.absoluteExpiresAt = Math.max(stored.absoluteExpiresAt, input.absoluteExpiresAt!);
+        } else {
+          // Profile writers can never replace credentials, identity or the session lifetime.
+          if (Number(input.lastUsedAt) > stored.lastUsedAt) updated.lastUsedAt = input.lastUsedAt!;
+          if (Number(input.verifiedCharactersAt) > Number(stored.verifiedCharactersAt || 0) && Array.isArray(input.verifiedCharacterIds)) {
+            updated.verifiedCharacterIds = input.verifiedCharacterIds;
+            updated.verifiedCharactersAt = input.verifiedCharactersAt;
+          }
+        }
+        await this.ctx.storage.put("record", updated);
+        if (path === "/renew") {
+          const renewalAt = nextRenewalAt(updated);
+          if (renewalAt !== null) await this.ctx.storage.setAlarm(renewalAt);
+        }
+        return Response.json(updated, { headers: { "Cache-Control": "no-store" } });
+      });
+    }
     if (path === "/paradox-loadouts") return storedParadoxLoadouts(request, this.ctx.storage);
     if ((request.method === "GET" || request.method === "PUT") && path === "/prepared-page") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");
@@ -137,7 +190,7 @@ export class AuthRecord extends DurableObject<Env> {
     }
     if (request.method === "PUT" && path === "/record") {
       const record = await request.json<AuthRecordValue>();
-      await this.ctx.storage.put("record", record);
+      await this.exclusive(() => this.ctx.storage.put("record", record));
       if (record.kind === "session") {
         const renewalAt = nextRenewalAt(record);
         if (renewalAt !== null) await this.ctx.storage.setAlarm(renewalAt);
@@ -168,7 +221,7 @@ export class AuthRecord extends DurableObject<Env> {
       return Response.json(used, { headers: { "Cache-Control": "no-store" } });
     }
     if (request.method === "DELETE" && path === "/record") {
-      await this.ctx.storage.deleteAll();
+      await this.exclusive(async () => { await this.ctx.storage.delete("record"); await this.ctx.storage.deleteAlarm(); });
       return new Response(null, { status: 204 });
     }
     return new Response(null, { status: 404 });
@@ -176,46 +229,93 @@ export class AuthRecord extends DurableObject<Env> {
 
   async alarm(): Promise<void> {
     const record = await this.ctx.storage.get<AuthRecordValue>("record");
-    const now = Date.now();
-    if (!record || record.kind !== "session" || record.absoluteExpiresAt <= now) {
-      await this.ctx.storage.deleteAll();
+    if (!record || record.kind !== "session") {
+      await this.exclusive(async () => { await this.ctx.storage.delete("record"); await this.ctx.storage.deleteAlarm(); });
       return;
     }
-    if (!record.refreshToken || (record.refreshExpiresAt !== null && record.refreshExpiresAt <= now)) {
-      await this.ctx.storage.deleteAll();
+    if (record.absoluteExpiresAt <= Date.now()) {
+      await this.exclusive(async () => {
+        const latest = await this.ctx.storage.get<AuthRecordValue>("record");
+        if (latest?.kind === "session" && latest.absoluteExpiresAt <= Date.now()) {
+          await this.ctx.storage.delete("record");
+          await this.ctx.storage.deleteAlarm();
+        }
+      });
       return;
     }
+    try {
+      const refreshed = await this.refresh();
+      const renewalAt = nextRenewalAt(refreshed);
+      await this.ctx.storage.setAlarm(renewalAt ?? Date.now() + TEMPORARY_RETRY_MS);
+    } catch (error) {
+      if (!(error instanceof Error && error.message === "bungie_reauthentication_required")) {
+        await this.ctx.storage.setAlarm(Date.now() + TEMPORARY_RETRY_MS);
+      }
+    }
+  }
 
-    const body = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: record.refreshToken,
-      client_id: this.env.BUNGIE_CLIENT_ID,
-      client_secret: this.env.BUNGIE_CLIENT_SECRET
-    });
-    const response = await fetch(BUNGIE_TOKEN, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body
-    });
-    if (response.status === 400 || response.status === 401) {
-      await this.ctx.storage.deleteAll();
-      return;
+  private async refreshStoredSession(): Promise<SessionRecord> {
+    const record = await this.ctx.storage.get<AuthRecordValue>("record");
+    if (!record || record.kind !== "session") throw new Error("bungie_reauthentication_required");
+    if (record.accessExpiresAt > Date.now() + 60_000) return record;
+    let status: number | null = null;
+    let code = "transport_error";
+    let revoked = false;
+    try {
+      if (!record.refreshToken) { code = "refresh_token_missing"; throw new Error("bungie_unavailable"); }
+      const body = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: record.refreshToken,
+        client_id: this.env.BUNGIE_CLIENT_ID,
+        client_secret: this.env.BUNGIE_CLIENT_SECRET
+      });
+      const response = await fetch(BUNGIE_TOKEN, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+        signal: AbortSignal.timeout(10_000)
+      });
+      status = response.status;
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        const failure = refreshFailure(response.status, payload);
+        code = failure.code;
+        if (failure.revoke) {
+          // Remove credentials only. Saved account data is not an OAuth credential.
+          await this.ctx.storage.delete("record");
+          await this.ctx.storage.deleteAlarm();
+          revoked = true;
+          throw new Error("bungie_reauthentication_required");
+        }
+        throw new Error("bungie_unavailable");
+      }
+      const token = payload as TokenResponse | null;
+      if (!token || typeof token.access_token !== "string" || !token.access_token || !Number.isFinite(token.expires_in) || token.expires_in <= 0 ||
+          (token.refresh_token !== undefined && (typeof token.refresh_token !== "string" || !token.refresh_token)) ||
+          (token.refresh_expires_in !== undefined && (!Number.isFinite(token.refresh_expires_in) || token.refresh_expires_in <= 0))) {
+        code = "invalid_token_response";
+        throw new Error("bungie_unavailable");
+      }
+      const now = Date.now();
+      const refreshed: SessionRecord = {
+        ...record,
+        accessToken: token.access_token,
+        refreshToken: token.refresh_token || record.refreshToken,
+        accessExpiresAt: now + token.expires_in * 1000,
+        refreshExpiresAt: token.refresh_expires_in ? now + token.refresh_expires_in * 1000 : record.refreshExpiresAt
+      };
+      await this.ctx.storage.put("record", refreshed);
+      const renewalAt = nextRenewalAt(refreshed, now);
+      if (renewalAt !== null) await this.ctx.storage.setAlarm(renewalAt);
+      code = "success";
+      return refreshed;
+    } catch (error) {
+      if (!revoked) await this.ctx.storage.setAlarm(Date.now() + TEMPORARY_RETRY_MS);
+      throw error;
+    } finally {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(this.ctx.id.toString()));
+      const sessionHash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+      console.info("bungie_refresh", { sessionHash, status, code, revoked });
     }
-    if (!response.ok) throw new Error(`bungie_token_alarm_refresh_failed:${response.status}`);
-
-    const token = await response.json<TokenResponse>();
-    if (!token.access_token || !Number.isFinite(token.expires_in) || token.expires_in <= 0) {
-      throw new Error("bungie_token_alarm_refresh_invalid");
-    }
-    const refreshed: SessionRecord = {
-      ...record,
-      accessToken: token.access_token,
-      refreshToken: token.refresh_token || record.refreshToken,
-      accessExpiresAt: now + token.expires_in * 1000,
-      refreshExpiresAt: token.refresh_expires_in ? now + token.refresh_expires_in * 1000 : record.refreshExpiresAt
-    };
-    await this.ctx.storage.put("record", refreshed);
-    const renewalAt = nextRenewalAt(refreshed, now);
-    if (renewalAt !== null) await this.ctx.storage.setAlarm(renewalAt);
   }
 }
