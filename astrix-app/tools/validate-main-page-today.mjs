@@ -45,7 +45,7 @@ assert.doesNotMatch(portalController,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/
 assert.match(portalCss,/\.apx-auth-panel/,'The shared portal must visibly own the Bungie authentication gate');
 
 assert.match(auth,/readCachedBungieSession/,'Bungie authentication must reuse the current tab session');
-assert.match(auth,/if\(session\?\.authenticated\)\{[\s\S]*?cacheBungieSession\(session\)[\s\S]*?authResolved[\s\S]*?else\{[\s\S]*?authRequired\?\.\(authStartUrl\(\)\)/,'Bungie authentication must silently reuse a valid connection and gate only a genuinely disconnected user');
+assert.match(auth,/if\(session\?\.authenticated===true\)\{[\s\S]*?cacheBungieSession\(session\)[\s\S]*?authResolved[\s\S]*?else if\(session\?\.authenticated===false\)\{[\s\S]*?authRequired\?\.\(authStartUrl\(\)\)/,'Bungie authentication must silently reuse a valid connection and gate only a genuinely disconnected user');
 assert.match(profile,/readCachedBungieProfile/,'Guardian profile must reuse the current authenticated session snapshot');
 assert.match(profile,/readCachedBungieLoadoutDetail/,'Selected Bungie loadout detail must survive Main and Build navigation');
 assert.match(profile,/invalidatedLoadoutCacheKeys[\s\S]*?invalidateBungieLoadoutDetail/,'A changed Bungie loadout slot must not reopen from stale browser detail.');

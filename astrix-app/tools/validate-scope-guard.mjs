@@ -14,6 +14,9 @@ const allowed=new Set([
   'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2-beta.css',
   'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2-compact.css',
   'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/index.html',
+  'forge-auth-worker/src/refresh-failure.ts',
+  'forge-auth-worker/test/auth-session.test.ts',
+  'astrix-app/tools/validate-auth-session.mjs',
 
   'astrix-app/tools/test-journey-summary-css.mjs',
   'css/astrix-palette.css',

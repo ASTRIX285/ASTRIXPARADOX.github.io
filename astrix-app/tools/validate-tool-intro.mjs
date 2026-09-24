@@ -36,10 +36,10 @@ assert.match(css,/@media\(max-width:800px\)/,'Intro page must provide a mobile c
 assert.match(runtime,/const seenKey=`astrix_intro_seen_\$\{gameId\}`/,'Seen state must be namespaced per game');
 assert.match(runtime,/fetch\(`\$\{AUTH_ORIGIN\}\/session`,\{[\s\S]*?credentials:'include'[\s\S]*?headers:\{Accept:'application\/json'\}[\s\S]*?signal:controller\.signal/,'Intro must run the verified Bungie session request');
 assert.match(runtime,/setTimeout\(\(\)=>controller\.abort\(\),12000\)/,'Intro must retain the verified session timeout');
-assert.match(runtime,/response\.status===401[\s\S]*?response\.ok[\s\S]*?response\.json\(\)/,'Intro must retain the verified session response handling');
+assert.match(runtime,/response\.json\(\)[\s\S]*?response\.status===401&&session\?\.authenticated===false[\s\S]*?response\.ok/,'Intro must retain the verified session response handling');
 assert.match(runtime,/location\.hostname===SANDBOX_HOST[\s\S]*?new URL\('\/__astrix\/bungie\/start',location\.origin\)[\s\S]*?start\.searchParams\.set\('return',returnUrl\)/,'Sandbox visitors must use the existing sandbox Bungie start route');
 assert.match(runtime,/function openJourney\(\)\{\s*location\.replace\(JOURNEY_URL\);\s*\}/,'Connected visitors must replace the intro with Journey');
-assert.match(runtime,/const session=await getBungieSession\(\);[\s\S]*?if\(session\?\.authenticated\)[\s\S]*?openJourney\(\)[\s\S]*?location\.assign\(authStartUrl\(\)\)/,'Intro must check the session before choosing Journey or Bungie approval');
+assert.match(runtime,/const session=await getBungieSession\(\);[\s\S]*?if\(session\?\.authenticated===true\)[\s\S]*?openJourney\(\)[\s\S]*?location\.assign\(authStartUrl\(\)\)/,'Intro must check the session before choosing Journey or Bungie approval');
 assert.match(runtime,/import \{preloadForgeLoaderPayload\} from '\.\.\/forge-loader\/forge-loader-preload\.mjs[^']*'/,'The tool intro must reuse the shared Forge Loader prepared-page client.');
 assert.ok(runtime.indexOf("await preloadForgeLoaderPayload(session,{force:false,reason:'tool-intro'})")<runtime.indexOf('openJourney();'),'The authenticated intro must make the prepared display snapshot resident without blocking Journey on a live Bungie read.');
 assert.match(runtime,/rememberIntro\(\)[\s\S]*?classList\.add\('is-transitioning'\)[\s\S]*?continueToGuardianJourney\(\)/,'CTA must remember the game, start the transition and run the real handoff');
