@@ -155,6 +155,12 @@ for(const [label,html] of appPages.filter(([label])=>['Forge Loader','Journey','
 
 // Prompt 7b: gear geometry is independent of viewport and container width.
 const inventoryCss=await readFile(new URL('../../shared/guardian-inventory-workspace.css',ROOT),'utf8');
+assert.match(inventoryCss,/body:not\(\.forge-loader-page\) \.vault-character-column \.vault-transfer-items\{flex-wrap:wrap;overflow:visible\}/,'Vault character gear rows must wrap with visible overflow, excluding Forge Loader');
+for(const page of ['../../pages/vault/index.html','index.html']){
+  const markup=await readFile(new URL(page,ROOT),'utf8');
+  assert.match(markup,/guardian-inventory-workspace\.css\?v=20260924-vault-wrap-1"/,'Every inventory workspace page must load the wrapping stylesheet revision');
+}
+
 assert.match(inventoryCss,/grid-template-columns:repeat\(10,var\(--apx-equipment-icon-size\)\)/,'Character must retain ten fixed-width carried-item tracks');
 assert.doesNotMatch(inventoryCss,/(?:100|22|122)cqw|--character-item-size:48px/,'Character gear must not shrink or stretch with its container');
 assert.match(inventoryCss,/--apx-tile-height:calc\(var\(--character-item-size\) \* 1\.22\)/,'Fixed art must retain its separate power footer');
