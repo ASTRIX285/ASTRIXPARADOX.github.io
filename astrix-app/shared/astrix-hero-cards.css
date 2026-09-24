@@ -262,3 +262,10 @@ body:has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::after{
     grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--apx-hero-width,220px)),var(--apx-hero-width,1fr)))!important;width:100%!important;min-width:0!important;max-width:100%!important;
   }
 }
+
+/* Prompt 12: opaque fixed command band. Preserve existing rest geometry.
+   Forge Loader retains its current header and ribbon treatment. */
+html body:not(.forge-loader-page) header:has(>[data-forge-hero-cards]){overflow:visible!important}
+body:not(.forge-loader-page):has(header>[data-forge-hero-cards])>[data-forge-destination-ribbon]::before{
+  content:"";position:absolute;z-index:-1;inset:-12px calc((100% - 100vw) / 2) 0;background:var(--apx-colour-raised,#060606);
+}

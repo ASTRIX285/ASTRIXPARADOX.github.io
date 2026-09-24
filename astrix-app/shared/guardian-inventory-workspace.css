@@ -96,15 +96,15 @@ body:not(.forge-loader-page) .vault-character-column .vault-transfer-items{flex-
 .character-inventory-workspace .vault-character-column{width:100%}
 .character-inventory-workspace .vault-transfer-items{gap:6px;flex-wrap:wrap;overflow:visible}
 
-/* Keep ten carried-item tracks at the fixed gear size. Narrow panels scroll
-   instead of shrinking gear; the separate in-game loadout strip is unchanged. */
-body.guardian-main-page .character-inventory-workspace{container-type:inline-size}
+/* Prompt 12: ten capped tracks where they fit; narrower panels wrap. */
+body.guardian-main-page .character-inventory-workspace{container:character-inventory / inline-size}
 body.guardian-main-page .character-inventory-workspace .vault-postmaster-section{display:none}
 body.guardian-main-page .character-inventory-workspace .vault-transfer-items{
   display:grid;
-  grid-template-columns:repeat(10,var(--apx-equipment-icon-size));
+  grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size));
+  max-width:calc(10 * var(--apx-equipment-icon-size) + 9 * 4px);
   gap:4px;
-  overflow-x:auto;
+  overflow:visible;
 }
 body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
   container-type:inline-size;
@@ -147,4 +147,25 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspec
     }
     .vault-character-columns>.vault-character-column>.vault-character-inventory{align-self:stretch}
   }
+}
+
+/* Prompt 12: two ten-tile columns at the 64px cap, section padding and gap.
+   Existing family headings and bucket sections keep their DOM/action hooks. */
+@container character-inventory (min-width:calc(2 * (10 * 64px + 9 * 4px) + 24px + 12px)){
+  body.guardian-main-page .character-inventory-workspace .vault-equipped-carried-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;align-items:start}
+  body.guardian-main-page .character-inventory-workspace .vault-equipped-carried-section>header{grid-column:1/-1}
+  body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(1){grid-column:1;grid-row:2}
+  body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(2){grid-column:2;grid-row:2}
+  body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(3){grid-column:1;grid-row:6}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="primary"]{grid-column:1;grid-row:3}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="special"]{grid-column:1;grid-row:4}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="heavy"]{grid-column:1;grid-row:5}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ghost"]{grid-column:1;grid-row:7}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ship"]{grid-column:1;grid-row:8}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="sparrow"]{grid-column:1;grid-row:9}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="helmet"]{grid-column:2;grid-row:3}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="gauntlets"]{grid-column:2;grid-row:4}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="chest"]{grid-column:2;grid-row:5}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="legs"]{grid-column:2;grid-row:6}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="class-item"]{grid-column:2;grid-row:7}
 }
