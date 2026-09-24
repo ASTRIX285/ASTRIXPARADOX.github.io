@@ -4,6 +4,16 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/tools/test-champion-overlays.mjs',
+  // Prompt 7b: gear sizing in the tracked legacy mirror only.
+  'ASTRIX285.github.io/astrix-app/components/guardian-workspace/guardian-workspace.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-layout-feedback.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-mobile.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2-beta.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2-compact.css',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v2/index.html',
   'forge-auth-worker/src/refresh-failure.ts',
   'forge-auth-worker/test/auth-session.test.ts',
   'astrix-app/tools/validate-auth-session.mjs',

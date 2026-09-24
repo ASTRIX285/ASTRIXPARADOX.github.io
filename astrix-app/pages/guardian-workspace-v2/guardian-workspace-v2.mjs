@@ -4,13 +4,13 @@ import {
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1";
+} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1";
 import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
-import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1";
+import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2";
-import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2";
+import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";

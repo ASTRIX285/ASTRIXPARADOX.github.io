@@ -4,7 +4,7 @@
    globalThis.ForgeBetaFixtures without DOM hijacking.
    ========================================================================== */
 
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-page-payload-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1";
 
 const FIXTURE_URL = "../../data/paradox-forge/beta/ASTRIX_Paradox_Forge_Beta_Fixtures_v1.json";
 const IDENTITY_URL = "../../data/paradox-forge/beta/beta-component-identities.json";

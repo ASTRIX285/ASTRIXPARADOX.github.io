@@ -1,13 +1,13 @@
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
-import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260913-breaker-icon-2';
+import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1';
+import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
 

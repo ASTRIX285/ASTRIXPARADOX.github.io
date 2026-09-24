@@ -44,6 +44,7 @@ const validators=[
   'test-forge-set-list.mjs',
   'test-weapon-diagnostics.mjs',
   'test-weapon-presentation.mjs',
+  'test-champion-overlays.mjs',
   'test-journey-collections.mjs',
   'test-journey-records.mjs',
   'validate-paradox-item-cards.mjs',

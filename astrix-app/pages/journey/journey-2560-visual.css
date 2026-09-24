@@ -1083,3 +1083,10 @@ button.journey-map-marker.has-no-icon:not(:focus-visible):not(.is-selected){outl
   html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__identity strong{font-size:.75rem!important}
   html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-card__power{right:.5rem!important;font-size:.8125rem!important}
 }
+
+/* Collection gear and weapon records use the fixed catalogue tier.
+   Triumph, title, rank and other record emblems retain their own sizing. */
+.journey-page .journey-record-row.is-gear:not(.has-no-icon),
+.journey-page .journey-records-group.is-patterns-catalysts .journey-record-row:not(.has-no-icon){grid-template-columns:var(--apx-icon-catalog,44px) minmax(0,1fr)}
+.journey-page .journey-record-row.is-gear .journey-record-icon,
+.journey-page .journey-records-group.is-patterns-catalysts .journey-record-icon{width:var(--apx-icon-catalog,44px);height:var(--apx-icon-catalog,44px)}

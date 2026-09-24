@@ -1809,11 +1809,12 @@ body.paradox-inventory-inspect-open{overflow:hidden}
   --paradox-card-panel-raised:#151219;
   --paradox-card-gold-bright:#f3d361;
   --paradox-card-rule:rgba(255,255,255,.12);
-  --paradox-inspect-art-width:calc(var(--apx-icon-gear-art-width) * .8);
+  --paradox-inspect-art-width:var(--apx-equipment-icon-size);
   --paradox-perk-size:var(--apx-icon-card);
   width:100%;border:0;border-radius:0;background:linear-gradient(145deg,rgba(24,4,8,.98),#09080b 56%,rgba(201,168,76,.07))
 }
 .paradox-item-inspect-card.is-legendary{border-top:3px solid #a777c4}
+body.forge-loader-page .paradox-item-inspect-card{--paradox-inspect-art-width:calc(var(--apx-icon-gear-art-width) * .8)}
 .paradox-item-inspect-card.is-exotic{border-top:3px solid #e0b94f}
 .paradox-item-inspect-card .paradox-item-header{
   position:sticky;top:0;z-index:2;grid-template-columns:var(--paradox-inspect-art-width) minmax(0,1fr) auto!important;

@@ -2,11 +2,11 @@ import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-chara
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
 import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
-import {paradoxDefinitionId,resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
+import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
@@ -500,7 +500,7 @@ function normaliseItem(profile,definitions,item,payload={}){
     state:Number(item?.state??0),
     damageTypeHash:instance?.damageTypeHash??base.definition?.defaultDamageTypeHash??null,
     elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??base.definition?.defaultDamageTypeHash)]||null,
-    breakerDefinition:resolveBreakerTypeDefinition(instance,base.definition,payload?.breakerDefinitions),
+    breakerDefinition:resolveWeaponBreakerTypeDefinition(instance,base.definition,payload?.breakerDefinitions,{plugs,sandboxPerks:payload?.sandboxPerks,activePerks:profile?.itemComponents?.perks?.data?.[item.itemInstanceId]?.perks}),
     isExotic,
     shader,
     ornament,

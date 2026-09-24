@@ -5,9 +5,9 @@ import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weap
    with 6 functional mod tiles each without tearing down sibling DOM blocks.
    ========================================================================== */
 
-import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&ui=20260917-no-diagnostics-1&status=20260917-compact-1";
+import "./guardian-semantic-ui.mjs?v=20260908-icon-hover-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&ui=20260917-no-diagnostics-1&status=20260917-compact-1&champion=20260924-champion-export-1";
 import { classifyArmourPlug } from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
-import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1';
 import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);

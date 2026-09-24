@@ -66,19 +66,19 @@
   --apx-icon-manual-item:calc(50 * var(--apx-icon-unit,1px));
   --apx-icon-detail-compact:calc(52 * var(--apx-icon-unit,1px));
   --apx-icon-detail-tile:calc(82 * var(--apx-icon-unit,1px));
-  --apx-icon-card:calc(56 * var(--apx-icon-unit,1px));
+  --apx-icon-card:50px;
   --apx-icon-legacy-item:calc(58 * var(--apx-icon-unit,1px));
   --apx-icon-detail-identity:calc(60 * var(--apx-icon-unit,1px));
   --apx-icon-stage:calc(60.8 * var(--apx-icon-unit,1px));
   --apx-icon-detail-socket:calc(62 * var(--apx-icon-unit,1px));
   --apx-icon-perk:calc(64 * var(--apx-icon-unit,1px));
   --apx-icon-perk-responsive:clamp(2.625rem,12vw,3.5rem);
-  --apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));
-  --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
+  --apx-icon-catalog:44px;
+  --apx-icon-weapon-card:50px;
   --apx-icon-selector:calc(68 * var(--apx-icon-unit,1px));
   --apx-icon-detail-art:calc(72 * var(--apx-icon-unit,1px));
   --apx-icon-inspect:calc(112 * var(--apx-icon-unit,1px));
-  --apx-icon-gear-art-width:var(--apx-inventory-size,96px);
+  --apx-icon-gear-art-width:var(--apx-inventory-size,50px);
   --apx-icon-gear-art-height:calc(var(--apx-icon-gear-art-width) * var(--apx-inventory-ratio,1.22));
   --apx-icon-weapon-socket:clamp(2.125rem,3.6cqi,3.25rem);
   --apx-icon-weapon-socket-compact:clamp(1.25rem,2.25cqi,1.75rem);
@@ -88,6 +88,15 @@
 }
 
 
+/* Prompt 7 changes these three tokens only. Equipment artwork is owned by
+   --apx-equipment-icon-size below. Forge Loader retains its existing values. */
+:root:has(>body.forge-loader-page){
+  --apx-icon-card:calc(56 * var(--apx-icon-unit,1px));
+  --apx-icon-catalog:calc(128 * var(--apx-icon-unit,1px));
+  --apx-icon-weapon-card:clamp(2.75rem,4.2cqi,3.5rem);
+  --apx-equipment-icon-size:max(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20));
+}
+
 /* Fluid images are opt-in per destination. 1920 CSS px is the measured desktop
    reference: the existing clamp(40px,3.2vw,64px) evaluates to 61.44px there.
    Dividing by 61.44 preserves every existing pixel baseline at that viewport.
@@ -95,8 +104,8 @@
    evaluated on :root. Text and workspace tracks do not use this image unit. */
 :root:has(>body.apx-fluid-icons){
   --apx-icon-unit:calc(clamp(40px,3.2vw,64px) / 61.44);
-  /* DIM: 50px desktop itemSize, 48px small-screen/slider floor, square tile. */
-  --apx-inventory-size:clamp(48px,calc(50 * var(--apx-icon-unit)),calc(50px * 64 / 61.44));
+  /* Gear keeps the fixed standard at every viewport; other image families retain their scale. */
+  --apx-inventory-size:var(--apx-equipment-icon-size);
   --apx-inventory-ratio:1;
   --apx-tile-art-height:95.40%;
   --apx-tile-label-size:calc(var(--apx-inventory-size) * .92 * 16 / 96);
@@ -342,18 +351,18 @@ body.apx-destination-page .apx-page-shell{
 }
 
 @media (max-width:720px){
-  :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,76px)}
+  :root{--apx-page-gutter:.5rem;--apx-workspace-gap:.5rem;--apx-icon-gear-art-width:var(--apx-inventory-size,50px)}
 }
 
-/* Weapon and armour artwork only: use the approved Character strip proportions
-   on every page. Twenty slots, nineteen 4px gaps, a 20%/360px rail, a 12px
-   column gap and 30px panel inset. Power strips retain the 100:122 ratio.
+/* Weapon and armour artwork uses one fixed 50px standard on every page.
+   Forge Loader alone retains its original strip-derived size via the scoped
+   override above. Power strips retain the 100:122 ratio.
    Do not use this token for mods, perks, subclass abilities, Supers or
    navigation imagery. */
 :root,
 :root:has(>body.apx-fluid-icons){
   --apx-equipment-reference-inset:calc(max(360px,20vw) + 42px);
-  --apx-equipment-icon-size:max(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20));
+  --apx-equipment-icon-size:50px;
   --apx-equipped-stroke:3px solid #49adff;
   --apx-inventory-size:var(--apx-equipment-icon-size)!important;
   --apx-icon-gear-art-width:var(--apx-equipment-icon-size)!important;
@@ -408,8 +417,13 @@ body .saved-build-equipment-item .saved-build-power img{
   width:calc(var(--apx-equipment-icon-size) / 5);
   height:calc(var(--apx-equipment-icon-size) / 5);
 }
-/* Non-weapon/armour inventory items retain their existing dimensions. */
-body .vault-transfer-item:not(.has-item-tile){
+/* Other inventory gear uses the same square art standard. Forge Loader keeps
+   the pre-existing non-structured tile geometry. */
+body:not(.forge-loader-page) .vault-transfer-item:not(.has-item-tile){
+  --apx-icon-gear-art-width:var(--apx-equipment-icon-size);
+  --apx-icon-gear-art-height:var(--apx-equipment-icon-size);
+}
+body.forge-loader-page .vault-transfer-item:not(.has-item-tile){
   --apx-icon-gear-art-width:50px;
   --apx-icon-gear-art-height:63px;
 }

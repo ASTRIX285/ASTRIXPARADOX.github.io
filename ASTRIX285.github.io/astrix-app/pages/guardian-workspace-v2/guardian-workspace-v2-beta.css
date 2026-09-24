@@ -219,13 +219,14 @@
   gap: 6px !important;
 }
 
-.weap-grid .weap,
-.weap-grid .weap .art {
+.weap-grid .weap {
   min-width: 0 !important;
   width: 100% !important;
 }
 
 .weap-grid .weap .art {
+  width: var(--apx-equipment-icon-size,50px) !important;
+  height: var(--apx-equipment-icon-size,50px) !important;
   aspect-ratio: 1 / 1 !important;
 }
 

@@ -3,7 +3,7 @@ import {
   renderGuardianCharacterCards,
   renderGuardianCharacterCardStatus
 } from '../guardian-workspace-v2/guardian-character-cards.mjs';
-import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1';
+import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1';
 
 const $=id=>document.getElementById(id);
 const resolving=$('missionResolving');

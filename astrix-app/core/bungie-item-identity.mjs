@@ -44,3 +44,26 @@ export function resolveBreakerTypeDefinition(instance={},itemDefinition={},defin
   if(!Number.isInteger(enumValue)||enumValue<=0)return null;
   return Object.values(definitions||{}).find(definition=>Number(definition?.enumValue)===enumValue)||null;
 }
+
+// Some weapons expose their champion capability only on an attached sandbox perk.
+// Use Bungie's explicit champion glyph tokens, never a weapon name or archetype guess.
+export function resolveWeaponBreakerTypeDefinition(instance={},itemDefinition={},definitions={},context={}){
+  const direct=resolveBreakerTypeDefinition(instance,itemDefinition,definitions);
+  if(direct)return direct;
+  const perks=context.sandboxPerks||{},states=context.activePerks||[];
+  const inactive=new Set(states.filter(row=>row?.isActive===false).map(row=>Number(row.perkHash)));
+  const attached=[itemDefinition,...(context.plugs||[]).filter(plug=>plug?.isEnabled!==false&&plug?.enabled!==false).map(plug=>plug.definition||{})];
+  const hashes=new Set([
+    ...attached.flatMap(definition=>(definition.perks||[]).map(row=>Number(row.perkHash))),
+    ...states.filter(row=>row?.isActive===true).map(row=>Number(row.perkHash))
+  ]);
+  const markers={'[Shield-Piercing]':485622768,'[Disruption]':2611060930,'[Stagger]':3178805705};
+  const found=new Set();
+  for(const hash of hashes){
+    if(inactive.has(hash))continue;
+    const description=perks[String(hash)]?.displayProperties?.description||'';
+    for(const [marker,breakerHash] of Object.entries(markers))if(description.includes(marker))found.add(breakerHash);
+  }
+  // Do not silently choose one capability when the evidence is ambiguous.
+  return found.size===1?definitions?.[String([...found][0])]||null:null;
+}

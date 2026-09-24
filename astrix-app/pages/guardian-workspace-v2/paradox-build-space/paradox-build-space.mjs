@@ -5,13 +5,13 @@ import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMat
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1';
 import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&copy=20260922-readable-block-1';
-import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1';
-import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2&ui=20260917-no-diagnostics-1&status=20260917-compact-1';
+import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&champion=20260924-champion-export-1';
+import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2&ui=20260917-no-diagnostics-1&status=20260917-compact-1&champion=20260924-champion-export-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260916-equipped-source-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260916-equipped-source-1';
 import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2';
-import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1';
+import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260916-equipped-source-1';
@@ -22,15 +22,15 @@ import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedS
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1';
-import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
+import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&champion=20260924-champion-export-1';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1';
-import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1';
+import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1&champion=20260924-champion-export-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
-import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1';
+import {bindParadoxItemInspect} from '../paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 mountForgeShell({rootSelector:'.build-space',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie'});
