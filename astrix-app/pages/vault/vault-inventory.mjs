@@ -1,6 +1,6 @@
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
 import {classifyArmourPlug,normaliseArmourSemantics,normaliseWeaponSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {resolveBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
+import {resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260913-breaker-icon-2';
 import {ARMOUR_BUCKETS,CHARACTER_EQUIPMENT_BUCKETS,EQUIPMENT_GROUPS,EQUIPMENT_GROUP_BY_HASH,INVENTORY_GROUPS,WEAPON_BUCKETS,groupInventoryWorkspaceItems,itemKey,sortInventoryWorkspaceItems} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -218,7 +218,7 @@ function normaliseWeaponItem(payload,row,group){
   return {
     ...identity,itemHash:Number(rawItem.itemHash),itemInstanceId:String(rawItem.itemInstanceId||''),bucketHash:group.hash,storageBucketHash:finite(rawItem.bucketHash),source:clone(row.source),quantity:Math.max(1,Number(rawItem.quantity)||1),equipmentGroup:group,
     power:finite(instance?.primaryStat?.value),itemLevel:finite(instance?.itemLevel),gearTier:finite(instance?.gearTier),quality:finite(instance?.quality),state:Number(rawItem.state||0),versionNumber,releaseWatermark,tierIcon:releaseWatermark.icon,isExotic,
-    weaponType:weaponType.label,weaponTypeId:weaponType.id,damageTypeHash:finite(instance?.damageTypeHash??definition?.defaultDamageTypeHash),elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??definition?.defaultDamageTypeHash)]||null,breakerDefinition:resolveBreakerTypeDefinition(instance,definition,payload?.breakerDefinitions),
+    weaponType:weaponType.label,weaponTypeId:weaponType.id,damageTypeHash:finite(instance?.damageTypeHash??definition?.defaultDamageTypeHash),elementDefinition:payload?.damageDefinitions?.[String(instance?.damageTypeHash??definition?.defaultDamageTypeHash)]||null,breakerDefinition:resolveWeaponBreakerTypeDefinition(instance,definition,payload?.breakerDefinitions,{plugs,sandboxPerks:payload?.sandboxPerks,activePerks:payload?.profile?.itemComponents?.perks?.data?.[rawItem.itemInstanceId]?.perks}),
     socketsAvailable:Boolean(rawItem.itemInstanceId&&payload?.profile?.itemComponents?.sockets?.data?.[rawItem.itemInstanceId]),socketCoverage:{plugs,requested:plugs.map(plug=>Number(plug.hash)).filter(Number.isFinite),resolved:plugs.filter(plug=>plug.definition&&Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),unresolved:plugs.filter(plug=>!plug.definition||!Object.keys(plug.definition).length).map(plug=>Number(plug.hash)),complete:plugs.every(plug=>plug.definition&&Object.keys(plug.definition).length)},socketOptions,
     weaponSemantics,intrinsic:weaponSemantics.intrinsic,selectedPerks:weaponSemantics.selectedPerks,weaponPerkModel:weaponSemantics.perkModel,weaponPerkRows:weaponSemantics.perkRows,weaponPerkRowCount:weaponSemantics.perkRowCount,exoticWeaponTraits:weaponSemantics.exoticTraits,weaponMasterwork:weaponSemantics.masterwork,weaponMod:weaponSemantics.mod,catalyst:weaponSemantics.catalyst,championCapability:weaponSemantics.champion,weaponStats:weaponSemantics.stats
   };
