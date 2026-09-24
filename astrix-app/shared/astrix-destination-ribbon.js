@@ -159,7 +159,14 @@
     mount.replaceChildren(nav);
   }
 
-  function init(){document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);}
+  function init(){
+    document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);
+    if(!document.body.classList.contains('forge-loader-page')){
+      import(new URL('./astrix-image-size.mjs?v=20260924-1',scriptUrl).href)
+        .then(module=>module.installImageSizeControl())
+        .catch(error=>console.warn('Image size control unavailable',error));
+    }
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

@@ -1,0 +1,82 @@
+/* Bounded application image sizes. Browser zoom remains under user control.
+   The installer excludes Forge Loader completely. No viewport/DPR compensation. */
+:root[data-apx-image-size][data-apx-image-size]{
+  --apx-icon-unit:calc(1px * var(--apx-image-scale,1));
+  --apx-equipment-icon-size:calc(50px * var(--apx-image-scale,1));
+  --apx-icon-card:calc(50px * var(--apx-image-scale,1));
+  --apx-icon-weapon-card:calc(50px * var(--apx-image-scale,1));
+  --apx-icon-catalog:calc(44px * var(--apx-image-scale,1));
+  --apx-icon-perk-responsive:calc(56px * var(--apx-image-scale,1));
+  --apx-icon-item-card-socket:calc(54px * var(--apx-image-scale,1));
+  --apx-icon-weapon-socket:calc(42px * var(--apx-image-scale,1));
+  --apx-icon-weapon-socket-compact:calc(24px * var(--apx-image-scale,1));
+  --guardian-square:calc(61.44px * var(--apx-image-scale,1));
+  --apx-super-cluster:calc(300px * var(--apx-image-scale,1));
+  --apx-subclass-crest:calc(68px * var(--apx-image-scale,1));
+  --apx-subclass-option:calc(56px * var(--apx-image-scale,1));
+  /* Header cards and navigation retain their baseline, independently of images. */
+  --apx-hero-width:300px;
+  --apx-hero-height:88px;
+  --apx-hero-row:910px;
+  --apx-hero-header:108px;
+  --apx-hero-header-compact:174px;
+  --apx-icon-brand:46px;
+  --apx-icon-brand-compact:38px;
+  --apx-icon-account-avatar:52px;
+  --apx-icon-account-avatar-compact:44px;
+  --apx-icon-account-avatar-mobile:36px;
+}
+html[data-apx-image-size] body:is(.guardian-main-page,.build-forge-page){
+  --apx-workspace-left:392px;
+  --apx-workspace-columns:392px minmax(720px,1fr) minmax(420px,24%);
+  --apx-workspace-compact-columns:392px minmax(0,1fr);
+}
+html[data-apx-image-size] body .guardian-loadouts-strip .guardian-loadouts-grid{
+  grid-template-columns:repeat(20,calc(48px * var(--apx-image-scale,1)))!important;
+  overflow-x:auto!important;
+  max-width:100%!important;
+}
+/* Keep the image preference separate from account controls and page content. */
+.apx-image-size-control{
+  position:fixed;right:12px;bottom:12px;z-index:95;
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border:1px solid #616161;border-radius:6px;background:#222;color:#fff;
+  font:14px/1.3 system-ui,sans-serif;box-shadow:0 2px 10px #0008;
+}
+.apx-image-size-control select{
+  min-height:32px;border:1px solid #888;border-radius:4px;
+  background:#303030;color:#fff;font:inherit;
+}
+.apx-image-size-control select:focus-visible{outline:2px solid #fff;outline-offset:3px}
+html[data-apx-image-size] body[class] .apx-destination-ribbon a[aria-current="page"]{
+  position:relative;box-shadow:none!important;
+}
+html[data-apx-image-size] .apx-destination-ribbon a[aria-current="page"]::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(#ed3449,#ed3449) left bottom/2px 100% no-repeat,
+    linear-gradient(to right,#ed3449 0%,#ed3449 25%,transparent 85%) left bottom/100% 2px no-repeat;
+  filter:drop-shadow(0 0 5px #ed3449);
+  animation:apx-selected-page-pulse 2.4s ease-in-out infinite;
+}
+@keyframes apx-selected-page-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  html[data-apx-image-size] .apx-destination-ribbon a[aria-current="page"]::after{animation:none;opacity:1}
+}
+/* Character's carried-item board also owns a container-based size locally.
+   Override that owner, not just the root token, so zoom-out cannot grow tiles. */
+html[data-apx-image-size] body.guardian-main-page .character-inventory-workspace .vault-transfer-items{
+  grid-template-columns:repeat(10,var(--apx-equipment-icon-size));
+}
+html[data-apx-image-size] body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
+  --character-item-size:var(--apx-equipment-icon-size);
+  --apx-icon-gear-art-width:var(--character-item-size);
+  --apx-icon-gear-art-height:var(--character-item-size);
+  --apx-tile-art-height:var(--character-item-size);
+  --apx-tile-footer-top:var(--character-item-size);
+  --apx-tile-label-size:calc(var(--character-item-size) / 5);
+  --apx-tile-badge-height:calc(var(--character-item-size) * .22);
+  --apx-tile-height:calc(var(--character-item-size) * 1.22);
+}
+html[data-apx-image-size] header:has(>[data-forge-hero-cards]){
+  --apx-icon-stat:20px;
+}

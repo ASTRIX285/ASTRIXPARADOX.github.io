@@ -4,6 +4,9 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/shared/astrix-image-size.mjs',
+  'astrix-app/shared/astrix-image-size.css',
+  'astrix-app/tools/test-image-size.mjs',
   'forge-auth-worker/src/refresh-failure.ts',
   'forge-auth-worker/test/auth-session.test.ts',
   'astrix-app/tools/validate-auth-session.mjs',
