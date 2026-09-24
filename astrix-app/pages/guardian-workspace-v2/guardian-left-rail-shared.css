@@ -662,3 +662,11 @@ body.guardian-main-page .workspace>.right{display:none!important}
   html body .workspace .left.guardian-left-rail :is(#abilityList,#aspectList,#fragList)::before{display:none!important}
 
 }
+
+/* Prompt 12: Character loadout slots match inventory art, never stretch. */
+body.guardian-main-page .guardian-loadouts-strip .guardian-loadouts-grid{
+  grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size))!important;
+  grid-template-rows:none!important;
+  justify-content:start;
+}
+body.guardian-main-page .guardian-loadouts-strip .guardian-loadout-slot{width:var(--apx-equipment-icon-size)!important}
