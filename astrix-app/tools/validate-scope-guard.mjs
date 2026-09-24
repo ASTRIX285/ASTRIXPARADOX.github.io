@@ -190,6 +190,7 @@ const allowed=new Set([
   'astrix-app/shared/guardian-inventory-workspace.css',
   'astrix-app/shared/item-tile.css',
   'astrix-app/tools/validate-journey-visual-pass.mjs',
+  'astrix-app/tools/validate-guardian-adaptive-layout.py',
   'astrix-app/tools/validate-guardian-character-cards.py',
   'astrix-app/tools/validate-guardian-semantics.mjs',
   'astrix-app/tools/validate-main-page-today.mjs',

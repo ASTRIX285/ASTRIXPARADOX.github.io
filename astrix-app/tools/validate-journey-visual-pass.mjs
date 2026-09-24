@@ -38,8 +38,9 @@ const placeholderMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/a
 const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp`);
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
-assert.ok(html.includes('href="./journey-2560-visual.css?v=20260918-emblem-fit-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+// PR #272 (381a8e2) added maps; #273 (b913547) and #274 (8988fb2) refreshed their entries.
+assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -115,12 +116,14 @@ assert.match(journey,/const emblemArtwork=selected\.emblemBackgroundPath\|\|sele
 assert.match(html,/journey-vault-card[\s\S]*?>Vault inventory<[\s\S]*?id="journeyVault"/,'Journey must present Vault inventory as a dedicated data card');
 assert.match(journey,/function bindVault[\s\S]*?ARMOUR_ITEM_TYPE[\s\S]*?journey-vault-total[\s\S]*?>ALL<[\s\S]*?journey-vault-breakdown[\s\S]*?>ARMOUR<[\s\S]*?WEAPONS &amp; EQUIPMENT/,'Vault inventory must split its verified total into Armour and Weapons & Equipment');
 assert.match(journey,/if\(postmasterMax>=18\)[\s\S]*?POSTMASTER NEAR CAPACITY/,'Postmaster must appear only as a conditional near-capacity warning');
-assert.match(css,/\.journey-page \.journey-vault-summary\{[\s\S]*?linear-gradient[\s\S]*?\.journey-page \.journey-vault-breakdown\{[\s\S]*?grid-template-columns/,'Vault inventory must use a distinctive crimson-and-gold split-card treatment');
+// PR #248 (6c308ca) replaced the brown gradient with the approved neutral palette and crimson edge.
+assert.match(css,/\.journey-page \.journey-vault-summary\{[^}]*border:1px solid var\(--apx-colour-border\);background:var\(--apx-colour-raised\);box-shadow:inset 3px 0 0 rgba\(211,32,47,\.72\)\}[\s\S]*?\.journey-page \.journey-vault-breakdown\{[^}]*grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)/,'Vault inventory must use the approved neutral and crimson split-card treatment');
 assert.match(journey,/function createRankBadge[\s\S]*?journey-rank-badge[\s\S]*?renderGuardianRankSummary[\s\S]*?createRankBadge\(rank/,'Guardian Rank summaries must use the custom crimson-and-gold number medallion');
 assert.match(css,/\.journey-page \.journey-rank-badge\{[\s\S]*?background:radial-gradient[\s\S]*?\.journey-page \.journey-rank-badge strong\{[\s\S]*?color:#b51222/,'Rank medallions must use the requested gold/crimson background and crimson number');
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?bindProfileCards\(profile\);[\s\S]*?const mapReady=showJourney\(\);/,'Journey must keep its resolving state until the prepared profile is renderable, then reveal and bind the dashboard in that order');
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
-assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1"'),'Journey must load the backend-prepared shared Guardian renderer');
+// PR #268 (0e74619) added the prepared-navigation version to the shared renderer.
+assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1"'),'Journey must load the backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
 assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared six-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
@@ -160,22 +163,24 @@ for(const page of globalHeroPages){
 assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'))).length,4,'Journey, Vault, Forge Loader and Loadout must load the backend-prepared Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its backend-prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the backend-prepared persistent Guardian renderer');
-assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260914-fast-transfer-2'),'Character must load the fast resilient transfer module graph');
+// PR #231 (a6974b1) superseded fast-transfer-2; #241, #242, #243 and #268 refreshed its graph.
+assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260916-equipped-source-1&amp;inventory=20260916-dim-geometry-1&amp;subclass=20260916-hash-1&amp;navigation=20260919-1'),'Character must load the current resilient transfer module graph');
 assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-character-safe-2'),'Build Forge must load the partial-data-safe live module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
 assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');
 assert.doesNotMatch(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:relative!important;[\s\S]*?top:auto!important;/,'Mission Reports must not reattach the Guardian ribbon to its report columns');
 assert.match(heroCss,/position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'Every hero-card topbar must remain fixed to the viewport top');
-assert.match(heroCss,/grid-template-columns:minmax\(0,1fr\) 910px minmax\(0,1fr\)!important;/,'The command header must keep its three-card Guardian rail centred in the page');
+// PR #234 (3ac9e57) moved shared header dimensions into the canonical hero tokens.
+assert.match(heroCss,/grid-template-columns:minmax\(0,1fr\) var\(--apx-hero-row,910px\) minmax\(0,1fr\)!important;/,'The command header must keep its three-card Guardian rail centred in the page');
 assert.match(heroCss,/\.apx-destination-header-copy\{position:absolute!important;top:50%!important;left:calc\(25% - 5rem\)!important;[^}]*transform:translate\(-50%,-50%\)!important/,'The compact page identity must sit midway between the brand and the first Guardian card');
-assert.match(heroCss,/grid-template-columns:repeat\(3,300px\)!important;/,'The desktop hero track must retain three equal Character-format cards');
+assert.match(heroCss,/grid-template-columns:repeat\(3,var\(--apx-hero-width,300px\)\)!important;/,'The desktop hero track must retain three equal Character-format cards');
 assert.match(heroCss,/header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card\.is-selected\{[^}]*border-color:rgba\(201,168,76,\.92\);[^}]*box-shadow:[^}]*rgba\(201,168,76,\.5\)[^}]*opacity:1\}/,'Every destination must use the same fully opaque gold-and-crimson selected Guardian glow');
 assert.match(heroCss,/header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card\.is-selected::before\{opacity:1;filter:none\}/,'Every selected Guardian card must retain fully visible verified emblem artwork');
 assert.match(heroCss,/body:has\(header>\[data-forge-hero-cards\]\)\{zoom:1\}/,'Hero-card destination pages must remain at native 100 percent scale');
-assert.match(heroCss,/body:has\(header>\[data-forge-hero-cards\]\)>\[data-forge-destination-ribbon\]\{[\s\S]*?position:fixed!important;[\s\S]*?top:120px!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'The shared destination buttons must remain fixed beneath the hero topbar');
+assert.match(heroCss,/body:has\(header>\[data-forge-hero-cards\]\)>\[data-forge-destination-ribbon\]\{[\s\S]*?position:fixed!important;[\s\S]*?top:calc\(var\(--apx-hero-header,108px\) \+ 12px\)!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'The shared destination buttons must remain fixed beneath the hero topbar');
 assert.match(heroCss,/header:has\(>\[data-forge-hero-cards\]\)\{[\s\S]*?background:#060606!important;/,'Every hero destination header must form an opaque scrolling boundary');
-assert.match(heroCss,/body:has\(header>\[data-forge-hero-cards\]\)\{[\s\S]*?padding-top:180px!important;/,'The fixed global stack must preserve document space below the viewport anchors');
+assert.match(heroCss,/body:has\(header>\[data-forge-hero-cards\]\)\{[\s\S]*?padding-top:calc\(var\(--apx-hero-header,108px\) \+ 72px\)!important;/,'The fixed global stack must preserve document space below the viewport anchors');
 assert.match(heroCss,/\[data-forge-destination-ribbon\] \.apx-destination-ribbon\{[\s\S]*?background:transparent!important;/,'The second ribbon container must remain transparent');
 assert.match(heroCss,/\[data-forge-destination-ribbon\] \.apx-destination-ribbon a\{[\s\S]*?background:rgba\(6,6,6,\.8\);/,'Only the destination buttons may retain the dark background');
 assert.match(heroCss,/\[data-forge-destination-ribbon\]::after\{[\s\S]*?width:100vw;[\s\S]*?background:transparent;[\s\S]*?backdrop-filter:blur\(8px\) brightness\(\.58\);[\s\S]*?mask-image:linear-gradient\(to bottom,#000,transparent\);/,'The transparent second ribbon edge must fade scrolling content across the viewport');
@@ -220,14 +225,15 @@ assert.ok(journey.includes('initLocationSelector({'),'Journey must retain the lo
 assert.ok(journey.includes("mount:document.getElementById('journeyLocationSelector')"),'Journey selector mount must remain unchanged');
 assert.ok(journey.includes("detail:document.getElementById('journeyLocationDetail')"),'Journey detail mount must remain unchanged');
 assert.ok(journey.includes('const session=await getBungieSession();'),'Journey authentication must remain unchanged');
-assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260905-journey-repair-1'"),'Journey must load its current versioned page-owned destination data registry');
+// PR #272 (381a8e2) replaced placeholders with destination maps; #274 (8988fb2) refreshed the registry.
+assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3'"),'Journey must load its current versioned page-owned destination data registry');
 assert.ok(journey.includes('initJourneyLocationMaps('),'Journey must initialise its page-owned interactive map layer');
-assert.ok(mapModule.includes("src:'./assets/maps/astrix-paradox-map-placeholder-4k.webp'"),'Journey must mount the shared 4K ASTRIX PARADOX placeholder');
-assert.ok(mapModule.includes("detailSrc:'./assets/maps/astrix-paradox-map-placeholder-6k.webp'"),'Journey must provide the shared 6K ASTRIX PARADOX placeholder for zoom');
-for(const key of ['pale-heart','dreaming-city','neomuna','europa','throne-world','nessus','edz','moon']){
-  assert.ok(mapModule.includes(`'${key}':JOURNEY_PLACEHOLDER_MAP`),`Journey must retain the ${key} placeholder registration`);
+assert.ok(mapModule.includes('src:`./assets/maps/${key}-director-map-4k.webp`'),'Journey must mount the selected destination 4K Director map');
+assert.ok(mapModule.includes('detailSrc:`./assets/maps/${key}-director-map-6k.webp`'),'Journey must provide the selected destination 6K Director map for zoom');
+for(const key of ['pale-heart','dreaming-city','neomuna','europa','throne-world','nessus','edz','moon','kepler']){
+  assert.ok(mapModule.includes(`'${key}':destinationMap('${key}',`),`Journey must retain the ${key} Director map registration`);
 }
-assert.equal((mapModule.match(/:JOURNEY_PLACEHOLDER_MAP/g)??[]).length,8,'Journey must use one shared placeholder for exactly eight pending destination maps');
+assert.equal((mapModule.match(/:destinationMap\(/g)??[]).length,9,'Journey must register exactly nine destination-specific Director maps alongside Cosmodrome');
 assert.ok(mapModule.includes("src:'./assets/maps/cosmodrome-director-map-4k.webp'"),'Journey map registry must mount the page-owned Cosmodrome map asset');
 assert.ok(mapModule.includes("detailSrc:'./assets/maps/cosmodrome-director-map-6k.webp'"),'Journey map registry must provide its high-resolution zoom asset');
 assert.ok(mapModule.includes("if(state.scale>1)requestDetailSource();"),'Journey map must request its high-resolution asset only after zoom begins');
@@ -257,7 +263,8 @@ assert.doesNotMatch(mapModule,/type:'raid'|fetch\(|setInterval\(|getBungieSessio
 assert.ok(mapModule.includes("stage.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`"),'Map image and static markers must pan and zoom as one stage');
 assert.ok(mapModule.includes("stage.style.setProperty('--journey-marker-scale',String(1/state.scale))"),'Static marker labels must retain a readable screen size while zooming');
 assert.ok(mapModule.includes("const label=globalThis.ForgeDestinations?.labelOf(key)||key;"),'Journey map labels must come from the selected destination registry');
-assert.ok(mapModule.includes("viewport.append(stage,createRegionChestOverlay(key,label))"),'Regional chest progress must remain outside the moving map stage and receive the selected destination label');
+// PR #272 (381a8e2) moved chest progress into the support panel beside the viewport.
+assert.ok(mapModule.includes('support.append(createRegionChestOverlay(key,label));')&&mapModule.includes('viewport.append(stage);\n  figure.append(toolbar,viewport,explorer.root,support);'),'Regional chest progress must remain outside the moving map stage and receive the selected destination label');
 assert.ok(mapModule.includes("const REGION_CHEST_EVENT='forge:journey-region-chests'"),'Regional chest progress must accept a verified data event');
 assert.equal((mapModule.match(/<strong data-region-chest-(?:discovered|missing|total)>--<\/strong>/g)??[]).length,3,'Regional chest progress must keep three honest pending placeholders before live records arrive');
 assert.equal((mapModule.match(/Object\.freeze\(\{key:'(?:records|quests|endgame)',label:/g)??[]).length,3,'Every destination must expose one Records button plus Quests and Dungeons & Raids');
