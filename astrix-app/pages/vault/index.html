@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
-  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1"></script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;plain=20260925-1"></script>
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;fluid=20260914-1&amp;capped=20260924-dim66-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
@@ -24,34 +24,34 @@
   <link rel="stylesheet" href="../../shared/guardian-inventory-workspace.css?v=20260924-vault-wrap-1&amp;capped=20260924-dim66-1&amp;columns=20260925-1&amp;brace=20260925-1">
   <link rel="stylesheet" href="../../shared/item-tile.css?v=20260913-breaker-icon-2&amp;fluid=20260914-1&amp;champion=20260923-native-art-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1&amp;capped=20260924-dim66-1">
-  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3" defer></script>
+  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;plain=20260925-1" defer></script>
 </head>
 <body data-apx-button-system class="apx-destination-page forge-paradox-map-background apx-fluid-icons">
-  <header class="apx-destination-header forge-command-header"><a class="apx-destination-brand" href="../journey/"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a><div class="apx-destination-header-copy"><strong>VAULT</strong><small>BROWSE VERIFIED OWNED GEAR</small></div><div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div><button class="apx-data-refresh" id="vaultRefreshButton" type="button" aria-busy="false" disabled hidden>Refresh</button><span class="apx-destination-header-state" id="vaultHeaderState">BUNGIE INVENTORY</span></header>
+  <header class="apx-destination-header forge-command-header"><a class="apx-destination-brand" href="../journey/"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a><div class="apx-destination-header-copy"><strong>VAULT</strong></div><div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div><button class="apx-data-refresh" id="vaultRefreshButton" type="button" aria-busy="false" disabled hidden>Refresh</button><span class="apx-destination-header-state" id="vaultHeaderState">BUNGIE INVENTORY</span></header>
   <div data-forge-destination-ribbon data-active-destination="vault"></div>
   <main class="apx-page-shell">
     <span class="apx-visually-hidden" id="vaultConnectionState" aria-live="polite">RESOLVING</span>
 
     <section class="vault-capacity" aria-label="Vault inventory totals">
-      <article class="vault-capacity-total"><span>ALL VAULT ITEMS</span><strong id="vaultTotalCount">—</strong><small>Verified shared Vault entries</small></article>
-      <article><span>ARMOUR</span><strong id="vaultArmourCount">—</strong><small>Verified armour definitions</small></article>
-      <article><span>OTHER ITEMS</span><strong id="vaultEquipmentCount">—</strong><small>Remaining verified Vault entries</small></article>
-      <article><span>OWNED ARMOUR</span><strong id="vaultOwnedArmourCount">—</strong><small>Vault, carried and equipped</small></article>
+      <article class="vault-capacity-total"><span>ALL VAULT ITEMS</span><strong id="vaultTotalCount">—</strong><small>Vault items</small></article>
+      <article><span>ARMOUR</span><strong id="vaultArmourCount">—</strong><small>Armour items</small></article>
+      <article><span>OTHER ITEMS</span><strong id="vaultEquipmentCount">—</strong><small>Other Vault items</small></article>
+      <article><span>ARMOUR</span><strong id="vaultOwnedArmourCount">—</strong><small>Vault, carried and equipped</small></article>
     </section>
 
     <section class="apx-section vault-transfer-workspace" aria-labelledby="vaultTransferTitle">
-      <div class="apx-section-heading"><div><p class="apx-eyebrow">GUARDIAN TRANSFER WORKSPACE</p><div class="vault-inventory-heading"><h2 id="vaultTransferTitle">INVENTORY</h2><span class="vault-transfer-help"><button type="button" id="vaultTransferHelpButton" aria-label="Inventory transfer instructions" aria-describedby="vaultTransferHelp" aria-controls="vaultTransferHelp" aria-expanded="false">ⓘ</button><span id="vaultTransferHelp" role="tooltip" hidden>A single click focuses an item without transferring it. Press Enter or Space to transfer a focused item. On touch screens, double-tap an item to transfer it. Drag and drop moves an item to a matching destination bucket. The item appears at its destination while moving; a failed transfer restores its original slot.</span></span></div></div><span class="apx-status-chip">REAL ACCOUNT ACTIONS</span></div>
+      <div class="apx-section-heading"><div><p class="apx-eyebrow">GUARDIAN TRANSFER WORKSPACE</p><div class="vault-inventory-heading"><h2 id="vaultTransferTitle">INVENTORY</h2><span class="vault-transfer-help"><button type="button" id="vaultTransferHelpButton" aria-label="Inventory transfer instructions" aria-describedby="vaultTransferHelp" aria-controls="vaultTransferHelp" aria-expanded="false">ⓘ</button><span id="vaultTransferHelp" role="tooltip" hidden>A single click focuses an item without transferring it. Press Enter or Space to transfer a focused item. On touch screens, double-tap an item to transfer it. Drag and drop moves an item to a matching destination bucket. The item appears at its destination while moving; a failed transfer restores its original slot.</span></span></div></div></div>
       <p class="vault-context" id="vaultTransferInstructions">Double-click an item to move it. Transfers are live and happen immediately.</p>
       <div class="vault-runtime-status" id="vaultRuntimeStatus" role="status">Resolving Bungie inventory...</div>
       <div class="vault-transfer-board" id="vaultTransferWorkspace" aria-live="polite" aria-describedby="vaultTransferInstructions"></div>
     </section>
 
     <section class="apx-section vault-workspace" aria-labelledby="vaultArmourTitle" hidden>
-      <div class="apx-section-heading"><div><p class="apx-eyebrow">VISUAL INVENTORY</p><h2 id="vaultArmourTitle">Verified owned armour</h2></div><span class="apx-status-chip" id="vaultResultCount">WAITING FOR BUNGIE</span></div>
-      <p class="vault-context" id="vaultReturnContext">Inspect verified owned armour without changing live equipment. Forge Loader now owns armour calculation and Build Forge staging.</p>
+      <div class="apx-section-heading"><div><p class="apx-eyebrow">VISUAL INVENTORY</p><h2 id="vaultArmourTitle">Undefined armour</h2></div><span class="apx-status-chip" id="vaultResultCount">WAITING FOR BUNGIE</span></div>
+      <p class="vault-context" id="vaultReturnContext">Inspect your armour. Use Forge Loader to compare sets.</p>
 
       <section class="vault-optimiser" aria-labelledby="vaultOptimiserTitle" hidden>
-        <div class="vault-optimiser-heading"><div><p class="apx-eyebrow">ASTRIX ARMOUR PICKER</p><h3 id="vaultOptimiserTitle">Choose your desired stat distribution</h3><p>Set one or more targets. ASTRIX will compare exact owned item instances and return the five closest legal armour sets.</p></div><span class="vault-optimiser-class" id="vaultOptimiserClass">SELECTED GUARDIAN</span></div>
+        <div class="vault-optimiser-heading"><div><p class="apx-eyebrow">ASTRIX ARMOUR PICKER</p><h3 id="vaultOptimiserTitle">Choose your desired stat distribution</h3><p>Set stat targets to find your five closest armour sets.</p></div><span class="vault-optimiser-class" id="vaultOptimiserClass">SELECTED GUARDIAN</span></div>
         <div class="vault-stat-targets" id="vaultStatTargets">
           <label data-target-stat="health"><span>HEALTH</span><input type="range" min="0" max="0" value="0" step="1"><output>0 / —</output></label>
           <label data-target-stat="melee"><span>MELEE</span><input type="range" min="0" max="0" value="0" step="1"><output>0 / —</output></label>
@@ -60,7 +60,7 @@
           <label data-target-stat="class"><span>CLASS</span><input type="range" min="0" max="0" value="0" step="1"><output>0 / —</output></label>
           <label data-target-stat="weapon"><span>WEAPON</span><input type="range" min="0" max="0" value="0" step="1"><output>0 / —</output></label>
         </div>
-        <div class="vault-optimiser-actions"><button type="button" id="vaultFindBuilds" disabled>FIND 5 CLOSEST SETS</button><button type="button" id="vaultResetTargets" disabled>RESET TARGETS</button><span id="vaultOptimiserStatus">Load verified armour to calculate available stat ranges.</span></div>
+        <div class="vault-optimiser-actions"><button type="button" id="vaultFindBuilds" disabled>FIND 5 CLOSEST SETS</button><button type="button" id="vaultResetTargets" disabled>RESET TARGETS</button><span id="vaultOptimiserStatus">Load armour to calculate available stat ranges.</span></div>
         <div class="vault-candidate-builds" id="vaultCandidateBuilds" hidden aria-live="polite"></div>
       </section>
 
@@ -68,7 +68,7 @@
         <label><span>SEARCH</span><input id="vaultSearch" type="search" autocomplete="off" placeholder="Armour, set, archetype or source"></label>
         <label><span>CLASS</span><select id="vaultClassFilter"><option value="all">All classes</option><option value="hunter">Hunter</option><option value="titan">Titan</option><option value="warlock">Warlock</option></select></label>
         <label><span>SLOT</span><select id="vaultSlotFilter"><option value="all">All slots</option><option value="helmet">Helmet</option><option value="gauntlets">Gauntlets</option><option value="chest">Chest</option><option value="legs">Legs</option><option value="class-item">Class item</option></select></label>
-        <label><span>LOCATION</span><select id="vaultSourceFilter"><option value="all">All owned armour</option><option value="vault">Vault</option><option value="carried">Carried</option><option value="equipped">Equipped</option><option value="postmaster">Postmaster</option></select></label>
+        <label><span>LOCATION</span><select id="vaultSourceFilter"><option value="all">All armour</option><option value="vault">Vault</option><option value="carried">Carried</option><option value="equipped">Equipped</option><option value="postmaster">Postmaster</option></select></label>
       </form>
 
       <div class="vault-selection" aria-labelledby="vaultSelectionTitle" hidden>
@@ -83,12 +83,12 @@
 
     <section class="apx-section vault-signed-out" id="vaultSignedOut" hidden aria-labelledby="vaultSignedOutTitle">
       <div class="apx-section-heading"><h2 id="vaultSignedOutTitle">Bungie connection required</h2><span class="apx-status-chip">SIGNED OUT</span></div>
-      <p>Connect Bungie to load verified item instances. No inventory totals or equipment states are guessed.</p>
+      <p>Connect Bungie to load your inventory.</p>
       <a class="vault-connect" id="vaultConnectButton" href="https://auth.astrixparadox.com/bungie/start">CONNECT BUNGIE</a>
     </section>
   </main>
-  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"></script>
-  <script type="module" src="./vault.mjs?v=20260914-fast-transfer-2&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1&amp;status=20260917-compact-1&amp;navigation=20260919-1&amp;champion=20260924-champion-export-1&amp;feedback=20260925-1&amp;columns=20260925-1&amp;copy=20260925-1&amp;toast=20260925-1"></script>
+  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1&amp;plain=20260925-1"></script>
+  <script type="module" src="./vault.mjs?v=20260914-fast-transfer-2&amp;inspect=20260913-compact-1&amp;transport=20260911-compact-plugs-1&amp;status=20260917-compact-1&amp;navigation=20260919-1&amp;champion=20260924-champion-export-1&amp;feedback=20260925-1&amp;columns=20260925-1&amp;copy=20260925-1&amp;toast=20260925-1&amp;plain=20260925-1"></script>
   <script>
     (()=>{
       const button=document.getElementById('vaultTransferHelpButton');

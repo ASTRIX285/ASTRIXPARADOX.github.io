@@ -1,15 +1,15 @@
 import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
-import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
-import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?plain=20260925-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1';
 import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1';
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2';
+import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-1';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
@@ -88,7 +88,7 @@ async function fetchProfile(){
 async function loadVerifiedPayload(){
   const shared=globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
   const next=await loadPreparedPagePayload(session,'vault',{sharedPayload:shared});
-  if(!next?.profile)throw new Error('Bungie returned no verified profile inventory.');
+  if(!next?.profile)throw new Error('Inventory unavailable. Retry.');
   assertRenderablePagePayload(next,'vault');
   reportPreparedPageStage('join','vault');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,includeReusable:true,allowNetwork:false});
@@ -206,17 +206,17 @@ async function performPendingVaultAction(){
   vaultActionBusy=true;
   if(confirm)confirm.disabled=true;
   if(cancel)cancel.disabled=true;
-  if(progress)progress.textContent='Running fresh Bungie preflight. The moving item is awaiting confirmation.';
+  if(progress)progress.textContent='Transferring…';
   let result=null;
   try{
     const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,row);setStatus(label);};
-    const onAccepted=async({liveInventory})=>{await refreshAfterLiveAction(liveInventory);setStatus('Transfer accepted by Bungie. The exact item has moved while final inventory verification continues.','good');};
+    const onAccepted=async({liveInventory})=>{await refreshAfterLiveAction(liveInventory);setStatus('Item moved. Updating inventory…','good');};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
     if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
     transferFeedback.finish(action.queueKey,{success:result.status==='applied'&&result.readback?.verified,error:actionFailureMessage(result)});
-    if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
+    if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Transfer complete.':'Collected from Postmaster.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
@@ -238,7 +238,7 @@ function selectedKeySet(){return new Set([...selectedSlots.values()].map(itemKey
 
 function selectionSlotMarkup(slot,index){
   const item=selectedSlots.get(index);
-  return `<div class="vault-selection-slot" data-selection-slot="${index}">${item?`<span class="vault-selection-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span>`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Owned'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
+  return `<div class="vault-selection-slot" data-selection-slot="${index}">${item?`<span class="vault-selection-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span>`:'<span class="vault-slot-empty" aria-hidden="true">◇</span>'}<span><b>${esc(item?.name||slot.label)}</b><small>${esc(item?`${item.source?.label||'Items'} · ${item.totalStats} total`:'No item staged')}</small></span></div>`;
 }
 
 function bindVaultItemInspectors(root){
@@ -296,11 +296,11 @@ function configureOptimiser({reset=false}={}){
     updateTargetControl(label);
   }
   const classLabel=activeCharacterClass?activeCharacterClass.toUpperCase():'SELECTED GUARDIAN';
-  byId('vaultOptimiserClass').textContent=`${classLabel} · ${items.length} OWNED PIECES`;
+  byId('vaultOptimiserClass').textContent=`${classLabel} · ${items.length} PIECES`;
   const hasRanges=ARMOUR_STAT_KEYS.some(key=>targetMaximums[key]>0);
   byId('vaultFindBuilds').disabled=!hasRanges||targetCount()===0;
   byId('vaultResetTargets').disabled=!hasRanges||targetCount()===0;
-  byId('vaultOptimiserStatus').textContent=hasRanges?'Set one or more verified stat targets, then find the five closest sets.':'No recognised Armour 3.0 stat values were returned for this Guardian.';
+  byId('vaultOptimiserStatus').textContent=hasRanges?'Set one or more stat targets, then find the five closest sets.':'No recognised Armour 3.0 stat values were returned for this Guardian.';
   if(reset){matchedBuilds=[];renderCandidateBuilds();}
 }
 
@@ -309,7 +309,7 @@ function candidateStatsMarkup(stats={}){
 }
 
 function candidateItemMarkup(item){
-  return `<article class="vault-candidate-item"><span class="vault-candidate-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span><span><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.source?.label||'Owned'}`)}</small></span></article>`;
+  return `<article class="vault-candidate-item"><span class="vault-candidate-inspect" data-inspect-item="${esc(itemKey(item))}" tabindex="0" title="${esc(item.name)}">${itemTileMarkup(item,{kind:'armour'})}</span><span><b>${esc(item.name)}</b><small>${esc(`${item.slotLabel} · ${item.source?.label||'Items'}`)}</small></span></article>`;
 }
 
 function candidateMarkup(candidate,index){
@@ -331,8 +331,8 @@ async function findCandidateBuilds(){
   if(!ARMOUR_STAT_KEYS.some(key=>targets[key]>0))return;
   const button=byId('vaultFindBuilds');
   button.disabled=true;
-  button.textContent='CALCULATING VERIFIED SETS…';
-  byId('vaultOptimiserStatus').textContent='Comparing exact owned item instances across all five armour slots…';
+  button.textContent='CALCULATING SETS…';
+  byId('vaultOptimiserStatus').textContent='Comparing item instances across all five armour slots…';
   await new Promise(resolve=>requestAnimationFrame(resolve));
   matchedBuilds=matchArmourBuilds(optimiserItems(),targets,{limit:5});
   renderCandidateBuilds();
@@ -368,8 +368,8 @@ function itemMarkup(item){
 function renderInventory(){
   const rows=filterVaultArmour(catalogue.armour,filters());
   const visible=rows.slice(0,visibleLimit);
-  byId('vaultResultCount').textContent=`${rows.length} VERIFIED ITEM${rows.length===1?'':'S'}`;
-  byId('vaultItemGrid').innerHTML=visible.length?visible.map(item=>itemMarkup(item)).join(''):'<div class="vault-empty">No verified armour matches these filters.</div>';
+  byId('vaultResultCount').textContent=`${rows.length} ITEM${rows.length===1?'':'S'}`;
+  byId('vaultItemGrid').innerHTML=visible.length?visible.map(item=>itemMarkup(item)).join(''):'<div class="vault-empty">No armour matches these filters.</div>';
   bindVaultItemInspectors(byId('vaultItemGrid'));
   const loadMore=byId('vaultLoadMore');
   loadMore.hidden=visible.length>=rows.length;
@@ -386,7 +386,7 @@ function renderContext(){
   const source=text(params.get('from'));
   const character=selectedCharacter();
   const classLabel=activeCharacterClass?activeCharacterClass[0].toUpperCase()+activeCharacterClass.slice(1):'Guardian';
-  byId('vaultReturnContext').textContent=`Browse verified ${classLabel} armour visually. Open Forge Loader to calculate and stage an armour combination.`;
+  byId('vaultReturnContext').textContent=`Browse ${classLabel} armour visually. Open Forge Loader to calculate and stage an armour combination.`;
   byId('vaultHeaderState').textContent=character?`${classLabel.toUpperCase()} INVENTORY`:'BUNGIE INVENTORY';
 }
 
@@ -583,7 +583,7 @@ function installEvents(){
     const count=targetCount();
     byId('vaultFindBuilds').disabled=count===0;
     byId('vaultResetTargets').disabled=count===0;
-    byId('vaultOptimiserStatus').textContent=count?`${count} target stat${count===1?'':'s'} active. Find the five closest complete sets.`:'Set one or more verified stat targets.';
+    byId('vaultOptimiserStatus').textContent=count?`${count} target stat${count===1?'':'s'} active. Find the five closest complete sets.`:'Set one or more stat targets.';
   });
   byId('vaultFindBuilds')?.addEventListener('click',findCandidateBuilds);
   byId('vaultResetTargets')?.addEventListener('click',resetTargets);
@@ -630,7 +630,7 @@ async function init(){
       byId('vaultSignedOut').hidden=false;
       byId('vaultConnectionState').textContent='SIGNED OUT';
       byId('vaultHeaderState').textContent='CONNECT BUNGIE';
-      setStatus('Connect Bungie to load verified item instances. No inventory totals are estimated.');
+      setStatus('Connect Bungie to load your inventory.');
       globalThis.ForgeLoader?.authRequired?.(authStartUrl());
       return;
     }
@@ -655,9 +655,9 @@ async function init(){
   }catch(error){
     console.error('[Forge Vault]',error);
     byId('vaultConnectionState').textContent='INVENTORY UNAVAILABLE';
-    setStatus(error?.message||'Verified Bungie inventory is unavailable.','error');
-    globalThis.ForgeLoader?.status?.(error?.message||'Verified Bungie inventory is unavailable.');
-    globalThis.ForgeLoader?.blocked?.(error?.message||'Verified Bungie inventory is unavailable.');
+    setStatus(error?.message||'Bungie inventory is unavailable.','error');
+    globalThis.ForgeLoader?.status?.(error?.message||'Bungie inventory is unavailable.');
+    globalThis.ForgeLoader?.blocked?.(error?.message||'Bungie inventory is unavailable.');
   }
 }
 
