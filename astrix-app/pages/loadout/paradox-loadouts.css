@@ -225,3 +225,7 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 }
 
 html body #loadout-equipped .saved-build-tile.is-equipment::after{content:none!important}
+
+/* PR #304 follow-up: end the workspace 24px after its content rather than
+   inheriting the shared shell's 72px bottom spacer. */
+body.apx-destination-page > .apx-page-shell.paradox-loadout-shell{padding-bottom:24px}

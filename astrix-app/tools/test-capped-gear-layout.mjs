@@ -71,6 +71,12 @@ try{
    }else{
     document.getElementById('forgeExoticSlots').innerHTML=`<section class="forge-exotic-slot"><h3>FIXTURE EXOTIC ARMOUR</h3><div class="forge-exotic-grid">${Array.from({length:12},()=>`<button class="forge-exotic"><img src="${icon}" alt="Synthetic exotic"></button>`).join('')}</div></section>`;
    }
+   // PR #304 follow-up: measure real bottom spacing before the test-only runway.
+   if(name==='Loadout'){
+    const shell=document.querySelector('.paradox-loadout-shell'),footer=document.querySelector('.apx-bungie-attribution');
+    const lastContent=Math.max(...[...shell.children].map(node=>node.getBoundingClientRect().bottom));
+    window.fixtureNaturalBottom={padding:getComputedStyle(shell).paddingBottom,gap:shell.getBoundingClientRect().bottom-lastContent,documentBottom:document.documentElement.scrollHeight,footerBottom:footer.getBoundingClientRect().bottom+scrollY,viewport:innerHeight};
+   }
    // A labelled test-only scroll runway guarantees scrollY=300 even when the
    // wide desktop fixture fits within one screen. It does not size any panel.
    const runway=document.createElement('footer');runway.textContent='Synthetic layout fixture: scroll runway';runway.style.minHeight='calc(100vh + 400px)';document.body.append(runway);
@@ -171,6 +177,10 @@ try{
     assert.equal(layout.statIcons.length,6,'All six stat icons render');
     for(const icon of layout.statIcons){assert.equal(icon.width,13);assert.equal(icon.height,13);}
    }
+  const bottom=await page.evaluate(()=>window.fixtureNaturalBottom);
+  assert.equal(bottom.padding,'24px','Loadout uses a 24px bottom inset');
+  assert.ok(Math.abs(bottom.gap-24)<=1,'No extra space after the final Loadout content');
+  assert.ok(bottom.documentBottom<=Math.max(bottom.viewport,bottom.footerBottom)+1,'No scroll space after the footer');
   assert.ok(state.sockets.length&&state.small.length&&state.equipment.length,'All requested icon families present');
   for(const box of state.sockets){assert.equal(box.width,52);assert.equal(box.height,52);}
   for(const box of state.small){assert.equal(box.width,30);assert.equal(box.height,30);}
