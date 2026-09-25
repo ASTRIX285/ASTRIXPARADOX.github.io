@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ASTRIX PARADOX Forge Loader for verified Destiny 2 armour combinations">
+  <meta name="description" content="ASTRIX PARADOX Forge Loader for Destiny 2 armour combinations">
   <title>Forge Loader — ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
-  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1"></script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;plain=20260925-1"></script>
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="../../shared/item-tile.css?v=20260913-breaker-icon-2">
   <link rel="stylesheet" href="./forge-loader.css?v=20260913-selector-image-1&amp;icons=20260912-global-audit-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1">
-  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;reports=20260925-3" defer></script>
+  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;plain=20260925-1" defer></script>
 </head>
 <body class="apx-destination-page forge-paradox-map-background forge-loader-page">
-  <header class="apx-destination-header forge-command-header"><a class="apx-destination-brand" href="../journey/"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a><div class="apx-destination-header-copy"><strong>FORGE LOADER</strong><small>SELECT AND MAXIMISE VERIFIED ARMOUR</small></div><div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div><button class="apx-data-refresh" id="forgeRefreshButton" type="button" aria-busy="false" disabled hidden>Check for new Exotic</button><span class="apx-destination-header-state" id="forgeHeaderState">BUNGIE ARMOUR</span></header>
+  <header class="apx-destination-header forge-command-header"><a class="apx-destination-brand" href="../journey/"><img src="../../../img/logo.png" alt="ASTRIX PARADOX"><span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span></a><div class="apx-destination-header-copy"><strong>FORGE LOADER</strong><small>SELECT AND MAXIMISE ARMOUR</small></div><div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div><button class="apx-data-refresh" id="forgeRefreshButton" type="button" aria-busy="false" disabled hidden>Check for new Exotic</button><span class="apx-destination-header-state" id="forgeHeaderState">BUNGIE ARMOUR</span></header>
   <div data-forge-destination-ribbon data-active-destination="forge-loader"></div>
 
   <main class="apx-page-shell forge-loader-shell">
@@ -36,20 +36,20 @@
       <aside class="forge-loader-selector" aria-label="Guardian and Exotic selector">
         <section class="forge-panel forge-selected-guardian" aria-labelledby="forgeGuardianTitle">
           <div class="forge-panel-heading"><div><p class="apx-eyebrow">SELECTED GUARDIAN</p><h2 id="forgeGuardianTitle">Guardian</h2></div><span id="forgeGuardianClass">RESOLVING</span></div>
-          <div class="forge-hero-card" id="forgeHeroCard"><span>Resolving verified Guardian…</span></div>
+          <div class="forge-hero-card" id="forgeHeroCard"><span>Loading…</span></div>
         </section>
 
         <section class="forge-panel forge-residency" aria-labelledby="forgeResidencyTitle">
-          <div class="forge-panel-heading"><div><p class="apx-eyebrow">RESIDENT DATA</p><h2 id="forgeResidencyTitle">Forge staging sources</h2></div><span id="forgeResidencyStatus">VERIFYING</span></div>
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">RESIDENT DATA</p><h2 id="forgeResidencyTitle">Forge staging sources</h2></div><span id="forgeResidencyStatus">LOADING</span></div>
           <ul class="forge-resident-sources" id="forgeResidentSources">
-            <li data-resident-source="equipped" data-state="verifying"><span><b>Equipped loadout</b><small>Awaiting verified Bungie equipment</small></span><em>VERIFYING</em></li>
-            <li data-resident-source="vault-armour" data-state="verifying"><span><b>Vault armour</b><small>Awaiting verified Vault armour</small></span><em>VERIFYING</em></li>
-            <li data-resident-source="weapons" data-state="verifying"><span><b>Weapons</b><small>Awaiting verified weapon instances</small></span><em>VERIFYING</em></li>
-            <li data-resident-source="subclass" data-state="verifying"><span><b>Subclass and fragments</b><small>Awaiting live subclass sockets</small></span><em>VERIFYING</em></li>
-            <li data-resident-source="artifact" data-state="verifying"><span><b>Seasonal Artifact</b><small>Awaiting verified Artifact data</small></span><em>VERIFYING</em></li>
-            <li data-resident-source="manifest" data-state="verifying"><span><b>Manifest</b><small>Awaiting cached manifest</small></span><em>VERIFYING</em></li>
+            <li data-resident-source="equipped" data-state="verifying"><span><b>Equipped loadout</b><small>Loading equipment…</small></span><em>LOADING</em></li>
+            <li data-resident-source="vault-armour" data-state="verifying"><span><b>Vault armour</b><small>Loading Vault armour…</small></span><em>LOADING</em></li>
+            <li data-resident-source="weapons" data-state="verifying"><span><b>Weapons</b><small>Loading weapons…</small></span><em>LOADING</em></li>
+            <li data-resident-source="subclass" data-state="verifying"><span><b>Subclass and fragments</b><small>Awaiting live subclass sockets</small></span><em>LOADING</em></li>
+            <li data-resident-source="artifact" data-state="verifying"><span><b>Seasonal Artifact</b><small>Loading Artifact…</small></span><em>LOADING</em></li>
+            <li data-resident-source="manifest" data-state="verifying"><span><b>Manifest</b><small>Awaiting cached manifest</small></span><em>LOADING</em></li>
           </ul>
-          <p class="forge-resident-summary" id="forgeResidentSummary" role="status">Verifying required Bungie sources. No unverified counts are shown.</p>
+          <p class="forge-resident-summary" id="forgeResidentSummary" role="status">Loading inventory…</p>
         </section>
 
         <section class="forge-panel forge-exotic-selector" aria-labelledby="forgeExoticTitle">
@@ -71,12 +71,12 @@
             <label data-target-stat="weapon"><span>WEAPON</span><input type="range" min="0" max="200" value="0" step="1" disabled><output>0 / 200</output><button type="button" data-max-stat="weapon" disabled>MAX</button><select data-stat-priority="weapon" aria-label="Weapon priority" disabled><option value="">AUTO</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
           </div>
           <div class="forge-stat-actions"><button type="button" id="forgeFindBuilds" disabled>REFRESH TOP 50 COMBINATIONS</button><button type="button" id="forgeResetTargets" disabled>RESET TARGETS</button></div>
-          <p class="forge-runtime-status" id="forgeRuntimeStatus" role="status">Select an owned Exotic to initialise the Forge Loader.</p>
+          <p class="forge-runtime-status" id="forgeRuntimeStatus" role="status">Choose an Exotic to start.</p>
         </section>
 
         <section class="forge-panel forge-set-selector" aria-labelledby="forgeSetTitle">
           <div class="forge-panel-heading"><div><p class="apx-eyebrow">SET PROTOCOL</p><h2 id="forgeSetTitle">Armour set bonuses</h2></div><span id="forgeSetStatus">SELECT EXOTIC</span></div>
-          <p class="forge-guidance">Keep Open Armour active for the top 50 owned combinations, choose one four-piece bonus, or choose up to two compatible two-piece bonuses. Unavailable combinations remain locked.</p>
+          <p class="forge-guidance">Keep Open Armour active for the top 50 combinations, choose one four-piece bonus, or choose up to two compatible two-piece bonuses. Unavailable combinations remain locked.</p>
           <div class="forge-set-list" id="forgeSetList"><div class="forge-empty">Select an Exotic to calculate compatible set bonuses.</div></div>
         </section>
       </section>
@@ -98,14 +98,14 @@
 
     <section class="apx-section forge-signed-out" id="forgeSignedOut" hidden aria-labelledby="forgeSignedOutTitle">
       <div class="apx-section-heading"><h2 id="forgeSignedOutTitle">Bungie connection required</h2><span class="apx-status-chip">SIGNED OUT</span></div>
-      <p>Connect Bungie to calculate from verified owned armour. No inventory, Exotic or set-bonus state is guessed.</p>
+      <p>Connect Bungie to load your armour.</p>
       <a class="forge-connect" id="forgeConnectButton" href="https://auth.astrixparadox.com/bungie/start">CONNECT BUNGIE</a>
     </section>
   </main>
 
   <aside class="forge-item-inspect" id="forgeItemInspect" hidden aria-hidden="true"></aside>
-  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260920-1&amp;reports=20260925-1"></script>
-  <script type="module" src="./forge-loader.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;status=20260917-compact-1&amp;navigation=20260920-1"></script>
+  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260920-1&amp;reports=20260925-1&amp;plain=20260925-1"></script>
+  <script type="module" src="./forge-loader.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;status=20260917-compact-1&amp;navigation=20260920-1&amp;plain=20260925-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>
