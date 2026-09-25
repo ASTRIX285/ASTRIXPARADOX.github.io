@@ -61,6 +61,8 @@
     }finally{clearTimeout(timer);}
   }
   async function prepareData(destination){
+    const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
+    if(isJourneyPreview())return;
     const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
@@ -163,7 +165,9 @@
     mount.replaceChildren(nav);
   }
 
-  function warmReports(session){
+  async function warmReports(session){
+    const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
+    if(isJourneyPreview())return;
     if(!session?.authenticated)return;
     void import(new URL('./reports-preload.mjs?v=20260925-reports-3',scriptUrl).href)
       .then(module=>module.preloadReports(session)).catch(()=>{});

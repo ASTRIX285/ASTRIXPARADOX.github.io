@@ -7,6 +7,7 @@ const read=path=>readFileSync(`${root}${path}`,'utf8');
 const html=read('astrix-app/pages/journey/index.html');
 const css=read('astrix-app/pages/journey/journey-2560-visual.css');
 const journey=read('astrix-app/pages/journey/journey.mjs');
+const journeyEntry=read('astrix-app/pages/journey/journey-entry.mjs');
 const mapModule=read('astrix-app/pages/journey/journey-location-maps.mjs');
 const ribbon=read('astrix-app/shared/astrix-destination-ribbon.js');
 const ribbonCss=read('astrix-app/shared/astrix-destination-ribbon.css');
@@ -42,7 +43,8 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 // PR #272 (381a8e2) added maps; #273 (b913547) and #274 (8988fb2) refreshed their entries.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+// Local preview request: exact live import remains required behind the host gate.
+assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1')"),'Journey must retain its exact current live runtime through its gated entry');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -125,7 +127,8 @@ assert.match(css,/\.journey-page \.journey-rank-badge\{[\s\S]*?background:radial
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?bindProfileCards\(profile\);[\s\S]*?const mapReady=showJourney\(\);/,'Journey must keep its resolving state until the prepared profile is renderable, then reveal and bind the dashboard in that order');
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
 // Prompt 20 appends Reports support, retaining every existing resource version.
-assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"'),'Journey must load the backend-prepared shared Guardian renderer');
+// Local preview request: preserve exact shared renderer import on the live branch.
+assert.ok(journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1')"),'Journey must retain its exact backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
 assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared seven-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
@@ -166,7 +169,7 @@ for(const page of globalHeroPages){
   assert.ok(page.includes('astrix-hero-cards.css?v=20260904-mobile-crosscheck-1'),'Every destination page must load the current centred, mobile-contained command-header presentation');
   assert.equal((page.match(/forge-command-header/g)??[]).length,1,'Every destination page must contain exactly one shared command header');
 }
-assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'))).length,5,'Journey, Vault, Forge Loader, Loadout and Reports must load the backend-prepared Guardian renderer');
+assert.equal((globalHeroPages.filter(page=>(page===html?journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1"):page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1')))).length,5,'Journey, Vault, Forge Loader, Loadout and Reports must load the backend-prepared Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its backend-prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the backend-prepared persistent Guardian renderer');
 // PR #231 (a6974b1) superseded fast-transfer-2; #241, #242, #243 and #268 refreshed its graph.
