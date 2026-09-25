@@ -371,6 +371,7 @@ __CARDS_HTML__
   </div>
   <div class="gold-line" style="margin-bottom:20px;"></div>
   <div class="footer-copy">&copy; 2025 ASTRIX PARADOX &mdash; Built for the community, powered by gaming passion and history.</div>
+  <p class="apx-bungie-attribution">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</p>
 </footer>
 
 <div class="clip-modal" id="clipModal">
