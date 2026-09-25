@@ -260,7 +260,6 @@ const allowed=new Set([
   'astrix-app/pages/loadout/paradox-loadouts.css',
   'astrix-app/pages/loadout/paradox-loadouts.mjs',
   'astrix-app/shared/astrix-destination-ribbon.js',
-  'astrix-app/shared/astrix-embers.js',
   'astrix-app/shared/astrix-destination-ribbon.css',
   'astrix-app/shared/astrix-desktop-density.css',
   'astrix-app/shared/astrix-hero-cards.mjs',
