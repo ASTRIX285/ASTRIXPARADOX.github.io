@@ -31,8 +31,8 @@ const mobileNavigationPages=[
 ];
 for(const [path,prefix] of mobileNavigationPages){
   const html=read(path);
-  // PR #246 (f9347ba) refreshed these palette entry points; Clips kept its existing version.
-  const cssVersion=path==='pages/clips.html'?'20260913-mobile-nav-1':'20260917-approved-palette-1';
+  // PR #246 refreshed the palette entry points; PR #256 brings Clips onto the same approved version.
+  const cssVersion='20260917-approved-palette-1';
   assert.ok(html.includes(`href="${prefix}css/style.css?v=${cssVersion}"`),`${path} must load the current mobile-navigation CSS`);
   assert.ok(html.includes(`src="${prefix}js/main.js?v=20260913-mobile-nav-1"`),`${path} must load the current mobile-navigation controller`);
   assert.match(html,/<button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation">/,`${path} hamburger must expose its closed state and controlled menu`);

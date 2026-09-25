@@ -6,7 +6,8 @@
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="../css/style.css?v=20260913-mobile-nav-1">
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1">
+  <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1">
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
@@ -18,13 +19,16 @@
   <link rel="icon" href="../img/favicon/favicon.ico">
 
   <style>
+    /* Keep this page and the automated builder in sync: readable text uses the shared palette. */
+    .clips-hero .section-title .accent{color:var(--white)}
+    .footer-copy{color:var(--grey)}
     .clips-hero{padding:calc(var(--nav-height) + 60px) 40px 60px;background:var(--dark-2);border-bottom:1px solid rgba(139,0,0,0.2);position:relative;overflow:hidden}
     .clips-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(139,0,0,0.15) 0%,transparent 60%)}
     .filter-wrap{background:var(--dark-2);border-bottom:1px solid rgba(139,0,0,0.25);padding:0 40px}
     .filter-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:0}
     .filter-row{display:flex;align-items:center;gap:0;min-height:52px;border-bottom:1px solid rgba(139,0,0,0.1)}
     .filter-row:last-child{border-bottom:none}
-    .filter-label{font-family:'bahnschrift-semicondensed',monospace;font-size:8px;letter-spacing:4px;color:var(--grey-dark);text-transform:uppercase;min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:4px;flex-shrink:0}
+    .filter-label{font-family:'bahnschrift-semicondensed',monospace;font-size:8px;letter-spacing:4px;color:var(--grey);text-transform:uppercase;min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:4px;flex-shrink:0}
     .filter-pills{display:flex;flex-wrap:wrap;gap:2px;padding:8px 0 8px 8px}
     .filter-btn{font-family:'bahnschrift-semicondensed',monospace;font-size:9px;letter-spacing:2px;padding:7px 18px;border:1px solid transparent;color:var(--grey);cursor:pointer;text-transform:uppercase;transition:all 0.2s;background:transparent;white-space:nowrap}
     .filter-btn:hover{color:var(--white);border-color:rgba(139,0,0,0.5);background:rgba(139,0,0,0.06)}
@@ -55,7 +59,7 @@
     .clip-body{padding:16px 20px}
     .clip-title{font-family:"bahnschrift-semicondensed",monospace;font-size:12px;font-weight:600;color:var(--white);line-height:1.4;margin-bottom:8px;letter-spacing:0.5px}
     .clip-meta{display:flex;justify-content:space-between;align-items:center}
-    .clip-date{font-size:11px;color:var(--grey-dark);letter-spacing:1px}
+    .clip-date{font-size:11px;color:var(--grey);letter-spacing:1px}
     .clip-links{display:flex;gap:10px}
     .clip-link{font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-decoration:none;transition:color 0.2s}
     .clip-link:hover{color:var(--gold-light)}
@@ -68,8 +72,8 @@
     .clip-modal-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
     .clip-modal-label{font-family:"bahnschrift-semicondensed",monospace;font-size:10px;letter-spacing:2px;color:var(--grey);text-align:center;margin-top:16px;text-transform:uppercase}
     .clip-modal-source{font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:6px}
-    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:9px;letter-spacing:2px;color:var(--grey-dark);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
-    .clips-stats span{color:var(--crimson-mid)}
+    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:9px;letter-spacing:2px;color:var(--grey);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
+    .clips-stats span{color:var(--white)}
     @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-label{min-width:48px;font-size:7px;letter-spacing:2px}.filter-btn{font-size:8px;padding:6px 12px}}
   </style>
 </head>
@@ -142,7 +146,7 @@
   <div style="max-width:1100px;margin:0 auto;">
     <div class="clips-stats">
       SHOWING <span id="clipCount">61</span> CLIPS
-      &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--crimson-mid);font-family:'bahnschrift-semicondensed',monospace;font-size:9px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
+      &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--gold);font-family:'bahnschrift-semicondensed',monospace;font-size:9px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
     </div>
     <div id="clipsGrid">
 
