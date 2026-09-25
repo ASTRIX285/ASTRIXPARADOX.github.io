@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
-  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1"></script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;plain=20260925-1"></script>
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22">
   <link rel="stylesheet" href="../../astrix-destinations.css">
   <link rel="stylesheet" href="../../shared/astrix-location-atmosphere.css">
@@ -76,7 +76,7 @@
     .journey-page .journey-records-empty{margin:0}
     @media(max-width:720px){.journey-page .journey-records-toolbar{align-items:flex-start;flex-direction:column}.journey-page .journey-records-status{text-align:left}.journey-page .journey-record-detail-hero,.journey-page .journey-record-detail-grid{grid-template-columns:1fr}.journey-page .journey-record-type-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.journey-page .journey-records-group.is-patterns-catalysts .journey-records-list{grid-template-columns:1fr}.journey-page .journey-rank-strip{grid-template-columns:repeat(11,40px)}}
   </style>
-  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3" defer></script>
+  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;plain=20260925-1" defer></script>
   <script src="../../shared/astrix-destination-theme.js?v=20260920-map-links-1" defer></script>
   <script src="../../shared/astrix-location-visuals.js" defer></script>
 </head>
@@ -110,7 +110,7 @@
             </div>
             <div class="mission-identity-copy">
               <h1 id="journeyGuardianClass">Guardian unavailable</h1>
-              <p id="journeyGuardianSubclass">Subclass awaiting verified data</p>
+              <p id="journeyGuardianSubclass">Subclass awaiting data</p>
             </div>
             <div class="journey-identity-stats" id="journeyGuardianStats" aria-label="Selected Guardian statistics" aria-live="polite"></div>
           </section>
@@ -119,16 +119,16 @@
             <dl>
               <div><dt>Account playtime</dt><dd id="journeyTotalPlaytime">—</dd></div>
             </dl>
-            <article class="journey-record-detail-hero journey-guardian-rank-summary has-no-icon" id="journeyGuardianRankSummary" aria-live="polite"><div class="journey-record-detail-copy"><h4>Guardian Rank unavailable</h4><p>Highest completed Guardian Rank awaiting verified Bungie data.</p><a class="journey-record-link" id="journeyGuardianRankDetailsLink" href="#journeyGuardianRankHeading">VIEW GUARDIAN RANK DETAILS</a></div></article>
+            <article class="journey-record-detail-hero journey-guardian-rank-summary has-no-icon" id="journeyGuardianRankSummary" aria-live="polite"><div class="journey-record-detail-copy"><h4>Guardian Rank unavailable</h4><p>Highest completed Guardian Rank awaiting Bungie data.</p><a class="journey-record-link" id="journeyGuardianRankDetailsLink" href="#journeyGuardianRankHeading">VIEW GUARDIAN RANK DETAILS</a></div></article>
           </section>
 
           <section class="journey-column-summaries journey-left-summaries" aria-labelledby="journeyIdentitySummariesTitle">
             <h2 id="journeyIdentitySummariesTitle">IDENTITY &amp; PROGRESSION</h2>
-            <article class="apx-scaffold-card" data-journey-equipped-title><h2>Equipped title and seal</h2><div class="journey-record-detail-hero journey-equipped-title-summary has-no-icon" id="journeyTitleSeal" aria-live="polite"><div class="journey-record-detail-copy"><h4>Equipped title unavailable</h4><p>Equipped title awaiting verified Bungie data.</p><a class="journey-record-link" id="journeyEquippedTitleDetailsLink" href="#journeyTitlesHeading">VIEW ALL TITLES</a></div></div></article>
-            <article class="apx-scaffold-card" data-journey-next-title><h2>Progress to next title</h2><div class="journey-record-detail-hero journey-next-title-summary has-no-icon" id="journeyTitleProgress" aria-live="polite"><div class="journey-record-detail-copy"><h4>Next title unavailable</h4><p>Verified title progress is not available.</p><a class="journey-record-link" id="journeyNextTitleDetailsLink" href="#journeyTitlesHeading">VIEW ALL TITLES</a></div></div></article>
-            <article class="apx-scaffold-card journey-triumph-card"><h2>Triumph and progression statistics</h2><div class="journey-triumph-summary" id="journeyTriumphStats" aria-live="polite"><span class="apx-empty-state">No verified Triumph or progression values are available.</span></div></article>
-            <article class="apx-scaffold-card journey-usage-card"><h2>Guardian class usage</h2><div class="journey-usage-summary" id="journeyGuardianUsage" aria-live="polite"><span class="apx-empty-state">Verified class playtime is not available.</span></div></article>
-            <article class="apx-scaffold-card journey-season-card"><h2>Current Season Rank</h2><div class="journey-record-detail-hero journey-season-rank-summary has-no-icon" id="journeySeasonRank" aria-live="polite"><div class="journey-record-detail-copy"><h4>Season Rank unavailable</h4><p>Current seasonal progression is awaiting verified Bungie data.</p></div></div></article>
+            <article class="apx-scaffold-card" data-journey-equipped-title><h2>Equipped title and seal</h2><div class="journey-record-detail-hero journey-equipped-title-summary has-no-icon" id="journeyTitleSeal" aria-live="polite"><div class="journey-record-detail-copy"><h4>Equipped title unavailable</h4><p>Equipped title awaiting Bungie data.</p><a class="journey-record-link" id="journeyEquippedTitleDetailsLink" href="#journeyTitlesHeading">VIEW ALL TITLES</a></div></div></article>
+            <article class="apx-scaffold-card" data-journey-next-title><h2>Progress to next title</h2><div class="journey-record-detail-hero journey-next-title-summary has-no-icon" id="journeyTitleProgress" aria-live="polite"><div class="journey-record-detail-copy"><h4>Next title unavailable</h4><p>Title progress is not available.</p><a class="journey-record-link" id="journeyNextTitleDetailsLink" href="#journeyTitlesHeading">VIEW ALL TITLES</a></div></div></article>
+            <article class="apx-scaffold-card journey-triumph-card"><h2>Triumph and progression statistics</h2><div class="journey-triumph-summary" id="journeyTriumphStats" aria-live="polite"><span class="apx-empty-state">No Triumph or progression values are available.</span></div></article>
+            <article class="apx-scaffold-card journey-usage-card"><h2>Guardian class usage</h2><div class="journey-usage-summary" id="journeyGuardianUsage" aria-live="polite"><span class="apx-empty-state">Class playtime is not available.</span></div></article>
+            <article class="apx-scaffold-card journey-season-card"><h2>Current Season Rank</h2><div class="journey-record-detail-hero journey-season-rank-summary has-no-icon" id="journeySeasonRank" aria-live="polite"><div class="journey-record-detail-copy"><h4>Season Rank unavailable</h4><p>Current seasonal progression is awaiting Bungie data.</p></div></div></article>
           </section>
         </aside>
 
@@ -138,29 +138,29 @@
               <button type="button" role="tab" aria-selected="true" data-journey-view="overview">OVERVIEW</button>
               <button type="button" role="tab" aria-selected="false" data-journey-view="pve">PVE</button>
               <button type="button" role="tab" aria-selected="false" data-journey-view="pvp">PVP</button>
-              <span class="mission-feed-state" id="journeyFeedStatus" aria-live="polite">AWAITING VERIFIED ACTIVITY DATA</span>
+              <span class="mission-feed-state" id="journeyFeedStatus" aria-live="polite">AWAITING ACTIVITY DATA</span>
             </div>
 
             <section class="mission-metrics journey-metrics" aria-label="Guardian Journey summary">
               <article class="mission-metric-card" data-journey-metric="all">
                 <span class="mission-metric-icon" aria-hidden="true">◫</span>
                 <div><small>TOTAL ACTIVITIES</small><strong id="journeyMetricActivities">—</strong><span>Awaiting live history</span></div>
-                <i class="mission-verified-tick" title="Verified live value" hidden>✓</i>
+                <i class="mission-verified-tick" title="Current value" hidden>✓</i>
               </article>
               <article class="mission-metric-card mission-metric-card--donut" data-journey-metric="all">
                 <svg class="mission-mini-donut" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17"/><circle class="mission-donut-value" cx="22" cy="22" r="17" pathLength="100"/></svg>
-                <div><small>COMPLETION RATE</small><strong id="journeyMetricCompletion">—</strong><span>Awaiting completion evidence</span></div>
-                <i class="mission-verified-tick" title="Verified live value" hidden>✓</i>
+                <div><small>COMPLETION RATE</small><strong id="journeyMetricCompletion">—</strong><span>Awaiting completion data</span></div>
+                <i class="mission-verified-tick" title="Current value" hidden>✓</i>
               </article>
               <article class="mission-metric-card" data-journey-metric="pve">
                 <span class="mission-metric-icon" aria-hidden="true">⬡</span>
-                <div><small>PVE CLEARS</small><strong id="journeyMetricPve">—</strong><span>Awaiting PVE evidence</span></div>
-                <i class="mission-verified-tick" title="Verified live value" hidden>✓</i>
+                <div><small>PVE CLEARS</small><strong id="journeyMetricPve">—</strong><span>Awaiting PVE data</span></div>
+                <i class="mission-verified-tick" title="Current value" hidden>✓</i>
               </article>
               <article class="mission-metric-card" data-journey-metric="pvp">
                 <span class="mission-metric-icon" aria-hidden="true">◇</span>
-                <div><small>PVP K/D</small><strong id="journeyMetricPvp">—</strong><span>Awaiting PVP evidence</span></div>
-                <i class="mission-verified-tick" title="Verified live value" hidden>✓</i>
+                <div><small>PVP K/D</small><strong id="journeyMetricPvp">—</strong><span>Awaiting PVP data</span></div>
+                <i class="mission-verified-tick" title="Current value" hidden>✓</i>
               </article>
             </section>
           </section>
@@ -187,41 +187,41 @@
               <div class="journey-focus-detail-column">
                 <div class="apx-loc-detail" id="journeyLocationDetail"></div>
                 <section class="journey-records-panel" id="journeyRecordsPanel" aria-label="Destiny 2 Guardian records" hidden>
-                  <div class="journey-records-toolbar"><button class="journey-records-back" id="journeyRecordsBack" type="button">Back to Destination</button><span class="journey-records-status" id="journeyRecordsStatus" role="status">AWAITING VERIFIED BUNGIE RECORDS</span></div>
-                  <div class="journey-records-group" data-journey-record-view="titles" aria-labelledby="journeyTitlesHeading"><h3 id="journeyTitlesHeading">Destiny 2 Titles</h3><div class="journey-records-list" id="journeyTitlesList"><span class="apx-empty-state journey-records-empty">Title presentation nodes are awaiting verified profile data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="badges" aria-labelledby="journeyBadgesHeading" hidden><h3 id="journeyBadgesHeading">Destiny 2 Badges</h3><div class="journey-records-list" id="journeyBadgesList"><span class="apx-empty-state journey-records-empty">Badge presentation nodes are awaiting verified profile data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="title-detail" aria-labelledby="journeyTitleRequirementsHeading" hidden><div class="journey-record-detail-hero" id="journeyTitleDetailHero"></div><h3 id="journeyTitleRequirementsHeading">Title Requirements</h3><div class="journey-records-list" id="journeyTitleRequirementsList"><span class="apx-empty-state journey-records-empty">Verified title requirements are awaiting data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="triumphs" aria-labelledby="journeyTriumphCategoriesHeading" hidden><h3 id="journeyTriumphCategoriesHeading">Triumph Categories</h3><div class="journey-records-list" id="journeyTriumphCategoriesList"><span class="apx-empty-state journey-records-empty">Triumph presentation nodes are awaiting verified profile data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="triumph-detail" aria-labelledby="journeyTriumphDetailHeading" hidden><div class="journey-record-detail-hero" id="journeyTriumphDetailHero"></div><h3 id="journeyTriumphDetailHeading">Triumph Subcategories</h3><div class="journey-record-submenu" id="journeyTriumphSubcategories"></div><div class="journey-records-list" id="journeyTriumphDetailList"><span class="apx-empty-state journey-records-empty">Verified Triumph records are awaiting data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="guardian-rank" aria-labelledby="journeyGuardianRankHeading" hidden><div class="journey-record-detail-hero" id="journeyGuardianRankHero"></div><div class="journey-rank-strip" id="journeyGuardianRankStrip" aria-label="Guardian Ranks"></div><h3 id="journeyGuardianRankHeading">Guardian Rank Objectives</h3><div class="journey-records-list" id="journeyGuardianRankObjectives"><span class="apx-empty-state journey-records-empty">Verified Guardian Rank objectives are awaiting data.</span></div></div>
-                  <div class="journey-records-group" data-journey-record-view="records" aria-labelledby="journeyRecordsHeading" hidden><h3 id="journeyRecordsHeading">Records</h3><div class="journey-records-list" id="journeyRecordsSections"><span class="apx-empty-state journey-records-empty">Record sections are awaiting verified data.</span></div></div>
-                  <div class="journey-records-group" id="journeyRecordsDetailGroup" data-journey-record-view="records-detail" aria-labelledby="journeyRecordsDetailHeading" hidden><div class="journey-record-detail-hero" id="journeyRecordsDetailHero"></div><div class="journey-record-type-tabs" id="journeyRecordsTypes" role="tablist" aria-label="Pattern and catalyst types" hidden></div><h3 id="journeyRecordsDetailHeading">Record Categories</h3><div class="journey-record-detail-grid"><div class="journey-record-submenu" id="journeyRecordsSubcategories"></div><div class="journey-records-list" id="journeyRecordsDetailList"><span class="apx-empty-state journey-records-empty">Verified individual Record progress is awaiting data.</span></div></div></div>
+                  <div class="journey-records-toolbar"><button class="journey-records-back" id="journeyRecordsBack" type="button">Back to Destination</button><span class="journey-records-status" id="journeyRecordsStatus" role="status">AWAITING BUNGIE RECORDS</span></div>
+                  <div class="journey-records-group" data-journey-record-view="titles" aria-labelledby="journeyTitlesHeading"><h3 id="journeyTitlesHeading">Destiny 2 Titles</h3><div class="journey-records-list" id="journeyTitlesList"><span class="apx-empty-state journey-records-empty">Title presentation nodes are awaiting profile data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="badges" aria-labelledby="journeyBadgesHeading" hidden><h3 id="journeyBadgesHeading">Destiny 2 Badges</h3><div class="journey-records-list" id="journeyBadgesList"><span class="apx-empty-state journey-records-empty">Badge presentation nodes are awaiting profile data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="title-detail" aria-labelledby="journeyTitleRequirementsHeading" hidden><div class="journey-record-detail-hero" id="journeyTitleDetailHero"></div><h3 id="journeyTitleRequirementsHeading">Title Requirements</h3><div class="journey-records-list" id="journeyTitleRequirementsList"><span class="apx-empty-state journey-records-empty">Title requirements are awaiting data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="triumphs" aria-labelledby="journeyTriumphCategoriesHeading" hidden><h3 id="journeyTriumphCategoriesHeading">Triumph Categories</h3><div class="journey-records-list" id="journeyTriumphCategoriesList"><span class="apx-empty-state journey-records-empty">Triumph presentation nodes are awaiting profile data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="triumph-detail" aria-labelledby="journeyTriumphDetailHeading" hidden><div class="journey-record-detail-hero" id="journeyTriumphDetailHero"></div><h3 id="journeyTriumphDetailHeading">Triumph Subcategories</h3><div class="journey-record-submenu" id="journeyTriumphSubcategories"></div><div class="journey-records-list" id="journeyTriumphDetailList"><span class="apx-empty-state journey-records-empty">Triumph records are awaiting data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="guardian-rank" aria-labelledby="journeyGuardianRankHeading" hidden><div class="journey-record-detail-hero" id="journeyGuardianRankHero"></div><div class="journey-rank-strip" id="journeyGuardianRankStrip" aria-label="Guardian Ranks"></div><h3 id="journeyGuardianRankHeading">Guardian Rank Objectives</h3><div class="journey-records-list" id="journeyGuardianRankObjectives"><span class="apx-empty-state journey-records-empty">Guardian Rank objectives are awaiting data.</span></div></div>
+                  <div class="journey-records-group" data-journey-record-view="records" aria-labelledby="journeyRecordsHeading" hidden><h3 id="journeyRecordsHeading">Records</h3><div class="journey-records-list" id="journeyRecordsSections"><span class="apx-empty-state journey-records-empty">Record sections are awaiting data.</span></div></div>
+                  <div class="journey-records-group" id="journeyRecordsDetailGroup" data-journey-record-view="records-detail" aria-labelledby="journeyRecordsDetailHeading" hidden><div class="journey-record-detail-hero" id="journeyRecordsDetailHero"></div><div class="journey-record-type-tabs" id="journeyRecordsTypes" role="tablist" aria-label="Pattern and catalyst types" hidden></div><h3 id="journeyRecordsDetailHeading">Record Categories</h3><div class="journey-record-detail-grid"><div class="journey-record-submenu" id="journeyRecordsSubcategories"></div><div class="journey-records-list" id="journeyRecordsDetailList"><span class="apx-empty-state journey-records-empty">Individual Record progress is awaiting data.</span></div></div></div>
                 </section>
               </div>
             </div>
           </section>
         </section>
 
-        <aside class="mission-right-rail journey-right-rail" data-journey-character-panel aria-label="Journey analysis and evidence summaries">
+        <aside class="mission-right-rail journey-right-rail" data-journey-character-panel aria-label="Journey analysis and data summaries">
           <section class="mission-panel mission-current-form" id="journeyCurrentForm" aria-labelledby="journeyCurrentFormTitle">
             <header class="mission-panel-heading">
               <div><p class="mission-eyebrow">LAST 30 DAYS</p><h2 id="journeyCurrentFormTitle">CURRENT FORM</h2></div>
               <select aria-label="Current form range" disabled><option>Last 30 Days</option></select>
             </header>
             <div class="mission-chart-wrap">
-              <svg class="mission-trend-chart" id="journeyTrendChart" viewBox="0 0 320 150" role="img" aria-label="No verified performance trend available">
+              <svg class="mission-trend-chart" id="journeyTrendChart" viewBox="0 0 320 150" role="img" aria-label="No performance trend available">
                 <g class="mission-chart-grid" aria-hidden="true"><path d="M18 20H308M18 58H308M18 96H308M18 134H308"/></g>
                 <path class="mission-chart-line mission-chart-line--pve" data-journey-trend="pve" d=""/>
                 <path class="mission-chart-line mission-chart-line--pvp" data-journey-trend="pvp" d=""/>
               </svg>
-              <div class="mission-chart-empty" id="journeyTrendEmpty">Performance trends require live dated activity evidence.</div>
+              <div class="mission-chart-empty" id="journeyTrendEmpty">Play activities to see performance trends.</div>
             </div>
             <div class="mission-chart-dates"><span>—</span><span>—</span></div>
             <div class="mission-chart-legend"><span data-journey-trend="pve"><i class="is-pve"></i>PVE Success Rate</span><span data-journey-trend="pvp"><i class="is-pvp"></i>PVP K/D</span></div>
           </section>
 
           <section class="mission-panel mission-confidence" aria-labelledby="journeyConfidenceTitle">
-            <header class="mission-panel-heading"><div><p class="mission-eyebrow">SOURCE COVERAGE</p><h2 id="journeyConfidenceTitle">EVIDENCE CONFIDENCE</h2></div></header>
+            <header class="mission-panel-heading"><div><p class="mission-eyebrow">SOURCE COVERAGE</p><h2 id="journeyConfidenceTitle">DATA COVERAGE</h2></div></header>
             <div class="mission-confidence-layout">
               <div class="mission-confidence-donut">
                 <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="48"/><circle class="mission-donut-value" id="journeyConfidenceDonutValue" cx="60" cy="60" r="48" pathLength="100"/></svg>
@@ -237,19 +237,19 @@
           </section>
 
           <section class="journey-column-summaries journey-right-summaries" aria-labelledby="journeyEvidenceSummariesTitle">
-            <h2 id="journeyEvidenceSummariesTitle">EVIDENCE &amp; TOOLS</h2>
-            <article class="apx-scaffold-card"><h2>Most used since connecting ASTRIX PARADOX</h2><div class="apx-empty-state" id="journeyMostUsed" aria-live="polite">No verified Build Test or Mission Report loadout evidence has been recorded.</div></article>
+            <h2 id="journeyEvidenceSummariesTitle">BUILD DATA &amp; TOOLS</h2>
+            <article class="apx-scaffold-card"><h2>Most used since connecting ASTRIX PARADOX</h2><div class="apx-empty-state" id="journeyMostUsed" aria-live="polite">No build activity recorded yet.</div></article>
             <article class="apx-scaffold-card" id="journeyRecentActivity"><h2>Recent activity</h2><span class="apx-empty-state">Recent activity data is not connected.</span></article>
-            <article class="apx-scaffold-card"><h2>Build Forge summary</h2><div class="apx-empty-state" id="journeyBuildSummary" aria-live="polite">No verified Build Forge state is available for this Guardian.</div></article>
-            <article class="apx-scaffold-card journey-vault-card"><h2>Vault inventory</h2><div class="journey-vault-summary" id="journeyVault" aria-live="polite"><span class="apx-empty-state">Vault inventory is awaiting verified Bungie data.</span></div></article>
-            <article class="apx-scaffold-card"><h2>Mission Report highlights</h2><div class="apx-empty-state" id="journeyMissionHighlights" aria-live="polite">No verified activity history is available for Mission Report highlights.</div></article>
+            <article class="apx-scaffold-card"><h2>Build Forge summary</h2><div class="apx-empty-state" id="journeyBuildSummary" aria-live="polite">No Build Forge state is available for this Guardian.</div></article>
+            <article class="apx-scaffold-card journey-vault-card"><h2>Vault inventory</h2><div class="journey-vault-summary" id="journeyVault" aria-live="polite"><span class="apx-empty-state">Vault inventory is awaiting Bungie data.</span></div></article>
+            <article class="apx-scaffold-card"><h2>Mission Report highlights</h2><div class="apx-empty-state" id="journeyMissionHighlights" aria-live="polite">No activity history is available for Mission Report highlights.</div></article>
           </section>
         </aside>
       </div>
     </section>
   </main>
-  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"></script>
-  <script type="module" src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1"></script>
+  <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1&amp;plain=20260925-1"></script>
+  <script type="module" src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;plain=20260925-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>

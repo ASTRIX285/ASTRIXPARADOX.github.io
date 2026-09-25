@@ -1,15 +1,15 @@
 import {destinationNameMatches,destinationActivityMatches,destinationObjectiveMatches,REGION_CHEST_CHECKLIST_HASH,resolveRegionChestProgress} from './journey-destination-model.mjs?v=20260920-zoom-chests-3';
-import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {guardianManifest} from './journey-manifest.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1';
 import {resolveRecordTree,patternTypeKey,seasonRankProgress,findDestinationNodes} from './journey-record-model.mjs?v=20260905-journey-repair-1';
 import {resolveCollectionBadges} from './journey-collection-model.mjs?v=20260905-pattern-badges-1';
-import {PREPARED_PAGE_REFRESH_MS,bindPreparedPageRefreshControl,createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
+import {PREPARED_PAGE_REFRESH_MS,bindPreparedPageRefreshControl,createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1';
 import {validateHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
-import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-shooting-range-capture.mjs?v=20260902-journey-data-hooks-1';
-import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1';
-import {initLocationSelector} from '../../shared/astrix-location-selector.mjs?v=20260920-map-links-1';
-import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260920-zoom-chests-3';
-import {loadPreparedPagePayload,preloadPreparedWorkspace,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
+import {readCapture,readCaptureArchive} from '../guardian-workspace-v2/guardian-shooting-range-capture.mjs?v=20260902-journey-data-hooks-1&plain=20260925-1';
+import {buildMissionReportView,normaliseActivityHistory} from '../mission-reports/mission-reports-data.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {initLocationSelector} from '../../shared/astrix-location-selector.mjs?v=20260920-map-links-1&plain=20260925-1';
+import {initJourneyLocationMaps,publishJourneyDestinationData,publishJourneyRegionChestProgress} from './journey-location-maps.mjs?v=20260920-zoom-chests-3&plain=20260925-1';
+import {loadPreparedPagePayload,preloadPreparedWorkspace,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
@@ -138,7 +138,7 @@ function waitWithin(promise,timeoutMs){
 
 async function finishJourneyLoader(root=document){
   reportPreparedPageStage('ready','journey');
-  await Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(error=>globalThis.ForgeLoader.blocked(error?.message||'Journey could not finish rendering verified data.'));
+  await Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(error=>globalThis.ForgeLoader.blocked(error?.message||'Journey could not finish rendering data.'));
 }
 
 function waitForHeroCards(){
@@ -185,7 +185,7 @@ async function currentSeasonMetadata(payload){
 
 async function bindSeasonRank(payload){
   if(!seasonRankCard)return;
-  renderDetailHero(seasonRankCard,{name:'Season Rank unavailable',description:'Current seasonal progression is awaiting verified Bungie data.'});
+  renderDetailHero(seasonRankCard,{name:'Season Rank unavailable',description:'Current seasonal progression is awaiting Bungie data.'});
   try{
     const metadata=await currentSeasonMetadata(payload);
     const {active,rank}=seasonRankProgress(payload,String(journeyCharacterFor(payload)?.characterId||''),metadata);
@@ -212,7 +212,7 @@ function bindGuardianUsage(payload){
   }
   const total=usage.reduce((sum,item)=>sum+item.minutes,0);
   guardianUsage.replaceChildren();
-  if(total<=0){const empty=document.createElement('span');empty.className='apx-empty-state';empty.textContent='Verified class playtime is not available.';guardianUsage.appendChild(empty);return false;}
+  if(total<=0){const empty=document.createElement('span');empty.className='apx-empty-state';empty.textContent='Class playtime is not available.';guardianUsage.appendChild(empty);return false;}
   usage.forEach(item=>{item.percent=item.minutes/total*100;});
   const top=[...usage].sort((left,right)=>right.minutes-left.minutes)[0];
   const layout=document.createElement('div');layout.className='journey-usage-layout';
@@ -299,7 +299,7 @@ function formatPlaytime(minutes){
 
 function bindActiveGuardian(payload){
   guardianClass.textContent='Guardian unavailable';
-  guardianSubclass.textContent='Subclass awaiting verified data';
+  guardianSubclass.textContent='Subclass awaiting data';
   bindGuardianStats(payload,null);
   guardianCrest.hidden=true;
   guardianCrest.removeAttribute('src');
@@ -370,7 +370,7 @@ function renderGuardianRankSummary({rank,name=''}){
   const heading=document.createElement('h4');
   heading.textContent=rank===null?'Guardian Rank unavailable':name;
   const description=document.createElement('p');
-  description.textContent=rank===null?'Highest completed Guardian Rank awaiting verified Bungie data.':`HIGHEST COMPLETED GUARDIAN RANK ${rank}`;
+  description.textContent=rank===null?'Highest completed Guardian Rank awaiting Bungie data.':`HIGHEST COMPLETED GUARDIAN RANK ${rank}`;
   const link=document.createElement('a');
   link.className='journey-record-link';
   link.id='journeyGuardianRankDetailsLink';
@@ -380,7 +380,7 @@ function renderGuardianRankSummary({rank,name=''}){
   guardianRankSummary.appendChild(copy);
 }
 
-function renderEquippedTitleSummary(title=null,unavailableText='Equipped title awaiting verified Bungie data.'){
+function renderEquippedTitleSummary(title=null,unavailableText='Equipped title awaiting Bungie data.'){
   if(!titleSealCard)return;
   equippedTitleSummary=title;
   const name=title?.name||'Equipped title unavailable';
@@ -399,7 +399,7 @@ function renderEquippedTitleSummary(title=null,unavailableText='Equipped title a
 function renderNextTitleSummary(title=null){
   if(!titleProgressCard)return;
   nextTitleSummary=title;
-  renderDetailHero(titleProgressCard,{name:title?.name||'Next title unavailable',icon:title?.icon||'',description:title?.description||'Verified title progress is not available.',completed:title?.completed??null,total:title?.total??null,unit:title?.unit||'TITLE REQUIREMENTS'});
+  renderDetailHero(titleProgressCard,{name:title?.name||'Next title unavailable',icon:title?.icon||'',description:title?.description||'Title progress is not available.',completed:title?.completed??null,total:title?.total??null,unit:title?.unit||'TITLE REQUIREMENTS'});
   const copy=titleProgressCard.querySelector('.journey-record-detail-copy');
   if(!copy)return;
   const link=document.createElement('a');
@@ -816,10 +816,10 @@ async function bindDestinationProgress(payload,key=globalThis.ForgeDestinations?
 }
 
 const RECORD_SECTION_DEFINITIONS=[
-  {key:'medals',name:'Medals',description:'Verified activity medals and earned counts.'},
+  {key:'medals',name:'Medals',description:'Activity medals and earned counts.'},
   {key:'patterns-catalysts',name:'Patterns & Catalysts',description:'Weapon-pattern and catalyst objective progress.'},
   {key:'lore',name:'Lore',description:'Unlocked lore entries and collection progress.',optional:true},
-  {key:'stat-trackers',name:'Stat Trackers',description:'Verified Guardian statistics and objective progress.'}
+  {key:'stat-trackers',name:'Stat Trackers',description:'Guardian statistics and objective progress.'}
 ];
 const PATTERN_CATALYST_TYPE_DEFINITIONS=[
   {key:'primary',name:'Primary Weapon Patterns',shortName:'Primary',categories:['Auto Rifles','Bows','Hand Cannons','Pulse Rifles','Scout Rifles','Sidearms','Submachine Guns']},
@@ -855,9 +855,9 @@ function makeJourneyRecordRow({hash,itemHash=null,name,icon,description='',compl
     const progress=document.createElement('div');
     progress.className='journey-record-progress';
     const label=document.createElement('span');
-    label.textContent=unit||'VERIFIED VALUE';
+    label.textContent=unit||'VALUE';
     const output=document.createElement('b');
-    output.textContent=verifiedProgress?`${numberFormatter.format(completed)} / ${numberFormatter.format(total)}`:hasValue?(typeof value==='number'?numberFormatter.format(value):String(value)):'AWAITING VERIFIED COUNTS';
+    output.textContent=verifiedProgress?`${numberFormatter.format(completed)} / ${numberFormatter.format(total)}`:hasValue?(typeof value==='number'?numberFormatter.format(value):String(value)):'AWAITING COUNTS';
     progress.append(label,output);
     copy.appendChild(progress);
   }
@@ -1107,7 +1107,7 @@ function activateRecordView(view){
   const root=recordRootView(view);
   const headings={titles:'Titles',badges:'Badges',triumphs:'Triumphs','guardian-rank':'Guardian Rank',records:'Records'};
   if(focusHeading)focusHeading.textContent=headings[root]||'Guardian Records';
-  if(focusStatus)focusStatus.textContent='VERIFIED BUNGIE RECORDS';
+  if(focusStatus)focusStatus.textContent='BUNGIE RECORDS';
   if(recordsBack)recordsBack.textContent=view==='title-detail'?selectedTitleKind==='badges'?'Back to Badges':'Back to Titles':view==='triumph-detail'?'Back to Triumph Categories':view==='records-detail'?'Back to Records':'Back to Destination';
   setRecordSelectorState(root);
 }
@@ -1122,8 +1122,8 @@ function showTitleDetail(title,kind='titles'){
   const detailName=title.detailName||title.name;
   const description=[title.description,title.name!==detailName?`${label} · ${title.name}`:''].filter(Boolean).join(' · ');
   renderDetailHero(titleDetailHero,{name:detailName,icon:title.icon,description,completed:title.completed,total:title.total,unit:`${label} PROGRESS`});
-  if(Array.isArray(title.requirements)){renderJourneyRecordList(titleRequirementsList,title.requirements,`Verified requirements for this ${label.toLowerCase()} are not yet connected.`);return;}
-  renderJourneyRecordList(titleRequirementsList,[],`Loading verified ${label.toLowerCase()} requirements.`);
+  if(Array.isArray(title.requirements)){renderJourneyRecordList(titleRequirementsList,title.requirements,`Requirements for this ${label.toLowerCase()} are not yet connected.`);return;}
+  renderJourneyRecordList(titleRequirementsList,[],`Loading ${label.toLowerCase()} requirements.`);
   void (async()=>{
     const entries=title.requirementEntries||[];
     const recordDefinitions=await guardianManifest.getMany('DestinyRecordDefinition',entries.map(entry=>entry.recordHash));
@@ -1135,7 +1135,7 @@ function showTitleDetail(title,kind='titles'){
     title.completed=requirements.filter(requirement=>requirement.complete).length;
     title.total=requirements.length;
     renderDetailHero(titleDetailHero,{name:detailName,icon:title.icon,description,completed:title.completed,total:title.total,unit:`${label} REQUIREMENTS`});
-    renderJourneyRecordList(titleRequirementsList,requirements,`No verified requirements were returned for this ${label.toLowerCase()}.`);
+    renderJourneyRecordList(titleRequirementsList,requirements,`No requirements were returned for this ${label.toLowerCase()}.`);
   })();
 }
 
@@ -1148,8 +1148,8 @@ function showTriumphDetail(category){
   const renderSections=()=>{
     renderSubmenu(triumphSubcategories,category.subcategories||[],section=>{
       const requestId=++triumphSectionRequest;
-      if(Array.isArray(section.items)){renderJourneyRecordList(triumphDetailList,section.items,'No verified Triumphs were returned for this subcategory.');return;}
-      renderJourneyRecordList(triumphDetailList,[],'Loading verified Triumph records.');
+      if(Array.isArray(section.items)){renderJourneyRecordList(triumphDetailList,section.items,'No Triumphs were returned for this subcategory.');return;}
+      renderJourneyRecordList(triumphDetailList,[],'Loading Triumph records.');
       void (async()=>{
         const recordDefinitions=await guardianManifest.getMany('DestinyRecordDefinition',section.recordEntries.map(entry=>entry.recordHash));
         const objectiveDefinitions=await guardianManifest.getMany('DestinyObjectiveDefinition',Object.values(recordDefinitions).flatMap(definition=>definition?.objectiveHashes||[]));
@@ -1160,14 +1160,14 @@ function showTriumphDetail(category){
           const score=finiteNumber(definition?.completionInfo?.ScoreValue);
           return row?{...row,unit:score===null?'':'TRIUMPH SCORE',value:score,claimed:state!==null&&(state&1)===1}:null;
         }).filter(item=>item?.name);
-        if(selectedTriumphCategory===category&&requestId===triumphSectionRequest)renderJourneyRecordList(triumphDetailList,section.items,'No verified Triumphs were returned for this subcategory.');
+        if(selectedTriumphCategory===category&&requestId===triumphSectionRequest)renderJourneyRecordList(triumphDetailList,section.items,'No Triumphs were returned for this subcategory.');
       })();
     });
-    if(!(category.subcategories||[]).length)renderJourneyRecordList(triumphDetailList,[],'No verified Triumph subcategories were returned.');
+    if(!(category.subcategories||[]).length)renderJourneyRecordList(triumphDetailList,[],'No Triumph subcategories were returned.');
   };
   if(Array.isArray(category.subcategories)){renderSections();return;}
   triumphSubcategories?.replaceChildren();
-  renderJourneyRecordList(triumphDetailList,[],'Loading verified Triumph subcategories.');
+  renderJourneyRecordList(triumphDetailList,[],'Loading Triumph subcategories.');
   void (async()=>{
     const sections=[];
     const seen=new Set();
@@ -1200,10 +1200,10 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
   const titleCollectionList=view==='badges'?badgesList:titlesList;
   const titleCollectionLabel=view==='badges'?'BADGES':'TITLES';
   const titleCollectionSelect=view==='badges'?showBadgeDetail:showTitleDetail;
-  if(recordsStatus)recordsStatus.textContent='LOADING VERIFIED BUNGIE DEFINITIONS';
+  if(recordsStatus)recordsStatus.textContent='LOADING BUNGIE DEFINITIONS';
   const hookedRows=isTitleCollection?null:journeyRecordHookRows(payload,view);
   if(hookedRows){
-    renderJourneyRecordList(isTitleCollection?titleCollectionList:triumphCategoriesList,hookedRows,isTitleCollection?`No verified Destiny ${titleCollectionLabel.toLowerCase()} were returned.`:'No verified Triumph category rows were returned.',isTitleCollection?titleCollectionSelect:showTriumphDetail);
+    renderJourneyRecordList(isTitleCollection?titleCollectionList:triumphCategoriesList,hookedRows,isTitleCollection?`No Destiny ${titleCollectionLabel.toLowerCase()} were returned.`:'No Triumph category rows were returned.',isTitleCollection?titleCollectionSelect:showTriumphDetail);
     if(recordsStatus)recordsStatus.textContent=isTitleCollection?`${hookedRows.length} ${titleCollectionLabel}`:`${hookedRows.length} TRIUMPH CATEGORIES`;
     return;
   }
@@ -1217,7 +1217,7 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
       if(requestId!==titleTriumphRequest)return;
       payload.journeyBadgeCoverage=result.coverage;
       renderJourneyRecordList(badgesList,result.badges,'Collection badges are unavailable in the current Bungie response.',showBadgeDetail);
-      if(recordsStatus)recordsStatus.textContent=result.coverage.complete?`${result.badges.length} VERIFIED COLLECTION BADGES`:'COLLECTION BADGES · SOME BUNGIE DATA IS UNAVAILABLE';
+      if(recordsStatus)recordsStatus.textContent=result.coverage.complete?`${result.badges.length} COLLECTION BADGES`:'COLLECTION BADGES · SOME BUNGIE DATA IS UNAVAILABLE';
     }catch(error){
       if(requestId!==titleTriumphRequest)return;
       renderJourneyRecordList(badgesList,[],'Collection badges could not be loaded. Reopen Badges to retry.');
@@ -1231,17 +1231,17 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
     catch(error){console.info('[Forge Journey] profile title nodes unavailable',error);}
     if(requestId!==titleTriumphRequest)return;
     if(profileTitles.length){
-      renderJourneyRecordList(titleCollectionList,profileTitles,`No verified Destiny ${titleCollectionLabel.toLowerCase()} were returned in the profile nodes.`,titleCollectionSelect);
+      renderJourneyRecordList(titleCollectionList,profileTitles,`No Destiny ${titleCollectionLabel.toLowerCase()} were returned in the profile nodes.`,titleCollectionSelect);
       if(recordsStatus){
         const earned=view==='titles'?profileTitles.filter(title=>title.earned).length:null;
-        recordsStatus.textContent=view==='titles'?`${profileTitles.length} VERIFIED TITLES · ${earned} EARNED · SYNCING COMPLETE CATALOGUE`:`${profileTitles.length} VERIFIED ${titleCollectionLabel} · SYNCING COMPLETE CATALOGUE`;
+        recordsStatus.textContent=view==='titles'?`${profileTitles.length} TITLES · ${earned} EARNED · SYNCING COMPLETE CATALOGUE`:`${profileTitles.length} ${titleCollectionLabel} · SYNCING COMPLETE CATALOGUE`;
       }
     }
     let titles=[];
     try{titles=await resolvedTitleCollection(payload,character,view);}
     catch(error){console.info('[Forge Journey] title collection unavailable',error);}
     if(requestId!==titleTriumphRequest)return;
-    renderJourneyRecordList(titleCollectionList,titles,`No Destiny ${titleCollectionLabel.toLowerCase()} definitions were returned from the verified Bungie seal catalogue.`,titleCollectionSelect);
+    renderJourneyRecordList(titleCollectionList,titles,`No Destiny ${titleCollectionLabel.toLowerCase()} definitions were returned from the Bungie seal catalogue.`,titleCollectionSelect);
     if(recordsStatus){
       const earned=view==='titles'?titles.filter(title=>title.earned).length:null;
       recordsStatus.textContent=view==='titles'?`${titles.length} TITLES · ${earned} EARNED`:`${titles.length} ${titleCollectionLabel}`;
@@ -1249,8 +1249,8 @@ async function bindTitleTriumphPanel(payload,view=recordRootView(activeRecordVie
     return;
   }
   if(!Object.keys(nodes).length){
-    renderJourneyRecordList(triumphCategoriesList,[],'Triumph presentation nodes are not present in the verified profile response.');
-    if(recordsStatus)recordsStatus.textContent='VERIFIED RECORD DATA UNAVAILABLE';
+    renderJourneyRecordList(triumphCategoriesList,[],'Triumph presentation nodes are not present in the profile response.');
+    if(recordsStatus)recordsStatus.textContent='RECORD DATA UNAVAILABLE';
     return;
   }
   await manifestReady;
@@ -1289,7 +1289,7 @@ async function bindGuardianRankPanel(payload){
   guardianRankObjectiveRequest+=1;
   let data=guardianRankRows(payload);
   if(!Array.isArray(payload?.journeyRecordOverview?.guardianRank?.ranks)){
-    if(recordsStatus)recordsStatus.textContent='LOADING VERIFIED GUARDIAN RANKS';
+    if(recordsStatus)recordsStatus.textContent='LOADING GUARDIAN RANKS';
     await manifestReady;
     const constants=await guardianManifest.getAsync('DestinyGuardianRankConstantsDefinition',1);
     const rankHashes=(constants?.guardianRankHashes||[]).slice(0,finiteNumber(constants?.rankCount)??11);
@@ -1325,8 +1325,8 @@ async function bindGuardianRankPanel(payload){
       const description=data.currentRank===null?'Current Guardian Rank unavailable':`CURRENT RANK ${data.currentRank}${data.currentRankName?` · ${data.currentRankName}`:''}${next?` · NEXT RANK ${next.rank} · ${next.name}`:' · MAXIMUM RANK'}`;
       renderDetailHero(guardianRankHero,{name:item.name,badge:item.rank,description,completed:item.completed,total:item.total,unit:'RANK PROGRESS'});
       const objectiveRequest=++guardianRankObjectiveRequest;
-      if(Array.isArray(item.objectives)){renderJourneyRecordList(guardianRankObjectives,item.objectives,'No verified objectives were returned for this Guardian Rank.');return;}
-      renderJourneyRecordList(guardianRankObjectives,[],'Loading verified Guardian Rank objectives.');
+      if(Array.isArray(item.objectives)){renderJourneyRecordList(guardianRankObjectives,item.objectives,'No objectives were returned for this Guardian Rank.');return;}
+      renderJourneyRecordList(guardianRankObjectives,[],'Loading Guardian Rank objectives.');
       void (async()=>{
         const sections=await presentationRecordCategories(item.nodeEntries,item.nodes,item.characterId,'guardian-rank');
         const recordEntries=sections.flatMap(section=>section.recordEntries);
@@ -1337,7 +1337,7 @@ async function bindGuardianRankPanel(payload){
           const objectives=section.recordEntries.map(entry=>titleRequirementRow(payload,item.characterId,entry,recordDefinitions[String(entry.recordHash)],objectiveDefinitions)).filter(row=>row?.name);
           return [category,...objectives];
         });
-        if(objectiveRequest===guardianRankObjectiveRequest)renderJourneyRecordList(guardianRankObjectives,item.objectives,'No verified objectives were returned for this Guardian Rank.');
+        if(objectiveRequest===guardianRankObjectiveRequest)renderJourneyRecordList(guardianRankObjectives,item.objectives,'No objectives were returned for this Guardian Rank.');
       })();
     });
     guardianRankStrip?.appendChild(button);
@@ -1547,7 +1547,7 @@ function showRecordsDetail(section){
   const renderCategory=(category,emptyText)=>{
     const requestId=++recordsCategoryRequest;
     if(Array.isArray(category.items)){renderJourneyRecordList(recordsDetailList,category.items,emptyText);return;}
-    renderJourneyRecordList(recordsDetailList,[],'Loading verified Bungie records.');
+    renderJourneyRecordList(recordsDetailList,[],'Loading Bungie records.');
     void (async()=>{
       const recordDefinitions=await guardianManifest.getMany('DestinyRecordDefinition',category.recordEntries.map(entry=>entry.recordHash));
       const objectiveDefinitions=await guardianManifest.getMany('DestinyObjectiveDefinition',Object.values(recordDefinitions).flatMap(definition=>definition?.objectiveHashes||[]));
@@ -1567,16 +1567,16 @@ function showRecordsDetail(section){
   if(patternsCatalysts){
     renderRecordTypes(recordsTypes,section.types||[],type=>{
       if(recordsDetailHeading)recordsDetailHeading.textContent=type.name;
-      renderSubmenu(recordsSubcategories,type.categories||[],category=>renderCategory(category,type.key==='catalysts'?'No verified catalyst records were returned for this weapon group.':'No patterns for this weapon type were returned in the Bungie catalogue.'));
+      renderSubmenu(recordsSubcategories,type.categories||[],category=>renderCategory(category,type.key==='catalysts'?'No catalyst records were returned for this weapon group.':'No patterns for this weapon type were returned in the Bungie catalogue.'));
     });
     return;
   }
   recordsTypes?.replaceChildren();
   if(recordsDetailHeading)recordsDetailHeading.textContent='Record Categories';
   renderSubmenu(recordsSubcategories,section.categories||[],category=>{
-    renderCategory(category,section.key==='stat-trackers'?'Verified Stat Trackers for this category are not yet connected.':'No verified records were returned for this category.');
+    renderCategory(category,section.key==='stat-trackers'?'Stat Trackers for this category are not yet connected.':'No records were returned for this category.');
   });
-  if(!(section.categories||[]).length)renderJourneyRecordList(recordsDetailList,[],'Verified Record categories are not yet connected.');
+  if(!(section.categories||[]).length)renderJourneyRecordList(recordsDetailList,[],'Record categories are not yet connected.');
 }
 
 async function bindRecordsPanel(payload){
@@ -1584,7 +1584,7 @@ async function bindRecordsPanel(payload){
   let sections=recordsFrameworkSections(payload);
   const nodes=payload?.profile?.profilePresentationNodes?.data?.nodes;
   if(!Array.isArray(payload?.journeyRecordOverview?.records?.sections)&&nodes&&typeof nodes==='object'){
-    if(recordsStatus)recordsStatus.textContent='LOADING VERIFIED BUNGIE RECORDS';
+    if(recordsStatus)recordsStatus.textContent='LOADING BUNGIE RECORDS';
     await manifestReady;
     const tree=await recordPresentationTree(payload);
     const characters=payload?.profile?.characters?.data||{};
@@ -1622,7 +1622,7 @@ async function bindRecordsPanel(payload){
   if(statTrackerSection&&statTrackers)Object.assign(statTrackerSection,statTrackers);
   if(panelRequest!==recordsPanelRequest||activeRecordView!=='records')return;
   renderJourneyRecordList(recordsSections,sections,'Record sections are unavailable.',showRecordsDetail);
-  if(recordsStatus)recordsStatus.textContent=`${sections.length} RECORD SECTIONS${sections.some(section=>section.key==='lore')?'':' · LORE AWAITING VERIFIED DATA'}`;
+  if(recordsStatus)recordsStatus.textContent=`${sections.length} RECORD SECTIONS${sections.some(section=>section.key==='lore')?'':' · LORE AWAITING DATA'}`;
 }
 
 function setRecordSelectorState(view){
@@ -1645,7 +1645,7 @@ function showGuardianRecordPanel(view){
   activateRecordView(view);
   if(view==='titles'||view==='badges'||view==='triumphs'){
     if(verifiedProfile)void bindTitleTriumphPanel(verifiedProfile,view).catch(()=>{if(recordRootView(activeRecordView)===view){renderJourneyRecordList(view==='triumphs'?triumphCategoriesList:view==='badges'?badgesList:titlesList,[],'Records could not be loaded. Reopen this section to retry.');if(recordsStatus)recordsStatus.textContent='RECORDS UNAVAILABLE';}});
-    else if(recordsStatus)recordsStatus.textContent='AWAITING VERIFIED BUNGIE RECORDS';
+    else if(recordsStatus)recordsStatus.textContent='AWAITING BUNGIE RECORDS';
   }else if(view==='guardian-rank')void bindGuardianRankPanel(verifiedProfile||{});
   else void bindRecordsPanel(verifiedProfile||{}).catch(()=>{if(recordRootView(activeRecordView)==='records'){renderJourneyRecordList(recordsSections,[],'Records could not be loaded. Reopen Records to retry.');if(recordsStatus)recordsStatus.textContent='RECORDS UNAVAILABLE';}});
   recordsBack?.focus();
@@ -1714,9 +1714,9 @@ function setMetric(element,value,label){
 
 async function bindHistoricalStats(session,payload=verifiedProfile){
   resetMetric(metricActivities,'Awaiting live history');
-  resetMetric(metricCompletion,'Awaiting completion evidence');
-  resetMetric(metricPve,'Awaiting PVE evidence');
-  resetMetric(metricPvp,'Awaiting PVP evidence');
+  resetMetric(metricCompletion,'Awaiting completion data');
+  resetMetric(metricPve,'Awaiting PVE data');
+  resetMetric(metricPvp,'Awaiting PVP data');
   if(session?.authenticated!==true)return;
   try{
     const historical=payload?.preparedAccountData?.historicalStats;
@@ -1731,10 +1731,10 @@ async function bindHistoricalStats(session,payload=verifiedProfile){
     const pveCleared=historicalValue(pve,'activitiesCleared');
     const pvpCleared=historicalValue(pvp,'activitiesCleared');
     const kd=historicalValue(pvp,'killsDeathsRatio');
-    if(pveEntered!==null&&pvpEntered!==null)setMetric(metricActivities,numberFormatter.format(pveEntered+pvpEntered),'Verified career total');
-    if(pveEntered!==null&&pveEntered>0&&pveCleared!==null)setMetric(metricCompletion,`${Math.round(pveCleared/pveEntered*100)}%`,'Verified PvE completion');
-    if(pveCleared!==null)setMetric(metricPve,numberFormatter.format(pveCleared),'Verified career clears');
-    if(kd!==null)setMetric(metricPvp,kd.toFixed(2),'Verified career K/D');
+    if(pveEntered!==null&&pvpEntered!==null)setMetric(metricActivities,numberFormatter.format(pveEntered+pvpEntered),'Career total');
+    if(pveEntered!==null&&pveEntered>0&&pveCleared!==null)setMetric(metricCompletion,`${Math.round(pveCleared/pveEntered*100)}%`,'PvE completion');
+    if(pveCleared!==null)setMetric(metricPve,numberFormatter.format(pveCleared),'Career clears');
+    if(kd!==null)setMetric(metricPvp,kd.toFixed(2),'Career K/D');
   }catch{}
 }
 
@@ -1750,7 +1750,7 @@ function trendPath(values,maxValue){
 function resetCurrentForm(){
   if(!trendChart||!trendEmpty)return;
   trendChart.querySelectorAll('.mission-chart-line').forEach(path=>path.setAttribute('d',''));
-  trendChart.setAttribute('aria-label','No verified performance trend available');
+  trendChart.setAttribute('aria-label','No performance trend available');
   trendEmpty.hidden=false;
   const dates=trendChart.closest('.mission-current-form')?.querySelectorAll('.mission-chart-dates span');
   if(dates?.length===2){dates[0].textContent='—';dates[1].textContent='—';}
@@ -1767,7 +1767,7 @@ function renderCurrentForm(view){
   if(!pvePath&&!pvpPath)return;
   trendChart.querySelector('[data-journey-trend="pve"]')?.setAttribute('d',pvePath);
   trendChart.querySelector('[data-journey-trend="pvp"]')?.setAttribute('d',pvpPath);
-  trendChart.setAttribute('aria-label','Verified 30-day PVE success and PVP K/D trends');
+  trendChart.setAttribute('aria-label','30-day PVE success and PVP K/D trends');
   trendEmpty.hidden=true;
   const dated=[...pveSeries,...pvpSeries].filter(point=>point?.date).sort((left,right)=>left.date.localeCompare(right.date));
   const dates=trendChart.closest('.mission-current-form')?.querySelectorAll('.mission-chart-dates span');
@@ -1821,7 +1821,7 @@ function renderEvidenceRows(mount,rows=[]){
 }
 
 function renderMissionHighlights(activities=[],view=null){
-  setEvidenceEmpty(missionHighlightsCard,'No verified activity history is available for Mission Report highlights.');
+  setEvidenceEmpty(missionHighlightsCard,'No activity history is available for Mission Report highlights.');
   if(!activities.length||!view)return;
   const rows=[];
   const leader=view.mastery?.[0];
@@ -1868,7 +1868,7 @@ function readJourneyBuildState(session,characterId){
 }
 
 function renderBuildSummary(session=journeySession){
-  setEvidenceEmpty(buildSummaryCard,'No verified Build Forge state is available for this Guardian.');
+  setEvidenceEmpty(buildSummaryCard,'No Build Forge state is available for this Guardian.');
   if(session?.authenticated!==true||!selectedCharacterId)return;
   const result=readJourneyBuildState(session,selectedCharacterId);
   if(!result)return;
@@ -1883,7 +1883,7 @@ function renderBuildSummary(session=journeySession){
     {label:'SOURCE',value:loadout},
     {label:'EQUIPMENT SNAPSHOT',value:`${weapons} WEAPONS · ${armour} ARMOUR`}
   ];
-  if(build.paradoxAnalysis)rows.push({label:'PARADOX EVIDENCE',value:'LIVE ANALYSIS LINKED'});
+  if(build.paradoxAnalysis)rows.push({label:'PARADOX DATA',value:'LIVE ANALYSIS LINKED'});
   renderEvidenceRows(buildSummaryCard,rows);
 }
 
@@ -1927,7 +1927,7 @@ function captureEvidenceRows(session=journeySession){
 }
 
 function renderMostUsed(activities=[],session=journeySession){
-  setEvidenceEmpty(mostUsedCard,'No verified Build Test or Mission Report loadout evidence has been recorded.');
+  setEvidenceEmpty(mostUsedCard,'No build activity recorded yet.');
   const activityRows=activities.map(activity=>{
     const identity=buildSnapshotIdentity(activity?.buildSnapshot||{});
     return identity?{...identity,source:'MISSION REPORT'}:null;
@@ -1945,8 +1945,8 @@ function renderMostUsed(activities=[],session=journeySession){
   const percent=Math.round(winner.count/evidence.length*100);
   renderEvidenceRows(mostUsedCard,[
     {label:'MOST OBSERVED BUILD',value:winner.label},
-    {label:'VERIFIED USAGE',value:`${winner.count} OF ${evidence.length} SAMPLES · ${percent}%`},
-    {label:'EVIDENCE SOURCE',value:[...winner.sources].join(' + ')}
+    {label:'USAGE',value:`${winner.count} OF ${evidence.length} SAMPLES · ${percent}%`},
+    {label:'SOURCE',value:[...winner.sources].join(' + ')}
   ]);
 }
 
@@ -2026,7 +2026,7 @@ async function bindTitleAndProgression(payload){
   const requestId=++profileIdentityRequest;
   renderEquippedTitleSummary();
   renderNextTitleSummary();
-  if(triumphStatsCard)triumphStatsCard.innerHTML='<span class="apx-empty-state">No verified Triumph or progression values are available.</span>';
+  if(triumphStatsCard)triumphStatsCard.innerHTML='<span class="apx-empty-state">No Triumph or progression values are available.</span>';
 
   const characters=payload?.profile?.characters?.data||{};
   const character=characters[selectedCharacterId]
@@ -2068,7 +2068,7 @@ async function bindTitleAndProgression(payload){
     if(name)equipped={completionRecordHash:titleHash,name,detailName:name,icon:bungiePresentationIcon(definition),description:String(definition?.displayProperties?.description||'').trim(),completed:null,total:null,unit:'TITLE REQUIREMENTS',earned:state!==null&&(state&64)===64,complete:state!==null&&(state&64)===64,gilded:state!==null&&(state&128)===128,requirements:null,requirementEntries:[],characterId};
   }
   if(equipped)renderEquippedTitleSummary(equipped);
-  else renderEquippedTitleSummary(null,character&&titleHash===null?'No title is equipped on the selected Guardian.':'Equipped title awaiting verified Bungie data.');
+  else renderEquippedTitleSummary(null,character&&titleHash===null?'No title is equipped on the selected Guardian.':'Equipped title awaiting Bungie data.');
 
   const next=titles.filter(title=>!title.earned&&title.completed!==null&&title.total!==null&&title.total>0&&title.completed<title.total)
     .sort((left,right)=>(right.completed/right.total)-(left.completed/left.total)||(left.total-left.completed)-(right.total-right.completed))[0];
@@ -2090,8 +2090,8 @@ function renderJourneyContextStatus(){
   const guardian=selectedClassName||'GUARDIAN';
   const evidence=currentActivityEvidence?.characterId===selectedCharacterId?currentActivityEvidence:null;
   const source=evidence?.status==='ok'
-    ?`${numberFormatter.format(evidence.activities.length)} VERIFIED ACTIVITY RECORDS`
-    :evidence?.status==='unavailable'?'ACTIVITY EVIDENCE UNAVAILABLE':'AWAITING VERIFIED ACTIVITY DATA';
+    ?`${numberFormatter.format(evidence.activities.length)} ACTIVITY RECORDS`
+    :evidence?.status==='unavailable'?'ACTIVITY DATA UNAVAILABLE':'AWAITING ACTIVITY DATA';
   feedStatus.textContent=`${guardian} · ${activeView.toUpperCase()} · ${source}`;
 }
 
@@ -2113,7 +2113,7 @@ function renderJourneyContext(){
     item.hidden=activeView==='pve'&&lens==='pvp'||activeView==='pvp'&&lens==='pve';
   });
   const lensName=activeView==='pve'?'PVE ':activeView==='pvp'?'PVP ':'';
-  trendEmpty.textContent=`${lensName}performance trends require live dated activity evidence.`;
+  trendEmpty.textContent=`${lensName}play activities to see performance trends.`;
   if(verifiedProfile)bindProfileCards(verifiedProfile);
 }
 
