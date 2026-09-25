@@ -1,0 +1,23 @@
+# Site-wide v2 design work: tokens, tabs, panels, embers, Journey polish.
+astrix-app/index.html
+astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html
+astrix-app/pages/journey/index.html
+astrix-app/pages/journey/journey-2560-visual.css
+astrix-app/pages/tool-intro/index.html
+astrix-app/shared/astrix-design-v2.css
+astrix-app/shared/astrix-destination-ribbon.css
+astrix-app/shared/astrix-destination-ribbon.js
+astrix-app/shared/astrix-embers.js
+astrix-app/shared/astrix-portal-loader.css
+astrix-app/shared/astrix-portal-loader.js
+astrix-app/styles.css
+css/style.css
+index.html
+pages/clips.html
+pages/games.html
+pages/join.html
+pages/news.html
+pages/rebrand.html
+pages/reviews.html
+scripts/build_clips.py
+tools/index.html
