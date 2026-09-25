@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
   'astrix-app/tools/test-capped-gear-layout.mjs',
   'astrix-app/tools/test-champion-overlays.mjs',
   // Prompt 7b: gear sizing in the tracked legacy mirror only.

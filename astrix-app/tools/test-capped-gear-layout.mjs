@@ -84,6 +84,49 @@ try{
   const primary=document.querySelector('.character-inventory-workspace [data-equipment-group="primary"]'),helmet=document.querySelector('.character-inventory-workspace [data-equipment-group="helmet"]');
   return {page:name,viewport:innerWidth,copyOverlaps,equipmentGap,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
  },name);}
+ // Prompt 15: panel stretch and the in-flow action bar must not alter gear geometry.
+ async function checkCharacterActions(width){
+  const state=await page.evaluate(()=>{
+   const box=node=>{const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+   const bar=document.querySelector('body>.actionbar'),improve=document.querySelector('.improve-cta'),bounds=box(bar);
+   const buttons=[...bar.querySelectorAll('.ab-btn,.improve-cta')],right=[...bar.lastElementChild.children];
+   const overlaps=[...document.querySelectorAll('.workspace *')].filter(node=>{
+    const r=box(node);return r.width>0&&r.height>0&&r.left<bounds.right&&r.right>bounds.left&&r.top<bounds.bottom-.5&&r.bottom>bounds.top+.5;
+   }).map(node=>node.id||node.className);
+   const primary=document.createElement('span');primary.style.backgroundColor='var(--apx-colour-action)';bar.append(primary);
+   const primaryColour=getComputedStyle(primary).backgroundColor;primary.remove();
+   return {
+    inventory:box(document.querySelector('.gear-combined')),rail:box(document.querySelector('.guardian-left-rail')),
+    bounds,overlaps,inside:bar.contains(improve),count:document.querySelectorAll('.improve-cta').length,
+    order:right.map(node=>node.textContent.trim()),href:improve.getAttribute('href'),label:improve.getAttribute('aria-label'),
+    padding:parseFloat(getComputedStyle(document.body).paddingBottom),primaryColour,improveColour:getComputedStyle(improve).backgroundColor,
+    buttons:buttons.map(node=>({...box(node),font:getComputedStyle(node).fontFamily,fontSize:getComputedStyle(node).fontSize,whiteSpace:getComputedStyle(node).whiteSpace,scrollWidth:node.scrollWidth,clientWidth:node.clientWidth})),
+    rightBounds:box(bar.lastElementChild),fontSize:getComputedStyle(improve).fontSize
+   };
+  });
+  if(width>=1920)assert.ok(Math.abs(state.inventory.bottom-state.rail.bottom)<=1,`Character ${width}: inventory bottom equals left rail bottom`);
+  assert.equal(state.inside,true,`Character ${width}: Improve is inside action bar`);
+  assert.equal(state.count,1,'Exactly one Improve link; no floating copy');
+  assert.deepEqual(state.order,['✦ IMPROVE MY GUARDIAN','🖫 SAVE LOADOUT','⤴ SHARE','•••'],'Right action order preserves existing controls');
+  assert.equal(state.href,'./paradox-build-space/','Native Improve destination unchanged');
+  assert.equal(state.label,'Improve My Guardian','Icon-only action remains accessible');
+  assert.equal(state.improveColour,state.primaryColour,'Improve retains crimson primary fill');
+  assert.ok(Math.abs(state.padding-state.bounds.height)<=1,`Character ${width}: bottom padding equals bar height`);
+  assert.deepEqual(state.overlaps,[],`Character ${width}: no workspace content overlaps the bar`);
+  assert.ok(state.bounds.left>=-1&&state.bounds.right<=width+1,`Character ${width}: bar fits viewport`);
+  for(const button of state.buttons){
+   assert.ok(button.left>=state.bounds.left&&button.right<=state.bounds.right&&button.top>=state.bounds.top&&button.bottom<=state.bounds.bottom,`Character ${width}: every action fits inside bar`);
+   assert.ok(Math.abs(button.height-state.buttons[0].height)<=1,'All bar controls have equal height');
+   assert.equal(button.font,state.buttons[0].font,'All bar controls use the same typeface');
+   if(width>=480)assert.equal(button.fontSize,state.buttons[0].fontSize,'All text actions use the same type size');
+   assert.equal(button.whiteSpace,'nowrap','Action labels never wrap');
+   assert.ok(button.scrollWidth<=button.clientWidth+1,'Action labels never overflow');
+  }
+  if(width<480)assert.equal(state.fontSize,'0px','Phone Improve uses accessible icon-only label');
+  const rightButtons=state.buttons.slice(-4);
+  assert.ok(rightButtons.every(button=>Math.abs(button.top-rightButtons[0].top)<=1),'Right actions remain in one row');
+  return state;
+ }
  for(const [width,height] of [[1363,936],[1920,1080],[2560,1440]]){
   await load('ForgeLoader',width,height,true);const before=await measure('ForgeLoader');
   for(const name of Object.keys(pages)){
@@ -104,6 +147,7 @@ try{
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);
    assert.ok(row.scrollWidth<=width&&row.bodyScroll<=width,`${name} ${width}: no horizontal page scroll`);
    if(name==='Character'){
+    row.actions=await checkCharacterActions(width);
     assert.equal(row.strip.length,20);for(const slot of row.strip)assert.ok(Math.abs(slot.width-row.gear[0].width)<.1,'Strip equals inventory art');
     if(width!==1920)assert.equal(row.columns,width===2560?2:1,'Character inventory columns');
    }
@@ -130,6 +174,9 @@ try{
     await page.screenshot({path:resolve(output,`BuildForge-${width}-catalogue.png`)});captures.push({name:'Build Forge owned catalogue',width,file:`BuildForge-${width}-catalogue.png`});
    }
   }
+ }
+ for(const width of [320,375,479,480,767,980,1199]){
+  await load('Character',width,900);await checkCharacterActions(width);
  }
  await writeFile(resolve(output,'measurements.json'),JSON.stringify(results,null,2));
  const figures=[];for(const capture of captures){const png=await readFile(resolve(output,capture.file));figures.push(`<figure><figcaption>${capture.name} ${capture.width}px, synthetic fixtures</figcaption><img src="data:image/png;base64,${png.toString('base64')}" alt="${capture.name} fixture layout"></figure>`);}
