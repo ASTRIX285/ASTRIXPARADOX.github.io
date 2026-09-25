@@ -15,7 +15,8 @@ import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./pa
 import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
 
 import { reportsRead } from './reports-read';
-import { reportsCatalogue } from './reports-catalogue';
+import { reportsCatalogueResponse } from './reports-catalogue';
+import { fetchBungieDefinitions } from './bungie-definition-fetch';
 
 export { AuthRecord };
 
@@ -327,7 +328,7 @@ async function manifestDefinitionTable(env: Env, manifest: DestinyManifestRespon
   const defaultCache = (caches as unknown as { default: Cache }).default;
   let response = await defaultCache.match(cacheKey);
   if (!response) {
-    const upstream = await fetch(bungieUrl, { headers: { "User-Agent": "ASTRIX-PARADOX/alpha (+https://astrixparadox.com)" } });
+    const upstream = await fetchBungieDefinitions(bungieUrl);
     if (!upstream.ok) throw new Error(`bungie_${type}_failed:${upstream.status}`);
     const headers = new Headers(upstream.headers);
     headers.set("Cache-Control", "public, max-age=3600");
@@ -2306,11 +2307,7 @@ export default {
         return await loadoutRoute(request, env);
       }
       if (request.method === "GET" && url.pathname === "/bungie/reports/catalogue") {
-        try {
-          return withCors(request, env, await reportsCatalogue(request, await destinyManifest(env), (caches as CacheStorage & {default: Cache}).default));
-        } catch {
-          return withCors(request, env, Response.json({error: 'reports_catalogue_unavailable'}, {status: 502, headers: {'Cache-Control': 'no-store'}}));
-        }
+        return withCors(request, env, await reportsCatalogueResponse(request, () => destinyManifest(env), (caches as CacheStorage & {default: Cache}).default));
       }
       if (request.method === "GET" && url.pathname === "/bungie/reports") {
         const auth = await authenticatedSession(request, env);
