@@ -1,5 +1,5 @@
-import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1';
+import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {loadPreparedPagePayload} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-1';
 
 const PAGE_PATH='/astrix-app/pages/forge-loader/';
 const FORGE_LOADER_PRELOAD_RECEIPT_KEY='astrix:forge-loader-preload-receipt:v1';

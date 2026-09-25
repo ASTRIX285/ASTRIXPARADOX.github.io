@@ -1,5 +1,5 @@
 import {armourSetHash,compareArmourScores} from '../vault/vault-armour-matcher.mjs';
-import {explicitTokens} from '../guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs';
+import {explicitTokens} from '../guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs?plain=20260925-1';
 
 const finite=value=>Number.isFinite(Number(value))?Number(value):0;
 const CLASS_TYPES=Object.freeze({titan:0,hunter:1,warlock:2});
