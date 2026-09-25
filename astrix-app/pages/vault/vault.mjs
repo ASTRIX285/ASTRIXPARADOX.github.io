@@ -1,3 +1,4 @@
+import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
@@ -36,6 +37,7 @@ let vaultActionBusy=false;
 const vaultActionQueue=[];
 const queuedVaultActionKeys=new Set();
 const selectedSlots=new Map();
+const transferFeedback=createVaultTransferFeedback({board:byId('vaultTransferWorkspace'),itemKey,characterLabel,canDrop:validFeedbackDrop});
 
 function membershipBinding(){
   const membership=session?.activeDestinyMembership||{};
@@ -147,6 +149,7 @@ function renderTransferWorkspace(){
   if(!host)return;
   host.innerHTML=`<div class="vault-character-columns">${workspaceCharacters().map(characterColumnMarkup).join('')}</div>${vaultOnlyMarkup()}`;
   bindVaultWorkspaceHovers(host);
+  transferFeedback.reconcile();
 }
 
 function carriedReplacement(item){
@@ -154,10 +157,12 @@ function carriedReplacement(item){
 }
 
 function stageTransfer(item,destination){
+  if(transferFeedback.isMoving(itemKey(item)))return;
   try{
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
     const queueKey=`transfer:${item.itemInstanceId}:${destination.kind}:${destination.characterId||''}`;
     if(queuedVaultActionKeys.has(queueKey)){setStatus(`${item.name} is already queued for that exact destination.`);return;}
+    transferFeedback.begin(queueKey,item,destination);
     queuedVaultActionKeys.add(queueKey);vaultActionQueue.push({kind:'transfer',intent,queueKey});
     setStatus(`Moving ${item.name} from ${item.source.label||item.source.kind} to ${target}.${replacementCopy} Waiting for Bungie inventory feedback.`);
     void performPendingVaultAction();
@@ -201,19 +206,21 @@ async function performPendingVaultAction(){
   vaultActionBusy=true;
   if(confirm)confirm.disabled=true;
   if(cancel)cancel.disabled=true;
-  if(progress)progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
+  if(progress)progress.textContent='Running fresh Bungie preflight. The moving item is awaiting confirmation.';
   let result=null;
   try{
-    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;setStatus(label);};
+    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,label);setStatus(label);};
     const onAccepted=async({liveInventory})=>{await refreshAfterLiveAction(liveInventory);setStatus('Transfer accepted by Bungie. The exact item has moved while final inventory verification continues.','good');};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
     if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
+    transferFeedback.finish(action.queueKey,{success:result.status==='applied'&&result.readback?.verified,error:actionFailureMessage(result)});
     if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Live transfer confirmed by Bungie and fresh inventory readback.':'Postmaster collection confirmed by Bungie and fresh inventory readback.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
+    transferFeedback.finish(action.queueKey,{success:false,error:error?.payload?.Message||error?.message});
     setStatus(error?.message||'The Bungie action failed before confirmation.','error');
   }finally{
     vaultActionBusy=false;
@@ -463,6 +470,7 @@ function clearIncompatibleSelection(){
 }
 
 function dropDestination(target){
+  target=target?.closest?.('[data-drop-kind]');
   if(!target)return null;
   return target.dataset.dropKind==='vault'?{kind:'vault',characterId:null}:{kind:'character',characterId:text(target.dataset.dropCharacterId)};
 }
@@ -473,27 +481,34 @@ function validDrop(item,destination){
   return destination.characterId&&!(item.source?.kind!=='vault'&&text(item.source?.characterId)===destination.characterId);
 }
 
-function clearDropTargets(){
-  document.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));
+function validFeedbackDrop(item,destination){
+  if(!validDrop(item,destination)||liveActionCapabilities(session).transferItems!==true)return false;
+  if(item.source?.kind==='equipped'&&liveActionCapabilities(session).equipItems!==true)return false;
+  if(destination.kind==='character'){
+    const targetClass=characterClass(characters().find(row=>text(row.characterId)===destination.characterId));
+    if(item.characterClass&&item.characterClass!=='any'&&item.characterClass!==targetClass)return false;
+  }
+  try{stageVaultTransferIntent({item,destination,session,replacementItem:item.source?.kind==='equipped'?carriedReplacement(item):null});return true;}catch{return false;}
 }
+function clearDropTargets(){transferFeedback.clearDrag();}
 
 function installTransferEvents(){
   const board=byId('vaultTransferWorkspace');
   let pointerDrag=null;
-  const pointerTarget=(x,y)=>document.elementFromPoint(x,y)?.closest?.('[data-drop-kind]')||null;
+  const pointerTarget=(x,y)=>document.elementFromPoint(x,y)?.closest?.('.vault-transfer-group')||null;
   const updatePointerTarget=(x,y)=>{
     const target=pointerTarget(x,y),item=workspaceItem(pointerDrag?.key),destination=dropDestination(target);
-    clearDropTargets();
-    if(validDrop(item,destination))target.classList.add('is-drop-target');
+    transferFeedback.hover(target);
     return {target,item,destination};
   };
   board?.addEventListener('dragstart',event=>{
     const tile=event.target.closest?.('[data-drag-item]'),item=workspaceItem(tile?.dataset?.dragItem);
-    if(!tile||!item){event.preventDefault();return;}
+    if(!tile||!item||transferFeedback.isMoving(itemKey(item))){event.preventDefault();return;}
     draggedItemKey=itemKey(item);
     tile.classList.add('is-dragging');
     event.dataTransfer.effectAllowed='move';
     event.dataTransfer.setData('text/plain',draggedItemKey);
+    transferFeedback.startDrag(item,tile,event);
   });
   board?.addEventListener('dragend',event=>{
     event.target.closest?.('[data-drag-item]')?.classList.remove('is-dragging');
@@ -501,36 +516,38 @@ function installTransferEvents(){
     clearDropTargets();
   });
   board?.addEventListener('dragover',event=>{
-    const target=event.target.closest?.('[data-drop-kind]'),item=workspaceItem(draggedItemKey),destination=dropDestination(target);
-    clearDropTargets();
-    if(!validDrop(item,destination))return;
+    const target=event.target.closest?.('.vault-transfer-group'),item=workspaceItem(draggedItemKey),destination=dropDestination(target);
+    transferFeedback.hover(target);
+    if(!validDrop(item,destination)||!transferFeedback.validTarget(item,target))return;
     event.preventDefault();
     event.dataTransfer.dropEffect='move';
     target.classList.add('is-drop-target');
   });
   board?.addEventListener('dragleave',event=>{
-    const target=event.target.closest?.('[data-drop-kind]');
+    const target=event.target.closest?.('.vault-transfer-group');
     if(target&&!target.contains(event.relatedTarget))target.classList.remove('is-drop-target');
   });
   board?.addEventListener('drop',event=>{
-    const target=event.target.closest?.('[data-drop-kind]'),key=draggedItemKey||event.dataTransfer.getData('text/plain'),item=workspaceItem(key),destination=dropDestination(target);
+    const target=event.target.closest?.('.vault-transfer-group'),key=draggedItemKey||event.dataTransfer.getData('text/plain'),item=workspaceItem(key),destination=dropDestination(target);
     clearDropTargets();
     draggedItemKey='';
-    if(!validDrop(item,destination))return;
+    if(!validDrop(item,destination)||!transferFeedback.validTarget(item,target))return;
     event.preventDefault();
     stageTransfer(item,destination);
   });
   board?.addEventListener('pointerdown',event=>{
     if(event.pointerType==='mouse'||event.button!==0||event.target.closest?.('button'))return;
     const tile=event.target.closest?.('[data-drag-item]'),item=workspaceItem(tile?.dataset?.dragItem);
-    if(!tile||!item)return;
+    if(!tile||!item||transferFeedback.isMoving(itemKey(item)))return;
     pointerDrag={pointerId:event.pointerId,key:itemKey(item),tile,startX:event.clientX,startY:event.clientY,active:false};
     tile.setPointerCapture?.(event.pointerId);
   });
   board?.addEventListener('pointermove',event=>{
     if(!pointerDrag||pointerDrag.pointerId!==event.pointerId)return;
     if(!pointerDrag.active&&Math.hypot(event.clientX-pointerDrag.startX,event.clientY-pointerDrag.startY)<8)return;
+    if(!pointerDrag.active)transferFeedback.startDrag(workspaceItem(pointerDrag.key),pointerDrag.tile,event);
     pointerDrag.active=true;
+    transferFeedback.moveGhost(event.clientX,event.clientY);
     event.preventDefault();
     pointerDrag.tile.classList.add('is-dragging');
     updatePointerTarget(event.clientX,event.clientY);
@@ -542,7 +559,7 @@ function installTransferEvents(){
     drag.tile.releasePointerCapture?.(event.pointerId);
     pointerDrag=null;
     clearDropTargets();
-    if(result&&validDrop(result.item,result.destination)){event.preventDefault();stageTransfer(result.item,result.destination);}
+    if(result&&validDrop(result.item,result.destination)&&transferFeedback.validTarget(result.item,result.target)){event.preventDefault();stageTransfer(result.item,result.destination);}
   };
   board?.addEventListener('pointerup',finishPointerDrag);
   board?.addEventListener('pointercancel',event=>{
