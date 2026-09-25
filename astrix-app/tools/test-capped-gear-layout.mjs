@@ -74,6 +74,7 @@ try{
   for(const tile of document.querySelectorAll(selector)){
    const r=box(tile);for(let parent=tile.parentElement;parent&&parent!==document.body;parent=parent.parentElement){
     if(!parent.matches('.vault-transfer-items,.vault-transfer-group,.vault-character-column,.vault-character-inventory,.character-inventory-workspace,.weap,.gear-slot,.design-section,.forge-exotic-grid,.forge-panel'))continue;
+    if(getComputedStyle(parent).display==='contents')continue;
     const p=box(parent);if(r.x<p.x-1||r.right>p.right+1)violations.push(`${tile.className} exceeds ${parent.className}`);
    }
   }
