@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  // Clips footer: validate before the scheduled generator commits its output.
+  '.github/workflows/update-clips.yml',
   // Europa sourcing request: page-owned marker audit and its validator only.
   'astrix-app/pages/journey/europa-marker-data.mjs',
   'astrix-app/tools/test-europa-marker-sources.mjs',
