@@ -285,13 +285,15 @@ html,body{
 /* Prompt 11c: explicit equal-width cards preserve inline-size containment. */
 .design-canvas .weapon-design-section{container-name:build-weapon-section}
 .design-canvas .weapon-design-section .gear-weapons .weap-grid{
-  --build-weapon-card:calc(var(--gear-weapon-art) + 26px);
+  --build-weapon-card:max-content;
   grid-template-columns:repeat(3,var(--build-weapon-card))!important;
   grid-template-rows:repeat(5,auto);
   width:max-content!important;max-width:none!important;
   margin-inline:auto;column-gap:12px!important;row-gap:8px!important;
 }
 .design-canvas .weapon-design-section .gear-weapons .weap{
+  /* Prompt 25: art plus two 8px pads and two 1px borders before sizing. */
+  min-width:calc(var(--gear-weapon-art) + 18px)!important;
   width:auto!important;max-width:none!important;min-height:0!important;
   padding:8px!important;
   grid-row:span 5;grid-template-columns:minmax(0,1fr)!important;
@@ -301,10 +303,13 @@ html,body{
 }
 .design-canvas .weapon-design-section .gear-weapons .weap .art{width:var(--gear-weapon-art)!important;height:var(--apx-icon-gear-art-height)!important;aspect-ratio:100/122!important;justify-self:center}
 .design-canvas .weapon-design-section .gear-weapons .weap .cap{min-height:0!important;width:100%;text-align:center;border-bottom:1px solid rgba(147,35,43,.42)!important}
-.design-canvas .weapon-design-section .gear-weapons .weapon-perk-strip{justify-self:center;align-self:start}
+.design-canvas .weapon-design-section .gear-weapons .weapon-perk-strip{justify-self:center;align-self:start;width:max-content;max-width:none;overflow:visible}
 .design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix{margin-inline:auto}
-.design-canvas .weapon-design-section .gear-weapons .weapon-support-icons{justify-content:center;align-items:center;align-self:start}
-.design-canvas .weapon-design-section .gear-weapons .weapon-support-icon.is-mod{width:var(--build-armour-mod)!important;height:var(--build-armour-mod)!important;min-width:var(--build-armour-mod);flex-shrink:0}
+/* Prompt 23: the matrix retains one fixed-size column per Bungie socket. */
+.design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix.is-compact{width:max-content;max-width:none;overflow:visible}
+.design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix.is-compact .weapon-perk-row{grid-template-columns:repeat(var(--weapon-perk-columns),var(--gear-weapon-socket))}
+.design-canvas .weapon-design-section .gear-weapons .weapon-support-icons{justify-content:center;align-items:center;align-self:start;flex-wrap:nowrap;width:max-content;max-width:none}
+.design-canvas .weapon-design-section .gear-weapons .weapon-support-icon{width:var(--build-armour-mod)!important;height:var(--build-armour-mod)!important;min-width:var(--build-armour-mod);flex-shrink:0}
 .design-canvas .weapon-design-section .gear-weapons .weapon-apply-footer{grid-area:apply;justify-self:center;min-width:100%;width:0;overflow-wrap:anywhere}
 #weaponRecommendationState[hidden]{display:none!important}
 .design-canvas .weapon-design-section .gear-weapons .weapon-perk-icon,
