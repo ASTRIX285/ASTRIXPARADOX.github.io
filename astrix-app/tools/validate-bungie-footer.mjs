@@ -14,5 +14,8 @@ for(const path of new Set(files)){
   assert.match(text,/<footer\b[^>]*>[\s\S]*?<\/footer>/i,`${path}: footer missing`);
   assert.ok([...text.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),`${path}: Bungie attribution missing`);
 }
+// Clips footer fix: exercise the workflow's real template without API requests.
+const generated=execFileSync('python3',['-B','-c','from scripts.build_clips import build_html; print(build_html([], 0))'],{cwd:root,encoding:'utf8'});
+assert.ok([...generated.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),'Clips generator must retain Bungie attribution');
 assert.ok(checked>0);
 console.log(`BUNGIE_FOOTER=PASS (${checked} pages)`);

@@ -173,8 +173,10 @@ const genericBuildSource=handoff.slice(handoff.indexOf('function resolveBuildSou
 assert.match(genericBuildSource,/equippedByCharacter\.get\(selectedId\)/,'Improve My Guardian must prefer the selected Guardian’s live equipped snapshot');
 assert.doesNotMatch(genericBuildSource,/LAST_LOADOUT_KEY|latestExplicitLoadout/,'A previously viewed saved slot must not become the generic Improve source');
 assert.match(handoff,/loadoutsAvailable:detail\.loadoutsAvailable===true/,'Build handoff must carry the exact Bungie in-game loadout catalogue');
-assert.match(loadoutsModule,/VIEW DETAILS[\s\S]*?EDIT A PARADOX COPY[\s\S]*?SAVE AS PARADOX COPY[\s\S]*?<b>Apply<\/b>[\s\S]*?OVERWRITE SLOT[\s\S]*?CLEAR SLOT/,'Every saved Bungie slot must expose its contextual review, PARADOX-copy and exactly labelled Apply action.');
-assert.match(loadoutsModule,/APPLY BUNGIE SLOT \$\{slot\} IN GAME\?[\s\S]*?separate from the Build Forge Apply button[\s\S]*?APPLY THIS IN-GAME LOADOUT/,'The saved-slot Apply confirmation must remain visibly distinct from Build Forge Apply.');
+// Prompt 21: six exact plain menu actions replace the six-box popup, with the same complete action coverage.
+assert.match(loadoutsModule,/Loadout details[\s\S]*?'Equip'[\s\S]*?Edit in Build Forge[\s\S]*?Save as PARADOX loadout[\s\S]*?Overwrite with equipped gear[\s\S]*?Clear slot \$\{index\+1\}/,'Every saved slot exposes all six exact menu actions in order');
+// Prompt 21: compact slot identity, gear and two-button confirmation replace the old explanation.
+assert.match(loadoutsModule,/guardianLoadoutConfirmName[\s\S]*?guardian-loadout-confirm-gear[\s\S]*?data-loadout-confirm-action[\s\S]*?'Equip'[\s\S]*?>Cancel<\/button>/,'Equip confirmation contains identity, gear, Equip and Cancel');
 assert.match(loadoutsModule,/stageBungieLoadoutAction[\s\S]*?confirmBungieLoadoutAction\(menuState\.intent\)[\s\S]*?executeBungieLoadoutAction/,'In-game loadout changes must preserve the staged intent through the final confirmation handler.');
 assert.match(handoff,/function openContextualLoadout[\s\S]*?edit-paradox-copy[\s\S]*?save-paradox-copy[\s\S]*?safeStore\(BUILD_SPACE_KEY,createBuildState\(source\)[\s\S]*?location\.href=`\.\/paradox-build-space/,'Edit and Save-as-PARADOX actions must carry the exact selected Bungie slot into Build Forge.');
 assert.match(handoff,/super:detail\.super\|\|null/,'Build handoff must preserve fixture and legacy subclass fields without an empty subclassBuild');
@@ -286,3 +288,13 @@ console.log('SUBCLASS_SUPER_DATA_PATH=PASS');
 console.log('STRICT_CHARACTER_AND_ARTIFACT_PROVENANCE=PASS');
 console.log('ARMOUR_WEAPON_HERO_PRESENTATION=PASS');
 console.log('BUILD_TOOL_PARITY=PASS');
+
+// Prompt 21: UI contracts are stricter than the retired popup text pins.
+assert.doesNotMatch(loadoutsModule,/LOADOUT ACTION COMPLETED|BUNGIE READBACK REQUESTED|Build Forge Apply|verified|authoritative|readback/i,'Retired popup and reassurance copy must not return');
+assert.match(loadoutsModule,/menu\.setAttribute\('role','menu'\)/,'Actions must use an anchored menu, not a dialog');
+assert.match(loadoutsModule,/mode:\['equip','clear'\]\.includes\(value\)\?'confirm':'menu'/,'Only Equip and Clear open confirmations');
+assert.match(loadoutsModule,/if\(value==='snapshot'\)void confirmLoadoutMutation\(value\)/,'Overwrite is the direct selected action');
+assert.match(loadoutsModule,/loadoutStatus\(loadout,currentProfile\(\),activeCharacterId\)/,'Slot badges derive from the live profile rather than viewed selection');
+assert.doesNotMatch(loadoutsModule,/selectedLoadoutIndex/,'Viewing a slot cannot set equipped status');
+assert.match(loadoutsModule,/if\(!failed\)setTimeout\(\(\)=>toast\.remove\(\),2000\)/,'Only success toasts close automatically after two seconds');
+assert.match(sharedRailCss,/guardian-loadout-slot\.is-active\{outline:2px solid var\(--apx-colour-success/,'Equipped slots have a green 2px outline');

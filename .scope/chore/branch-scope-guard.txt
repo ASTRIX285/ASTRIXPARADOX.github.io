@@ -1,0 +1,5 @@
+# Scope guard isolation, fixtures and contributor instructions only.
+astrix-app/tools/validate-scope-guard.mjs
+astrix-app/tools/test-scope-guard.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/docs/branch-scope-guard.md
