@@ -1,0 +1,4 @@
+# Exact new paths for the per-branch scope migration.
+astrix-app/tools/scope-guard-policy.mjs
+astrix-app/tools/test-scope-guard.mjs
+astrix-app/docs/scope-guard.md

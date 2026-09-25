@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {loadBranchScope, scopeAllows} from './scope-guard-policy.mjs';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
+// Existing baseline permissions are preserved. New branch exceptions belong in .scope/.
 const allowed=new Set([
   // Clips footer: validate before the scheduled generator commits its output.
   '.github/workflows/update-clips.yml',
@@ -373,20 +375,21 @@ const allowed=new Set([
   'tools/index.html',
   'tools/tools.css',
 ]);
-const changed=execFileSync('git',['diff','--name-only','origin/main...HEAD'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const working=execFileSync('git',['diff','--name-only'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const staged=execFileSync('git',['diff','--name-only','--cached'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const untracked=execFileSync('git',['ls-files','--others','--exclude-standard'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
+// NUL-delimited paths preserve whitespace and unusual tracked filenames. Disable rename
+// detection so both the removed and added paths must be within scope.
+const gitPaths=args=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean);
+const changed=gitPaths(['diff','--no-renames','--name-only','-z','origin/main...HEAD']);
+const working=gitPaths(['diff','--no-renames','--name-only','-z']);
+const staged=gitPaths(['diff','--no-renames','--name-only','-z','--cached']);
+const untracked=gitPaths(['ls-files','--others','--exclude-standard','-z']);
+const scope=loadBranchScope(root);
 const cataloguePath=/^astrix-app\/data\/weapon-catalogue\/(?:index|weapons-[a-z-]+|(?:plugDefinitions|plugSetDefinitions|sandboxPerks|socketTypeDefinitions|socketCategoryDefinitions|socketLayouts|socketEntries|iconDefinitions|equipmentWatermarks)-\d{3})\.json$/;
 const journeyIndexPath=/^astrix-app\/data\/journey-index\/(?:index|Destiny(?:PresentationNode|Record|Objective|Activity|Destination|Metric|Collectible)Definition-(?:[0-9]|1[0-5]))\.json$/;
 const phaseThreeInfrastructurePath=/^(?:(?:\.astrix-community|\.forge-community)|(?:astrix|forge)-(?:auth-worker|destiny-backend|manifest-worker|sandbox|worker))\//;
 const phaseThreeWorkflowPath=/^\.github\/workflows\/(?:deploy-(?:astrix|forge)-(?:sandbox|worker)|(?:astrix|forge)-(?:build-validation|probe-artifact-sandbox-perks|probe-current-artifact-v2|probe-current-artifact|probe-damage-types|probe-s28-localdb|probe-s28-perks-simple|worker-check)|refresh-backend-manifest|refresh-bungie-manifest-data|refresh-current-artifact|refresh-live-activity-data|update-armor-information|update-component-icons|update-cosmetic-information|update-game-components|update-weapon-information|validate-knowledge-graph|validate-weapon-audit)\.yml$/;
 const phaseThreeRootPath=/^(?:\.gitignore|CLAUDE\.md)$/;
-const outside=[...new Set([...changed,...working,...staged,...untracked])].filter(path=>!allowed.has(path)&&!cataloguePath.test(path)&&!journeyIndexPath.test(path)&&!phaseThreeInfrastructurePath.test(path)&&!phaseThreeWorkflowPath.test(path)&&!phaseThreeRootPath.test(path));
+const baselineAllows=path=>allowed.has(path)||cataloguePath.test(path)||journeyIndexPath.test(path)||phaseThreeInfrastructurePath.test(path)||phaseThreeWorkflowPath.test(path)||phaseThreeRootPath.test(path);
+const outside=[...new Set([...changed,...working,...staged,...untracked])].filter(path=>!scopeAllows(path,scope,baselineAllows));
 
 assert.deepEqual(outside,[],`Scope violation:\n${outside.join('\n')}`);
 console.log('SCOPE_GUARD=PASS');

@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 const tools=fileURLToPath(new URL('./',import.meta.url));
 const validators=[
   'validate-scope-guard.mjs',
+  'test-scope-guard.mjs', // Per-branch scope policy and Git integration regressions.
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
