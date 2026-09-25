@@ -68,7 +68,7 @@ function createRegionChestOverlay(key,label){
       <span><strong data-region-chest-missing>--</strong><small>MISSING</small></span>
       <span><strong data-region-chest-total>--</strong><small>TOTAL</small></span>
     </div>
-    <p class="journey-map-position-note" data-region-chest-unknown hidden></p>
+    <p class="journey-region-chest-unknown" data-region-chest-unknown hidden></p>
     <div class="journey-region-chests-list" data-region-chest-list hidden></div>`;
 
   const discovered=overlay.querySelector('[data-region-chest-discovered]');

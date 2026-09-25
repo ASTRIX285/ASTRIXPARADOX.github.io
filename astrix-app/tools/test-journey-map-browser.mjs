@@ -83,6 +83,9 @@ try{
   await page.locator('.journey-map-point-list button').click();
   assert.equal(await page.locator('.journey-map-completion').innerText(),'Not collected');
   assert.equal(await page.locator('.journey-map-position-note').innerText(),'Map position unavailable.');
+  // Prompt 25: independent chest note keeps the existing selected-position assertion strict.
+  assert.equal(await page.locator('.journey-region-chest-unknown').count(),1);
+  assert.equal(await page.locator('.journey-region-chest-unknown').isVisible(),false);
   await page.evaluate(()=>publishData({key:'cosmodrome',loading:true,sections:{}}));
   assert.equal(await page.locator('[data-region-chest-total]').innerText(),'--');
   await page.setViewportSize({width:390,height:844});

@@ -758,7 +758,7 @@ button.journey-map-marker:hover .journey-map-marker-copy,
 button.journey-map-marker:focus-visible .journey-map-marker-copy{visibility:visible}
 .journey-map-explorer{padding:18px;border-top:1px solid rgba(201,168,76,.25);background:rgba(5,9,14,.92);color:#eee9dc}
 .journey-map-explorer h3{margin:0;font-size:1rem;letter-spacing:.1em;color:#dac58d}
-.journey-map-catalogue-note,.journey-map-point-count,.journey-map-position-note,.journey-map-availability{color:#b7bac3;font-size:.8125rem;line-height:1.5}
+.journey-map-catalogue-note,.journey-map-point-count,.journey-map-position-note,.journey-region-chest-unknown,.journey-map-availability{color:#b7bac3;font-size:.8125rem;line-height:1.5}
 .journey-map-point-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
 .journey-map-point-filters label{display:grid;gap:5px;min-width:0;font-size:.8125rem;color:#d7d9df}
 .journey-map-point-filters input,.journey-map-point-filters select{
