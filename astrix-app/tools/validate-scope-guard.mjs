@@ -370,7 +370,7 @@ const cataloguePath=/^astrix-app\/data\/weapon-catalogue\/(?:index|weapons-[a-z-
 const journeyIndexPath=/^astrix-app\/data\/journey-index\/(?:index|Destiny(?:PresentationNode|Record|Objective|Activity|Destination|Metric|Collectible)Definition-(?:[0-9]|1[0-5]))\.json$/;
 const phaseThreeInfrastructurePath=/^(?:(?:\.astrix-community|\.forge-community)|(?:astrix|forge)-(?:auth-worker|destiny-backend|manifest-worker|sandbox|worker))\//;
 const phaseThreeWorkflowPath=/^\.github\/workflows\/(?:deploy-(?:astrix|forge)-(?:sandbox|worker)|(?:astrix|forge)-(?:build-validation|probe-artifact-sandbox-perks|probe-current-artifact-v2|probe-current-artifact|probe-damage-types|probe-s28-localdb|probe-s28-perks-simple|worker-check)|refresh-backend-manifest|refresh-bungie-manifest-data|refresh-current-artifact|refresh-live-activity-data|update-armor-information|update-component-icons|update-cosmetic-information|update-game-components|update-weapon-information|validate-knowledge-graph|validate-weapon-audit)\.yml$/;
-const phaseThreeRootPath=/^\.gitignore$/;
+const phaseThreeRootPath=/^(?:\.gitignore|CLAUDE\.md)$/;
 const outside=[...new Set([...changed,...working,...staged,...untracked])].filter(path=>!allowed.has(path)&&!cataloguePath.test(path)&&!journeyIndexPath.test(path)&&!phaseThreeInfrastructurePath.test(path)&&!phaseThreeWorkflowPath.test(path)&&!phaseThreeRootPath.test(path));
 
 assert.deepEqual(outside,[],`Scope violation:\n${outside.join('\n')}`);
