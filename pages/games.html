@@ -57,7 +57,7 @@
       position: absolute; bottom: 0; left: 0; right: 0; padding: 24px;
     }
     .game-card-tag {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 8px; letter-spacing: 3px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 3px;
       color: var(--gold); text-transform: uppercase; margin-bottom: 8px;
       opacity: 0; transform: translateY(8px);
       transition: opacity 0.3s, transform 0.3s;
@@ -83,7 +83,7 @@
     }
     .game-card:hover .game-card-actions { opacity: 1; transform: translateY(0); }
     .game-card-btn {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 8px; letter-spacing: 2px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       padding: 6px 14px; text-transform: uppercase; cursor: pointer;
       border: none; transition: background 0.2s;
     }
@@ -96,7 +96,7 @@
     .game-card-btn.review:hover { background: rgba(201,168,76,0.1); }
     .game-card-status {
       display: inline-block;
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 8px; letter-spacing: 2px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       padding: 4px 12px; text-transform: uppercase;
       opacity: 0; transform: translateY(8px);
       transition: opacity 0.3s 0.15s, transform 0.3s 0.15s;
@@ -128,14 +128,14 @@
     .trailer-modal-inner { position: relative; width: 90vw; max-width: 1000px; }
     .trailer-modal-close {
       position: absolute; top: -40px; right: 0;
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 10px; letter-spacing: 2px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       color: var(--grey); background: none; border: none; cursor: pointer; text-transform: uppercase;
     }
     .trailer-modal-close:hover { color: var(--white); }
     .trailer-frame { position: relative; padding-top: 56.25%; background: #000; }
     .trailer-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
     .trailer-modal-label {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 10px; letter-spacing: 2px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       color: var(--grey); text-align: center; margin-top: 14px; text-transform: uppercase;
     }
 
@@ -151,6 +151,7 @@
     }
 
   </style>
+  <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
 </head>
 <body>
 
@@ -204,7 +205,7 @@
           <div class="game-card-title">Crimson Desert</div>
           <div class="game-card-desc">Pearl Abyss's brutal open-world action RPG. The world I live in right now.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('ZdmoGYg8tB0','Crimson Desert — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('ZdmoGYg8tB0','Crimson Desert: Official Trailer');event.stopPropagation();">▶ Trailer</button>
             <a href="reviews.html" class="game-card-btn review" onclick="event.stopPropagation();">Read Review</a>
           </div>
           <span class="game-card-status playing">Active</span>
@@ -222,10 +223,10 @@
           <div class="game-card-title">Warframe</div>
           <div class="game-card-desc">Still one of the best free-to-play experiences out there. The parkour never gets old.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('CdQU5fzkXwA','Warframe — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('CdQU5fzkXwA','Warframe: Official Trailer');event.stopPropagation();">▶ Trailer</button>
             <a href="reviews.html" class="game-card-btn review" onclick="event.stopPropagation();">Read Review</a>
           </div>
-          <span class="game-card-status reviewed">Reviewed — 9.2</span>
+          <span class="game-card-status reviewed">Reviewed: 9.2</span>
         </div>
       </div>
 
@@ -240,10 +241,10 @@
           <div class="game-card-title">Borderlands 4</div>
           <div class="game-card-desc">Bigger worlds, more guns, same chaotic energy. The franchise at its most ambitious.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('zlEZzjpEbko','Borderlands 4 — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('zlEZzjpEbko','Borderlands 4: Official Trailer');event.stopPropagation();">▶ Trailer</button>
             <a href="reviews.html" class="game-card-btn review" onclick="event.stopPropagation();">Read Review</a>
           </div>
-          <span class="game-card-status reviewed">Reviewed — 8.5</span>
+          <span class="game-card-status reviewed">Reviewed: 8.5</span>
         </div>
       </div>
       <!-- DESTINY 2 -->
@@ -257,7 +258,7 @@
           <div class="game-card-title">Destiny 2</div>
           <div class="game-card-desc">The Final Shape changed everything. Still one of the best gunplay experiences in gaming.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('ZSWN-VP0lD8','Destiny 2 — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('ZSWN-VP0lD8','Destiny 2: Official Trailer');event.stopPropagation();">▶ Trailer</button>
             <a href="reviews.html" class="game-card-btn review" onclick="event.stopPropagation();">Read Review</a>
           </div>
           <span class="game-card-status reviewed">In Rotation</span>
@@ -275,7 +276,7 @@
           <div class="game-card-title">Black Myth: Wukong</div>
           <div class="game-card-desc">Game Science delivers a breathtaking journey through Chinese mythology. A masterclass in combat and spectacle.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('pnSsgRJmsCc','Black Myth: Wukong — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('pnSsgRJmsCc','Black Myth: Wukong: Official Trailer');event.stopPropagation();">▶ Trailer</button>
           </div>
           <span class="game-card-status reviewed">In Rotation</span>
         </div>
@@ -292,7 +293,7 @@
           <div class="game-card-title">God of War</div>
           <div class="game-card-desc">Kratos and Atreus redefine what a father-son story can be. Santa Monica Studio at their absolute peak.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('hfJ4Km46A-0','God of War — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('hfJ4Km46A-0','God of War: Official Trailer');event.stopPropagation();">▶ Trailer</button>
           </div>
           <span class="game-card-status reviewed">In Rotation</span>
         </div>
@@ -309,7 +310,7 @@
           <div class="game-card-title">Battlefield</div>
           <div class="game-card-desc">Large scale warfare at its finest. Squad up and take the objective.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('mJntSVa4OBE','Battlefield — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('mJntSVa4OBE','Battlefield: Official Trailer');event.stopPropagation();">▶ Trailer</button>
           </div>
           <span class="game-card-status reviewed">In Rotation</span>
         </div>
@@ -326,7 +327,7 @@
           <div class="game-card-title">Warhammer 40K</div>
           <div class="game-card-desc">For the Emperor. The grimdark universe brought to life in brutal, satisfying detail.</div>
           <div class="game-card-actions">
-            <button class="game-card-btn trailer" onclick="openTrailer('pgNCgJG0vnY','Warhammer 40K — Official Trailer');event.stopPropagation();">▶ Trailer</button>
+            <button class="game-card-btn trailer" onclick="openTrailer('pgNCgJG0vnY','Warhammer 40K: Official Trailer');event.stopPropagation();">▶ Trailer</button>
           </div>
           <span class="game-card-status reviewed">In Rotation</span>
         </div>
@@ -345,7 +346,7 @@
     <a href="https://www.youtube.com/c/ASTRIX285Gaming" target="_blank">YouTube</a>
   </div>
   <div class="gold-line" style="margin-bottom:20px;"></div>
-  <div class="footer-copy">© 2025 ASTRIX PARADOX — Built for the community, powered by gaming passion and history.</div>
+  <div class="footer-copy">© 2025 ASTRIX PARADOX. Built for the community, powered by gaming passion and history.</div>
 </footer>
 
 <!-- TRAILER MODAL -->

@@ -3,6 +3,8 @@
   --apx-crimson:var(--apx-colour-action);
   --apx-crimson-bright:var(--apx-colour-action);
   --apx-gold:var(--apx-colour-focus);
+  --apx-ember-crimson:var(--apx-colour-action);
+  --apx-ember-gold:#c9a84c;
   --apx-black:var(--apx-colour-canvas);
   --apx-panel:var(--apx-colour-panel);
   --apx-line:var(--apx-colour-border);

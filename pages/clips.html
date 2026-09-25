@@ -28,16 +28,16 @@
     .filter-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:0}
     .filter-row{display:flex;align-items:center;gap:0;min-height:52px;border-bottom:1px solid rgba(139,0,0,0.1)}
     .filter-row:last-child{border-bottom:none}
-    .filter-label{font-family:'bahnschrift-semicondensed',monospace;font-size:8px;letter-spacing:4px;color:var(--grey);text-transform:uppercase;min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:4px;flex-shrink:0}
+    .filter-label{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:4px;color:var(--grey);text-transform:uppercase;min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:4px;flex-shrink:0}
     .filter-pills{display:flex;flex-wrap:wrap;gap:2px;padding:8px 0 8px 8px}
-    .filter-btn{font-family:'bahnschrift-semicondensed',monospace;font-size:9px;letter-spacing:2px;padding:7px 18px;border:1px solid transparent;color:var(--grey);cursor:pointer;text-transform:uppercase;transition:all 0.2s;background:transparent;white-space:nowrap}
+    .filter-btn{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:2px;padding:7px 18px;border:1px solid transparent;color:var(--grey);cursor:pointer;text-transform:uppercase;transition:all 0.2s;background:transparent;white-space:nowrap}
     .filter-btn:hover{color:var(--white);border-color:rgba(139,0,0,0.5);background:rgba(139,0,0,0.06)}
     .filter-btn.game-btn.active{color:var(--white);background:rgba(139,0,0,0.2);border-color:var(--crimson-mid)}
     .filter-btn.type-btn.active{color:var(--dark);background:var(--gold);border-color:var(--gold)}
     .game-section{margin-bottom:48px}
     .game-section.hidden{display:none}
     .game-section-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-top:8px}
-    .game-section-label{font-family:'bahnschrift-semicondensed',monospace;font-size:10px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+    .game-section-label{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
     .game-section-line{flex:1;height:1px;background:linear-gradient(to right,rgba(201,168,76,0.4),transparent)}
     .game-section-header .game-section-line:first-child{background:linear-gradient(to left,rgba(201,168,76,0.4),transparent)}
     #clipsGrid{display:block}
@@ -53,35 +53,36 @@
     .clip-play-btn{width:56px;height:56px;border-radius:50%;background:rgba(139,0,0,0.9);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;transition:transform 0.2s,background 0.2s}
     .clip-card:hover .clip-play-btn{transform:scale(1.12);background:var(--crimson-mid)}
     .clip-play-btn svg{margin-left:4px}
-    .clip-game-badge{position:absolute;top:10px;left:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--white);background:var(--crimson);padding:3px 10px;text-transform:uppercase}
-    .clip-type-badge{position:absolute;top:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--dark);background:var(--gold);padding:3px 10px;text-transform:uppercase}
-    .clip-duration{position:absolute;bottom:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:9px;color:var(--white);background:rgba(0,0,0,0.8);padding:2px 8px;letter-spacing:1px}
+    .clip-game-badge{position:absolute;top:10px;left:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--white);background:var(--crimson);padding:3px 10px;text-transform:uppercase}
+    .clip-type-badge{position:absolute;top:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--dark);background:var(--gold);padding:3px 10px;text-transform:uppercase}
+    .clip-duration{position:absolute;bottom:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;color:var(--white);background:rgba(0,0,0,0.8);padding:2px 8px;letter-spacing:1px}
     .clip-body{padding:16px 20px}
     .clip-title{font-family:"bahnschrift-semicondensed",monospace;font-size:12px;font-weight:600;color:var(--white);line-height:1.4;margin-bottom:8px;letter-spacing:0.5px}
     .clip-meta{display:flex;justify-content:space-between;align-items:center}
     .clip-date{font-size:11px;color:var(--grey);letter-spacing:1px}
     .clip-links{display:flex;gap:10px}
-    .clip-link{font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-decoration:none;transition:color 0.2s}
+    .clip-link{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-decoration:none;transition:color 0.2s}
     .clip-link:hover{color:var(--gold-light)}
     .clip-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center}
     .clip-modal.open{display:flex}
     .clip-modal-inner{position:relative;width:92vw;max-width:1100px}
-    .clip-modal-close{position:absolute;top:-44px;right:0;font-family:"bahnschrift-semicondensed",monospace;font-size:10px;letter-spacing:2px;color:var(--grey);background:none;border:none;cursor:pointer;text-transform:uppercase}
+    .clip-modal-close{position:absolute;top:-44px;right:0;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);background:none;border:none;cursor:pointer;text-transform:uppercase}
     .clip-modal-close:hover{color:var(--white)}
     .clip-modal-frame{position:relative;padding-top:56.25%;background:#000}
     .clip-modal-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-    .clip-modal-label{font-family:"bahnschrift-semicondensed",monospace;font-size:10px;letter-spacing:2px;color:var(--grey);text-align:center;margin-top:16px;text-transform:uppercase}
-    .clip-modal-source{font-family:"bahnschrift-semicondensed",monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:6px}
-    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:9px;letter-spacing:2px;color:var(--grey);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
+    .clip-modal-label{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);text-align:center;margin-top:16px;text-transform:uppercase}
+    .clip-modal-source{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:6px}
+    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
     .clips-stats span{color:var(--white)}
-    @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-label{min-width:48px;font-size:7px;letter-spacing:2px}.filter-btn{font-size:8px;padding:6px 12px}}
+    @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-label{min-width:48px;font-size:7px;letter-spacing:2px}.filter-btn{font-size:11px;padding:6px 12px}}
   </style>
+  <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
 </head>
 <body>
 <nav class="nav">
   <a class="nav-logo" href="../index.html" aria-label="ASTRIX PARADOX home">
     <img src="../img/logo.png" alt="ASTRIX PARADOX">
-    <span>ASTRIX<span class="accent">285</span></span>
+    <span>ASTRIX<span class="accent"> PARADOX</span></span>
   </a>
   <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span></button>
   <div class="nav-links" id="site-navigation">
@@ -103,9 +104,9 @@
   <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
     <div class="section-eyebrow" style="animation:fadeUp 0.8s ease 0.2s both;">AUTO-GENERATED HIGHLIGHTS</div>
     <h1 class="section-title" style="animation:fadeUp 0.8s ease 0.4s both;">Clips &amp; <span class="accent">Highlights</span></h1>
-    <p style="color:var(--grey);max-width:500px;margin-top:16px;animation:fadeUp 0.8s ease 0.6s both;">The best moments from every stream — captured live and published straight here.</p>
+    <p style="color:var(--grey);max-width:500px;margin-top:16px;animation:fadeUp 0.8s ease 0.6s both;">The best moments from every stream, captured live and published straight here.</p>
     <div style="display:flex;gap:16px;margin-top:24px;animation:fadeUp 0.8s ease 0.8s both;flex-wrap:wrap;">
-      <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" class="btn-primary" style="font-size:10px;padding:10px 24px;">&#9654; &nbsp; YouTube Channel &#8599;</a>
+      <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" class="btn-primary" style="font-size:11px;padding:10px 24px;">&#9654; &nbsp; YouTube Channel &#8599;</a>
     </div>
   </div>
 </div>
@@ -146,7 +147,7 @@
   <div style="max-width:1100px;margin:0 auto;">
     <div class="clips-stats">
       SHOWING <span id="clipCount">61</span> CLIPS
-      &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--gold);font-family:'bahnschrift-semicondensed',monospace;font-size:9px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
+      &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--gold);font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
     </div>
     <div id="clipsGrid">
 

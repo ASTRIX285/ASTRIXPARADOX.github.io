@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ASTRIX Destiny public build library using Armor 3.0 static data">
-  <title>ASTRIX PARADOX — Destiny Builds</title>
+  <title>ASTRIX PARADOX | Destiny Builds</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
@@ -19,13 +19,14 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="mechanics.css">
   <link rel="stylesheet" href="synergy-ui.css">
+  <script src="./shared/astrix-embers.js?v=20260925-embers-1" defer></script>
 </head>
 <body data-apx-button-system>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="#home" aria-label="ASTRIX PARADOX home">
-        <span class="brand-mark">A</span>
-        <span class="brand-copy"><strong>ASTRIX PARADOX</strong><small>DESTINY INTELLIGENCE</small></span>
+        <img class="brand-mark" src="/img/logo.png" alt="">
+        <span class="brand-copy"><strong>ASTRIX <span class="accent">PARADOX</span></strong><small>DESTINY INTELLIGENCE</small></span>
       </a>
       <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
       <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
@@ -69,7 +70,7 @@
         <div class="overview-grid">
           <article class="feature-card large-card"><div class="card-heading"><span class="icon-chip">✦</span><div><small>Data contract</small><h3>Three-stat armor archetypes</h3></div></div><p>Build records store preferred archetypes, gear tiers, set bonuses, subclass setup, mods, Artifact notes and verification flags.</p><div class="progress-row"><span>Presentation source</span><strong>Static JSON</strong></div><div class="progress-track"><span style="width:100%"></span></div></article>
           <article class="feature-card"><span class="micro-label">Stat cap</span><strong class="metric">200</strong><p>Maximum accepted target for each current stat.</p></article>
-          <article class="feature-card"><span class="micro-label">Gear tiers</span><strong class="metric">1–5</strong><p>Minimum tier can be recorded per build.</p></article>
+          <article class="feature-card"><span class="micro-label">Gear tiers</span><strong class="metric">1 to 5</strong><p>Minimum tier can be recorded per build.</p></article>
           <article class="feature-card"><span class="micro-label">Verification</span><strong class="metric metric-text">Visible</strong><p>Unconfirmed records are never presented as certain.</p></article>
         </div>
       </section>

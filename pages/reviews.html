@@ -63,13 +63,13 @@
     }
     .review-tags { display: flex; gap: 6px; flex-wrap: wrap; }
     .review-tag {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 8px; letter-spacing: 2px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       color: var(--grey-dark); border: 1px solid var(--dark-4); padding: 3px 10px; text-transform: uppercase;
     }
     .review-intro { color: var(--grey); line-height: 1.8; font-size: 15px; }
     .review-body { padding: 0 32px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .review-section-title {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 10px; letter-spacing: 3px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 3px;
       text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid;
     }
     .review-section-title.highs { color: var(--gold); border-color: rgba(201,168,76,0.2); }
@@ -82,7 +82,7 @@
       background: linear-gradient(to right, var(--crimson-dark), transparent);
       border-left: 3px solid var(--crimson-glow);
       padding: 6px 16px; margin-bottom: 16px; display: inline-block;
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 9px; letter-spacing: 3px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 3px;
       color: var(--crimson-glow); text-transform: uppercase;
     }
     .trailer-modal {
@@ -93,14 +93,14 @@
     .trailer-modal-inner { position:relative; width:90vw; max-width:1000px; }
     .trailer-modal-close {
       position:absolute; top:-40px; right:0;
-      font-family:'bahnschrift-semicondensed',monospace; font-size:10px; letter-spacing:2px;
+      font-family:'bahnschrift-semicondensed',monospace; font-size:11px; letter-spacing:2px;
       color:var(--grey); background:none; border:none; cursor:pointer; text-transform:uppercase;
     }
     .trailer-modal-close:hover { color:var(--white); }
     .trailer-frame { position:relative; padding-top:56.25%; background:#000; }
     .trailer-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
     .trailer-modal-label {
-      font-family:'bahnschrift-semicondensed',monospace; font-size:10px; letter-spacing:2px;
+      font-family:'bahnschrift-semicondensed',monospace; font-size:11px; letter-spacing:2px;
       color:var(--grey); text-align:center; margin-top:14px; text-transform:uppercase;
     }
     @media (max-width: 768px) {
@@ -115,6 +115,7 @@
       .review-score { width: 52px; height: 52px; font-size: 15px; }
     }
   </style>
+  <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
 </head>
 <body>
 
@@ -167,7 +168,7 @@
     <a href="https://www.youtube.com/c/ASTRIX285Gaming" target="_blank">YouTube</a>
   </div>
   <div class="gold-line" style="margin-bottom:20px;"></div>
-  <div class="footer-copy">© 2025 ASTRIX PARADOX — Built for the community, powered by gaming passion and history.</div>
+  <div class="footer-copy">© 2025 ASTRIX PARADOX. Built for the community, powered by gaming passion and history.</div>
   <div class="footer-disclaimer">All images featured on this site are official wallpapers sourced from the respective publishers and developers' websites. They remain the property of their rightful owners and are used here for fan and review purposes only.</div>
 </footer>
 
@@ -224,8 +225,8 @@ function buildReviewCard(review, index) {
       '<p class="review-section-text">' + review.finalThoughts + '</p>' +
     '</div>' +
     '<div class="review-actions">' +
-      '<button class="btn-primary" style="padding:10px 24px;font-size:10px;" onclick="openTrailer(\'' + review.trailerId + '\',\'' + review.title + ' — Official Trailer\')">▶ Watch Trailer</button>' +
-      '<a href="' + review.studioLink + '" target="_blank" class="btn-secondary" style="padding:10px 24px;font-size:10px;">Visit Game ↗</a>' +
+      '<button class="btn-primary" style="padding:10px 24px;font-size:11px;" onclick="openTrailer(\'' + review.trailerId + '\',\'' + review.title + ': Official Trailer\')">▶ Watch Trailer</button>' +
+      '<a href="' + review.studioLink + '" target="_blank" class="btn-secondary" style="padding:10px 24px;font-size:11px;">Visit Game ↗</a>' +
     '</div>' +
   '</div>';
 }

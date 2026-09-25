@@ -105,7 +105,7 @@ a {
 
 .nav-links a {
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
   color: var(--grey);
 
@@ -132,7 +132,7 @@ a {
   gap: 8px;
 
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 3px;
   color: var(--grey);
 }
@@ -186,7 +186,7 @@ a {
   }
 
   .nav-live {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 1px;
   }
 }
@@ -281,7 +281,7 @@ a {
 
 .hero-eyebrow {
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 6px;
   color: var(--gold);
   text-transform: uppercase;
@@ -349,7 +349,7 @@ a {
 
 .hero-tag {
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 2px;
   color: var(--white);
   text-transform: uppercase;
@@ -501,7 +501,7 @@ a {
 
 .section-eyebrow {
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 5px;
   color: var(--gold);
   text-transform: uppercase;
@@ -832,7 +832,7 @@ body.stream-locked .nav {
 
 .footer-social a {
   font-family: 'bahnschrift-semicondensed', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 2px;
   color: var(--grey);
   text-transform: uppercase;
@@ -1056,7 +1056,7 @@ body.stream-locked .nav {
 
   .footer-social a {
     padding: 8px 12px;
-    font-size: 8px;
+    font-size: 11px;
   }
 }
 
@@ -1169,4 +1169,212 @@ body > main > section,
 
 .footer {
   background: rgba(3,5,10,0.72) !important;
+}
+
+/* ============================================================
+   SITE-WIDE V2
+   Block navigation, warm ember atmosphere, hero key art, readable
+   micro type. Colours come from tokens only.
+   ============================================================ */
+:root {
+  --apx-ember-crimson: var(--apx-colour-action);
+  --apx-ember-gold: #c9a84c;
+  --v2-crimson-glow: color-mix(in srgb, var(--crimson) 55%, transparent);
+  --v2-warm-1: color-mix(in srgb, var(--crimson) 26%, transparent);
+  --v2-warm-2: color-mix(in srgb, var(--crimson) 12%, transparent);
+  --v2-tab-height: 44px;
+  --grey-dark: color-mix(in srgb, var(--grey) 70%, var(--dark));
+}
+
+/* Warm atmosphere over the fixed background art */
+html { background: var(--dark); }
+
+body::before {
+  background:
+    radial-gradient(1100px 700px at 82% 6%, var(--v2-warm-1), transparent 62%),
+    radial-gradient(900px 640px at 4% 104%, var(--v2-warm-2), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--dark) 55%, transparent), color-mix(in srgb, var(--dark) 74%, transparent)),
+    url('../astrix-app/shared/astrix-deep-space.jpg') center center / cover no-repeat;
+}
+
+/* Header: crimson top rule, larger wordmark, block tabs */
+.nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--crimson);
+  box-shadow: 0 0 14px var(--v2-crimson-glow);
+}
+
+.nav-logo {
+  font-size: 22px;
+  letter-spacing: 3px;
+}
+
+.nav-logo img {
+  height: 44px;
+}
+
+.nav-links a {
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+@media (min-width: 769px) {
+  .nav-links {
+    gap: 4px;
+  }
+
+  .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--v2-tab-height);
+    padding: 0 22px;
+    background: var(--dark-3);
+    border: 1px solid var(--apx-colour-border);
+    border-bottom: 2px solid var(--apx-colour-border);
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active {
+    background: var(--dark-4);
+    border-bottom-color: var(--crimson);
+    box-shadow: 0 8px 16px -10px var(--v2-crimson-glow);
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 769px) {
+  .nav-logo {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .nav-logo img {
+    height: 36px;
+  }
+
+  .nav-links a {
+    padding: 0 11px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-logo {
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+
+  .nav-logo img {
+    height: 36px;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+  }
+}
+
+/* Readable eyebrows and micro type */
+body .hero-eyebrow,
+body .section-eyebrow,
+body .game-section-label,
+body .filter-label {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--grey);
+}
+
+body .hero-eyebrow::before,
+body .section-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  margin-right: 12px;
+  background: var(--crimson);
+  vertical-align: middle;
+}
+
+body .game-card-tag,
+body .game-card-status,
+body .game-card-btn,
+body .footer-social a {
+  font-size: 11px;
+}
+
+/* Home hero key art with a fade into the page */
+.hero-bg-video {
+  background: url('../img/BG_hero_CD.png') right center / auto 100% no-repeat !important;
+  -webkit-mask-image: linear-gradient(to right, transparent 30%, black 68%);
+  mask-image: linear-gradient(to right, transparent 30%, black 68%);  filter: brightness(1.25) contrast(1.05);
+}
+
+@media (max-width: 900px) {
+  .hero-bg-video {
+    background-position: 72% center !important;
+    opacity: 0.4;
+  }
+}
+
+/* Games: keep card titles clear of the artwork logos */
+body .game-card-desc,
+body .game-card-actions {
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+body .game-card:hover .game-card-desc,
+body .game-card:hover .game-card-actions,
+body .game-card:focus-within .game-card-desc,
+body .game-card:focus-within .game-card-actions {
+  max-height: 200px;
+}
+
+body .game-card:hover .game-card-desc,
+body .game-card:focus-within .game-card-desc {
+  margin-bottom: 12px;
+}
+
+body .game-card:focus-within .game-card-tag,
+body .game-card:focus-within .game-card-desc,
+body .game-card:focus-within .game-card-actions,
+body .game-card:focus-within .game-card-status {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reviews: cover fills its cell, score badge stays on brand */
+body .review-card-header {
+  align-items: stretch;
+}
+
+body .review-img img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-position: center top;
+}
+
+body .review-score.gold {
+  background: var(--crimson);
+  color: var(--white);
+  box-shadow: 0 0 20px var(--v2-crimson-glow);
+}
+
+/* Clips: one active chip style, touch sized */
+body .filter-btn {
+  min-height: 44px;
+  font-size: 11px;
+}
+
+body .filter-btn.type-btn.active {
+  color: var(--white);
+  background: color-mix(in srgb, var(--crimson) 20%, transparent);
+  border-color: var(--crimson-mid);
 }
