@@ -175,17 +175,17 @@ function artifactState(artifactData, currentSeasonNumber) {
   }
   if (artifactData.availabilityModel === 'artifact-2-socket-buckets') {
     if (!Array.isArray(artifactData.selectionSlots) || artifactData.selectionSlots.length === 0) {
-      return { status: 'missing-artifact-slots', blocker: 'Artifact 2.0 socket-bucket evidence is unavailable.' };
+      return { status: 'missing-artifact-slots', blocker: 'Artifact 2.0 socket-bucket data is unavailable.' };
     }
     return { status: 'current', blocker: null };
   }
   const artifactSeason = finiteInteger(artifactData.seasonNumber);
   const currentSeason = finiteInteger(currentSeasonNumber);
   if (artifactSeason === null) {
-    return { status: 'artifact-season-unresolved', blocker: 'The active Artifact season could not be verified.' };
+    return { status: 'artifact-season-unresolved', blocker: 'The active Artifact season is unavailable.' };
   }
   if (currentSeason === null) {
-    return { status: 'current-season-unresolved', blocker: 'Current season metadata was not supplied; Artifact freshness cannot be verified.' };
+    return { status: 'current-season-unresolved', blocker: 'Current Artifact data is unavailable.' };
   }
   if (artifactSeason !== currentSeason) {
     return { status: 'stale-artifact', blocker: `Artifact season ${artifactSeason} does not match current season ${currentSeason}.` };
@@ -423,10 +423,10 @@ export function recommendArtifactPerks(build, artifactData, { currentSeasonNumbe
     reason:row.reasons?.[0]?.label||`Legal pick for Artifact bucket ${row.perk.column}.`
   }));
   const blockers = [];
-  if (selectionLimit === 0) blockers.push(artifactTwo?'Artifact 2.0 exposes no selectable socket buckets.':planFullBuild?'No verified current Artifact perks are available for a target build plan.':'Bungie reports no Artifact unlock points available for this configuration.');
-  if (socketSelection?.shortages.length) blockers.push('One or more Artifact 2.0 buckets could not be filled from verified manifest perk choices.');
-  if (selected.length < selectionLimit) blockers.push(`Only ${selected.length} of ${selectionLimit} legal Artifact selections could be resolved from verified tier evidence.`);
-  if (!recommendations.length) blockers.push('No explicit match was found between verified Artifact descriptions and the staged Forge Loader build.');
+  if (selectionLimit === 0) blockers.push(artifactTwo?'Artifact 2.0 exposes no selectable socket buckets.':planFullBuild?'No current Artifact perks are available for a target build plan.':'Bungie reports no Artifact unlock points available for this configuration.');
+  if (socketSelection?.shortages.length) blockers.push('One or more Artifact 2.0 buckets could not be filled from manifest perk choices.');
+  if (selected.length < selectionLimit) blockers.push(`Only ${selected.length} of ${selectionLimit} legal Artifact selections could be resolved from tier data.`);
+  if (!recommendations.length) blockers.push('No explicit match was found between Artifact descriptions and the staged Forge Loader build.');
   const selectionStatus = blockers.length ? (selected.length === selectionLimit && selectionLimit > 0 ? 'no-verified-match' : 'partial') : 'ready';
 
   return {

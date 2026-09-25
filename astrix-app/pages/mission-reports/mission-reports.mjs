@@ -1,9 +1,9 @@
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
 import {
   renderGuardianCharacterCards,
   renderGuardianCharacterCardStatus
 } from '../guardian-workspace-v2/guardian-character-cards.mjs';
-import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1';
+import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 const $=id=>document.getElementById(id);
 const resolving=$('missionResolving');
@@ -105,7 +105,7 @@ function renderGuardianContext(context){
   accountPill.textContent=context?.displayName?`BUNGIE: ${context.displayName}`:'BUNGIE ACCOUNT';
   $('missionGuardianClass').textContent=guardian?.className||'Guardian unavailable';
   $('missionGuardianSubclass').textContent=guardian?.subclassName||'Subclass unavailable';
-  $('missionVerifiedGuardian').hidden=guardian?.verified!==true;
+  $('missionVerifiedGuardian').hidden=true; // Prompt 19: remove the reassurance badge, retain its DOM hook.
   $('missionTotalPlaytime').textContent=formatPlaytime(guardian?.totalPlaytimeMinutes);
   $('missionAccountAge').textContent=Number.isFinite(guardian?.accountAgeDays)?`${numberFormatter.format(guardian.accountAgeDays)} days`:'—';
   $('missionJourneyLevel').textContent=Number.isFinite(guardian?.journeyLevel)?numberFormatter.format(guardian.journeyLevel):'—';
@@ -160,7 +160,7 @@ function renderSummary(summary){
   );
   renderMetric(
     $('missionMetricCompletion'),$('missionMetricCompletionVerified'),summary.completionRate,
-    $('missionMetricCompletionNote'),'From activities with completion evidence',value=>`${value}%`
+    $('missionMetricCompletionNote'),'From activities with completion data',value=>`${value}%`
   );
   renderMetric(
     $('missionMetricPve'),$('missionMetricPveVerified'),summary.pveClears,
@@ -204,10 +204,10 @@ function masteryRow(row){
   const detail=document.createElement('div');
   detail.className='mission-mastery-detail';
   detail.append(
-    createTextElement('span','',`Evidence rows: ${numberFormatter.format(row.evidenceCount)}`),
+    createTextElement('span','',`Data rows: ${numberFormatter.format(row.evidenceCount)}`),
     createTextElement('span','',`Mode: ${row.modeLabel}`),
     createTextElement('span','',`Category: ${row.category}`),
-    createTextElement('span','',row.buildUsed?`Build: ${row.buildUsed}`:'Build evidence not returned')
+    createTextElement('span','',row.buildUsed?`Build: ${row.buildUsed}`:'Build data not returned')
   );
   details.append(summary,detail);
   return details;
@@ -218,7 +218,7 @@ function renderMastery(rows){
   const visible=showAllMastery?categoryRows:categoryRows.slice(0,5);
   masteryList.replaceChildren(...visible.map(masteryRow));
   masteryEmpty.hidden=categoryRows.length>0;
-  masteryEmpty.textContent=categoryRows.length?'':'No verified activities were returned for this category.';
+  masteryEmpty.textContent=categoryRows.length?'':'No activities were returned for this category.';
   viewAllMastery.disabled=categoryRows.length<=5;
   viewAllMastery.textContent=`${showAllMastery?'SHOW RECENT':'VIEW ALL'} ${masteryCategory.toUpperCase()} ACTIVITIES`;
 }
@@ -305,7 +305,7 @@ function renderTrends(trends){
   $('missionTrendEmpty').hidden=all.length>0;
   $('missionTrendStart').textContent=all.length?formatDate(all[0].date):'—';
   $('missionTrendEnd').textContent=all.length?formatDate(all.at(-1).date):'—';
-  $('missionTrendChart').setAttribute('aria-label',all.length?'Performance trend derived from live activities in the last 30 days':'No verified performance trend available');
+  $('missionTrendChart').setAttribute('aria-label',all.length?'Performance trend derived from live activities in the last 30 days':'No performance trend available');
 }
 
 function renderConfidence(confidence){
@@ -339,8 +339,8 @@ function renderBuildCard(type,evidence){
   const metric=card.querySelector('[data-build-metric]');
   const sparkline=card.querySelector('[data-build-sparkline]');
   const thumbnails=card.querySelector('[data-build-thumbnails]');
-  verified.hidden=!evidence?.verified;
-  name.textContent=evidence?.name||'No verified build evidence';
+  verified.hidden=true; // Prompt 19: remove the reassurance badge, retain its DOM hook.
+  name.textContent=evidence?.name||'No build data';
   subtitle.textContent=evidence?.subtitle||'Build snapshots are not returned by the current activity feed.';
   sample.textContent=Number.isFinite(evidence?.sampleSize)?numberFormatter.format(evidence.sampleSize):'—';
   metric.textContent=Number.isFinite(evidence?.metric)?(evidence.metricType==='success-rate'?`${evidence.metric}%`:evidence.metric.toFixed(2)):'—';
@@ -354,7 +354,7 @@ function renderBuildCard(type,evidence){
       image.loading='lazy';
       return image;
     }));
-    thumbnails.setAttribute('aria-label','Verified build item thumbnails');
+    thumbnails.setAttribute('aria-label','Build item thumbnails');
   }else{
     thumbnails.replaceChildren(...Array.from({length:6},()=>createTextElement('span','','—')));
     thumbnails.setAttribute('aria-label','Build item thumbnails unavailable');
@@ -384,7 +384,7 @@ function renderUnavailable(){
   renderSummary(emptySummary);
   masteryList.replaceChildren();
   masteryEmpty.hidden=false;
-  masteryEmpty.textContent='Activity mastery will appear once verified activity history is available.';
+  masteryEmpty.textContent='Activity mastery will appear once activity history is available.';
   evidenceList.replaceChildren();
   evidenceEmpty.hidden=false;
   evidenceEmpty.textContent='Activity history will appear once the live feed is connected.';
@@ -417,7 +417,7 @@ async function loadReport(characterId=''){
     renderUnavailable();
     return;
   }
-  feedStatus.textContent='LIVE BUNGIE DATA';
+  feedStatus.textContent='';
   sourceState.textContent='SOURCE · BUNGIE ACTIVITY HISTORY';
   renderLastSynced(result.lastSynced);
   renderLiveReport();

@@ -151,7 +151,7 @@ function freshSocketChanges(plan,payload){
     const target=plan?.equipment?.targets?.find(row=>String(row.itemInstanceId)===itemInstanceId);
     const itemName=readable(change?.itemName)||readable(target?.name)||'the selected item',plugName=readable(change?.plugName)||'the selected mod or perk',label=`${plugName} on ${itemName} (socket ${socketIndex+1})`;
     if(!targetIds.has(itemInstanceId)){blockers.push(`${label} is not attached to an exact equipment target in this Working Build.`);continue;}
-    if(!locations.has(itemInstanceId)){blockers.push(`${label} cannot be checked because its exact item instance is no longer owned.`);continue;}
+    if(!locations.has(itemInstanceId)){blockers.push(`${label} cannot be checked because its exact item instance is no longer in your inventory.`);continue;}
     const current=Number(sockets?.[itemInstanceId]?.sockets?.[socketIndex]?.plugHash);
     if(current===plugHash){alreadyApplied.push(change);continue;}
     const options=reusable?.[itemInstanceId]?.plugs?.[String(socketIndex)]||[];
@@ -185,11 +185,11 @@ function freshLivePlanInspection(plan,payload,advertised={}){
     if(!location)ownershipBlockers.push(`${target.name} is no longer present in the Bungie account inventory.`);
     else if(Number.isInteger(Number(target.itemHash))&&Number(location.itemHash)!==Number(target.itemHash))ownershipBlockers.push(`${target.name} no longer matches its saved Bungie item identity.`);
   }
-  add('ownership','Exact item ownership',ownershipBlockers,{targetCount:targets.length,ownedTargetCount:targets.length-ownershipBlockers.length});
+  add('ownership','Item availability',ownershipBlockers,{targetCount:targets.length,ownedTargetCount:targets.length-ownershipBlockers.length});
 
   const resolved=freshTransferSteps(plan,payload),locationBlockers=[...resolved.blockers];
   if(plan.kind==='weapon-perk-only'&&resolved.steps.length)locationBlockers.push('This weapon moved. Refresh its card before changing perks.');
-  if(resolved.steps.length&&advertised.transferItems!==true)locationBlockers.push('Fresh inventory state requires item transfer, but the Bungie route does not advertise that capability.');
+  if(resolved.steps.length&&advertised.transferItems!==true)locationBlockers.push('Item transfers are unavailable.');
   add('instance-location','Exact item locations',locationBlockers,{transferCount:resolved.steps.length});
 
   const compatibilityBlockers=[];
@@ -205,7 +205,7 @@ function freshLivePlanInspection(plan,payload,advertised={}){
   add('exotic','Destiny Exotic limits',exoticBlockers,{weaponExotics,armourExotics});
 
   const resolvedSockets=freshSocketChanges(plan,payload),socketBlockers=[...resolvedSockets.blockers];
-  if(resolvedSockets.changes.length&&advertised.insertSocketPlugFree!==true)socketBlockers.push('Fresh socket state requires a socket mutation, but the Bungie route does not advertise that capability.');
+  if(resolvedSockets.changes.length&&advertised.insertSocketPlugFree!==true)socketBlockers.push('Socket changes are unavailable.');
   add('socket-legality','Exact socket legality',socketBlockers,{changeCount:resolvedSockets.changes.length,alreadyAppliedCount:resolvedSockets.alreadyApplied.length});
 
   const activity=characterActivityRestriction(plan,payload),activityBlockers=activity.allowed?[]:[activity.reason];
@@ -283,11 +283,11 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
     return requestActionWithThrottleRetry(path,body,{session,fetchImpl,authOrigin,waitImpl,onRetry:({attempt,delay})=>onProgress({phase:'throttle',status:'retrying',label:`${label} paused for ${delay} ms before retry ${attempt}.`})});
   };
   try{
-    onProgress({phase:'snapshot',status:'running',label:'Reading fresh Bungie ownership and equipment…'});
+    onProgress({phase:'snapshot',status:'running',label:'Loading equipment…'});
     fresh=await requestFreshProfile({fetchImpl,authOrigin});
     const inspection=freshLivePlanInspection(plan,fresh,advertised),{activity,resolved,resolvedSockets}=inspection,freshBlockers=inspection.blockers;
-    if(freshBlockers.length){record('snapshot','blocked','Fresh activity, ownership or socket compatibility validation blocked Apply.',freshBlockers);result.status='blocked';result.finishedAt=new Date().toISOString();return result;}
-    record('snapshot','complete','Fresh Bungie activity, ownership, equipment and socket compatibility captured.',{validationOrder:inspection.checks.map(row=>row.key),activityState:activity.state,targetCount:plan.equipment.targets.length,transferCount:resolved.steps.length,socketChangeCount:resolvedSockets.changes.length,socketsAlreadyApplied:resolvedSockets.alreadyApplied.length,alreadyAppliedSocketChanges:clone(resolvedSockets.alreadyApplied)});
+    if(freshBlockers.length){record('snapshot','blocked','Apply blocked. Check the activity, items and sockets.',freshBlockers);result.status='blocked';result.finishedAt=new Date().toISOString();return result;}
+    record('snapshot','complete','Build checks complete.',{validationOrder:inspection.checks.map(row=>row.key),activityState:activity.state,targetCount:plan.equipment.targets.length,transferCount:resolved.steps.length,socketChangeCount:resolvedSockets.changes.length,socketsAlreadyApplied:resolvedSockets.alreadyApplied.length,alreadyAppliedSocketChanges:clone(resolvedSockets.alreadyApplied)});
 
     for(const step of resolved.steps){
       try{
@@ -316,11 +316,11 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
 
     if(equipmentApplied&&plan.kind!=='weapon-perk-only'){
       try{
-        onProgress({phase:'verify-equipment',status:'running',label:'Verifying equipped items from a fresh Bungie profile…'});
+        onProgress({phase:'verify-equipment',status:'running',label:'Checking equipment…'});
         const equippedProfile=await requestFreshProfile({fetchImpl,authOrigin}),verification=verifyEquippedItems(plan,equippedProfile);
-        if(verification.verified)record('verify-equipment','complete','Fresh profile confirms every expected item is equipped.',verification);
-        else{equipmentApplied=false;record('verify-equipment','mismatch','Fresh profile did not confirm every expected item; all socket changes were skipped.',verification);}
-      }catch(error){equipmentApplied=false;record('verify-equipment','failed','Fresh equipped-item verification failed; all socket changes were skipped.',{message:error.message});}
+        if(verification.verified)record('verify-equipment','complete','Equipment applied.',verification);
+        else{equipmentApplied=false;record('verify-equipment','mismatch','Some items were not equipped. Socket changes were skipped.',verification);}
+      }catch(error){equipmentApplied=false;record('verify-equipment','failed','Equipment could not be checked. Socket changes were skipped.',{message:error.message});}
     }
 
     if(equipmentApplied){
@@ -359,12 +359,12 @@ function stageVaultTransferIntent({item,destination,session,replacementItem=null
   const binding=sessionBinding(session),source=item?.source||{},sourceKind=String(source.kind||''),sourceCharacterId=String(source.characterId||''),destinationKind=String(destination?.kind||''),destinationCharacterId=String(destination?.characterId||'');
   if(!decimal(item?.itemInstanceId)||!Number.isInteger(Number(item?.itemHash)))throw new TypeError('A live Vault transfer requires an exact Bungie item instance and definition hash.');
   if(!VAULT_TRANSFER_SOURCE_KINDS.has(sourceKind))throw new TypeError('Only equipped, carried, or Vault items can start a live Vault transfer.');
-  if(!VAULT_TRANSFER_DESTINATION_KINDS.has(destinationKind))throw new TypeError('Choose a real Guardian or Vault destination.');
+  if(!VAULT_TRANSFER_DESTINATION_KINDS.has(destinationKind))throw new TypeError('Choose a Guardian or the Vault.');
   if(sourceKind!=='vault'&&!decimal(sourceCharacterId))throw new TypeError('The source Guardian binding is missing.');
   if(destinationKind==='character'&&!decimal(destinationCharacterId))throw new TypeError('The destination Guardian binding is missing.');
   if(destinationKind==='vault'&&sourceKind==='vault')throw new TypeError('This item is already in Vault.');
   if(destinationKind==='character'&&sourceKind!=='vault'&&sourceCharacterId===destinationCharacterId)throw new TypeError('This item is already on that Guardian.');
-  if(equipAfterTransfer&&destinationKind!=='character')throw new TypeError('Direct equip requires a real destination Guardian.');
+  if(equipAfterTransfer&&destinationKind!=='character')throw new TypeError('Choose a Guardian to equip this item.');
   const replacement=replacementItem?{
     itemInstanceId:String(replacementItem.itemInstanceId||''),itemHash:Number(replacementItem.itemHash),bucketHash:Number(replacementItem.bucketHash),name:String(replacementItem.name||'replacement item')
   }:null;
@@ -464,9 +464,9 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
   const destinationExpected=intent.destination.kind==='vault'?{kind:'vault'}:{kind:intent.equipAfterTransfer?'equipped':'carried',characterId:intent.destination.characterId};
   const transferExact=async(item,step,{allowUnverifiedSource=false,allowAcceptedWithoutReadback=false,verifiedSource=null}={})=>{
     const before=verifiedSource?{fresh:null,location:verifiedSource}:allowUnverifiedSource?{fresh:null,location:null}:await freshInventoryLocation(item.itemInstanceId,{fetchImpl,authOrigin});
-    if(locationMatches(before.location,step.expected)){record(step.phase||'transfer','complete',`${step.label} was already complete in fresh Bungie inventory.`,{expected:step.expected,alreadyComplete:true});return before;}
+    if(locationMatches(before.location,step.expected)){record(step.phase||'transfer','complete',`${step.label} was already complete in Bungie inventory.`,{expected:step.expected,alreadyComplete:true});return before;}
     if(step.from&&before.location&&!locationMatches(before.location,step.from)&&!allowUnverifiedSource)throw Object.assign(new Error('The exact item moved to a different Bungie location before this transfer step.'),{detail:{expectedSource:step.from,actual:before.location?.source||null}});
-    if(step.from&&!before.location&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is continuing immediately from Bungie's accepted previous leg; final profile readback remains authoritative.`,{expectedSource:step.from,acceptedPreviousLeg:true});
+    if(step.from&&!before.location&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is moving to the destination…`,{expectedSource:step.from,acceptedPreviousLeg:true});
     else if(step.from&&!locationMatches(before.location,step.from)&&allowUnverifiedSource)record('transfer-consistency','continuing',`${step.label} is continuing from Bungie's accepted previous leg while profile readback catches up.`,{expectedSource:step.from,staleReadback:before.location?.source||null});
     for(let attempt=0;attempt<=AMBIGUOUS_ACTION_RETRY_LIMIT;attempt+=1){
       try{
@@ -514,7 +514,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     if(!location)blockers.push(`${item.name} is no longer present in the Bungie account inventory.`);
     else if(Number(location.itemHash)!==Number(item.itemHash))blockers.push(`${item.name} no longer matches its staged Bungie definition hash.`);
     if(destination.kind==='character'&&!Object.hasOwn(profile?.characters?.data||{},String(destination.characterId||'')))blockers.push('The destination Guardian is not present in the latest Bungie profile.');
-    if(blockers.length){record('preflight','blocked','Fresh Vault transfer preflight blocked all live changes.',blockers);result.status='blocked';return result;}
+    if(blockers.length){record('preflight','blocked','Transfer unavailable. Nothing changed.',blockers);result.status='blocked';return result;}
     if(locationMatches(location,destinationExpected)){
       result.readback={verified:true,expected:destinationExpected,actual:location.source,alreadyComplete:true};
       result.liveInventory=fresh;
@@ -524,7 +524,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
     }
     let source={...location.source},transferSourceEvidence=location;
     if(!['vault','carried','equipped'].includes(source.kind)){record('preflight','blocked',`${item.name} is in a Bungie location that cannot use the Vault transfer route.`,{actual:source});result.status='blocked';return result;}
-    record('preflight',locationMatches(location,reviewedSource)?'complete':'resumed',locationMatches(location,reviewedSource)?'Fresh ownership, location, and Guardian evidence verified. Bungie remains authoritative for transfer availability.':`Fresh Bungie inventory moved since staging. Resuming ${item.name} from its exact current ${source.kind} location.`,{reviewed:reviewedSource,actual:source});
+    record('preflight',locationMatches(location,reviewedSource)?'complete':'resumed',locationMatches(location,reviewedSource)?'Preparing transfer…':`Bungie inventory moved since staging. Resuming ${item.name} from its exact current ${source.kind} location.`,{reviewed:reviewedSource,actual:source});
 
     if(source.kind==='equipped'){
       if(liveActionCapabilities(session).equipItems!==true){record('equip-replacement','blocked','The live session cannot equip an exact replacement before moving this equipped item.');result.status='blocked';return result;}
@@ -537,7 +537,7 @@ async function executeVaultTransferIntent(intent,{session,fetchImpl=fetch,authOr
         if(failures.length){record('equip-replacement','failed','Bungie did not confirm the exact replacement equip.',{failures,ErrorCode:response?.ErrorCode??1});result.status='partial';return result;}
         const settled=await waitForInventoryLocation(item.itemInstanceId,{kind:'carried',characterId:source.characterId},{fetchImpl,authOrigin,waitImpl});
         const replacementEquipped=inventoryLocations(settled.fresh||{}).locations.get(String(replacement.itemInstanceId||''));
-        if(!settled.verified||!locationMatches(replacementEquipped,{kind:'equipped',characterId:source.characterId})){record('equip-replacement','mismatch','Fresh Bungie readback did not confirm the replacement equip.',{itemLocation:settled.location?.source||null,replacementLocation:replacementEquipped?.source||null});result.status='partial';return result;}
+        if(!settled.verified||!locationMatches(replacementEquipped,{kind:'equipped',characterId:source.characterId})){record('equip-replacement','mismatch','Bungie readback did not confirm the replacement equip.',{itemLocation:settled.location?.source||null,replacementLocation:replacementEquipped?.source||null});result.status='partial';return result;}
         record('equip-replacement','complete',label,{ErrorCode:response?.ErrorCode??1});
         source={kind:'carried',characterId:source.characterId};
         transferSourceEvidence=settled.location;result.liveInventory=settled.fresh||result.liveInventory;
@@ -613,7 +613,7 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
   };
   const transferItem=async(item,{characterId,transferToVault,expected,label,phase})=>{
     const response=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(characterId),itemId:String(item.itemInstanceId),itemReferenceHash:Number(item.itemHash),stackSize:1,transferToVault},label),settled=await waitForInventoryLocation(item.itemInstanceId,expected,{fetchImpl,authOrigin,waitImpl});
-    if(!settled.verified)throw Object.assign(new Error('Fresh Bungie inventory did not confirm the requested overflow transfer.'),{detail:{expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1}});
+    if(!settled.verified)throw Object.assign(new Error('Bungie inventory did not confirm the requested overflow transfer.'),{detail:{expected,actual:settled.location?.source||null,ErrorCode:response?.ErrorCode??1}});
     record(phase,'complete',label,{expected,ErrorCode:response?.ErrorCode??1});
     return settled;
   };
@@ -630,7 +630,7 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
       if(!pulled.verified)throw Object.assign(new Error('Bungie accepted the Postmaster retry but fresh inventory did not confirm collection.'),{detail:{actual:pulled.location?.source||null,ErrorCode:pullResponse?.ErrorCode??1}});
       record('collect-overflow-pull','complete',pullLabel,{actual:pulled.location?.source||null,ErrorCode:pullResponse?.ErrorCode??1});
       if(locationMatches(pulled.location,{kind:'carried',characterId:result.characterId}))await transferItem(item,{characterId:result.characterId,transferToVault:true,expected:{kind:'vault'},label:`Move ${item.name} to Vault`,phase:'collect-overflow-vault'});
-      else if(!locationMatches(pulled.location,{kind:'vault'}))throw Object.assign(new Error('Fresh Bungie inventory returned an unsupported destination for the collected Postmaster item.'),{detail:{actual:pulled.location?.source||null}});
+      else if(!locationMatches(pulled.location,{kind:'vault'}))throw Object.assign(new Error('Bungie inventory returned an unsupported destination for the collected Postmaster item.'),{detail:{actual:pulled.location?.source||null}});
       await transferItem(candidate,{characterId:result.characterId,transferToVault:false,expected:{kind:'carried',characterId:result.characterId},label:`Restore Bungie item ${candidate.itemInstanceId} to its character bucket`,phase:'collect-overflow-restore'});
       displacedInVault=false;
       record('collect','complete',`Collect ${item.name} from Postmaster to Vault`,{itemInstanceId:item.itemInstanceId,overflowToVault:true});
@@ -649,14 +649,14 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     const fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'}),{profile,locations}=inventoryLocations(fresh),blockers=[],collectable=[];
     if(!Object.hasOwn(profile?.characters?.data||{},result.characterId))blockers.push('The selected Guardian is not present in the latest Bungie profile.');
     if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
-    if(blockers.length){record('preflight','blocked','Fresh Postmaster preflight blocked all live changes.',blockers);result.status='blocked';return result;}
+    if(blockers.length){record('preflight','blocked','Postmaster collection unavailable. Nothing changed.',blockers);result.status='blocked';return result;}
     for(const item of intent.items||[]){
       const location=locations.get(String(item.itemInstanceId||''));
       if(location&&Number(location.itemHash)===Number(item.itemHash)&&locationMatches(location,{kind:'postmaster',characterId:result.characterId})){collectable.push(item);continue;}
       if(location&&Number(location.itemHash)===Number(item.itemHash)&&!intent.equipAfterCollection){completedItems+=1;record('collect','complete',`${item.name} already left this Guardian's Postmaster. No duplicate pull was sent.`,{itemInstanceId:item.itemInstanceId,actual:location.source,alreadyComplete:true});continue;}
       itemFailures+=1;record('collect','failed',`${item.name} is no longer an exact item in this Guardian's Postmaster.`,{itemInstanceId:item.itemInstanceId,actual:location?.source||null,actualItemHash:location?.itemHash||null});
     }
-    record('preflight','complete',`Fresh Postmaster evidence verified for ${collectable.length} exact item${collectable.length===1?'':'s'}${itemFailures?`; ${itemFailures} stale item${itemFailures===1?' was':'s were'} isolated so the remaining pulls can continue`:''}.`);
+    record('preflight','complete',`Fresh Postmaster data for ${collectable.length} exact item${collectable.length===1?'':'s'}${itemFailures?`; ${itemFailures} stale item${itemFailures===1?' was':'s were'} isolated so the remaining pulls can continue`:''}.`);
     for(const item of collectable){
       const label=`Collect ${item.name} from Postmaster`;
       try{
@@ -675,7 +675,7 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
               {characterId:result.targetCharacterId,transferToVault:false,expected:{kind:'carried',characterId:result.targetCharacterId},label:`Move ${item.name} from Vault to ${result.targetCharacterId}`}
             ]:[];
           const supported=locationMatches(location,{kind:'equipped',characterId:result.targetCharacterId})||locationMatches(location,{kind:'carried',characterId:result.targetCharacterId})||locationMatches(location,{kind:'vault'})||locationMatches(location,{kind:'carried',characterId:result.characterId});
-          if(!supported){record('direct-equip','blocked','Fresh Bungie readback returned an unsupported location after Postmaster collection.',{actual:location?.source||null});result.status='partial';return result;}
+          if(!supported){record('direct-equip','blocked','Bungie readback returned an unsupported location after Postmaster collection.',{actual:location?.source||null});result.status='partial';return result;}
           for(const step of transferSteps){
             try{
               const transferResponse=await mutate('/bungie/actions/transfer-item',{membershipType:Number(binding.membershipType),characterId:String(step.characterId),itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:1,transferToVault:step.transferToVault},step.label);

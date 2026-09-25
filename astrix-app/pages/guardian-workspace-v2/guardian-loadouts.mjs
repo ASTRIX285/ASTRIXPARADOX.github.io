@@ -1,6 +1,6 @@
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
-import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2';
+import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-1';
 
 const SLOT_COUNT=20;
 const BUNGIE_ORIGIN='https://www.bungie.net';

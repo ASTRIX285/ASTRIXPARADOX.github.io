@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
@@ -69,9 +70,9 @@ assert.deepEqual(
 assert.deepEqual(result.recommendedArmor, [], 'PF-BETA-11 should still recommend no armor');
 
 const expectedRejections = [
-  ['Buried Bloodline', 'Produces Devour, but PF-BETA-11 already has a verified Scatter Grenade -> Feed the Void -> Devour route; no new producer->consumer edge is proven.'],
-  ['Le Monarque', 'No explicit producer/consumer relationship to the verified Nothing Manacles / Scatter Grenade / Feed the Void loop is present in the supplied evidence.'],
-  ['Gnawing Hunger', 'No explicit producer/consumer relationship to the verified Nothing Manacles / Scatter Grenade / Feed the Void loop is present in the supplied evidence.'],
+  ['Buried Bloodline', 'Produces Devour, but PF-BETA-11 already has a Scatter Grenade -> Feed the Void -> Devour route; no new producer->consumer link was found.'],
+  ['Le Monarque', 'No explicit producer/consumer relationship to the Nothing Manacles / Scatter Grenade / Feed the Void loop is present in the supplied data.'],
+  ['Gnawing Hunger', 'No explicit producer/consumer relationship to the Nothing Manacles / Scatter Grenade / Feed the Void loop is present in the supplied data.'],
   ['Contraverse Hold', 'Cannot equip Contraverse Hold with anchor Exotic Nothing Manacles; both are Exotic armor.'],
   ["Verity's Brow", "Cannot equip Verity's Brow with anchor Exotic Nothing Manacles; both are Exotic armor."]
 ];

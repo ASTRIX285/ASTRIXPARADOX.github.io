@@ -11,7 +11,7 @@
     Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-1',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null,progress=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
@@ -61,14 +61,14 @@
     }finally{clearTimeout(timer);}
   }
   async function prepareData(destination){
-    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2',scriptUrl).href);
+    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
     if(destination.key==='reports'){
       const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-3',scriptUrl).href);
       await preloadReports(session);return;
     }
-    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1',scriptUrl).href);
+    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-1',scriptUrl).href);
     await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
   }
   function prepare(destination){

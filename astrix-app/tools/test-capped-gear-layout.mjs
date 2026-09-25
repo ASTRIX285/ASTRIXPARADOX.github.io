@@ -1,3 +1,4 @@
+// Prompt 19: preserve strict resource-tag expectations.
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
@@ -37,7 +38,7 @@ try{
    const items=inv.INVENTORY_GROUPS.flatMap((group,g)=>Array.from({length:10},(_,i)=>({itemHash:990000+g*10+i,itemInstanceId:String(900000+g*10+i),name:`Fixture ${group.label} ${i+1}`,icon,power:550,equipmentGroup:group,source:{kind:i?'carried':'equipped',characterId:'2'}})));
    const {renderGuardianCharacterCards}=await import('/astrix-app/pages/guardian-workspace-v2/guardian-character-cards.mjs');
    renderGuardianCharacterCards(['Hunter','Warlock','Titan'].map((characterClass,i)=>({characterId:String(i+1),characterClass,power:550,emblem:{background:icon},stats:Array.from({length:6},(_,i)=>[`Fixture stat ${i}`,60+i,icon])})),'2');
-   await new Promise((done,fail)=>{const script=document.createElement('script');script.src='/astrix-app/shared/astrix-destination-ribbon.js';script.onload=done;script.onerror=fail;document.head.append(script);});
+   await new Promise((done,fail)=>{const script=document.createElement('script');script.src='/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-1';script.onload=done;script.onerror=fail;document.head.append(script);});
    if(name==='Character'){
     document.querySelector('.equip').classList.add('gear-layout-active');
     document.getElementById('characterInventoryWorkspace').innerHTML=`<article class="vault-character-column is-active character-live-inventory"><div class="vault-character-inventory">${inv.equippedAndCarriedMarkup({characterId:'2',items})}</div></article>`;

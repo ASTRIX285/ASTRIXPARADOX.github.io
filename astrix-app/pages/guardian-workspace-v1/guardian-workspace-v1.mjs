@@ -28,10 +28,10 @@ function bindInspection(){
     all('[data-inspect]').forEach(item=>item.classList.remove('is-focused'));
     node.classList.add('is-focused');
     const label=node.querySelector('strong')?.textContent||node.title||node.dataset.inspect;
-    const description=node.dataset.description||'This component is ready for manifest, ownership and reasoning bindings.';
+    const description=node.dataset.description||'This component is ready for manifest, inventory and reasoning bindings.';
     setText('[data-selection]',`${label}: ${description}`);
   }));
-  all('[data-path-node]').forEach(node=>node.addEventListener('click',()=>setText('[data-selection]',`${node.dataset.pathNode}: this is one verified step in the build's directed cause-and-effect chain.`)));
+  all('[data-path-node]').forEach(node=>node.addEventListener('click',()=>setText('[data-selection]',`${node.dataset.pathNode}: this is one step in the build's directed cause-and-effect chain.`)));
 }
 
 function render(state){
@@ -83,7 +83,7 @@ function render(state){
   setText('[data-build-score]',state.analysis.buildScore??'--');
   setText('[data-health-grade]',state.analysis.health?.grade||'--');
   setText('[data-health-label]',state.analysis.health?.label||'Analysing');
-  setText('[data-health-summary]',state.analysis.health?.summary||'Connect Bungie for a verified personal assessment.');
+  setText('[data-health-summary]',state.analysis.health?.summary||'Connect Bungie for a personal assessment.');
   const measures=$('[data-measures]');if(measures)measures.innerHTML=renderMeters(state.analysis.measures);
   const coverage=$('[data-coverage]');if(coverage)coverage.innerHTML=renderCoverage(state.analysis.coverage);
   setText('[data-loop-summary]',state.analysis.loopSummary);
@@ -95,7 +95,7 @@ function render(state){
 
   const bottomDock=$('[data-bottom-dock]');if(bottomDock)bottomDock.innerHTML=state.equipment.weapons.map(dockCard).join('')+modsCard(state.equipment.mods)+statsCard(state.equipment.stats)+activityCard(state.activity);
   bindInspection();
-  $('[data-improve]')?.addEventListener('click',()=>setText('[data-selection]','Improve My Guardian: deployment validation, ownership checks and Bungie push planning will start here after account connection.'));
+  $('[data-improve]')?.addEventListener('click',()=>setText('[data-selection]','Improve My Guardian: deployment validation, inventory checks and Bungie push planning will start here after account connection.'));
 }
 
 async function init(){

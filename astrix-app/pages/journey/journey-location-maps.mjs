@@ -1,5 +1,5 @@
 // Journey-owned interactive map registry and viewer.
-import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3';
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3&plain=20260925-1';
 import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs?v=20260920-zoom-chests-3';
 
 const destinationMap=(key,name)=>Object.freeze({
@@ -321,7 +321,7 @@ function createDestinationDataView(key,label,mapFigure){
     const empty=document.createElement('span');
     empty.className='apx-empty-state journey-records-empty';
     const data=verifiedDestinationData.get(key);
-    empty.textContent=data?.loading?'Loading destination records…':data?.error||`No verified ${label} ${section.label.toLocaleLowerCase('en-GB')} are available.`;
+    empty.textContent=data?.loading?'Loading destination records…':data?.error||`No ${label} ${section.label.toLocaleLowerCase('en-GB')} are available.`;
     list.replaceChildren(empty);
   }
 

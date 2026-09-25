@@ -265,11 +265,11 @@ export function openArmourDrawer(index, item) {
     ? `<div class="paradox-card-body">
         <section class="paradox-section paradox-section--stats"><h3>ARMOUR STATS</h3>${armourStatMarkup(resolved)}</section>
         <section class="paradox-section paradox-section--energy"><h3>ENERGY</h3>${armourEnergyMarkup(resolved)}</section>
-        <section class="paradox-section paradox-section--traits"><h3>ARCHETYPE &amp; TRAITS</h3>${identities || '<p class="inspector-empty">No resolved archetype or trait evidence.</p>'}</section>
+        <section class="paradox-section paradox-section--traits"><h3>ARCHETYPE &amp; TRAITS</h3>${identities || '<p class="inspector-empty">No archetype or trait details.</p>'}</section>
        </div>`
     : fallback;
   document.querySelector('[data-panel="appearance"]').innerHTML = resolved
-    ? `<div class="paradox-card-body"><section class="paradox-section"><h3>ARMOUR COSMETICS</h3><div class="paradox-socket-grid">${cosmetics.map((entry, cosmeticIndex) => armourDetailTile(entry, cosmeticIndex === 0 ? "Shader" : "Ornament")).join("") || '<p class="inspector-empty">No resolved shader or ornament evidence.</p>'}</div></section></div>`
+    ? `<div class="paradox-card-body"><section class="paradox-section"><h3>ARMOUR COSMETICS</h3><div class="paradox-socket-grid">${cosmetics.map((entry, cosmeticIndex) => armourDetailTile(entry, cosmeticIndex === 0 ? "Shader" : "Ornament")).join("") || '<p class="inspector-empty">No shader or ornament details.</p>'}</div></section></div>`
     : fallback;
   document.querySelector('[data-panel="mods"]').innerHTML = mods.length
     ? `<div class="paradox-card-body"><section class="paradox-section"><div class="paradox-section-heading"><h3>ARMOUR MODS</h3><span>MASTERWORK · 2 GENERAL · 3 SLOT</span></div><div class="paradox-socket-grid">${mods.map((mod, modIndex) => armourDetailTile(mod, modIndex === 0 && /masterwork/i.test([mod?.semanticRole, itemName(mod)].join(" ")) ? "Masterwork" : "Armour mod")).join("")}</div></section></div>`

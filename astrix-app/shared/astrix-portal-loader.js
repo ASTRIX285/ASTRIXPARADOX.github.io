@@ -155,7 +155,7 @@
         '</div>'+
         '<div class="apx-brand">ASTRIX <em>PARADOX</em></div>'+
         '<div class="apx-auth-panel" hidden>'+
-          '<strong>BUNGIE AUTHENTICATION</strong>'+
+          '<strong>BUNGIE SIGN-IN</strong>'+
           '<span>Connect your Bungie account to load your live Guardian.</span>'+
           '<button class="apx-auth-button" type="button">CONNECT BUNGIE</button>'+
         '</div>'+
@@ -208,7 +208,7 @@
     document.body.classList.add('apx-loading');cache();apply();
     clearTimeout(noticeTimer);noticeTimer=setTimeout(function(){
       if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;
-      setStatus('Still loading verified Guardian data');
+      setStatus('Still loading Guardian data');
     },SLOW_LOAD_NOTICE_MS);
     document.documentElement.classList.remove('apx-booting');
   }
@@ -229,11 +229,11 @@
   function authRequired(url){
     if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
     pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
-    warmNavigation=false;mount();setStatus('Bungie authentication required');applyAuth();revealNavigation(true);
+    warmNavigation=false;mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
-    pendingBlockedMessage=String(message||'Verified live Guardian data is unavailable.');pendingDone=false;
+    pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
     warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
   }
   function settleImage(image){

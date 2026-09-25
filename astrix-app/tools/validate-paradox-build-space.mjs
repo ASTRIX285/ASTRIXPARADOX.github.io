@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createBuildState,diffBuilds,createValidationRecord,VALIDATION_STATUS} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
@@ -32,7 +33,7 @@ assert.equal(validateTierFiveArmour({armour:t5Armour,forgeLoaderDecision:{rankin
 assert.equal(validateTierFiveArmour({armour:t5Armour.map((row,index)=>index===2?{...row,armourTier:4}:row),forgeLoaderDecision:{ranking:{maximized:true}}}).ready,false,'Any armour below T5 must block generation.');
 assert.equal(validateTierFiveArmour({armour:t5Armour,forgeLoaderDecision:{ranking:{maximized:false}}}).ready,false,'A non-Maximized Forge Loader result must block generation.');
 assert.equal(verifiedMasterworkState({armourTier:5}),'MASTERWORK NOT REPORTED','T5 alone must not be presented as verified masterwork evidence.');
-assert.equal(verifiedMasterworkState({armourTier:5,masterwork:{semanticRole:'masterwork'}}),'MASTERWORK VERIFIED','An explicit masterwork socket must remain available to the hidden validation gate.');
+assert.equal(verifiedMasterworkState({armourTier:5,masterwork:{semanticRole:'masterwork'}}),'MASTERWORK','An explicit masterwork socket must remain available to the hidden validation gate.');
 
 const verifiedComponent=(hash,name,description,componentType,extra={})=>({hash,bungieHash:hash,name,description,componentType,source:'bungie-manifest',definition:{displayProperties:{name,description},traitIds:extra.traitIds||[]},...extra});
 const quietSuper=verifiedComponent(101,'Quiet Super','Arc damage.','super');
@@ -65,7 +66,7 @@ assert.ok(composed.workingBuild.subclassBuild.aspects.every(row=>row.unresolved!
 assert.deepEqual(composed.workingBuild.abilities.map(row=>row.hash),composed.workingBuild.subclassBuild.abilities.map(row=>row.hash),'The root live-transfer projection must match the recommended subclass socket projection.');
 assert.equal(composed.intelligence.source,'verified-forge-loader-bungie-catalogue');
 assert.ok(composed.intelligence.evidence.directedLinks>=4,'The decision ledger must preserve directed evidence metrics.');
-assert.throws(()=>composeForgeRecommendation({build:intelligenceSource,candidate:{...intelligenceCandidate,subclassBuild:{...intelligenceCandidate.subclassBuild,socketsAvailable:false}},element:'arc',analyzeBuild:analyseCandidate}),/complete verified Bungie subclass socket set/,'A canonical element without a live verified socket set must never be offered as an intelligence result.');
+assert.throws(()=>composeForgeRecommendation({build:intelligenceSource,candidate:{...intelligenceCandidate,subclassBuild:{...intelligenceCandidate.subclassBuild,socketsAvailable:false}},element:'arc',analyzeBuild:analyseCandidate}),/complete Bungie subclass socket set/,'A canonical element without a live verified socket set must never be offered as an intelligence result.');
 assert.deepEqual(composeForgeRecommendation({build:intelligenceSource,candidate:intelligenceCandidate,element:'arc',analyzeBuild:analyseCandidate,bounded:true}),composed,'Bounded worker scoring must retain the established choices and evidence.');
 const prismaticFragments=['arc','solar','void','stasis','strand'].map((element,index)=>verifiedComponent(400+index,`${element} fragment`,`${element} damage interaction.`, 'fragment',{element}));
 const prismaticCandidate={...intelligenceCandidate,element:'prismatic',name:'Prismatic',subclassBuild:{...intelligenceCandidate.subclassBuild,aspects:[{...joltAspect,fragmentSlots:5}],availableAspects:[{...joltAspect,fragmentSlots:5}],fragments:prismaticFragments.slice(0,2),availableFragments:prismaticFragments}};
@@ -248,7 +249,7 @@ const secondPass=selectOwnedWeapons({build:comboResult.workingBuild,objective:'d
 assert.equal(secondPass.recommendation.decisions[0].action,'REPLACE','Artifact-aware ranking must not relabel its previous replacement as current best fit.');
 const selectedAlternative=comboRecommendation.combinations[1].weapons.map(item=>item.itemInstanceId),alternativeResult=selectOwnedWeapons({build:comboSource,objective:'dps',weaponInstanceIds:selectedAlternative});
 assert.deepEqual(alternativeResult.workingBuild.weapons.map(item=>item.itemInstanceId),selectedAlternative,'The chosen trio must be used as exact instances.');
-assert.throws(()=>selectOwnedWeapons({build:comboSource,weaponInstanceIds:['missing',...selectedAlternative.slice(1)]}),/complete owned weapon instances/,'A stale or unowned choice must fail rather than silently substitute another item.');
+assert.throws(()=>selectOwnedWeapons({build:comboSource,weaponInstanceIds:['missing',...selectedAlternative.slice(1)]}),/complete weapon instances/,'A stale or unowned choice must fail rather than silently substitute another item.');
 const brokenCandidate=structuredClone(comboWeapons[1]);brokenCandidate.itemInstanceId='broken';brokenCandidate.weaponSemantics.perkModel.columns[0].selectedPlugHash=null;
 const evidenceResult=selectOwnedWeapons({build:{...comboSource,ownedWeapons:[...comboWeapons,brokenCandidate]}});
 assert.ok(evidenceResult.recommendation.excluded.some(item=>item.itemInstanceId==='broken'));
@@ -328,12 +329,12 @@ assert.match(html,/id="generateMaxLoadout"[^>]*>[^<]+<\/button>[\s\S]*?id="forge
 assert.match(css,/\.forge-generation-loader\{[^}]*background:transparent\}/,'Recommendation generation must reuse only the circular loader without a full-screen background.');
 assert.match(runtime,/await showForgeGenerationLoader\(selectedRecommendationElement\)[\s\S]*?forgePreparation\.get/,'The circular loader must paint before verified build generation begins.');
 assert.match(runtime,/writeState\(next\);render\(\);hideForgeGenerationLoader\(\);if\(!await openRecommendedBuild\(\)\)throw new Error/,'The in-page loader must close before the generated result opens, and a failed review open must be reported.');
-assert.match(html,/OWNED VAULT \+ CHARACTER INVENTORY/,'The recommendation review must identify its full verified weapon-inventory scope.');
+assert.match(html,/VAULT \+ CHARACTER INVENTORY/,'The recommendation review must identify its full verified weapon-inventory scope.');
 assert.match(sequenceRuntime,/initialWeaponResult=selectOwnedWeapons[\s\S]*?applyForgeArtifactRecommendation\(next,\{currentSeasonNumber,force:true\}\)[\s\S]*?artifactAwareWeaponResult=selectOwnedWeapons/,'Generation must rank owned weapons, select Artifact synergy, then re-rank weapons against that Artifact fit.');
 assert.match(sequenceRuntime,/provisionalModResult=recommendArmourMods[\s\S]*?applyForgeArtifactRecommendation\(next,\{currentSeasonNumber,force:true\}\)[\s\S]*?artifactAwareWeaponResult=selectOwnedWeapons/,'Generation must expose the grenade-orb-Super mod loop to Artifact ranking before re-ranking owned weapons.');
 assert.match(sequenceRuntime,/artifactSynergyScore:Number\(working\.artifactRecommendation\?\.totalScore\|\|0\)/,'Forge intelligence must record the verified Artifact synergy contribution.');
 assert.match(html,/id="armourExoticRule">DESTINY EQUIP RULE · 1 EXOTIC ARMOUR/,'The review must show the enforced one-Exotic armour rule.');
-assert.match(html,/id="weaponExoticRule">OWNED VAULT \+ CHARACTER INVENTORY · 1 EXOTIC WEAPON MAX/,'The review must show both its full owned inventory scope and one-Exotic weapon limit.');
+assert.match(html,/id="weaponExoticRule">VAULT \+ CHARACTER INVENTORY · 1 EXOTIC WEAPON MAX/,'The review must show both its full owned inventory scope and one-Exotic weapon limit.');
 assert.match(runtime,/EXOTIC ANCHOR: \$\{String\(anchorName\)\.toUpperCase\(\)\}/,'The recommendation heading must name the selected Exotic armour anchor.');
 assert.match(runtime,/changedItems=\(plan\.items\|\|\[\]\)[\s\S]*?filter\(row=>row\.action!=='KEEP'\)/,'The review must omit unchanged mod sockets and present only proposed changes.');
 assert.match(runtime,/review-artifact-synergy[\s\S]*?ARTIFACT SYNERGY/,'The review must expose the evidence behind the Artifact recommendation.');
@@ -362,7 +363,7 @@ assert.match(runtime,/resolvedSubclassOptions\(build\)\.filter\(hasVerifiedSubcl
 assert.match(runtime,/filterExoticCompatibleSubclasses\(build,verified\)/,'Element buttons must remove subclass options that conflict with an explicitly named selected-Exotic ability.');
 assert.match(html,/id="buildSuperSynergy"[^>]*role="status"/,'Build Forge must expose per-Super Exotic evidence beside the selectable Super formation.');
 assert.match(runtime,/rankExoticSuperSynergy\(build,candidate\?\[candidate\]:\[\]\)/,'The visible Super formation must use the same evidence-backed ranking as generation.');
-assert.match(runtime,/NO DIRECT SYNERGY EVIDENCE/,'Build Forge must state plainly when the staged Exotic does not support a Super.');
+assert.match(runtime,/NO DIRECT SYNERGY/,'Build Forge must state plainly when the staged Exotic does not support a Super.');
 assert.match(css,/\.super-diamond\.is-exotic-super-best\{[^}]*box-shadow/,'Only Supers with the strongest real Exotic evidence may receive the evidence highlight.');
 assert.match(intelligenceRuntime,/status:!description\?'unknown':strongest>0\?'evidenced':'no-direct-super-synergy'/,'Missing Super synergy evidence must remain an explicit no-ranking result.');
 assert.match(sequenceRuntime,/working\.paradoxAnalysis=analyzeLiveGuardian\(working\)[\s\S]*?advise\(working,working\.paradoxAnalysis\|\|\{\}, \{insertSocketPlugFree:false\}\)/,'Generation must re-run directed analysis after Artifact selection before recommendation-only weapon advice.');
@@ -405,7 +406,7 @@ assert.doesNotMatch(html,/T5 BASE REQUIRED|T5 VERIFIED|MASTERWORK NOT REPORTED/,
 assert.match(gearRuntime,/return \[masterwork, \.\.\.clean\(generalSource\)\.slice\(0, 2\), \.\.\.clean\(slotSource\)\.slice\(0, 3\)\]/,'Armour mapping must remain masterwork, two general slots and three armour slots.');
 
 assert.match(html,/id="applyWorkingBuild" disabled>APPLY<\/button>/,'The Working Build must expose one explicit Apply entry point outside generation.');
-assert.match(html,/id="applyConfirmationDialog"[\s\S]*?LIVE BUNGIE ACTION · FINAL CONFIRMATION[\s\S]*?id="confirmApplyBuild">APPLY TO THIS GUARDIAN<\/button>/,'Apply must open an exact Guardian-scoped final confirmation before any live action.');
+assert.match(html,/id="applyConfirmationDialog"[\s\S]*?APPLY · FINAL CONFIRMATION[\s\S]*?id="confirmApplyBuild">APPLY TO THIS GUARDIAN<\/button>/,'Apply must open an exact Guardian-scoped final confirmation before any live action.');
 assert.match(html,/LIVE GUARDIAN UNCHANGED/,'The review must state that generation does not alter the live Guardian.');
 assert.doesNotMatch(runtime,/if\(!build\?\.recommendationGeneratedAt\)throw new Error/,'Manual Apply must not depend on generating an AI recommendation first.');
 const planStart=runtime.indexOf('function buildLivePlan()'),applyEnd=runtime.indexOf('function verifiedActivities',planStart),applySource=runtime.slice(planStart,applyEnd);

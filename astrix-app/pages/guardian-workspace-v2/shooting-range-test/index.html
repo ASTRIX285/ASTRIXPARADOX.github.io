@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
 <link rel="stylesheet" href="../../../shared/astrix-portal-loader.css?v=20260913-live-gate-1">
 <script>window.APX_LOGO='../../../../img/logo.png';</script>
-<script src="../../../shared/astrix-portal-loader.js?v=20260913-live-gate-1"></script>
+<script src="../../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;plain=20260925-1"></script>
 <style>
 :root{color-scheme:dark;font-family:bahnschrift,system-ui,sans-serif;background:#050509;color:#f5f5f7}*{box-sizing:border-box}body{margin:0;padding:32px;background:radial-gradient(circle at 50% 0,#160d20,#050509 48%);min-height:100vh}.wrap{max-width:1100px;margin:auto}.card{border:1px solid #4a245f;border-radius:14px;background:#0e0b13;padding:20px;margin-bottom:16px}h1,h2{margin:0 0 12px}p{color:#b8b3bf;line-height:1.5}.row{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid #9a65d5;background:#231230;color:#fff;padding:12px 16px;border-radius:9px;font-weight:800;cursor:pointer}.btn.primary{border-color:#cf3340;background:#a6111c}.btn:disabled{opacity:.45;cursor:wait}.status{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;background:#050507;border:1px solid #26212d;border-radius:10px;padding:14px;max-height:62vh;overflow:auto}.ok{color:#67e3ad}.warn{color:#ffcf66}.bad{color:#ff7d89}.meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pill{border:1px solid #2f2938;border-radius:9px;padding:10px;background:#09080c}.pill small{display:block;color:#8d8695;margin-bottom:4px}@media(max-width:760px){body{padding:14px}.meta{grid-template-columns:1fr}}
 </style>
@@ -40,13 +40,13 @@
     </div>
   </section>
   <section class="card">
-    <h2>Raw verified output</h2>
+    <h2>Raw output</h2>
     <div id="output" class="status">Ready.</div>
   </section>
 </div>
 <script type="module">
-import {getBungieSession} from '../guardian-bungie-auth.mjs';
-import {armShootingRangeCapture,collectShootingRangeResults,readCapture,clearCapture} from '../guardian-shooting-range-capture.mjs';
+import {getBungieSession} from '../guardian-bungie-auth.mjs?plain=20260925-1';
+import {armShootingRangeCapture,collectShootingRangeResults,readCapture,clearCapture} from '../guardian-shooting-range-capture.mjs?plain=20260925-1';
 const $=id=>document.getElementById(id);
 const out=$('output');
 const pretty=value=>JSON.stringify(value,null,2);

@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {accountItemRows,forgeLoaderEvaluateReady,forgeLoaderResidency} from '../pages/forge-loader/forge-loader-residency.mjs';
 import {forgeInventorySignature} from '../pages/forge-loader/forge-loader-refresh.mjs';
@@ -57,7 +58,7 @@ const resident=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,
 assert.equal(resident.ready,false);
 assert.equal(resident.rows.every(row=>row.state==='resident'),true);
 assert.match(resident.rows.find(row=>row.key==='vault-armour').detail,/2 armour items indexed/);
-assert.match(resident.rows.find(row=>row.key==='weapons').detail,/1 owned weapons indexed/);
+assert.match(resident.rows.find(row=>row.key==='weapons').detail,/1 weapons indexed/);
 
 const ready=forgeLoaderResidency(payload,{characterId,catalogue,profileBuild,phase:'ready',backendSolverReady:true,durationMs:1250});
 assert.equal(ready.ready,true);

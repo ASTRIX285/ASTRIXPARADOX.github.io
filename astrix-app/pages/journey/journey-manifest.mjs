@@ -1,4 +1,4 @@
-import {GuardianManifestService} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1';
+import {GuardianManifestService} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 const BASE=new URL('../../data/journey-index/',import.meta.url);
 const validHash=value=>value!==null&&value!==undefined&&value!==''&&Number.isInteger(Number(value))&&Number(value)>0&&Number(value)<=0xffffffff;

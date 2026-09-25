@@ -1,4 +1,4 @@
-import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260916-unique-artifact-picks-1';
+import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-1';
 import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 
 const clone=value=>{

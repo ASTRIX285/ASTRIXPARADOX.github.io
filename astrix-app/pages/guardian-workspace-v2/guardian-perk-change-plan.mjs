@@ -93,7 +93,7 @@ function transferStepsForTarget(target,characterId){
   ],blocker:''};
   if(kind==='equipped'&&sourceCharacterId&&sourceCharacterId!==characterId)return {steps:[],blocker:`${target.name} is equipped on another Guardian. Unequip it there before applying this build.`};
   if(kind==='postmaster')return {steps:[],blocker:`${target.name} is in Postmaster and must be collected before it can be applied.`};
-  return {steps:[],blocker:`${target.name} does not have verified owned-location evidence.`};
+  return {steps:[],blocker:`${target.name} is not in your inventory.`};
 }
 
 function subclassSelections(build={}){
@@ -116,7 +116,7 @@ function inferredSubclassChanges(build={},originalBuild={}){
     if(Number.isInteger(currentPlugHash)&&currentPlugHash===plugHash)continue;
     const candidate=normalizedChange({itemInstanceId,itemHash:hashOf(subclassItem),itemName:build.subclassName||'Subclass',socketIndex,plugHash,plugName:itemName(row),currentPlugHash:Number.isInteger(currentPlugHash)?currentPlugHash:null,component:`subclass-${row.componentType||'socket'}`,source:row.source||'bungie-reusable-plugs',remoteSupported:row.canInsert===true&&exactRemoteSocketEvidence(row)},'subclass');
     if(candidate.itemInstanceId&&candidate.remoteSupported)changes.push(candidate);
-    else manual.push(`Set ${itemName(row)} on ${build.subclassName||build.subclass||'the selected subclass'} in Destiny; a verified free socket mapping was not exposed.`);
+    else manual.push(`Set ${itemName(row)} on ${build.subclassName||build.subclass||'the selected subclass'} in Destiny; a free socket mapping was not exposed.`);
   }
   return {changes,manual};
 }
@@ -175,9 +175,9 @@ function createLiveTransferPlan({build={},originalBuild={},advice=null,capabilit
   if(subclassItem&&itemIdOf(subclassItem))targets.push(equipmentTarget(subclassItem,'subclass',0));
   const blockers=[];
   if(!/^\d+$/.test(characterId)||!/^\d+$/.test(membershipId)||!/^\d+$/.test(membershipType))blockers.push('The Working Build is not bound to a Bungie Guardian and Destiny membership.');
-  if(weapons.length!==3)blockers.push('Three exact owned weapon instances are required before Apply.');
+  if(weapons.length!==3)blockers.push('Three weapon instances are required before Apply.');
   if(armour.length!==5)blockers.push('Five exact armour instances are required before Apply.');
-  if(targets.some(row=>!/^\d+$/.test(row.itemInstanceId)))blockers.push('Every applied item must have an exact owned Bungie instance ID.');
+  if(targets.some(row=>!/^\d+$/.test(row.itemInstanceId)))blockers.push('Every applied item must have a Bungie instance ID.');
   if(targets.some(row=>!Number.isInteger(row.itemHash)||row.itemHash<0))blockers.push('Every applied item must retain its exact Bungie item hash.');
   if(new Set(targets.map(row=>row.itemInstanceId)).size!==targets.length)blockers.push('Each equipment target must use a distinct Bungie item instance.');
   weapons.forEach((item,index)=>{const bucket=Number(item?.bucketHash??item?.definition?.inventory?.bucketTypeHash);if(bucket!==WEAPON_BUCKETS[index])blockers.push(`Weapon slot ${index+1} does not match its Destiny equipment bucket.`);});
@@ -202,18 +202,18 @@ function createLiveTransferPlan({build={},originalBuild={},advice=null,capabilit
   for(const change of bySocket.values()){
     if(change.remoteSupported&&change.reversible&&targets.some(target=>target.itemInstanceId===change.itemInstanceId))socketChanges.push(change);
     else if(change.remoteSupported&&!targets.some(target=>target.itemInstanceId===change.itemInstanceId))blockers.push(`${change.plugName||`Plug ${change.plugHash}`} is not attached to an exact equipment target.`);
-    else inGameSteps.push(`Set ${change.plugName||`plug ${change.plugHash}`} on ${change.itemName||`item ${change.itemInstanceId}`} in Destiny; this socket was not verified as a free remote insertion.`);
+    else inGameSteps.push(`Set ${change.plugName||`plug ${change.plugHash}`} on ${change.itemName||`item ${change.itemInstanceId}`} in Destiny; this socket was unavailable as a free remote insertion.`);
   }
   const artifactStep=intendedArtifactStep(build);if(artifactStep)inGameSteps.push(artifactStep);
 
   const weaponSocketChanges=socketChanges.filter(row=>row.component!=='armour-mod'),armourModChanges=socketChanges.filter(row=>row.component==='armour-mod');
   const requirements=[
-    {key:'captureSnapshot',capability:'captureSnapshot',label:'Capture fresh ownership, equipment and activity state',changes:targets.length,required:true},
+    {key:'captureSnapshot',capability:'captureSnapshot',label:'Check items, equipment and activity',changes:targets.length,required:true},
     {key:'transferItems',capability:'transferItems',label:'Transfer target items to the selected Guardian',changes:transfers.length,required:transfers.length>0},
     {key:'equipItems',capability:'equipItems',label:'Equip exact item instances',changes:targets.length,required:targets.length>0},
-    {key:'verifyEquipment',capability:'verifyEquipment',label:'Verify equipped instance IDs from a fresh profile',changes:targets.length,required:targets.length>0},
-    {key:'applyWeaponSockets',capability:'insertSocketPlugFree',label:'Apply verified weapon and subclass socket changes',changes:weaponSocketChanges.length,required:weaponSocketChanges.length>0},
-    {key:'applyArmourMods',capability:'insertSocketPlugFree',label:'Apply verified armour mod changes',changes:armourModChanges.length,required:armourModChanges.length>0},
+    {key:'verifyEquipment',capability:'verifyEquipment',label:'Check equipped items',changes:targets.length,required:targets.length>0},
+    {key:'applyWeaponSockets',capability:'insertSocketPlugFree',label:'Apply weapon and subclass socket changes',changes:weaponSocketChanges.length,required:weaponSocketChanges.length>0},
+    {key:'applyArmourMods',capability:'insertSocketPlugFree',label:'Apply armour mod changes',changes:armourModChanges.length,required:armourModChanges.length>0},
     {key:'verifyFinalState',capability:'verifyFinalState',label:'Read back the final Bungie profile',changes:targets.length+socketChanges.length,required:true}
   ];
   const phases=requirements.map((phase,index)=>({...phase,order:index+1,status:!phase.required?'skipped':supported[phase.capability]?'supported':'blocked'}));
@@ -243,7 +243,7 @@ function createLiveTransferPlan({build={},originalBuild={},advice=null,capabilit
 }
 
 function confirmPerkChangePlan(plan){
-  if(!plan?.changes?.length)throw new Error('No verified perk changes are staged.');
+  if(!plan?.changes?.length)throw new Error('No perk changes are staged.');
   if(!plan.remotePerkMutationSupported)throw new Error('The Bungie socket action route is not enabled.');
   return {...clone(plan),status:'confirmed',confirmedAt:new Date().toISOString()};
 }

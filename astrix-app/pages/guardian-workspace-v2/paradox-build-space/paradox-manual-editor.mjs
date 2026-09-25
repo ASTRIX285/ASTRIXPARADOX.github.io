@@ -1,4 +1,4 @@
-import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs?plain=20260925-1';
 import {classifyArmourPlug,classifyWeaponPlug,normaliseWeaponPerkModel} from '../guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 
 const CLASS_TYPES={titan:0,hunter:1,warlock:2};
@@ -36,7 +36,7 @@ function recordManualEdit(build,entry={}){
 function validateEquipmentChoice(build,kind,slotIndex,item){
   const expected=(kind==='weapon'?WEAPON_BUCKETS:ARMOUR_BUCKETS)[slotIndex],actual=Number(item?.bucketHash??item?.definition?.inventory?.bucketTypeHash);
   if(actual!==expected)throw new TypeError(`This item does not belong in ${kind} slot ${slotIndex+1}.`);
-  if(!/^\d+$/.test(itemId(item)))throw new TypeError('Manual equipment choices require an exact owned Bungie instance.');
+  if(!/^\d+$/.test(itemId(item)))throw new TypeError('Manual equipment choices require a Bungie instance.');
   if(!manualEquipmentSourceAllowed(item,build.characterId))throw new TypeError('Manual equipment choices are limited to this Guardian’s carried or equipped items plus the Vault.');
   if(kind==='armour'){
     const expectedClass=CLASS_TYPES[String(build.characterClass||'').toLowerCase()],classType=Number(item?.classType??item?.definition?.classType);
@@ -106,11 +106,11 @@ function updateArmourSocket(item,socketIndex,option){
 }
 
 function stageSocketChoice(build,kind,slotIndex,socketIndex,option){
-  if(!['weapon','armour'].includes(kind)||option?.canInsert!==true)throw new TypeError('Only a verified insertable socket option can be staged.');
+  if(!['weapon','armour'].includes(kind)||option?.canInsert!==true)throw new TypeError('Only an insertable socket option can be staged.');
   const key=kind==='weapon'?'weapons':'armour',item=clone(build[key]?.[slotIndex]);
-  if(!item||!/^\d+$/.test(itemId(item)))throw new TypeError('Select an exact owned item before editing its sockets.');
+  if(!item||!/^\d+$/.test(itemId(item)))throw new TypeError('Select an item before editing its sockets.');
   const verified=socketGroups(item,kind).find(group=>group.socketIndex===Number(socketIndex))?.options.some(row=>hashOf(row)===hashOf(option));
-  if(!verified)throw new TypeError('This socket option is not in the item’s verified reusable plug set.');
+  if(!verified)throw new TypeError('This socket option is not in the item’s reusable plug set.');
   const current=item.socketCoverage?.plugs?.find(row=>Number(row?.socketIndex)===Number(socketIndex))||null,currentPlugHash=hashOf(current),plugHash=hashOf(option);
   replaceSocketPlug(item,Number(socketIndex),option);
   if(kind==='weapon')updateWeaponSocket(item,Number(socketIndex),option);else updateArmourSocket(item,Number(socketIndex),option);
@@ -129,7 +129,7 @@ function stageSocketChoice(build,kind,slotIndex,socketIndex,option){
 
 function stageSubclassSocketChoice(build,before,option,component='socket'){
   const socketIndex=Number(option?.socketIndex),plugHash=hashOf(option),currentPlugHash=hashOf(before),subclassItem=build.subclassItem||null,subclassItemInstanceId=String(build.subclassItemInstanceId||itemId(subclassItem)||'');
-  if(!Number.isInteger(socketIndex)||!Number.isInteger(plugHash)||plugHash<=0)throw new TypeError('This subclass choice has no verified socket identity.');
+  if(!Number.isInteger(socketIndex)||!Number.isInteger(plugHash)||plugHash<=0)throw new TypeError('This subclass choice has no socket identity.');
   const changes=[...(build.manualSocketChanges||[])],changeAt=changes.findIndex(row=>String(row.itemInstanceId)===subclassItemInstanceId&&Number(row.socketIndex)===socketIndex),prior=changeAt>=0?changes[changeAt]:null,originalHash=Number.isInteger(Number(prior?.currentPlugHash))?Number(prior.currentPlugHash):Number.isInteger(currentPlugHash)?currentPlugHash:null;
   if(originalHash===plugHash){if(changeAt>=0)changes.splice(changeAt,1);}
   else{

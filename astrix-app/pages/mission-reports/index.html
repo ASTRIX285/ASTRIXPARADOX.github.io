@@ -15,14 +15,14 @@
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
-  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1"></script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;plain=20260925-1"></script>
   <link rel="stylesheet" href="../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22">
   <link rel="stylesheet" href="../guardian-workspace-v2/guardian-character-cards.css?v=20260902-recent-guardian-emblem-1">
   <link rel="stylesheet" href="./mission-reports.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;capped=20260924-dim66-1">
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1&amp;capped=20260924-dim66-1">
-  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3" defer></script>
+  <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;plain=20260925-1" defer></script>
 </head>
 <body data-apx-button-system class="apx-destination-page mission-reports-page forge-paradox-map-background">
   <header class="mission-topbar topbar apx-destination-header forge-command-header">
@@ -30,7 +30,7 @@
       <img src="../../../img/logo.png" alt="ASTRIX PARADOX">
       <span><strong>ASTRIX <em>PARADOX</em></strong><small>AI GAMING INTELLIGENCE</small></span>
     </a>
-    <div class="mission-workspace-title workspace-title apx-destination-header-copy"><strong>MISSION REPORTS</strong><small>REVIEW VERIFIED GUARDIAN ACTIVITY</small></div>
+    <div class="mission-workspace-title workspace-title apx-destination-header-copy"><strong>MISSION REPORTS</strong><small>REVIEW GUARDIAN ACTIVITY</small></div>
     <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters">
       <div class="guardian-character-cards__status is-pending" role="status">CHECKING BUNGIE CHARACTERS</div>
     </div>
@@ -67,7 +67,7 @@
           <h1 id="missionGuardianClass">Guardian unavailable</h1>
           <p id="missionGuardianSubclass">Subclass unavailable</p>
         </div>
-        <span class="mission-verified-badge" id="missionVerifiedGuardian" hidden>✓ VERIFIED GUARDIAN</span>
+        <span class="mission-verified-badge" id="missionVerifiedGuardian" hidden></span>
       </section>
 
       <section class="mission-guardian-stats" aria-label="Guardian Journey statistics">
@@ -104,7 +104,7 @@
         <button type="button" role="tab" aria-selected="true" data-mission-view="overview">OVERVIEW</button>
         <button type="button" role="tab" aria-selected="false" data-mission-view="pve">PVE</button>
         <button type="button" role="tab" aria-selected="false" data-mission-view="pvp">PVP</button>
-        <button type="button" role="tab" aria-selected="false" data-mission-view="build">BUILD EVIDENCE</button>
+        <button type="button" role="tab" aria-selected="false" data-mission-view="build">BUILD DATA</button>
         <span class="mission-feed-state" id="missionFeedStatus" aria-live="polite">CONNECTING</span>
       </div>
 
@@ -112,42 +112,42 @@
         <article class="mission-metric-card">
           <span class="mission-metric-icon" aria-hidden="true">◫</span>
           <div><small>TOTAL ACTIVITIES</small><strong id="missionMetricActivities">—</strong><span id="missionMetricActivitiesNote">Awaiting live history</span></div>
-          <i class="mission-verified-tick" id="missionMetricActivitiesVerified" title="Verified live value" hidden>✓</i>
+          <i class="mission-verified-tick" id="missionMetricActivitiesVerified" title="Current value" hidden>✓</i>
         </article>
         <article class="mission-metric-card mission-metric-card--donut">
           <svg class="mission-mini-donut" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17"/><circle id="missionCompletionDonut" class="mission-donut-value" cx="22" cy="22" r="17" pathLength="100"/></svg>
-          <div><small>COMPLETION RATE</small><strong id="missionMetricCompletion">—</strong><span id="missionMetricCompletionNote">Awaiting completion evidence</span></div>
-          <i class="mission-verified-tick" id="missionMetricCompletionVerified" title="Verified live value" hidden>✓</i>
+          <div><small>COMPLETION RATE</small><strong id="missionMetricCompletion">—</strong><span id="missionMetricCompletionNote">Awaiting completion data</span></div>
+          <i class="mission-verified-tick" id="missionMetricCompletionVerified" title="Current value" hidden>✓</i>
         </article>
         <article class="mission-metric-card">
           <span class="mission-metric-icon" aria-hidden="true">⬡</span>
-          <div><small>PVE CLEARS</small><strong id="missionMetricPve">—</strong><span id="missionMetricPveNote">Awaiting PVE evidence</span></div>
-          <i class="mission-verified-tick" id="missionMetricPveVerified" title="Verified live value" hidden>✓</i>
+          <div><small>PVE CLEARS</small><strong id="missionMetricPve">—</strong><span id="missionMetricPveNote">Awaiting PVE data</span></div>
+          <i class="mission-verified-tick" id="missionMetricPveVerified" title="Current value" hidden>✓</i>
         </article>
         <article class="mission-metric-card">
           <span class="mission-metric-icon" aria-hidden="true">◇</span>
-          <div><small>PVP K/D</small><strong id="missionMetricPvp">—</strong><span id="missionMetricPvpNote">Awaiting PVP evidence</span></div>
-          <i class="mission-verified-tick" id="missionMetricPvpVerified" title="Verified live value" hidden>✓</i>
+          <div><small>PVP K/D</small><strong id="missionMetricPvp">—</strong><span id="missionMetricPvpNote">Awaiting PVP data</span></div>
+          <i class="mission-verified-tick" id="missionMetricPvpVerified" title="Current value" hidden>✓</i>
         </article>
       </section>
 
       <section class="mission-panel mission-journey-overview" id="journeyOverview" aria-labelledby="journeyOverviewTitle">
         <header class="mission-panel-heading">
           <div><p class="mission-eyebrow">MILESTONE RECORD</p><h2 id="journeyOverviewTitle">JOURNEY OVERVIEW</h2></div>
-          <span>VERIFIED PROGRESSION ONLY</span>
+          <span>PROGRESSION ONLY</span>
         </header>
         <div class="mission-timeline-layout">
           <div class="mission-timeline" id="missionMilestoneTimeline">
-            <article data-milestone="light-reforged"><i></i><h3>Light Reforged</h3><p>Awaiting verified milestone</p><time>—</time></article>
-            <article data-milestone="vanguard"><i></i><h3>Vanguard</h3><p>Awaiting verified milestone</p><time>—</time></article>
-            <article data-milestone="dungeon-conqueror"><i></i><h3>Dungeon Conqueror</h3><p>Awaiting verified milestone</p><time>—</time></article>
-            <article data-milestone="flawless-warrior"><i></i><h3>Flawless Warrior</h3><p>Awaiting verified milestone</p><time>—</time></article>
-            <article data-milestone="raid-master"><i></i><h3>Raid Master</h3><p>Awaiting verified milestone</p><time>—</time></article>
-            <article data-milestone="journey-level"><i></i><h3>Journey Level</h3><p>Awaiting verified milestone</p><time>—</time></article>
+            <article data-milestone="light-reforged"><i></i><h3>Light Reforged</h3><p>Awaiting milestone</p><time>—</time></article>
+            <article data-milestone="vanguard"><i></i><h3>Vanguard</h3><p>Awaiting milestone</p><time>—</time></article>
+            <article data-milestone="dungeon-conqueror"><i></i><h3>Dungeon Conqueror</h3><p>Awaiting milestone</p><time>—</time></article>
+            <article data-milestone="flawless-warrior"><i></i><h3>Flawless Warrior</h3><p>Awaiting milestone</p><time>—</time></article>
+            <article data-milestone="raid-master"><i></i><h3>Raid Master</h3><p>Awaiting milestone</p><time>—</time></article>
+            <article data-milestone="journey-level"><i></i><h3>Journey Level</h3><p>Awaiting milestone</p><time>—</time></article>
           </div>
           <aside class="mission-recent-progression">
             <h3>RECENT PROGRESSION</h3>
-            <div class="mission-inline-empty" id="missionRecentProgression">No verified progression milestones are available.</div>
+            <div class="mission-inline-empty" id="missionRecentProgression">No progression milestones are available.</div>
           </aside>
         </div>
         <div class="mission-pagination" aria-label="Journey overview pages"><span class="is-active"></span><span></span><span></span></div>
@@ -155,7 +155,7 @@
 
       <section class="mission-panel" id="activityMastery" aria-labelledby="activityMasteryTitle">
         <header class="mission-panel-heading">
-          <div><p class="mission-eyebrow">VERIFIED PERFORMANCE</p><h2 id="activityMasteryTitle">ACTIVITY MASTERY</h2></div>
+          <div><p class="mission-eyebrow">PERFORMANCE</p><h2 id="activityMasteryTitle">ACTIVITY MASTERY</h2></div>
           <span id="missionSourceState" aria-live="polite">AWAITING LIVE FEED</span>
         </header>
         <div class="mission-category-chips" role="group" aria-label="Activity category">
@@ -167,13 +167,13 @@
         </div>
         <div class="mission-mastery-head" aria-hidden="true"><span>Activity</span><span>Completions</span><span>Best Result</span><span>Last Played</span><span>Success Rate</span><span>Build Used</span><span></span></div>
         <div class="mission-mastery-list" id="missionMasteryList"></div>
-        <div class="mission-data-empty" id="missionMasteryEmpty" role="status">Activity mastery will appear once verified activity history is available.</div>
+        <div class="mission-data-empty" id="missionMasteryEmpty" role="status">Activity mastery will appear once activity history is available.</div>
         <button class="mission-text-action" id="missionViewAllMastery" type="button" disabled>VIEW ALL VANGUARD ACTIVITIES</button>
       </section>
 
       <section class="mission-panel" id="recentActivityEvidence" aria-labelledby="recentActivityTitle">
         <header class="mission-panel-heading">
-          <div><p class="mission-eyebrow">SOURCE RECORD</p><h2 id="recentActivityTitle">RECENT ACTIVITY EVIDENCE</h2></div>
+          <div><p class="mission-eyebrow">SOURCE RECORD</p><h2 id="recentActivityTitle">RECENT ACTIVITY DATA</h2></div>
           <span>LIVE VALUES ONLY</span>
         </header>
         <div class="mission-evidence-list" id="missionEvidenceList"></div>
@@ -189,19 +189,19 @@
           <select id="missionTrendRange" aria-label="Current form range"><option value="30-days">Last 30 Days</option></select>
         </header>
         <div class="mission-chart-wrap">
-          <svg class="mission-trend-chart" id="missionTrendChart" viewBox="0 0 320 150" role="img" aria-label="No verified performance trend available">
+          <svg class="mission-trend-chart" id="missionTrendChart" viewBox="0 0 320 150" role="img" aria-label="No performance trend available">
             <g class="mission-chart-grid" aria-hidden="true"><path d="M18 20H308M18 58H308M18 96H308M18 134H308"/></g>
             <path class="mission-chart-line mission-chart-line--pve" id="missionPveTrendLine" d=""/>
             <path class="mission-chart-line mission-chart-line--pvp" id="missionPvpTrendLine" d=""/>
           </svg>
-          <div class="mission-chart-empty" id="missionTrendEmpty">Performance trends require live dated activity evidence.</div>
+          <div class="mission-chart-empty" id="missionTrendEmpty">Play activities to see performance trends.</div>
         </div>
         <div class="mission-chart-dates"><span id="missionTrendStart">—</span><span id="missionTrendEnd">—</span></div>
         <div class="mission-chart-legend"><span><i class="is-pve"></i>PVE Success Rate</span><span><i class="is-pvp"></i>PVP K/D</span></div>
       </section>
 
       <section class="mission-panel mission-confidence" aria-labelledby="confidenceTitle">
-        <header class="mission-panel-heading"><div><p class="mission-eyebrow">SOURCE COVERAGE</p><h2 id="confidenceTitle">EVIDENCE CONFIDENCE</h2></div></header>
+        <header class="mission-panel-heading"><div><p class="mission-eyebrow">SOURCE COVERAGE</p><h2 id="confidenceTitle">DATA COVERAGE</h2></div></header>
         <div class="mission-confidence-layout">
           <div class="mission-confidence-donut">
             <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="48"/><circle id="missionConfidenceDonut" class="mission-donut-value" cx="60" cy="60" r="48" pathLength="100"/></svg>
@@ -217,10 +217,10 @@
       </section>
 
       <section class="mission-panel mission-build-evidence" id="buildEvidence" aria-labelledby="buildEvidenceTitle">
-        <header class="mission-panel-heading"><div><p class="mission-eyebrow">RECORDED LOADOUTS</p><h2 id="buildEvidenceTitle">BUILD EVIDENCE</h2></div></header>
+        <header class="mission-panel-heading"><div><p class="mission-eyebrow">RECORDED LOADOUTS</p><h2 id="buildEvidenceTitle">BUILD DATA</h2></div></header>
         <article class="mission-build-card" data-build-card="pve">
-          <header><span>MOST SUCCESSFUL PVE BUILD</span><i class="mission-verified-badge" data-build-verified hidden>✓ VERIFIED</i></header>
-          <h3 data-build-name>No verified build evidence</h3>
+          <header><span>MOST SUCCESSFUL PVE BUILD</span><i class="mission-verified-badge" data-build-verified hidden></i></header>
+          <h3 data-build-name>No build data</h3>
           <p data-build-subtitle>Build snapshots are not returned by the current activity feed.</p>
           <div class="mission-build-metrics"><span>SAMPLE SIZE <strong data-build-sample>—</strong></span><span>SUCCESS RATE <strong data-build-metric>—</strong></span></div>
           <svg class="mission-sparkline" viewBox="0 0 240 46" aria-hidden="true"><path data-build-sparkline d=""/></svg>
@@ -228,8 +228,8 @@
           <a class="mission-build-link" href="../guardian-workspace-v2/paradox-build-space/">OPEN IN BUILD FORGE</a>
         </article>
         <article class="mission-build-card" data-build-card="pvp">
-          <header><span>MOST SUCCESSFUL PVP BUILD</span><i class="mission-verified-badge" data-build-verified hidden>✓ VERIFIED</i></header>
-          <h3 data-build-name>No verified build evidence</h3>
+          <header><span>MOST SUCCESSFUL PVP BUILD</span><i class="mission-verified-badge" data-build-verified hidden></i></header>
+          <h3 data-build-name>No build data</h3>
           <p data-build-subtitle>Build snapshots are not returned by the current activity feed.</p>
           <div class="mission-build-metrics"><span>SAMPLE SIZE <strong data-build-sample>—</strong></span><span>K/D <strong data-build-metric>—</strong></span></div>
           <svg class="mission-sparkline" viewBox="0 0 240 46" aria-hidden="true"><path data-build-sparkline d=""/></svg>
@@ -240,12 +240,12 @@
     </aside>
 
     <footer class="mission-footer">
-      <span>All displayed values are evidence-backed and synchronized with Build Forge when a verified source is available.</span>
+      <span></span>
       <span>Last Synced: <time id="missionLastSynced"></time></span>
     </footer>
   </main>
 
-  <script type="module" src="./mission-reports.mjs?v=20260906-page-payload-1&amp;champion=20260924-champion-export-1"></script>
+  <script type="module" src="./mission-reports.mjs?v=20260906-page-payload-1&amp;champion=20260924-champion-export-1&amp;plain=20260925-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>

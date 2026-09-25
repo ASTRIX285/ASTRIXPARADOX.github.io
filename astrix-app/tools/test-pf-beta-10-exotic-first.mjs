@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
@@ -24,8 +25,8 @@ assert.deepEqual(result.recommendedArmor, [], 'PF-BETA-10 should recommend no ar
 assert.deepEqual(
   result.rejectedCandidates.map(row => [row.item.name, row.reason]),
   [
-    ['Le Monarque', 'No explicit producer/consumer relationship to the verified Starfire Protocol / Fusion Grenade loop is present in the supplied evidence.'],
-    ['Gnawing Hunger', 'No explicit producer/consumer relationship to the verified Starfire Protocol / Fusion Grenade loop is present in the supplied evidence.'],
+    ['Le Monarque', 'No explicit producer/consumer relationship to the Starfire Protocol / Fusion Grenade loop is present in the supplied data.'],
+    ['Gnawing Hunger', 'No explicit producer/consumer relationship to the Starfire Protocol / Fusion Grenade loop is present in the supplied data.'],
     ['Sunbracers', 'Cannot equip Sunbracers with anchor Exotic Starfire Protocol; both are Exotic armor.'],
     ['Phoenix Protocol', 'Cannot equip Phoenix Protocol with anchor Exotic Starfire Protocol; both are Exotic armor.']
   ],

@@ -1,4 +1,4 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
 import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
@@ -317,7 +317,7 @@ class GuardianManifestService{
         }
       }
       this.mode="live-fallback";this.versionMatched=false;
-      emitProgress({status:"selective",percent:24,label:"Backend manifest current · resolving owned armour only",version});
+      emitProgress({status:"selective",percent:24,label:"Backend manifest current · resolving armour only",version});
       return this;
     }catch(error){
       this.mode="live-fallback";this.versionMatched=false;
@@ -344,7 +344,7 @@ class GuardianManifestService{
       if(!version||version!==this.version)throw new Error(`Forge armour index is stale (${version||"unknown"}; expected ${this.version||"current"}).`);
       if(![4,5].includes(Number(payload?.schemaVersion)))throw new Error("Forge armour and Artifact index schema is unsupported.");
       if(!payload?.definitions||typeof payload.definitions!=="object"||Array.isArray(payload.definitions))throw new Error("Forge armour index contains no definition map.");
-      if(!Array.isArray(payload?.artifactCatalog)||payload.artifactCatalog.length===0)throw new Error("Forge index contains no verified Artifact 2.0 catalogue.");
+      if(!Array.isArray(payload?.artifactCatalog)||payload.artifactCatalog.length===0)throw new Error("Forge index contains no Artifact 2.0 catalogue.");
       return payload;
     })());
     return this.forgeIndexPromises.get(key);

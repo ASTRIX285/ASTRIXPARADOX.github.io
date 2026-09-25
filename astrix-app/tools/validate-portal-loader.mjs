@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -52,7 +53,7 @@ assert.match(portalJs,/APX_SKIP_PORTAL===true[\s\S]*?skipped:true/,'Cached Guard
 assert.match(portalJs,/authRequired:authRequired/,'Portal must expose a dedicated Bungie authentication state');
 assert.match(portalJs,/function done\(\)\{if\(pendingAuthUrl\|\|pendingBlockedMessage\)return/,'Portal must not reveal an unauthenticated or unrendered application shell');
 assert.match(portalJs,/SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800/,'Every data-page portal must report a slow verified-data load before the three-second target');
-assert.match(portalJs,/if\(pendingAuthUrl\|\|pendingBlockedMessage\|\|pendingDone\)return;[\s\S]*?Still loading verified Guardian data[\s\S]*?SLOW_LOAD_NOTICE_MS/,'The three-second notice must never dismiss the verified-data gate');
+assert.match(portalJs,/if\(pendingAuthUrl\|\|pendingBlockedMessage\|\|pendingDone\)return;[\s\S]*?Still loading Guardian data[\s\S]*?SLOW_LOAD_NOTICE_MS/,'The three-second notice must never dismiss the verified-data gate');
 assert.doesNotMatch(portalJs,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/,'The slow-load notice must not expose an empty page.');
 assert.match(portalCss,/\.apx-auth-panel/,'Portal must render the full-screen Bungie authentication panel');
 assert.match(portalCss,/\.apx-failure-panel/,'Portal must render an actionable full-screen live-data failure panel');
@@ -200,7 +201,7 @@ function navigationHarness(){
   storage.set('astrix:bungie-session-cache:v1',JSON.stringify({session:{authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}}}));
   const makeLink=path=>({href:`https://astrixparadox.com${path}`,target:'',hasAttribute:()=>false,setAttribute(){},removeAttribute(){},closest(){return this;}});
   const location={href:'https://astrixparadox.com/astrix-app/pages/journey/',origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/journey/',assign:path=>assigned.push(path)};
-  const document={currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
+  const document={currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-1'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
   const window={addEventListener:(name,fn)=>events.set(name,fn)};
   const fixturePrepare=destination=>{requests.push(destination.key);return new Promise((resolve,reject)=>pending.set(destination.key,{resolve,reject}));};
   const source=ribbonSource.replace('  function init(){','  prepareData=fixturePrepare;prepareResources=async()=>{};window.testNavigation={navigatePrepared,prepare};\n  function init(){');

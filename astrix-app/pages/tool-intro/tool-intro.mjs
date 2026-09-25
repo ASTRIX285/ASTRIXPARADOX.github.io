@@ -1,6 +1,6 @@
-import {readCachedBungieSession,cacheBungieSession} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
+import {readCachedBungieSession,cacheBungieSession} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1';
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
-import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-step-1&transport=20260911-compact-plugs-1';
+import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-step-1&transport=20260911-compact-plugs-1&plain=20260925-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const JOURNEY_URL='../journey/';

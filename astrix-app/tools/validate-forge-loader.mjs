@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
@@ -263,7 +264,7 @@ assert.match(runtime,/reportPreparedPageStage\('join','loadout'\)/,'Forge Loader
 assert.doesNotMatch(runtime,/await guardianManifest\.ready\(\)/,'Forge Loader must never return to the 58-percent full-manifest startup gate.');
 assert.match(preload,/writeForgeLoaderPreloadReceipt\(\{startedAt,completedAt,durationMs:completedAt-startedAt,reason,manifestVersion:/,'The shared preload must retain its measured resident-data receipt for Forge Loader.');
 assert.match(html,/data-resident-source="equipped"[\s\S]*?data-resident-source="vault-armour"[\s\S]*?data-resident-source="weapons"[\s\S]*?data-resident-source="subclass"[\s\S]*?data-resident-source="artifact"[\s\S]*?data-resident-source="manifest"/,'Forge Loader must visibly stage every required verified Bungie source.');
-assert.match(residency,/Verifying required Bungie sources\. No unverified counts are shown\./,'Unresolved resident sources must never paint placeholder counts.');
+assert.match(residency,/Loading inventory…/,'Unresolved resident sources must never paint placeholder counts.');
 assert.match(residency,/items indexed · backend solver ready · ready in/,'Ready state must expose the measured backend-resident summary.');
 assert.match(runtime,/async function completeResidentPreparation\(\)[\s\S]*?prepareResidentProfileBuild\(\)[\s\S]*?backendSolverReady=Boolean[\s\S]*?renderResidency\('ready'\)/,'Forge Loader must normalise verified resident data and bind the live-manifest backend solver before enabling the handoff.');
 assert.doesNotMatch(runtime,/prewarmCombinationPools|armourTargetMaximums/,'Forge Loader must not precompute armour combinations or stat ceilings on the browser main thread.');
@@ -280,7 +281,7 @@ assert.match(semanticWrapper,/\["character", "build-forge", "journey", "vault", 
 assert.match(residency,/forgeArmourIndexCoverage[\s\S]*?weaponDefinitionCoverage[\s\S]*?subclassCatalogCoverage[\s\S]*?artifactCatalogCoverage/,'The Manifest row must use exact prepared source coverage rather than the later armour-only hydration flag.');
 assert.match(refresh,/payload\?\.weaponDefinitionCoverage[\s\S]*?payload\?\.subclassCatalogCoverage/,'Background Forge refreshes must rebuild residency when weapon or subclass definition coverage is repaired.');
 assert.match(runtime,/url\.searchParams\.set\('prewarm','forge-loader'\)/,'The verified handoff must request the existing Build Forge worker pre-warm.');
-assert.match(html,/<header class="apx-destination-header forge-command-header">[\s\S]*?<strong>FORGE LOADER<\/strong><small>SELECT AND MAXIMISE VERIFIED ARMOUR<\/small>/,'Forge Loader must present its page identity only in the shared compact command header.');
+assert.match(html,/<header class="apx-destination-header forge-command-header">[\s\S]*?<strong>FORGE LOADER<\/strong><small>SELECT AND MAXIMISE ARMOUR<\/small>/,'Forge Loader must present its page identity only in the shared compact command header.');
 assert.doesNotMatch(html,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not retain the oversized duplicate page hero.');
 assert.match(html,/id="forgeHeroCard"/);
 assert.match(html,/id="forgeExoticSlots"/);
@@ -335,13 +336,13 @@ assert.match(html,/REFRESH TOP 50 COMBINATIONS/,'The Stat Directive must accurat
 assert.match(runtime,/CANDIDATE_BATCH_SIZE=50[\s\S]*?combinationsEvaluated[\s\S]*?matchedBuilds\.slice\(0,shown\)/,'Forge Loader must expose the legal scan count while retaining no more than the top 50 combinations.');
 assert.match(runtime,/renderCandidateLoading\(exotic\)[\s\S]*?Locking \$\{esc\(exotic\.name\)\} into every load/,'Selecting an Exotic must immediately reveal where its calculated combinations will appear.');
 assert.match(runtime,/totalCombinations:Number\(matchedBuilds\.combinationsEvaluated\|\|matchedBuilds\.length\)/,'The protected Build Forge handoff must retain the full legal combination count rather than only the visible top 50.');
-assert.match(runtime,/scanDuration<1000[\s\S]*?exact owned combinations scanned by the backend Worker in \$\{durationLabel\}/,'Forge Loader must report the backend round-trip duration beside its result count.');
-assert.match(runtime,/OPEN ARMOUR · NO SET BONUS REQUIRED[\s\S]*?Rank the top 50 exact owned combinations/,'Forge Loader must expose an explicit Open Armour mode instead of implying that an empty set selection is accidental.');
+assert.match(runtime,/scanDuration<1000[\s\S]*?combinations scanned by the backend Worker in \$\{durationLabel\}/,'Forge Loader must report the backend round-trip duration beside its result count.');
+assert.match(runtime,/OPEN ARMOUR · NO SET BONUS REQUIRED[\s\S]*?Rank the top 50 combinations/,'Forge Loader must expose an explicit Open Armour mode instead of implying that an empty set selection is accidental.');
 assert.match(runtime,/if\(!setSelections\.length\)matchedBuilds=rankOpenProtocolCandidates\(matchedBuilds,exotic\)/,'Open Armour must rank owned candidates with verified Exotic-to-set evidence after satisfying stat constraints.');
 assert.match(runtime,/naturalSetProtocols\(candidate\)\.map[\s\S]*?verifiedTraitContext\(row\.trait\)/,'A naturally active Open Armour set perk must survive the protected Build Forge decision chain.');
 assert.match(runtime,/payload\?\.collectibleDefinitions[\s\S]*?sourceString/,'Optional acquisition guidance must read prepared Bungie collectible source evidence from the existing page payload.');
 assert.doesNotMatch(runtime,/guardianManifest\.getMany\('DestinyCollectibleDefinition'/,'Optional acquisition guidance must not start a definition lookup after interaction.');
-assert.match(runtime,/Bungie acquisition source is unresolved; no activity is claimed\./,'Forge Loader must never invent an acquisition activity when Bungie source evidence is unavailable.');
+assert.match(runtime,/Acquisition source unavailable\./,'Forge Loader must never invent an acquisition activity when Bungie source evidence is unavailable.');
 assert.doesNotMatch(runtime,/CALCULATE 5 COMBINATIONS|refresh the five legal combinations/,'Forge Loader must not retain a five-result limitation.');
 assert.match(runtime,/Five exact Bungie armour instances · no mods[\s\S]*?UNMODDED ARMOUR TOTAL/,'Forge Matrix must identify that its ranking excludes mods.');
 assert.doesNotMatch(runtime,/ARMOUR_STAT_LABELS\[key\]\.slice/,'Calculated loads must show full stat names rather than unreadable abbreviations.');
@@ -396,7 +397,7 @@ assert.match(buildRuntime,/writeState\(applied\.state\)/,'An expanded atomic tra
 // PR #282 (24df19a) moved Build Forge entry gating and its reason into the shared validator.
 assert.match(buildRuntime,/entry=validateForgeGenerationEntry\(build\),hasVerifiedResult=entry\.ready/,'Elemental options and Build Objectives must share the verified generation-entry gate.');
 assert.match(buildRuntime,/button\.disabled=!hasVerifiedResult\|\|recommendationBusy/,'Build Objectives must remain disabled outside a verified generation entry.');
-assert.match(buildRecommendationRuntime,/Choose a direct entry or stage a verified Forge Loader armour result\./,'Build Forge must state the exact missing verified-result requirement.');
+assert.match(buildRecommendationRuntime,/Choose a direct entry or stage a Forge Loader armour result\./,'Build Forge must state the exact missing verified-result requirement.');
 assert.match(buildRuntime,/button\.title=!hasVerifiedResult\?entry\.reason/,'Blocked build options must expose the shared entry validator reason.');
 assert.match(buildRuntime,/!hasVerifiedResult\?entry\.reason:!hasElement\?subclassBlocker/,'Build status must expose the same shared entry validator reason.');
 assert.match(buildRecommendationRuntime,/if\(!mode\)\{\s*const tier=validateTierFiveArmour\(build\);\s*return \{ready:Boolean\(build\.forgeLoaderDecision\)&&tier\.ready&&exotic\.ready/,'The Forge Loader path must retain its verified Tier 5 armour and Exotic gate.');
@@ -435,7 +436,7 @@ assert.match(runtime,/function stagedMarkup[\s\S]*?data-inspect-item="\$\{esc\(i
 assert.match(runtime,/class="forge-matrix-exotic" data-inspect-item="\$\{esc\(itemKey\(exotic\)\)\}"/,'Every Forge Matrix Exotic icon must inspect its exact matched roll.');
 assert.match(runtime,/function inspectItemFromTarget\(target\)\{[\s\S]*?catalogue\.armour\.find\(item=>itemKey\(item\)===String\(key\|\|''\)\)\|\|null;/,'Item Inspect must resolve only exact owned catalogue instances.');
 assert.match(runtime,/function showInspect\(target\)\{[\s\S]*?if\(!item\?\.itemInstanceId\|\|!panel\)return;/,'Item Inspect must reject any definition-only or uninstanced item.');
-assert.match(runtime,/ownedExoticGroups\(catalogue\.armour,activeCharacterClass\)[\s\S]*?THIS ROLL · OWNED \$\{ordinal\} OF \$\{instances\.length\} IN VAULT CATALOGUE/,'An inspected Exotic roll must report its position within the real owned-copy group.');
+assert.match(runtime,/ownedExoticGroups\(catalogue\.armour,activeCharacterClass\)[\s\S]*?THIS ROLL \$\{ordinal\} OF \$\{instances\.length\} IN VAULT CATALOGUE/,'An inspected Exotic roll must report its position within the real owned-copy group.');
 assert.doesNotMatch(runtime,/VERIFIED DEFINITION|BUNGIE COLLECTION DATA|ownedInstance/,'Item Inspect must not retain its generic collection-definition path.');
 const loaderIndex=ribbon.indexOf("key:'forge-loader'");
 const buildIndex=ribbon.indexOf("key:'build-forge'");

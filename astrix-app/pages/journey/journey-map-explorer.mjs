@@ -28,7 +28,7 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewB
   const root=make('section','journey-map-explorer');
   root.setAttribute('aria-label',`${label} activities and points of interest`);
   const heading=make('h3',null,'ACTIVITIES & POINTS OF INTEREST');
-  const note=make('p','journey-map-catalogue-note','Explore Director locations and activity details. Some activities are seasonal or historical; current availability is not verified.');
+  const note=make('p','journey-map-catalogue-note','Explore locations and activities. Check current availability in Destiny 2.');
   const filters=make('div','journey-map-point-filters');
   const searchLabel=make('label',null,'Find a point');
   const search=make('input');search.type='search';search.placeholder='Search activities, vendors and places';
@@ -66,7 +66,7 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewB
         option.append(make('summary',null,variant.name));
         if(variant.description)option.append(make('p',null,variant.description));
         if(variant.activityType)option.append(make('p','journey-map-point-kind',variant.activityType));
-        option.append(make('p','journey-map-availability','Availability and completion are not verified. Launch activities in Destiny 2.'));
+        option.append(make('p','journey-map-availability','Check availability and launch activities in Destiny 2.'));
         details.append(option);
       }
     }

@@ -41,6 +41,17 @@ const allowed=new Set([
   'forge-auth-worker/src/reports-read.ts',
   'forge-auth-worker/test/reports-read.test.ts',
 
+  // Prompt 19: copy-only changes and the plain-language regression guard.
+  'astrix-app/tools/test-pf-beta-04-subclass-fallback.mjs',
+  'astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-evidence.mjs',
+  'astrix-app/pages/journey/journey-map-explorer.mjs',
+  'astrix-app/docs/plain-language-copy.json',
+  'astrix-app/tools/plain-language-copy.mjs',
+  'astrix-app/tools/validate-plain-language.mjs',
+  'astrix-app/tools/test-plain-language-rendered.mjs',
+  'astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-inline.mjs',
+  'astrix-app/tools/test-pf-beta-10-exotic-first.mjs',
+  'astrix-app/tools/test-pf-beta-11-exotic-first-regression.mjs',
   'astrix-app/pages/vault/vault-drag-scroll.mjs',
   'astrix-app/tools/test-vault-drag-scroll.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',

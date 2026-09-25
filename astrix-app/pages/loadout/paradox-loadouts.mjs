@@ -1,15 +1,15 @@
-import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1';
+import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-1';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1';
+import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-1';
 import {LOADOUT_DEFINITIONS} from '../guardian-workspace-v2/guardian-loadout-definitions.mjs';
 import {createVaultCatalogue} from '../vault/vault-inventory.mjs?champion=20260924-champion-export-1';
-import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1';
-import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1';
-import {liveActionCapabilities,sessionBinding,inventoryLocations,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,requestFreshProfile,verifyReadback,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1';
-import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
+import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-1';
+import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-1';
+import {liveActionCapabilities,sessionBinding,inventoryLocations,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,requestFreshProfile,verifyReadback,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&plain=20260925-1';
+import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
@@ -145,7 +145,7 @@ export async function applyThenSaveSlot({plan,index,session,assertCurrent,onProg
   const intent=stageBungieLoadoutAction('snapshot',{characterId:plan.characterId,index});
   await executeSlot('snapshot',{characterId:plan.characterId,index,session,confirmation:confirmBungieLoadoutAction(intent)});
   const readback=await readFresh();
-  if(!verifySavedSlot(plan,readback,index))throw new Error(`Bungie accepted the save, but slot ${index+1} has not verified the requested equipment and sockets. Refresh before retrying.`);
+  if(!verifySavedSlot(plan,readback,index))throw new Error(`Bungie accepted the save, but slot ${index+1} could not confirm the equipment and sockets. Refresh and retry.`);
   return result;
 }
 function editableSnapshotItem(item,fresh,kind){
@@ -346,13 +346,13 @@ function editChoice(node){
 function slotOptions(){return Array.from({length:20},(_,index)=>{const slot=equipped?.loadouts?.[index],saved=Boolean(slot?.items?.length||slot?.subclassOverrides?.length);return `<option value="${index}">${index+1} · ${saved?`${esc(slotIdentity(slot).name)} (overwrite)`:'Empty'}</option>`;}).join('');}
 async function reviewBuildAction(id,toGame){
   const check=guardContext(),record=draftFor(id);
-  showDialog(toGame?'CHECKING IN-GAME SAVE':'CHECKING LOADOUT',`<p>Checking ${esc(record.name)} against your current Guardian, owned items and socket permissions.</p><p class="paradox-dialog-note">Your in-game equipment stays unchanged until you confirm.</p>`,'',{kind:'checking',check});
+  showDialog(toGame?'CHECKING IN-GAME SAVE':'CHECKING LOADOUT',`<p>Checking ${esc(record.name)} against your current Guardian, items and socket permissions.</p><p class="paradox-dialog-note">Your in-game equipment stays unchanged until you confirm.</p>`,'',{kind:'checking',check});
   await refreshProfile();check();
   const build=restoreSavedSocketIntent(id==='equipped'?equipped:record.build,payload);
   // Compare intended Artifact perks with fresh live perks, not the saved
   // snapshot's old active list. Artifact changes always remain in game.
   build.artifact={...build.artifact,activePerks:copy(equipped.artifact?.activePerks||[])};
-  if(!build.subclassItemInstanceId||!build.subclassItem)throw new Error('This build has no exact saved subclass instance. Edit or resave it from verified equipment before Apply.');
+  if(!build.subclassItemInstanceId||!build.subclassItem)throw new Error('This build has no exact saved subclass instance. Edit or resave it from equipment before Apply.');
   let plan=createLiveTransferPlan({build,originalBuild:build,capabilities:liveActionCapabilities(session)});
   if(!plan.ready)throw new Error(plan.blockers.join('\n'));
   plan=await stageLiveTransferPreflight(plan,{session});check();
@@ -362,7 +362,7 @@ async function reviewBuildAction(id,toGame){
   if(toGame&&unsupported.length)throw new Error(`This build needs ${unsupported.length} socket change(s) in Destiny before it can be saved exactly to an in-game slot. ${unsupported.map(row=>row.plugName).join(', ')}`);
   const equippedOnly=id==='equipped';
   const text=toGame?(equippedOnly?'Save the selected Guardian’s currently equipped build to the chosen Bungie slot.':`Apply ${record.name} to ${build.characterClass.toUpperCase()}, verify its equipment and sockets, then save it to the chosen Bungie slot.`):`Apply ${record.name} to ${build.characterClass.toUpperCase()}.`;
-  showDialog(toGame?'SAVE TO IN-GAME':'APPLY LOADOUT',`<p>${esc(text)}</p><p>${plan.equipment.targets.length} equipment targets · ${plan.socketChanges.length} verified socket targets</p>${toGame?`<label>In-game slot<select id="paradoxTargetSlot"><option value="">Choose a slot</option>${slotOptions()}</select></label><p class="paradox-dialog-note">A saved Bungie slot will be overwritten. This keeps the PARADOX copy.</p>`:''}${plan.inGameSteps.length?component('IN-GAME STEPS',plan.inGameSteps):''}`,
+  showDialog(toGame?'SAVE TO IN-GAME':'APPLY LOADOUT',`<p>${esc(text)}</p><p>${plan.equipment.targets.length} equipment targets · ${plan.socketChanges.length} socket targets</p>${toGame?`<label>In-game slot<select id="paradoxTargetSlot"><option value="">Choose a slot</option>${slotOptions()}</select></label><p class="paradox-dialog-note">A saved Bungie slot will be overwritten. This keeps the PARADOX copy.</p>`:''}${plan.inGameSteps.length?component('IN-GAME STEPS',plan.inGameSteps):''}`,
     `<button type="button" class="is-primary" data-dialog-action="execute-build">${toGame?(equippedOnly?'SAVE TO SLOT':'APPLY & SAVE TO SLOT'):'CONFIRM APPLY'}</button>`,{kind:'apply',record,plan,toGame,equippedOnly,check});
 }
 async function executeBuildAction(){
@@ -380,7 +380,7 @@ async function executeBuildAction(){
       ...(state.equippedOnly?{executeApply:async()=>{const fresh=await requestFreshProfile();if(!verifyReadback(state.plan,fresh).verified)throw new Error('Equipped gear changed. Close this dialog and refresh before saving.');return {status:'applied',readback:{verified:true}};}}:{}),
       onProgress:row=>{const node=byId('paradoxDialogError');if(node)node.textContent=row.label;}});
     dialog().close();dialogState=null;
-    status(index==null?`Applied ${state.record.name}.${state.plan.inGameSteps.length?' Complete the listed in-game steps separately.':''}`:`Saved and verified Bungie slot ${index+1}.${state.plan.inGameSteps.length?' Artifact choices remain an in-game step.':''}`);
+    status(index==null?`Applied ${state.record.name}.${state.plan.inGameSteps.length?' Complete the listed in-game steps separately.':''}`:`Saved and Bungie slot ${index+1}.${state.plan.inGameSteps.length?' Artifact choices remain an in-game step.':''}`);
   }finally{
     if(mutationStarted)try{await refreshProfile();}catch(error){status(`Refresh needed: ${error.message}`,true);}
   }
@@ -431,7 +431,7 @@ async function executeSlotAction(){
       const plan={characterId,equipment:{targets:raw.map(item=>({itemInstanceId:String(item.itemInstanceId)}))},socketChanges:raw.flatMap(item=>(item.plugItemHashes||[]).flatMap((hash,index)=>Number(hash)>0?[{itemInstanceId:String(item.itemInstanceId),socketIndex:index,plugHash:Number(hash)}]:[]))};
       if(!verifyReadback(plan,payload).verified)throw new Error('Bungie accepted Apply, but the equipped build did not fully verify. Check missing items and mods in Destiny.');
     }
-    dialog().close();dialogState=null;status(`Bungie slot ${state.index+1} ${state.action==='clear'?'cleared':'applied'} and verified.`);
+    dialog().close();dialogState=null;status(`Bungie slot ${state.index+1} ${state.action==='clear'?'cleared':'applied'}.`);
   }catch(error){try{await refreshProfile();}catch{}throw error;}
 }
 async function handleDialogAction(action){

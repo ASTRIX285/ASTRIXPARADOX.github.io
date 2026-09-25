@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {expandForgeArmourIndex} from '../core/forge-index-transport.mjs';
@@ -37,7 +38,7 @@ assert.match(service,/commitVersion\(version\)[\s\S]*?removeOtherVersions\(versi
 assert.doesNotMatch(service,/bungie\/manifest\/definition/,'Browser definition service must not retain a single definition route');
 assert.match(service,/const allowNetwork=!this\.backend&&options\.allowNetwork!==false/,'Prepared page payloads must disable browser definition network expansion by construction');
 assert.match(service,/this\.backend\?"prepared-page-payload"[\s\S]*?"prepared-bulk-manifest"/,'Prepared page payload resolution must be observable');
-assert.match(service,/initialiseCached\(\)[\s\S]*?Backend manifest current · resolving owned armour only/,'Forge pages must be able to inspect an existing manifest cache without starting a full component download');
+assert.match(service,/initialiseCached\(\)[\s\S]*?Backend manifest current · resolving armour only/,'Forge pages must be able to inspect an existing manifest cache without starting a full component download');
 assert.match(service,/loadForgeArmourIndex[\s\S]*?manifestVersion[\s\S]*?version!==this\.version/,'The compact Forge index must be rejected unless it matches the current Bungie manifest version');
 assert.match(service,/requestUrl\.searchParams\.set\("manifest",this\.version\)/,'The compact Forge index request must bypass stale static-asset caches when Bungie changes manifest version.');
 assert.match(service,/applyForgeArmourIndex[\s\S]*?hourly-compact-manifest/,'The compact Forge index must merge only as an explicit verified payload source');

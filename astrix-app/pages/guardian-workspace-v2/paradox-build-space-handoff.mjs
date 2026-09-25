@@ -1,5 +1,5 @@
 import {clone,createBuildState} from './paradox-build-space/paradox-build-state.mjs';
-import {markGuardianFastReturn} from './guardian-session-cache.mjs?v=20260913-live-character-2';
+import {markGuardianFastReturn} from './guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1';
 import {isEquippedSelection,isExplicitLoadoutSelection,bindingOf,createHandoffEnvelope,validateHandoffEnvelope} from './paradox-build-binding.mjs?v=20260916-equipped-source-1';
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';

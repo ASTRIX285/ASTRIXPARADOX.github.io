@@ -1,0 +1,4319 @@
+{
+  "prompt": 19,
+  "notes": "Visible source strings and template segments; interpolated values and identifiers are unchanged. Mission Reports shares the Journey copy group; legacy Character and Build Test use the Character group. Empty reassurance badges are removed or kept hidden without renaming their DOM hooks. Internal source/state values stay unchanged; their displayed labels use plain copy.",
+  "changes": [
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 71,
+      "context": "literal",
+      "before": "Awaiting verified Bungie equipment",
+      "after": "Loading equipment…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 72,
+      "context": "literal",
+      "before": "Awaiting verified Vault armour",
+      "after": "Loading Vault armour…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 73,
+      "context": "literal",
+      "before": "Awaiting verified weapon instances",
+      "after": "Loading weapons…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 73,
+      "context": "template",
+      "before": " owned weapons indexed",
+      "after": " weapons indexed"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 75,
+      "context": "literal",
+      "before": "Awaiting verified Artifact data",
+      "after": "Loading Artifact…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 75,
+      "context": "template",
+      "before": " verified definitions resident",
+      "after": " definitions resident"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+      "line": 84,
+      "context": "literal",
+      "before": "Verifying required Bungie sources. No unverified counts are shown.",
+      "after": "Loading inventory…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+      "line": 26,
+      "context": "markup literal",
+      "before": "No verified armour set definitions are available.",
+      "after": "No armour set definitions are available."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+      "line": 31,
+      "context": "literal",
+      "before": "Not owned",
+      "after": "Not in inventory"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+      "line": 31,
+      "context": "literal",
+      "before": "Owned set",
+      "after": "In inventory"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+      "line": 35,
+      "context": "literal",
+      "before": "Available with owned pieces",
+      "after": "Available with pieces"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+      "line": 35,
+      "context": "literal",
+      "before": "Unavailable with current owned pieces and selected set requirements",
+      "after": "Unavailable with current pieces and selected set requirements"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 85,
+      "context": "state display label; data-state remains verifying",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 87,
+      "context": "literal",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 116,
+      "context": "literal",
+      "before": "Bungie returned no verified profile inventory.",
+      "after": "Inventory unavailable. Retry."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 141,
+      "context": "literal",
+      "before": "SUBCLASS VERIFYING",
+      "after": "LOADING SUBCLASS"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 146,
+      "context": "markup literal",
+      "before": "Verified Guardian unavailable.",
+      "after": "Guardian unavailable."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 146,
+      "context": "literal",
+      "before": "Subclass verifying",
+      "after": "Loading subclass"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 171,
+      "context": "template",
+      "before": "Owned ",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 185,
+      "context": "template",
+      "before": " OWNED · ",
+      "after": " IN INVENTORY · "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 190,
+      "context": "literal",
+      "before": "not owned",
+      "after": "not in inventory"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 190,
+      "context": "template",
+      "before": " owned ",
+      "after": " "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 204,
+      "context": "template",
+      "before": "-piece verified set bonus",
+      "after": "-piece set bonus"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 214,
+      "context": "template",
+      "before": " SETS NOT YET VERIFIED",
+      "after": " SETS UNAVAILABLE"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 214,
+      "context": "template",
+      "before": " VERIFIED SET",
+      "after": " SET"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 215,
+      "context": "template",
+      "before": "Rank the top 50 exact owned combinations, then use verified Exotic-to-set perk evidence as a tie-break.",
+      "after": "Rank the top 50 combinations, then use Exotic-to-set perk data as a tie-break."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 240,
+      "context": "markup literal",
+      "before": "Checking verified Bungie set variants and acquisition sources…",
+      "after": "Checking Bungie set variants and acquisition sources…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 244,
+      "context": "markup literal",
+      "before": "No evidence-bound unowned set match identified.",
+      "after": "No new matching set found."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 245,
+      "context": "literal",
+      "before": "Bungie acquisition source is unresolved; no activity is claimed.",
+      "after": "Acquisition source unavailable."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 246,
+      "context": "template",
+      "before": "Availability is not assumed and future roll stats are unknown. Load 01 remains the best exact owned fallback.",
+      "after": "Check availability in Destiny 2. Load 01 uses your current gear."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 246,
+      "context": "template",
+      "before": " VERIFIED VARIANT",
+      "after": " VARIANT"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 246,
+      "context": "template",
+      "before": "OWNED ",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 291,
+      "context": "literal",
+      "before": "Owned",
+      "after": "Items"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 296,
+      "context": "literal",
+      "before": "COMPLETE VERIFIED LOAD",
+      "after": "COMPLETE LOAD"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 394,
+      "context": "literal",
+      "before": "Owned",
+      "after": "Items"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 417,
+      "context": "markup literal",
+      "before": "No complete owned-armour combination is available for this Exotic and set protocol.",
+      "after": "No complete armour combination is available for this Exotic and set protocol."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 423,
+      "context": "literal",
+      "before": "SCANNING OWNED ARMOUR",
+      "after": "SCANNING ARMOUR"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 424,
+      "context": "template",
+      "before": " exact owned combinations…",
+      "after": " combinations…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 442,
+      "context": "literal",
+      "before": "CALCULATING VERIFIED LOADS…",
+      "after": "CALCULATING LOADS…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 457,
+      "context": "literal",
+      "before": "The live Bungie manifest changed. Refresh Guardian data and calculate again.",
+      "after": "The Bungie manifest changed. Refresh Guardian data and calculate again."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 474,
+      "context": "literal",
+      "before": "No complete owned-armour combination satisfies the selected Exotic and set protocol.",
+      "after": "No complete armour combination satisfies the selected Exotic and set protocol."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 474,
+      "context": "template",
+      "before": " exact owned combinations scanned by the backend Worker in ",
+      "after": " combinations scanned by the backend Worker in "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 483,
+      "context": "literal",
+      "before": "Select an owned Exotic to initialise the Forge Loader.",
+      "after": "Choose an Exotic to start."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 483,
+      "context": "template",
+      "before": " anchored. Ranking the maximum-stat owned load automatically.",
+      "after": " anchored. Ranking the maximum-stat load automatically."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 498,
+      "context": "literal",
+      "before": "Open armour active. Ranking the top owned combinations with verified Exotic-to-set perk evidence.",
+      "after": "Open armour active. Ranking the top combinations with Exotic-to-set perk data."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 506,
+      "context": "template",
+      "before": " assigned. Re-ranking every legal owned-armour combination.",
+      "after": " assigned. Re-ranking every legal armour combination."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 521,
+      "context": "literal",
+      "before": "OWNED",
+      "after": "ITEMS"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 525,
+      "context": "literal",
+      "before": "THIS ROLL · OWNED",
+      "after": "THIS ROLL"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 525,
+      "context": "template",
+      "before": "THIS ROLL · OWNED ",
+      "after": "THIS ROLL "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 540,
+      "context": "literal",
+      "before": "Verified armour",
+      "after": "Armour"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 540,
+      "context": "template",
+      "before": "ASTRIX PARADOX · VERIFIED INSTANCE",
+      "after": "ASTRIX PARADOX"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 551,
+      "context": "literal",
+      "before": "Protecting the verified equipped Guardian before Build Forge opens…",
+      "after": "Opening Build Forge…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 562,
+      "context": "literal",
+      "before": "The verified Guardian transfer could not be prepared. No build was changed.",
+      "after": "Build Forge could not open. Your build is unchanged."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 605,
+      "context": "literal",
+      "before": "Verified character sources remain unavailable.",
+      "after": "Character sources remain unavailable."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 605,
+      "context": "literal",
+      "before": "One or more verified Forge sources remain unavailable. Build Forge handoff stays locked.",
+      "after": "One or more Forge sources remain unavailable. Build Forge handoff stays locked."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 605,
+      "context": "template",
+      "before": " ready. Select an owned Exotic.",
+      "after": " ready. Select an Exotic."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 605,
+      "context": "template",
+      "before": " selected. Verifying resident Forge sources.",
+      "after": " selected. Loading resident Forge sources."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 647,
+      "context": "template",
+      "before": " Select an owned Exotic.",
+      "after": " Select an Exotic."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 690,
+      "context": "literal",
+      "before": "VERIFYING SOURCES",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "template",
+      "before": " shown; no owned instance can be selected.",
+      "after": " shown; no instance can be selected."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "template",
+      "before": " verified ",
+      "after": " "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "template",
+      "before": ". Select an owned piece to begin.",
+      "after": ". Select a piece to begin."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "template",
+      "before": " verified ",
+      "after": " "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "template",
+      "before": " owned of ",
+      "after": " in inventory of "
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 695,
+      "context": "literal",
+      "before": "One or more verified Forge sources remain unavailable. Build Forge handoff stays locked.",
+      "after": "One or more Forge sources remain unavailable. Build Forge handoff stays locked."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 697,
+      "context": "literal",
+      "before": "Verified Bungie armour is unavailable.",
+      "after": "Bungie armour is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/forge-loader.mjs",
+      "line": 697,
+      "context": "literal",
+      "before": "Verified Bungie armour is unavailable.",
+      "after": "Bungie armour is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 7,
+      "context": "html",
+      "before": "ASTRIX PARADOX Forge Loader for verified Destiny 2 armour combinations",
+      "after": "ASTRIX PARADOX Forge Loader for Destiny 2 armour combinations"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 29,
+      "context": "html",
+      "before": "SELECT AND MAXIMISE VERIFIED ARMOUR",
+      "after": "SELECT AND MAXIMISE ARMOUR"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 39,
+      "context": "html",
+      "before": "Resolving verified Guardian…",
+      "after": "Loading…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 43,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 45,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 45,
+      "context": "html",
+      "before": "Awaiting verified Bungie equipment",
+      "after": "Loading equipment…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 46,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 46,
+      "context": "html",
+      "before": "Awaiting verified Vault armour",
+      "after": "Loading Vault armour…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 47,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 47,
+      "context": "html",
+      "before": "Awaiting verified weapon instances",
+      "after": "Loading weapons…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 48,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 49,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 49,
+      "context": "html",
+      "before": "Awaiting verified Artifact data",
+      "after": "Loading Artifact…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 50,
+      "context": "html",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 52,
+      "context": "html",
+      "before": "Verifying required Bungie sources. No unverified counts are shown.",
+      "after": "Loading inventory…"
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 74,
+      "context": "html",
+      "before": "Select an owned Exotic to initialise the Forge Loader.",
+      "after": "Choose an Exotic to start."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 79,
+      "context": "html",
+      "before": "Keep Open Armour active for the top 50 owned combinations, choose one four-piece bonus, or choose up to two compatible two-piece bonuses. Unavailable combinations remain locked.",
+      "after": "Keep Open Armour active for the top 50 combinations, choose one four-piece bonus, or choose up to two compatible two-piece bonuses. Unavailable combinations remain locked."
+    },
+    {
+      "file": "astrix-app/pages/forge-loader/index.html",
+      "line": 101,
+      "context": "html",
+      "before": "Connect Bungie to calculate from verified owned armour. No inventory, Exotic or set-bonus state is guessed.",
+      "after": "Connect Bungie to load your armour."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs",
+      "line": 31,
+      "context": "literal",
+      "before": "This component is ready for manifest, ownership and reasoning bindings.",
+      "after": "This component is ready for manifest, inventory and reasoning bindings."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs",
+      "line": 34,
+      "context": "template",
+      "before": ": this is one verified step in the build's directed cause-and-effect chain.",
+      "after": ": this is one step in the build's directed cause-and-effect chain."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs",
+      "line": 86,
+      "context": "literal",
+      "before": "Connect Bungie for a verified personal assessment.",
+      "after": "Connect Bungie for a personal assessment."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs",
+      "line": 98,
+      "context": "literal",
+      "before": "Improve My Guardian: deployment validation, ownership checks and Bungie push planning will start here after account connection.",
+      "after": "Improve My Guardian: deployment validation, inventory checks and Bungie push planning will start here after account connection."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-provenance.mjs",
+      "line": 89,
+      "context": "literal",
+      "before": "Bungie returned incomplete Artifact tier activation evidence for the selected character.",
+      "after": "Bungie returned incomplete Artifact tier activation data for the selected character."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 178,
+      "context": "literal",
+      "before": "Artifact 2.0 socket-bucket evidence is unavailable.",
+      "after": "Artifact 2.0 socket-bucket data is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 185,
+      "context": "literal",
+      "before": "The active Artifact season could not be verified.",
+      "after": "The active Artifact season is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 188,
+      "context": "literal",
+      "before": "Current season metadata was not supplied; Artifact freshness cannot be verified.",
+      "after": "Current Artifact data is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 426,
+      "context": "literal",
+      "before": "No verified current Artifact perks are available for a target build plan.",
+      "after": "No current Artifact perks are available for a target build plan."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 427,
+      "context": "literal",
+      "before": "One or more Artifact 2.0 buckets could not be filled from verified manifest perk choices.",
+      "after": "One or more Artifact 2.0 buckets could not be filled from manifest perk choices."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 428,
+      "context": "template",
+      "before": " legal Artifact selections could be resolved from verified tier evidence.",
+      "after": " legal Artifact selections could be resolved from tier data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+      "line": 429,
+      "context": "literal",
+      "before": "No explicit match was found between verified Artifact descriptions and the staged Forge Loader build.",
+      "after": "No explicit match was found between Artifact descriptions and the staged Forge Loader build."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs",
+      "line": 132,
+      "context": "literal",
+      "before": "Live Bungie Artifact state unavailable",
+      "after": "Bungie Artifact state unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs",
+      "line": 151,
+      "context": "literal",
+      "before": "Live Bungie Artifact",
+      "after": "Bungie Artifact"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs",
+      "line": 268,
+      "context": "markup literal",
+      "before": "No resolved archetype or trait evidence.",
+      "after": "No archetype or trait details."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs",
+      "line": 272,
+      "context": "markup literal",
+      "before": "No resolved shader or ornament evidence.",
+      "after": "No shader or ornament details."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs",
+      "line": 145,
+      "context": "literal",
+      "before": "Live Bungie Guardian",
+      "after": "Bungie Guardian"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs",
+      "line": 977,
+      "context": "literal",
+      "before": "Retrieving live Bungie appearance",
+      "after": "Retrieving Bungie appearance"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs",
+      "line": 999,
+      "context": "literal",
+      "before": "Waiting for your live Bungie Guardian",
+      "after": "Waiting for your Bungie Guardian"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 154,
+      "context": "template",
+      "before": " cannot be checked because its exact item instance is no longer owned.",
+      "after": " cannot be checked because its exact item instance is no longer in your inventory."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 188,
+      "context": "literal",
+      "before": "Exact item ownership",
+      "after": "Item availability"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 192,
+      "context": "literal",
+      "before": "Fresh inventory state requires item transfer, but the Bungie route does not advertise that capability.",
+      "after": "Item transfers are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 208,
+      "context": "literal",
+      "before": "Fresh socket state requires a socket mutation, but the Bungie route does not advertise that capability.",
+      "after": "Socket changes are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 286,
+      "context": "literal",
+      "before": "Reading fresh Bungie ownership and equipment…",
+      "after": "Loading equipment…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 289,
+      "context": "literal",
+      "before": "Fresh activity, ownership or socket compatibility validation blocked Apply.",
+      "after": "Apply blocked. Check the activity, items and sockets."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 290,
+      "context": "literal",
+      "before": "Fresh Bungie activity, ownership, equipment and socket compatibility captured.",
+      "after": "Build checks complete."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 319,
+      "context": "literal",
+      "before": "Verifying equipped items from a fresh Bungie profile…",
+      "after": "Checking equipment…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 321,
+      "context": "literal",
+      "before": "Fresh profile confirms every expected item is equipped.",
+      "after": "Equipment applied."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 322,
+      "context": "literal",
+      "before": "Fresh profile did not confirm every expected item; all socket changes were skipped.",
+      "after": "Some items were not equipped. Socket changes were skipped."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 323,
+      "context": "literal",
+      "before": "Fresh equipped-item verification failed; all socket changes were skipped.",
+      "after": "Equipment could not be checked. Socket changes were skipped."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 362,
+      "context": "literal",
+      "before": "Choose a real Guardian or Vault destination.",
+      "after": "Choose a Guardian or the Vault."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 367,
+      "context": "literal",
+      "before": "Direct equip requires a real destination Guardian.",
+      "after": "Choose a Guardian to equip this item."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 467,
+      "context": "template",
+      "before": " was already complete in fresh Bungie inventory.",
+      "after": " was already complete in Bungie inventory."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 469,
+      "context": "template",
+      "before": " is continuing immediately from Bungie's accepted previous leg; final profile readback remains authoritative.",
+      "after": " is moving to the destination…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 517,
+      "context": "literal",
+      "before": "Fresh Vault transfer preflight blocked all live changes.",
+      "after": "Transfer unavailable. Nothing changed."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 527,
+      "context": "template",
+      "before": "Fresh Bungie inventory moved since staging. Resuming ",
+      "after": "Bungie inventory moved since staging. Resuming "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 527,
+      "context": "literal",
+      "before": "Fresh ownership, location, and Guardian evidence verified. Bungie remains authoritative for transfer availability.",
+      "after": "Preparing transfer…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 540,
+      "context": "literal",
+      "before": "Fresh Bungie readback did not confirm the replacement equip.",
+      "after": "Bungie readback did not confirm the replacement equip."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 616,
+      "context": "literal",
+      "before": "Fresh Bungie inventory did not confirm the requested overflow transfer.",
+      "after": "Bungie inventory did not confirm the requested overflow transfer."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 633,
+      "context": "literal",
+      "before": "Fresh Bungie inventory returned an unsupported destination for the collected Postmaster item.",
+      "after": "Bungie inventory returned an unsupported destination for the collected Postmaster item."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 652,
+      "context": "literal",
+      "before": "Fresh Postmaster preflight blocked all live changes.",
+      "after": "Postmaster collection unavailable. Nothing changed."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 659,
+      "context": "template",
+      "before": "Fresh Postmaster evidence verified for ",
+      "after": "Fresh Postmaster data for "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+      "line": 678,
+      "context": "literal",
+      "before": "Fresh Bungie readback returned an unsupported location after Postmaster collection.",
+      "after": "Bungie readback returned an unsupported location after Postmaster collection."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-manifest-service.mjs",
+      "line": 320,
+      "context": "literal",
+      "before": "Backend manifest current · resolving owned armour only",
+      "after": "Backend manifest current · resolving armour only"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-manifest-service.mjs",
+      "line": 347,
+      "context": "literal",
+      "before": "Forge index contains no verified Artifact 2.0 catalogue.",
+      "after": "Forge index contains no Artifact 2.0 catalogue."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 445,
+      "context": "template",
+      "before": " output evidence.",
+      "after": " output data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 445,
+      "context": "template",
+      "before": " dependency evidence, but no equipped component has verified ",
+      "after": " dependency data, but no equipped component has "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 469,
+      "context": "literal",
+      "before": "No explicit causal contribution can be proven from available fixture/manifest evidence; no loop claim made.",
+      "after": "No build link found."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 469,
+      "context": "literal",
+      "before": "Weapon identity is unresolved; no loop claim made.",
+      "after": "Weapon details unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 490,
+      "context": "literal",
+      "before": "No activity counter evidence was supplied.",
+      "after": "No activity counter data was supplied."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 515,
+      "context": "literal",
+      "before": "All reported causal links are supported by available explicit fixture/manifest evidence.",
+      "after": "Build links"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 520,
+      "context": "template",
+      "before": " input evidence.",
+      "after": " input data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 520,
+      "context": "template",
+      "before": "'s verified ",
+      "after": "'s "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 520,
+      "context": "template",
+      "before": " output evidence that feeds ",
+      "after": " output data that feeds "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 520,
+      "context": "template",
+      "before": " has verified ",
+      "after": " has "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 526,
+      "context": "template",
+      "before": " is resolved, but its loop contribution is not proven by the available evidence.",
+      "after": " has no matching build link."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 533,
+      "context": "template",
+      "before": ", but the current fixture has no verified source for it.",
+      "after": ", but the current fixture has no source for it."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 533,
+      "context": "template",
+      "before": " has explicit evidence that consumes/depends on ",
+      "after": " needs "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 533,
+      "context": "template",
+      "before": "Equip or select a verified source of ",
+      "after": "Equip or select a source of "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 534,
+      "context": "literal",
+      "before": "The item identity/effect evidence is unresolved.",
+      "after": "The item identity/effect data is unresolved."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 776,
+      "context": "template",
+      "before": " is not resolved by the supplied inventory/manifest evidence.",
+      "after": " details are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 827,
+      "context": "template",
+      "before": " already has a verified ",
+      "after": " already has a "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 830,
+      "context": "template",
+      "before": "-debuffed target, but the verified ",
+      "after": "-debuffed target, but the "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 832,
+      "context": "template",
+      "before": " loop is present in the supplied evidence.",
+      "after": " loop is present in the supplied data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 832,
+      "context": "template",
+      "before": "No explicit producer/consumer relationship to the verified ",
+      "after": "No explicit producer/consumer relationship to the "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 27,
+      "context": "literal",
+      "before": "Verified armour evidence",
+      "after": "Armour details"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 100,
+      "context": "literal",
+      "before": "Live Bungie evidence · verified",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 104,
+      "context": "literal",
+      "before": "Evidence Limited",
+      "after": "Limited data"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 106,
+      "context": "literal",
+      "before": "No Verified Loop",
+      "after": "No Loop"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 106,
+      "context": "template",
+      "before": " Verified Link",
+      "after": " Link"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 109,
+      "context": "literal",
+      "before": "No strength claimed without directed evidence",
+      "after": "No strengths identified yet."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 110,
+      "context": "literal",
+      "before": "No verified weak link identified",
+      "after": "No weak link identified"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 113,
+      "context": "literal",
+      "before": "No recommendation is claimed until a verified missing input or weak link is found.",
+      "after": "No recommendations yet."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 120,
+      "context": "literal",
+      "before": "PARTIAL EVIDENCE",
+      "after": "PARTIAL DATA"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 120,
+      "context": "literal",
+      "before": "EVIDENCE VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 122,
+      "context": "template",
+      "before": " unresolved or unclassified evidence item(s) excluded from claims.",
+      "after": " item detail(s) unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+      "line": 122,
+      "context": "literal",
+      "before": "Paradox is reasoning only from resolved live Bungie evidence.",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 96,
+      "context": "template",
+      "before": " does not have verified owned-location evidence.",
+      "after": " is not in your inventory."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 119,
+      "context": "template",
+      "before": " in Destiny; a verified free socket mapping was not exposed.",
+      "after": " in Destiny; a free socket mapping was not exposed."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 178,
+      "context": "literal",
+      "before": "Three exact owned weapon instances are required before Apply.",
+      "after": "Three weapon instances are required before Apply."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 180,
+      "context": "literal",
+      "before": "Every applied item must have an exact owned Bungie instance ID.",
+      "after": "Every applied item must have a Bungie instance ID."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 205,
+      "context": "template",
+      "before": " in Destiny; this socket was not verified as a free remote insertion.",
+      "after": " in Destiny; this socket was unavailable as a free remote insertion."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 211,
+      "context": "literal",
+      "before": "Capture fresh ownership, equipment and activity state",
+      "after": "Check items, equipment and activity"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 214,
+      "context": "literal",
+      "before": "Verify equipped instance IDs from a fresh profile",
+      "after": "Check equipped items"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 215,
+      "context": "literal",
+      "before": "Apply verified weapon and subclass socket changes",
+      "after": "Apply weapon and subclass socket changes"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 216,
+      "context": "literal",
+      "before": "Apply verified armour mod changes",
+      "after": "Apply armour mod changes"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+      "line": 246,
+      "context": "literal",
+      "before": "No verified perk changes are staged.",
+      "after": "No perk changes are staged."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-portal-progress.mjs",
+      "line": 87,
+      "context": "literal",
+      "before": "Verified live Guardian data is unavailable. Retry the live request.",
+      "after": "Live Guardian data is unavailable. Retry the live request."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 53,
+      "context": "markup literal",
+      "before": "No resolved intrinsic trait evidence.",
+      "after": "No intrinsic trait details."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 54,
+      "context": "markup literal",
+      "before": "No resolved perk evidence.",
+      "after": "No perk details."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 54,
+      "context": "template",
+      "before": "SELECTED · OWNED ROLL",
+      "after": "SELECTED · ROLL"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 55,
+      "context": "markup literal",
+      "before": "No resolved mod evidence.",
+      "after": "No mod details."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 90,
+      "context": "literal",
+      "before": "No active perk evidence resolved",
+      "after": "No active perk data resolved"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 179,
+      "context": "template",
+      "before": "EVIDENCE READY",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 179,
+      "context": "template",
+      "before": "PARTIAL EVIDENCE",
+      "after": "PARTIAL DATA"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 180,
+      "context": "literal",
+      "before": "All equipped armour and weapon semantic evidence resolved",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+      "line": 180,
+      "context": "literal",
+      "before": "Unresolved/unclassified evidence is excluded from Paradox claims",
+      "after": "Some item details are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs",
+      "line": 77,
+      "context": "literal",
+      "before": "Prepared page refresh requires an authenticated membership.",
+      "after": "Connect Bungie to refresh."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-capture.mjs",
+      "line": 286,
+      "context": "literal",
+      "before": "A verified Working Build is required before arming a Build Test.",
+      "after": "A Working Build is required before arming a Build Test."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-evidence.mjs",
+      "line": 107,
+      "context": "literal",
+      "before": "Activity candidates were collected. None may be labelled Shooting Range until a verified hash mapping proves the activity identity.",
+      "after": "Activity list loaded. Shooting Range details are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-weapon-selection.mjs",
+      "line": 78,
+      "context": "literal",
+      "before": "Checking this owned perk with Bungie…",
+      "after": "Applying perk…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-weapon-selection.mjs",
+      "line": 80,
+      "context": "literal",
+      "before": "Perk availability could not be verified. Try selecting it again.",
+      "after": "Perk unavailable. Try again."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-weapon-selection.mjs",
+      "line": 102,
+      "context": "literal",
+      "before": "Applied and verified with Bungie.",
+      "after": "Applied."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+      "line": 96,
+      "context": "markup literal",
+      "before": "Live Bungie inventory is unavailable for the active Guardian.",
+      "after": "Bungie inventory is unavailable for the active Guardian."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+      "line": 131,
+      "context": "literal",
+      "before": "Showing real equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip.",
+      "after": "Showing equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+      "line": 216,
+      "context": "literal",
+      "before": "Running fresh Bungie preflight. No local item position has changed.",
+      "after": "Preparing transfer…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+      "line": 276,
+      "context": "literal",
+      "before": "The Character page is ready while verified Bungie data continues loading.",
+      "after": "The Character page is ready while Bungie data continues loading."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+      "line": 287,
+      "context": "literal",
+      "before": "Telemetry synchronized from live Bungie profile",
+      "after": "Telemetry synchronized from Bungie profile"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/index.html",
+      "line": 126,
+      "context": "html",
+      "before": "LIVE BUNGIE",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/index.html",
+      "line": 136,
+      "context": "html",
+      "before": "LIVE BUNGIE ACTION",
+      "after": "TRANSFER"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/index.html",
+      "line": 138,
+      "context": "html",
+      "before": "This changes the connected Destiny 2 account. The item will remain in its current position here until Bungie confirms the mutation and a fresh profile readback matches.",
+      "after": "This transfers the item in Destiny 2. Review the destination before confirming."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 60,
+      "context": "html",
+      "before": "Stage a verified Forge Loader Exotic to evaluate these Supers.",
+      "after": "Stage a Forge Loader Exotic to evaluate these Supers."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 60,
+      "context": "html",
+      "before": "EXOTIC TO SUPER EVIDENCE",
+      "after": "EXOTIC AND SUPER SYNERGY"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 60,
+      "context": "html",
+      "before": "Verified Prismatic Transcendence slots",
+      "after": "Prismatic Transcendence slots"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 64,
+      "context": "html",
+      "before": "Verified Artifact perk bucket matrix",
+      "after": "Artifact perk bucket matrix"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 64,
+      "context": "html",
+      "before": "Verified Artifact 2.0 catalogue",
+      "after": "Artifact 2.0 catalogue"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 71,
+      "context": "html",
+      "before": "Installed mods retained as evaluation evidence",
+      "after": "Installed mods"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 71,
+      "context": "html",
+      "before": "Choose exact owned armour and reusable mods manually, or generate an AI sequence.",
+      "after": "Choose armour and reusable mods manually, or generate an AI sequence."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 72,
+      "context": "html",
+      "before": "Choose exact owned weapons and reusable perks manually, or ask Paradox to rank them for this build.",
+      "after": "Choose weapons and reusable perks manually, or ask Paradox to rank them for this build."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 75,
+      "context": "html",
+      "before": "Build from my owned gear",
+      "after": "Build from my gear"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 76,
+      "context": "html",
+      "before": "Start with equipped gear or your owned inventory at any armour tier. A verified Exotic armour anchor and compatible subclass sockets are required. Changes stay in the Working Build until you review and confirm Apply.",
+      "after": "Start with equipped gear or your inventory at any armour tier. An Exotic armour anchor and compatible subclass sockets are required. Changes stay in the Working Build until you review and confirm Apply."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 97,
+      "context": "html",
+      "before": "Generating verified Paradox build",
+      "after": "Generating Paradox build"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 108,
+      "context": "html",
+      "before": "FORGING VERIFIED GUARDIAN BUILD…",
+      "after": "Forging build…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 120,
+      "context": "html",
+      "before": "Select an expected PvE activity when Bungie supplies a verified definition, or leave Any Activity selected.",
+      "after": "Select an expected PvE activity when Bungie supplies a definition, or leave Any Activity selected."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 128,
+      "context": "html",
+      "before": "DOWNLOAD RAW EVIDENCE",
+      "after": "Download build data"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 136,
+      "context": "html",
+      "before": "Stage a verified Forge Loader result to begin armour-led build reasoning.",
+      "after": "Stage a Forge Loader result to begin armour-led build reasoning."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 136,
+      "context": "html",
+      "before": "AWAITING ARMOUR EVIDENCE",
+      "after": "Choose armour"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 136,
+      "context": "html",
+      "before": "No component choice is claimed before generation.",
+      "after": "Generate a build to see recommendations."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 138,
+      "context": "html",
+      "before": "Awaiting verified evidence",
+      "after": "Loading…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 139,
+      "context": "html",
+      "before": "Load a live Guardian build to begin verified analysis.",
+      "after": "Load a live Guardian build to begin analysis."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 139,
+      "context": "html",
+      "before": "EVIDENCE PENDING",
+      "after": "Choose a build"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 141,
+      "context": "html",
+      "before": "Evidence Limited",
+      "after": "Limited data"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 141,
+      "context": "html",
+      "before": "Evidence only",
+      "after": "Build details"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 142,
+      "context": "html",
+      "before": "No verified weak link identified",
+      "after": "No weak link identified"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 142,
+      "context": "html",
+      "before": "No strength claimed without directed evidence",
+      "after": "No strengths identified yet."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 143,
+      "context": "html",
+      "before": "No recommendation is claimed until a verified missing input or weak link is found.",
+      "after": "No recommendations yet."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 151,
+      "context": "html",
+      "before": "MANUAL WORKING BUILD · EXACT OWNED ITEMS",
+      "after": "MANUAL WORKING BUILD · ITEMS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 154,
+      "context": "html",
+      "before": "SEARCH OWNED ITEMS",
+      "after": "SEARCH ITEMS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 155,
+      "context": "html",
+      "before": "Loading exact owned inventory…",
+      "after": "Loading inventory…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 159,
+      "context": "html",
+      "before": "Every choice is staged locally first. Apply rechecks ownership, Guardian binding, equipment rules and exact-item reusable plugs. Compatible choices without exact remote evidence are retained as in-game steps.",
+      "after": "Changes stay in this build until you confirm Apply. Some changes must be made in game."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 166,
+      "context": "html",
+      "before": "Choose one activity context. No recommendation is claimed until it is selected.",
+      "after": "Choose an activity for recommendations."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 169,
+      "context": "html",
+      "before": "LIVE BUNGIE ACTION · FINAL CONFIRMATION",
+      "after": "APPLY · FINAL CONFIRMATION"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+      "line": 184,
+      "context": "html",
+      "before": "OWNED VAULT + CHARACTER INVENTORY · 1 EXOTIC WEAPON MAX",
+      "after": "VAULT + CHARACTER INVENTORY · 1 EXOTIC WEAPON MAX"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 50,
+      "context": "literal",
+      "before": "Choose a direct entry or stage a verified Forge Loader armour result.",
+      "after": "Choose a direct entry or stage a Forge Loader armour result."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 57,
+      "context": "template",
+      "before": "A complete set of exact owned ",
+      "after": "A complete set of "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 59,
+      "context": "template",
+      "before": " must match owned inventory and its equipment slot.",
+      "after": " must match inventory and its equipment slot."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 61,
+      "context": "literal",
+      "before": "Verified item socket data is required before generation.",
+      "after": "Item socket data is required before generation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 63,
+      "context": "literal",
+      "before": "Verified armour energy capacity is required before generation.",
+      "after": "Armour energy capacity is required before generation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 66,
+      "context": "literal",
+      "before": "Choose one owned Exotic armour piece before generation.",
+      "after": "Choose one Exotic armour piece before generation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 66,
+      "context": "literal",
+      "before": "Choose a legal owned armour selection.",
+      "after": "Choose a legal armour selection."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 80,
+      "context": "literal",
+      "before": "MASTERWORK VERIFIED",
+      "after": "MASTERWORK"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 81,
+      "context": "literal",
+      "before": "MASTERWORK VERIFIED",
+      "after": "MASTERWORK"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+      "line": 98,
+      "context": "literal",
+      "before": "A verified armour tier is missing.",
+      "after": "An armour tier is missing."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 175,
+      "context": "literal",
+      "before": "OWNED ARMOUR & INSTALLED MODS",
+      "after": "ARMOUR & INSTALLED MODS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 176,
+      "context": "literal",
+      "before": "Choose exact owned armour manually, or select an elemental build and generate an AI sequence.",
+      "after": "Choose armour manually, or select an elemental build and generate an AI sequence."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 176,
+      "context": "literal",
+      "before": "Select an elemental build and generate from this owned equipment.",
+      "after": "Select an elemental build and generate from this equipment."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 176,
+      "context": "literal",
+      "before": "Exact owned armour and reusable mods staged manually.",
+      "after": "Undefined armour and reusable mods staged manually."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 177,
+      "context": "literal",
+      "before": "Installed mods retained as evaluation evidence",
+      "after": "Installed mods"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 177,
+      "context": "literal",
+      "before": "Every manual socket choice retains Bungie instance and reusable-plug evidence.",
+      "after": "Your socket choices are staged in this build."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 195,
+      "context": "template",
+      "before": "Choose any owned armour for this Guardian. Paradox compares owned weapons and plans mods for these five pieces.",
+      "after": "Choose any armour for this Guardian. Paradox compares weapons and plans mods for these five pieces."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 216,
+      "context": "literal",
+      "before": "Owned gear could not be prepared.",
+      "after": "Gear could not be prepared."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 262,
+      "context": "markup literal",
+      "before": "No exact owned item matches this slot and search.",
+      "after": "No item matches this slot and search."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 264,
+      "context": "literal",
+      "before": "Loading exact owned inventory…",
+      "after": "Loading inventory…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 264,
+      "context": "template",
+      "before": " exact owned option",
+      "after": " option"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 273,
+      "context": "literal",
+      "before": "Exact owned inventory could not be loaded.",
+      "after": "Undefined inventory could not be loaded."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 340,
+      "context": "template",
+      "before": " · EXACT OWNED INSTANCE",
+      "after": " · INSTANCE"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 355,
+      "context": "literal",
+      "before": "Waiting for current Bungie evidence.",
+      "after": "Waiting for current Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 355,
+      "context": "literal",
+      "before": "FRESH CHECK",
+      "after": "CHECKING"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 357,
+      "context": "literal",
+      "before": "Waiting for fresh Bungie readback.",
+      "after": "Waiting for Bungie readback."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 357,
+      "context": "literal",
+      "before": "VERIFYING",
+      "after": "LOADING"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 375,
+      "context": "literal",
+      "before": "Fresh Bungie readback confirms this exact item equipped.",
+      "after": "Bungie readback confirms this exact item equipped."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 380,
+      "context": "literal",
+      "before": "Fresh Bungie readback confirms this exact socket value.",
+      "after": "Bungie readback confirms this exact socket value."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 387,
+      "context": "literal",
+      "before": "Every remote entry shown below was confirmed by fresh Bungie readback.",
+      "after": "All listed changes were applied."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 387,
+      "context": "literal",
+      "before": "Only entries marked Confirmed were verified by fresh Bungie readback. Completed changes were not rolled back.",
+      "after": "Only entries marked Confirmed were applied. Completed changes were not rolled back."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 387,
+      "context": "literal",
+      "before": "LIVE BUNGIE ACTION · VERIFIED RESULT",
+      "after": "APPLY RESULT"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 394,
+      "context": "literal",
+      "before": "Apply preflight · checking fresh Guardian, ownership, location, compatibility, Exotic, socket and activity evidence. No live changes are being made.",
+      "after": "Checking this build before Apply. No changes have been made."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 401,
+      "context": "literal",
+      "before": "LIVE BUNGIE ACTION · FINAL CONFIRMATION",
+      "after": "APPLY · FINAL CONFIRMATION"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 409,
+      "context": "literal",
+      "before": "LIVE BUNGIE ACTION · IN PROGRESS",
+      "after": "APPLYING…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 409,
+      "context": "literal",
+      "before": "Bungie calls are in progress. Each entry remains pending until a fresh readback confirms its final state.",
+      "after": "Applying changes…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 415,
+      "context": "template",
+      "before": "Apply verified · Bungie readback matched all ",
+      "after": "Apply · Bungie readback matched all "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 416,
+      "context": "literal",
+      "before": "fresh ownership validation blocked Apply.",
+      "after": "fresh inventory validation blocked Apply."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 434,
+      "context": "literal",
+      "before": "Select a verified PvE activity, leave Any Activity selected, or use optional Shooting Range calibration.",
+      "after": "Select a PvE activity, leave Any Activity selected, or use optional Shooting Range calibration."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 434,
+      "context": "literal",
+      "before": "Crucible modes appear only when resolved from current Bungie activity definitions. Map and modifier context can attach to the same verified intake contract.",
+      "after": "Crucible modes appear only when resolved from current Bungie activity definitions. Map and modifier context can attach to the same intake contract."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 548,
+      "context": "markup literal",
+      "before": "Bungie did not supply a verified option for this slot",
+      "after": "Bungie did not supply an option for this slot"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 548,
+      "context": "literal",
+      "before": "Evidence unavailable",
+      "after": "Details unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 553,
+      "context": "literal",
+      "before": "Verified Bungie Artifact perk",
+      "after": "Bungie Artifact perk"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 562,
+      "context": "markup literal",
+      "before": "VERIFYING CURRENT ARTIFACT",
+      "after": "LOADING CURRENT ARTIFACT"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 565,
+      "context": "literal",
+      "before": "A complete verified Artifact match is not available.",
+      "after": "A complete Artifact match is not available."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 566,
+      "context": "markup literal",
+      "before": "CHECK VERIFIED ARTIFACT",
+      "after": "CHECK ARTIFACT"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 570,
+      "context": "literal",
+      "before": "Verified Forge Loader compatibility",
+      "after": "Forge Loader compatibility"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 571,
+      "context": "literal",
+      "before": "Verified Artifact",
+      "after": "Artifact"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 571,
+      "context": "template",
+      "before": " verified Artifacts",
+      "after": " Artifacts"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 573,
+      "context": "literal",
+      "before": "PARADOX BEST VERIFIED FIT",
+      "after": "PARADOX BEST FIT"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 575,
+      "context": "literal",
+      "before": "This complete target plan is ranked from the current verified Artifact perk tree even when Bungie reports no unused unlock points. Apply the picks in game as they become available. Working Build only · currently unlocked and equipped perks remain unchanged.",
+      "after": "This complete target plan is ranked from the current Artifact perk tree even when Bungie reports no unused unlock points. Apply the picks in game as they become available. Working Build only · currently unlocked and equipped perks remain unchanged."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 576,
+      "context": "literal",
+      "before": "Artifact 2.0 is ranked from its verified socket buckets, then each bucket is filled from the staged Exotic, stat priorities, armour-set traits, subclass/Super and weapons. Working Build only · currently unlocked and equipped perks remain unchanged.",
+      "after": "Artifact 2.0 is ranked from its socket buckets, then each bucket is filled from the staged Exotic, stat priorities, armour-set traits, subclass/Super and weapons. Working Build only · currently unlocked and equipped perks remain unchanged."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 581,
+      "context": "markup literal",
+      "before": "Requires verified Artifact socket-bucket or CharacterProgressions perk definitions from Bungie.",
+      "after": "Requires Artifact socket-bucket or CharacterProgressions perk definitions from Bungie."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 592,
+      "context": "literal",
+      "before": "Choose one activity context. No recommendation is claimed until it is selected.",
+      "after": "Choose an activity for recommendations."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 621,
+      "context": "literal",
+      "before": "Verified socket options unavailable",
+      "after": "Socket options unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 640,
+      "context": "literal",
+      "before": "Verified option",
+      "after": "Option"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 654,
+      "context": "template",
+      "before": "No verified ",
+      "after": "No "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 654,
+      "context": "template",
+      "before": "The selected Exotic armour perk is not compatible with the verified ",
+      "after": "The selected Exotic armour perk is not compatible with the "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 654,
+      "context": "template",
+      "before": "Evaluate a verified ",
+      "after": "Evaluate a "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 657,
+      "context": "literal",
+      "before": "GENERATING VERIFIED BUILD…",
+      "after": "Generating build…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 659,
+      "context": "literal",
+      "before": "No complete live Bungie subclass socket set is available for this Guardian.",
+      "after": "No complete Bungie subclass socket set is available for this Guardian."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 659,
+      "context": "literal",
+      "before": "The staged Exotic has no explicit compatibility evidence for the available verified elemental options.",
+      "after": "The staged Exotic has no explicit compatibility data for the available elemental options."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 659,
+      "context": "template",
+      "before": ". Refresh verified Guardian data before generating.",
+      "after": ". Refresh Guardian data before generating."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 660,
+      "context": "literal",
+      "before": "Owned inventory",
+      "after": "Inventory"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 660,
+      "context": "template",
+      "before": " damage build · one verified Exotic armour anchor · ",
+      "after": " damage build · one Exotic armour anchor · "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 660,
+      "context": "literal",
+      "before": "Resolving elemental damage, weapon and Artifact evidence…",
+      "after": "Resolving elemental damage, weapon and Artifact data…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 679,
+      "context": "markup literal",
+      "before": "Stage a verified Forge Loader Exotic to evaluate these Supers.",
+      "after": "Stage a Forge Loader Exotic to evaluate these Supers."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 679,
+      "context": "markup literal",
+      "before": "EXOTIC TO SUPER EVIDENCE",
+      "after": "EXOTIC AND SUPER SYNERGY"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 680,
+      "context": "markup literal",
+      "before": "Verified Exotic effect text unavailable.",
+      "after": "Exotic effect text unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 682,
+      "context": "literal",
+      "before": "NO DIRECT SYNERGY EVIDENCE",
+      "after": "NO DIRECT SYNERGY"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 682,
+      "context": "template",
+      "before": "EVIDENCE RANK ",
+      "after": "MATCH RANK "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 682,
+      "context": "template",
+      "before": "BEST VERIFIED EVIDENCE",
+      "after": "BEST MATCH"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 689,
+      "context": "template",
+      "before": "EXOTIC TO SUPER EVIDENCE · ",
+      "after": "EXOTIC TO SUPER DATA · "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 693,
+      "context": "template",
+      "before": " retained because no resolved alternative proved a stronger directed evidence score.",
+      "after": " retained; no stronger alternative was found."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 708,
+      "context": "literal",
+      "before": "AWAITING ARMOUR EVIDENCE",
+      "after": "Choose armour"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 708,
+      "context": "markup literal",
+      "before": "No component choice is claimed before generation.",
+      "after": "Generate a build to see recommendations."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 709,
+      "context": "template",
+      "before": " is carried into the evidence score.",
+      "after": " contributes to the match score."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 709,
+      "context": "literal",
+      "before": "Generate Max Loadout to compare the verified subclass catalogue against the selected owned armour.",
+      "after": "Generate Max Loadout to compare the subclass catalogue against the selected armour."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 709,
+      "context": "literal",
+      "before": "ARMOUR EVIDENCE STAGED",
+      "after": "ARMOUR DATA STAGED"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 709,
+      "context": "literal",
+      "before": "verified Exotic",
+      "after": "Exotic"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "template",
+      "before": "/5 Prismatic elements evidenced",
+      "after": "/5 Prismatic elements available"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "template",
+      "before": " verified subclass component decisions",
+      "after": " subclass component decisions"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "template",
+      "before": " directed evidence link",
+      "after": " directed data link"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "template",
+      "before": " unresolved evidence field",
+      "after": " unresolved data field"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "literal",
+      "before": "VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 710,
+      "context": "literal",
+      "before": "VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 711,
+      "context": "markup literal",
+      "before": "The verified equipped configuration remains the safest evidence-bound result.",
+      "after": "Keep the equipped build; no stronger alternative was found."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 716,
+      "context": "literal",
+      "before": "verified subclass",
+      "after": "subclass"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 717,
+      "context": "literal",
+      "before": "PARTIAL EVIDENCE · LIVE GUARDIAN UNCHANGED",
+      "after": "PARTIAL DATA · LIVE GUARDIAN UNCHANGED"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 719,
+      "context": "markup literal",
+      "before": "NO VERIFIED FRAGMENTS",
+      "after": "NO FRAGMENTS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 719,
+      "context": "markup literal",
+      "before": "NO VERIFIED ASPECTS",
+      "after": "NO ASPECTS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 719,
+      "context": "markup literal",
+      "before": "NO VERIFIED ABILITIES",
+      "after": "NO ABILITIES"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 726,
+      "context": "literal",
+      "before": "verified Super",
+      "after": "Super"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 727,
+      "context": "template",
+      "before": " effect text is unresolved and was excluded from the evidence score.",
+      "after": " effect details are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 727,
+      "context": "template",
+      "before": " contributes only its verified effect text to the ranking.",
+      "after": " contributes only its effect text to the ranking."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 727,
+      "context": "markup literal",
+      "before": "No additional intelligence claim is available for this snapshot.",
+      "after": "No additional recommendations."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 733,
+      "context": "template",
+      "before": "OWNED VAULT + CHARACTER INVENTORY · ",
+      "after": "VAULT + CHARACTER INVENTORY · "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 738,
+      "context": "literal",
+      "before": "Exact owned instance retained; no stronger explicit synergy evidence was proven.",
+      "after": "Item retained; no stronger synergy was found."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 738,
+      "context": "template",
+      "before": " OWNED CANDIDATES",
+      "after": " CANDIDATES"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 738,
+      "context": "literal",
+      "before": "Owned weapon",
+      "after": "Weapon"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 754,
+      "context": "markup literal",
+      "before": "No Artifact synergy claim is available from the supplied Bungie evidence.",
+      "after": "No matching Artifact synergy."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 756,
+      "context": "literal",
+      "before": "No complete legal recommendation was resolved from the supplied Bungie evidence.",
+      "after": "No complete legal recommendation was resolved from the supplied Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 756,
+      "context": "literal",
+      "before": "EVIDENCE LIMITED · CURRENT CONFIGURATION SHOWN",
+      "after": "DATA LIMITED · CURRENT CONFIGURATION SHOWN"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 775,
+      "context": "literal",
+      "before": "VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 799,
+      "context": "literal",
+      "before": "The selected elemental build option is not supported by this Guardian’s verified subclass catalogue.",
+      "after": "The selected elemental build option is not supported by this Guardian’s subclass catalogue."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 817,
+      "context": "literal",
+      "before": "Unable to generate a verified recommendation.",
+      "after": "Unable to generate a recommendation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 830,
+      "context": "literal",
+      "before": "RECOVERING VERIFIED GUARDIAN",
+      "after": "RECOVERING GUARDIAN"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 831,
+      "context": "literal",
+      "before": "No verified Original or Working Build has been loaded.",
+      "after": "No Original or Working Build has been loaded."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 832,
+      "context": "literal",
+      "before": "Artifact resolution starts only after a verified build snapshot is loaded.",
+      "after": "Artifact resolution starts only after a build snapshot is loaded."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 851,
+      "context": "literal",
+      "before": "Verified slot unavailable",
+      "after": "Slot unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 858,
+      "context": "literal",
+      "before": "The transferred build remains protected while the remaining verified equipment evidence is displayed.",
+      "after": "The transferred build remains protected while the remaining equipment data is displayed."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 861,
+      "context": "literal",
+      "before": "Verified Artifact catalogue unavailable",
+      "after": "Artifact catalogue unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 861,
+      "context": "literal",
+      "before": "Resolving verified Artifact evidence…",
+      "after": "Resolving Artifact data…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 862,
+      "context": "template",
+      "before": " verified Artifact option(s) · ",
+      "after": " Artifact option(s) · "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 862,
+      "context": "template",
+      "before": " legal target picks staged from the verified perk tree. Current unlocks and equipped perks remain unchanged.",
+      "after": " legal target picks staged from the perk tree. Current unlocks and equipped perks remain unchanged."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 862,
+      "context": "literal",
+      "before": "Verified Artifact socket data is unavailable.",
+      "after": "Artifact socket data is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 877,
+      "context": "literal",
+      "before": "The transferred build remains protected while the available Build Forge evidence is displayed.",
+      "after": "The transferred build remains protected while the available Build Forge data is displayed."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 878,
+      "context": "literal",
+      "before": "Completing Build Forge with protected evidence…",
+      "after": "Completing Build Forge with protected data…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 892,
+      "context": "literal",
+      "before": "RESULT EVIDENCE LIMITED",
+      "after": "RESULT DATA LIMITED"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 892,
+      "context": "literal",
+      "before": "VERIFIED RESULT REVIEWED",
+      "after": "RESULT REVIEWED"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 892,
+      "context": "literal",
+      "before": "The completed activity was confirmed, but complete activity-hash and PGCR proof was not available; no performance claim is made.",
+      "after": "Activity completed. Performance details unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 893,
+      "context": "literal",
+      "before": "VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 893,
+      "context": "template",
+      "before": "PGCR EVIDENCE",
+      "after": "PGCR DATA"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 897,
+      "context": "template",
+      "before": ". Raw evidence remains available to download.",
+      "after": ". Raw data remains available to download."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+      "line": 899,
+      "context": "template",
+      "before": " verified activity + PGCR record(s) pulled. Causal perk and uptime claims remain inference.",
+      "after": " activity result(s) loaded. Perk effects and uptime are estimates."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 30,
+      "context": "literal",
+      "before": "Verified component",
+      "after": "Component"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 114,
+      "context": "template",
+      "before": " in its verified effect.",
+      "after": " in its effect."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 119,
+      "context": "template",
+      "before": " explicitly scopes its verified effect to ",
+      "after": " explicitly scopes its effect to "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 134,
+      "context": "template",
+      "before": "Verified Super investment is ",
+      "after": "Super investment is "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 177,
+      "context": "template",
+      "before": ", whose verified definition explicitly names ",
+      "after": ", whose definition explicitly names "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 180,
+      "context": "template",
+      "before": ", whose verified definition supplies Super energy to ",
+      "after": ", whose definition supplies Super energy to "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 186,
+      "context": "template",
+      "before": ", whose verified definition grants Super energy to ",
+      "after": ", whose definition grants Super energy to "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 327,
+      "context": "template",
+      "before": " evidence with ",
+      "after": " effects with "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 327,
+      "context": "template",
+      "before": " shares verified ",
+      "after": " shares "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 338,
+      "context": "template",
+      "before": " evidence for Forge Loader priority ",
+      "after": " data for Forge Loader priority "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 411,
+      "context": "literal",
+      "before": "Directed-loop analysis was unavailable; component choices use explicit Forge Loader evidence matches only.",
+      "after": "Directed-loop analysis was unavailable; component choices use explicit Forge Loader data matches only."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 415,
+      "context": "template",
+      "before": "Verified Prismatic component evidence does not cover: ",
+      "after": "Prismatic component data does not cover: "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 433,
+      "context": "literal",
+      "before": "A verified elemental build option is required.",
+      "after": "An elemental build option is required."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 443,
+      "context": "literal",
+      "before": "A verified elemental build option is required.",
+      "after": "An elemental build option is required."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 444,
+      "context": "literal",
+      "before": "The selected element does not have a complete verified Bungie subclass socket set.",
+      "after": "The selected element does not have a complete Bungie subclass socket set."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs",
+      "line": 49,
+      "context": "literal",
+      "before": "Choose a direct entry or stage a verified Forge Loader result first.",
+      "after": "Choose a direct entry or stage a Forge Loader result first."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 20,
+      "context": "template",
+      "before": " effect description is unresolved and was excluded from the evidence score.",
+      "after": " effect details are unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 26,
+      "context": "literal",
+      "before": "All required and optional generation evidence resolved.",
+      "after": "All required and optional generation data resolved."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 26,
+      "context": "template",
+      "before": " unresolved evidence field",
+      "after": " unresolved data field"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 31,
+      "context": "literal",
+      "before": "The selected subclass is not compatible with the verified armour selection.",
+      "after": "The selected subclass is not compatible with the armour selection."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 35,
+      "context": "literal",
+      "before": "The selected Super is not in this verified subclass catalogue.",
+      "after": "The selected Super is not in this subclass catalogue."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 40,
+      "context": "literal",
+      "before": "OPTIMISING VERIFIED SUBCLASS COMPONENTS…",
+      "after": "OPTIMISING SUBCLASS COMPONENTS…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 46,
+      "context": "literal",
+      "before": "RANKING ALL VERIFIED OWNED WEAPONS…",
+      "after": "RANKING ALL WEAPONS…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 52,
+      "context": "literal",
+      "before": "RE-RANKING OWNED WEAPONS WITH ARTIFACT FIT…",
+      "after": "RE-RANKING WEAPONS WITH ARTIFACT FIT…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 55,
+      "context": "literal",
+      "before": "OPTIMISING VERIFIED ARMOUR MOD CHANGES…",
+      "after": "OPTIMISING ARMOUR MOD CHANGES…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 59,
+      "context": "literal",
+      "before": "VERIFYING RECOMMENDED WEAPON PERK ROLLS…",
+      "after": "LOADING RECOMMENDED WEAPON PERK ROLLS…"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+      "line": 61,
+      "context": "literal",
+      "before": "verified perk evidence was unavailable",
+      "after": "perk data was unavailable"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-worker.mjs",
+      "line": 19,
+      "context": "literal",
+      "before": "No compatible verified subclass for this element.",
+      "after": "No compatible subclass for this element."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 23,
+      "context": "literal",
+      "before": "Verified option",
+      "after": "Option"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 41,
+      "context": "literal",
+      "before": "Verified Exotic",
+      "after": "Exotic"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 42,
+      "context": "template",
+      "before": " owned weapon fit",
+      "after": " weapon fit"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 44,
+      "context": "literal",
+      "before": "Grenade final blows create an Orb of Power through a verified Firepower-style armour mod.",
+      "after": "Grenade final blows create an Orb of Power through a Firepower-style armour mod."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 45,
+      "context": "literal",
+      "before": "Grenade final blows grant Super energy through a verified Ashes to Assets-style armour mod.",
+      "after": "Grenade final blows grant Super energy through an Ashes to Assets-style armour mod."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 137,
+      "context": "template",
+      "before": " requires a verified ",
+      "after": " requires a "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 149,
+      "context": "template",
+      "before": "Verified ",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 153,
+      "context": "template",
+      "before": " evidence supports the ",
+      "after": " supports the "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 198,
+      "context": "template",
+      "before": ": energy capacity was not resolved, so no capacity claim is made.",
+      "after": ": energy capacity unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 199,
+      "context": "template",
+      "before": ": no verified insertable alternatives were supplied; the installed state is preserved.",
+      "after": ": no insertable alternatives were supplied; the installed state is preserved."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 319,
+      "context": "literal",
+      "before": "This combination no longer has three complete owned weapon instances. Generate fresh alternatives.",
+      "after": "This combination no longer has three complete weapon instances. Generate fresh alternatives."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 329,
+      "context": "literal",
+      "before": "The broader owned inventory is unavailable; only the supplied equipped instances could be compared.",
+      "after": "The broader inventory is unavailable; only the supplied equipped instances could be compared."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 329,
+      "context": "template",
+      "before": " owned weapon instance(s) lack selected-perk evidence and were excluded from alternatives.",
+      "after": " weapon instance(s) lack selected-perk data and were excluded from alternatives."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 329,
+      "context": "literal",
+      "before": "No complete legal owned weapon combination could be resolved; the existing selections require review.",
+      "after": "No complete legal weapon combination could be resolved; the existing selections require review."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 330,
+      "context": "template",
+      "before": "No complete owned ",
+      "after": "No complete "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 349,
+      "context": "template",
+      "before": ": the verified Tier ",
+      "after": ": the Tier "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 350,
+      "context": "template",
+      "before": ": selected perk evidence is incomplete.",
+      "after": ": selected perk data is incomplete."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 352,
+      "context": "template",
+      "before": ": perk columns require verified socket indexes.",
+      "after": ": perk columns require socket indexes."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 360,
+      "context": "template",
+      "before": " is missing verified option evidence.",
+      "after": " has no available option."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 378,
+      "context": "literal",
+      "before": "A verified grenade-to-Orb mod is available but missing from the recommendation.",
+      "after": "A grenade-to-Orb mod is available but missing from the recommendation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 379,
+      "context": "literal",
+      "before": "A verified grenade-to-Super mod is available but missing from the recommendation.",
+      "after": "A grenade-to-Super mod is available but missing from the recommendation."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 382,
+      "context": "template",
+      "before": "A verified owned ",
+      "after": "A "
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 389,
+      "context": "literal",
+      "before": "Apply requires three exact owned weapon instance IDs.",
+      "after": "Apply requires three weapon instance IDs."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 390,
+      "context": "literal",
+      "before": "Apply requires five exact owned armour instance IDs.",
+      "after": "Apply requires five armour instance IDs."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 394,
+      "context": "template",
+      "before": " is missing verified owned-location evidence.",
+      "after": " is not in your inventory."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+      "line": 396,
+      "context": "literal",
+      "before": "Artifact choices are preserved as explicit in-game steps unless Bungie exposes a verified free socket mapping.",
+      "after": "Artifact choices are preserved as explicit in-game steps unless Bungie exposes a free socket mapping."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+      "line": 39,
+      "context": "literal",
+      "before": "Manual equipment choices require an exact owned Bungie instance.",
+      "after": "Manual equipment choices require a Bungie instance."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+      "line": 109,
+      "context": "literal",
+      "before": "Only a verified insertable socket option can be staged.",
+      "after": "Only an insertable socket option can be staged."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+      "line": 111,
+      "context": "literal",
+      "before": "Select an exact owned item before editing its sockets.",
+      "after": "Select an item before editing its sockets."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+      "line": 113,
+      "context": "literal",
+      "before": "This socket option is not in the item’s verified reusable plug set.",
+      "after": "This socket option is not in the item’s reusable plug set."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+      "line": 132,
+      "context": "literal",
+      "before": "This subclass choice has no verified socket identity.",
+      "after": "This subclass choice has no socket identity."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs",
+      "line": 17,
+      "context": "markup literal",
+      "before": "No complete owned weapon alternatives are available. Refresh the inventory and generate again.",
+      "after": "No complete weapon alternatives are available. Refresh the inventory and generate again."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs",
+      "line": 18,
+      "context": "template",
+      "before": "OWNED WEAPON COMBINATIONS",
+      "after": "WEAPON COMBINATIONS"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs",
+      "line": 21,
+      "context": "template",
+      "before": "Fit uses owned perks and ammo roles; damage output is not measured. Choosing a combination recalculates Artifact picks, armour mods and perk advice.",
+      "after": "Fit uses perks and ammo roles; damage output is not measured. Choosing a combination recalculates Artifact picks, armour mods and perk advice."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs",
+      "line": 21,
+      "context": "literal",
+      "before": "Ammo-role evidence is incomplete.",
+      "after": "Ammo-role data is incomplete."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs",
+      "line": 150,
+      "context": "literal",
+      "before": "Exact owned instance",
+      "after": "Item details"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html",
+      "line": 43,
+      "context": "html",
+      "before": "Raw verified output",
+      "after": "Raw output"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 113,
+      "context": "html",
+      "before": "Subclass awaiting verified data",
+      "after": "Subclass awaiting data"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 122,
+      "context": "html",
+      "before": "Highest completed Guardian Rank awaiting verified Bungie data.",
+      "after": "Highest completed Guardian Rank awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 127,
+      "context": "html",
+      "before": "Equipped title awaiting verified Bungie data.",
+      "after": "Equipped title awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 128,
+      "context": "html",
+      "before": "Verified title progress is not available.",
+      "after": "Title progress is not available."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 129,
+      "context": "html",
+      "before": "No verified Triumph or progression values are available.",
+      "after": "No Triumph or progression values are available."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 130,
+      "context": "html",
+      "before": "Verified class playtime is not available.",
+      "after": "Class playtime is not available."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 131,
+      "context": "html",
+      "before": "Current seasonal progression is awaiting verified Bungie data.",
+      "after": "Current seasonal progression is awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 141,
+      "context": "html",
+      "before": "AWAITING VERIFIED ACTIVITY DATA",
+      "after": "AWAITING ACTIVITY DATA"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 148,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 152,
+      "context": "html",
+      "before": "Awaiting completion evidence",
+      "after": "Awaiting completion data"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 153,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 157,
+      "context": "html",
+      "before": "Awaiting PVE evidence",
+      "after": "Awaiting PVE data"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 158,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 162,
+      "context": "html",
+      "before": "Awaiting PVP evidence",
+      "after": "Awaiting PVP data"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 163,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 190,
+      "context": "html",
+      "before": "AWAITING VERIFIED BUNGIE RECORDS",
+      "after": "AWAITING BUNGIE RECORDS"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 191,
+      "context": "html",
+      "before": "Title presentation nodes are awaiting verified profile data.",
+      "after": "Title presentation nodes are awaiting profile data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 192,
+      "context": "html",
+      "before": "Badge presentation nodes are awaiting verified profile data.",
+      "after": "Badge presentation nodes are awaiting profile data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 193,
+      "context": "html",
+      "before": "Verified title requirements are awaiting data.",
+      "after": "Title requirements are awaiting data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 194,
+      "context": "html",
+      "before": "Triumph presentation nodes are awaiting verified profile data.",
+      "after": "Triumph presentation nodes are awaiting profile data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 195,
+      "context": "html",
+      "before": "Verified Triumph records are awaiting data.",
+      "after": "Triumph records are awaiting data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 196,
+      "context": "html",
+      "before": "Verified Guardian Rank objectives are awaiting data.",
+      "after": "Guardian Rank objectives are awaiting data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 197,
+      "context": "html",
+      "before": "Record sections are awaiting verified data.",
+      "after": "Record sections are awaiting data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 198,
+      "context": "html",
+      "before": "Verified individual Record progress is awaiting data.",
+      "after": "Individual Record progress is awaiting data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 205,
+      "context": "html",
+      "before": "Journey analysis and evidence summaries",
+      "after": "Journey analysis and data summaries"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 212,
+      "context": "html",
+      "before": "No verified performance trend available",
+      "after": "No performance trend available"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 217,
+      "context": "html",
+      "before": "Performance trends require live dated activity evidence.",
+      "after": "Play activities to see performance trends."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 224,
+      "context": "html",
+      "before": "EVIDENCE CONFIDENCE",
+      "after": "DATA COVERAGE"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 240,
+      "context": "html",
+      "before": "EVIDENCE &amp; TOOLS",
+      "after": "BUILD DATA &amp; TOOLS"
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 241,
+      "context": "html",
+      "before": "No verified Build Test or Mission Report loadout evidence has been recorded.",
+      "after": "No build activity recorded yet."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 243,
+      "context": "html",
+      "before": "No verified Build Forge state is available for this Guardian.",
+      "after": "No Build Forge state is available for this Guardian."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 244,
+      "context": "html",
+      "before": "Vault inventory is awaiting verified Bungie data.",
+      "after": "Vault inventory is awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/index.html",
+      "line": 245,
+      "context": "html",
+      "before": "No verified activity history is available for Mission Report highlights.",
+      "after": "No activity history is available for Mission Report highlights."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey-location-maps.mjs",
+      "line": 324,
+      "context": "template",
+      "before": "No verified ",
+      "after": "No "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey-map-explorer.mjs",
+      "line": 31,
+      "context": "literal",
+      "before": "Explore Director locations and activity details. Some activities are seasonal or historical; current availability is not verified.",
+      "after": "Explore locations and activities. Check current availability in Destiny 2."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey-map-explorer.mjs",
+      "line": 69,
+      "context": "literal",
+      "before": "Availability and completion are not verified. Launch activities in Destiny 2.",
+      "after": "Check availability and launch activities in Destiny 2."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 141,
+      "context": "literal",
+      "before": "Journey could not finish rendering verified data.",
+      "after": "Journey could not finish rendering data."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 188,
+      "context": "literal",
+      "before": "Current seasonal progression is awaiting verified Bungie data.",
+      "after": "Current seasonal progression is awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 215,
+      "context": "literal",
+      "before": "Verified class playtime is not available.",
+      "after": "Class playtime is not available."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 302,
+      "context": "literal",
+      "before": "Subclass awaiting verified data",
+      "after": "Subclass awaiting data"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 373,
+      "context": "literal",
+      "before": "Highest completed Guardian Rank awaiting verified Bungie data.",
+      "after": "Highest completed Guardian Rank awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 383,
+      "context": "literal",
+      "before": "Equipped title awaiting verified Bungie data.",
+      "after": "Equipped title awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 402,
+      "context": "literal",
+      "before": "Verified title progress is not available.",
+      "after": "Title progress is not available."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 819,
+      "context": "literal",
+      "before": "Verified activity medals and earned counts.",
+      "after": "Activity medals and earned counts."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 822,
+      "context": "literal",
+      "before": "Verified Guardian statistics and objective progress.",
+      "after": "Guardian statistics and objective progress."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 858,
+      "context": "literal",
+      "before": "VERIFIED VALUE",
+      "after": "VALUE"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 860,
+      "context": "literal",
+      "before": "AWAITING VERIFIED COUNTS",
+      "after": "AWAITING COUNTS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1110,
+      "context": "literal",
+      "before": "VERIFIED BUNGIE RECORDS",
+      "after": "BUNGIE RECORDS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1125,
+      "context": "template",
+      "before": "Verified requirements for this ",
+      "after": "Requirements for this "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1126,
+      "context": "template",
+      "before": "Loading verified ",
+      "after": "Loading "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1138,
+      "context": "template",
+      "before": "No verified requirements were returned for this ",
+      "after": "No requirements were returned for this "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1151,
+      "context": "literal",
+      "before": "No verified Triumphs were returned for this subcategory.",
+      "after": "No Triumphs were returned for this subcategory."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1152,
+      "context": "literal",
+      "before": "Loading verified Triumph records.",
+      "after": "Loading Triumph records."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1163,
+      "context": "literal",
+      "before": "No verified Triumphs were returned for this subcategory.",
+      "after": "No Triumphs were returned for this subcategory."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1166,
+      "context": "literal",
+      "before": "No verified Triumph subcategories were returned.",
+      "after": "No Triumph subcategories were returned."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1170,
+      "context": "literal",
+      "before": "Loading verified Triumph subcategories.",
+      "after": "Loading Triumph subcategories."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1203,
+      "context": "literal",
+      "before": "LOADING VERIFIED BUNGIE DEFINITIONS",
+      "after": "LOADING BUNGIE DEFINITIONS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1206,
+      "context": "literal",
+      "before": "No verified Triumph category rows were returned.",
+      "after": "No Triumph category rows were returned."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1206,
+      "context": "template",
+      "before": "No verified Destiny ",
+      "after": "No Destiny "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1220,
+      "context": "template",
+      "before": " VERIFIED COLLECTION BADGES",
+      "after": " COLLECTION BADGES"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1234,
+      "context": "template",
+      "before": "No verified Destiny ",
+      "after": "No Destiny "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1237,
+      "context": "template",
+      "before": " VERIFIED ",
+      "after": " "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1237,
+      "context": "template",
+      "before": " VERIFIED TITLES · ",
+      "after": " TITLES · "
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1244,
+      "context": "template",
+      "before": " definitions were returned from the verified Bungie seal catalogue.",
+      "after": " definitions were returned from the Bungie seal catalogue."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1252,
+      "context": "literal",
+      "before": "Triumph presentation nodes are not present in the verified profile response.",
+      "after": "Triumph presentation nodes are not present in the profile response."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1253,
+      "context": "literal",
+      "before": "VERIFIED RECORD DATA UNAVAILABLE",
+      "after": "RECORD DATA UNAVAILABLE"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1292,
+      "context": "literal",
+      "before": "LOADING VERIFIED GUARDIAN RANKS",
+      "after": "LOADING GUARDIAN RANKS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1328,
+      "context": "literal",
+      "before": "No verified objectives were returned for this Guardian Rank.",
+      "after": "No objectives were returned for this Guardian Rank."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1329,
+      "context": "literal",
+      "before": "Loading verified Guardian Rank objectives.",
+      "after": "Loading Guardian Rank objectives."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1340,
+      "context": "literal",
+      "before": "No verified objectives were returned for this Guardian Rank.",
+      "after": "No objectives were returned for this Guardian Rank."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1550,
+      "context": "literal",
+      "before": "Loading verified Bungie records.",
+      "after": "Loading Bungie records."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1570,
+      "context": "literal",
+      "before": "No verified catalyst records were returned for this weapon group.",
+      "after": "No catalyst records were returned for this weapon group."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1577,
+      "context": "literal",
+      "before": "No verified records were returned for this category.",
+      "after": "No records were returned for this category."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1577,
+      "context": "literal",
+      "before": "Verified Stat Trackers for this category are not yet connected.",
+      "after": "Stat Trackers for this category are not yet connected."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1579,
+      "context": "literal",
+      "before": "Verified Record categories are not yet connected.",
+      "after": "Record categories are not yet connected."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1587,
+      "context": "literal",
+      "before": "LOADING VERIFIED BUNGIE RECORDS",
+      "after": "LOADING BUNGIE RECORDS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1625,
+      "context": "literal",
+      "before": " · LORE AWAITING VERIFIED DATA",
+      "after": " · LORE AWAITING DATA"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1648,
+      "context": "literal",
+      "before": "AWAITING VERIFIED BUNGIE RECORDS",
+      "after": "AWAITING BUNGIE RECORDS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1717,
+      "context": "literal",
+      "before": "Awaiting completion evidence",
+      "after": "Awaiting completion data"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1718,
+      "context": "literal",
+      "before": "Awaiting PVE evidence",
+      "after": "Awaiting PVE data"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1719,
+      "context": "literal",
+      "before": "Awaiting PVP evidence",
+      "after": "Awaiting PVP data"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1734,
+      "context": "literal",
+      "before": "Verified career total",
+      "after": "Career total"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1735,
+      "context": "literal",
+      "before": "Verified PvE completion",
+      "after": "PvE completion"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1736,
+      "context": "literal",
+      "before": "Verified career clears",
+      "after": "Career clears"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1737,
+      "context": "literal",
+      "before": "Verified career K/D",
+      "after": "Career K/D"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1753,
+      "context": "literal",
+      "before": "No verified performance trend available",
+      "after": "No performance trend available"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1770,
+      "context": "literal",
+      "before": "Verified 30-day PVE success and PVP K/D trends",
+      "after": "30-day PVE success and PVP K/D trends"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1824,
+      "context": "literal",
+      "before": "No verified activity history is available for Mission Report highlights.",
+      "after": "No activity history is available for Mission Report highlights."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1871,
+      "context": "literal",
+      "before": "No verified Build Forge state is available for this Guardian.",
+      "after": "No Build Forge state is available for this Guardian."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1886,
+      "context": "literal",
+      "before": "PARADOX EVIDENCE",
+      "after": "PARADOX DATA"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1930,
+      "context": "literal",
+      "before": "No verified Build Test or Mission Report loadout evidence has been recorded.",
+      "after": "No build activity recorded yet."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1948,
+      "context": "literal",
+      "before": "VERIFIED USAGE",
+      "after": "USAGE"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 1949,
+      "context": "literal",
+      "before": "EVIDENCE SOURCE",
+      "after": "SOURCE"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2029,
+      "context": "markup literal",
+      "before": "No verified Triumph or progression values are available.",
+      "after": "No Triumph or progression values are available."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2071,
+      "context": "literal",
+      "before": "Equipped title awaiting verified Bungie data.",
+      "after": "Equipped title awaiting Bungie data."
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2093,
+      "context": "template",
+      "before": " VERIFIED ACTIVITY RECORDS",
+      "after": " ACTIVITY RECORDS"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2094,
+      "context": "literal",
+      "before": "AWAITING VERIFIED ACTIVITY DATA",
+      "after": "AWAITING ACTIVITY DATA"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2094,
+      "context": "literal",
+      "before": "ACTIVITY EVIDENCE UNAVAILABLE",
+      "after": "ACTIVITY DATA UNAVAILABLE"
+    },
+    {
+      "file": "astrix-app/pages/journey/journey.mjs",
+      "line": 2116,
+      "context": "template",
+      "before": "performance trends require live dated activity evidence.",
+      "after": "play activities to see performance trends."
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 148,
+      "context": "template",
+      "before": " has not verified the requested equipment and sockets. Refresh before retrying.",
+      "after": " could not confirm the equipment and sockets. Refresh and retry."
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 349,
+      "context": "template",
+      "before": " against your current Guardian, owned items and socket permissions.",
+      "after": " against your current Guardian, items and socket permissions."
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 355,
+      "context": "literal",
+      "before": "This build has no exact saved subclass instance. Edit or resave it from verified equipment before Apply.",
+      "after": "This build has no exact saved subclass instance. Edit or resave it from equipment before Apply."
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 365,
+      "context": "template",
+      "before": " verified socket targets",
+      "after": " socket targets"
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 383,
+      "context": "template",
+      "before": "Saved and verified Bungie slot ",
+      "after": "Saved and Bungie slot "
+    },
+    {
+      "file": "astrix-app/pages/loadout/paradox-loadouts.mjs",
+      "line": 434,
+      "context": "template",
+      "before": " and verified.",
+      "after": "."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 33,
+      "context": "html",
+      "before": "REVIEW VERIFIED GUARDIAN ACTIVITY",
+      "after": "REVIEW GUARDIAN ACTIVITY"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 70,
+      "context": "html",
+      "before": "✓ VERIFIED GUARDIAN",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 107,
+      "context": "html",
+      "before": "BUILD EVIDENCE",
+      "after": "BUILD DATA"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 115,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 119,
+      "context": "html",
+      "before": "Awaiting completion evidence",
+      "after": "Awaiting completion data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 120,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 124,
+      "context": "html",
+      "before": "Awaiting PVE evidence",
+      "after": "Awaiting PVE data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 125,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 129,
+      "context": "html",
+      "before": "Awaiting PVP evidence",
+      "after": "Awaiting PVP data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 130,
+      "context": "html",
+      "before": "Verified live value",
+      "after": "Current value"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 137,
+      "context": "html",
+      "before": "VERIFIED PROGRESSION ONLY",
+      "after": "PROGRESSION ONLY"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 141,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 142,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 143,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 144,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 145,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 146,
+      "context": "html",
+      "before": "Awaiting verified milestone",
+      "after": "Awaiting milestone"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 150,
+      "context": "html",
+      "before": "No verified progression milestones are available.",
+      "after": "No progression milestones are available."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 158,
+      "context": "html",
+      "before": "VERIFIED PERFORMANCE",
+      "after": "PERFORMANCE"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 170,
+      "context": "html",
+      "before": "Activity mastery will appear once verified activity history is available.",
+      "after": "Activity mastery will appear once activity history is available."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 176,
+      "context": "html",
+      "before": "RECENT ACTIVITY EVIDENCE",
+      "after": "RECENT ACTIVITY DATA"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 192,
+      "context": "html",
+      "before": "No verified performance trend available",
+      "after": "No performance trend available"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 197,
+      "context": "html",
+      "before": "Performance trends require live dated activity evidence.",
+      "after": "Play activities to see performance trends."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 204,
+      "context": "html",
+      "before": "EVIDENCE CONFIDENCE",
+      "after": "DATA COVERAGE"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 220,
+      "context": "html",
+      "before": "BUILD EVIDENCE",
+      "after": "BUILD DATA"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 222,
+      "context": "html",
+      "before": "✓ VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 223,
+      "context": "html",
+      "before": "No verified build evidence",
+      "after": "No build data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 231,
+      "context": "html",
+      "before": "✓ VERIFIED",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 232,
+      "context": "html",
+      "before": "No verified build evidence",
+      "after": "No build data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/index.html",
+      "line": 243,
+      "context": "html",
+      "before": "All displayed values are evidence-backed and synchronized with Build Forge when a verified source is available.",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 163,
+      "context": "literal",
+      "before": "From activities with completion evidence",
+      "after": "From activities with completion data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 207,
+      "context": "template",
+      "before": "Evidence rows: ",
+      "after": "Data rows: "
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 210,
+      "context": "literal",
+      "before": "Build evidence not returned",
+      "after": "Build data not returned"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 221,
+      "context": "literal",
+      "before": "No verified activities were returned for this category.",
+      "after": "No activities were returned for this category."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 308,
+      "context": "literal",
+      "before": "No verified performance trend available",
+      "after": "No performance trend available"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 343,
+      "context": "literal",
+      "before": "No verified build evidence",
+      "after": "No build data"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 357,
+      "context": "literal",
+      "before": "Verified build item thumbnails",
+      "after": "Build item thumbnails"
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 387,
+      "context": "literal",
+      "before": "Activity mastery will appear once verified activity history is available.",
+      "after": "Activity mastery will appear once activity history is available."
+    },
+    {
+      "file": "astrix-app/pages/mission-reports/mission-reports.mjs",
+      "line": 420,
+      "context": "literal",
+      "before": "LIVE BUNGIE DATA",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 30,
+      "context": "html",
+      "before": "BROWSE VERIFIED OWNED GEAR",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 36,
+      "context": "html",
+      "before": "Verified shared Vault entries",
+      "after": "Vault items"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 37,
+      "context": "html",
+      "before": "Verified armour definitions",
+      "after": "Armour items"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 38,
+      "context": "html",
+      "before": "Remaining verified Vault entries",
+      "after": "Other Vault items"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 39,
+      "context": "html",
+      "before": "OWNED ARMOUR",
+      "after": "ARMOUR"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 43,
+      "context": "html",
+      "before": "REAL ACCOUNT ACTIONS",
+      "after": ""
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 50,
+      "context": "html",
+      "before": "Verified owned armour",
+      "after": "Undefined armour"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 51,
+      "context": "html",
+      "before": "Inspect verified owned armour without changing live equipment. Forge Loader now owns armour calculation and Build Forge staging.",
+      "after": "Inspect your armour. Use Forge Loader to compare sets."
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 54,
+      "context": "html",
+      "before": "Set one or more targets. ASTRIX will compare exact owned item instances and return the five closest legal armour sets.",
+      "after": "Set stat targets to find your five closest armour sets."
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 63,
+      "context": "html",
+      "before": "Load verified armour to calculate available stat ranges.",
+      "after": "Load armour to calculate available stat ranges."
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 71,
+      "context": "html",
+      "before": "All owned armour",
+      "after": "All armour"
+    },
+    {
+      "file": "astrix-app/pages/vault/index.html",
+      "line": 86,
+      "context": "html",
+      "before": "Connect Bungie to load verified item instances. No inventory totals or equipment states are guessed.",
+      "after": "Connect Bungie to load your inventory."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 91,
+      "context": "literal",
+      "before": "Bungie returned no verified profile inventory.",
+      "after": "Inventory unavailable. Retry."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 209,
+      "context": "literal",
+      "before": "Running fresh Bungie preflight. The moving item is awaiting confirmation.",
+      "after": "Transferring…"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 219,
+      "context": "literal",
+      "before": "Postmaster collection confirmed by Bungie and fresh inventory readback.",
+      "after": "Collected from Postmaster."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 219,
+      "context": "literal",
+      "before": "Live transfer confirmed by Bungie and fresh inventory readback.",
+      "after": "Transfer complete."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 241,
+      "context": "literal",
+      "before": "Owned",
+      "after": "Items"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 299,
+      "context": "template",
+      "before": " OWNED PIECES",
+      "after": " PIECES"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 303,
+      "context": "literal",
+      "before": "Set one or more verified stat targets, then find the five closest sets.",
+      "after": "Set one or more stat targets, then find the five closest sets."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 312,
+      "context": "literal",
+      "before": "Owned",
+      "after": "Items"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 334,
+      "context": "literal",
+      "before": "CALCULATING VERIFIED SETS…",
+      "after": "CALCULATING SETS…"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 335,
+      "context": "literal",
+      "before": "Comparing exact owned item instances across all five armour slots…",
+      "after": "Comparing item instances across all five armour slots…"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 371,
+      "context": "template",
+      "before": " VERIFIED ITEM",
+      "after": " ITEM"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 372,
+      "context": "markup literal",
+      "before": "No verified armour matches these filters.",
+      "after": "No armour matches these filters."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 389,
+      "context": "template",
+      "before": "Browse verified ",
+      "after": "Browse "
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 586,
+      "context": "literal",
+      "before": "Set one or more verified stat targets.",
+      "after": "Set one or more stat targets."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 633,
+      "context": "literal",
+      "before": "Connect Bungie to load verified item instances. No inventory totals are estimated.",
+      "after": "Connect Bungie to load your inventory."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 658,
+      "context": "literal",
+      "before": "Verified Bungie inventory is unavailable.",
+      "after": "Bungie inventory is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 659,
+      "context": "literal",
+      "before": "Verified Bungie inventory is unavailable.",
+      "after": "Bungie inventory is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 660,
+      "context": "literal",
+      "before": "Verified Bungie inventory is unavailable.",
+      "after": "Bungie inventory is unavailable."
+    },
+    {
+      "file": "astrix-app/shared/astrix-location-selector.mjs",
+      "line": 123,
+      "context": "template",
+      "before": "Awaiting verified progression for ",
+      "after": "Awaiting progression for "
+    },
+    {
+      "file": "astrix-app/shared/astrix-portal-loader.js",
+      "line": 211,
+      "context": "literal",
+      "before": "Still loading verified Guardian data",
+      "after": "Still loading Guardian data"
+    },
+    {
+      "file": "astrix-app/shared/astrix-portal-loader.js",
+      "line": 236,
+      "context": "literal",
+      "before": "Verified live Guardian data is unavailable.",
+      "after": "Live Guardian data is unavailable."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 327,
+      "context": "interpolated display label; internal source kind unchanged",
+      "before": "owned weapon",
+      "after": "weapon"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-weapon-selection.mjs",
+      "line": 32,
+      "context": "literal",
+      "before": "Weapon perk verification",
+      "after": "Weapon perk check"
+    },
+    {
+      "file": "astrix-app/pages/vault/vault.mjs",
+      "line": 213,
+      "context": "literal",
+      "before": "Transfer accepted by Bungie. The exact item has moved while final inventory verification continues.",
+      "after": "Item moved. Updating inventory…"
+    },
+    {
+      "file": "astrix-app/shared/astrix-portal-loader.js",
+      "line": 158,
+      "context": "literal",
+      "before": "BUNGIE AUTHENTICATION",
+      "after": "BUNGIE SIGN-IN"
+    },
+    {
+      "file": "astrix-app/shared/astrix-portal-loader.js",
+      "line": 232,
+      "context": "literal",
+      "before": "Bungie authentication required",
+      "after": "Sign in to Bungie"
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+      "line": 827,
+      "context": "literal",
+      "before": "route; no new producer->consumer edge is proven.",
+      "after": "route; no new producer->consumer link was found."
+    },
+    {
+      "file": "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+      "line": 412,
+      "context": "literal",
+      "before": "No directed producer-to-consumer loop is proven by the currently resolved descriptions.",
+      "after": "No producer-to-consumer loop was found in the available descriptions."
+    }
+  ],
+  "filesChanged": [
+    "astrix-app/components/guardian-workspace/guardian-workspace.html",
+    "astrix-app/core/prepared-page-client.mjs",
+    "astrix-app/docs/plain-language-copy.json",
+    "astrix-app/index.html",
+    "astrix-app/pages/forge-loader/forge-loader-model.mjs",
+    "astrix-app/pages/forge-loader/forge-loader-preload.mjs",
+    "astrix-app/pages/forge-loader/forge-loader-refresh.mjs",
+    "astrix-app/pages/forge-loader/forge-loader-residency.mjs",
+    "astrix-app/pages/forge-loader/forge-loader-set-list.mjs",
+    "astrix-app/pages/forge-loader/forge-loader.mjs",
+    "astrix-app/pages/forge-loader/index.html",
+    "astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs",
+    "astrix-app/pages/guardian-workspace-v1/index.html",
+    "astrix-app/pages/guardian-workspace-v2/guardian-advisor-layer.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-artifact-provenance.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-beta-selection.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-fixture-loader.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-loadouts.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-manifest-service.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-paradox-engine.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-paradox-live-adapter.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-portal-progress.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-semantic-interceptor.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-capture.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-evidence.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-shooting-range-inline.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-super-feature-sync.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-weapon-diagnostics.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-weapon-selection.mjs",
+    "astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs",
+    "astrix-app/pages/guardian-workspace-v2/index.html",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space-handoff.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-worker.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs",
+    "astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs",
+    "astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html",
+    "astrix-app/pages/journey/index.html",
+    "astrix-app/pages/journey/journey-location-maps.mjs",
+    "astrix-app/pages/journey/journey-manifest.mjs",
+    "astrix-app/pages/journey/journey-map-explorer.mjs",
+    "astrix-app/pages/journey/journey.mjs",
+    "astrix-app/pages/loadout/index.html",
+    "astrix-app/pages/loadout/paradox-loadouts.mjs",
+    "astrix-app/pages/mission-reports/index.html",
+    "astrix-app/pages/mission-reports/mission-reports-data.mjs",
+    "astrix-app/pages/mission-reports/mission-reports.mjs",
+    "astrix-app/pages/tool-intro/index.html",
+    "astrix-app/pages/tool-intro/tool-intro.mjs",
+    "astrix-app/pages/vault/index.html",
+    "astrix-app/pages/vault/vault.mjs",
+    "astrix-app/shared/astrix-destination-ribbon.js",
+    "astrix-app/shared/astrix-hero-cards.mjs",
+    "astrix-app/shared/astrix-location-selector.mjs",
+    "astrix-app/shared/astrix-portal-loader.js",
+    "astrix-app/tools/paradox-validator.mjs",
+    "astrix-app/tools/plain-language-copy.mjs",
+    "astrix-app/tools/test-artifact-provenance.mjs",
+    "astrix-app/tools/test-capped-gear-layout.mjs",
+    "astrix-app/tools/test-forge-background.mjs",
+    "astrix-app/tools/test-forge-loader-residency.mjs",
+    "astrix-app/tools/test-manual-build-editor.mjs",
+    "astrix-app/tools/test-pf-beta-04-subclass-fallback.mjs",
+    "astrix-app/tools/test-pf-beta-10-exotic-first.mjs",
+    "astrix-app/tools/test-pf-beta-11-exotic-first-regression.mjs",
+    "astrix-app/tools/test-plain-language-rendered.mjs",
+    "astrix-app/tools/test-recommended-build-reveal.mjs",
+    "astrix-app/tools/validate-forge-loader.mjs",
+    "astrix-app/tools/validate-guardian-semantics.mjs",
+    "astrix-app/tools/validate-journey-visual-pass.mjs",
+    "astrix-app/tools/validate-main-page-today.mjs",
+    "astrix-app/tools/validate-manifest-service.mjs",
+    "astrix-app/tools/validate-paradox-build-space.mjs",
+    "astrix-app/tools/validate-plain-language.mjs",
+    "astrix-app/tools/validate-portal-loader.mjs",
+    "astrix-app/tools/validate-scope-guard.mjs",
+    "astrix-app/tools/validate-vault-foundation.mjs"
+  ]
+}

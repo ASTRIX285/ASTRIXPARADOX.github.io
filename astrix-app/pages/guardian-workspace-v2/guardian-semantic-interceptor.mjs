@@ -1,4 +1,4 @@
-import "./guardian-paradox-live-adapter.mjs?v=20260905-weapon-audit-1";
+import "./guardian-paradox-live-adapter.mjs?v=20260905-weapon-audit-1&plain=20260925-1";
 import { resolveArmourSet } from "./guardian-armour-set-resolver.mjs";
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {
