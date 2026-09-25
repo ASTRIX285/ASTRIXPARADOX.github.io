@@ -74,7 +74,7 @@ function createPreparedPageRefreshController({
   clearTimer=timer=>globalThis.clearTimeout(timer),
   onError=()=>{}
 }={}){
-  if(!sessionIdentity(session))throw new Error("Prepared page refresh requires an authenticated membership.");
+  if(!sessionIdentity(session))throw new Error("Connect Bungie to refresh.");
   if(typeof refresh!=="function")throw new TypeError("Prepared page refresh requires a refresh function.");
   let timer=null;
   let activeRequest=null;

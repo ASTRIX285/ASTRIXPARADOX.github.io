@@ -2,12 +2,12 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1&plain=20260925-1';
 import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
@@ -50,9 +50,9 @@ function openWeaponDetail(item){
     <header class="paradox-item-header weapon-detail-head"><div class="weapon-detail-icon"${hashAttribute(item)}><img src="${esc(bungieIcon(item.icon))}" alt="">${release.icon?`<img class="paradox-release-watermark" src="${esc(release.icon)}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX WEAPON MODEL</span><h2>${esc(item.name||"Weapon")}</h2><p>${esc(item.weaponType||item.itemTypeDisplayName||"Weapon")}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(item.power??"—")}</b></div></header>
     <div class="paradox-card-body">
       <section class="paradox-section paradox-section--stats"><h3>WEAPON STATS</h3><div class="weapon-stats">${statRows||'<p class="weapon-detail-empty">Stats unresolved.</p>'}</div></section>
-      <section class="paradox-section paradox-section--traits"><h3>INTRINSIC &amp; EXOTIC TRAITS</h3>${traitHierarchy||'<p class="weapon-detail-empty">No resolved intrinsic trait evidence.</p>'}</section>
-      <section class="paradox-section paradox-section--perks"><div class="paradox-section-heading"><h3>${perkHeading}</h3><span>SELECTED · OWNED ROLL</span></div><p class="paradox-rule-note">${esc(perkRule)}</p>${perkMatrix||'<p class="weapon-detail-empty">No resolved perk evidence.</p>'}</section>
-      <section class="paradox-section paradox-section--support"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${mods.map(x=>weaponDetailTile(x,supportLabel(x),{square:true})).join("")||'<p class="weapon-detail-empty">No resolved mod evidence.</p>'}</div></section>
+      <section class="paradox-section paradox-section--traits"><h3>INTRINSIC &amp; EXOTIC TRAITS</h3>${traitHierarchy||'<p class="weapon-detail-empty">No intrinsic trait details.</p>'}</section>
+      <section class="paradox-section paradox-section--perks"><div class="paradox-section-heading"><h3>${perkHeading}</h3><span>SELECTED · ROLL</span></div><p class="paradox-rule-note">${esc(perkRule)}</p>${perkMatrix||'<p class="weapon-detail-empty">No perk details.</p>'}</section>
+      <section class="paradox-section paradox-section--support"><h3>WEAPON MODS</h3><div class="weapon-detail-tiles">${mods.map(x=>weaponDetailTile(x,supportLabel(x),{square:true})).join("")||'<p class="weapon-detail-empty">No mod details.</p>'}</div></section>
     </div>
   </article>`;
   bindWeaponSelection(content,item);
@@ -87,7 +87,7 @@ function weaponSubtitle(item){
   if(s.mod)parts.push(text(s.mod));
   if(s.catalyst)parts.push(`Catalyst: ${text(s.catalyst)}${s.catalyst?.progress?.active?" active":" inactive"}`);
   if(s.champion?.breakerType!=null||s.champion?.breakerTypeHash!=null)parts.push("Champion capability resolved");
-  return parts.filter(Boolean).join(" · ")||"No active perk evidence resolved";
+  return parts.filter(Boolean).join(" · ")||"No active perk data resolved";
 }
 
 
@@ -176,8 +176,9 @@ function renderCoverage(detail){
   const armour=detail?.hashCoverage?.armour;
   const weapons=detail?.hashCoverage?.weapons;
   const unknown=(armour?.unresolved?.length||0)+(armour?.semanticUnknown?.length||0)+(weapons?.unresolved?.length||0)+(weapons?.semanticUnknown?.length||0);
-  node.textContent=unknown?`PARTIAL EVIDENCE`:`EVIDENCE READY`;
-  node.title=unknown?"Unresolved/unclassified evidence is excluded from Paradox claims":"All equipped armour and weapon semantic evidence resolved";
+  node.textContent=unknown?`PARTIAL DATA`:``;
+  node.hidden=!unknown; // Prompt 19: no empty success badge.
+  node.title=unknown?"Some item details are unavailable.":"";
 }
 
 function render(detail){

@@ -104,7 +104,7 @@ function summarizeCaptureEvidence(results=[]){
     pgcrUnavailableCount:rows.filter(row=>row?.evidence?.classification==='pgcr-unavailable').length,
     shootingRangeIdentified:false,
     conclusion:rows.length
-      ?'Activity candidates were collected. None may be labelled Shooting Range until a verified hash mapping proves the activity identity.'
+      ?'Activity list loaded. Shooting Range details are unavailable.'
       :'No post-arm activity candidate was found.'
   };
 }

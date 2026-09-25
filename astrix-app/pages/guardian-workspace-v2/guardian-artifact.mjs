@@ -3,7 +3,7 @@
  * Fixture/DIM test builds fall back to the beta manifest picker.
  */
 import { resolveArtifactViewState,resolveIntendedArtifactConfiguration } from './guardian-artifact-state.mjs';
-import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1';
+import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 const MANIFEST_URL='../../data/paradox-forge/beta/beta-bungie-manifest-cache.json';
 const BUNGIE_ROOT='https://www.bungie.net';
@@ -129,7 +129,7 @@ function renderArtifactDisplay(){
     if(iconEl){iconEl.removeAttribute('src');iconEl.style.opacity='0';}
     if(row){
       row.dataset.artifactMode=currentMode;
-      row.setAttribute('aria-label',stateUnavailable?'Live Bungie Artifact state unavailable':'Configure Artifact perks');
+      row.setAttribute('aria-label',stateUnavailable?'Bungie Artifact state unavailable':'Configure Artifact perks');
       row.style.cursor=currentMode==='live'?'default':'pointer';
       row.classList.toggle('is-development',stateUnavailable);
     }
@@ -148,7 +148,7 @@ function renderArtifactDisplay(){
   if(iconEl){iconEl.src=id.icon||'';iconEl.alt=id.name;iconEl.style.opacity=id.icon?'1':'0';}
   if(row){
     row.dataset.artifactMode=currentMode;
-    row.setAttribute('aria-label',currentMode==='live'?'Live Bungie Artifact':'Configure Artifact perks');
+    row.setAttribute('aria-label',currentMode==='live'?'Bungie Artifact':'Configure Artifact perks');
     row.style.cursor=currentMode==='live'?'default':'pointer';
   }
 

@@ -1,15 +1,15 @@
-import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
+import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1&plain=20260925-1";
 import {
   normaliseLiveProfile,
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1";
-import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
+} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-1";
+import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&plain=20260925-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
-import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1";
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1";
+import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1&plain=20260925-1";
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
@@ -93,7 +93,7 @@ function renderCharacterInventory(){
   const host=byId('characterInventoryWorkspace'),payload=characterInventoryState.payload,characterId=String(characterInventoryState.activeCharacterId||'');
   if(!host)return;
   if(!payload?.profile||!characterId){
-    host.innerHTML='<p class="vault-transfer-empty">Live Bungie inventory is unavailable for the active Guardian.</p>';
+    host.innerHTML='<p class="vault-transfer-empty">Bungie inventory is unavailable for the active Guardian.</p>';
     return;
   }
   const character=payload.profile?.characters?.data?.[characterId]||null;
@@ -128,7 +128,7 @@ function updateCharacterInventory(detail={}){
     characterInventoryState.activeCharacterId=String(detail.characterId||'');
     characterInventoryState.detail=detail;
     renderCharacterInventory();
-    characterInventoryStatus('Showing real equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip.','good');
+    characterInventoryStatus('Showing equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip.','good');
   }catch(error){
     characterInventoryState.payload=null;
     renderCharacterInventory();
@@ -213,7 +213,7 @@ async function performCharacterInventoryAction(){
   characterInventoryState.busy=true;
   confirm.disabled=true;
   cancel.disabled=true;
-  progress.textContent='Running fresh Bungie preflight. No local item position has changed.';
+  progress.textContent='Preparing transfer…';
   let result=null;
   try{
     const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';progress.textContent=label;characterInventoryStatus(label);};
@@ -273,7 +273,7 @@ function setStageState(state, message = "") {
       if (stage && stage.dataset.state !== "loading") return;
       if (stage) stage.dataset.state = "deferred";
       if (titleNode) titleNode.textContent = "LIVE DATA UPDATING";
-      if (msgNode) msgNode.textContent = "The Character page is ready while verified Bungie data continues loading.";
+      if (msgNode) msgNode.textContent = "The Character page is ready while Bungie data continues loading.";
       document.dispatchEvent(new CustomEvent("forge:guardian-load-timeout"));
     }, 2800);
   }
@@ -284,7 +284,7 @@ function renderVerifiedPreview(data = {}) {
   if (!previewHost) return;
 
   const title = escapeHtml(data.title || workspaceState.subclassName || "Equipped Setup");
-  const desc = escapeHtml(data.description || "Telemetry synchronized from live Bungie profile");
+  const desc = escapeHtml(data.description || "Telemetry synchronized from Bungie profile");
 
   previewHost.innerHTML = `
     <div class="verified-header">

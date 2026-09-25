@@ -1,4 +1,4 @@
-import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
+import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1";
 
 const AUTH_ORIGIN = globalThis.FORGE_AUTH_ORIGIN || "https://auth.astrixparadox.com";
 const CANONICAL_APP_ORIGIN = "https://astrixparadox.com";
@@ -264,6 +264,6 @@ async function refreshAuthState(control,force=false){
 installStyles();
 const control=makeControl();
 if(control) refreshAuthState(control);
-if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs");
+if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?plain=20260925-1");
 
 export {AUTH_ORIGIN,authStartUrl,getBungieSession};

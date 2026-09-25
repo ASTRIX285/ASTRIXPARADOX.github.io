@@ -6,7 +6,7 @@
 import { cleanImageElement } from './guardian-bungie-icon-cleaner.mjs?v=20260824-icon-cleaner-2';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from './guardian-super-formation.mjs?v=20260916-equipped-source-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from './guardian-super-catalog.mjs?v=20260916-equipped-source-1';
-import './guardian-artifact.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1';
+import './guardian-artifact.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 const leftPanelLockLink = document.querySelector('link[data-forge-left-panel-lock]') || document.createElement('link');
 leftPanelLockLink.rel = 'stylesheet';
