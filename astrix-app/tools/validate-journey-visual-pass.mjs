@@ -22,7 +22,9 @@ const missionReportsData=read('astrix-app/pages/mission-reports/mission-reports-
 const vaultHtml=read('astrix-app/pages/vault/index.html');
 const forgeLoaderHtml=read('astrix-app/pages/forge-loader/index.html');
 const loadoutHtml=read('astrix-app/pages/loadout/index.html');
+const reportsHtml=read('astrix-app/pages/reports/index.html');
 const globalHeroPages=[
+  reportsHtml,
   html,
   characterHtml,
   buildForgeHtml,
@@ -122,10 +124,10 @@ assert.match(journey,/function createRankBadge[\s\S]*?journey-rank-badge[\s\S]*?
 assert.match(css,/\.journey-page \.journey-rank-badge\{[\s\S]*?background:radial-gradient[\s\S]*?\.journey-page \.journey-rank-badge strong\{[\s\S]*?color:#b51222/,'Rank medallions must use the requested gold/crimson background and crimson number');
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?bindProfileCards\(profile\);[\s\S]*?const mapReady=showJourney\(\);/,'Journey must keep its resolving state until the prepared profile is renderable, then reveal and bind the dashboard in that order');
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
-// PR #268 (0e74619) added the prepared-navigation version to the shared renderer.
-assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1"'),'Journey must load the backend-prepared shared Guardian renderer');
+// Prompt 20 appends Reports support, retaining every existing resource version.
+assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"'),'Journey must load the backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
-assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared six-page ribbon mount');
+assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared seven-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
 
 for(const id of [
@@ -153,10 +155,10 @@ assert.match(journey,/function captureEvidenceRows[\s\S]*?readCapture\(\)[\s\S]*
 assert.match(journey,/function renderMostUsed[\s\S]*?activity\?\.buildSnapshot[\s\S]*?winner\.count\/evidence\.length\*100/,'Most-used build tracking must combine future Mission Report snapshots with verified Build Test samples');
 assert.match(html,/id="journeyMostUsed"[\s\S]*?No verified Build Test or Mission Report loadout evidence[\s\S]*?id="journeyBuildSummary"[\s\S]*?No verified Build Forge state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No verified activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
 assert.match(css,/\.journey-column-summaries \.journey-evidence-rows[\s\S]*?grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)/,'Connected Journey evidence must remain readable inside the existing compact cards');
-// PR #277 intentionally hid Mission Reports; retain exactly these six ribbon routes in order.
+// Prompt 20 adds Reports; retain exactly these seven ribbon routes in order.
 const ribbonRoutes=[...ribbon.matchAll(/Object\.freeze\(\{key:'([^']+)'/g)].map(match=>match[1]);
-assert.equal((ribbon.match(/Object\.freeze\(\{key:/g)??[]).length,6,'Shared Journey ribbon must retain exactly six destination routes');
-assert.deepEqual(ribbonRoutes,['journey','character','forge-loader','build-forge','vault','loadout'],'Shared Journey ribbon must retain the approved destination order');
+assert.equal((ribbon.match(/Object\.freeze\(\{key:/g)??[]).length,7,'Shared Journey ribbon must retain exactly seven destination routes');
+assert.deepEqual(ribbonRoutes,['journey','character','forge-loader','build-forge','reports','vault','loadout'],'Shared Journey ribbon must retain the approved destination order');
 assert.ok(!ribbonRoutes.includes('mission-reports'),'Mission Reports must remain absent from the ribbon');
 assert.ok(ribbon.indexOf("key:'forge-loader'")<ribbon.indexOf("key:'build-forge'"),'Forge Loader must appear before Build Forge');
 for(const page of globalHeroPages){
@@ -164,7 +166,7 @@ for(const page of globalHeroPages){
   assert.ok(page.includes('astrix-hero-cards.css?v=20260904-mobile-crosscheck-1'),'Every destination page must load the current centred, mobile-contained command-header presentation');
   assert.equal((page.match(/forge-command-header/g)??[]).length,1,'Every destination page must contain exactly one shared command header');
 }
-assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'))).length,4,'Journey, Vault, Forge Loader and Loadout must load the backend-prepared Guardian renderer');
+assert.equal((globalHeroPages.filter(page=>page.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'))).length,5,'Journey, Vault, Forge Loader, Loadout and Reports must load the backend-prepared Guardian renderer');
 assert.ok(loadoutHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Loadout must retain its backend-prepared profile renderer');
 assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1'),'Forge Loader must load the backend-prepared persistent Guardian renderer');
 // PR #231 (a6974b1) superseded fast-transfer-2; #241, #242, #243 and #268 refreshed its graph.

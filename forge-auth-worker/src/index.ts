@@ -14,6 +14,9 @@ import { paradoxLoadoutsRoute } from "./paradox-loadouts";
 import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./page-semantics";
 import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
 
+import { reportsRead } from './reports-read';
+import { reportsCatalogue } from './reports-catalogue';
+
 export { AuthRecord };
 
 const BUNGIE_AUTHORIZE = "https://www.bungie.net/en/oauth/authorize";
@@ -2301,6 +2304,18 @@ export default {
       }
       if (request.method === "GET" && (url.pathname === "/bungie/loadout" || url.pathname === "/v1/destiny/loadout")) {
         return await loadoutRoute(request, env);
+      }
+      if (request.method === "GET" && url.pathname === "/bungie/reports/catalogue") {
+        try {
+          return withCors(request, env, await reportsCatalogue(request, await destinyManifest(env), (caches as CacheStorage & {default: Cache}).default));
+        } catch {
+          return withCors(request, env, Response.json({error: 'reports_catalogue_unavailable'}, {status: 502, headers: {'Cache-Control': 'no-store'}}));
+        }
+      }
+      if (request.method === "GET" && url.pathname === "/bungie/reports") {
+        const auth = await authenticatedSession(request, env);
+        if (auth instanceof Response) return auth;
+        return withCors(request, env, await reportsRead(request, auth.session, env.BUNGIE_API_KEY));
       }
       if (request.method === "GET" && url.pathname === "/bungie/activity-history") {
         return await activityHistoryRoute(request, env);
