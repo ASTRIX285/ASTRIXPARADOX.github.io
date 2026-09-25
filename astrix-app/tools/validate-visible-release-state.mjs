@@ -38,8 +38,6 @@ for(const page of activePages){
 const renderedSources=[
   'astrix-app/components/guardian-workspace/guardian-workspace.mjs',
   'astrix-app/components/guardian-workspace/guardian-workspace.preview.json',
-  'astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs',
-  'astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.preview.json',
   'astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs',

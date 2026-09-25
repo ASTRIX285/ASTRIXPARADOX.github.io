@@ -1,107 +1,18 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Guardian Build Forge | Guardian Build Forge</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <link rel="icon" href="/img/favicon/favicon.ico">
+  <title>Character | ASTRIX PARADOX</title>
+  <meta name="robots" content="noindex">
+  <meta http-equiv="refresh" content="0; url=/astrix-app/pages/guardian-workspace-v2/">
+  <link rel="canonical" href="/astrix-app/pages/guardian-workspace-v2/">
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="./guardian-workspace-v1.css?v=20260908-icon-hover-1">
-  <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1&amp;capped=20260924-dim66-1">
+  <script>location.replace('/astrix-app/pages/guardian-workspace-v2/' + location.search + location.hash);</script>
 </head>
-<body data-apx-button-system>
-  <header class="pf-topbar">
-    <a class="pf-brand" href="#" aria-label="Guardian Build Forge home">
-      <span class="pf-brand-mark">P</span>
-      <span><strong>GUARDIAN BUILD FORGE</strong><small>ASTRIX DESTINY ADVISOR</small></span>
-    </a>
-    <nav class="pf-nav" aria-label="Primary">
-      <a href="#">Forge</a><a class="active" href="#">Guardian</a><a href="#">Builds</a><a href="#">Encounters</a>
-    </nav>
-    <div class="pf-account"><span class="status-dot"></span><strong data-account>GUARDIAN</strong><small data-season>DESTINY 2</small></div>
-  </header>
-
-  <main class="workspace" data-workspace>
-    <div class="preview-banner" data-preview-banner>Loading Guardian data...</div>
-
-    <section class="workspace-grid">
-      <aside class="build-rail surface" aria-label="Subclass build">
-        <header class="subclass-header">
-          <img data-subclass-crest alt="Subclass crest">
-          <div><span class="eyebrow">Subclass</span><h1 data-subclass-name>NIGHTSTALKER</h1><p data-class-name>HUNTER SUBCLASS</p><span data-element>VOID</span></div>
-          <div class="power"><small>POWER</small><strong data-power>UNAVAILABLE</strong></div>
-        </header>
-        <section><div class="section-title"><h2>Super</h2><span>1 equipped</span></div><div class="card-grid super-grid" data-supers></div></section>
-        <section><div class="section-title"><h2>Abilities</h2><span>Equipped</span></div><div class="card-grid ability-grid" data-abilities></div></section>
-        <section><div class="section-title"><h2>Aspects</h2><span data-aspect-count></span></div><div class="card-grid aspect-grid" data-aspects></div></section>
-        <section><div class="section-title"><h2>Fragments</h2><span data-fragment-count></span></div><div class="card-grid fragment-grid" data-fragments></div></section>
-        <section><div class="section-title"><h2>Seasonal Artifact</h2><span data-artifact-count></span></div><div class="artifact-row" data-artifact></div></section>
-      </aside>
-
-      <section class="guardian-stage surface" aria-label="Guardian stage">
-        <div class="stage-grid" aria-hidden="true"></div>
-        <div class="stage-aura" aria-hidden="true"></div>
-        <div class="stage-particles" aria-hidden="true"></div>
-        <div class="stage-meta">
-          <div class="identity-block">
-            <span class="eyebrow">Guardian Build Forge</span>
-            <h2 data-guardian-name>GUARDIAN</h2>
-            <p><span data-guardian-class>Hunter</span> · <span data-guardian-subclass>Nightstalker</span></p>
-          </div>
-          <div class="stage-power"><strong data-stage-power>UNAVAILABLE</strong><small>POWER</small></div>
-        </div>
-        <div class="guardian-wrap" data-guardian-wrap>
-          <img class="guardian-render" data-guardian-render alt="Guardian render">
-          <div class="guardian-fallback" data-guardian-fallback>
-            <span class="fallback-ring"></span>
-            <img data-fallback-crest alt="Subclass crest">
-            <strong>LIVE GUARDIAN</strong>
-            <span>Loads after Bungie connect</span>
-          </div>
-        </div>
-        <div class="identity-stack">
-          <div><small>Guardian Rank</small><strong data-guardian-rank>Unavailable</strong></div>
-          <div><small>Triumph Score</small><strong data-triumph-score>Unavailable</strong></div>
-          <div><small>Emblem</small><strong data-emblem>Unavailable</strong></div>
-        </div>
-        <div class="armour-rail" data-armour></div>
-        <div class="stat-rail" data-stage-stats></div>
-        <div class="title-ribbon" data-title>CONQUEROR</div>
-      </section>
-
-      <aside class="analysis-rail surface" aria-label="Paradox analysis">
-        <section class="analysis-block analysis-hero">
-          <div class="analysis-heading"><div><span class="eyebrow">Paradox Analysis</span><h2>Guardian Health</h2></div><div class="score"><small>Build Score</small><strong data-build-score>--</strong><span>/100</span></div></div>
-          <div class="health-summary"><div class="health-ring"><span data-health-grade>--</span></div><div><strong data-health-label>Analysing</strong><p data-health-summary></p></div></div>
-          <div data-measures></div><div class="coverage" data-coverage></div>
-        </section>
-        <section class="analysis-block"><h3>Why This Build Works</h3><p data-loop-summary></p><div class="evidence-path" data-evidence-path></div></section>
-        <section class="analysis-block"><h3>Strengths</h3><div class="strength-list" data-strengths></div></section>
-        <section class="analysis-block"><h3>Weak Links</h3><div class="weakness-list" data-weaknesses></div></section>
-        <section class="analysis-block"><h3>Today's Improvement</h3><div data-recommendations></div></section>
-        <section class="analysis-block"><h3>Activity Context</h3><div data-activity></div></section>
-        <section class="analysis-block"><h3>Inspection</h3><p data-selection>Choose an item to inspect its role in the build.</p></section>
-      </aside>
-
-      <section class="bottom-dock" data-bottom-dock aria-label="Equipment and stats"></section>
-    </section>
-
-    <footer class="action-dock">
-      <button type="button" class="secondary-action">Loadouts</button>
-      <button type="button" class="secondary-action">Compare</button>
-      <button type="button" class="primary-action" data-improve>✦ Improve My Guardian</button>
-      <button type="button" class="secondary-action">Save Loadout</button>
-      <button type="button" class="secondary-action">Share</button>
-    </footer>
-  </main>
-
-  <script type="module" src="./guardian-workspace-v1.mjs"></script>
+<body>
+  <p>This page has moved. <a href="/astrix-app/pages/guardian-workspace-v2/">Open the Character page</a>.</p>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>
