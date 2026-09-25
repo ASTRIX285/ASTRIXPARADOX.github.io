@@ -1,3 +1,4 @@
+import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260924-card-width-1';
 import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
@@ -176,7 +177,7 @@ function renderArmourRecommendationState(build={}){
   if(evidence)evidence.textContent=generated?'Original and installed mods remain protected':manual?'Every manual socket choice retains Bungie instance and reusable-plug evidence.':staged?'Installed mods retained as evaluation evidence':'Original build remains protected';
   if(staged&&!generated&&!manual&&!directEntryMode(build))blankArmourModCanvas();
 }
-function renderBuildGear(build={}){byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);byId('weaponRecommendationState').textContent=build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'MANUAL OR PARADOX';}
+function renderBuildGear(build={}){byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);sizeBuildWeaponCards(byId('weaponGrid'));const weaponState=byId('weaponRecommendationState');weaponState.hidden=!(build.weapons||[]).some(Boolean);weaponState.textContent=weaponState.hidden?'':build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'EQUIPPED LOADOUT';}
 function currentBuild(){const state=readState();return state?.workingBuild||state?.originalBuild||null;}
 
 const manualItemId=item=>String(item?.itemInstanceId||item?.instanceId||'');

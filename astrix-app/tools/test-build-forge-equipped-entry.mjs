@@ -140,7 +140,7 @@ Object.defineProperty(nodes.get('armourGrid'),'innerHTML',{set(markup){
   modGrids=[...markup.matchAll(/<div class="gear-mods"[^>]*>([\s\S]*?)<\/div>/g)].map(match=>({innerHTML:match[1],dataset:{},classList:{add(){}},setAttribute(){}}));
 }});
 let renderedWeapons=[];
-const display=vm.createContext({directEntryMode:entry.directEntryMode,classifyArmourPlug,byId:id=>nodes.get(id),document:{querySelectorAll:()=>modGrids},bindParadoxItemInspect(){},renderWeapons:weapons=>{renderedWeapons=weapons;},itemTileMarkup:()=>'',perkTooltipAttributes:()=>''});
+const display=vm.createContext({sizeBuildWeaponCards(){},directEntryMode:entry.directEntryMode,classifyArmourPlug,byId:id=>nodes.get(id),document:{querySelectorAll:()=>modGrids},bindParadoxItemInspect(){},renderWeapons:weapons=>{renderedWeapons=weapons;},itemTileMarkup:()=>'',perkTooltipAttributes:()=>''});
 vm.runInContext(between(gearSource,'const esc =','export function buildGear').replace('export function armourCard','function armourCard'),display);
 vm.runInContext(between(runtime,'function weaponCardShell','function currentBuild'),display);
 for(const guardian of guardians){
@@ -161,6 +161,22 @@ for(const guardian of guardians){
   assert.equal(JSON.stringify(build),before,'Rendering cannot mutate the original equipped armour, mods or weapons.');
 }
 console.log('BUILD_FORGE_MOD_PRESENTATION=PASS equipped, saved, staged, manual and generated builds for Hunter, Warlock and Titan');
+// Prompt 11: execute the production renderer for every weapon label state.
+const weaponStatus=nodes.get('weaponRecommendationState');
+for(const [build,label,hidden] of [
+  [{weapons:[{itemInstanceId:'equipped-weapon'}]},'EQUIPPED LOADOUT',false],
+  [{weapons:[{itemInstanceId:'manual-weapon'}],editMode:'manual'},'MANUAL WORKING BUILD',false],
+  [{weapons:[{itemInstanceId:'generated-weapon'}],recommendationGeneratedAt:'2026-09-24'},'PARADOX SELECTION',false],
+  [{weapons:[]},'',true],
+  [{weapons:[null,null,null],editMode:'manual'},'',true],
+  [{recommendationGeneratedAt:'2026-09-24'},'',true]
+]){
+  display.renderBuildGear(build);
+  assert.equal(weaponStatus.textContent,label);
+  assert.equal(weaponStatus.hidden,hidden);
+}
+console.log('BUILD_FORGE_WEAPON_STATUS=PASS equipped, manual, generated and empty transitions');
+
 
 // Direct entries execute the same production button handlers and readiness
 // render with synthetic owned instances. No account or live action is involved.

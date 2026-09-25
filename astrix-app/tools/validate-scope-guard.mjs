@@ -6,6 +6,8 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
   'astrix-app/tools/test-capped-gear-layout.mjs',
+  'astrix-app/pages/guardian-workspace-v2/paradox-build-space/build-weapon-card-layout.mjs',
+  'astrix-app/tools/test-build-weapon-card-layout.mjs',
   'astrix-app/tools/test-champion-overlays.mjs',
   // Prompt 7b: gear sizing in the tracked legacy mirror only.
   'ASTRIX285.github.io/astrix-app/components/guardian-workspace/guardian-workspace.css',
