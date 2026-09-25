@@ -1,8 +1,8 @@
 import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
-import {preloadReports} from '../../shared/reports-preload.mjs?v=20260925-reports-3';
-import {accountKey} from './reports-data.mjs?v=20260925-reports-3';
-import {mountReports} from './reports-ui.mjs?v=20260925-reports-3';
+import {preloadReports} from '../../shared/reports-preload.mjs?v=20260925-reports-20c';
+import {accountKey} from './reports-data.mjs?v=20260925-reports-20c';
+import {mountReports} from './reports-ui.mjs?v=20260925-reports-3&boxes=20260925-20c2';
 const root=document.querySelector('#reportsWorkspace');
 mountForgeShell({rootSelector:'#reportsWorkspace',layout:'destination'});
 let revision=0,displayedIdentity='';

@@ -12,10 +12,13 @@
 @media(max-width:760px){.reports-workspace{grid-template-columns:1fr;padding:16px;gap:16px}.reports-sidebar nav{grid-template-columns:repeat(2,minmax(0,1fr))}.reports-detail{grid-template-columns:1fr}.reports-grid{--reports-card-width:clamp(220px,calc((100vw - 44px)/2),320px)}}
 @media(max-width:479px){.reports-grid{--reports-card-width:clamp(220px,calc(100vw - 32px),320px);justify-content:center}}
 
-/* Prompt 20a-fix2: encounter names use the card width; each cell remains one line. */
-.reports-encounter-row{border-top:1px solid #303c51}
-.reports-encounter-row>span:first-child{grid-column:1/-1}
-.reports-encounter-row>span:nth-child(2){grid-column:2}
+/* Prompt 20c: single-line bands and independent card columns. */
+.reports-band-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reports-workspace .reports-open{display:block;width:100%;padding:0;border:0;border-radius:0;background:transparent}
+.reports-workspace .reports-expand{grid-column:1/-1;font-size:11px;margin-top:6px}
+.reports-grid{position:relative}
+.reports-grid.is-packed{display:block}
+.reports-grid.is-packed>.reports-card{position:absolute;left:0;top:0}
 
 /* Prompt 22: protect the status and attribution from density overrides. */
 body.apx-destination-page #reportsWorkspace,
