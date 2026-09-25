@@ -4,6 +4,9 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  // Prompt 22: seven-route ribbon appearance and Reports edge coverage.
+  'astrix-app/tools/test-ribbon-buttons.mjs',
+  'astrix-app/tools/validate-ribbon-buttons.mjs',
   // Prompt 20a-fix: catalogue projection, release coverage and fixture only.
   'astrix-app/tools/validate-reports-catalogue.mjs',
   'astrix-app/tools/fixtures/reports-catalogue-current.json',
