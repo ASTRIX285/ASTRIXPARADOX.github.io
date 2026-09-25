@@ -1,10 +1,10 @@
+@layer astrix-tabs-v2, astrix-ribbon-buttons;
+@import url("astrix-design-v2.css");
 :root{
   color-scheme:dark;
   --apx-crimson:var(--apx-colour-action);
   --apx-crimson-bright:var(--apx-colour-action);
   --apx-gold:var(--apx-colour-focus);
-  --apx-ember-crimson:var(--apx-colour-action);
-  --apx-ember-gold:#c9a84c;
   --apx-black:var(--apx-colour-canvas);
   --apx-panel:var(--apx-colour-panel);
   --apx-line:var(--apx-colour-border);
@@ -151,6 +151,80 @@ body.apx-destination-page::before{
   .apx-page-heading{align-items:flex-start;flex-direction:column}.apx-card-grid,.apx-subgrid,.apx-destination-links{grid-template-columns:1fr}.apx-page-shell{padding-top:32px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Site-wide v2 tabs: glossy charcoal at rest, one crimson pill that slides to
+   the current tab, thin crimson rule under the row. Declared in an earlier
+   layer than astrix-ribbon-buttons so its important rules take precedence. */
+@layer astrix-tabs-v2 {
+  .apx-destination-ribbon { position:relative!important; isolation:isolate; }
+  .apx-destination-ribbon::after {
+    content:""; position:absolute; right:0; bottom:-6px; left:0; height:1px;
+    background:var(--apx-crimson-rule); pointer-events:none;
+  }
+  .apx-destination-ribbon li { position:relative; }
+  .apx-destination-ribbon li::before {
+    content:""; position:absolute; inset:0; z-index:0;
+    border:1px solid var(--apx-hairline);
+    border-top-color:var(--apx-tab-edge);
+    border-radius:var(--apx-radius-sm);
+    background:linear-gradient(180deg,var(--apx-tab-top),var(--apx-tab-bottom));
+    box-shadow:inset 0 1px 0 var(--apx-tab-edge);
+    pointer-events:none;
+    transition:transform var(--apx-motion-fast) var(--apx-ease-out),border-color var(--apx-motion-fast) var(--apx-ease-out);
+  }
+  .apx-destination-ribbon li:hover::before,
+  .apx-destination-ribbon li:focus-within::before {
+    transform:translateY(-1px);
+    border-color:var(--apx-hairline-strong);
+    border-top-color:var(--apx-tab-edge);
+  }
+  .apx-destination-ribbon li:has(a[aria-current="page"])::before {
+    border-color:transparent;
+    background:linear-gradient(180deg,var(--apx-pill-top),var(--apx-pill-bottom));
+  }
+  .apx-has-pill li:has(a[aria-current="page"])::before { opacity:0; }
+  .apx-destination-ribbon a {
+    position:relative!important; z-index:2!important;
+    border:0!important;
+    border-radius:var(--apx-radius-sm)!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    color:var(--apx-colour-secondary)!important;
+    transition:transform var(--apx-motion-fast) var(--apx-ease-out),color var(--apx-motion-fast) var(--apx-ease-out)!important;
+  }
+  .apx-destination-ribbon a:hover,
+  .apx-destination-ribbon a:focus-visible {
+    transform:translateY(-1px)!important;
+    color:var(--apx-colour-text)!important;
+  }
+  .apx-destination-ribbon a:focus-visible {
+    outline:2px solid var(--apx-colour-focus)!important;
+    outline-offset:-3px!important;
+  }
+  .apx-destination-ribbon a[aria-current="page"] {
+    background:transparent!important;
+    color:var(--apx-button-primary-text)!important;
+  }
+  .apx-ribbon-pill {
+    position:absolute; top:0; left:0; z-index:1;
+    width:var(--pill-w,0); height:var(--pill-h,0);
+    transform:translate(var(--pill-x,0),var(--pill-y,0));
+    border-radius:var(--apx-radius-sm);
+    background:linear-gradient(180deg,var(--apx-pill-top),var(--apx-pill-bottom));
+    box-shadow:inset 0 1px 0 var(--apx-tab-edge),0 8px 18px -10px var(--apx-crimson-glow);
+    pointer-events:none;
+    transition:transform var(--apx-motion-base) var(--apx-ease-out),width var(--apx-motion-base) var(--apx-ease-out),height var(--apx-motion-base) var(--apx-ease-out);
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .apx-ribbon-pill,
+    .apx-destination-ribbon li::before,
+    .apx-destination-ribbon a { transition:none!important; }
+    .apx-destination-ribbon li:hover::before,
+    .apx-destination-ribbon li:focus-within::before,
+    .apx-destination-ribbon a:hover,
+    .apx-destination-ribbon a:focus-visible { transform:none!important; }
+  }
+}
 
 /* Prompt 22: one button treatment outranks legacy page cosmetics. Geometry
    remains in the existing responsive rules; state changes never resize links. */

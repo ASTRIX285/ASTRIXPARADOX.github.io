@@ -1,6 +1,7 @@
 /* ============================================================
    ASTRIX PARADOX — Global Styles
    ============================================================ */
+@import url("../astrix-app/shared/astrix-design-v2.css");
 
 :root {
   --crimson:      var(--apx-colour-action);
@@ -1177,8 +1178,6 @@ body > main > section,
    micro type. Colours come from tokens only.
    ============================================================ */
 :root {
-  --apx-ember-crimson: var(--apx-colour-action);
-  --apx-ember-gold: #c9a84c;
   --v2-crimson-glow: color-mix(in srgb, var(--crimson) 55%, transparent);
   --v2-warm-1: color-mix(in srgb, var(--crimson) 26%, transparent);
   --v2-warm-2: color-mix(in srgb, var(--crimson) 12%, transparent);
