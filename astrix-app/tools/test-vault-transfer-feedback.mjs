@@ -144,5 +144,36 @@ try{
   await drop(page,hunter);await count(page,sourceRow+' '+tile,1);await count(page,'.vault-transfer-toast',0);
   assert.equal(test.requests.length,0);assert.deepEqual(test.errors,[]);await page.close();
  }
+ // Prompt 16: a held edge drag reaches the initially off-screen Vault without wheel input.
+ for(const pointer of [false,true]){
+  const test=await setup(),{page}=test;
+  await page.evaluate(()=>{
+   const header=document.createElement('header');header.className='apx-destination-header';header.style.cssText='position:fixed;top:0;left:0;right:0;height:120px;z-index:10';document.body.append(header);
+   document.querySelector('[data-drop-character-id="1"]').setAttribute('aria-label','Hunter');
+  });
+  assert.ok(await page.locator(vault).evaluate(node=>node.getBoundingClientRect().top>innerHeight),'Vault initially below viewport');
+  if(pointer){
+   await page.evaluate(()=>{
+    const node=document.querySelector('[data-inspect-item="102"]');node.setPointerCapture=()=>{};node.releasePointerCapture=()=>{};
+    node.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7,pointerType:'touch',button:0,clientX:400,clientY:300}));
+    node.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,cancelable:true,pointerId:7,pointerType:'touch',clientX:400,clientY:innerHeight-1}));
+   });
+  }else{
+   await drag(page);
+   await page.evaluate(()=>document.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:window.dragData,clientX:400,clientY:innerHeight-1})));
+  }
+  await page.waitForFunction(()=>scrollY>100);
+  await page.waitForFunction(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return r.top<innerHeight-120&&r.bottom>120;},vault);
+  if(pointer){
+   await page.evaluate(selector=>{
+    const r=document.querySelector(selector).getBoundingClientRect();
+    document.querySelector('[data-inspect-item="102"]').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,cancelable:true,pointerId:7,pointerType:'touch',clientX:r.left+r.width/2,clientY:Math.max(125,r.top+10)}));
+   },vault);
+  }else await drop(page,vault);
+  await count(page,vault+' '+tile+'.is-moving',1);
+  const stopped=await page.evaluate(()=>scrollY);await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(()=>scrollY),stopped,'Auto-scroll stops on drop');
+  test.release();await page.waitForSelector('.vault-transfer-toast.is-success');assert.deepEqual(test.errors,[]);await page.close();
+ }
  console.log('Vault feedback: drag activation, instant landing, real mocked Bungie sequence, success, exact rollback, keyboard, double click and stacked queue passed.');
 }finally{await browser?.close();await new Promise(done=>server.close(done));}

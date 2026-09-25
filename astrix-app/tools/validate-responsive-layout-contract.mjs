@@ -158,7 +158,7 @@ const inventoryCss=await readFile(new URL('../../shared/guardian-inventory-works
 assert.match(inventoryCss,/body:not\(\.forge-loader-page\) \.vault-character-column \.vault-transfer-items\{flex-wrap:wrap;overflow:visible;gap:var\(--apx-gear-gap,6px\)\}/,'Vault character gear rows must wrap with visible overflow, excluding Forge Loader');
 for(const page of ['../../pages/vault/index.html','index.html']){
   const markup=await readFile(new URL(page,ROOT),'utf8');
-  assert.match(markup,/guardian-inventory-workspace\.css\?v=20260924-vault-wrap-1&amp;capped=20260924-dim66-1"/,'Every inventory workspace page must load the wrapping stylesheet revision');
+  assert.match(markup,/guardian-inventory-workspace\.css\?v=20260924-vault-wrap-1&amp;capped=20260924-dim66-1&amp;columns=20260925-1"/,'Every inventory workspace page must load the wrapping stylesheet revision');
 }
 
 assert.match(inventoryCss,/grid-template-columns:repeat\(auto-fill,var\(--apx-equipment-icon-size\)\)/,'Prompt 12: Character must wrap fixed token-width tracks without stretching');

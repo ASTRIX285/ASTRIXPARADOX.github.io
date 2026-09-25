@@ -1,4 +1,4 @@
-import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1';
+import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
@@ -137,7 +137,7 @@ function characterColumnMarkup(character){
 
 function vaultOnlyMarkup(){
   const items=catalogue.items.filter(item=>item.source?.kind==='vault');
-  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
+  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. Items wrap inside their matching Bungie category.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
 }
 
 function bindVaultWorkspaceHovers(root){
