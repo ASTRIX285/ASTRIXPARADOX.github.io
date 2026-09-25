@@ -295,7 +295,25 @@ const itemCardCss=await readFile(new URL('paradox-item-cards.css',root),'utf8');
 assert.doesNotMatch(itemCardCss,/body \.gear-combined \.gear-mod(?:s)?\{[^}]*--apx-icon-socket-compact/,'Shared item styling must not shrink Character armour mods to the compact weapon-perk tier.');
 assert.match(itemCardCss,/body \.gear-weapons,body \.recommended-weapons-summary\{--gear-weapon-art:var\(--paradox-equipment-width\)/,'Recommended weapon cards must consume the canonical shared equipment-art owner');
 assert.doesNotMatch(css,/--gear-weapon-art:/,'Build must not reintroduce a competing review thumbnail size');
-assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{grid-template-columns:repeat\(auto-fit,minmax\(min\(300px,100%\),1fr\)\)!important/,'Build Forge must wrap weapon cards using the shared minimum readable width.');
+// Prompts 11 and 11c require a centred group with explicit equal card widths.
+assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{\s*--build-weapon-card:calc\(var\(--gear-weapon-art\) \+ 26px\);\s*grid-template-columns:repeat\(3,var\(--build-weapon-card\)\)!important;[\s\S]*?width:max-content!important;max-width:none!important;\s*margin-inline:auto;column-gap:12px!important/,'Build Forge must centre three equal content-sized weapon cards with the existing gap.');
+assert.match(css,/grid-row:span 5;grid-template-columns:minmax\(0,1fr\)!important;\s*grid-template-rows:subgrid!important;\s*grid-template-areas:"art" "cap" "perks" "support" "apply"!important/,'All three weapon cards must share aligned art, label/divider, perk, mod and Apply rows.');
+assert.match(css,/\.design-canvas\{--build-armour-mod:var\(--guardian-square\)\}/,'Armour and weapon mods must inherit one common mod token.');
+assert.match(css,/\.weapon-support-icon\.is-mod\{width:var\(--build-armour-mod\)!important;height:var\(--build-armour-mod\)!important/,'Weapon mods must use the Armour mod size without changing perk size.');
+assert.doesNotMatch(html+runtime,/MANUAL OR PARADOX/,'The ambiguous weapon status fallback must never be rendered.');
+assert.match(html,/<span id="weaponRecommendationState" hidden><\/span>/,'Empty weapon status must start hidden.');
+// Prompt 11c advances both resources for the explicit card-width helper.
+for(const [file,tag] of [['paradox-build-space.css','20260925-rows-4'],['paradox-build-space.mjs','20260925-rows-4']])assert.ok(html.includes(file+'?')&&html.split(file+'?')[1].split('"')[0].includes('weaponcards='+tag),'Changed Build Forge resources must invalidate their cache tags.');
+assert.ok(html.split('paradox-build-space.mjs?')[1].split('"')[0].includes('champion=20260924-champion-export-1'),'The rebase must retain the merged champion export cache tag.');
+assert.doesNotMatch(css,/\.weapon-design-section[^{}]*\.gear-weapons[^{}]*\{[^}]*overflow-x\s*:\s*(?:auto|scroll)/,'Build Forge weapons must never introduce horizontal section scrolling.');
+assert.match(css,/\.design-canvas \.weapon-design-section\{container-name:build-weapon-section\}/,'The weapon section must own the named size container.');
+// Prompt 11c replaces the fixed threshold with the measured three-card width.
+const cardLayout=await readFile(new URL('paradox-build-space/build-weapon-card-layout.mjs',root),'utf8');
+assert.match(cardLayout,/threshold=3\*width\+2\*gap/,'The stack threshold must derive from the three card widths and two gaps.');
+assert.ok(cardLayout.includes('@container build-weapon-section (width < ${threshold}px)'),'Stacking must remain a weapon-section container query.');
+assert.ok(cardLayout.includes('grid-template-columns:var(--build-weapon-card)!important'),'Stacked cards must retain the same explicit width.');
+assert.match(runtime,/sizeBuildWeaponCards\(byId\('weaponGrid'\)\)/,'Rendered weapon cards must update their explicit geometry.');
+assert.doesNotMatch(css,/container-type:normal/,'Build Forge must preserve card inline-size containment.');
 assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
 
 const elementButtons=[...html.matchAll(/data-recommendation-element="([^"]+)"/g)].map(match=>match[1]);
