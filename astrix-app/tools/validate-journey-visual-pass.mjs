@@ -40,9 +40,10 @@ const placeholderMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/a
 const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp`);
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
+// Europa sourcing request: retain exact import checks with the new source audit cache tag.
 // Prompt 24: retain exact resource checks with the marker/readability cache tag.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;markers=20260925-24&amp;chestnote=20260925-25"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;sources=20260925-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -232,7 +233,7 @@ assert.ok(journey.includes("mount:document.getElementById('journeyLocationSelect
 assert.ok(journey.includes("detail:document.getElementById('journeyLocationDetail')"),'Journey detail mount must remain unchanged');
 assert.ok(journey.includes('const session=await getBungieSession();'),'Journey authentication must remain unchanged');
 // PR #272 (381a8e2) replaced placeholders with destination maps; #274 (8988fb2) refreshed the registry.
-assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&markers=20260925-24&chestnote=20260925-25'"),'Journey must load its current versioned page-owned destination data registry');
+assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&markers=20260925-24&chestnote=20260925-25&sources=20260925-1'"),'Journey must load its current versioned page-owned destination data registry');
 assert.ok(journey.includes('initJourneyLocationMaps('),'Journey must initialise its page-owned interactive map layer');
 assert.ok(mapModule.includes('src:`./assets/maps/${key}-director-map-4k.webp`'),'Journey must mount the selected destination 4K Director map');
 assert.ok(mapModule.includes('detailSrc:`./assets/maps/${key}-director-map-6k.webp`'),'Journey must provide the selected destination 6K Director map for zoom');

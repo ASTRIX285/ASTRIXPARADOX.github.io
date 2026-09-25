@@ -26,6 +26,7 @@ const validators=[
   'validate-forge-loader.mjs',
   'test-forge-loader-residency.mjs',
   'validate-journey-visual-pass.mjs',
+  'test-europa-marker-sources.mjs', // Europa sourcing request: reject incomplete markers.
   'test-journey-maps.mjs', // Prompt 24: marker and chest contrast contracts.
   'validate-public-deep-space.mjs',
   'validate-live-artifact-contract.mjs',

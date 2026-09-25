@@ -1,10 +1,13 @@
-import {POINT_TYPES,hasMapPosition,canRenderMapMarker,markerGlyphMarkup,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-zoom-chests-3&markers=20260925-24';
+import {POINT_TYPES,canRenderSourcedMapMarker,applySourcedMapMarkers,hasMapPosition,canRenderMapMarker,markerGlyphMarkup,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1';
 
 const loaders=Object.freeze({
   edz:()=>import('./assets/map-data/edz.mjs?v=20260920-1'),
   nessus:()=>import('./assets/map-data/nessus.mjs?v=20260920-1'),
   moon:()=>import('./assets/map-data/moon.mjs?v=20260920-1'),
-  europa:()=>import('./assets/map-data/europa.mjs?v=20260920-1'),
+  europa:async()=>{
+    const [{default:catalogue},{default:audit}]=await Promise.all([import('./assets/map-data/europa.mjs?v=20260920-1'),import('./europa-marker-data.mjs?v=20260925-sources-1')]);
+    return {default:applySourcedMapMarkers(catalogue,audit)};
+  },
   neomuna:()=>import('./assets/map-data/neomuna.mjs?v=20260920-1'),
   kepler:()=>import('./assets/map-data/kepler.mjs?v=20260920-1'),
   'pale-heart':()=>import('./assets/map-data/pale-heart.mjs?v=20260920-1'),
@@ -23,6 +26,8 @@ const button=(className,text)=>{
 };
 
 export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewBox,onFocus}){
+  const sourcedOnly=key==='europa';
+  const renderable=entry=>sourcedOnly?canRenderSourcedMapMarker(entry):canRenderMapMarker(entry);
   const layer=make('div','journey-map-marker-layer');
   layer.setAttribute('aria-label',`${label} map points`);
   const root=make('section','journey-map-explorer');
@@ -77,7 +82,7 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewB
   function renderMarkers(){
     const oldFocus=document.activeElement?.closest?.('.journey-map-marker');
     const focusId=oldFocus&&layer.contains(oldFocus)?oldFocus._pointIds[0]:null;
-    layer.replaceChildren(...visible.filter(canRenderMapMarker).map(entry=>{
+    layer.replaceChildren(...visible.filter(renderable).map(entry=>{
       const position=directorViewPosition(entry.position,viewBox);
       const item=button('journey-map-marker');
       item.dataset.markerKey=entry.markerKey||entry.id;
@@ -85,21 +90,23 @@ export function createJourneyMapExplorer({key,label,staticMarkers,viewport,viewB
       item._pointIds=[entry.id];
       item.style.left=`${position.x}%`;item.style.top=`${position.y}%`;
       const name=entry.name;
-      item.setAttribute('aria-label',name);item.title=name;item.setAttribute('aria-controls',details.id);
+      const markerLabel=`${name} · ${POINT_TYPES[entry.type]}`;
+      item.setAttribute('aria-label',markerLabel);item.title=markerLabel;item.setAttribute('aria-controls',details.id);
       item.classList.toggle('is-selected',item._pointIds.includes(selected));
       const icon=make('span','journey-map-marker-icon');
-      icon.innerHTML=markerGlyphMarkup(entry.type);
+      icon.innerHTML=sourcedOnly?'':markerGlyphMarkup(entry.type);
+      if(sourcedOnly){item.hidden=true;item.style.visibility='hidden';}
       const glyph=icon.firstElementChild;
       const iconUrl=directorIconUrl(entry);
       item.classList.toggle('has-no-icon',!iconUrl);
       if(iconUrl){
         const image=make('img','journey-map-director-icon');
         image.alt='';image.draggable=false;image.hidden=true;
-        image.addEventListener('load',()=>{image.hidden=false;glyph.setAttribute('hidden','');},{once:true});
-        image.addEventListener('error',()=>{image.remove();glyph.removeAttribute('hidden');item.classList.add('has-no-icon');},{once:true});
+        image.addEventListener('load',()=>{image.hidden=false;item.hidden=false;item.style.removeProperty('visibility');glyph?.setAttribute('hidden','');},{once:true});
+        image.addEventListener('error',()=>{if(sourcedOnly){item.remove();return;}image.remove();glyph.removeAttribute('hidden');item.classList.add('has-no-icon');},{once:true});
         icon.append(image);image.src=iconUrl;
       }
-      const copy=make('span','journey-map-marker-copy');copy.append(make('strong',null,name));
+      const copy=make('span','journey-map-marker-copy');copy.append(make('strong',null,name),make('small',null,POINT_TYPES[entry.type]));
       item.append(icon,copy);
       item.addEventListener('click',()=>select(entry));
       return item;

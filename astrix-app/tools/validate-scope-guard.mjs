@@ -4,6 +4,9 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  // Europa sourcing request: page-owned marker audit and its validator only.
+  'astrix-app/pages/journey/europa-marker-data.mjs',
+  'astrix-app/tools/test-europa-marker-sources.mjs',
   // Prompt 20a-hotfix: shared public Bungie definition fetch.
   'forge-auth-worker/src/bungie-definition-fetch.ts',
   // Prompt 24: Journey marker fallbacks and chest readability coverage.

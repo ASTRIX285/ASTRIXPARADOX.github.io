@@ -91,3 +91,27 @@ export function markerGlyphMarkup(type){
   const kind=['raid','dungeon','strike'].includes(type)?'activity':type;
   return `<svg class="journey-map-marker-glyph" data-marker-glyph="${kind}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${MARKER_PATHS[kind]}"/></svg>`;
 }
+
+// Europa sourcing request: a coordinate or a type glyph alone cannot qualify a marker.
+const MARKER_DEFINITION_TYPES=new Set(['DestinyActivityDefinition','DestinyVendorDefinition','DestinyPlaceDefinition','DestinyDestinationDefinition']);
+export function canRenderSourcedMapMarker(entry){
+  const definition=entry?.definition,properties=definition?.displayProperties,source=entry?.position?.source;
+  const safeUrl=value=>{try{return new URL(value).protocol==='https:';}catch{return false;}};
+  return Boolean(canRenderMapMarker(entry)&&MARKER_DEFINITION_TYPES.has(definition?.table)
+    &&Number.isInteger(definition?.hash)&&definition.hash>0
+    &&definition.nameField==='name'&&properties?.name?.trim()&&entry.name===properties.name
+    &&['icon','mapIcon','smallTransparentIcon','largeTransparentIcon'].includes(definition.iconField)
+    &&entry.icon===properties[definition.iconField]&&directorIconUrl({icon:entry.icon})
+    &&entry.position.basis==='hand-placed'&&source?.publisher?.trim()
+    &&safeUrl(source.url)&&safeUrl(source.image)&&/^[a-f0-9]{64}$/.test(source.sha256)
+    &&Array.isArray(source.imageSize)&&source.imageSize.length===2
+    &&source.imageSize.every(n=>Number.isFinite(n)&&n>0)
+    &&Array.isArray(source.pixel)&&source.pixel.length===2
+    &&source.pixel.every((n,i)=>Number.isFinite(n)&&n>=0&&n<=source.imageSize[i])
+    &&source.notes?.trim());
+}
+export function applySourcedMapMarkers(catalogue,audit){
+  if(catalogue.key!==audit.key||catalogue.manifestVersion!==audit.manifestVersion)throw new Error('Marker source mismatch');
+  const approved=new Map(audit.markers.filter(canRenderSourcedMapMarker).map(entry=>[entry.id,entry]));
+  return {...catalogue,entries:catalogue.entries.map(entry=>approved.get(entry.id)||{...entry,position:null})};
+}

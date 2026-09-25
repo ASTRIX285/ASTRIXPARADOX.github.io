@@ -144,6 +144,26 @@ try{
     assert.equal(contrast.length,12);
     for(const row of contrast){assert.equal(row.alpha,1);assert.equal(row.textAlpha,1);assert.ok(row.ratio>=4.5,JSON.stringify(row));assert.equal(row.effects,false);}
   }
+  // Europa sourcing request: preserve the legacy fallback assertions above;
+  // Europa has the stronger manifest + citation contract, including failed images.
+  await fixturePage.unroute('**/*');
+  await fixturePage.route('https://www.bungie.net/**',route=>route.request().url().includes('bd7a1fc995f87be96698263bc16698e7')
+    ?route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')})
+    :route.fulfill({status:404,body:''}));
+  await fixturePage.evaluate(()=>ForgeDestinations.set('europa',{persist:false}));
+  await fixturePage.waitForFunction(()=>document.querySelector('[data-map-key="europa"]')?.dataset.renderComplete==='ready');
+  await fixturePage.waitForFunction(()=>document.querySelector('[data-marker-key="node-1162322578"] img')?.naturalWidth>0);
+  await fixturePage.waitForFunction(()=>!document.querySelector('[data-marker-key="location-405582238"]'));
+  for(const width of [1363,2560]){
+    await fixturePage.setViewportSize({width,height:1080});
+    assert.equal(await fixturePage.locator('.journey-map-marker:visible').count(),1,'Missing source data and failed icons never become visible markers');
+    assert.equal(await fixturePage.locator('.journey-map-marker svg').count(),0,'No substitute glyphs on Europa');
+    const marker=fixturePage.locator('.journey-map-marker:visible');
+    assert.equal(await marker.getAttribute('aria-label'),'Deep Stone Crypt · Raids');
+    assert.equal(await marker.getAttribute('title'),'Deep Stone Crypt · Raids');
+    await marker.hover();
+    assert(await marker.locator('.journey-map-marker-copy').isVisible());
+  }
   await fixturePage.close();
   console.log('JOURNEY_MAP_BROWSER=PASS switching, 4K/6K, search, keyboard, filters, chest reset, mobile');
 }catch(error){if(/Executable doesn't exist/.test(error.message))console.error('NOT RUN: Chromium missing');throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
