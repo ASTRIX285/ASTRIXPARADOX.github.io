@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
@@ -42,7 +43,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 // PR #272 (381a8e2) added maps; #273 (b913547) and #274 (8988fb2) refreshed their entries.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;plain=20260925-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -124,8 +125,8 @@ assert.match(journey,/function createRankBadge[\s\S]*?journey-rank-badge[\s\S]*?
 assert.match(css,/\.journey-page \.journey-rank-badge\{[\s\S]*?background:radial-gradient[\s\S]*?\.journey-page \.journey-rank-badge strong\{[\s\S]*?color:#b51222/,'Rank medallions must use the requested gold/crimson background and crimson number');
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?bindProfileCards\(profile\);[\s\S]*?const mapReady=showJourney\(\);/,'Journey must keep its resolving state until the prepared profile is renderable, then reveal and bind the dashboard in that order');
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
-// Prompt 20 appends Reports support, retaining every existing resource version.
-assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"'),'Journey must load the backend-prepared shared Guardian renderer');
+// Prompts 19 and 20: retain both copy and Reports versions after rebase.
+assert.ok(html.includes('src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1&amp;plain=20260925-1"'),'Journey must load the backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
 assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared seven-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
@@ -153,7 +154,7 @@ assert.match(journey,/const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';[\s\
 assert.match(journey,/validateHandoffEnvelope[\s\S]*?function readJourneyBuildState[\s\S]*?expectedCharacterId[\s\S]*?expectedMembershipId[\s\S]*?expectedMembershipType[\s\S]*?allowLegacy:false/,'Build Forge summaries must reject stale, legacy or cross-account build state');
 assert.match(journey,/function captureEvidenceRows[\s\S]*?readCapture\(\)[\s\S]*?readCaptureArchive\(\)[\s\S]*?const completed=[\s\S]*?capture\?\.status!=='collected'/,'Most-used build tracking must count only completed verified Build Test evidence');
 assert.match(journey,/function renderMostUsed[\s\S]*?activity\?\.buildSnapshot[\s\S]*?winner\.count\/evidence\.length\*100/,'Most-used build tracking must combine future Mission Report snapshots with verified Build Test samples');
-assert.match(html,/id="journeyMostUsed"[\s\S]*?No verified Build Test or Mission Report loadout evidence[\s\S]*?id="journeyBuildSummary"[\s\S]*?No verified Build Forge state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No verified activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
+assert.match(html,/id="journeyMostUsed"[\s\S]*?No build activity recorded yet\.[\s\S]*?id="journeyBuildSummary"[\s\S]*?No Build Forge state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
 assert.match(css,/\.journey-column-summaries \.journey-evidence-rows[\s\S]*?grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)/,'Connected Journey evidence must remain readable inside the existing compact cards');
 // Prompt 20 adds Reports; retain exactly these seven ribbon routes in order.
 const ribbonRoutes=[...ribbon.matchAll(/Object\.freeze\(\{key:'([^']+)'/g)].map(match=>match[1]);
@@ -196,12 +197,13 @@ assert.match(heroModule,/const CLASS_ORDER=\{hunter:0,warlock:1,titan:2\}/,'Warl
 for(const [page,title,purpose] of [
   [html,'JOURNEY','GUARDIAN COMMAND CONSOLE'],
   [characterHtml,'CHARACTER','INSPECT YOUR LIVE GUARDIAN LOADOUT'],
-  [forgeLoaderHtml,'FORGE LOADER','SELECT AND MAXIMISE VERIFIED ARMOUR'],
+  [forgeLoaderHtml,'FORGE LOADER','SELECT AND MAXIMISE ARMOUR'],
   [buildForgeHtml,'BUILD FORGE','OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD'],
-  [missionReportsHtml,'MISSION REPORTS','REVIEW VERIFIED GUARDIAN ACTIVITY'],
-  [vaultHtml,'VAULT','BROWSE VERIFIED OWNED GEAR'],
+  [missionReportsHtml,'MISSION REPORTS','REVIEW GUARDIAN ACTIVITY'],
+  [vaultHtml,'VAULT',null],
   [loadoutHtml,'LOADOUT','REVIEW SAVED GUARDIAN BUILDS']
-])assert.match(page,new RegExp(`<strong>${title}<\\/strong><small>${purpose}<\\/small>`),`${title} must expose its page-specific name and purpose inside the shared command header`);
+// Prompt 19 explicitly removes Vault's subtitle; require the header to close immediately.
+])assert.match(page,new RegExp(purpose===null?`<strong>${title}<\\/strong><\\/div>`:`<strong>${title}<\\/strong><small>${purpose}<\\/small>`),`${title} must expose its page-specific name and purpose inside the shared command header`);
 assert.doesNotMatch(forgeLoaderHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not repeat its page identity in an oversized content hero');
 assert.match(forgeLoaderHtml,/<span class="apx-visually-hidden" id="forgeConnectionState"/,'Forge Loader must preserve its connection-state hook after removing the oversized hero');
 assert.doesNotMatch(vaultHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Vault<\/h1>/,'Vault must not repeat its page identity below the shared command header');
@@ -232,7 +234,7 @@ assert.ok(journey.includes("mount:document.getElementById('journeyLocationSelect
 assert.ok(journey.includes("detail:document.getElementById('journeyLocationDetail')"),'Journey detail mount must remain unchanged');
 assert.ok(journey.includes('const session=await getBungieSession();'),'Journey authentication must remain unchanged');
 // PR #272 (381a8e2) replaced placeholders with destination maps; #274 (8988fb2) refreshed the registry.
-assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3'"),'Journey must load its current versioned page-owned destination data registry');
+assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&plain=20260925-1'"),'Journey must load its current versioned page-owned destination data registry');
 assert.ok(journey.includes('initJourneyLocationMaps('),'Journey must initialise its page-owned interactive map layer');
 assert.ok(mapModule.includes('src:`./assets/maps/${key}-director-map-4k.webp`'),'Journey must mount the selected destination 4K Director map');
 assert.ok(mapModule.includes('detailSrc:`./assets/maps/${key}-director-map-6k.webp`'),'Journey must provide the selected destination 6K Director map for zoom');

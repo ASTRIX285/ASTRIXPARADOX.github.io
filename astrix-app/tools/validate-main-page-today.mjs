@@ -1,3 +1,4 @@
+// Prompt 19: expected visible copy and resource tags updated; assertion coverage unchanged.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -40,7 +41,7 @@ assert.match(portalController,/APX_SKIP_PORTAL===true/,'Shared portal must suppo
 assert.match(portalController,/authRequired:authRequired/,'Shared portal must expose its full-screen Bungie authentication state');
 assert.match(portalController,/function done\(\)\{if\(pendingAuthUrl\|\|pendingBlockedMessage\)return/,'The application must not appear before Bungie authentication and verified rendering complete');
 assert.match(portalController,/SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800/,'All data pages must report when verified data misses the three-second target');
-assert.match(portalController,/Still loading verified Guardian data/,'The three-second target must retain an honest loading state instead of exposing an empty shell');
+assert.match(portalController,/Still loading Guardian data/,'The three-second target must retain an honest loading state instead of exposing an empty shell');
 assert.doesNotMatch(portalController,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/,'The slow-load notice must not dismiss the live-data gate');
 assert.match(portalCss,/\.apx-auth-panel/,'The shared portal must visibly own the Bungie authentication gate');
 
@@ -208,7 +209,7 @@ assert.match(workspaceHtml,/<section class="eq guardian-loadouts-container"[\s\S
 assert.doesNotMatch(workspaceHtml,/<section class="eq gear-combined">[\s\S]*?id="guardianLoadouts"/,'Main Armour & Mods must not contain the in-game loadout tray');
 assert.match(buildHtml,/<section class="design-section loadouts-design-section"[\s\S]*?id="guardianLoadouts"[\s\S]*?<\/section>\s*<section class="design-section armour-design-section gear-combined"/,'Build in-game loadouts must be a separate container directly above Armour & Mods');
 assert.doesNotMatch(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="guardianLoadouts"/,'Build Armour & Mods must not contain the in-game loadout tray');
-assert.match(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="armourBuildState">STAGED ARMOUR · MOD PLAN PENDING<\/span>[\s\S]*?id="armourBuildInstruction">Choose exact owned armour and reusable mods manually, or generate an AI sequence\.<\/span>[\s\S]*?id="armourBuildEvidence">Installed mods retained as evaluation evidence<\/span>[\s\S]*?id="armourGrid" class="gear-columns"/,'Build Armour must start as a clearly labelled manual-or-generated canvas while retaining installed mods as evidence');
+assert.match(buildHtml,/<section class="design-section armour-design-section gear-combined"[\s\S]*?id="armourBuildState">STAGED ARMOUR · MOD PLAN PENDING<\/span>[\s\S]*?id="armourBuildInstruction">Choose armour and reusable mods manually, or generate an AI sequence\.<\/span>[\s\S]*?id="armourBuildEvidence">Installed mods<\/span>[\s\S]*?id="armourGrid" class="gear-columns"/,'Build Armour must start as a clearly labelled manual-or-generated canvas while retaining installed mods as evidence');
 assert.match(buildHtml,/<section class="design-section loadouts-design-section"[\s\S]*?<section class="design-section armour-design-section gear-combined"[\s\S]*?<section class="design-section weapon-design-section"/,'Build centre column must run from loadouts to armour to weapons.');
 assert.match(buildHtml,/<section class="design-section recommendation-panel"[\s\S]*?ELEMENTAL BUILD OPTIONS[\s\S]*?<\/section>\s*<\/section>\s*<aside class="build-right-rail"[\s\S]*?<section class="panel validation-panel design-section test-loop"[\s\S]*?<section class="panel intelligence" data-paradox-analysis>/,'Elemental Build Options must follow Weapons in the centre while Validation Loop and Intelligence use the right rail.');
 assert.match(buildHtml,/id="artifactPickerPanel"[\s\S]*?hidden/,'Build Artifact catalogue must stay collapsed behind the equipped summary');
@@ -225,7 +226,7 @@ assert.match(buildModule,/cacheBuildForgeState\(binding,snapshot\)[\s\S]*?could 
 assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Build Forge state must persist asynchronously through the IndexedDB session cache.');
 assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWorkingBuildPatch\(state\.workingBuild\|\|state\.originalBuild\)/,'Representative manual edits must use a small mutable patch instead of cloning the full snapshot.');
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
-assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&champion=20260924-champion-export-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
+assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs\?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&champion=20260924-champion-export-1&plain=20260925-1'/,'Build Armour must import the same current renderer and hover wiring as Character');
 assert.match(buildHtml,/paradox-build-space\.css\?v=20260908-icon-hover-1/,'Build must load the completed icon-token wiring without a stale cache');
 assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-character-safe-2/,'Build must load the partial-data-safe verified module graph without stale code');
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');

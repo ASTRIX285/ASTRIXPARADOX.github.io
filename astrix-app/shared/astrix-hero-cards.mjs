@@ -1,5 +1,5 @@
-import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1';
+import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const CLASS_NAMES=['titan','hunter','warlock'];

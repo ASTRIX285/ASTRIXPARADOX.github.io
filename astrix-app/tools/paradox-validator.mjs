@@ -8,6 +8,7 @@ const validators=[
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
   'validate-reports-catalogue.mjs',
+  'validate-plain-language.mjs', // Prompt 19: copy-only language contract.
   'validate-forge-internal-rename.mjs',
   'validate-site-typography.mjs',
   'validate-guardian-adaptive-layout.py',
