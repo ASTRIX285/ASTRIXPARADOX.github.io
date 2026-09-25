@@ -6,7 +6,7 @@
     Object.freeze({key:'character',label:'Character',href:'/astrix-app/pages/guardian-workspace-v2/'}),
     Object.freeze({key:'forge-loader',label:'Forge Loader',href:'/astrix-app/pages/forge-loader/'}),
     Object.freeze({key:'build-forge',label:'Build Forge',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
-    Object.freeze({key:'mission-reports',label:'Mission Reports',href:'/astrix-app/pages/mission-reports/'}),
+    // Mission Reports is temporarily hidden from navigation; its page remains intact.
     Object.freeze({key:'vault',label:'Vault',href:'/astrix-app/pages/vault/'}),
     Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
   ]);
