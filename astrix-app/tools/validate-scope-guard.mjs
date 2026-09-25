@@ -1,14 +1,25 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
+import {lstatSync, readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
+// Frozen permissions inherited from main at aff4223a. New task permissions belong
+// in .scope/<exact-branch-name>.txt, never in this shared baseline.
 const allowed=new Set([
-  // Prompt 20c: Reports box presentation and focused catalogue tests.
-  'astrix-app/pages/reports/reports-boxes.mjs',
-  'astrix-app/tools/test-reports-boxes.mjs',
+  // Clips footer: validate before the scheduled generator commits its output.
+  '.github/workflows/update-clips.yml',
+  // Europa sourcing request: page-owned marker audit and its validator only.
+  'astrix-app/pages/journey/europa-marker-data.mjs',
+  'astrix-app/tools/test-europa-marker-sources.mjs',
   // Prompt 20a-hotfix: shared public Bungie definition fetch.
   'forge-auth-worker/src/bungie-definition-fetch.ts',
+  // Prompt 24: Journey marker fallbacks and chest readability coverage.
+  'astrix-app/pages/journey/journey-map-explorer.mjs',
+  'astrix-app/pages/journey/journey-map-model.mjs',
+  'astrix-app/tools/test-journey-map-browser.mjs',
+  'astrix-app/tools/test-journey-maps.mjs',
   // Prompt 22: seven-route ribbon appearance and Reports edge coverage.
   'astrix-app/tools/test-ribbon-buttons.mjs',
   'astrix-app/tools/validate-ribbon-buttons.mjs',
@@ -44,6 +55,11 @@ const allowed=new Set([
   'forge-auth-worker/src/reports-read.ts',
   'forge-auth-worker/test/reports-read.test.ts',
 
+  // Prompt 21: status model and focused fixtures/tests only.
+  'astrix-app/pages/guardian-workspace-v2/guardian-loadout-status.mjs',
+  'astrix-app/tools/fixtures/character-loadouts-fixture.mjs',
+  'astrix-app/tools/test-character-loadout-status.mjs',
+  'astrix-app/tools/test-character-loadout-menu.mjs',
   'astrix-app/pages/vault/vault-drag-scroll.mjs',
   'astrix-app/tools/test-vault-drag-scroll.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
@@ -361,20 +377,94 @@ const allowed=new Set([
   'tools/index.html',
   'tools/tools.css',
 ]);
-const changed=execFileSync('git',['diff','--name-only','origin/main...HEAD'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const working=execFileSync('git',['diff','--name-only'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const staged=execFileSync('git',['diff','--name-only','--cached'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
-const untracked=execFileSync('git',['ls-files','--others','--exclude-standard'],{cwd:root,encoding:'utf8'})
-  .split(/\r?\n/).filter(Boolean);
 const cataloguePath=/^astrix-app\/data\/weapon-catalogue\/(?:index|weapons-[a-z-]+|(?:plugDefinitions|plugSetDefinitions|sandboxPerks|socketTypeDefinitions|socketCategoryDefinitions|socketLayouts|socketEntries|iconDefinitions|equipmentWatermarks)-\d{3})\.json$/;
 const journeyIndexPath=/^astrix-app\/data\/journey-index\/(?:index|Destiny(?:PresentationNode|Record|Objective|Activity|Destination|Metric|Collectible)Definition-(?:[0-9]|1[0-5]))\.json$/;
 const phaseThreeInfrastructurePath=/^(?:(?:\.astrix-community|\.forge-community)|(?:astrix|forge)-(?:auth-worker|destiny-backend|manifest-worker|sandbox|worker))\//;
 const phaseThreeWorkflowPath=/^\.github\/workflows\/(?:deploy-(?:astrix|forge)-(?:sandbox|worker)|(?:astrix|forge)-(?:build-validation|probe-artifact-sandbox-perks|probe-current-artifact-v2|probe-current-artifact|probe-damage-types|probe-s28-localdb|probe-s28-perks-simple|worker-check)|refresh-backend-manifest|refresh-bungie-manifest-data|refresh-current-artifact|refresh-live-activity-data|update-armor-information|update-component-icons|update-cosmetic-information|update-game-components|update-weapon-information|validate-knowledge-graph|validate-weapon-audit)\.yml$/;
 const phaseThreeRootPath=/^(?:\.gitignore|CLAUDE\.md)$/;
-const outside=[...new Set([...changed,...working,...staged,...untracked])].filter(path=>!allowed.has(path)&&!cataloguePath.test(path)&&!journeyIndexPath.test(path)&&!phaseThreeInfrastructurePath.test(path)&&!phaseThreeWorkflowPath.test(path)&&!phaseThreeRootPath.test(path));
+export function baselineAllows(path){
+  return allowed.has(path)||cataloguePath.test(path)||journeyIndexPath.test(path)||phaseThreeInfrastructurePath.test(path)||phaseThreeWorkflowPath.test(path)||phaseThreeRootPath.test(path);
+}
 
-assert.deepEqual(outside,[],`Scope violation:\n${outside.join('\n')}`);
-console.log('SCOPE_GUARD=PASS');
+function git(cwd,args){
+  return execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']});
+}
+
+export function branchName(cwd,env=process.env){
+  let branch=env.GITHUB_HEAD_REF;
+  if(!branch && env.GITHUB_EVENT_PATH && /^pull_request/.test(env.GITHUB_EVENT_NAME||'')){
+    branch=JSON.parse(readFileSync(env.GITHUB_EVENT_PATH,'utf8')).pull_request?.head?.ref;
+    assert.ok(branch,'Missing pull request head ref');
+  }
+  if(!branch) branch=git(cwd,['branch','--show-current']).trim();
+  if(!branch && env.GITHUB_REF?.startsWith('refs/heads/')) branch=env.GITHUB_REF.slice('refs/heads/'.length);
+  assert.ok(branch,'Cannot resolve branch in detached checkout; supply GITHUB_HEAD_REF (PR) or GITHUB_REF (push)');
+  assert.match(branch,/^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)*$/,'Malformed branch name');
+  git(cwd,['check-ref-format','--branch',branch]);
+  return branch;
+}
+
+export function exactPath(path){
+  assert.match(path,/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/,'Scope entries must be exact repository-relative paths');
+  assert.ok(!path.split('/').some(part=>part==='.'||part==='..'||part.toLowerCase()==='.git'),'Scope traversal or Git metadata path');
+  assert.ok(path!=='.scope'&&!path.startsWith('.scope/'),'Scope entries cannot authorize scope files');
+  return path;
+}
+
+// Check every ancestor before reading. A scope file or allowed entry must never
+// redirect through a symlink, including a symlinked .scope directory.
+function regularFile(cwd,path,{missing=false}={}){
+  const parts=path.split('/');
+  for(let index=0;index<parts.length;index++){
+    let stat;
+    try {stat=lstatSync(resolve(cwd,...parts.slice(0,index+1)));}
+    catch(error){if(error.code==='ENOENT'&&missing)return false;throw error;}
+    assert.ok(!stat.isSymbolicLink(),`Symlink forbidden in scope: ${path}`);
+    assert.ok(index===parts.length-1?stat.isFile():stat.isDirectory(),`Not a regular scope file path: ${path}`);
+  }
+  return true;
+}
+
+export function readScope(cwd,branch,baseFiles){
+  const scopePath=`.scope/${branch}.txt`;
+  regularFile(cwd,scopePath);
+  const content=readFileSync(resolve(cwd,scopePath),'utf8');
+  assert.ok(!content.includes('\uFFFD'),'Scope file must be valid UTF-8');
+  const entries=new Set();
+  for(const line of content.split(/\r?\n/)){
+    if(line===''||line.startsWith('#'))continue;
+    const path=exactPath(line);
+    assert.ok(!entries.has(path),`Duplicate scope entry: ${path}`);
+    assert.ok(regularFile(cwd,path,{missing:true})||baseFiles.has(path),`Missing scope entry: ${path}`);
+    entries.add(path);
+  }
+  return {scopePath,entries};
+}
+
+export function validateScope(cwd=root,env=process.env){
+  const branch=branchName(cwd,env);
+  const paths=new Set([
+    ...git(cwd,['diff','--no-renames','--name-only','-z','origin/main...HEAD']).split('\0'),
+    ...git(cwd,['diff','--no-renames','--name-only','-z']).split('\0'),
+    ...git(cwd,['diff','--no-renames','--name-only','-z','--cached']).split('\0'),
+    ...git(cwd,['ls-files','--others','--exclude-standard','-z']).split('\0'),
+  ].filter(Boolean));
+  const scopePath=`.scope/${branch}.txt`;
+  // No other branch's permissions can be added, changed, renamed or removed.
+  for(const path of paths){
+    if(path==='.scope'||path.startsWith('.scope/'))assert.equal(path,scopePath,`Another branch's scope file changed: ${path}`);
+  }
+  const baseFiles=new Set(git(cwd,['ls-tree','-r','--name-only','-z','origin/main']).split('\0').filter(Boolean));
+  let entries=new Set();
+  // A clean main checkout needs no task file. Every task with changes needs one,
+  // even if its code paths happen to be covered by the inherited baseline.
+  if(paths.size||regularFile(cwd,scopePath,{missing:true}))entries=readScope(cwd,branch,baseFiles).entries;
+  const outside=[...paths].filter(path=>path!==scopePath&&!baselineAllows(path)&&!entries.has(path));
+  assert.deepEqual(outside,[],`Scope violation:\n${outside.join('\n')}`);
+  return {branch,scopePath,changed:paths.size};
+}
+
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  try {validateScope();console.log('SCOPE_GUARD=PASS');}
+  catch(error){console.error(`SCOPE_GUARD=FAIL: ${error.message}`);process.exitCode=1;}
+}
