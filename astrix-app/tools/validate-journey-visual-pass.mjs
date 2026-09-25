@@ -40,7 +40,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 // PR #272 (381a8e2) added maps; #273 (b913547) and #274 (8988fb2) refreshed their entries.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');

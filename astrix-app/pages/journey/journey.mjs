@@ -1963,11 +1963,16 @@ function journeyActivityCacheKey(session,characterId){
 async function fetchJourneyActivityEvidence(session,characterId,{force=false}={}){
   const membership=session?.activeDestinyMembership;
   if(session?.authenticated!==true||!membership?.membershipType||!membership?.membershipId||!characterId)return null;
+  // Hero-card selection can arrive before the shared profile has resolved.
+  // Keep that state pending; bootstrap binds again once the profile is ready.
+  if(!verifiedProfile)return null;
   const key=journeyActivityCacheKey(session,characterId);
   const cached=journeyActivityCache.get(key);
   if(cached?.promise)return cached.promise;
   if(!force&&cached?.status==='ok'&&Date.now()-cached.fetchedAt<PREPARED_PAGE_REFRESH_MS)return cached;
-  const promise=(async()=>{
+  // Register the pending task before it can settle, including a synchronous
+  // missing-history failure. Otherwise a settled failure gets cached forever.
+  const promise=Promise.resolve().then(async()=>{
     try{
       const prepared=verifiedProfile?.preparedAccountData?.activityHistoryByCharacter?.[characterId];
       if(!prepared)throw new Error('Prepared Journey data contains no activity history for this Guardian.');
@@ -1986,7 +1991,7 @@ async function fetchJourneyActivityEvidence(session,characterId,{force=false}={}
       journeyActivityCache.delete(key);
       return {status:'unavailable',characterId,activities:[],view:null,fetchedAt:Date.now()};
     }
-  })();
+  });
   journeyActivityCache.set(key,{...cached,promise});
   return promise;
 }
@@ -2297,6 +2302,7 @@ try{
     if(!profile?.profile?.characters?.data)throw new Error('Prepared Journey data is unavailable. Retry the page or reconnect Bungie.');
     verifiedProfile=profile;
     bindProfileCards(profile);
+    syncSelectedCharacterFromCards();
     void bindDestinationProgress(profile);
     const mapReady=showJourney();
     startJourneyBackgroundRefresh();
