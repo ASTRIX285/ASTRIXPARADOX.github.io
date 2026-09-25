@@ -1,4 +1,4 @@
-import { analyzeGuardianBuild } from "./guardian-paradox-engine.mjs?v=20260905-background-forge-1";
+import { analyzeGuardianBuild } from "./guardian-paradox-engine.mjs?v=20260905-background-forge-1&plain=20260925-1";
 import { adviseLiveWeaponRolls } from "./guardian-weapon-roll-advisor.mjs?v=20260905-weapon-audit-1";
 
 const clone=v=>v==null?v:structuredClone(v);
@@ -24,7 +24,7 @@ function evidenceComponent(row){
   return {
     hash:Number(row.sourceHash)||null,
     bungieHash:Number(row.sourceHash)||null,
-    name:row.sourceName||"Verified armour evidence",
+    name:row.sourceName||"Armour details",
     description:row.description||"",
     sourceKind:`armour-${row.semanticRole||"evidence"}`,
     componentType:`armour-${row.semanticRole||"evidence"}`,
@@ -97,29 +97,29 @@ function renderLiveAnalysis(analysis){
   if(!panel)return;
   panel.dataset.analysisSource="bungie-live";
   const updated=panel.querySelector(".ra-head .upd");
-  if(updated)updated.textContent="Live Bungie evidence · verified";
+  if(updated){updated.textContent="";updated.hidden=true;}
   const confidence=analysis.confidence;
   const confidenceValue=typeof confidence==="number"?confidence:Number(confidence?.score??confidence?.value??0);
   const conf=panel.querySelector(".mini-grid .mini:nth-child(4) .big");
-  if(conf)conf.textContent=confidenceValue>=.8||confidenceValue>=80?"Very High":confidenceValue>=.6||confidenceValue>=60?"High":"Evidence Limited";
+  if(conf)conf.textContent=confidenceValue>=.8||confidenceValue>=80?"Very High":confidenceValue>=.6||confidenceValue>=60?"High":"Limited data";
   const loop=panel.querySelector(".mini-grid .mini:nth-child(1) .big");
-  if(loop)loop.textContent=analysis.buildLoop?.length?`${analysis.buildLoop.length} Verified Link${analysis.buildLoop.length===1?"":"s"}`:"No Verified Loop";
+  if(loop)loop.textContent=analysis.buildLoop?.length?`${analysis.buildLoop.length} Link${analysis.buildLoop.length===1?"":"s"}`:"No Loop";
   const strengthHost=panel.querySelector(".sw-card.str ul");
   const weakHost=panel.querySelector(".sw-card.weak ul");
-  renderList(strengthHost,analysis.strengths,"No strength claimed without directed evidence");
-  renderList(weakHost,analysis.weakLinks,"No verified weak link identified");
+  renderList(strengthHost,analysis.strengths,"No strengths identified yet.");
+  renderList(weakHost,analysis.weakLinks,"No weak link identified");
   const improve=panel.querySelector(".improve p");
   const recommendation=analysis.recommendations?.[0];
-  if(improve)improve.textContent=recommendation?.causalImpact||recommendation?.change||"No recommendation is claimed until a verified missing input or weak link is found.";
+  if(improve)improve.textContent=recommendation?.causalImpact||recommendation?.change||"No recommendations yet.";
   const verdict=panel.querySelector(".health-card .verdict");
   if(verdict){
     const coverage=analysis.coverage||{};
     const unresolved=[...(coverage?.definitions?.unresolved||[]),...(coverage?.armour?.unresolved||[]),...(coverage?.weapons?.unresolved||[])];
     const semanticUnknown=[...(coverage?.armour?.semanticUnknown||[]),...(coverage?.weapons?.semanticUnknown||[])];
     const complete=unresolved.length===0&&semanticUnknown.length===0;
-    verdict.childNodes[0].nodeValue=complete?"EVIDENCE VERIFIED":"PARTIAL EVIDENCE";
+    verdict.childNodes[0].nodeValue=complete?"":"PARTIAL DATA";
     const small=verdict.querySelector("small");
-    if(small)small.textContent=complete?"Paradox is reasoning only from resolved live Bungie evidence.":`${unresolved.length+semanticUnknown.length} unresolved or unclassified evidence item(s) excluded from claims.`;
+    if(small)small.textContent=complete?"":`${unresolved.length+semanticUnknown.length} item detail(s) unavailable.`;
   }
 }
 

@@ -86,7 +86,7 @@ function resolveArtifactByProvenance(payload,characterId){
     return unavailable('Bungie returned no Artifact tier item state for the selected character.');
   }
   if(items.some(item=>numberOrNull(item?.itemHash)===null||typeof item?.isActive!=='boolean'||typeof item?.isVisible!=='boolean')){
-    return unavailable('Bungie returned incomplete Artifact tier activation evidence for the selected character.');
+    return unavailable('Bungie returned incomplete Artifact tier activation data for the selected character.');
   }
 
   const perks=items.map(item=>({...displayItem(definitions,item.itemHash),isActive:item.isActive,isVisible:item.isVisible,tierHash:item.tierHash,tierIndex:item.tierIndex,itemIndex:item.itemIndex,column:item.column,order:item.order,tierTitle:item.tierTitle,tierUnlocked:item.tierUnlocked,pointsToUnlock:item.pointsToUnlock,minimumUnlockPointsUsedRequirement:item.minimumUnlockPointsUsedRequirement}));

@@ -1,6 +1,6 @@
 import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260913-square-intrinsic-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -147,7 +147,7 @@ function cardMarkup(item,kind,{contextLabel='',definitionOnly=false,presentation
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
   const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
   const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
-  const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Bungie item');
+  const source=item?.source?.label??(item?.itemInstanceId?'Item details':'Bungie item');
   const rarity=/\bexotic\b/i.test(String(tier))||item?.isExotic===true?'exotic':/\blegendary\b/i.test(String(tier))?'legendary':'standard';
   const presentationClass=presentation==='inspect'?'paradox-item-inspect-card':'paradox-item-hover-card';
   return `<article class="paradox-item-card paradox-item-card--${kind} ${presentationClass} is-${rarity}" data-item-kind="${kind}" data-item-rarity="${rarity}">

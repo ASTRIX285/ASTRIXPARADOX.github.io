@@ -1,4 +1,4 @@
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1";
 
 const SAVED_KEY="astrix-paradox-saved-loadouts";
 

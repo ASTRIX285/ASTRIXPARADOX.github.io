@@ -1,4 +1,4 @@
-import {armShootingRangeCapture,collectShootingRangeResults,readCapture,clearCapture} from './guardian-shooting-range-capture.mjs';
+import {armShootingRangeCapture,collectShootingRangeResults,readCapture,clearCapture} from './guardian-shooting-range-capture.mjs?plain=20260925-1';
 
 if(new URLSearchParams(location.search).has('rangeTest')){
   const host=document.createElement('aside');

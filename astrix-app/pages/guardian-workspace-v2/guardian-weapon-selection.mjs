@@ -1,6 +1,6 @@
-import {inventoryLocations,sessionBinding,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1';
+import {inventoryLocations,sessionBinding,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1&plain=20260925-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
+import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-1';
 
 // The page singleton is deliberately backend-only. This deferred reader uses
 // the same manifest service/cache, but only asks for the small stat group table.
@@ -29,7 +29,7 @@ export function weaponPerkPlan(item,choices,{session,payload}={}){
   if(!socketChanges.length)throw new Error('Select a different perk first.');
   return {schemaVersion:1,kind:'weapon-perk-only',status:'staged',ready:true,blockers:[],...sessionBinding(session),characterId:location.source.characterId,
     equipment:{targets:[{itemInstanceId:id,itemHash:location.itemHash,bucketHash:location.bucketHash,name:item.name,kind:'weapon',isExotic:item.isExotic===true}]},socketChanges,
-    phases:[{required:true,capability:'insertSocketPlugFree',label:'Weapon perk Apply'},{required:true,capability:'verifyFinalState',label:'Weapon perk verification'}]};
+    phases:[{required:true,capability:'insertSocketPlugFree',label:'Weapon perk Apply'},{required:true,capability:'verifyFinalState',label:'Weapon perk check'}]};
 }
 
 export function bindWeaponSelection(root,item){
@@ -75,9 +75,9 @@ export function bindWeaponSelection(root,item){
     else{
       let availability=weaponPerkAvailability(item,index,option,eligibilityPayload);
       if(availability==='unknown'){
-        setStatus('Checking this owned perk with Bungie…');
+        setStatus('Applying perk…');
         try{eligibilityPayload=await requestFreshProfile();}
-        catch{setStatus('Perk availability could not be verified. Try selecting it again.');return;}
+        catch{setStatus('Perk unavailable. Try again.');return;}
         if(disposed||busy||request!==selectionRequest)return;
         const owned=inventoryLocations(eligibilityPayload).locations.get(String(item.itemInstanceId));
         if(!owned||owned.itemHash!==Number(item.itemHash??item.hash))return;
@@ -99,7 +99,7 @@ export function bindWeaponSelection(root,item){
       const result=await executeLiveTransferPlan(confirmLiveTransferPlan(staged),{session,onProgress:row=>{setStatus(row.label);}});
       if(result.status!=='applied')throw new Error('Bungie did not confirm every selected perk. Refreshing the weapon to show its actual state.');
       confirmed=true;update();
-      setStatus('Applied and verified with Bungie.');
+      setStatus('Applied.');
       button.hidden=true;
       root.querySelectorAll('[data-perk-selectable]').forEach(node=>{node.dataset.perkSelectable='false';});
       // Keep this snapshot immutable. The normal profile refresh supplies the new roll.

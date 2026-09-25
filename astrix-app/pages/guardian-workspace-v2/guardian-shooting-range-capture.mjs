@@ -1,5 +1,5 @@
-import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {captureMatchesCharacter,mergeCaptureArchive,selectCandidateActivities,chooseCandidateActivity,classifyCandidateEvidence,summarizeCaptureEvidence} from './guardian-shooting-range-evidence.mjs';
+import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-1';
+import {captureMatchesCharacter,mergeCaptureArchive,selectCandidateActivities,chooseCandidateActivity,classifyCandidateEvidence,summarizeCaptureEvidence} from './guardian-shooting-range-evidence.mjs?plain=20260925-1';
 
 const CAPTURE_KEY='astrix:shooting-range-capture:v1';
 const CAPTURE_ARCHIVE_KEY='astrix:shooting-range-capture-archive:v1';
@@ -283,7 +283,7 @@ async function armBuildTest({characterId=null,buildSnapshot=null,testDomain='pve
   if(!cid)throw new Error('Select the Guardian you will use for this Build Test.');
   const domain=asString(testDomain).toLowerCase()==='pvp'?'pvp':'pve';
   const immutableBuild=clone(buildSnapshot||readBuildSnapshot());
-  if(!immutableBuild)throw new Error('A verified Working Build is required before arming a Build Test.');
+  if(!immutableBuild)throw new Error('A Working Build is required before arming a Build Test.');
   let baseline=[];
   let baselineError=null;
   try{

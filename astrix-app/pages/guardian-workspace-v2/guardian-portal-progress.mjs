@@ -1,6 +1,6 @@
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1";
-import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260913-live-character-2";
-import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1';
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-1";
+import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-1";
+import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&plain=20260925-1';
 
 const loader=window.ForgeLoader;
 const manifestReady=guardianManifest.cached();
@@ -84,7 +84,7 @@ document.addEventListener('forge:bungie-character-roster',()=>queueMicrotask(may
 document.addEventListener('forge:guardian-loadout-context',()=>{finishRevision++;profileSettled=false;});
 document.addEventListener('forge:guardian-error',event=>{
   finishRevision++;profileSettled=true;profileFailed=true;
-  const message=event.detail?.message||'Verified live Guardian data is unavailable. Retry the live request.';
+  const message=event.detail?.message||'Live Guardian data is unavailable. Retry the live request.';
   loader?.blocked?.(message);
 });
 

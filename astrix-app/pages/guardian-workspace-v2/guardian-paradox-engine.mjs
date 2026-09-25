@@ -442,7 +442,7 @@ function missingInputs(nodes) {
       if (!available.has(effect)) missing.push({
         type: 'missing-input', effect,
         consumer: { hash: node.hash, name: node.name, type: node.type },
-        statement: `${node.name} has explicit ${effect} dependency evidence, but no equipped component has verified ${effect} output evidence.`,
+        statement: `${node.name} has explicit ${effect} dependency data, but no equipped component has ${effect} output data.`,
         evidence: node.description
       });
     }
@@ -466,7 +466,7 @@ function weaponContribution(nodes, loop) {
     const incoming = loop.filter(x => x.to.hash === weapon.hash);
     const roles = uniq([...outgoing.map(x => `supplies ${x.output} to ${x.to.name}`), ...incoming.map(x => `uses ${x.input} from ${x.from.name}`)]);
     const verified = !weapon.unresolved && roles.length > 0;
-    const base={hash:weapon.hash,name:weapon.name,status:weapon.unresolved?'unresolved':verified?'verified-loop-contributor':'insufficient-evidence',roles,evidence:verified?weapon.description:null,note:verified?null:weapon.unresolved?'Weapon identity is unresolved; no loop claim made.':'No explicit causal contribution can be proven from available fixture/manifest evidence; no loop claim made.'};
+    const base={hash:weapon.hash,name:weapon.name,status:weapon.unresolved?'unresolved':verified?'verified-loop-contributor':'insufficient-evidence',roles,evidence:verified?weapon.description:null,note:verified?null:weapon.unresolved?'Weapon details unavailable.':'No build link found.'};
     if(!weapon.weaponEffects?.hasRollEvidence)return base;
     const contributionLinks=[...outgoing,...incoming].filter(link=>link.source==='runtime-weapon-perk-parsing'||sourceParts(link).some(x=>x.source==='runtime-weapon-perk-parsing'));
     const contributions=contributionLinks.map(link=>{const roleType=weaponRoleType(link,weapon);if(!WEAPON_ROLE_TYPES.has(roleType))throw new Error(`Unknown weapon role type: ${roleType}`);return {roleType,chain:link.chain,output:link.output,input:link.input,evidence:link.evidence};});
@@ -487,7 +487,7 @@ function artifactFit(nodes, loop, build) {
 
 function activityCounters(build, nodes) {
   const profile = build?.activityProfile ?? build?.activity ?? null;
-  if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) return { status: 'not-supplied', chains: [], note: 'No activity counter evidence was supplied.' };
+  if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) return { status: 'not-supplied', chains: [], note: 'No activity counter data was supplied.' };
   const requirements = Array.isArray(profile.requirements) ? profile.requirements : [];
   const outputs = new Set(nodes.flatMap(n => n.effects.outputs));
   const chains = requirements.map(req => {
@@ -512,26 +512,26 @@ function confidence(build, nodes, loop, missing) {
     level,
     evidence: { equippedComponents: nodes.length, directedLinks: loop.length, unresolvedItems: unresolvedNodes.length, fixtureUnresolvedHashes: betaUnresolved, componentsWithoutDescription: noDescription.length, missingInputs: missing.length },
     blockers,
-    statement: blockers.length ? `Confidence limited by: ${blockers.join(', ')}.` : 'All reported causal links are supported by available explicit fixture/manifest evidence.'
+    statement: blockers.length ? `Confidence limited by: ${blockers.join(', ')}.` : 'Build links'
   };
 }
 
 function strengthsFromLoop(loop) {
-  return loop.map(link => ({ type: 'directed-synergy', statement: link.chain, reason: `${link.from.name} has verified ${link.output} output evidence that feeds ${link.to.name}'s verified ${link.input} input evidence.`, evidence: link.evidence }));
+  return loop.map(link => ({ type: 'directed-synergy', statement: link.chain, reason: `${link.from.name} has ${link.output} output data that feeds ${link.to.name}'s ${link.input} input data.`, evidence: link.evidence }));
 }
 
 function evidenceWeakLinks(nodes, missing, weaponRows) {
   const rows = [...missing];
   for (const node of nodes.filter(n => n.unresolved)) rows.push({ type: 'unresolved-identity', item: { hash: node.hash, name: node.name, type: node.type }, statement: `${node.name} is unresolved, so Paradox will not infer an effect or synergy role.` });
-  for (const weapon of weaponRows.filter(w => w.status === 'insufficient-evidence')) rows.push({ type: 'weapon-evidence-gap', item: { hash: weapon.hash, name: weapon.name, type: 'weapon' }, statement: `${weapon.name} is resolved, but its loop contribution is not proven by the available evidence.` });
+  for (const weapon of weaponRows.filter(w => w.status === 'insufficient-evidence')) rows.push({ type: 'weapon-evidence-gap', item: { hash: weapon.hash, name: weapon.name, type: 'weapon' }, statement: `${weapon.name} has no matching build link.` });
   return rows;
 }
 
 function recommendationsFromWeakLinks(weakLinks) {
   const recs = [];
   for (const gap of weakLinks) {
-    if (gap.type === 'missing-input') recs.push({ change: `Equip or select a verified source of ${gap.effect}.`, reason: `${gap.consumer.name} has explicit evidence that consumes/depends on ${gap.effect}, but the current fixture has no verified source for it.`, causalImpact: `Adds the missing ${gap.effect} output -> ${gap.consumer.name} input link.`, evidence: gap.evidence, actionable: true });
-    else if (gap.type === 'unresolved-identity') recs.push({ change: `Resolve ${gap.item.name} before making a gameplay recommendation for that slot.`, reason: 'The item identity/effect evidence is unresolved.', causalImpact: 'Prevents Paradox from inventing a causal link for unknown data.', evidence: { hash: gap.item.hash }, actionable: false });
+    if (gap.type === 'missing-input') recs.push({ change: `Equip or select a source of ${gap.effect}.`, reason: `${gap.consumer.name} needs ${gap.effect}, but the current fixture has no source for it.`, causalImpact: `Adds the missing ${gap.effect} output -> ${gap.consumer.name} input link.`, evidence: gap.evidence, actionable: true });
+    else if (gap.type === 'unresolved-identity') recs.push({ change: `Resolve ${gap.item.name} before making a gameplay recommendation for that slot.`, reason: 'The item identity/effect data is unresolved.', causalImpact: 'Prevents Paradox from inventing a causal link for unknown data.', evidence: { hash: gap.item.hash }, actionable: false });
   }
   return recs;
 }
@@ -773,7 +773,7 @@ export function recommendBuildForExotic(exoticHash, vaultPool, manifestCache = {
   const exoticPoolItem = Number(poolContext?.exotic?.hash) === Number(exoticHash) ? poolContext.exotic : null;
   const exoticManifest = manifest.get(Number(exoticHash));
   const exotic = exoticPoolItem || exoticManifest;
-  if (!exotic) throw new Error(`Exotic ${exoticHash} is not resolved by the supplied inventory/manifest evidence.`);
+  if (!exotic) throw new Error(`Exotic ${exoticHash} details are unavailable.`);
 
   const anchorChains = (poolContext?.anchorEvidence?.synergyChains ?? []).map(normalizeCuratedChain).filter(Boolean);
   const anchorEffects = recommendationEffects(anchorEvidenceParts(anchorChains));
@@ -824,12 +824,12 @@ export function recommendBuildForExotic(exoticHash, vaultPool, manifestCache = {
     if (candidate?.type === 'weapon' && redundant) {
       const active = actionChain(anchorChains);
       const route = active ? `${active.from.name} -> ${active.to.name} -> ${displayEffect(redundant)}` : `${loopNames.join(' -> ')} -> ${displayEffect(redundant)}`;
-      rejectedCandidates.push({ item, reason: `Produces ${displayEffect(redundant)}, but ${poolContext?.fixtureId ?? 'the supplied anchor'} already has a verified ${route} route; no new producer->consumer edge is proven.`, evidence: evidenceParts });
+      rejectedCandidates.push({ item, reason: `Produces ${displayEffect(redundant)}, but ${poolContext?.fixtureId ?? 'the supplied anchor'} already has a ${route} route; no new producer->consumer link was found.`, evidence: evidenceParts });
     } else if (elementDebuffInput) {
       const element = `${elementDebuffInput[0].toUpperCase()}${elementDebuffInput.slice(1).toLowerCase()}`;
-      rejectedCandidates.push({ item, reason: `Requires a ${element}-debuffed target, but the verified ${poolContext?.fixtureId ?? 'anchor'} anchor chains do not establish weaken, volatile, or suppression as an input producer.`, evidence: evidenceParts });
+      rejectedCandidates.push({ item, reason: `Requires a ${element}-debuffed target, but the ${poolContext?.fixtureId ?? 'anchor'} anchor chains do not establish weaken, volatile, or suppression as an input producer.`, evidence: evidenceParts });
     } else {
-      rejectedCandidates.push({ item, reason: `No explicit producer/consumer relationship to the verified ${loopNames.join(' / ')} loop is present in the supplied evidence.`, evidence: evidenceParts });
+      rejectedCandidates.push({ item, reason: `No explicit producer/consumer relationship to the ${loopNames.join(' / ')} loop is present in the supplied data.`, evidence: evidenceParts });
     }
   }
 
