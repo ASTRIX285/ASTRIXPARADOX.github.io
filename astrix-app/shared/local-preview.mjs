@@ -1,9 +1,11 @@
-// Preview is an explicit, local-only page opt-in. No storage or auth state is used.
+// Preview is an explicit page opt-in on localhost and Cloudflare quick tunnel hosts only. No storage or auth state is used.
+const TUNNEL_HOST=/^(?:[a-z0-9-]+\.)+trycloudflare\.com$/;
+function isPreviewHost(hostname){return ['localhost','127.0.0.1'].includes(hostname)||TUNNEL_HOST.test(hostname);}
 export function isLocalPreview(location=globalThis.location){
   try{
     const url=new URL(location.href);
     return ['http:','https:'].includes(url.protocol)
-      && ['localhost','127.0.0.1'].includes(url.hostname)
+      && isPreviewHost(url.hostname)
       && url.searchParams.has('preview');
   }catch{return false;}
 }

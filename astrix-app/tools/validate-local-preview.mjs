@@ -3,12 +3,12 @@ import {readFile} from 'node:fs/promises';
 import {isLocalPreview,isJourneyPreview,startPage} from '../shared/local-preview.mjs';
 import {createJourneyPreviewPayload} from '../pages/journey/journey-preview.mjs';
 const href=(host,query='?preview')=>({href:`http://${host}/astrix-app/pages/journey/${query}`});
-const denied=['astrixparadox.com','auth.astrixparadox.com','sandbox.astrixparadox.com','astrix285.github.io','example.com','localhost.example.com','127.0.0.1.example.com','localhost@evil.example','[::1]','192.168.1.10'];
+const denied=['astrixparadox.com','auth.astrixparadox.com','sandbox.astrixparadox.com','astrix285.github.io','example.com','localhost.example.com','127.0.0.1.example.com','localhost@evil.example','[::1]','192.168.1.10','trycloudflare.com','trycloudflare.com.evil.example','evil-trycloudflare.com','trycloudflare.com@evil.example','quick-tunnel.trycloudflare.com.evil.example','quick-tunnel.trycloudflare.co','quick-tunnel.trycloudflare.com.'];
 for(const host of denied)for(const query of ['?preview','?preview=1','?preview=false','?preview&host=localhost']){
  const location=href(host,query);assert.equal(isLocalPreview(location),false,location.href);assert.equal(createJourneyPreviewPayload(location),null);
 }
 for(const location of [{},{href:'bad URL'},{href:'file:///astrix-app/pages/journey/?preview'},href('localhost',''),href('localhost','?Preview'),href('127.0.0.1','?x=preview')])assert.equal(isLocalPreview(location),false);
-for(const host of ['localhost','localhost:8080','127.0.0.1','127.0.0.1:3000']){
+for(const host of ['localhost','localhost:8080','127.0.0.1','127.0.0.1:3000','random-words-here.trycloudflare.com','random-words-here.trycloudflare.com:443','a.b.trycloudflare.com']){
  const location=href(host);assert.equal(isLocalPreview(location),true);assert.equal(isJourneyPreview(location),true);
  const data=createJourneyPreviewPayload(location);assert.equal(data.preview,true);assert.equal(data.displayName,'Sample Guardian');assert.equal(data.characters.length,3);
  assert.ok(data.characters.every(row=>row.name.startsWith('Sample ')&&row.characterId.startsWith('sample-')&&row.power===1000));
@@ -41,4 +41,4 @@ const sample=await readFile(new URL('../pages/journey/journey-preview.mjs',impor
 assert.match(sample,/const payload=createJourneyPreviewPayload\(\);if\(!payload\)return false;/);
 assert.match(sample,/badge.textContent='PREVIEW DATA'/);
 assert.doesNotMatch(sample,/fetch\(|localStorage|sessionStorage|FORGE_BUNGIE_SESSION|loadPreparedPagePayload|getBungieSession/,'Sample data cannot use live loaders, sessions or storage');
-console.log('LOCAL_PREVIEW=PASS localhost allowlist, production rejection, gated imports, fixture isolation');
+console.log('LOCAL_PREVIEW=PASS localhost and trycloudflare.com allowlist, production rejection, gated imports, fixture isolation');
