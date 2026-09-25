@@ -172,13 +172,24 @@ try{
   await minimalToast(page,'Hunter');
   assert.equal(await page.locator('.vault-transfer-toast').getAttribute('data-progress'),'0');
   test.releaseStep(1);await page.waitForFunction(()=>document.querySelector('.vault-transfer-toast').dataset.progress==='0.5');
-  await page.waitForTimeout(250);
+  await page.waitForFunction(()=>{
+   const node=document.querySelector('.vault-transfer-toast-fill');
+   if(!node)return false;
+   const fill=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();
+   return Math.abs(fill.width-(toast.width-2)/2)<=1&&Math.abs(fill.left-toast.left)<=1;
+  },null,{timeout:3000});
   const halfway=await page.locator('.vault-transfer-toast-fill').evaluate(node=>{const r=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();return {width:r.width,full:toast.width,left:r.left,toastLeft:toast.left};});
   assert.ok(Math.abs(halfway.width-(halfway.full-2)/2)<=1,'First accepted call fills exactly half the toast');assert.ok(Math.abs(halfway.left-halfway.toastLeft)<=1,'Fill starts at the left edge');
   assert.equal(test.requests.length,2,'Second call waits after the first succeeds');
   test.releaseStep(2);await page.waitForSelector('.vault-transfer-toast.is-success');await count(page,hunter+' '+tile,1);
   assert.equal(await page.locator('.vault-transfer-toast').getAttribute('data-progress'),'1');
-  await page.waitForTimeout(250);assert.ok(await page.locator('.vault-transfer-toast-fill').evaluate(node=>Math.abs(node.getBoundingClientRect().width-(node.parentElement.getBoundingClientRect().width-2))<=1),'Success fills the entire toast');
+  await page.waitForFunction(()=>{
+   const node=document.querySelector('.vault-transfer-toast-fill');
+   if(!node)return false;
+   const fill=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();
+   return Math.abs(fill.width-(toast.width-2))<=1&&Math.abs(fill.left-toast.left)<=1;
+  },null,{timeout:3000});
+  assert.ok(await page.locator('.vault-transfer-toast-fill').evaluate(node=>Math.abs(node.getBoundingClientRect().width-(node.parentElement.getBoundingClientRect().width-2))<=1),'Success fills the entire toast');
   assert.deepEqual(test.requests.map(({characterId,transferToVault})=>({characterId,transferToVault})),[{characterId:'1',transferToVault:true},{characterId:'2',transferToVault:false}]);
   assert.deepEqual(test.errors,[]);await page.close();
  }
