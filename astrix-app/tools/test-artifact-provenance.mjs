@@ -1,3 +1,4 @@
+// Prompt 19: retain strict assertions with the new plain-language copy and resource tags.
 import assert from 'node:assert/strict';
 import {resolveArtifactByProvenance,createArtifactConfiguration} from '../pages/guardian-workspace-v2/guardian-artifact-provenance.mjs';
 import {createBuildState} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
@@ -61,7 +62,7 @@ const incompleteActivation=resolveArtifactByProvenance(incompleteActivationPaylo
 assert.equal(incompleteActivation.state,'state-unavailable');
 assert.equal(incompleteActivation.activePerks,null,'missing isActive evidence must not become zero active perks');
 assert.equal(incompleteActivation.artifactConfiguration.selectedPerkHashes,null);
-assert.match(incompleteActivation.stateMessage,/incomplete Artifact tier activation evidence/);
+assert.match(incompleteActivation.stateMessage,/incomplete Artifact tier activation data/);
 
 const incompleteVisibilityPayload=structuredClone(payload);
 delete incompleteVisibilityPayload.profile.characterProgressions.data['cid-live'].seasonalArtifact.tiers[0].items[0].isVisible;

@@ -177,7 +177,8 @@ try{
   const supported=transferPlans.createLiveTransferPlan({build,advice,capabilities:{captureSnapshot:true,transferItems:true,equipItems:true,verifyEquipment:true,insertSocketPlugFree:true,verifyFinalState:true}});
   if(!supported.ready||supported.executionPolicy!=='fresh-read-activity-check-transfer-equip-verify-weapon-sockets-armour-mods-final-readback'||supported.socketChanges.length!==1)fail('G3e: complete route support did not produce a ready exact-item plan');
   const compatibleOnly=transferPlans.createLiveTransferPlan({build,advice:{stagedChanges:[{...advice.stagedChanges[0],source:'bungie-profile-plug-set',remoteInsertEvidence:'compatible-plug-set',remoteSupported:false}]},capabilities:{captureSnapshot:true,transferItems:true,equipItems:true,verifyEquipment:true,insertSocketPlugFree:true,verifyFinalState:true}});
-  if(!compatibleOnly.ready||compatibleOnly.socketChanges.length||!compatibleOnly.inGameSteps.some(row=>row.includes('not verified as a free remote insertion')))fail('G3e: compatible-only plug-set evidence was not preserved as an explicit in-game step');
+  // Prompt 19: retain the exact unsupported-operation check with the new copy.
+  if(!compatibleOnly.ready||compatibleOnly.socketChanges.length||!compatibleOnly.inGameSteps.some(row=>row.includes('unavailable as a free remote insertion')))fail('G3e: compatible-only plug-set evidence was not preserved as an explicit in-game step');
 }catch(error){fail(`G3e threw: ${error.message}`);}
 
 // G4 — Stat threshold is above 100, not merely at 100.

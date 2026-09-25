@@ -34,7 +34,8 @@ assert.deepEqual(rollAdviceInputs,[weaponInstanceIds],'Perk advice must run on t
 assert.equal(alternativeGenerated.patch.artifactRecommendation.selectionStatus,'ready');
 assert.equal(alternativeGenerated.patch.armourModRecommendation.validation.ready,true);
 assert.equal(alternativeGenerated.patch.liveTransferPreflight.ready,true,'The recomputed alternative must pass the same complete Apply preflight.');
-await assert.rejects(prepareForgeSequence({build:comboBuild,candidate:nothingManaclesCandidate,...variant,weaponInstanceIds:['missing',...weaponInstanceIds.slice(1)]},{advise:async()=>{}}),/complete owned weapon instances/);
+// Prompt 19: keep the missing-instance rejection, using the new visible error.
+await assert.rejects(prepareForgeSequence({build:comboBuild,candidate:nothingManaclesCandidate,...variant,weaponInstanceIds:['missing',...weaponInstanceIds.slice(1)]},{advise:async()=>{}}),/complete weapon instances/);
 const reviewOnlyResult=await prepareForgeSequence({build:{...build,membershipId:''},candidate:nothingManaclesCandidate,...variant,currentSeasonNumber:31},{advise:async()=>{}});
 assert.ok(reviewOnlyResult.patch.recommendationGeneratedAt,'A coherent generated build must remain reviewable when Apply is unavailable.');
 assert.equal(reviewOnlyResult.patch.liveTransferPreflight.ready,false,'Apply preflight blockers must be retained as review information.');
@@ -63,7 +64,8 @@ assert.equal(directResult.patch.subclassBuild.grenade.hash,114,'The existing Exo
 assert.equal(directResult.recommendation.source,'verified-owned-instance-working-build');
 assert.equal(JSON.stringify(directBuild),directBefore,'Direct generation cannot mutate the original inventory.');
 await assert.rejects(prepareForgeSequence({build:{...directBuild,forgeLoaderDecision:{...build.forgeLoaderDecision,ranking:{maximized:true}}},candidate:nothingManaclesCandidate,...variant}),/T5/,'The optional Forge Loader path retains its Tier 5 check.');
-await assert.rejects(prepareForgeSequence({build:{...directBuild,armour:directBuild.armour.map(item=>({...item,isExotic:false}))},candidate:nothingManaclesCandidate,...variant}),/owned Exotic/);
+// Prompt 19: assert the full replacement message for the same missing-Exotic gate.
+await assert.rejects(prepareForgeSequence({build:{...directBuild,armour:directBuild.armour.map(item=>({...item,isExotic:false}))},candidate:nothingManaclesCandidate,...variant}),/Choose one Exotic armour piece before generation\./);
 await assert.rejects(prepareForgeSequence({build:directBuild,candidate:{...nothingManaclesCandidate,subclassBuild:{...nothingManaclesCandidate.subclassBuild,socketCoverage:{complete:false}}},...variant}),/subclass/);
 const overBudget=structuredClone(directBuild);overBudget.armour[0].generalMods=[{name:'Over budget',energyCost:6}];
 await assert.rejects(prepareForgeSequence({build:overBudget,candidate:nothingManaclesCandidate,...variant}),/energy/);

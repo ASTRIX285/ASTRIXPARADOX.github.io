@@ -120,7 +120,7 @@ export function initLocationSelector(opts = {}) {
           return `<div class="apx-loc-item ${done ? 'is-done' : ''}"><span class="tick">${done ? '✓' : ''}</span><strong>${escapeHtml(nm)}</strong><span class="where">${escapeHtml(where)}</span></div>`;
         }).join('')).join('');
     } else {
-      html += `<span class="apx-empty-state">Awaiting verified progression for ${escapeHtml(band)}. Connect the activity-history route to populate this checklist.</span>`;
+      html += `<span class="apx-empty-state">Awaiting progression for ${escapeHtml(band)}. Connect the activity-history route to populate this checklist.</span>`;
     }
     detail.innerHTML = html;
   }

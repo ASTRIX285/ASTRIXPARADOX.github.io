@@ -75,6 +75,17 @@ const [{loadBetaFixture},{analyzeGuardianBuild}]=await Promise.all([
   import(ENGINE_URL.href)
 ]);
 
+// Prompt 19 all-page regression: main's old single-definition HTTP mock no longer
+// feeds the prepared-payload manifest service. Seed the same fixture definitions;
+// keep every subclass, direction and full-fixture regression assertion unchanged.
+const {guardianManifest}=await import(new URL('pages/guardian-workspace-v2/guardian-manifest-service.mjs',ROOT));
+const definitions=Object.fromEntries([...new Set([...Object.keys(manifestLibrary.inventoryItems??{}),...identityByHash.keys()])].map(hash=>{
+  const cached=manifestLibrary.inventoryItems?.[hash]??null,identity=identityByHash.get(hash)??null;
+  const display=cached?.display||{name:identity?.name??identity?.displayName??'',description:identity?.description??'',icon:identity?.icon??''};
+  return [hash,{...cached,hash:Number(hash),itemType:cached?.itemType,displayProperties:display}];
+}));
+guardianManifest.seedPayload({definitions});
+
 const detail=await loadBetaFixture('PF-BETA-04');
 const aspectRows=detail.aspects.map(row=>({hash:Number(row.hash),name:row.name,description:row.description,traitIds:row.traitIds??row.official?.traitIds??[]}));
 assert.ok(aspectRows.some(row=>row.hash===4194622037&&row.name==='Tempest Strike'),'Tempest Strike must resolve from PF-BETA-04 socketOverrides');
