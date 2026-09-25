@@ -1,8 +1,8 @@
-import {SERIES,viewModel,display,duration} from './reports-model.mjs?v=20260925-reports-2';
+import {SERIES,viewModel,display,duration} from './reports-model.mjs?v=20260925-reports-3';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const art=activity=>`<div class="reports-art">${activity.image?`<img src="${escape(activity.image)}" alt="" width="320" height="180">`:''}<h2>${escape(activity.name)}</h2></div>`;
 const statList=(totals,keys)=>`<dl class="reports-stats">${keys.map(([key,label])=>`<div><dt>${label}</dt><dd>${key==='time'?duration(totals[key]):display(totals[key])}</dd></div>`).join('')}</dl>`;
-const band=activity=>`<div class="reports-band-head"><span>Difficulty</span><span>Cleared</span><span>Fastest</span></div>${activity.difficulties.map(row=>`<div class="reports-band-row"><span>${escape(row.difficulty)}</span><span>${row.cleared?display(row.cleared):'-'}</span><span>${duration(row.fastest)}</span></div>`).join('')}`;
+const band=activity=>`<div class="reports-band-head"><span>Difficulty</span><span>Cleared</span><span>Fastest</span></div>${activity.difficulties.map(row=>`<div class="reports-band-row${activity.name==='The Pantheon'?' reports-encounter-row':''}"><span>${escape(row.difficulty)}</span><span>${row.cleared?display(row.cleared):'-'}</span><span>${duration(row.fastest)}</span></div>`).join('')}`;
 const details=activity=>`${statList(activity.totals,[['entered','Entered'],['cleared','Cleared'],['score','Best Score'],['kills','Kills']])}<table><thead><tr><th>Difficulty</th><th>Cleared</th><th>Fastest</th><th>Score</th></tr></thead><tbody>${activity.difficulties.map(row=>`<tr><th scope="row">${escape(row.difficulty)}</th><td>${row.cleared?display(row.cleared):'-'}</td><td>${duration(row.fastest)}</td><td>${display(row.score)}</td></tr>`).join('')}</tbody></table>`;
 export function mountReports(root,snapshot){
   let selectedSeries='raids',character='all',selectedActivity=null;

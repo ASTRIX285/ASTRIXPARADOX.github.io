@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {fixture,definitions} from './fixtures/reports-fixture.mjs';
-import {aggregateRow,viewModel,catalogue,bungieImage,variantIdentity,slimCatalogue} from '../pages/reports/reports-model.mjs';
+import {SERIES,aggregateRow,viewModel,catalogue,bungieImage,variantIdentity,slimCatalogue} from '../pages/reports/reports-model.mjs';
 import {createReportsLoader,createReportsStore} from '../pages/reports/reports-data.mjs';
 const all=viewModel(fixture,'raids');
 assert.deepEqual(all.totals,{entered:12,cleared:8,kills:370,deaths:37,time:12000,fastest:700,score:125,flawless:null});
@@ -24,14 +24,14 @@ assert.equal(bungieImage('/img/a.jpg'),'https://www.bungie.net/img/a.jpg');
 const session={authenticated:true,activeDestinyMembership:{membershipType:3,membershipId:'123'}};
 let calls=[],warmed=0,throttled=false;const waits=[];
 const store=createReportsStore(null);
-const loader=createReportsLoader({store,now:()=>1000,warmImages:async rows=>{warmed++;assert.equal(rows.length,4);},sleep:async ms=>waits.push(ms),fetchImpl:async (input,options)=>{
+const loader=createReportsLoader({store,now:()=>1000,warmImages:async rows=>{warmed++;assert.equal(rows.length,8); /* Prompt 20a-fix2: four additional series fixtures. */},sleep:async ms=>waits.push(ms),fetchImpl:async (input,options)=>{
   const url=new URL(input);calls.push(url);
   // Prompt 20a-fix: preserve the public credential assertion at the slim boundary.
   assert.notEqual(url.hostname,'www.bungie.net','Browser never downloads full definitions');
   assert.notEqual(url.pathname,'/bungie/manifest','Browser requests only the slim catalogue');
   if(url.pathname==='/bungie/reports/catalogue'){
     assert.equal(options.credentials,'omit');
-    return Response.json({schema:'2-fixture',version:'fixture-1',activities:fixture.catalogue.flatMap(group=>group.variants.map(row=>({...row,name:group.name,series:group.series,pgcrImage:group.image,releaseOrder:group.releaseTime})))});
+    return Response.json({schema:'3-fixture',version:'fixture-1',activities:fixture.catalogue.flatMap(group=>group.variants.map(row=>({...row,name:group.name,series:group.series,pgcrImage:group.image,releaseOrder:group.releaseTime})))});
   }
   if(url.searchParams.get('kind')==='profile')return Response.json({ErrorCode:1,Response:{characters:{data:Object.fromEntries(fixture.characters.map(row=>[row.characterId,row]))},characterProgressions:{data:{1:{milestones:{}}}},profileRecords:{data:{records:{5:{state:0}}}}}});
   const id=url.searchParams.get('characterId');
@@ -59,3 +59,15 @@ assert.equal(loaded.catalogue.filter(row=>row.series==='raids')[0].name,'New Rai
 const alphabetic=slimCatalogue([{hash:'1',name:'Zulu',series:'story',difficulty:'-',releaseOrder:99},{hash:'2',name:'Alpha',series:'story',difficulty:'-',releaseOrder:1}]);
 assert.deepEqual(alphabetic.map(row=>row.name),['Alpha','Zulu'],'Other series sort by name');
 console.log('REPORTS_DATA=PASS');
+
+// Prompt 20a-fix2: every series has a non-empty fixture and stable base labels.
+for(const series of SERIES)assert.ok(fixture.catalogue.some(row=>row.series===series.id),series.id);
+for(const series of ['raids','dungeons','exotic']){
+  const rows=slimCatalogue([{hash:'1',name:'Known',series,difficulty:'Normal',releaseOrder:99},{hash:'2',name:'New',series,difficulty:'-',releaseOrder:null}]);
+  assert.equal(rows[0].name,'New');
+}
+for(const series of ['raids','vanguard']){
+  const rows=slimCatalogue([{hash:'1',name:'Mixed',series,difficulty:'Master',releaseOrder:1},{hash:'2',name:'Mixed',series,difficulty:'-',releaseOrder:1},{hash:'3',name:'Unknown',series,difficulty:'-',releaseOrder:1}]);
+  assert.deepEqual(rows.find(row=>row.name==='Mixed').variants.map(row=>row.difficulty),['Master',series==='vanguard'?'Standard':'Normal']);
+  assert.equal(rows.find(row=>row.name==='Unknown').variants[0].difficulty,'-');
+}

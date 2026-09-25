@@ -10,16 +10,21 @@ export interface ReportsActivity {
   pgcrImage: string; releaseOrder: number | null;
 }
 export interface ReportsManifest { version?: string; jsonWorldComponentContentPaths?: { en?: Record<string, string> } }
-export const REPORTS_SCHEMA = `2-${RELEASE_ORDER_VERSION}`;
-const difficulties = ['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode','Explorer','Eternity','Ultimatum'];
+export const REPORTS_SCHEMA = `3-${RELEASE_ORDER_VERSION}`;
+const difficulties = ['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode','Explorer','Eternity','Ultimatum','Epic'];
 const difficultyPattern = difficulties.join('|');
 const suffix = new RegExp(`(?::\\s*|\\s*\\()(${difficultyPattern})\\)?$`, 'i');
 export function activityIdentity(def: ActivityDefinition): {name: string; difficulty: string} {
   const displayed = (def.displayProperties?.name || def.originalDisplayProperties?.name || '').trim();
   let name = displayed.replace(/\s*\(Matchmade\)$/i, '');
   const match = name.match(suffix);
-  const difficulty = /^Nightfall Grandmaster:/i.test(displayed) ? 'Grandmaster' : match ? difficulties.find(value => value.toLowerCase() === match[1].toLowerCase())! : '-';
+  let difficulty = /^Nightfall Grandmaster:/i.test(displayed) ? 'Grandmaster' : match ? difficulties.find(value => value.toLowerCase() === match[1].toLowerCase())! : '-';
   name = name.replace(/^(?:Nightfall(?: Grandmaster)?|(?:Grandmaster|Master) Conquest):\s*/i, '').replace(suffix, '').replace(/: Level \d+$/i, '').replace(/: (?:Customize|Matchmade)$/i, '').trim();
+  // Prompt 20a-fix2: Epic belongs to the base raid, including Epic: Contest.
+  if (/\s*\(Epic\)$/i.test(name)) { name = name.replace(/\s*\(Epic\)$/i, ''); difficulty = 'Epic'; }
+  const pantheon = name.match(/^(?:The )?Pantheon:\s*(.+)$/i);
+  const featured = name.match(/^Featured (?:Encore|Reprise):\s*(.+?):\s*(?:The Pantheon|Atraks Sovereign)$/i);
+  if (pantheon || featured) return {name: 'The Pantheon', difficulty: (pantheon || featured)![1]};
   return {name, difficulty};
 }
 function seriesFor(def: ActivityDefinition): string | null {
@@ -39,7 +44,7 @@ export function validateReleaseCoverage(activities: ReportsActivity[]): void {
     if (row.releaseOrder !== releaseOrder(row.series, row.name)) throw new Error(`Reports release order mismatch: ${row.name}`);
   }
 }
-export function buildReportsCatalogue(definitions: Record<string, ActivityDefinition>, version: string) {
+export function buildReportsCatalogue(definitions: Record<string, ActivityDefinition>, version: string, logMissing: (message: string) => void = console.warn) {
   const values = Object.values(definitions);
   const lostSectors = new Set(values.filter(def => def.activityModeTypes?.includes(87)).map(def => activityIdentity(def).name));
   const activities: ReportsActivity[] = [];
@@ -51,8 +56,18 @@ export function buildReportsCatalogue(definitions: Record<string, ActivityDefini
     const pgcrImage = def.pgcrImage?.startsWith('/img/') ? def.pgcrImage : '';
     activities.push({hash: String(def.hash), name, series, difficulty, pgcrImage, releaseOrder: releaseOrder(series, name)});
   }
-  validateReleaseCoverage(activities);
-  activities.sort((a,b) => a.series.localeCompare(b.series) || (b.releaseOrder || 0) - (a.releaseOrder || 0) || a.name.localeCompare(b.name) || a.hash.localeCompare(b.hash));
+  // Prompt 20a-fix2: CI is strict; a new live activity cannot break Reports.
+  // Dedupe within this version's build; edge-cache hits do not rebuild or log.
+  const reported = new Set<string>(), labelled = new Set<string>();
+  for (const row of activities) {
+    const key = `${row.series}:${row.name}`;
+    if (row.difficulty !== '-') labelled.add(key);
+    if (['raids','dungeons','exotic'].includes(row.series) && row.releaseOrder === null && !reported.has(key)) {
+      reported.add(key); logMissing(`Missing Reports release order: ${key}`);
+    }
+  }
+  for (const row of activities) if (row.difficulty === '-' && labelled.has(`${row.series}:${row.name}`)) row.difficulty = row.series === 'vanguard' ? 'Standard' : 'Normal';
+  activities.sort((a,b) => a.series.localeCompare(b.series) || (['raids','dungeons','exotic'].includes(a.series) ? (b.releaseOrder ?? Number.MAX_SAFE_INTEGER) - (a.releaseOrder ?? Number.MAX_SAFE_INTEGER) : 0) || a.name.localeCompare(b.name) || a.hash.localeCompare(b.hash));
   return {schema: REPORTS_SCHEMA, version, activities};
 }
 async function boundedDefinitions(response: Response): Promise<Record<string, ActivityDefinition>> {

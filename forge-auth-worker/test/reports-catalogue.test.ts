@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {activityIdentity,buildReportsCatalogue,reportsCatalogue,REPORTS_SCHEMA} from '../src/reports-catalogue.ts';
+import {activityIdentity,buildReportsCatalogue,reportsCatalogue,REPORTS_SCHEMA,validateReleaseCoverage} from '../src/reports-catalogue.ts';
 const definitions = {
   1:{hash:1,displayProperties:{name:'Last Wish: Normal'},activityModeTypes:[4],pgcrImage:'/img/raid.jpg'},
   2:{hash:2,displayProperties:{name:'Last Wish: Master'},activityModeTypes:[4]},
@@ -27,7 +27,14 @@ test('slim rows retain variants and current type hashes, strip unrelated data, u
   assert.equal(buildReportsCatalogue({1:{...definitions[1],redacted:true}},'fixture').activities.length,0);
   assert.equal(buildReportsCatalogue({1:{...definitions[1],isPlaylist:true}},'fixture').activities.length,0);
   assert.equal(buildReportsCatalogue({1:{...definitions[1],pgcrImage:'https://example.org/image.png'}},'fixture').activities[0].pgcrImage,'');
-  for(const activityModeTypes of [[4],[82]])assert.throws(()=>buildReportsCatalogue({1:{hash:1,displayProperties:{name:'Missing release'},activityModeTypes}},'fixture'),/Missing Reports release order/);
+  // Prompt 20a-fix2 moves the strict assertion to CI; runtime must remain usable.
+  for(const activityModeTypes of [[4],[82]]){
+    const messages:string[]=[];
+    const result=buildReportsCatalogue({1:{hash:1,displayProperties:{name:'Missing release'},activityModeTypes}},'fixture',message=>messages.push(message));
+    assert.equal(result.activities.length,1);
+    assert.equal(messages.length,1);
+    assert.throws(()=>validateReleaseCoverage(result.activities),/Missing Reports release order/);
+  }
 });
 test('edge catalogue is keyed by manifest version, public and contains no player data',async()=>{
   const cache=memoryCache();let fetches=0;
@@ -52,4 +59,32 @@ test('invalid paths, failed upstreams and oversized bodies never enter cache',as
   let sent=0;
   await assert.rejects(reportsCatalogue(request,manifest,cache,async()=>new Response(new ReadableStream({pull(controller){controller.enqueue(new Uint8Array(1024*1024));if(++sent===25)controller.close();}}))),/too large/);
   assert.equal(cache.rows.size,0);
+});
+
+test('Pantheon encounters and Epic hashes group without losing any variant',()=>{
+  const names=['The Pantheon: Atraks Sovereign','Pantheon: Calus Resplendent','Featured Encore: Morgeth: The Pantheon','Featured Reprise: Argos: The Pantheon','The Desert Perpetual (Epic): Standard','The Desert Perpetual (Epic): Contest','The Desert Perpetual: Standard'];
+  const input=Object.fromEntries(names.map((name,index)=>[index,{hash:index,displayProperties:{name},activityModeTypes:[4]}]));
+  const result=buildReportsCatalogue(input,'grouping');
+  assert.equal(result.activities.length,names.length);
+  assert.equal(new Set(result.activities.map(row=>row.hash)).size,names.length);
+  assert.deepEqual([...new Set(result.activities.map(row=>row.name))],['The Desert Perpetual','The Pantheon']);
+  assert.deepEqual(result.activities.filter(row=>row.name==='The Pantheon').map(row=>row.difficulty),['Atraks Sovereign','Calus Resplendent','Morgeth','Argos']);
+  assert.equal(result.activities.filter(row=>row.difficulty==='Epic').length,2);
+  validateReleaseCoverage(result.activities);
+});
+test('missing release entries sort first and log once per name, not per variant',()=>{
+  for(const [series,activityTypeHash] of [['raids',2043403989],['dungeons',608898761],['exotic',1227821118]] as const){
+    const messages:string[]=[];
+    const result=buildReportsCatalogue({...definitions,90:{hash:90,activityTypeHash,displayProperties:{name:'Unlisted: Normal'}},91:{hash:91,activityTypeHash,displayProperties:{name:'Unlisted: Master'}}},'unknown',message=>messages.push(message));
+    assert.deepEqual(messages,[`Missing Reports release order: ${series}:Unlisted`]);
+    assert.deepEqual(result.activities.filter(row=>row.series===series).slice(0,2).map(row=>row.hash),['90','91']);
+    assert.throws(()=>validateReleaseCoverage(result.activities),/Missing Reports release order/);
+  }
+});
+test('unlabelled variants fold into Normal or strike Standard only with labelled siblings',()=>{
+  const input={...definitions,7:{hash:7,displayProperties:{name:'Last Wish'},activityModeTypes:[4]},8:{hash:8,displayProperties:{name:'The Arms Dealer'},activityModeTypes:[3]},9:{hash:9,displayProperties:{name:'Deep Stone Crypt'},activityModeTypes:[4]}};
+  const rows=buildReportsCatalogue(input,'labels').activities;
+  assert.equal(rows.find(row=>row.hash==='7')?.difficulty,'Normal');
+  assert.equal(rows.find(row=>row.hash==='8')?.difficulty,'Standard');
+  assert.equal(rows.find(row=>row.hash==='9')?.difficulty,'-');
 });

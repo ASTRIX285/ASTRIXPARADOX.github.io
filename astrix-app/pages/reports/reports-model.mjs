@@ -7,7 +7,7 @@ export const SERIES=Object.freeze([
   {id:'exotic',name:'Exotic Missions',description:'Missions for Exotic rewards.'},
   {id:'story',name:'Story Missions',description:'Campaign missions and replays.'}
 ]);
-const DIFFICULTIES=['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode','Explorer','Eternity','Ultimatum'];
+const DIFFICULTIES=['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode','Explorer','Eternity','Ultimatum','Epic'];
 const EXOTIC=/^(?:\/\/node\.ovrd\.AVALON\/\/|Presage|Harbinger|The Whisper|Zero Hour|Vox Obscura|Operation: Seraph's Shield|Starcrossed|Encore|Kell's Fall|Derealize|Dual Destiny)(?::|$)/i;
 export function bungieImage(path){
   if(!path)return '';
@@ -61,7 +61,11 @@ export function slimCatalogue(activities){
     const group=groups.get(id);group.image ||= bungieImage(row.pgcrImage);
     group.variants.push({hash:String(row.hash),difficulty:row.difficulty});
   }
-  return [...groups.values()].sort((a,b)=>a.series.localeCompare(b.series)||(['raids','dungeons','exotic'].includes(a.series)?(b.releaseOrder||0)-(a.releaseOrder||0):0)||a.name.localeCompare(b.name));
+  // Prompt 20a-fix2: retain unknown labels only for entirely unlabelled activities.
+  for(const group of groups.values())if(group.variants.some(row=>row.difficulty!=='-')){
+    for(const row of group.variants)if(row.difficulty==='-')row.difficulty=group.series==='vanguard'?'Standard':'Normal';
+  }
+  return [...groups.values()].sort((a,b)=>a.series.localeCompare(b.series)||(['raids','dungeons','exotic'].includes(a.series)?(b.releaseOrder??Number.MAX_SAFE_INTEGER)-(a.releaseOrder??Number.MAX_SAFE_INTEGER):0)||a.name.localeCompare(b.name));
 }
 export const STAT_KEYS={entered:'activitiesEntered',cleared:'activityCompletions',kills:'activityKills',deaths:'activityDeaths',time:'activitySecondsPlayed',fastest:'fastestCompletionMsForActivity',score:'bestSingleGameScore'};
 export function stat(stats,key){const value=stats?.[key]?.basic?.value;return typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;}

@@ -1,9 +1,8 @@
 // Public content debut order, not manifest visibility dates or player activity.
 // Names identify Bungie activities; notes and ordering code are original.
-// Variants of a mission share its debut order. Featured Pantheon encounters share
-// their June 16, 2026 direct-launch release wave; later weekly rotations do not
-// reorder the catalogue. The two launch gauntlets precede the June 13 full gauntlet.
-export const RELEASE_ORDER_VERSION = '20260925-1';
+// Prompt 20a-fix2: a grouped activity retains its original public debut order.
+// Later Epic and Featured variants do not move the base box ahead of newer raids.
+export const RELEASE_ORDER_VERSION = '20260925-2';
 export const RELEASE_SOURCES = [
   'https://help.bungie.net/hc/en-us/articles/4408041224852-Years-of-Destiny',
   'https://www.bungie.net/7/en/News/Article/twid_09_25_2025',
@@ -19,19 +18,8 @@ export const RELEASE_ORDER: Readonly<Record<string, Readonly<Record<string, numb
     'Last Wish': 4, 'Scourge of the Past': 5, 'Crown of Sorrow': 6,
     'Garden of Salvation': 7, 'Deep Stone Crypt': 8, 'Vault of Glass': 9,
     'Vow of the Disciple': 10, "King's Fall": 11, 'Root of Nightmares': 12,
-    "Crota's End": 13, 'The Pantheon: Atraks Sovereign': 14,
-    'The Pantheon: Oryx Exalted': 15, 'The Pantheon: Rhulk Indomitable': 16,
-    'The Pantheon: Nezarec Sublime': 17, "Salvation's Edge": 18,
-    'The Desert Perpetual': 19, 'The Desert Perpetual (Epic)': 20,
-    'Pantheon: Calus Resplendent': 21, 'Pantheon: Morgeth Surpassing': 21,
-    'Pantheon: Insurrection Prime Revolutionary': 22,
-    'Featured Reprise: Argos: The Pantheon': 23,
-    'Featured Reprise: Calus: The Pantheon': 23,
-    'Featured Reprise: Gahlran: The Pantheon': 23,
-    'Featured Encore: Consecrated Mind: The Pantheon': 23,
-    'Featured Encore: Insurrection Prime: The Pantheon': 23,
-    'Featured Encore: Morgeth: The Pantheon': 23,
-    'Featured Encore: Warpriest: The Pantheon': 23
+    "Crota's End": 13, 'The Pantheon': 14, "Salvation's Edge": 18,
+    'The Desert Perpetual': 19
   },
   dungeons: {
     'The Shattered Throne': 1, 'Pit of Heresy': 2, 'Prophecy': 3,

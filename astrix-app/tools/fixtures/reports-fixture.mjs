@@ -7,7 +7,12 @@ export const definitions={
   102:definition(102,'New Raid: Normal',4,200),
   200:definition(200,'Fixture Dungeon: Standard',82),
   300:definition(300,'Fixture Strike',3),
-  301:definition(301,'Nightfall Grandmaster: Fixture Strike',46)
+  301:definition(301,'Nightfall Grandmaster: Fixture Strike',46),
+  // Prompt 20a-fix2: exercise every series with an actual visible card.
+  400:definition(400,'Fixture Conquest: Standard',2),
+  500:definition(500,'Fixture Sector: Legend',87),
+  600:{...definition(600,'Fixture Exotic: Normal',2),activityTypeHash:1227821118},
+  700:definition(700,'Fixture Story: Normal',2)
 };
 const row=(hash,entered,cleared,kills,deaths,time,fastest,score)=>({activityHash:hash,values:Object.fromEntries(Object.entries({activitiesEntered:entered,activityCompletions:cleared,activityKills:kills,activityDeaths:deaths,activitySecondsPlayed:time,fastestCompletionMsForActivity:fastest*1000,bestSingleGameScore:score}).map(([key,value])=>[key,{basic:{value}}]))});
 export const fixture={

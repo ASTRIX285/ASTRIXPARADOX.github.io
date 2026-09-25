@@ -65,7 +65,7 @@
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
     if(destination.key==='reports'){
-      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-2',scriptUrl).href);
+      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-3',scriptUrl).href);
       await preloadReports(session);return;
     }
     const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1',scriptUrl).href);
@@ -165,7 +165,7 @@
 
   function warmReports(session){
     if(!session?.authenticated)return;
-    void import(new URL('./reports-preload.mjs?v=20260925-reports-2',scriptUrl).href)
+    void import(new URL('./reports-preload.mjs?v=20260925-reports-3',scriptUrl).href)
       .then(module=>module.preloadReports(session)).catch(()=>{});
   }
   window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
