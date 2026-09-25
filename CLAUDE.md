@@ -17,7 +17,7 @@ Static site, vanilla HTML/CSS/JS. GitHub Pages deploys from `main`. `main` is th
 
 ## Files to leave alone
 - Only edit files under the repo root `astrix-app/` etc. There is a nested duplicate folder `ASTRIX285.github.io/` inside the repo. Never edit it; flag it if a task seems to need it.
-- Never touch an untracked `astrix-worker/` folder if one appears. It is a local leftover.
+- Never touch any untracked leftover worker folder from before the Forge rename if one appears locally. Move it to a backup outside the repo, never commit or delete it.
 - Don't rename or move `astrix-app/`. Its folder path is a live URL path.
 - `guardian-adaptive-layout.css` is the only file that sets the top-level `.workspace` grid columns.
 
