@@ -40,9 +40,9 @@ const placeholderMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/a
 const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp`);
 
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
-// PR #272 (381a8e2) added maps; #273 (b913547) and #274 (8988fb2) refreshed their entries.
-assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2"'),'Journey must load the contained emblem and compact stats without stale page CSS');
-assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
+// Prompt 24: retain exact resource checks with the marker/readability cache tag.
+assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24"'),'Journey must load the contained emblem and compact stats without stale page CSS');
+assert.ok(html.includes('src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;markers=20260925-24"'),'Journey must load the backend workspace preload runtime and current selected-Guardian emblem binding');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -232,7 +232,7 @@ assert.ok(journey.includes("mount:document.getElementById('journeyLocationSelect
 assert.ok(journey.includes("detail:document.getElementById('journeyLocationDetail')"),'Journey detail mount must remain unchanged');
 assert.ok(journey.includes('const session=await getBungieSession();'),'Journey authentication must remain unchanged');
 // PR #272 (381a8e2) replaced placeholders with destination maps; #274 (8988fb2) refreshed the registry.
-assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3'"),'Journey must load its current versioned page-owned destination data registry');
+assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&markers=20260925-24'"),'Journey must load its current versioned page-owned destination data registry');
 assert.ok(journey.includes('initJourneyLocationMaps('),'Journey must initialise its page-owned interactive map layer');
 assert.ok(mapModule.includes('src:`./assets/maps/${key}-director-map-4k.webp`'),'Journey must mount the selected destination 4K Director map');
 assert.ok(mapModule.includes('detailSrc:`./assets/maps/${key}-director-map-6k.webp`'),'Journey must provide the selected destination 6K Director map for zoom');
@@ -330,7 +330,7 @@ assert.match(css,/@media \(min-width:981px\)\{[\s\S]*?\.journey-page \[data-forg
 assert.match(css,/\.journey-page \.apx-destination-ribbon a:hover,[\s\S]*?border-color:rgba\(201,168,76,\.68\);[\s\S]*?box-shadow:/,'Journey ribbon must provide the approved block hover state');
 assert.match(css,/\.journey-map-stage\{[\s\S]*?position:absolute;[\s\S]*?transform-origin:center;/,'Map image and markers must share one anchored stage');
 assert.match(css,/\.journey-map-marker\{[\s\S]*?transform:translate\(-50%,-50%\) scale\(var\(--journey-marker-scale\)\);/,'Static activity markers must remain anchored and legible while zooming');
-assert.match(css,/\.journey-region-chests\{[\s\S]*?position:absolute;[\s\S]*?top:18px;[\s\S]*?left:18px;[\s\S]*?width:35%;[\s\S]*?background:rgba\(4,6,7,\.05\);[\s\S]*?pointer-events:auto;/,'Regional chest progress must retain its approved interactive top-left overlay with 95 percent transparency');
+assert.match(css,/\.journey-region-chests\{[\s\S]*?position:absolute;[\s\S]*?top:18px;[\s\S]*?left:18px;[\s\S]*?width:35%;[\s\S]*?background:var\(--apx-colour-panel\);[\s\S]*?pointer-events:auto;/,'Prompt 24: chest progress retains top-left interactive geometry and uses an opaque panel for text contrast');
 assert.doesNotMatch(css,/body\.journey-page[^}]*transform\s*:\s*scale\(|\.apx-page-shell[^}]*position\s*:\s*absolute/,'Journey page layout must remain in document flow without transform scaling');
 
 console.log('JOURNEY_2560_NATIVE_SCALE=PASS');

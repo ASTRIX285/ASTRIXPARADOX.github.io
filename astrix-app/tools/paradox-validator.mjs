@@ -26,6 +26,7 @@ const validators=[
   'validate-forge-loader.mjs',
   'test-forge-loader-residency.mjs',
   'validate-journey-visual-pass.mjs',
+  'test-journey-maps.mjs', // Prompt 24: marker and chest contrast contracts.
   'validate-public-deep-space.mjs',
   'validate-live-artifact-contract.mjs',
   'test-artifact-provenance.mjs',

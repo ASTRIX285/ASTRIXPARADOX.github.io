@@ -6,6 +6,11 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
   // Prompt 20a-hotfix: shared public Bungie definition fetch.
   'forge-auth-worker/src/bungie-definition-fetch.ts',
+  // Prompt 24: Journey marker fallbacks and chest readability coverage.
+  'astrix-app/pages/journey/journey-map-explorer.mjs',
+  'astrix-app/pages/journey/journey-map-model.mjs',
+  'astrix-app/tools/test-journey-map-browser.mjs',
+  'astrix-app/tools/test-journey-maps.mjs',
   // Prompt 22: seven-route ribbon appearance and Reports edge coverage.
   'astrix-app/tools/test-ribbon-buttons.mjs',
   'astrix-app/tools/validate-ribbon-buttons.mjs',

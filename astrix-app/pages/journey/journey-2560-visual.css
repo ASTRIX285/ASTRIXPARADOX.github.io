@@ -611,10 +611,11 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
   padding:20px;
   overflow:hidden;
   border:1px solid rgba(201,168,76,.62);
-  background:rgba(4,6,7,.05);
+  background:var(--apx-colour-panel);
   box-shadow:0 0 0 1px rgba(0,0,0,.58),0 12px 32px rgba(0,0,0,.34);
-  color:#f1eee6;
-  text-shadow:0 2px 4px #000,0 0 10px #000;
+  color:var(--apx-colour-text);
+  text-shadow:none;
+  filter:none;
   pointer-events:auto;
 }
 
@@ -644,13 +645,13 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 }
 
 .journey-region-chests-summary strong{
-  color:#f1eee6;
+  color:var(--apx-colour-text);
   font:700 2rem/1 bahnschrift-semicondensed,sans-serif;
 }
 
 .journey-region-chests-summary small{
   margin-top:5px;
-  color:rgba(241,238,230,.55);
+  color:var(--apx-colour-secondary);
   font:700 .75rem/1 bahnschrift-semicondensed,sans-serif;
   letter-spacing:.08em;
 }
@@ -678,30 +679,27 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
   min-width:0;
   padding:6px 0;
   border-bottom:1px solid rgba(255,255,255,.06);
-  color:rgba(241,238,230,.68);
+  color:var(--apx-colour-text);
   font:600 .8125rem/1.2 bahnschrift,sans-serif;
 }
 
 .journey-region-chest:last-child{border-bottom:0}
 
 .journey-region-chest-tick{
-  color:#50b986;
+  color:var(--apx-colour-success);
   font:800 1rem/1 bahnschrift-semicondensed,sans-serif;
   text-align:center;
 }
 
 .journey-region-chest-copy{display:flex;min-width:0;flex-direction:column;gap:2px}
 .journey-region-chest-copy b{font-weight:700}
-.journey-region-chest-copy small{color:rgba(241,238,230,.55);font-size:.75rem}
+.journey-region-chest-copy small{color:var(--apx-colour-secondary);font-size:.75rem}
 
-.journey-region-chest.is-missing .journey-region-chest-copy b,
-.journey-region-chest.is-missing .journey-region-chest-copy small{
-  background:linear-gradient(90deg,#a50f22,#cf4b31 48%,#c9a84c);
-  color:transparent;
-  font-weight:800;
-  -webkit-background-clip:text;
-  background-clip:text;
-}
+/* Prompt 24: status uses a symbol; names, numbers and sub-lines remain readable. */
+.journey-region-chests *{text-shadow:none;filter:none}
+.journey-region-chest-copy b{color:var(--apx-colour-text)}
+.journey-region-chest.is-missing .journey-region-chest-tick{color:var(--apx-colour-action)}
+.journey-region-chest.is-unknown .journey-region-chest-tick{color:var(--apx-colour-secondary)}
 
 .journey-map-stage{
   --journey-marker-scale:1;
@@ -1090,3 +1088,9 @@ button.journey-map-marker.has-no-icon:not(:focus-visible):not(.is-selected){outl
 .journey-page .journey-records-group.is-patterns-catalysts .journey-record-row:not(.has-no-icon){grid-template-columns:var(--apx-icon-catalog,44px) minmax(0,1fr)}
 .journey-page .journey-record-row.is-gear .journey-record-icon,
 .journey-page .journey-records-group.is-patterns-catalysts .journey-record-icon{width:var(--apx-icon-catalog,44px);height:var(--apx-icon-catalog,44px)}
+
+/* Original fallback symbols occupy the same box while Bungie artwork loads. */
+.journey-map-marker-icon{color:var(--apx-colour-focus)}
+.journey-map-marker-icon>*{grid-area:1/1}
+.journey-map-marker-icon>[hidden]{display:none}
+.journey-map-marker-glyph{padding:4px}
