@@ -165,7 +165,7 @@ assert.match(loadoutsCss,/background-image:var\(--loadout-color-image/,'Saved lo
 assert.match(loadoutsCss,/guardian-loadout-icon\{width:var\(--pf-mod-size,var\(--apx-icon-loadout\)\)/,'Loadout icon must consume the shared loadout tier while retaining the armour-mod override');
 assert.match(loadoutsModule,/data-bungie-icon-hash/,'Rendered loadouts must retain Bungie iconHash provenance');
 assert.match(loadoutsModule,/data-bungie-color-hash/,'Rendered loadouts must retain Bungie colorHash provenance');
-assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Build Forge link when JavaScript or storage fails');
+assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/" aria-label="Improve My Guardian">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Build Forge link when JavaScript or storage fails');
 assert.match(workspaceHtml,/guardian-workspace-v2-compact\.css\?v=20260829-build-cta-anchor-1/,'Main must load the native Build Forge link styling without stale button CSS');
 assert.match(await read('guardian-workspace-v2-compact.css'),/\.improve-cta\{[^}]*display:inline-flex;[^}]*text-decoration:none/,'The native Build Forge link must preserve the approved button presentation');
 assert.match(workspaceHtml,/paradox-build-space-handoff\.mjs\?v=20260916-equipped-source-1/,'Main must load the live-equipped Bungie-to-PARADOX handoff without stale code');

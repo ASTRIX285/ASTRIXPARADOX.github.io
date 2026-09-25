@@ -1,0 +1,78 @@
+/* Character only: stretch panel backgrounds without resizing inventory content. */
+@media (min-width:1200px){
+  html body.guardian-main-page .workspace>.equip{
+    display:flex!important;
+    flex-direction:column!important;
+    align-self:stretch!important;
+    align-items:stretch!important;
+  }
+  html body.guardian-main-page .workspace>.equip>.guardian-loadouts-container{flex:0 0 auto}
+  html body.guardian-main-page .workspace>.equip>.gear-combined{
+    flex:1 0 auto;
+    align-self:stretch!important;
+  }
+}
+
+/* Keep the bar in flow; reserve its full height below the page as well. */
+body.guardian-main-page{--character-actionbar-height:64px;padding-bottom:var(--character-actionbar-height)!important}
+html body.guardian-main-page>.actionbar{
+  position:static!important;
+  box-sizing:border-box!important;
+  height:var(--character-actionbar-height)!important;
+  min-height:var(--character-actionbar-height)!important;
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  padding:10px 16px!important;
+}
+html body.guardian-main-page>.actionbar>.grp{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin:0!important;
+  padding:0!important;
+  min-width:0;
+}
+html body.guardian-main-page>.actionbar :is(.ab-btn,.improve-cta){
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto;
+  width:auto!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:8px 12px!important;
+  font-family:bahnschrift-semicondensed,bahnschrift,sans-serif!important;
+  font-size:.78rem!important;
+  line-height:1.2!important;
+  letter-spacing:normal!important;
+  white-space:nowrap!important;
+  border-radius:8px!important;
+  transform:none!important;
+}
+html body.guardian-main-page>.actionbar .improve-cta{
+  background-image:none!important;
+  background-color:var(--apx-colour-action)!important;
+  box-shadow:none!important;
+}
+@media (max-width:767px){
+  body.guardian-main-page{--character-actionbar-height:calc(112px + env(safe-area-inset-bottom,0px))}
+  html body.guardian-main-page>.actionbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:40px 40px!important;
+    justify-items:center!important;
+    padding:10px 8px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body.guardian-main-page>.actionbar :is(.ab-btn,.improve-cta){padding-inline:8px!important}
+}
+@media (max-width:479px){
+  html body.guardian-main-page>.actionbar .improve-cta{font-size:0!important;gap:0!important;width:40px!important}
+  html body.guardian-main-page>.actionbar .improve-cta::before{content:'+';font-size:.78rem}
+}
