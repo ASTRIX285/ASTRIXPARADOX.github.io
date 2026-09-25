@@ -44,6 +44,11 @@ try{
       const plug=(hash)=>({hash,name:`Synthetic perk ${hash}`,icon:location.origin+'/img/logo.png'});
       const weapons=(fixture==='typical'?[5,6,6]:[6,7,8]).map((columns,slot)=>({itemHash:990000+slot,itemInstanceId:`fixture-${slot}`,name:`Synthetic weapon ${slot}`,icon:location.origin+'/img/logo.png',power:550,weaponSemantics:{perkModel:{expectedRowCount:5,columns:Array.from({length:columns},(_,i)=>({socketIndex:i,options:Array.from({length:1+(i+slot)%5},(_,j)=>plug(1000+slot*100+i*10+j))}))},masterwork:slot>0?plug(9000+slot*10+1):null,modSockets:Array.from({length:slot+1},(_,i)=>({...plug(9000+slot*10+i),name:['Weapon mod','Masterwork','Ornament'][i]}))}}));
       renderWeapons(weapons);
+      // Prompt 25: containment must work before the sizing helper runs.
+      for(const card of grid.querySelectorAll('.weap')){
+        const bounds=card.getBoundingClientRect(),art=card.querySelector('.art').getBoundingClientRect();
+        if(art.left<bounds.left||art.right>bounds.right)throw new Error('Weapon art exceeds card before sizing');
+      }
       if(!baseline){const {sizeBuildWeaponCards}=await import('/'+base+'build-weapon-card-layout.mjs');sizeBuildWeaponCards(grid);}
       await new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));
     },{shell,base,baseline,fixture});

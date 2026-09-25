@@ -292,6 +292,8 @@ html,body{
   margin-inline:auto;column-gap:12px!important;row-gap:8px!important;
 }
 .design-canvas .weapon-design-section .gear-weapons .weap{
+  /* Prompt 25: art plus two 8px pads and two 1px borders before sizing. */
+  min-width:calc(var(--gear-weapon-art) + 18px)!important;
   width:auto!important;max-width:none!important;min-height:0!important;
   padding:8px!important;
   grid-row:span 5;grid-template-columns:minmax(0,1fr)!important;
