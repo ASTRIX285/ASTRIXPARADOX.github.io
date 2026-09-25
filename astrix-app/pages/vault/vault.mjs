@@ -1,4 +1,4 @@
-import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1';
+import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2';
@@ -209,7 +209,7 @@ async function performPendingVaultAction(){
   if(progress)progress.textContent='Running fresh Bungie preflight. The moving item is awaiting confirmation.';
   let result=null;
   try{
-    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,label);setStatus(label);};
+    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,row);setStatus(label);};
     const onAccepted=async({liveInventory})=>{await refreshAfterLiveAction(liveInventory);setStatus('Transfer accepted by Bungie. The exact item has moved while final inventory verification continues.','good');};
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
