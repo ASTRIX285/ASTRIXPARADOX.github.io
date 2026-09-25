@@ -55,11 +55,30 @@ export function catalogue(definitions){
 // Prompt 20a-fix: production receives only the Worker projection, never full definitions.
 export function slimCatalogue(activities){
   const groups=new Map();
+  // Prompt 20c: only split a prefix that is a known complete activity in this series.
+  // A colon alone (for example Operation: Seraph's Shield) is not a grouping rule.
+  const names=new Map(SERIES.map(series=>[series.id,new Set(activities.filter(row=>row.series===series.id).map(row=>row.name))]));
   for(const row of activities){
-    const id=`${row.series}:${row.name.toLocaleLowerCase('en')}`;
-    if(!groups.has(id))groups.set(id,{id,series:row.series,name:row.name,image:bungieImage(row.pgcrImage),releaseOrder:row.releaseOrder,variants:[]});
-    const group=groups.get(id);group.image ||= bungieImage(row.pgcrImage);
-    group.variants.push({hash:String(row.hash),difficulty:row.difficulty});
+    const bases=[...(names.get(row.series)||[])].filter(name=>row.name.startsWith(`${name}: `)).sort((a,b)=>a.length-b.length);
+    const name=bases[0]||row.name,variant=name===row.name?'':row.name.slice(name.length+2);
+    const id=`${row.series}:${name.toLocaleLowerCase('en')}`;
+    if(!groups.has(id))groups.set(id,{id,series:row.series,name,image:'',imageCandidates:[],releaseOrder:row.releaseOrder,variants:[]});
+    const group=groups.get(id),image=bungieImage(row.pgcrImage);
+    if(image&&!group.imageCandidates.includes(image))group.imageCandidates.push(image);
+    // Use the base's public debut order when it is present, independent of input order.
+    if(!variant)group.releaseOrder=row.releaseOrder;
+    group.variants.push({hash:String(row.hash),difficulty:row.difficulty,variant});
+  }
+  // Prefer the first image belonging to this box alone, across all series.
+  const owners=new Map();
+  for(const group of groups.values())for(const image of group.imageCandidates){
+    if(!owners.has(image))owners.set(image,new Set());owners.get(image).add(group.id);
+  }
+  for(const group of groups.values())group.image=[...group.imageCandidates].sort((a,b)=>owners.get(a).size-owners.get(b).size)[0]||'';
+  // If no globally distinct image exists, avoid a same-series duplicate when possible.
+  for(const group of groups.values()){
+    const others=[...groups.values()].filter(other=>other!==group&&other.series===group.series);
+    if(others.some(other=>other.image===group.image))group.image=group.imageCandidates.find(image=>!others.some(other=>other.image===image))||group.image;
   }
   // Prompt 20a-fix2: retain unknown labels only for entirely unlabelled activities.
   for(const group of groups.values())if(group.variants.some(row=>row.difficulty!=='-')){
@@ -105,8 +124,9 @@ export function viewModel(snapshot,series,characterId='all'){
         if(!snapshot.aggregates[character.characterId])return unknown();
         const row=indexed.get(character.characterId).get(variant.hash);return row?aggregateRow(row):absent();
       });
-      if(!difficulties.has(variant.difficulty))difficulties.set(variant.difficulty,[]);
-      difficulties.get(variant.difficulty).push(...rows);
+      const label=variant.variant?[variant.variant,variant.difficulty==='-'?'':variant.difficulty].filter(Boolean).join(' · '):variant.difficulty;
+      if(!difficulties.has(label))difficulties.set(label,[]);
+      difficulties.get(label).push(...rows);
     }
     const rows=[...difficulties].map(([difficulty,values])=>({difficulty,...combine(values)}))
       .sort((a,b)=>DIFFICULTIES.indexOf(a.difficulty)-DIFFICULTIES.indexOf(b.difficulty));

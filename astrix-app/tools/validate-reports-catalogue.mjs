@@ -34,3 +34,17 @@ assert.equal(grouped.flatMap(row=>row.variants).length,catalogue.activities.leng
 for(const group of grouped)if(group.variants.some(row=>row.difficulty!=='-'))assert.ok(group.variants.every(row=>row.difficulty!=='-'),group.name);
 const model=viewModel({catalogue:grouped,characters:[],aggregates:{}},'raids');
 assert.equal(model.activities.find(row=>row.name==='The Pantheon').difficulties.length,14);
+
+// Prompt 20c additions 4-6: one box per known mission, ordered by public debut.
+const exotic=grouped.filter(row=>row.series==='exotic');
+for(const name of ['Oblation',"Kell's Fall",'Encore']){
+ assert.equal(exotic.filter(row=>row.name===name).length,1,name);
+ assert.equal(exotic.filter(row=>row.name.startsWith(`${name}: `)).length,0,name);
+}
+assert.ok(exotic.every((row,index)=>!index||(exotic[index-1].releaseOrder??Infinity)>=(row.releaseOrder??Infinity)));
+assert.equal(exotic[0].name,'Oblation');
+for(const group of grouped){
+ const peers=grouped.filter(other=>other!==group&&other.series===group.series);
+ if(group.image&&peers.some(other=>other.image===group.image))assert.ok(group.imageCandidates.every(image=>peers.some(other=>other.image===image)),`${group.name}: shared art despite an available alternative`);
+ assert.ok(!group.image||group.imageCandidates.includes(group.image),'Art comes from a variant of this box');
+}

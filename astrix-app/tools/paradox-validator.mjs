@@ -8,6 +8,7 @@ const validators=[
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
+  'test-reports-boxes.mjs',
   'validate-reports-catalogue.mjs',
   'validate-forge-internal-rename.mjs',
   'validate-site-typography.mjs',

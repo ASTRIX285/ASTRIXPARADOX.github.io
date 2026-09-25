@@ -1,5 +1,5 @@
 import {AUTH_ORIGIN} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2';
-import {accountKey,createReportsLoader} from '../pages/reports/reports-data.mjs?v=20260925-reports-3';
+import {accountKey,createReportsLoader} from '../pages/reports/reports-data.mjs?v=20260925-reports-20c';
 const retainedImages=new Map();
 async function warmImages(groups){
   const urls=[...new Set(groups.map(row=>row.image).filter(Boolean))];

@@ -48,7 +48,8 @@ try{
   });
   await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
   await page.waitForLoadState('networkidle');
-  const measurements=await page.locator('.reports-card:visible').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,radius:getComputedStyle(node).borderRadius,overflow:[...node.querySelectorAll('*')].some(child=>child.scrollWidth>child.clientWidth+1||child.scrollHeight>child.clientHeight+1)})));
+  // Prompt 20c allows only single-line ellipsis with a full-name tooltip.
+  const measurements=await page.locator('.reports-card:visible').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,radius:getComputedStyle(node).borderRadius,overflow:[...node.querySelectorAll('*')].some(child=>(child.scrollWidth>child.clientWidth+1&&!(child.matches('.reports-band-label')&&getComputedStyle(child).textOverflow==='ellipsis'&&child.title===child.textContent))||child.scrollHeight>child.clientHeight+1)})));
   assert.ok(measurements.length>0);
   for(const card of measurements){assert.ok(card.width>=220&&card.width<=320,JSON.stringify(card));assert.equal(card.radius,'8px');assert.equal(card.overflow,false);}
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
@@ -67,8 +68,8 @@ try{
    // Prompt 20a-fix2: a missing series fixture must fail rather than time out.
    assert.ok(await page.locator('.reports-card:visible').count()>0,`${series} shows at least one card`);
    for(const cardWidth of [220,320]){
-    await page.locator('.reports-grid:visible').evaluate((node,width)=>node.style.setProperty('--reports-card-width',`${width}px`),cardWidth);
-    const cells=await page.locator('.reports-card:visible .reports-band span').evaluateAll(nodes=>nodes.map(node=>{const range=document.createRange();range.selectNodeContents(node);return {text:node.textContent,lines:new Set([...range.getClientRects()].map(rect=>Math.round(rect.top))).size,overflow:node.scrollWidth>node.clientWidth+1};}));
+    await page.locator('.reports-grid:visible').evaluate(async(node,width)=>{node.style.setProperty('--reports-card-width',`${width}px`);await new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));},cardWidth);
+    const cells=await page.locator('.reports-card:visible .reports-band span').evaluateAll(nodes=>nodes.map(node=>{const range=document.createRange();range.selectNodeContents(node);return {text:node.textContent,lines:new Set([...range.getClientRects()].map(rect=>Math.round(rect.top))).size,overflow:(node.scrollWidth>node.clientWidth+1&&!(node.matches('.reports-band-label')&&getComputedStyle(node).textOverflow==='ellipsis'&&node.title===node.textContent))};}));
     for(const cell of cells){assert.ok(cell.lines<=1,JSON.stringify(cell));assert.equal(cell.overflow,false,JSON.stringify(cell));}
    }
    const buttons=page.locator('[data-activity]:visible');
@@ -110,15 +111,46 @@ try{
    await page.locator(`[data-series="${series}"]`).click();
    assert.ok(await page.locator('.reports-card:visible').count()>0,`Real ${series} shows at least one card`);
    const labels=await page.locator('.reports-card:visible').evaluateAll(cards=>cards.map(card=>[...card.querySelectorAll('.reports-band-row>span:first-child')].map(cell=>cell.textContent)));
-   for(const rows of labels)if(rows.some(label=>label!=='-'))assert.ok(!rows.includes('-'),'Labelled variants have no unlabelled row');
+   // Prompt 20c strengthens the label assertion for entirely unlabelled activities.
+   for(const rows of labels)assert.ok(!rows.includes('-'),'Every activity has a difficulty label');
    for(const cardWidth of [220,320]){
-    await page.locator('.reports-grid:visible').evaluate((grid,value)=>grid.style.setProperty('--reports-card-width',`${value}px`),cardWidth);
-    const measures=await page.locator('.reports-card:visible').evaluateAll(cards=>cards.map(card=>({width:card.getBoundingClientRect().width,radius:getComputedStyle(card).borderRadius,overflow:[...card.querySelectorAll('*')].some(node=>node.scrollWidth>node.clientWidth+1||node.scrollHeight>node.clientHeight+1)})));
+    await page.locator('.reports-grid:visible').evaluate(async(grid,value)=>{grid.style.setProperty('--reports-card-width',`${value}px`);await new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));},cardWidth);
+    const measures=await page.locator('.reports-card:visible').evaluateAll(cards=>cards.map(card=>({width:card.getBoundingClientRect().width,radius:getComputedStyle(card).borderRadius,overflow:[...card.querySelectorAll('*')].some(node=>(node.scrollWidth>node.clientWidth+1&&!(node.matches('.reports-band-label')&&getComputedStyle(node).textOverflow==='ellipsis'&&node.title===node.textContent))||node.scrollHeight>node.clientHeight+1)})));
     for(const card of measures){assert.equal(card.width,cardWidth);assert.equal(card.radius,'8px');assert.equal(card.overflow,false,JSON.stringify(card));}
-    const cells=await page.locator('.reports-card:visible .reports-band span').evaluateAll(nodes=>nodes.map(node=>{const range=document.createRange();range.selectNodeContents(node);return {text:node.textContent,lines:new Set([...range.getClientRects()].map(rect=>Math.round(rect.top))).size,overflow:node.scrollWidth>node.clientWidth+1};}));
+    const cells=await page.locator('.reports-card:visible .reports-band span').evaluateAll(nodes=>nodes.map(node=>{const range=document.createRange();range.selectNodeContents(node);return {text:node.textContent,lines:new Set([...range.getClientRects()].map(rect=>Math.round(rect.top))).size,overflow:(node.scrollWidth>node.clientWidth+1&&!(node.matches('.reports-band-label')&&getComputedStyle(node).textOverflow==='ellipsis'&&node.title===node.textContent))};}));
     for(const cell of cells){assert.ok(cell.lines<=1,JSON.stringify(cell));assert.equal(cell.overflow,false,JSON.stringify(cell));}
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    }
+  }
+  await page.locator('[data-series="raids"]').click();
+  // Prompt 20c: every expanded row is one line; controls reuse prepared DOM/art.
+  const pantheon=page.locator('.reports-card:visible').filter({has:page.getByRole('heading',{name:'The Pantheon',exact:true})});
+  assert.equal(await pantheon.locator('.reports-band-row:visible').count(),5);
+  await pantheon.getByRole('button',{name:'Show all (14)',exact:true}).click();
+  assert.equal(await pantheon.locator('.reports-band-row:visible').count(),14);
+  assert.equal(await page.locator('[data-back]:visible').count(),0);
+  const rowLines=await pantheon.locator('.reports-band-row:visible').evaluateAll(rows=>rows.map(row=>[...row.children].map(cell=>cell.getBoundingClientRect().top)));
+  for(const tops of rowLines)assert.ok(tops.every(top=>Math.abs(top-tops[0])<=1));
+  await page.evaluate(()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done))));
+  const packed=await page.locator('.reports-grid:visible .reports-card').evaluateAll(cards=>cards.map(card=>{const r=card.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom};}));
+  for(const card of packed){const previous=packed.filter(other=>Math.abs(other.x-card.x)<1&&other.y<card.y).sort((a,b)=>b.y-a.y)[0];if(previous)assert.ok(Math.abs(card.y-previous.bottom-12)<=1,'No empty row space beside expanded cards');}
+  await pantheon.getByRole('button',{name:'Show less',exact:true}).click();
+  assert.equal(await pantheon.locator('.reports-band-row:visible').count(),5);
+  await page.waitForLoadState('networkidle');assert.deepEqual(requests,[],'Expand/collapse makes zero requests');
+  await page.locator('[data-series="exotic"]').click();
+  const exoticNames=await page.locator('.reports-card:visible h2').allTextContents();
+  assert.equal(exoticNames[0],'Oblation');
+  assert.equal(await page.evaluate(()=>{const rows=window.fixtureCatalogue.filter(row=>row.series==='exotic');return rows.every((row,i)=>!i||(rows[i-1].releaseOrder??Infinity)>=(row.releaseOrder??Infinity));}),true);
+  for(const name of ['Oblation',"Kell's Fall",'Encore']){
+   assert.equal(exoticNames.filter(value=>value===name).length,1);
+   assert.ok(!exoticNames.some(value=>value.startsWith(`${name}: `)));
+   const card=page.locator('.reports-card:visible').filter({has:page.getByRole('heading',{name,exact:true})});
+   const rows=await card.locator('.reports-band-label').allTextContents();
+   if(name==="Kell's Fall")assert.ok(rows.includes('Diffraction · Expert'));
+   if(name==='Encore')assert.ok(rows.includes('Coda · Standard'));
+   await card.locator('.reports-open').click();
+   assert.deepEqual(await page.locator('.reports-detail:visible tbody th').allTextContents(),rows);
+   await page.locator('[data-back]:visible').click();
   }
   await page.locator('[data-series="raids"]').click();
   for(const name of ['The Pantheon','The Desert Perpetual']){

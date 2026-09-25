@@ -1,4 +1,4 @@
-import {slimCatalogue} from './reports-model.mjs?v=20260925-reports-3';
+import {slimCatalogue} from './reports-model.mjs?v=20260925-reports-20c';
 const DB_NAME='astrix-reports-v1';
 const VERSION=1;
 export function accountKey(session){const m=session?.activeDestinyMembership;return session?.authenticated&&m?.membershipId?`${m.membershipType}:${m.membershipId}`:'';}
@@ -43,7 +43,7 @@ export function createReportsLoader({origin='https://auth.astrixparadox.com',fet
     const identity=accountKey(session);if(!identity)return null;
     if(flights.has(identity))return flights.get(identity);
     const task=(async()=>{
-      const key=`account:catalogue-v3:${identity}`;
+      const key=`account:catalogue-v3-boxes20c:${identity}`;
       const cached=force?null:await store.get(key);
       if(cached&&now()-cached.fetchedAt<10*60_000){await warmImages(cached.catalogue);return cached;}
       const [profile,groups]=await Promise.all([request(route('profile')),manifest()]);
