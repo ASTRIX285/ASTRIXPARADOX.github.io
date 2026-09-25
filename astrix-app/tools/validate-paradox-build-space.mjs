@@ -430,3 +430,6 @@ console.log('BUILD_MY_GUARDIAN_CONFIRMATION_GATE=PASS');
 console.log('VANGUARD_VALIDATION_RECORD=PASS');
 
 export {voidLoopSource,nothingManaclesCandidate,comboSource,comboRecommendation};
+
+// Prompt 25: inline containment cannot collapse below the art and card insets.
+assert.match(css,/min-width:calc\(var\(--gear-weapon-art\) \+ 18px\)!important/);
