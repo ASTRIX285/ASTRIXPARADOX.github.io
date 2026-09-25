@@ -14,6 +14,7 @@ const validators=[
   'validate-guardian-character-cards.py',
   'validate-guardian-complete-loadout.py',
   'validate-main-page-today.mjs',
+  'test-character-loadout-status.mjs',
   'validate-super-formation.mjs',
   'validate-responsive-layout-contract.mjs',
   'validate-destination-theming.mjs',

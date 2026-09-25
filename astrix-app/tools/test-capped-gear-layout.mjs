@@ -247,7 +247,8 @@ try{
    else for(const art of row.gear)assert.ok(Math.abs(art.width-(width===1363?44:66))<=(width===1363?1:.1),`${name} ${width}: art ${art.width}`);
    // Prompt 12b: Miguel's measured DIM pitch is tile + 6px on Character and Vault rows and the loadout strip.
    if(name==='Character'||name==='Vault'){const first=row.gear[0],next=row.gear.find(r=>Math.abs(r.y-first.y)<1&&r.x>first.x+1);assert.ok(next,`${name} ${width}: second tile in row`);assert.ok(Math.abs(next.x-first.x-(first.width+6))<=.1,`${name} ${width}: pitch ${next.x-first.x} for tile ${first.width}`);}
-   if(name==='Character'&&row.strip.length>1)assert.ok(Math.abs(row.strip[1].x-row.strip[0].x-(row.strip[0].width+6))<=.1,`Character ${width}: strip pitch`);
+   // Prompt 21: slot size unchanged; pitch adds the separate 22px menu button and 4px internal gap.
+   if(name==='Character'&&row.strip.length>1)assert.ok(Math.abs(row.strip[1].x-row.strip[0].x-(row.strip[0].width+4+22+6))<=.1,`Character ${width}: strip pitch includes menu`);
    assert.deepEqual(row.copyOverlaps,[],`${name} ${width}: header title and subtitle clear of hero cards and brand`);
    if(row.columns===2&&row.equipmentGap!==null)assert.ok(row.equipmentGap<=16,`Character ${width}: no empty row between Heavy and Equipment (${row.equipmentGap}px)`);
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);

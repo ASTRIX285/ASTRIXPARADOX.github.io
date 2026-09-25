@@ -49,6 +49,11 @@ const allowed=new Set([
   'forge-auth-worker/src/reports-read.ts',
   'forge-auth-worker/test/reports-read.test.ts',
 
+  // Prompt 21: status model and focused fixtures/tests only.
+  'astrix-app/pages/guardian-workspace-v2/guardian-loadout-status.mjs',
+  'astrix-app/tools/fixtures/character-loadouts-fixture.mjs',
+  'astrix-app/tools/test-character-loadout-status.mjs',
+  'astrix-app/tools/test-character-loadout-menu.mjs',
   'astrix-app/pages/vault/vault-drag-scroll.mjs',
   'astrix-app/tools/test-vault-drag-scroll.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
