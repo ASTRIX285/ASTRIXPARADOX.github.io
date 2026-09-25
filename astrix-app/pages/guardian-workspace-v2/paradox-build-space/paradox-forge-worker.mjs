@@ -1,5 +1,5 @@
-import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
-import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
+import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-1';
+import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-1';
 
 const objectives=new Set(['balanced','dps','add-clear','survivability','ability-uptime']);
 
@@ -16,7 +16,7 @@ export function createForgeWorkerHandler(post,{compute=prepareForgeSequence}={})
     try{
       if(!objectives.has(job.objective||'balanced'))throw new Error('Unsupported build objective.');
       const candidate=snapshot.candidates.find(item=>item.element===job.element)?.candidate;
-      if(!candidate)throw new Error('No compatible verified subclass for this element.');
+      if(!candidate)throw new Error('No compatible subclass for this element.');
       const result=await compute({...snapshot,...job,candidate,currentSeasonNumber:snapshot.season},{onProgress:message=>post({type:'progress',revision:snapshot.revision,key,message})});
       if(context===snapshot){
         if(prepared.size>=32)prepared.delete(prepared.values().next().value);
