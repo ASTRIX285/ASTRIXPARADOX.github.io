@@ -149,16 +149,16 @@ console.log('RESPONSIVE_TABLET_PHONE_SOURCE=PASS');
 // Prompt 12: non-gear images retain their fluid contract; gear grows to its cap.
 assert.match(densityCss,/:root:has\(>body\.apx-fluid-icons\)\{[\s\S]*?--apx-icon-unit:calc\(clamp\(40px,3\.2vw,64px\) \/ 61\.44\)/,'Only opted-in pages use the shared viewport image unit');
 assert.match(densityCss,/--apx-inventory-size:var\(--apx-equipment-icon-size\)/,'Inventory must use the capped equipment standard');
-assert.match(densityCss,/:root,\s*:root:has\(>body\.apx-fluid-icons\)\{[^}]*--apx-equipment-icon-size:clamp\(32px,calc\(\(100vw - var\(--apx-equipment-reference-inset\) - 76px\) \/ 20\),64px\);/,'Prompt 12: equipment must use the exact viewport formula with 32px floor and 64px ceiling');
+assert.match(densityCss,/:root,\s*:root:has\(>body\.apx-fluid-icons\)\{[^}]*--apx-equipment-icon-size:clamp\(32px,calc\(\(100vw - var\(--apx-equipment-reference-inset\) - 76px\) \/ 20\),66px\);/,'Prompt 12b: equipment must use the exact viewport formula with 32px floor and 66px ceiling (measured DIM at 2560)');
 assert.match(densityCss,/--apx-inventory-ratio:1;/,'DIM-equivalent inventory thumbnails are square');
 for(const [label,html] of appPages.filter(([label])=>['Forge Loader','Journey','Mission Reports'].includes(label)))assert.doesNotMatch(html,/apx-fluid-icons/,label+' remains outside this fluid sizing round');
 
 // Prompt 12 supersedes fixed 50px: viewport growth stops at 64px; containers cannot stretch gear.
 const inventoryCss=await readFile(new URL('../../shared/guardian-inventory-workspace.css',ROOT),'utf8');
-assert.match(inventoryCss,/body:not\(\.forge-loader-page\) \.vault-character-column \.vault-transfer-items\{flex-wrap:wrap;overflow:visible\}/,'Vault character gear rows must wrap with visible overflow, excluding Forge Loader');
+assert.match(inventoryCss,/body:not\(\.forge-loader-page\) \.vault-character-column \.vault-transfer-items\{flex-wrap:wrap;overflow:visible;gap:var\(--apx-gear-gap,6px\)\}/,'Vault character gear rows must wrap with visible overflow, excluding Forge Loader');
 for(const page of ['../../pages/vault/index.html','index.html']){
   const markup=await readFile(new URL(page,ROOT),'utf8');
-  assert.match(markup,/guardian-inventory-workspace\.css\?v=20260924-vault-wrap-1&amp;capped=20260924-1"/,'Every inventory workspace page must load the wrapping stylesheet revision');
+  assert.match(markup,/guardian-inventory-workspace\.css\?v=20260924-vault-wrap-1&amp;capped=20260924-dim66-1"/,'Every inventory workspace page must load the wrapping stylesheet revision');
 }
 
 assert.match(inventoryCss,/grid-template-columns:repeat\(auto-fill,var\(--apx-equipment-icon-size\)\)/,'Prompt 12: Character must wrap fixed token-width tracks without stretching');
@@ -171,7 +171,7 @@ assert.match(sources.items,/body\.forge-loader-page \.paradox-item-inspect-card\
 assert.match(densityCss,/body\.forge-loader-page \.vault-transfer-item:not\(\.has-item-tile\)\{\s*--apx-icon-gear-art-width:50px;\s*--apx-icon-gear-art-height:63px;/,'Forge Loader non-structured items must retain their original dimensions');
 const gearSizeOwners=[...densityCss.matchAll(/([^{}]+)\{([^{}]*--apx-equipment-icon-size:[^{}]*)\}/g)];
 assert.equal(gearSizeOwners.length,2,'Only the capped default and protected Forge Loader exception may own equipment sizing');
-assert.equal(gearSizeOwners.filter(match=>/--apx-equipment-icon-size:clamp\(32px,calc\(\(100vw - var\(--apx-equipment-reference-inset\) - 76px\) \/ 20\),64px\);/.test(match[2])).length,1);
+assert.equal(gearSizeOwners.filter(match=>/--apx-equipment-icon-size:clamp\(32px,calc\(\(100vw - var\(--apx-equipment-reference-inset\) - 76px\) \/ 20\),66px\);/.test(match[2])).length,1);
 assert.equal(gearSizeOwners.filter(match=>match[1].includes('body.forge-loader-page')).length,1);
 const journeyRenderer=await readFile(new URL('../journey/journey.mjs',ROOT),'utf8');
 assert.ok(journeyRenderer.includes("Number(itemHash)>0?' is-gear':''"),'Only item-backed records opt into collection gear styling');
@@ -185,9 +185,13 @@ for(const prefix of ['','ASTRIX285.github.io/']){
 console.log('GEAR_FIXED_STANDARDS_AND_FORGE_LOADER_GUARDS=PASS');
 
 // Prompt 12 adds strict caps, strip parity and two-column inventory containment.
-assert.match(inventoryCss,/max-width:calc\(10 \* var\(--apx-equipment-icon-size\) \+ 9 \* 4px\)/,'Character rows must stop at ten tiles plus nine gaps');
-assert.match(inventoryCss,/@container character-inventory \(min-width:calc\(2 \* \(10 \* 64px \+ 9 \* 4px\) \+ 24px \+ 12px\)\)/,'Two inventory columns require two ten-tile rows at the cap plus padding and gap');
-assert.match(sources.shared,/body\.guardian-main-page \.guardian-loadouts-strip \.guardian-loadouts-grid\{\s*grid-template-columns:repeat\(auto-fill,var\(--apx-equipment-icon-size\)\)!important;[\s\S]*?justify-content:start/,'Character strip must use capped left-aligned tracks');
+assert.match(inventoryCss,/max-width:calc\(10 \* var\(--apx-equipment-icon-size\) \+ 9 \* var\(--apx-gear-gap,6px\)\);\s*gap:var\(--apx-gear-gap,6px\);/,'Prompt 12b: Character rows stop at ten tiles plus nine 6px DIM gaps');
+assert.match(inventoryCss,/@container character-inventory \(min-width:calc\(2 \* \(10 \* 66px \+ 9 \* 6px\) \+ 24px \+ 12px\)\)/,'Two inventory columns require two ten-tile rows at the cap plus padding and gap');
+assert.match(sources.shared,/body\.guardian-main-page \.guardian-loadouts-strip \.guardian-loadouts-grid\{\s*grid-template-columns:repeat\(auto-fill,var\(--apx-equipment-icon-size\)\)!important;[\s\S]*?justify-content:start;\s*gap:var\(--apx-gear-gap,6px\)!important;/,'Character strip must use capped left-aligned tracks with the DIM 6px gap');
 const heroBandCss=await readFile(new URL('../../shared/astrix-hero-cards.css',ROOT),'utf8');
 assert.match(heroBandCss,/body:not\(\.forge-loader-page\)[^{]*\[data-forge-destination-ribbon\]::before\{[^}]*inset:-12px calc\(\(100% - 100vw\) \/ 2\) 0;background:var\(--apx-colour-raised,#060606\)/,'Fixed ribbon band must be full-width and opaque, excluding Forge Loader');
 assert.match(heroBandCss,/body:not\(\.forge-loader-page\) header:has\(>\[data-forge-hero-cards\]\)\{overflow:visible!important\}/,'Header must not clip hero cards');
+// Prompt 12b: header copy sits in the brand-to-hero gap; compact mode keeps row-1 placement.
+assert.match(heroBandCss,/--apx-header-copy-gap:calc\(50vw - var\(--apx-hero-row,910px\) \/ 2 - 282px\)/,'Header copy width must be derived from the free gap beside the hero row');
+assert.match(heroBandCss,/@media\(max-width:1599px\)\{\s*html body header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy\{\s*position:static!important/,'Compact header copy must not be absolutely positioned over the hero cards');
+assert.match(inventoryCss,/\[data-equipment-group="ghost"\]\{grid-column:1;grid-row:6;padding-top:/,'Prompt 12b: Equipment heading shares the Ghost cell, no empty row');

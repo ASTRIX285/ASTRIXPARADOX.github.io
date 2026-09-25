@@ -60,7 +60,7 @@
 .vault-only-section>.vault-transfer-family,.vault-only-section>.vault-transfer-group{margin-left:.85rem;margin-right:.85rem}
 .vault-only-section>.vault-transfer-empty{margin-left:.85rem;margin-right:.85rem}
 .vault-postmaster-section .vault-transfer-items,.vault-only-section .vault-transfer-items{flex-wrap:wrap;overflow:visible}
-body:not(.forge-loader-page) .vault-character-column .vault-transfer-items{flex-wrap:wrap;overflow:visible}
+body:not(.forge-loader-page) .vault-character-column .vault-transfer-items{flex-wrap:wrap;overflow:visible;gap:var(--apx-gear-gap,6px)}
 .vault-action-dialog{width:min(34rem,calc(100vw - 2rem));padding:0;border:1px solid rgba(201,168,76,.56);background:#0a090c;color:#fff;box-shadow:0 28px 90px rgba(0,0,0,.72)}
 .vault-action-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(5px)}
 .vault-action-dialog form{display:grid;gap:.85rem;padding:1.1rem}
@@ -102,8 +102,8 @@ body.guardian-main-page .character-inventory-workspace .vault-postmaster-section
 body.guardian-main-page .character-inventory-workspace .vault-transfer-items{
   display:grid;
   grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size));
-  max-width:calc(10 * var(--apx-equipment-icon-size) + 9 * 4px);
-  gap:4px;
+  max-width:calc(10 * var(--apx-equipment-icon-size) + 9 * var(--apx-gear-gap,6px));
+  gap:var(--apx-gear-gap,6px);
   overflow:visible;
 }
 body.guardian-main-page .character-inventory-workspace .vault-transfer-item{
@@ -149,23 +149,26 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspec
   }
 }
 
-/* Prompt 12: two ten-tile columns at the 64px cap, section padding and gap.
+/* Prompt 12b: two ten-tile columns at the 66px cap with 6px gear gaps, plus
+   section padding and column gap. Column 1: Weapons then Equipment. Column 2:
+   Armour. The Equipment heading shares Ghost's cell, so no empty row appears.
    Existing family headings and bucket sections keep their DOM/action hooks. */
-@container character-inventory (min-width:calc(2 * (10 * 64px + 9 * 4px) + 24px + 12px)){
+@container character-inventory (min-width:calc(2 * (10 * 66px + 9 * 6px) + 24px + 12px)){
   body.guardian-main-page .character-inventory-workspace .vault-equipped-carried-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;align-items:start}
   body.guardian-main-page .character-inventory-workspace .vault-equipped-carried-section>header{grid-column:1/-1}
   body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(1){grid-column:1;grid-row:2}
   body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(2){grid-column:2;grid-row:2}
-  body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(3){grid-column:1;grid-row:6}
+  body.guardian-main-page .character-inventory-workspace .vault-transfer-family:nth-of-type(3){grid-column:1;grid-row:6;align-self:start;margin-top:0}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="primary"]{grid-column:1;grid-row:3}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="special"]{grid-column:1;grid-row:4}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="heavy"]{grid-column:1;grid-row:5}
-  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ghost"]{grid-column:1;grid-row:7}
-  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ship"]{grid-column:1;grid-row:8}
-  body.guardian-main-page .character-inventory-workspace [data-equipment-group="sparrow"]{grid-column:1;grid-row:9}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ghost"]{grid-column:1;grid-row:6;padding-top:var(--apx-family-heading-block,1.25rem)}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="ship"]{grid-column:1;grid-row:7}
+  body.guardian-main-page .character-inventory-workspace [data-equipment-group="sparrow"]{grid-column:1;grid-row:8}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="helmet"]{grid-column:2;grid-row:3}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="gauntlets"]{grid-column:2;grid-row:4}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="chest"]{grid-column:2;grid-row:5}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="legs"]{grid-column:2;grid-row:6}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="class-item"]{grid-column:2;grid-row:7}
+}
 }

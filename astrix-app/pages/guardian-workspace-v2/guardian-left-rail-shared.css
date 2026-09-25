@@ -663,10 +663,11 @@ body.guardian-main-page .workspace>.right{display:none!important}
 
 }
 
-/* Prompt 12: Character loadout slots match inventory art, never stretch. */
+/* Prompt 12/12b: Character loadout slots match inventory art and gap, never stretch. */
 body.guardian-main-page .guardian-loadouts-strip .guardian-loadouts-grid{
   grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size))!important;
   grid-template-rows:none!important;
   justify-content:start;
+  gap:var(--apx-gear-gap,6px)!important;
 }
 body.guardian-main-page .guardian-loadouts-strip .guardian-loadout-slot{width:var(--apx-equipment-icon-size)!important}
