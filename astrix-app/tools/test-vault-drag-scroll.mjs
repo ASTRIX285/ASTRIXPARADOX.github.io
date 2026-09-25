@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {createVaultDragScroll} from '../pages/vault/vault-drag-scroll.mjs';
+let next=0,calls=0;const frames=new Map();
+globalThis.innerWidth=1200;globalThis.innerHeight=900;globalThis.scrollY=300;
+globalThis.requestAnimationFrame=fn=>{frames.set(++next,fn);return next;};
+globalThis.cancelAnimationFrame=id=>frames.delete(id);
+globalThis.document={querySelectorAll:()=>[{getBoundingClientRect:()=>({top:0,bottom:180})}]};
+globalThis.getComputedStyle=()=>({position:'sticky'});
+globalThis.window={scrollBy:({top})=>{globalThis.scrollY=Math.max(0,scrollY+top);calls++;}};
+const step=()=>{const [id,fn]=frames.entries().next().value;frames.delete(id);fn();};
+const scroll=createVaultDragScroll();
+scroll.update(400,821);step();const slow=scrollY-300;assert.ok(slow>0&&slow<1,'Speed starts gently inside 80px edge');
+scroll.update(400,899);const before=scrollY;step();assert.ok(scrollY-before>19&&scrollY-before<=20,'Speed increases to at most 20px/frame');
+scroll.update(400,500);assert.equal(frames.size,0,'Leaving edge cancels RAF');
+scroll.update(400,181);const up=scrollY;step();assert.ok(scrollY<up,'Top scroll zone begins below fixed header/ribbon');
+scroll.stop();assert.equal(frames.size,0,'Drop/dragend stop cancels RAF');
+scroll.update(-1,899);assert.equal(frames.size,0,'Pointer outside viewport stops');
+assert.ok(calls>=3);console.log('VAULT_DRAG_SCROLL=PASS acceleration, header boundary, edge exit and cancellation');

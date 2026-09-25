@@ -43,7 +43,8 @@ try{
     document.getElementById('characterInventoryWorkspace').innerHTML=`<article class="vault-character-column is-active character-live-inventory"><div class="vault-character-inventory">${inv.equippedAndCarriedMarkup({characterId:'2',items})}</div></article>`;
     const {renderGuardianLoadouts}=await import('/astrix-app/pages/guardian-workspace-v2/guardian-loadouts.mjs');renderGuardianLoadouts([]);
    }else if(name==='Vault'){
-    document.getElementById('vaultTransferWorkspace').innerHTML=`<div class="vault-character-columns">${['1','2','3'].map(characterId=>`<article class="vault-character-column"><div class="vault-character-inventory">${inv.equippedAndCarriedMarkup({characterId,items:items.map(item=>({...item,source:{...item.source,characterId}}))})}</div></article>`).join('')}</div>${inv.vaultOnlyMarkup({items:items.map(item=>({...item,source:{kind:'vault'}}))})}`;
+    const vaultItems=inv.INVENTORY_GROUPS.flatMap((group,g)=>Array.from({length:31},(_,i)=>({itemHash:880000+g*100+i,itemInstanceId:String(880000+g*100+i),name:`Vault ${group.label} ${i}`,icon,power:550,equipmentGroup:group,source:{kind:'vault'}})));
+    document.getElementById('vaultTransferWorkspace').innerHTML=`<div class="vault-character-columns">${['1','2','3'].map((characterId,i)=>`<article class="vault-character-column" data-drop-kind="character" data-drop-character-id="${characterId}">${inv.postmasterMarkup({characterId,items:[],characterLabel:['Hunter','Warlock','Titan'][i]})}<div class="vault-character-inventory"><header class="vault-character-header"><h3>${['HUNTER','WARLOCK','TITAN'][i]}</h3></header>${inv.equippedAndCarriedMarkup({characterId,items:items.map(item=>({...item,source:{...item.source,characterId}}))})}</div></article>`).join('')}</div>${inv.vaultOnlyMarkup({items:vaultItems})}`;
    }else if(name==='BuildForge'){
     const {armourCard}=await import('/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs');
     const {renderWeapons}=await import('/astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs');
@@ -73,6 +74,7 @@ try{
   for(const tile of document.querySelectorAll(selector)){
    const r=box(tile);for(let parent=tile.parentElement;parent&&parent!==document.body;parent=parent.parentElement){
     if(!parent.matches('.vault-transfer-items,.vault-transfer-group,.vault-character-column,.vault-character-inventory,.character-inventory-workspace,.weap,.gear-slot,.design-section,.forge-exotic-grid,.forge-panel'))continue;
+    if(getComputedStyle(parent).display==='contents')continue;
     const p=box(parent);if(r.x<p.x-1||r.right>p.right+1)violations.push(`${tile.className} exceeds ${parent.className}`);
    }
   }
@@ -84,6 +86,32 @@ try{
   const primary=document.querySelector('.character-inventory-workspace [data-equipment-group="primary"]'),helmet=document.querySelector('.character-inventory-workspace [data-equipment-group="helmet"]');
   return {page:name,viewport:innerWidth,copyOverlaps,equipmentGap,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
  },name);}
+ async function checkVaultColumns(width){
+  const state=await page.evaluate(()=>{
+   const box=node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,right:r.right,bottom:r.bottom,height:r.height};};
+   const characters=[...document.querySelectorAll('#vaultTransferWorkspace .vault-character-column')],vault=document.querySelector('#vaultTransferWorkspace>.vault-only-section'),columns=[...characters,vault];
+   const groups=columns.map(column=>[...column.querySelectorAll('.vault-transfer-group')].filter(group=>!group.closest('.vault-postmaster-section')));
+   const countFirstRow=group=>{const tiles=[...group.querySelectorAll('.vault-transfer-item')];return tiles.filter(tile=>Math.abs(box(tile).y-box(tiles[0]).y)<1).length;};
+   return {columns:columns.map(box),tops:groups.map(rows=>rows.map(row=>box(row).y)),heights:groups.map(rows=>rows.map(row=>box(row).height)),
+    characterCounts:groups.slice(0,3).map(rows=>countFirstRow(rows[0])),vaultCounts:groups[3].map(countFirstRow),
+    equippedFirst:groups.slice(0,3).every(rows=>rows[0].querySelector('.vault-transfer-item').classList.contains('is-equipped')),
+    topHeaders:[...characters.map(column=>column.querySelector('.vault-postmaster-section')),vault.querySelector('header')].map(box),
+    escapes:columns.flatMap(column=>[...column.querySelectorAll('.vault-transfer-item')].filter(tile=>box(tile).x<box(column).x-1||box(tile).right>box(column).right+1).map(tile=>tile.dataset.inspectItem))};
+  });
+  assert.equal(state.equippedFirst,true,'Vault character buckets keep equipped item first');
+  assert.deepEqual(state.escapes,[],`Vault ${width}: no tile escapes its column`);
+  if(width===1363){assert.ok(state.columns[3].y>=Math.max(...state.columns.slice(0,3).map(c=>c.bottom)), 'Vault fallback remains below characters');return;}
+  for(let i=1;i<4;i++){assert.ok(state.columns[i].x>=state.columns[i-1].right,'Four distinct side-by-side columns');assert.ok(Math.abs(state.columns[i].y-state.columns[0].y)<=1,'Four column tops align');}
+  assert.deepEqual(state.characterCounts,[5,5,5],'Characters wrap after five items');
+  for(const column of state.columns.slice(0,3))assert.ok(Math.abs(column.width-(5*66+4*6+18))<=1,'Character width is five tiles, four gaps and padding');
+  for(const count of state.vaultCounts)assert.ok(count>=6&&count<=15,'Vault fits six to fifteen items per row');
+  if(width===2560)assert.equal(state.vaultCounts[0],15,'Wide Vault caps rows at fifteen items');
+  for(let bucket=0;bucket<state.tops[0].length;bucket++)for(let column=1;column<4;column++){
+   assert.ok(Math.abs(state.tops[column][bucket]-state.tops[0][bucket])<=1,`Bucket ${bucket} starts aligned`);
+   assert.ok(Math.abs(state.heights[column][bucket]-state.heights[0][bucket])<=1,`Bucket ${bucket} fills the tallest shared row`);
+  }
+  assert.ok(state.topHeaders.every(header=>Math.abs(header.y-state.topHeaders[0].y)<=1),'Vault count header aligns with Postmasters');
+ }
  // Prompt 15: panel stretch and the in-flow action bar must not alter gear geometry.
  async function checkCharacterActions(width){
   const state=await page.evaluate(()=>{
@@ -146,6 +174,7 @@ try{
    if(row.columns===2&&row.equipmentGap!==null)assert.ok(row.equipmentGap<=16,`Character ${width}: no empty row between Heavy and Equipment (${row.equipmentGap}px)`);
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);
    assert.ok(row.scrollWidth<=width&&row.bodyScroll<=width,`${name} ${width}: no horizontal page scroll`);
+   if(name==='Vault')await checkVaultColumns(width);
    if(name==='Character'){
     row.actions=await checkCharacterActions(width);
     assert.equal(row.strip.length,20);for(const slot of row.strip)assert.ok(Math.abs(slot.width-row.gear[0].width)<.1,'Strip equals inventory art');

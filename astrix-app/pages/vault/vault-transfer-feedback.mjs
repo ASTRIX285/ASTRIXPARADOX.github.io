@@ -1,7 +1,14 @@
+import {createVaultDragScroll} from './vault-drag-scroll.mjs?v=20260925-four-columns-1';
 // Presentation only: never mutate the catalogue, payload or Bungie request plan.
 export function createVaultTransferFeedback({board,itemKey,characterLabel,canDrop}){
   const pending=new Map();
   let ghost=null,dragTile=null;
+  const dragScroll=createVaultDragScroll({onScroll:(x,y)=>hover(document.elementFromPoint(x,y))});
+  document.addEventListener('dragover',event=>{if(dragTile)dragScroll.update(event.clientX,event.clientY);});
+  document.addEventListener('dragleave',event=>{if(!event.relatedTarget)dragScroll.stop();});
+  document.addEventListener('drop',()=>clearDrag());
+  document.addEventListener('dragend',()=>clearDrag());
+  window.addEventListener('blur',()=>clearDrag());
   const keyOf=node=>node?.dataset?.inspectItem;
   const tileFor=key=>[...board.querySelectorAll('.vault-transfer-item[data-inspect-item]')].find(node=>keyOf(node)===key);
   const destinationOf=node=>{
@@ -56,7 +63,7 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
   }
   function clearHover(){board.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));}
   function clearDrag(){
-    clearHover();board.querySelectorAll('.is-drop-active').forEach(node=>node.classList.remove('is-drop-active'));
+    dragScroll.stop();clearHover();board.querySelectorAll('.is-drop-active').forEach(node=>node.classList.remove('is-drop-active'));
     dragTile?.classList.remove('is-dragging');ghost?.remove();ghost=null;dragTile=null;
   }
   function startDrag(item,tile,event){
@@ -70,7 +77,7 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
     if(event.dataTransfer){ghost.style.left='-1000px';ghost.style.top='0';event.dataTransfer.setDragImage?.(ghost,ghost.offsetWidth/2,ghost.offsetHeight/2);}
     else moveGhost(event.clientX,event.clientY);
   }
-  function moveGhost(x,y){if(ghost){ghost.style.left=`${x+12}px`;ghost.style.top=`${y+12}px`;}}
+  function moveGhost(x,y){if(dragTile)dragScroll.update(x,y);if(ghost){ghost.style.left=`${x+12}px`;ghost.style.top=`${y+12}px`;}}
   function hover(target){clearHover();const group=target?.closest('.vault-transfer-group');if(group?.classList.contains('is-drop-active'))group.classList.add('is-drop-target');}
   return {begin,finish,clearHover,clearDrag,startDrag,moveGhost,hover,
     isMoving:key=>[...pending.values()].some(state=>state.key===key),

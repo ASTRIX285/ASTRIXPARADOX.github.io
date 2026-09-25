@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/pages/vault/vault-drag-scroll.mjs',
+  'astrix-app/tools/test-vault-drag-scroll.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
   'astrix-app/pages/vault/vault-transfer-feedback.mjs',
   'astrix-app/tools/test-vault-transfer-feedback.mjs',

@@ -171,4 +171,81 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspec
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="legs"]{grid-column:2;grid-row:6}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="class-item"]{grid-column:2;grid-row:7}
 }
+
+/* Vault four-column layout: 3 × (5 × 66 + 4 × 6 + 18) +
+   (6 × 66 + 5 × 6 + 18) + 3 × 12 = 1596px of container width.
+   Rows share tracks through subgrid; no inventory geometry is measured in JS. */
+.vault-transfer-workspace:has(>#vaultTransferWorkspace){container:vault-gear / inline-size}
+@container vault-gear (min-width:1596px){
+  #vaultTransferWorkspace{
+    grid-template-columns:repeat(3,calc(5 * var(--apx-equipment-icon-size) + 24px + 18px)) minmax(0,1fr);
+    grid-template-rows:repeat(17,auto);
+    gap:6px 12px;
+    align-items:stretch;
+  }
+  #vaultTransferWorkspace>.vault-character-columns{display:contents}
+  #vaultTransferWorkspace .vault-character-column,
+  #vaultTransferWorkspace>.vault-only-section{
+    display:grid;
+    grid-template-rows:subgrid;
+    grid-row:1 / span 17;
+    gap:6px;
+    box-sizing:border-box;
+    padding:8px;
+    border:1px solid var(--apx-colour-border);
+    background:var(--apx-colour-panel);
+    overflow:visible;
+    align-items:stretch;
+  }
+  #vaultTransferWorkspace .vault-character-column:nth-child(1){grid-column:1}
+  #vaultTransferWorkspace .vault-character-column:nth-child(2){grid-column:2}
+  #vaultTransferWorkspace .vault-character-column:nth-child(3){grid-column:3}
+  #vaultTransferWorkspace>.vault-only-section{grid-column:4}
+  #vaultTransferWorkspace .vault-character-inventory,
+  #vaultTransferWorkspace .vault-equipped-carried-section{display:contents}
+  #vaultTransferWorkspace .vault-postmaster-section,
+  #vaultTransferWorkspace>.vault-only-section>header{grid-row:1;margin:0;align-self:stretch}
+  #vaultTransferWorkspace .vault-character-header,
+  #vaultTransferWorkspace>.vault-only-section>p{grid-row:2;margin:0}
+  #vaultTransferWorkspace .vault-equipped-carried-section>header{grid-row:3;margin:0}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>.vault-transfer-family{margin:0;align-self:end}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>.vault-transfer-family:nth-of-type(1){grid-row:4}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>.vault-transfer-family:nth-of-type(2){grid-row:8}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>.vault-transfer-family:nth-of-type(3){grid-row:14}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>.vault-transfer-group{
+    margin:0;
+    align-self:stretch;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    min-height:0;
+  }
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="primary"]{grid-row:5}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="special"]{grid-row:6}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="heavy"]{grid-row:7}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="helmet"]{grid-row:9}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="gauntlets"]{grid-row:10}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="chest"]{grid-row:11}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="legs"]{grid-row:12}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="class-item"]{grid-row:13}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="ghost"]{grid-row:15}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="ship"]{grid-row:16}
+  #vaultTransferWorkspace :is(.vault-equipped-carried-section,.vault-only-section)>[data-equipment-group="sparrow"]{grid-row:17}
+  #vaultTransferWorkspace .vault-character-column .vault-transfer-items{
+    display:grid;
+    grid-template-columns:repeat(5,var(--apx-equipment-icon-size));
+    gap:var(--apx-gear-gap,6px);
+    align-content:start;
+    max-width:100%;
+  }
+  #vaultTransferWorkspace>.vault-only-section .vault-transfer-items{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,var(--apx-equipment-icon-size));
+    gap:var(--apx-gear-gap,6px);
+    width:100%;
+    max-width:calc(15 * var(--apx-equipment-icon-size) + 14 * var(--apx-gear-gap,6px));
+    align-content:start;
+  }
+  #vaultTransferWorkspace .vault-postmaster-section{padding:0;min-width:0}
+  #vaultTransferWorkspace .vault-transfer-items>[hidden]{display:none}
 }

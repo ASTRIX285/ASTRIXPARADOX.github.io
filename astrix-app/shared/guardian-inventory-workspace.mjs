@@ -189,7 +189,7 @@ function equippedAndCarriedMarkup({characterId,items=[],capabilities={},activeCh
 
 function vaultOnlyMarkup({items=[],capabilities={},activeCharacterId=''}={}){
   const rows=(Array.isArray(items)?items:[]).filter(item=>item?.source?.kind==='vault');
-  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${rows.length} SORTED ITEM${rows.length===1?'':'S'}</strong></header><p>Drop carried or equipped items here. The shared account pool stays within the width of the three Guardian columns and wraps inside each Bungie category.</p>${inventoryGroupsMarkup(rows,{includeEmpty:true,capabilities,activeCharacterId})}</section>`;
+  return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${rows.length} SORTED ITEM${rows.length===1?'':'S'}</strong></header><p>Drop items here to move them to the Vault.</p>${inventoryGroupsMarkup(rows,{includeEmpty:true,capabilities,activeCharacterId})}</section>`;
 }
 
 function bindInventoryWorkspaceHovers(root,{resolveItem=()=>null,bindInspect=()=>{}}={}){
