@@ -5,6 +5,8 @@ import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',
+  'astrix-app/pages/vault/vault-transfer-feedback.mjs',
+  'astrix-app/tools/test-vault-transfer-feedback.mjs',
   'astrix-app/tools/test-capped-gear-layout.mjs',
   'astrix-app/pages/guardian-workspace-v2/paradox-build-space/build-weapon-card-layout.mjs',
   'astrix-app/tools/test-build-weapon-card-layout.mjs',
