@@ -90,15 +90,20 @@
 .vault-drag-ghost{position:fixed!important;z-index:1000;pointer-events:none!important;opacity:.9;overflow:hidden}
 .vault-drag-ghost img{width:100%;height:100%;object-fit:contain}
 .vault-transfer-toasts{position:fixed;z-index:1000;top:1rem;right:1rem;display:grid;gap:.5rem;width:min(25rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow-y:auto;pointer-events:none}
-.vault-transfer-toast{display:grid;grid-template-columns:2.75rem minmax(0,1fr) 1.5rem 2rem;align-items:center;gap:.65rem;padding:.75rem;background:var(--apx-colour-raised);color:var(--apx-colour-text);border:1px solid var(--apx-colour-border-strong);box-shadow:0 .25rem .75rem var(--apx-colour-canvas);pointer-events:auto}
+.vault-transfer-toast{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:2.75rem minmax(0,1fr) 2rem;align-items:center;gap:.65rem;padding:.75rem;background:var(--apx-colour-raised);color:var(--apx-colour-text);border:1px solid var(--apx-colour-border-strong);box-shadow:0 .25rem .75rem var(--apx-colour-canvas);pointer-events:auto}
+.vault-transfer-toast-fill{position:absolute;inset:0;z-index:-1;background:var(--apx-colour-focus);opacity:.18;transform:scaleX(var(--transfer-progress,0));transform-origin:left;transition:transform .2s ease-out;overflow:hidden;pointer-events:none}
+.vault-transfer-toast.is-moving .vault-transfer-toast-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--apx-colour-text),transparent);opacity:.25;animation:vault-transfer-shimmer 1.8s linear infinite}
+.vault-transfer-toast.is-success .vault-transfer-toast-fill{background:var(--apx-colour-success);transition:none;animation:vault-transfer-success .5s ease-out}
+.vault-transfer-toast.is-error .vault-transfer-toast-fill{background:var(--apx-colour-action)}
+.vault-transfer-toast [hidden]{display:none!important}
 .vault-transfer-toast>img{width:2.75rem;height:2.75rem;object-fit:contain}
 .vault-transfer-toast>div{display:grid;gap:.25rem;min-width:0;font-size:.875rem;overflow-wrap:anywhere}
 .vault-transfer-toast-status{color:var(--apx-colour-secondary)}
 .vault-transfer-toast>button{width:2rem;height:2rem;border:1px solid var(--apx-colour-border);cursor:pointer}
 .vault-transfer-toast>button:focus-visible{outline:2px solid var(--apx-colour-focus);outline-offset:2px}
-.vault-transfer-toast-mark{display:grid;place-items:center;width:1.5rem;height:1.5rem;font-size:1.25rem}
-.vault-transfer-toast.is-moving .vault-transfer-toast-mark{border:2px solid var(--apx-colour-border-strong);border-top-color:var(--apx-colour-focus);border-radius:50%;animation:vault-transfer-spin 1s linear infinite}
+.vault-transfer-toast-mark{display:grid;place-items:center;width:2rem;height:2rem;font-size:1.25rem}
 .vault-transfer-toast.is-success .vault-transfer-toast-mark{color:var(--apx-colour-success)}
 .vault-transfer-toast.is-error .vault-transfer-toast-mark{color:var(--apx-colour-action)}
-@keyframes vault-transfer-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){#vaultTransferWorkspace .vault-transfer-item.is-moving,.vault-transfer-toast.is-moving .vault-transfer-toast-mark{animation:none}}
+@keyframes vault-transfer-shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes vault-transfer-success{0%{opacity:.5}100%{opacity:.18}}
+@media(prefers-reduced-motion:reduce){#vaultTransferWorkspace .vault-transfer-item.is-moving,.vault-transfer-toast-fill,.vault-transfer-toast.is-moving .vault-transfer-toast-fill::after{animation:none!important;transition:none!important}}

@@ -4,6 +4,13 @@ import {createServer} from 'node:http';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {resolve,extname} from 'node:path';
+import {transferFailureReason} from '../pages/vault/vault-transfer-feedback.mjs';
+// Prompt 18: error wording is short and mapped, never raw transport details.
+assert.equal(transferFailureReason('The Vault is full.'),'Vault full');
+assert.equal(transferFailureReason('Item is currently equipped.'),'Item is equipped');
+assert.equal(transferFailureReason('Destination has no space.'),'Inventory full');
+assert.equal(transferFailureReason('Bungie service unavailable.'),'Bungie unavailable');
+assert.equal(transferFailureReason('Bungie fixture failure'),'Transfer failed');
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 const root=fileURLToPath(new URL('../../',import.meta.url));
@@ -59,11 +66,11 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({channel:'chromium',headless:true});
- async function setup({fail=false,viewport={width:1363,height:900},hunterSource=false}={}){
-  const page=await browser.newPage({viewport}),errors=[],requests=[];
+ async function setup({fail=false,viewport={width:1363,height:900},hunterSource=false,reducedMotion='no-preference'}={}){
+  const page=await browser.newPage({viewport,reducedMotion}),errors=[],requests=[];
   page.on('pageerror',error=>errors.push(error.message));
   const locations=new Map(['101','102','103'].map(id=>[id,{kind:'carried',characterId:'1'}]));
-  let release;const gate=new Promise(done=>{release=done;});
+  const releases=[],gates=[0,1].map(()=>new Promise(done=>releases.push(done))),release=()=>releases.forEach(done=>done());
   await page.route('**/*',async route=>{
    const request=route.request(),url=new URL(request.url());
    if(url.origin!==origin){await route.abort();return;}
@@ -73,7 +80,7 @@ try{
     await route.fulfill({json:{profile}});return;
    }
    if(url.pathname==='/bungie/actions/transfer-item'){
-    const body=request.postDataJSON();requests.push(body);await gate;
+    const body=request.postDataJSON();requests.push(body);await gates[Math.min(requests.length-1,1)];
     if(fail){await route.fulfill({status:400,json:{ErrorCode:99,Message:'Bungie fixture failure'}});return;}
     locations.set(body.itemId,body.transferToVault?{kind:'vault',characterId:null}:{kind:'carried',characterId:body.characterId});
     await route.fulfill({json:{ErrorCode:1}});return;
@@ -82,7 +89,7 @@ try{
    await route.continue();
   });
   await page.goto(origin+(hunterSource?'/?hunter':''));await page.waitForFunction(()=>window.fixtureReady);
-  return {page,errors,requests,release};
+  return {page,errors,requests,release,releaseStep:step=>releases[step-1]()};
  }
  const tile='[data-inspect-item="102"]',sourceRow='[data-drop-character-id="1"] [data-equipment-group="primary"] .vault-transfer-items',vault='[data-drop-kind="vault"] [data-equipment-group="primary"]',hunter='[data-drop-character-id="2"] [data-equipment-group="primary"]';
  async function drag(page){
@@ -92,6 +99,14 @@ try{
   await page.evaluate(selector=>{const node=document.querySelector(selector);for(const type of ['dragover','drop'])node.dispatchEvent(new DragEvent(type,{bubbles:true,cancelable:true,dataTransfer:window.dragData}));},target);
  }
  async function count(page,selector,n){assert.equal(await page.locator(selector).count(),n,selector);}
+ async function minimalToast(page,destination){
+  const toast=page.locator('.vault-transfer-toast');
+  assert.deepEqual(await toast.locator('> div').innerText().then(text=>text.split('\n').filter(Boolean)),['Fixture 102',`Transfer to ${destination}`]);
+  assert.doesNotMatch(await toast.innerText(),/ownership|evidence|verified|authenticated|authoritative|Moving|complete/i);
+  await count(page,'.vault-transfer-toast > img',1);await count(page,'.vault-transfer-toast > button:visible',1);
+  await count(page,'.vault-transfer-toast-status:visible,.vault-transfer-toast-mark:visible',0);
+  assert.equal(await toast.locator('.vault-transfer-toast-mark').evaluate(node=>getComputedStyle(node).animationName),'none','No spinner');
+ }
  for(const viewport of [{width:1363,height:900},{width:2560,height:1440}]){
   const test=await setup({viewport,hunterSource:true}),{page}=test;
   const buckets=['primary','special','heavy','helmet','gauntlets','chest','legs','class-item','ghost','ship','sparrow'];
@@ -122,12 +137,18 @@ try{
   await drop(page,vault);
   await count(page,vault+' '+tile+'.is-moving',1);await count(page,'.vault-transfer-toast.is-moving',1);
   assert.match(await page.locator('.vault-transfer-toast').innerText(),/Transfer to Vault/);
+  await minimalToast(page,'Vault');
+  await page.waitForFunction(()=>Number(document.querySelector('.vault-transfer-toast').dataset.progress)>0);
+  const waiting=Number(await page.locator('.vault-transfer-toast').getAttribute('data-progress'));assert.ok(waiting>0&&waiting<.9,'Single-call fill eases towards, never exceeds, 90% before confirmation');
   await count(page,'.is-drop-active,.is-drop-target,.vault-drag-ghost',0);
   assert.equal(await page.locator(tile).getAttribute('aria-busy'),'true');
   test.release();await page.waitForSelector('.vault-transfer-toast.is-success');
+  assert.equal(await page.locator('.vault-transfer-toast').getAttribute('data-progress'),'1');
+  await count(page,'.vault-transfer-toast > button:visible',0);assert.equal(await page.locator('.vault-transfer-toast-mark:visible').innerText(),'✓');
   await count(page,vault+' '+tile,1);await count(page,tile+'.is-moving',0);
   assert.deepEqual(test.requests,[{membershipType:3,characterId:'1',itemId:'102',itemReferenceHash:1001,stackSize:1,transferToVault:true}]);
-  await page.waitForSelector('.vault-transfer-toast',{state:'detached',timeout:5000});
+  const completedAt=Date.now();await page.waitForTimeout(1500);await count(page,'.vault-transfer-toast.is-success',1);
+  await page.waitForSelector('.vault-transfer-toast',{state:'detached',timeout:1200});assert.ok(Date.now()-completedAt<2700,'Success auto-dismisses after 2s');
   assert.deepEqual(test.errors,[]);await page.close();
  }
  {
@@ -136,7 +157,9 @@ try{
   await drag(page);await drop(page,vault);await count(page,vault+' '+tile+'.is-moving',1);
   test.release();await page.waitForSelector('.vault-transfer-toast.is-error');
   assert.deepEqual(await page.locator(sourceRow+' > [data-inspect-item]').evaluateAll(nodes=>nodes.map(node=>node.dataset.inspectItem)),before,'Failure restores the exact original slot even after profile rerender');
-  assert.equal(await page.locator('.vault-transfer-toast [role="alert"]').innerText(),'Bungie fixture failure');
+  // Prompt 18: retain the error assertion with the exact mapped short reason.
+  assert.equal(await page.locator('.vault-transfer-toast [role="alert"]').innerText(),'Transfer failed');
+  assert.equal(await page.locator('.vault-transfer-toast-fill').evaluate(node=>{const probe=document.createElement('span');probe.style.color='var(--apx-colour-action)';node.append(probe);const matches=getComputedStyle(node).backgroundColor===getComputedStyle(probe).color;probe.remove();return matches;}),true,'Failure fill is the red action token');
   await page.waitForTimeout(3100);await count(page,'.vault-transfer-toast.is-error',1);
   await page.locator('.vault-transfer-toast button').click();await count(page,'.vault-transfer-toast',0);
   await count(page,'.is-drop-active,.is-drop-target,.is-moving',0);assert.deepEqual(test.errors,[]);await page.close();
@@ -146,9 +169,36 @@ try{
   if(gesture==='double-click')await page.locator(tile).dblclick();else{await page.locator(tile).focus();await page.keyboard.press(gesture);}
   await count(page,hunter+' '+tile+'.is-moving',1);await count(page,'.vault-transfer-toast.is-moving',1);
   assert.match(await page.locator('.vault-transfer-toast').innerText(),/Transfer to Hunter/);
-  test.release();await page.waitForSelector('.vault-transfer-toast.is-success');await count(page,hunter+' '+tile,1);
+  await minimalToast(page,'Hunter');
+  assert.equal(await page.locator('.vault-transfer-toast').getAttribute('data-progress'),'0');
+  test.releaseStep(1);await page.waitForFunction(()=>document.querySelector('.vault-transfer-toast').dataset.progress==='0.5');
+  await page.waitForFunction(()=>{
+   const node=document.querySelector('.vault-transfer-toast-fill');
+   if(!node)return false;
+   const fill=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();
+   return Math.abs(fill.width-(toast.width-2)/2)<=1&&Math.abs(fill.left-toast.left)<=1;
+  },null,{timeout:3000});
+  const halfway=await page.locator('.vault-transfer-toast-fill').evaluate(node=>{const r=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();return {width:r.width,full:toast.width,left:r.left,toastLeft:toast.left};});
+  assert.ok(Math.abs(halfway.width-(halfway.full-2)/2)<=1,'First accepted call fills exactly half the toast');assert.ok(Math.abs(halfway.left-halfway.toastLeft)<=1,'Fill starts at the left edge');
+  assert.equal(test.requests.length,2,'Second call waits after the first succeeds');
+  test.releaseStep(2);await page.waitForSelector('.vault-transfer-toast.is-success');await count(page,hunter+' '+tile,1);
+  assert.equal(await page.locator('.vault-transfer-toast').getAttribute('data-progress'),'1');
+  await page.waitForFunction(()=>{
+   const node=document.querySelector('.vault-transfer-toast-fill');
+   if(!node)return false;
+   const fill=node.getBoundingClientRect(),toast=node.parentElement.getBoundingClientRect();
+   return Math.abs(fill.width-(toast.width-2))<=1&&Math.abs(fill.left-toast.left)<=1;
+  },null,{timeout:3000});
+  assert.ok(await page.locator('.vault-transfer-toast-fill').evaluate(node=>Math.abs(node.getBoundingClientRect().width-(node.parentElement.getBoundingClientRect().width-2))<=1),'Success fills the entire toast');
   assert.deepEqual(test.requests.map(({characterId,transferToVault})=>({characterId,transferToVault})),[{characterId:'1',transferToVault:true},{characterId:'2',transferToVault:false}]);
   assert.deepEqual(test.errors,[]);await page.close();
+ }
+ {
+  const test=await setup({reducedMotion:'reduce'}),{page}=test;
+  await page.locator(tile).dblclick();test.releaseStep(1);
+  await page.waitForFunction(()=>document.querySelector('.vault-transfer-toast').dataset.progress==='0.5');
+  assert.deepEqual(await page.locator('.vault-transfer-toast-fill').evaluate(node=>({transition:getComputedStyle(node).transitionDuration,animation:getComputedStyle(node,'::after').animationName})),{transition:'0s',animation:'none'},'Reduced motion has stepped fill and no shimmer');
+  test.releaseStep(2);await page.waitForSelector('.vault-transfer-toast.is-success');assert.deepEqual(test.errors,[]);await page.close();
  }
  {
   const test=await setup(),{page}=test;await drag(page);
