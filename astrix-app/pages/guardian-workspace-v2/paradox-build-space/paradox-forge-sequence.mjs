@@ -1,10 +1,10 @@
 // Worker-safe Forge sequence. Selection and Artifact rules are shared with the established UI flow.
 import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
-import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1';
-import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1';
-import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1';
-import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
+import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1&plain=20260925-1';
+import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-1';
+import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-1';
+import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-1';
+import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);
 const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments']);
@@ -17,48 +17,48 @@ function forgeEvidenceAssessment(build={},coherence={violations:[]},additional=[
   const pending=[];
   const add=row=>{if(row?.message&&!pending.some(item=>item.code===row.code&&item.message===row.message))pending.push(row);};
   const anchor=build.forgeLoaderDecision?.buildAnchor||{},perk=anchor.perk||{},effectText=String(perk.description||perk.definition?.displayProperties?.description||'').trim();
-  if(!effectText)add({code:'exotic-effect-description-unresolved',field:'forgeLoaderDecision.buildAnchor.perk.description',hash:Number(perk.hash)||Number(anchor.selectedItemHash)||null,message:`${anchor.name||'Staged Exotic'} effect description is unresolved and was excluded from the evidence score.`});
+  if(!effectText)add({code:'exotic-effect-description-unresolved',field:'forgeLoaderDecision.buildAnchor.perk.description',hash:Number(perk.hash)||Number(anchor.selectedItemHash)||null,message:`${anchor.name||'Staged Exotic'} effect details are unavailable.`});
   for(const message of coherence?.violations||[]){
     const weapon=(build.weapons||[]).find(item=>message.startsWith(`${item?.name||''}:`));
     add({code:/Artifact/i.test(message)?'artifact-evidence-incomplete':/perk|weapon/i.test(message)?'weapon-perk-evidence-incomplete':'optional-loadout-evidence-incomplete',field:/Artifact/i.test(message)?'artifactRecommendation':/perk|weapon/i.test(message)?'weapons.weaponPerkModel':'loadoutCoherence',hash:Number(weapon?.itemHash??weapon?.hash)||null,message});
   }
   for(const row of additional)add(row);
-  return {schemaVersion:1,status:pending.length?'partial':'complete',critical:{stagedArmour:true,verifiedSubclass:true,activityContext:forgeActivityKey(build.activityContext)},pending,excludedFromEvidenceScore:[...new Set(pending.map(row=>row.field))],statement:pending.length?`Partial Working Build generated with ${pending.length} unresolved evidence field${pending.length===1?'':'s'} excluded from scoring.`:'All required and optional generation evidence resolved.'};
+  return {schemaVersion:1,status:pending.length?'partial':'complete',critical:{stagedArmour:true,verifiedSubclass:true,activityContext:forgeActivityKey(build.activityContext)},pending,excludedFromEvidenceScore:[...new Set(pending.map(row=>row.field))],statement:pending.length?`Partial Working Build generated with ${pending.length} unresolved data field${pending.length===1?'':'s'} excluded from scoring.`:'All required and optional generation data resolved.'};
 }
 
 export async function prepareForgeSequence({build,candidate,element,objective='balanced',currentSeasonNumber=null,superHash=0,weaponInstanceIds=[]},{onProgress=()=>{},advise=adviseLiveWeaponRolls}={}){
   const entry=validateForgeGenerationEntry(build);if(!entry.ready)throw new Error(entry.reason);
-  if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the verified armour selection.');
+  if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the armour selection.');
   if(!hasForgeActivityContext(build))throw new Error('Select Raid, DPS, Grandmaster, Crucible, PVE or PVP before generating this build.');
   if(superHash){
     const sb=candidate.subclassBuild||candidate.build,selected=[sb.super,...(sb.superOptions||[])].find(item=>Number(item?.hash??item?.bungieHash)===Number(superHash));
-    if(!selected)throw new Error('The selected Super is not in this verified subclass catalogue.');
+    if(!selected)throw new Error('The selected Super is not in this subclass catalogue.');
     candidate={...candidate,subclassBuild:{...sb,super:selected,superOptions:[selected]}};
   }
   const state=createBuildState(build),updateForgeGenerationPhase=async message=>onProgress(message),additionalPending=[];
   let next=protectBuildState(state),working={...next.workingBuild};
-  await updateForgeGenerationPhase('OPTIMISING VERIFIED SUBCLASS COMPONENTS…');
+  await updateForgeGenerationPhase('OPTIMISING SUBCLASS COMPONENTS…');
   const composed=composeForgeRecommendation({build:forgeComputationProjection(working),candidate,element:element,analyzeBuild:analyzeLiveGuardian,bounded:true});
   working=mergeComposedRecommendation(working,composed.workingBuild);
   working.recommendationGeneratedAt=new Date().toISOString();working.recommendationElement=element;working.recommendationStatus='review-required';working.forgeIntelligence={...composed.intelligence,generatedAt:working.recommendationGeneratedAt};working.paradoxAnalysis=composed.analysis||analyzeLiveGuardian(working)||null;
   next={...next,workingBuild:working,recommendation:{status:'review-required',generatedAt:working.recommendationGeneratedAt,element,source:directEntryMode(build)?'verified-owned-instance-working-build':'verified-forge-loader-working-build',intelligenceMethod:working.forgeIntelligence.method}};
   working.objective=objective;working.loadoutIntent=deriveLoadoutIntent(working);
-  await updateForgeGenerationPhase('RANKING ALL VERIFIED OWNED WEAPONS…');
+  await updateForgeGenerationPhase('RANKING ALL WEAPONS…');
   const initialWeaponResult=selectOwnedWeapons({build:working,objective,baselineWeapons:build.weapons,weaponInstanceIds});working=initialWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
   await updateForgeGenerationPhase('BUILDING GRENADE, ORB AND SUPER MOD LOOP…');
   const provisionalModResult=recommendArmourMods({build:working,objective:objective});working=provisionalModResult.workingBuild;
   await updateForgeGenerationPhase('MATCHING ARTIFACT SYNERGY…');
   next=protectBuildState({...next,workingBuild:working});const artifactResult=applyForgeArtifactRecommendation(next,{currentSeasonNumber,force:true});next=artifactResult.state;working={...next.workingBuild};
-  await updateForgeGenerationPhase('RE-RANKING OWNED WEAPONS WITH ARTIFACT FIT…');
+  await updateForgeGenerationPhase('RE-RANKING WEAPONS WITH ARTIFACT FIT…');
   const artifactAwareWeaponResult=selectOwnedWeapons({build:working,objective,baselineWeapons:build.weapons,weaponInstanceIds});working=artifactAwareWeaponResult.workingBuild;working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
   const generatedExoticValidation=validateExoticLoadout(working,{requireArmourAnchor:true});if(!generatedExoticValidation.ready)throw new Error(generatedExoticValidation.reason);
-  await updateForgeGenerationPhase('OPTIMISING VERIFIED ARMOUR MOD CHANGES…');
+  await updateForgeGenerationPhase('OPTIMISING ARMOUR MOD CHANGES…');
   const modResult=recommendArmourMods({build:working,objective:objective});working=modResult.workingBuild;const generatedModValidation=validateArmourModLoadout(working);if(!generatedModValidation.ready)throw new Error(generatedModValidation.reason);working.paradoxAnalysis=analyzeLiveGuardian(working)||working.paradoxAnalysis||null;
   await updateForgeGenerationPhase('FINALISING ORDERED ARTIFACT PICKS…');
   next=protectBuildState({...next,workingBuild:working});const finalArtifactResult=applyForgeArtifactRecommendation(next,{currentSeasonNumber,force:true});next=finalArtifactResult.state;working={...next.workingBuild};const coherence=validateLoadoutCoherence(working);working.loadoutCoherence=coherence;
-  await updateForgeGenerationPhase('VERIFYING RECOMMENDED WEAPON PERK ROLLS…');
+  await updateForgeGenerationPhase('LOADING RECOMMENDED WEAPON PERK ROLLS…');
   try{await advise(working,working.paradoxAnalysis||{}, {insertSocketPlugFree:false});}
-  catch(error){additionalPending.push({code:'weapon-roll-advice-unavailable',field:'weaponRollAdvice',hash:null,message:`Weapon roll advice remains pending: ${error?.message||'verified perk evidence was unavailable'}.`});}
+  catch(error){additionalPending.push({code:'weapon-roll-advice-unavailable',field:'weaponRollAdvice',hash:null,message:`Weapon roll advice remains pending: ${error?.message||'perk data was unavailable'}.`});}
   working.forgeEvidence=forgeEvidenceAssessment(working,coherence,additionalPending);
   working.recommendationStatus=working.forgeEvidence.status==='partial'?'partial-review-required':'review-required';
   const refreshedIntelligence=refreshForgeIntelligence({build:forgeComputationProjection(working),element,analyzeBuild:analyzeLiveGuardian,bounded:true});

@@ -1,6 +1,6 @@
-import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs?plain=20260925-1';
 import {ARMOUR_STAT_KEYS,armourStatVector} from '../../vault/vault-armour-matcher.mjs';
-import {isExoticItem,validateExoticLoadout,validateArmourModLoadout} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1';
+import {isExoticItem,validateExoticLoadout,validateArmourModLoadout} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-1';
 
 const BUILD_ELEMENTS=Object.freeze(['arc','solar','strand','stasis','void','prismatic']);
 const DIRECT_ENTRY_MODES=new Set(['equipped','owned']);
@@ -47,23 +47,23 @@ function validateForgeGenerationEntry(build={}){
   const mode=directEntryMode(build),exotic=validateExoticLoadout(build,{requireArmourAnchor:true});
   if(!mode){
     const tier=validateTierFiveArmour(build);
-    return {ready:Boolean(build.forgeLoaderDecision)&&tier.ready&&exotic.ready,reason:!build.forgeLoaderDecision?'Choose a direct entry or stage a verified Forge Loader armour result.':tier.reason||exotic.reason};
+    return {ready:Boolean(build.forgeLoaderDecision)&&tier.ready&&exotic.ready,reason:!build.forgeLoaderDecision?'Choose a direct entry or stage a Forge Loader armour result.':tier.reason||exotic.reason};
   }
   const binding=build.forgeLoaderDecision.binding||{},fail=reason=>({ready:false,reason});
   for(const key of ['characterId','membershipId','membershipType'])if(!/^\d+$/.test(String(build[key]||''))||String(binding[key])!==String(build[key]))return fail('The direct entry must match the selected Guardian and Bungie membership.');
   if(!Object.hasOwn(CLASS_TYPES,build.characterClass))return fail('The selected Guardian class is unresolved.');
   for(const [kind,buckets,catalogue] of [['armour',ARMOUR_BUCKETS,build.ownedArmour],['weapons',WEAPON_BUCKETS,build.ownedWeapons]]){
     const items=build[kind]||[];
-    if(items.length!==buckets.length||new Set(items.map(instanceId)).size!==buckets.length)return fail(`A complete set of exact owned ${kind} instances is required.`);
+    if(items.length!==buckets.length||new Set(items.map(instanceId)).size!==buckets.length)return fail(`A complete set of ${kind} instances is required.`);
     for(const [index,item] of items.entries()){
-      if(!/^\d+$/.test(instanceId(item))||!ownedSource(item)||Number(item?.bucketHash)!==buckets[index]||!(catalogue||[]).some(row=>instanceId(row)===instanceId(item)&&itemHash(row)===itemHash(item)&&ownedSource(row)))return fail(`The selected ${kind} must match owned inventory and its equipment slot.`);
+      if(!/^\d+$/.test(instanceId(item))||!ownedSource(item)||Number(item?.bucketHash)!==buckets[index]||!(catalogue||[]).some(row=>instanceId(row)===instanceId(item)&&itemHash(row)===itemHash(item)&&ownedSource(row)))return fail(`The selected ${kind} must match inventory and its equipment slot.`);
       if(!matchesClass(item,build))return fail('The selected equipment does not match this Guardian class.');
-      if(!verifiedSockets(item))return fail('Verified item socket data is required before generation.');
+      if(!verifiedSockets(item))return fail('Item socket data is required before generation.');
       const capacity=item?.energy?.capacity??item?.armourSemantics?.energy?.capacity;
-      if(kind==='armour'&&(capacity==null||!Number.isFinite(Number(capacity))||Number(capacity)<0))return fail('Verified armour energy capacity is required before generation.');
+      if(kind==='armour'&&(capacity==null||!Number.isFinite(Number(capacity))||Number(capacity)<0))return fail('Armour energy capacity is required before generation.');
     }
   }
-  if(!exotic.ready)return fail(exotic.reason.replace('Return to Forge Loader and stage a legal armour result.','Choose a legal owned armour selection.').replace('The selected Forge Loader Exotic armour piece is missing from this build.','Choose one owned Exotic armour piece before generation.'));
+  if(!exotic.ready)return fail(exotic.reason.replace('Return to Forge Loader and stage a legal armour result.','Choose a legal armour selection.').replace('The selected Forge Loader Exotic armour piece is missing from this build.','Choose one Exotic armour piece before generation.'));
   const mods=validateArmourModLoadout(build);if(!mods.ready)return fail(mods.reason);
   return {ready:true,reason:''};
 }
@@ -77,8 +77,8 @@ function verifiedMasterworkState(item){
   const semantics=item?.armourSemantics||{};
   const source=item?.masterwork??semantics.masterwork??null;
   const level=Number(item?.masterworkLevel??semantics.masterworkLevel);
-  if(item?.isMasterworked===true||item?.masterworked===true)return 'MASTERWORK VERIFIED';
-  if(source&&(/masterwork/i.test(String(source?.semanticRole||source?.name||source?.displayName||''))||Number.isFinite(level)))return 'MASTERWORK VERIFIED';
+  if(item?.isMasterworked===true||item?.masterworked===true)return 'MASTERWORK';
+  if(source&&(/masterwork/i.test(String(source?.semanticRole||source?.name||source?.displayName||''))||Number.isFinite(level)))return 'MASTERWORK';
   return 'MASTERWORK NOT REPORTED';
 }
 
@@ -95,7 +95,7 @@ function validateTierFiveArmour(build={}){
     reason:armour.length!==5
       ?'Five exact armour instances are required.'
       :tiers.some(tier=>!Number.isFinite(tier))
-        ?'A verified armour tier is missing.'
+        ?'An armour tier is missing.'
         :tiers.some(tier=>tier<5)
           ?'Generated builds require T5 armour in every slot.'
           :!maximized

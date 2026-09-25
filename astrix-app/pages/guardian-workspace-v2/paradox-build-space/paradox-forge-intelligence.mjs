@@ -27,7 +27,7 @@ const clean=value=>String(value??'').trim();
 const lower=value=>clean(value).toLowerCase();
 const uniq=values=>[...new Set(values.filter(Boolean))];
 const itemKey=item=>String(item?.hash??item?.itemHash??item?.bungieHash??'');
-const itemName=(item,fallback='Verified component')=>clean(item?.name??item?.displayName??item?.definition?.displayProperties?.name)||fallback;
+const itemName=(item,fallback='Component')=>clean(item?.name??item?.displayName??item?.definition?.displayProperties?.name)||fallback;
 const regexEscape=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 
 function descriptionEvidence(item={}){
@@ -111,12 +111,12 @@ function subclassCompatibilityEvidence(build={},candidate={}){
   const named=subclassComponents(candidate).filter(item=>descriptionNamesComponent(description,item));
   for(const item of named)evidence.push({
     code:'exotic-explicit-component',score:500,componentHash:Number(itemKey(item)),componentName:itemName(item),
-    label:`${itemName(perk,'The staged Exotic perk')} explicitly names ${itemName(item)} in its verified effect.`,sourceText:description
+    label:`${itemName(perk,'The staged Exotic perk')} explicitly names ${itemName(item)} in its effect.`,sourceText:description
   });
   const elements=scopedElements(description,['damage','ability','abilities','grenade','melee','super']);
   if(element&&elements.includes(element))evidence.push({
     code:'exotic-explicit-element',score:220,element,
-    label:`${itemName(perk,'The staged Exotic perk')} explicitly scopes its verified effect to ${element.toUpperCase()}.`,sourceText:description
+    label:`${itemName(perk,'The staged Exotic perk')} explicitly scopes its effect to ${element.toUpperCase()}.`,sourceText:description
   });
   return {
     candidateHash:itemKey(candidate),element,status:evidence.length?'evidenced':'no-explicit-subclass-restriction',
@@ -131,7 +131,7 @@ function superInvestmentEvidence(build={}){
   const value=Number.isFinite(achieved)?achieved:Number.isFinite(profileValue)?profileValue:null;
   return value===null?null:{
     code:'super-investment-context',score:0,value,priority:Number.isInteger(priority)&&priority>0?priority:null,
-    label:`Verified Super investment is ${value}${Number.isInteger(priority)&&priority>0?` with Forge Loader priority ${priority}`:''}. This is build context and does not prove one Super is stronger.`
+    label:`Super investment is ${value}${Number.isInteger(priority)&&priority>0?` with Forge Loader priority ${priority}`:''}. This is build context and does not prove one Super is stronger.`
   };
 }
 
@@ -174,16 +174,16 @@ function rankExoticSuperSynergy(build={},candidates=[]){
         for(const component of namedSupport){
           const supportText=descriptionEvidence(component),superAlias=componentAliases(superItem).find(alias=>lower(supportText).includes(alias));
           if(superAlias)evidence.push({
-            code:'exotic-component-super-bridge',score:220,label:`${perkName} explicitly supports ${itemName(component)}, whose verified definition explicitly names ${superAlias}.`,sourceText:description,supportText
+            code:'exotic-component-super-bridge',score:220,label:`${perkName} explicitly supports ${itemName(component)}, whose definition explicitly names ${superAlias}.`,sourceText:description,supportText
           });
           else if(/\bsuper energy\b/i.test(supportText))evidence.push({
-            code:'exotic-component-super-energy-bridge',score:150,label:`${perkName} explicitly supports ${itemName(component)}, whose verified definition supplies Super energy to ${itemName(superItem)}.`,sourceText:description,supportText
+            code:'exotic-component-super-energy-bridge',score:150,label:`${perkName} explicitly supports ${itemName(component)}, whose definition supplies Super energy to ${itemName(superItem)}.`,sourceText:description,supportText
           });
         }
         for(const component of energyBridges){
           const supportText=descriptionEvidence(component),kind=namedAbilityKinds.find(value=>lower(supportText).includes(value))||'subclass ability';
           evidence.push({
-            code:'exotic-ability-super-energy-bridge',score:150,label:`${perkName} explicitly supports a ${kind} used by ${itemName(component)}, whose verified definition grants Super energy to ${itemName(superItem)}.`,sourceText:description,supportText
+            code:'exotic-ability-super-energy-bridge',score:150,label:`${perkName} explicitly supports a ${kind} used by ${itemName(component)}, whose definition grants Super energy to ${itemName(superItem)}.`,sourceText:description,supportText
           });
         }
       }
@@ -324,7 +324,7 @@ function componentEvidenceScore(item,context={}){
   for(const source of superEvidence?[]:(context.sources||[])){
     for(const token of tokens.filter(value=>source.tokens.includes(value)).slice(0,3)){
       const points=36*Math.max(1,Number(source.weight)||1);
-      add(`mechanic:${token}:${source.kind}`,`${itemName(item)} shares verified ${token} evidence with ${source.kind} · ${source.name}`,points,{componentHash:Number(itemKey(item)),sourceKind:source.kind,sourceName:source.name,token});
+      add(`mechanic:${token}:${source.kind}`,`${itemName(item)} shares ${token} effects with ${source.kind==='owned weapon'?'weapon':source.kind} · ${source.name}`,points,{componentHash:Number(itemKey(item)),sourceKind:source.kind,sourceName:source.name,token});
     }
     const componentName=lower(itemName(item,'')),sourceText=itemEvidence(source.item);
     if(source.weight>1&&componentName.length>=4&&sourceText.includes(componentName))add('exotic-anchor-exact-ability',`${source.name} explicitly names ${itemName(item)}; it is required for the selected Exotic armour loop.`,360,{componentHash:Number(itemKey(item)),sourceKind:source.kind,sourceName:source.name,componentName:itemName(item)});
@@ -335,7 +335,7 @@ function componentEvidenceScore(item,context={}){
   for(const stat of ['health','melee','grenade','super','class','weapon']){
     const rank=Number(priorities[stat]);
     if(!Number.isInteger(rank)||rank<1||rank>6||!tokens.includes(stat==='class'?'class ability':stat))continue;
-    add(`stat-priority:${stat}`,`${itemName(item)} has explicit ${stat} evidence for Forge Loader priority ${rank}`,Math.max(6,24-(rank-1)*3),{stat,rank});
+    add(`stat-priority:${stat}`,`${itemName(item)} has explicit ${stat} data for Forge Loader priority ${rank}`,Math.max(6,24-(rank-1)*3),{stat,rank});
   }
   reasons.sort((left,right)=>right.score-left.score||left.label.localeCompare(right.label));
   return {score:reasons.reduce((sum,row)=>sum+row.score,0),tokens,reasons};
@@ -408,11 +408,11 @@ function decisionLedger(result,context){
   }));
   rows.sort((left,right)=>right.score-left.score||left.componentName.localeCompare(right.componentName));
   const limitations=[];
-  if(!result.analysis)limitations.push('Directed-loop analysis was unavailable; component choices use explicit Forge Loader evidence matches only.');
-  if(result.directed.links===0)limitations.push('No directed producer-to-consumer loop is proven by the currently resolved descriptions.');
+  if(!result.analysis)limitations.push('Directed-loop analysis was unavailable; component choices use explicit Forge Loader data matches only.');
+  if(result.directed.links===0)limitations.push('No producer-to-consumer loop was found in the available descriptions.');
   if(context.element==='prismatic'){
     const missing=['arc','solar','void','stasis','strand'].filter(element=>!result.coveredElements.includes(element));
-    if(missing.length)limitations.push(`Verified Prismatic component evidence does not cover: ${missing.join(', ')}.`);
+    if(missing.length)limitations.push(`Prismatic component data does not cover: ${missing.join(', ')}.`);
   }
   return {rows,limitations};
 }
@@ -430,7 +430,7 @@ function intelligenceRecord({build,result,context,requested,superSynergy}){
 
 function refreshForgeIntelligence({build={},element='',analyzeBuild=null,bounded=true}={}){
   const base=synchroniseSubclassProjection(clone(build)||{}),requested=ELEMENTS.includes(lower(element))?lower(element):elementOf(base.subclass||base.subclassName||'');
-  if(!requested)throw new TypeError('A verified elemental build option is required.');
+  if(!requested)throw new TypeError('An elemental build option is required.');
   const candidate={element:requested,subclassBuild:base.subclassBuild};
   const superSynergy=rankExoticSuperSynergy(base,[candidate]);
   const context={bounded,element:requested,sources:optionSources(base),superSynergy,superEvidence:new Map(superSynergy.entries.map(row=>[String(row.superHash),row])),priorities:base?.forgeLoaderDecision?.statDirective?.priorities||{},baselineKeys:new Set(selectedComponents(base).map(itemKey)),cache:new Map()};
@@ -440,8 +440,8 @@ function refreshForgeIntelligence({build={},element='',analyzeBuild=null,bounded
 
 function composeForgeRecommendation({build={},candidate={},element='',analyzeBuild=null,bounded=false}={}){
   const requested=ELEMENTS.includes(lower(element))?lower(element):elementOf(candidate);
-  if(!requested)throw new TypeError('A verified elemental build option is required.');
-  if(!hasVerifiedSubclassSockets(candidate))throw new TypeError('The selected element does not have a complete verified Bungie subclass socket set.');
+  if(!requested)throw new TypeError('An elemental build option is required.');
+  if(!hasVerifiedSubclassSockets(candidate))throw new TypeError('The selected element does not have a complete Bungie subclass socket set.');
   let base=stageVerifiedSubclassCandidate(build,candidate);
   const superSynergy=rankExoticSuperSynergy(base,[candidate]);
   const context={bounded,element:requested,sources:optionSources(base),superSynergy,superEvidence:new Map(superSynergy.entries.map(row=>[String(row.superHash),row])),priorities:base?.forgeLoaderDecision?.statDirective?.priorities||{},baselineKeys:new Set(selectedComponents(base).map(itemKey)),cache:new Map()};

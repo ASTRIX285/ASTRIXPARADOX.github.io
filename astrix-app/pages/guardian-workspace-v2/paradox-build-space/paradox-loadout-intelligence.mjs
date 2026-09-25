@@ -1,5 +1,5 @@
 import {classifyArmourPlug,classifyWeaponPlug,weaponPerkColumnRowCountForTier,weaponPerkRowCountForTier} from '../guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {explicitTokens} from './paradox-forge-intelligence.mjs';
+import {explicitTokens} from './paradox-forge-intelligence.mjs?plain=20260925-1';
 
 const STAT_KEYS=Object.freeze(['health','melee','grenade','super','class','weapon']);
 const WEAPON_BUCKETS=Object.freeze([1498876634,2465295065,953998645]);
@@ -20,7 +20,7 @@ const clean=value=>String(value??'').trim();
 const lower=value=>clean(value).toLowerCase();
 const itemHash=item=>Number(item?.hash??item?.itemHash??item?.bungieHash);
 const itemIdentity=item=>String(item?.itemInstanceId||itemHash(item)||'');
-const itemName=(item,fallback='Verified option')=>clean(item?.name||item?.displayName||item?.definition?.displayProperties?.name)||fallback;
+const itemName=(item,fallback='Option')=>clean(item?.name||item?.displayName||item?.definition?.displayProperties?.name)||fallback;
 const itemText=item=>[
   itemName(item,''),item?.description,item?.itemTypeDisplayName,item?.definition?.displayProperties?.description,
   item?.definition?.itemTypeDisplayName,item?.definition?.plug?.plugCategoryIdentifier,item?.element,item?.damageType,
@@ -38,11 +38,11 @@ function itemElement(item={}){
 function deriveLoadoutIntent(build={}){
   const anchor=build.forgeLoaderDecision?.buildAnchor||{},anchorText=itemText(anchor.perk||anchor),subclassText=[build.subclass,build.subclassName,build.subclassBuild?.name,build.subclassBuild?.super?.element,build.subclassBuild?.super?.elementDefinition?.displayProperties?.name].map(lower).join(' '),element=DAMAGE_ELEMENTS.find(value=>value!=='kinetic'&&subclassText.includes(value))||null,grenadeAnchor=/\bgrenade\b|scatter charge|nothing manacles/i.test(anchorText),sequence=[];
   const add=(name,description,weight)=>sequence.push({order:sequence.length+1,name,description,weight});
-  add('Exotic and subclass anchor',[itemName(anchor,'Verified Exotic'),element?`${element.toUpperCase()} subclass`:null,grenadeAnchor?'grenade loop':null].filter(Boolean).join(' · '),52);
-  if(element)add(`${element.toUpperCase()} owned weapon fit`,`${element} weapons enable matching weapon, Siphon and Artifact effects.`,46);
+  add('Exotic and subclass anchor',[itemName(anchor,'Exotic'),element?`${element.toUpperCase()} subclass`:null,grenadeAnchor?'grenade loop':null].filter(Boolean).join(' · '),52);
+  if(element)add(`${element.toUpperCase()} weapon fit`,`${element} weapons enable matching weapon, Siphon and Artifact effects.`,46);
   if(grenadeAnchor){
-    add('Grenade orb generation','Grenade final blows create an Orb of Power through a verified Firepower-style armour mod.',58);
-    add('Grenade Super return','Grenade final blows grant Super energy through a verified Ashes to Assets-style armour mod.',56);
+    add('Grenade orb generation','Grenade final blows create an Orb of Power through a Firepower-style armour mod.',58);
+    add('Grenade Super return','Grenade final blows grant Super energy through an Ashes to Assets-style armour mod.',56);
     add('Orb and Super loop','Orbs of Power and grenade final blows accelerate Super replenishment and ability uptime.',50);
   }
   add('Artifact bucket sequence','Fill each legal Artifact 2.0 bucket in order using the Exotic, subclass, weapons, Orbs of Power and Super loop.',42);
@@ -134,7 +134,7 @@ function scoreMod(mod,{build={},objective='balanced'}={}){
   const decision=build.forgeLoaderDecision?.statDirective||{},targets=decision.targets||{},achieved=decision.achieved||{},priorities=decision.priorities||{},stats=modStats(mod),reasons=[],evidence=buildEvidence(build),anchorStats=new Set(evidence.filter(source=>source.weight>1).flatMap(source=>source.tokens).map(token=>token==='class ability'?'class':STAT_KEYS.includes(token)?token:null).filter(Boolean));
   let score=0;
   const compatibility=modCompatibleWithWeapons(mod,build),intent=build.loadoutIntent||deriveLoadoutIntent(build),loopRole=modLoopRole(mod);
-  if(!compatibility.compatible)return {score:Number.NEGATIVE_INFINITY,tokens:explicitTokens(mod),stats,reasons:[{kind:'weapon-element-conflict',label:`${itemName(mod)} requires a verified ${String(compatibility.requiredElement).toUpperCase()} weapon, but none is selected.`,score:Number.NEGATIVE_INFINITY}],compatible:false,requiredElement:compatibility.requiredElement,loopRole};
+  if(!compatibility.compatible)return {score:Number.NEGATIVE_INFINITY,tokens:explicitTokens(mod),stats,reasons:[{kind:'weapon-element-conflict',label:`${itemName(mod)} requires a ${String(compatibility.requiredElement).toUpperCase()} weapon, but none is selected.`,score:Number.NEGATIVE_INFINITY}],compatible:false,requiredElement:compatibility.requiredElement,loopRole};
   if(intent.grenadeAnchor&&loopRole==='grenade-orb'){score+=260;reasons.push({kind:'required-loop-step',label:`${itemName(mod)} converts the selected Exotic grenade loop into Orb of Power generation.`,score:260,step:'grenade-orb'});}
   if(intent.grenadeAnchor&&loopRole==='grenade-super'){score+=240;reasons.push({kind:'required-loop-step',label:`${itemName(mod)} converts grenade final blows into faster Super replenishment.`,score:240,step:'grenade-super'});}
   if(loopRole==='element-siphon'&&compatibility.requiredElement===intent.element){score+=120;reasons.push({kind:'verified-weapon-loop',label:`${itemName(mod)} is enabled by the recommended ${String(intent.element).toUpperCase()} weapon selection.`,score:120,element:intent.element});}
@@ -146,11 +146,11 @@ function scoreMod(mod,{build={},objective='balanced'}={}){
   const tokens=explicitTokens(mod);
   for(const source of evidence){
     const shared=tokens.filter(token=>source.tokens.includes(token)).slice(0,2);
-    for(const token of shared){const points=9*Math.max(1,Number(source.weight)||1);score+=points;reasons.push({kind:source.weight>1?'exotic-anchor-synergy':'synergy',label:`Verified ${token} wording matches ${source.kind} · ${source.name}.`,score:points,token});}
+    for(const token of shared){const points=9*Math.max(1,Number(source.weight)||1);score+=points;reasons.push({kind:source.weight>1?'exotic-anchor-synergy':'synergy',label:`${token} wording matches ${source.kind} · ${source.name}.`,score:points,token});}
   }
   const objectiveTerms=OBJECTIVE_TERMS[objectiveName(objective)],text=itemText(mod);
   const objectiveMatches=objectiveTerms.filter(term=>text.includes(term)).slice(0,3);
-  for(const term of objectiveMatches){score+=6;reasons.push({kind:'objective',label:`Explicit ${term} evidence supports the ${objectiveName(objective)} objective.`,score:6,term});}
+  for(const term of objectiveMatches){score+=6;reasons.push({kind:'objective',label:`Explicit ${term} supports the ${objectiveName(objective)} objective.`,score:6,term});}
   reasons.sort((left,right)=>right.score-left.score||left.label.localeCompare(right.label));
   return {score,tokens,stats,reasons,compatible:true,requiredElement:compatibility.requiredElement,loopRole};
 }
@@ -195,8 +195,8 @@ function rankArmourModPlan(item,build,objective){
   });
   const limitations=[];
   if(!sockets.length)limitations.push(`${itemName(item,'Armour')}: Bungie supplied no resolved functional mod sockets.`);
-  if(!Number.isFinite(capacity))limitations.push(`${itemName(item,'Armour')}: energy capacity was not resolved, so no capacity claim is made.`);
-  for(const row of sockets)if(!row.options.length)limitations.push(`${itemName(item,'Armour')} socket ${row.socketIndex}: no verified insertable alternatives were supplied; the installed state is preserved.`);
+  if(!Number.isFinite(capacity))limitations.push(`${itemName(item,'Armour')}: energy capacity unavailable.`);
+  for(const row of sockets)if(!row.options.length)limitations.push(`${itemName(item,'Armour')} socket ${row.socketIndex}: no insertable alternatives were supplied; the installed state is preserved.`);
   const repeatedSingleCopyOptions=new Map();
   for(const row of sockets)for(const mod of uniqueByHash([row.current,...row.options])){const evidence=singleCopyModEvidence(mod);if(!evidence)continue;const existing=repeatedSingleCopyOptions.get(evidence.key)||{mod,evidence,sockets:new Set()};existing.sockets.add(row.socketIndex);repeatedSingleCopyOptions.set(evidence.key,existing);}
   for(const {mod,sockets:eligible} of repeatedSingleCopyOptions.values())if(eligible.size>1)limitations.push(`${itemName(item,'Armour')}: ${itemName(mod,'Mod')} is limited to one copy because Bungie marks additional copies as conflicting or non-beneficial.`);
@@ -316,7 +316,7 @@ function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build
   let chosen=ranked[0]||null;
   if(weaponInstanceIds.length){
     const ids=new Set(weaponInstanceIds.map(String)),rows=rankedByBucket.map(candidates=>candidates.find(row=>ids.has(itemIdentity(row.weapon))));
-    if(weaponInstanceIds.length!==3||ids.size!==3||rows.some(row=>!row))throw new Error('This combination no longer has three complete owned weapon instances. Generate fresh alternatives.');
+    if(weaponInstanceIds.length!==3||ids.size!==3||rows.some(row=>!row))throw new Error('This combination no longer has three complete weapon instances. Generate fresh alternatives.');
     chosen=finishWeaponPlan(rows.reduce((plan,row)=>extendWeaponPlan(plan,row,currentIds,intent),emptyWeaponPlan()),intent,activity);
     if(chosen.exoticCount>1||intent.requiresMatchingWeapon&&hasMatching&&!chosen.matching)throw new Error('This combination violates the Exotic or matching-element build requirement. Generate fresh alternatives.');
   }
@@ -326,8 +326,8 @@ function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build
   });
   const combinations=plans.map((plan,index)=>({id:plan.signature,selected:index===0,score:plan.score,changedSlots:plan.changes,exoticCount:plan.exoticCount,reasons:[...plan.reasons,...plan.rows.flatMap(row=>row.reasons.slice(0,1))],weapons:plan.rows.map(row=>({itemInstanceId:itemIdentity(row.weapon),hash:itemHash(row.weapon),name:itemName(row.weapon),icon:row.weapon.icon||row.weapon.definition?.displayProperties?.icon||'',bucketHash:Number(row.weapon.bucketHash),element:itemElement(row.weapon),ammoType:row.ammo,source:row.weapon.source||null,isExotic:isExoticItem(row.weapon)}))}));
   working.weapons=decisions.map(row=>row.recommended).filter(Boolean);working.objective=resolvedObjective;working.loadoutIntent=intent;
-  const limitations=[];if(!chosen)limitations.push('No complete legal owned weapon combination could be resolved; the existing selections require review.');if(excluded.length)limitations.push(`${excluded.length} owned weapon instance(s) lack selected-perk evidence and were excluded from alternatives.`);if(!(build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length))limitations.push('The broader owned inventory is unavailable; only the supplied equipped instances could be compared.');
-  if(intent.requiresMatchingWeapon&&!chosen?.matching)limitations.push(`No complete owned ${String(intent.element).toUpperCase()} weapon combination was resolved; matching effects require review.`);
+  const limitations=[];if(!chosen)limitations.push('No complete legal weapon combination could be resolved; the existing selections require review.');if(excluded.length)limitations.push(`${excluded.length} weapon instance(s) lack selected-perk data and were excluded from alternatives.`);if(!(build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length))limitations.push('The broader inventory is unavailable; only the supplied equipped instances could be compared.');
+  if(intent.requiresMatchingWeapon&&!chosen?.matching)limitations.push(`No complete ${String(intent.element).toUpperCase()} weapon combination was resolved; matching effects require review.`);
   const recommendation={schemaVersion:2,source:'bungie-owned-exact-weapon-instances',inventoryScope:build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length?'vault-character-and-equipped':'equipped-fallback',method:'owned-active-perk-combination-rank-v4',objective:resolvedObjective,activity,status:chosen?'review-required':'incomplete',decisions,combinations,candidateCount:owned.length,eligibleCandidateCount:rankedByBucket.flat().length,legalCombinationCount:[...states.values()].reduce((sum,state)=>sum+state.count,0),excluded,constraints:{maxExoticWeapons:1,selectedExoticWeaponCount:working.weapons.filter(isExoticItem).length,requiredElement:intent.element,matchingElementCount:intent.element?working.weapons.filter(item=>itemElement(item)===intent.element).length:0},limitations,requiresReview:true,liveTransferAuthorized:false,scoreBasis:'Active perk descriptions, selected objective/activity, element coverage and ammo roles; not measured damage.'};
   working.weaponSelectionRecommendation=recommendation;return {workingBuild:working,recommendation};
 }
@@ -346,10 +346,10 @@ function validateWeaponModel(build={}){
   for(const weapon of (build.weapons||[]).filter(Boolean)){
     const semantics=weapon.weaponSemantics||{},model=semantics.perkModel||weapon.weaponPerkModel||{},tier=Number(model.weaponTier??semantics.gearTier??weapon.gearTier),name=itemName(weapon,'Weapon'),columns=model.columns||[];
     const expectedRows=weaponPerkRowCountForTier(tier);
-    if(!expectedRows||!Number.isFinite(Number(model.expectedRowCount))||Number(model.expectedRowCount)<expectedRows)violations.push(`${name}: the verified Tier ${Number.isInteger(tier)?tier:'unknown'} perk-row model is incomplete.`);
-    if(!columns.length||model.complete===false||(model.unindexedPerks||[]).length)violations.push(`${name}: selected perk evidence is incomplete.`);
+    if(!expectedRows||!Number.isFinite(Number(model.expectedRowCount))||Number(model.expectedRowCount)<expectedRows)violations.push(`${name}: the Tier ${Number.isInteger(tier)?tier:'unknown'} perk-row model is incomplete.`);
+    if(!columns.length||model.complete===false||(model.unindexedPerks||[]).length)violations.push(`${name}: selected perk data is incomplete.`);
     const ordered=columns.map(column=>Number(column.socketIndex));
-    if(columns.some(column=>column.socketIndex==null)||ordered.some(socketIndex=>!Number.isInteger(socketIndex)||socketIndex<0))violations.push(`${name}: perk columns require verified socket indexes.`);
+    if(columns.some(column=>column.socketIndex==null)||ordered.some(socketIndex=>!Number.isInteger(socketIndex)||socketIndex<0))violations.push(`${name}: perk columns require socket indexes.`);
     if(ordered.some((socketIndex,index)=>index>0&&socketIndex<=ordered[index-1]))violations.push(`${name}: perk columns do not preserve Bungie's socket order.`);
     for(const [index,column] of columns.entries()){
       const columnNumber=index+1,required=weaponPerkColumnRowCountForTier(tier,columnNumber);
@@ -357,7 +357,7 @@ function validateWeaponModel(build={}){
       // Tier rows are display capacity, not a minimum number of owned choices.
       // Require the selected perk; live Apply still verifies each socket change.
       const selectedHash=Number(column.selectedPlugHash);
-      if(!Number.isInteger(selectedHash)||selectedHash<=0||column.selectedVisible===false||!(column.options||[]).some(option=>Number(option?.hash??option?.itemHash??option?.bungieHash)===selectedHash))violations.push(`${name}: the selected perk in column ${columnNumber} is missing verified option evidence.`);
+      if(!Number.isInteger(selectedHash)||selectedHash<=0||column.selectedVisible===false||!(column.options||[]).some(option=>Number(option?.hash??option?.itemHash??option?.bungieHash)===selectedHash))violations.push(`${name}: the selected perk in column ${columnNumber} has no available option.`);
       if((column.options||[]).some(option=>classifyWeaponPlug(option)!=='perk'))violations.push(`${name}: a non-perk socket was placed in perk column ${columnNumber}.`);
     }
     const modSockets=semantics.modSockets||[];
@@ -375,25 +375,25 @@ function validateLoadoutCoherence(build={}){
   for(const mod of selectedMods){const compatibility=modCompatibleWithWeapons(mod,build);if(!compatibility.compatible)violations.push(`${itemName(mod)} requires a selected ${String(compatibility.requiredElement).toUpperCase()} weapon.`);}
   if(artifact&&!(artifact.selectionStatus==='ready'&&artifact.selectionLimit>0&&artifact.selectedPerkHashes?.length===artifact.selectionLimit))violations.push('The complete legal Artifact selection was not resolved.');
   const roles=new Set(selectedMods.map(modLoopRole).filter(Boolean)),available=(build.armour||[]).flatMap(item=>Object.values(item?.armourModOptions||item?.socketOptions||{}).flat()).filter(Boolean),availableRoles=new Set(available.map(modLoopRole).filter(Boolean));
-  if(intent.grenadeAnchor&&availableRoles.has('grenade-orb')&&!roles.has('grenade-orb'))violations.push('A verified grenade-to-Orb mod is available but missing from the recommendation.');
-  if(intent.grenadeAnchor&&availableRoles.has('grenade-super')&&!roles.has('grenade-super'))violations.push('A verified grenade-to-Super mod is available but missing from the recommendation.');
+  if(intent.grenadeAnchor&&availableRoles.has('grenade-orb')&&!roles.has('grenade-orb'))violations.push('A grenade-to-Orb mod is available but missing from the recommendation.');
+  if(intent.grenadeAnchor&&availableRoles.has('grenade-super')&&!roles.has('grenade-super'))violations.push('A grenade-to-Super mod is available but missing from the recommendation.');
   const matchingWeapons=(build.weapons||[]).filter(weapon=>itemElement(weapon)===intent.element);
   const matchingOwned=[...(build.ownedWeapons||[]),...(build.vaultWeapons||[]),...(build.inventoryWeapons||[])].filter(weapon=>itemElement(weapon)===intent.element);
-  if(intent.requiresMatchingWeapon&&matchingOwned.length&&!matchingWeapons.length)violations.push(`A verified owned ${String(intent.element).toUpperCase()} weapon exists but none was selected.`);
+  if(intent.requiresMatchingWeapon&&matchingOwned.length&&!matchingWeapons.length)violations.push(`A ${String(intent.element).toUpperCase()} weapon exists but none was selected.`);
   return {ready:violations.length===0,reason:violations[0]||'',violations:[...new Set(violations)],intent,weaponModel,coverage:{matchingWeaponCount:matchingWeapons.length,grenadeOrb:roles.has('grenade-orb'),grenadeSuper:roles.has('grenade-super'),elementSiphon:roles.has('element-siphon'),artifactPicks:Number(artifact?.selectedPerkHashes?.length||0),artifactLimit:Number(artifact?.selectionLimit||0)}};
 }
 
 function createLiveTransferPreflight(build={}){
   const generated=Boolean(build.recommendationGeneratedAt),coherence=generated?validateLoadoutCoherence(build):{ready:true,reason:'',violations:[]},weapons=(build.weapons||[]).filter(Boolean),armour=(build.armour||[]).filter(Boolean),violations=generated?[...coherence.violations]:[],warnings=[];
   if(!/^\d+$/.test(String(build.characterId||''))||!/^\d+$/.test(String(build.membershipId||build.bungieMembershipId||''))||!/^\d+$/.test(String(build.membershipType??'')))violations.push('Apply requires a Bungie Guardian and Destiny membership binding.');
-  if(weapons.length!==3||weapons.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires three exact owned weapon instance IDs.');
-  if(armour.length!==5||armour.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires five exact owned armour instance IDs.');
+  if(weapons.length!==3||weapons.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires three weapon instance IDs.');
+  if(armour.length!==5||armour.some(item=>!/^\d+$/.test(String(item.itemInstanceId||''))))violations.push('Apply requires five armour instance IDs.');
   const exotic=validateExoticLoadout(build,{requireArmourAnchor:false});if(!exotic.ready)violations.push(exotic.reason);
   const mods=validateArmourModLoadout(build);if(!mods.ready)violations.push(mods.reason);
   const locationKinds=new Set(['equipped','carried','vault','profile','postmaster']);
-  for(const item of [...weapons,...armour])if(!locationKinds.has(String(item?.source?.kind||'')))violations.push(`${itemName(item,'Selected item')} is missing verified owned-location evidence.`);
+  for(const item of [...weapons,...armour])if(!locationKinds.has(String(item?.source?.kind||'')))violations.push(`${itemName(item,'Selected item')} is not in your inventory.`);
   if(!build.artifactConfiguration?.selectedPerkHashes?.length)warnings.push('No intended Artifact change is staged.');
-  else warnings.push('Artifact choices are preserved as explicit in-game steps unless Bungie exposes a verified free socket mapping.');
+  else warnings.push('Artifact choices are preserved as explicit in-game steps unless Bungie exposes a free socket mapping.');
   for(const change of build.manualSocketChanges||[])if(change?.remoteSupported===false)warnings.push(`${change.plugName||'A selected socket change'} must be completed in game.`);
   return {schemaVersion:2,status:violations.length?'blocked':'ready',ready:violations.length===0,checkedAt:new Date().toISOString(),mode:generated?'generated-recommendation':'manual-working-build',characterId:String(build.characterId||''),membershipId:String(build.membershipId||build.bungieMembershipId||''),membershipType:String(build.membershipType??''),violations:[...new Set(violations)],warnings:[...new Set(warnings)],coherence,scope:{weapons:weapons.map(item=>String(item.itemInstanceId||'')),armour:armour.map(item=>String(item.itemInstanceId||'')),artifactHash:Number(build.artifactConfiguration?.artifactHash)||null,artifactPerkHashes:[...(build.artifactConfiguration?.selectedPerkHashes||[])],manualSocketChanges:Number(build.manualSocketChanges?.length||0),armourModChanges:Number(build.armourModRecommendation?.summary?.replace||0)+Number(build.armourModRecommendation?.summary?.add||0)+Number(build.armourModRecommendation?.summary?.remove||0)}};
 }
