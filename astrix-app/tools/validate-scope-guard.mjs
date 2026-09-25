@@ -4,6 +4,32 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  'astrix-app/docs/reports-data-grid.md',
+  'astrix-app/tools/test-reports-browser.mjs',
+  // Prompt 20: Reports A and the required page attribution.
+  'ASTRIX285.github.io/admin/index.html',
+  'ASTRIX285.github.io/astrix-app/index.html',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-alpha/index.html',
+  'ASTRIX285.github.io/astrix-app/pages/guardian-workspace-v1/index.html',
+  'ASTRIX285.github.io/index.html',
+  'ASTRIX285.github.io/pages/clips.html',
+  'ASTRIX285.github.io/pages/games.html',
+  'ASTRIX285.github.io/pages/join.html',
+  'ASTRIX285.github.io/pages/news.html',
+  'ASTRIX285.github.io/pages/reviews.html',
+  'astrix-app/pages/reports/index.html',
+  'astrix-app/pages/reports/reports-data.mjs',
+  'astrix-app/pages/reports/reports-model.mjs',
+  'astrix-app/pages/reports/reports-ui.mjs',
+  'astrix-app/pages/reports/reports.css',
+  'astrix-app/pages/reports/reports.mjs',
+  'astrix-app/shared/reports-preload.mjs',
+  'astrix-app/tools/fixtures/reports-fixture.mjs',
+  'astrix-app/tools/test-reports-data.mjs',
+  'astrix-app/tools/validate-bungie-footer.mjs',
+  'forge-auth-worker/src/reports-read.ts',
+  'forge-auth-worker/test/reports-read.test.ts',
+
   'astrix-app/pages/vault/vault-drag-scroll.mjs',
   'astrix-app/tools/test-vault-drag-scroll.mjs',
   'astrix-app/pages/guardian-workspace-v2/guardian-character-actions.css',

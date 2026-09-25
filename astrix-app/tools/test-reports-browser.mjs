@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,mkdir} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+import {resolve,extname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
+const root=fileURLToPath(new URL('../../',import.meta.url));
+const fixture=`import {fixture} from '/astrix-app/tools/fixtures/reports-fixture.mjs';
+import {mountReports} from '/astrix-app/pages/reports/reports-ui.mjs';
+const image='https://www.bungie.net/img/destiny_content/pgcr/europa-raid-deep-stone-crypt.jpg';
+const snapshot=structuredClone(fixture);
+snapshot.catalogue.forEach(row=>row.image=image);
+const art=new Image();const ready=new Promise(resolve=>{art.onload=art.onerror=resolve;});art.src=image;await ready;
+mountReports(document.querySelector('#reportsWorkspace'),snapshot);window.fixtureReady=true;`;
+const html=(await readFile(resolve(root,'astrix-app/pages/reports/index.html'),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'').replace('</body>','<script type="module" src="/reports-fixture.mjs"></script></body>');
+const server=createServer(async(req,res)=>{
+ const path=new URL(req.url,'http://localhost').pathname;
+ if(path==='/'){res.setHeader('Content-Type','text/html');res.end(html);return;}
+ if(path==='/reports-fixture.mjs'){res.setHeader('Content-Type','text/javascript');res.end(fixture);return;}
+ // Resolve the page's relative resources at its real route.
+ const file=resolve(root,'.'+path);if(!file.startsWith(root+'/')){res.writeHead(403).end();return;}
+ try{res.setHeader('Content-Type',({'.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.png':'image/png'})[extname(file)]||'application/octet-stream');res.setHeader('Cache-Control','public, max-age=3600');res.end(await readFile(file));}catch{res.writeHead(404).end();}
+});
+await new Promise(done=>server.listen(0,'127.0.0.1',done));
+const origin=`http://127.0.0.1:${server.address().port}`;
+let browser;
+try{
+ try{browser=await chromium.launch({channel:'chromium',headless:true});}catch(error){if(/Executable doesn't exist/.test(error.message))console.error('NOT RUN: Chromium missing');throw error;}
+ const screenshots=process.env.REPORTS_SCREENSHOT_DIR||'/tmp/astrix-reports-screenshots';await mkdir(screenshots,{recursive:true});
+ for(const width of [1363,1920,2560]){
+  const page=await browser.newPage({viewport:{width,height:1080}});const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/*',async route=>{
+   const url=new URL(route.request().url());
+   if(url.pathname==='/astrix-app/pages/reports/'){await route.fulfill({contentType:'text/html',body:html});return;}
+   if(url.hostname==='www.bungie.net'){await route.fulfill({contentType:'image/png',headers:{'Cache-Control':'public, max-age=3600'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')});return;}
+   if(url.origin!==origin){await route.abort();return;}await route.continue();
+  });
+  await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
+  await page.waitForLoadState('networkidle');
+  const measurements=await page.locator('.reports-card').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,radius:getComputedStyle(node).borderRadius,overflow:[...node.querySelectorAll('*')].some(child=>child.scrollWidth>child.clientWidth+1||child.scrollHeight>child.clientHeight+1)})));
+  assert.ok(measurements.length>0);
+  for(const card of measurements){assert.ok(card.width>=220&&card.width<=320,JSON.stringify(card));assert.equal(card.radius,'8px');assert.equal(card.overflow,false);}
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  const requests=[];page.on('request',request=>requests.push(request.url()));
+  await page.locator('[data-series="dungeons"]').click();await page.locator('[data-series="vanguard"]').click();await page.locator('[data-series="raids"]').click();
+  await page.locator('[data-activity]').first().click();await page.locator('[data-back]').waitFor();
+  await page.waitForLoadState('networkidle');assert.deepEqual(requests,[],'Series switches and activity opening make zero requests');
+  assert.deepEqual(errors,[]);await page.screenshot({path:`${screenshots}/reports-${width}-detail.png`,fullPage:true});
+  await page.locator('[data-back]').click();await page.screenshot({path:`${screenshots}/reports-${width}-grid.png`,fullPage:true});
+  console.log(`REPORTS_BROWSER width=${width} cards=${measurements.map(row=>row.width).join(',')} radius=8 requests=0`);await page.close();
+ }
+}finally{await browser?.close();await new Promise(done=>server.close(done));}

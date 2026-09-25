@@ -6,7 +6,7 @@
     Object.freeze({key:'character',label:'Character',href:'/astrix-app/pages/guardian-workspace-v2/'}),
     Object.freeze({key:'forge-loader',label:'Forge Loader',href:'/astrix-app/pages/forge-loader/'}),
     Object.freeze({key:'build-forge',label:'Build Forge',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
-    // Mission Reports is temporarily hidden from navigation; its page remains intact.
+    Object.freeze({key:'reports',label:'Reports',href:'/astrix-app/pages/reports/'}),
     Object.freeze({key:'vault',label:'Vault',href:'/astrix-app/pages/vault/'}),
     Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
   ]);
@@ -14,7 +14,7 @@
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null,progress=null;
-  const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey'};
+  const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
   function accountIdentity(){
     try{
       const session=window.FORGE_BUNGIE_SESSION||JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session;
@@ -64,6 +64,10 @@
     const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
+    if(destination.key==='reports'){
+      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-1',scriptUrl).href);
+      await preloadReports(session);return;
+    }
     const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1',scriptUrl).href);
     await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
   }
@@ -159,7 +163,13 @@
     mount.replaceChildren(nav);
   }
 
-  function init(){document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);}
+  function warmReports(session){
+    if(!session?.authenticated)return;
+    void import(new URL('./reports-preload.mjs?v=20260925-reports-1',scriptUrl).href)
+      .then(module=>module.preloadReports(session)).catch(()=>{});
+  }
+  window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
+  function init(){document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);warmReports(window.FORGE_BUNGIE_SESSION);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
