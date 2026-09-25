@@ -392,10 +392,9 @@ html,body{
 .recommended-build-safety b{color:#6fe3b6;font:800 9px bahnschrift-semicondensed,sans-serif;letter-spacing:.09em}.recommended-build-safety span{color:#b9c8c2;font-size:10px;text-align:right}
 .recommended-build-render-status[hidden]{display:none!important}
 .recommended-build-render-status{grid-area:status;margin:0;padding:10px 22px;border-bottom:1px solid rgba(239,93,93,.35);background:rgba(82,9,15,.78);color:#ffd5d5;font-size:12px;line-height:1.5}
-.recommended-build-content{grid-area:content;display:grid;grid-template-columns:clamp(310px,20vw,390px) minmax(0,1fr);align-content:start;align-items:start;gap:12px;min-height:0;padding:10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.recommended-build-content{grid-area:content;display:grid;grid-template-columns:minmax(0,1fr);align-content:start;align-items:start;gap:12px;min-height:0;padding:10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .recommended-build-rail>section,.recommended-build-equipment>section{min-width:0;padding:10px;border:1px solid rgba(180,132,45,.24);border-radius:8px;background:rgba(255,255,255,.018)}
-/* Match the Character workspace rail width and equipment flow. Each column
-   stacks independently; a long subclass/Artifact rail cannot push armour down. */
+/* Preserve renderer hosts while disclosing supporting evidence below the explanation. */
 .recommended-build-rail,.recommended-build-equipment{display:grid;align-content:start;gap:12px;min-width:0}
 
 .review-section-heading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.08)}.review-section-heading h3{margin:0;font:800 11px bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
@@ -496,3 +495,30 @@ body.manual-editor-open,body.working-dialog-open{overflow:hidden}
 @media(max-width:720px){.manual-item-grid{grid-template-columns:repeat(auto-fill,var(--apx-icon-gear-art-width))}}
 @media(max-width:1000px){.apply-change-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.apply-change-grid{grid-template-columns:1fr}.apply-confirmation{padding:14px}.apply-change-copy b{white-space:normal}.apply-confirmation footer{align-items:stretch;flex-direction:column}.apply-confirmation footer .primary{width:100%}}
+
+/* Recommendation reading order. Rem-based copy scales with browser zoom;
+   the existing body scroller keeps the live-action footer visible. */
+body.build-forge-page .recommended-build-content{padding:1.25rem;gap:.75rem}
+body.build-forge-page .recommended-build-dialog .review-primary{margin:0 0 .5rem;padding:1.25rem 1.5rem;min-width:0}
+body.build-forge-page .recommended-build-dialog .review-primary h3{margin:0;color:#6fe3b6;font-size:1rem;line-height:1.4;letter-spacing:.06em}
+body.build-forge-page .recommended-build-dialog .review-primary ul{max-width:78ch;margin:1rem 0 0;padding-left:1.25rem}
+body.build-forge-page .recommended-build-dialog .review-primary li{font-size:1.125rem!important;line-height:1.6!important;margin-bottom:.625rem;overflow-wrap:anywhere}
+body.build-forge-page .recommended-build-header h2{font-size:1.75rem!important;line-height:1.2!important}
+body.build-forge-page .recommended-build-header p{font-size:1rem!important;line-height:1.5!important;overflow-wrap:anywhere}
+body.build-forge-page .recommended-build-rail{width:auto;max-width:none}
+.review-disclosure{min-width:0;border:1px solid rgba(180,132,45,.3);border-radius:.5rem;background:rgba(255,255,255,.018)}
+.review-disclosure>summary{padding:1rem;cursor:pointer;color:#eee;font:700 1rem/1.4 var(--apx-font-copy,sans-serif);overflow-wrap:anywhere}
+.review-disclosure>summary::marker{color:#d9b84f}
+.review-disclosure>summary:focus-visible{outline:2px solid #6fe3b6;outline-offset:-3px;border-radius:.5rem}
+.review-disclosure[open]>summary{border-bottom:1px solid rgba(180,132,45,.3)}
+.review-disclosure-body{padding:1rem;min-width:0;overflow-x:auto}
+.review-disclosure #recommendedSubclassSummary{max-width:26rem}
+body.build-forge-page .recommended-armour-summary .gear-columns{grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))}
+body.build-forge-page .recommended-build-actions small{font-size:.875rem;line-height:1.5}
+@media(max-width:720px){
+  body.build-forge-page .recommended-build-content{padding:.75rem}
+  body.build-forge-page .recommended-build-dialog .review-primary{padding:1rem}
+  body.build-forge-page .recommended-build-actions{grid-template-columns:1fr;max-height:45dvh;overflow:auto}
+  body.build-forge-page .recommended-build-actions>div{display:flex;flex-wrap:wrap}
+  body.build-forge-page .recommended-build-actions small{flex-basis:100%;text-align:left}
+}
