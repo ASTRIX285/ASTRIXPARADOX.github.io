@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {POINT_TYPES,hasMapPosition,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries,directorIconUrl,directorViewBox,directorViewPosition,normaliseRegionChestProgress} from '../pages/journey/journey-map-model.mjs';
+import {POINT_TYPES,hasMapPosition,canRenderMapMarker,markerGlyphMarkup,mapCatalogueEntries,filterMapEntries,clusterMapEntries,regionChestEntries,directorIconUrl,directorViewBox,directorViewPosition,normaliseRegionChestProgress} from '../pages/journey/journey-map-model.mjs';
 import {destinationNameMatches,resolveRegionChestProgress,REGION_CHEST_CHECKLIST_HASH} from '../pages/journey/journey-destination-model.mjs';
 
 const dataRoot=new URL('../pages/journey/assets/map-data/',import.meta.url);
@@ -114,3 +114,24 @@ for(const asset of manifest.assets){
   assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');
 }
 console.log(`JOURNEY_MAPS=PASS destinations=10 entries=${total} positioned=${positioned+9} assets=18`);
+
+// Prompt 24: missing art has an original type glyph; unknown positions/types stay off-map.
+for(const type of Object.keys(POINT_TYPES)){
+ const entry={type,position:{x:50,y:50}};
+ assert.equal(canRenderMapMarker(entry),true);
+ assert.equal(directorIconUrl(entry),null);
+ assert.match(markerGlyphMarkup(type),/<svg[^>]+data-marker-glyph=[^>]+><path d="[^" ]/);
+ assert.doesNotMatch(markerGlyphMarkup(type),/undefined|<image|https?:/);
+}
+for(const entry of [{type:'unknown',position:{x:50,y:50}},{type:'chest'}, {type:'vendor',position:{x:NaN,y:5}}, {type:'activity',position:{x:101,y:5}}])assert.equal(canRenderMapMarker(entry),false);
+assert.equal(markerGlyphMarkup('unknown'),'');
+assert.equal(directorIconUrl({icon:`https://www.bungie.net${official}`}),`https://www.bungie.net${official}`);
+const palette=await readFile(new URL('../../css/astrix-palette.css',import.meta.url),'utf8');
+const rgb=token=>palette.match(new RegExp(`--${token}:\\s*#([0-9a-f]{6})`,'i'))[1].match(/../g).map(v=>parseInt(v,16)/255);
+const luminance=rgb=>rgb.map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+const background=luminance(rgb('apx-colour-panel'));
+for(const token of ['apx-colour-text','apx-colour-secondary'])assert.ok((luminance(rgb(token))+.05)/(background+.05)>=4.5,`${token}: chest text contrast`);
+const styles=await readFile(new URL('../pages/journey/journey-2560-visual.css',import.meta.url),'utf8');
+assert.match(styles,/\.journey-region-chests \*\{text-shadow:none;filter:none\}/);
+assert.doesNotMatch(styles,/\.journey-region-chest\.is-missing[^{}]*\{[^}]*color:transparent/);
+console.log('JOURNEY_MARKERS_CHESTS=PASS known types, original fallback glyphs, positions, tokens >=4.5:1');

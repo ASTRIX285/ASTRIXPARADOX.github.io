@@ -1,6 +1,6 @@
 // Journey-owned interactive map registry and viewer.
-import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3';
-import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs?v=20260920-zoom-chests-3';
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1';
+import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1';
 
 const destinationMap=(key,name)=>Object.freeze({
   src:`./assets/maps/${key}-director-map-4k.webp`,
@@ -68,7 +68,7 @@ function createRegionChestOverlay(key,label){
       <span><strong data-region-chest-missing>--</strong><small>MISSING</small></span>
       <span><strong data-region-chest-total>--</strong><small>TOTAL</small></span>
     </div>
-    <p class="journey-map-position-note" data-region-chest-unknown hidden></p>
+    <p class="journey-region-chest-unknown" data-region-chest-unknown hidden></p>
     <div class="journey-region-chests-list" data-region-chest-list hidden></div>`;
 
   const discovered=overlay.querySelector('[data-region-chest-discovered]');
@@ -94,7 +94,7 @@ function createRegionChestOverlay(key,label){
       row.className=`journey-region-chest ${chest.collected===true?'is-collected':chest.collected===false?'is-missing':'is-unknown'}`;
       const tick=document.createElement('span');
       tick.className='journey-region-chest-tick';
-      tick.textContent=chest.collected?'✓':'';
+      tick.textContent=chest.collected===true?'✓':chest.collected===false?'○':'–';
       tick.setAttribute('aria-hidden','true');
       const copy=document.createElement('span');
       copy.className='journey-region-chest-copy';
