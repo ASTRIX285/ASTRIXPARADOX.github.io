@@ -1,4 +1,4 @@
-import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260924-card-width-1';
+import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1';
 import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';

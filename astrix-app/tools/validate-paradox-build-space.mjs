@@ -295,11 +295,11 @@ const itemCardCss=await readFile(new URL('paradox-item-cards.css',root),'utf8');
 assert.doesNotMatch(itemCardCss,/body \.gear-combined \.gear-mod(?:s)?\{[^}]*--apx-icon-socket-compact/,'Shared item styling must not shrink Character armour mods to the compact weapon-perk tier.');
 assert.match(itemCardCss,/body \.gear-weapons,body \.recommended-weapons-summary\{--gear-weapon-art:var\(--paradox-equipment-width\)/,'Recommended weapon cards must consume the canonical shared equipment-art owner');
 assert.doesNotMatch(css,/--gear-weapon-art:/,'Build must not reintroduce a competing review thumbnail size');
-// Prompts 11 and 11c require a centred group with explicit equal card widths.
-assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{\s*--build-weapon-card:calc\(var\(--gear-weapon-art\) \+ 26px\);\s*grid-template-columns:repeat\(3,var\(--build-weapon-card\)\)!important;[\s\S]*?width:max-content!important;max-width:none!important;\s*margin-inline:auto;column-gap:12px!important/,'Build Forge must centre three equal content-sized weapon cards with the existing gap.');
+// Prompt 23 replaces the art-based fallback with max-content; equal widths and containment remain strict.
+assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{\s*--build-weapon-card:max-content;\s*grid-template-columns:repeat\(3,var\(--build-weapon-card\)\)!important;[\s\S]*?width:max-content!important;max-width:none!important;\s*margin-inline:auto;column-gap:12px!important/,'Build Forge must centre three equal content-sized weapon cards with the existing gap.');
 assert.match(css,/grid-row:span 5;grid-template-columns:minmax\(0,1fr\)!important;\s*grid-template-rows:subgrid!important;\s*grid-template-areas:"art" "cap" "perks" "support" "apply"!important/,'All three weapon cards must share aligned art, label/divider, perk, mod and Apply rows.');
 assert.match(css,/\.design-canvas\{--build-armour-mod:var\(--guardian-square\)\}/,'Armour and weapon mods must inherit one common mod token.');
-assert.match(css,/\.weapon-support-icon\.is-mod\{width:var\(--build-armour-mod\)!important;height:var\(--build-armour-mod\)!important/,'Weapon mods must use the Armour mod size without changing perk size.');
+assert.match(css,/\.weapon-support-icon\{width:var\(--build-armour-mod\)!important;height:var\(--build-armour-mod\)!important/,'Prompt 23: every support icon must use the Armour mod size without changing perk size.');
 assert.doesNotMatch(html+runtime,/MANUAL OR PARADOX/,'The ambiguous weapon status fallback must never be rendered.');
 assert.match(html,/<span id="weaponRecommendationState" hidden><\/span>/,'Empty weapon status must start hidden.');
 // Prompt 11c advances both resources for the explicit card-width helper.
@@ -312,6 +312,8 @@ const cardLayout=await readFile(new URL('paradox-build-space/build-weapon-card-l
 assert.match(cardLayout,/threshold=3\*width\+2\*gap/,'The stack threshold must derive from the three card widths and two gaps.');
 assert.ok(cardLayout.includes('@container build-weapon-section (width < ${threshold}px)'),'Stacking must remain a weapon-section container query.');
 assert.ok(cardLayout.includes('grid-template-columns:var(--build-weapon-card)!important'),'Stacked cards must retain the same explicit width.');
+assert.ok(cardLayout.includes('twoThreshold=2*width+gap'),'Prompt 23: two cards fit before the one-card fallback.');
+assert.ok(css.includes('flex-wrap:nowrap;width:max-content;max-width:none'),'Prompt 23: support icons stay on one row.');
 assert.match(runtime,/sizeBuildWeaponCards\(byId\('weaponGrid'\)\)/,'Rendered weapon cards must update their explicit geometry.');
 assert.doesNotMatch(css,/container-type:normal/,'Build Forge must preserve card inline-size containment.');
 assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
