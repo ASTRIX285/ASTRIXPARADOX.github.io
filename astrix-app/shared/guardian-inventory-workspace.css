@@ -171,7 +171,6 @@ body.guardian-main-page .character-inventory-workspace .vault-transfer-art{aspec
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="legs"]{grid-column:2;grid-row:6}
   body.guardian-main-page .character-inventory-workspace [data-equipment-group="class-item"]{grid-column:2;grid-row:7}
 }
-}
 
 /* Vault four-column layout: 3 × (5 × 66 + 4 × 6 + 18) +
    (6 × 66 + 5 × 6 + 18) + 3 × 12 = 1596px of container width.
