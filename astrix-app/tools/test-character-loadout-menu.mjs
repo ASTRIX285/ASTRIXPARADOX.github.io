@@ -49,7 +49,15 @@ try{
   const slotSize=(await page.locator('[data-loadout-slot="1"]').boundingBox()).width;assert.ok(slotSize>=32&&slotSize<=66);
   await page.locator('[data-loadout-slot="1"]').click();assert.equal(await page.evaluate(()=>window.selected.at(-1).intent),'view-bungie-details');
   assert.equal(await page.locator('[data-loadout-slot="1"]').getAttribute('data-loadout-state'),'ready','Viewing never marks the slot equipped');
-  const more=page.locator('[data-loadout-more="1"]');await more.focus();await page.keyboard.press('Enter');
+  // Prompt 25: actual hit target and exact slot/menu pitch, without relaxing prior checks.
+  const geometry=await page.locator('.guardian-loadout-entry').evaluateAll(entries=>entries.map(entry=>{
+   const slot=entry.querySelector('.guardian-loadout-slot'),more=entry.querySelector('.guardian-loadout-more'),icon=slot.querySelector('img');
+   const a=slot.getBoundingClientRect(),b=more.getBoundingClientRect(),c=icon?.getBoundingClientRect();
+   return {x:a.x,width:a.width,gap:b.x-a.right,menu:b.width,hit:document.elementFromPoint(b.x+b.width/2,b.y+b.height/2)===more,inside:!c||(c.left>=a.left&&c.right<=a.right)};
+  }));
+  for(const row of geometry){assert.ok(Math.abs(row.gap-4)<.1);assert.equal(row.menu,22);assert.equal(row.hit,true);assert.equal(row.inside,true);}
+  assert.ok(Math.abs(geometry[1].x-geometry[0].x-geometry[0].width-4-22-6)<.1,'Prompt 21 exact strip pitch');
+  const more=page.locator('[data-loadout-more="1"]');await more.click();await page.keyboard.press('Escape');await more.focus();await page.keyboard.press('Enter');
   const menu=page.getByRole('menu');await menu.waitFor();
   assert.deepEqual(await menu.getByRole('menuitem').allTextContents(),['Loadout details','Equip','Edit in Build Forge','Save as PARADOX loadout','Overwrite with equipped gear','Clear slot 2']);
   const anchor=await more.locator('..').boundingBox(),box=await menu.boundingBox();
