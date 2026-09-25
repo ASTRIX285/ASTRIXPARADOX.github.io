@@ -153,7 +153,11 @@ assert.match(journey,/function captureEvidenceRows[\s\S]*?readCapture\(\)[\s\S]*
 assert.match(journey,/function renderMostUsed[\s\S]*?activity\?\.buildSnapshot[\s\S]*?winner\.count\/evidence\.length\*100/,'Most-used build tracking must combine future Mission Report snapshots with verified Build Test samples');
 assert.match(html,/id="journeyMostUsed"[\s\S]*?No verified Build Test or Mission Report loadout evidence[\s\S]*?id="journeyBuildSummary"[\s\S]*?No verified Build Forge state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No verified activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
 assert.match(css,/\.journey-column-summaries \.journey-evidence-rows[\s\S]*?grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)/,'Connected Journey evidence must remain readable inside the existing compact cards');
-assert.equal((ribbon.match(/Object\.freeze\(\{key:/g)??[]).length,7,'Shared Journey ribbon must retain all seven destination routes');
+// PR #277 intentionally hid Mission Reports; retain exactly these six ribbon routes in order.
+const ribbonRoutes=[...ribbon.matchAll(/Object\.freeze\(\{key:'([^']+)'/g)].map(match=>match[1]);
+assert.equal((ribbon.match(/Object\.freeze\(\{key:/g)??[]).length,6,'Shared Journey ribbon must retain exactly six destination routes');
+assert.deepEqual(ribbonRoutes,['journey','character','forge-loader','build-forge','vault','loadout'],'Shared Journey ribbon must retain the approved destination order');
+assert.ok(!ribbonRoutes.includes('mission-reports'),'Mission Reports must remain absent from the ribbon');
 assert.ok(ribbon.indexOf("key:'forge-loader'")<ribbon.indexOf("key:'build-forge'"),'Forge Loader must appear before Build Forge');
 for(const page of globalHeroPages){
   assert.equal((page.match(/data-forge-hero-cards/g)??[]).length,1,'Every destination page must contain exactly one shared hero-card mount');
