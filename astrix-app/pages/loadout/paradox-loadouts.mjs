@@ -1,3 +1,4 @@
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
 import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1';
@@ -27,13 +28,15 @@ function savedIcon(item){
   if(value.startsWith('/')&&!value.startsWith('//'))return `https://www.bungie.net${value}`;
   try{const url=new URL(value);return url.protocol==='https:'?url.href:'';}catch{return '';}
 }
-function savedTile(item,{compact=false,equipment=false,tooltip=''}={}){
+function savedTile(item,{compact=false,equipment=false,kind='',tooltip=''}={}){
   if(!item)return '';
   const name=item.name||item.displayName||item.displayProperties?.name||item.definition?.displayProperties?.name||`Unresolved item ${hashOf(item)||''}`,icon=savedIcon(item);
   const power=item.power==null||item.power===''?null:Number(item.power);
   const label=[name,tooltip,!icon?'No icon':'',equipment&&!Number.isFinite(power)?'Power unavailable':''].filter(Boolean).join('\n');
-  const element=savedIcon(item.elementDefinition);
-  return `<figure class="saved-build-tile${compact?' is-compact':''}${equipment?' is-equipment':''}${item.isExotic?' is-exotic':''}" title="${esc(label)}" aria-label="${esc(label)}" role="img" tabindex="0"><div class="saved-build-art">${icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:'<span class="saved-build-missing" aria-hidden="true">?</span>'}</div>${equipment?`<div class="saved-build-power" aria-hidden="true">${element?`<img src="${esc(element)}" alt="">`:''}<b>${Number.isFinite(power)?esc(power):'?'}</b></div>`:''}</figure>`;
+  const empty='<span class="saved-build-empty-socket" aria-hidden="true">◇</span>';
+  const shared=equipment&&['weapon','armour'].includes(kind)?itemTileMarkup({...item,icon,source:{...item.source,kind:'saved'}},{kind}):'';
+  const count=Number(item.count??item.quantity);
+  return `<figure class="saved-build-tile${compact?' is-compact':''}${equipment?' is-equipment':''}${item.isExotic?' is-exotic':''}" title="${esc(label)}" aria-label="${esc(label)}" role="img" tabindex="0">${shared||`<div class="saved-build-art">${icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:empty}</div>`}${!equipment&&Number.isInteger(count)&&count>1?`<span class="saved-build-count" aria-label="Count ${count}">${count}</span>`:''}</figure>`;
 }
 function savedMods(item){
   const mods=[...(item.generalMods||item.armourSemantics?.generalMods||[]),...(item.slotMods||item.armourSemantics?.slotMods||[])].filter(Boolean);
@@ -46,7 +49,7 @@ function savedEquipment(title,items){
     const model=item.weaponSemantics?.perkModel||item.weaponPerkModel;
     const perks=(model?.columns||[]).map(column=>(column.options||[]).find(option=>hashOf(option)===Number(column.selectedPlugHash))).filter(Boolean);
     const appearance=title==='Armour'?[item.shader,item.ornament].filter(Boolean):[];
-    return `<div class="saved-build-equipment-item">${savedTile(item,{equipment:true,tooltip:perks.map(nameOf).join('\n')})}${appearance.length?`<div class="saved-build-appearance" role="group" aria-label="${esc(nameOf(item))} appearance">${appearance.map(plug=>savedTile(plug,{compact:true})).join('')}</div>`:''}</div>`;
+    return `<div class="saved-build-equipment-item">${savedTile(item,{equipment:true,kind:title==='Weapons'?'weapon':title==='Armour'?'armour':'equipment',tooltip:perks.map(nameOf).join('\n')})}${title==='Armour'?`<div class="saved-build-attached-mods" role="group" aria-label="${esc(nameOf(item))} mods">${savedMods(item).map(mod=>savedTile(mod,{compact:true})).join('')}</div>`:''}${appearance.length?`<div class="saved-build-appearance" role="group" aria-label="${esc(nameOf(item))} appearance">${appearance.map(plug=>savedTile(plug,{compact:true})).join('')}</div>`:''}</div>`;
   }).join('')||'<p class="saved-build-missing">Not saved</p>'}</div>`;
 }
 function savedStats(stats=[]){
@@ -55,7 +58,7 @@ function savedStats(stats=[]){
   const total=rows.length===6&&rows.every(row=>Number.isFinite(valueOf(row)))?rows.reduce((sum,row)=>sum+valueOf(row),0):null;
   return `<div class="saved-build-stats" role="group" aria-label="Saved build stats">${total!==null?`<b class="saved-build-stat-total">Total: ${esc(total)}</b>`:''}${rows.map(row=>{
     const value=valueOf(row),label=`${row.name||'Stat'}: ${Number.isFinite(value)?value:'unavailable'}`,icon=savedIcon(row);
-    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img src="${esc(icon)}" alt="">`:'<span aria-hidden="true">?</span>'}<b>${Number.isFinite(value)?esc(value):'?'}</b></span>`;
+    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="saved-build-empty-socket" aria-hidden="true">◇</span>'}<b>${Number.isFinite(value)?esc(value):'—'}</b></span>`;
   }).join('')||'<span class="saved-build-missing">Stats not saved</span>'}</div>`;
 }
 export function savedBuildOverview(build={}){
@@ -64,9 +67,10 @@ export function savedBuildOverview(build={}){
   const hashes=build.artifactConfiguration?.selectedPerkHashes;
   const selected=Array.isArray(hashes)?hashes.map(hash=>perks.find(perk=>hashOf(perk)===Number(hash))||{hash,name:`Unresolved Artifact perk ${hash}`}):perks.filter(perk=>perk.isActive===true);
   const armour=(build.armour||[]).filter(Boolean),mods=armour.flatMap(item=>savedMods(item).map(mod=>({item:mod,owner:nameOf(item)})));
+  const equipment=[build.ghost||build.equipment?.ghost,build.ship||build.equipment?.ship,build.sparrow||build.equipment?.sparrow].filter(Boolean);
   const subclassName=build.subclassName||build.subclass||'Subclass';
   const components=[...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])].filter(Boolean);
-  return `<div class="saved-build-overview" role="region" aria-label="Saved build equipment" tabindex="0"><div class="saved-build-row"><div class="saved-build-subclass" role="group" aria-label="Subclass and abilities"><div class="saved-build-super">${savedTile(sb.super||{name:subclassName,icon:build.subclassIcon},{tooltip:subclassName})}</div><div class="saved-build-subclass-icons">${components.map(item=>savedTile(item)).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div><div class="saved-build-weapons">${savedEquipment('Weapons',build.weapons||[])}</div><div class="saved-build-armour">${savedEquipment('Armour',armour)}${savedStats(build.stats||[])}</div><div class="saved-build-sockets"><div class="saved-build-mods" role="group" aria-label="Armour mods">${mods.map(mod=>savedTile(mod.item,{tooltip:mod.owner})).join('')||'<p class="saved-build-missing">Mods not saved</p>'}</div><div class="saved-build-artifact" role="group" aria-label="Artifact"><span class="saved-build-section-label">Artifact</span><div class="saved-build-artifact-icons">${[build.artifact,...selected].filter(Boolean).map(item=>savedTile(item,{compact:true})).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div></div></div></div>`;
+  return `<div class="saved-build-overview" role="region" aria-label="Saved build equipment" tabindex="0"><div class="saved-build-row"><div class="saved-build-subclass" role="group" aria-label="Subclass and abilities"><div class="saved-build-super">${savedTile(sb.super||{name:subclassName,icon:build.subclassIcon},{tooltip:subclassName})}</div><div class="saved-build-subclass-icons">${components.map(item=>savedTile(item)).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div><div class="saved-build-weapons">${savedEquipment('Weapons',build.weapons||[])}</div><div class="saved-build-armour">${savedEquipment('Armour',armour)}${savedStats(build.stats||[])}</div><div class="saved-build-cosmetics">${equipment.length?savedEquipment('Ghost, Ship and Sparrow',equipment):''}</div><div class="saved-build-sockets"><div class="saved-build-mods" role="group" aria-label="Armour mods">${mods.map(mod=>savedTile(mod.item,{tooltip:mod.owner})).join('')||'<p class="saved-build-missing">Mods not saved</p>'}</div><div class="saved-build-artifact" role="group" aria-label="Artifact"><span class="saved-build-section-label">Artifact</span><div class="saved-build-artifact-icons">${[build.artifact,...selected].filter(Boolean).map(item=>savedTile(item,{compact:true})).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div></div></div></div>`;
 }
 function artifactRequiresInGameStep(build={}){const intended=[...new Set((build.artifactConfiguration?.selectedPerkHashes||[]).map(Number).filter(Number.isInteger))].sort((a,b)=>a-b),active=[...new Set((build.artifact?.activePerks||[]).filter(row=>row?.isActive!==false).map(hashOf).filter(Number.isInteger))].sort((a,b)=>a-b);return intended.length>0&&JSON.stringify(intended)!==JSON.stringify(active);}
 
@@ -196,12 +200,17 @@ function slotIdentity(slot){
   const find=(key,hash)=>LOADOUT_DEFINITIONS?.[key]?.[String(hash)]||{};
   return {name:find('names',slot?.nameHash).name||'Saved loadout',icon:savedIcon({icon:find('icons',slot?.iconHash).iconImagePath}),color:savedIcon({icon:find('colors',slot?.colorHash).colorImagePath})};
 }
+function savedSlotStatus(slot,index,current){
+  if(current.equippedLoadoutIndex===index)return '<span class="saved-slot-status is-match" aria-label="Matches equipped loadout">✓</span>';
+  if(slot?.hasIssues===true||slot?.validation?.issues?.length)return '<span class="saved-slot-status is-issue" aria-label="Loadout issue">!</span>';
+  return '';
+}
 function renderSlots(){
   const host=byId('guardianLoadouts');
   if(loading||!equipped?.loadoutsAvailable){host.innerHTML=`<p class="guardian-loadouts-status" role="status">${loading?'Loading selected Guardian...':session?.authenticated?'In-game loadout data unavailable.':'Connect Bungie to view in-game loadouts.'}</p>`;return;}
   host.innerHTML=Array.from({length:20},(_,index)=>{
     const slot=equipped.loadouts?.[index],saved=Boolean(slot?.items?.length||slot?.subclassOverrides?.length),identity=slotIdentity(slot),label=`${saved?identity.name:'Empty slot'} · Bungie ${index+1}`;
-    return `<button type="button" class="guardian-loadout-slot ${saved?'is-saved':'is-empty'}${equipped.equippedLoadoutIndex===index?' is-active':''}" data-in-game-slot="${index}" title="${esc(label)}" aria-label="${esc(label)}"${identity.color?` style="--loadout-color-image:url('${esc(identity.color)}')"`:''}${busy?' disabled':''}>${saved&&identity.icon?`<img class="guardian-loadout-icon" src="${esc(identity.icon)}" alt="">`:saved?'<span class="guardian-loadout-icon-fallback" aria-hidden="true">◆</span>':'<span class="guardian-loadout-empty-label" aria-hidden="true">EMPTY</span>'}<small>${index+1}</small></button>`;
+    return `<button type="button" class="guardian-loadout-slot ${saved?'is-saved':'is-empty'}${equipped.equippedLoadoutIndex===index?' is-active':''}" data-in-game-slot="${index}" title="${esc(label)}" aria-label="${esc(label)}"${identity.color?` style="--loadout-color-image:url('${esc(identity.color)}')"`:''}${busy?' disabled':''}>${saved&&identity.icon?`<img class="guardian-loadout-icon" src="${esc(identity.icon)}" alt="">`:saved?'<span class="guardian-loadout-icon-fallback" aria-hidden="true">◆</span>':'<span class="guardian-loadout-empty-label" aria-hidden="true">EMPTY</span>'}${saved?savedSlotStatus(slot,index,equipped):''}<small>${index+1}</small></button>`;
   }).join('');
 }
 function render(){

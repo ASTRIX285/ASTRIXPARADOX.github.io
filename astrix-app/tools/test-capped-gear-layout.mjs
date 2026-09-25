@@ -10,12 +10,21 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${proce
 assert.ok(process.env.PLAYWRIGHT_BROWSERS_PATH,'Use the installed Chromium via PLAYWRIGHT_BROWSERS_PATH; this test never downloads browsers.');
 const root=fileURLToPath(new URL('../../',import.meta.url)),output=process.env.CAPPED_GEAR_REVIEW_DIR||'/tmp/capped-gear-review';
 const baseline=process.env.CAPPED_GEAR_BASELINE||'e6ae42c72d0356c3cc9ce4deb2474f0c2f224c2d';
-const pages={Character:'astrix-app/pages/guardian-workspace-v2/',Vault:'astrix-app/pages/vault/',BuildForge:'astrix-app/pages/guardian-workspace-v2/paradox-build-space/',ForgeLoader:'astrix-app/pages/forge-loader/'};
+const pages={Character:'astrix-app/pages/guardian-workspace-v2/',Vault:'astrix-app/pages/vault/',BuildForge:'astrix-app/pages/guardian-workspace-v2/paradox-build-space/',ForgeLoader:'astrix-app/pages/forge-loader/',Loadout:'astrix-app/pages/loadout/'};
 const changes=['astrix-app/shared/astrix-desktop-density.css','astrix-app/shared/guardian-inventory-workspace.css','astrix-app/shared/astrix-hero-cards.css','astrix-app/pages/guardian-workspace-v2/guardian-left-rail-shared.css'];
+const loadoutSource=await readFile(resolve(root,'astrix-app/pages/loadout/paradox-loadouts.mjs'),'utf8');
+const loadoutFixtureModule=`import {itemTileMarkup} from '/astrix-app/shared/guardian-inventory-workspace.mjs';
+import {classifyArmourPlug} from '/astrix-app/pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
+${loadoutSource.slice(loadoutSource.indexOf('const esc='),loadoutSource.indexOf('function artifactRequiresInGameStep'))}
+const byId=id=>document.getElementById(id),LOADOUT_DEFINITIONS={};
+let loading=false,busy=false,session={authenticated:true},equipped={loadoutsAvailable:true,equippedLoadoutIndex:0,loadouts:Array.from({length:20},(_,i)=>({items:[{itemInstanceId:String(i+1)}],hasIssues:i===1}))};
+${loadoutSource.slice(loadoutSource.indexOf('function slotIdentity('),loadoutSource.indexOf('function render(){'))}
+export function fixtureSlots(){renderSlots();}`;
 let main=false;
 await mkdir(output,{recursive:true});
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;let relative=path.slice(1);if(path.endsWith('/'))relative+='index.html';
+ if(path==='/loadout-fixture.mjs'){res.setHeader('Content-Type','text/javascript');res.end(loadoutFixtureModule);return;}
  const file=resolve(root,relative);if(!file.startsWith(root)){res.writeHead(403).end();return;}
  try{let data=main&&changes.includes(relative)?execFileSync('git',['show',`${baseline}:${relative}`],{cwd:root}):await readFile(file);
  if(relative.endsWith('.html'))data=data.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*rel="modulepreload"[^>]*>/gi,'');
@@ -28,7 +37,7 @@ let browser;const results=[],captures=[];
 try{
  browser=await chromium.launch({channel:'chromium',headless:true});
  const page=await browser.newPage({deviceScaleFactor:1});
- await page.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
+ await page.route('**/*',async route=>route.request().url().startsWith(origin)?route.continue():route.request().url()==='https://fixture.invalid/item.png'?route.fulfill({contentType:'image/png',body:await readFile(resolve(root,'img/logo.png'))}):route.abort());
  async function load(name,width,height,isMain=false){
   main=isMain;await page.setViewportSize({width,height});await page.goto(origin+'/'+pages[name]);
   await page.evaluate(async(name)=>{
@@ -54,12 +63,23 @@ try{
     // Production catalogue markup in the existing manual picker, opened only
     // after page geometry checks so its modal cannot mask header occlusion.
     window.fixtureCatalogue=items.filter(item=>item.equipmentGroup.kind==='weapon').slice(0,6).map(item=>inv.itemTileMarkup(item)).join('');
+   }else if(name==='Loadout'){
+    const {savedBuildOverview,fixtureSlots}=await import('/loadout-fixture.mjs');
+    const art='https://fixture.invalid/item.png',socket=(name,count)=>({name,icon:art,count});
+    const build={subclassName:'Synthetic Hunter',subclassBuild:{super:socket('Super'),abilities:Array.from({length:3},(_,i)=>socket(`Ability ${i}`)),aspects:[socket('Aspect')],fragments:[socket('Fragment'),{name:'Empty socket'}]},weapons:items.slice(0,3).map(item=>({...item,icon:art,source:{kind:'equipped'}})),armour:inv.ARMOUR_BUCKETS.map(group=>({...items.find(item=>item.equipmentGroup.key===group.key),icon:art,source:{kind:'equipped'},generalMods:[socket('Mod',3),{name:'Empty mod'}]})),ghost:socket('Ghost'),ship:socket('Ship'),sparrow:socket('Sparrow'),artifact:{name:'Artifact',icon:art,activePerks:[{...socket('Artifact perk'),isActive:true}]},stats:Array.from({length:6},(_,i)=>({name:`Stat ${i}`,value:60+i,icon:art}))};
+    document.getElementById('paradoxLoadoutDetail').innerHTML=[build,{...build,ghost:null,ship:null,sparrow:null}].map((snapshot,i)=>`<article id="${i?'loadout-fixture':'loadout-equipped'}" class="apx-section paradox-loadout-detail">${savedBuildOverview(snapshot)}</article>`).join('');fixtureSlots();
    }else{
     document.getElementById('forgeExoticSlots').innerHTML=`<section class="forge-exotic-slot"><h3>FIXTURE EXOTIC ARMOUR</h3><div class="forge-exotic-grid">${Array.from({length:12},()=>`<button class="forge-exotic"><img src="${icon}" alt="Synthetic exotic"></button>`).join('')}</div></section>`;
    }
+   // PR #304 follow-up: measure real bottom spacing before the test-only runway.
+   if(name==='Loadout'){
+    const shell=document.querySelector('.paradox-loadout-shell'),footer=document.querySelector('.apx-bungie-attribution');
+    const lastContent=Math.max(...[...shell.children].map(node=>node.getBoundingClientRect().bottom));
+    window.fixtureNaturalBottom={padding:getComputedStyle(shell).paddingBottom,gap:shell.getBoundingClientRect().bottom-lastContent,documentBottom:document.documentElement.scrollHeight,footerBottom:footer.getBoundingClientRect().bottom+scrollY,viewport:innerHeight};
+   }
    // A labelled test-only scroll runway guarantees scrollY=300 even when the
    // wide desktop fixture fits within one screen. It does not size any panel.
-   const runway=document.createElement('footer');runway.textContent='Synthetic layout fixture: scroll runway';runway.style.minHeight='400px';document.body.append(runway);
+   const runway=document.createElement('footer');runway.textContent='Synthetic layout fixture: scroll runway';runway.style.minHeight='calc(100vh + 400px)';document.body.append(runway);
    await document.fonts.ready;await new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));
   },name);
  }
@@ -111,6 +131,64 @@ try{
    assert.ok(Math.abs(state.heights[column][bucket]-state.heights[0][bucket])<=1,`Bucket ${bucket} fills the tallest shared row`);
   }
   assert.ok(state.topHeaders.every(header=>Math.abs(header.y-state.topHeaders[0].y)<=1),'Vault count header aligns with Postmasters');
+ }
+ async function checkLoadout(width){
+  const state=await page.evaluate(()=>{
+   const box=node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
+   const cards=[...document.querySelectorAll('.paradox-loadout-detail')],select=selector=>[...document.querySelectorAll(selector)].map(box);
+   return {columns:cards.map(card=>[...card.querySelector('.saved-build-row').children].map(box)),
+    sections:cards.map(card=>['subclass','weapons','armour','cosmetics','mods','artifact'].map(name=>box(card.querySelector(`.saved-build-${name}`)))),
+    layout:cards.map(card=>{
+     const weapons=card.querySelector('.saved-build-weapons .saved-build-equipment'),armour=card.querySelector('.saved-build-armour .saved-build-equipment');
+     const mods=card.querySelector('.saved-build-mods'),artifact=card.querySelector('.saved-build-artifact'),stats=card.querySelector('.saved-build-stats');
+     return {weapons:[...weapons.querySelectorAll('.tile-art')].map(box),armour:[...armour.querySelectorAll('.tile-art')].map(box),armourBlock:box(armour),mods:box(mods),artifact:box(artifact),stats:box(stats),
+      attached:[...armour.querySelectorAll('.saved-build-attached-mods')].map(box),
+      artifactUnderMods:artifact.parentElement.classList.contains('saved-build-sockets')&&artifact.previousElementSibling===mods,
+      total:stats.querySelector('.saved-build-stat-total')?.textContent,statIcons:[...stats.querySelectorAll('img')].map(box)};
+    }),
+    sockets:select('.saved-build-subclass-icons .saved-build-art,.saved-build-mods .saved-build-art'),small:select('.saved-build-attached-mods .saved-build-art,.saved-build-artifact-icons .saved-build-art'),equipment:select('.saved-build-cosmetics .saved-build-art'),
+    stats:[...document.querySelectorAll('.saved-build-stats')].map(node=>({font:getComputedStyle(node).fontSize,rect:box(node),items:[...node.children].map(box)})),
+    gaps:[...document.querySelectorAll('.saved-build-subclass-icons,.saved-build-mods,.saved-build-attached-mods,.saved-build-artifact-icons')].map(node=>getComputedStyle(node).gap),
+    question:cards.some(card=>card.textContent.includes('?')),outline:getComputedStyle(document.querySelector('#loadout-equipped .saved-build-tile.is-equipment'),'::after').content,
+    count:document.querySelector('.saved-build-count')?.textContent,match:document.querySelector('.saved-slot-status.is-match')?.textContent,issue:document.querySelector('.saved-slot-status.is-issue')?.textContent,
+    escapes:cards.flatMap(card=>[...card.querySelectorAll('.saved-build-tile')].filter(tile=>box(tile).x<box(card).x||box(tile).right>box(card).right).map(tile=>tile.getAttribute('aria-label')))};
+  });
+  assert.equal(state.columns.length,2,'Two Loadout cards render');
+   for(const columns of state.columns)assert.equal(columns.length,5,'Five tracks: subclass, weapons, armour, equipment, and mods with Artifact below');
+   for(let i=0;i<5;i++)assert.ok(Math.abs(state.columns[0][i].x-state.columns[1][i].x)<=1,`Loadout ${width}: column ${i} aligned across cards`);
+   for(let i=0;i<6;i++){
+    assert.ok(Math.abs(state.sections[0][i].x-state.sections[1][i].x)<=1,`Loadout ${width}: section ${i}, including Artifact, aligned across cards`);
+    assert.ok(Math.abs(state.sections[0][i].width-state.sections[1][i].width)<=1,`Loadout ${width}: section ${i} width matches across cards`);
+   }
+   for(const layout of state.layout){
+    assert.equal(layout.weapons.length,3,'All three weapons render');assert.equal(layout.armour.length,5,'All five armour pieces render');
+    const gear=[...layout.weapons,...layout.armour];
+    assert.ok(gear.every(tile=>Math.abs(tile.y-gear[0].y)<=1),'Weapons and armour stay on the same row');
+    assert.ok(Math.abs(layout.armour[0].x-layout.weapons[2].right-12)<=.1,`Loadout ${width}: exactly 12px between weapons and armour`);
+    for(const tiles of [layout.weapons,layout.armour])for(let i=1;i<tiles.length;i++)assert.ok(Math.abs(tiles[i].x-tiles[i-1].right-6)<=.1,'Within weapons and armour, tile gaps stay 6px');
+    assert.equal(layout.artifactUnderMods,true,'Artifact immediately follows the mods grid in the same track');
+    assert.ok(Math.abs(layout.artifact.x-layout.mods.x)<=1,'Artifact left edge aligns with mods');
+    assert.ok(Math.abs(layout.artifact.width-layout.mods.width)<=1,'Artifact fills the mods track, not a far-right column');
+    assert.ok(Math.abs(layout.artifact.y-layout.mods.bottom-8)<=.1,'Artifact sits directly below the mods grid with the 8px section gap');
+    assert.equal(layout.total,'Total: 375','Stat total remains present');
+    assert.ok(Math.abs(layout.stats.x-layout.armour[0].x)<=1,'Stat total row starts under armour');
+    assert.ok(layout.stats.right<=layout.armourBlock.right+1,'Stat total row remains within the armour block');
+    assert.ok(layout.stats.y>=Math.max(...layout.armour.map(tile=>tile.bottom),...layout.attached.map(mods=>mods.bottom)),'Stats sit below armour and attached mods');
+    assert.equal(layout.statIcons.length,6,'All six stat icons render');
+    for(const icon of layout.statIcons){assert.equal(icon.width,13);assert.equal(icon.height,13);}
+   }
+  const bottom=await page.evaluate(()=>window.fixtureNaturalBottom);
+  assert.equal(bottom.padding,'24px','Loadout uses a 24px bottom inset');
+  assert.ok(Math.abs(bottom.gap-24)<=1,'No extra space after the final Loadout content');
+  assert.ok(bottom.documentBottom<=Math.max(bottom.viewport,bottom.footerBottom)+1,'No scroll space after the footer');
+  assert.ok(state.sockets.length&&state.small.length&&state.equipment.length,'All requested icon families present');
+  for(const box of state.sockets){assert.equal(box.width,52);assert.equal(box.height,52);}
+  for(const box of state.small){assert.equal(box.width,30);assert.equal(box.height,30);}
+  for(const box of state.equipment)assert.ok(Math.abs(box.width-(width===1363?44:66))<=(width===1363?1:.1),'Equipment uses gear token');
+  for(const stats of state.stats){assert.equal(stats.font,'13px');assert.ok(stats.items.every(item=>Math.abs(item.y-stats.items[0].y)<3),'Stats remain one row');}
+  assert.ok(state.gaps.every(gap=>gap==='6px'),'Socket and mod gaps remain 6px');
+  assert.equal(state.question,false,'No question-mark placeholders');assert.equal(state.outline,'none','No equipped overlay in Loadout cards');
+  assert.equal(state.count,'3','Supplied mod count badge');assert.equal(state.match,'✓');assert.equal(state.issue,'!');assert.deepEqual(state.escapes,[],'Loadout tiles remain inside card');
  }
  // Prompt 15: panel stretch and the in-flow action bar must not alter gear geometry.
  async function checkCharacterActions(width){
@@ -175,6 +253,14 @@ try{
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);
    assert.ok(row.scrollWidth<=width&&row.bodyScroll<=width,`${name} ${width}: no horizontal page scroll`);
    if(name==='Vault')await checkVaultColumns(width);
+   if(name==='Loadout'){
+    await checkLoadout(width);
+    const character=results.find(result=>result.page==='Character'&&result.viewport===width);
+    assert.ok(row.gear.every(tile=>Math.abs(tile.width-character.gear[0].width)<.1),'Loadout weapons and armour equal Character gear');
+    assert.equal(row.strip.length,20);
+    assert.ok(Math.abs(row.strip[0].width-character.strip[0].width)<.1,'Loadout strip equals Character');
+    assert.ok(Math.abs(row.strip[1].x-row.strip[0].x-row.strip[0].width-6)<.1,'Loadout strip gap is 6px');
+   }
    if(name==='Character'){
     row.actions=await checkCharacterActions(width);
     assert.equal(row.strip.length,20);for(const slot of row.strip)assert.ok(Math.abs(slot.width-row.gear[0].width)<.1,'Strip equals inventory art');
