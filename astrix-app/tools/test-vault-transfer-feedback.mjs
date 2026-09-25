@@ -9,7 +9,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${proce
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const source=await readFile(resolve(root,'astrix-app/pages/vault/vault.mjs'),'utf8');
 // Exercise the actual page handlers without booting authentication or a live account.
-const names=['characters','characterClass','characterLabel','workspaceItem','carriedReplacement','stageTransfer','transferToActiveCharacter','actionFailureMessage','performPendingVaultAction','dropDestination','validDrop','validFeedbackDrop','clearDropTargets','installTransferEvents'];
+const names=['characters','characterClass','characterLabel','workspaceCharacters','equipmentGroupsMarkup','postmasterMarkup','characterColumnMarkup','vaultOnlyMarkup','workspaceItem','carriedReplacement','stageTransfer','transferToActiveCharacter','actionFailureMessage','performPendingVaultAction','dropDestination','validDrop','validFeedbackDrop','clearDropTargets','installTransferEvents'];
 const handlers=names.map(name=>{
  const start=source.search(new RegExp(`^(?:async )?function ${name}\\(`,'m'));
  assert.ok(start>=0,`Production handler ${name} exists`);
@@ -20,11 +20,13 @@ const handlers=names.map(name=>{
 }).join('\n');
 const fixture=`
 import {createVaultTransferFeedback} from '/astrix-app/pages/vault/vault-transfer-feedback.mjs';
-import {inventoryGroupsMarkup,bindInventoryWorkspaceInteractions,INVENTORY_GROUPS} from '/astrix-app/shared/guardian-inventory-workspace.mjs';
+import {inventoryGroupsMarkup,equippedAndCarriedMarkup,postmasterMarkup as sharedPostmasterMarkup,bindInventoryWorkspaceInteractions,INVENTORY_GROUPS} from '/astrix-app/shared/guardian-inventory-workspace.mjs';
 import {stageVaultTransferIntent,confirmVaultTransferIntent,liveActionCapabilities,inventoryLocations,executeVaultTransferIntent as executeReal} from '/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs';
+const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('\"','&quot;');
 const byId=id=>document.getElementById(id),text=value=>String(value??'').trim(),itemKey=item=>String(item?.itemInstanceId||''),CLASS_NAMES=['titan','hunter','warlock'];
 const session={authenticated:true,csrfToken:'fixture-only',activeDestinyMembership:{membershipId:'123',membershipType:3},liveActionCapabilities:{transferItems:true,equipItems:true}};
 const payload={profile:{characters:{data:{'1':{characterId:'1',classType:0},'2':{characterId:'2',classType:1},'3':{characterId:'3',classType:2}}}}};
+if(new URL(location.href).searchParams.has('hunter')){payload.profile.characters.data['1'].classType=1;payload.profile.characters.data['2'].classType=2;payload.profile.characters.data['3'].classType=0;}
 let catalogue={items:['101','102','103'].map((id,index)=>({itemInstanceId:id,itemHash:1000+index,bucketHash:1498876634,name:'Fixture '+id,icon:location.origin+'/img/logo.png',equipmentGroup:INVENTORY_GROUPS[0],characterClass:'any',source:{kind:'carried',characterId:'1'}})),postmasterItems:[]};
 let activeCharacterId='2',draggedItemKey='',pendingVaultAction=null,vaultActionBusy=false;
 const vaultActionQueue=[],queuedVaultActionKeys=new Set(),setStatus=message=>byId('status').textContent=message,stagePostmasterCollection=()=>{throw Error('Unexpected Postmaster action');};
@@ -32,8 +34,7 @@ const transferFeedback=createVaultTransferFeedback({board:byId('vaultTransferWor
 // Only timing and HTTP origin are injected; the request sequence and bodies are production code.
 const executeVaultTransferIntent=(intent,options)=>executeReal(intent,{...options,authOrigin:location.origin,waitImpl:async()=>{}});
 function render(){
- const groups=items=>inventoryGroupsMarkup(items,{includeEmpty:true,capabilities:liveActionCapabilities(session),activeCharacterId});
- byId('vaultTransferWorkspace').innerHTML=['1','2','3'].map(id=>'<article data-drop-kind="character" data-drop-character-id="'+id+'">'+groups(catalogue.items.filter(item=>item.source.kind!=='vault'&&item.source.characterId===id))+'</article>').join('')+'<section data-drop-kind="vault">'+groups(catalogue.items.filter(item=>item.source.kind==='vault'))+'</section>';
+ byId('vaultTransferWorkspace').innerHTML='<div class="vault-character-columns">'+workspaceCharacters().map(characterColumnMarkup).join('')+'</div>'+vaultOnlyMarkup();
  transferFeedback.reconcile();
 }
 async function refreshAfterLiveAction(live){
@@ -45,7 +46,7 @@ async function refreshAfterLiveAction(live){
 ${handlers}
 render();installTransferEvents();window.restrictFixtureClass=()=>{catalogue.items.find(item=>item.itemInstanceId==='102').characterClass='titan';};window.fixtureReady=true;
 `;
-const html='<!doctype html><link rel="stylesheet" href="/css/astrix-palette.css"><link rel="stylesheet" href="/astrix-app/shared/guardian-inventory-workspace.css"><link rel="stylesheet" href="/astrix-app/pages/vault/vault.css"><main id="vaultTransferWorkspace"></main><p id="status"></p><script type="module" src="/fixture.mjs"></script>';
+const html='<!doctype html><link rel="stylesheet" href="/css/astrix-palette.css"><link rel="stylesheet" href="/astrix-app/pages/vault/vault.css"><link rel="stylesheet" href="/astrix-app/shared/guardian-inventory-workspace.css"><link rel="stylesheet" href="/astrix-app/shared/item-tile.css"><link rel="stylesheet" href="/astrix-app/shared/astrix-desktop-density.css"><body class="apx-fluid-icons"><main class="vault-transfer-workspace"><div id="vaultTransferWorkspace" class="vault-transfer-board"></div></main><p id="status"></p><script type="module" src="/fixture.mjs"></script>';
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/'){res.setHeader('Content-Type','text/html');res.end(html);return;}
@@ -58,8 +59,8 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({channel:'chromium',headless:true});
- async function setup({fail=false}={}){
-  const page=await browser.newPage({viewport:{width:1363,height:900}}),errors=[],requests=[];
+ async function setup({fail=false,viewport={width:1363,height:900},hunterSource=false}={}){
+  const page=await browser.newPage({viewport}),errors=[],requests=[];
   page.on('pageerror',error=>errors.push(error.message));
   const locations=new Map(['101','102','103'].map(id=>[id,{kind:'carried',characterId:'1'}]));
   let release;const gate=new Promise(done=>{release=done;});
@@ -80,7 +81,7 @@ try{
    if(url.pathname.startsWith('/bungie/'))throw Error('Unexpected Bungie route '+url.pathname);
    await route.continue();
   });
-  await page.goto(origin);await page.waitForFunction(()=>window.fixtureReady);
+  await page.goto(origin+(hunterSource?'/?hunter':''));await page.waitForFunction(()=>window.fixtureReady);
   return {page,errors,requests,release};
  }
  const tile='[data-inspect-item="102"]',sourceRow='[data-drop-character-id="1"] [data-equipment-group="primary"] .vault-transfer-items',vault='[data-drop-kind="vault"] [data-equipment-group="primary"]',hunter='[data-drop-character-id="2"] [data-equipment-group="primary"]';
@@ -91,8 +92,27 @@ try{
   await page.evaluate(selector=>{const node=document.querySelector(selector);for(const type of ['dragover','drop'])node.dispatchEvent(new DragEvent(type,{bubbles:true,cancelable:true,dataTransfer:window.dragData}));},target);
  }
  async function count(page,selector,n){assert.equal(await page.locator(selector).count(),n,selector);}
- {
-  const test=await setup(),{page}=test;await drag(page);
+ for(const viewport of [{width:1363,height:900},{width:2560,height:1440}]){
+  const test=await setup({viewport,hunterSource:true}),{page}=test;
+  const buckets=['primary','special','heavy','helmet','gauntlets','chest','legs','class-item','ghost','ship','sparrow'];
+  for(const column of ['[data-drop-character-id="1"]','[data-drop-character-id="2"]','[data-drop-character-id="3"]','[data-drop-kind="vault"]']){
+   assert.deepEqual(await page.locator(column+' .vault-transfer-group').evaluateAll(nodes=>nodes.map(node=>node.dataset.equipmentGroup)),buckets,'Every bucket remains a destination, including empty buckets');
+   const emptyHeights=await page.locator(column+' .vault-transfer-row-empty').evaluateAll(nodes=>nodes.map(node=>({height:node.getBoundingClientRect().height,normal:parseFloat(getComputedStyle(node).minHeight)})));
+   assert.equal(emptyHeights.length,column.includes('"1"')?10:11);
+   assert.ok(emptyHeights.every(({height,normal})=>height>=normal-0.02&&normal>0),'Empty rows retain normal tile height');
+  }
+  await drag(page);
+  assert.deepEqual(await page.locator('.is-drop-active').evaluateAll(nodes=>nodes.map(node=>{const column=node.closest('[data-drop-kind]');return [column.dataset.dropKind==='vault'?'Vault':column.querySelector('h3').textContent,node.dataset.equipmentGroup];})),[['WARLOCK','primary'],['TITAN','primary'],['Vault','primary']]);
+  if(viewport.width===2560){
+   const rows=await page.locator('[data-equipment-group="primary"]').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {top:r.top,height:r.height,left:r.left};}));
+   assert.equal(rows.length,4);
+   assert.ok(rows.every((r,i)=>!i||r.left>rows[i-1].left),'Four columns are side by side');
+   const track=await page.locator('#vaultTransferWorkspace').evaluate(node=>parseFloat(getComputedStyle(node).gridTemplateRows.split(' ')[4]));
+   assert.ok(track>0);
+   for(const row of rows){assert.ok(Math.abs(row.top-rows[0].top)<=1,'Primary tops align within 1px');assert.ok(Math.abs(row.height-track)<=1,'Every Primary group fills the aligned grid row');}
+  }else{
+   assert.ok(await page.locator('[data-drop-kind="vault"]').evaluate(node=>node.getBoundingClientRect().top>=document.querySelector('.vault-character-columns').getBoundingClientRect().bottom),'Vault stacks below characters');
+  }
   await count(page,'.is-drop-active',3); // Other two Guardians and Vault, same bucket only.
   await count(page,'[data-drop-character-id="1"] .is-drop-active',0);
   await count(page,'[data-equipment-group="special"].is-drop-active',0);
