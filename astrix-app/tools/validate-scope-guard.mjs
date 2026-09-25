@@ -4,6 +4,12 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  // Local preview mode: explicit localhost gate, Journey opt-in and checks.
+  'astrix-app/shared/local-preview.mjs',
+  'astrix-app/pages/journey/journey-entry.mjs',
+  'astrix-app/pages/journey/journey-preview.mjs',
+  'astrix-app/tools/validate-local-preview.mjs',
+  'astrix-app/tools/test-local-preview-browser.mjs',
   // Prompt 20a-hotfix: shared public Bungie definition fetch.
   'forge-auth-worker/src/bungie-definition-fetch.ts',
   // Prompt 22: seven-route ribbon appearance and Reports edge coverage.

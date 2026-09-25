@@ -228,6 +228,7 @@ const browserEntries=await Promise.all([
   'pages/guardian-workspace-v2/guardian-workspace-v2.mjs',
   'pages/guardian-workspace-v2/paradox-build-space/index.html',
   'pages/journey/index.html',
+  'pages/journey/journey-entry.mjs',
   'pages/vault/index.html',
   'pages/loadout/index.html',
   'pages/forge-loader/index.html',
@@ -238,6 +239,8 @@ for(const [path,source] of browserEntries){
   // PR #241 (ef57dff) refreshed the Character profile import; #243 and #268 extended that graph.
   const version=path==='pages/guardian-workspace-v2/guardian-workspace-v2.mjs'
     ?/guardian-bungie-profile\.mjs\?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1/
+    // Local preview request: HTML pins the gate; its entry retains the exact live transport pin.
+    :path==='pages/journey/index.html'?/journey-entry\.mjs\?v=20260925-local-preview-1/
     :/transport=20260911-compact-plugs-1/;
   assert.match(source,version,`${path} must invalidate the prior prepared page module graph`);
 }
