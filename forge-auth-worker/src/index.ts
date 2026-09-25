@@ -15,6 +15,7 @@ import { compactPreparedProfilePlugLists, enrichPreparedPageAccount } from "./pa
 import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourSolverRequest } from "./armour-solver";
 
 import { reportsRead } from './reports-read';
+import { reportsCatalogue } from './reports-catalogue';
 
 export { AuthRecord };
 
@@ -2303,6 +2304,13 @@ export default {
       }
       if (request.method === "GET" && (url.pathname === "/bungie/loadout" || url.pathname === "/v1/destiny/loadout")) {
         return await loadoutRoute(request, env);
+      }
+      if (request.method === "GET" && url.pathname === "/bungie/reports/catalogue") {
+        try {
+          return withCors(request, env, await reportsCatalogue(request, await destinyManifest(env), (caches as CacheStorage & {default: Cache}).default));
+        } catch {
+          return withCors(request, env, Response.json({error: 'reports_catalogue_unavailable'}, {status: 502, headers: {'Cache-Control': 'no-store'}}));
+        }
       }
       if (request.method === "GET" && url.pathname === "/bungie/reports") {
         const auth = await authenticatedSession(request, env);

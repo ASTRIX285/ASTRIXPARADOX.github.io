@@ -6,7 +6,8 @@ import {resolve,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
-const root=fileURLToPath(new URL('../../',import.meta.url));
+// Prompt 20a-fix: normalize the root before enforcing the existing containment boundary.
+const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const fixture=`import {fixture} from '/astrix-app/tools/fixtures/reports-fixture.mjs';
 import {mountReports} from '/astrix-app/pages/reports/reports-ui.mjs';
 const image='https://www.bungie.net/img/destiny_content/pgcr/europa-raid-deep-stone-crypt.jpg';
@@ -27,6 +28,8 @@ await new Promise(done=>server.listen(0,'127.0.0.1',done));
 const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
+ for(const path of ['/astrix-app/pages/reports/reports-ui.mjs','/astrix-app/pages/reports/reports.css'])assert.equal((await fetch(origin+path)).status,200,'Fixture server must serve Reports resources');
+ console.log('REPORTS_BROWSER_SERVER=PASS');
  try{browser=await chromium.launch({channel:'chromium',headless:true});}catch(error){if(/Executable doesn't exist/.test(error.message))console.error('NOT RUN: Chromium missing');throw error;}
  const screenshots=process.env.REPORTS_SCREENSHOT_DIR||'/tmp/astrix-reports-screenshots';await mkdir(screenshots,{recursive:true});
  for(const width of [1363,1920,2560]){
@@ -40,16 +43,37 @@ try{
   });
   await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
   await page.waitForLoadState('networkidle');
-  const measurements=await page.locator('.reports-card').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,radius:getComputedStyle(node).borderRadius,overflow:[...node.querySelectorAll('*')].some(child=>child.scrollWidth>child.clientWidth+1||child.scrollHeight>child.clientHeight+1)})));
+  const measurements=await page.locator('.reports-card:visible').evaluateAll(nodes=>nodes.map(node=>({width:node.getBoundingClientRect().width,radius:getComputedStyle(node).borderRadius,overflow:[...node.querySelectorAll('*')].some(child=>child.scrollWidth>child.clientWidth+1||child.scrollHeight>child.clientHeight+1)})));
   assert.ok(measurements.length>0);
   for(const card of measurements){assert.ok(card.width>=220&&card.width<=320,JSON.stringify(card));assert.equal(card.radius,'8px');assert.equal(card.overflow,false);}
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  // Prompt 20a-fix: detect new image nodes as well as requests, including cached images.
+  await page.evaluate(()=>{window.initialImages=new Set(document.querySelectorAll('#reportsWorkspace img'));window.newImages=0;window.imageObserver=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1)for(const img of [...(node.matches('img')?[node]:[]),...node.querySelectorAll('img')])if(!window.initialImages.has(img))window.newImages++;});window.imageObserver.observe(document.querySelector('#reportsWorkspace'),{childList:true,subtree:true});});
   const requests=[];page.on('request',request=>requests.push(request.url()));
   await page.locator('[data-series="dungeons"]').click();await page.locator('[data-series="vanguard"]').click();await page.locator('[data-series="raids"]').click();
-  await page.locator('[data-activity]').first().click();await page.locator('[data-back]').waitFor();
+  await page.locator('[data-activity]:visible').first().click();await page.locator('[data-back]:visible').waitFor();
   await page.waitForLoadState('networkidle');assert.deepEqual(requests,[],'Series switches and activity opening make zero requests');
+  assert.equal(await page.evaluate(()=>window.newImages),0,'Opening views creates no new image elements');
   assert.deepEqual(errors,[]);await page.screenshot({path:`${screenshots}/reports-${width}-detail.png`,fullPage:true});
-  await page.locator('[data-back]').click();await page.screenshot({path:`${screenshots}/reports-${width}-grid.png`,fullPage:true});
+  await page.locator('[data-back]:visible').click();await page.screenshot({path:`${screenshots}/reports-${width}-grid.png`,fullPage:true});
+  // Prompt 20a-fix: every series, both limiting card widths, and every band text line.
+  for(const series of ['raids','dungeons','vanguard','conquests','lost-sectors','exotic','story']){
+   await page.locator(`[data-series="${series}"]`).click();
+   for(const cardWidth of [220,320]){
+    await page.locator('.reports-grid:visible').evaluate((node,width)=>node.style.setProperty('--reports-card-width',`${width}px`),cardWidth);
+    const cells=await page.locator('.reports-card:visible .reports-band span').evaluateAll(nodes=>nodes.map(node=>{const range=document.createRange();range.selectNodeContents(node);return {text:node.textContent,lines:new Set([...range.getClientRects()].map(rect=>Math.round(rect.top))).size,overflow:node.scrollWidth>node.clientWidth+1};}));
+    for(const cell of cells){assert.ok(cell.lines<=1,JSON.stringify(cell));assert.equal(cell.overflow,false,JSON.stringify(cell));}
+   }
+   const buttons=page.locator('[data-activity]:visible');
+   for(let index=0;index<await buttons.count();index++){
+    await buttons.nth(index).click();await page.locator('[data-back]:visible').click();
+    await buttons.nth(index).click();await page.locator('#reportCharacter').selectOption('1');await page.locator('[data-back]:visible').click();await page.locator('#reportCharacter').selectOption('all');
+   }
+  }
+  await page.waitForLoadState('networkidle');assert.deepEqual(requests,[],'Series switches and activity opening make zero requests');
+  assert.equal(await page.evaluate(()=>window.newImages),0,'Opening views creates no new image elements');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  assert.deepEqual(errors,[]);
   console.log(`REPORTS_BROWSER width=${width} cards=${measurements.map(row=>row.width).join(',')} radius=8 requests=0`);await page.close();
  }
 }finally{await browser?.close();await new Promise(done=>server.close(done));}

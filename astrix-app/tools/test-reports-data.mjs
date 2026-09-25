@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {fixture,definitions} from './fixtures/reports-fixture.mjs';
-import {aggregateRow,viewModel,catalogue,bungieImage,variantIdentity} from '../pages/reports/reports-model.mjs';
+import {aggregateRow,viewModel,catalogue,bungieImage,variantIdentity,slimCatalogue} from '../pages/reports/reports-model.mjs';
 import {createReportsLoader,createReportsStore} from '../pages/reports/reports-data.mjs';
 const all=viewModel(fixture,'raids');
 assert.deepEqual(all.totals,{entered:12,cleared:8,kills:370,deaths:37,time:12000,fastest:700,score:125,flawless:null});
@@ -26,8 +26,13 @@ let calls=[],warmed=0,throttled=false;const waits=[];
 const store=createReportsStore(null);
 const loader=createReportsLoader({store,now:()=>1000,warmImages:async rows=>{warmed++;assert.equal(rows.length,4);},sleep:async ms=>waits.push(ms),fetchImpl:async (input,options)=>{
   const url=new URL(input);calls.push(url);
-  if(url.pathname==='/bungie/manifest')return Response.json({version:'fixture-1',jsonWorldComponentContentPaths:{en:{DestinyActivityDefinition:'/common/destiny2_content/json/fixture.json'}}});
-  if(url.hostname==='www.bungie.net'){assert.equal(options.credentials,'omit');return Response.json(definitions);}
+  // Prompt 20a-fix: preserve the public credential assertion at the slim boundary.
+  assert.notEqual(url.hostname,'www.bungie.net','Browser never downloads full definitions');
+  assert.notEqual(url.pathname,'/bungie/manifest','Browser requests only the slim catalogue');
+  if(url.pathname==='/bungie/reports/catalogue'){
+    assert.equal(options.credentials,'omit');
+    return Response.json({schema:'2-fixture',version:'fixture-1',activities:fixture.catalogue.flatMap(group=>group.variants.map(row=>({...row,name:group.name,series:group.series,pgcrImage:group.image,releaseOrder:group.releaseTime})))});
+  }
   if(url.searchParams.get('kind')==='profile')return Response.json({ErrorCode:1,Response:{characters:{data:Object.fromEntries(fixture.characters.map(row=>[row.characterId,row]))},characterProgressions:{data:{1:{milestones:{}}}},profileRecords:{data:{records:{5:{state:0}}}}}});
   const id=url.searchParams.get('characterId');
   if(id==='1'&&!throttled){throttled=true;return Response.json({ErrorCode:36,ThrottleSeconds:2},{status:429});}
@@ -49,4 +54,8 @@ assert.equal(catalogue({1:{hash:1,displayProperties:{name:'New dungeon: Standard
 assert.equal(aggregateRow({values:{activityCompletions:{basic:{value:2}},fastestCompletionMsForActivity:{basic:{value:700000}}}}).cleared,2);
 assert.equal(aggregateRow({values:{activityCompletions:{basic:{value:2}}}}).entered,null,'Clears must not masquerade as entered runs');
 assert.equal(aggregateRow({values:{activityCompletions:{basic:{value:0}},fastestCompletionMsForActivity:{basic:{value:700000}}}}).fastest,null,'An uncompleted activity has no fastest clear');
+assert.deepEqual(viewModel(loaded,'raids').totals,all.totals,'Slim projection preserves hand-computed totals');
+assert.equal(loaded.catalogue.filter(row=>row.series==='raids')[0].name,'New Raid');
+const alphabetic=slimCatalogue([{hash:'1',name:'Zulu',series:'story',difficulty:'-',releaseOrder:99},{hash:'2',name:'Alpha',series:'story',difficulty:'-',releaseOrder:1}]);
+assert.deepEqual(alphabetic.map(row=>row.name),['Alpha','Zulu'],'Other series sort by name');
 console.log('REPORTS_DATA=PASS');

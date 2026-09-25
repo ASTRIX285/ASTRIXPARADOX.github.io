@@ -1,4 +1,4 @@
-import {catalogue} from './reports-model.mjs?v=20260925-reports-1';
+import {slimCatalogue} from './reports-model.mjs?v=20260925-reports-2';
 const DB_NAME='astrix-reports-v1';
 const VERSION=1;
 export function accountKey(session){const m=session?.activeDestinyMembership;return session?.authenticated&&m?.membershipId?`${m.membershipType}:${m.membershipId}`:'';}
@@ -22,9 +22,9 @@ export function createReportsStore(indexedDB=globalThis.indexedDB){
 }
 export function createReportsLoader({origin='https://auth.astrixparadox.com',fetchImpl=globalThis.fetch?.bind(globalThis),store=createReportsStore(),now=Date.now,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),warmImages=async()=>{}}={}){
   const flights=new Map();
-  async function request(url){
+  async function request(url,{publicData=false}={}){
     for(let attempt=0;attempt<5;attempt++){
-      const response=await fetchImpl(url,{credentials:new URL(url).origin===origin?'include':'omit',signal:AbortSignal.timeout(30_000)});
+      const response=await fetchImpl(url,{credentials:!publicData&&new URL(url).origin===origin?'include':'omit',signal:AbortSignal.timeout(30_000)});
       const payload=await response.json();
       const seconds=Number(payload?.ThrottleSeconds)||Number(response.headers?.get('Retry-After'))||0;
       if(response.status===429||seconds>0&&payload?.ErrorCode!==1||payload?.ErrorCode===36){await sleep(Math.max(1000,seconds*1000));continue;}
@@ -35,19 +35,15 @@ export function createReportsLoader({origin='https://auth.astrixparadox.com',fet
   }
   const route=(kind,characterId)=>{const url=new URL('/bungie/reports',origin);url.searchParams.set('kind',kind);if(characterId)url.searchParams.set('characterId',characterId);return url.href;};
   async function manifest(){
-    const meta=await request(new URL('/bungie/manifest',origin).href);
-    const key=`manifest:${meta.version}`;
-    const cached=await store.get(key);if(cached)return cached;
-    const path=meta.jsonWorldComponentContentPaths?.en?.DestinyActivityDefinition;
-    const url=new URL(path||'', 'https://www.bungie.net');
-    if(!path?.startsWith('/common/destiny2_content/json/')||url.origin!=='https://www.bungie.net')throw new Error('Activity definitions unavailable');
-    const result=catalogue(await request(url.href));await store.set(key,result);return result;
+    const slim=await request(new URL('/bungie/reports/catalogue',origin).href,{publicData:true});
+    if(!slim.schema?.startsWith('2-')||!slim.version||!Array.isArray(slim.activities))throw new Error('Activity catalogue unavailable');
+    return slimCatalogue(slim.activities);
   }
   async function load(session,{force=false}={}){
     const identity=accountKey(session);if(!identity)return null;
     if(flights.has(identity))return flights.get(identity);
     const task=(async()=>{
-      const key=`account:${identity}`;
+      const key=`account:catalogue-v2:${identity}`;
       const cached=force?null:await store.get(key);
       if(cached&&now()-cached.fetchedAt<10*60_000){await warmImages(cached.catalogue);return cached;}
       const [profile,groups]=await Promise.all([request(route('profile')),manifest()]);

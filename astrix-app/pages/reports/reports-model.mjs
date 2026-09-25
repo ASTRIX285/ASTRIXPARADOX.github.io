@@ -7,7 +7,7 @@ export const SERIES=Object.freeze([
   {id:'exotic',name:'Exotic Missions',description:'Missions for Exotic rewards.'},
   {id:'story',name:'Story Missions',description:'Campaign missions and replays.'}
 ]);
-const DIFFICULTIES=['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode'];
+const DIFFICULTIES=['Normal','Standard','Advanced','Expert','Legend','Legendary','Master','Prestige','Grandmaster','Contest','Challenge Mode','Explorer','Eternity','Ultimatum'];
 const EXOTIC=/^(?:\/\/node\.ovrd\.AVALON\/\/|Presage|Harbinger|The Whisper|Zero Hour|Vox Obscura|Operation: Seraph's Shield|Starcrossed|Encore|Kell's Fall|Derealize|Dual Destiny)(?::|$)/i;
 export function bungieImage(path){
   if(!path)return '';
@@ -51,6 +51,17 @@ export function catalogue(definitions){
     group.variants.push({hash:String(def.hash),difficulty});
   }
   return [...groups.values()].sort((a,b)=>(b.releaseTime||0)-(a.releaseTime||0)||a.name.localeCompare(b.name));
+}
+// Prompt 20a-fix: production receives only the Worker projection, never full definitions.
+export function slimCatalogue(activities){
+  const groups=new Map();
+  for(const row of activities){
+    const id=`${row.series}:${row.name.toLocaleLowerCase('en')}`;
+    if(!groups.has(id))groups.set(id,{id,series:row.series,name:row.name,image:bungieImage(row.pgcrImage),releaseOrder:row.releaseOrder,variants:[]});
+    const group=groups.get(id);group.image ||= bungieImage(row.pgcrImage);
+    group.variants.push({hash:String(row.hash),difficulty:row.difficulty});
+  }
+  return [...groups.values()].sort((a,b)=>a.series.localeCompare(b.series)||(['raids','dungeons','exotic'].includes(a.series)?(b.releaseOrder||0)-(a.releaseOrder||0):0)||a.name.localeCompare(b.name));
 }
 export const STAT_KEYS={entered:'activitiesEntered',cleared:'activityCompletions',kills:'activityKills',deaths:'activityDeaths',time:'activitySecondsPlayed',fastest:'fastestCompletionMsForActivity',score:'bestSingleGameScore'};
 export function stat(stats,key){const value=stats?.[key]?.basic?.value;return typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;}

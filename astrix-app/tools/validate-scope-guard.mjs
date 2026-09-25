@@ -4,6 +4,12 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const allowed=new Set([
+  // Prompt 20a-fix: catalogue projection, release coverage and fixture only.
+  'astrix-app/tools/validate-reports-catalogue.mjs',
+  'astrix-app/tools/fixtures/reports-catalogue-current.json',
+  'forge-auth-worker/src/reports-catalogue.ts',
+  'forge-auth-worker/src/reports-release-order.ts',
+  'forge-auth-worker/test/reports-catalogue.test.ts',
   'astrix-app/docs/reports-data-grid.md',
   'astrix-app/tools/test-reports-browser.mjs',
   // Prompt 20: Reports A and the required page attribution.

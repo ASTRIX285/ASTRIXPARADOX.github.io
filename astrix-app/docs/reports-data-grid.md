@@ -21,12 +21,11 @@ stays absent instead of initiating another request when selected.
   supply run counts. Flawless remains `-` until run data supports it.
 - Fastest reads `fastestCompletionMsForActivity`, divided by 1000. A zero clear
   count cannot produce a fastest clear. Score reads `bestSingleGameScore`.
-- Newest-first sorting uses a positive definition `releaseTime`. Bungie's current
-  manifest checked on 25 September has **zero nonzero releaseTime values**.
-  Undated activities consequently sort by name. Complete historical release
-  ordering remains unresolved; manifest index and first account play are not
-  treated as release dates. This PR does not claim that the current catalogue
-  meets newest-first ordering.
+- Newest-first sorting uses the checked-in public release-order table for raids,
+  dungeons and Exotic missions. Other series sort by name. Mission variants share
+  the mission's debut order. Featured Pantheon encounters share their content
+  release wave, rather than moving every weekly rotation. The runtime builder and
+  offline validator reject any uncovered raid, dungeon or Exotic mission.
 - Unlabelled difficulties remain `-`. Display names supply labelled difficulties;
   generic original names such as "Nightfall Grandmaster" must not collapse
   different strikes. Activity type hashes also classify newer raids and dungeons
@@ -59,3 +58,28 @@ rendered measurements are claimed.
 The referenced `claude/astrix-rights-check-25sep2026.md` is absent from the base
 checkout. The task's explicit rights requirements are applied, including the
 footer. No Cloudflare changes, deployment or merge were performed.
+
+## Prompt 20a-fix
+
+The public GET `/bungie/reports/catalogue` route fetches Activity definitions only
+inside the Worker. Downloads are bounded at 24 MiB. The edge cache key includes
+manifest version and catalogue/release-table revision; cached public projections
+last one year, while the stable client URL has a five-minute TTL. No credentials
+or player data enter this route or its edge cache. Existing account snapshots
+remain browser-only. The browser requests only the slim projection, even when
+preloading Reports from another page. The browser snapshot key changed to avoid
+reusing the old catalogue schema.
+
+Measured with the Worker builder against Bungie's current English manifest,
+`244213.26.06.29.2000-1-bnet.65864`: **349,632 bytes** of UTF-8 JSON,
+**2,045 variants**, compared with **10,988,279 bytes** of full definitions. This is
+an uncompressed local build measurement, not a deployed endpoint measurement.
+The checked-in public fixture records that exact response for offline coverage.
+
+Every series grid and image node is built during preparation. Detail shells are
+built once on first open; their art moves the existing card node. Later switches
+use `hidden`. Character changes update text without creating images. The browser
+assertions still require zero requests of every kind, and now reject new image
+nodes, repeated-open requests and multiline band cells at both 220 and 320px.
+The normalized test-server root retains its path boundary. Its resource smoke
+checks pass before Chromium launch. **NOT RUN: Chromium missing.**
