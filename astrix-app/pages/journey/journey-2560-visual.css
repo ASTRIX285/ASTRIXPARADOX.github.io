@@ -4,9 +4,8 @@
 html{font-size:16px}
 
 .journey-page{
-  --journey-royal-blue:#4169e1;
-  --mission-purple:var(--journey-royal-blue);
-  --mission-purple-soft:rgba(65,105,225,.18);
+  --mission-purple:var(--apx-pvp);
+  --mission-purple-soft:color-mix(in srgb,var(--apx-pvp) 18%,transparent);
   --mission-line:color-mix(in srgb,var(--loc) 26%,transparent);
   --mission-line-soft:rgba(255,255,255,.07);
   font-size:1rem;
@@ -128,14 +127,14 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 .journey-metrics{grid-template-columns:repeat(4,minmax(0,1fr));padding:0 .625rem}
 .journey-metrics .mission-metric-card{border-color:color-mix(in srgb,var(--loc) 24%,transparent)}
 .journey-metrics .mission-metric-icon{
-  border-color:rgba(65,105,225,.42);
-  color:#91a9ff;
-  background:rgba(65,105,225,.12);
+  border-color:color-mix(in srgb,var(--apx-pvp) 42%,transparent);
+  color:var(--apx-pvp);
+  background:color-mix(in srgb,var(--apx-pvp) 12%,transparent);
 }
 .journey-metrics .mission-metric-card small{font-size:.75rem}
 .journey-metrics .mission-metric-card strong{font-size:1.5rem}
 .journey-metrics .mission-metric-card div>span{font-size:.75rem}
-.journey-metrics .mission-donut-value{stroke:var(--journey-royal-blue)!important}
+.journey-metrics .mission-donut-value{stroke:var(--apx-pvp)!important}
 
 .journey-page .mission-panel-heading h2{font-size:.875rem}
 .journey-page .mission-panel-heading>span{font-size:.75rem}
@@ -181,13 +180,13 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 
 .journey-right-rail .mission-panel{border-color:color-mix(in srgb,var(--loc) 26%,transparent)}
 .journey-right-rail .mission-chart-line--pve{stroke:var(--loc)}
-.journey-right-rail .mission-chart-line--pvp{stroke:var(--journey-royal-blue)}
+.journey-right-rail .mission-chart-line--pvp{stroke:var(--apx-pvp)}
 .journey-right-rail .mission-chart-empty{font-size:.8125rem}
 .journey-right-rail .mission-chart-dates{font-size:.75rem}
 .journey-right-rail .mission-chart-legend{font-size:.75rem}
 .journey-right-rail .mission-chart-legend i{background:var(--loc)}
-.journey-right-rail .mission-chart-legend i.is-pvp{background:var(--journey-royal-blue)}
-.journey-right-rail .mission-confidence-donut .mission-donut-value{stroke:var(--journey-royal-blue)!important}
+.journey-right-rail .mission-chart-legend i.is-pvp{background:var(--apx-pvp)}
+.journey-right-rail .mission-confidence-donut .mission-donut-value{stroke:var(--apx-pvp)!important}
 .journey-page .mission-confidence-donut strong{font-size:1.25rem}
 .journey-page .mission-confidence-donut small{font-size:.75rem}
 .journey-page .mission-confidence-rows dt,
@@ -517,8 +516,8 @@ html body.journey-page header:has(>[data-forge-hero-cards]) .guardian-character-
 
 .journey-map-controls button{
   display:grid;
-  min-width:34px;
-  height:30px;
+  min-width:44px;
+  height:44px;
   place-items:center;
   border:1px solid rgba(201,168,76,.3);
   border-radius:0;
