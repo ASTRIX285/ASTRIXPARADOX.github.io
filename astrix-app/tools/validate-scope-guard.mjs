@@ -8,16 +8,11 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 // Frozen permissions inherited from main at aff4223a. New task permissions belong
 // in .scope/<exact-branch-name>.txt, never in this shared baseline.
 const allowed=new Set([
-<<<<<<< HEAD
-  // LF checkout policy only.
-  '.gitattributes',
-=======
   // Clips footer: validate before the scheduled generator commits its output.
   '.github/workflows/update-clips.yml',
   // Europa sourcing request: page-owned marker audit and its validator only.
   'astrix-app/pages/journey/europa-marker-data.mjs',
   'astrix-app/tools/test-europa-marker-sources.mjs',
->>>>>>> main
   // Prompt 20a-hotfix: shared public Bungie definition fetch.
   'forge-auth-worker/src/bungie-definition-fetch.ts',
   // Prompt 24: Journey marker fallbacks and chest readability coverage.
