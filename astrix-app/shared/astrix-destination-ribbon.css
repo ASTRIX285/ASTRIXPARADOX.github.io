@@ -149,3 +149,32 @@ body.apx-destination-page::before{
   .apx-page-heading{align-items:flex-start;flex-direction:column}.apx-card-grid,.apx-subgrid,.apx-destination-links{grid-template-columns:1fr}.apx-page-shell{padding-top:32px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Prompt 22: one button treatment outranks legacy page cosmetics. Geometry
+   remains in the existing responsive rules; state changes never resize links. */
+@layer astrix-ribbon-buttons {
+  .apx-destination-ribbon ul { gap:6px!important; }
+  .apx-destination-ribbon a {
+    background:var(--apx-colour-canvas)!important;
+    border:1px solid var(--apx-colour-action)!important;
+    border-radius:8px!important;
+    color:var(--apx-colour-focus)!important;
+    box-shadow:none!important;
+    text-decoration:none!important;
+  }
+  .apx-destination-ribbon a:hover,
+  .apx-destination-ribbon a:focus-visible { border-color:var(--apx-colour-focus)!important; }
+  .apx-destination-ribbon a:focus-visible {
+    outline:2px solid var(--apx-colour-focus)!important;
+    outline-offset:-3px!important;
+  }
+  .apx-destination-ribbon a[aria-current="page"] {
+    background:var(--apx-colour-action)!important;
+    color:var(--apx-button-primary-text)!important;
+    box-shadow:none!important;
+  }
+  /* Two 42px mobile rows retain their button height plus the new 6px gap. */
+  @media(max-width:720px) {
+    [data-forge-destination-ribbon],.apx-destination-ribbon { height:90px!important;min-height:90px!important; }
+  }
+}

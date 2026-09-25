@@ -16,3 +16,13 @@
 .reports-encounter-row{border-top:1px solid #303c51}
 .reports-encounter-row>span:first-child{grid-column:1/-1}
 .reports-encounter-row>span:nth-child(2){grid-column:2}
+
+/* Prompt 22: protect the status and attribution from density overrides. */
+body.apx-destination-page #reportsWorkspace,
+body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution {
+  padding-inline:max(24px,var(--apx-page-gutter,24px));
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
+}
