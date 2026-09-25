@@ -5,7 +5,7 @@ import {
   characterRoster,
   selectLiveCharacter
 } from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1";
-import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1";
+import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1";

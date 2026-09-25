@@ -11,7 +11,7 @@ const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const harness=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="journey-2560-visual.css"><style>body{margin:12px;background:#090e15;color:#eee;font-family:Arial,sans-serif}main{max-width:1200px;margin:auto}.apx-loc-list{display:flex;flex-wrap:wrap;gap:8px}.apx-loc{padding:8px}#detail{margin-top:16px}</style>
+<link rel="stylesheet" href="/css/astrix-palette.css"><link rel="stylesheet" href="journey-2560-visual.css"><link rel="stylesheet" href="../../shared/astrix-desktop-density.css"><style>body{margin:12px;background:#090e15;color:#eee;font-family:Arial,sans-serif}main{max-width:1200px;margin:auto}.apx-loc-list{display:flex;flex-wrap:wrap;gap:8px}.apx-loc{padding:8px}#detail{margin-top:16px}</style>
 <script src="../../shared/astrix-destination-theme.js"></script></head><body><main><div id="selector"></div><div id="detail"></div></main>
 <script type="module">
 import {initLocationSelector} from '../../shared/astrix-location-selector.mjs';
@@ -83,6 +83,9 @@ try{
   await page.locator('.journey-map-point-list button').click();
   assert.equal(await page.locator('.journey-map-completion').innerText(),'Not collected');
   assert.equal(await page.locator('.journey-map-position-note').innerText(),'Map position unavailable.');
+  // Prompt 25: independent chest note keeps the existing selected-position assertion strict.
+  assert.equal(await page.locator('.journey-region-chest-unknown').count(),1);
+  assert.equal(await page.locator('.journey-region-chest-unknown').isVisible(),false);
   await page.evaluate(()=>publishData({key:'cosmodrome',loading:true,sections:{}}));
   assert.equal(await page.locator('[data-region-chest-total]').innerText(),'--');
   await page.setViewportSize({width:390,height:844});
@@ -96,5 +99,71 @@ try{
     await page.screenshot({path:resolve(process.env.JOURNEY_SCREENSHOT_DIR,'journey-maps-desktop.png'),fullPage:true});
   }
   assert.deepEqual(errors,[]);
+  // Prompt 24: a fresh module graph receives missing/failed/successful icon fixtures.
+  const fixturePage=await browser.newPage({viewport:{width:1363,height:1080}});
+  const points=['chest','lost-sector','activity','vendor','landing'].map((type,i)=>({id:`missing-${i}`,type,name:`Fixture ${type}`,position:{x:10+i*15,y:30},variants:[]}));
+  points.push({id:'loaded',type:'activity',name:'Bungie image',position:{x:30,y:65},icon:'/common/destiny2_content/icons/fixture_loaded.png',variants:[]},
+    {id:'failed',type:'vendor',name:'Failed Bungie image',position:{x:65,y:65},icon:'/common/destiny2_content/icons/fixture_failed.png',variants:[]},
+    {id:'unknown',type:'unknown',name:'Unknown type',position:{x:50,y:50},variants:[]},
+    {id:'unpositioned',type:'activity',name:'No position',position:null,variants:[]});
+  await fixturePage.route('**/*',async route=>{
+    const url=new URL(route.request().url());
+    if(url.pathname.endsWith('/assets/map-data/nessus.mjs'))return route.fulfill({contentType:'text/javascript',body:`export default ${JSON.stringify({key:'nessus',entries:points})}`});
+    if(url.hostname==='www.bungie.net')return url.pathname.endsWith('fixture_loaded.png')
+      ?route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')})
+      :route.fulfill({status:404,body:''});
+    return route.continue();
+  });
+  await fixturePage.goto(`http://127.0.0.1:${server.address().port}/astrix-app/pages/journey/__map-test.html`);
+  await fixturePage.evaluate(()=>window.ready);
+  await fixturePage.waitForFunction(()=>document.querySelectorAll('.journey-map-marker').length===7);
+  await fixturePage.waitForFunction(()=>document.querySelector('[data-marker-key="loaded"] img')?.naturalWidth>0&&!document.querySelector('[data-marker-key="failed"] img'));
+  for(const width of [1363,2560]){
+    await fixturePage.setViewportSize({width,height:1080});
+    const markers=await fixturePage.locator('.journey-map-marker').evaluateAll(nodes=>nodes.map(node=>({
+      name:node.getAttribute('aria-label'),title:node.title,
+      visibleIcon:[...node.querySelectorAll('.journey-map-marker-icon>img,.journey-map-marker-icon>svg')].some(icon=>getComputedStyle(icon).display!=='none'&&(icon.tagName.toLowerCase()==='svg'?!!icon.querySelector('path[d]'):icon.complete&&icon.naturalWidth>0))
+    })));
+    assert.equal(markers.length,7,'Unknown or unpositioned markers are not drawn');
+    for(const marker of markers){assert.equal(marker.visibleIcon,true,'Every marker has a visible image or glyph');assert.ok(marker.name);assert.equal(marker.title,marker.name);}
+    assert.equal(await fixturePage.locator('[data-marker-key="failed"] svg:visible').count(),1);
+    assert.equal(await fixturePage.locator('[data-marker-key="loaded"] img:visible').count(),1);
+    await fixturePage.evaluate(()=>publishChests({key:'nessus',total:3,discovered:1,chests:[
+      {name:'Chest 1',location:'Fixture',collected:false},{name:'Chest 2',location:'Fixture',collected:true},{name:'Chest 3',location:'Fixture',collected:null}
+    ]}));
+    assert.equal(await fixturePage.locator('.journey-region-chest.is-missing .journey-region-chest-tick').innerText(),'○');
+    assert.equal(await fixturePage.locator('.journey-region-chest.is-collected .journey-region-chest-tick').innerText(),'✓');
+    const contrast=await fixturePage.locator('.journey-region-chest-copy b,.journey-region-chest-copy small,.journey-region-chests-summary strong,.journey-region-chests-summary small').evaluateAll(nodes=>nodes.map(node=>{
+      const channels=value=>value.match(/[\d.]+/g).map(Number);
+      const lum=values=>values.slice(0,3).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+      const style=getComputedStyle(node),panel=node.closest('.journey-region-chests'),background=channels(getComputedStyle(panel).backgroundColor),foreground=channels(style.color);
+      const light=lum(foreground),dark=lum(background);let effects=false;
+      for(let element=node;element;element=element.parentElement){const computed=getComputedStyle(element);if(computed.filter!=='none'||computed.textShadow!=='none')effects=true;if(element===panel)break;}
+      return {ratio:(Math.max(light,dark)+.05)/(Math.min(light,dark)+.05),alpha:background[3]??1,textAlpha:foreground[3]??1,effects};
+    }));
+    assert.equal(contrast.length,12);
+    for(const row of contrast){assert.equal(row.alpha,1);assert.equal(row.textAlpha,1);assert.ok(row.ratio>=4.5,JSON.stringify(row));assert.equal(row.effects,false);}
+  }
+  // Europa sourcing request: preserve the legacy fallback assertions above;
+  // Europa has the stronger manifest + citation contract, including failed images.
+  await fixturePage.unroute('**/*');
+  await fixturePage.route('https://www.bungie.net/**',route=>route.request().url().includes('bd7a1fc995f87be96698263bc16698e7')
+    ?route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')})
+    :route.fulfill({status:404,body:''}));
+  await fixturePage.evaluate(()=>ForgeDestinations.set('europa',{persist:false}));
+  await fixturePage.waitForFunction(()=>document.querySelector('[data-map-key="europa"]')?.dataset.renderComplete==='ready');
+  await fixturePage.waitForFunction(()=>document.querySelector('[data-marker-key="node-1162322578"] img')?.naturalWidth>0);
+  await fixturePage.waitForFunction(()=>!document.querySelector('[data-marker-key="location-405582238"]'));
+  for(const width of [1363,2560]){
+    await fixturePage.setViewportSize({width,height:1080});
+    assert.equal(await fixturePage.locator('.journey-map-marker:visible').count(),1,'Missing source data and failed icons never become visible markers');
+    assert.equal(await fixturePage.locator('.journey-map-marker svg').count(),0,'No substitute glyphs on Europa');
+    const marker=fixturePage.locator('.journey-map-marker:visible');
+    assert.equal(await marker.getAttribute('aria-label'),'Deep Stone Crypt · Raids');
+    assert.equal(await marker.getAttribute('title'),'Deep Stone Crypt · Raids');
+    await marker.hover();
+    assert(await marker.locator('.journey-map-marker-copy').isVisible());
+  }
+  await fixturePage.close();
   console.log('JOURNEY_MAP_BROWSER=PASS switching, 4K/6K, search, keyboard, filters, chest reset, mobile');
-}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
+}catch(error){if(/Executable doesn't exist/.test(error.message))console.error('NOT RUN: Chromium missing');throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

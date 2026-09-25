@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 const tools=fileURLToPath(new URL('./',import.meta.url));
 const validators=[
   'validate-scope-guard.mjs',
+  'test-scope-guard.mjs',
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
@@ -15,6 +16,7 @@ const validators=[
   'validate-guardian-character-cards.py',
   'validate-guardian-complete-loadout.py',
   'validate-main-page-today.mjs',
+  'test-character-loadout-status.mjs',
   'validate-super-formation.mjs',
   'validate-responsive-layout-contract.mjs',
   'validate-destination-theming.mjs',
@@ -27,6 +29,8 @@ const validators=[
   'validate-forge-loader.mjs',
   'test-forge-loader-residency.mjs',
   'validate-journey-visual-pass.mjs',
+  'test-europa-marker-sources.mjs', // Europa sourcing request: reject incomplete markers.
+  'test-journey-maps.mjs', // Prompt 24: marker and chest contrast contracts.
   'validate-public-deep-space.mjs',
   'validate-live-artifact-contract.mjs',
   'test-artifact-provenance.mjs',

@@ -10,7 +10,7 @@ import {createBuildState,createWorkingBuildPatch,createBuildPersistenceSnapshot,
 import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs';
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
 import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,inventoryLocations,verifyReadback,sessionBinding,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
-import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState} from '../shared/guardian-inventory-workspace.mjs';
+import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState,itemTileMarkup} from '../shared/guardian-inventory-workspace.mjs';
 import {resolveBreakerTypeDefinition} from '../core/bungie-item-identity.mjs';
 
 const CHARACTER_ID='9100001';
@@ -719,7 +719,7 @@ console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');
 // Exercise the saved overview independently of auth, DOM boot and the live Guardian.
 const overviewSource=readFileSync(new URL('../pages/loadout/paradox-loadouts.mjs',import.meta.url),'utf8');
 const overviewHelpers=overviewSource.slice(overviewSource.indexOf('const esc='),overviewSource.indexOf('function artifactRequiresInGameStep')).replace('export function savedBuildOverview','function savedBuildOverview');
-const overviewContext={URL,classifyArmourPlug};
+const overviewContext={URL,classifyArmourPlug,itemTileMarkup};
 runInNewContext(overviewHelpers+';this.renderOverview=savedBuildOverview;',overviewContext);
 const overviewBuild={subclassName:'Saved Titan',subclassIcon:'/subclass.png',subclassBuild:{super:{name:'Saved Super',icon:'/super.png'},abilities:[{name:'Saved ability',icon:'/ability.png'}],aspects:[{name:'Saved aspect',icon:'/aspect.png'}],fragments:[{name:'Saved fragment',icon:'/fragment.png'}]},weapons:[{name:'Saved weapon',icon:'/weapon.png',weaponPerkModel:{columns:[{selectedPlugHash:2,options:[{hash:1,name:'Unselected perk'},{hash:2,name:'Selected perk',icon:'/perk.png'}]}]}}],armour:[{name:'Saved armour',icon:'/armour.png',generalMods:[{name:'Saved mod',icon:'/mod.png'}]}],artifact:{name:'Saved Artifact',perks:[{hash:7,name:'Selected Artifact',icon:'/artifact.png'},{hash:8,name:'Unselected Artifact'}]},artifactConfiguration:{selectedPerkHashes:[7,9]}};
 const unchangedOverview=JSON.stringify(overviewBuild),overviewMarkup=overviewContext.renderOverview(overviewBuild);
@@ -736,6 +736,15 @@ assert.match(overviewMarkup,/<figure[^>]+title="Saved Super/,'Icon names must re
 assert.match(overviewMarkup,/class="saved-build-mods"[^>]*>[\s\S]*title="Saved mod/,'Armour mods must occupy the shared socket grid');
 assert.match(overviewMarkup,/Stats not saved/,'Absent saved stats must not be replaced with live or invented values');
 assert.match(overviewMarkup,/Power unavailable/,'An absent saved power value must remain unknown');
+const dimOverview=overviewContext.renderOverview({...overviewBuild,ghost:{name:'Saved Ghost',icon:'/ghost.png'},ship:{name:'Saved Ship',icon:'/ship.png'},sparrow:{name:'Saved Sparrow',icon:'/sparrow.png'},armour:[{name:'Saved armour',source:{kind:'equipped'},generalMods:[{name:'Counted mod',count:3}]}]});
+assert.match(dimOverview,/item-tile--armour/,'Loadout armour uses shared item tile component');
+assert.match(dimOverview,/item-tile--weapon/,'Loadout weapons use shared item tile component');
+assert.doesNotMatch(dimOverview,/is-equipped|>\?<|javascript:/,'Snapshot tiles have no equipped state or question placeholders');
+assert.match(dimOverview,/saved-build-attached-mods/,'Armour retains attached mods');
+assert.match(dimOverview,/aria-label="Count 3"/,'Counts require supplied count evidence');
+assert.match(dimOverview,/Saved Ghost[\s\S]*Saved Ship[\s\S]*Saved Sparrow/,'Equipment preserves Ghost, Ship, Sparrow order');
+assert.match(dimOverview,/saved-build-empty-socket/,'Missing socket artwork uses standard empty glyph');
+assert.match(dimOverview,/<div class="saved-build-sockets"><div class="saved-build-mods"[^>]*>[\s\S]*?<\/figure><\/div><div class="saved-build-artifact"[\s\S]*<\/div><\/div><\/div><\/div><\/div>$/,'Artifact follows the mods grid inside its track, not as a sixth outer column');
 console.log('SAVED_BUILD_OVERVIEW=PASS selected gear, sockets, subclass, Artifact, escaping and immutable snapshots');
 
 // Exercise the actual hover/focus handlers, including scroller-independent placement.
@@ -776,7 +785,7 @@ const pageNode=id=>{
   if(!pageNodes.has(id))pageNodes.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,value:'',classList:{toggle(){}},querySelector(){return null;},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
   return pageNodes.get(id);
 };
-const pageContext={URL,structuredClone,classifyArmourPlug,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
+const pageContext={URL,structuredClone,classifyArmourPlug,itemTileMarkup,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
 runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editorSelect,editableSnapshotItem,editChoice,closeDialog,draftFor,preparePayload,setCharacter,
   setEditor(state){dialogState=state;renderEditor(state);},
   setState(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload||{definitions:{}};loading=false;},
@@ -885,7 +894,7 @@ function startLoadoutRace(){
     return nodes.get(id);
   };
   const forbidden=()=>{throw new Error('Unexpected persistence or network call in Loadout ordering test');};
-  const context={URL,structuredClone,sessionBinding,classifyArmourPlug,LOADOUT_DEFINITIONS:{},
+  const context={URL,structuredClone,sessionBinding,classifyArmourPlug,itemTileMarkup,LOADOUT_DEFINITIONS:{},
     document:{getElementById:node,querySelector:()=>null,addEventListener(){}},
     window:{addEventListener(type,handler){listeners.set(type,handler);}},
     mountForgeShell(){},reportPreparedPageStage(){},
