@@ -73,3 +73,12 @@
 .vault-selection-slot{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr);min-height:var(--apx-icon-gear-art-height)}
 .vault-candidate-item{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr);gap:.5rem;padding:.3rem}
 @media(max-width:560px){.vault-item-grid{grid-template-columns:repeat(auto-fill,var(--apx-icon-gear-art-width))}.vault-selection-slot{grid-template-columns:var(--apx-icon-gear-art-width) minmax(0,1fr)}.vault-candidate-items{grid-template-columns:1fr}}
+
+/* Vault instruction disclosure: page-only controls using approved chrome tokens. */
+.vault-inventory-heading{display:flex;align-items:center;gap:.5rem}
+.vault-transfer-help{position:relative;display:inline-flex}
+#vaultTransferHelpButton{display:grid;place-items:center;min-width:2rem;min-height:2rem;padding:.25rem;border:1px solid var(--apx-colour-border);border-radius:50%;background:var(--apx-colour-raised);color:var(--apx-colour-text);font:inherit;cursor:pointer}
+#vaultTransferHelpButton:focus-visible{outline:2px solid var(--apx-colour-focus);outline-offset:2px}
+#vaultTransferHelp{position:absolute;z-index:20;top:100%;left:0;width:min(22rem,65vw);padding:.75rem;border:1px solid var(--apx-colour-border-strong);background:var(--apx-colour-raised);color:var(--apx-colour-text);font:400 .875rem/1.5 bahnschrift,sans-serif;box-shadow:0 .25rem .75rem var(--apx-colour-canvas)}
+#vaultTransferHelp[hidden]{display:none}
+@media(max-width:600px){#vaultTransferHelp{left:auto;right:-2rem}}
