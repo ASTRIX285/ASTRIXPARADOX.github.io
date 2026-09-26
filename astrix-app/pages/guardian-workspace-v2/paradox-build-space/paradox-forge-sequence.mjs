@@ -10,7 +10,7 @@ const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','
 const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments']);
 function forgeComputationProjection(build={}){return Object.fromEntries(FORGE_COMPUTATION_FIELDS.filter(key=>Object.hasOwn(build,key)).map(key=>[key,build[key]]));}
 function mergeComposedRecommendation(build={},composed={}){const next={...build};for(const key of FORGE_COMPOSED_FIELDS)if(Object.hasOwn(composed,key))next[key]=composed[key];return next;}
-const FORGE_ACTIVITY_KEYS=new Set(['raid','dps','grandmaster','crucible','pve','pvp']);
+const FORGE_ACTIVITY_KEYS=new Set(['raid','dungeon','grandmaster','crucible','pve','dps','pvp']);
 function forgeActivityKey(context){return String(context?.key||context?.activityKey||context?.name||'').trim().toLowerCase().replace(/[^a-z]+/g,'-').replace(/^-|-$/g,'');}
 function hasForgeActivityContext(build={}){return FORGE_ACTIVITY_KEYS.has(forgeActivityKey(build.activityContext));}
 function forgeEvidenceAssessment(build={},coherence={violations:[]},additional=[]){
@@ -29,7 +29,7 @@ function forgeEvidenceAssessment(build={},coherence={violations:[]},additional=[
 export async function prepareForgeSequence({build,candidate,element,objective='balanced',currentSeasonNumber=null,superHash=0,weaponInstanceIds=[]},{onProgress=()=>{},advise=adviseLiveWeaponRolls}={}){
   const entry=validateForgeGenerationEntry(build);if(!entry.ready)throw new Error(entry.reason);
   if(!hasVerifiedSubclassSockets(candidate)||!filterExoticCompatibleSubclasses(build,[candidate]).length)throw new Error('The selected subclass is not compatible with the armour selection.');
-  if(!hasForgeActivityContext(build))throw new Error('Select Raid, DPS, Grandmaster, Crucible, PVE or PVP before generating this build.');
+  if(!hasForgeActivityContext(build))throw new Error('Select Raid, Dungeon, Grandmaster, Crucible or General PVE before generating this build.');
   if(superHash){
     const sb=candidate.subclassBuild||candidate.build,selected=[sb.super,...(sb.superOptions||[])].find(item=>Number(item?.hash??item?.bungieHash)===Number(superHash));
     if(!selected)throw new Error('The selected Super is not in this subclass catalogue.');

@@ -1,5 +1,5 @@
 import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1&20260924-card-width-1';
-import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1&plain=20260925-2&refresh=20260927-1';
@@ -48,11 +48,13 @@ const elementOf=item=>{const text=[item?.element,item?.damageType,item?.name,ite
 const isPrismaticBuild=build=>[build?.subclass,build?.subclassName,build?.subclassBuild?.name].filter(Boolean).join(' ').toLowerCase().includes('prismatic');
 const FORGE_ACTIVITY_OPTIONS=Object.freeze([
   Object.freeze({key:'raid',label:'RAID',domain:'pve'}),
-  Object.freeze({key:'dps',label:'DPS',domain:'pve'}),
+  Object.freeze({key:'dungeon',label:'DUNGEON',domain:'pve'}),
   Object.freeze({key:'grandmaster',label:'GRANDMASTER',domain:'pve'}),
   Object.freeze({key:'crucible',label:'CRUCIBLE',domain:'pvp'}),
   Object.freeze({key:'pve',label:'PVE',domain:'pve'}),
-  Object.freeze({key:'pvp',label:'PVP',domain:'pvp'})
+  // Retired from the picker (DPS is a Build objective, PVP duplicates Crucible). Kept so saved Working Builds still resolve.
+  Object.freeze({key:'dps',label:'DPS',domain:'pve',legacy:true}),
+  Object.freeze({key:'pvp',label:'PVP',domain:'pvp',legacy:true})
 ]);
 const forgeActivityOption=value=>{const key=String(value?.key||value?.activityKey||value?.name||value||'').trim().toLowerCase().replace(/[^a-z]+/g,'-').replace(/^-|-$/g,'');return FORGE_ACTIVITY_OPTIONS.find(row=>row.key===key)||null;};
 let activeLoadError='';
@@ -81,7 +83,6 @@ let applyDialogMode='idle';
 let liveActionBusy=false;
 let livePreflightBusy=false;
 let livePreflightRequest=0;
-let pendingForgeActivityKey='';
 const forgePreparation=new ForgePreparationClient({onStatus:message=>{
   const status=byId('forgePreparationStatus');
   if(status&&message.type==='unavailable')status.textContent=message.message||'Background preparation unavailable. Generate will retry.';
@@ -585,21 +586,11 @@ function artifactMatrix(artifact,configuration,recommendation){
   return [...tiers.entries()].sort((a,b)=>a[0]-b[0]).map(([tier,rows])=>{const requirement=Number(rows[0]?.perk?.minimumUnlockPointsUsedRequirement??rows[0]?.perk?.pointsToUnlock),capacity=Number(artifact?.selectionSlots?.find(slot=>Number(slot?.tierIndex)===tier)?.capacity??rows[0]?.perk?.bucketCapacity),tierTitle=esc(rows[0]?.perk?.tierTitle||((artifactTwo?'BUCKET ':'TIER ')+(tier+1))),suffix=artifactTwo&&Number.isFinite(capacity)?` · ${capacity} PICKS`:Number.isFinite(requirement)&&requirement>0?' · '+requirement+' PRIOR PICKS':'';return '<section class="artifact-tier" data-artifact-tier="'+tier+'"><h4>'+tierTitle+suffix+'</h4><div class="artifact-tier-perks">'+rows.sort((a,b)=>(a.perk.itemIndex||0)-(b.perk.itemIndex||0)).map(row=>{const key=String(row.perk?.hash),detail=ranked.get(key);return artifactPerkCard(row.perk,row.index,{selected:selected.has(key),recommended:automatic&&selected.has(key),recommendation:detail});}).join('')+'</div></section>';}).join('');
 }
 function stageWorkingBuild(mutator){const state=readState();if(!state?.originalBuild)return;let working=createWorkingBuildPatch(state.workingBuild||state.originalBuild);const mode=directEntryMode(working);mutator(working);if(mode)working=withDirectGenerationContext(working,mode);writeState({...state,workingBuild:working});render();}
-function renderForgeActivityDialog(){
-  const selected=forgeActivityOption(pendingForgeActivityKey),continueButton=byId('confirmForgeActivity'),status=byId('forgeActivityStatus');
-  document.querySelectorAll('[data-forge-activity]').forEach(button=>{const active=button.dataset.forgeActivity===selected?.key;button.classList.toggle('is-selected',active);button.setAttribute('aria-pressed',String(active));});
-  if(continueButton)continueButton.disabled=!selected;
-  if(status)status.textContent=selected?`${selected.label} selected. Continue to generate with this activity context.`:'Choose an activity for recommendations.';
-}
-function openForgeActivityDialog(){
-  const dialog=byId('forgeActivityDialog');if(!dialog)return false;
-  pendingForgeActivityKey=forgeActivityOption(currentBuild()?.activityContext)?.key||'';dialog.hidden=false;document.body.classList.add('working-dialog-open');renderForgeActivityDialog();dialog.querySelector('[data-forge-activity]')?.focus();return true;
-}
-function closeForgeActivityDialog(){const dialog=byId('forgeActivityDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');byId('generateMaxLoadout')?.focus();}
-function confirmForgeActivity(){
-  const activity=forgeActivityOption(pendingForgeActivityKey);if(!activity)return;
+function selectForgeActivity(key){
+  const activity=forgeActivityOption(key);if(!activity||activity.legacy)return;
+  if(forgeActivityOption(currentBuild()?.activityContext)?.key===activity.key)return;
+  recommendationFailure='';
   stageWorkingBuild(working=>{working.activityContext={schemaVersion:1,key:activity.key,name:activity.label,domain:activity.domain,source:'user-selected-build-context'};for(const key of ['recommendationGeneratedAt','recommendationElement','recommendationStatus','forgeIntelligence','forgeEvidence','liveTransferPreflight','liveTransferPlan','liveTransferResult'])delete working[key];});
-  closeForgeActivityDialog();void generateMaxLoadout();
 }
 function renderForgeActivityFit(build={}){const activity=forgeActivityOption(build.activityContext),node=document.querySelector('[data-paradox-analysis] .mini-grid .mini:nth-child(3) .big');if(node)node.textContent=activity?.label||'Not selected';}
 async function fetchCurrentArtifactSeason(){
@@ -653,8 +644,10 @@ function renderRecommendationControls(build={}){
   elementGrid?.classList.toggle('has-multiple-options',hasVerifiedResult&&supported.size>1);
   elementButtons.forEach(button=>{const element=button.dataset.recommendationElement,available=hasVerifiedResult&&supported.has(element),selected=available&&element===selectedRecommendationElement;button.disabled=!available||recommendationBusy||directEntryBusy;button.classList.toggle('is-available',available);button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));button.title=!hasVerifiedResult?entry.reason:available?`Evaluate a ${element} damage build with the staged Exotic armour result.`:verifiedElements.has(element)?`The selected Exotic armour perk is not compatible with the ${element} subclass components.`:`No ${element} build option is available for this Guardian.`;});
   if(!['balanced','dps','add-clear','survivability','ability-uptime'].includes(selectedRecommendationObjective))selectedRecommendationObjective=build.objective||'balanced';document.querySelectorAll('[data-build-objective]').forEach(button=>{const selected=button.dataset.buildObjective===selectedRecommendationObjective;button.disabled=!hasVerifiedResult||recommendationBusy||directEntryBusy;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));});
-  const hasElement=Boolean(selectedRecommendationElement&&supported.has(selectedRecommendationElement)),ready=hasVerifiedResult&&hasElement&&!recommendationBusy&&!directEntryBusy,button=byId('generateMaxLoadout'),status=byId('recommendationReadiness');
-  if(button){button.disabled=!ready;button.textContent=recommendationBusy?'Generating build…':build.recommendationGeneratedAt?'REGENERATE MAX LOADOUT':'GENERATE MAX LOADOUT';}
+  const hasElement=Boolean(selectedRecommendationElement&&supported.has(selectedRecommendationElement)),chosenActivity=forgeActivityOption(build.activityContext),hasActivity=Boolean(chosenActivity),ready=hasVerifiedResult&&hasElement&&hasActivity&&!recommendationBusy&&!directEntryBusy,button=byId('generateMaxLoadout'),status=byId('recommendationReadiness');
+  document.querySelectorAll('[data-forge-activity]').forEach(node=>{const selected=hasActivity&&node.dataset.forgeActivity===chosenActivity.key;node.disabled=!hasVerifiedResult||recommendationBusy||directEntryBusy;node.classList.toggle('is-selected',selected);node.setAttribute('aria-pressed',String(selected));});
+  const missing=hasVerifiedResult?[hasElement?'':'AN ELEMENT',hasActivity?'':'AN ACTIVITY'].filter(Boolean):[];
+  if(button){button.disabled=!ready;button.textContent=recommendationBusy?'Generating build…':missing.length?`PICK ${missing.join(' AND ')}`:build.recommendationGeneratedAt?'REGENERATE MAX LOADOUT':'GENERATE MAX LOADOUT';}
   const unresolvedCount=new Set([...(build?.hashCoverage?.subclass?.unresolved||[]),...subclassOptions.flatMap(item=>(item?.subclassBuild||item?.build||{})?.socketCoverage?.unresolved||[])]).size;
   const subclassBlocker=unresolvedCount?`Bungie subclass socket definitions are incomplete for ${unresolvedCount} resolved profile plug${unresolvedCount===1?'':'s'}. Refresh Guardian data before generating.`:verified.length?'The staged Exotic has no explicit compatibility data for the available elemental options.':'No complete Bungie subclass socket set is available for this Guardian.';
   if(status){status.className='recommendation-readiness'+(ready?' is-ready':' is-blocked');status.textContent=recommendationBusy?'Resolving elemental damage, weapon and Artifact data…':recommendationFailure||(!hasVerifiedResult?entry.reason:!hasElement?subclassBlocker:`Ready · ${selectedRecommendationElement.toUpperCase()} damage build · one Exotic armour anchor · ${directEntryMode(build)==='equipped'?'Current equipped gear':directEntryMode(build)==='owned'?'Inventory':'Maximized Forge Loader result'}.`);}
@@ -783,7 +776,7 @@ async function updateForgeGenerationPhase(message){const status=byId('forgeGener
 async function generateMaxLoadout({weaponInstanceIds=[]}={}){
   if(recommendationBusy||directEntryBusy)return;
   const stagedBuild=currentBuild();
-  if(stagedBuild?.forgeLoaderDecision&&!forgeActivityOption(stagedBuild.activityContext)){recommendationFailure='Select an activity context before generating.';renderRecommendationControls(stagedBuild);openForgeActivityDialog();return;}
+  if(stagedBuild?.forgeLoaderDecision&&!forgeActivityOption(stagedBuild.activityContext)){recommendationFailure='Pick an activity before generating.';renderRecommendationControls(stagedBuild);return;}
   recommendationBusy=true;
   recommendationFailure='';
   let failureMessage='';
@@ -796,7 +789,7 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
     // snapshot so an unrelated refresh cannot invalidate this review request.
     await refreshForgeArtifactRecommendation();
     const state=readState(),build=state?.workingBuild,activity=forgeActivityOption(build?.activityContext),entry=validateForgeGenerationEntry(build||{}),candidate=filterExoticCompatibleSubclasses(build||{},resolvedSubclassOptions(build||{}).filter(hasVerifiedSubclassSockets)).find(item=>elementOf(item)===selectedRecommendationElement);
-    if(!activity)throw new Error('Select Raid, DPS, Grandmaster, Crucible, PVE or PVP before generating this build.');
+    if(!activity)throw new Error('Select Raid, Dungeon, Grandmaster, Crucible or General PVE before generating this build.');
     if(!state?.originalBuild||!entry.ready||!candidate){const reason=entry.reason||'The selected elemental build option is not supported by this Guardian’s subclass catalogue.';throw new Error(reason);}
     await showForgeGenerationLoader(selectedRecommendationElement);
     clearTimeout(preparationTimer);
@@ -898,7 +891,7 @@ function downloadRangeEvidence(){const capture=readCapture();if(!capture)return;
 function refreshRangeCapture(){const capture=readCapture();const build=currentBuild(),characterId=String(build?.characterId||'').trim(),matches=captureMatchesCharacter(capture,characterId);const pull=byId('pullRangeResults');const arm=byId('armRangeTest');const download=byId('downloadRangeEvidence');renderCandidateConfirmation(capture);renderParadoxTestReview(capture);if(arm)arm.disabled=!characterId;if(download)download.disabled=capture?.status!=='collected';if(capture?.status==='armed'){arm?.classList.toggle('is-armed',matches);if(pull)pull.disabled=!matches;if(!matches)setRangeStatus(`CAPTURE GUARDIAN MISMATCH · saved character ${capture.characterId||'unknown'} · current character ${characterId||'unknown'}. Return to the captured Guardian before pulling results.`,'bad');else setRangeStatus(`ARMED ${String(capture.testDomain||'pve').toUpperCase()} BUILD TEST · ${capture.testId} · character ${capture.characterId}`,'warn');}else if(capture?.status==='collected'){arm?.classList.remove('is-armed');if(pull)pull.disabled=!matches;if(!matches)setRangeStatus(`RESULTS PRESERVED FOR DIFFERENT GUARDIAN · ${capture.testId} · saved character ${capture.characterId||'unknown'}. Raw data remains available to download.`,'bad');else setRangeStatus(`RESULTS COLLECTED · ${capture.testId} · ${capture.candidates?.length||0} completed candidate activity instance(s)`,'good');}else{arm?.classList.remove('is-armed');if(pull)pull.disabled=true;setRangeStatus('Choose PvE or PvP, then arm the exact Working Build before playing.');}}
 async function armRange(){const build=currentBuild();if(!build?.characterId){setRangeStatus('No Guardian characterId is present in this Build Forge snapshot.','bad');return;}const button=byId('armRangeTest');try{if(button)button.disabled=true;setRangeStatus('Taking the pre-test Activity History baseline…','warn');const capture=await armBuildTest({characterId:build.characterId,buildSnapshot:build,testDomain,calibrationType:testDomain==='pve'&&byId('shootingRangeCalibration')?.checked?'shooting-range':null,expectedActivity:selectedExpectedActivity()});refreshRangeCapture();showRangeOutput(capture);if(capture.baselineError)setRangeStatus(`ARMED, but Activity History baseline failed: ${capture.baselineError.message}`,'warn');}catch(error){setRangeStatus(error?.message||'Unable to arm Build Test.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null});}finally{if(button)button.disabled=!String(currentBuild()?.characterId||'').trim();}}
 async function pullRange(){const button=byId('pullRangeResults'),build=currentBuild(),capture=readCapture();if(!captureMatchesCharacter(capture,build?.characterId)){setRangeStatus(`Capture blocked: saved character ${capture?.characterId||'unknown'} does not match current Build Forge Guardian ${build?.characterId||'unknown'}.`,'bad');showRangeOutput({error:'Build Test Guardian mismatch.',code:'capture-character-mismatch',captureCharacterId:capture?.characterId||null,currentCharacterId:build?.characterId||null});return;}try{if(button)button.disabled=true;setRangeStatus('Pulling completed post-arm activities and candidate PGCRs…','warn');const result=await collectBuildTestResults({expectedCharacterId:build.characterId});refreshRangeCapture();showRangeOutput(result);if(!result.candidates?.length)setRangeStatus('No completed post-arm Bungie activity candidate was found.','warn');else if(result.candidateSelection?.requiresUserConfirmation)setRangeStatus(`${result.candidates.length} candidates found. Confirm the correct completed activity; Build Forge will not guess.`,'warn');else if(!result.evidenceSummary?.verifiedActivityPgcrCount)setRangeStatus('Candidates pulled, but none has complete activity-hash + PGCR proof.','warn');else setRangeStatus(`${result.evidenceSummary.verifiedActivityPgcrCount} activity result(s) loaded. Perk effects and uptime are estimates.`,'good');}catch(error){setRangeStatus(error?.message||'Unable to pull Build Test results.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null,captureCharacterId:error?.captureCharacterId||null,currentCharacterId:error?.currentCharacterId||null});}finally{if(button)button.disabled=!captureMatchesCharacter(readCapture(),currentBuild()?.characterId);}}
-document.addEventListener('click',event=>{const activity=event.target.closest('[data-forge-activity]');if(activity){pendingForgeActivityKey=activity.dataset.forgeActivity||'';renderForgeActivityDialog();return;}const recommendationElement=event.target.closest('[data-recommendation-element]');if(recommendationElement&&!recommendationElement.disabled){recommendationFailure='';selectedRecommendationElement=recommendationElement.dataset.recommendationElement||'';renderRecommendationControls(currentBuild()||{});return;}const objective=event.target.closest('[data-build-objective]');if(objective&&!objective.disabled){recommendationFailure='';selectedRecommendationObjective=objective.dataset.buildObjective||'balanced';renderRecommendationControls(currentBuild()||{});return;}const artifactRecommend=event.target.closest('[data-artifact-recommend]');if(artifactRecommend){artifactRecommend.disabled=true;void refreshForgeArtifactRecommendation({force:true});return;}const candidate=event.target.closest('[data-confirm-instance]');if(candidate){try{const confirmed=confirmCandidateActivity(candidate.dataset.confirmInstance,{expectedCharacterId:currentBuild()?.characterId});refreshRangeCapture();showRangeOutput(confirmed);setRangeStatus(`COMPLETED ACTIVITY CONFIRMED · ${candidate.dataset.confirmInstance}`,'good');}catch(error){setRangeStatus(error?.message||'Unable to confirm this activity.','bad');}return;}const toggle=event.target.closest('[data-toggle-panel]');if(toggle){const panel=byId(toggle.dataset.togglePanel),expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));if(panel)panel.hidden=expanded;return;}const option=event.target.closest('[data-select-kind]');if(option){const kind=option.dataset.selectKind;stageSelection(kind,Number(option.dataset.selectIndex));if(kind!=='artifactPerks')queueMicrotask(()=>void refreshForgeArtifactRecommendation());}});
+document.addEventListener('click',event=>{const activity=event.target.closest('[data-forge-activity]');if(activity){if(!activity.disabled)selectForgeActivity(activity.dataset.forgeActivity||'');return;}const recommendationElement=event.target.closest('[data-recommendation-element]');if(recommendationElement&&!recommendationElement.disabled){recommendationFailure='';selectedRecommendationElement=recommendationElement.dataset.recommendationElement||'';renderRecommendationControls(currentBuild()||{});return;}const objective=event.target.closest('[data-build-objective]');if(objective&&!objective.disabled){recommendationFailure='';selectedRecommendationObjective=objective.dataset.buildObjective||'balanced';renderRecommendationControls(currentBuild()||{});return;}const artifactRecommend=event.target.closest('[data-artifact-recommend]');if(artifactRecommend){artifactRecommend.disabled=true;void refreshForgeArtifactRecommendation({force:true});return;}const candidate=event.target.closest('[data-confirm-instance]');if(candidate){try{const confirmed=confirmCandidateActivity(candidate.dataset.confirmInstance,{expectedCharacterId:currentBuild()?.characterId});refreshRangeCapture();showRangeOutput(confirmed);setRangeStatus(`COMPLETED ACTIVITY CONFIRMED · ${candidate.dataset.confirmInstance}`,'good');}catch(error){setRangeStatus(error?.message||'Unable to confirm this activity.','bad');}return;}const toggle=event.target.closest('[data-toggle-panel]');if(toggle){const panel=byId(toggle.dataset.togglePanel),expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));if(panel)panel.hidden=expanded;return;}const option=event.target.closest('[data-select-kind]');if(option){const kind=option.dataset.selectKind;stageSelection(kind,Number(option.dataset.selectIndex));if(kind!=='artifactPerks')queueMicrotask(()=>void refreshForgeArtifactRecommendation());}});
 document.addEventListener('click',event=>{
   const opener=event.target.closest('[data-open-manual-editor]');if(opener){void openManualEditor(opener.dataset.openManualEditor);return;}
   const slot=event.target.closest('[data-manual-slot]');if(slot){manualEditorState.slotIndex=Number(slot.dataset.manualSlot);manualEditorState.search='';byId('manualEditorSearch').value='';renderManualEditor();return;}
@@ -926,8 +919,6 @@ byId('dismissApplyBuild')?.addEventListener('click',closeApplyConfirmation);
 byId('saveParadoxBuild')?.addEventListener('click',()=>openSaveParadoxDialog());
 byId('saveParadoxForm')?.addEventListener('submit',submitParadoxSave);
 byId('cancelSaveParadox')?.addEventListener('click',closeSaveParadoxDialog);
-byId('cancelForgeActivity')?.addEventListener('click',closeForgeActivityDialog);
-byId('confirmForgeActivity')?.addEventListener('click',confirmForgeActivity);
 byId('closeManualEditor')?.addEventListener('click',closeManualEditor);
 byId('doneManualEditor')?.addEventListener('click',closeManualEditor);
 byId('manualEditorSearch')?.addEventListener('input',event=>{manualEditorState.search=event.target.value||'';renderManualEditor();});
@@ -938,7 +929,7 @@ byId('directOwnedArmour')?.addEventListener('change',event=>{if(event.target.mat
 byId('closeRecommendedBuild')?.addEventListener('click',closeRecommendedBuild);
 byId('returnToForge')?.addEventListener('click',closeRecommendedBuild);
 byId('continueToBuildTest')?.addEventListener('click',continueToBuildTest);
-document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(!byId('applyConfirmationDialog')?.hidden)closeApplyConfirmation();else if(!byId('forgeActivityDialog')?.hidden)closeForgeActivityDialog();else if(!byId('saveParadoxDialog')?.hidden)closeSaveParadoxDialog();else if(!byId('manualBuildEditor')?.hidden)closeManualEditor();else if(!byId('recommendedBuildReveal')?.hidden)closeRecommendedBuild();});
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(!byId('applyConfirmationDialog')?.hidden)closeApplyConfirmation();else if(!byId('saveParadoxDialog')?.hidden)closeSaveParadoxDialog();else if(!byId('manualBuildEditor')?.hidden)closeManualEditor();else if(!byId('recommendedBuildReveal')?.hidden)closeRecommendedBuild();});
 async function initialiseBuildForge(){
   try{
     const atomicTransfer=await restoreAtomicForgeTransfer();
@@ -950,6 +941,8 @@ async function initialiseBuildForge(){
     initialisingBuild=false;
     if(pendingEquippedContext){const detail=pendingEquippedContext;pendingEquippedContext=null;recoverMissingBuild(detail);}
     render();
+    // Report the measured Forge Loader to Build Forge handoff (console only; nothing is shown on the page).
+    try{const raw=sessionStorage.getItem('astrix:forge-flow-timing:v1');if(raw){sessionStorage.removeItem('astrix:forge-flow-timing:v1');const flow=JSON.parse(raw),totalMs=Date.now()-Number(flow.clickedAt),marks=flow.marks||{};globalThis.FORGE_FLOW_TIMING={totalMs,marks,afterNavigateMs:totalMs-Number(marks.navigate||0)};console.info('[Forge flow] Forge Loader to Build Forge',globalThis.FORGE_FLOW_TIMING);}}catch{}
     const staged=currentBuild();if(new URLSearchParams(location.search).get('prewarm')==='forge-loader')scheduleForgePreparation(staged,{immediate:true});
     queueMicrotask(()=>void refreshForgeArtifactRecommendation());
   }
