@@ -2,7 +2,7 @@
    Colours derive from the approved palette (css/astrix-palette.css).
    Imported by the public stylesheet, the app ribbon stylesheet and the
    app landing stylesheet, so every page receives it. */
-@import url("astrix-gloss-controls.css?v=20260926-gloss-1");
+@import url("astrix-gloss-controls.css?v=20260926-gloss-2");
 
 
 :root {

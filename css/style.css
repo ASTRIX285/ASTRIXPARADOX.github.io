@@ -1,7 +1,7 @@
 /* ============================================================
    ASTRIX PARADOX — Global Styles
    ============================================================ */
-@import url("../astrix-app/shared/astrix-design-v2.css?v=20260926-gloss-1");
+@import url("../astrix-app/shared/astrix-design-v2.css?v=20260926-gloss-2");
 
 :root {
   --crimson:      var(--apx-colour-action);
