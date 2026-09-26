@@ -1,4 +1,4 @@
-# Plain-language copy pass (Prompt 19) plus item card cleanup.
+# Plain-language copy pass (Prompt 19), item card cleanup and Exotic and Super panel simplification.
 astrix-app/components/guardian-workspace/guardian-workspace.html
 astrix-app/core/prepared-page-client.mjs
 astrix-app/docs/plain-language-copy.json
@@ -10,8 +10,6 @@ astrix-app/pages/forge-loader/forge-loader-residency.mjs
 astrix-app/pages/forge-loader/forge-loader-set-list.mjs
 astrix-app/pages/forge-loader/forge-loader.mjs
 astrix-app/pages/forge-loader/index.html
-astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs
-astrix-app/pages/guardian-workspace-v1/index.html
 astrix-app/pages/guardian-workspace-v2/guardian-advisor-layer.mjs
 astrix-app/pages/guardian-workspace-v2/guardian-artifact-provenance.mjs
 astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs
@@ -45,6 +43,7 @@ astrix-app/pages/guardian-workspace-v2/paradox-build-space-handoff.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs
@@ -57,6 +56,7 @@ astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-rev
 astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs
 astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html
 astrix-app/pages/journey/index.html
+astrix-app/pages/journey/journey-entry.mjs
 astrix-app/pages/journey/journey-location-maps.mjs
 astrix-app/pages/journey/journey-manifest.mjs
 astrix-app/pages/journey/journey-map-explorer.mjs
@@ -80,6 +80,7 @@ astrix-app/tools/test-artifact-provenance.mjs
 astrix-app/tools/test-capped-gear-layout.mjs
 astrix-app/tools/test-forge-background.mjs
 astrix-app/tools/test-forge-loader-residency.mjs
+astrix-app/tools/test-forge-super-synergy.mjs
 astrix-app/tools/test-manual-build-editor.mjs
 astrix-app/tools/test-pf-beta-04-subclass-fallback.mjs
 astrix-app/tools/test-pf-beta-10-exotic-first.mjs
@@ -89,6 +90,7 @@ astrix-app/tools/test-recommended-build-reveal.mjs
 astrix-app/tools/validate-forge-loader.mjs
 astrix-app/tools/validate-guardian-semantics.mjs
 astrix-app/tools/validate-journey-visual-pass.mjs
+astrix-app/tools/validate-local-preview.mjs
 astrix-app/tools/validate-main-page-today.mjs
 astrix-app/tools/validate-manifest-service.mjs
 astrix-app/tools/validate-paradox-build-space.mjs

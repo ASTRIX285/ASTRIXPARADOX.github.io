@@ -63,7 +63,7 @@
   async function prepareData(destination){
     const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
     if(isJourneyPreview())return;
-    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&plain=20260925-2',scriptUrl).href);
+    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
     if(destination.key==='reports'){

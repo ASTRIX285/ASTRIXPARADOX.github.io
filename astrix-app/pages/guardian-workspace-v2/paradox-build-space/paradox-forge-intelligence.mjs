@@ -131,7 +131,7 @@ function superInvestmentEvidence(build={}){
   const value=Number.isFinite(achieved)?achieved:Number.isFinite(profileValue)?profileValue:null;
   return value===null?null:{
     code:'super-investment-context',score:0,value,priority:Number.isInteger(priority)&&priority>0?priority:null,
-    label:`Super investment is ${value}${Number.isInteger(priority)&&priority>0?` with Forge Loader priority ${priority}`:''}. This is build context and does not prove one Super is stronger.`
+    label:`Super stat: ${value}`
   };
 }
 
@@ -192,7 +192,7 @@ function rankExoticSuperSynergy(build={},candidates=[]){
         super:superItem,superHash:Number(itemKey(superItem)),superName:itemName(superItem),candidateHash:itemKey(candidate),element,
         score,evidenceStatus:score>0?'evidenced':description?'no-direct-evidence':'unknown',evidence,context,
         limitation:description
-          ?`No genuine Super synergy is stated for ${itemName(superItem)} by ${perkName} or the resolved supporting subclass definitions.`
+          ?`No Super synergy for ${perkName}.`
           :'The staged Exotic perk has no resolved effect description, so Super synergy is unknown.'
       });
     }
@@ -206,7 +206,7 @@ function rankExoticSuperSynergy(build={},candidates=[]){
     schemaVersion:1,anchor:{hash:Number(itemKey(perk))||null,name:perkName,description},
     status:!description?'unknown':strongest>0?'evidenced':'no-direct-super-synergy',entries,
     limitations:unavailableExplicitSupers.map(item=>`${perkName} explicitly names ${itemName(item)}, which is not available in the resolved Super options for this subclass.`),
-    limitation:description&&strongest===0?`No genuine Super synergy is stated by ${perkName} for the resolved Supers. No Super is ranked as preferred.`:''
+    limitation:description&&strongest===0?`No Super synergy for ${perkName}.`:''
   };
 }
 

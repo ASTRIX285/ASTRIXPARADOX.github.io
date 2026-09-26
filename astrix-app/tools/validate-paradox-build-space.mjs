@@ -365,7 +365,7 @@ assert.match(runtime,/resolvedSubclassOptions\(build\)\.filter\(hasVerifiedSubcl
 assert.match(runtime,/filterExoticCompatibleSubclasses\(build,verified\)/,'Element buttons must remove subclass options that conflict with an explicitly named selected-Exotic ability.');
 assert.match(html,/id="buildSuperSynergy"[^>]*role="status"/,'Build Forge must expose per-Super Exotic evidence beside the selectable Super formation.');
 assert.match(runtime,/rankExoticSuperSynergy\(build,candidate\?\[candidate\]:\[\]\)/,'The visible Super formation must use the same evidence-backed ranking as generation.');
-assert.match(runtime,/NO DIRECT SYNERGY/,'Build Forge must state plainly when the staged Exotic does not support a Super.');
+assert.match(runtime,/No Super synergy for \$\{report\.anchor\.name\}\./,'Build Forge must state plainly when the staged Exotic does not support a Super.');
 assert.match(css,/\.super-diamond\.is-exotic-super-best\{[^}]*box-shadow/,'Only Supers with the strongest real Exotic evidence may receive the evidence highlight.');
 assert.match(intelligenceRuntime,/status:!description\?'unknown':strongest>0\?'evidenced':'no-direct-super-synergy'/,'Missing Super synergy evidence must remain an explicit no-ranking result.');
 assert.match(sequenceRuntime,/working\.paradoxAnalysis=analyzeLiveGuardian\(working\)[\s\S]*?advise\(working,working\.paradoxAnalysis\|\|\{\}, \{insertSocketPlugFree:false\}\)/,'Generation must re-run directed analysis after Artifact selection before recommendation-only weapon advice.');

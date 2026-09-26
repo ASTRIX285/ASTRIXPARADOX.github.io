@@ -342,6 +342,7 @@ html,body{
 .build-rail :is(.artifact-copy b,.super-feature__name){font-size:clamp(.74rem,4.2cqi,1.55rem)!important;color:#f6f3f7!important}
 .super-synergy-evidence{margin:10px 0 8px;padding:9px;border:1px solid rgba(255,255,255,.12);border-left:2px solid #8b858f;border-radius:6px;background:rgba(5,5,8,.62);text-align:left}
 .super-synergy-evidence>b{display:block;color:#e3c765;font:800 clamp(.58rem,3.1cqi,.9rem)/1.35 bahnschrift,system-ui,sans-serif;letter-spacing:.055em}
+.super-synergy-evidence .super-synergy-perk{display:block;margin:6px 0 0;color:#f5f1f6;font:750 clamp(.57rem,2.9cqi,.84rem)/1.3 bahnschrift,system-ui,sans-serif}
 .super-synergy-evidence blockquote{margin:7px 0;padding:0 0 0 7px;border-left:1px solid rgba(227,199,101,.35);color:#c9c3cc;font:500 clamp(.56rem,2.8cqi,.82rem)/1.45 bahnschrift,system-ui,sans-serif}
 .super-synergy-evidence ol{display:grid;gap:6px;margin:7px 0 0;padding:0;list-style:none}
 .super-synergy-evidence li{display:grid;grid-template-columns:1fr auto;gap:2px 6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08)}

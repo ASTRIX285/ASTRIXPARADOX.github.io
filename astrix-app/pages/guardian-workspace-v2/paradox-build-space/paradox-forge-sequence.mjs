@@ -1,6 +1,6 @@
 // Worker-safe Forge sequence. Selection and Artifact rules are shared with the established UI flow.
 import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
-import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1&plain=20260925-2';
+import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1&plain=20260925-2&synergy=20260926-1';
 import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-2';
 import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-2';
 import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-2';

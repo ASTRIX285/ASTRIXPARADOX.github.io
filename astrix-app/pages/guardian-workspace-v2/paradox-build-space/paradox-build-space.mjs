@@ -1,5 +1,5 @@
 import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1&20260924-card-width-1';
-import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&plain=20260925-2';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1&plain=20260925-2';
@@ -19,7 +19,7 @@ import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMis
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-2';
 import {BUILD_ELEMENTS,directEntryMode,directArmourChoices,withDirectGenerationContext,createDirectGenerationBuild,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-2';
-import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1&plain=20260925-2';
+import {composeForgeRecommendation,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1&plain=20260925-2&synergy=20260926-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2';
@@ -676,17 +676,18 @@ function renderSuperSynergyEvidence(build={},candidate=null){
     slot.title=[slot.title,reason].filter(Boolean).join(' · ');
     slot.setAttribute('aria-label',[row.superName,reason].filter(Boolean).join('. '));
   });
-  if(!build.forgeLoaderDecision){host.className='super-synergy-evidence is-unknown';host.innerHTML='<b>EXOTIC AND SUPER SYNERGY</b><p>Stage a Forge Loader Exotic to evaluate these Supers.</p>';return;}
-  const tied=report.entries.filter(row=>row.recommended).length>1,source=report.anchor.description?`<blockquote>${esc(report.anchor.description)}</blockquote>`:'<blockquote>Exotic effect text unavailable.</blockquote>';
-  const rows=report.entries.map(row=>{
-    const state=row.recommended?`BEST MATCH${tied?' · TIED':''}`:row.evidenceStatus==='evidenced'?`MATCH RANK ${row.rank}`:'NO DIRECT SYNERGY';
-    const reason=row.evidence?.[0]?.label||row.limitation;
-    return `<li class="${row.recommended?'is-best':row.evidenceStatus==='evidenced'?'is-evidenced':'is-unsupported'}"><b>${esc(row.superName)}</b><em>${esc(state)}</em><span>${esc(reason)}</span></li>`;
+  if(!build.forgeLoaderDecision){host.className='super-synergy-evidence is-unknown';host.innerHTML='<b>Exotic and Super</b><p>Stage a Forge Loader Exotic to evaluate these Supers.</p>';return;}
+  const source=report.anchor.description?`<blockquote>${esc(report.anchor.description)}</blockquote>`:'<blockquote>Exotic effect text unavailable.</blockquote>';
+  // Only Supers with real synergy are listed, one short line each. No per-Super "no synergy" rows.
+  const rows=report.entries.filter(row=>row.evidenceStatus==='evidenced').map(row=>{
+    const reason=row.evidence?.[0]?.label||'';
+    return `<li class="${row.recommended?'is-best':'is-evidenced'}"><b>${esc(row.superName)}</b><span>${esc(reason)}</span></li>`;
   }).join('');
+  const emptyLine=report.status==='no-direct-super-synergy'?`No Super synergy for ${report.anchor.name}.`:report.limitation||'No resolved Super definitions are available for this subclass.';
   const limitations=(report.limitations||[]).map(row=>`<li>${esc(row)}</li>`).join('');
   const investment=report.entries[0]?.context?.[0]?.label||'';
   host.className=`super-synergy-evidence is-${report.status}`;
-  host.innerHTML=`<b>EXOTIC TO SUPER DATA · ${esc(report.anchor.name)}</b>${source}${rows?`<ol>${rows}</ol>`:`<p>${esc(report.limitation||'No resolved Super definitions are available for this subclass.')}</p>`}${limitations?`<ul class="super-synergy-limitations">${limitations}</ul>`:''}${investment?`<small>${esc(investment)}</small>`:''}`;
+  host.innerHTML=`<b>Exotic and Super</b><strong class="super-synergy-perk">${esc(report.anchor.name)}</strong>${source}${rows?`<ol>${rows}</ol>`:`<p>${esc(emptyLine)}</p>`}${rows&&limitations?`<ul class="super-synergy-limitations">${limitations}</ul>`:''}${investment?`<small>${esc(investment)}</small>`:''}`;
 }
 
 function reviewIcon(item,label='Item'){const icon=abs(iconOf(item)),name=esc(item?.name||item?.displayName||label);return `<span class="review-icon" title="${name}">${icon?`<img src="${esc(icon)}" alt="">`:'◆'}<small>${name}</small></span>`;}

@@ -65,7 +65,8 @@ const nothingReport=rankExoticSuperSynergy(nothingBuild,[voidCandidate]);
 assert.equal(nothingReport.status,'no-direct-super-synergy');
 assert.equal(nothingReport.entries.length,3);
 assert.ok(nothingReport.entries.every(row=>row.score===0&&row.rank===null&&row.recommended===false));
-assert.ok(nothingReport.entries.every(row=>row.limitation.includes('No genuine Super synergy')));
+assert.ok(nothingReport.entries.every(row=>row.limitation.includes('No Super synergy for Nothing Manacles.')));
+assert.equal(nothingReport.limitation,'No Super synergy for Nothing Manacles.','A perk with no synergy reports exactly one line');
 assert.ok(nothingReport.entries.every(row=>row.context[0].value===37&&row.context[0].priority===4));
 
 const skullBuild=buildFor(skull,3050017626);
@@ -85,3 +86,5 @@ assert.equal(warp.recommended,false);
 
 console.log('FORGE_REAL_EXOTIC_SUPER_SYNERGY=PASS');
 console.log('FORGE_NO_INVENTED_SUPER_RANKING=PASS');
+assert.ok(nothingReport.entries.every(row=>row.context[0].label==='Super stat: 37'&&!/does not prove/.test(row.context[0].label)),'Super stat is shown as a plain value with no disclaimer');
+console.log('FORGE_SUPER_PANEL_SIMPLE=PASS');
