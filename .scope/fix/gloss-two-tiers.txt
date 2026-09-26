@@ -1,0 +1,27 @@
+# Gloss two tiers: shared gloss stylesheet, design token, tag bumps and the gloss test only.
+astrix-app/index.html
+astrix-app/pages/forge-loader/index.html
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html
+astrix-app/pages/journey/index.html
+astrix-app/pages/loadout/index.html
+astrix-app/pages/mission-reports/index.html
+astrix-app/pages/reports/index.html
+astrix-app/pages/tool-intro/index.html
+astrix-app/pages/vault/index.html
+astrix-app/shared/astrix-design-v2.css
+astrix-app/shared/astrix-destination-ribbon.css
+astrix-app/shared/astrix-gloss-controls.css
+astrix-app/styles.css
+astrix-app/tools/test-gloss-controls.mjs
+astrix-app/tools/validate-tools-hub.mjs
+css/style.css
+index.html
+pages/clips.html
+pages/games.html
+pages/join.html
+pages/news.html
+pages/rebrand.html
+pages/reviews.html
+tools/index.html
