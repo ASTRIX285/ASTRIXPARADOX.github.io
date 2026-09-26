@@ -8,10 +8,11 @@ const require=createRequire(import.meta.url),{chromium}=require(process.env.CODE
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const script=`import {characterLoadoutsFixture} from '/astrix-app/tools/fixtures/character-loadouts-fixture.mjs';
 const fixture=characterLoadoutsFixture();window.fixture=fixture;window.FORGE_PAGE_PAYLOAD={profile:fixture.profile,definitions:fixture.definitions};
-window.FORGE_BUNGIE_SESSION={authenticated:true,csrfToken:'fixture-only',activeDestinyMembership:{membershipId:'123',membershipType:3},capabilities:{destinyActions:{equipLoadout:true,snapshotLoadout:true,clearLoadout:true}}};
+window.FORGE_BUNGIE_SESSION={authenticated:true,csrfToken:'fixture-only',activeDestinyMembership:{membershipId:'123',membershipType:3},capabilities:{destinyActions:{equipLoadout:true,snapshotLoadout:true,updateLoadoutIdentifiers:true,clearLoadout:true}}};
+window.shared=[];Object.defineProperty(navigator,'share',{configurable:true,value:async data=>window.shared.push(data)});
 await import('/astrix-app/pages/guardian-workspace-v2/guardian-loadouts.mjs');
 window.publish=()=>document.dispatchEvent(new CustomEvent('forge:guardian-selection-changed',{detail:{source:'bungie-live',characterId:'1',loadoutsAvailable:true,loadouts:fixture.loadouts,selectedLoadoutIndex:1}}));
-window.selected=[];document.addEventListener('forge:loadout-selected',event=>{window.selected.push(event.detail);window.publish();});window.publish();window.fixtureReady=true;`;
+window.selected=[];document.addEventListener('forge:loadout-selected',event=>{window.selected.push(event.detail);window.publish();if(event.detail.intent==='view-bungie-details')queueMicrotask(()=>document.dispatchEvent(new CustomEvent('forge:bungie-loadout-loaded',{detail:{...fixture.detail,loadoutActionIntent:event.detail.intent}})));});window.publish();window.fixtureReady=true;`;
 const html=`<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/css/astrix-palette.css"><link rel="stylesheet" href="/astrix-app/shared/astrix-desktop-density.css"><link rel="stylesheet" href="/astrix-app/pages/guardian-workspace-v2/guardian-left-rail-shared.css"><style>body{margin:24px;background:#101722}.guardian-loadouts-strip{width:100%;box-sizing:border-box}</style></head><body class="guardian-main-page apx-fluid-icons"><section class="guardian-loadouts-strip"><div id="guardianLoadouts" class="guardian-loadouts-grid"></div></section><script type="module" src="/loadout-fixture.mjs"></script></body></html>`;
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
@@ -49,6 +50,12 @@ try{
   const slotSize=(await page.locator('[data-loadout-slot="1"]').boundingBox()).width;assert.ok(slotSize>=32&&slotSize<=66);
   await page.locator('[data-loadout-slot="1"]').click();assert.equal(await page.evaluate(()=>window.selected.at(-1).intent),'view-bungie-details');
   assert.equal(await page.locator('[data-loadout-slot="1"]').getAttribute('data-loadout-state'),'ready','Viewing never marks the slot equipped');
+  const details=page.locator('#guardianLoadoutDetails');await details.waitFor();assert.equal(await details.getByRole('heading').innerText(),await page.evaluate(()=>window.fixture.names[1]));
+  assert.match(await details.locator('.guardian-loadout-detail-header').innerText(),/Slot 2/);
+  assert.deepEqual(await details.locator('.guardian-loadout-detail-actions button').allTextContents(),['Equip','Prepare equip','Edit identifiers','Save as PARADOX loadout','Share','Clear slot']);
+  assert.equal(await details.locator('[data-loadout-row-kind="subclass"]').count(),1);assert.equal(await details.locator('[data-loadout-row-kind="weapon"]').count(),3);assert.equal(await details.locator('[data-loadout-row-kind="armour"]').count(),5);
+  assert.match(await details.innerText(),/Saved super/);assert.match(await details.innerText(),/Saved perk 1\.2/);assert.equal(await details.locator('[data-empty-socket]').count(),1,'Missing saved plug is displayed honestly');
+  await page.keyboard.press('Escape');assert.equal(await details.isVisible(),false);assert.equal(await page.locator('[data-loadout-slot="1"]').evaluate(node=>node===document.activeElement),true);
   // Prompt 25: actual hit target and exact slot/menu pitch, without relaxing prior checks.
   const geometry=await page.locator('.guardian-loadout-entry').evaluateAll(entries=>entries.map(entry=>{
    const slot=entry.querySelector('.guardian-loadout-slot'),more=entry.querySelector('.guardian-loadout-more'),icon=slot.querySelector('img');
@@ -93,6 +100,14 @@ try{
   await page.getByRole('button',{name:'Dismiss notification'}).click();fail='';
   await more.click();await menu.getByRole('menuitem',{name:'Overwrite with equipped gear'}).click();
   await page.locator('.guardian-loadout-toast.is-success').waitFor();assert.equal(await dialog.count(),0);assert.equal(requests.at(-1).path,'/bungie/actions/loadout/snapshot');
+  await page.locator('[data-loadout-slot="1"]').click();await details.waitFor();await details.getByRole('button',{name:'Share',exact:true}).click();await page.waitForFunction(()=>window.shared.length===1);assert.match(await page.evaluate(()=>window.shared[0].url),/loadoutCharacter=1/);
+  await details.getByRole('button',{name:'Edit identifiers',exact:true}).click();const identifiers=page.locator('#guardianLoadoutIdentifiers');await identifiers.waitFor();
+  const choices=await page.evaluate(()=>window.fixture.identifierChoices);await identifiers.locator('[name="nameHash"]').selectOption(String(choices.nameHash));await identifiers.locator('[name="iconHash"]').selectOption(String(choices.iconHash));await identifiers.locator('[name="colorHash"]').selectOption(String(choices.colorHash));await identifiers.getByRole('button',{name:'Update identifiers'}).click();
+  await page.waitForFunction(()=>document.querySelector('#guardianLoadoutIdentifiers')?.open===false);assert.deepEqual(requests.at(-1),{path:'/bungie/actions/loadout/identifiers',body:{membershipType:3,characterId:'1',loadoutIndex:1,colorHash:choices.colorHash,iconHash:choices.iconHash,nameHash:choices.nameHash}});
+  await details.getByRole('button',{name:'Prepare equip'}).click();assert.equal(await page.evaluate(()=>window.selected.at(-1).intent),'edit-paradox-copy');
+  await page.locator('[data-loadout-slot="1"]').click();await details.waitFor();await details.getByRole('button',{name:'Save as PARADOX loadout'}).click();assert.equal(await page.evaluate(()=>window.selected.at(-1).intent),'save-paradox-copy');
+  await page.locator('[data-loadout-slot="1"]').click();await details.waitFor();await details.getByRole('button',{name:'Equip',exact:true}).click();await dialog.waitFor();await dialog.getByRole('button',{name:'Cancel'}).click();
+  await page.locator('[data-loadout-slot="1"]').click();await details.waitFor();await details.getByRole('button',{name:'Clear slot'}).click();await dialog.waitFor();await dialog.getByRole('button',{name:'Cancel'}).click();
   await more.click();await menu.getByRole('menuitem',{name:'Clear slot 2'}).click();assert.equal(await dialog.count(),1);
   await dialog.getByRole('button',{name:'Cancel'}).click();assert.notEqual(requests.at(-1).path,'/bungie/actions/loadout/clear');
   await more.click();await menu.getByRole('menuitem',{name:'Clear slot 2'}).click();await dialog.getByRole('button',{name:'Clear slot 2'}).click();
