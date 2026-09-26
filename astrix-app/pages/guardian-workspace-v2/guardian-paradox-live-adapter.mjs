@@ -1,4 +1,4 @@
-import { analyzeGuardianBuild } from "./guardian-paradox-engine.mjs?v=20260905-background-forge-1&plain=20260925-1";
+import { analyzeGuardianBuild } from "./guardian-paradox-engine.mjs?v=20260905-background-forge-1&plain=20260925-2";
 import { adviseLiveWeaponRolls } from "./guardian-weapon-roll-advisor.mjs?v=20260905-weapon-audit-1";
 
 const clone=v=>v==null?v:structuredClone(v);

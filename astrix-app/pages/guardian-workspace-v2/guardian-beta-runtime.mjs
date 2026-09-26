@@ -210,7 +210,7 @@ function createArmourDrawer() {
        <article class="paradox-item-card paradox-item-card--armour" data-item-kind="armour">
        <header class="paradox-item-header armour-drawer-head">
          <div class="weapon-detail-icon" id="armourDrawerIcon"></div>
-         <div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ARMOUR MODEL</span><h2 id="armourDrawerTitle">Armour slot</h2><p id="armourDrawerType">Armour</p></div>
+         <div class="paradox-item-identity"><h2 id="armourDrawerTitle">Armour slot</h2><p id="armourDrawerType">Armour</p></div>
          <div class="weapon-detail-power"><small>POWER</small><b id="armourDrawerPower">—</b></div>
        </header>
        <div class="armour-drawer-tabs paradox-card-tabs" role="tablist">

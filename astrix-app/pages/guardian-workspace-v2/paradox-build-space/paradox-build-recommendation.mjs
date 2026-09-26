@@ -1,6 +1,6 @@
-import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs?plain=20260925-1';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs?plain=20260925-2';
 import {ARMOUR_STAT_KEYS,armourStatVector} from '../../vault/vault-armour-matcher.mjs';
-import {isExoticItem,validateExoticLoadout,validateArmourModLoadout} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-1';
+import {isExoticItem,validateExoticLoadout,validateArmourModLoadout} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 
 const BUILD_ELEMENTS=Object.freeze(['arc','solar','strand','stasis','void','prismatic']);
 const DIRECT_ENTRY_MODES=new Set(['equipped','owned']);

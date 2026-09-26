@@ -46,7 +46,7 @@ assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey mu
 // Prompt 24: retain exact resource checks with the marker/readability cache tag.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
 // Local preview request: exact live import remains required behind the host gate.
-assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1&amp;plain=20260925-1"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-1')"),'Journey must retain its exact current live runtime through its gated entry');
+assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1&amp;plain=20260925-2"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2')"),'Journey must retain its exact current live runtime through its gated entry');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -130,7 +130,7 @@ assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
 // Prompt 20 appends Reports support, retaining every existing resource version.
 // Local preview request: preserve exact shared renderer import on the live branch.
-assert.ok(journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-1')"),'Journey must retain its exact backend-prepared shared Guardian renderer');
+assert.ok(journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-2')"),'Journey must retain its exact backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
 assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared seven-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
@@ -238,7 +238,7 @@ assert.ok(journey.includes("mount:document.getElementById('journeyLocationSelect
 assert.ok(journey.includes("detail:document.getElementById('journeyLocationDetail')"),'Journey detail mount must remain unchanged');
 assert.ok(journey.includes('const session=await getBungieSession();'),'Journey authentication must remain unchanged');
 // PR #272 (381a8e2) replaced placeholders with destination maps; #274 (8988fb2) refreshed the registry.
-assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-1'"),'Journey must load its current versioned page-owned destination data registry');
+assert.ok(journey.includes("from './journey-location-maps.mjs?v=20260920-zoom-chests-3&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2'"),'Journey must load its current versioned page-owned destination data registry');
 assert.ok(journey.includes('initJourneyLocationMaps('),'Journey must initialise its page-owned interactive map layer');
 assert.ok(mapModule.includes('src:`./assets/maps/${key}-director-map-4k.webp`'),'Journey must mount the selected destination 4K Director map');
 assert.ok(mapModule.includes('detailSrc:`./assets/maps/${key}-director-map-6k.webp`'),'Journey must provide the selected destination 6K Director map for zoom');

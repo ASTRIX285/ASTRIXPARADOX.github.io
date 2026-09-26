@@ -6,7 +6,7 @@ await startPage({
     await mountJourneyPreview();
   },
   live:()=>Promise.all([
-    import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-1'),
-    import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-1')
+    import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-2'),
+    import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2')
   ])
 });

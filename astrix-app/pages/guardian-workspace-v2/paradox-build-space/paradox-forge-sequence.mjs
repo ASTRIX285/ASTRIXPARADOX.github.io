@@ -1,10 +1,10 @@
 // Worker-safe Forge sequence. Selection and Artifact rules are shared with the established UI flow.
 import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
-import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1&plain=20260925-1';
-import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-1';
-import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-1';
-import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-1';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-1';
+import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=20260911-evidence-isolation-1&plain=20260925-2';
+import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-2';
+import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-2';
+import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-2';
+import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);
 const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments']);

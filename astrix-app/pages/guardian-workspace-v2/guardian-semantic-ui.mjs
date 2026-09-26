@@ -2,12 +2,12 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1&plain=20260925-2';
 import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-1';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
@@ -47,7 +47,7 @@ function openWeaponDetail(item){
   const release=resolveItemWatermark(item,item.definition||{});
   const content=host.querySelector(".weapon-detail-content");
   if(content)content.innerHTML=`<article class="paradox-item-card paradox-item-card--weapon" data-item-kind="weapon" data-weapon-tier="${Number.isInteger(weaponTier)?weaponTier:""}">
-    <header class="paradox-item-header weapon-detail-head"><div class="weapon-detail-icon"${hashAttribute(item)}><img src="${esc(bungieIcon(item.icon))}" alt="">${release.icon?`<img class="paradox-release-watermark" src="${esc(release.icon)}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX WEAPON MODEL</span><h2>${esc(item.name||"Weapon")}</h2><p>${esc(item.weaponType||item.itemTypeDisplayName||"Weapon")}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(item.power??"—")}</b></div></header>
+    <header class="paradox-item-header weapon-detail-head"><div class="weapon-detail-icon"${hashAttribute(item)}><img src="${esc(bungieIcon(item.icon))}" alt="">${release.icon?`<img class="paradox-release-watermark" src="${esc(release.icon)}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><h2>${esc(item.name||"Weapon")}</h2><p>${esc(item.weaponType||item.itemTypeDisplayName||"Weapon")}</p></div><div class="weapon-detail-power"><small>POWER</small><b>${esc(item.power??"—")}</b></div></header>
     <div class="paradox-card-body">
       <section class="paradox-section paradox-section--stats"><h3>WEAPON STATS</h3><div class="weapon-stats">${statRows||'<p class="weapon-detail-empty">Stats unresolved.</p>'}</div></section>
       <section class="paradox-section paradox-section--traits"><h3>INTRINSIC &amp; EXOTIC TRAITS</h3>${traitHierarchy||'<p class="weapon-detail-empty">No intrinsic trait details.</p>'}</section>
