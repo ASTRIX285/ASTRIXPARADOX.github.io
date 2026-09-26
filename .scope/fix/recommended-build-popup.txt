@@ -1,0 +1,4 @@
+# Recommended Build dialog: centred popup, full screen only below 720px.
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/tools/validate-paradox-build-space.mjs
