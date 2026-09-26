@@ -19,14 +19,32 @@ await new Promise(done=>server.listen(0,'127.0.0.1',done));const origin=`http://
 try{
   browser=await chromium.launch({channel:'chromium',headless:true});const page=await browser.newPage();
   await page.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
-  for(const file of files){
-    await page.goto(`${origin}/${relative(root,file)}`,{waitUntil:'domcontentloaded'});
-    const copy=await page.evaluate(()=>{
+  // Some pages start their own navigation while loading, which aborts the first goto with net::ERR_ABORTED.
+  // Tolerate only that error, then wait for the document to settle before reading it.
+  const isNavigationRace=error=>/ERR_ABORTED|frame was detached|Execution context was destroyed|interrupted by another navigation/i.test(String(error?.message||error));
+  const openSettled=async url=>{
+    try{await page.goto(url,{waitUntil:'domcontentloaded'});}catch(error){if(!isNavigationRace(error))throw error;}
+    let previous='',stable=0;
+    for(let attempt=0;attempt<100&&stable<3;attempt++){
+      await page.waitForLoadState('domcontentloaded');
+      const current=page.url();stable=current===previous?stable+1:0;previous=current;
+      if(stable<3)await page.waitForTimeout(100);
+    }
+  };
+  const readCopy=async()=>{
+    for(let attempt=0;;attempt++){
+      try{return await page.evaluate(()=>{
       const rows=[],walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
       while(walker.nextNode())if(!walker.currentNode.parentElement.closest('script,style'))rows.push(walker.currentNode.textContent);
       for(const node of document.querySelectorAll('[aria-label],[aria-description],[aria-valuetext],[title],[alt],[placeholder]'))for(const name of ['aria-label','aria-description','aria-valuetext','title','alt','placeholder'])if(node.hasAttribute(name))rows.push(node.getAttribute(name));
       return rows;
-    });
+    });}
+      catch(error){if(attempt>=5||!isNavigationRace(error))throw error;await page.waitForLoadState('domcontentloaded');}
+    }
+  };
+  for(const file of files){
+    await openSettled(`${origin}/${relative(root,file)}`);
+    const copy=await readCopy();
     assert.deepEqual(copy.filter(text=>bannedCopy.test(text)),[],`${relative(root,file)} rendered copy`);
   }
   console.log(`PLAIN_LANGUAGE_RENDERED=PASS ${files.length} page HTML fixtures; dynamic template source checked by validate-plain-language.mjs`);
