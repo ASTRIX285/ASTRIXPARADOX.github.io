@@ -1,0 +1,4 @@
+# Journey identity card: compact height, emblem fills the card, rounded corners.
+astrix-app/pages/journey/journey-2560-visual.css
+astrix-app/pages/journey/index.html
+astrix-app/tools/validate-journey-visual-pass.mjs

@@ -44,7 +44,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 // Europa sourcing request: retain exact import checks with the new source audit cache tag.
 // Prompt 24: retain exact resource checks with the marker/readability cache tag.
-assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
+assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1&amp;card=20260926-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
 // Local preview request: exact live import remains required behind the host gate.
 assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1&amp;plain=20260925-2"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2')"),'Journey must retain its exact current live runtime through its gated entry');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
@@ -114,9 +114,9 @@ assert.doesNotMatch(html,/VERIFIED GUARDIAN|id="journeyVerifiedGuardian"/,'Journ
 assert.match(journey,/const STAT_ORDER=\[2996146975,392767087,1943323491,1735777505,144602215,4244567218\];[\s\S]*?function bindGuardianStats[\s\S]*?payload\?\.statDefinitions[\s\S]*?character\?\.stats/,'The identity stat strip must bind all six official Bungie stats for the selected Guardian');
 assert.match(css,/\.journey-page \.journey-identity-stats\{[^}]*grid-column:1\/-1;[^}]*grid-template-columns:repeat\(6,max-content\);[^}]*justify-content:start/,'The six selected-Guardian stats must stay in one compact row');
 assert.match(css,/\.journey-page \.mission-crest\{[^}]*position:absolute;[^}]*inset:0;[^}]*width:100%;[^}]*height:100%/,'The selected Guardian emblem must fill the identity card');
-assert.match(css,/\.journey-page \.mission-crest img\{[^}]*position:absolute;[^}]*inset:0;[^}]*height:100%;[^}]*max-height:100%;[^}]*aspect-ratio:auto;[^}]*object-fit:contain/,'The complete emblem must fit inside the card without the inherited square-image crop');
-assert.match(css,/\.journey-page \.mission-identity-card\{[^}]*padding:12px/,'The identity card must retain its 12px content inset');
-assert.match(css,/\.journey-page \.journey-identity-stats\{[^}]*padding:4px 0 4px 12px/,'Stats must start 24px from the card edge, including its 12px padding');
+assert.match(css,/\.journey-page \.mission-crest img\{[^}]*position:absolute;[^}]*inset:0;[^}]*height:100%;[^}]*max-height:100%;[^}]*aspect-ratio:auto;[^}]*object-fit:cover/,'The emblem must fill the whole card (Miguel, 26 Sep 2026: no letterbox), replacing the earlier contain rule');
+assert.match(css,/\.journey-page \.mission-identity-card\{[^}]*padding:10px 12px 0/,'The identity card keeps a 12px side inset and a compact top inset');
+assert.match(css,/\.journey-page \.journey-identity-stats\{[^}]*padding:4px 0 4px 24px/,'Stats must start 24px from the card edge, running full width at the card bottom');
 assert.doesNotMatch(css,/\.journey-page \.journey-identity-stat\{[^}]*flex-direction:column/,'Stat icons and numbers must remain beside each other on narrow cards');
 assert.match(journey,/const emblemArtwork=selected\.emblemBackgroundPath\|\|selected\.emblemPath/,'The identity background must prefer the selected Guardian banner over the square icon');
 assert.match(html,/journey-vault-card[\s\S]*?>Vault inventory<[\s\S]*?id="journeyVault"/,'Journey must present Vault inventory as a dedicated data card');
@@ -367,6 +367,10 @@ console.log('GLOBAL_DESTINATION_BUTTONS=PASS');
 console.log('JOURNEY_WIDE_SIDE_RAILS=PASS');
 console.log('JOURNEY_DESTINATION_LEFT_RAIL=PASS');
 console.log('GLOBAL_PARADOX_MAP_BACKGROUND=PASS');
+// Identity card: compact, emblem fills the whole card, corners follow the card radius.
+assert.match(css,/\.journey-page \.mission-identity-card\{[^}]*min-height:112px/,'Journey identity card must be compact');
+assert.match(css,/\.journey-page \.mission-crest img\{[^}]*object-fit:cover/,'Journey emblem must fill the identity card');
+assert.match(css,/\.journey-page \.mission-crest\{[^}]*border-radius:inherit/,'Journey emblem must follow the card corner radius');
 console.log('GLOBAL_PARADOX_MAP_SLIGHT_BLUR=PASS');
 
 // Prompt 25: the chest note has a distinct class; selected map position remains independent.
