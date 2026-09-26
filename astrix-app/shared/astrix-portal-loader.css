@@ -126,3 +126,20 @@ body.apx-loading{overflow:hidden!important}
 }
 
 .apx-navigation-progress{position:fixed;right:16px;bottom:16px;z-index:100000;padding:8px 12px;border:1px solid var(--apx-loader-gold);background:#100d10;color:#fff;font:700 14px sans-serif;pointer-events:none}
+
+/* Glass breach skin: first visit of a session, never on Forge Loader or Build
+   Forge. The portal artwork is hidden while the breach plays; the auth and retry
+   panels stay available below it. */
+.apx-breach-stage{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .4s ease}
+.apx-gate.is-breach .apx-breach-stage{opacity:1}
+.apx-breach-stage canvas{display:block;width:100%;height:100%}
+.apx-gate.is-breach{background:radial-gradient(ellipse at 50% 55%,var(--apx-loader-deep-red) 0,color-mix(in srgb,var(--apx-loader-deep-red) 22%,black) 58%,black 100%)}
+.apx-gate.is-breach::before,.apx-gate.is-breach::after{display:none}
+.apx-gate.is-breach :is(.apx-portal,.apx-pct,.apx-brand){display:none}
+.apx-gate.is-breach .apx-stage{align-self:end;padding-bottom:7vh}
+.apx-breach-hud{position:absolute;left:50%;top:calc(50% + 29vh);transform:translateX(-50%);display:grid;justify-items:center;gap:10px;opacity:0;transition:opacity .6s ease}
+.apx-breach-hud.is-on{opacity:1}
+.apx-breach-label{color:var(--apx-loader-gold);font:700 14px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.35em;text-shadow:0 1px 6px black,0 0 12px black}
+.apx-breach-bar{width:180px;height:2px;overflow:hidden;border-radius:2px;background:color-mix(in srgb,var(--apx-loader-gold) 18%,transparent)}
+.apx-breach-bar span{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--apx-loader-crimson),var(--apx-loader-gold));transition:transform .3s ease}
+.apx-gate.is-live-blocked .apx-breach-hud,.apx-gate.is-auth-required .apx-breach-hud{display:none}

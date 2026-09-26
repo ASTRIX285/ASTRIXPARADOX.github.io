@@ -10,6 +10,7 @@
    Set the logo path once:  window.APX_LOGO = '/img/logo.png';
    ===================================================================== */
 (function(){
+  var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
@@ -133,6 +134,47 @@
   else document.documentElement.classList.remove('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
+  // Glass breach skin: first visit of a session only. The Forge Loader and Build
+  // Forge recommendation pages always keep the original portal loader.
+  var BREACH_MIN_MS=2800,BREACH_WAIT_MS=1500,breach=null,breachT0=0,breachTimer=null,breachStarted=false;
+  function breachEligible(){
+    try{
+      var path=window.location.pathname;
+      if(window.APX_BREACH===false||!loaderScriptSrc)return false;
+      if(path.includes('/pages/forge-loader/')||path.includes('/paradox-build-space/'))return false;
+      if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
+      var connection=navigator.connection;
+      if((connection&&connection.saveData)||(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=2))return false;
+      if(!window.WebGLRenderingContext)return false;
+      if(sessionStorage.getItem('astrix:breach-seen:v1'))return false;
+      return true;
+    }catch(error){return false;}
+  }
+  function startBreach(){
+    if(breachStarted||!gate||!breachEligible())return;
+    breachStarted=true;
+    var host=document.createElement('div');
+    host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');
+    gate.insertBefore(host,gate.firstChild);
+    var abandoned=false;
+    var give=setTimeout(function(){abandoned=true;host.remove();},BREACH_WAIT_MS);
+    var lowTier=(navigator.hardwareConcurrency||8)<=4;
+    import(new URL('./astrix-breach-loader.mjs?v=20260926-breach-1',loaderScriptSrc).href)
+      .then(function(module){return module.createBreach({host:host,logoUrl:LOGO,lowTier:lowTier});})
+      .then(function(api){
+        clearTimeout(give);
+        if(abandoned||!gate||pendingDone){api.dispose();host.remove();return;}
+        breach=api;breachT0=performance.now();
+        try{sessionStorage.setItem('astrix:breach-seen:v1','1');}catch(error){}
+        gate.classList.add('is-breach');
+        api.setProgress(pendingPct/100);
+      })
+      .catch(function(){clearTimeout(give);abandoned=true;host.remove();});
+  }
+  function disposeBreach(){
+    clearTimeout(breachTimer);
+    if(breach){breach.dispose();breach=null;}
+  }
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
@@ -205,7 +247,7 @@
     if(!document.body)return;
     var wrap=document.createElement('div');wrap.innerHTML=markup();
     gate=wrap.firstElementChild;document.body.appendChild(gate);
-    document.body.classList.add('apx-loading');cache();apply();
+    document.body.classList.add('apx-loading');cache();apply();startBreach();
     clearTimeout(noticeTimer);noticeTimer=setTimeout(function(){
       if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;
       setStatus('Still loading verified Guardian data');
@@ -217,6 +259,7 @@
     pendingPct=Math.max(pendingPct,v);
     if(prog)prog.style.setProperty('--p',pendingPct);
     if(pct)pct.textContent=pendingPct+'%';
+    if(breach)breach.setProgress(pendingPct/100);
   }
   function setStatus(t){
     pendingStatus=String(t||'Opening portal');
@@ -263,15 +306,22 @@
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');
-    if(navigationTransition){gate.remove();gate=null;return;}
+    if(navigationTransition){disposeBreach();gate.remove();gate=null;return;}
     var removeGate=function(event){
       if(event.target!==gate||!pendingDone)return;
       gate.removeEventListener('transitionend',removeGate);
+      disposeBreach();
       if(gate&&gate.parentNode)gate.remove();
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
+  function holdForBreach(){
+    if(!breach)return false;
+    var wait=BREACH_MIN_MS-(performance.now()-breachT0);
+    if(wait<=0)return false;
+    clearTimeout(breachTimer);breachTimer=setTimeout(done,wait);return true;
+  }
+  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;if(holdForBreach())return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
