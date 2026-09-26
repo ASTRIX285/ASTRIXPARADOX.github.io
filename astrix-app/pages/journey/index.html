@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="../../astrix-destinations.css">
   <link rel="stylesheet" href="../../shared/astrix-location-atmosphere.css">
   <link rel="stylesheet" href="../mission-reports/mission-reports.css">
-  <link rel="stylesheet" href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1">
+  <link rel="stylesheet" href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1">
   <link rel="stylesheet" href="../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;capped=20260924-dim66-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1&amp;capped=20260924-dim66-1">
   <style>
@@ -88,10 +88,12 @@
     <div class="guardian-character-selector guardian-character-cards" id="guardianCharacterCards" data-forge-hero-cards aria-label="Bungie characters"><div class="guardian-character-cards__status is-pending" role="status">LOADING BUNGIE CHARACTERS</div></div>
     <button class="apx-data-refresh" id="journeyRefreshButton" type="button" aria-busy="false" disabled hidden>Refresh</button>
     <span class="apx-destination-header-state" id="journeyAuthStatus" aria-live="polite">CHECKING CONNECTION</span>
+    <button class="apx-gloss journey-back journey-back--header" type="button" data-journey-back aria-label="Back"><span class="journey-back__long" aria-hidden="true">&larr; Back</span><span class="journey-back__short" aria-hidden="true">&larr;</span></button>
   </header>
   <div data-forge-destination-ribbon data-active-destination="journey"></div>
 
   <main class="apx-page-shell">
+    <div class="journey-back-row"><button class="apx-gloss journey-back journey-back--flow" type="button" data-journey-back aria-label="Back"><span class="journey-back__long" aria-hidden="true">&larr; Back</span><span class="journey-back__short" aria-hidden="true">&larr;</span></button></div>
     <section class="apx-auth-resolving" id="journeyResolving" aria-live="polite"><p class="apx-eyebrow">SECURE TRANSMISSION</p><p>Checking the existing Bungie session before selecting the landing state.</p></section>
 
     <section class="apx-landing" id="journeySignedOut" hidden>
@@ -252,5 +254,17 @@
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260919-1&amp;reports=20260925-1"></script>
   <script type="module" src="./journey.mjs?v=20260913-workspace-preload-1&amp;recovery=20260917-renderable-2&amp;transport=20260911-compact-plugs-1&amp;identity=20260918-emblem-card-1&amp;navigation=20260919-1&amp;maps=20260920-zoom-chests-3&amp;champion=20260924-champion-export-1&amp;activity=20260918-activity-startup-1&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;sources=20260925-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
+<script>
+document.querySelectorAll('[data-journey-back]').forEach(function(button){
+  button.addEventListener('click',function(){
+    var sameSite=false;
+    try{
+      var previous=new URL(document.referrer);
+      sameSite=previous.origin===location.origin&&!/\/astrix-app\/pages\/journey\/?(?:index\.html)?$/.test(previous.pathname);
+    }catch(error){}
+    if(sameSite)history.back();else location.assign('/tools/');
+  });
+});
+</script>
 </body>
 </html>
