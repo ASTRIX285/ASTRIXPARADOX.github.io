@@ -1,0 +1,4 @@
+# Journey back button: page markup, styles, tag bump and the pinned tag only.
+astrix-app/pages/journey/index.html
+astrix-app/pages/journey/journey-2560-visual.css
+astrix-app/tools/validate-journey-visual-pass.mjs

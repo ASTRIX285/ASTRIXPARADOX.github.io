@@ -1093,3 +1093,27 @@ button.journey-map-marker.has-no-icon:not(:focus-visible):not(.is-selected){outl
 .journey-map-marker-icon>*{grid-area:1/1}
 .journey-map-marker-icon>[hidden]{display:none}
 .journey-map-marker-glyph{padding:4px}
+
+/* Back button: same 42px height and 8px radius as the destination tabs, on the tab row to the
+   left of the Journey tab (6px gap) where the row has a gutter; the seven tabs never move. */
+.journey-page .journey-back{
+  height:42px;min-height:42px;width:42px;padding:0;
+  font:700 12px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.09em;
+  --apx-gloss-radius:8px;
+}
+.journey-page .journey-back__long{display:none}
+.journey-page .journey-back__short{display:block;font-size:16px;letter-spacing:0}
+.journey-page .journey-back-row{display:none}
+.journey-page .journey-back--header{position:absolute;z-index:81}
+@media(min-width:1363px){
+  .journey-page .journey-back--header{width:72px;top:calc(100% + 13px);left:calc((100% - min(1180px,100% - 64px)) / 2 - 78px)}
+  .journey-page .journey-back--header .journey-back__long{display:block}
+  .journey-page .journey-back--header .journey-back__short{display:none}
+}
+@media(min-width:901px) and (max-width:1362px){
+  .journey-page .journey-back--header{top:13px;left:204px}
+}
+@media(max-width:900px){
+  .journey-page .journey-back--header{display:none}
+  .journey-page .journey-back-row{display:block;margin:0 0 12px}
+}
