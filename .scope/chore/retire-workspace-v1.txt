@@ -1,0 +1,7 @@
+# Retire guardian-workspace-v1: redirect page, remove v1 assets, update the two tests that referenced it.
+astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.css
+astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.mjs
+astrix-app/pages/guardian-workspace-v1/guardian-workspace-v1.preview.json
+astrix-app/pages/guardian-workspace-v1/index.html
+astrix-app/tools/test-manual-build-editor.mjs
+astrix-app/tools/validate-visible-release-state.mjs
