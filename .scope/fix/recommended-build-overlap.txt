@@ -1,0 +1,3 @@
+# Recommended Build overlap hotfix: CSS and default-open sections only.
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
