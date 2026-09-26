@@ -1,7 +1,7 @@
 /* ============================================================
    ASTRIX PARADOX — Global Styles
    ============================================================ */
-@import url("../astrix-app/shared/astrix-design-v2.css?v=20260926-gloss-3");
+@import url("../astrix-app/shared/astrix-design-v2.css?v=20260926-gloss-4");
 
 :root {
   --crimson:      var(--apx-colour-action);
@@ -1295,20 +1295,6 @@ body .game-card-status,
 body .game-card-btn,
 body .footer-social a {
   font-size: 11px;
-}
-
-/* Home hero key art with a fade into the page */
-.hero-bg-video {
-  background: url('../img/BG_hero_CD.png') right center / auto 100% no-repeat !important;
-  -webkit-mask-image: linear-gradient(to right, transparent 30%, black 68%);
-  mask-image: linear-gradient(to right, transparent 30%, black 68%);  filter: brightness(1.25) contrast(1.05);
-}
-
-@media (max-width: 900px) {
-  .hero-bg-video {
-    background-position: 72% center !important;
-    opacity: 0.4;
-  }
 }
 
 /* Games: keep card titles clear of the artwork logos */
