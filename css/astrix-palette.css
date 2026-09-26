@@ -1,5 +1,6 @@
 /* Approved ASTRIX chrome palette. Game artwork, element and rarity colours
    remain data-owned; never map them to these interface tokens. */
+@layer astrix-gloss, astrix-ribbon-buttons, astrix-button-tiers;
 :root {
   color-scheme: dark;
   --apx-colour-canvas: #161616;

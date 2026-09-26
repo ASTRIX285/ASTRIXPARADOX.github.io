@@ -1,0 +1,239 @@
+/* ASTRIX PARADOX gloss controls: ONE style for every button, tab, toggle and filter.
+   Reference: astrix-gloss-controls-mock.html (.apx-gloss). The reference component is kept
+   verbatim in section 1; existing controls are mapped onto the same finish through the
+   selector list, so no page markup changes. Mapped controls keep their own size, padding,
+   font size and position: only the finish changes.
+   Declared in the first cascade layer (see css/astrix-palette.css), so these important
+   rules outrank the older button tier and ribbon layers.
+   Not applied to: the Forge Loader page, the Build Forge recommendation controls, the
+   loader gate, and the item tiles and artwork buttons the palette already excludes. */
+@layer astrix-gloss {
+/* 1. Reference component (verbatim from the mock; tokens replace the raw colours) */
+.apx-gloss{--c:var(--apx-gloss-crimson);--c-hi:var(--apx-gloss-crimson-hi);--gold:var(--apx-gloss-gold);
+ position:relative;isolation:isolate;display:inline-grid;place-items:center;min-height:36px;padding:0 20px;border:0;border-radius:6px;
+ color:var(--apx-gloss-label);font:700 15px/1 inherit;font-family:inherit;letter-spacing:.02em;text-decoration:none;cursor:pointer;
+ background:linear-gradient(180deg,rgb(255 255 255/.16) 0,rgb(255 255 255/.05) 46%,rgb(0 0 0/.30) 54%,rgb(0 0 0/.55) 100%);
+ box-shadow:inset 0 1px 0 rgb(255 255 255/.2),0 4px 10px rgb(0 0 0/.35);
+ transition:transform .15s ease,background .3s ease,box-shadow .3s ease}
+
+/* 2. Mapped controls: rest is transparent black glass (no grey fill), glossy top highlight,
+      white bold label. */
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a){
+ --c:var(--apx-gloss-crimson);--c-hi:var(--apx-gloss-crimson-hi);--gold:var(--apx-gloss-gold);
+ position:relative;isolation:isolate;
+ border-color:transparent!important;
+ border-radius:var(--apx-gloss-radius,6px)!important;
+ color:var(--apx-gloss-label)!important;
+ font-weight:700!important;
+ text-shadow:none!important;
+ background-color:transparent!important;
+ background-image:linear-gradient(180deg,rgb(255 255 255/.16) 0,rgb(255 255 255/.05) 46%,rgb(0 0 0/.30) 54%,rgb(0 0 0/.55) 100%)!important;
+ box-shadow:inset 0 1px 0 rgb(255 255 255/.2),0 4px 10px rgb(0 0 0/.35)!important;
+ transition:translate .15s ease,background .3s ease,box-shadow .3s ease
+}
+
+/* 3. Stroke: thick and bright crimson at the top-left corner, thinning and fading to nothing at
+      the bottom-right corner (mask ring, padding 3px 1px 1px 3px, 135deg crimson gradient). */
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta)::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:3px 1px 1px 3px;pointer-events:none;z-index:-1;
+ background:linear-gradient(135deg,transparent 0%,var(--c-hi) 8%,var(--c) 22%,var(--apx-gloss-crimson-soft) 45%,transparent 70%);
+ background-size:100% 100%;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+ filter:drop-shadow(0 0 3px var(--apx-gloss-crimson-glow))}
+/* 4. Light pulse flowing along the stroke, top-left to bottom-right, every 2.8s (1.4s on hover). */
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:3px 1px 1px 3px;pointer-events:none;z-index:-1;
+ background:linear-gradient(135deg,transparent 40%,var(--apx-gloss-pulse) 50%,transparent 60%);background-size:300% 300%;background-position:100% 100%;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+ animation:apx-flow 2.8s ease-in-out infinite}
+
+/* 5. Hover lifts 1px (the individual translate property, so it never replaces an existing
+      transform) and the pulse runs twice as fast. Focus outlines stay as the palette defines them. */
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):hover,
+.apx-destination-ribbon a:hover,
+.nav-links a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-join:hover,
+.btn-facebook:hover,
+.nav-toggle:hover,
+.form-submit:hover,
+.universe-pill:hover,
+.filter-btn:hover,
+.news-filter:hover,
+.game-card-btn:hover,
+.clip-modal-close:hover,
+.trailer-modal-close:hover,
+.tools-mission-trigger:hover,
+.tools-mission-close:hover,
+.stream-actions a:hover,
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):focus-visible,
+.apx-destination-ribbon a:focus-visible,
+.nav-links a:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-join:focus-visible,
+.btn-facebook:focus-visible,
+.nav-toggle:focus-visible,
+.form-submit:focus-visible,
+.universe-pill:focus-visible,
+.filter-btn:focus-visible,
+.news-filter:focus-visible,
+.game-card-btn:focus-visible,
+.clip-modal-close:focus-visible,
+.trailer-modal-close:focus-visible,
+.tools-mission-trigger:focus-visible,
+.tools-mission-close:focus-visible,
+.stream-actions a:focus-visible,
+.apx-gloss:hover,
+.apx-gloss:focus-visible{translate:0 -1px}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):hover::after,
+.apx-destination-ribbon a:hover::after,
+.nav-links a:hover::after,
+.btn-primary:hover::after,
+.btn-secondary:hover::after,
+.btn-join:hover::after,
+.btn-facebook:hover::after,
+.nav-toggle:hover::after,
+.form-submit:hover::after,
+.universe-pill:hover::after,
+.filter-btn:hover::after,
+.news-filter:hover::after,
+.game-card-btn:hover::after,
+.clip-modal-close:hover::after,
+.trailer-modal-close:hover::after,
+.tools-mission-trigger:hover::after,
+.tools-mission-close:hover::after,
+.stream-actions a:hover::after,
+.apx-gloss:hover::after{animation-duration:1.4s}
+.apx-gloss:focus-visible{outline:2px solid var(--apx-gloss-label);outline-offset:3px}
+
+/* 6. Selected and primary: glossy crimson fill with a crimson-to-gold glow underneath, 0.3s
+      transition. No stroke and no flowing pulse on these controls, only the glow. */
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):is([aria-current="page"],[aria-selected="true"],[aria-pressed="true"],.is-active,.is-primary,.active),
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):is(.improve-cta,[data-improve],#toolIntroCta,#applyWorkingBuild,#applyBuild,#confirmForgeActivity,#confirmApplyBuild,#dismissApplyBuild,#doneManualEditor,#characterInventoryActionConfirm,#vaultActionConfirm,#missionViewHistory,.mission-connect-action .bungie-auth-btn,#saveParadoxDialog button[type="submit"],#arm,.hero-actions [data-jump="builds"],[data-gw-recommendations]>.gw-rec:first-child button,[data-build-action="save"][data-build-id="equipped"],.paradox-loadout-dialog .is-primary,.beta-modal .beta-primary,[data-loadout-confirm-action],.guardian-loadout-menu-actions [data-loadout-menu-action="equip"],body.journey-page .apx-data-refresh,#vaultRefreshButton,#journeyConnectButton,#vaultConnectButton,.btn-primary,.btn-join,.form-submit,.game-card-btn.trailer){
+ background-color:var(--apx-colour-action)!important;
+ background-image:linear-gradient(180deg,var(--apx-gloss-fill-1) 0,var(--apx-gloss-fill-2) 46%,var(--apx-gloss-fill-3) 54%,var(--apx-gloss-fill-4) 100%)!important;
+ box-shadow:inset 0 1px 0 rgb(255 255 255/.35),0 6px 14px -4px var(--apx-gloss-glow-crimson),0 12px 22px -8px var(--apx-gloss-glow-gold)!important;
+ border-color:transparent!important}
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta):is([aria-current="page"],[aria-selected="true"],[aria-pressed="true"],.is-active,.is-primary,.active)::before,
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta):is([aria-current="page"],[aria-selected="true"],[aria-pressed="true"],.is-active,.is-primary,.active)::after,
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta):is(.improve-cta,[data-improve],#toolIntroCta,#applyWorkingBuild,#applyBuild,#confirmForgeActivity,#confirmApplyBuild,#dismissApplyBuild,#doneManualEditor,#characterInventoryActionConfirm,#vaultActionConfirm,#missionViewHistory,.mission-connect-action .bungie-auth-btn,#saveParadoxDialog button[type="submit"],#arm,.hero-actions [data-jump="builds"],[data-gw-recommendations]>.gw-rec:first-child button,[data-build-action="save"][data-build-id="equipped"],.paradox-loadout-dialog .is-primary,.beta-modal .beta-primary,[data-loadout-confirm-action],.guardian-loadout-menu-actions [data-loadout-menu-action="equip"],body.journey-page .apx-data-refresh,#vaultRefreshButton,#journeyConnectButton,#vaultConnectButton,.btn-primary,.btn-join,.form-submit,.game-card-btn.trailer)::before,
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta):is(.improve-cta,[data-improve],#toolIntroCta,#applyWorkingBuild,#applyBuild,#confirmForgeActivity,#confirmApplyBuild,#dismissApplyBuild,#doneManualEditor,#characterInventoryActionConfirm,#vaultActionConfirm,#missionViewHistory,.mission-connect-action .bungie-auth-btn,#saveParadoxDialog button[type="submit"],#arm,.hero-actions [data-jump="builds"],[data-gw-recommendations]>.gw-rec:first-child button,[data-build-action="save"][data-build-id="equipped"],.paradox-loadout-dialog .is-primary,.beta-modal .beta-primary,[data-loadout-confirm-action],.guardian-loadout-menu-actions [data-loadout-menu-action="equip"],body.journey-page .apx-data-refresh,#vaultRefreshButton,#journeyConnectButton,#vaultConnectButton,.btn-primary,.btn-join,.form-submit,.game-card-btn.trailer)::after{display:none}
+
+/* 7. Disabled: 45% opacity, no pulse. */
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):is(:disabled,[aria-disabled="true"]),
+.apx-destination-ribbon a:is(:disabled,[aria-disabled="true"]),
+.nav-links a:is(:disabled,[aria-disabled="true"]),
+.btn-primary:is(:disabled,[aria-disabled="true"]),
+.btn-secondary:is(:disabled,[aria-disabled="true"]),
+.btn-join:is(:disabled,[aria-disabled="true"]),
+.btn-facebook:is(:disabled,[aria-disabled="true"]),
+.nav-toggle:is(:disabled,[aria-disabled="true"]),
+.form-submit:is(:disabled,[aria-disabled="true"]),
+.universe-pill:is(:disabled,[aria-disabled="true"]),
+.filter-btn:is(:disabled,[aria-disabled="true"]),
+.news-filter:is(:disabled,[aria-disabled="true"]),
+.game-card-btn:is(:disabled,[aria-disabled="true"]),
+.clip-modal-close:is(:disabled,[aria-disabled="true"]),
+.trailer-modal-close:is(:disabled,[aria-disabled="true"]),
+.tools-mission-trigger:is(:disabled,[aria-disabled="true"]),
+.tools-mission-close:is(:disabled,[aria-disabled="true"]),
+.stream-actions a:is(:disabled,[aria-disabled="true"]),
+.apx-gloss:is(:disabled,[aria-disabled="true"]){opacity:.45!important;cursor:not-allowed;translate:none}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):is(:disabled,[aria-disabled="true"])::after,
+.apx-destination-ribbon a:is(:disabled,[aria-disabled="true"])::after,
+.nav-links a:is(:disabled,[aria-disabled="true"])::after,
+.btn-primary:is(:disabled,[aria-disabled="true"])::after,
+.btn-secondary:is(:disabled,[aria-disabled="true"])::after,
+.btn-join:is(:disabled,[aria-disabled="true"])::after,
+.btn-facebook:is(:disabled,[aria-disabled="true"])::after,
+.nav-toggle:is(:disabled,[aria-disabled="true"])::after,
+.form-submit:is(:disabled,[aria-disabled="true"])::after,
+.universe-pill:is(:disabled,[aria-disabled="true"])::after,
+.filter-btn:is(:disabled,[aria-disabled="true"])::after,
+.news-filter:is(:disabled,[aria-disabled="true"])::after,
+.game-card-btn:is(:disabled,[aria-disabled="true"])::after,
+.clip-modal-close:is(:disabled,[aria-disabled="true"])::after,
+.trailer-modal-close:is(:disabled,[aria-disabled="true"])::after,
+.tools-mission-trigger:is(:disabled,[aria-disabled="true"])::after,
+.tools-mission-close:is(:disabled,[aria-disabled="true"])::after,
+.stream-actions a:is(:disabled,[aria-disabled="true"])::after,
+.apx-gloss:is(:disabled,[aria-disabled="true"])::after{animation:none;opacity:0}
+/* 8. Reduced motion: no animation, no transitions, no lift. */
+@media(prefers-reduced-motion:reduce){
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a),
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta)::after,
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta)::before{animation:none!important;transition:none!important}
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):not(.improve-cta)::after{opacity:0}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):hover,
+.apx-destination-ribbon a:hover,
+.nav-links a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-join:hover,
+.btn-facebook:hover,
+.nav-toggle:hover,
+.form-submit:hover,
+.universe-pill:hover,
+.filter-btn:hover,
+.news-filter:hover,
+.game-card-btn:hover,
+.clip-modal-close:hover,
+.trailer-modal-close:hover,
+.tools-mission-trigger:hover,
+.tools-mission-close:hover,
+.stream-actions a:hover,
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):focus-visible,
+.apx-destination-ribbon a:focus-visible,
+.nav-links a:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-join:focus-visible,
+.btn-facebook:focus-visible,
+.nav-toggle:focus-visible,
+.form-submit:focus-visible,
+.universe-pill:focus-visible,
+.filter-btn:focus-visible,
+.news-filter:focus-visible,
+.game-card-btn:focus-visible,
+.clip-modal-close:focus-visible,
+.trailer-modal-close:focus-visible,
+.tools-mission-trigger:focus-visible,
+.tools-mission-close:focus-visible,
+.stream-actions a:focus-visible{translate:none}
+}
+
+/* Ribbon destination tabs (Prompt 22 contract): 8px radius (the stroke and pulse rings inherit it),
+   a faint black glass tint so a tab never matches the band behind it, and the selected tab glows
+   with a drop-shadow filter instead of a box-shadow so its box-shadow stays none. */
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):is(.apx-destination-ribbon a){--apx-gloss-radius:8px;background-color:rgb(0 0 0/.2)!important}
+:is(.apx-gloss,body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],.improve-cta,.tool-intro-cta,.vault-connect,.bungie-auth-btn,a.restore-btn,.mission-build-link,.mission-analyse-link,a.btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *),.apx-destination-ribbon a,.nav-links a,.btn-primary,.btn-secondary,.btn-join,.btn-facebook,.nav-toggle,.form-submit,.universe-pill,.filter-btn,.news-filter,.game-card-btn,.clip-modal-close,.trailer-modal-close,.tools-mission-trigger,.tools-mission-close,.stream-actions a):is(.apx-destination-ribbon a):is([aria-current="page"]){
+ background-color:var(--apx-colour-action)!important;
+ background-image:linear-gradient(180deg,rgb(255 255 255/.35) 0,rgb(255 255 255/.35) 1px,transparent 1px),linear-gradient(180deg,var(--apx-gloss-fill-1) 0,var(--apx-gloss-fill-2) 46%,var(--apx-gloss-fill-3) 54%,var(--apx-gloss-fill-4) 100%)!important;
+ box-shadow:none!important;
+ filter:drop-shadow(0 6px 7px var(--apx-gloss-glow-crimson)) drop-shadow(0 12px 10px var(--apx-gloss-glow-gold))}
+
+/* 9. Hero cards (character selector): frame only. The stroke and the flowing pulse are drawn on the
+      card's existing head layer, so the emblem art (the card's own ::before and ::after), text, size,
+      position and centring are untouched. No red fill, no tint and no glow on any card.
+      Ring padding: 0.5px top, 0 right, 1.5px bottom, 3px left: a fine top edge, the heaviest left
+      edge, a medium bottom edge and no stroke on the right edge. The gradient runs down the left side
+      and round the bottom-left corner, fading out along the bottom before the bottom-right corner. */
+.guardian-character-card__head{border-radius:inherit}
+.guardian-character-card__head::before,
+.guardian-character-card__head::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:.5px 0 1.5px 3px;pointer-events:none;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.guardian-character-card__head::before{
+ background:linear-gradient(100deg,var(--apx-gloss-crimson-hi) 0%,var(--apx-gloss-crimson) 18%,var(--apx-gloss-crimson-soft) 46%,transparent 78%)}
+.guardian-character-card__head::after{
+ background:linear-gradient(115deg,transparent 40%,var(--apx-gloss-pulse) 50%,transparent 60%);background-size:300% 300%;background-position:100% 100%;
+ animation:apx-flow 2.8s ease-in-out infinite}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card,
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected,
+body .guardian-character-card,
+body .guardian-character-card.is-selected{box-shadow:none!important;filter:none!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected::after,
+body .guardian-character-card.is-selected::after{background:none!important;opacity:0!important}
+@media(prefers-reduced-motion:reduce){.guardian-character-card__head::after{animation:none!important;opacity:0}}
+}
+
+@keyframes apx-flow{0%{background-position:100% 100%;opacity:0}15%{opacity:1}70%{opacity:.6}100%{background-position:0% 0%;opacity:0}}

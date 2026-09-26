@@ -1,0 +1,122 @@
+/* ASTRIX PARADOX design v2: shared tokens and components.
+   Colours derive from the approved palette (css/astrix-palette.css).
+   Imported by the public stylesheet, the app ribbon stylesheet and the
+   app landing stylesheet, so every page receives it. */
+@import url("astrix-gloss-controls.css?v=20260926-gloss-2");
+
+
+:root {
+  /* Colour */
+  --apx-surface-band: color-mix(in srgb, var(--apx-colour-canvas) 68%, transparent);
+  --apx-surface-band-raised: color-mix(in srgb, var(--apx-colour-panel) 64%, transparent);
+  --apx-hairline: color-mix(in srgb, var(--apx-colour-text) 9%, transparent);
+  --apx-hairline-strong: color-mix(in srgb, var(--apx-colour-text) 16%, transparent);
+  --apx-crimson-rule: var(--apx-colour-action);
+  --apx-crimson-glow: color-mix(in srgb, var(--apx-colour-action) 45%, transparent);
+  --apx-gloss-crimson: var(--apx-colour-action);
+  --apx-gloss-crimson-hi: #ff4a3d;
+  --apx-gloss-crimson-soft: color-mix(in srgb, var(--apx-gloss-crimson) 35%, transparent);
+  --apx-gloss-crimson-glow: rgb(255 60 50 / 55%);
+  --apx-gloss-pulse: rgb(255 220 200 / 95%);
+  --apx-gloss-gold: var(--apx-ember-gold);
+  --apx-gloss-label: #fff;
+  --apx-gloss-fill-1: #e33a3a;
+  --apx-gloss-fill-2: var(--apx-gloss-crimson);
+  --apx-gloss-fill-3: #8c1616;
+  --apx-gloss-fill-4: #6a0e0e;
+  --apx-gloss-glow-crimson: rgb(178 34 34 / 75%);
+  --apx-gloss-glow-gold: rgb(201 168 76 / 65%);
+  --apx-pvp: #6f8fb8;
+  --apx-ember-crimson: var(--apx-colour-action);
+  --apx-ember-gold: #c9a84c;
+
+  /* Spacing */
+  --apx-space-1: 4px;
+  --apx-space-2: 8px;
+  --apx-space-3: 12px;
+  --apx-space-4: 16px;
+  --apx-space-5: 24px;
+  --apx-space-6: 32px;
+  --apx-space-7: 48px;
+
+  /* Radius */
+  --apx-radius-sm: 6px;
+  --apx-radius-md: 12px;
+  --apx-radius-lg: 18px;
+  --apx-radius-pill: 999px;
+
+  /* Motion */
+  --apx-motion-fast: 150ms;
+  --apx-motion-base: 250ms;
+  --apx-motion-slow: 400ms;
+  --apx-ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --apx-motion-fast: 0ms;
+    --apx-motion-base: 0ms;
+    --apx-motion-slow: 0ms;
+  }
+}
+
+/* Shared components */
+.apx-band {
+  border: 1px solid var(--apx-hairline);
+  border-radius: var(--apx-radius-md);
+  background: var(--apx-surface-band);
+  box-shadow: inset 0 1px 0 var(--apx-hairline);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.apx-band-divided > * + * {
+  border-top: 1px solid var(--apx-hairline);
+}
+
+.apx-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--apx-space-1) var(--apx-space-3);
+  border: 1px solid var(--apx-hairline-strong);
+  border-radius: var(--apx-radius-pill);
+  color: var(--apx-colour-secondary);
+  background: var(--apx-surface-band);
+}
+
+/* Panels site-wide: translucent bands, soft corners, hairline edges */
+body .platform-card,
+body .clip-card,
+body .game-card,
+body .join-card,
+body .news-card,
+body .namecard,
+body .review-card,
+body .tools-mission-dialog,
+body .apx-scaffold-card,
+body .apx-section,
+body .apx-landing,
+body .apx-auth-resolving,
+body .apx-subpanel,
+body .apx-loc-panel,
+body .apx-loc-detail,
+body .apx-destination-link,
+body .mission-panel,
+body .mission-metric-card,
+body .mission-identity-card,
+body .journey-records-panel,
+body .feature-card {
+  border: 1px solid var(--apx-hairline) !important;
+  border-radius: var(--apx-radius-md) !important;
+  background: var(--apx-surface-band) !important;
+  box-shadow: inset 0 1px 0 var(--apx-hairline), 0 14px 34px -22px rgb(0 0 0 / 70%) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+body .apx-section-heading,
+body .apx-page-heading,
+body .apx-field-list li,
+body .mission-panel-heading {
+  border-bottom-color: var(--apx-hairline) !important;
+}

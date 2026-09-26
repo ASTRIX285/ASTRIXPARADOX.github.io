@@ -175,7 +175,7 @@
     clearTimeout(breachTimer);
     if(breach){breach.dispose();breach=null;}
   }
-  var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
+  var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
     '<div class="apx-gate" role="status" aria-live="polite" aria-label="Loading">'+
@@ -205,6 +205,7 @@
           '<strong>LIVE GUARDIAN DATA UNAVAILABLE</strong>'+
           '<span></span>'+
           '<button class="apx-auth-button apx-retry-button" type="button">RETRY LIVE DATA</button>'+
+          '<button class="apx-auth-button apx-continue-button" type="button">CONTINUE WITHOUT LIVE DATA</button>'+
         '</div>'+
         // Loading copy is percentage-only. Status calls remain API-compatible.
       '</div>'+
@@ -215,7 +216,7 @@
     if(!gate)return;
     prog=gate.querySelector('.apx-prog');pct=gate.querySelector('.apx-pct');status=gate.querySelector('.apx-status');
     authPanel=gate.querySelector('.apx-auth-panel');authButton=authPanel&&authPanel.querySelector('.apx-auth-button');
-    failurePanel=gate.querySelector('.apx-failure-panel');failureMessage=failurePanel&&failurePanel.querySelector('span');retryButton=failurePanel&&failurePanel.querySelector('.apx-retry-button');
+    failurePanel=gate.querySelector('.apx-failure-panel');failureMessage=failurePanel&&failurePanel.querySelector('span');retryButton=failurePanel&&failurePanel.querySelector('.apx-retry-button');continueButton=failurePanel&&failurePanel.querySelector('.apx-continue-button');
   }
   function applyAuth(){
     if(!gate||!authPanel||!authButton)return;
@@ -231,6 +232,7 @@
     failurePanel.hidden=!blocked;
     if(failureMessage)failureMessage.textContent=pendingBlockedMessage;
     if(retryButton)retryButton.onclick=blocked?function(){window.location.reload();}:null;
+    if(continueButton)continueButton.onclick=blocked?function(){pendingBlockedMessage='';pendingDone=true;applyBlocked();finish();}:null;
   }
   function apply(){
     if(prog)prog.style.setProperty('--p',pendingPct);

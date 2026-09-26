@@ -143,3 +143,11 @@ body.apx-loading{overflow:hidden!important}
 .apx-breach-bar{width:180px;height:2px;overflow:hidden;border-radius:2px;background:color-mix(in srgb,var(--apx-loader-gold) 18%,transparent)}
 .apx-breach-bar span{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--apx-loader-crimson),var(--apx-loader-gold));transition:transform .3s ease}
 .apx-gate.is-live-blocked .apx-breach-hud,.apx-gate.is-auth-required .apx-breach-hud{display:none}
+
+/* SITE-WIDE V2: calmer loader and a way past a failed live load */
+.apx-gate::after{background:radial-gradient(ellipse at 50% 44%,rgba(211,32,47,.05) 0%,rgba(121,8,16,.16) 50%,rgba(8,1,2,.96) 100%),
+    linear-gradient(180deg,rgba(10,1,2,.4),rgba(40,3,7,.3) 58%,rgba(7,1,2,.94))}
+.apx-gate::before{opacity:.5}
+.apx-failure-panel span{font-size:.8125rem;line-height:1.5}
+.apx-failure-panel .apx-continue-button{border-color:rgba(255,247,228,.34);background:transparent}
+.apx-failure-panel .apx-continue-button:hover{border-color:rgba(255,247,228,.7);background:rgba(255,247,228,.08)}

@@ -1038,7 +1038,7 @@ assert.doesNotMatch(actionPalette,/--apx-icon-|(?:^|[;{])\s*(?:width|height|font
 for(const page of ['index.html','components/guardian-workspace/guardian-workspace.html','pages/guardian-workspace-v1/index.html','pages/guardian-workspace-v2/index.html','pages/guardian-workspace-v2/paradox-build-space/index.html','pages/guardian-workspace-v2/shooting-range-test/index.html','pages/journey/index.html','pages/vault/index.html','pages/loadout/index.html','pages/mission-reports/index.html','pages/tool-intro/index.html']){
   const html=readFileSync(new URL(`../${page}`,import.meta.url),'utf8');
   assert.match(html,/<body\b[^>]*\bdata-apx-button-system(?:\s|>)/,`${page} must opt into the shared button system.`);
-  assert.match(html,/href="\/css\/astrix-palette\.css\?v=20260923-button-tiers-1"/,`${page} must load the current shared action tokens.`);
+  assert.match(html,/href="\/css\/astrix-palette\.css\?v=20260923-button-tiers-1&amp;gloss=20260926-1"/,`${page} must load the current shared action tokens.`);
 }
 assert.doesNotMatch(readFileSync(new URL('../pages/forge-loader/index.html',import.meta.url),'utf8'),/apx-button-system/,'Forge Loader must retain its existing presentation.');
 console.log('SHARED_BUTTON_HIERARCHY=PASS one primary review action, two shared tiers, eleven entry points, Forge Loader and artwork excluded');

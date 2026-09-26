@@ -1,3 +1,5 @@
+@layer astrix-gloss, astrix-ribbon-buttons;
+@import url("astrix-design-v2.css?v=20260926-gloss-2");
 :root{
   color-scheme:dark;
   --apx-crimson:var(--apx-colour-action);
@@ -149,6 +151,14 @@ body.apx-destination-page::before{
   .apx-page-heading{align-items:flex-start;flex-direction:column}.apx-card-grid,.apx-subgrid,.apx-destination-links{grid-template-columns:1fr}.apx-page-shell{padding-top:32px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Site-wide v2: a thin crimson rule under the tab row. The tab finish itself comes from
+   astrix-gloss-controls.css, the one gloss style for every control. */
+.apx-destination-ribbon { position:relative; isolation:isolate; }
+.apx-destination-ribbon::after {
+  content:""; position:absolute; right:0; bottom:-6px; left:0; height:1px;
+  background:var(--apx-crimson-rule); pointer-events:none;
+}
 
 /* Prompt 22: one button treatment outranks legacy page cosmetics. Geometry
    remains in the existing responsive rules; state changes never resize links. */
