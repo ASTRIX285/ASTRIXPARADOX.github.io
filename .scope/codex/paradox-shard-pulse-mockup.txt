@@ -1,3 +1,2 @@
 astrix-app/shared/astrix-shard-pulse.css
 astrix-app/pages/shard-pulse-mockup/index.html
-.scope/codex/paradox-shard-pulse-mockup.txt

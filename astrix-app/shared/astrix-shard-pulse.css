@@ -1,4 +1,4 @@
-/* ASTRIX PARADOX — experimental shard / pulse surface
+/* ASTRIX PARADOX: experimental shard / pulse surface
    Isolated opt-in mockup. Apply .apx-shard-surface to a control; no existing UI changes. */
 .apx-shard-surface{
   --apx-pulse-cyan:rgba(55,205,255,.72);
