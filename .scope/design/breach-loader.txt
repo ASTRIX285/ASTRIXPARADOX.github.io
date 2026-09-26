@@ -1,0 +1,4 @@
+# Glass breach loader skin: shared loader script, styles and the new breach module only.
+astrix-app/shared/astrix-breach-loader.mjs
+astrix-app/shared/astrix-portal-loader.css
+astrix-app/shared/astrix-portal-loader.js
