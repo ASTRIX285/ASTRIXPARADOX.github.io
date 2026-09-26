@@ -543,3 +543,17 @@ body.build-forge-page .recommended-build-actions small{font-size:.875rem;line-he
   body.build-forge-page .recommended-build-actions>div{display:flex;flex-wrap:wrap}
   body.build-forge-page .recommended-build-actions small{flex-basis:100%;text-align:left}
 }
+
+/* Recommended Build overlap hotfix. The shared left-rail rule makes the rail a
+   scroll container, whose automatic minimum height is zero, so its grid row
+   collapsed and its content painted over the sections below. Each section now
+   takes its own content height and the Super diamond stays inside its box. */
+.recommended-build-content{grid-auto-rows:max-content}
+body.build-forge-page .recommended-build-rail.guardian-left-rail{overflow:visible;min-height:auto}
+.recommended-build-rail>.review-disclosure,
+.recommended-build-equipment>.review-disclosure{min-height:0;overflow:visible}
+.review-disclosure #recommendedSubclassSummary{width:100%;max-width:26rem;margin-inline:auto;isolation:isolate}
+.review-disclosure #recommendedSubclassSummary .subclass-super-shell{max-width:100%}
+.review-disclosure #recommendedSubclassSummary .super-feature{max-width:100%;contain:paint}
+.review-disclosure #recommendedSubclassSummary .super-feature__cluster{max-width:100%}
+@media(max-width:1100px){.recommended-build-rail,.recommended-build-equipment{grid-column:1}}
