@@ -205,7 +205,7 @@ try{
     inventory:box(document.querySelector('.gear-combined')),rail:box(document.querySelector('.guardian-left-rail')),
     bounds,overlaps,inside:bar.contains(improve),count:document.querySelectorAll('.improve-cta').length,
     order:right.map(node=>node.textContent.trim()),href:improve.getAttribute('href'),label:improve.getAttribute('aria-label'),
-    padding:parseFloat(getComputedStyle(document.body).paddingBottom),primaryColour,improveColour:getComputedStyle(improve).backgroundColor,
+    padding:parseFloat(getComputedStyle(document.body).paddingBottom),primaryColour,improveColour:getComputedStyle(improve).backgroundColor,improveRing:{image:getComputedStyle(improve,'::after').backgroundImage,animation:getComputedStyle(improve,'::after').animationName,padding:getComputedStyle(improve,'::after').paddingTop},
     buttons:buttons.map(node=>({...box(node),font:getComputedStyle(node).fontFamily,fontSize:getComputedStyle(node).fontSize,whiteSpace:getComputedStyle(node).whiteSpace,scrollWidth:node.scrollWidth,clientWidth:node.clientWidth})),
     rightBounds:box(bar.lastElementChild),fontSize:getComputedStyle(improve).fontSize
    };
@@ -216,7 +216,12 @@ try{
   assert.deepEqual(state.order,['✦ IMPROVE MY GUARDIAN','🖫 SAVE LOADOUT','⤴ SHARE','•••'],'Right action order preserves existing controls');
   assert.equal(state.href,'./paradox-build-space/','Native Improve destination unchanged');
   assert.equal(state.label,'Improve My Guardian','Icon-only action remains accessible');
-  assert.equal(state.improveColour,state.primaryColour,'Improve retains crimson primary fill');
+  // Miguel's decision (26 Sep 2026): only selected items are red. Improve is a FULL-tier action, so at rest it is black glass
+  // with the fading crimson stroke and the flowing pulse, never a crimson fill.
+  assert.notEqual(state.improveColour,state.primaryColour,'Improve is not crimson at rest (only selected items are red)');
+  assert.match(state.improveRing.image,/linear-gradient/,'Improve has the FULL-tier stroke');
+  assert.equal(state.improveRing.animation,'apx-flow-pos','Improve has the flowing pulse');
+  assert.equal(state.improveRing.padding,'3px','Improve stroke is 3px thick at the top-left');
   assert.ok(Math.abs(state.padding-state.bounds.height)<=1,`Character ${width}: bottom padding equals bar height`);
   assert.deepEqual(state.overlaps,[],`Character ${width}: no workspace content overlaps the bar`);
   assert.ok(state.bounds.left>=-1&&state.bounds.right<=width+1,`Character ${width}: bar fits viewport`);

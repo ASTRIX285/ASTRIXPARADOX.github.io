@@ -17,5 +17,13 @@ for(const path of new Set(files)){
 // Clips footer fix: exercise the workflow's real template without API requests.
 const generated=execFileSync('python3',['-B','-c','from scripts.build_clips import build_html; print(build_html([], 0))'],{cwd:root,encoding:'utf8'});
 assert.ok([...generated.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),'Clips generator must retain Bungie attribution');
+// The generator must not reset the stylesheet version tags that the site pages carry.
+const tagOf=(html,file)=>{const match=html.match(new RegExp(`href="[^"]*${file}[?]v=([^"]+)"`));assert.ok(match,`${file} tag missing`);return match[1]};
+const read=path=>readFileSync(new URL(path,new URL('../../',import.meta.url)),'utf8');
+for(const file of ['style.css','astrix-palette.css']){
+  const current=tagOf(read('pages/news.html'),file);
+  assert.equal(tagOf(generated,file),current,`Clips generator uses the current ${file} tag`);
+  assert.equal(tagOf(read('pages/clips.html'),file),current,`Committed clips page uses the current ${file} tag`);
+}
 assert.ok(checked>0);
 console.log(`BUNGIE_FOOTER=PASS (${checked} pages)`);

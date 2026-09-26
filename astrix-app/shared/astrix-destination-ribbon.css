@@ -1,5 +1,5 @@
 @layer astrix-gloss, astrix-ribbon-buttons;
-@import url("astrix-design-v2.css?v=20260926-gloss-3");
+@import url("astrix-design-v2.css?v=20260926-gloss-4");
 :root{
   color-scheme:dark;
   --apx-crimson:var(--apx-colour-action);
