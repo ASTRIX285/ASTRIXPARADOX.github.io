@@ -2,3 +2,14 @@
 astrix-app/shared/astrix-breach-loader.mjs
 astrix-app/shared/astrix-portal-loader.css
 astrix-app/shared/astrix-portal-loader.js
+astrix-app/components/guardian-workspace/guardian-workspace.html
+astrix-app/index.html
+astrix-app/pages/forge-loader/index.html
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html
+astrix-app/pages/journey/index.html
+astrix-app/pages/loadout/index.html
+astrix-app/pages/mission-reports/index.html
+astrix-app/pages/reports/index.html
+astrix-app/pages/vault/index.html
