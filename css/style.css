@@ -1,7 +1,7 @@
 /* ============================================================
    ASTRIX PARADOX — Global Styles
    ============================================================ */
-@import url("../astrix-app/shared/astrix-design-v2.css");
+@import url("../astrix-app/shared/astrix-design-v2.css?v=20260926-gloss-1");
 
 :root {
   --crimson:      var(--apx-colour-action);
@@ -1232,16 +1232,8 @@ body::before {
     align-items: center;
     min-height: var(--v2-tab-height);
     padding: 0 22px;
-    background: var(--dark-3);
-    border: 1px solid var(--apx-colour-border);
-    border-bottom: 2px solid var(--apx-colour-border);
-  }
-
-  .nav-links a:hover,
-  .nav-links a.active {
-    background: var(--dark-4);
-    border-bottom-color: var(--crimson);
-    box-shadow: 0 8px 16px -10px var(--v2-crimson-glow);
+    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
   }
 }
 

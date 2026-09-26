@@ -2,6 +2,8 @@
    Colours derive from the approved palette (css/astrix-palette.css).
    Imported by the public stylesheet, the app ribbon stylesheet and the
    app landing stylesheet, so every page receives it. */
+@import url("astrix-gloss-controls.css?v=20260926-gloss-1");
+
 
 :root {
   /* Colour */
@@ -11,11 +13,19 @@
   --apx-hairline-strong: color-mix(in srgb, var(--apx-colour-text) 16%, transparent);
   --apx-crimson-rule: var(--apx-colour-action);
   --apx-crimson-glow: color-mix(in srgb, var(--apx-colour-action) 45%, transparent);
-  --apx-tab-top: color-mix(in srgb, var(--apx-colour-raised) 90%, var(--apx-colour-text));
-  --apx-tab-bottom: var(--apx-colour-canvas);
-  --apx-tab-edge: color-mix(in srgb, var(--apx-colour-text) 24%, transparent);
-  --apx-pill-top: color-mix(in srgb, var(--apx-colour-action) 78%, var(--apx-colour-text));
-  --apx-pill-bottom: color-mix(in srgb, var(--apx-colour-action) 74%, var(--apx-colour-canvas));
+  --apx-gloss-crimson: var(--apx-colour-action);
+  --apx-gloss-crimson-hi: #ff4a3d;
+  --apx-gloss-crimson-soft: color-mix(in srgb, var(--apx-gloss-crimson) 35%, transparent);
+  --apx-gloss-crimson-glow: rgb(255 60 50 / 55%);
+  --apx-gloss-pulse: rgb(255 220 200 / 95%);
+  --apx-gloss-gold: var(--apx-ember-gold);
+  --apx-gloss-label: #fff;
+  --apx-gloss-fill-1: #e33a3a;
+  --apx-gloss-fill-2: var(--apx-gloss-crimson);
+  --apx-gloss-fill-3: #8c1616;
+  --apx-gloss-fill-4: #6a0e0e;
+  --apx-gloss-glow-crimson: rgb(178 34 34 / 75%);
+  --apx-gloss-glow-gold: rgb(201 168 76 / 65%);
   --apx-pvp: #6f8fb8;
   --apx-ember-crimson: var(--apx-colour-action);
   --apx-ember-gold: #c9a84c;

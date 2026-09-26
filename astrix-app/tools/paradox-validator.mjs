@@ -20,6 +20,7 @@ const validators=[
   'validate-super-formation.mjs',
   'validate-responsive-layout-contract.mjs',
   'validate-destination-theming.mjs',
+  'test-gloss-controls.mjs',
   'validate-portal-loader.mjs',
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',

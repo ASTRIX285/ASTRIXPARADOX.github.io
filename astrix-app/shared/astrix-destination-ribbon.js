@@ -161,37 +161,6 @@
     list.addEventListener('pointerleave',()=>clearTimeout(intentTimer));
     nav.append(list);
     mount.replaceChildren(nav);
-    placePill(nav);
-  }
-
-  const PILL_KEY='astrix:ribbon-pill:v1';
-  function placePill(nav){
-    const link=nav.querySelector('a[aria-current="page"]');
-    if(!link)return;
-    const pill=document.createElement('span');
-    pill.className='apx-ribbon-pill';pill.setAttribute('aria-hidden','true');
-    nav.prepend(pill);
-    const measure=()=>{
-      const n=nav.getBoundingClientRect(),r=link.getBoundingClientRect();
-      return{x:Math.round(r.left-n.left),y:Math.round(r.top-n.top),w:Math.round(r.width),h:Math.round(r.height)};
-    };
-    const place=box=>{
-      pill.style.setProperty('--pill-x',`${box.x}px`);pill.style.setProperty('--pill-y',`${box.y}px`);
-      pill.style.setProperty('--pill-w',`${box.w}px`);pill.style.setProperty('--pill-h',`${box.h}px`);
-    };
-    const target=measure();
-    let from=null;
-    try{
-      const saved=JSON.parse(sessionStorage.getItem(PILL_KEY)||'null');
-      if(saved&&saved.vw===innerWidth&&saved.box&&saved.box.w>0)from=saved.box;
-    }catch{}
-    pill.style.transition='none';place(from||target);nav.classList.add('apx-has-pill');
-    void pill.offsetWidth;pill.style.transition='';
-    if(from)requestAnimationFrame(()=>place(target));
-    try{sessionStorage.setItem(PILL_KEY,JSON.stringify({vw:innerWidth,box:target}));}catch{}
-    if('ResizeObserver' in window)new ResizeObserver(()=>{
-      pill.style.transition='none';place(measure());void pill.offsetWidth;pill.style.transition='';
-    }).observe(nav);
   }
 
   function warmReports(session){
