@@ -1,0 +1,2 @@
+# Make the rendered plain-language test tolerate navigation races.
+astrix-app/tools/test-plain-language-rendered.mjs
