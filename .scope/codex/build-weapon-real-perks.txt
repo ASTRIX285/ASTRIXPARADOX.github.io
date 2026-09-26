@@ -1,0 +1,7 @@
+# Build Forge real perk matrices: card layout, build space page and focused tests.
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/build-weapon-card-layout.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/tools/test-build-weapon-card-layout.mjs
+astrix-app/tools/validate-paradox-build-space.mjs

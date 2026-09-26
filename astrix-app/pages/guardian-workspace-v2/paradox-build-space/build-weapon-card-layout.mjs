@@ -26,14 +26,14 @@ export function sizeBuildWeaponCards(grid){
         // Use the rendered socket columns of this weapon, never an assumed eight-column loadout.
         const columns=row.querySelectorAll('.weapon-perk-cell').length;
         const socket=number(getComputedStyle(cell).width),gap=number(getComputedStyle(row).columnGap);
-        content=Math.max(content,columns*socket+Math.max(0,columns-1)*gap+horizontal(getComputedStyle(matrix)));
+        const strip=matrix.closest('.weapon-perk-strip');
+        content=Math.max(content,horizontal(getComputedStyle(strip||matrix))+columns*socket+Math.max(0,columns-1)*gap+horizontal(getComputedStyle(matrix)));
         // Explicit block contribution prevents contained subgrid cards from
         // sizing the shared perks track to only the first weapon's row count.
         const rows=[...matrix.querySelectorAll('.weapon-perk-row')],style=getComputedStyle(matrix);
         const height=rows.reduce((sum,row)=>sum+Math.max(...[...row.querySelectorAll('.weapon-perk-cell')].map(cell=>cell.getBoundingClientRect().height),0),0)
           +Math.max(0,rows.length-1)*number(style.rowGap)+number(style.paddingTop)+number(style.paddingBottom)
           +number(style.borderTopWidth)+number(style.borderBottomWidth);
-        const strip=matrix.closest('.weapon-perk-strip');
         if(strip)strip.style.minHeight=`${Math.ceil(height)}px`;
       }
       const mods=card.querySelector('.weapon-support-icons');
@@ -42,17 +42,19 @@ export function sizeBuildWeaponCards(grid){
         content=Math.max(content,children.reduce((sum,child)=>sum+number(getComputedStyle(child).width),0)+Math.max(0,children.length-1)*number(style.columnGap)+horizontal(style));
       }
     }
-    const width=Math.ceil(content+padding),gap=number(getComputedStyle(grid).columnGap),threshold=3*width+2*gap;
+    const width=Math.ceil(content+padding),gap=number(getComputedStyle(grid).columnGap),threshold=3*width+2*gap,twoThreshold=2*width+gap;
     if(width!==lastWidth){grid.style.setProperty('--build-weapon-card',`${width}px`);lastWidth=width;}
     if(threshold!==lastThreshold){
       // Size queries cannot reference custom properties. Emit the resolved
       // threshold from the same card width used by both layouts.
-      rules.textContent=`@container build-weapon-section (width < ${threshold}px){.design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:var(--build-weapon-card)!important;}}`;
+      rules.textContent=`@container build-weapon-section (width < ${threshold}px){.design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:repeat(2,var(--build-weapon-card))!important;}}
+@container build-weapon-section (width < ${twoThreshold}px){.design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:var(--build-weapon-card)!important;}}`;
       lastThreshold=threshold;
     }
   };
   const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(update);};
   new ResizeObserver(schedule).observe(section);
+  new MutationObserver(schedule).observe(grid,{childList:true,subtree:true});
   window.addEventListener('resize',schedule);
   installed.set(grid,update);update();
 }
