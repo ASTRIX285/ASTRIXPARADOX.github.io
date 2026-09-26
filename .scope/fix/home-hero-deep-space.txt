@@ -1,0 +1,11 @@
+# Home hero: remove the Crimson Desert art override so deep space shows again; style.css tag bump.
+astrix-app/tools/validate-tools-hub.mjs
+css/style.css
+index.html
+pages/clips.html
+pages/games.html
+pages/join.html
+pages/news.html
+pages/rebrand.html
+pages/reviews.html
+tools/index.html
