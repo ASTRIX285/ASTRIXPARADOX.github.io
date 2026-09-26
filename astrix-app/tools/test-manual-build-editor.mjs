@@ -433,7 +433,8 @@ assert.equal(readinessCheck.node('liveTransferStatus').textContent,readinessChec
 assert.match(readinessCheck.node('liveTransferStatus').textContent,/staged socket changes/);
 assert.ok(readinessCheck.node('liveTransferStatus').textContent.includes(`${plan.inGameSteps.length} in-game`),'Known manual steps must remain explicit before the fresh check.');
 const checkingPromise=readinessCheck.context.openConfirmation();
-assert.match(readinessCheck.node('liveTransferStatus').textContent,/checking fresh Guardian/);
+// Prompt 19: assert the complete plain-language status, preserving the preflight check.
+assert.match(readinessCheck.node('liveTransferStatus').textContent,/^Checking this build before Apply\. No changes have been made\.$/);
 assert.equal(readinessCheck.node('applyWorkingBuild').disabled,true,'The live check must still prevent overlapping Apply attempts.');
 finishReadinessCheck(profilePayload({compatible:false}));await checkingPromise;
 assert.match(readinessCheck.node('liveActionBanner').textContent,/Apply blocked.*Test Trait on Test Legendary/);

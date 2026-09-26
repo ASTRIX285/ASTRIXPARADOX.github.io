@@ -68,11 +68,11 @@ function forgeLoaderResidency(payload={},options={}){
   const weaponsComplete=Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons)&&coverageComplete(weaponCoverage)&&weapons.length===expectedWeaponInstances;
   const manifestComplete=Boolean(manifestVersion)&&forgeLoaderManifestComplete(payload);
   const rows=[
-    {key:'equipped',label:'Equipped loadout',resident:Array.isArray(equipment?.items),complete:Array.isArray(equipment?.items),detail:Array.isArray(equipment?.items)?`${equipment.items.length} equipped items resident`:'Awaiting verified Bungie equipment'},
-    {key:'vault-armour',label:'Vault armour',resident:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),complete:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),detail:Number.isFinite(armourCount)?`${armourCount} armour items indexed`:'Awaiting verified Vault armour'},
-    {key:'weapons',label:'Weapons',resident:Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons),complete:weaponsComplete,detail:profileBuild&&Array.isArray(profileBuild?.ownedWeapons)?`${weapons.length} owned weapons indexed`:'Awaiting verified weapon instances'},
+    {key:'equipped',label:'Equipped loadout',resident:Array.isArray(equipment?.items),complete:Array.isArray(equipment?.items),detail:Array.isArray(equipment?.items)?`${equipment.items.length} equipped items resident`:'Loading equipment…'},
+    {key:'vault-armour',label:'Vault armour',resident:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),complete:Array.isArray(profileInventory?.items)&&Number.isFinite(armourCount),detail:Number.isFinite(armourCount)?`${armourCount} armour items indexed`:'Loading Vault armour…'},
+    {key:'weapons',label:'Weapons',resident:Boolean(profileBuild)&&Array.isArray(profileBuild?.ownedWeapons),complete:weaponsComplete,detail:profileBuild&&Array.isArray(profileBuild?.ownedWeapons)?`${weapons.length} weapons indexed`:'Loading weapons…'},
     {key:'subclass',label:'Subclass and fragments',resident:Boolean(profileBuild)&&subclasses.length>0,complete:subclasses.some(hasVerifiedSubclassSockets),detail:subclasses.length?`${subclasses.length} live subclass${subclasses.length===1?'':'es'} and ${fragmentCount} fragment options resolved`:'Awaiting live subclass sockets'},
-    {key:'artifact',label:'Seasonal Artifact',resident:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),complete:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),detail:profileBuild?`${artifact?.name?`${text(artifact.name)} active · `:'No active Artifact reported · '}${artifactCatalog.length} verified definitions resident`:'Awaiting verified Artifact data'},
+    {key:'artifact',label:'Seasonal Artifact',resident:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),complete:Boolean(profileBuild)&&Array.isArray(payload?.artifactCatalog),detail:profileBuild?`${artifact?.name?`${text(artifact.name)} active · `:'No active Artifact reported · '}${artifactCatalog.length} definitions resident`:'Loading Artifact…'},
     {key:'manifest',label:'Manifest',resident:Boolean(manifestVersion),complete:manifestComplete,detail:manifestVersion?`Cached manifest ${manifestVersion}`:'Awaiting cached manifest'}
   ].map(row=>({...row,state:sourceState(row.resident,row.complete,phase)}));
   const ready=options.backendSolverReady===true&&rows.every(row=>row.state==='ready');
@@ -81,7 +81,7 @@ function forgeLoaderResidency(payload={},options={}){
     rows,
     itemCount:allItems.length,
     ready,
-    summary:ready?`${allItems.length} items indexed · backend solver ready · ready in ${(durationMs/1000).toFixed(1)}s`:'Verifying required Bungie sources. No unverified counts are shown.'
+    summary:ready?`${allItems.length} items indexed · backend solver ready · ready in ${(durationMs/1000).toFixed(1)}s`:'Loading inventory…'
   };
 }
 

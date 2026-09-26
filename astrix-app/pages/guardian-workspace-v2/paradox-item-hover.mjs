@@ -1,6 +1,6 @@
 import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260913-square-intrinsic-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
@@ -147,13 +147,13 @@ function cardMarkup(item,kind,{contextLabel='',definitionOnly=false,presentation
   const type=item?.itemTypeDisplayName??item?.weaponType??item?.slotLabel??(kind==='weapon'?'Weapon':'Armour');
   const tier=item?.tier??item?.tierTypeName??item?.definition?.inventory?.tierTypeName??(item?.isExotic?'Exotic':'');
   const metricLabel=definitionOnly?'RARITY':'POWER',metricValue=definitionOnly?tier:(item?.power??item?.primaryStat?.value??'—');
-  const source=item?.source?.label??(item?.itemInstanceId?'Exact owned instance':'Bungie item');
+  const source=item?.source?.label??(item?.itemInstanceId?'Item details':'Bungie item');
   const rarity=/\bexotic\b/i.test(String(tier))||item?.isExotic===true?'exotic':/\blegendary\b/i.test(String(tier))?'legendary':'standard';
   const presentationClass=presentation==='inspect'?'paradox-item-inspect-card':'paradox-item-hover-card';
   return `<article class="paradox-item-card paradox-item-card--${kind} ${presentationClass} is-${rarity}" data-item-kind="${kind}" data-item-rarity="${rarity}">
     <header class="paradox-item-header"><div class="weapon-detail-icon">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="ph-glyph" aria-hidden="true">◇</span>'}${release.icon?`<img class="paradox-release-watermark" src="${esc(asset(release.icon))}" data-watermark-source="${esc(release.source)}" alt="Release watermark">`:''}</div><div class="paradox-item-identity"><span class="paradox-kicker">PARADOX ${kind.toUpperCase()} MODEL${contextLabel?` · ${esc(contextLabel)}`:''}</span><h2>${esc(itemName(item,kind))}</h2><p>${esc(type)}</p></div><div class="weapon-detail-power"><small>${metricLabel}</small><b>${esc(metricValue)}</b></div></header>
     <div class="paradox-card-body">${definitionOnly&&kind==='armour'?armourDefinitionDetails(item):kind==='weapon'?weaponDetails(item,{inspect:presentation==='inspect'}):armourDetails(item,{inspect:presentation==='inspect'})}</div>
-    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span><span>${definitionOnly?'TYPE LEVEL BUNGIE DATA':item?.itemInstanceId?'EXACT BUNGIE INSTANCE':'BUNGIE DEFINITION'}</span></footer>
+    <footer class="paradox-hover-foot"><span>${esc(String(source).toUpperCase())}</span></footer>
   </article>`;
 }
 
