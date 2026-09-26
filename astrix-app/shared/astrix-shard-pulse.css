@@ -1,0 +1,48 @@
+/* ASTRIX PARADOX: experimental shard / pulse surface
+   Isolated opt-in mockup. Apply .apx-shard-surface to a control; no existing UI changes. */
+.apx-shard-surface{
+  --apx-pulse-cyan:rgba(55,205,255,.72);
+  --apx-pulse-violet:rgba(126,82,255,.62);
+  --apx-pulse-magenta:rgba(224,73,255,.42);
+  --apx-pulse-opacity:.10;
+  position:relative;isolation:isolate;overflow:hidden;
+  color:rgba(255,255,255,.88);
+  border:1px solid rgba(185,225,255,.18);
+  background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.035) 28%,rgba(4,8,15,.22) 54%,rgba(2,5,10,.58) 100%),rgba(7,11,18,.88);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.62),0 7px 20px rgba(0,0,0,.28);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform 160ms ease,border-color 220ms ease,box-shadow 220ms ease,color 220ms ease
+}
+.apx-shard-surface::before{
+  content:"";position:absolute;z-index:-1;inset:-90%;pointer-events:none;
+  background:conic-gradient(from 205deg,transparent 0 34deg,var(--apx-pulse-cyan) 76deg,var(--apx-pulse-violet) 126deg,var(--apx-pulse-magenta) 166deg,var(--apx-pulse-cyan) 218deg,transparent 274deg);
+  opacity:var(--apx-pulse-opacity);filter:blur(18px) saturate(145%);transform:scale(.96)
+}
+.apx-shard-surface::after{
+  content:"";position:absolute;z-index:2;inset:0;pointer-events:none;
+  background:linear-gradient(112deg,transparent 14%,rgba(255,255,255,.025) 31%,rgba(255,255,255,.28) 45%,rgba(255,255,255,.075) 53%,transparent 69%);
+  transform:translateX(-135%);opacity:.82
+}
+.apx-shard-surface:is(.active,.is-active,[aria-selected="true"],[aria-current="page"]){
+  --apx-pulse-opacity:.24;color:#fff;border-color:rgba(115,215,255,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.62),0 0 16px rgba(55,195,255,.13),0 7px 20px rgba(0,0,0,.3)
+}
+.apx-shard-surface.apx-pulse::before,
+.apx-shard-demo .apx-shard-surface:nth-child(3)::before{animation:apx-paradox-pulse 6s ease-in-out infinite}
+.apx-shard-surface.apx-pulse-once::before{animation:apx-paradox-pulse-hit 720ms ease-out 1}
+@media(hover:hover){
+  .apx-shard-surface:hover{--apx-pulse-opacity:.25;border-color:rgba(145,220,255,.4)}
+  .apx-shard-surface:hover::after{animation:apx-paradox-reflection 680ms ease-out 1}
+}
+.apx-shard-surface:active{transform:translateY(1px) scale(.985)}
+@keyframes apx-paradox-pulse{0%,100%{opacity:.07;transform:scale(.96);filter:blur(16px) saturate(110%)}45%{opacity:.44;transform:scale(1.08);filter:blur(20px) saturate(165%)}65%{opacity:.19;transform:scale(1.02)}}
+@keyframes apx-paradox-pulse-hit{0%{opacity:.07;transform:scale(.84)}40%{opacity:.68;transform:scale(1.12)}100%{opacity:.07;transform:scale(1)}}
+@keyframes apx-paradox-reflection{from{transform:translateX(-135%)}to{transform:translateX(135%)}}
+@media(prefers-reduced-motion:reduce){.apx-shard-surface::before,.apx-shard-surface::after{animation:none!important;transition:none!important}.apx-shard-surface::before{transform:none}}
+
+/* Standalone review specimen only. */
+.apx-shard-demo{min-height:100vh;display:grid;place-content:center;gap:18px;padding:32px;background:radial-gradient(circle at 50% 35%,rgba(73,72,145,.18),transparent 34%),#05080d;color:#fff;font-family:bahnschrift,Arial,sans-serif}
+.apx-shard-demo__title{text-align:center;letter-spacing:.16em;text-transform:uppercase;font-size:clamp(1.4rem,4vw,2.4rem);margin:0}
+.apx-shard-demo__note{text-align:center;color:#99a8bb;margin:0 0 14px}
+.apx-shard-demo__tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.apx-shard-demo__tabs .apx-shard-surface{border-radius:999px;padding:12px 20px;font:700 .78rem bahnschrift,Arial,sans-serif;letter-spacing:.06em;cursor:pointer}
