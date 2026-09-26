@@ -45,7 +45,10 @@ try {
   put(cwd,'secret.txt');fail(cwd,/Scope violation/); // Other scope file is not loaded.
   rmSync(join(cwd,'secret.txt'));put(cwd,'feature.txt.bak');fail(cwd,/Scope violation/);
   git(cwd,'add','.');fail(cwd,/Scope violation/);git(cwd,'commit','-m','outside scope');fail(cwd,/Scope violation/);
-  cwd=fixture();scope(cwd);put(cwd,'line\nbreak.txt');fail(cwd,/Scope violation/);
+  // Windows forbids newline filenames; retain this fixture on Linux and CI.
+  if(process.platform!=='win32'){
+    cwd=fixture();scope(cwd);put(cwd,'line\nbreak.txt');fail(cwd,/Scope violation/);
+  }
   cwd=fixture();scope(cwd);git(cwd,'update-ref','-d','refs/remotes/origin/main');fail(cwd,/origin\/main/);
 
   for(const contents of ['missing.txt\n','../escape\n','feature*\n','feature.txt\nfeature.txt\n',' feature.txt\n','.scope/chore/other.txt\n','directory\n']){
