@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 import {ARMOUR_STAT_KEYS} from '../pages/vault/vault-armour-matcher.mjs';
 import {WEAPON_BUCKETS} from '../pages/vault/vault-inventory.mjs';
-import {decodeForgeResultsUrl,encodeForgeResultsUrl,scanArmourCombinations} from '../pages/forge-loader/forge-loader-scan.mjs';
+import {decodeForgeResultsUrl,encodeForgeResultsUrl,scanArmourCombinations,resolveForgeSelectionIndex,candidateStatMarkup} from '../pages/forge-loader/forge-loader-scan.mjs';
 
 const read=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 const selector=read('../pages/forge-loader/forge-loader.mjs');
@@ -18,6 +18,16 @@ function functionSource(source,name){
 // The reported bookmark has one target and no priorities. Omitted values mean
 // no preference, not missing fields in the worker's strict six-stat contract.
 const selection=decodeForgeResultsUrl('?characterId=2305843009264858730&exotic=3883286570&sets=1777208707%3A4&targets=melee%3A141');
+const loads=[1,2,3].map(n=>({items:Array.from({length:5},(_,slot)=>({itemInstanceId:String(n*10+slot)}))}));
+assert.equal(resolveForgeSelectionIndex(loads,selection),0,'Without a selection, use load 1');
+const picked=loads[1].items.map(item=>item.itemInstanceId);
+const bookmarked=decodeForgeResultsUrl(encodeForgeResultsUrl('https://example.test/results/',{...selection,selectIndex:1,selectedItemIds:picked}).search);
+assert.equal(resolveForgeSelectionIndex([loads[1],loads[2],loads[0]],bookmarked),0,'Keep the selected five items when rankings change');
+assert.throws(()=>resolveForgeSelectionIndex([loads[0],loads[2]],bookmarked),/selected load is no longer available/,'Never silently replace an unavailable selected load with load 1');
+assert.equal(resolveForgeSelectionIndex(loads,{selectIndex:2}),2,'Retain older explicit rank links');
+const statRow=candidateStatMarkup({stats:{health:70,melee:80,grenade:85,super:75,class:0,weapon:85}},{targets:{melee:100}});
+assert.doesNotMatch(statRow,/<em>|forge-matrix-stat-bar|OPEN/,'Summary stat tiles contain only the icon and value');
+assert.match(statRow,/aria-label="Melee 80, TARGET 100"/,'Targets remain available to assistive technology');
 const originalFetch=globalThis.fetch;
 const requests=[];
 globalThis.fetch=async(url,options)=>{
@@ -60,6 +70,33 @@ const canSearch=runInNewContext(functionSource(selector,'canSearch')+';canSearch
   selectedExotic:()=>({}),activeTargetCount:()=>1,activePriorityCount:()=>0,setSelections:[],openProtocolChosen:false
 });
 assert.equal(canSearch,true,'A weapon anchor is optional');
+
+// Changing only the weapon must preserve armour results and refresh the handoff.
+const armourResults=[{items:Array.from({length:5},(_,i)=>({itemInstanceId:String(i+1)}))}];
+const armourSets=[{setHash:123,count:4}];
+const weaponContext={
+  selectedExoticKey:'armour',selectedExoticWeaponKey:'',matchedBuilds:armourResults,setSelections:armourSets,
+  targetMaximums:{melee:150},activeCharacterId:'guardian',location:{href:'https://example.test/forge-loader/'},
+  exoticWeaponGroups:()=>groups,selectedExotic:()=>({hash:456}),targetValues:()=>({melee:140}),priorityValues:()=>({}),
+  encodeForgeResultsUrl,URL,byId,renderExoticWeapons(){},renderResultsCta(){},
+  resetResults(){throw new Error('Weapon selection must not discard armour results');}
+};
+weaponContext.selectedExoticWeapon=()=>groups.find(group=>group.key===weaponContext.selectedExoticWeaponKey)||null;
+const weaponScript=functionSource(selector,'selectExoticWeapon')+';'+functionSource(selector,'resultsUrl');
+for(const key of ['1','2','2']){
+  const url=runInNewContext(weaponScript+`;selectExoticWeapon('${key}');resultsUrl();`,weaponContext);
+  assert.equal(weaponContext.selectedExoticKey,'armour');
+  assert.equal(weaponContext.matchedBuilds,armourResults);
+  assert.equal(weaponContext.setSelections,armourSets);
+  assert.equal(weaponContext.targetMaximums.melee,150);
+  const decoded=decodeForgeResultsUrl(url.search);
+  assert.equal(decoded.exoticHash,456);
+  assert.equal(decoded.targets.melee,140);
+  assert.equal(decoded.weaponInstanceId,weaponContext.selectedExoticWeaponKey);
+  assert.deepEqual(decoded.selectedItemIds,['1','2','3','4','5']);
+}
+assert.equal(weaponContext.selectedExoticWeaponKey,'','Clicking the anchor again clears only the weapon');
+
 
 // Rendering ten entries never changes the backend search or invents extra rows.
 for(const count of [0,2,50]){

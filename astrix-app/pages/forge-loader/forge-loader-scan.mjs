@@ -109,9 +109,8 @@ function candidateStatMarkup(candidate,{itemRow=false,payload=null,targets={}}={
     const state=target>0?(value>=target?' is-met':' is-short'):'';
     const icon=itemRow?'':armourStatIcon(payload,key);
     if(itemRow)return `<span class="forge-matrix-stat"><small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small><b>${value}</b></span>`;
-    const calculation=target>0?`TARGET ${target}`:'OPEN',label=`${ARMOUR_STAT_LABELS[key]} ${value}, ${calculation}`;
-    const proportion=Math.max(0,Math.min(100,Number((value/ARMOUR_STAT_CAP*100).toFixed(2))));
-    return `<span class="forge-matrix-stat${state}" aria-label="${esc(label)}" title="${esc(label)}"><span class="forge-matrix-stat-reading">${icon?`<img class="forge-matrix-stat-icon" src="${esc(icon)}" alt="" aria-hidden="true" decoding="async">`:`<small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small>`}<b>${value}</b></span><em>${calculation}</em><span class="forge-matrix-stat-bar" aria-hidden="true"><i style="--forge-stat-fill:${proportion}%"></i></span></span>`;
+    const calculation=target>0?`TARGET ${target}`:'OPEN',label=`${ARMOUR_STAT_LABELS[key]} ${value}${target>0?`, ${calculation}`:''}`;
+    return `<span class="forge-matrix-stat${state}" aria-label="${esc(label)}" title="${esc(label)}"><span class="forge-matrix-stat-reading">${icon?`<img class="forge-matrix-stat-icon" src="${esc(icon)}" alt="" aria-hidden="true" decoding="async">`:`<small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small>`}<b>${value}</b></span></span>`;
   }).join('');
 }
 
@@ -166,7 +165,7 @@ function candidateMarkup(candidate,index,{activeTargetCount=0,expandedCandidateI
   const hasTargets=activeTargetCount>0,outcome=!hasTargets?'MAXIMUM STAT LOAD':candidate.score.met?'ALL TARGETS MET':`${candidate.score.shortfall} POINT${candidate.score.shortfall===1?'':'S'} SHORT`;
   const expanded=expandedCandidateIndex===index,selected=selectedCandidateIndex===index,maximized=index===0;
   const exotic=candidate.items.find(item=>item.isExotic)||candidate.items[0],icon=exoticIcon||exotic?.icon||'';
-  return `<article class="forge-candidate${candidate.score.met?' is-target-met':''}${selected?' is-selected':''}${maximized?' is-maximized':''}"><div class="forge-matrix-row"><button type="button" class="forge-matrix-expand" data-candidate-expand="${index}" aria-expanded="${expanded}" aria-controls="forgeLoadBreakdown${index}"><span><small>LOAD</small><b>${String(index+1).padStart(4,'0')}</b></span><i aria-hidden="true">⌄</i></button><button type="button" class="forge-matrix-exotic" data-inspect-item="${esc(itemKey(exotic))}" aria-label="Inspect ${esc(exotic?.name||'matched Exotic')} matched roll">${icon?`<img src="${esc(icon)}" alt="">`:''}<small>EXOTIC</small></button><div class="forge-matrix-stats" aria-label="Calculated unmodded armour stats">${candidateStatMarkup(candidate,{payload,targets})}</div><span class="forge-matrix-protocol"><small>SET PROTOCOL</small><span class="forge-matrix-protocol-icons">${candidateSetProtocolIconMarkup(candidate,setSelections)}</span></span><span class="forge-matrix-total"><small>RAW TOTAL</small><b>${candidate.score.total}</b></span><button type="button" class="forge-candidate-select" data-candidate-index="${index}" aria-pressed="${selected}">SELECT</button></div><div class="forge-load-breakdown" id="forgeLoadBreakdown${index}" ${expanded?'':'hidden'}><div class="forge-breakdown-heading"><div><span>${maximized?'MAXIMIZED LOAD':'LOAD BREAKDOWN'}</span><strong>Five exact Bungie armour instances · no mods</strong></div><span>${esc(outcome)}</span></div><div class="forge-breakdown-items">${candidate.items.map(candidateItemMarkup).join('')}</div><div class="forge-breakdown-summary"><div><small>UNMODDED ARMOUR TOTAL</small><strong>${candidate.score.total}</strong></div><div><small>ACTIVE SET PROTOCOL</small><strong>${esc(candidateSetProtocol(candidate,setSelections))}</strong></div><div class="forge-breakdown-actions"><button type="button" class="forge-candidate-select" data-candidate-index="${index}">${selected?'STAGED':'STAGE LOAD'}</button><button type="button" class="forge-candidate-evaluate" data-candidate-evaluate="${index}">EVALUATE IN BUILD FORGE</button></div></div></div></article>`;
+  return `<article class="forge-candidate${candidate.score.met?' is-target-met':''}${selected?' is-selected':''}${maximized?' is-maximized':''}"><div class="forge-matrix-row"><button type="button" class="forge-matrix-expand" data-candidate-expand="${index}" aria-expanded="${expanded}" aria-controls="forgeLoadBreakdown${index}"><span><small>LOAD</small><b>${String(index+1).padStart(4,'0')}</b></span><i aria-hidden="true">⌄</i></button><button type="button" class="forge-matrix-exotic" data-inspect-item="${esc(itemKey(exotic))}" aria-label="Inspect ${esc(exotic?.name||'matched Exotic')} matched roll">${icon?`<img src="${esc(icon)}" alt="">`:''}</button><div class="forge-matrix-stats" aria-label="Calculated unmodded armour stats">${candidateStatMarkup(candidate,{payload,targets})}</div><span class="forge-matrix-protocol"><span class="forge-matrix-protocol-icons">${candidateSetProtocolIconMarkup(candidate,setSelections)}</span></span><span class="forge-matrix-total" aria-label="Raw total ${candidate.score.total}"><b>${candidate.score.total}</b></span><button type="button" class="forge-candidate-select" data-candidate-index="${index}" aria-pressed="${selected}">SELECT</button></div><div class="forge-load-breakdown" id="forgeLoadBreakdown${index}" ${expanded?'':'hidden'}><div class="forge-breakdown-heading"><div><span>${maximized?'MAXIMIZED LOAD':'LOAD BREAKDOWN'}</span><strong>Five exact Bungie armour instances · no mods</strong></div><span>${esc(outcome)}</span></div><div class="forge-breakdown-items">${candidate.items.map(candidateItemMarkup).join('')}</div><div class="forge-breakdown-summary"><div><small>UNMODDED ARMOUR TOTAL</small><strong>${candidate.score.total}</strong></div><div><small>ACTIVE SET PROTOCOL</small><strong>${esc(candidateSetProtocol(candidate,setSelections))}</strong></div><div class="forge-breakdown-actions"><button type="button" class="forge-candidate-select" data-candidate-index="${index}">${selected?'STAGED':'STAGE LOAD'}</button><button type="button" class="forge-candidate-evaluate" data-candidate-evaluate="${index}">EVALUATE IN BUILD FORGE</button></div></div></div></article>`;
 }
 
 function stagedMarkup(slot,index,selectedSlots){
@@ -177,7 +176,7 @@ function stagedMarkup(slot,index,selectedSlots){
 
 // URL state for the results page: the whole selection lives in the query string, so a reload,
 // a bookmark or a shared link reruns the same real search rather than depending on anything cached.
-function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',setSelections=[],targets={},priorities={},selectIndex=0}={}){
+function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',setSelections=[],targets={},priorities={},selectIndex=0,selectedItemIds=[]}={}){
   const url=new URL(base);
   if(characterId)url.searchParams.set('characterId',characterId);
   url.searchParams.set('exotic',String(exoticHash));
@@ -188,6 +187,7 @@ function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',
   const priorityPairs=ARMOUR_STAT_KEYS.filter(key=>Number(priorities[key])>0).map(key=>`${key}:${Number(priorities[key])}`);
   if(priorityPairs.length)url.searchParams.set('priorities',priorityPairs.join(','));
   if(Number.isInteger(selectIndex)&&selectIndex>0)url.searchParams.set('select',String(selectIndex));
+  if(selectedItemIds.length===5)url.searchParams.set('load',selectedItemIds.map(String).join(','));
   return url;
 }
 
@@ -202,8 +202,24 @@ function decodeForgeResultsUrl(search){
     setSelections,
     targets:parsePairs(params.get('targets')),
     priorities:parsePairs(params.get('priorities')),
-    selectIndex:Math.max(0,Number(params.get('select'))||0)
+    selectIndex:Math.max(0,Number(params.get('select'))||0),
+    selectedItemIds:params.has('load')?params.get('load').split(','):[]
   };
 }
+
+function resolveForgeSelectionIndex(candidates,selection){
+  const ids=selection.selectedItemIds||[];
+  if(ids.length){
+    const wanted=[...ids].sort().join(',');
+    const index=ids.length===5&&new Set(ids).size===5?candidates.findIndex(candidate=>candidate.items.map(item=>String(item.itemInstanceId)).sort().join(',')===wanted):-1;
+    if(index<0)throw new Error('Your selected load is no longer available in these results. Return to Forge Loader and select a load again.');
+    return index;
+  }
+  const index=selection.selectIndex||0;
+  if(!Number.isInteger(index)||index<0||index>=candidates.length)throw new Error('Your selected load is no longer available. Select a load again.');
+  return index;
+}
+
+export {resolveForgeSelectionIndex};
 
 export {CANDIDATE_BATCH_SIZE,armourStatIcon,candidateItemMarkup,candidateItemMeta,candidateMarkup,candidateSetProtocol,candidateSetProtocolIconMarkup,candidateStatMarkup,decodeForgeResultsUrl,encodeForgeResultsUrl,forgeLoaderDecision,forgeWeaponAnchorContext,scanArmourCombinations,stagedMarkup,verifiedTraitContext};
