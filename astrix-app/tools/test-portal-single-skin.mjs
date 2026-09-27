@@ -20,7 +20,11 @@ for(const route of routes){
 }
 const server=createServer(async(req,res)=>{
  const pathname=new URL(req.url,'http://localhost').pathname;
- if(pages.has(pathname)){res.setHeader('Content-Type','text/html');res.end(pages.get(pathname));return;}
+ if(pages.has(pathname)){
+  res.setHeader('Content-Type','text/html');
+  const fixture=new URL(req.url,'http://localhost').searchParams.has('navigationFixture');
+  res.end(pages.get(pathname)+(fixture?`<script>document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{const node=document.createElement('p');node.id='fixture-populated';node.textContent='Destination fixture populated';document.body.append(node);document.dispatchEvent(new CustomEvent('forge:hero-cards-render-complete'));window.ForgeLoader.done();},700));</script>`:''));return;
+ }
  const file=resolve(root,'.'+pathname);
  if(!file.startsWith(root)){res.writeHead(403).end();return;}
  try{res.setHeader('Content-Type',({'.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml'})[extname(file)]||'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}
@@ -30,7 +34,7 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'],...(process.env.CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.CHROMIUM_EXECUTABLE_PATH}:{})});
- async function run(route,delay,{reduced=false,noWebGL=false,earlyDone=false}={}){
+ async function run(route,delay,{reduced=false,noWebGL=false,earlyDone=false,entry=true}={}){
   const page=await browser.newPage({viewport:{width:1100,height:800},reducedMotion:reduced?'reduce':'no-preference'});
   const errors=[],diagnostics=[];let threeRequests=0;
   page.on('console',message=>{if(message.type()==='error')diagnostics.push(message.text());});
@@ -66,11 +70,11 @@ try{
    }).observe(document,{subtree:true,childList:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
    setInterval(sample,100);
   },{noWebGL});
-  await page.goto(origin+`/astrix-app/pages/${route}/`,{waitUntil:'domcontentloaded'});
+  await page.goto(origin+`/astrix-app/pages/${route}/`,{waitUntil:'domcontentloaded',referer:origin+(entry?'/tools/':'/astrix-app/pages/loadout/')});
   if(earlyDone)await page.evaluate(()=>ForgeLoader.done());
   await page.waitForTimeout(2500);
-  const label=`${route} three=${delay}ms reduced=${reduced} noWebGL=${noWebGL} earlyDone=${earlyDone}`;
-  const expected=earlyDone?null:delay>=1200||reduced||noWebGL?'ring':'breach';
+  const label=`${route} three=${delay}ms reduced=${reduced} noWebGL=${noWebGL} earlyDone=${earlyDone} entry=${entry}`;
+  const expected=earlyDone||!entry?null:delay>=1200||reduced||noWebGL?'ring':'breach';
   const samples=await page.evaluate(()=>window.skinSamples);
   const states=[...new Set(samples.map(s=>s.chosen).filter(Boolean))];
   assert.deepEqual(states,expected?[expected]:[],`${label}: exactly the expected final skin; ${diagnostics.join("; ")}`);
@@ -79,8 +83,8 @@ try{
   assert.ok(!samples.some(s=>s.ring&&s.breach),`${label}: no simultaneous skins`);
   assert.ok(!samples.some(s=>s.pending&&(s.ring||s.pct)),`${label}: pending is neutral`);
   if(!earlyDone){
-   assert.ok(samples.some(s=>s[expected]),`${label}: chosen skin actually shown`);
-   assert.equal(await page.locator('.apx-gate').count(),1);
+   if(expected)assert.ok(samples.some(s=>s[expected]),`${label}: chosen skin actually shown`);
+   assert.equal(await page.locator('.apx-gate').count(),entry?1:0);
    await page.evaluate(()=>{ForgeLoader.authRequired('/connect');ForgeLoader.mount();});
    await page.locator('.apx-auth-button').first().waitFor({state:'visible'});
    await page.evaluate(()=>{ForgeLoader.authResolved();ForgeLoader.blocked('Fixture failure');});
@@ -98,8 +102,26 @@ try{
   await page.close();console.log(`PORTAL_SINGLE_SKIN_CASE=PASS ${label} skin=${expected||'none'}`);
  }
  for(const route of routes)for(const delay of [1500,200])await run(route,delay);
+ for(const route of routes)await run(route,200,{entry:false});
  await run('vault',200,{reduced:true});
  await run('vault',200,{noWebGL:true});
  await run('vault',1500,{earlyDone:true});
+ // Real native navigation holds the outgoing snapshot until a populated
+ // destination emits readiness. There is no portal on the destination.
+ const transfer=await browser.newPage();
+ await transfer.route('**/*',request=>new URL(request.request().url()).origin===origin?request.continue():request.abort());
+ await transfer.goto(origin+'/astrix-app/pages/vault/');
+ await transfer.evaluate(()=>{ForgeLoader.done();const link=document.createElement('a');link.id='fixture-link';link.href='/astrix-app/pages/journey/?navigationFixture=1';link.textContent='Fixture transfer';document.body.prepend(link);});
+ await transfer.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ const started=Date.now();
+ await Promise.all([transfer.waitForURL('**/*navigationFixture*',{waitUntil:'domcontentloaded'}),transfer.locator('#fixture-link').click()]);
+ assert.equal(await transfer.locator('.apx-gate').count(),0,'Internal transfer never mounts a loader');
+ await transfer.waitForFunction(()=>document.documentElement.dataset.navigationState==='rendering',{},{timeout:600});
+ assert.equal(await transfer.locator('#fixture-populated').count(),0,'Native snapshot holds while destination is unpopulated');
+ await transfer.waitForFunction(()=>document.documentElement.dataset.navigationState==='ready');
+ assert.equal(await transfer.locator('#fixture-populated').count(),1);
+ assert.ok(Date.now()-started<=4000,'Populated fixture transfer completes within four seconds');
+ await transfer.close();
+ console.log('TOOL_ENTRY_NAVIGATION=PASS loader only from Tools, internal recovery without animation, populated snapshot transfer under four seconds');
  console.log('PORTAL_SINGLE_SKIN=PASS five routes, both delays, neutral pending, immutable skin, reduced motion, no WebGL, late completion and recovery');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

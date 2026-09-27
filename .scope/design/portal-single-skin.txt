@@ -20,3 +20,5 @@ astrix-app/tools/test-portal-single-skin.mjs
 astrix-app/tools/validate-single-loader.mjs
 astrix-app/vendor/three/LICENSE
 astrix-app/vendor/three/three.module.js
+astrix-app/tools/validate-portal-loader.mjs
+CLAUDE.md

@@ -50,3 +50,8 @@ Changes to any step below need Miguel's sign-off first. Do not add, remove, reor
 2. Results page (its own URL, reloadable, bookmarkable, shareable): the full ranked list, Staged armour and Enter Build Forge. Enter Build Forge is grey and disabled only when not ready, pulsing charcoal when ready, crimson with a visible progress state while transferring.
 3. Build Forge: element, Build objective and Activity (Raid, Dungeon, Grandmaster, Crucible, General PvE) are all picked in the Elemental Build Options panel. If a weapon anchor is set, its element is pre-selected with a visible reason (e.g. "Solar suggested: One Thousand Voices deals Solar damage."); the user can pick a different one. There is no activity popup, and each question is asked once.
 4. Generate stays disabled until all three are picked, and its label says what is missing. The engine receives the activity context exactly as before. An anchored Exotic weapon stays in its slot through generation.
+
+## Tool entry and navigation rule
+- Show the portal loader only on a fresh navigation from the public Tools entry. Never show its ring or breach skin on internal tool transfers, reloads, history traversal or direct links.
+- Retain the outgoing page snapshot until the selected destination has populated and reported readiness. Reveal immediately when ready; 3 to 4 seconds is the maximum target, never an artificial delay.
+- A failed transfer exposes recovery actions without a loader animation. Preserve authentication and retry controls.

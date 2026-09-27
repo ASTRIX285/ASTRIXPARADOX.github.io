@@ -113,7 +113,7 @@ body.apx-loading{overflow:hidden!important}
 
 /* Native cross-document transitions retain the outgoing rendered page while
    the destination resolves. No page geometry or equipment sizes change. */
-@view-transition{navigation:none}
+@view-transition{navigation:auto}
 @keyframes apxNavigationHold{from{opacity:1}to{opacity:1}}
 @keyframes apxNavigationOut{from{opacity:1}to{opacity:0}}
 @keyframes apxNavigationIn{from{opacity:0}to{opacity:1}}
@@ -153,3 +153,7 @@ body.apx-loading{overflow:hidden!important}
 .apx-gate.breach-pending::before,.apx-gate.breach-pending::after{display:none}
 .apx-gate.breach-pending .apx-stage{visibility:hidden}
 .apx-gate:not(.is-breach) .apx-breach-stage{display:none}
+
+/* Transfers can expose recovery actions, never a second loading skin. */
+.apx-gate.is-recovery::before,.apx-gate.is-recovery::after{display:none}
+.apx-gate.is-recovery :is(.apx-portal,.apx-pct,.apx-brand,.apx-breach-stage){display:none}

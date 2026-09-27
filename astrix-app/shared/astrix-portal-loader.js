@@ -11,6 +11,14 @@
    ===================================================================== */
 (function(){
   if(window.ForgeLoader?.owner==='astrix-portal')return;
+  // Only a fresh navigation from the public Tools entry can show animation.
+  // Reloads, bookmarks, history and transfers between tools never mount it.
+  var entryPortal=false;
+  try{
+    var source=new URL(document.referrer);
+    var navigationType=window.performance?.getEntriesByType('navigation')[0]?.type;
+    entryPortal=source.origin===window.location.origin&&/^\/tools(?:\/|\/index\.html)?$/.test(source.pathname)&&(!navigationType||navigationType==='navigate');
+  }catch{}
   var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
   var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;
   var BREACH_READY_MS=1200;
@@ -24,7 +32,7 @@
     return true;
   }
   function startBreach(){
-    if(breachStarted||!gate||pendingDone)return;
+    if(!entryPortal||breachStarted||!gate||pendingDone)return;
     breachStarted=true;
     if(!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){chooseSkin('ring');return;}
     var deadline=Date.now()+BREACH_READY_MS;
@@ -117,10 +125,10 @@
     navigationTimer=setTimeout(function(){
       window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
       revealNavigation(true);
-    },30000);
+    },4000);
     var cleanup=function(){
       clearTimeout(navigationTimer);navigationTransition=null;
-      if(!navigationRendered)window.ForgeLoader?.requireData?.();
+      if(!navigationRendered)window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
       document.documentElement.classList.remove('apx-navigation-waiting');
       document.documentElement.classList.remove('apx-navigation-ready');
     };
@@ -128,13 +136,13 @@
     if(navigationRendered)revealNavigation(false);
   });
   var warmNavigation=false;
-  document.documentElement.classList.add('apx-booting');
+  if(entryPortal)document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
-    '<div class="apx-gate breach-pending" role="status" aria-live="polite" aria-label="Loading">'+
+    '<div class="apx-gate '+(entryPortal?'breach-pending':'is-recovery')+'" role="status" aria-live="polite" aria-label="Loading">'+
       '<div class="apx-stage">'+
         '<div class="apx-pct">0%</div>'+
         '<div class="apx-portal">'+
@@ -198,7 +206,7 @@
     if(pendingDone)finish();
   }
   function mount(){
-    if(warmNavigation||pendingDone)return;
+    if(warmNavigation||pendingDone||(!entryPortal&&!pendingAuthUrl&&!pendingBlockedMessage))return;
     if(gate||document.querySelector('.apx-gate')){
       cache();gate.classList.remove('is-done');document.body.classList.add('apx-loading');apply();document.documentElement.classList.remove('apx-booting');return;
     }
@@ -263,7 +271,6 @@
   function finish(){
     disposeBreach();
     if(!gate||gate.classList.contains('is-done'))return;
-    document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));
     clearTimeout(noticeTimer);pendingPct=100;
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
@@ -277,7 +284,16 @@
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
+  window.addEventListener?.('pageshow',function(event){
+    if(!event.persisted)return;
+    entryPortal=false;disposeBreach();clearTimeout(noticeTimer);
+    document.documentElement.classList.remove('apx-booting');
+    if(!gate)return;
+    gate.classList.remove('breach-pending','ring-visible','is-breach');
+    if(pendingAuthUrl||pendingBlockedMessage){gate.classList.add('is-recovery');return;}
+    gate.remove();gate=null;document.body.classList.remove('apx-loading');
+  });
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
