@@ -27,7 +27,7 @@ function harness(search=''){
   vm.runInContext(`let volatileState=null,activeLoadError='',explicitlySelectedCharacterId='',initialisingBuild=true,pendingEquippedContext=null,equippedEntryState=null,statePersistenceRevision=0;
     const BUILD_SPACE_KEY='build',BUILD_SNAPSHOT_KEY='snapshot';
     ${between(runtime,'function validateBuildState','function emitLoad')}
-    ${between(runtime,'function writeState(next)','function completeBuildRender')}
+    ${between(runtime,'function writeState(','function completeBuildRender')}
     function currentBuild(){const value=readState();return value?.workingBuild||null;}
     ${runtime.slice(runtime.indexOf('async function initialiseBuildForge()'),runtime.indexOf('void initialiseBuildForge();'))}
   `,context);
@@ -113,12 +113,12 @@ assert.equal(refreshed.currentBuild().armour[0].itemInstanceId,'titan-manual-arm
 for(const selected of guardians){
   const h=vm.createContext({URLSearchParams,console,location:{pathname:'/paradox-build-space/',search:''},sessionStorage:store(),document:{documentElement:{dataset:{guardianProfileMode:'roster-only'}},dispatchEvent(){}},
     CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail;}},
-    assertRenderablePagePayload(){},currentPagePayloadKind:()=> 'build-forge',currentSelectedCharacterId:()=>selected.characterId,activeCharacter:()=>({characterId:'hunter'}),rememberCharacterId(){},publishCharacterRoster(payload,id){h.headerId=id;},normaliseLiveProfile:(payload,session,id)=>structuredClone(guardians.find(row=>row.characterId===id)),
+    assertRenderablePagePayload(){},currentPagePayloadKind:()=> 'build-forge',currentSelectedCharacterId:()=>selected.characterId,activeCharacter:()=>({characterId:'hunter'}),rememberCharacterId(){},publishCharacterRoster(payload,id){h.headerId=id;},runProfileTask:async(type,{characterId:id})=>structuredClone(guardians.find(row=>row.characterId===id)),normaliseLiveProfile:(payload,session,id)=>structuredClone(guardians.find(row=>row.characterId===id)),
     currentAuthenticatedSession:()=>({authenticated:true}),setRenderStatus(){},ensureLiveProfile(){},forgetLoadoutSelection(){},
   });
   vm.runInContext(`let explicitlySelectedCharacterId='',liveProfilePayload=null,liveProfileSession=null,preparedPagePayloadResolved=false;function resolvePreparedPagePayload(){}
     ${between(profile,'async function activateLiveProfile','async function loadLiveProfile')}
-    ${between(profile,'function selectLiveCharacter','let liveProfileRequest')}
+    ${between(profile,'async function selectLiveCharacter','let liveProfileRequest')}
   `,h);
   const payload={profile:{characters:{data:Object.fromEntries(guardians.map(row=>[row.characterId,row]))}}};
   const loaded=await h.activateLiveProfile(payload,{});
@@ -126,7 +126,7 @@ for(const selected of guardians){
   checkBuild(loaded,selected);
   vm.runInContext('liveProfilePayload=null; explicitlySelectedCharacterId="";',h);
   h.currentSelectedCharacterId=()=>'';
-  h.selectLiveCharacter(selected.characterId,selected.characterClass);
+  await h.selectLiveCharacter(selected.characterId,selected.characterClass);
   checkBuild(await h.activateLiveProfile(payload,{}),selected);
 }
 console.log('BUILD_FORGE_EQUIPPED_ENTRY=PASS stale caches, all three Guardians, six switches, URL binding, protected staging and delayed restore/selection');
@@ -201,7 +201,7 @@ function directHarness(){
     resolvedSubclassOptions:()=>[{element:'void',verified:true}],filterExoticCompatibleSubclasses:(build,options)=>options,
     scheduleForgePreparation(){},guardianManifest:{ready:async()=>{},hydratePayload:async()=>{}},assertRenderablePagePayload:value=>value,
     FORGE_PAGE_PAYLOAD:{membership:{membershipId:'98001',membershipType:'3'}},FORGE_BUNGIE_SESSION:{authenticated:true},
-    normaliseLiveProfile:()=>structuredClone(equipped),createVaultCatalogue:()=>structuredClone(inventory),prepareArmourSelection:(payload,items)=>structuredClone(items),
+    runProfileTask:async()=>structuredClone(equipped),normaliseLiveProfile:()=>structuredClone(equipped),createVaultCatalogue:()=>structuredClone(inventory),prepareArmourSelection:(payload,items)=>structuredClone(items),
     bindBuildRoute(){},forgeActivityOption:value=>{const key=typeof value==='string'?value:value?.key;return key?{key,label:key.toUpperCase(),domain:'pve'}:null;},ui,buttons,elements,objectives
   });
   vm.runInContext(`let value=createBuildState({...${JSON.stringify(equipped)},armour:[]}),directEntryBusy=false,recommendationBusy=false,liveActionBusy=false,selectedRecommendationElement='',selectedRecommendationObjective='',recommendationFailure='',equippedEntryState=null;
@@ -277,7 +277,7 @@ console.log('BUILD_FORGE_DIRECT_ENTRY=PASS equipped baseline, full owned armour,
 // catch/finally, with controlled worker I/O and the exact captured error text.
 const timeoutMessage='Build preparation exceeded the 120 second worker budget. No recommendation was generated. Retry this selection.';
 const failureUI=directHarness();
-Object.assign(failureUI,{ForgePreparationClient,forgePreparationKey,setTimeout,clearTimeout,
+Object.assign(failureUI,{ForgePreparationClient,forgePreparationKey,setTimeout,clearTimeout,beginEngineTiming:()=>({mark(){},end(){}}),afterEnginePaint:async()=>{},
   console:{...console,error(){}},forgeActivityOption:()=>({key:'pve'}),
   refreshForgeArtifactRecommendation:async()=>{},showForgeGenerationLoader:async()=>{},hideForgeGenerationLoader(){},
   prepareForgeBackground:async()=>{},requestedForgeVariant:()=>({element:'void',objective:'balanced'}),setLiveActionBanner(){},

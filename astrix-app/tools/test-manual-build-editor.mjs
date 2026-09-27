@@ -900,7 +900,7 @@ function startLoadoutRace(){
     window:{addEventListener(type,handler){listeners.set(type,handler);}},
     mountForgeShell(){},reportPreparedPageStage(){},
     getBungieSession:async()=>({authenticated:true,activeDestinyMembership:binding}),
-    loadPreparedPagePayload:async()=>({}),normalisePreparedPagePayload:value=>value,normaliseLiveProfile:()=>null,
+    loadPreparedPagePayload:async()=>({}),normalisePreparedPagePayload:value=>value,normaliseLiveProfile:()=>null,runProfileTask:async()=>null,
     guardianManifest:{seedPayload(){},hydratePayload(){preparing.resolve();return profileReady.promise;}},
     createPreparedPageRefreshController:()=>({start(){}}),
     listParadoxLoadouts(){const read=deferred();reads.push(read);return read.promise;},
@@ -975,7 +975,7 @@ globalThis.CustomEvent=class{constructor(type,options={}){this.type=type;this.de
 const {GuardianManifestService}=await import('../pages/guardian-workspace-v2/guardian-manifest-service.mjs');
 const {normalisePreparedPagePayload,normaliseLiveProfile}=await import('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs');
 const equippedManifest=new GuardianManifestService({backend:true,fetchImpl:async()=>{throw new Error('Equipped preparation must use supplied definitions');}});
-Object.assign(pageContext,{guardianManifest:equippedManifest,normalisePreparedPagePayload,normaliseLiveProfile});
+Object.assign(pageContext,{guardianManifest:equippedManifest,normalisePreparedPagePayload,normaliseLiveProfile,runProfileTask:async(type,{payload,session,characterId})=>normaliseLiveProfile(payload,session,characterId)});
 const transport={manifestVersion:'test-equipped-v1',membership:{membershipId:MEMBERSHIP_ID,membershipType:3},definitions:{},artifactCatalog:[{hash:999,name:'Test Artifact',perks:[]}],profile:{characters:{data:{}},characterEquipment:{data:{}},itemComponents:{instances:{data:{}},sockets:{data:{}}}},forgeArmourIndex:{schemaVersion:5,transportEncoding:'shared-definitions-v1',manifestVersion:'test-equipped-v1',definitionTemplates:[],definitions:{},plugDefinitions:{},socketEntryDefinitions:[{},{},{},{},{}],socketLayouts:{armour:{socketEntryIds:[0,1,2,3,4]}}}};
 const index=transport.forgeArmourIndex;
 const testPlugs=[['Test general mod','armor.mods.general'],['Test slot mod','armor.mods.helmet'],['Paragon','armor.archetype'],['Test Shader','shader'],['Test Ornament','armor.skins']];
@@ -1002,7 +1002,7 @@ const preparedEquipped=await pageApi.preparePayload(clone(transport));
 assert.ok(preparedEquipped.definitions['10000']?.inventory,'The supplied armour index must be expanded before live equipment is normalized');
 pageApi.setState({records:[],characterId:'',session:{authenticated:true,activeDestinyMembership:transport.membership},equipped:null,payload:preparedEquipped});
 for(const [id,expected] of expectedArmour){
-  pageApi.setCharacter(id);
+  await pageApi.setCharacter(id);
   const current=pageApi.draftFor('equipped').build;
   assert.deepEqual(Array.from(current.armour,item=>item?.itemInstanceId),expected,'Equipped and Save PARADOX must use all five items from the selected character');
   assert.deepEqual(Array.from(current.armour,item=>item.power),[550,549,548,547,546]);
@@ -1018,7 +1018,7 @@ const refreshed=clone(transport),selectedCharacter='9300002';
 refreshed.profile.characterEquipment.data[selectedCharacter].items.shift();
 const refreshedEquipped=await pageApi.preparePayload(refreshed);
 pageApi.setState({records:[],characterId:selectedCharacter,session:{authenticated:true,activeDestinyMembership:transport.membership},equipped:null,payload:refreshedEquipped});
-pageApi.setCharacter(selectedCharacter);
+await pageApi.setCharacter(selectedCharacter);
 assert.equal(pageApi.draftFor('equipped').build.armour[0],null,'A refreshed missing item must not be borrowed from a saved build, another character or the previous profile');
 const mismatched=clone(transport);mismatched.forgeArmourIndex.manifestVersion='stale-test-index';
 await assert.rejects(pageApi.preparePayload(mismatched),/armour index/i,'Reject an index that does not match the prepared profile manifest');

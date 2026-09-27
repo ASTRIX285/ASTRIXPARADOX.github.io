@@ -1,4 +1,5 @@
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1";
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1';
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?plain=20260925-2";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
@@ -10,7 +11,7 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,
@@ -723,6 +724,8 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   }
   return {
     source:"bungie-live",
+    manifestVersion:payload.pageReady?.manifestVersion||payload.manifestVersion||null,
+    profileSnapshot:profile.responseMintedTimestamp||profile.profile?.data?.dateLastPlayed||null,
     selectionResolutionVersion:SELECTION_RESOLUTION_VERSION,
     characterId:character.characterId,
     membershipId:String(membership.membershipId||session?.primaryMembershipId||session?.bungieMembershipId||""),
@@ -909,7 +912,7 @@ async function loadSelectedLoadout(selection){
   if(!prepared)throw new Error(`Bungie loadout ${index+1} is not available in the prepared account payload.`);
   const payload=await hydrateManifestPayload(prepared,{allowNetwork:false,waitForManifest:false});
   payload.profile=profileWithSelectedLoadout(payload);
-  const detail={...normaliseLiveProfile(payload,null,characterId),selectedLoadoutIndex:index,loadoutSource:"bungie-live"};
+  const detail={...await runProfileTask('normalise',{payload,session:null,characterId}),selectedLoadoutIndex:index,loadoutSource:"bungie-live"};
   detail.coverage=loadoutCoverage(detail);
 
   if(!detail.coverage.complete){
@@ -956,14 +959,16 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
   }
 
   if(document.documentElement.dataset.guardianProfileMode==="roster-only"){
-    const resolved=normaliseLiveProfile(payload,session,selectedCharacterId);
+    const resolved=await runProfileTask('normalise',{payload,session,characterId:selectedCharacterId});
+  if(liveProfilePayload!==payload||liveProfileSession!==session||(explicitlySelectedCharacterId&&explicitlySelectedCharacterId!==selectedCharacterId))return null;
     const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
     document.dispatchEvent(new CustomEvent("forge:guardian-loadout-context",{detail:{...detail,sessionCacheRestored:fromCache}}));
     return detail;
   }
 
   forgetLoadoutSelection();
-  const resolved=normaliseLiveProfile(payload,session,selectedCharacterId);
+  const resolved=await runProfileTask('normalise',{payload,session,characterId:selectedCharacterId});
+  if(liveProfilePayload!==payload||liveProfileSession!==session||(explicitlySelectedCharacterId&&explicitlySelectedCharacterId!==selectedCharacterId))return null;
   const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
   detail.coverage=loadoutCoverage(detail);
   if(detail.coverage.complete)setRenderStatus("CURRENTLY EQUIPPED LOADOUT","Live equipped items ready","Active Guardian default · saved Bungie slots load only when selected");
@@ -987,7 +992,7 @@ async function loadLiveProfile(session,{background=false}={}){
   return detail;
 }
 
-function selectLiveCharacter(characterId,expectedClass=""){
+async function selectLiveCharacter(characterId,expectedClass=""){
   console.log("[TRACE select] clicked id:", characterId, "| exists in profile?", !!liveProfilePayload?.profile?.characters?.data?.[characterId]);
   if(!liveProfilePayload){
     const session=currentAuthenticatedSession();
@@ -1013,7 +1018,10 @@ function selectLiveCharacter(characterId,expectedClass=""){
     }
     throw new Error("Bungie character roster is not loaded; character selection cannot fall back to last played.");
   }
-  const resolved=normaliseLiveProfile(liveProfilePayload,liveProfileSession,characterId);
+  explicitlySelectedCharacterId=String(characterId);
+  const sourcePayload=liveProfilePayload,sourceSession=liveProfileSession;
+  const resolved=await runProfileTask('normalise',{payload:sourcePayload,session:sourceSession,characterId});
+  if(liveProfilePayload!==sourcePayload||liveProfileSession!==sourceSession||explicitlySelectedCharacterId!==String(characterId))return null;
   const detail={...resolved,selectedLoadoutIndex:resolved.equippedLoadoutIndex,loadoutSource:"currently-equipped"};
   const expected=String(expectedClass||"").trim().toLowerCase();
   if(expected&&detail.characterClass!==expected)throw new Error(`Selected ${expected} card resolved ${detail.characterClass} data for character ${characterId}.`);
@@ -1160,8 +1168,7 @@ if(PROFILE_RUNTIME_ENABLED){
   });
 
   document.addEventListener("forge:character-selected",event=>{
-    try{selectLiveCharacter(String(event.detail?.characterId||""),String(event.detail?.characterClass||""));}
-    catch(error){reportProfileError(error);}
+    void selectLiveCharacter(String(event.detail?.characterId||""),String(event.detail?.characterClass||"")).catch(reportProfileError);
   });
 
   document.addEventListener("forge:bungie-profile-refresh-requested",event=>{

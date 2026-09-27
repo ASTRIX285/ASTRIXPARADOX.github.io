@@ -46,6 +46,8 @@ function compactForgeLoaderProfileBuild(profileBuild={},binding={}){
   return {
     version:1,
     capturedAt:new Date().toISOString(),
+    manifestVersion:profileBuild.manifestVersion||null,
+    profileSnapshot:profileBuild.profileSnapshot||null,
     source:'bungie-live',
     characterId:text(binding.characterId),
     membershipId:text(binding.membershipId),
