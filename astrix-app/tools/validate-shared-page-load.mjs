@@ -51,6 +51,53 @@ await requestPreparedPagePayload('character',{freshness:'live',fetchImpl:async r
 }});
 assert.equal(liveRequest.searchParams.get('freshness'),'live','A live Character refresh must be explicit on the prepared route.');
 
+// A truncated display snapshot gets one fresh retry, without touching authentication.
+let recoveryCalls=0;
+await requestPreparedPagePayload('journey',{fetchImpl:async url=>{
+  recoveryCalls++;
+  if(recoveryCalls===1)return new Response('{"account":');
+  assert.equal(new URL(url).searchParams.get('freshness'),'live');
+  return Response.json(envelope('journey'));
+}});
+assert.equal(recoveryCalls,2);
+let failedCalls=0;
+await assert.rejects(requestPreparedPagePayload('journey',{fetchImpl:async()=>{failedCalls++;return new Response('');}}),error=>error.code==='prepared_page_incomplete'&&!/sign.in|reconnect/i.test(error.message));
+assert.equal(failedCalls,2,'Never loop on malformed data');
+await assert.rejects(requestPreparedPagePayload('journey',{fetchImpl:async()=>new Response('',{status:502})}),error=>error.status===502&&/502/.test(error.message));
+await assert.rejects(requestPreparedPagePayload('journey',{fetchImpl:async()=>Response.json({error:'bungie_reauthentication_required'},{status:401})}),error=>error.status===401&&error.code==='bungie_reauthentication_required');
+
+// Ten fresh profiles, one public bundle download. Account rows never enter the bundle cache.
+const {readPreparedBundle}=await import('../core/prepared-bundle-cache.mjs');
+const publicBundle={...envelope('journey').prepared,manifestVersion:'bundle-budget-v2',publicData:'x'.repeat(1024*1024)};
+let bundleDownloads=0;const warmBytes=[];
+for(let i=0;i<10;i++){
+  const profile=await requestPreparedPagePayload('journey',{freshness:'live',fetchImpl:async url=>{
+    const wire=envelope('journey');wire.account.pageReady.manifestVersion=publicBundle.manifestVersion;
+    wire.account.profile.largeProfile='p'.repeat(2*1024*1024);
+    wire.account.profile.characters.data['1'].light=100+i;
+    wire.account.journeyAccountManifestTables={DestinyInventoryItemDefinition:{privateItem:{hash:99}}};
+    if(new URL(url).searchParams.get('manifestVersion')===publicBundle.manifestVersion){wire.prepared={manifestVersion:publicBundle.manifestVersion,bundleCached:true};warmBytes.push(JSON.stringify(wire).length);}
+    else{bundleDownloads++;wire.prepared=publicBundle;}
+    return Response.json(wire);
+  }});
+  assert.equal(profile.profile.characters.data['1'].light,100+i);
+  assert.equal(profile.publicData.length,1024*1024);
+}
+assert.equal(bundleDownloads,1);assert.equal(warmBytes.length,9);assert.equal(new Set(warmBytes).size,1);
+const saved=await readPreparedBundle('journey');assert.equal(saved.profile,undefined);assert.equal(saved.manifestTables.DestinyInventoryItemDefinition,undefined);
+console.log(`PROFILE_ONLY_REPEAT_LOADS=PASS loads=10 bundle-downloads=${bundleDownloads} warm-bytes=${warmBytes[0]}`);
+const savedDocument=globalThis.document;delete globalThis.document;
+globalThis.location={pathname:'/astrix-app/pages/journey/',search:''};
+const {handleProfileTask}=await import('../core/engine-profile-worker.mjs');
+globalThis.document=savedDocument;
+let parsedMessage;
+handleProfileTask({id:1,type:'parse',text:'',page:'journey'},value=>{parsedMessage=value;});
+assert.equal(parsedMessage.errorName,'SyntaxError','Worker parse errors must retain their type for bounded recovery');
+const cachedEnvelope=envelope('journey');cachedEnvelope.prepared={manifestVersion:publicBundle.manifestVersion,bundleCached:true};
+handleProfileTask({id:2,type:'parse',text:JSON.stringify(cachedEnvelope),page:'journey',cachedPrepared:publicBundle,returnEnvelope:true},value=>{parsedMessage=value;});
+assert.equal(parsedMessage.error,undefined);assert.equal(parsedMessage.result.payload.publicData.length,1024*1024);
+assert.equal(parsedMessage.result.preparedBundle,null,'A warm parse must not rewrite its existing public cache');
+
 const runtimes=[
   'pages/guardian-workspace-v2/guardian-bungie-profile.mjs',
   'pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs',
@@ -122,6 +169,7 @@ const refreshing=loadPreparedPagePayload(account,'journey',{force:true,fetchImpl
 }});
 assert.equal(foregroundProgress,oldProgress,'Background live requests must not emit loader progress');
 assert.equal(gateRequests,0,'Background live requests must not reopen the gate');
+await new Promise(resolve=>setImmediate(resolve));
 assert.ok(liveRelease,'A forced refresh must still reach the live backend');
 liveRelease();await refreshing;
 await assert.rejects(loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>{throw new Error('synthetic offline');}}),/synthetic offline/);
@@ -133,6 +181,7 @@ const releases=[];
 const fetchPending=async()=>new Promise(resolve=>releases.push(()=>resolve(Response.json(envelope('vault')))));
 const first=loadPreparedPagePayload(account,'vault',{force:true,fetchImpl:fetchPending});
 const second=loadPreparedPagePayload(otherAccount,'vault',{force:true,fetchImpl:fetchPending});
+await new Promise(resolve=>setImmediate(resolve));
 assert.equal(releases.length,2,'Requests must be deduplicated within a membership, never across accounts');
 releases.forEach(release=>release());await Promise.all([first,second]);
 
@@ -156,6 +205,7 @@ console.log('PAGE_REQUEST_MEMBERSHIP_ISOLATION=PASS');
 let releaseSwitched;
 globalThis.FORGE_BUNGIE_SESSION=account;
 const switchedRequest=loadPreparedPagePayload(account,'journey',{force:true,fetchImpl:async()=>new Promise(resolve=>{releaseSwitched=()=>resolve(Response.json(envelope('journey')));})});
+await new Promise(resolve=>setImmediate(resolve));
 globalThis.FORGE_BUNGIE_SESSION=otherAccount;
 releaseSwitched();await assert.rejects(switchedRequest,/membership changed/,'A late response must not be cached or published after switching accounts');
 delete globalThis.FORGE_BUNGIE_SESSION;

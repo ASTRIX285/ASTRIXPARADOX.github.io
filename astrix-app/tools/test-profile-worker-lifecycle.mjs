@@ -15,6 +15,9 @@ const stalled=call(),queued=call(),failures=Promise.all([assert.rejects(stalled,
 [...timers.values()][0].fn();await failures;assert.equal(workers[0].terminated,true);assert.equal(timers.size,0);
 const retry=call();assert.equal(workers.length,2);workers[1].reply({type:'ready'});workers[1].reply({id:workers[1].sent[0].id,result:'recovered'});assert.equal(await retry,'recovered');
 const broken=call(),failed=assert.rejects(broken,/worker failed/);workers[1].onerror();await failed;
+const malformed=call(),parseFailure=assert.rejects(malformed,error=>error.name==='SyntaxError');
+workers[2].reply({type:'ready'});workers[2].reply({id:workers[2].sent[0].id,error:'Unexpected end of JSON input',errorName:'SyntaxError'});await parseFailure;
+workers[2].onerror();
 const boot=call(),bootFailure=assert.rejects(boot,/startup timed out/);[...timers.values()][0].fn();await bootFailure;assert.equal(timers.size,0);
 assert.match(readFileSync(new URL('../core/engine-profile-worker.mjs',import.meta.url),'utf8'),/self.postMessage\(\{type:'ready'\}\)/);
 console.log('PROFILE_WORKER_LIFECYCLE=PASS bounded startup, sequential jobs, processing deadline, termination and retry');

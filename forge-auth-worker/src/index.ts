@@ -1557,7 +1557,8 @@ async function pagePayloadRoute(
   const sessionId = cookieValue(request, SESSION_COOKIE);
   const preparedStatusPromise = preparedManifestTables({}, env);
   const preparedStatus = await preparedStatusPromise;
-  if (requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
+  const hasPreparedBundle = Boolean(preparedStatus.manifestVersion && requestUrl.searchParams.get("manifestVersion") === preparedStatus.manifestVersion);
+  if (!hasPreparedBundle && requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
     const cached = await readPreparedPage(sessionId, page, preparedStatus.manifestVersion, env);
     if (cached) {
       const headers = new Headers(cached.headers);
@@ -1593,7 +1594,9 @@ async function pagePayloadRoute(
     indexUrl.searchParams.set("page", page === "journey" ? "journey" : "loadout");
     indexUrl.searchParams.set("version", preparedVersion);
     const [bundleResponse, indexResponse] = await Promise.all([
-      env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null),
+      hasPreparedBundle
+        ? Promise.resolve(json({ manifestVersion: preparedVersion, bundleCached: true }))
+        : env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null),
       page === "journey" || page === "loadout" || page === "build-forge"
         ? env.MANIFEST_DATA.fetch(new Request(indexUrl)).catch(() => null)
         : Promise.resolve(null)
@@ -1706,7 +1709,7 @@ async function pagePayloadRoute(
   compactPreparedProfilePlugLists(payload);
   const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
   const response = preparedPageEnvelope(request, env, payload, prepared);
-  if (sessionId && preparedVersion) {
+  if (!hasPreparedBundle && sessionId && preparedVersion) {
     const cacheTask = storePreparedPage(sessionId, page, preparedVersion, response, env)
       .catch(error => {
         console.warn("prepared_page_cache_write_failed", { page, error: String(error) });
