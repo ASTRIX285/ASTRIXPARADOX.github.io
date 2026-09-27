@@ -337,7 +337,7 @@ assert.match(sequenceRuntime,/provisionalModResult=recommendArmourMods[\s\S]*?ap
 assert.match(sequenceRuntime,/artifactSynergyScore:Number\(working\.artifactRecommendation\?\.totalScore\|\|0\)/,'Forge intelligence must record the verified Artifact synergy contribution.');
 assert.match(html,/id="armourExoticRule">DESTINY EQUIP RULE · 1 EXOTIC ARMOUR/,'The review must show the enforced one-Exotic armour rule.');
 assert.match(html,/id="weaponExoticRule">VAULT \+ CHARACTER INVENTORY · 1 EXOTIC WEAPON MAX/,'The review must show both its full owned inventory scope and one-Exotic weapon limit.');
-assert.match(runtime,/EXOTIC ANCHOR: \$\{String\(anchorName\)\.toUpperCase\(\)\}/,'The recommendation heading must name the selected Exotic armour anchor.');
+assert.match(runtime,/byId\('recommendedBuildSubtitle'\)\.textContent=reviewCopy\.subtitle/,'The recommendation heading must use the sentence-case presentation model, whose anchor identity is covered by the review-copy tests.');
 assert.match(runtime,/changedItems=\(plan\.items\|\|\[\]\)[\s\S]*?filter\(row=>row\.action!=='KEEP'\)/,'The review must omit unchanged mod sockets and present only proposed changes.');
 assert.match(runtime,/review-artifact-synergy[\s\S]*?ARTIFACT SYNERGY/,'The review must expose the evidence behind the Artifact recommendation.');
 assert.match(artifactSelectionRuntime,/recommendArtifactPerks\(build,effectiveArtifact,\{currentSeasonNumber:season,planFullBuild:true\}\)/,'Build Forge must produce a complete target Artifact plan when only the current CharacterProgressions tree is available.');
