@@ -15,6 +15,10 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','
 // Runs the exact backend search Forge Loader has always used. Never invents a combination: every
 // candidate comes back from the Worker's exact scan over the profile's real armour instances.
 async function scanArmourCombinations({authOrigin,session,binding,manifestVersion,sourceItems,exotic,setSelections=[],targets={},priorities={},limit=CANDIDATE_BATCH_SIZE,signal}={}){
+  // URLs omit unset controls. The worker requires complete six-stat vectors;
+  // zero means no target or priority, exactly as on the selector page.
+  targets=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,Number(targets[key]??0)]));
+  priorities=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,Number(priorities[key]??0)]));
   const solverItems=sourceItems.filter(item=>/^\d{1,30}$/.test(text(item.itemInstanceId))).map(item=>({
     itemInstanceId:text(item.itemInstanceId),itemHash:Number(item.itemHash||item.hash),slotIndex:Number(item.slotIndex),isExotic:Boolean(item.isExotic),stats:armourStatVector(item),setHash:armourSetHash(item)
   }));

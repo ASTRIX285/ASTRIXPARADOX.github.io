@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="../../../shared/item-tile.css?v=20260913-breaker-icon-2">
   <link rel="stylesheet" href="../forge-loader.css?v=20260913-selector-image-1&amp;icons=20260912-global-audit-1&amp;flow=20260926-1&amp;anchor=20260927-1">
   <link rel="stylesheet" href="./forge-loader-results.css?v=20260927-1">
+  <link rel="stylesheet" href="../forge-loader-responsive.css?v=20260927-1">
   <link rel="stylesheet" href="../../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1">
 </head>
 <body class="apx-destination-page forge-paradox-map-background forge-loader-page forge-loader-results-page">
@@ -33,6 +34,7 @@
     <section class="forge-loader-output forge-results-workspace" aria-label="Staged armour and Forge Matrix results">
       <section class="forge-panel forge-staged" aria-labelledby="forgeStagedTitle">
         <div class="forge-panel-heading"><div><p class="apx-eyebrow">WORKING LOAD</p><h2 id="forgeStagedTitle">Staged armour</h2></div><span id="forgeStagedStatus">NO COMBINATION</span></div>
+        <p id="forgeResultsWeaponAnchor" class="forge-weapon-anchor-status" hidden></p>
         <div class="forge-staged-slots" id="forgeStagedSlots"></div>
         <button class="forge-evaluate" type="button" id="forgeEvaluate" disabled><span class="forge-evaluate-label" id="forgeEvaluateLabel">ENTER BUILD FORGE</span><span class="forge-evaluate-progress" aria-hidden="true"></span></button>
       </section>
@@ -53,7 +55,7 @@
   </main>
 
   <aside class="forge-item-inspect" id="forgeItemInspect" hidden aria-hidden="true"></aside>
-  <script type="module" src="./forge-loader-results.mjs?v=20260927-1"></script>
+  <script type="module" src="./forge-loader-results.mjs?v=20260927-1&amp;layoutfix=20260927-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>
