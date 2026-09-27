@@ -40,14 +40,14 @@ export function openGuardianLoadoutDetails({characterId,index,getCharacterId,ret
     if(!['captureSnapshot','equipItems','verifyEquipment','verifyFinalState'].every(key=>capabilities[key]))disabledReasons.equip=disabledReasons.prepare='Apply is unavailable in this session.';
     if(!capabilities.updateLoadoutIdentifiers||!['names','icons','colors'].every(key=>model.identifierChoices[key].length))disabledReasons.identifiers='Loadout identifier choices are unavailable. Refresh the Character page.';
     if(!capabilities.clearLoadout)disabledReasons.clear='Clear slot is unavailable in this session.';
-    const events=['forge:guardian-selection-changed','forge:guardian-loadout-context','forge:bungie-profile-loaded','forge:bungie-session-changed'];
+    const events=['forge:guardian-selection-changed','forge:guardian-loadout-context','forge:bungie-profile-loaded'];
     const check=()=>{
       const context=getContext(),active=sessionBinding(context.session);
       if(!context.session?.authenticated||active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType||String(context.characterId)!==String(characterId))current?.invalidate();
       else if(!acceptedFingerprints.has(loadoutFingerprint(context.profile?.characterLoadouts?.data?.[characterId]?.loadouts?.[index])))current?.invalidate('The saved slot changed. Close and reopen its details.');
     };
-    current=openLoadoutDetails(model,{actions,disabledReasons,returnFocus,onClose:()=>{events.forEach(event=>document.removeEventListener(event,check));current=null;}});
-    events.forEach(event=>document.addEventListener(event,check));
+    current=openLoadoutDetails(model,{actions,disabledReasons,returnFocus,onClose:()=>{events.forEach(event=>document.removeEventListener(event,check));globalThis.removeEventListener('forge:bungie-session',check);current=null;}});
+    events.forEach(event=>document.addEventListener(event,check));globalThis.addEventListener('forge:bungie-session',check);
     return current;
   })().finally(()=>{opening=null;});
   return opening;

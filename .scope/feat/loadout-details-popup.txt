@@ -18,3 +18,4 @@ astrix-app/tools/test-loadout-details.mjs
 forge-auth-worker/src/loadout-details.ts
 forge-auth-worker/src/page-semantics.ts
 forge-manifest-worker/worker.mjs
+.github/workflows/validate-manifest-coverage-refresh.yml

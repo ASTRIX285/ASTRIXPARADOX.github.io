@@ -23,6 +23,7 @@ jobs:
     env:
       NODE_OPTIONS: --experimental-strip-types
       PYTHONDONTWRITEBYTECODE: '1'
+      GITHUB_HEAD_REF: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,7 +42,12 @@ jobs:
           git diff --stat main...HEAD
           git rev-parse HEAD HEAD^{tree}
           for file in astrix-app/tools/build-backend-manifest.py astrix-app/core/active-profile-refresh.mjs forge-manifest-worker/worker.mjs astrix-app/tools/test-manifest-coverage.py astrix-app/tools/test-manifest-retirement.mjs astrix-app/tools/test-active-profile-refresh.mjs; do
-            git diff --name-only main...HEAD | grep -Fx "$file"
+            test -f "$file"
+            # PR #335 required proof of publication. Later PRs keep the files and
+            # all regression tests, but need not reimplement that merged feature.
+            if [ "$GITHUB_HEAD_REF" = 'feat/manifest-coverage-refresh' ]; then
+              git diff --name-only main...HEAD | grep -Fx "$file"
+            fi
           done
       - name: Branch scope
         run: node astrix-app/tools/validate-scope-guard.mjs

@@ -39,6 +39,8 @@ try{
       if(url.hostname==='www.bungie.net'){
         await route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')});return;
       }
+      // Saving starts the real account-sync service, including its session read.
+      if(url.hostname==='auth.astrixparadox.com'&&url.pathname==='/session'){await route.fulfill({json:fixture.session});return;}
       if(url.hostname==='auth.astrixparadox.com'&&url.pathname==='/bungie/profile'){calls.push({method:'GET',path:url.pathname});await route.fulfill({json:{profile:backend}});return;}
       if(url.hostname==='auth.astrixparadox.com'&&url.pathname.startsWith('/bungie/actions/')){
         const body=request.postDataJSON();calls.push({method:'POST',path:url.pathname,body});
@@ -49,6 +51,7 @@ try{
       // All remote traffic is intercepted. No real account or storage requests.
       await route.fulfill({status:503,json:{error:'Offline browser fixture'}});
     });
+    try{
     await page.goto(origin);await page.waitForFunction(()=>window.ready);
     const more=page.locator('[data-loadout-more="0"]');await more.click();await page.getByRole('menuitem',{name:'Loadout details',exact:true}).click();
     const dialog=page.locator('.apx-loadout-details');await dialog.waitFor();
@@ -75,5 +78,9 @@ try{
     await dialog.getByRole('button',{name:'Clear slot',exact:true}).click();await dialog.getByRole('button',{name:'Confirm clear slot',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.apx-ld-message').textContent==='Slot cleared.');
     await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});assert.equal(await more.evaluate(el=>el===document.activeElement),true);
     assert.deepEqual(errors,[]);console.log(`LOADOUT_DETAILS_BROWSER=PASS width=${width} geometry, fonts, authentic images, all actions, Apply gate, save/share, clear cancellation, keyboard and return focus`);await page.close();
+    }catch(error){
+      console.error('LOADOUT_DETAILS_BROWSER_FAILURE',JSON.stringify({width,calls,errors,ui:await page.locator('.apx-loadout-details').innerText().catch(()=>''),busy:await page.locator('.apx-loadout-details').getAttribute('aria-busy').catch(()=>null)}));
+      throw error;
+    }
   }
 }finally{await browser?.close();await new Promise(done=>server.close(done));}

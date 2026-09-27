@@ -39,8 +39,12 @@ jobs:
         run: |
           git diff --stat origin/main...HEAD
           git diff --check origin/main...HEAD
-          git diff --name-only origin/main...HEAD | grep -Fx 'astrix-app/shared/loadout-details.mjs'
-          git diff --name-only origin/main...HEAD | grep -Fx 'astrix-app/shared/loadout-details-model.mjs'
+          for file in astrix-app/shared/loadout-details.mjs astrix-app/shared/loadout-details-model.mjs; do
+            test -f "$file"
+            if [ "$GITHUB_HEAD_REF" = 'feat/loadout-details-popup' ]; then
+              git diff --name-only origin/main...HEAD | grep -Fx "$file"
+            fi
+          done
       - name: Scope and Journey
         run: |
           node astrix-app/tools/validate-scope-guard.mjs
