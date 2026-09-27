@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ASTRIX PARADOX Guardian Home: your Destiny 2 career at a glance">
+  <title>Guardian Home | ASTRIX PARADOX</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/img/favicon/favicon.ico">
+  <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
+  <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
+  <link rel="modulepreload" href="/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1">
+  <link rel="modulepreload" href="/astrix-app/vendor/three/three.module.js">
+  <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2">
+  <script>window.APX_LOGO='../../../img/logo.png';</script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2"></script>
+  <link rel="stylesheet" href="./home.css?v=20260928-1">
+</head>
+<body class="home-page">
+  <main class="home-shell">
+    <header class="home-top">
+      <a class="home-brand" href="../../../tools/"><img src="../../../img/logo.png" alt="" width="40" height="40"><span><strong>ASTRIX <em>PARADOX</em></strong><small>GUARDIAN HOME</small></span></a>
+    </header>
+
+    <section class="home-signed-out" id="homeSignedOut" hidden aria-labelledby="homeSignedOutTitle">
+      <h1 id="homeSignedOutTitle">Connect Bungie to see your Guardian</h1>
+      <p>Guardian Home reads your Destiny 2 career from Bungie. Nothing changes in your game.</p>
+      <a class="home-cta" id="homeConnect" href="../journey/">CONNECT BUNGIE</a>
+    </section>
+
+    <p class="home-error" id="homeError" role="alert" hidden></p>
+
+    <div id="homeStats" hidden>
+      <section class="home-hero" aria-labelledby="homeTimeTitle">
+        <div class="home-hero-copy">
+          <p class="home-eyebrow" id="homeWelcome">WELCOME BACK, GUARDIAN</p>
+          <div id="homeTime" hidden>
+            <h1 id="homeTimeTitle"><span id="homeTimePrefix"></span><span class="home-accent" id="homeTimeValue"></span><span id="homeTimeSuffix"></span></h1>
+            <p class="home-detail" id="homeTimeDetail"></p>
+          </div>
+          <div class="home-actions">
+            <a class="home-cta" href="../journey/">SEE MORE
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </a>
+            <a class="home-secondary" href="../reports/">MY REPORTS</a>
+          </div>
+        </div>
+        <article class="home-card home-main" id="homeMain" hidden>
+          <div class="home-card-head"><span class="home-label">MAIN CHARACTER</span><span class="home-label" id="homeMainShare"></span></div>
+          <strong class="home-big" id="homeMainClass"></strong>
+          <p class="home-line" id="homeMainLine"></p>
+          <div class="home-bars" id="homeClassBars"></div>
+        </article>
+      </section>
+
+      <section class="home-grid" aria-label="Career highlights">
+        <article class="home-card" id="homeWeapon" hidden>
+          <span class="home-label">EMOTIONAL SUPPORT EXOTIC</span>
+          <div class="home-weapon"><img id="homeWeaponIcon" alt="" width="48" height="48" hidden><strong class="home-name home-gold" id="homeWeaponName"></strong></div>
+          <span class="home-count" id="homeWeaponKills"></span>
+          <p class="home-line" id="homeWeaponLine"></p>
+        </article>
+        <article class="home-card" id="homeAbility" hidden>
+          <span class="home-label">SIGNATURE MOVE</span>
+          <strong class="home-name home-accent" id="homeAbilityName"></strong>
+          <span class="home-count" id="homeAbilityKills"></span>
+          <p class="home-line" id="homeAbilityLine"></p>
+        </article>
+        <article class="home-card" id="homeMode" hidden>
+          <span class="home-label">WHERE YOU LIVE NOW</span>
+          <strong class="home-name home-cyan" id="homeModeName"></strong>
+          <span class="home-count" id="homeModeCount"></span>
+          <p class="home-line" id="homeModeLine"></p>
+        </article>
+        <article class="home-card" id="homeSelf" hidden>
+          <span class="home-label">GRAVITY INCIDENTS</span>
+          <strong class="home-name" id="homeSelfCount"></strong>
+          <span class="home-count">self eliminations</span>
+          <p class="home-line" id="homeSelfLine"></p>
+        </article>
+      </section>
+
+      <section class="home-strip" aria-label="Recent activity">
+        <article class="home-card home-row" id="homeLast" hidden>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+          <div><span class="home-label">LAST SEEN</span><p id="homeLastText"></p></div>
+        </article>
+        <article class="home-card home-row" id="homeRaid" hidden>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+          <div><span class="home-label">RAID CLEARS</span><p id="homeRaidText"></p></div>
+        </article>
+      </section>
+    </div>
+
+    <nav class="home-tools" aria-label="Open a tool">
+      <a href="../journey/">JOURNEY</a>
+      <a href="../guardian-workspace-v2/">CHARACTER</a>
+      <a href="../forge-loader/">FORGE LOADER</a>
+      <a href="../guardian-workspace-v2/paradox-build-space/">BUILD FORGE</a>
+      <a href="../vault/">VAULT</a>
+      <a href="../loadout/">LOADOUT</a>
+    </nav>
+  </main>
+  <script type="module" src="./home.mjs?v=20260928-1"></script>
+<footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
+</body>
+</html>

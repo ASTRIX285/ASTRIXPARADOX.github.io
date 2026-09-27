@@ -28,7 +28,7 @@ type TokenResponse = {
   refresh_expires_in?: number;
 };
 type PreparedReadRequest = {
-  kind: "activity-history" | "historical-stats" | "pgcr";
+  kind: "activity-history" | "historical-stats" | "pgcr" | "home-profile" | "home-stats" | "unique-weapons";
   characterId?: string;
   count?: number;
   page?: number;
@@ -89,6 +89,22 @@ export class AuthRecord extends DurableObject<Env> {
       url = new URL(`https://www.bungie.net/Platform/Destiny2/${membership.membershipType}/Account/${encodeURIComponent(membership.membershipId)}/Stats/`);
       url.searchParams.set("groups", "1");
       key = "historical:1";
+    } else if (input.kind === "home-profile") {
+      // Guardian Home: profile identity and per character play time only.
+      url = new URL(`https://www.bungie.net/Platform/Destiny2/${membership.membershipType}/Profile/${encodeURIComponent(membership.membershipId)}/`);
+      url.searchParams.set("components", "100,200");
+      key = "home:profile";
+    } else if (input.kind === "home-stats") {
+      // All characters merged (character 0), PvE, PvP and Raid, general group.
+      url = new URL(`https://www.bungie.net/Platform/Destiny2/${membership.membershipType}/Account/${encodeURIComponent(membership.membershipId)}/Character/0/Stats/`);
+      url.searchParams.set("groups", "1");
+      url.searchParams.set("modes", "7,5,4");
+      key = "home:stats";
+    } else if (input.kind === "unique-weapons") {
+      const characterId = String(input.characterId || "");
+      if (!/^\d+$/.test(characterId)) return new Response(null, { status: 400 });
+      url = new URL(`https://www.bungie.net/Platform/Destiny2/${membership.membershipType}/Account/${encodeURIComponent(membership.membershipId)}/Character/${encodeURIComponent(characterId)}/Stats/UniqueWeapons/`);
+      key = `home:unique-weapons:${characterId}`;
     } else {
       const instanceId = String(input.instanceId || "");
       if (!/^\d+$/.test(instanceId)) return new Response(null, { status: 400 });

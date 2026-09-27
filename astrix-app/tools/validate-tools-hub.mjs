@@ -72,7 +72,7 @@ assert.equal((tools.match(/ENTER FORGE/g)??[]).length,2,'Tools card and mission 
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
 assert.ok(tools.includes('<script type="module" src="tools.mjs"></script>'),'Tools page must load its isolated mission controller');
 assert.ok(tools.includes('Destiny 2 Guardian Platform'),'Tools page must identify the current platform');
-assert.equal((tools.match(/\.\.\/astrix-app\/pages\/journey\//g)??[]).length,2,'Tools card and mission popup must enter Journey directly');
+assert.equal((tools.match(/\.\.\/astrix-app\/pages\/home\//g)??[]).length,2,'Tools card and mission popup must enter Guardian Home, the light landing page');
 assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
 assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
 assert.equal((tools.match(/<article class="platform-card /g)??[]).length,2,'Tools catalogue must use one active card and one reusable future card');

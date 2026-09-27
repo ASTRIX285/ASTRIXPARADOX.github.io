@@ -1,0 +1,13 @@
+astrix-app/pages/home/index.html
+astrix-app/pages/home/home.mjs
+astrix-app/pages/home/home.css
+astrix-app/pages/home/home-copy.mjs
+astrix-app/tools/test-home-browser.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/validate-tools-hub.mjs
+astrix-app/tools/validate-tool-intro.mjs
+tools/index.html
+forge-auth-worker/src/index.ts
+forge-auth-worker/src/auth-record.ts
+forge-auth-worker/src/home-summary.ts
+forge-auth-worker/test/home-summary.test.ts

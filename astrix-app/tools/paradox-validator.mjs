@@ -36,6 +36,7 @@ const validators=[
   'validate-portal-loader.mjs',
   'validate-single-loader.mjs',
   'test-portal-single-skin.mjs',
+  'test-home-browser.mjs',
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
