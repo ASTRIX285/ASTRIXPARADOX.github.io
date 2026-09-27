@@ -15,10 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/weapon-card-qa" playwright@1.62.1
+          node "$RUNNER_TEMP/weapon-card-qa/node_modules/playwright/cli.js" install --with-deps chromium
       - name: Catalogue and application regression gates
         env:
           BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
           FORGE_INDEX_ONLY: '1'
+          PLAYWRIGHT_MODULE_PATH: ${{ runner.temp }}/weapon-card-qa/node_modules/playwright/index.mjs
         run: |
           python3 astrix-app/tools/import-armor-information.py
           node astrix-app/tools/paradox-validator.mjs
@@ -31,10 +36,6 @@ jobs:
         run: |
           npm install --ignore-scripts --package-lock=false
           npm run check
-      - name: Install browser test runtime
-        run: |
-          npm install --prefix "$RUNNER_TEMP/weapon-card-qa" playwright@1.62.1
-          node "$RUNNER_TEMP/weapon-card-qa/node_modules/playwright/cli.js" install --with-deps chromium
       - name: Render every weapon type at four widths
         env:
           PLAYWRIGHT_MODULE_PATH: ${{ runner.temp }}/weapon-card-qa/node_modules/playwright/index.mjs

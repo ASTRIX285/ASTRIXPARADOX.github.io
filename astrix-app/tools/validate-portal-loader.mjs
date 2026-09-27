@@ -113,7 +113,7 @@ assert.match(buildHtml,/window\.APX_SKIP_PORTAL=false/,'Build entry must retain 
 const {runInNewContext}=await import('node:vm');
 async function loaderHarness({stalledBackground=false,isBuildSpace=true}={}){
   const documentEvents=new Map(),windowEvents=new Map(),frames=[];let headerPending=true,completed=0;
-  const document={querySelector:selector=>selector==='.build-space'?(isBuildSpace?{}:null):selector.includes('is-pending')&&headerPending?{}:null,querySelectorAll:selector=>stalledBackground&&selector==='.scene.immersive'?[{}]:[],documentElement:{dataset:{}},baseURI:'https://sandbox.astrixparadox.com/',addEventListener:(name,fn)=>documentEvents.set(name,fn)};
+  const document={referrer:'https://astrixparadox.com/tools/',querySelector:selector=>selector==='.build-space'?(isBuildSpace?{}:null):selector.includes('is-pending')&&headerPending?{}:null,querySelectorAll:selector=>stalledBackground&&selector==='.scene.immersive'?[{}]:[],documentElement:{dataset:{}},baseURI:'https://sandbox.astrixparadox.com/',addEventListener:(name,fn)=>documentEvents.set(name,fn)};
   let blocked=0;
   const window={ForgeLoader:{set(){},status(){},done(){completed++;},blocked(){blocked++;}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
   const source=mainProgress.replace(/^import .*;\n/gm,'').replace('const BACKGROUND_DECODE_TIMEOUT_MS=5*1000;','const BACKGROUND_DECODE_TIMEOUT_MS=1;');
@@ -138,13 +138,13 @@ function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astr
   const classes=()=>{const names=new Set();return {add:name=>names.add(name),remove:name=>names.delete(name),contains:name=>names.has(name),toggle:(name,on)=>on?names.add(name):names.delete(name)};};
   const node=()=>({classList:classes(),style:{setProperty(){}},hidden:true,textContent:'',addEventListener(){},removeEventListener(){},querySelector(){return node();}});
   let mounts=0,gate=null,markup='',assetReads=0;
-  const document={documentElement:{classList:classes()},body:{classList:classes(),appendChild(value){gate=value;mounts++;}},querySelector:()=>gate,createElement(){return {set innerHTML(value){markup=value;},get firstElementChild(){return node();}};},addEventListener(){},get fonts(){assetReads++;return {ready:Promise.resolve()};}};
+  const document={referrer:'https://astrixparadox.com/tools/',documentElement:{classList:classes()},body:{classList:classes(),appendChild(value){gate=value;mounts++;}},querySelector:()=>gate,createElement(){return {set innerHTML(value){markup=value;},get firstElementChild(){return node();}};},addEventListener(){},get fonts(){assetReads++;return {ready:Promise.resolve()};}};
   const session={authenticated:true,csrfToken:'synthetic',capabilities:{destinyActions:{}},activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};
   const records={'astrix:bungie-session-cache:v1':JSON.stringify({session})};
   if(warm)records['astrix:bungie-page-cache:v4:loadout']=JSON.stringify({scope:'loadout',identity,savedAt:Date.now()-age});
   if(preparedEntry)records['astrix:prepared-navigation:v1']=JSON.stringify({path,at:Date.now()});
-  const window={location:{pathname:path}};
-  runInNewContext(portalJs,{window,document,sessionStorage:{getItem(key){if(storageError)throw new Error('denied');return records[key]||null;},removeItem(key){delete records[key];}},Date,Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()});
+  const window={location:{origin:'https://astrixparadox.com',pathname:path}};
+  runInNewContext(portalJs,{URL,window,document,sessionStorage:{getItem(key){if(storageError)throw new Error('denied');return records[key]||null;},removeItem(key){delete records[key];}},Date,Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()});
   return {loader:window.ForgeLoader,document,mounts:()=>mounts,markup:()=>markup,assetReads:()=>assetReads};
 }
 const warmPortal=warmPortalHarness();assert.equal(warmPortal.mounts(),1,'Every entry uses one portal');
@@ -169,12 +169,13 @@ function transitionHarness({headerPending=false}={}){
   const classList={add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)};
   const item=()=>({classList:{add(){},remove(){},contains:()=>false,toggle(){}},style:{setProperty(){}},querySelector:()=>item(),addEventListener(){},removeEventListener(){},remove(){if(this===gate)gate=null;}});
   const image={complete:false,closest:()=>null,getBoundingClientRect:()=>({width:50,height:50,top:10,left:10,right:60,bottom:60}),decode:()=>Promise.resolve(),addEventListener(name,fn){if(name==='load')finishImage=fn;},removeEventListener(){}};
-  const document={documentElement:{classList,dataset:{}},body:{classList,appendChild:node=>{gate=node;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:selector==='[data-forge-hero-cards]'&&headerPending?{}:null,querySelectorAll:selector=>selector==='img'?[image]:[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return item();}}),addEventListener(name,fn){documentEvents.set(name,[...(documentEvents.get(name)||[]),fn]);}};
-  const window={innerWidth:400,innerHeight:800,location:{pathname:'/astrix-app/pages/loadout/'},addEventListener:(name,fn)=>events.set(name,fn)};
-  runInNewContext(portalJs,{window,document,sessionStorage:{getItem:()=>null,removeItem(){}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>fn(),Promise,Date});
+  const document={referrer:'https://astrixparadox.com/tools/',documentElement:{classList,dataset:{}},body:{classList,appendChild:node=>{gate=node;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:selector==='[data-forge-hero-cards]'&&headerPending?{}:null,querySelectorAll:selector=>selector==='img'?[image]:[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return item();}}),addEventListener(name,fn){documentEvents.set(name,[...(documentEvents.get(name)||[]),fn]);}};
+  const window={innerWidth:400,innerHeight:800,location:{origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/loadout/'},addEventListener:(name,fn)=>events.set(name,fn)};
+  runInNewContext(portalJs,{URL,window,document,sessionStorage:{getItem:()=>null,removeItem(){}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>fn(),Promise,Date});
+  let blockedCount=0;const realBlocked=window.ForgeLoader.blocked;window.ForgeLoader.blocked=message=>{blockedCount++;return realBlocked(message);};
   let finishTransition;
   const transition={finished:new Promise(resolve=>{finishTransition=resolve;})};
-  return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===30000).fn(),gate:()=>gate};
+  return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===4000).fn(),failure:()=>[...timers.values()].find(row=>row.ms===30000)?.fn(),blockedCalls:()=>blockedCount,gate:()=>gate};
 }
 const settleMicrotasks=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
 const reveal=transitionHarness();reveal.emit();
@@ -187,8 +188,11 @@ reveal.image();await settleMicrotasks();
 assert.ok(reveal.classes.has('apx-navigation-ready'));assert.equal(reveal.document.documentElement.dataset.navigationState,'ready');
 reveal.finish();await settleMicrotasks();assert.equal(reveal.classes.has('apx-navigation-waiting'),false);
 const recover=transitionHarness();recover.emit();recover.loader.blocked('Synthetic failure');await settleMicrotasks();assert.equal(recover.document.documentElement.dataset.navigationState,'recovery');
-const stalled=transitionHarness();stalled.emit();stalled.timeout();await settleMicrotasks();assert.equal(stalled.document.documentElement.dataset.navigationState,'recovery','A stalled page must release to retry instead of permanently freezing the old view');
-assert.match(portalCss,/@view-transition\{navigation:none\}/);
+const stalled=transitionHarness();stalled.emit();stalled.timeout();await settleMicrotasks();assert.equal(stalled.document.documentElement.dataset.navigationState,'loading','A slow but healthy page is revealed at 4 s with its own progress, never an error');
+assert.equal(stalled.blockedCalls(),0,'A slow page must not show the failure screen at 4 s');
+stalled.failure();await settleMicrotasks();assert.equal(stalled.blockedCalls(),1,'A page that never renders is blocked at 30 s');assert.equal(stalled.document.documentElement.dataset.navigationState,'recovery');
+const slowThenReady=transitionHarness();slowThenReady.emit();slowThenReady.timeout();slowThenReady.loader.done();slowThenReady.failure();await settleMicrotasks();assert.equal(slowThenReady.blockedCalls(),0,'A page that renders late is never blocked');
+assert.match(portalCss,/@view-transition\{navigation:auto\}/);
 assert.match(portalCss,/apx-navigation-waiting::view-transition-old\(root\)\{animation:apxNavigationHold 1s both paused/);
 assert.match(portalCss,/prefers-reduced-motion:reduce[\s\S]*?apx-navigation-ready[\s\S]*?animation-duration:\.001s/);
 console.log('DESTINATION_RENDER_AND_VISIBLE_ASSET_REVEAL=PASS');
@@ -199,7 +203,7 @@ function navigationHarness(){
   storage.set('astrix:bungie-session-cache:v1',JSON.stringify({session:{authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}}}));
   const makeLink=path=>({href:`https://astrixparadox.com${path}`,target:'',hasAttribute:()=>false,setAttribute(){},removeAttribute(){},closest(){return this;}});
   const location={href:'https://astrixparadox.com/astrix-app/pages/journey/',origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/journey/',assign:path=>assigned.push(path)};
-  const document={currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
+  const document={referrer:'https://astrixparadox.com/tools/',currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
   const window={addEventListener:(name,fn)=>events.set(name,fn)};
   const fixturePrepare=destination=>{requests.push(destination.key);return new Promise((resolve,reject)=>pending.set(destination.key,{resolve,reject}));};
   const source=ribbonSource.replace('  function init(){','  prepareData=fixturePrepare;prepareResources=async()=>{};window.testNavigation={navigatePrepared,prepare};\n  function init(){');

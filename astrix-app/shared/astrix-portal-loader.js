@@ -11,23 +11,53 @@
    ===================================================================== */
 (function(){
   if(window.ForgeLoader?.owner==='astrix-portal')return;
+  // Only a fresh navigation from the public Tools entry can show animation.
+  // Reloads, bookmarks, history and transfers between tools never mount it.
+  var entryPortal=false;
+  try{
+    var source=new URL(document.referrer);
+    var navigationType=window.performance?.getEntriesByType('navigation')[0]?.type;
+    entryPortal=source.origin===window.location.origin&&/^\/tools(?:\/|\/index\.html)?$/.test(source.pathname)&&(!navigationType||navigationType==='navigate');
+  }catch{}
   var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
-  var breach=null,breachStarted=false;
-  function startBreach(){
-    if(breachStarted||!gate||!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
-    breachStarted=true;
-    var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
-    import(new URL('./astrix-breach-loader.mjs?v=20260927-restore-1',loaderScriptSrc).href)
-      .then(function(module){return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4});})
-      .then(function(api){
-        if(!gate||pendingDone){api.dispose();host.remove();return;}
-        breach=api;gate.classList.add('is-breach');api.setProgress(pendingPct/100);
-      }).catch(function(){host.remove();});
+  var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;
+  var BREACH_READY_MS=1200;
+  // A page chooses once. Late imports cannot replace the fallback or revive a gate.
+  function chooseSkin(next){
+    if(skin||pendingDone||!gate)return false;
+    skin=next;clearTimeout(skinTimer);
+    gate.classList.add(next==='breach'?'is-breach':'ring-visible');
+    gate.classList.remove('breach-pending');
+    if(next==='ring')breachAbort?.abort();
+    return true;
   }
-  function disposeBreach(){if(breach){breach.dispose();breach=null;}}
+  function startBreach(){
+    if(!entryPortal||breachStarted||!gate||pendingDone)return;
+    breachStarted=true;
+    if(!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){chooseSkin('ring');return;}
+    var deadline=Date.now()+BREACH_READY_MS;
+    breachAbort=new AbortController();
+    skinTimer=setTimeout(function(){chooseSkin('ring');},BREACH_READY_MS);
+    var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
+    import(new URL('./astrix-breach-loader.mjs?v=20260927-single-skin-1',loaderScriptSrc).href)
+      .then(function(module){
+        if(skin||pendingDone||Date.now()>=deadline){chooseSkin('ring');return null;}
+        return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4,signal:breachAbort.signal});
+      })
+      .then(function(api){
+        if(!api){host.remove();return;}
+        if(Date.now()>=deadline)chooseSkin('ring');
+        if(!chooseSkin('breach')){api.dispose();host.remove();return;}
+        breach=api;api.setProgress(pendingPct/100);
+      }).catch(function(){host.remove();chooseSkin('ring');});
+  }
+  function disposeBreach(){clearTimeout(skinTimer);breachAbort?.abort();if(breach){breach.dispose();breach=null;}}
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
+  // A slow but healthy page is revealed with its own progress at 4 s. Only a page
+  // that has still not rendered after 30 s is treated as a failure.
+  var NAVIGATION_REVEAL_MS=4000,NAVIGATION_FAILURE_MS=30000,navigationFailureTimer=null;
   function navigationImageReady(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
     return new Promise(function(resolve){
@@ -76,7 +106,7 @@
     });
     return navigationAssets;
   }
-  function revealNavigation(terminal){
+  function revealNavigation(terminal,state){
     if(!navigationTransition)return;
     var transition=navigationTransition;
     if(terminal)navigationRecovering=true;
@@ -85,10 +115,10 @@
       clearTimeout(navigationTimer);
       document.documentElement.classList.remove('apx-navigation-waiting');
       document.documentElement.classList.add('apx-navigation-ready');
-      document.documentElement.dataset.navigationState=terminal?'recovery':'ready';
+      document.documentElement.dataset.navigationState=state||(terminal?'recovery':'ready');
     });
   }
-  function navigationRenderComplete(){navigationRendered=true;revealNavigation(false);}
+  function navigationRenderComplete(){navigationRendered=true;clearTimeout(navigationFailureTimer);revealNavigation(false);}
   if(typeof window.addEventListener==='function')window.addEventListener('pagereveal',function(event){
     if(!event.viewTransition)return;
     navigationTransition=event.viewTransition;navigationRecovering=false;
@@ -96,12 +126,17 @@
     document.documentElement.classList.add('apx-navigation-waiting');
     document.documentElement.dataset.navigationState='rendering';
     navigationTimer=setTimeout(function(){
+      // Slow is not failed: show the destination and let it report its own progress.
+      revealNavigation(true,'loading');
+    },NAVIGATION_REVEAL_MS);
+    clearTimeout(navigationFailureTimer);
+    navigationFailureTimer=setTimeout(function(){
+      if(navigationRendered||pendingDone)return;
       window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
-      revealNavigation(true);
-    },30000);
+      document.documentElement.dataset.navigationState='recovery';
+    },NAVIGATION_FAILURE_MS);
     var cleanup=function(){
       clearTimeout(navigationTimer);navigationTransition=null;
-      if(!navigationRendered)window.ForgeLoader?.requireData?.();
       document.documentElement.classList.remove('apx-navigation-waiting');
       document.documentElement.classList.remove('apx-navigation-ready');
     };
@@ -109,13 +144,13 @@
     if(navigationRendered)revealNavigation(false);
   });
   var warmNavigation=false;
-  document.documentElement.classList.add('apx-booting');
+  if(entryPortal)document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
-    '<div class="apx-gate" role="status" aria-live="polite" aria-label="Loading">'+
+    '<div class="apx-gate '+(entryPortal?'breach-pending':'is-recovery')+'" role="status" aria-live="polite" aria-label="Loading">'+
       '<div class="apx-stage">'+
         '<div class="apx-pct">0%</div>'+
         '<div class="apx-portal">'+
@@ -179,7 +214,7 @@
     if(pendingDone)finish();
   }
   function mount(){
-    if(warmNavigation||pendingDone)return;
+    if(warmNavigation||pendingDone||(!entryPortal&&!pendingAuthUrl&&!pendingBlockedMessage))return;
     if(gate||document.querySelector('.apx-gate')){
       cache();gate.classList.remove('is-done');document.body.classList.add('apx-loading');apply();document.documentElement.classList.remove('apx-booting');return;
     }
@@ -244,7 +279,6 @@
   function finish(){
     disposeBreach();
     if(!gate||gate.classList.contains('is-done'))return;
-    document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));
     clearTimeout(noticeTimer);pendingPct=100;
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
@@ -258,7 +292,16 @@
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
+  window.addEventListener?.('pageshow',function(event){
+    if(!event.persisted)return;
+    entryPortal=false;disposeBreach();clearTimeout(noticeTimer);
+    document.documentElement.classList.remove('apx-booting');
+    if(!gate)return;
+    gate.classList.remove('breach-pending','ring-visible','is-breach');
+    if(pendingAuthUrl||pendingBlockedMessage){gate.classList.add('is-recovery');return;}
+    gate.remove();gate=null;document.body.classList.remove('apx-loading');
+  });
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
