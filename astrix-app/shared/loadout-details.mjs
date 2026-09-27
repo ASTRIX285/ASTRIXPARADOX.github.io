@@ -1,7 +1,7 @@
 import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const actionRows=[['equip','Equip'],['prepare','Prepare equip'],['identifiers','Edit identifiers'],['save','Save as PARADOX loadout'],['share','Share'],['clear','Clear slot']];
+const defaultActionRows=[['equip','Equip'],['prepare','Prepare equip'],['identifiers','Edit identifiers'],['save','Save as PARADOX loadout'],['share','Share'],['clear','Clear slot']];
 let sequence=0;
 function artwork(icon,label,className=''){
   const src=bungieArtwork(icon);
@@ -13,11 +13,11 @@ function socket(plug){
   return `<div class="apx-ld-socket" tabindex="0" data-socket-index="${esc(plug.socketIndex)}" title="${esc([label,plug.description,stats].filter(Boolean).join('\n'))}">${artwork(plug.icon,label)}<span>${esc(label)}</span>${stats?`<small>${esc(stats)}</small>`:''}</div>`;
 }
 export function renderLoadoutDetailsContent(model){
-  return (model.items||[]).map(item=>`<section class="apx-ld-item" data-item-kind="${esc(item.kind)}"><div class="apx-ld-gear">${artwork(item.icon,item.name)}<div><span class="apx-ld-kind">${esc(({subclass:'Subclass',weapon:'Weapon',armour:'Armour'})[item.kind]||'Saved item')}</span><h3>${esc(item.name||'Item unavailable')}</h3>${item.unresolved?'<p>Item unavailable</p>':''}</div></div><div class="apx-ld-groups">${(item.groups||[]).length?item.groups.map(group=>`<section class="apx-ld-group"><h4>${esc(group.label)}</h4><div class="apx-ld-sockets">${(group.plugs||[]).map(socket).join('')}</div></section>`).join(''):'<p class="apx-ld-note">No saved socket data</p>'}</div></section>`).join('')||'<p class="apx-ld-note">This slot has no saved items.</p>';
+  return (model.items||[]).map(item=>`<section class="apx-ld-item" data-item-kind="${esc(item.kind)}"><div class="apx-ld-gear">${artwork(item.icon,item.name)}<div><span class="apx-ld-kind">${esc(({subclass:'Subclass',weapon:'Weapon',armour:'Armour'})[item.kind]||'Saved item')}</span><h3>${esc(item.name||'Item unavailable')}</h3>${item.notOwned?'<p>Not in your inventory</p>':''}${item.alternative?`<p>Closest in your inventory: ${esc(item.alternative.definition?.displayProperties?.name||'')}</p>`:''}${item.match&&item.match.itemHash!==item.itemHash?`<p>Preselected: ${esc(item.match.definition?.displayProperties?.name||'')}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}${item.unresolved?'<p>Item unavailable</p>':''}</div></div><div class="apx-ld-groups">${(item.groups||[]).length?item.groups.map(group=>`<section class="apx-ld-group"><h4>${esc(group.label)}</h4><div class="apx-ld-sockets">${(group.plugs||[]).map(socket).join('')}</div></section>`).join(''):'<p class="apx-ld-note">No saved socket data</p>'}</div></section>`).join('')||'<p class="apx-ld-note">This slot has no saved items.</p>';
 }
 /** A presentation component only: no Bungie calls, account storage or source branching.
  * All source-specific actions and bindings are supplied by the host adapter. */
-export function openLoadoutDetails(model,{actions={},disabledReasons={},document:doc=globalThis.document,onClose=()=>{},returnFocus=doc?.activeElement}={}){
+export function openLoadoutDetails(model,{actions={},actionRows=defaultActionRows,disabledReasons={},document:doc=globalThis.document,onClose=()=>{},returnFocus=doc?.activeElement}={}){
   if(!doc?.body)throw new Error('Loadout Details requires a document.');
   const dialog=doc.createElement('dialog'),id=`apx-loadout-details-${++sequence}`;
   dialog.className='apx-loadout-details';dialog.setAttribute('aria-labelledby',`${id}-name`);dialog.setAttribute('aria-describedby',`${id}-source`);
@@ -66,7 +66,7 @@ export function openLoadoutDetails(model,{actions={},disabledReasons={},document
     if(key==='clear'){showPanel(`<h3>Clear slot ${esc(model.slotNumber)}</h3><p>Remove ${esc(model.name)} from this in-game slot? This does not delete your items.</p><div class="apx-ld-form-actions"><button type="button" data-ld-confirm-clear>Confirm clear slot</button><button type="button" data-ld-cancel>Cancel</button></div>`);return;}
     void run(async()=>{
       if(key==='equip'||key==='prepare'){setStatus('Checking the saved loadout…');review=await actions[key]();showPanel(reviewHtml(review));setStatus(review.ready?'Ready for your review. Nothing has been equipped.':'Apply is blocked. Review the reasons below.');}
-      else{await actions[key]();setStatus('Share file prepared.');}
+      else{await actions[key]();setStatus(key==='forge'?'Sent to Build Forge.':'Share file prepared.');}
     });
   });
   dialog.addEventListener('submit',event=>{

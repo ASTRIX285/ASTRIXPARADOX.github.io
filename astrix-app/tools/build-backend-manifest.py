@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'forge-manifest-worker/data'
 LIMIT = 2 * 1024 * 1024
 TYPES = (
-    'InventoryItem SandboxPerk Artifact PlugSet Stat StatGroup SocketCategory EquipableItemSet '
+    'InventoryItem InventoryBucket SandboxPerk Artifact PlugSet Stat StatGroup SocketCategory EquipableItemSet '
     'LoadoutName LoadoutIcon LoadoutColor ActivityMode Place Vendor '
     'PresentationNode Record Objective Collectible Metric GuardianRank GuardianRankConstants '
     'Destination Activity Checklist Location SocketType DamageType BreakerType PowerCap Season SeasonPass'
