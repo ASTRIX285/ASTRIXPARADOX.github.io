@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {readFile} from 'node:fs/promises';
+const files=['paradox-loadouts','prepared-page-cache','dim-share'].map(name=>new URL(`../../forge-auth-worker/test/${name}.test.ts`,import.meta.url).pathname);
+const result=spawnSync(process.execPath,['--experimental-strip-types','--test',...files],{stdio:'inherit'});
+if(result.status!==0)process.exit(result.status??1);
+const profile=await readFile(new URL('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs',import.meta.url),'utf8');
+for(const line of profile.split('\n').filter(line=>line.includes('[TRACE resolve]')||line.includes('[TRACE super]')))assert.match(line,/URLSearchParams.*has\('debug'\).*console\.log/);
+const share=await readFile(new URL('../core/dim-import/share.mjs',import.meta.url),'utf8');assert.doesNotMatch(share,/api\.destinyitemmanager\.com/);assert.match(share,/\/dim\/share\//);
+console.log('WORKER_LIMITS=PASS compressed saves, prepared byte shards, proxy, production traces');

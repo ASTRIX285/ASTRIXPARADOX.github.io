@@ -47,8 +47,8 @@ export function handlePreflight(request: Request, env: Env): Response {
     status: 204,
     headers: {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token, Content-Encoding",
       "Access-Control-Allow-Credentials": "true",
       "Access-Control-Max-Age": "600",
       "Vary": "Origin"

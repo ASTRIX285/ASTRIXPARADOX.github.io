@@ -161,8 +161,10 @@ export class AuthRecord extends DurableObject<Env> {
           : new Response(null, { status: 404 });
       }
       const body = await request.text();
-      const stored = await this.preparedPages.write(page, manifestVersion, body).catch(() => false);
-      return stored ? new Response(null, { status: 204 }) : new Response(null, { status: 413 });
+      try {
+        const stored = await this.preparedPages.write(page, manifestVersion, body);
+        return stored ? new Response(null, { status: 204 }) : new Response(null, { status: 413 });
+      } catch { return new Response(null, { status: 503 }); }
     }
     // Internal Durable Object route, never exposed by the public Worker router.
     if (request.method === "POST" && path === "/profile-snapshot") {

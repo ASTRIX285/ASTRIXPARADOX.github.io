@@ -95,7 +95,7 @@ function renderCurrentResidency(){
 }
 
 async function prepareResidentProfileBuild(){
-  const {normaliseLiveProfile}=await import('../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1');
+  const {normaliseLiveProfile}=await import('../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1');
   residentProfileBuild=normaliseLiveProfile(payload,session,activeCharacterId);
   return residentProfileBuild;
 }

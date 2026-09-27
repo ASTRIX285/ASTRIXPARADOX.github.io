@@ -1,7 +1,7 @@
-import {DimShareClient} from './share.mjs';
-import {ImportManifest,createImportStorage} from './cache.mjs';
-import {resolveDimLoadout} from './resolve.mjs';
-import {createDimActions} from './actions.mjs';
+import {DimShareClient} from './share.mjs?v=20260927-proxy-1';
+import {ImportManifest,createImportStorage} from './cache.mjs?v=20260927-proxy-1';
+import {resolveDimLoadout} from './resolve.mjs?v=20260927-proxy-1';
+import {createDimActions} from './actions.mjs?v=20260927-proxy-1';
 import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-dim-import-1';
 import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
@@ -28,8 +28,8 @@ export async function importDimLoadout(input,{returnFocus}={}){
   const [loadout,snapshot]=await Promise.all([shares.load(input),manifest.ready()]);
   const now=context(),active=sessionBinding(now.session);
   if(now.characterId!==before.characterId||active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType)throw new Error('The account or Guardian changed. Paste the link again.');
-  const model=resolveDimLoadout(loadout,{snapshot,profile:now.profile,binding});
-  const actions=createDimActions(model,{getContext:context,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1')).saveParadoxLoadout(value),send,refresh:()=>document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'dim-apply'}}))});
+  const model=resolveDimLoadout(loadout,{snapshot,profile:now.profile,binding,currentSeasonNumber:globalThis.FORGE_PAGE_PAYLOAD?.currentSeasonNumber});
+  const actions=createDimActions(model,{getContext:context,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1')).saveParadoxLoadout(value),send,refresh:()=>document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'dim-apply'}}))});
   current?.close();
   const disabledReasons={};if(!now.session.authenticated||!binding.characterId)for(const key of ['equip','save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
   current=openLoadoutDetails(model,{actions,actionRows:[['forge','Send to Build Forge'],['save','Save as PARADOX loadout'],['equip','Equip']],disabledReasons,returnFocus,onClose:()=>{current=null;}});

@@ -132,3 +132,22 @@ test('real local save and delete persist retry intent atomically with the snapsh
   await assert.rejects(saveParadoxLoadout(record()), /could not save/);
   delete (globalThis as any).localStorage;
 });
+
+test('large real-definition loadouts exceed the old 8 MiB request cap and sync losslessly',async()=>{
+ const {largeLoadoutFixture}=await import('./large-loadout-fixture.ts');const {items}=await largeLoadoutFixture();
+ const remote=server(),builds=Array.from({length:3},()=>record());
+ for(const build of builds)build.build.armour=Array.from({length:40},()=>items).flat();
+ assert.ok(new Blob([JSON.stringify(builds[0])]).size>MAX_LOADOUT_BYTES);
+ let compressed=0;
+ const pc=device(remote,builds),phone=device(remote);
+ await pc.sync({fetchImpl:async(url:any,init:any)=>{if(init.headers['Content-Encoding']==='gzip'){compressed++;assert.ok(init.body.byteLength<MAX_LOADOUT_BYTES);}return remote.request(url,init);}});
+ await phone.sync();assert.equal(compressed,3);assert.equal(phone.visible().length,3);
+ for(const build of builds)assert.deepEqual(phone.rows.get(build.id).build,build.build);
+});
+test('PUT aliases retain CSRF and compressed payloads reject corrupt input',async()=>{
+ const remote=server(),build=record(),url=`https://auth.astrixparadox.com/paradox/loadouts?membershipId=90001&membershipType=3&id=${build.id}`;
+ const body=JSON.stringify({baseVersion:0,mutationId:'put-fixture',deleted:false,record:build});
+ assert.equal((await remote.request(url,{method:'PUT',headers:{'Content-Type':'application/json'},body})).status,403);
+ assert.equal((await remote.request(url,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrfToken},body})).status,200);
+ assert.equal((await remote.request(url,{method:'PUT',headers:{'Content-Type':'application/json','Content-Encoding':'gzip','X-CSRF-Token':session.csrfToken},body:'not gzip'})).status,400);
+});

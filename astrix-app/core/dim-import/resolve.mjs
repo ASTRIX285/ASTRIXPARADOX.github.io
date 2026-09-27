@@ -64,7 +64,7 @@ function chooseArmour(items,index,profile,parameters,constraints){
   for(let pass=0;pass<5;pass++){let changed=false;for(const {row,candidates} of pools){const old=selected.get(row.bucketHash);let best=old,bestLoss=loss();for(const candidate of [...candidates].sort(stable)){selected.set(row.bucketHash,candidate);const next=loss();if(next<bestLoss){best=candidate;bestLoss=next;}}selected.set(row.bucketHash,best);changed||=best!==old;}if(!changed)break;}
   return selected;
 }
-export function resolveDimLoadout(loadout,{snapshot,profile={},binding={}}){
+export function resolveDimLoadout(loadout,{snapshot,profile={},binding={},currentSeasonNumber=null,now=Date.now()}){
   const {tables,version}=snapshot,requests=collectDimHashes(loadout),missing=[];let requested=0;
   for(const [type,hashes] of Object.entries(requests))for(const hash of hashes){requested++;if(!tables[type]?.[hash])missing.push(`${type}:${hash}`);}
   if(missing.length){const error=new Error(`The full manifest is missing ${missing.length} shared definitions. Retry after the manifest updates.`);error.unresolved=missing;throw error;}
@@ -104,7 +104,14 @@ export function resolveDimLoadout(loadout,{snapshot,profile={},binding={}}){
   group('Mods',(parameters.mods||[]).map(hash=>describe(ITEM,hash)));
   group('Armour perks',(parameters.perks||[]).map(hash=>describe('DestinySandboxPerkDefinition',hash)));
   for(const [hash,mods] of Object.entries(parameters.modsByBucket||{}))group(get('DestinyInventoryBucketDefinition',hash)?.displayProperties?.name||'Slot cosmetics',mods.map(hash=>describe(ITEM,hash)));
-  group('Artifact unlocks',(parameters.artifactUnlocks?.unlockedItemHashes||[]).map(hash=>describe(ITEM,hash)));
+  const artifactSeason=parameters.artifactUnlocks?.seasonNumber;
+  const seasonDefinition=Object.values(tables.DestinySeasonDefinition||{}).find(row=>row.seasonNumber===artifactSeason);
+  const seasonEnded=Number.isFinite(Date.parse(seasonDefinition?.endDate))&&Date.parse(seasonDefinition.endDate)<=now;
+  const oldArtifact=seasonEnded||(Number.isInteger(currentSeasonNumber)&&Number.isInteger(artifactSeason)&&artifactSeason<currentSeasonNumber);
+  group('Artifact unlocks',(parameters.artifactUnlocks?.unlockedItemHashes||[]).map(hash=>{
+    const plug=describe(ITEM,hash);
+    return oldArtifact&&!plug.retired?{...plug,retired:true,name:`Retired: ${plug.name}`,description:[plug.description,'From a previous seasonal artifact.'].filter(Boolean).join(' ')}:plug;
+  }));
   group('Set bonuses',Object.entries(parameters.setBonuses||{}).map(([hash,count])=>({...describe('DestinyEquipableItemSetDefinition',hash),description:`${count} pieces requested`})));
   group('Stat targets',statConstraints.map(row=>({...row,description:row.legacy?'Legacy stat target. Not applied.':`${row.minStat??0} to ${row.maxStat??200}`})));
   if(parameters.exoticArmorHash>0)group('Exotic armour',[describe(ITEM,parameters.exoticArmorHash)]);

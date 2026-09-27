@@ -1,3 +1,4 @@
+import { dimShareRoute } from './dim-share.ts';
 import {
   AuthRecord,
   type AccessBindingRecord,
@@ -2267,6 +2268,7 @@ export default {
         }
         return json({ error: "not_found" }, 404, { "Cache-Control": "no-store" });
       }
+      if (url.pathname.startsWith("/dim/share/")) return await dimShareRoute(request, (caches as CacheStorage & {default: Cache}).default);
       if (request.method === "OPTIONS") return handlePreflight(request, env);
       if (request.method === "GET" && (url.pathname === "/health" || url.pathname === "/v1/health")) {
         return json({ service: "forge-destiny-backend", status: "ready" });
@@ -2288,7 +2290,7 @@ export default {
       }
       if (request.method === "GET" && url.pathname === "/bungie/callback") return oauthCallback(request, env);
       if (request.method === "GET" && url.pathname === "/session") return await sessionRoute(request, env);
-      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/paradox/loadouts") return await paradoxLoadoutsRoute(request, env, authenticatedSession);
+      if (["GET", "POST", "PUT"].includes(request.method) && ["/paradox/loadouts", "/paradox-loadouts"].includes(url.pathname)) return await paradoxLoadoutsRoute(request, env, authenticatedSession);
       if (request.method === "GET" && url.pathname === "/session/recover") return await sessionRecoveryRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/account") return await bungieAccountRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/manifest") return await manifestMetadataRoute(request, env);

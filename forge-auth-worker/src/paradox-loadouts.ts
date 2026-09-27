@@ -1,7 +1,9 @@
+import { readBounded, gunzip } from './compressed-json.ts';
 import { json, withCors, allowedOrigins } from './web.ts';
 import type { SessionRecord } from './auth-record';
 
 export const MAX_LOADOUT_BYTES = 8 * 1024 * 1024;
+export const MAX_LOADOUT_DECODED_BYTES = 32 * 1024 * 1024;
 const ID = /^[a-zA-Z0-9_-]{1,128}$/;
 const DECIMAL = /^\d{1,30}$/;
 const PREFIX = 'paradox:meta:';
@@ -31,20 +33,13 @@ function validRecord(record: any, id: string, account: Account): record is Recor
 async function bodyFor(request: Request): Promise<any> {
   if (!request.headers.get('Content-Type')?.startsWith('application/json') || !request.body) return null;
   if (Number(request.headers.get('Content-Length')) > MAX_LOADOUT_BYTES) throw new RangeError('loadout_too_large');
-  const reader = request.body.getReader(), chunks: Uint8Array[] = [];
-  let size = 0;
+  const encoding = request.headers.get('Content-Encoding');
+  if (encoding && encoding !== 'gzip' && encoding !== 'identity') return null;
+  const bytes = await readBounded(request.body, MAX_LOADOUT_BYTES);
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.byteLength;
-      if (size > MAX_LOADOUT_BYTES) { await reader.cancel(); throw new RangeError('loadout_too_large'); }
-      chunks.push(value);
-    }
-  } finally { reader.releaseLock(); }
-  const bytes = new Uint8Array(size); let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-  try { return JSON.parse(new TextDecoder().decode(bytes)); } catch { return null; }
+    const body = encoding === 'gzip' ? await gunzip(bytes, MAX_LOADOUT_DECODED_BYTES) : new TextDecoder().decode(bytes);
+    return JSON.parse(body);
+  } catch (error) { if (error instanceof RangeError) throw error; return null; }
 }
 const chunkKey = (id: string, part: number) => `paradox:data:${id}:${part}`;
 async function envelope(tx: DurableObjectTransaction, meta: Meta): Promise<any> {
@@ -78,7 +73,7 @@ export async function storedParadoxLoadouts(request: Request, storage: Storage):
     const meta = await tx.get<Meta>(PREFIX + id);
     return meta ? json(await envelope(tx, meta)) : json({ error: 'loadout_not_found' }, 404);
   });
-  if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  if (!['POST', 'PUT'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
   let input: Mutation;
   try { input = await bodyFor(request); } catch (error) { if (error instanceof RangeError) return json({ error: 'loadout_too_large' }, 413); throw error; }
   if (!input || !Number.isSafeInteger(input.baseVersion) || input.baseVersion < 0 || !ID.test(input.mutationId || '') || typeof input.deleted !== 'boolean'
@@ -104,7 +99,7 @@ export async function paradoxLoadoutsRoute(request: Request, env: Env, authentic
   if (auth instanceof Response) return auth;
   const url = new URL(request.url), account = accountFor(url), membership = auth.session.activeDestinyMembership;
   if (!account || !membership || !belongs(membership, account)) return withCors(request, env, json({ error: 'membership_mismatch' }, 403));
-  if (request.method === 'POST' && (!request.headers.get('X-CSRF-Token') || request.headers.get('X-CSRF-Token') !== auth.session.csrfToken)) return withCors(request, env, json({ error: 'csrf_validation_failed' }, 403));
+  if (['POST', 'PUT'].includes(request.method) && (!request.headers.get('X-CSRF-Token') || request.headers.get('X-CSRF-Token') !== auth.session.csrfToken)) return withCors(request, env, json({ error: 'csrf_validation_failed' }, 403));
   const stub = env.AUTH_RECORDS.get(env.AUTH_RECORDS.idFromName(`paradox-loadouts:${account.membershipType}:${account.membershipId}`));
   const internal = new URL('https://internal/paradox-loadouts'); internal.search = url.search;
   const response = await stub.fetch(new Request(internal, request));
