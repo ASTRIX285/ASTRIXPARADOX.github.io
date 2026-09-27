@@ -87,3 +87,28 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution {
 .reports-run-group time{font-variant-numeric:tabular-nums}
 .reports-run-result{text-align:right}
 @media(max-width:479px){.reports-workspace .reports-run-group .reports-runs button{grid-template-columns:minmax(0,1fr);gap:4px}.reports-run-result{text-align:left}}
+
+/* One activity surface keeps the site map out of the report and fireteam rows. */
+.reports-run-page{position:relative;isolation:isolate;overflow:hidden;padding:16px;border:1px solid var(--apx-line);border-radius:10px;background:var(--apx-panel);color:var(--apx-text)}
+.reports-run-page>.reports-run-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:-2;pointer-events:none}
+.reports-run-page::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .38),rgb(0 0 0 / .72))}
+.reports-run-page .reports-run-feature{min-height:0;margin-bottom:12px;border-radius:0;background:transparent;overflow:visible;isolation:auto}
+.reports-run-page .reports-run-feature::after{display:none}
+.reports-run-page .reports-run-heading{padding:8px 4px 12px}
+.reports-run-page .reports-run-heading h1{font-size:clamp(24px,2.2vw,32px);margin-bottom:8px}
+.reports-run-page p{margin-block:8px;line-height:1.4}
+.reports-run-page .reports-badges:empty,.reports-run-page [data-share-status]:empty{display:none}
+.reports-run-modifiers{margin-top:8px;font-size:12px;max-width:70ch}
+.reports-run-modifiers summary{cursor:pointer;width:fit-content;font-weight:700}
+.reports-run-modifiers summary:focus-visible{outline:2px solid var(--apx-gold);outline-offset:4px}
+.reports-run-page>.reports-paging{gap:6px;margin-block:4px 10px}
+.reports-run-page>p{font-size:12px}
+/* The blurred activity shows subtly through an 88% panel, lending its own tint. */
+.reports-run-page .reports-table-scroll{border:1px solid var(--apx-line);border-radius:8px;background:var(--apx-panel);background:color-mix(in srgb,var(--apx-panel) 88%,transparent);backdrop-filter:blur(18px) saturate(.65);-webkit-backdrop-filter:blur(18px) saturate(.65)}
+.reports-run-page .reports-player-table{font-size:12px;line-height:1.3}
+.reports-run-page .reports-player-table :is(th,td){padding:7px 9px;border-bottom:1px solid var(--apx-line);border-right:1px solid var(--apx-line)}
+.reports-run-page .reports-player-table tr>:last-child{border-right:0}
+.reports-run-page .reports-player-table :is(thead,tfoot){background:color-mix(in srgb,var(--apx-panel) 94%,transparent)}
+.reports-run-page .reports-player-table tbody tr:nth-child(even){background:color-mix(in srgb,var(--apx-panel) 45%,transparent)}
+.reports-run-page .reports-player-table tbody tr:hover{background:color-mix(in srgb,var(--apx-panel) 72%,transparent)}
+@media(max-width:719px){.reports-run-page{padding:10px}.reports-run-page .reports-run-heading{padding:4px 2px 8px}.reports-run-page .reports-player-table :is(th,td){padding:6px 8px}}

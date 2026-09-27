@@ -2,7 +2,7 @@ import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mj
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {preloadReports} from '../../shared/reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1&recovery=20260927-1';
 import {accountKey,createReportsLoader} from './reports-data.mjs?v=20260927-three-stage-1';
-import {mountReports} from './reports-ui.mjs?v=20260927-difficulty-lists-1';
+import {mountReports} from './reports-ui.mjs?v=20260927-compact-activity-1';
 const root=document.querySelector('#reportsWorkspace');
 mountForgeShell({rootSelector:'#reportsWorkspace',layout:'destination'});
 let revision=0,displayedIdentity='',mounted=null;
