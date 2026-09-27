@@ -57,20 +57,10 @@ h=fixture();h.tables.DestinyInventoryItemDefinition[10000]={hash:10000,retired:t
 h=fixture();const owned=h.f.profile.characterEquipment.data['1'].items[0];h.f.profile.profileInventory.data.items.push({...owned,itemInstanceId:'999999'});h.f.profile.itemComponents.sockets.data[owned.itemInstanceId].sockets[0].plugHash=102;h.f.profile.itemComponents.sockets.data['999999']={sockets:[{plugHash:101},{plugHash:102}]};assert.equal(h.resolve().items[0].itemInstanceId,'999999','Best shared roll wins');
 h=fixture();const armour=h.f.profile.characterEquipment.data['1'].items[3];h.tables.DestinyInventoryItemDefinition[20000]={...h.tables.DestinyInventoryItemDefinition[armour.itemHash],hash:20000,equipableItemSetHash:600};h.tables.DestinyEquipableItemSetDefinition={600:{hash:600,displayProperties:{name:'Offline set'}}};h.f.profile.profileInventory.data.items.push({...armour,itemHash:20000,itemInstanceId:'999998'});h.loadout.parameters.setBonuses={600:1};assert.equal(h.resolve().items.find(row=>row.itemHash===armour.itemHash).match.itemHash,20000);
 
-function actions(){
- const h=fixture(),model=h.resolve(),context={session:h.f.session,profile:h.f.profile,characterId:'1',manifestVersion:h.f.manifestVersion},calls=[],events=[];
- const controller=createDimActions(model,{getContext:()=>context,save:value=>events.push(['save',value]),send:value=>events.push(['forge',value]),fetchImpl:async(url,options={})=>{
-  const path=new URL(url).pathname;calls.push({path,method:options.method||'GET'});
-  if(options.method!=='POST')return Response.json({profile:h.f.profile});
-  const body=JSON.parse(options.body);assert.equal(options.headers['X-CSRF-Token'],context.session.csrfToken);
-  if(path.endsWith('/equip-items'))return Response.json({ErrorCode:1,Response:{equipResults:body.itemIds.map(itemId=>({itemInstanceId:itemId,equipStatus:1}))}});
-  return Response.json({ErrorCode:1,Response:0});
- }});return {controller,context,calls,events};
-}
-let a=actions();await a.controller.save('Fixture');await a.controller.forge();assert.equal(a.calls.length,0);assert.equal(a.events.length,2);await assert.rejects(a.controller.apply({ready:true}),/Prepare/);
-let plan=await a.controller.equip();assert.equal(plan.ready,true);assert.ok(a.calls.every(row=>row.method==='GET'));await assert.rejects(a.controller.apply(structuredClone(plan)),/Prepare/);await a.controller.apply(plan);assert.ok(a.calls.some(row=>row.path.endsWith('/equip-items')));assert.ok(a.calls.every(row=>!row.path.endsWith('/loadout/equip')));await assert.rejects(a.controller.apply(plan),/Prepare/);
-a=actions();plan=await a.controller.equip();a.context.characterId='2';await assert.rejects(a.controller.apply(plan),/Guardian changed/);assert.ok(a.calls.every(row=>row.method==='GET'));
-a=actions();const pending=a.controller.equip();await assert.rejects(a.controller.equip(),/already running/);await pending;
+const actionFixture=fixture(),actionContext={session:actionFixture.f.session,profile:actionFixture.f.profile,characterId:'2'};
+const actionEvents=[];
+const controller=createDimActions(actionFixture.resolve(),{getContext:()=>actionContext,getSnapshot:()=>({version:actionFixture.f.manifestVersion,tables:actionFixture.tables}),save:value=>actionEvents.push(value),send:value=>actionEvents.push(value)});
+await controller.save('Fixture');await controller.forge();assert.equal(actionEvents.length,2);assert.equal(actionEvents[0].build.characterId,'1');assert.equal(actionEvents[1].characterId,'1');assert.deepEqual(Object.keys(controller).sort(),['forge','save']);
 const max=Math.max(...times);assert.ok(max<1000,`Warm resolve + HTML exceeded budget: ${max}ms`);
 console.log(`DIM_IMPORT=PASS resolve=${resolved}/${requested} (100%) shares=${ids.length} warm_resolve_html_max_ms=${max.toFixed(2)} browser_paint=CLAUDE_QA`);
 
@@ -116,7 +106,7 @@ assert.match(JSON.stringify(envelope),/Offline Ghost/);
 assert.equal(createParadoxLoadoutRecord({name:'Equipment test',build:imported}).build.equipment[0].itemHash,700001);
 assert.equal(imported.weapons.filter(Boolean).length,3);
 const iconHtml=renderLoadoutDetailsContent(model,{presentation:'icons'});
-assert.ok(iconHtml.indexOf('aria-label="Super &amp; abilities"')<iconHtml.indexOf('aria-label="Weapons"'));
+assert.ok(iconHtml.indexOf('aria-label="Super and abilities"')<iconHtml.indexOf('aria-label="Weapons"'));
 assert.ok(iconHtml.indexOf('aria-label="Weapons"')<iconHtml.indexOf('aria-label="Armour"'));
 assert.ok(iconHtml.indexOf('aria-label="Armour"')<iconHtml.indexOf('aria-label="Equipment"'));
 assert.match(iconHtml,/aria-label="Offline Ghost"/);

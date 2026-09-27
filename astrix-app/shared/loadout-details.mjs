@@ -1,4 +1,4 @@
-import {renderLoadoutIconLayout,bindLoadoutIconDetails} from './loadout-icon-layout.mjs?v=20260927-icons-1';
+import {renderLoadoutIconLayout,bindLoadoutIconDetails} from './loadout-icon-layout.mjs?v=20260927-adapt-1';
 import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

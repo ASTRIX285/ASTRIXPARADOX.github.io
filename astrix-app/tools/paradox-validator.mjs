@@ -24,6 +24,7 @@ const validators=[
   'test-loadout-details.mjs', // Prompt 3: resolved view and guarded actions.
   'test-loadout-details-backend.mjs',
   'test-dim-import.mjs',
+  'test-dim-adaptation.mjs',
   'test-dim-import-cache.mjs',
   'test-dim-manifest-smoke.mjs',
   'test-worker-limits.mjs',
