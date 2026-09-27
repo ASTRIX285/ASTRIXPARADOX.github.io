@@ -178,7 +178,7 @@ assert.ok(forgeLoaderHtml.includes('astrix-hero-cards.mjs?v=20260913-workspace-p
 assert.ok(characterHtml.includes('guardian-workspace-v2.mjs?v=20260916-equipped-source-1&amp;inventory=20260916-dim-geometry-1&amp;subclass=20260916-hash-1&amp;navigation=20260919-1'),'Character must load the current resilient transfer module graph');
 assert.ok(buildForgeHtml.includes('paradox-build-space.mjs?v=20260913-character-safe-2'),'Build Forge must load the partial-data-safe live module graph');
 assert.ok(missionReportsHtml.includes('mission-reports.mjs?v=20260906-page-payload-1'),'Mission Reports must load the prepared page payload module graph');
-assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
+assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1&amp;drilldown=20260927-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');
 assert.doesNotMatch(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:relative!important;[\s\S]*?top:auto!important;/,'Mission Reports must not reattach the Guardian ribbon to its report columns');
 assert.match(heroCss,/position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'Every hero-card topbar must remain fixed to the viewport top');

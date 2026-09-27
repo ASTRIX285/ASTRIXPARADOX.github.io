@@ -29,3 +29,25 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution {
   box-sizing:border-box;
   overflow-wrap:anywhere;
 }
+
+/* Reports drill-down: bounded columns, readable cards and paged run details. */
+.reports-workspace .reports-band{display:block;font-size:inherit}
+.reports-band .reports-stats{margin:0}
+.reports-band dd{text-align:right;overflow-wrap:anywhere}
+.reports-detail-card h3{padding-inline:16px}
+.reports-runs,.reports-fireteam{list-style:none;padding:0;margin:12px 0;display:grid;gap:12px}
+.reports-runs button{display:grid;gap:4px;width:100%;text-align:left}
+.reports-fireteam li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-items:start}
+.reports-fireteam img{width:48px;height:48px;object-fit:contain}
+.reports-fireteam h3{margin:0;overflow-wrap:anywhere}
+.reports-paging{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.reports-workspace button:disabled{opacity:.55;cursor:default}
+.reports-content,.reports-content>section,.reports-history{min-width:0;max-width:100%}
+@media(max-width:479px){
+  body.apx-destination-page #reportsWorkspace{padding-inline:16px;grid-template-columns:minmax(0,1fr)}
+  .reports-grid{--reports-card-width:min(320px,100%)}
+  .reports-workspace .reports-card{min-width:0;width:var(--reports-card-width);max-width:100%}
+  .reports-detail{grid-template-columns:minmax(0,1fr)}
+  .reports-stats>div{flex-wrap:wrap}
+  .reports-sidebar nav button{overflow-wrap:anywhere}
+}

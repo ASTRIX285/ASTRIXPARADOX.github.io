@@ -2,12 +2,13 @@ import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mj
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {preloadReports} from '../../shared/reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1';
 import {accountKey} from './reports-data.mjs?v=20260925-reports-20c';
-import {mountReports} from './reports-ui.mjs?v=20260925-reports-3&boxes=20260925-20c2';
+import {mountReports} from './reports-ui.mjs?v=20260925-reports-3&boxes=20260925-20c2&drilldown=20260927-1';
 const root=document.querySelector('#reportsWorkspace');
 mountForgeShell({rootSelector:'#reportsWorkspace',layout:'destination'});
-let revision=0,displayedIdentity='';
+let revision=0,displayedIdentity='',mounted=null;
 async function start({force=false,session:providedSession}={}){
   const current=++revision;
+  mounted?.destroy();mounted=null;
   root.innerHTML='<p role="status">Loading reports…</p>';
   try{
     const session=providedSession||await getBungieSession();
@@ -15,7 +16,7 @@ async function start({force=false,session:providedSession}={}){
     if(!session?.authenticated)return;
     const snapshot=await preloadReports(session,{force});
     if(current!==revision||!snapshot)return;
-    mountReports(root,snapshot);
+    mounted=mountReports(root,snapshot);
     window.ForgeLoader?.ready?.(root);
   }catch{
     if(current!==revision)return;
@@ -25,7 +26,7 @@ async function start({force=false,session:providedSession}={}){
   }
 }
 window.addEventListener('forge:bungie-session',event=>{
-  if(!event.detail?.authenticated){revision++;displayedIdentity='';root.replaceChildren();}
+  if(!event.detail?.authenticated){revision++;displayedIdentity='';mounted?.destroy();mounted=null;root.replaceChildren();}
   else if(accountKey(event.detail)!==displayedIdentity)void start({session:event.detail});
 });
 void start();

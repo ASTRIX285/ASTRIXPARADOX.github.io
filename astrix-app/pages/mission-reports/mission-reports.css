@@ -402,3 +402,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .mission-footer{flex-direction:column}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.mission-xp-track span,.mission-donut-value{transition:none}}
+
+/* Keep the mobile console within the viewport without clipping its contents. */
+@media(max-width:600px){
+  body.mission-reports-page .mission-console{width:100%;max-width:100%;box-sizing:border-box;grid-template-columns:minmax(0,1fr);padding-inline:12px}
+  .mission-console *{min-width:0;box-sizing:border-box}
+  .mission-console .mission-metrics,.mission-console .mission-right-rail{grid-template-columns:minmax(0,1fr)}
+  .mission-panel-heading{flex-wrap:wrap}
+  .mission-panel-heading select{max-width:100%}
+  .mission-tabs{flex-wrap:wrap;overflow:visible}
+  .mission-tabs button{min-height:40px;flex:1 1 auto}
+  .mission-feed-state{min-height:32px;flex:1 1 100%;margin-left:0}
+  .mission-console :is(p,h2,h3,dd,a){overflow-wrap:anywhere}
+}

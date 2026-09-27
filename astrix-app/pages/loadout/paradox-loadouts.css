@@ -229,3 +229,13 @@ html body #loadout-equipped .saved-build-tile.is-equipment::after{content:none!i
 /* PR #304 follow-up: end the workspace 24px after its content rather than
    inheriting the shared shell's 72px bottom spacer. */
 body.apx-destination-page > .apx-page-shell.paradox-loadout-shell{padding-bottom:24px}
+
+/* Page-only 390px containment; preserve the existing item sizes. */
+@media(max-width:600px){
+  body.apx-destination-page>.paradox-loadout-shell{box-sizing:border-box;grid-template-columns:minmax(0,1fr);min-width:0;max-width:100%}
+  .paradox-loadout-shell :is(.apx-section,.guardian-loadouts-container,.paradox-loadout-detail-head>div){min-width:0;max-width:100%;box-sizing:border-box}
+  .paradox-loadout-shell .apx-section-heading{flex-wrap:wrap;gap:8px}
+  .paradox-loadout-shell :is(h2,h3,p,.paradox-loadout-card b){overflow-wrap:anywhere}
+  .paradox-loadout-shell .saved-build-overview{max-width:100%;overflow-x:auto}
+  .paradox-loadout-shell .saved-build-stats{flex-wrap:wrap}
+}
