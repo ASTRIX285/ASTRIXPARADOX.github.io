@@ -51,3 +51,30 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution {
   .reports-stats>div{flex-wrap:wrap}
   .reports-sidebar nav button{overflow-wrap:anywhere}
 }
+
+/* Three stages share the Reports palette and stay inside the viewport. */
+.reports-workspace:has(.reports-stage){display:block}
+.reports-stage{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px}
+.reports-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.reports-tabs [aria-pressed=true]{outline:2px solid currentColor;outline-offset:1px}
+.reports-unplayed{opacity:.5}
+.reports-note{padding:0 16px;font-size:12px}
+.reports-table-scroll{max-width:100%;overflow-x:auto}
+.reports-player-table{width:100%;border-collapse:collapse}
+.reports-player-table th,.reports-player-table td{padding:10px;text-align:left;border-bottom:1px solid currentColor}
+.reports-badges{display:flex;flex-wrap:wrap;gap:8px}.reports-badges span{border:1px solid currentColor;border-radius:6px;padding:4px 8px}
+@media(max-width:900px){.reports-stage{grid-template-columns:minmax(0,1fr)}}
+
+.reports-stage:has(.reports-run-page){display:block}
+.reports-run-page{width:100%;min-width:0}
+.reports-run-feature{position:relative;isolation:isolate;width:100%;min-height:300px;overflow:hidden;border-radius:8px;background:var(--apx-panel);margin-bottom:16px}
+.reports-run-feature>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.reports-run-feature::after{content:'';position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .35),rgb(0 0 0 / .9));z-index:-1}
+.reports-run-heading{padding:24px;color:var(--apx-text)}
+.reports-run-heading h1{font-size:clamp(24px,3vw,44px);margin:0 0 12px;overflow-wrap:anywhere}
+.reports-run-heading h2{font-size:16px}
+.reports-player-table img{display:block;width:32px;height:32px;max-width:none;object-fit:contain}
+.reports-player-table a{color:inherit;overflow-wrap:anywhere}
+.reports-player-table{font-variant-numeric:tabular-nums;font-size:13px}
+.reports-player-table tfoot{font-weight:700}
+@media(max-width:719px){.reports-run-heading{padding:16px}.reports-player-table{min-width:850px}.reports-run-feature{min-height:260px}}

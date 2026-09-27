@@ -20,7 +20,7 @@ export function createReportsStore(indexedDB=globalThis.indexedDB){
     async set(key,value){memory.set(key,value);const db=await database();if(!db)return;await new Promise(resolve=>{const tx=db.transaction('snapshots','readwrite');tx.objectStore('snapshots').put(value,key);tx.oncomplete=tx.onerror=tx.onabort=resolve;});}
   };
 }
-export function createReportsLoader({origin='https://auth.astrixparadox.com',fetchImpl=globalThis.fetch?.bind(globalThis),store=createReportsStore(),now=Date.now,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),warmImages=async()=>{}}={}){
+export function createReportsLoader({origin='https://auth.astrixparadox.com',fetchImpl=globalThis.fetch?.bind(globalThis),store=createReportsStore(),now=Date.now,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),warmImages=async()=>{},subject=null}={}){
   const flights=new Map();
   async function request(url,{publicData=false}={}){
     for(let attempt=0;attempt<5;attempt++){
@@ -33,14 +33,14 @@ export function createReportsLoader({origin='https://auth.astrixparadox.com',fet
     }
     throw new Error('Reports unavailable');
   }
-  const route=(kind,characterId)=>{const url=new URL('/bungie/reports',origin);url.searchParams.set('kind',kind);if(characterId)url.searchParams.set('characterId',characterId);return url.href;};
+  const route=(kind,characterId)=>{const url=new URL('/bungie/reports',origin);url.searchParams.set('kind',kind);if(subject){url.searchParams.set('subjectType',subject.membershipType);url.searchParams.set('subjectId',subject.membershipId);}if(characterId)url.searchParams.set('characterId',characterId);return url.href;};
   async function manifest(){
     const slim=await request(new URL('/bungie/reports/catalogue',origin).href,{publicData:true});
     if(!slim.schema?.startsWith('3-')||!slim.version||!Array.isArray(slim.activities))throw new Error('Activity catalogue unavailable');
     return slimCatalogue(slim.activities);
   }
   async function load(session,{force=false}={}){
-    const identity=accountKey(session);if(!identity)return null;
+    const owner=accountKey(session);if(!owner)return null;const identity=subject?`${owner}:subject:${subject.membershipType}:${subject.membershipId}`:owner;
     if(flights.has(identity))return flights.get(identity);
     const task=(async()=>{
       const key=`account:catalogue-v3-boxes20c:${identity}`;
@@ -50,7 +50,7 @@ export function createReportsLoader({origin='https://auth.astrixparadox.com',fet
       const characters=Object.values(profile.characters?.data||{}).map(row=>({characterId:String(row.characterId),classType:row.classType}));
       if(!characters.length)throw new Error('Characters unavailable');
       const results=await Promise.all(characters.map(async character=>[character.characterId,await request(route('aggregate',character.characterId))]));
-      const snapshot={identity,fetchedAt:now(),characters,catalogue:groups,aggregates:Object.fromEntries(results),milestones:profile.characterProgressions?.data||{},records:{profile:profile.profileRecords?.data||null,characters:profile.characterRecords?.data||{}}};
+      const snapshot={identity,subject,fetchedAt:now(),characters,catalogue:groups,aggregates:Object.fromEntries(results),milestones:profile.characterProgressions?.data||{},records:{profile:profile.profileRecords?.data||null,characters:profile.characterRecords?.data||{}}};
       await warmImages(groups);
       await store.set(key,snapshot);return snapshot;
     })();
