@@ -1,3 +1,4 @@
+import { OAUTH_TTL_MS } from "../src/oauth-ui.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -13,7 +14,7 @@ test("actual AuthRecord snapshot handler returns diagnostics on a miss and does 
   const source = readFileSync(new URL("../src/auth-record.ts", import.meta.url), "utf8");
   const runtime = stripTypeScriptTypes(source.replace(/^import .*;\r?\n/gm, "")).replace(/export /g, "");
   class StubDurableObject { ctx: unknown; env: unknown; constructor(ctx: unknown, env: unknown) { this.ctx = ctx; this.env = env; } }
-  const AuthRecord = new Function("DurableObject", "ProfileSnapshotCache", "PreparedPageCache", "fetchProfileSnapshot", "snapshotDiagnostics", `${runtime}; return AuthRecord;`)(StubDurableObject, ProfileSnapshotCache, class {}, fetchProfileSnapshot, snapshotDiagnostics);
+  const AuthRecord = new Function("OAUTH_TTL_MS", "DurableObject", "ProfileSnapshotCache", "PreparedPageCache", "fetchProfileSnapshot", "snapshotDiagnostics", `${runtime}; return AuthRecord;`)(OAUTH_TTL_MS, StubDurableObject, ProfileSnapshotCache, class {}, fetchProfileSnapshot, snapshotDiagnostics);
   const rows = new Map<string, unknown>([["record", { kind: "session", absoluteExpiresAt: Date.now() + 60000, accessExpiresAt: Date.now() + 60000, accessToken: "private-test-token", activeDestinyMembership: { membershipId: "123", membershipType: 3 } }]]);
   const writes: Promise<void>[] = [];
   const storage = { get: async (key: string) => rows.get(key), put: async (key: string, value: unknown) => { rows.set(key, value); }, delete: async (key: string) => rows.delete(key) };

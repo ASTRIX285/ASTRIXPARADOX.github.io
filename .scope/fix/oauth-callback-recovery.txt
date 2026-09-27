@@ -1,0 +1,10 @@
+# OAuth navigation recovery and first-browser sign-in guidance
+forge-auth-worker/src/index.ts
+forge-auth-worker/src/auth-record.ts
+forge-auth-worker/src/oauth-ui.ts
+forge-auth-worker/test/oauth-callback.test.ts
+forge-sandbox/pages-worker.js
+astrix-app/pages/sign-in/index.html
+astrix-app/pages/sign-in/sign-in.css
+astrix-app/pages/sign-in/sign-in.mjs
+forge-auth-worker/test/profile-snapshot-error.test.ts
