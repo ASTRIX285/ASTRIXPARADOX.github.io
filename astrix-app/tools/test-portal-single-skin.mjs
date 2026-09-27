@@ -34,7 +34,11 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'],...(process.env.CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.CHROMIUM_EXECUTABLE_PATH}:{})});
- async function run(route,delay,{reduced=false,noWebGL=false,earlyDone=false,entry=true}={}){
+ // `delay` is how long the breach takes to become ready. By default a stub module
+ // stands in for the real WebGL breach, so the result never depends on the
+ // machine's GPU or CPU speed. One `real` smoke case uses the real module and
+ // only asserts a single skin per load.
+ async function run(route,delay,{reduced=false,noWebGL=false,earlyDone=false,entry=true,real=false}={}){
   const page=await browser.newPage({viewport:{width:1100,height:800},reducedMotion:reduced?'reduce':'no-preference'});
   const errors=[],diagnostics=[];let threeRequests=0;
   page.on('console',message=>{if(message.type()==='error')diagnostics.push(message.text());});
@@ -43,7 +47,10 @@ try{
    const url=new URL(request.request().url());
    if(url.origin!==origin)return request.abort();
    if(url.pathname.endsWith('/vendor/three/three.module.js')){
-    threeRequests++;await new Promise(resolve=>setTimeout(resolve,delay));
+    threeRequests++;if(real)await new Promise(resolve=>setTimeout(resolve,delay));
+   }
+   if(!real&&url.pathname.endsWith('/shared/astrix-breach-loader.mjs')){
+    return request.fulfill({contentType:'text/javascript',body:`export async function createBreach({signal}={}){const canvas=document.createElement('canvas');if(!(canvas.getContext('webgl2')||canvas.getContext('webgl')))throw new Error('WebGL unavailable');await new Promise(resolve=>setTimeout(resolve,${delay}));signal?.throwIfAborted?.();return {setProgress(){},dispose(){}};}`});
    }
    return request.continue();
   });
@@ -73,17 +80,18 @@ try{
   await page.goto(origin+`/astrix-app/pages/${route}/`,{waitUntil:'domcontentloaded',referer:origin+(entry?'/tools/':'/astrix-app/pages/loadout/')});
   if(earlyDone)await page.evaluate(()=>ForgeLoader.done());
   await page.waitForTimeout(2500);
-  const label=`${route} three=${delay}ms reduced=${reduced} noWebGL=${noWebGL} earlyDone=${earlyDone} entry=${entry}`;
-  const expected=earlyDone||!entry?null:delay>=1200||reduced||noWebGL?'ring':'breach';
+  const label=`${route} breachReady=${delay}ms real=${real} reduced=${reduced} noWebGL=${noWebGL} earlyDone=${earlyDone} entry=${entry}`;
+  const expected=earlyDone||!entry?null:real?'any':delay>=1200||reduced||noWebGL?'ring':'breach';
   const samples=await page.evaluate(()=>window.skinSamples);
   const states=[...new Set(samples.map(s=>s.chosen).filter(Boolean))];
-  assert.deepEqual(states,expected?[expected]:[],`${label}: exactly the expected final skin; ${diagnostics.join("; ")}`);
+  if(expected==='any')assert.equal(states.length,1,`${label}: exactly one skin per load; ${diagnostics.join("; ")}`);
+  else assert.deepEqual(states,expected?[expected]:[],`${label}: exactly the expected final skin; ${diagnostics.join("; ")}`);
   assert.ok(samples.length>=10,`${label}: sampled throughout load`);
-  if(expected==='breach')assert.ok(!samples.some(s=>s.ring),`${label}: no ring before breach`);
+  if(expected==='breach'||(expected==='any'&&states[0]==='breach'))assert.ok(!samples.some(s=>s.ring),`${label}: no ring before breach`);
   assert.ok(!samples.some(s=>s.ring&&s.breach),`${label}: no simultaneous skins`);
   assert.ok(!samples.some(s=>s.pending&&(s.ring||s.pct)),`${label}: pending is neutral`);
   if(!earlyDone){
-   if(expected)assert.ok(samples.some(s=>s[expected]),`${label}: chosen skin actually shown`);
+   if(expected&&expected!=='any')assert.ok(samples.some(s=>s[expected]),`${label}: chosen skin actually shown`);
    assert.equal(await page.locator('.apx-gate').count(),entry?1:0);
    await page.evaluate(()=>{ForgeLoader.authRequired('/connect');ForgeLoader.mount();});
    await page.locator('.apx-auth-button').first().waitFor({state:'visible'});
@@ -106,6 +114,7 @@ try{
  await run('vault',200,{reduced:true});
  await run('vault',200,{noWebGL:true});
  await run('vault',1500,{earlyDone:true});
+ await run('vault',200,{real:true});
  // Real native navigation holds the outgoing snapshot until a populated
  // destination emits readiness. There is no portal on the destination.
  const transfer=await browser.newPage();

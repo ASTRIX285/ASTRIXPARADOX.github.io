@@ -172,9 +172,10 @@ function transitionHarness({headerPending=false}={}){
   const document={referrer:'https://astrixparadox.com/tools/',documentElement:{classList,dataset:{}},body:{classList,appendChild:node=>{gate=node;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:selector==='[data-forge-hero-cards]'&&headerPending?{}:null,querySelectorAll:selector=>selector==='img'?[image]:[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return item();}}),addEventListener(name,fn){documentEvents.set(name,[...(documentEvents.get(name)||[]),fn]);}};
   const window={innerWidth:400,innerHeight:800,location:{origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/loadout/'},addEventListener:(name,fn)=>events.set(name,fn)};
   runInNewContext(portalJs,{URL,window,document,sessionStorage:{getItem:()=>null,removeItem(){}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>fn(),Promise,Date});
+  let blockedCount=0;const realBlocked=window.ForgeLoader.blocked;window.ForgeLoader.blocked=message=>{blockedCount++;return realBlocked(message);};
   let finishTransition;
   const transition={finished:new Promise(resolve=>{finishTransition=resolve;})};
-  return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===4000).fn(),gate:()=>gate};
+  return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===4000).fn(),failure:()=>[...timers.values()].find(row=>row.ms===30000)?.fn(),blockedCalls:()=>blockedCount,gate:()=>gate};
 }
 const settleMicrotasks=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
 const reveal=transitionHarness();reveal.emit();
@@ -187,7 +188,10 @@ reveal.image();await settleMicrotasks();
 assert.ok(reveal.classes.has('apx-navigation-ready'));assert.equal(reveal.document.documentElement.dataset.navigationState,'ready');
 reveal.finish();await settleMicrotasks();assert.equal(reveal.classes.has('apx-navigation-waiting'),false);
 const recover=transitionHarness();recover.emit();recover.loader.blocked('Synthetic failure');await settleMicrotasks();assert.equal(recover.document.documentElement.dataset.navigationState,'recovery');
-const stalled=transitionHarness();stalled.emit();stalled.timeout();await settleMicrotasks();assert.equal(stalled.document.documentElement.dataset.navigationState,'recovery','A stalled page must release to retry instead of permanently freezing the old view');
+const stalled=transitionHarness();stalled.emit();stalled.timeout();await settleMicrotasks();assert.equal(stalled.document.documentElement.dataset.navigationState,'loading','A slow but healthy page is revealed at 4 s with its own progress, never an error');
+assert.equal(stalled.blockedCalls(),0,'A slow page must not show the failure screen at 4 s');
+stalled.failure();await settleMicrotasks();assert.equal(stalled.blockedCalls(),1,'A page that never renders is blocked at 30 s');assert.equal(stalled.document.documentElement.dataset.navigationState,'recovery');
+const slowThenReady=transitionHarness();slowThenReady.emit();slowThenReady.timeout();slowThenReady.loader.done();slowThenReady.failure();await settleMicrotasks();assert.equal(slowThenReady.blockedCalls(),0,'A page that renders late is never blocked');
 assert.match(portalCss,/@view-transition\{navigation:auto\}/);
 assert.match(portalCss,/apx-navigation-waiting::view-transition-old\(root\)\{animation:apxNavigationHold 1s both paused/);
 assert.match(portalCss,/prefers-reduced-motion:reduce[\s\S]*?apx-navigation-ready[\s\S]*?animation-duration:\.001s/);

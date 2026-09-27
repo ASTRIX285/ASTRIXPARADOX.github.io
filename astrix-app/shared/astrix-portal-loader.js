@@ -55,6 +55,9 @@
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
+  // A slow but healthy page is revealed with its own progress at 4 s. Only a page
+  // that has still not rendered after 30 s is treated as a failure.
+  var NAVIGATION_REVEAL_MS=4000,NAVIGATION_FAILURE_MS=30000,navigationFailureTimer=null;
   function navigationImageReady(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
     return new Promise(function(resolve){
@@ -103,7 +106,7 @@
     });
     return navigationAssets;
   }
-  function revealNavigation(terminal){
+  function revealNavigation(terminal,state){
     if(!navigationTransition)return;
     var transition=navigationTransition;
     if(terminal)navigationRecovering=true;
@@ -112,10 +115,10 @@
       clearTimeout(navigationTimer);
       document.documentElement.classList.remove('apx-navigation-waiting');
       document.documentElement.classList.add('apx-navigation-ready');
-      document.documentElement.dataset.navigationState=terminal?'recovery':'ready';
+      document.documentElement.dataset.navigationState=state||(terminal?'recovery':'ready');
     });
   }
-  function navigationRenderComplete(){navigationRendered=true;revealNavigation(false);}
+  function navigationRenderComplete(){navigationRendered=true;clearTimeout(navigationFailureTimer);revealNavigation(false);}
   if(typeof window.addEventListener==='function')window.addEventListener('pagereveal',function(event){
     if(!event.viewTransition)return;
     navigationTransition=event.viewTransition;navigationRecovering=false;
@@ -123,12 +126,17 @@
     document.documentElement.classList.add('apx-navigation-waiting');
     document.documentElement.dataset.navigationState='rendering';
     navigationTimer=setTimeout(function(){
+      // Slow is not failed: show the destination and let it report its own progress.
+      revealNavigation(true,'loading');
+    },NAVIGATION_REVEAL_MS);
+    clearTimeout(navigationFailureTimer);
+    navigationFailureTimer=setTimeout(function(){
+      if(navigationRendered||pendingDone)return;
       window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
-      revealNavigation(true);
-    },4000);
+      document.documentElement.dataset.navigationState='recovery';
+    },NAVIGATION_FAILURE_MS);
     var cleanup=function(){
       clearTimeout(navigationTimer);navigationTransition=null;
-      if(!navigationRendered)window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
       document.documentElement.classList.remove('apx-navigation-waiting');
       document.documentElement.classList.remove('apx-navigation-ready');
     };
