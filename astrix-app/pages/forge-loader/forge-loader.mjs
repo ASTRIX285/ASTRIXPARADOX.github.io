@@ -10,7 +10,7 @@ import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionSt
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourSetHash,armourStatVector} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
-import {compatibleWithClass,exoticCatalogueGroups,naturalSetProtocols,openProtocolSolverEvidence,ownedExoticGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2';
+import {compatibleWithClass,exoticCatalogueGroups,naturalSetProtocols,openProtocolSolverEvidence,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets,weaponCatalystState} from './forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
 import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from './forge-loader-build-handoff.mjs?v=20260906-review-layout-1&perf=20260927-1';
 import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1';
 import {forgeLoaderEvaluateReady,forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
@@ -40,6 +40,7 @@ let catalogue={armour:[],postmasterByCharacter:{}};
 let activeCharacterId=text(params.get('characterId'));
 let activeCharacterClass='';
 let selectedExoticKey='';
+let selectedExoticWeaponKey='';
 let setSelections=[];
 let matchedBuilds=[];
 let selectedCandidateIndex=-1;
@@ -130,6 +131,10 @@ async function loadVerifiedPayload({force=false,showProgress=true}={}){
 }
 
 function armourItems(){return catalogue.armour.filter(item=>compatibleWithClass(item,activeCharacterClass));}
+// Exotic weapons are not class-restricted, and only the profile's owned instances are ever listed.
+function weaponItems(){return (catalogue.items||[]).filter(item=>item?.equipmentGroup?.kind==='weapon');}
+function exoticWeaponGroups(){return ownedExoticWeaponGroups(weaponItems());}
+function selectedExoticWeapon(){return exoticWeaponGroups().find(group=>group.key===selectedExoticWeaponKey)||null;}
 function inventoryDefinitions(){return guardianManifest.tables.get('DestinyInventoryItemDefinition')||payload?.definitions||{};}
 function equipableSetDefinitions(){return guardianManifest.tables.get('DestinyEquipableItemSetDefinition')||payload?.equipableItemSets||{};}
 function sandboxPerkDefinitions(){return guardianManifest.tables.get('DestinySandboxPerkDefinition')||payload?.sandboxPerks||{};}
@@ -209,6 +214,20 @@ function bonusReason(row,count,choice){
   if(count===2&&setSelections.filter(selection=>selection.count===2).length>=2)return 'TWO BONUS LIMIT REACHED';
   if(choice.disabled)return `${row.usableSlots} COMPATIBLE SLOT${row.usableSlots===1?'':'S'}`;
   return choice.effect.description||`${count}-piece set bonus`;
+}
+
+function renderExoticWeapons(){
+  const host=byId('forgeExoticWeaponSlots');if(!host)return;
+  const groups=exoticWeaponGroups();
+  if(!groups.length){host.innerHTML='<div class="forge-empty">No Exotic weapons on this Guardian.</div>';byId('forgeWeaponAnchorStatus').textContent='No Exotic weapon anchor selected.';return;}
+  host.innerHTML=groups.map(group=>{
+    const selected=group.key===selectedExoticWeaponKey;
+    const catalystBadge=!group.catalyst.present?'':`<em class="forge-weapon-catalyst${group.catalyst.active?' is-active':group.catalyst.unlocked?' is-unlocked':''}">${group.catalyst.active?'CATALYST ACTIVE':group.catalyst.unlocked?'CATALYST INSERTED':'CATALYST NOT COMPLETE'}</em>`;
+    return `<button type="button" class="forge-weapon-slot${selected?' is-selected':''}" data-exotic-weapon-key="${esc(group.key)}" aria-pressed="${selected}" data-inspect-item="${esc(itemKey(group.representative))}"><img src="${esc(group.icon)}" alt="">
+      <span><b>${esc(group.name)}</b><small>${esc(group.weaponType)}</small>${catalystBadge}</span></button>`;
+  }).join('');
+  const anchor=selectedExoticWeapon();
+  byId('forgeWeaponAnchorStatus').textContent=anchor?`${anchor.name} anchored${anchor.catalyst.present?(anchor.catalyst.active?', catalyst active':anchor.catalyst.unlocked?', catalyst inserted but not complete':', catalyst not unlocked'):''}.`:'No Exotic weapon anchor selected. Optional: pick one to lock it into generation.';
 }
 
 function renderSetBonuses(){
@@ -345,6 +364,28 @@ function verifiedTraitContext(effect){
   return {hash:Number.isInteger(hash)&&hash>0?hash:null,name:text(effect.name),description:text(effect.description),icon:text(effect.icon)};
 }
 
+// The chosen Exotic weapon, its element (Bungie's own damage type, the only claim never inferred) and its
+// catalyst state, exactly as read from the profile. definitionOnly perks (no catalyst effect) are never included.
+function forgeWeaponAnchorContext(){
+  const weaponGroup=selectedExoticWeapon();if(!weaponGroup)return null;
+  const weapon=weaponGroup.representative;if(!weapon)return null;
+  const evidencePerks=[weapon.weaponSemantics?.intrinsic,...(weapon.weaponSemantics?.exoticTraits||[]),...(weapon.weaponSemantics?.selectedPerks||[])].filter(Boolean);
+  const catalyst=weaponGroup.catalyst;
+  if(catalyst.active&&weapon.weaponSemantics?.catalyst)evidencePerks.push(weapon.weaponSemantics.catalyst);
+  return {
+    identityKey:weaponGroup.key,
+    name:weaponGroup.name,
+    itemHashes:weaponGroup.hashes,
+    selectedItemHash:Number(weapon.itemHash??weapon.hash)||null,
+    selectedItemInstanceId:text(weapon.itemInstanceId),
+    bucketHash:weaponGroup.bucketHash,
+    elementHash:Number(weapon.damageTypeHash)||null,
+    element:text(weapon.elementDefinition?.displayProperties?.name),
+    catalyst:{present:catalyst.present,unlocked:catalyst.unlocked,active:catalyst.active},
+    perks:evidencePerks.map(verifiedTraitContext).filter(Boolean)
+  };
+}
+
 function forgeLoaderDecision(candidate,index){
   const exoticGroup=selectedExotic(),exoticItem=candidate?.items?.find(item=>item?.isExotic)||null;
   if(!exoticGroup||!exoticItem)return null;
@@ -352,6 +393,7 @@ function forgeLoaderDecision(candidate,index){
   const setOptions=setBonusOptions(armourItems(),exoticGroup,setSelections);
   return {
     schemaVersion:1,
+    weaponAnchor:forgeWeaponAnchorContext(),
     buildAnchor:{
       identityKey:exoticGroup.key,
       name:exoticGroup.name,
@@ -534,6 +576,13 @@ async function calculateBuilds(options={}){
 
 function resetResults(){matchedBuilds=[];selectedCandidateIndex=-1;expandedCandidateIndex=-1;visibleCandidateCount=0;targetMaximums=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,0]));selectedSlots.clear();renderStaged();renderCandidates();}
 
+function selectExoticWeapon(key){
+  const next=exoticWeaponGroups().find(group=>group.key===String(key||''));
+  selectedExoticWeaponKey=next&&next.key===selectedExoticWeaponKey?'':next?.key||'';
+  renderExoticWeapons();
+  byId('forgeRuntimeStatus').textContent=selectedExoticWeaponKey?`${next.name} anchored. Generation will keep it in the Exotic weapon slot.`:'Exotic weapon anchor cleared.';
+}
+
 function selectExotic(key){
   const next=exoticGroups().find(group=>group.owned&&group.key===String(key||''));if(!next)return;
   selectedExoticKey=next.key;setSelections=[];openProtocolChosen=false;resetResults();renderExotics();renderSetBonuses();configureStats({reset:true});
@@ -658,6 +707,7 @@ async function evaluateInBuildForge(){
 
 function installEvents(){
   byId('forgeExoticSlots')?.addEventListener('click',event=>{const button=event.target.closest('[data-exotic-key]');if(button)selectExotic(button.dataset.exoticKey);});
+  byId('forgeExoticWeaponSlots')?.addEventListener('click',event=>{const button=event.target.closest('[data-exotic-weapon-key]');if(button)selectExoticWeapon(button.dataset.exoticWeaponKey);});
   byId('forgeSetList')?.addEventListener('click',event=>{if(event.target.closest('[data-open-set-protocol]'))openSetProtocol();});
   byId('forgeSetList')?.addEventListener('change',event=>{const input=event.target.closest('[data-set-hash]');if(input)toggleBonus(input);});
   byId('forgeStatTargets')?.addEventListener('input',event=>{if(event.target.matches('[data-stat-priority]'))return;const label=event.target.closest('[data-target-stat]');if(!label)return;updateTargetLabel(label);resetResults();configureStats();byId('forgeRuntimeStatus').textContent='Stat target changed. Calculate to rank every legal combination.';});
@@ -677,7 +727,7 @@ function installEvents(){
   document.addEventListener('focusin',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showInspect(target);});
   document.addEventListener('focusout',event=>{const target=event.target.closest('[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideInspect();});
   addEventListener('resize',hideInspect,{passive:true});addEventListener('scroll',hideInspect,{passive:true,capture:true});
-  document.addEventListener('forge:character-selected',event=>{if(!payload)return;void(async()=>{resolveActiveCharacter(event.detail?.characterId);selectedExoticKey='';setSelections=[];resetResults();renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});byId('forgeRuntimeStatus').textContent=`${classLabel()} selected. Loading resident Forge sources.`;try{await completeResidentPreparation();renderHero();renderStaged();byId('forgeRuntimeStatus').textContent=residentReady?`${classLabel()} ready. Select an Exotic.`:'One or more Forge sources remain unavailable. Build Forge handoff stays locked.';}catch(error){console.error('[Forge Loader] Resident character preparation failed.',error);renderResidency('resident');byId('forgeRuntimeStatus').textContent=error?.message||'Character sources remain unavailable.';}})();});
+  document.addEventListener('forge:character-selected',event=>{if(!payload)return;void(async()=>{resolveActiveCharacter(event.detail?.characterId);selectedExoticKey='';selectedExoticWeaponKey='';setSelections=[];resetResults();renderHero();renderExotics();renderExoticWeapons();renderSetBonuses();configureStats({reset:true});byId('forgeRuntimeStatus').textContent=`${classLabel()} selected. Loading resident Forge sources.`;try{await completeResidentPreparation();renderHero();renderStaged();byId('forgeRuntimeStatus').textContent=residentReady?`${classLabel()} ready. Select an Exotic.`:'One or more Forge sources remain unavailable. Build Forge handoff stays locked.';}catch(error){console.error('[Forge Loader] Resident character preparation failed.',error);renderResidency('resident');byId('forgeRuntimeStatus').textContent=error?.message||'Character sources remain unavailable.';}})();});
   document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','loadout'));
 }
 
@@ -713,6 +763,7 @@ async function applyForgeRefresh(next,{reason='poll'}={}){
   reconcileForgeRefresh();
   renderHero();
   renderExotics();
+  renderExoticWeapons();
   renderSetBonuses();
   configureStats();
   renderStaged();
@@ -731,6 +782,7 @@ async function checkForNewExotic(){
   const previous=new Set(catalogue.armour.filter(item=>item.isExotic).map(itemKey));
   catalogue=mergeExoticCheckCatalogue(catalogue,freshCatalogue);
   renderExotics();
+  renderExoticWeapons();
   const added=catalogue.armour.filter(item=>item.isExotic&&!previous.has(itemKey(item))).length;
   byId('forgeRuntimeStatus').textContent=added?`${added} newly detected Exotic armour instance${added===1?'':'s'} available.`:'Exotic check complete. No new Exotic armour found.';
   return next;
@@ -763,7 +815,7 @@ async function init(){
     if(session?.authenticated!==true){byId('forgeSignedOut').hidden=false;byId('forgeConnectionState').textContent='SIGNED OUT';byId('forgeHeaderState').textContent='CONNECT BUNGIE';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
     startForgeRefresh();
     byId('forgeConnectionState').textContent='LOADING';payload=await loadVerifiedPayload();
-    reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);renderResidency('resident');await completeResidentPreparation();
+    reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);renderExoticWeapons();renderResidency('resident');await completeResidentPreparation();
     renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});
     void forgeRefreshController.refreshNow().catch(()=>{});
     byId('forgeConnectionState').textContent=residentReady?'FORGE SOURCES READY':'FORGE SOURCES INCOMPLETE';

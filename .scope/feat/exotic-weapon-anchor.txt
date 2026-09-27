@@ -1,0 +1,9 @@
+# Exotic weapon anchor + Forge Loader results page. Scope exception approved by Miguel (as #333):
+# Forge Loader and Build Forge engine .mjs files, plus their pages, styles, docs and tests.
+# Grown per numbered step as new files are created (validate-scope-guard rejects entries for files
+# that do not exist yet).
+CLAUDE.md
+astrix-app/pages/forge-loader/forge-loader.mjs
+astrix-app/pages/forge-loader/forge-loader-model.mjs
+astrix-app/pages/forge-loader/forge-loader.css
+astrix-app/pages/forge-loader/index.html
