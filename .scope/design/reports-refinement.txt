@@ -1,0 +1,7 @@
+PRODUCT.md
+.impeccable/config.json
+astrix-app/pages/reports/DESIGN.md
+astrix-app/pages/reports/index.html
+astrix-app/pages/reports/reports-ui.mjs
+astrix-app/pages/reports/reports.css
+astrix-app/pages/reports/reports.mjs
