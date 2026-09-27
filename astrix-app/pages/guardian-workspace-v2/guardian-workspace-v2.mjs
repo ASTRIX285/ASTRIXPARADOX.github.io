@@ -1,14 +1,14 @@
-import '../../core/dim-import/entry.mjs?v=20260927-dim-import-2&limits=20260927-1&forge=20260927-1';
+import '../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1';
 import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1&plain=20260925-2";
 import {
   normaliseLiveProfile,
   loadSelectedLoadout,
   characterRoster,
   selectLiveCharacter
-} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1&recovery=20260927-2";
-import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&recovery=20260927-2";
+} from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1&recovery=20260927-3";
+import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&recovery=20260927-3";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-2";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-3";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1";
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1";

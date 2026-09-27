@@ -1,6 +1,6 @@
 import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-2';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260913-square-intrinsic-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';

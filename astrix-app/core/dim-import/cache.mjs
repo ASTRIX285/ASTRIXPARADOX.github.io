@@ -15,7 +15,7 @@ export function createImportStorage(indexedDB=globalThis.indexedDB){
 export const IMPORT_TABLES=Object.freeze(['DestinyInventoryItemDefinition','DestinySeasonDefinition','DestinySandboxPerkDefinition','DestinyStatDefinition','DestinySocketCategoryDefinition','DestinySocketTypeDefinition','DestinyPlugSetDefinition','DestinyEquipableItemSetDefinition','DestinyInventoryBucketDefinition','DestinyLoadoutNameDefinition','DestinyLoadoutIconDefinition','DestinyLoadoutColorDefinition']);
 export class ImportManifest {
   constructor({storage=createImportStorage(),fetchImpl=globalThis.fetch,origin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com'}={}){Object.assign(this,{storage,fetchImpl,origin});this.snapshot=null;this.pending=null;this.restorePending=null;}
-  async json(path){const response=await this.fetchImpl(`${this.origin}/bungie/manifest/import/${path}`,{credentials:'omit',signal:AbortSignal.timeout(30000)});if(!response.ok)throw new Error('The full manifest is unavailable. Retry when it finishes updating.');return response.json();}
+  async json(path){const response=await this.fetchImpl.call(globalThis,`${this.origin}/bungie/manifest/import/${path}`,{credentials:'omit',signal:AbortSignal.timeout(30000)});if(!response.ok)throw new Error('The full manifest is unavailable. Retry when it finishes updating.');return response.json();}
   async ready(){
     if(this.snapshot)return this.snapshot;
     if(!this.restorePending)this.restorePending=(async()=>{
