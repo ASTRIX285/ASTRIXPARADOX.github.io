@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'forge-manifest-worker/data'
 LIMIT = 2 * 1024 * 1024
+PREPARATION_VERSION = 1
 TYPES = (
     'InventoryItem InventoryBucket SandboxPerk Artifact PlugSet Stat StatGroup SocketCategory EquipableItemSet '
     'LoadoutName LoadoutIcon LoadoutColor ActivityMode Place Vendor '
@@ -266,12 +267,12 @@ def retired_definitions(table, current_rows, previous, version):
 
 
 def validate_saved_coverage(index, version, required):
-    # A code/schema change never authorizes re-downloading unchanged Bungie data.
+    # Fully prepared snapshots remain a no-op while Bungie's version is unchanged.
     if index.get('schemaVersion') != 2 or index.get('manifestVersion') != version:
         raise ValueError('Stored manifest schema/version mismatch')
     missing = set(required) - set(index.get('tables', {}))
     if missing:
-        raise ValueError('Backend coverage awaits a new Bungie version: ' + ', '.join(sorted(missing)))
+        raise ValueError('Backend coverage is incomplete: ' + ', '.join(sorted(missing)))
     for section, prefix in (('tables', ''), ('pageTables', 'page'), ('retiredTables', 'retired')):
         for table, descriptor in index.get(section, {}).items():
             for _ in saved_shards(OUT / prefix / table, descriptor, version):
@@ -336,10 +337,24 @@ def main():
     if OUT.exists() and not current.exists() and any(OUT.iterdir()):
         raise ValueError('Stored manifest index is missing; preserve the snapshot for recovery')
     previous = json.loads(current.read_text(encoding='utf-8')) if current.exists() else {}
-    if previous.get('manifestVersion') == version:
+    same_version = previous.get('manifestVersion') == version
+    upgrade = same_version and (
+        previous.get('preparationVersion') != PREPARATION_VERSION
+        or not set(required).issubset(previous.get('tables', {}))
+    )
+    if same_version and not upgrade:
         validate_saved_coverage(previous, version, required)
         print('BACKEND_MANIFEST_CURRENT=' + version)
         return False
+    if upgrade:
+        if previous.get('schemaVersion') != 2:
+            raise ValueError('Unsupported stored manifest schema')
+        # Verify ALL history before fetching missing tables. Never repair corruption
+        # by dropping the previous snapshot or its retirement archive.
+        for section, prefix in (('tables', ''), ('pageTables', 'page'), ('retiredTables', 'retired')):
+            for table, descriptor in previous.get(section, {}).items():
+                for _ in saved_shards(OUT / prefix / table, descriptor, version):
+                    pass
     paths = manifest['jsonWorldComponentContentPaths']['en']
     # An absent table path is incomplete metadata, not proof of mass retirement.
     for table in required:
@@ -350,13 +365,21 @@ def main():
     with tempfile.TemporaryDirectory(dir=OUT.parent) as temp:
         staging = Path(temp) / 'data'
         staging.mkdir()
-        index = {'schemaVersion': 2, 'manifestVersion': version, 'tables': {}, 'pageTables': {}, 'retiredTables': {}, 'retirementArchiveVersion': 1}
+        index = {'schemaVersion': 2, 'preparationVersion': PREPARATION_VERSION, 'manifestVersion': version, 'tables': {}, 'pageTables': {}, 'retiredTables': {}, 'retirementArchiveVersion': 1}
         page_rows = {}
         for table in required:
             path = manifest['jsonWorldComponentContentPaths']['en'][table]
             if not path.startswith('/common/destiny2_content/json/'):
                 raise ValueError('Unexpected Bungie manifest path')
-            rows = fetch('https://www.bungie.net' + path)
+            cached = previous.get('tables', {}).get(table) if same_version else None
+            if cached:
+                if cached.get('sourcePath', path) != path:
+                    raise ValueError('Stored source path does not match unchanged manifest: ' + table)
+                rows = {}
+                for shard in saved_shards(OUT / table, cached, version):
+                    rows.update(shard)
+            else:
+                rows = fetch('https://www.bungie.net' + path)
             if not isinstance(rows, dict) or any(not str(key).isdigit() or not isinstance(row, dict) or
                                                   row.get('hash', int(key)) != int(key) for key, row in rows.items()):
                 raise ValueError('Invalid Bungie definition table: ' + table)
