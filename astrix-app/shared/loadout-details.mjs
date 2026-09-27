@@ -1,3 +1,4 @@
+import {renderLoadoutIconLayout,bindLoadoutIconDetails} from './loadout-icon-layout.mjs?v=20260927-icons-1';
 import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,17 +13,19 @@ function socket(plug){
   const stats=(plug.statFocus||[]).map(stat=>`${stat.name} ${stat.value>0?'+':''}${stat.value}${stat.conditional?' (conditional)':''}`).join(', ');
   return `<div class="apx-ld-socket" tabindex="0" data-socket-index="${esc(plug.socketIndex)}" title="${esc([label,plug.description,stats].filter(Boolean).join('\n'))}">${artwork(plug.icon,label)}<span>${esc(label)}</span>${stats?`<small>${esc(stats)}</small>`:''}</div>`;
 }
-export function renderLoadoutDetailsContent(model){
+export function renderLoadoutDetailsContent(model,{presentation='rows'}={}){
+  if(presentation==='icons')return renderLoadoutIconLayout(model);
   return (model.items||[]).map(item=>`<section class="apx-ld-item" data-item-kind="${esc(item.kind)}"><div class="apx-ld-gear">${artwork(item.icon,item.name)}<div><span class="apx-ld-kind">${esc(({subclass:'Subclass',weapon:'Weapon',armour:'Armour'})[item.kind]||'Saved item')}</span><h3>${esc(item.name||'Item unavailable')}</h3>${item.notOwned?'<p>Not in your inventory</p>':''}${item.alternative?`<p>Closest in your inventory: ${esc(item.alternative.definition?.displayProperties?.name||'')}</p>`:''}${item.match&&item.match.itemHash!==item.itemHash?`<p>Preselected: ${esc(item.match.definition?.displayProperties?.name||'')}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}${item.unresolved?'<p>Item unavailable</p>':''}</div></div><div class="apx-ld-groups">${(item.groups||[]).length?item.groups.map(group=>`<section class="apx-ld-group"><h4>${esc(group.label)}</h4><div class="apx-ld-sockets">${(group.plugs||[]).map(socket).join('')}</div></section>`).join(''):'<p class="apx-ld-note">No saved socket data</p>'}</div></section>`).join('')||'<p class="apx-ld-note">This slot has no saved items.</p>';
 }
 /** A presentation component only: no Bungie calls, account storage or source branching.
  * All source-specific actions and bindings are supplied by the host adapter. */
-export function openLoadoutDetails(model,{actions={},actionRows=defaultActionRows,disabledReasons={},document:doc=globalThis.document,onClose=()=>{},returnFocus=doc?.activeElement}={}){
+export function openLoadoutDetails(model,{presentation='rows',actions={},actionRows=defaultActionRows,disabledReasons={},document:doc=globalThis.document,onClose=()=>{},returnFocus=doc?.activeElement}={}){
   if(!doc?.body)throw new Error('Loadout Details requires a document.');
   const dialog=doc.createElement('dialog'),id=`apx-loadout-details-${++sequence}`;
-  dialog.className='apx-loadout-details';dialog.setAttribute('aria-labelledby',`${id}-name`);dialog.setAttribute('aria-describedby',`${id}-source`);
+  dialog.className=`apx-loadout-details${presentation==='icons'?' apx-loadout-details--icons':''}`;dialog.setAttribute('aria-labelledby',`${id}-name`);dialog.setAttribute('aria-describedby',`${id}-source`);
   let busy=false,closed=false,invalid=false,review=null;
-  dialog.innerHTML=`<header class="apx-ld-header"><div class="apx-ld-identity">${artwork(model.icon,model.name,'apx-ld-loadout-icon')}<div><p id="${id}-source">${esc(model.source?.label||'Loadout')}${Number.isInteger(model.slotNumber)?` · Slot ${model.slotNumber}`:''}</p><h2 id="${id}-name">${esc(model.name||'Loadout details')}</h2></div></div><button type="button" data-ld-close aria-label="Close loadout details">Close</button></header><nav class="apx-ld-actions" aria-label="Loadout actions">${actionRows.map(([key,label])=>`<button type="button" data-ld-action="${key}" ${!actions[key]||disabledReasons[key]?`disabled title="${esc(disabledReasons[key]||'Not available for this source')}"`:''}>${label}</button>`).join('')}</nav><div class="apx-ld-scroll"><p class="apx-ld-message" role="status" aria-live="polite"></p><section class="apx-ld-panel" hidden></section>${model.warning?`<p class="apx-ld-note">${esc(model.warning)}</p>`:''}<div class="apx-ld-content">${renderLoadoutDetailsContent(model)}</div></div>`;
+  dialog.innerHTML=`<header class="apx-ld-header"><div class="apx-ld-identity">${artwork(model.icon,model.name,'apx-ld-loadout-icon')}<div><p id="${id}-source">${esc(model.source?.label||'Loadout')}${Number.isInteger(model.slotNumber)?` · Slot ${model.slotNumber}`:''}</p><h2 id="${id}-name">${esc(model.name||'Loadout details')}</h2></div></div><button type="button" data-ld-close aria-label="Close loadout details">Close</button></header><nav class="apx-ld-actions" aria-label="Loadout actions">${actionRows.map(([key,label])=>`<button type="button" data-ld-action="${key}" ${!actions[key]||disabledReasons[key]?`disabled title="${esc(disabledReasons[key]||'Not available for this source')}"`:''}>${label}</button>`).join('')}</nav><div class="apx-ld-scroll"><p class="apx-ld-message" role="status" aria-live="polite"></p><section class="apx-ld-panel" hidden></section>${model.warning?`<p class="apx-ld-note">${esc(model.warning)}</p>`:''}<div class="apx-ld-content">${renderLoadoutDetailsContent(model,{presentation})}</div></div>`;
+  const disposeIcons=presentation==='icons'?bindLoadoutIconDetails(dialog):()=>{};
   const status=dialog.querySelector('.apx-ld-message'),panel=dialog.querySelector('.apx-ld-panel');
   const setStatus=(message,error=false)=>{status.textContent=String(message||'');status.setAttribute('role',error?'alert':'status');status.classList.toggle('is-error',error);};
   function syncBusy(){
@@ -38,7 +41,7 @@ export function openLoadoutDetails(model,{actions={},actionRows=defaultActionRow
     finally{busy=false;if(!closed)syncBusy();}
   }
   function showPanel(html){panel.innerHTML=html;panel.hidden=false;panel.scrollIntoView?.({block:'nearest'});panel.querySelector('input,select,button')?.focus();}
-  function close(){if(closed||busy)return;closed=true;dialog.close();dialog.remove();onClose();if(returnFocus?.isConnected)returnFocus.focus();}
+  function close(){if(closed||busy)return;closed=true;disposeIcons();dialog.close();dialog.remove();onClose();if(returnFocus?.isConnected)returnFocus.focus();}
   function reviewHtml(plan){
     const targets=plan.equipment?.targets||[];
     return `<h3>Review Apply</h3><p>${targets.length} equipment items. ${plan.socketChanges?.length||0} saved socket targets.</p><p>Nothing changes until you confirm Apply.</p>${(plan.blockers||[]).length?`<ul>${plan.blockers.map(row=>`<li>${esc(row)}</li>`).join('')}</ul>`:''}${(plan.inGameSteps||[]).length?`<h4>Complete in Destiny</h4><ul>${plan.inGameSteps.map(row=>`<li>${esc(row)}</li>`).join('')}</ul>`:''}<div class="apx-ld-form-actions"><button type="button" data-ld-confirm-apply ${plan.ready?'':'disabled'}>Confirm Apply</button><button type="button" data-ld-cancel>Cancel</button></div>`;
