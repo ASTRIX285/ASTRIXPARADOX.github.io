@@ -12,7 +12,7 @@
   <link rel="icon" href="/img/favicon/favicon.ico">
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="../../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1">
+  <link rel="stylesheet" href="../../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-1">
   <script>
     window.APX_LOGO='../../../../img/logo.png';
     try{
@@ -21,9 +21,9 @@
       sessionStorage.removeItem(fastReturnKey);
     }catch{}
   </script>
-  <script src="../../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;plain=20260925-2"></script>
+  <script src="../../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;plain=20260925-2&amp;single=20260927-1"></script>
   <link rel="stylesheet" href="../../../astrix-tokens.css?v=20260917-approved-palette-1">
-  <link rel="stylesheet" href="./paradox-build-space.css?v=20260908-icon-hover-1&amp;overlap=20260925-1&amp;super=20260909-evidence-1&amp;generate=20260910-termination-1&amp;review=20260911-sizing-apply-1&amp;fluid=20260914-1&amp;combinations=20260916-1&amp;layout=20260917-character-size-2&amp;entry=20260921-direct-1&amp;hierarchy=20260922-1&amp;weaponcards=20260925-rows-4&amp;realperks=20260925-1&amp;artfit=20260925-25&amp;synergy=20260926-1&amp;popup=20260926-1&amp;flow=20260926-1&amp;anchor=20260927-1">
+  <link rel="stylesheet" href="./paradox-build-space.css?v=20260908-icon-hover-1&amp;overlap=20260925-1&amp;super=20260909-evidence-1&amp;generate=20260910-termination-1&amp;review=20260911-sizing-apply-1&amp;fluid=20260914-1&amp;combinations=20260916-1&amp;layout=20260917-character-size-2&amp;entry=20260921-direct-1&amp;hierarchy=20260922-1&amp;weaponcards=20260925-rows-4&amp;realperks=20260925-1&amp;artfit=20260925-25&amp;synergy=20260926-1&amp;popup=20260926-1&amp;flow=20260926-1&amp;anchor=20260927-1&amp;single=20260927-1">
   <link rel="stylesheet" href="./build-test-modes.css?v=20260904-post-test-review-1">
   <link rel="stylesheet" href="../guardian-gear-layout.css?v=20260908-icon-hover-1">
   <link rel="stylesheet" href="../guardian-character-cards.css?v=20260902-recent-guardian-emblem-1&amp;fluid=20260914-1">
@@ -34,12 +34,13 @@
   <link rel="stylesheet" href="../../../shared/item-tile.css?v=20260913-breaker-icon-2&amp;fluid=20260914-1&amp;champion=20260923-native-art-1">
   <link rel="stylesheet" href="../astrix-token-branch-preview.css?v=20260824-d2-background-4">
   <link rel="stylesheet" href="../../../astrix-destinations.css?v=20260824-destination-1">
-  <link rel="stylesheet" href="../../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22&amp;gloss=20260926-4">
+  <link rel="stylesheet" href="../../../shared/astrix-destination-ribbon.css?v=20260917-approved-palette-1&amp;buttons=20260925-22&amp;gloss=20260926-4&amp;readable=20260927-1">
   <link rel="stylesheet" href="../../../shared/astrix-hero-cards.css?v=20260904-mobile-crosscheck-1&amp;mobile=20260905-wrap-1&amp;fluid=20260914-1&amp;capped=20260924-dim66-1">
   <link rel="stylesheet" href="../../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
+  <link rel="stylesheet" href="../../../shared/loadout-details.css?v=20260927-icons-1">
   <link rel="stylesheet" href="../../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1&amp;capped=20260924-dim66-1">
   <script src="../../../shared/astrix-destination-theme.js?v=20260824-destination-1"></script>
-  <script src="../../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;reports=20260925-20c&amp;preview=20260925-1&amp;plain=20260925-2&amp;refresh=20260927-1" defer></script>
+  <script src="../../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;reports=20260925-20c&amp;preview=20260925-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;single=20260927-1" defer></script>
   <style>/* keep the destination ribbon non-sticky here so it never overlaps the topbar */
     [data-forge-destination-ribbon]{position:relative;top:auto;z-index:20}</style>
 </head>
@@ -70,6 +71,7 @@
       <section class="design-section loadouts-design-section" aria-labelledby="buildLoadoutsTitle"><div class="section-title"><h2 id="buildLoadoutsTitle">IN-GAME LOADOUTS</h2><span>BUNGIE · 1–20</span></div><div class="guardian-loadouts-panel guardian-loadouts-strip"><div class="guardian-loadouts-grid" id="guardianLoadouts" aria-label="Saved in-game loadouts"></div></div></section>
       <section class="design-section armour-design-section gear-combined" aria-labelledby="buildArmourTitle"><div class="eq-head"><h3 id="buildArmourTitle">ARMOUR & MODS</h3><div class="section-actions"><span class="tools" id="armourBuildState">STAGED ARMOUR · MOD PLAN PENDING</span><button type="button" class="manual-edit-btn" data-open-manual-editor="armour">EDIT ARMOUR & MODS</button></div></div><div class="gear-subhead"><span id="armourBuildInstruction">Choose armour and reusable mods manually, or generate an AI sequence.</span><span id="armourBuildEvidence">Installed mods</span></div><div id="armourGrid" class="gear-columns"></div></section>
       <section class="design-section weapon-design-section" aria-labelledby="buildWeaponsTitle"><div class="section-title"><h2 id="buildWeaponsTitle">WEAPONS & PERKS</h2><div class="section-actions"><span id="weaponRecommendationState" hidden></span><button type="button" class="manual-edit-btn" data-open-manual-editor="weapon">EDIT WEAPONS & PERKS</button></div></div><p class="section-guidance">Choose weapons and reusable perks manually, or ask Paradox to rank them for this build.</p><div class="gear-weapons"><div id="weaponGrid" class="weap-grid"></div></div></section>
+      <section id="importedEquipment" class="design-section" aria-labelledby="buildEquipmentTitle" hidden><div class="section-title"><h2 id="buildEquipmentTitle">EQUIPMENT</h2></div><p class="section-guidance">Saved with this imported build. Equip these items in Destiny.</p><div id="equipmentGrid"></div></section>
       <section class="design-section recommendation-panel" aria-labelledby="recommendationTitle">
         <div class="panel-head"><div><small>PARADOX RECOMMENDATION</small><h2 id="recommendationTitle">ELEMENTAL BUILD OPTIONS</h2></div><span class="working-only-chip">WORKING BUILD ONLY</span></div>
         <div class="working-build-actions generation-entry-actions" role="group" aria-label="Start generation"><button type="button" class="restore-btn" data-generation-entry="equipped" aria-pressed="false">Improve my current build</button><button type="button" class="restore-btn" data-generation-entry="owned" aria-pressed="false">Build from my gear</button><a class="restore-btn" href="../../forge-loader/">Forge Loader: Tier 5 armour</a></div>
@@ -102,20 +104,7 @@
         </div>
         <div class="recommendation-readiness" id="recommendationReadiness" role="status">Choose a direct entry or a staged Forge Loader build.</div>
         <small id="forgePreparationStatus" role="status" aria-live="polite"></small><button type="button" class="generate-build-btn" id="generateMaxLoadout" disabled>GENERATE MAX LOADOUT</button>
-      </section>
-      <section class="forge-generation-loader" id="forgeGenerationLoader" role="status" aria-live="polite" aria-label="Generating Paradox build" hidden>
-        <div class="apx-stage">
-          <div class="apx-portal" aria-hidden="true">
-            <div class="apx-aura"></div>
-            <div class="apx-tunnel"><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="apx-ring a"></div>
-            <div class="apx-ring b"></div>
-            <div class="apx-prog" style="--p:72"></div>
-            <div class="apx-core"></div>
-            <div class="apx-brandcore"><div class="apx-pulse"></div><div class="apx-pulse-ring"></div><div class="apx-pulse-ring two"></div><img class="apx-logo" src="../../../../img/logo.png" alt=""></div>
-          </div>
-          <p id="forgeGenerationStatus">Forging build…</p>
-        </div>
+        <p id="forgeGenerationStatus" role="status" aria-live="polite" hidden>Forging build…</p>
       </section>
     </section>
     <aside class="build-right-rail" aria-label="Build validation and Paradox Intelligence">
@@ -194,7 +183,7 @@
       <footer class="recommended-build-actions"><button type="button" class="ghost-btn" id="returnToForge">BACK TO BUILD FORGE</button><div><small id="liveTransferStatus">Test this recommendation first, save it as a PARADOX copy, or explicitly confirm Apply.</small><button type="button" class="ghost-btn test-build-review-btn" id="continueToBuildTest">TEST THIS BUILD</button><button type="button" class="primary" id="applyBuild" disabled>APPLY</button></div></footer>
     </div>
   </section>
-  <script type="module" src="./paradox-build-space.mjs?v=20260913-character-safe-2&amp;sets=20260908-set-icons-1&amp;weapons=20260913-breaker-icon-2&amp;roll=20260909-apply-1&amp;fix=20260920-empty-sockets-1&amp;super=20260909-evidence-1&amp;gate=20260910-forge-loader-step-1&amp;generate=20260910-termination-1&amp;transport=20260911-compact-plugs-1&amp;review=20260911-sizing-apply-1&amp;combinations=20260916-1&amp;layout=20260916-character-3&amp;subclass=20260916-hash-1&amp;entry=20260921-direct-1&amp;mods=20260916-equipped-1&amp;ui=20260917-no-diagnostics-1&amp;status=20260921-error-once-1&amp;sync=20260919-account-1&amp;navigation=20260919-1&amp;copy=20260922-readable-block-1&amp;readiness=20260923-live-check-1&amp;champion=20260924-champion-export-1&amp;hierarchy=20260922-1&amp;weaponcards=20260925-rows-4&amp;menu=20260925-1&amp;realperks=20260925-1&amp;plain=20260925-2&amp;synergy=20260926-1&amp;refresh=20260927-1&amp;details=20260927-1&amp;flow=20260926-1&amp;reviewcopy=20260927-1&amp;dim=20260927-1&amp;limits=20260927-1&amp;perf=20260927-1&amp;anchor=20260927-1"></script>
+  <script type="module" src="./paradox-build-space.mjs?v=20260913-character-safe-2&amp;sets=20260908-set-icons-1&amp;weapons=20260913-breaker-icon-2&amp;roll=20260909-apply-1&amp;fix=20260920-empty-sockets-1&amp;super=20260909-evidence-1&amp;gate=20260910-forge-loader-step-1&amp;generate=20260910-termination-1&amp;transport=20260911-compact-plugs-1&amp;review=20260911-sizing-apply-1&amp;combinations=20260916-1&amp;layout=20260916-character-3&amp;subclass=20260916-hash-1&amp;entry=20260921-direct-1&amp;mods=20260916-equipped-1&amp;ui=20260917-no-diagnostics-1&amp;status=20260921-error-once-1&amp;sync=20260919-account-1&amp;navigation=20260919-1&amp;copy=20260922-readable-block-1&amp;readiness=20260923-live-check-1&amp;champion=20260924-champion-export-1&amp;hierarchy=20260922-1&amp;weaponcards=20260925-rows-4&amp;menu=20260925-1&amp;realperks=20260925-1&amp;plain=20260925-2&amp;synergy=20260926-1&amp;refresh=20260927-1&amp;details=20260927-1&amp;flow=20260926-1&amp;reviewcopy=20260927-1&amp;dim=20260927-1&amp;limits=20260927-1&amp;perf=20260927-1&amp;anchor=20260927-1&amp;recovery=20260927-3&amp;single=20260927-1&amp;dimforge=20260927-1&amp;icons=20260927-1"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>

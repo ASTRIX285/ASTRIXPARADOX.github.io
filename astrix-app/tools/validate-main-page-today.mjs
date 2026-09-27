@@ -37,9 +37,9 @@ assert.ok(workspaceHtml.indexOf('guardian-portal-progress.mjs')<workspaceHtml.in
 assert.match(portalCss,/body\.apx-loading\{overflow:hidden!important\}/,'Shared portal must preserve page scroll locking above page-specific layout rules');
 assert.match(portalCss,/@media\(prefers-reduced-motion:reduce\)/,'Shared portal must honour reduced motion');
 assert.match(portalController,/role="status" aria-live="polite"/,'Shared portal must retain its accessible live status');
-assert.match(portalController,/APX_SKIP_PORTAL===true/,'Shared portal must support the explicit cached Guardian fast-return path');
+assert.doesNotMatch(portalController,/APX_SKIP_PORTAL===true/,'Cached Guardian entry must retain the single portal loader');
 assert.match(portalController,/authRequired:authRequired/,'Shared portal must expose its full-screen Bungie authentication state');
-assert.match(portalController,/function done\(\)\{if\(pendingAuthUrl\|\|pendingBlockedMessage\)return/,'The application must not appear before Bungie authentication and verified rendering complete');
+assert.match(portalController,/function done\(\)\{if\(pendingAuthUrl\|\|pendingBlockedMessage\|\|pendingDone\)return/,'The application must not appear before Bungie authentication and verified rendering complete');
 assert.match(portalController,/SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800/,'All data pages must report when verified data misses the three-second target');
 assert.match(portalController,/Still loading Guardian data/,'The three-second target must retain an honest loading state instead of exposing an empty shell');
 assert.doesNotMatch(portalController,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/,'The slow-load notice must not dismiss the live-data gate');

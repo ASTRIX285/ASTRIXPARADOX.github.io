@@ -1,7 +1,8 @@
-import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1';
+import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
+import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-3';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 
 const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loadout']);
 const PAGE_KIND_SET=new Set(PAGE_KINDS);
@@ -51,12 +52,15 @@ function mergeTables(target={},source={}){
 function expandPreparedPlugLists(profile={}){
   const compact=profile?.preparedPlugLists;
   if(compact?.schemaVersion!==1||!Array.isArray(compact.dictionary))return profile;
+  const expandedLists=new Map();
   const rows=index=>{
+    if(expandedLists.has(Number(index)))return expandedLists.get(Number(index));
     const value=compact.dictionary[Number(index)];
     const fields=['plugItemHash','plugHash','canInsert','enabled','isEnabled','isVisible','enableFailIndexes','insertFailIndexes'];
-    return Array.isArray(value)?value.map(tuple=>Object.fromEntries(fields
+    const expanded=Array.isArray(value)?value.map(tuple=>Object.fromEntries(fields
       .map((field,position)=>[field,tuple?.[position]])
       .filter(([,entry])=>entry!==undefined&&entry!==null))):[];
+    expandedLists.set(Number(index),expanded);return expanded;
   };
   profile.itemComponents=profile.itemComponents||{};
   profile.itemComponents.reusablePlugs=profile.itemComponents.reusablePlugs||{data:{}};
@@ -146,9 +150,9 @@ async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind
     const response=await fetchImpl(preparedPageUrl(page,{freshness}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
     timing.mark('fetch');
     const useWorker=typeof Worker==='function'&&typeof response.text==='function'&&response.ok;
-    const raw=useWorker?await response.text():await response.json().catch(()=>({}));
+    const raw=useWorker?await readBoundedText(response,'prepared page',MAX_PREPARED_PAGE_BYTES):await readBoundedJson(response,'prepared page',MAX_PREPARED_PAGE_BYTES);
     timing.mark('body');
-    if(!response.ok)throw new Error(raw?.error||`Prepared ${page} request failed (${response.status}).`);
+    if(!response.ok){const error=new Error(raw?.message||raw?.error||`Prepared ${page} request failed (${response.status}).`);error.status=response.status;error.code=raw?.error;throw error;}
     if(!quiet)reportPreparedPageStage('join',page);
     const payload=useWorker?await runProfileTask('parse',{text:raw,page}):normalizePreparedPagePayload(raw,page);
     assertRenderablePagePayload(payload,page);

@@ -5,7 +5,7 @@ main { width: 100%; max-width: 480px; padding: 28px; background: var(--apx-colou
 h1 { font-size: 1.5rem; line-height: 1.35; }
 p { line-height: 1.6; }
 .brand { font-size: .8rem; letter-spacing: .12em; color: var(--apx-colour-secondary); }
-button { width: 100%; min-height: 48px; margin-top: 12px; padding: 12px 16px; border: 1px solid var(--apx-colour-border-strong); border-radius: 6px; background: var(--apx-colour-raised); color: var(--apx-colour-text); font: inherit; font-weight: 600; cursor: pointer; }
-button:hover { border-color: var(--apx-colour-focus); }
-button:focus-visible { outline: 2px solid var(--apx-colour-focus); outline-offset: 4px; }
+button, .sign-in-continue { display: block; text-align: center; text-decoration: none; width: 100%; min-height: 48px; margin-top: 12px; padding: 12px 16px; border: 1px solid var(--apx-colour-border-strong); border-radius: 6px; background: var(--apx-colour-raised); color: var(--apx-colour-text); font: inherit; font-weight: 600; cursor: pointer; }
+button:hover, .sign-in-continue:hover { border-color: var(--apx-colour-focus); }
+button:focus-visible, .sign-in-continue:focus-visible { outline: 2px solid var(--apx-colour-focus); outline-offset: 4px; }
 footer { max-width: 480px; padding-top: 24px; font-size: .75rem; line-height: 1.5; color: var(--apx-colour-secondary); }

@@ -1,3 +1,5 @@
+import {boundedStringify,readBoundedJson} from '../../astrix-app/core/bounded-json.mjs';
+import {json} from './web';
 import worker, { AuthRecord } from "./index";
 import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, enrichEquipableSets } from "./manifest-semantics";
 export { AuthRecord };
@@ -202,13 +204,16 @@ async function enrichLoadoutSupers(payload: any, env: Env): Promise<any> {
 
 async function rewriteJsonResponse(response: Response, transform: (payload: any) => Promise<any>): Promise<Response> {
   if (!response.ok) return response;
-  const payload = await response.clone().json<any>().catch(() => null);
+  let payload: any;
+  try { payload = await readBoundedJson(response.clone(), 'worker profile rewrite'); }
+  catch { return json({ error: 'profile_payload_too_large', message: 'Profile data exceeds the safety limit. Retry loading the profile.' }, 503); }
   if (!payload) return response;
   const updated = await transform(payload);
   const headers = new Headers(response.headers);
   headers.set("Content-Type", "application/json");
   headers.set("Cache-Control", "no-store");
-  return new Response(JSON.stringify(updated), { status: response.status, statusText: response.statusText, headers });
+  try { return new Response(boundedStringify(updated, 'worker profile rewrite'), { status: response.status, statusText: response.statusText, headers }); }
+  catch { return json({ error: 'profile_payload_too_large', message: 'Profile data exceeds the safety limit. Retry loading the profile.' }, 503); }
 }
 
 export default {

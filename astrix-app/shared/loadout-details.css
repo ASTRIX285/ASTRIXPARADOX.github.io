@@ -59,3 +59,79 @@
   .apx-ld-actions{padding:10px 16px;gap:6px;}.apx-ld-actions button{font-size:12px;padding:7px 9px;}
   .apx-ld-scroll{padding:0 16px 20px;}.apx-ld-panel{padding:12px;}.apx-ld-item{padding:16px 0;}
 }
+
+/* Bergusia Forge artwork: Bungie activity 1434072700, pgcrImage.
+   The import form owns its sizing; resolved loadout details keep their full layout. */
+.apx-loadout-details.dim-import-dialog{
+  --dim-forge-art:url("https://www.bungie.net/img/destiny_content/pgcr/black_armory-bars.playlist_edz_oldtown_forge-35a17r14q.jpg");
+  width:min(640px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);
+  border-color:color-mix(in srgb,var(--apx-colour-action) 55%,var(--apx-colour-border));
+  box-shadow:0 24px 80px rgb(0 0 0/.65);overflow:auto;
+  background:var(--apx-colour-canvas);
+}
+.apx-loadout-details.dim-import-dialog .dim-import-hero{
+  align-items:flex-start;min-height:220px;padding:28px;gap:16px;
+  background:linear-gradient(0deg,var(--apx-colour-canvas),transparent 90%),linear-gradient(90deg,rgb(0 0 0/.76),rgb(0 0 0/.18)),var(--dim-forge-art) center 45%/cover;
+  border-bottom:1px solid color-mix(in srgb,var(--apx-colour-action) 55%,transparent);
+}
+.apx-loadout-details.dim-import-dialog .dim-import-kicker{font-size:12px;letter-spacing:.18em;font-weight:700;color:var(--apx-dim-orange);margin:0 0 18px;}
+.apx-loadout-details.dim-import-dialog h2{font-size:clamp(24px,5vw,32px);line-height:1.15;}
+.apx-loadout-details.dim-import-dialog .dim-import-intro{margin-top:12px;font-size:16px;color:var(--apx-colour-text);line-height:1.5;}
+.apx-loadout-details.dim-import-dialog .dim-import-form{display:grid;gap:12px;flex:none;padding:24px 28px 28px;overflow:visible;}
+.apx-loadout-details.dim-import-dialog label{font-size:16px;font-weight:700;}
+.apx-loadout-details.dim-import-dialog #dimImportHint{font-size:14px;line-height:1.5;color:var(--apx-colour-secondary);}
+.apx-loadout-details.dim-import-dialog input{width:100%;min-height:50px;font-size:16px;background:var(--apx-colour-raised);}
+.apx-loadout-details.dim-import-dialog button{font-size:16px;min-height:44px;line-height:1.3;}
+.apx-loadout-details.dim-import-dialog .dim-import-submit{margin-top:8px;min-height:50px;}
+.apx-loadout-details.dim-import-dialog .dim-import-status{font-size:15px;line-height:1.5;overflow-wrap:anywhere;}
+.apx-loadout-details.dim-import-dialog .dim-import-status:empty{display:none;}
+@layer astrix-gloss {
+ body[data-apx-button-system] #dimImportDialog.apx-loadout-details.dim-import-dialog button.dim-import-submit[type=submit]{
+   background:var(--apx-dim-orange)!important;color:var(--apx-dim-ink)!important;
+   border-color:var(--apx-dim-orange)!important;text-shadow:none!important;
+ }
+ body[data-apx-button-system] #dimImportDialog.apx-loadout-details.dim-import-dialog button.dim-import-submit[type=submit]:hover:not(:disabled){
+   background:color-mix(in srgb,var(--apx-dim-orange) 85%,white)!important;
+ }
+}
+@media(max-width:480px){
+ .apx-loadout-details.dim-import-dialog .dim-import-hero{min-height:190px;padding:20px;}
+ .apx-loadout-details.dim-import-dialog .dim-import-form{padding:20px;}
+}
+
+/* The imported build reads across, in the same order as its equipment slots. */
+.apx-loadout-details--icons{width:min(1120px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);background:var(--apx-colour-canvas);}
+.apx-loadout-details--icons .apx-ld-header{padding:24px;background:linear-gradient(90deg,var(--apx-colour-canvas),transparent),url("https://www.bungie.net/img/destiny_content/pgcr/black_armory-bars.playlist_edz_oldtown_forge-35a17r14q.jpg") center 45%/cover;}
+.apx-loadout-details--icons .apx-ld-actions button,.apx-loadout-details--icons .apx-ld-form-actions button{font-size:16px;min-height:44px;}
+.apx-loadout-details--icons .apx-ld-message:empty{display:none;}
+.apx-icon-section{padding:20px 0;border-bottom:1px solid var(--apx-colour-border);}
+.apx-icon-section>h3{font-size:16px;margin:0 0 14px;}
+.apx-icon-strip,.apx-icon-powers{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}
+.apx-icon-powers{gap:20px 28px;}
+.apx-icon-equipment{gap:24px;}
+.apx-icon-column{flex:0 1 160px;min-width:0;}
+.apx-icon-column>.apx-icon-group{margin-top:12px;}
+.apx-icon-group h4{font-size:12px;font-weight:600;color:var(--apx-colour-secondary);margin:0 0 8px;}
+.apx-icon-section[aria-label="Build settings"]{display:flex;flex-wrap:wrap;gap:20px 28px;}
+.apx-icon-section[aria-label="Build settings"]>h3{flex-basis:100%;margin-bottom:0;}
+.apx-build-icon{display:block;position:relative;flex:none;width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--apx-colour-border-strong);border-radius:3px;background:var(--apx-colour-raised);cursor:pointer;}
+.apx-build-icon--gear{width:72px;height:72px;}
+.apx-build-icon img,.apx-build-icon .apx-ld-empty{display:block;width:100%;height:100%;object-fit:contain;filter:none!important;}
+.apx-build-icon[data-not-owned]{outline:2px dashed var(--apx-colour-secondary);outline-offset:2px;}
+.apx-build-icon:hover{border-color:var(--apx-colour-text);}
+.apx-build-icon:focus-visible{outline:2px solid var(--apx-colour-focus);outline-offset:4px;}
+.apx-icon-tooltip{position:fixed;z-index:2147483647;width:max-content;max-width:min(320px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:14px 16px;background:var(--apx-colour-raised);color:var(--apx-colour-text);border:1px solid var(--apx-colour-border-strong);border-radius:6px;font:14px/1.5 var(--apx-font-copy,system-ui,sans-serif);overflow-wrap:anywhere;}
+.apx-icon-tooltip[hidden]{display:none;}
+.apx-icon-tooltip strong{display:block;font-size:16px;}
+.apx-icon-tooltip p{margin:6px 0 0;white-space:pre-line;}
+/* Preserve official artwork inside the site's global gloss button treatment. */
+@layer astrix-gloss{
+  button.apx-build-icon{padding:0!important;min-width:44px!important;background:var(--apx-colour-raised)!important;border-radius:3px!important;box-shadow:none!important;}
+  button.apx-build-icon::before,button.apx-build-icon::after{display:none!important;}
+}
+@media(max-width:719.98px){
+  .apx-loadout-details--icons{width:100%;height:100dvh;max-height:100dvh;}
+  .apx-loadout-details--icons .apx-ld-header{padding:16px;}
+  .apx-icon-equipment{gap:20px 16px;}
+  .apx-icon-column{flex-basis:calc(50% - 8px);}
+}

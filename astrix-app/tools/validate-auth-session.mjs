@@ -31,22 +31,14 @@ const failures=[
   ['503',async()=>Response.json({authenticated:'unknown'},{status:503})],
   ['network',async()=>{throw new TypeError('offline');}],
   ['bad JSON',async()=>new Response('{')],
+  ['unconfirmed 401',async()=>Response.json({authenticated:false},{status:401})],
+  ['oversize 503',async()=>Response.json({error:'profile_payload_too_large'},{status:503})],
+  ['range error',async()=>{throw new RangeError('Invalid string length');}],
   ['malformed 401',async()=>new Response('{',{status:401})],
   ['invalid session shape',async()=>Response.json({})],
   ['timeout',(_url,options)=>new Promise((_,reject)=>options.signal.addEventListener('abort',()=>reject(new Error('aborted'))))]
 ];
 for(const [name,fetcher] of failures){
-  const h=harness(withoutImports(intro).split('if(!config)')[0],fetcher);
-  const result=vm.runInContext('continueToGuardianJourney()',h.context);
-  if(name==='timeout')h.abort();
-  assert.equal(await result,false,name);
-  assert.equal(h.authStarts(),0,`${name} must not construct authorization URL`);
-  assert.equal(h.navigations(),0,`${name} must not navigate`);
-  assert.equal(h.element('toolIntroCta').textContent,'Retry');
-  assert.equal(h.element('toolIntroCta').disabled,false);
-  h.context.fetch=async()=>Response.json({authenticated:true});
-  assert.equal(await vm.runInContext('continueToGuardianJourney()',h.context),true,`${name}: retry succeeds`);
-  assert.equal(h.navigations(),1);
   const g=harness(withoutImports(guardian).split('\n// The profile normalizer')[0],fetcher);
   const pending=vm.runInContext('getBungieSession({force:true})',g.context);
   if(name==='timeout')g.abort();
@@ -54,12 +46,11 @@ for(const [name,fetcher] of failures){
   assert.equal(g.authStarts(),0,`${name}: shared auth must not offer authorization`);
   assert.equal(g.navigations(),0);
 }
-for(const source of [withoutImports(intro).split('if(!config)')[0],withoutImports(guardian).split('\n// The profile normalizer')[0]]){
-  const h=harness(source,async()=>Response.json({authenticated:false},{status:401}));
+for(const source of [withoutImports(guardian).split('\n// The profile normalizer')[0]]){
+  const h=harness(source,async()=>Response.json({authenticated:false,error:"bungie_reauthentication_required"},{status:401}));
   await vm.runInContext(source.includes('continueToGuardianJourney')?'continueToGuardianJourney()':'getBungieSession({force:true})',h.context);
   assert.ok(h.authStarts()>0,'Definitive signed-out response must retain sign-in');
 }
-assert.match(intro,/session\?\.authenticated!==false[\s\S]*?return false;[\s\S]*?location\.assign\(authStartUrl\(\)\)/);
 assert.match(guardian,/if\(button\.dataset\.state==="disconnected"\) location\.href=authStartUrl\(\)/);
 assert.match(guardian,/else if\(session\?\.authenticated===false\)\{\s*globalThis\.ForgeLoader\?\.authRequired\?\.\(authStartUrl\(\)\)/);
 assert.match(vault,/if\(session\?\.authenticated===false\)\{\s*byId\('vaultConnectButton'\)\.href=authStartUrl\(\)/);
@@ -79,4 +70,4 @@ for(const authenticated of [undefined,null,true]){
 guarded.context.FORGE_BUNGIE_SESSION={authenticated:false};
 assert.match(vm.runInContext('authStartUrl()',guarded.context),/\/bungie\/start\?/);
 const portal=read('shared/astrix-portal-loader.js');
-assert.match(portal,/function authRequired\(url\)\{\s*if\(!url\)\{authResolved\(\);blocked\('Bungie is not responding. Retry'\);return;\}/);
+assert.match(portal,/function authRequired\(url\)\{\s*if\(pendingDone\)return;\s*if\(!url\)\{authResolved\(\);blocked\('Bungie is not responding. Retry'\);return;\}/);

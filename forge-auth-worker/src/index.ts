@@ -1,3 +1,5 @@
+import {profileResponse as deliverProfileResponse, preparedAccountChunks, type PreparedProfileCapture} from './profile-response.ts';
+import {MAX_PREPARED_PAGE_BYTES,PayloadSizeError} from '../../astrix-app/core/bounded-json.mjs';
 import { OAUTH_TTL_MS, oauthRecovery, oauthIntro, OAUTH_INTRO_COOKIE } from "./oauth-ui";
 import { dimShareRoute } from './dim-share.ts';
 import {
@@ -914,7 +916,7 @@ async function fetchArtifactDefinition(
   return (await fetchPreparedManifestDefinitions("DestinyArtifactDefinition", [Number(hash)], env))[String(hash)] || null;
 }
 
-async function profileRoute(request: Request, env: Env): Promise<Response> {
+async function profileRoute(request: Request, env: Env, capture?: PreparedProfileCapture): Promise<Response> {
   const requestUrl = new URL(request.url);
   const profileScope = requestUrl.searchParams.get("scope");
   const requestedComponents = profileScope === "inventory"
@@ -1007,7 +1009,7 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
       if (!since || Array.isArray(since) || typeof since !== "object") return withCors(request, env, json({ error: "invalid_section_revisions" }, 400));
       sections = await profileSections(payload.Response, `${membership.membershipType}:${membership.membershipId}`, since);
     }
-    return withCors(request, env, json({
+    return withCors(request, env, deliverProfileResponse({
       authenticated: true,
       membership,
       components: requestedComponents,
@@ -1019,7 +1021,7 @@ async function profileRoute(request: Request, env: Env): Promise<Response> {
       gearAssets: {},
       manifestResolution: { mode: "client" },
       displaySnapshot: displaySnapshot ? { source: response.headers.get("X-Forge-Profile-Source"), fetchedAt: Number(response.headers.get("X-Forge-Profile-Fetched-At")), maxAgeMs: 15000 } : null
-    }, 200, profileResponseHeaders));
+    }, profileResponseHeaders, capture));
   }
 
   const baseDefinitionHashes = [...new Set([
@@ -1422,13 +1424,12 @@ function preparedPageEnvelope(
   prepared: Response
 ): Response {
   const encoder = new TextEncoder();
+  const encodedAccount = preparedAccountChunks(account);
   const reader = prepared.body?.getReader();
-  const accountJson = JSON.stringify(account);
   const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":`);
-  const accountChunk = encoder.encode(accountJson);
   const preparedPrefix = encoder.encode(`,"prepared":`);
   const suffix = encoder.encode("}");
-  const accountBytes = accountChunk.byteLength;
+  const accountBytes = encodedAccount.byteLength;
   console.info("prepared_page_account_budget", {
     page: (account as any)?.pageReady?.page || "unknown",
     accountBytes,
@@ -1438,14 +1439,19 @@ function preparedPageEnvelope(
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(prefix);
-      controller.enqueue(accountChunk);
+      for (const chunk of encodedAccount.chunks) controller.enqueue(chunk);
       controller.enqueue(preparedPrefix);
+      let totalBytes = prefix.byteLength + accountBytes + preparedPrefix.byteLength + suffix.byteLength;
       try {
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            if (value) controller.enqueue(value);
+            if (value) {
+              totalBytes += value.byteLength;
+              if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
+              controller.enqueue(value);
+            }
           }
         } else {
           controller.enqueue(encoder.encode("{}"));
@@ -1568,9 +1574,11 @@ async function pagePayloadRoute(
   profileUrl.searchParams.set("freshness", requestedFreshness);
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : page === "character" ? "character" : "forge");
   profileUrl.searchParams.set("definitions", "client-manifest");
-  const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env);
+  const captured: PreparedProfileCapture = {};
+  const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env, captured);
   if (!profileResponse.ok) return profileResponse;
-  const payload = await profileResponse.json<Record<string, any>>();
+  const payload = captured.payload;
+  if (!payload) throw new Error("prepared_profile_missing");
 
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
@@ -1834,11 +1842,11 @@ async function oauthCallback(request: Request, env: Env): Promise<Response> {
 
 async function sessionRoute(request: Request, env: Env): Promise<Response> {
   const sessionId = cookieValue(request, SESSION_COOKIE);
-  if (!sessionId) return withCors(request, env, json({ authenticated: false }, 401));
+  if (!sessionId) return withCors(request, env, json({ authenticated: false, error: "bungie_reauthentication_required" }, 401));
   const storedSession = await getSession(env, sessionId);
   if (!storedSession || storedSession.absoluteExpiresAt <= Date.now()) {
     if (storedSession) await revokeSession(env, sessionId, storedSession);
-    return withCors(request, env, json({ authenticated: false }, 401, { "Set-Cookie": clearSessionCookie() }));
+    return withCors(request, env, json({ authenticated: false, error: "bungie_reauthentication_required" }, 401, { "Set-Cookie": clearSessionCookie() }));
   }
   let session: SessionRecord;
   try {
@@ -2379,6 +2387,7 @@ export default {
       if (request.method === "POST" && url.pathname === "/logout") return await logoutRoute(request, env);
       return withCors(request, env, json({ error: "not_found" }, 404));
     } catch (error) {
+      if (error instanceof PayloadSizeError) return withCors(request, env, json({ error: error.code, message: error.message }, 503));
       if (["/bungie/callback", "/bungie/start", "/internal/access/start"].includes(url.pathname)) return oauthRecovery();
       if (error instanceof Error && error.message === "bungie_unavailable") {
         return withCors(request, env, json({ authenticated: "unknown", error: "bungie_unavailable" }, 503, { "Cache-Control": "no-store" }));

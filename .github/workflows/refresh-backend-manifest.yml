@@ -1,5 +1,12 @@
 name: Refresh Shared Backend Manifest
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'forge-manifest-worker/**'
+      - 'astrix-app/tools/build-backend-manifest.py'
+      - 'astrix-app/tools/smoke-dim-manifest.mjs'
+      - '.github/workflows/refresh-backend-manifest.yml'
   workflow_dispatch:
   schedule:
     - cron: '23 * * * *'
@@ -27,14 +34,8 @@ jobs:
         env:
           BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
         run: python3 astrix-app/tools/build-backend-manifest.py
-      - name: Retain verified public definitions
-        if: steps.manifest.outputs.changed == 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: forge-manifest-worker/data
-          key: backend-manifest-v1-${{ github.run_id }}
       - name: Deploy prepared definitions
-        if: steps.manifest.outputs.changed == 'true'
+        if: steps.manifest.outputs.changed == 'true' || github.event_name != 'schedule'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -42,3 +43,15 @@ jobs:
           workingDirectory: forge-manifest-worker
           wranglerVersion: 4.114.0
           command: deploy
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify live DIM manifest import route
+        run: node astrix-app/tools/smoke-dim-manifest.mjs
+      # Do not let a failed deployment become next run's "unchanged" snapshot.
+      - name: Retain verified public definitions
+        if: steps.manifest.outputs.changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: forge-manifest-worker/data
+          key: backend-manifest-v1-${{ github.run_id }}

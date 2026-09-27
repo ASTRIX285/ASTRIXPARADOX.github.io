@@ -1,12 +1,13 @@
-import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-1&limits=20260927-1';
+import {renderEquipmentIcons,bindLoadoutIconDetails} from '../../../shared/loadout-icon-layout.mjs?v=20260927-icons-1';
+import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';
-import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1';
+import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-3';
 import {beginEngineTiming,afterEnginePaint} from '../../../core/engine-timing.mjs?v=20260927-1';
 import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1&20260924-card-width-1';
 import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1&perf=20260927-1&anchor=20260927-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
-import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1&plain=20260925-2&refresh=20260927-1';
+import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-2';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
 import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&copy=20260922-readable-block-1&plain=20260925-2';
@@ -15,9 +16,9 @@ import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '.
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260916-equipped-source-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260916-equipped-source-1';
-import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
-import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
-import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
+import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
+import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
+import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-3';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260916-equipped-source-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
@@ -26,12 +27,12 @@ import {BUILD_ELEMENTS,directEntryMode,directArmourChoices,withDirectGenerationC
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,forgeWeaponElementSuggestion,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1&plain=20260925-2&synergy=20260926-1&anchor=20260927-1';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2&anchor=20260927-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
-import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1';
+import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-3';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&champion=20260924-champion-export-1';
-import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-3';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1&recovery=20260927-3';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
@@ -183,7 +184,14 @@ function renderArmourRecommendationState(build={}){
   if(evidence)evidence.textContent=generated?'Original and installed mods remain protected':manual?'Your socket choices are staged in this build.':staged?'Installed mods':'Original build remains protected';
   if(staged&&!generated&&!manual&&!directEntryMode(build))blankArmourModCanvas();
 }
-function renderBuildGear(build={}){byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);sizeBuildWeaponCards(byId('weaponGrid'));const weaponState=byId('weaponRecommendationState');weaponState.hidden=!(build.weapons||[]).some(Boolean);weaponState.textContent=weaponState.hidden?'':build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'EQUIPPED LOADOUT';}
+let disposeEquipmentIcons=()=>{};
+function renderBuildEquipment(build){
+  const host=byId('importedEquipment');if(!host)return;
+  disposeEquipmentIcons();host.hidden=!(build.equipment||[]).length;
+  byId('equipmentGrid').innerHTML=renderEquipmentIcons(build.equipment||[]);
+  disposeEquipmentIcons=bindLoadoutIconDetails(host);
+}
+function renderBuildGear(build={}){renderBuildEquipment(build);byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);sizeBuildWeaponCards(byId('weaponGrid'));const weaponState=byId('weaponRecommendationState');weaponState.hidden=!(build.weapons||[]).some(Boolean);weaponState.textContent=weaponState.hidden?'':build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'EQUIPPED LOADOUT';}
 function currentBuild(){const state=readState();return state?.workingBuild||state?.originalBuild||null;}
 
 const manualItemId=item=>String(item?.itemInstanceId||item?.instanceId||'');
@@ -784,8 +792,8 @@ async function openRecommendedBuild(){
 }
 function closeRecommendedBuild(){const dialog=byId('recommendedBuildReveal');if(dialog){dialog.hidden=true;dialog.setAttribute('aria-hidden','true');}document.body.classList.remove('recommended-build-open');byId('generateMaxLoadout')?.focus();}
 function continueToBuildTest(){closeRecommendedBuild();const panel=document.querySelector('.validation-panel'),arm=byId('armRangeTest'),reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;panel?.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});setRangeStatus('Recommendation ready. Choose PvE or PvP, select the activity, then arm this exact Working Build.','good');arm?.focus();}
-async function showForgeGenerationLoader(element){const loader=byId('forgeGenerationLoader'),panel=document.querySelector('.recommendation-panel'),status=byId('forgeGenerationStatus');if(!loader)return;loader.hidden=false;loader.dataset.element=element||'';if(panel)panel.setAttribute('aria-busy','true');if(status)status.textContent=`FORGING ${String(element||'').toUpperCase()} GUARDIAN BUILD…`;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
-function hideForgeGenerationLoader(){const loader=byId('forgeGenerationLoader'),panel=document.querySelector('.recommendation-panel');if(loader)loader.hidden=true;if(panel)panel.removeAttribute('aria-busy');}
+async function showForgeGenerationLoader(element){const panel=document.querySelector('.recommendation-panel'),status=byId('forgeGenerationStatus');if(panel)panel.setAttribute('aria-busy','true');if(status){status.hidden=false;status.textContent=`FORGING ${String(element||'').toUpperCase()} GUARDIAN BUILD…`;}await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
+function hideForgeGenerationLoader(){const panel=document.querySelector('.recommendation-panel'),status=byId('forgeGenerationStatus');if(status)status.hidden=true;if(panel)panel.removeAttribute('aria-busy');}
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);
 const FORGE_COMPOSED_FIELDS=Object.freeze(['subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments']);
 function forgeComputationProjection(build={}){return Object.fromEntries(FORGE_COMPUTATION_FIELDS.filter(key=>Object.hasOwn(build,key)).map(key=>[key,build[key]]));}

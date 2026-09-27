@@ -1,9 +1,10 @@
-import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1';
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1";
+import {boundedStringify} from '../../core/bounded-json.mjs';
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-3';
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-3";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?plain=20260925-2";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
 import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
@@ -11,7 +12,7 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-3';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,
@@ -19,7 +20,7 @@ import {
   cacheBungieLoadoutDetail,
   readCachedBungieLoadoutDetail,
   invalidateBungieLoadoutDetail
-} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1";
+} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-3";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const SELECTION_RESOLUTION_VERSION=3; // Rebuild saved details classified from display text instead of the equipped hash.
@@ -56,7 +57,7 @@ if(!globalThis.FORGE_PAGE_PAYLOAD_PROMISE)globalThis.FORGE_PAGE_PAYLOAD_PROMISE=
 const currentAuthenticatedSession=()=>authenticatedSession?.authenticated?authenticatedSession:(globalThis.FORGE_BUNGIE_SESSION?.authenticated?globalThis.FORGE_BUNGIE_SESSION:null);
 const isFixtureDetail=detail=>detail?.source==="paradox-beta-fixture";
 
-const cloneBuildValue=value=>{try{return structuredClone(value);}catch{return JSON.parse(JSON.stringify(value??null));}};
+const cloneBuildValue=value=>{try{return structuredClone(value);}catch{return JSON.parse(boundedStringify(value??null,'build clone'));}};
 function resolvedBuildSnapshot(detail={}){
   const characterId=String(detail.characterId||detail.fixtureId||"");
   if(!characterId)return null;
@@ -118,7 +119,7 @@ function persistResolvedBuildSnapshot(){
   const source=latestEquippedBuilds.get(selectedId)||(latestResolvedBuild&&isEquippedSelection(latestResolvedBuild)?latestResolvedBuild:null);
   if(!source?.characterId)return false;
   const envelope=createHandoffEnvelope(createBuildState(source));
-  const json=JSON.stringify(envelope);
+  let json;try{json=boundedStringify(envelope,'build snapshot');}catch{return false;}
   let stored=false;
   for(const store of [sessionStorage,localStorage]){try{store.removeItem(BUILD_SPACE_KEY);store.setItem(BUILD_SNAPSHOT_KEY,json);stored=true;}catch{}}
   return stored;
@@ -1044,7 +1045,7 @@ function reportProfileError(error){
   const message=error?.message||"Guardian data could not be loaded.";
   console.error("[Forge Bungie profile]",error);
   document.documentElement.dataset.guardianSource="bungie-live-error";
-  setRenderStatus("LIVE PROFILE UNAVAILABLE",message,"Retry or reconnect Bungie");
+  setRenderStatus("LIVE PROFILE UNAVAILABLE",message,"Retry loading Guardian data");
   document.dispatchEvent(new CustomEvent("forge:profile-error",{detail:{message}}));
   document.dispatchEvent(new CustomEvent("forge:guardian-error",{detail:{message}}));
   queueMicrotask(()=>setLiveProfileUnavailable(message));

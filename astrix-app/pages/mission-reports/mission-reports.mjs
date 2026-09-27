@@ -1,9 +1,9 @@
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 import {
   renderGuardianCharacterCards,
   renderGuardianCharacterCardStatus
 } from '../guardian-workspace-v2/guardian-character-cards.mjs';
-import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
+import {buildMissionReportView,loadMissionReports} from './mission-reports-data.mjs?v=20260906-page-payload-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 
 const $=id=>document.getElementById(id);
 const resolving=$('missionResolving');

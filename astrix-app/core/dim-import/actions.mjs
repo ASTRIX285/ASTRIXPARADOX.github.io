@@ -1,4 +1,4 @@
-import {dimWorkingBuild} from './resolve.mjs';
+import {dimWorkingBuild} from './resolve.mjs?v=20260927-icons-1';
 import {createLiveTransferPlan} from '../../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {sessionBinding,liveActionCapabilities,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 /** Importing, saving and handing off never call a Bungie mutation. Only Apply
@@ -24,7 +24,7 @@ export function createDimActions(model,{getContext,save,send,refresh=()=>{},fetc
     const build=dimWorkingBuild(model,profile,{forApply:true});
     const plan=api.createLiveTransferPlan({build,originalBuild:build,capabilities:api.liveActionCapabilities(value.session)});
     const manual=model.items.filter(row=>row.kind==='parameters').flatMap(row=>row.groups.filter(group=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers','Armour perks'].includes(group.label)).flatMap(group=>group.plugs.filter(plug=>!plug.retired).map(plug=>`${group.label}: ${plug.name}`)));
-    plan.inGameSteps=[...(plan.inGameSteps||[]),...manual];
+    plan.inGameSteps=[...(plan.inGameSteps||[]),...manual,...(build.equipment||[]).map(item=>`Equip in Destiny: ${item.name}`)];
     prepared=plan.ready?await api.stageLiveTransferPreflight(plan,{session:value.session,fetchImpl:guardedFetch,authOrigin}):plan;
     context();return prepared;
   });}

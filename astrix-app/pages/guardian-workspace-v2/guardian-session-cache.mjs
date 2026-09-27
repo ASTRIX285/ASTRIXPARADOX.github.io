@@ -1,3 +1,4 @@
+import {boundedStringify,jsonByteLength,MAX_JSON_BYTES,MAX_PREPARED_PAGE_BYTES} from '../../core/bounded-json.mjs';
 import {createActiveProfileRefresh,notifyProfileRefreshState} from '../../core/active-profile-refresh.mjs?v=20260927-active-profile-1';
 const SESSION_KEY="astrix:bungie-session-cache:v1";
 const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v4:";
@@ -31,7 +32,7 @@ const safeSessionRead=key=>{
 };
 
 const safeSessionWrite=(key,value)=>{
-  try{sessionStorage.setItem(key,JSON.stringify(value));return true;}
+  try{sessionStorage.setItem(key,boundedStringify(value,'session cache'));return true;}
   catch{return false;}
 };
 
@@ -254,9 +255,18 @@ async function cacheBungieProfile(session,payload,page=payload?.pageReady?.page)
   if(payload&&typeof payload==="object")profileCacheSavedAt.set(payload,savedAt);
   const key=profileRecordKey(identity,scope);
   cacheBungieSession(session);
-  safeSessionWrite(profileMarkerKey(scope),{key,identity,scope,savedAt});
-  const written=await writeRecord({key,identity,scope,savedAt,payload});
-  if(!written)safeSessionWrite(profileFallbackKey(scope),{key,identity,scope,savedAt,payload});
+  let bytes;
+  try{
+    jsonByteLength(payload.profile,{context:'private profile cache'});
+    bytes=jsonByteLength(payload,{context:'prepared profile cache',limit:MAX_PREPARED_PAGE_BYTES});
+  }catch{return false;}
+  const record={key,identity,scope,savedAt,payload};
+  let written=false;
+  try{written=await writeRecord(record);}catch{/* Quota or blocked IndexedDB is a cache miss, not a failed profile load. */}
+  // IndexedDB uses structured cloning. Do not stringify its public manifest tables
+  // into the smaller sessionStorage fallback when that database is unavailable.
+  const fallback=!written&&bytes<MAX_JSON_BYTES-4096&&safeSessionWrite(profileFallbackKey(scope),record);
+  if(written||fallback)safeSessionWrite(profileMarkerKey(scope),{key,identity,scope,savedAt});
   return written;
 }
 

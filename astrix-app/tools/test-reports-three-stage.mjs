@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createReportsHistory,historyTotals,pgcrModel,difficultyFor,modifierNames,activityAnalysis,clearsConsistent,fireteamTotals} from '../pages/reports/reports-history.mjs';
-import {readReportsRoute,runGroups,runRows,selectionArt} from '../pages/reports/reports-ui.mjs';
+import {readReportsRoute,runGroups,runRows,selectionArt,difficultyLabel} from '../pages/reports/reports-ui.mjs';
 import {createReportsLoader,createReportsStore} from '../pages/reports/reports-data.mjs';
 import {reportsRead} from '../../forge-auth-worker/src/reports-read.ts';
 const value=value=>({basic:{value}});
@@ -140,3 +140,11 @@ assert.equal(difficultyFor({hash:'5'},{variants:[{hash:'5',variant:'Coda',diffic
 assert.equal(selectionArt(aliases),'https://www.bungie.net/img/selection.jpg');
 assert.equal(selectionArt({image:''}),'','Do not substitute a different run image');
 console.log('REPORTS_DIFFICULTY_LISTS=PASS');
+
+assert.equal(difficultyLabel('-'),'Completed');
+assert.equal(difficultyLabel('Master'),'Master');
+const unlabelledRows=runRows({variants:[{hash:'1',difficulty:'-'}]},[{id:'77',hash:'1',period:'2026-09-27T10:00:00Z',completed:false}]);
+assert.match(unlabelledRows,/<h3>Completed<\/h3>/);
+assert.match(unlabelledRows,/Not completed/,'The difficulty caption must not change actual completion');
+assert.doesNotMatch(unlabelledRows,/Unspecified/);
+console.log('REPORTS_COMPLETED_CAPTION=PASS');

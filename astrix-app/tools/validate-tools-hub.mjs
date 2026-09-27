@@ -72,7 +72,7 @@ assert.equal((tools.match(/ENTER FORGE/g)??[]).length,2,'Tools card and mission 
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
 assert.ok(tools.includes('<script type="module" src="tools.mjs"></script>'),'Tools page must load its isolated mission controller');
 assert.ok(tools.includes('Destiny 2 Guardian Platform'),'Tools page must identify the current platform');
-assert.equal((tools.match(/\.\.\/astrix-app\/pages\/tool-intro\/\?game=destiny-2/g)??[]).length,2,'Tools card and mission popup must route through the Destiny 2 intro');
+assert.equal((tools.match(/\.\.\/astrix-app\/pages\/journey\//g)??[]).length,2,'Tools card and mission popup must enter Journey directly');
 assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
 assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
 assert.equal((tools.match(/<article class="platform-card /g)??[]).length,2,'Tools catalogue must use one active card and one reusable future card');
@@ -84,7 +84,7 @@ assert.doesNotMatch(tools,/platform-note/,'Current tool card must remain short a
 assert.doesNotMatch(tools,/The first platform we are building is for Destiny 2\./,'Removed Destiny opening sentence must not return');
 assert.doesNotMatch(tools,/destination-heading|destination-grid|Six parts of the same Guardian story/,'Destiny destinations must not appear publicly on the Tools page');
 assert.doesNotMatch(tools,/tools-future|Future route pattern|astrixparadox\.com\/tools\/\{game\}|More than one game/,'Generic future-game section must remain removed');
-assert.doesNotMatch(tools,/astrix-portal-loader|APX_LOGO/,'Public Tools hub must not mount the application loader');
+assert.doesNotMatch(tools,/astrix-portal-loader|ForgeLoader|APX_AUTO_READY/,'Public Tools hub must open directly; only entering an actual tool loads the portal');
 assert.doesNotMatch(tools,/—|–|&mdash;|&ndash;/,'Tools page must not use em or en dashes');
 assert.match(toolsCss,/\.tools-hero-inner,[\s\S]*?\.tools-shell\s*\{[\s\S]*?max-width:\s*1680px;/,'Tools content must use the approved wider desktop shell');
 assert.match(toolsCss,/\.tools-intro-layout\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1\.05fr\) minmax\(440px, 0\.95fr\);/,'Combined Tools introduction must use the approved wider desktop composition');

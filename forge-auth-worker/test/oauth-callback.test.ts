@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { registerHooks } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
-import { OAUTH_TTL_MS } from '../src/oauth-ui.ts';
+import { OAUTH_TTL_MS, oauthIntro } from '../src/oauth-ui.ts';
 
 registerHooks({ resolve(specifier, context, next) {
   if (specifier === 'cloudflare:workers') return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent('export class DurableObject { constructor(ctx,env){this.ctx=ctx;this.env=env;} }') };
@@ -162,9 +162,16 @@ test('intro appears once, Continue creates fresh state, later visits skip intro'
   assert.match(intro.headers.get('content-type')!, /text\/html/);
   const html = await intro.text();
   assert.match(html, /You'll sign in through Bungie\. The first time, Bungie asks which platform you play on, then it remembers you\./);
-  assert.match(html, /<button type="submit">Continue<\/button>/);
+  const href = html.match(/<a class="sign-in-continue" href="([^"]+)">Continue<\/a>/)?.[1].replaceAll('&amp;', '&');
+  assert.ok(href);
+  assert.doesNotMatch(html, /<form|<script|onclick=/);
+  assert.match(intro.headers.get('content-security-policy')!, /form-action 'self'/);
   assert.equal(f.objects.size, 0, 'state TTL starts after Continue');
-  const started = await f.request('/bungie/start?continue=1&return=' + encodeURIComponent(returnUrl));
+  const started = await f.request(href);
+  assert.equal(started.status, 302);
+  const destination = new URL(started.headers.get('location')!);
+  assert.equal(destination.origin, 'https://www.bungie.net');
+  assert.equal(f.object('oauth:' + destination.searchParams.get('state')).rows.get('record').returnUrl, returnUrl);
   assert.match(started.headers.get('set-cookie')!, /astrix_oauth_intro=1;.*HttpOnly; Secure; SameSite=Lax/);
   const later = await f.request('/bungie/start', 'astrix_oauth_intro=1');
   assert.equal(new URL(later.headers.get('location')!).origin, 'https://www.bungie.net');
@@ -187,9 +194,23 @@ test('internal access intro uses bridge URL without leaking the access identity'
   const request = new Request('https://forge-auth.internal/internal/access/start?identity=' + 'a'.repeat(64));
   const response = await worker.fetch(request, f.env, {} as any);
   const html = await response.text();
-  assert.match(html, /action="\/__astrix\/bungie\/start"/);
+  assert.match(html, /href="\/__astrix\/bungie\/start\?return=/);
   assert.doesNotMatch(html, /identity=|aaaaaaaa/);
 });
+for (const internal of [false, true]) {
+  test(`Continue is a script-free navigation with encoded parameters (bridge=${internal})`, async () => {
+    const target = returnUrl + '?x="<test>&continue=0#fragment';
+    const html = await oauthIntro(target, internal).text();
+    const href = html.match(/<a class="sign-in-continue" href="([^"]+)">Continue<\/a>/)?.[1];
+    assert.ok(href);
+    const link = new URL(href.replaceAll('&amp;', '&'), origin);
+    assert.equal(link.origin, origin);
+    assert.equal(link.pathname, internal ? '/__astrix/bungie/start' : '/bungie/start');
+    assert.equal(link.searchParams.get('return'), target);
+    assert.deepEqual(link.searchParams.getAll('continue'), ['1']);
+    assert.doesNotMatch(html, /<form|<button|<script|onclick=|<test>/);
+  });
+}
 test('recovery page preserves return via an input value, never injects markup or reuses code', () => {
   const input = { value: '' };
   const source = readFileSync(new URL('../../astrix-app/pages/sign-in/sign-in.mjs', import.meta.url), 'utf8');
