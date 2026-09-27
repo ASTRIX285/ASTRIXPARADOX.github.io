@@ -1,22 +1,31 @@
 // Forge Matrix results: its own URL, its own page. The whole selection (character, Exotic armour, optional
 // Exotic weapon anchor, set protocol, stat targets and priorities) lives in the query string, so this page
 // reruns the same real backend search on load. A reload, a bookmark or a shared link all work the same way.
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
 import {guardianManifest} from '../../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&fix=20260909-set-list-1&plain=20260925-2&refresh=20260927-1';
 import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionStorageFallbacks} from '../../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions} from '../forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
-import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1';
+import {writeForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1&perf=20260927-1';
 import {preloadForgeLoaderPayload} from '../forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1';
 import {forgeLoaderEvaluateReady,forgeLoaderResidency} from '../forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
-import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
 import {mountForgeShell} from '../../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
 import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup} from '../forge-loader-scan.mjs?v=20260927-1';
+import {EngineHandoffClient} from '../../../core/engine-handoff-client.mjs?v=20260927-1';
+import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1';
+import {beginEngineTiming} from '../../../core/engine-timing.mjs?v=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
+
+// Same worker pattern as Forge Loader: the packed handoff envelope is built off the main thread, kept
+// warm from the moment the profile resolves, so Enter Build Forge only waits on whatever prewarming
+// has not yet finished.
+const engineHandoff=new EngineHandoffClient();
+window.addEventListener('pagehide',()=>engineHandoff.dispose());
 
 const CLASS_NAMES=['titan','hunter','warlock'];
 const byId=id=>document.getElementById(id);
@@ -132,12 +141,16 @@ async function evaluateInBuildForge(){
   if(enterBusy)return;
   const candidate=matchedBuilds[selectedCandidateIndex];if(!candidate)return;
   const binding=membershipBinding();
-  const fail=message=>{byId('forgeResultsRuntimeStatus').textContent=message;setEnterState(null);};
+  const timing=beginEngineTiming('handoff.results-click-to-navigate');
+  const fail=message=>{timing.end('error');byId('forgeResultsRuntimeStatus').textContent=message;setEnterState(null);};
   setEnterState(.35,'PACKING YOUR LOAD…');
   await new Promise(resolve=>requestAnimationFrame(resolve));
+  timing.mark('paint');
   const setOptions=setBonusOptions(armourItems(),exoticGroup,selection.setSelections);
   const decision=forgeLoaderDecision({exoticGroup,candidate,index:selectedCandidateIndex,setOptions,setSelections:selection.setSelections,weaponGroup,targetValues:selection.targets,priorityValues:selection.priorities,combinationsEvaluated:matchedBuilds.combinationsEvaluated||matchedBuilds.length});
-  const snapshotEnvelope=createForgeLoaderBuildSnapshot(profileBuild,binding);
+  let snapshotEnvelope;
+  try{snapshotEnvelope=await engineHandoff.prepare(profileBuild,binding);}catch(error){fail(error.message);return;}
+  timing.mark('handoff');
   const selected=prepareArmourSelection(payload,[...selectedSlots.values()]);
   const armourSelection=createVaultArmourSelection({binding,slots:selected.map(item=>({slot:item.slotIndex,item})),sourcePage:'forge-loader',forgeLoaderDecision:decision});
   if(!snapshotEnvelope||!armourSelection){fail('Build Forge could not open. Your build is unchanged.');return;}
@@ -160,6 +173,7 @@ async function evaluateInBuildForge(){
   if(!baselineStored&&!transferStored)url.searchParams.set('baseline','bungie-recovery');
   for(const [key,value] of Object.entries(binding))if(value)url.searchParams.set(key,value);
   setEnterState(.9,'OPENING BUILD FORGE…');
+  timing.mark('navigate');timing.end();
   markGuardianFastReturn();location.href=url;
 }
 
@@ -215,9 +229,9 @@ async function init(){
     catalogue=createVaultCatalogue(payload);
     const character=Object.values(payload?.profile?.characters?.data||{}).find(row=>text(row.characterId)===selection.characterId);
     activeCharacterClass=characterClass(character);
-    const {normaliseLiveProfile}=await import('../../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1');
-    profileBuild=normaliseLiveProfile(payload,session,activeCharacterId);
+    profileBuild=await runProfileTask('normalise',{payload,session,characterId:activeCharacterId});
     backendSolverReady=Boolean(session?.authenticated&&text(payload?.pageReady?.manifestVersion||guardianManifest.status().version));
+    void engineHandoff.prepare(profileBuild,membershipBinding()).catch(()=>{});
     const inventoryDefinitions=guardianManifest.tables.get('DestinyInventoryItemDefinition')||payload?.definitions||{};
     const groups=exoticCatalogueGroups(catalogue.armour,inventoryDefinitions,activeCharacterClass,ARMOUR_BUCKETS);
     exoticGroup=groups.find(group=>group.owned&&Number(group.hash)===selection.exoticHash)||null;
