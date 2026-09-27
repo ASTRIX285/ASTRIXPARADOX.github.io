@@ -1,8 +1,8 @@
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2";
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?plain=20260925-2";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1";
 import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
 import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
 import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
@@ -10,14 +10,15 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1';
 import {
   cacheBungieProfile,
+  createPreparedPageRefreshController,
   readCachedBungieProfile,
   cacheBungieLoadoutDetail,
   readCachedBungieLoadoutDetail,
   invalidateBungieLoadoutDetail
-} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2";
+} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const SELECTION_RESOLUTION_VERSION=3; // Rebuild saved details classified from display text instead of the equipped hash.
@@ -1086,8 +1087,25 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
   return liveProfileRequest;
 }
 
+let guardianRefreshController=null;
+let guardianRefreshIdentity='';
+function startGuardianBackgroundRefresh(session){
+  const member=session.activeDestinyMembership||{};
+  const identity=`${member.membershipType}:${member.membershipId||session.primaryMembershipId||session.bungieMembershipId}`;
+  if(guardianRefreshController&&guardianRefreshIdentity===identity)return;
+  guardianRefreshController?.stop();
+  guardianRefreshIdentity=identity;
+  guardianRefreshController=createPreparedPageRefreshController({
+    session,page:currentPagePayloadKind(),
+    refresh:async()=>{await loadLiveProfile(session,{background:true});return liveProfilePayload;},
+    onError:error=>console.warn('[Forge] Background profile refresh failed',error)
+  });
+  guardianRefreshController.start();
+}
+
 async function handleAuthenticatedSession(session){
   if(!session?.authenticated){
+    guardianRefreshController?.stop();guardianRefreshController=null;guardianRefreshIdentity='';
     authenticatedSession=null;
     return null;
   }
@@ -1097,7 +1115,9 @@ async function handleAuthenticatedSession(session){
   // One authenticated profile request only. The earlier silent 15-second
   // attempt immediately launched a second request when the Worker was still
   // resolving Bungie manifest evidence, leaving the UI on empty placeholders.
-  return ensureLiveProfile(session,{background:false,silent:false});
+  const display=await ensureLiveProfile(session,{background:false,silent:false});
+  if(authenticatedSession===session)startGuardianBackgroundRefresh(session);
+  return display;
 }
 
 if(PROFILE_RUNTIME_ENABLED){

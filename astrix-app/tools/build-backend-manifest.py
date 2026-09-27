@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Prepare versioned, lossless public definition shards off the browser/Worker heap."""
-import json, os, shutil, tempfile, urllib.request
+import hashlib, json, os, shutil, tempfile, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'forge-manifest-worker/data'
 LIMIT = 2 * 1024 * 1024
 TYPES = (
-    'InventoryItem SandboxPerk Artifact PlugSet Stat SocketCategory EquipableItemSet '
+    'InventoryItem SandboxPerk Artifact PlugSet Stat StatGroup SocketCategory EquipableItemSet '
+    'LoadoutName LoadoutIcon LoadoutColor ActivityMode Place Vendor '
     'PresentationNode Record Objective Collectible Metric GuardianRank GuardianRankConstants '
     'Destination Activity Checklist Location SocketType DamageType BreakerType PowerCap Season SeasonPass'
 ).split()
@@ -79,9 +80,12 @@ def shard_table(rows, directory):
         if count > 8192:
             raise ValueError('Definition shard exceeds the bounded asset budget')
     directory.mkdir(parents=True)
+    digests = []
     for n, entries in enumerate(groups):
-        (directory / f'{n}.json').write_bytes(b'{' + b','.join(entries) + b'}')
-    return {'shards': count, 'definitions': len(rows), 'maxShardBytes': max(sizes)}
+        content = b'{' + b','.join(entries) + b'}'
+        (directory / f'{n}.json').write_bytes(content)
+        digests.append(hashlib.sha256(content).hexdigest())
+    return {'shards': count, 'definitions': len(rows), 'maxShardBytes': max(sizes), 'sha256': digests}
 
 def page_inventory_projection(definition):
     projected = {field: definition[field] for field in PAGE_INVENTORY_FIELDS if field in definition}
@@ -209,59 +213,167 @@ def journey_public_tables(tables):
         'complete': not unresolved and not missing_roots,
     }
 
+def saved_shards(directory, descriptor, version):
+    """Read the previous snapshot, failing closed on corrupt/missing history."""
+    if descriptor.get('manifestVersion', version) != version:
+        raise ValueError('Stored table does not match its manifest version')
+    seen = set()
+    for number in range(descriptor['shards']):
+        content = (directory / f'{number}.json').read_bytes()
+        digests = descriptor.get('sha256')
+        if digests is not None and (len(digests) != descriptor['shards'] or
+                                  hashlib.sha256(content).hexdigest() != digests[number]):
+            raise ValueError('Stored definition shard checksum mismatch')
+        rows = json.loads(content)
+        if not isinstance(rows, dict) or seen.intersection(rows):
+            raise ValueError('Invalid or duplicate stored definitions')
+        seen.update(rows)
+        yield rows
+    if len(seen) != descriptor['definitions']:
+        raise ValueError('Stored definition count mismatch')
+
+
+def retirement_record(table, hash_value, row, previous_version, version):
+    """Preserve Bungie's supplied identity, never infer names or artwork."""
+    display = row.get('displayProperties') or {}
+    record = {
+        'hash': int(hash_value), 'type': table,
+        'name': display.get('name') or row.get('name') or None,
+        'icon': display.get('icon') or row.get('iconImagePath') or row.get('colorImagePath') or None,
+        'lastSeenVersion': previous_version, 'removedInVersion': version,
+    }
+    for field in ('itemType', 'itemSubType', 'itemTypeDisplayName', 'iconImagePath', 'colorImagePath'):
+        if field in row:
+            record[field] = row[field]
+    return record
+
+
+def retired_definitions(table, current_rows, previous, version):
+    archive = {}
+    previous_version = previous.get('manifestVersion')
+    archived = (previous.get('retiredTables') or {}).get(table)
+    if archived:
+        for rows in saved_shards(OUT / 'retired' / table, archived, previous_version):
+            archive.update(rows)
+    former = previous.get('tables', {}).get(table)
+    if former:
+        for rows in saved_shards(OUT / table, former, previous_version):
+            for hash_value, row in rows.items():
+                if hash_value not in current_rows:
+                    archive[hash_value] = retirement_record(
+                        table, hash_value, row, previous_version, version)
+    return archive
+
+
+def validate_saved_coverage(index, version, required):
+    # A code/schema change never authorizes re-downloading unchanged Bungie data.
+    if index.get('schemaVersion') != 2 or index.get('manifestVersion') != version:
+        raise ValueError('Stored manifest schema/version mismatch')
+    missing = set(required) - set(index.get('tables', {}))
+    if missing:
+        raise ValueError('Backend coverage awaits a new Bungie version: ' + ', '.join(sorted(missing)))
+    for section, prefix in (('tables', ''), ('pageTables', 'page'), ('retiredTables', 'retired')):
+        for table, descriptor in index.get(section, {}).items():
+            for _ in saved_shards(OUT / prefix / table, descriptor, version):
+                pass
+    if index.get('pageTables', {}).get('DestinyInventoryItemDefinition', {}).get('definitions') != index['tables']['DestinyInventoryItemDefinition']['definitions']:
+        raise ValueError('Stored page projection coverage mismatch')
+    for page in ('common', 'journey', 'journey-index', 'loadout', 'loadout-index'):
+        payload = json.loads((OUT / 'pages' / f'{page}.json').read_text(encoding='utf-8'))
+        if payload.get('manifestVersion') != version:
+            raise ValueError('Stored page bundle version mismatch: ' + page)
+        coverage = payload.get('journeyCoverage') if page.startswith('journey') else payload.get('loadoutCoverage')
+        if page != 'common' and (coverage or {}).get('complete') is not True:
+            raise ValueError('Stored page bundle coverage incomplete: ' + page)
+
+    page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'journey-index', 'loadout', 'loadout-index')]
+    journey_page = json.loads((OUT / 'pages/journey.json').read_text()) if (OUT / 'pages/journey.json').exists() else {}
+    journey_page_index = json.loads((OUT / 'pages/journey-index.json').read_text()) if (OUT / 'pages/journey-index.json').exists() else {}
+    loadout_page = json.loads((OUT / 'pages/loadout.json').read_text()) if (OUT / 'pages/loadout.json').exists() else {}
+    loadout_index = json.loads((OUT / 'pages/loadout-index.json').read_text()) if (OUT / 'pages/loadout-index.json').exists() else {}
+    page_bundles_current = (
+        all(path.exists() for path in page_paths)
+        and journey_page.get('journeyCoverage', {}).get('complete') is True
+        and journey_page_index.get('manifestVersion') == version
+        and journey_page_index.get('definitionHashes') == {
+            table: sorted(int(hash_value) for hash_value in rows)
+            for table, rows in (journey_page.get('manifestTables') or {}).items()
+        }
+        and loadout_page.get('loadoutCoverage', {}).get('complete') is True
+        and loadout_page.get('loadoutCoverage', {}).get('weaponDefinitions') == len(loadout_page.get('weaponDefinitionHashes') or [])
+        and bool(loadout_page.get('weaponDefinitionHashes'))
+        and loadout_index.get('manifestVersion') == version
+        and loadout_index.get('weaponDefinitionHashes') == loadout_page.get('weaponDefinitionHashes')
+        and loadout_index.get('loadoutCoverage') == loadout_page.get('loadoutCoverage')
+    )
+    if not page_bundles_current:
+        raise ValueError('Stored page/index consistency mismatch')
+
+
+def publish_snapshot(staging):
+    # Keep rollback outside TemporaryDirectory so even a failed rollback cannot
+    # delete the last published snapshot and accumulated retirement archive.
+    backup = None
+    if OUT.exists():
+        backup = Path(tempfile.mkdtemp(prefix='.manifest-previous-', dir=OUT.parent))
+        os.replace(OUT, backup / 'data')
+    try:
+        os.replace(staging, OUT)
+    except BaseException:
+        if backup is not None:
+            os.replace(backup / 'data', OUT)
+            backup.rmdir()
+        raise
+    if backup is not None:
+        shutil.rmtree(backup)
+
+
 def main():
     manifest = metadata()
     version = manifest['version']
     required = ['Destiny' + name + 'Definition' for name in TYPES]
     current = OUT / 'index.json'
-    if current.exists():
-        index = json.loads(current.read_text())
-        page_paths = [OUT / f'pages/{page}.json' for page in ('common', 'journey', 'journey-index', 'loadout', 'loadout-index')]
-        journey_page = json.loads((OUT / 'pages/journey.json').read_text()) if (OUT / 'pages/journey.json').exists() else {}
-        journey_page_index = json.loads((OUT / 'pages/journey-index.json').read_text()) if (OUT / 'pages/journey-index.json').exists() else {}
-        loadout_page = json.loads((OUT / 'pages/loadout.json').read_text()) if (OUT / 'pages/loadout.json').exists() else {}
-        loadout_index = json.loads((OUT / 'pages/loadout-index.json').read_text()) if (OUT / 'pages/loadout-index.json').exists() else {}
-        page_bundles_current = (
-            all(path.exists() for path in page_paths)
-            and journey_page.get('journeyCoverage', {}).get('complete') is True
-            and journey_page_index.get('manifestVersion') == version
-            and journey_page_index.get('definitionHashes') == {
-                table: sorted(int(hash_value) for hash_value in rows)
-                for table, rows in (journey_page.get('manifestTables') or {}).items()
-            }
-            and loadout_page.get('loadoutCoverage', {}).get('complete') is True
-            and loadout_page.get('loadoutCoverage', {}).get('weaponDefinitions') == len(loadout_page.get('weaponDefinitionHashes') or [])
-            and bool(loadout_page.get('weaponDefinitionHashes'))
-            and loadout_index.get('manifestVersion') == version
-            and loadout_index.get('weaponDefinitionHashes') == loadout_page.get('weaponDefinitionHashes')
-            and loadout_index.get('loadoutCoverage') == loadout_page.get('loadoutCoverage')
-        )
-        page_inventory = (index.get('pageTables') or {}).get('DestinyInventoryItemDefinition') or {}
-        page_projection_current = page_inventory.get('definitions') == index.get('tables', {}).get('DestinyInventoryItemDefinition', {}).get('definitions')
-        if index.get('schemaVersion') == 2 and index.get('manifestVersion') == version and set(index.get('tables', {})) == set(required) and page_projection_current and page_bundles_current:
-            print('BACKEND_MANIFEST_CURRENT=' + version)
-            return
+    if OUT.exists() and not current.exists() and any(OUT.iterdir()):
+        raise ValueError('Stored manifest index is missing; preserve the snapshot for recovery')
+    previous = json.loads(current.read_text(encoding='utf-8')) if current.exists() else {}
+    if previous.get('manifestVersion') == version:
+        validate_saved_coverage(previous, version, required)
+        print('BACKEND_MANIFEST_CURRENT=' + version)
+        return False
+    paths = manifest['jsonWorldComponentContentPaths']['en']
+    # An absent table path is incomplete metadata, not proof of mass retirement.
+    for table in required:
+        path = paths.get(table, '')
+        if not path.startswith('/common/destiny2_content/json/') or '..' in path:
+            raise ValueError('Missing or unexpected Bungie manifest path: ' + table)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=OUT.parent) as temp:
         staging = Path(temp) / 'data'
         staging.mkdir()
-        index = {'schemaVersion': 2, 'manifestVersion': version, 'tables': {}, 'pageTables': {}}
+        index = {'schemaVersion': 2, 'manifestVersion': version, 'tables': {}, 'pageTables': {}, 'retiredTables': {}, 'retirementArchiveVersion': 1}
         page_rows = {}
         for table in required:
             path = manifest['jsonWorldComponentContentPaths']['en'][table]
             if not path.startswith('/common/destiny2_content/json/'):
                 raise ValueError('Unexpected Bungie manifest path')
             rows = fetch('https://www.bungie.net' + path)
-            index['tables'][table] = shard_table(rows, staging / table)
+            if not isinstance(rows, dict) or any(not str(key).isdigit() or not isinstance(row, dict) or
+                                                  row.get('hash', int(key)) != int(key) for key, row in rows.items()):
+                raise ValueError('Invalid Bungie definition table: ' + table)
+            index['tables'][table] = {**shard_table(rows, staging / table), 'manifestVersion': version, 'sourcePath': path}
+            archive = retired_definitions(table, rows, previous, version)
+            if archive:
+                index['retiredTables'][table] = {**shard_table(archive, staging / 'retired' / table), 'manifestVersion': version}
+            del archive
             if table == 'DestinyInventoryItemDefinition':
                 compact_rows = {hash_value: page_inventory_projection(row) for hash_value, row in rows.items()}
-                index['pageTables'][table] = shard_table(compact_rows, staging / 'page' / table)
+                index['pageTables'][table] = {**shard_table(compact_rows, staging / 'page' / table), 'manifestVersion': version}
             if table in JOURNEY_SOURCE_TYPES or table in ('DestinyActivityDefinition', 'DestinyDestinationDefinition', 'DestinySeasonDefinition', 'DestinySeasonPassDefinition'):
                 page_rows[table] = rows
             print(table, index['tables'][table], flush=True)
             if table not in page_rows:
                 del rows
-        if sum(t['shards'] for t in index['tables'].values()) + sum(t['shards'] for t in index['pageTables'].values()) + 1 > 19000:
+        if sum(t['shards'] for t in index['tables'].values()) + sum(t['shards'] for t in index['pageTables'].values()) + sum(t['shards'] for t in index['retiredTables'].values()) + 6 > 19000:
             raise ValueError('Backend catalogue exceeds the static asset count budget')
         # Reject a manifest change during generation rather than publish mixed data.
         if metadata()['version'] != version:
@@ -400,10 +512,12 @@ def main():
             },
             'journeyCoverage': journey_coverage,
         }))
-        if OUT.exists():
-            shutil.rmtree(OUT)
-        shutil.move(str(staging), OUT)
+        publish_snapshot(staging)
     print('BACKEND_MANIFEST_PREPARED=' + version)
+    return True
 
 if __name__ == '__main__':
-    main()
+    changed = main()
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+            output.write('changed=' + str(changed).lower() + '\n')

@@ -58,10 +58,14 @@ const controller=startForgeBackgroundRefresh({session:{authenticated:true,active
   refresh:async({reason})=>{assert.equal(reason,'poll');calls++;if(fail)throw Error('offline');return {profile:{}};}
 });
 const tick=async()=>{const [id,timer]=timers.entries().next().value;timers.delete(id);now+=timer.delay;timer.fn();await new Promise(resolve=>setImmediate(resolve));};
-assert.equal([...timers.values()][0].delay,0,'Background polling starts without pressing the button');
+// Manifest refresh: ordinary interaction, not a special button, activates polling.
+assert.equal(FORGE_REFRESH_MS,5*60*1000);
+assert.equal(timers.size,0,'Untouched tabs must not poll');
+doc.dispatchEvent(new Event('pointerdown'));
+assert.equal([...timers.values()][0].delay,0,'An active stale page schedules one background check');
 await tick();assert.equal(calls,1);assert.equal([...timers.values()][0].delay,FORGE_REFRESH_MS);
 fail=true;await tick();assert.equal([...timers.values()][0].delay,15000,'Initial or subsequent failure retries automatically');
-fail=false;await tick();assert.equal(calls,3);
+fail=false;doc.dispatchEvent(new Event('keydown'));await tick();assert.equal(calls,3);
 events.dispatchEvent(new Event('pagehide'));assert.equal(timers.size,0);
 now+=FORGE_REFRESH_MS;events.dispatchEvent(new Event('pageshow'));await new Promise(resolve=>setImmediate(resolve));assert.equal(calls,4,'Mobile resume checks stale data automatically');
 controller.stop();

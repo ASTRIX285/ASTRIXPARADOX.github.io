@@ -37,6 +37,8 @@ function scheduler(){
   };
 }
 
+const doc=new EventTarget();doc.visibilityState='visible';
+const events=new EventTarget();
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 const session={authenticated:true,activeDestinyMembership:{membershipType:3,membershipId:'refresh-account'}};
 const payload={pageReady:{page:'journey'},profile:{characters:{data:{guardian:{characterId:'guardian'}}}}};
@@ -45,7 +47,8 @@ globalThis.localStorage=persistent;
 globalThis.sessionStorage=memoryStorage();
 
 assert.equal(PROFILE_TTL_MS,12*60*60*1000,'The cached payload trust ceiling must remain twelve hours.');
-assert.equal(PREPARED_PAGE_REFRESH_MS,10*60*1000,'Prepared page checks must run every ten minutes.');
+// Manifest refresh: active five-minute policy replaces the old ungated timer.
+assert.equal(PREPARED_PAGE_REFRESH_MS,5*60*1000,'Active prepared page checks run every five minutes.');
 await cacheBungieProfile(session,payload,'journey');
 
 const staleLoadout={pageReady:{page:'loadout'},profile:{characters:{data:{guardian:{characterId:'guardian'}}}}};
@@ -68,7 +71,7 @@ let backendCalls=0;
 const pollScheduler=scheduler();
 const pollController=createPreparedPageRefreshController({
   session,
-  page:'journey',
+  page:'journey',documentTarget:doc,eventTarget:events,
   storage:persistent,
   now:()=>now,
   setTimer:pollScheduler.setTimer,
@@ -76,14 +79,16 @@ const pollController=createPreparedPageRefreshController({
   refresh:async()=>{backendCalls+=1;return payload;}
 });
 pollController.start();
+assert.equal(pollScheduler.first(),null,'An untouched tab must not poll');
+doc.dispatchEvent(new Event('pointerdown'));
 assert.equal(pollScheduler.first()?.delay,PREPARED_PAGE_REFRESH_MS);
 now+=PREPARED_PAGE_REFRESH_MS;
 pollScheduler.first().callback();
 await flush();
-assert.equal(backendCalls,1,'Ten minutes without a reload must fire one prepared route request.');
+assert.equal(backendCalls,1,'Five active minutes without a reload must fire one prepared route request.');
 assert.equal(readPreparedPageCheck(session,'journey',{storage:persistent}),now);
 pollController.stop();
-console.log(`PAGE_REFRESH_TEN_MINUTE_POLL=PASS elapsed=${PREPARED_PAGE_REFRESH_MS}ms backendCalls=${backendCalls}`);
+console.log(`PAGE_REFRESH_FIVE_MINUTE_POLL=PASS elapsed=${PREPARED_PAGE_REFRESH_MS}ms backendCalls=${backendCalls}`);
 
 const reloadElapsed=4*60*1000;
 now+=reloadElapsed;
@@ -93,7 +98,7 @@ const cached=await readCachedBungieProfile(session,'journey');
 assert.deepEqual(cached,payload,'A reload inside the check window must serve the existing page cache.');
 const reloadController=createPreparedPageRefreshController({
   session,
-  page:'journey',
+  page:'journey',documentTarget:doc,eventTarget:events,
   storage:persistent,
   now:()=>now,
   setTimer:reloadScheduler.setTimer,
@@ -101,6 +106,7 @@ const reloadController=createPreparedPageRefreshController({
   refresh:async()=>{reloadBackendCalls+=1;return payload;}
 });
 reloadController.start();
+doc.dispatchEvent(new Event('keydown'));
 await flush();
 const remaining=PREPARED_PAGE_REFRESH_MS-reloadElapsed;
 assert.equal(reloadBackendCalls,0,'A reload inside the check window must not issue a redundant prepared route request.');
@@ -122,7 +128,7 @@ let requestObserved=()=>{};
 const requestStarted=new Promise(resolve=>{requestObserved=resolve;});
 const manualController=createPreparedPageRefreshController({
   session,
-  page:'journey',
+  page:'journey',documentTarget:doc,eventTarget:events,
   storage:persistent,
   now:()=>now,
   setTimer:manualScheduler.setTimer,
@@ -150,7 +156,7 @@ const pages={
   vault:[read('astrix-app/pages/vault/index.html'),read('astrix-app/pages/vault/vault.mjs'),/loadPreparedPagePayload\(session,'vault'/],
   loadout:[read('astrix-app/pages/forge-loader/index.html'),`${read('astrix-app/pages/forge-loader/forge-loader.mjs')}\n${read('astrix-app/pages/forge-loader/forge-loader-preload.mjs')}\n${read('astrix-app/pages/forge-loader/forge-loader-refresh.mjs')}`,/loadPreparedPagePayload\(session,'loadout'/]
 };
-assert.match(sessionCache,/PREPARED_PAGE_REFRESH_MS=10\*60\*1000/);
+assert.match(sessionCache,/PREPARED_PAGE_REFRESH_MS=5\*60\*1000/);
 assert.match(sessionCache,/PREPARED_PAGE_CHECK_PREFIX[\s\S]*?localStorage/,'Successful check timestamps must survive a page reload.');
 assert.match(heroCards,/loadPreparedPagePayload\(session,page/,'Shared Guardian cards must delegate reload cache policy to the shared page client.');
 assert.match(preparedClient,/readCachedBungieProfile\(session,page\)[\s\S]*?if\(cached\?\.pageReady/,'The shared page client must not bypass a valid prepared page cache on reload.');

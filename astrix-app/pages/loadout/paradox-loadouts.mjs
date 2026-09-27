@@ -1,16 +1,16 @@
 import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
-import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2';
+import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2';
+import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoadout} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
 import {LOADOUT_DEFINITIONS} from '../guardian-workspace-v2/guardian-loadout-definitions.mjs';
 import {createVaultCatalogue} from '../vault/vault-inventory.mjs?champion=20260924-champion-export-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
 import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
 import {liveActionCapabilities,sessionBinding,inventoryLocations,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,requestFreshProfile,verifyReadback,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&plain=20260925-2';
-import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2';
-import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2';
+import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});

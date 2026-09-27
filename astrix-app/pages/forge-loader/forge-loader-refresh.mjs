@@ -1,19 +1,12 @@
-import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2';
+import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
 
-export const FORGE_REFRESH_MS=60*1000;
+export const FORGE_REFRESH_MS=5*60*1000;
 export function forgeInventorySignature(payload){
   const profile=payload?.profile||{};
   return JSON.stringify([payload?.pageReady?.manifestVersion||payload?.manifestVersion,payload?.pageReady?.coverage,payload?.definitionCoverage,payload?.weaponDefinitionCoverage,payload?.subclassCatalogCoverage,payload?.artifactCoverage,payload?.artifactCatalogCoverage,payload?.forgeArmourIndexCoverage,payload?.loadoutCoverage,payload?.forgeArmourIndex?.generatedAt,profile.profileInventory,profile.characterInventories,profile.characterEquipment,profile.characterLoadouts,profile.itemComponents?.instances,profile.itemComponents?.stats,profile.itemComponents?.sockets]);
 }
 export function startForgeBackgroundRefresh({session,refresh,onError=()=>{},eventTarget=globalThis,documentTarget=globalThis.document,...clock}={}){
-  const controller=createPreparedPageRefreshController({session,page:'loadout',intervalMs:FORGE_REFRESH_MS,retryMs:15*1000,...clock,refresh:()=>refresh({reason:'poll'}),onError});
-  const check=()=>{if(documentTarget?.visibilityState!=='hidden')void Promise.resolve(controller.check()).catch(()=>{});};
-  const resume=()=>{controller.start();check();};
-  eventTarget?.addEventListener?.('focus',check);
-  eventTarget?.addEventListener?.('online',check);
-  eventTarget?.addEventListener?.('pageshow',resume);
-  eventTarget?.addEventListener?.('pagehide',()=>controller.stop());
-  documentTarget?.addEventListener?.('visibilitychange',check);
+  const controller=createPreparedPageRefreshController({session,page:'loadout',intervalMs:FORGE_REFRESH_MS,retryMs:15*1000,...clock,eventTarget,documentTarget,refresh:()=>refresh({reason:'poll'}),onError});
   controller.start();
   return controller;
 }

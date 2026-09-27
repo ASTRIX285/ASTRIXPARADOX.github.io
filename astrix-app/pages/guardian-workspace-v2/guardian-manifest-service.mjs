@@ -1,4 +1,4 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2";
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
 import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
@@ -23,7 +23,9 @@ const LAZY_COMPONENT_TYPES=new Set([
   'DestinyCollectibleDefinition','DestinyMetricDefinition','DestinyGuardianRankDefinition',
   'DestinyGuardianRankConstantsDefinition','DestinyDestinationDefinition','DestinyActivityDefinition',
   'DestinyChecklistDefinition','DestinyLocationDefinition','DestinySocketTypeDefinition',
-  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition','DestinyStatGroupDefinition'
+  'DestinyDamageTypeDefinition','DestinyBreakerTypeDefinition','DestinyPowerCapDefinition','DestinyStatGroupDefinition',
+  'DestinyLoadoutNameDefinition','DestinyLoadoutIconDefinition','DestinyLoadoutColorDefinition',
+  'DestinyActivityModeDefinition','DestinyPlaceDefinition','DestinyVendorDefinition'
 ]);
 
 const tableKey=(version,type)=>`manifest:${version}:${type}`;
