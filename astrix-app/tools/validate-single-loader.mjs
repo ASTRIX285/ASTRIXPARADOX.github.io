@@ -71,6 +71,7 @@ for(const skip of [false,true]){
  h.loader.done();h.loader.mount();h.loader.blocked('Late background failure');h.loader.authRequired('/connect');assert.equal(h.mounted(),1);assert.equal(h.ready(),1);
 }
 const automaticTool=harness({auto:true});for(let i=0;i<8;i++)await Promise.resolve();assert.equal(automaticTool.loader.completed,true);assert.equal(automaticTool.mounted(),1);
-assert.doesNotMatch(read(portal),/startBreach|createBreach|holdForBreach|hasWarmPage/);
+assert.doesNotMatch(read(portal),/holdForBreach|hasWarmPage/);
+assert.match(read(portal),/module.createBreach/,'The one tool loader must use the approved glass breach skin');
 assert.match(read(portal),/RETRY LIVE DATA/);assert.match(read(portal),/CONTINUE WITHOUT LIVE DATA/);
 console.log(`SINGLE_LOADER=PASS tool-pages=${checked} public-pages-without-loader=${publicPages} duplicate-components-rejected lifecycle-once recovery-preserved`);

@@ -17,7 +17,7 @@ export function runProfileTask(type,input){
     const id=++next;pending.set(id,{type,input,resolve,reject,timer:null});
     if(!worker){
       try{
-        const current=worker=new Worker(new URL('./engine-profile-worker.mjs?v=20260927-1&recovery=20260927-3',import.meta.url),{type:'module',name:'paradox-profile'});
+        const current=worker=new Worker(new URL('./engine-profile-worker.mjs?v=20260927-1&recovery=20260927-4',import.meta.url),{type:'module',name:'paradox-profile'});
         bootTimer=setTimeout(()=>reset(new Error('Profile worker startup timed out. Retry loading the profile.')),15000);
         current.onmessage=({data})=>{
           if(worker!==current)return;
@@ -25,7 +25,9 @@ export function runProfileTask(type,input){
           if(data.id!==active)return;
           const task=pending.get(data.id);if(!task)return;
           pending.delete(data.id);active=0;clearTimeout(task.timer);
-          data.error?task.reject(new Error(data.error)):task.resolve(data.result);dispatch();
+          if(data.error){const error=new Error(data.error);if(data.errorName==='SyntaxError')error.name='SyntaxError';task.reject(error);}
+          else task.resolve(data.result);
+          dispatch();
         };
         current.onerror=()=>{if(worker===current)reset(new Error('Profile worker failed. Retry loading the profile.'));};
       }catch(error){reset(error);return;}
