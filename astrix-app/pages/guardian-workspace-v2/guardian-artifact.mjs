@@ -3,7 +3,7 @@
  * Fixture/DIM test builds fall back to the beta manifest picker.
  */
 import { resolveArtifactViewState,resolveIntendedArtifactConfiguration } from './guardian-artifact-state.mjs';
-import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-2';
+import {guardianManifest} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
 
 const MANIFEST_URL='../../data/paradox-forge/beta/beta-bungie-manifest-cache.json';
 const BUNGIE_ROOT='https://www.bungie.net';

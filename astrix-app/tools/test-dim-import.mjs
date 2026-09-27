@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {ImportManifest} from '../core/dim-import/cache.mjs';
 import {parseDimInput,DimShareClient} from '../core/dim-import/share.mjs';
 import {collectDimHashes,resolveDimLoadout,dimWorkingBuild} from '../core/dim-import/resolve.mjs';
 import {createDimActions} from '../core/dim-import/actions.mjs';
@@ -77,3 +78,18 @@ let retries=0;
 const retryClient=new DimShareClient({storage:{get:async()=>null,put:async()=>{}},fetchImpl:async()=>++retries===1?new Response(null,{status:503}):Response.json({loadout:{name:'Recovered share',classType:1,equipped:[]}})});
 await assert.rejects(retryClient.load('retryid'),/unreachable/);
 assert.equal((await retryClient.load('retryid')).name,'Recovered share');assert.equal(retries,2);
+
+// Browser fetch requires a Window/Worker global receiver. Arrow mocks hide this error.
+const originalFetch=globalThis.fetch;let nativeCalls=0;
+try{
+  globalThis.fetch=async function(url){
+    if(this!==globalThis)throw new TypeError('Illegal invocation');
+    nativeCalls++;
+    return Response.json(String(url).includes('/dim/share/')?{loadout:{name:'Native receiver share',classType:1,equipped:[]}}:{manifestVersion:'receiver-test'});
+  };
+  const uncached={get:async()=>null,put:async()=>true};
+  assert.equal((await new DimShareClient({storage:uncached}).load('fixturea')).name,'Native receiver share');
+  assert.equal((await new ImportManifest({storage:uncached}).json('status')).manifestVersion,'receiver-test');
+  assert.equal(nativeCalls,2);
+}finally{globalThis.fetch=originalFetch;}
+console.log('DIM_BROWSER_FETCH_RECEIVER=PASS share and manifest');

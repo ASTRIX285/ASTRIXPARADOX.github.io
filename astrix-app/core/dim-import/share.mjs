@@ -25,7 +25,7 @@ export class DimShareClient {
     const failed=this.failures.get(id);if(failed&&failed.until>Date.now())throw failed.error;
     const task=(async()=>{
       const stored=await this.storage.get(`share:${id}`);if(stored){const result=validateLoadout(stored);this.cache.set(id,result);return result;}
-      let response;try{response=await this.fetchImpl(`https://auth.astrixparadox.com/dim/share/${encodeURIComponent(id)}`,{credentials:'omit',signal:AbortSignal.timeout(15000),headers:{Accept:'application/json'}});}catch{throw new Error('DIM is unreachable. Please try again later.');}
+      let response;try{response=await this.fetchImpl.call(globalThis,`https://auth.astrixparadox.com/dim/share/${encodeURIComponent(id)}`,{credentials:'omit',signal:AbortSignal.timeout(15000),headers:{Accept:'application/json'}});}catch(error){console.error('[PARADOX DIM share fetch failed]',{name:error?.name,message:error?.message});throw new Error('DIM is unreachable. Please try again later.',{cause:error});}
       if(response.status===404||response.status===410){const error=new Error('This DIM share link has expired or no longer exists.');error.expired=true;throw error;}
       if(!response.ok)throw new Error('DIM is unreachable. Please try again later.');
       const payload=await response.json();const loadout=validateLoadout(payload.loadout);this.cache.set(id,loadout);await this.storage.put(`share:${id}`,loadout);return loadout;
