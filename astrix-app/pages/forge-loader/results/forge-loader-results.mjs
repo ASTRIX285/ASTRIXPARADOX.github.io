@@ -8,9 +8,9 @@ import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions} from '../forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
-import {createForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1';
+import {createForgeLoaderBuildSnapshot,writeForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1';
 import {preloadForgeLoaderPayload} from '../forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1';
-import {forgeLoaderEvaluateReady} from '../forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
+import {forgeLoaderEvaluateReady,forgeLoaderResidency} from '../forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1';
 import {mountForgeShell} from '../../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
@@ -24,11 +24,14 @@ const text=value=>String(value??'').trim();
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const selection=decodeForgeResultsUrl(location.search);
 
+const activeCharacterId=selection.characterId;
+
 let session=null;
 let payload=null;
 let catalogue={armour:[],items:[],postmasterByCharacter:{}};
 let profileBuild=null;
 let activeCharacterClass='';
+let backendSolverReady=false;
 let exoticGroup=null;
 let weaponGroup=null;
 let matchedBuilds=[];
@@ -76,11 +79,21 @@ function showInspect(target){
 }
 function hideInspect(){const panel=byId('forgeItemInspect');if(panel){panel.hidden=true;panel.setAttribute('aria-hidden','true');}}
 
+function renderResidency(){
+  return forgeLoaderResidency(payload||{},{characterId:activeCharacterId,catalogue,profileBuild,manifestStatus:guardianManifest.status(),phase:profileBuild&&backendSolverReady?'ready':payload?'resident':'verifying',backendSolverReady,durationMs:0});
+}
+
+function renderCurrentResidency(){
+  const view=renderResidency();
+  const enter=byId('forgeEvaluate');
+  if(enter){const ready=forgeLoaderEvaluateReady(view,selectedSlots,activeCharacterId);if(!enterBusy){enter.disabled=!ready;enter.classList.toggle('is-ready',ready);}}
+  return view;
+}
+
 function renderStaged(){
   byId('forgeStagedSlots').innerHTML=ARMOUR_BUCKETS.map((slot,index)=>stagedMarkup(slot,index,selectedSlots)).join('');
   byId('forgeStagedStatus').textContent=selectedSlots.size===5?'COMPLETE LOAD':`${selectedSlots.size} OF 5 STAGED`;
-  const ready=Boolean(profileBuild)&&forgeLoaderEvaluateReady({ready:true},selectedSlots,selection.characterId);
-  const enter=byId('forgeEvaluate');if(enter){enter.disabled=!ready||enterBusy;enter.classList.toggle('is-ready',ready&&!enterBusy);}
+  renderCurrentResidency();
 }
 
 function renderCandidates(){
@@ -114,27 +127,37 @@ function setEnterState(step,label){
 }
 
 async function evaluateInBuildForge(){
+  const residency=renderCurrentResidency();
+  if(!forgeLoaderEvaluateReady(residency,selectedSlots,activeCharacterId))return;
   if(enterBusy)return;
-  const candidate=matchedBuilds[selectedCandidateIndex];if(!candidate||selectedSlots.size!==5||!profileBuild)return;
+  const candidate=matchedBuilds[selectedCandidateIndex];if(!candidate)return;
   const binding=membershipBinding();
   const fail=message=>{byId('forgeResultsRuntimeStatus').textContent=message;setEnterState(null);};
   setEnterState(.35,'PACKING YOUR LOAD…');
   await new Promise(resolve=>requestAnimationFrame(resolve));
   const setOptions=setBonusOptions(armourItems(),exoticGroup,selection.setSelections);
-  const decision=forgeLoaderDecision({exoticGroup,candidate,index:selectedCandidateIndex,setOptions,setSelections:selection.setSelections,weaponGroup,targetValues:selection.targets,priorityValues:selection.priorities,combinationsEvaluated:matchedBuilds.combinationsEvaluated});
+  const decision=forgeLoaderDecision({exoticGroup,candidate,index:selectedCandidateIndex,setOptions,setSelections:selection.setSelections,weaponGroup,targetValues:selection.targets,priorityValues:selection.priorities,combinationsEvaluated:matchedBuilds.combinationsEvaluated||matchedBuilds.length});
   const snapshotEnvelope=createForgeLoaderBuildSnapshot(profileBuild,binding);
   const selected=prepareArmourSelection(payload,[...selectedSlots.values()]);
   const armourSelection=createVaultArmourSelection({binding,slots:selected.map(item=>({slot:item.slotIndex,item})),sourcePage:'forge-loader',forgeLoaderDecision:decision});
   if(!snapshotEnvelope||!armourSelection){fail('Build Forge could not open. Your build is unchanged.');return;}
   setEnterState(.65,'SECURING TRANSFER…');
   const transferStored=await cacheForgeLoaderTransfer(binding,{snapshotEnvelope,armourSelection});
-  let selectionStored=transferStored;
+  let baselineStored=transferStored,selectionStored=transferStored;
+  // IndexedDB is the atomic primary route. Use quota-limited Web Storage only
+  // when that route is unavailable, rather than retaining three large copies.
   if(!transferStored){
+    baselineStored=writeForgeLoaderBuildSnapshot(profileBuild,binding,{stores:[sessionStorage,localStorage],snapshotEnvelope});
     selectionStored=writeVaultArmourSelection(armourSelection);
     if(!selectionStored){releaseGuardianSessionStorageFallbacks();selectionStored=writeVaultArmourSelection(armourSelection);}
   }
   if(!selectionStored){fail('The protected staged load could not be stored on this device. No build was changed.');return;}
+  if(!baselineStored&&!transferStored){
+    byId('forgeResultsRuntimeStatus').textContent='Browser storage is full. Build Forge will recover the protected Original Build directly from Bungie.';
+    console.warn('[Forge Loader Results] Browser storage rejected the protected baseline; Build Forge will recover it from the authenticated Bungie profile.');
+  }
   const url=new URL('../../guardian-workspace-v2/paradox-build-space/',location.href);url.searchParams.set('vault','selection');url.searchParams.set('prewarm','forge-loader');
+  if(!baselineStored&&!transferStored)url.searchParams.set('baseline','bungie-recovery');
   for(const [key,value] of Object.entries(binding))if(value)url.searchParams.set(key,value);
   setEnterState(.9,'OPENING BUILD FORGE…');
   markGuardianFastReturn();location.href=url;
@@ -193,7 +216,8 @@ async function init(){
     const character=Object.values(payload?.profile?.characters?.data||{}).find(row=>text(row.characterId)===selection.characterId);
     activeCharacterClass=characterClass(character);
     const {normaliseLiveProfile}=await import('../../guardian-workspace-v2/guardian-bungie-profile.mjs?v=20260913-character-safe-2&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1');
-    profileBuild=normaliseLiveProfile(payload,session,selection.characterId);
+    profileBuild=normaliseLiveProfile(payload,session,activeCharacterId);
+    backendSolverReady=Boolean(session?.authenticated&&text(payload?.pageReady?.manifestVersion||guardianManifest.status().version));
     const inventoryDefinitions=guardianManifest.tables.get('DestinyInventoryItemDefinition')||payload?.definitions||{};
     const groups=exoticCatalogueGroups(catalogue.armour,inventoryDefinitions,activeCharacterClass,ARMOUR_BUCKETS);
     exoticGroup=groups.find(group=>group.owned&&Number(group.hash)===selection.exoticHash)||null;

@@ -76,7 +76,7 @@
             <label data-target-stat="class"><span>CLASS</span><input type="range" min="0" max="200" value="0" step="1" disabled><output>0 / 200</output><button type="button" data-max-stat="class" disabled>MAX</button><select data-stat-priority="class" aria-label="Class priority" disabled><option value="">AUTO</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
             <label data-target-stat="weapon"><span>WEAPON</span><input type="range" min="0" max="200" value="0" step="1" disabled><output>0 / 200</output><button type="button" data-max-stat="weapon" disabled>MAX</button><select data-stat-priority="weapon" aria-label="Weapon priority" disabled><option value="">AUTO</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
           </div>
-          <div class="forge-stat-actions"><button type="button" id="forgeFindBuilds" disabled>REFRESH TOP 50 COMBINATIONS</button><button type="button" id="forgeResetTargets" disabled>RESET TARGETS</button></div>
+          <div class="forge-stat-actions"><button type="button" id="forgeFindBuilds" disabled>SEARCH FORGE MATRIX</button><button type="button" id="forgeResetTargets" disabled>RESET TARGETS</button></div>
           <p class="forge-runtime-status" id="forgeRuntimeStatus" role="status">Choose an Exotic to start.</p>
         </section>
 
@@ -89,7 +89,7 @@
 
       <section class="forge-loader-output" aria-label="Live preview and Forge Matrix search">
         <section class="forge-panel forge-preview" id="forgePreviewPanel" hidden aria-labelledby="forgePreviewTitle">
-          <div class="forge-panel-heading"><div><p class="apx-eyebrow">LIVE PREVIEW</p><h2 id="forgePreviewTitle">Top loads</h2></div><span id="forgePreviewStatus">0 RESULTS</span></div>
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">LIVE RANKING</p><h2 id="forgePreviewTitle">Top loads</h2></div><span id="forgePreviewStatus">0 RESULTS</span></div>
           <div class="forge-candidate-builds forge-preview-builds" id="forgePreviewBuilds" aria-live="polite"></div>
         </section>
 
