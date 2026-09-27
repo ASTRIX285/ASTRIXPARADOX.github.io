@@ -12,7 +12,7 @@ import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=202
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-2';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -306,7 +306,8 @@ function resultsUrl({selectIndex=0}={}){
   const exotic=selectedExotic();if(!exotic)return null;
   return encodeForgeResultsUrl(new URL('./results/',location.href),{
     characterId:activeCharacterId,exoticHash:exotic.hash,weaponInstanceId:selectedExoticWeapon()?.representative?.itemInstanceId||'',
-    setSelections,targets:targetValues(),priorities:priorityValues(),selectIndex
+    setSelections,targets:targetValues(),priorities:priorityValues(),selectIndex,
+    selectedItemIds:matchedBuilds[selectIndex]?.items.map(item=>String(item.itemInstanceId))||[]
   });
 }
 
@@ -378,7 +379,7 @@ function resetResults(){matchedBuilds=[];targetMaximums=Object.fromEntries(ARMOU
 function selectExoticWeapon(key){
   const next=exoticWeaponGroups().find(group=>group.key===String(key||''));
   selectedExoticWeaponKey=next&&next.key===selectedExoticWeaponKey?'':next?.key||'';
-  renderExoticWeapons();resetResults();
+  renderExoticWeapons();renderResultsCta();
   byId('forgeRuntimeStatus').textContent=selectedExoticWeaponKey?`${next.name} anchored. Generation will keep it in the Exotic weapon slot.`:'Exotic weapon anchor cleared.';
 }
 
