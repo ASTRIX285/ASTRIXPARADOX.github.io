@@ -78,3 +78,12 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution {
 .reports-player-table{font-variant-numeric:tabular-nums;font-size:13px}
 .reports-player-table tfoot{font-weight:700}
 @media(max-width:719px){.reports-run-heading{padding:16px}.reports-player-table{min-width:850px}.reports-run-feature{min-height:260px}}
+
+/* Compact difficulty sections use the same panel palette as activity cards. */
+.reports-run-group{margin-block:16px}
+.reports-run-group h3{margin:0;padding:8px 12px;border-bottom:1px solid var(--apx-line);color:var(--apx-text)}
+.reports-run-group .reports-runs{gap:4px;margin:8px 0}
+.reports-workspace .reports-run-group .reports-runs button{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:12px;padding:10px 12px;background:var(--apx-panel);background-image:none;border:1px solid var(--apx-line);border-radius:6px;box-shadow:none;color:var(--apx-text)}
+.reports-run-group time{font-variant-numeric:tabular-nums}
+.reports-run-result{text-align:right}
+@media(max-width:479px){.reports-workspace .reports-run-group .reports-runs button{grid-template-columns:minmax(0,1fr);gap:4px}.reports-run-result{text-align:left}}

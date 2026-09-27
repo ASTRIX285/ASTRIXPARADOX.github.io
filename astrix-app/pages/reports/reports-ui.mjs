@@ -1,5 +1,5 @@
 import {SERIES,viewModel,display,duration} from './reports-model.mjs?v=20260925-reports-20c';
-import {createReportsHistory,difficultyFor,activityAnalysis,clearsConsistent,RUN_PAGE_SIZE} from './reports-history.mjs?v=20260927-three-stage-1';
+import {createReportsHistory,normalizeDifficulty,difficultyFor,activityAnalysis,clearsConsistent,RUN_PAGE_SIZE} from './reports-history.mjs?v=20260927-difficulty-lists-1';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>Number.isFinite(value)?display(value):'Pending';
 const elapsed=value=>Number.isFinite(value)?(value===0?'00:00':duration(value)):'Pending';
@@ -15,9 +15,20 @@ export function readReportsRoute(url,snapshot){
   const q=new URL(url).searchParams;
   const activity=snapshot.catalogue.find(a=>a.id===q.get('activity'));
   return {series:activity?.series|| (SERIES.some(s=>s.id===q.get('series'))?q.get('series'):'raids'),activity:activity?.id||null,
-    character:snapshot.characters.some(c=>c.characterId===q.get('character'))?q.get('character'):'all',difficulty:q.get('difficulty')||'All',
+    character:snapshot.characters.some(c=>c.characterId===q.get('character'))?q.get('character'):'all',difficulty:normalizeDifficulty(q.get('difficulty')||'All'),
     page:/^\d+$/.test(q.get('page')||'')?Math.min(100000,Number(q.get('page'))):0,run:activity&&/^\d+$/.test(q.get('run')||'')?q.get('run'):null};
 }
+// Group the current newest-first page without losing its original run IDs.
+export function runGroups(activity,rows){
+  const groups=new Map();
+  for(const row of rows){const label=difficultyFor(row,activity);if(!groups.has(label))groups.set(label,[]);groups.get(label).push(row);}
+  return [...groups].map(([difficulty,runs])=>({difficulty,runs}));
+}
+export function runRows(activity,rows){
+  return runGroups(activity,rows).map(group=>`<section class="reports-run-group" aria-label="${escape(group.difficulty)} runs"><h3>${escape(group.difficulty==='-'?'Unspecified':group.difficulty)}</h3><ol class="reports-runs">${group.runs.map(r=>`<li><button type="button" data-run="${escape(r.id)}"><time datetime="${escape(r.period)}">${escape(date(r.period))}</time><span class="reports-run-result">${completion(r.completed)}</span></button></li>`).join('')}</ol></section>`).join('');
+}
+export const selectionArt=activity=>activity.image||'';
+
 export function mountReports(root,snapshot,{history=createReportsHistory(snapshot)}={}){
   let state=readReportsRoute(location.href,snapshot),disposed=false,busy=false,error='',runData=null,runId=null,runError='',token=0;
   const reports=new Map(),failedReports=new Set();
@@ -48,14 +59,14 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
     return `<div class="reports-tabs" aria-label="Difficulty">${['All',...analysis(a).difficulties.map(d=>d.difficulty)].map(d=>{
       const never=d!=='All'&&analysis(a).difficulties.find(row=>row.difficulty===d)?.notPlayed;
       return `<button data-difficulty="${escape(d)}" aria-pressed="${d===state.difficulty}" class="${never?'reports-unplayed':''}">${escape(d==='-'?'Unspecified':d)}</button>`;
-    }).join('')}</div><h2>Runs</h2><p>Newest first. Local date and time.</p><p role="status">${error|| (busy?'Loading all history pages…':history.complete(state.character)?'All available history pages loaded.':'History pending.')}</p>${error||failedReports.size?'<button data-retry>Retry pending data</button>':''}<ol class="reports-runs">${page.map(r=>`<li><button data-run="${escape(r.id)}"><time datetime="${escape(r.period)}">${escape(date(r.period))}</time><span>${escape(difficultyFor(r,a))} · ${className(snapshot.characters.find(c=>c.characterId===r.characterId))}</span><span>${elapsed(r.duration)} · ${completion(r.completed)} · Fireteam ${number(reports.get(r.id)?.fireteamSize??r.fireteamSize)}</span></button></li>`).join('')}</ol>${!page.length?`<p>${history.complete(state.character)?'No runs returned for this selection.':'Runs pending.'}</p>`:''}<nav class="reports-paging" aria-label="Run pages"><button data-page="${state.page-1}" ${state.page===0?'disabled':''}>Previous</button><span>Page ${state.page+1}</span><button data-page="${state.page+1}" ${(state.page+1)*RUN_PAGE_SIZE>=list.length?'disabled':''}>Next</button></nav>`;
+    }).join('')}</div><h2>Runs</h2><p>Newest first within each difficulty. Local date and time.</p><p role="status">${error|| (busy?'Loading all history pages…':history.complete(state.character)?'All available history pages loaded.':'History pending.')}</p>${error||failedReports.size?'<button data-retry>Retry pending data</button>':''}${runRows(a,page)}${!page.length?`<p>${history.complete(state.character)?'No runs returned for this selection.':'Runs pending.'}</p>`:''}<nav class="reports-paging" aria-label="Run pages"><button data-page="${state.page-1}" ${state.page===0?'disabled':''}>Previous</button><span>Page ${state.page+1}</span><button data-page="${state.page+1}" ${(state.page+1)*RUN_PAGE_SIZE>=list.length?'disabled':''}>Next</button></nav>`;
   }
   function memberLink(p){const url=new URL(location.href);url.searchParams.set('subjectId',p.membershipId);url.searchParams.set('subjectType',p.membershipType);for(const key of ['run','page','character','difficulty'])url.searchParams.delete(key);return url.href;}
   const percent=value=>Number.isFinite(value)?`${value.toFixed(1)}%`:'Not available';
   function runPage(a){
     const variant=a.variants.find(v=>v.hash===runData?.directorHash)||a.variants.find(v=>v.hash===runData?.hash);
     const name=runData?.name||(variant?[a.name,variant.variant,variant.difficulty==='-'?'':variant.difficulty].filter(Boolean).join(' · '):a.name);
-    const image=runData?.image||a.image;
+    const image=selectionArt(a);
     const modifiers=!runData?'<p>Modifiers pending.</p>':runData.modifiers===null?'<p>Modifiers not provided by Bungie for this run.</p>':runData.modifiers?.length?`<ul>${runData.modifiers.map(m=>`<li>${escape(m.name||'Modifier name pending')}</li>`).join('')}</ul>`:'<p>No player-selected modifiers recorded. Other historical modifiers are not provided.</p>';
     const totals=runData?.teamTotals;
     return `<article class="reports-run-page"><header class="reports-run-feature">${image?`<img src="${escape(image)}" alt="">`:''}<div class="reports-run-heading"><h1 tabindex="-1">${escape(name)}</h1><p>${escape(date(runData?.period))} · ${elapsed(runData?.duration)}</p><p class="reports-badges">${(runData?.badges||[]).map(b=>`<span>${b}</span>`).join('')}</p><h2>Modifiers</h2>${modifiers}</div></header><nav class="reports-paging"><button data-back-activity>Back to ${escape(a.name)}</button><button data-back>Back to Reports</button><button data-share>Share</button></nav><p data-share-status role="status"></p>${!runData?`<p role="status">${runError||'Loading fireteam…'}</p>${runError?'<button data-retry-run>Retry</button>':''}`:`<p>Badges describe recorded players and deaths, including checkpoint runs. Started from beginning: ${runData.startedFromBeginning===null?'Not provided':runData.startedFromBeginning?'Yes':'No'}.</p><div class="reports-table-scroll" tabindex="0" aria-label="Fireteam results"><table class="reports-player-table"><thead><tr>${['Emblem','Player','Class','Kills','Assists','Deaths','K/D','% of team kills','Time in activity','Completed'].map(label=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${runData.players.map((p,i)=>`<tr><td>${p.emblem?`<img src="${escape(p.emblem)}" alt="" width="32" height="32">`:'Pending'}</td><th scope="row">${p.membershipId&&p.membershipType?`<a href="${escape(memberLink(p))}">${escape(p.name)}</a>`:escape(p.name)}</th><td>${escape(p.className||'Pending')}</td><td>${number(p.kills)}</td><td>${number(p.assists)}</td><td>${number(p.deaths)}</td><td>${number(p.kd)}</td><td>${percent(runData.killShares[i])}</td><td>${elapsed(p.timePlayed)}</td><td>${completion(p.completed)}</td></tr>`).join('')}</tbody><tfoot><tr><th colspan="3" scope="row">Totals</th><td>${number(totals.kills)}</td><td>${number(totals.assists)}</td><td>${number(totals.deaths)}</td><td>${totals.deaths===0?'No deaths':number(totals.kd)}</td><td>${percent(totals.killShare)}</td><td>${elapsed(totals.timePlayed)}</td><td>${totals.completed===null?'Pending':`${totals.completed} / ${runData.players.length}`}</td></tr></tfoot></table></div><p>Time totals sum each player's time in activity. Kill shares use one decimal place and balanced rounding.${totals.killShare===null?' Percentages are unavailable when team kills are zero or missing.':''}</p>`}</article>`;

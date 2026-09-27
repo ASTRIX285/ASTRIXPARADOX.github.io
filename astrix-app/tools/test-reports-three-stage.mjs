@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createReportsHistory,historyTotals,pgcrModel,difficultyFor,modifierNames,activityAnalysis,clearsConsistent,fireteamTotals} from '../pages/reports/reports-history.mjs';
-import {readReportsRoute} from '../pages/reports/reports-ui.mjs';
+import {readReportsRoute,runGroups,runRows,selectionArt} from '../pages/reports/reports-ui.mjs';
 import {createReportsLoader,createReportsStore} from '../pages/reports/reports-data.mjs';
 import {reportsRead} from '../../forge-auth-worker/src/reports-read.ts';
 const value=value=>({basic:{value}});
@@ -20,7 +20,7 @@ assert.equal(calls.length,12);assert.equal(historyTotals(activity,history.runs(a
 assert.equal(historyTotals(activity,[],false).entered,null);
 assert.equal(historyTotals(activity,[],true).entered,null,'Clear evidence prevents a false zero entered');
 assert.equal(difficultyFor({hash:'100',directorHash:'101'},activity),'Master','Selected director variant wins over a shared reference hash');
-assert.equal(difficultyFor({hash:'999',directorHash:'100'},activity),'Normal');
+assert.equal(difficultyFor({hash:'999',directorHash:'100'},activity),'Standard');
 const missing=[...history.runs(activity)];missing[0]={...missing[0],kills:null};assert.equal(historyTotals(activity,missing,true).kills,null);
 const route=readReportsRoute('https://test/reports/?activity=raids%3Afixture&difficulty=Master&character=2&page=2&run=123',snapshot);
 assert.deepEqual(route,{activity:'raids:fixture',series:'raids',difficulty:'Master',character:'2',page:2,run:'123'});
@@ -122,3 +122,21 @@ assert.equal(kingsFallModel.teamTotals.completed,0);
 assert.equal(kingsFallModel.players[0].assists,null,'Unobserved values are not invented');
 assert.equal(kingsFallModel.players[0].timePlayed,null);
 console.log('REPORTS_KINGS_FALL_17105004322=PASS both players Not completed');
+
+// Standard and Normal are one presentation bucket; original hashes remain exact.
+const aliases={...activity,image:'https://www.bungie.net/img/selection.jpg',variants:[{hash:'10',difficulty:'Standard'},{hash:'11',difficulty:'Normal'},{hash:'12',difficulty:'Master'}]};
+const aliasRuns=[{id:'1',hash:'11',characterId:'1',period:'2026-08-03T10:00:00Z',completed:true,duration:300,kills:10},{id:'2',hash:'12',characterId:'2',period:'2026-08-02T10:00:00Z',completed:false,duration:100,kills:5},{id:'3',hash:'10',characterId:'2',period:'2026-08-01T10:00:00Z',completed:true,duration:400,kills:20}];
+const aliasAnalysis=activityAnalysis(aliases,aliasRuns,snapshot.characters,true);
+assert.deepEqual(aliasAnalysis.difficulties.map(d=>[d.difficulty,d.cleared]),[['Standard',2],['Master',0]]);
+assert.ok(clearsConsistent(aliasAnalysis));
+assert.deepEqual(runGroups(aliases,aliasRuns).map(g=>[g.difficulty,g.runs.map(r=>r.id)]),[['Standard',['1','3']],['Master',['2']]]);
+const rendered=runRows(aliases,aliasRuns);
+assert.match(rendered,/<h3>Standard<\/h3>/);assert.match(rendered,/<h3>Master<\/h3>/);
+assert.equal((rendered.match(/data-run=/g)||[]).length,3);
+assert.match(rendered,/Completed/);assert.match(rendered,/Not completed/);
+assert.doesNotMatch(rendered,/Titan|Warlock|Hunter|Fireteam|05:00/);
+assert.equal(readReportsRoute('https://test/reports/?difficulty=Normal',snapshot).difficulty,'Standard');
+assert.equal(difficultyFor({hash:'5'},{variants:[{hash:'5',variant:'Coda',difficulty:'Normal'}]}),'Coda · Standard');
+assert.equal(selectionArt(aliases),'https://www.bungie.net/img/selection.jpg');
+assert.equal(selectionArt({image:''}),'','Do not substitute a different run image');
+console.log('REPORTS_DIFFICULTY_LISTS=PASS');
