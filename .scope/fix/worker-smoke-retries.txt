@@ -1,0 +1,3 @@
+.github/workflows/deploy-forge-worker.yml
+.github/scripts/worker-smoke-fetch.mjs
+.github/scripts/worker-smoke-fetch.test.mjs
