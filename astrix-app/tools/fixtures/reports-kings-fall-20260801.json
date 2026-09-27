@@ -1,0 +1,34 @@
+{
+  "source": {
+    "runId": "17105004322",
+    "endpoint": "/bungie/pgcr/17105004322",
+    "observedAt": "2026-09-27",
+    "capture": "Anonymized projection of the production PGCR view, not a raw API capture. The deployed pgcrModel maps each entry's own completed.basic.value 0 to Not completed. Unexposed fields are omitted.",
+    "activity": "King's Fall",
+    "localDateTime": "1 Aug 2026, 09:55 Europe/London",
+    "durationSeconds": 338,
+    "expectedCompletion": [false, false]
+  },
+  "report": {
+    "period": "2026-08-01T08:55:58Z",
+    "activityDetails": {"instanceId": "17105004322"},
+    "entries": [
+      {
+        "player": {"destinyUserInfo": {"displayName": "Observed player 1"}},
+        "values": {
+          "kills": {"basic": {"value": 0}},
+          "deaths": {"basic": {"value": 1}},
+          "completed": {"basic": {"value": 0}}
+        }
+      },
+      {
+        "player": {"destinyUserInfo": {"displayName": "Observed player 2"}},
+        "values": {
+          "kills": {"basic": {"value": 8}},
+          "deaths": {"basic": {"value": 0}},
+          "completed": {"basic": {"value": 0}}
+        }
+      }
+    ]
+  }
+}

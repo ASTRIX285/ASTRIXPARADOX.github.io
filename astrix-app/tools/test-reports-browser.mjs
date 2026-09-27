@@ -14,7 +14,7 @@ const snapshot=structuredClone(fixture);
 const real=new URL(location.href).searchParams.has('real');
 if(real)snapshot.catalogue=slimCatalogue((await (await fetch('/astrix-app/tools/fixtures/reports-catalogue-current.json')).json()).activities);
 window.fixtureCatalogue=snapshot.catalogue;
-mountReports(document.querySelector('#reportsWorkspace'),snapshot,real?{history:null}:{});window.fixtureReady=true;`;
+mountReports(document.querySelector('#reportsWorkspace'),snapshot);window.fixtureReady=true;`;
 const pages=new Map();
 for(const name of ['reports','mission-reports','loadout']){
  let html=(await readFile(resolve(root,`astrix-app/pages/${name}/index.html`),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
@@ -33,7 +33,7 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64');
 const value=value=>({basic:{value}});
 const rows=Array.from({length:45},(_,i)=>({period:new Date(Date.UTC(2026,8,27,0,45-i)).toISOString(),activityDetails:{instanceId:String(1000+i),referenceId:100},values:{activityDurationSeconds:value(600),completed:value(i%2),kills:value(5),deaths:value(0)}}));
-const report=id=>({period:rows[0].period,activityDetails:{instanceId:id},entries:[{characterId:'1',player:{destinyUserInfo:{displayName:'Fixture <player>',iconPath:'/img/emblem.png'}},values:{kills:value(0),deaths:value(0),completed:value(0),activityDurationSeconds:value(600)}},{characterId:'2',player:{destinyUserInfo:{displayName:'Missing values'}},values:{}}]});
+const report=id=>({period:rows[0].period,activityDetails:{instanceId:id,referenceId:100},entries:[{characterId:'1',player:{destinyUserInfo:{displayName:'Fixture <player>',iconPath:'/img/emblem.png'}},values:{kills:value(0),deaths:value(0),completed:value(0),activityDurationSeconds:value(600)}},{characterId:'2',player:{destinyUserInfo:{displayName:'Missing values'}},values:{}}]});
 const noOverflow=async(page,label)=>{
  const bad=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(node=>{
   if(!node.getClientRects().length||node.closest('[hidden]'))return false;
@@ -54,29 +54,36 @@ try{
   page.on('pageerror',error=>errors.push(error.message));
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
+   if(url.pathname==='/bungie/reports'&&url.searchParams.get('kind')==='definition')return route.fulfill({json:{ErrorCode:1,Response:{displayProperties:{name:'Fixture Raid: Normal'}}}});
    if(url.pathname==='/bungie/reports')return route.fulfill({json:{ErrorCode:1,Response:{activities:url.searchParams.get('characterId')==='1'&&url.searchParams.get('page')==='0'?rows:[]}}});
    if(url.pathname.startsWith('/bungie/pgcr/')){pgcrCalls++;return route.fulfill({json:{ErrorCode:1,Response:report(url.pathname.split('/').pop())}});}
    if(url.hostname==='www.bungie.net')return route.fulfill({contentType:'image/png',body:png});
    if(url.origin!==origin)return route.abort();return route.continue();
   });
   await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
-  await page.waitForFunction(()=>!document.querySelector('[data-history-state]').textContent.includes('Loading'));
   const card=page.locator('.reports-card').filter({has:page.getByRole('heading',{name:'Fixture Raid',exact:true})});
-  assert.match(await card.innerText(),/Clears\s+8/);assert.match(await card.innerText(),/Fastest\s+11:40/);assert.match(await card.innerText(),/27 Sept? 2026/);
+  assert.equal((await card.innerText()).trim(),'Fixture Raid','Front card contains only the activity name and image');
   assert.equal(await card.locator('.reports-band-row,[data-expand]').count(),0,'Front cards have no encounter lists');
   await noOverflow(page,`Reports ${width} cards`);
-  await card.getByRole('button').click();await page.waitForFunction(()=>!document.querySelector('.reports-history').textContent.includes('Loading runs'));
+  await card.getByRole('button').click();await page.waitForFunction(()=>document.querySelector('.reports-history').textContent.includes('All available history pages loaded.'));
   assert.equal(await page.locator('.reports-runs li').count(),20);
+  assert.match(await page.locator('.reports-detail-card table').first().innerText(),/Master\s+Not played\s+Not played/);
+  assert.match(await page.locator('.reports-detail-card table').last().innerText(),/Titan\s+22/);
   await noOverflow(page,`Reports ${width} activity`);
   await page.getByRole('button',{name:'Next',exact:true}).click();assert.match(await page.locator('.reports-paging').innerText(),/Page 2/);
   await page.getByRole('button',{name:'Previous',exact:true}).click();
-  await page.locator('[data-run]').first().click();await page.getByRole('heading',{name:'Fixture <player>',exact:true}).waitFor();
-  assert.match(await page.locator('.reports-fireteam').innerText(),/Not completed/);assert.match(await page.locator('.reports-fireteam').innerText(),/Pending/);
+  await page.locator('[data-run]').first().click();await page.locator('.reports-run-page .reports-player-table').waitFor();
+  assert.match(await page.locator('.reports-player-table').innerText(),/Not completed/);assert.match(await page.locator('.reports-player-table').innerText(),/Pending/);
   await noOverflow(page,`Reports ${width} run`);
   await page.screenshot({path:`${screenshots}/reports-${width}-run.png`,fullPage:true});
-  await page.locator('[data-back]:visible').click();await page.locator('[data-run]').first().click();await page.getByRole('heading',{name:'Fixture <player>',exact:true}).waitFor();assert.equal(pgcrCalls,1);
-  await page.getByLabel('Character',{exact:true}).selectOption('2');assert.equal(await page.locator('.reports-fireteam').count(),0);
-  await page.locator('[data-back]:visible').click();assert.match(await card.innerText(),/Clears\s+1/);
+  const shared=page.url();assert.ok(new URL(shared).searchParams.has('run'));
+  await page.goBack();assert.equal(await page.locator('.reports-run-page').count(),0);
+  await page.goForward();await page.locator('.reports-run-page .reports-player-table').waitFor();
+  await page.locator('[data-back-activity]').click();
+  await page.locator('.reports-tabs [data-difficulty="Master"]').click();assert.equal(await page.locator('.reports-runs li').count(),0);
+  await page.locator('.reports-detail-card [data-difficulty="Normal"]').click();assert.equal(await page.locator('.reports-runs li').count(),20);
+  await page.getByLabel('Character',{exact:true}).selectOption('2');assert.equal(await page.locator('.reports-runs li').count(),0);
+  await page.locator('[data-back]:visible').click();assert.equal((await card.innerText()).trim(),'Fixture Raid');
   assert.deepEqual(errors,[]);
   // Real public catalogue: all grouped variants must survive on the activity page.
   await page.goto(origin+'/astrix-app/pages/reports/?real');await page.waitForFunction(()=>window.fixtureReady);
