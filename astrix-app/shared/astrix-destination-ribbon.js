@@ -13,7 +13,7 @@
 
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1',location.href).href;
   const prepared=new Map();
-  let navigationRevision=0,intentTimer=null,progress=null;
+  let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
   function accountIdentity(){
     try{
@@ -82,16 +82,8 @@
     promise.catch(()=>{if(prepared.get(key)?.promise===promise)prepared.delete(key);});
     return promise;
   }
-  function showProgress(value){
-    if(!progress){
-      progress=document.createElement('output');progress.className='apx-navigation-progress';
-      progress.setAttribute('role','status');progress.setAttribute('aria-live','polite');
-      document.body.append(progress);
-    }
-    progress.textContent=`${value}%`;
-  }
   function clearNavigation(){
-    navigationRevision++;progress?.remove();progress=null;
+    navigationRevision++;
     document.querySelectorAll('.apx-destination-ribbon [aria-busy]').forEach(link=>link.removeAttribute('aria-busy'));
   }
   function prepareIntent(event){
@@ -106,12 +98,7 @@
     const link=event.target.closest('a'),destination=destinationFor(link);
     if(!destination)return;
     event.preventDefault();clearTimeout(intentTimer);clearNavigation();
-    const revision=navigationRevision,identity=accountIdentity();
-    link.setAttribute('aria-busy','true');showProgress(8);
-    try{await prepare(destination);}catch{/* Normal navigation retains sign-in and retry recovery. */}
-    if(revision!==navigationRevision)return;
-    if(identity!==accountIdentity()){clearNavigation();return;}
-    try{sessionStorage.setItem('astrix:prepared-navigation:v1',JSON.stringify({path:destination.href,at:Date.now()}));}catch{}
+    // Hover/focus prefetch stays opportunistic. Only the destination shows a loader.
     clearNavigation();location.assign(destination.href);
   }
   window.addEventListener('pageshow',clearNavigation);
