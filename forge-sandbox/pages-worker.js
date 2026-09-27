@@ -63,9 +63,10 @@ async function handleBungieBridge(request,env,url){
   target.searchParams.set('identity',accessIdentityKey);
   const returnUrl=url.searchParams.get('return');
   if(returnUrl)target.searchParams.set('return',returnUrl);
+  if(url.searchParams.get('continue')==='1')target.searchParams.set('continue','1');
   const response=await env.AUTH_API.fetch(new Request(target,{
     method:'GET',
-    headers:{Accept:'application/json'},
+    headers:{Accept:'application/json',Cookie:(request.headers.get('Cookie')||'').split(';').map(value=>value.trim()).filter(value=>value==='astrix_oauth_intro=1').join('; ')},
     redirect:'manual',
   }));
   return sandboxResponse(response,'',true);

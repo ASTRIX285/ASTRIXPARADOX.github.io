@@ -1,3 +1,4 @@
+import { OAUTH_TTL_MS } from "./oauth-ui";
 import { refreshFailure } from "./refresh-failure";
 import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
@@ -9,12 +10,12 @@ const BUNGIE_TOKEN = "https://www.bungie.net/platform/app/oauth/token/";
 const TOKEN_RENEWAL_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
 const TOKEN_RENEWAL_LEEWAY_MS = 7 * 24 * 60 * 60 * 1000;
 const MIN_ALARM_DELAY_MS = 5 * 60 * 1000;
-const OAUTH_RECORD_TTL_MS = 15 * 60 * 1000;
+const OAUTH_RECORD_TTL_MS = OAUTH_TTL_MS + 5 * 60 * 1000;
 const TEMPORARY_RETRY_MS = 15 * 60 * 1000;
 const RECOVERY_RECORD_TTL_MS = 5 * 60 * 1000;
 
 export type Membership = { membershipType: number; membershipId: string; displayName?: string };
-export type OAuthTransaction = { kind: "oauth-transaction"; state: string; createdAt: number; returnUrl: string; used: boolean; accessIdentityKey?: string };
+export type OAuthTransaction = { kind: "oauth-transaction"; state: string; createdAt: number; returnUrl: string; used: boolean; accessIdentityKey?: string; completedSessionId?: string };
 export type RecoveryTransaction = { kind: "recovery-transaction"; ticket: string; createdAt: number; returnUrl: string; sessionId: string; accessIdentityKey: string; used: boolean };
 export type AccessBindingRecord = { kind: "access-binding"; sessionId: string; createdAt: number; expiresAt: number };
 export type SessionRecord = { kind: "session"; createdAt: number; lastUsedAt: number; absoluteExpiresAt: number; accessToken: string; refreshToken: string; accessExpiresAt: number; refreshExpiresAt: number | null; bungieMembershipId: string | null; destinyMemberships: Membership[]; primaryMembershipId: string | null; activeDestinyMembership: Membership | null; csrfToken: string; accessIdentityKey?: string; verifiedCharacterIds?: string[]; verifiedCharactersAt?: number };
@@ -209,11 +210,23 @@ export class AuthRecord extends DurableObject<Env> {
       return record ? Response.json(record, { headers: { "Cache-Control": "no-store" } }) : new Response(null, { status: 404 });
     }
     if (request.method === "POST" && path === "/take-oauth") {
-      const record = await this.ctx.storage.get<AuthRecordValue>("record");
-      if (!record || record.kind !== "oauth-transaction" || record.used) return new Response(null, { status: 404 });
-      const used: OAuthTransaction = { ...record, used: true };
-      await this.ctx.storage.put("record", used);
-      return Response.json(used, { headers: { "Cache-Control": "no-store" } });
+      return this.exclusive(async () => {
+        const record = await this.ctx.storage.get<AuthRecordValue>("record");
+        if (!record || record.kind !== "oauth-transaction") return new Response(null, { status: 404 });
+        if (record.used) return Response.json(record, { status: 409, headers: { "Cache-Control": "no-store" } });
+        const used: OAuthTransaction = { ...record, used: true };
+        await this.ctx.storage.put("record", used);
+        return Response.json(used, { headers: { "Cache-Control": "no-store" } });
+      });
+    }
+    if (request.method === "POST" && path === "/complete-oauth") {
+      const { sessionId } = await request.json<{ sessionId: string }>();
+      return this.exclusive(async () => {
+        const record = await this.ctx.storage.get<AuthRecordValue>("record");
+        if (!record || record.kind !== "oauth-transaction" || !record.used || record.completedSessionId || !sessionId) return new Response(null, { status: 409 });
+        await this.ctx.storage.put("record", { ...record, completedSessionId: sessionId });
+        return new Response(null, { status: 204 });
+      });
     }
     if (request.method === "POST" && path === "/take-recovery") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");

@@ -1,3 +1,4 @@
+import { OAUTH_TTL_MS, oauthRecovery, oauthIntro, OAUTH_INTRO_COOKIE } from "./oauth-ui";
 import { dimShareRoute } from './dim-share.ts';
 import {
   AuthRecord,
@@ -28,7 +29,6 @@ const BUNGIE_PLATFORM = "https://www.bungie.net/Platform";
 const MANIFEST_METADATA_CACHE_KEY = "https://auth.astrixparadox.com/.cache/manifest-metadata/current";
 const MANIFEST_METADATA_TTL_SECONDS = 60 * 60;
 const SESSION_COOKIE = "astrix_session";
-const OAUTH_TTL_MS = 10 * 60 * 1000;
 const RECOVERY_TTL_MS = 2 * 60 * 1000;
 const SESSION_TTL_MS = 400 * 24 * 60 * 60 * 1000;
 const INTERNAL_ACCESS_HOST = "forge-auth.internal";
@@ -478,10 +478,10 @@ async function putRecord(env: Env, key: string, record: AuthRecordValue): Promis
   if (!response.ok) throw new Error(`auth_record_write_failed:${response.status}`);
 }
 
-async function takeOAuth(env: Env, state: string): Promise<OAuthTransaction | null> {
+async function takeOAuth(env: Env, state: string): Promise<{ tx: OAuthTransaction; reused: boolean } | null> {
   const response = await recordStub(env, `oauth:${state}`).fetch("https://auth-record/take-oauth", { method: "POST" });
-  if (!response.ok) return null;
-  return response.json<OAuthTransaction>();
+  if (!response.ok && response.status !== 409) return null;
+  return { tx: await response.json<OAuthTransaction>(), reused: response.status === 409 };
 }
 
 async function takeRecovery(env: Env, ticket: string): Promise<RecoveryTransaction | null> {
@@ -577,11 +577,14 @@ async function startOAuth(request: Request, env: Env, accessIdentityKey?: string
   const url = new URL(request.url);
   const clientId = (env.BUNGIE_CLIENT_ID || "").trim();
   if (!clientId) {
-    return json({ error: "oauth_not_configured", missing: ["BUNGIE_CLIENT_ID"] }, 500);
+    return oauthRecovery();
   }
 
-  const state = randomToken();
   const returnUrl = approvedReturnUrl(url.searchParams.get("return"), env);
+  if (cookieValue(request, OAUTH_INTRO_COOKIE) !== "1" && url.searchParams.get("continue") !== "1") {
+    return oauthIntro(returnUrl, Boolean(accessIdentityKey));
+  }
+  const state = randomToken();
   const tx: OAuthTransaction = {
     kind: "oauth-transaction",
     state,
@@ -596,7 +599,12 @@ async function startOAuth(request: Request, env: Env, accessIdentityKey?: string
   authorize.searchParams.set("client_id", clientId);
   authorize.searchParams.set("response_type", "code");
   authorize.searchParams.set("state", state);
-  return Response.redirect(authorize.toString(), 302);
+  return new Response(null, { status: 302, headers: {
+    Location: authorize.toString(),
+    "Cache-Control": "no-store",
+    "Referrer-Policy": "no-referrer",
+    "Set-Cookie": `${OAUTH_INTRO_COOKIE}=1; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=34560000`
+  } });
 }
 
 async function exchangeCode(code: string, env: Env): Promise<TokenResponse> {
@@ -1719,84 +1727,109 @@ async function warmPreparedWorkspace(request: Request, env: Env): Promise<void> 
 }
 
 async function oauthCallback(request: Request, env: Env): Promise<Response> {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
-  const oauthError = url.searchParams.get("error");
-  if (oauthError) return json({ error: "bungie_authorization_denied", detail: oauthError }, 400);
-  if (!code || !state) return json({ error: "missing_oauth_parameters" }, 400);
+  let retryReturn: string | undefined;
+  try {
+    const url = new URL(request.url);
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const oauthError = url.searchParams.get("error");
+    if (oauthError) return oauthRecovery();
+    if (!code || !state) return oauthRecovery();
 
-  const tx = await takeOAuth(env, state);
-  if (!tx || tx.state !== state || Date.now() - tx.createdAt > OAUTH_TTL_MS) {
-    return json({ error: "invalid_or_expired_oauth_state" }, 400);
-  }
-
-  const token = await exchangeCode(code, env);
-  const membershipData = await fetchMemberships(token.access_token, env);
-  const destinyMemberships: Membership[] = (membershipData.Response?.destinyMemberships || []).map((m) => ({
-    membershipType: m.membershipType,
-    membershipId: m.membershipId,
-    ...(m.displayName ? { displayName: m.displayName } : {})
-  }));
-  const primaryMembershipId = membershipData.Response?.primaryMembershipId || null;
-  const activeDestinyMembership = destinyMemberships.find((m) => m.membershipId === primaryMembershipId) || destinyMemberships[0] || null;
-  const now = Date.now();
-  const sessionId = randomToken();
-  const csrfToken = randomToken();
-  const session: SessionRecord = {
-    kind: "session",
-    createdAt: now,
-    lastUsedAt: now,
-    absoluteExpiresAt: now + SESSION_TTL_MS,
-    accessToken: token.access_token,
-    refreshToken: token.refresh_token || "",
-    accessExpiresAt: now + token.expires_in * 1000,
-    refreshExpiresAt: token.refresh_expires_in ? now + token.refresh_expires_in * 1000 : null,
-    bungieMembershipId: token.membership_id || null,
-    destinyMemberships,
-    primaryMembershipId,
-    activeDestinyMembership,
-    csrfToken,
-    ...(tx.accessIdentityKey ? { accessIdentityKey: tx.accessIdentityKey } : {})
-  };
-  await putRecord(env, `session:${sessionId}`, session);
-  if (tx.accessIdentityKey) {
-    await putAccessBinding(env, tx.accessIdentityKey, sessionId, session.absoluteExpiresAt);
-  }
-
-  // Finish the one-time Bungie approval by preparing the private account data
-  // before Forge opens. Later pages reuse this superset snapshot silently.
-  const preparedProfiles = await Promise.all([CHARACTER_PROFILE_COMPONENTS, JOURNEY_PROFILE_COMPONENTS].map(components =>
-    recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/profile-snapshot", {
-      method: "POST",
-      body: JSON.stringify({ components })
-    }))
-  )).catch(error => console.warn("initial_profile_snapshot_warm_failed", { error: String(error) }));
-  const characterPayload = Array.isArray(preparedProfiles)
-    ? await preparedProfiles[0]?.clone().json<BungieApiResponse<DestinyProfilePayload>>().catch(() => null)
-    : null;
-  const characterIds = Object.keys(characterPayload?.Response?.characters?.data || {});
-  await Promise.all([
-    recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/prepared-read", {
-      method: "POST",
-      body: JSON.stringify({ kind: "historical-stats" })
-    })),
-    ...characterIds.map(characterId => recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/prepared-read", {
-      method: "POST",
-      body: JSON.stringify({ kind: "activity-history", characterId, count: 25, page: 0 })
-    })))
-  ]).catch(error => console.warn("initial_account_data_warm_failed", { error: String(error) }));
-
-  const returnUrl = new URL(tx.returnUrl);
-  returnUrl.searchParams.set("bungie", "connected");
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: returnUrl.toString(),
-      "Set-Cookie": sessionCookie(sessionId, Math.floor(SESSION_TTL_MS / 1000)),
-      "Cache-Control": "no-store"
+    const taken = await takeOAuth(env, state);
+    const tx = taken?.tx;
+    if (!tx || tx.state !== state || !Number.isFinite(tx.createdAt) || tx.createdAt > Date.now() || Date.now() - tx.createdAt >= OAUTH_TTL_MS) {
+      return oauthRecovery();
     }
-  });
+    retryReturn = approvedReturnUrl(tx.returnUrl, env);
+    if (taken?.reused) {
+      // A replay can only resume the session established by this transaction.
+      // Never exchange its code twice or trust a return URL from the callback.
+      const sessionId = cookieValue(request, SESSION_COOKIE);
+      if (!sessionId || sessionId !== tx.completedSessionId) return oauthRecovery(retryReturn);
+      const session = await getSession(env, sessionId);
+      if (!session || session.absoluteExpiresAt <= Date.now()) return oauthRecovery(retryReturn);
+      await refreshAccessToken(sessionId, session, env);
+      return new Response(null, { status: 302, headers: { Location: retryReturn, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
+    }
+
+    const token = await exchangeCode(code, env);
+    if (!token?.access_token || !Number.isFinite(token.expires_in) || token.expires_in <= 0) throw new Error("invalid_oauth_token");
+    const membershipData = await fetchMemberships(token.access_token, env);
+    if (membershipData?.ErrorCode !== 1 || !membershipData.Response) throw new Error("invalid_oauth_memberships");
+    const destinyMemberships: Membership[] = (membershipData.Response?.destinyMemberships || []).map((m) => ({
+      membershipType: m.membershipType,
+      membershipId: m.membershipId,
+      ...(m.displayName ? { displayName: m.displayName } : {})
+    }));
+    const primaryMembershipId = membershipData.Response?.primaryMembershipId || null;
+    const activeDestinyMembership = destinyMemberships.find((m) => m.membershipId === primaryMembershipId) || destinyMemberships[0] || null;
+    const now = Date.now();
+    const sessionId = randomToken();
+    const csrfToken = randomToken();
+    const session: SessionRecord = {
+      kind: "session",
+      createdAt: now,
+      lastUsedAt: now,
+      absoluteExpiresAt: now + SESSION_TTL_MS,
+      accessToken: token.access_token,
+      refreshToken: token.refresh_token || "",
+      accessExpiresAt: now + token.expires_in * 1000,
+      refreshExpiresAt: token.refresh_expires_in ? now + token.refresh_expires_in * 1000 : null,
+      bungieMembershipId: token.membership_id || null,
+      destinyMemberships,
+      primaryMembershipId,
+      activeDestinyMembership,
+      csrfToken,
+      ...(tx.accessIdentityKey ? { accessIdentityKey: tx.accessIdentityKey } : {})
+    };
+    await putRecord(env, `session:${sessionId}`, session);
+    if (tx.accessIdentityKey) {
+      await putAccessBinding(env, tx.accessIdentityKey, sessionId, session.absoluteExpiresAt);
+    }
+
+    // Finish the one-time Bungie approval by preparing the private account data
+    // before Forge opens. Later pages reuse this superset snapshot silently.
+    const preparedProfiles = await Promise.all([CHARACTER_PROFILE_COMPONENTS, JOURNEY_PROFILE_COMPONENTS].map(components =>
+      recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/profile-snapshot", {
+        method: "POST",
+        body: JSON.stringify({ components })
+      }))
+    )).catch(error => console.warn("initial_profile_snapshot_warm_failed", { error: String(error) }));
+    const characterPayload = Array.isArray(preparedProfiles)
+      ? await preparedProfiles[0]?.clone().json<BungieApiResponse<DestinyProfilePayload>>().catch(() => null)
+      : null;
+    const characterIds = Object.keys(characterPayload?.Response?.characters?.data || {});
+    await Promise.all([
+      recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/prepared-read", {
+        method: "POST",
+        body: JSON.stringify({ kind: "historical-stats" })
+      })),
+      ...characterIds.map(characterId => recordStub(env, `session:${sessionId}`).fetch(new Request("https://internal/prepared-read", {
+        method: "POST",
+        body: JSON.stringify({ kind: "activity-history", characterId, count: 25, page: 0 })
+      })))
+    ]).catch(error => console.warn("initial_account_data_warm_failed", { error: String(error) }));
+
+    const completed = await recordStub(env, `oauth:${state}`).fetch("https://auth-record/complete-oauth", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId })
+    });
+    if (!completed.ok) throw new Error("oauth_completion_failed");
+    const returnUrl = new URL(retryReturn);
+    returnUrl.searchParams.set("bungie", "connected");
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: returnUrl.toString(),
+        "Set-Cookie": sessionCookie(sessionId, Math.floor(SESSION_TTL_MS / 1000)),
+        "Referrer-Policy": "no-referrer",
+        "Cache-Control": "no-store"
+      }
+    });
+  } catch {
+    // Do not expose provider payloads, credentials or callback parameters in logs or UI.
+    return oauthRecovery(retryReturn);
+  }
 }
 
 async function sessionRoute(request: Request, env: Env): Promise<Response> {
@@ -2260,7 +2293,7 @@ export default {
         if (request.method === "GET" && url.pathname === "/internal/access/start") {
           const accessIdentityKey = internalAccessIdentity(url);
           return accessIdentityKey
-            ? startOAuth(request, env, accessIdentityKey)
+            ? await startOAuth(request, env, accessIdentityKey)
             : json({ error: "invalid_access_identity" }, 400, { "Cache-Control": "no-store" });
         }
         if (request.method === "GET" && url.pathname === "/internal/access/recovery-ticket") {
@@ -2281,14 +2314,14 @@ export default {
           OAUTH_REDIRECT_URI: bindingInfo(env.OAUTH_REDIRECT_URI)
         }, 200, { "Cache-Control": "no-store" });
       }
-      if (request.method === "GET" && url.pathname === "/bungie/start") return startOAuth(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/start") return await startOAuth(request, env);
       if (request.method === "GET" && url.pathname === "/diagnostics/data") {
         const response = await env.MANIFEST_DATA?.fetch(new Request("https://manifest/status")).catch(() => null);
         const prepared = response?.ok ? await response.json<{ manifestVersion: string; tables: Record<string,unknown> }>() : null;
         const manifest = await destinyManifest(env);
         return withCors(request, env, json({ prepared: Boolean(prepared), manifestVersion: manifest.version, preparedVersion: prepared?.manifestVersion || null, tables: Object.keys(prepared?.tables || {}), current: prepared?.manifestVersion === manifest.version }, 200, { "Cache-Control": "no-store" }));
       }
-      if (request.method === "GET" && url.pathname === "/bungie/callback") return oauthCallback(request, env);
+      if (request.method === "GET" && url.pathname === "/bungie/callback") return await oauthCallback(request, env);
       if (request.method === "GET" && url.pathname === "/session") return await sessionRoute(request, env);
       if (["GET", "POST", "PUT"].includes(request.method) && ["/paradox/loadouts", "/paradox-loadouts"].includes(url.pathname)) return await paradoxLoadoutsRoute(request, env, authenticatedSession);
       if (request.method === "GET" && url.pathname === "/session/recover") return await sessionRecoveryRoute(request, env);
@@ -2346,6 +2379,7 @@ export default {
       if (request.method === "POST" && url.pathname === "/logout") return await logoutRoute(request, env);
       return withCors(request, env, json({ error: "not_found" }, 404));
     } catch (error) {
+      if (["/bungie/callback", "/bungie/start", "/internal/access/start"].includes(url.pathname)) return oauthRecovery();
       if (error instanceof Error && error.message === "bungie_unavailable") {
         return withCors(request, env, json({ authenticated: "unknown", error: "bungie_unavailable" }, 503, { "Cache-Control": "no-store" }));
       }
