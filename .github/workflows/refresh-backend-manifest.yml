@@ -23,15 +23,18 @@ jobs:
           key: backend-manifest-v1-${{ github.run_id }}
           restore-keys: backend-manifest-v1-
       - name: Check Bungie version and prepare changed data
+        id: manifest
         env:
           BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
         run: python3 astrix-app/tools/build-backend-manifest.py
       - name: Retain verified public definitions
+        if: steps.manifest.outputs.changed == 'true'
         uses: actions/cache/save@v4
         with:
           path: forge-manifest-worker/data
           key: backend-manifest-v1-${{ github.run_id }}
       - name: Deploy prepared definitions
+        if: steps.manifest.outputs.changed == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -1,19 +1,25 @@
-name: Publish validated manifest implementation
+name: Manifest coverage and active refresh
 on:
   pull_request:
     branches: [main]
     paths:
+      - '.scope/feat/manifest-coverage-refresh.txt'
       - '.github/workflows/validate-manifest-coverage-refresh.yml'
+      - 'astrix-app/tools/build-backend-manifest.py'
+      - 'astrix-app/tools/test-manifest-coverage.py'
+      - 'astrix-app/tools/test-active-profile-refresh.mjs'
+      - 'astrix-app/core/active-profile-refresh.mjs'
+      - 'astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs'
+      - 'forge-manifest-worker/**'
+      - 'forge-auth-worker/src/index.ts'
+      - '.github/workflows/refresh-backend-manifest.yml'
+      - 'astrix-app/tools/test-manifest-retirement.mjs'
 permissions:
-  contents: write
-concurrency:
-  group: manifest-coverage-publish-335
-  cancel-in-progress: false
+  contents: read
 jobs:
-  publish:
-    if: github.repository == 'ASTRIX285/ASTRIXPARADOX.github.io' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feat/manifest-coverage-refresh'
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       NODE_OPTIONS: --experimental-strip-types
       PYTHONDONTWRITEBYTECODE: '1'
@@ -22,78 +28,32 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Restore exact validated implementation
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Published implementation diff
         run: |
-          python3 - <<'PY'
-          import base64, hashlib, json, lzma, os, subprocess, urllib.request
-          from pathlib import Path, PurePosixPath
-          repo='ASTRIX285/ASTRIXPARADOX.github.io'
-          chunks=['8e5b4c15268c53bc92dcbf2b3982db54d997c2dc','6a432770fc4164b76ecfc2b14afa098ca34af79f','78c85b4f0ba059e725f78199fd51bac7eae22f26','14b7bd40d0dd9b7acda12417fe9b47f7130c5ac4']
-          def git(*args):
-              return subprocess.check_output(['git',*args]).decode().strip()
-          def blob(data):
-              return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
-          start=git('rev-parse','HEAD')
-          remote=git('ls-remote','origin','refs/heads/feat/manifest-coverage-refresh').split()[0]
-          assert start==remote, 'Branch advanced; refusing to overwrite work'
-          Path('/tmp/manifest-publish-start').write_text(start)
-          parts=[]
-          for sha in chunks:
-              request=urllib.request.Request('https://api.github.com/repos/'+repo+'/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
-              with urllib.request.urlopen(request,timeout=30) as response:
-                  row=json.load(response)
-              content=base64.b64decode(row['content'])
-              assert blob(content)==sha
-              parts.append(content.decode('ascii'))
-          data=json.loads(lzma.decompress(base64.b64decode(''.join(parts))))
-          assert data['base']=='8c3ada1aa2a3666fa907084d0bde84a12e757582'
-          assert data['tree']=='58a1db35cc4a0afe4400206186f7cf3e481a6b10'
-          workflow='.github/workflows/validate-manifest-coverage-refresh.yml'
-          assert git('diff','--name-only',data['base']+'...HEAD').splitlines()==[workflow], 'Unexpected branch changes'
-          Path(workflow).write_bytes(subprocess.check_output(['git','show',data['base']+':'+workflow]))
-          paths=[]
-          for change in data['files']:
-              path=PurePosixPath(change['path'])
-              assert not path.is_absolute() and '..' not in path.parts
-              assert path.parts[0] not in ('.git','ASTRIX285.github.io')
-              target=Path(path)
-              before=target.read_bytes() if target.exists() else None
-              assert (blob(before) if before is not None else None)==change['before'], str(path)
-              text=before.decode('utf-8') if before is not None else ''
-              for offset,length,replacement in reversed(change['edits']):
-                  text=text[:offset]+replacement+text[offset+length:]
-              after=text.encode('utf-8')
-              assert blob(after)==change['after'], str(path)
-              target.parent.mkdir(parents=True,exist_ok=True)
-              target.write_bytes(after)
-              paths.append(str(path))
-          subprocess.run(['git','add','--',*paths],check=True)
-          assert git('write-tree')==data['tree'], 'Final tree differs from locally validated work'
-          subprocess.run(['git','diff','--cached','--check'],check=True)
-          print('VALIDATED_IMPLEMENTATION_TREE='+data['tree'])
-          print('IMPLEMENTATION_FILES='+str(len(paths)))
-          PY
-      - name: Validate implementation before publication
-        run: |
-          node astrix-app/tools/validate-scope-guard.mjs
-          node astrix-app/tools/validate-journey-visual-pass.mjs
-          node astrix-app/tools/paradox-validator.mjs
-      - name: Publish implementation to the feature branch only
-        run: |
-          test "$(git ls-remote origin refs/heads/feat/manifest-coverage-refresh | cut -f1)" = "$(cat /tmp/manifest-publish-start)"
-          git restore --source=HEAD --staged --worktree .github/workflows/refresh-backend-manifest.yml .github/workflows/validate-manifest-coverage-refresh.yml
-          git diff --cached --check
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'feat: publish manifest coverage, retirement and active refresh'
-          git push origin HEAD:refs/heads/feat/manifest-coverage-refresh
+          git branch main origin/main
+          git diff --stat main...HEAD
           git rev-parse HEAD HEAD^{tree}
-          git diff --stat origin/main...HEAD
+          for file in astrix-app/tools/build-backend-manifest.py astrix-app/core/active-profile-refresh.mjs forge-manifest-worker/worker.mjs astrix-app/tools/test-manifest-coverage.py astrix-app/tools/test-manifest-retirement.mjs astrix-app/tools/test-active-profile-refresh.mjs; do
+            git diff --name-only main...HEAD | grep -Fx "$file"
+          done
+      - name: Branch scope
+        run: node astrix-app/tools/validate-scope-guard.mjs
+      - name: Journey validation
+        if: always()
+        run: node astrix-app/tools/validate-journey-visual-pass.mjs
+      - name: Manifest and refresh regressions
+        if: always()
+        run: |
+          python3 astrix-app/tools/test-manifest-coverage.py
+          node astrix-app/tools/test-manifest-retirement.mjs
+          node astrix-app/tools/test-active-profile-refresh.mjs
+      - name: Registered validation suite
+        if: always()
+        run: node astrix-app/tools/paradox-validator.mjs
