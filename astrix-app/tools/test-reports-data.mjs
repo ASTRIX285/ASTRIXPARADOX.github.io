@@ -71,3 +71,32 @@ for(const series of ['raids','vanguard']){
   assert.deepEqual(rows.find(row=>row.name==='Mixed').variants.map(row=>row.difficulty),['Master',series==='vanguard'?'Standard':'Normal']);
   assert.equal(rows.find(row=>row.name==='Unknown').variants[0].difficulty,'-');
 }
+
+// Root of Nightmares: account clears do not imply a clear on every character.
+// Test the drill-down card summary and difficulty rows as well as the aggregate joins.
+const {statList,difficultyRows}=await import('../pages/reports/reports-ui.mjs');
+const rootGroup={id:'raids:root of nightmares',series:'raids',name:'Root of Nightmares',variants:[{hash:'2381413764',difficulty:'Standard'},{hash:'2918919505',difficulty:'Master'}]};
+const rootRow=count=>({activityHash:2381413764,values:{activityCompletions:{basic:{value:count}}}});
+const rootSnapshot={characters:[{characterId:'titan'},{characterId:'warlock'},{characterId:'hunter'}],catalogue:[rootGroup],aggregates:{titan:{activities:[rootRow(1)]},warlock:{activities:[rootRow(3)]},hunter:{activities:[]}}};
+const rootFor=(source,character='all')=>viewModel(source,'raids',character).activities[0];
+assert.equal(rootFor(rootSnapshot).totals.cleared,4);
+assert.equal(rootFor(rootSnapshot,'hunter').totals.cleared,0,'An absent Hunter row contributes zero, not the account count');
+assert.equal(rootFor(rootSnapshot,'titan').totals.cleared,1);
+assert.equal(rootFor(rootSnapshot,'warlock').totals.cleared,3);
+for(const source of [rootSnapshot,{...rootSnapshot,aggregates:{...rootSnapshot.aggregates,hunter:{activities:[rootRow(0)]}}}]){
+ const hunter=rootFor(source,'hunter');
+ assert.match(statList(hunter.totals,[['cleared','Clears']]),/>Clears<\/dt><dd>0<\/dd>/);
+ assert.match(difficultyRows(hunter),/>Standard<\/th><td>0<\/td>/);
+ assert.match(difficultyRows(hunter),/>Master<\/th><td>0<\/td>/);
+ assert.equal(hunter.totals.fastest,null,'Zero clears do not invent a fastest completion');
+ assert.equal(rootFor(source).totals.cleared,4,'Character presentation must not change account totals');
+}
+for(const unavailable of [null,{activities:[{activityHash:2381413764,values:{}}]}]){
+ const source={...rootSnapshot,aggregates:{...rootSnapshot.aggregates,hunter:unavailable}};
+ const hunter=rootFor(source,'hunter');
+ assert.equal(hunter.totals.cleared,null,'Missing response or field is unknown, not zero');
+ assert.match(statList(hunter.totals,[['cleared','Clears']]),/>Clears<\/dt><dd>Pending<\/dd>/);
+ assert.match(difficultyRows(hunter),/>Standard<\/th><td>Pending<\/td>/);
+ assert.equal(rootFor(source).totals.cleared,null,'Do not publish partial account totals');
+}
+console.log('REPORTS_ROOT_NIGHTMARES_ZERO_CLEARS=PASS');

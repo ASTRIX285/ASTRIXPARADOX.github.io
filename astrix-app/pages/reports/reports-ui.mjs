@@ -8,7 +8,9 @@ const date=value=>value?new Date(value).toLocaleString('en-GB',{dateStyle:'mediu
 const completion=value=>value===true?'Completed':value===false?'Not completed':'Pending';
 const className=row=>['Titan','Hunter','Warlock'][row?.classType]||'Guardian';
 const art=activity=>`<div class="reports-art">${activity.image?`<img src="${escape(activity.image)}" alt="" width="320" height="180">`:''}<h2>${escape(activity.name)}</h2></div>`;
-const statList=(totals,keys)=>`<dl class="reports-stats">${keys.map(([key,label])=>`<div><dt>${label}</dt><dd>${key==='time'||key==='fastest'?elapsed(totals[key]):number(totals[key])}</dd></div>`).join('')}</dl>`;
+export const statList=(totals,keys)=>`<dl class="reports-stats">${keys.map(([key,label])=>`<div><dt>${label}</dt><dd>${key==='time'||key==='fastest'?elapsed(totals[key]):number(totals[key])}</dd></div>`).join('')}</dl>`;
+
+export const difficultyRows=activity=>[...activity.difficulties].sort((a,b)=>(b.cleared??0)-(a.cleared??0)).map(row=>`<tr><th scope="row">${escape(row.difficulty==='-'?'Pending':row.difficulty)}</th><td>${number(row.cleared)}</td><td>${elapsed(row.fastest)}</td></tr>`).join('');
 
 export function mountReports(root,snapshot,{history=createReportsHistory(snapshot)}={}){
   let selectedSeries='raids',character='all',selectedActivity=null,selectedRun=null,pageIndex=0;
@@ -34,7 +36,7 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
   }
   function details(activity){
     const characters=snapshot.characters.filter(row=>character==='all'||row.characterId===character);
-    return `${statList(summary(activity),[['cleared','Clears'],['fastest','Fastest'],['kills','Kills']])}<h3>Clears by difficulty</h3><table><thead><tr><th>Difficulty</th><th>Clears</th><th>Fastest</th></tr></thead><tbody>${[...activity.difficulties].sort((a,b)=>(b.cleared??0)-(a.cleared??0)).map(row=>`<tr><th scope="row">${escape(row.difficulty==='-'?'Pending':row.difficulty)}</th><td>${number(row.cleared)}</td><td>${elapsed(row.fastest)}</td></tr>`).join('')}</tbody></table><h3>Clears by character</h3><table><thead><tr><th>Character</th><th>Clears</th><th>Fastest</th></tr></thead><tbody>${characters.map(row=>{
+    return `${statList(summary(activity),[['cleared','Clears'],['fastest','Fastest'],['kills','Kills']])}<h3>Clears by difficulty</h3><table><thead><tr><th>Difficulty</th><th>Clears</th><th>Fastest</th></tr></thead><tbody>${difficultyRows(activity)}</tbody></table><h3>Clears by character</h3><table><thead><tr><th>Character</th><th>Clears</th><th>Fastest</th></tr></thead><tbody>${characters.map(row=>{
       const data=viewModel(snapshot,selectedSeries,row.characterId).activities.find(item=>item.id===activity.id),totals=summary(data,row.characterId);
       return `<tr><th scope="row">${className(row)}</th><td>${number(totals.cleared)}</td><td>${elapsed(totals.fastest)}</td></tr>`;
     }).join('')}</tbody></table>`;
