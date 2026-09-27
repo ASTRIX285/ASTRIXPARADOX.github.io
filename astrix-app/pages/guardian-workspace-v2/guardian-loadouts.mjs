@@ -49,6 +49,15 @@ function renderMenu(){
   menu.hidden=false;trigger(index)?.setAttribute('aria-expanded','true');positionMenu();menu.querySelector('button:not(:disabled)')?.focus();
 }
 function openMenu(index){if(mutationPending||pendingIndex!==null)return;closeMenu({focus:false});menuState={index,characterId:activeCharacterId,loadout:currentLoadouts[index]||null,mode:'menu'};renderMenu();}
+async function viewLoadoutDetails(index){
+  if(!isSaved(currentLoadouts[index])||mutationPending||pendingIndex!==null)return;
+  const characterId=activeCharacterId,identity=loadoutIdentity(currentLoadouts[index]),returnFocus=trigger(index);
+  closeMenu();
+  try{
+    const {openGuardianLoadoutDetails}=await import('./guardian-loadout-details.mjs?v=20260927-loadout-details-1');
+    await openGuardianLoadoutDetails({characterId,index,getCharacterId:()=>activeCharacterId,returnFocus});
+  }catch(error){showToast(identity,error.message||'Loadout details unavailable',true);}
+}
 function selectLoadout(index,intent){
   if(!isSaved(currentLoadouts[index])||mutationPending||pendingIndex!==null)return;
   pendingIndex=index;render(currentLoadouts);closeMenu();
@@ -103,7 +112,7 @@ document.addEventListener('click',event=>{
   const confirm=target.closest?.('[data-loadout-confirm-action]');if(confirm){void confirmLoadoutMutation(confirm.dataset.loadoutConfirmAction);return;}
   const action=target.closest?.('[data-loadout-menu-action]');if(!action||!menuState){if(menuState?.mode==='menu'&&!target.closest?.('#guardianLoadoutMenu'))closeMenu({focus:false});return;}
   const value=action.dataset.loadoutMenuAction,index=menuState.index;
-  if(value==='view'){selectLoadout(index,'view-bungie-details');return;}
+  if(value==='view'){void viewLoadoutDetails(index);return;}
   if(value==='edit'){selectLoadout(index,'edit-paradox-copy');return;}
   if(value==='save'){selectLoadout(index,'save-paradox-copy');return;}
   menuState={...menuState,mode:['equip','clear'].includes(value)?'confirm':'menu',action:value,intent:stageBungieLoadoutAction(value,{characterId:menuState.characterId,index,loadoutName:loadoutIdentity(menuState.loadout).name})};

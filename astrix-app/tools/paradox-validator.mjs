@@ -19,6 +19,8 @@ const validators=[
   'validate-guardian-complete-loadout.py',
   'validate-main-page-today.mjs',
   'test-character-loadout-status.mjs',
+  'test-loadout-details.mjs', // Prompt 3: resolved view and guarded actions.
+  'test-loadout-details-backend.mjs',
   'validate-super-formation.mjs',
   'validate-responsive-layout-contract.mjs',
   'validate-destination-theming.mjs',
