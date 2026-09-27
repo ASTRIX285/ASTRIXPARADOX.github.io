@@ -146,3 +146,6 @@
 /* Forge Matrix search CTA: grey until a search has produced results, then a plain, always-enabled link. */
 .forge-search-open{display:block;margin-top:.75rem;padding:.9rem;border:1px solid rgba(201,168,76,.4);border-radius:.35rem;background:linear-gradient(135deg,rgba(103,7,17,.9),rgba(24,7,10,.94));color:#f5db7e;font:800 .76rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.055em;text-align:center;text-decoration:none;cursor:pointer}
 .forge-search-open[aria-disabled="true"]{opacity:.32;pointer-events:none;cursor:not-allowed}
+
+/* Live preview: same Forge Matrix row styling, just capped to the top few loads. */
+.forge-preview-builds{display:grid;gap:.5rem}

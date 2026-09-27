@@ -154,7 +154,7 @@ async function runSearch(){
     return;
   }
   visibleCandidateCount=Math.min(CANDIDATE_BATCH_SIZE,matchedBuilds.length);
-  if(matchedBuilds.length)stageCandidate(0);else{renderStaged();renderCandidates();}
+  if(matchedBuilds.length)stageCandidate(Math.min(selection.selectIndex,matchedBuilds.length-1));else{renderStaged();renderCandidates();}
   const evaluated=Number(matchedBuilds.combinationsEvaluated||matchedBuilds.length);
   byId('forgeResultsRuntimeStatus').textContent=matchedBuilds.length?`${evaluated.toLocaleString()} combinations scanned. Load 1 is the best fit with ${exoticGroup.name} locked${weaponGroup?`, ${weaponGroup.name} anchored`:''}.`:'No complete armour combination satisfies this Exotic and set protocol.';
 }

@@ -87,7 +87,12 @@
         </section>
       </section>
 
-      <section class="forge-loader-output" aria-label="Forge Matrix search">
+      <section class="forge-loader-output" aria-label="Live preview and Forge Matrix search">
+        <section class="forge-panel forge-preview" id="forgePreviewPanel" hidden aria-labelledby="forgePreviewTitle">
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">LIVE PREVIEW</p><h2 id="forgePreviewTitle">Top loads</h2></div><span id="forgePreviewStatus">0 RESULTS</span></div>
+          <div class="forge-candidate-builds forge-preview-builds" id="forgePreviewBuilds" aria-live="polite"></div>
+        </section>
+
         <section class="forge-panel forge-search-cta" aria-labelledby="forgeSearchTitle">
           <div class="forge-panel-heading"><div><p class="apx-eyebrow">FORGE MATRIX</p><h2 id="forgeSearchTitle">Search results</h2></div><span id="forgeSearchStatus">NOT SEARCHED</span></div>
           <p class="forge-runtime-status" id="forgeSearchSummary" role="status">Choose an Exotic to begin.</p>

@@ -12,7 +12,7 @@ import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=202
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {CANDIDATE_BATCH_SIZE,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -296,26 +296,47 @@ function configureStats({reset=false}={}){
   byId('forgeStatStatus').textContent=!exotic?'SELECT EXOTIC':available?(count||priorityCount?`${count} TARGET${count===1?'':'S'} · ${priorityCount} PRIORIT${priorityCount===1?'Y':'IES'}`:'AUTO MAXIMUM'):'NO COMPLETE LOAD';
 }
 
-const RESULTS_TRANSFER_KEY='astrix:forge-results-transfer:v1';
-let calculationToken=0,calculationController=null,openProtocolChosen=false;
+const PREVIEW_COUNT=3;
+let calculationToken=0,calculationController=null,openProtocolChosen=false,expandedPreviewIndex=-1;
 
 function canSearch(){return Boolean(selectedExotic())&&(activeTargetCount()>0||activePriorityCount()>0||setSelections.length>0||openProtocolChosen);}
 
+function resultsUrl({selectIndex=0}={}){
+  const exotic=selectedExotic();if(!exotic)return null;
+  return encodeForgeResultsUrl(new URL('./results/',location.href),{
+    characterId:activeCharacterId,exoticHash:exotic.hash,weaponInstanceId:selectedExoticWeapon()?.representative?.itemInstanceId||'',
+    setSelections,targets:targetValues(),priorities:priorityValues(),selectIndex
+  });
+}
+
+// The top few loads update instantly here, on every slider or selection change, using the same
+// forge-loader-scan.mjs markup the results page renders. Selecting or evaluating a previewed load
+// hands off to the results page (its full list, staged armour and Enter Build Forge live there),
+// carrying that load's position so it opens already staged.
+function renderPreview(){
+  const panel=byId('forgePreviewPanel'),host=byId('forgePreviewBuilds'),status=byId('forgePreviewStatus');
+  if(!panel||!host)return;
+  panel.hidden=!matchedBuilds.length;
+  if(!matchedBuilds.length)return;
+  const shown=Math.min(PREVIEW_COUNT,matchedBuilds.length);
+  status.textContent=`TOP ${shown} OF ${matchedBuilds.length}`;
+  const exotic=selectedExotic();
+  host.innerHTML=matchedBuilds.slice(0,shown).map((candidate,index)=>candidateMarkup(candidate,index,{
+    activeTargetCount:activeTargetCount(),expandedCandidateIndex:expandedPreviewIndex,selectedCandidateIndex:-1,exoticIcon:exotic?.icon||'',payload,targets:targetValues(),setSelections
+  })).join('');
+}
+
 // Forge Matrix results, staged armour and Enter Build Forge all live on their own page now, at their own
-// URL, so a result can be reloaded, bookmarked and shared. The whole selection travels in the query string;
-// a small session cache of the just-computed candidates avoids repeating the backend search on the same click.
+// URL, so a result can be reloaded, bookmarked and shared. The whole selection travels in the query string.
 function renderResultsCta(){
   const status=byId('forgeSearchStatus'),summary=byId('forgeSearchSummary'),open=byId('forgeOpenResults');
+  renderPreview();
   if(!status||!open)return;
   if(!matchedBuilds.length){status.textContent='NOT SEARCHED';summary.textContent=selectedExotic()?'Search to rank this Guardian’s real armour combinations.':'Choose an Exotic to begin.';open.setAttribute('aria-disabled','true');open.removeAttribute('href');return;}
   const evaluated=Number(matchedBuilds.combinationsEvaluated||matchedBuilds.length);
   status.textContent=`${matchedBuilds.length} RESULT${matchedBuilds.length===1?'':'S'}`;
   summary.textContent=`${evaluated.toLocaleString()} combinations scanned. Load 1 is the best fit with ${selectedExotic()?.name} locked.`;
-  const exotic=selectedExotic();
-  const url=encodeForgeResultsUrl(new URL('./results/',location.href),{
-    characterId:activeCharacterId,exoticHash:exotic.hash,weaponInstanceId:selectedExoticWeapon()?.representative?.itemInstanceId||'',
-    setSelections,targets:targetValues(),priorities:priorityValues()
-  });
+  const url=resultsUrl();
   open.href=url.href;open.removeAttribute('aria-disabled');
 }
 
@@ -443,6 +464,10 @@ function installEvents(){
   byId('forgeStatTargets')?.addEventListener('click',event=>{const button=event.target.closest('[data-max-stat]');if(!button)return;const label=button.closest('[data-target-stat]'),input=label?.querySelector('input'),key=label?.dataset?.targetStat;if(!input||!key)return;input.value=String(Math.min(ARMOUR_STAT_CAP,Math.max(0,Number(targetMaximums[key]||0))));updateTargetLabel(label);configureStats();void calculateBuilds();});
   byId('forgeFindBuilds')?.addEventListener('click',calculateBuilds);
   byId('forgeResetTargets')?.addEventListener('click',()=>{for(const input of document.querySelectorAll('[data-target-stat] input'))input.value='0';for(const select of document.querySelectorAll('[data-stat-priority]'))select.value='';resetResults();configureStats();byId('forgeRuntimeStatus').textContent='Stat targets and priorities reset. Ranking by maximum unmodded stats.';void calculateBuilds();});
+  byId('forgePreviewBuilds')?.addEventListener('click',event=>{
+    const expand=event.target.closest('[data-candidate-expand]');if(expand){expandedPreviewIndex=expandedPreviewIndex===Number(expand.dataset.candidateExpand)?-1:Number(expand.dataset.candidateExpand);renderPreview();return;}
+    const select=event.target.closest('[data-candidate-index]')||event.target.closest('[data-candidate-evaluate]');if(select){const index=Number(select.dataset.candidateIndex??select.dataset.candidateEvaluate);const url=resultsUrl({selectIndex:index});if(url)location.href=url.href;}
+  });
   document.addEventListener('pointerover',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showInspect(target);});
   document.addEventListener('pointerout',event=>{const target=event.target.closest('[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideInspect();});
   document.addEventListener('focusin',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showInspect(target);});

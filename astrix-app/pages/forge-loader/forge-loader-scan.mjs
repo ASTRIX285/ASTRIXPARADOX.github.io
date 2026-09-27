@@ -173,7 +173,7 @@ function stagedMarkup(slot,index,selectedSlots){
 
 // URL state for the results page: the whole selection lives in the query string, so a reload,
 // a bookmark or a shared link reruns the same real search rather than depending on anything cached.
-function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',setSelections=[],targets={},priorities={}}={}){
+function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',setSelections=[],targets={},priorities={},selectIndex=0}={}){
   const url=new URL(base);
   if(characterId)url.searchParams.set('characterId',characterId);
   url.searchParams.set('exotic',String(exoticHash));
@@ -183,6 +183,7 @@ function encodeForgeResultsUrl(base,{characterId,exoticHash,weaponInstanceId='',
   if(targetPairs.length)url.searchParams.set('targets',targetPairs.join(','));
   const priorityPairs=ARMOUR_STAT_KEYS.filter(key=>Number(priorities[key])>0).map(key=>`${key}:${Number(priorities[key])}`);
   if(priorityPairs.length)url.searchParams.set('priorities',priorityPairs.join(','));
+  if(Number.isInteger(selectIndex)&&selectIndex>0)url.searchParams.set('select',String(selectIndex));
   return url;
 }
 
@@ -196,7 +197,8 @@ function decodeForgeResultsUrl(search){
     weaponInstanceId:text(params.get('weapon')),
     setSelections,
     targets:parsePairs(params.get('targets')),
-    priorities:parsePairs(params.get('priorities'))
+    priorities:parsePairs(params.get('priorities')),
+    selectIndex:Math.max(0,Number(params.get('select'))||0)
   };
 }
 
