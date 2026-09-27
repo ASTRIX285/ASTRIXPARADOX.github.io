@@ -60,7 +60,13 @@ jobs:
         run: |
           node astrix-app/tools/validate-scope-guard.mjs
           node astrix-app/tools/validate-sandbox-deployment.mjs
+      - name: Install browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/weapon-card-qa" playwright@1.62.1
+          node "$RUNNER_TEMP/weapon-card-qa/node_modules/playwright/cli.js" install --with-deps chromium
       - name: Validate weapon catalogue, cards and Journey
+        env:
+          PLAYWRIGHT_MODULE_PATH: ${{ runner.temp }}/weapon-card-qa/node_modules/playwright/index.mjs
         run: node astrix-app/tools/paradox-validator.mjs
       - name: Validate auth Worker
         working-directory: forge-auth-worker

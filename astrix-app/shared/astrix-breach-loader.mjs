@@ -8,7 +8,7 @@
    and loaded on demand. The caller falls back to the portal loader if this
    module or three.js cannot load in time, or WebGL is unavailable. */
 
-const THREE_URL='https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+const THREE_URL=new URL('../vendor/three/three.module.js',import.meta.url).href;
 
 const CONFIG={
   logoAspect:543/420,
@@ -30,11 +30,14 @@ const CONFIG={
   colours:{crimson:0xb22222,gold:0xc9a84c,glass:0xcfd8e2,smoke:0x2a2b31,ember:0xe0602a}
 };
 
-export async function createBreach({host,logoUrl,lowTier=false}){
+export async function createBreach({host,logoUrl,lowTier=false,signal}){
   const THREE=await import(THREE_URL);
+  signal?.throwIfAborted();
   const logoImage=await new Promise((resolve,reject)=>{
     const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=logoUrl;
   });
+
+  signal?.throwIfAborted();
 
   const C={...CONFIG,counts:{...CONFIG.counts}};
   if(lowTier)for(const key of Object.keys(C.counts))C.counts[key]=Math.round(C.counts[key]*0.5);

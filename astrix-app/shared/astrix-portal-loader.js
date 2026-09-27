@@ -12,19 +12,38 @@
 (function(){
   if(window.ForgeLoader?.owner==='astrix-portal')return;
   var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
-  var breach=null,breachStarted=false;
-  function startBreach(){
-    if(breachStarted||!gate||!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
-    breachStarted=true;
-    var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
-    import(new URL('./astrix-breach-loader.mjs?v=20260927-restore-1',loaderScriptSrc).href)
-      .then(function(module){return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4});})
-      .then(function(api){
-        if(!gate||pendingDone){api.dispose();host.remove();return;}
-        breach=api;gate.classList.add('is-breach');api.setProgress(pendingPct/100);
-      }).catch(function(){host.remove();});
+  var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;
+  var BREACH_READY_MS=1200;
+  // A page chooses once. Late imports cannot replace the fallback or revive a gate.
+  function chooseSkin(next){
+    if(skin||pendingDone||!gate)return false;
+    skin=next;clearTimeout(skinTimer);
+    gate.classList.add(next==='breach'?'is-breach':'ring-visible');
+    gate.classList.remove('breach-pending');
+    if(next==='ring')breachAbort?.abort();
+    return true;
   }
-  function disposeBreach(){if(breach){breach.dispose();breach=null;}}
+  function startBreach(){
+    if(breachStarted||!gate||pendingDone)return;
+    breachStarted=true;
+    if(!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){chooseSkin('ring');return;}
+    var deadline=Date.now()+BREACH_READY_MS;
+    breachAbort=new AbortController();
+    skinTimer=setTimeout(function(){chooseSkin('ring');},BREACH_READY_MS);
+    var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
+    import(new URL('./astrix-breach-loader.mjs?v=20260927-single-skin-1',loaderScriptSrc).href)
+      .then(function(module){
+        if(skin||pendingDone||Date.now()>=deadline){chooseSkin('ring');return null;}
+        return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4,signal:breachAbort.signal});
+      })
+      .then(function(api){
+        if(!api){host.remove();return;}
+        if(Date.now()>=deadline)chooseSkin('ring');
+        if(!chooseSkin('breach')){api.dispose();host.remove();return;}
+        breach=api;api.setProgress(pendingPct/100);
+      }).catch(function(){host.remove();chooseSkin('ring');});
+  }
+  function disposeBreach(){clearTimeout(skinTimer);breachAbort?.abort();if(breach){breach.dispose();breach=null;}}
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
@@ -115,7 +134,7 @@
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
-    '<div class="apx-gate" role="status" aria-live="polite" aria-label="Loading">'+
+    '<div class="apx-gate breach-pending" role="status" aria-live="polite" aria-label="Loading">'+
       '<div class="apx-stage">'+
         '<div class="apx-pct">0%</div>'+
         '<div class="apx-portal">'+

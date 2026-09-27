@@ -16,7 +16,7 @@
 
 /* Cover the application during parser startup so its background cannot paint
    before the loader has mounted into <body>. */
-html.apx-booting::before{content:"";position:fixed;inset:0;z-index:99998;background:var(--apx-loader-bg)}
+html.apx-booting::before{content:"";position:fixed;inset:0;z-index:99998;background:#080102}
 html.apx-booting body{visibility:hidden!important}
 
 .apx-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;
@@ -148,3 +148,8 @@ body.apx-loading{overflow:hidden!important}
 .apx-failure-panel span{font-size:.8125rem;line-height:1.5}
 .apx-failure-panel .apx-continue-button{border-color:rgba(255,247,228,.34);background:transparent}
 .apx-failure-panel .apx-continue-button:hover{border-color:rgba(255,247,228,.7);background:rgba(255,247,228,.08)}
+
+/* Neutral first paint. Only the controller's final choice reveals a skin. */
+.apx-gate.breach-pending::before,.apx-gate.breach-pending::after{display:none}
+.apx-gate.breach-pending .apx-stage{visibility:hidden}
+.apx-gate:not(.is-breach) .apx-breach-stage{display:none}

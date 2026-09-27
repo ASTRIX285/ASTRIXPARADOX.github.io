@@ -13,7 +13,9 @@ function assertOneLoader(html,label){
  const extra=[...html.matchAll(componentPattern)].length;
  assert.equal(controllers,1,`${label}: must have exactly one portal controller`);
  assert.equal(extra,0,`${label}: additional loader component`);
- assert.doesNotMatch(html,/astrix-breach-loader|tool-intro-panel|apx-navigation-progress/,`${label}: retired loader`);
+ // A preload fetches bytes only. No executable breach entry point is allowed.
+ const preload='<link rel="modulepreload" href="/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1">';
+ assert.doesNotMatch(html.replace(preload,''),/astrix-breach-loader|tool-intro-panel|apx-navigation-progress/,`${label}: retired loader`);
 }
 function isTool(file){return file.startsWith('astrix-app/')&&!file.startsWith('astrix-app/pages/sign-in/');}
 function assertNoLoader(html,label){
@@ -25,7 +27,15 @@ for(const file of files){
  const html=read(file);
  if(!/<head\b/i.test(html)||/http-equiv=["']refresh/i.test(html))continue;
  const tool=isTool(file);
- if(tool){assertOneLoader(html,file);checked++;}
+ if(tool){
+  assertOneLoader(html,file);
+  for(const url of ['/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1','/astrix-app/vendor/three/three.module.js']){
+   const tag=`<link rel="modulepreload" href="${url}">`;
+   assert.equal(html.split(tag).length-1,1,`${file}: exactly one local module preload`);
+   assert.ok(html.indexOf(tag)<html.indexOf('astrix-portal-loader.js'),`${file}: preload before controller`);
+  }
+  checked++;
+ }
  else{assertNoLoader(html,file);publicPages++;}
  const sources=[...html.matchAll(/<script\b[^>]*src=["']([^"']+)["']/g)].map(row=>row[1].replaceAll('&amp;','&'));
  const visited=new Set();
@@ -47,6 +57,7 @@ const simple='<script src="/astrix-app/shared/astrix-portal-loader.js"></script>
 assertNoLoader(read('scripts/build_clips.py'),'generated Clips template');
 assert.throws(()=>assertNoLoader(simple,'public controller'),/public navigation/);
 assert.throws(()=>assertNoLoader('<script>ForgeLoader.mount()</script>','public initializer'),/public navigation/);
+assert.throws(()=>assertOneLoader(simple+'<script type="module" src="/astrix-app/shared/astrix-breach-loader.mjs"></script>','executable breach'),/retired loader/);
 assert.throws(()=>assertOneLoader(simple+simple,'duplicate script'),/exactly one/);
 assert.throws(()=>assertOneLoader(simple+'<div class="second-loader"></div>','duplicate component'),/additional loader/);
 assert.throws(()=>assertOneLoader(simple+'<section data-page-loader></section>','duplicate component'),/additional loader/);
