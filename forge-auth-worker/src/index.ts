@@ -21,6 +21,7 @@ import { solveArmourCombinations, STAT_KEYS, type ArmourSolverItem, type ArmourS
 import { reportsRead } from './reports-read';
 import { reportsCatalogueResponse } from './reports-catalogue';
 import { fetchBungieDefinitions } from './bungie-definition-fetch';
+import { buildHomeSummary } from './home-summary';
 
 export { AuthRecord };
 
@@ -2232,6 +2233,37 @@ async function activityHistoryRoute(request: Request, env: Env): Promise<Respons
   }));
 }
 
+// Guardian Home: one small career summary (target well under 20 KB), no manifest tables.
+async function homeSummaryRoute(request: Request, env: Env): Promise<Response> {
+  const auth = await authenticatedSession(request, env);
+  if (auth instanceof Response) return auth;
+  if (!auth.session.activeDestinyMembership) {
+    return withCors(request, env, json({ error: "destiny_membership_not_found" }, 404));
+  }
+  const stub = recordStub(env, `session:${auth.sessionId}`);
+  const read = async (input: Record<string, unknown>) => {
+    const response = await stub.fetch(new Request("https://internal/prepared-read", { method: "POST", body: JSON.stringify(input) })).catch(() => null);
+    if (!response?.ok) return null;
+    return response.json<any>().catch(() => null);
+  };
+  const definition = async (type: string, hash: number) => {
+    try {
+      const response = await fetch(new URL(`https://www.bungie.net/Platform/Destiny2/Manifest/${type}/${hash}/`), {
+        headers: { "X-API-Key": env.BUNGIE_API_KEY },
+        signal: AbortSignal.timeout(8_000)
+      });
+      if (!response.ok) return null;
+      const payload = await response.json<any>();
+      return payload?.ErrorCode === 1 ? payload.Response : null;
+    } catch { return null; }
+  };
+  const summary = await buildHomeSummary(read as any, definition as any);
+  if (!summary.timePlayed && !summary.abilityKills && !summary.modes) {
+    return withCors(request, env, json({ error: "bungie_home_unavailable" }, 502));
+  }
+  return withCors(request, env, json(summary as unknown as Record<string, unknown>, 200, { "Cache-Control": "private, no-store" }));
+}
+
 async function historicalStatsRoute(request: Request, env: Env): Promise<Response> {
   const auth = await authenticatedSession(request, env);
   if (auth instanceof Response) return auth;
@@ -2381,6 +2413,9 @@ export default {
       }
       if (request.method === "GET" && url.pathname === "/bungie/activity-history") {
         return await activityHistoryRoute(request, env);
+      }
+      if (request.method === "GET" && url.pathname === "/bungie/home") {
+        return await homeSummaryRoute(request, env);
       }
       if (request.method === "GET" && url.pathname === "/bungie/historical-stats") {
         return await historicalStatsRoute(request, env);
