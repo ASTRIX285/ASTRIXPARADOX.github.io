@@ -42,7 +42,7 @@ for(const label of ['Guardian Main','Build Space','Journey','Mission Reports','V
     assert.ok(url?.includes('ready=20260920-1'),`${label} must refresh ${resource} for prepared navigation`);
   }
 }
-assert.match(operationsHtml,/astrix-portal-loader\.js/,'Public homepage must use the one portal loader');
+assert.doesNotMatch(operationsHtml,/astrix-portal-loader|ForgeLoader|APX_AUTO_READY/,'Public homepage must not mount or call the tool loader');
 
 assert.match(portalCss,/body\.apx-loading\{overflow:hidden!important\}/,'Portal must lock body scroll above page-specific layout rules');
 assert.match(portalCss,/@media\(prefers-reduced-motion:reduce\)/,'Portal must freeze animation for reduced motion');
@@ -100,7 +100,7 @@ assert.match(journeyMaps,/try\{if\(status==='ready'&&image\.decode\)await image\
 
 console.log('GLOBAL_PORTAL_SINGLE_OWNER=PASS');
 console.log('GLOBAL_PORTAL_ALL_DATA_PAGES=PASS');
-console.log('GLOBAL_PORTAL_PUBLIC_HOMEPAGE_SINGLE_LOADER=PASS');
+console.log('GLOBAL_PORTAL_PUBLIC_HOMEPAGE_NO_LOADER=PASS');
 console.log('GLOBAL_PORTAL_REAL_RENDER_COMPLETION=PASS');
 console.log('GLOBAL_PORTAL_ACCESSIBILITY_MOTION=PASS');
 

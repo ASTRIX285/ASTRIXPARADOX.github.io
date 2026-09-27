@@ -1,0 +1,14 @@
+index.html
+pages/clips.html
+pages/games.html
+pages/join.html
+pages/news.html
+pages/rebrand.html
+pages/reviews.html
+admin/index.html
+tools/index.html
+astrix-app/pages/sign-in/index.html
+scripts/build_clips.py
+astrix-app/tools/validate-portal-loader.mjs
+astrix-app/tools/validate-tools-hub.mjs
+astrix-app/tools/validate-single-loader.mjs

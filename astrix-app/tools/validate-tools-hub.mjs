@@ -84,8 +84,7 @@ assert.doesNotMatch(tools,/platform-note/,'Current tool card must remain short a
 assert.doesNotMatch(tools,/The first platform we are building is for Destiny 2\./,'Removed Destiny opening sentence must not return');
 assert.doesNotMatch(tools,/destination-heading|destination-grid|Six parts of the same Guardian story/,'Destiny destinations must not appear publicly on the Tools page');
 assert.doesNotMatch(tools,/tools-future|Future route pattern|astrixparadox\.com\/tools\/\{game\}|More than one game/,'Generic future-game section must remain removed');
-assert.match(tools,/astrix-portal-loader/,'Public Tools hub must use the shared portal');
-assert.match(tools,/APX_AUTO_READY=true/,'Public Tools hub must finish without a Guardian dependency');
+assert.doesNotMatch(tools,/astrix-portal-loader|ForgeLoader|APX_AUTO_READY/,'Public Tools hub must open directly; only entering an actual tool loads the portal');
 assert.doesNotMatch(tools,/—|–|&mdash;|&ndash;/,'Tools page must not use em or en dashes');
 assert.match(toolsCss,/\.tools-hero-inner,[\s\S]*?\.tools-shell\s*\{[\s\S]*?max-width:\s*1680px;/,'Tools content must use the approved wider desktop shell');
 assert.match(toolsCss,/\.tools-intro-layout\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1\.05fr\) minmax\(440px, 0\.95fr\);/,'Combined Tools introduction must use the approved wider desktop composition');
