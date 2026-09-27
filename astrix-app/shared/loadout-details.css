@@ -59,3 +59,42 @@
   .apx-ld-actions{padding:10px 16px;gap:6px;}.apx-ld-actions button{font-size:12px;padding:7px 9px;}
   .apx-ld-scroll{padding:0 16px 20px;}.apx-ld-panel{padding:12px;}.apx-ld-item{padding:16px 0;}
 }
+
+/* Bergusia Forge artwork: Bungie activity 1434072700, pgcrImage.
+   The import form owns its sizing; resolved loadout details keep their full layout. */
+.apx-loadout-details.dim-import-dialog{
+  --dim-forge-art:url("https://www.bungie.net/img/destiny_content/pgcr/black_armory-bars.playlist_edz_oldtown_forge-35a17r14q.jpg");
+  width:min(640px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);
+  border-color:color-mix(in srgb,var(--apx-colour-action) 55%,var(--apx-colour-border));
+  box-shadow:0 24px 80px rgb(0 0 0/.65);overflow:auto;
+  background:var(--apx-colour-canvas);
+}
+.apx-loadout-details.dim-import-dialog .dim-import-hero{
+  align-items:flex-start;min-height:220px;padding:28px;gap:16px;
+  background:linear-gradient(0deg,var(--apx-colour-canvas),transparent 90%),linear-gradient(90deg,rgb(0 0 0/.76),rgb(0 0 0/.18)),var(--dim-forge-art) center 45%/cover;
+  border-bottom:1px solid color-mix(in srgb,var(--apx-colour-action) 55%,transparent);
+}
+.apx-loadout-details.dim-import-dialog .dim-import-kicker{font-size:12px;letter-spacing:.18em;font-weight:700;color:var(--apx-dim-orange);margin:0 0 18px;}
+.apx-loadout-details.dim-import-dialog h2{font-size:clamp(24px,5vw,32px);line-height:1.15;}
+.apx-loadout-details.dim-import-dialog .dim-import-intro{margin-top:12px;font-size:16px;color:var(--apx-colour-text);line-height:1.5;}
+.apx-loadout-details.dim-import-dialog .dim-import-form{display:grid;gap:12px;flex:none;padding:24px 28px 28px;overflow:visible;}
+.apx-loadout-details.dim-import-dialog label{font-size:16px;font-weight:700;}
+.apx-loadout-details.dim-import-dialog #dimImportHint{font-size:14px;line-height:1.5;color:var(--apx-colour-secondary);}
+.apx-loadout-details.dim-import-dialog input{width:100%;min-height:50px;font-size:16px;background:var(--apx-colour-raised);}
+.apx-loadout-details.dim-import-dialog button{font-size:16px;min-height:44px;line-height:1.3;}
+.apx-loadout-details.dim-import-dialog .dim-import-submit{margin-top:8px;min-height:50px;}
+.apx-loadout-details.dim-import-dialog .dim-import-status{font-size:15px;line-height:1.5;overflow-wrap:anywhere;}
+.apx-loadout-details.dim-import-dialog .dim-import-status:empty{display:none;}
+@layer astrix-gloss {
+ body[data-apx-button-system] #dimImportDialog.apx-loadout-details.dim-import-dialog button.dim-import-submit[type=submit]{
+   background:var(--apx-dim-orange)!important;color:var(--apx-dim-ink)!important;
+   border-color:var(--apx-dim-orange)!important;text-shadow:none!important;
+ }
+ body[data-apx-button-system] #dimImportDialog.apx-loadout-details.dim-import-dialog button.dim-import-submit[type=submit]:hover:not(:disabled){
+   background:color-mix(in srgb,var(--apx-dim-orange) 85%,white)!important;
+ }
+}
+@media(max-width:480px){
+ .apx-loadout-details.dim-import-dialog .dim-import-hero{min-height:190px;padding:20px;}
+ .apx-loadout-details.dim-import-dialog .dim-import-form{padding:20px;}
+}

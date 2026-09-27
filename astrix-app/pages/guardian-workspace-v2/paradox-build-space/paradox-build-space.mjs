@@ -1,4 +1,4 @@
-import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-1&limits=20260927-1';
+import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-1&limits=20260927-1&forge=20260927-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';
 import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-1';
 import {beginEngineTiming,afterEnginePaint} from '../../../core/engine-timing.mjs?v=20260927-1';
