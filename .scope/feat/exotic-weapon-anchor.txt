@@ -11,3 +11,15 @@ astrix-app/pages/forge-loader/index.html
 astrix-app/pages/forge-loader/results/index.html
 astrix-app/pages/forge-loader/results/forge-loader-results.mjs
 astrix-app/pages/forge-loader/results/forge-loader-results.css
+astrix-app/tools/validate-forge-loader.mjs
+astrix-app/tools/test-build-forge-equipped-entry.mjs
+astrix-app/tools/test-forge-weapon-anchor.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequence.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-worker.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html

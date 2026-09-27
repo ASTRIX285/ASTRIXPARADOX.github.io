@@ -292,11 +292,20 @@ function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build
   const seen=new Set(),owned=[...(build.weapons||[]),...(build.ownedWeapons||[]),...(build.vaultWeapons||[]),...(build.inventoryWeapons||[])].filter(item=>{
     const key=itemIdentity(item);if(!item?.itemInstanceId||!item?.definition||!Object.keys(item.definition).length||!WEAPON_BUCKETS.includes(Number(item.bucketHash))||seen.has(key))return false;seen.add(key);return true;
   });
-  const excluded=[],sources=buildEvidence({...working,weapons:[]}),rankedByBucket=WEAPON_BUCKETS.map(bucketHash=>owned.filter(item=>Number(item.bucketHash)===bucketHash).flatMap(weapon=>{
-    const validation=precomputed?.weaponModels.get(itemIdentity(weapon))?.validation||validateWeaponModel({weapons:[weapon]});
-    if(!validation.ready){excluded.push({itemInstanceId:itemIdentity(weapon),name:itemName(weapon),reason:validation.reason});return [];}
-    return [scoreWeapon(weapon,resolvedObjective,sources,activity)];
-  }));
+  // Forge Loader's Exotic weapon anchor (if any) stays in its slot through generation. It is never
+  // invented here; it only applies when the exact owned instance is still present in this pool.
+  const lockedWeaponId=String(build.forgeLoaderDecision?.weaponAnchor?.selectedItemInstanceId||'');
+  if(lockedWeaponId&&weaponInstanceIds.length&&!weaponInstanceIds.map(String).includes(lockedWeaponId))throw new Error('The anchored Exotic weapon must stay in its slot. Generate fresh alternatives.');
+  const excluded=[],sources=buildEvidence({...working,weapons:[]}),rankedByBucket=WEAPON_BUCKETS.map(bucketHash=>{
+    const bucketOwned=owned.filter(item=>Number(item.bucketHash)===bucketHash);
+    const locked=lockedWeaponId?bucketOwned.find(item=>itemIdentity(item)===lockedWeaponId):null;
+    const candidates=locked?[locked]:bucketOwned;
+    return candidates.flatMap(weapon=>{
+      const validation=precomputed?.weaponModels.get(itemIdentity(weapon))?.validation||validateWeaponModel({weapons:[weapon]});
+      if(!validation.ready){excluded.push({itemInstanceId:itemIdentity(weapon),name:itemName(weapon),reason:validation.reason});return [];}
+      return [scoreWeapon(weapon,resolvedObjective,sources,activity)];
+    });
+  });
   // Exact dominance: future bonuses depend only on Exotic/element/ammo coverage.
   // Keep top-K distinct hashes per equivalent slot state, retaining every count.
   const grouped=rankedByBucket.map(candidates=>{
@@ -345,6 +354,7 @@ function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build
   working.weapons=decisions.map(row=>row.recommended).filter(Boolean);working.objective=resolvedObjective;working.loadoutIntent=intent;
   const limitations=[];if(!chosen)limitations.push('No complete legal weapon combination could be resolved; the existing selections require review.');if(excluded.length)limitations.push(`${excluded.length} weapon instance(s) lack selected-perk data and were excluded from alternatives.`);if(!(build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length))limitations.push('The broader inventory is unavailable; only the supplied equipped instances could be compared.');
   if(intent.requiresMatchingWeapon&&!chosen?.matching)limitations.push(`No complete ${String(intent.element).toUpperCase()} weapon combination was resolved; matching effects require review.`);
+  if(lockedWeaponId&&chosen&&!chosen.rows.some(row=>itemIdentity(row.weapon)===lockedWeaponId))limitations.push('The anchored Exotic weapon could not be kept in its slot; it lacks selected-perk data.');
   const recommendation={schemaVersion:2,source:'bungie-owned-exact-weapon-instances',inventoryScope:build.ownedWeapons?.length||build.vaultWeapons?.length||build.inventoryWeapons?.length?'vault-character-and-equipped':'equipped-fallback',method:'owned-active-perk-combination-rank-v4',objective:resolvedObjective,activity,status:chosen?'review-required':'incomplete',decisions,combinations,candidateCount:owned.length,eligibleCandidateCount:rankedByBucket.flat().length,legalCombinationCount:[...states.values()].reduce((sum,state)=>sum+state.count,0),excluded,constraints:{maxExoticWeapons:1,selectedExoticWeaponCount:working.weapons.filter(isExoticItem).length,requiredElement:intent.element,matchingElementCount:intent.element?working.weapons.filter(item=>itemElement(item)===intent.element).length:0},limitations,requiresReview:true,liveTransferAuthorized:false,scoreBasis:'Active perk descriptions, selected objective/activity, element coverage and ammo roles; not measured damage.'};
   working.weaponSelectionRecommendation=recommendation;return {workingBuild:working,recommendation};
 }

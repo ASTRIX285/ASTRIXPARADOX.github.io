@@ -51,6 +51,7 @@ const validators=[
   'test-engine-budget.mjs',
   'test-engine-stream-review.mjs',
   'test-forge-super-synergy.mjs',
+  'test-forge-weapon-anchor.mjs',
   'validate-manifest-service.mjs',
   'test-manifest-service.mjs',
   'test-backend-data.mjs',

@@ -265,8 +265,37 @@ function optionSources(build={}){
     add('owned weapon',weapon);
     for(const perk of weapon?.weaponSemantics?.selectedPerks||[])add(`${itemName(weapon,'weapon')} perk`,perk);
   }
+  // Forge Loader's Exotic weapon anchor, same weight as the Exotic armour anchor. Its perk list already
+  // excludes a locked catalyst's effect text (built once, in Forge Loader, from the profile).
+  const weaponAnchor=decision?.weaponAnchor;
+  if(weaponAnchor)for(const perk of weaponAnchor.perks||[])add('selected Exotic weapon',perk,{name:[weaponAnchor.name,itemName(perk,'weapon perk')].filter(Boolean).join(' · '),weight:5});
   for(const perk of selectedArtifactPerks(build))add('selected Artifact perk',perk);
   return sources.filter(source=>source.tokens.length||source.weight>1);
+}
+
+// From the anchored Exotic weapon's own Bungie damage type (never inferred, always the strongest signal),
+// or failing that its perk or catalyst text, or failing that the armour set's trait text. Returns null
+// rather than guessing when none of these name an element.
+function forgeWeaponElementSuggestion(build={}){
+  const anchor=build.forgeLoaderDecision?.weaponAnchor;if(!anchor)return null;
+  const name=itemName(anchor,'the anchored weapon'),cap=value=>value?value[0].toUpperCase()+value.slice(1):value;
+  const damageElement=lower(anchor.element);
+  if(damageElement&&ELEMENTS.includes(damageElement)&&damageElement!=='prismatic')return {element:damageElement,reason:`${cap(damageElement)} suggested: ${name} deals ${cap(damageElement)} damage.`,source:'weapon-damage-type'};
+  const perks=anchor.perks||[];
+  for(const element of ELEMENTS){
+    if(element==='prismatic')continue;
+    const pattern=new RegExp(`\\b${element}\\b`,'i');
+    const perk=perks.find(row=>pattern.test(`${row.name} ${row.description}`));
+    if(perk)return {element,reason:`${cap(element)} suggested: ${name}'s ${perk.name} explicitly mentions ${cap(element)}.`,source:'weapon-perk-text'};
+  }
+  const setProtocol=build.forgeLoaderDecision?.setProtocol||[];
+  for(const element of ELEMENTS){
+    if(element==='prismatic')continue;
+    const pattern=new RegExp(`\\b${element}\\b`,'i');
+    const row=setProtocol.find(entry=>entry?.trait&&pattern.test(`${entry.trait.name} ${entry.trait.description}`));
+    if(row)return {element,reason:`${cap(element)} suggested: ${name} pairs with the ${row.setName||'armour'} set's explicit ${cap(element)} bonus.`,source:'armour-set-text'};
+  }
+  return null;
 }
 
 function filterExoticCompatibleSubclasses(build={},candidates=[]){
@@ -482,4 +511,4 @@ function composeForgeRecommendation({build={},candidate={},element='',analyzeBui
   };
 }
 
-export {ABILITY_SOCKETS,COMBAT_TERMS,ELEMENTS,composeForgeRecommendation,explicitTokens,filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets,rankExoticSuperSynergy,refreshForgeIntelligence,resolvedItem,stageVerifiedSubclassCandidate,subclassCompatibilityEvidence,synchroniseSubclassProjection};
+export {ABILITY_SOCKETS,COMBAT_TERMS,ELEMENTS,composeForgeRecommendation,explicitTokens,filterExoticCompatibleSubclasses,forgeWeaponElementSuggestion,hasVerifiedSubclassSockets,rankExoticSuperSynergy,refreshForgeIntelligence,resolvedItem,stageVerifiedSubclassCandidate,subclassCompatibilityEvidence,synchroniseSubclassProjection};
