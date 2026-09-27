@@ -22,7 +22,7 @@ for(const id of ids){
   const [a,b]=await Promise.all([shares.load(id),shares.load(`https://dim.gg/${id}/name`)]);assert.equal(a,b);
   for(let i=0;i<10;i++){
     const start=performance.now(),model=resolveDimLoadout(await shares.load(id),{snapshot});
-    const html=renderLoadoutDetailsContent(model);times.push(performance.now()-start);
+    const html=renderLoadoutDetailsContent(model,{presentation:'icons'});times.push(performance.now()-start);
     assert.equal(model.coverage.unresolved.length,0);assert.equal(model.coverage.rate,1);
     assert.ok(html.length>1000);assert.doesNotMatch(html,/Item unavailable|definition unavailable/);
     assert.equal(model.source.label,'Imported from DIM');
@@ -93,3 +93,40 @@ try{
   assert.equal(nativeCalls,2);
 }finally{globalThis.fetch=originalFetch;}
 console.log('DIM_BROWSER_FETCH_RECEIVER=PASS share and manifest');
+
+// Refreshing the same Guardian must not permanently disable every popup action.
+const {dimContextChanged}=await import('../core/dim-import/context.mjs');
+h=fixture();model=h.resolve();
+const liveContext={session:structuredClone(h.f.session),characterId:'1'};
+assert.equal(dimContextChanged(model,liveContext),false);
+for(let i=0;i<10;i++)assert.equal(dimContextChanged(model,{...liveContext,session:structuredClone(h.f.session)}),false);
+assert.equal(dimContextChanged(model,{...liveContext,characterId:'2'}),true);
+assert.equal(dimContextChanged(model,{...liveContext,session:{...h.f.session,authenticated:false}}),true);
+assert.equal(dimContextChanged(model,{...liveContext,session:{...h.f.session,activeDestinyMembership:{membershipId:'456',membershipType:3}}}),true);
+
+// Auxiliary equipment is retained through the same handoff and save operations
+// used by the buttons, without becoming a weapon or a remotely applied socket.
+model.items.push({kind:'item',equipped:true,itemHash:700001,bucketHash:4023194814,name:'Offline Ghost',icon:'',sockets:[],groups:[],notOwned:true});
+const imported=dimWorkingBuild(model,h.f.profile);
+const {createBuildState}=await import('../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs');
+const {createHandoffEnvelope}=await import('../pages/guardian-workspace-v2/paradox-build-binding.mjs');
+const {createParadoxLoadoutRecord}=await import('../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs');
+const envelope=createHandoffEnvelope(createBuildState(imported));
+assert.match(JSON.stringify(envelope),/Offline Ghost/);
+assert.equal(createParadoxLoadoutRecord({name:'Equipment test',build:imported}).build.equipment[0].itemHash,700001);
+assert.equal(imported.weapons.filter(Boolean).length,3);
+const iconHtml=renderLoadoutDetailsContent(model,{presentation:'icons'});
+assert.ok(iconHtml.indexOf('aria-label="Super &amp; abilities"')<iconHtml.indexOf('aria-label="Weapons"'));
+assert.ok(iconHtml.indexOf('aria-label="Weapons"')<iconHtml.indexOf('aria-label="Armour"'));
+assert.ok(iconHtml.indexOf('aria-label="Armour"')<iconHtml.indexOf('aria-label="Equipment"'));
+assert.match(iconHtml,/aria-label="Offline Ghost"/);
+assert.doesNotMatch(iconHtml,/<h3>Offline Ghost|No saved socket data/);
+console.log('DIM_ACTION_REFRESH_AND_EQUIPMENT=PASS');
+const {watchDimContext}=await import('../core/dim-import/context.mjs');
+const docEvents=new EventTarget(),windowEvents=new EventTarget();let invalidations=0,selected='1';
+const disposeContext=watchDimContext({document:docEvents,window:windowEvents,getModel:()=>model,getContext:()=>({...liveContext,characterId:selected}),onCharacter:id=>{selected=id;},invalidate:()=>{invalidations++;}});
+for(let i=0;i<10;i++){docEvents.dispatchEvent(new CustomEvent('forge:guardian-loadout-context',{detail:{characterId:'1'}}));windowEvents.dispatchEvent(new Event('forge:bungie-session'));}
+assert.equal(invalidations,0);
+docEvents.dispatchEvent(new CustomEvent('forge:character-selected',{detail:{characterId:'2'}}));assert.equal(invalidations,1);
+disposeContext();windowEvents.dispatchEvent(new Event('forge:bungie-session'));assert.equal(invalidations,1);
+console.log('DIM_CONTEXT_EVENT_REGRESSION=PASS');

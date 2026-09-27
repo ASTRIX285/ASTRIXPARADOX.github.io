@@ -135,5 +135,6 @@ export function dimWorkingBuild(model,profile,{forApply=false}={}){
     return {...row,definition:match.definition,itemHash:match.itemHash,name:match.definition.displayProperties?.name||row.name,icon:bungieArtwork(match.definition.displayProperties?.icon),itemInstanceId:match.itemInstanceId,source:match.source,sockets};
   });
   const build=loadoutWorkingBuild({...model,items:selected},profile);
-  return {...build,source:'dim-import',loadoutSource:'dim-import',selectedLoadoutIndex:null,dimImport:{loadout:model.portableLoadout,manifestVersion:model.manifestVersion},statConstraints:model.statConstraints.filter(row=>!row.legacy).map(({statHash,minStat,maxStat})=>({statHash,minStat,maxStat})),importedParameters:structuredClone(model.parameters)};
+  const equipment=model.items.filter(row=>row.equipped&&row.kind==='item').map(({itemHash,bucketHash,name,description,icon,itemInstanceId,source,notOwned,sockets,groups})=>({itemHash,bucketHash,name,description,icon,itemInstanceId,source,notOwned,sockets:sockets.map(({definition, ...plug})=>plug),groups:groups.map(group=>({...group,plugs:group.plugs.map(({definition,...plug})=>plug)}))}));
+  return {...build,equipment,source:'dim-import',loadoutSource:'dim-import',selectedLoadoutIndex:null,dimImport:{loadout:model.portableLoadout,manifestVersion:model.manifestVersion},statConstraints:model.statConstraints.filter(row=>!row.legacy).map(({statHash,minStat,maxStat})=>({statHash,minStat,maxStat})),importedParameters:structuredClone(model.parameters)};
 }
