@@ -535,7 +535,7 @@ function subclassConfiguration(profile,definitions,item,payload={},characterId="
   const plugs=socketCoverage.plugs;
   const typed=(row,type)=>row?{...row,componentType:type}:null;
   const superItem=typed(plugs.find(isSuperPlug),"super");
-  console.log("[TRACE super] subclassItem:", item?.itemHash, "instance:", item?.itemInstanceId, "→ super:", superItem?.hash, superItem?.name, "| cat:", superItem?.definition?.plug?.plugCategoryIdentifier);
+  if(new URLSearchParams(globalThis.location?.search||'').has('debug'))console.log("[TRACE super] subclassItem:", item?.itemHash, "instance:", item?.itemInstanceId, "→ super:", superItem?.hash, superItem?.name, "| cat:", superItem?.definition?.plug?.plugCategoryIdentifier);
   const classAbility=typed(plugs.find(isClassAbilityPlug),"classAbility");
   const movement=typed(plugs.find(isMovementPlug),"movementAbility");
   const melee=typed(plugs.find(isMeleePlug),"melee");
@@ -682,7 +682,7 @@ function normaliseLiveProfile(payload,session,preferredCharacterId=null){
   const definitions=payload.definitions||{};
   const explicitCharacterId=String(preferredCharacterId||"");
   const character=explicitCharacterId?profile?.characters?.data?.[explicitCharacterId]:activeCharacter(profile);
-  console.log("[TRACE resolve] preferred:", preferredCharacterId, "→ resolved:", character?.characterId, "class:", character?.classType);
+  if(new URLSearchParams(globalThis.location?.search||'').has('debug'))console.log("[TRACE resolve] preferred:", preferredCharacterId, "→ resolved:", character?.characterId, "class:", character?.classType);
   if(explicitCharacterId&&!character)throw new Error(`Selected Bungie character was not found: ${explicitCharacterId}`);
   if(!character?.characterId)throw new Error("No Destiny character was returned for this membership.");
   const equipment=profile?.characterEquipment?.data?.[character.characterId]?.items||[];

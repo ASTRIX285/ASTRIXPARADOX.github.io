@@ -20,6 +20,10 @@ required = ["BUNGIE_API_KEY", "BUNGIE_CLIENT_ID", "BUNGIE_CLIENT_SECRET"]
 pattern = "auth.astrixparadox.com"
 custom_domain = true
 
+[[routes]]
+pattern = "astrixparadox.com/dim/share/*"
+zone_name = "astrixparadox.com"
+
 [[durable_objects.bindings]]
 name = "AUTH_RECORDS"
 class_name = "AuthRecord"

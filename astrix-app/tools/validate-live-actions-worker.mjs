@@ -46,7 +46,7 @@ assert.match(worker,/loadoutIndex < 0 \|\| loadoutIndex > 19/,'Bungie loadout ac
 assert.match(worker,/const upstream = await fetch\(`\$\{BUNGIE_PLATFORM\}\$\{action\.path\}`[\s\S]*?JSON\.stringify\(action\.body\)/,'Only the validated allow-listed payload may be forwarded upstream.');
 assert.doesNotMatch(worker,/console\.(?:log|warn|error)\([^\n]*(?:accessToken|refreshToken|csrfToken|requestBody|action\.body)/,'Mutation logging must not expose credentials, CSRF tokens or action bodies.');
 
-assert.match(web,/Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token"/,'CORS preflight must allow the CSRF header used by authenticated action calls.');
+assert.match(web,/Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token, Content-Encoding"/,'CORS preflight must allow the CSRF header used by authenticated action calls.');
 assert.match(web,/Access-Control-Allow-Credentials": "true"/,'CORS preflight must preserve the authenticated HttpOnly session cookie.');
 
 console.log('LIVE_ACTION_WORKER_ALLOWLIST=PASS');

@@ -206,7 +206,13 @@ async function syncParadoxAccount({session,readAll=readAllStored,read=readStored
   const request=async(params={},body=null)=>{
     check();const url=new URL('/paradox/loadouts',origin);
     for(const [name,value] of Object.entries({...params,membershipId:account.membershipId,membershipType:account.membershipType}))url.searchParams.set(name,String(value));
-    const response=await fetchImpl(url,{method:body?'POST':'GET',credentials:'include',cache:'no-store',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000),headers:{Accept:'application/json',...(body?{'Content-Type':'application/json','X-CSRF-Token':session.csrfToken}:{})},...(body?{body:JSON.stringify(body)}:{})});
+    let payload=body?JSON.stringify(body):null,compressed=false;
+    if(payload&&payload.length>256*1024&&typeof CompressionStream==='function'){
+      const bytes=await new Response(new Blob([payload]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+      if(bytes.byteLength<new Blob([payload]).size){payload=bytes;compressed=true;}
+    }
+    check();
+    const response=await fetchImpl(url,{method:body?'POST':'GET',credentials:'include',cache:'no-store',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000),headers:{Accept:'application/json',...(body?{'Content-Type':'application/json','X-CSRF-Token':session.csrfToken,...(compressed?{'Content-Encoding':'gzip'}:{})}:{})},...(body?{body:payload}:{})});
     check();const data=await response.json();
     if(!response.ok&&response.status!==409)throw new Error(response.status===413?'A build is too large to sync. Your local copy is safe.':`Background sync will retry (${response.status}).`);
     return {status:response.status,data};

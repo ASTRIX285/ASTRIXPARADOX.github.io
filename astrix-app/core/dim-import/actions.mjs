@@ -23,7 +23,7 @@ export function createDimActions(model,{getContext,save,send,refresh=()=>{},fetc
     const profile=fresh.profile||fresh.Response||{};
     const build=dimWorkingBuild(model,profile,{forApply:true});
     const plan=api.createLiveTransferPlan({build,originalBuild:build,capabilities:api.liveActionCapabilities(value.session)});
-    const manual=model.items.filter(row=>row.kind==='parameters').flatMap(row=>row.groups.filter(group=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers','Armour perks'].includes(group.label)).flatMap(group=>group.plugs.map(plug=>`${group.label}: ${plug.name}`)));
+    const manual=model.items.filter(row=>row.kind==='parameters').flatMap(row=>row.groups.filter(group=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers','Armour perks'].includes(group.label)).flatMap(group=>group.plugs.filter(plug=>!plug.retired).map(plug=>`${group.label}: ${plug.name}`)));
     plan.inGameSteps=[...(plan.inGameSteps||[]),...manual];
     prepared=plan.ready?await api.stageLiveTransferPreflight(plan,{session:value.session,fetchImpl:guardedFetch,authOrigin}):plan;
     context();return prepared;
