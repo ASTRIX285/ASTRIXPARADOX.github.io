@@ -23,3 +23,4 @@ astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-sequenc
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-worker.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-forge-preparation.mjs
 astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/tools/test-profile-size.mjs
