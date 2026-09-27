@@ -201,7 +201,7 @@ for(const scenario of ['idle','action-started','editor-open','account-changed'])
   const ctx={busy:false,loading:false,session:{authenticated:true},refreshVersion:0,characterId:'synthetic-guardian',payload:{old:true},dialogOpen:false,changed:false,
     dialog:()=>({open:ctx.dialogOpen}),guardContext:()=>()=>{if(ctx.changed)throw new Error('Synthetic account changed');},
     loadPreparedPagePayload:async(_session,page,options)=>{assert.equal(page,'loadout');assert.equal(options.force,true);assert.equal(options.quiet,true);return new Promise(resolve=>{resolveFetch=resolve;});},
-    preparePayload:async value=>value,normaliseLiveProfile:()=>({}),emit(){},render(){rendered++;}
+    preparePayload:async value=>value,normaliseLiveProfile:()=>({}),runProfileTask:async()=>({}),emit(){},render(){rendered++;}
   };
   runInNewContext(displayRefreshSource,ctx);
   const refresh=ctx.refreshDisplayedLoadout();

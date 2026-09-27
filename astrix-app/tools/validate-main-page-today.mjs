@@ -222,8 +222,8 @@ assert.match(buildModule,/import '\.\.\/guardian-loadouts\.mjs(?:\?[^']+)?'/,'Bu
 assert.match(buildModule,/from '\.\.\/guardian-bungie-profile\.mjs(?:\?[^']+)?'/,'Build Tool must reuse strict Main character selection');
 assert.match(buildModule,/createBuildState\(boundDetail\)/,'Selected Build Tool character must create a new membership-bound protected build snapshot');
 assert.match(buildModule,/let volatileState=null/,'Build must retain a protected in-page snapshot when Web Storage rejects the handoff');
-assert.match(buildModule,/function writeState\(next\)\{[\s\S]*?const state=protectBuildState\(next\);[\s\S]*?volatileState=state;[\s\S]*?void queueStatePersistence\(state\);/,'Build writes must protect the in-page fallback and queue asynchronous persistence.');
-const writeStateSource=buildModule.slice(buildModule.indexOf('function writeState(next)'),buildModule.indexOf('function requestedTransferBinding'));
+assert.match(buildModule,/function writeState\(next,\{retainPreparation=false\}=\{\}\)\{[\s\S]*?const state=protectBuildState\(next\);[\s\S]*?volatileState=state;[\s\S]*?void queueStatePersistence\(state\);/,'Build writes must protect the in-page fallback and queue asynchronous persistence.');
+const writeStateSource=buildModule.slice(buildModule.indexOf('function writeState('),buildModule.indexOf('function requestedTransferBinding'));
 assert.doesNotMatch(writeStateSource,/sessionStorage|localStorage|JSON\.stringify/,'Build edits must not synchronously JSON-encode or duplicate state into Web Storage.');
 assert.match(buildModule,/cacheBuildForgeState\(binding,snapshot\)[\s\S]*?could not be saved for refresh/,'Async persistence failure must be surfaced visibly instead of silently becoming memory-only.');
 assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Build Forge state must persist asynchronously through the IndexedDB session cache.');

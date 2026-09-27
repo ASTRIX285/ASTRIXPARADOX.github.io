@@ -261,9 +261,13 @@ async function refreshAuthState(control,force=false){
   control.button.textContent=session?.authenticated===false?"CONNECT BUNGIE":"Bungie is not responding. Retry";
 }
 
+// The profile normalizer also runs in a Worker; controls belong to documents.
+if(typeof document!=='undefined'){
 installStyles();
 const control=makeControl();
 if(control) refreshAuthState(control);
 if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?plain=20260925-2&refresh=20260927-1");
+
+}
 
 export {AUTH_ORIGIN,authStartUrl,getBungieSession};

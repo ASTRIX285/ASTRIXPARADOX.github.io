@@ -1,3 +1,4 @@
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1';
 import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
 import {listParadoxLoadouts,saveParadoxLoadout,deleteParadoxLoadout} from '../guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1';
 import {classifyArmourPlug,normaliseArmourSemantics} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
@@ -226,10 +227,11 @@ function initialCharacter(){
   if(dom&&payload?.profile?.characters?.data?.[dom])return dom;
   return Object.values(payload?.profile?.characters?.data||{}).sort((a,b)=>String(b.dateLastPlayed||'').localeCompare(String(a.dateLastPlayed||'')))[0]?.characterId||'';
 }
-function setCharacter(id){
+async function setCharacter(id){
   if(!id||!payload?.profile?.characters?.data?.[id])return;
   if(id!==characterId){characterId=String(id);selectionVersion++;selectedId='equipped';closeDialog();}
-  equipped=normaliseLiveProfile(payload,session,characterId);render();
+  const check=guardContext(),prepared=await runProfileTask('normalise',{payload,session,characterId});check();
+  equipped=prepared;render();
 }
 async function preparePayload(raw){
   const normalized=normalisePreparedPagePayload(raw);
@@ -248,7 +250,9 @@ async function refreshProfile({force=true}={}){
   const raw=await requestFreshProfile({scope:'inventory'});check();
   const prepared=await preparePayload({...payload,...raw,definitions:{...payload?.definitions,...raw.definitions}});check();
   if(request!==refreshVersion)throw new Error('A newer profile refresh replaced this action. Please try again.');
-  payload=prepared;equipped=normaliseLiveProfile(payload,session,characterId);
+  const normalized=await runProfileTask('normalise',{payload:prepared,session,characterId});check();
+  if(request!==refreshVersion)throw new Error('A newer profile refresh replaced this action. Please try again.');
+  payload=prepared;equipped=normalized;
   globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
   emit('forge:prepared-page-refreshed',{page:'loadout',payload});render();return payload;
 }
@@ -394,7 +398,8 @@ async function executeBuildAction(){
     if(mutationStarted)try{await refreshProfile();}catch(error){status(`Refresh needed: ${error.message}`,true);}
   }
 }
-function loadoutSnapshot(index){
+async function loadoutSnapshot(index){
+  const check=guardContext();
   const slot=equipped?.loadouts?.[index];if(!slot?.items?.length&&!slot?.subclassOverrides?.length)throw new Error('This Bungie slot is empty.');
   const {locations}=inventoryLocations(payload),selectedItems=[];
   for(const row of [...(slot.items||[]),...(slot.subclassOverrides||[])]){
@@ -405,7 +410,7 @@ function loadoutSnapshot(index){
     if(prior){if(row.plugItemHashes)prior.plugItemHashes=row.plugItemHashes;}else selectedItems.push({...source,plugItemHashes:row.plugItemHashes});
   }
   const projected=profileWithSelectedLoadout({...payload,characterId,selectedItems});
-  const build=normaliseLiveProfile({...payload,profile:projected},session,characterId);
+  const build=await runProfileTask('normalise',{payload:{...payload,profile:projected},session,characterId});check();
   // Bungie slots do not persist character totals or an Artifact configuration.
   build.stats=[];build.artifact=null;build.artifactConfiguration=null;build.selectedLoadoutIndex=index;
   for(const key of ['weapons','armour'])build[key]=(build[key]||[]).map(item=>item?{...item,source:locations.get(itemId(item))?.source||{}}:item);
@@ -455,7 +460,7 @@ async function handleDialogAction(action){
   if(action==='equip-slot'||action==='clear-slot')return confirmSlotAction(action==='equip-slot'?'equip':'clear',state);
   if(action==='snapshot-slot'){await reviewBuildAction('equipped',true);byId('paradoxTargetSlot').value=String(state.index);return;}
   await refreshProfile();state.check();
-  const record=loadoutSnapshot(state.index);
+  const record=await loadoutSnapshot(state.index);
   if(action==='copy-slot')return openSave(record);
   if(action==='edit-slot')return openEditor(record,{asCopy:true});
   if(action==='view-slot')showDialog(`BUNGIE SLOT ${state.index+1} · ${record.name}`,`<div class="paradox-loadout-detail">${savedBuildOverview(record.build)}</div><p class="paradox-dialog-note">Saved Bungie slot. Equipped stays unchanged above your PARADOX builds.</p>`,'<button type="button" data-dialog-action="copy-slot">SAVE PARADOX COPY</button><button type="button" data-dialog-action="edit-slot">EDIT COPY</button>',{kind:'slot',index:state.index,check:state.check});
@@ -510,8 +515,8 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('change',event=>{if(event.target.matches?.('[data-editor-choice]'))try{editChoice(event.target);}catch(error){dialogError(error);}});
 dialog().addEventListener('cancel',event=>{if(busy)event.preventDefault();else dialogState=null;});
-document.addEventListener('forge:character-selected',event=>{if(busy)return;try{setCharacter(String(event.detail?.characterId||''));}catch(error){reportError(error);}});
-document.addEventListener('forge:hero-cards-render-complete',()=>{if(!busy&&!loading)try{setCharacter(initialCharacter());}catch(error){reportError(error);}});
+document.addEventListener('forge:character-selected',event=>{if(busy)return;void setCharacter(String(event.detail?.characterId||'')).catch(reportError);});
+document.addEventListener('forge:hero-cards-render-complete',()=>{if(!busy&&!loading)void setCharacter(initialCharacter()).catch(reportError);});
 window.addEventListener('forge:bungie-session',event=>{
   const next=event.detail;if(!session||!next||next.recovering)return;
   const before=sessionBinding(session),after=sessionBinding(next);
@@ -538,7 +543,9 @@ async function refreshDisplayedLoadout(){
   const prepared=await preparePayload(raw);
   check();
   if(busy||dialog().open||revision!==refreshVersion)return null;
-  payload=prepared;equipped=normaliseLiveProfile(payload,session,characterId);
+  const normalized=await runProfileTask('normalise',{payload:prepared,session,characterId});check();
+  if(busy||dialog().open||revision!==refreshVersion)return null;
+  payload=prepared;equipped=normalized;
   globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
   emit('forge:prepared-page-refreshed',{page:'loadout',payload});render();
   return payload;
@@ -557,7 +564,7 @@ try{
     const raw=await loadPreparedPagePayload(session,'loadout',{sharedPayload:globalThis.FORGE_HERO_PROFILE_PAYLOAD});
     payload=await preparePayload(raw);globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
     characterId=String(initialCharacter());
-    if(characterId)equipped=normaliseLiveProfile(payload,session,characterId);
+    if(characterId){const check=guardContext(),normalized=await runProfileTask('normalise',{payload,session,characterId});check();equipped=normalized;}
   }
 }catch(error){reportError(error);}
 try{await savedPromise;}catch(error){reportError(error);}

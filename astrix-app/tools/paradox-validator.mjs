@@ -48,6 +48,8 @@ const validators=[
   'test-artifact-recommender.mjs',
   'test-forge-artifact-selection.mjs',
   'test-forge-background.mjs',
+  'test-engine-budget.mjs',
+  'test-engine-stream-review.mjs',
   'test-forge-super-synergy.mjs',
   'validate-manifest-service.mjs',
   'test-manifest-service.mjs',

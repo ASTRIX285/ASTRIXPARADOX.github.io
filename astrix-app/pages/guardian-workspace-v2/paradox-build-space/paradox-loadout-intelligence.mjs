@@ -287,28 +287,45 @@ function finishWeaponPlan(plan,intent,activity){
   if(plan.ammo[3]){score+=20;reasons.push({kind:'ammo-coverage',label:'Includes a Heavy-ammo weapon.',score:20});}
   return {...plan,score,reasons};
 }
-function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build.weapons||[],weaponInstanceIds=[]}={}){
+function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build.weapons||[],weaponInstanceIds=[],precomputed=null}={}){
   const working={...build},resolvedObjective=objectiveName(objective||build.objective),intent=build.loadoutIntent||deriveLoadoutIntent(build),activity=lower(build.activityContext?.key||build.activityContext?.activityKey||build.activityContext?.name),currentIds=new Set(baselineWeapons.map(itemIdentity));
   const seen=new Set(),owned=[...(build.weapons||[]),...(build.ownedWeapons||[]),...(build.vaultWeapons||[]),...(build.inventoryWeapons||[])].filter(item=>{
     const key=itemIdentity(item);if(!item?.itemInstanceId||!item?.definition||!Object.keys(item.definition).length||!WEAPON_BUCKETS.includes(Number(item.bucketHash))||seen.has(key))return false;seen.add(key);return true;
   });
   const excluded=[],sources=buildEvidence({...working,weapons:[]}),rankedByBucket=WEAPON_BUCKETS.map(bucketHash=>owned.filter(item=>Number(item.bucketHash)===bucketHash).flatMap(weapon=>{
-    const validation=validateWeaponModel({weapons:[weapon]});
+    const validation=precomputed?.weaponModels.get(itemIdentity(weapon))?.validation||validateWeaponModel({weapons:[weapon]});
     if(!validation.ready){excluded.push({itemInstanceId:itemIdentity(weapon),name:itemName(weapon),reason:validation.reason});return [];}
     return [scoreWeapon(weapon,resolvedObjective,sources,activity)];
   }));
-  // Keep the best four distinct weapon sets per equivalent coverage state.
-  // Every owned candidate is evaluated; no top-Legendary/Exotic preselection.
-  // Future scores depend only on this state, so dominated prefixes can be
-  // discarded without enumerating millions of full three-item combinations.
+  // Exact dominance: future bonuses depend only on Exotic/element/ammo coverage.
+  // Keep top-K distinct hashes per equivalent slot state, retaining every count.
+  const grouped=rankedByBucket.map(candidates=>{
+    const groups=new Map();
+    for(const row of candidates){
+      const one=extendWeaponPlan(emptyWeaponPlan(),row,currentIds,intent);
+      const key=JSON.stringify([one.exoticCount,one.matching,one.ammo]);
+      const group=groups.get(key)||{count:0,plans:[]};group.count++;
+      group.plans.push(one);group.plans.sort(compareWeaponPlans);
+      const seen=new Set();group.plans=group.plans.filter(plan=>{if(seen.has(plan.typeSignature))return false;seen.add(plan.typeSignature);return true;}).slice(0,WEAPON_COMBINATION_LIMIT);
+      groups.set(key,group);
+    }
+    return [...groups.values()];
+  });
   let states=new Map([['initial',{count:1,plans:[emptyWeaponPlan()]}]]);
-  for(const candidates of rankedByBucket){
+  for(const groups of grouped){
     const next=new Map();
-    for(const state of states.values())for(const row of candidates){
-      const sample=extendWeaponPlan(state.plans[0],row,currentIds,intent);if(sample.exoticCount>1)continue;
-      const key=JSON.stringify([sample.exoticCount,sample.matching,sample.ammo]),target=next.get(key)||{count:0,plans:[]};target.count+=state.count;
-      for(const plan of state.plans)target.plans.push(extendWeaponPlan(plan,row,currentIds,intent));
-      const distinct=new Set();target.plans.sort(compareWeaponPlans);target.plans=target.plans.filter(plan=>{if(distinct.has(plan.typeSignature))return false;distinct.add(plan.typeSignature);return true;}).slice(0,WEAPON_COMBINATION_LIMIT);next.set(key,target);
+    for(const state of states.values())for(const group of groups){
+      const sample=extendWeaponPlan(state.plans[0],group.plans[0].rows[0],currentIds,intent);if(sample.exoticCount>1)continue;
+      const key=JSON.stringify([sample.exoticCount,sample.matching,sample.ammo]),target=next.get(key)||{count:0,plans:[]};target.count+=state.count*group.count;
+      for(const plan of state.plans)for(const one of group.plans){
+        // Same coverage means equal remaining bonuses. A strictly worse prefix
+        // cannot enter the final K; ties retain the established comparator.
+        if(target.plans.length===WEAPON_COMBINATION_LIMIT&&plan.score+one.score<target.plans.at(-1).score)continue;
+        const candidate=extendWeaponPlan(plan,one.rows[0],currentIds,intent);
+        target.plans.push(candidate);target.plans.sort(compareWeaponPlans);
+        const distinct=new Set();target.plans=target.plans.filter(row=>{if(distinct.has(row.typeSignature))return false;distinct.add(row.typeSignature);return true;}).slice(0,WEAPON_COMBINATION_LIMIT);
+      }
+      next.set(key,target);
     }
     states=next;
   }

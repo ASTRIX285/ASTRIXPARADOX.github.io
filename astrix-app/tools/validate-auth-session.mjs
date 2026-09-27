@@ -47,14 +47,14 @@ for(const [name,fetcher] of failures){
   h.context.fetch=async()=>Response.json({authenticated:true});
   assert.equal(await vm.runInContext('continueToGuardianJourney()',h.context),true,`${name}: retry succeeds`);
   assert.equal(h.navigations(),1);
-  const g=harness(withoutImports(guardian).split('\ninstallStyles();')[0],fetcher);
+  const g=harness(withoutImports(guardian).split('\n// The profile normalizer')[0],fetcher);
   const pending=vm.runInContext('getBungieSession({force:true})',g.context);
   if(name==='timeout')g.abort();
   assert.equal((await pending).authenticated,null);
   assert.equal(g.authStarts(),0,`${name}: shared auth must not offer authorization`);
   assert.equal(g.navigations(),0);
 }
-for(const source of [withoutImports(intro).split('if(!config)')[0],withoutImports(guardian).split('\ninstallStyles();')[0]]){
+for(const source of [withoutImports(intro).split('if(!config)')[0],withoutImports(guardian).split('\n// The profile normalizer')[0]]){
   const h=harness(source,async()=>Response.json({authenticated:false},{status:401}));
   await vm.runInContext(source.includes('continueToGuardianJourney')?'continueToGuardianJourney()':'getBungieSession({force:true})',h.context);
   assert.ok(h.authStarts()>0,'Definitive signed-out response must retain sign-in');
@@ -69,7 +69,7 @@ assert.doesNotMatch([intro,guardian,worker].join('\n'),/PlayStation|Sony|\bPSN\b
 console.log('AUTH_SESSION_DEFINITIVE_SIGN_OUT_ONLY=PASS');
 console.log('AUTH_SESSION_UNKNOWN_RETRY=PASS');
 
-const guarded=harness(withoutImports(guardian).split('\ninstallStyles();')[0],async()=>Response.json({}));
+const guarded=harness(withoutImports(guardian).split('\n// The profile normalizer')[0],async()=>Response.json({}));
 // Restore the real URL function, including its guard, for callers such as Forge Loader.
 vm.runInContext(guardian.slice(guardian.indexOf('function authStartUrl('),guardian.indexOf('async function requestAccessRecovery')),guarded.context);
 for(const authenticated of [undefined,null,true]){

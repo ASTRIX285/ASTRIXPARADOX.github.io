@@ -1,9 +1,9 @@
 export const forgePreparationKey=v=>JSON.stringify([v.element,v.objective||'balanced',Number(v.superHash)||0,...(v.weaponInstanceIds?.length?[[...v.weaponInstanceIds].map(String).sort()]:[])]);
 const keyOf=forgePreparationKey;
-const INPUT_FIELDS=['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','artifactRecommendation','artifactValidation','availableArtifacts','artifactOptions','currentSeasonNumber','currentSeason','weapons','ownedWeapons','vaultWeapons','inventoryWeapons','ownedArmour','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','activityProfile','activity','beta','buildFocus','locks'];
+const INPUT_FIELDS=['manifestVersion','profileSnapshot','version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','artifactRecommendation','artifactValidation','availableArtifacts','artifactOptions','currentSeasonNumber','currentSeason','weapons','ownedWeapons','vaultWeapons','inventoryWeapons','ownedArmour','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','activityProfile','activity','beta','buildFocus','locks'];
 
 export class ForgePreparationClient{
-  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024,timeoutMs=120000}={}){
+  constructor({workerFactory=()=>new Worker(new URL('./paradox-forge-worker.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1&perf=20260927-1',import.meta.url),{type:'module',name:'paradox-forge'}),onStatus=()=>{},maxEntries=4,maxBytes=8*1024*1024,timeoutMs=120000}={}){
     Object.assign(this,{workerFactory,onStatus,maxEntries,maxBytes,timeoutMs});
     this.revision=0;this.cache=new Map();this.pending=new Map();this.bytes=0;this.worker=null;this.input=null;this.runningKey='';
   }
@@ -24,6 +24,7 @@ export class ForgePreparationClient{
   receive(message){
     if(message.revision!==this.revision)return;
     if(message.type==='started')this.runningKey=message.key;
+    if(message.type==='first')this.pending.get(message.key)?.resolveFirst(message.result);
     if(message.type==='ready'){
       this.runningKey='';
       const size=Number(message.bytes)||0;
@@ -33,31 +34,33 @@ export class ForgePreparationClient{
         this.cache.set(message.key,{result:message.result,bytes:size});this.bytes+=size;
       }
       const pending=this.pending.get(message.key);
-      if(pending){clearTimeout(pending.timer);this.pending.delete(message.key);pending.resolve(message.result);}
+      if(pending){clearTimeout(pending.timer);this.pending.delete(message.key);pending.resolveFirst(message.result);pending.resolve(message.result);}
     }
     if(message.type==='error'){
       this.runningKey='';const pending=this.pending.get(message.key);
-      if(pending){clearTimeout(pending.timer);this.pending.delete(message.key);pending.reject(new Error(message.message));}
+      if(pending){clearTimeout(pending.timer);this.pending.delete(message.key);pending.rejectFirst(new Error(message.message));pending.reject(new Error(message.message));}
     }
     this.onStatus(message);
   }
   warm(jobs){this.preferredKey=jobs[0]?keyOf(jobs[0]):'';if(this.input&&this.worker)this.worker.postMessage({type:'prepare',revision:this.revision,jobs:jobs.slice(0,12)});}
-  get(variant){
+  get(variant,{first=false}={}){
     const key=keyOf(variant),hit=this.cache.get(key);
     if(hit){this.cache.delete(key);this.cache.set(key,hit);return Promise.resolve(hit.result);}
-    if(this.pending.has(key))return this.pending.get(key).promise;
+    if(this.pending.has(key))return first?this.pending.get(key).firstPromise:this.pending.get(key).promise;
     if(!this.input)return Promise.reject(new Error('Choose a direct entry or stage a Forge Loader result first.'));
     // Stop speculative work immediately when a requested variant is not ready.
     if(!this.worker||(this.runningKey&&this.runningKey!==key))this.launch();
     let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
+    let resolveFirst,rejectFirst;const firstPromise=new Promise((yes,no)=>{resolveFirst=yes;rejectFirst=no;});
+    promise.catch(()=>{});firstPromise.catch(()=>{});
     const budget=this.timeoutMs===120000?'120 second':`${this.timeoutMs} millisecond`,timer=setTimeout(()=>this.fail(`Build preparation exceeded the ${budget} worker budget. No recommendation was generated. Retry this selection.`),this.timeoutMs);
-    this.pending.set(key,{promise,resolve,reject,timer});
+    this.pending.set(key,{promise,firstPromise,resolve,reject,resolveFirst,rejectFirst,timer});
     this.worker.postMessage({type:'prepare',revision:this.revision,jobs:[variant],requested:true});
-    return promise;
+    return first?firstPromise:promise;
   }
   fail(message){
     this.worker?.terminate();this.worker=null;this.runningKey='';
-    for(const pending of this.pending.values()){clearTimeout(pending.timer);pending.reject(new Error(message));}this.pending.clear();
+    for(const pending of this.pending.values()){clearTimeout(pending.timer);pending.rejectFirst(new Error(message));pending.reject(new Error(message));}this.pending.clear();
     this.onStatus({type:'unavailable',message});
   }
   invalidate(){this.fail('The build inputs changed. Generate again for the current selection.');this.revision++;this.cache.clear();this.bytes=0;this.input=null;this.build=null;}

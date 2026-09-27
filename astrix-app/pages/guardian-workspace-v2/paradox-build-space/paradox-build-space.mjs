@@ -1,7 +1,9 @@
 import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-1&limits=20260927-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';
+import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1';
+import {beginEngineTiming,afterEnginePaint} from '../../../core/engine-timing.mjs?v=20260927-1';
 import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1&20260924-card-width-1';
-import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1';
+import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1&perf=20260927-1';
 import {diffBuilds,createBuildState,createIntendedArtifactConfiguration,toggleIntendedArtifactPerk,createWorkingBuildPatch,createBuildPersistenceSnapshot,restoreBuildPersistenceSnapshot,protectBuildState,restoreWorkingBuild} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
 import {mountForgeShell} from '../platform-forge-shell.mjs';
 import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMatchesCharacter,readCapture,readCaptureArchive} from '../guardian-shooting-range-capture.mjs?v=20260902-shared-account-orbit-1&plain=20260925-2&refresh=20260927-1';
@@ -15,7 +17,7 @@ import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260916-equipped-source-1';
 import {markGuardianFastReturn,readForgeLoaderTransfer,cacheBuildForgeState,readBuildForgeState} from '../guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
 import {guardianManifest} from '../guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
-import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {getBungieSession} from '../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
 import {assertRenderablePagePayload} from '../../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {HANDOFF_SCHEMA,bindingOf,bindingsEqual,shouldReplaceBuildState,repairMissingBuildBinding,mergePreparedLoadoutContext,validateHandoffEnvelope} from '../paradox-build-binding.mjs?v=20260916-equipped-source-1';
 import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelection,validateVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
@@ -26,10 +28,10 @@ import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,sele
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&champion=20260924-champion-export-1';
-import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
 import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1';
-import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1';
+import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
 import '../guardian-vault-access.mjs?v=20260902-forge-loader-1';
@@ -207,7 +209,7 @@ async function startDirectGeneration(mode){
     await guardianManifest.hydratePayload(payload,{allowNetwork:false});
     const session=globalThis.FORGE_BUNGIE_SESSION||await getBungieSession();
     if(payload.membership&&!bindingsEqual({...selected,...payload.membership},selected))throw new Error('The prepared inventory belongs to a different Bungie membership. Refresh Guardian data.');
-    const equipped=normaliseLiveProfile(payload,session,selected.characterId);
+    const equipped=await runProfileTask('normalise',{payload,session,characterId:selected.characterId});
     if(!session?.authenticated||readState()!==state||!bindingsEqual(selected,equipped))throw new Error('The selected Guardian or account changed. Choose the entry again.');
     const inventory=createVaultCatalogue(payload),byInstance=new Map(inventory.armour.map(item=>[String(item.itemInstanceId),item]));
     const armour=prepareArmourSelection(payload,equipped.armour.map(item=>byInstance.get(String(item?.itemInstanceId))||item));
@@ -241,7 +243,7 @@ async function loadManualInventory(build={}){
     await guardianManifest.ready();
     const payload=assertRenderablePagePayload(globalThis.FORGE_PAGE_PAYLOAD||await globalThis.FORGE_PAGE_PAYLOAD_PROMISE,'build-forge');
     await guardianManifest.hydratePayload(payload,{allowNetwork:false});
-    const session=globalThis.FORGE_BUNGIE_SESSION||await getBungieSession(),normalized=normaliseLiveProfile(payload,session,build.characterId),vault=createVaultCatalogue(payload);
+    const session=globalThis.FORGE_BUNGIE_SESSION||await getBungieSession(),normalized=await runProfileTask('normalise',{payload,session,characterId:build.characterId}),vault=createVaultCatalogue(payload);
     const unique=(rows,current)=>{const map=new Map();for(const item of [...(rows||[]),...(current||[])])if(manualItemId(item))map.set(manualItemId(item),item);return [...map.values()];};
     const activeCharacterId=String(build.characterId||'');
     manualInventory={key,payload,weapons:filterManualEquipmentSources(unique(normalized.ownedWeapons,build.weapons),activeCharacterId),armour:prepareArmourSelection(payload,filterManualEquipmentSources(unique(vault.armour,build.armour),activeCharacterId)),loadedAt:new Date().toISOString()};
@@ -444,9 +446,9 @@ function queueStatePersistence(state){
   });
   return statePersistenceChain;
 }
-function writeState(next){
+function writeState(next,{retainPreparation=false}={}){
   const state=protectBuildState(next);
-  if(volatileState!==state)forgePreparation.invalidate();
+  if(volatileState!==state&&!retainPreparation)forgePreparation.invalidate();
   volatileState=state;
   void queueStatePersistence(state);
   return true;
@@ -788,6 +790,7 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
   if(recommendationBusy||directEntryBusy)return;
   const stagedBuild=currentBuild();
   if(stagedBuild?.forgeLoaderDecision&&!forgeActivityOption(stagedBuild.activityContext)){recommendationFailure='Pick an activity before generating.';renderRecommendationControls(stagedBuild);return;}
+  const engineTiming=beginEngineTiming('generate.click-to-paint');
   recommendationBusy=true;
   recommendationFailure='';
   let failureMessage='';
@@ -807,9 +810,13 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
     await prepareForgeBackground(build);
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
     activePreparationKey=forgePreparationKey({...requestedForgeVariant(build),weaponInstanceIds});
-    const prepared=await forgePreparation.get({...requestedForgeVariant(build),weaponInstanceIds});
+    const variant={...requestedForgeVariant(build),weaponInstanceIds};
+    const prepared=await forgePreparation.get(variant,{first:true});
+    const completedPromise=forgePreparation.get(variant);
+    engineTiming.mark('first-result');
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
     let working={...build,...prepared.patch};
+    if(working.weaponSelectionRecommendation?.combinations?.length>1)working.weaponSelectionRecommendation={...working.weaponSelectionRecommendation,combinations:working.weaponSelectionRecommendation.combinations.slice(0,1)};
     // Recheck the prepared selection at the point of review; never execute live actions here.
     const coherence=validateLoadoutCoherence(working);working.loadoutCoherence=coherence;
     // Apply readiness is review information, not permission to hide a valid
@@ -818,9 +825,20 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
     let next=protectBuildState({...state,workingBuild:working,recommendation:prepared.recommendation});
     await updateForgeGenerationPhase('PREPARING BUILD REVIEW…');
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
-    next=protectBuildState({...next,workingBuild:working});writeState(next);render();hideForgeGenerationLoader();if(!await openRecommendedBuild())throw new Error('The recommendation was generated, but its protected review could not be opened. Reload this Build Forge page and try again.');
+    next=protectBuildState({...next,workingBuild:working});writeState(next,{retainPreparation:true});render();hideForgeGenerationLoader();if(!await openRecommendedBuild())throw new Error('The recommendation was generated, but its protected review could not be opened. Reload this Build Forge page and try again.');
+    await afterEnginePaint();engineTiming.mark('first-paint');
+    const completed=await completedPromise;
+    if(readState()===next&&completed.patch?.weaponSelectionRecommendation){
+      // Only alternatives change after the complete, validated best build paints.
+      const alternatives=completed.patch.weaponSelectionRecommendation;
+      next={...next,workingBuild:{...next.workingBuild,weaponSelectionRecommendation:alternatives}};
+      writeState(next);renderRecommendedBuildReview(next.workingBuild);
+    }
+    engineTiming.mark('alternatives');
+
   }catch(error){failureMessage=error?.message||'Unable to generate a recommendation.';recommendationFailure=failureMessage;console.error('Build Forge recommendation generation failed.',error);}
   finally{
+    engineTiming.end(failureMessage?'error':'complete');
     hideForgeGenerationLoader();recommendationBusy=false;renderRecommendationControls(currentBuild()||{});
     if(failureMessage){const status=byId('recommendationReadiness');if(status){status.className='recommendation-readiness is-blocked';status.textContent=failureMessage;}setLiveActionBanner(`Generate blocked · ${failureMessage}`,'warn');}
   }

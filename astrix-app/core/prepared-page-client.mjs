@@ -1,3 +1,5 @@
+import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1';
+import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
 import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
 
@@ -5,6 +7,7 @@ const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loa
 const PAGE_KIND_SET=new Set(PAGE_KINDS);
 const REQUEST_TIMEOUT_MS=30_000;
 const requests=new Map();
+const pageTimings=new Map();
 const WORKSPACE_PRELOAD_PAGES=Object.freeze(['character','build-forge','vault','loadout']);
 
 const PREPARED_PAGE_STAGES=Object.freeze({
@@ -23,6 +26,9 @@ function pageKind(value){
 }
 
 function reportPreparedPageStage(stage,page,detail={}){
+  if(stage==='start')pageTimings.set(page,beginEngineTiming('profile.page-to-paint'));
+  const timing=pageTimings.get(page);timing?.mark(detail.source||stage);
+  if(stage==='ready'&&timing){pageTimings.delete(page);void afterEnginePaint().then(()=>timing.end());}
   const row=PREPARED_PAGE_STAGES[stage];
   if(!row)throw new Error(`Unknown prepared page stage ${stage}`);
   globalThis.ForgeLoader?.set?.(row.percent);
@@ -130,23 +136,31 @@ function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https:/
 
 async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
   if(!fetchImpl)throw new Error('Prepared page network access is unavailable.');
+  const timing=beginEngineTiming('profile.fetch-join');
   const controller=signal?null:new AbortController();
   const activeSignal=signal||controller.signal;
+  let outcome='complete';
   const timer=controller?setTimeout(()=>controller.abort(),timeoutMs):null;
   try{
     if(!quiet)reportPreparedPageStage('request',page);
     const response=await fetchImpl(preparedPageUrl(page,{freshness}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
-    const raw=await response.json().catch(()=>({}));
+    timing.mark('fetch');
+    const useWorker=typeof Worker==='function'&&typeof response.text==='function'&&response.ok;
+    const raw=useWorker?await response.text():await response.json().catch(()=>({}));
+    timing.mark('body');
     if(!response.ok)throw new Error(raw?.error||`Prepared ${page} request failed (${response.status}).`);
     if(!quiet)reportPreparedPageStage('join',page);
-    const payload=normalizePreparedPagePayload(raw,page);
+    const payload=useWorker?await runProfileTask('parse',{text:raw,page}):normalizePreparedPagePayload(raw,page);
     assertRenderablePagePayload(payload,page);
+    timing.mark('join');
     return payload;
   }catch(error){
+    outcome='error';
     if(error?.name==='AbortError')throw new Error(`Prepared ${page} request timed out.`);
     throw error;
   }finally{
     if(timer!==null)clearTimeout(timer);
+    timing.end(outcome);
   }
 }
 
@@ -169,7 +183,7 @@ function publishCoverage(payload,page,source){
   globalThis.document?.dispatchEvent?.(new CustomEvent('forge:prepared-page-loaded',{detail:{page,payload,source,complete,missing:payload?.pageReady?.coverage?.missing||[]}}));
 }
 
-async function loadPreparedPagePayload(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=force,publish=true}={}){
+async function loadPreparedPagePayloadImpl(session,pageValue,{force=false,preferBackend=false,sharedPayload=null,fetchImpl,quiet=force,publish=true}={}){
   const page=pageKind(pageValue);
   if(!quiet){reportPreparedPageStage('start',page);reportPreparedPageStage('session',page);}
   if(!force&&!preferBackend&&sharedPayload?.pageReady?.page===page&&sharedPayload?.profile){
@@ -212,6 +226,12 @@ async function loadPreparedPagePayload(session,pageValue,{force=false,preferBack
   })());
   try{return await requests.get(key);}
   finally{requests.delete(key);}
+}
+
+async function loadPreparedPagePayload(session,pageValue,options={}){
+  const timing=beginEngineTiming('profile.load');
+  try{const payload=await loadPreparedPagePayloadImpl(session,pageValue,options);timing.end();return payload;}
+  catch(error){timing.end('error');throw error;}
 }
 
 async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,fetchImpl}={}){
