@@ -1,8 +1,9 @@
 import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
-import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-3';
+import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
+import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-3';
+import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 
 const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loadout']);
 const PAGE_KIND_SET=new Set(PAGE_KINDS);
@@ -41,9 +42,10 @@ function reportPreparedPageStage(stage,page,detail={}){
 }
 
 function mergeTables(target={},source={}){
+  target={...target};
   for(const [type,rows] of Object.entries(source||{})){
     if(!rows||typeof rows!=='object'||Array.isArray(rows))continue;
-    if(target[type])Object.assign(target[type],rows);
+    if(target[type])target[type]={...target[type],...rows};
     else target[type]=rows;
   }
   return target;
@@ -132,13 +134,29 @@ function normalizePreparedPagePayload(raw,pageValue){
   return completeEnvelopeCoverage(payload,page);
 }
 
-function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com',freshness='display'}={}){
+function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com',freshness='display',manifestVersion}={}){
   const url=new URL(`/bungie/page/${pageKind(page)}`,authOrigin);
   url.searchParams.set('freshness',freshness==='live'?'live':'display');
+  if(manifestVersion)url.searchParams.set('manifestVersion',manifestVersion);
   return url;
 }
 
-async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
+async function requestPreparedPagePayload(page,options={}){
+  try{return await requestPreparedPageAttempt(page,options);}
+  catch(error){
+    if(error?.name!=='SyntaxError')throw error;
+    // An incomplete cached envelope must not strand every revisit on the same bytes.
+    console.warn('[Forge] Invalid prepared JSON; retrying once with a fresh response',{page});
+    try{return await requestPreparedPageAttempt(page,{...options,freshness:'live'});}
+    catch(retryError){
+      if(retryError?.name!=='SyntaxError')throw retryError;
+      const failure=new Error('Guardian data arrived incomplete. Retry loading your data.');
+      failure.code='prepared_page_incomplete';throw failure;
+    }
+  }
+}
+
+async function requestPreparedPageAttempt(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
   if(!fetchImpl)throw new Error('Prepared page network access is unavailable.');
   const timing=beginEngineTiming('profile.fetch-join');
   const controller=signal?null:new AbortController();
@@ -146,16 +164,24 @@ async function requestPreparedPagePayload(page,{fetchImpl=globalThis.fetch?.bind
   let outcome='complete';
   const timer=controller?setTimeout(()=>controller.abort(),timeoutMs):null;
   try{
+    const cachedPrepared=await readPreparedBundle(page);
     if(!quiet)reportPreparedPageStage('request',page);
-    const response=await fetchImpl(preparedPageUrl(page,{freshness}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
+    const response=await fetchImpl(preparedPageUrl(page,{freshness,manifestVersion:cachedPrepared?.manifestVersion}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
     timing.mark('fetch');
+    if(!response.ok){
+      let details;
+      try{details=await readBoundedJson(response,'prepared page error',MAX_PREPARED_PAGE_BYTES);}catch{}
+      const error=new Error(details?.message||details?.error||`Guardian data request failed (${response.status}). Retry loading your data.`);
+      error.status=response.status;error.code=details?.error;throw error;
+    }
     const useWorker=typeof Worker==='function'&&typeof response.text==='function'&&response.ok;
     const raw=useWorker?await readBoundedText(response,'prepared page',MAX_PREPARED_PAGE_BYTES):await readBoundedJson(response,'prepared page',MAX_PREPARED_PAGE_BYTES);
     timing.mark('body');
-    if(!response.ok){const error=new Error(raw?.message||raw?.error||`Prepared ${page} request failed (${response.status}).`);error.status=response.status;error.code=raw?.error;throw error;}
     if(!quiet)reportPreparedPageStage('join',page);
-    const payload=useWorker?await runProfileTask('parse',{text:raw,page}):normalizePreparedPagePayload(raw,page);
+    const result=useWorker?await runProfileTask('parse',{text:raw,page,cachedPrepared,returnEnvelope:true}):{payload:normalizePreparedPagePayload(joinPreparedBundle(raw,cachedPrepared),page),preparedBundle:raw?.prepared};
+    const payload=result.payload;
     assertRenderablePagePayload(payload,page);
+    if(result.preparedBundle?.manifestVersion&&!result.preparedBundle.bundleCached)void savePreparedBundle(page,result.preparedBundle);
     timing.mark('join');
     return payload;
   }catch(error){

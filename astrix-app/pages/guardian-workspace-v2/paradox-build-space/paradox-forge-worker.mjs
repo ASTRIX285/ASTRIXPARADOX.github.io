@@ -1,4 +1,4 @@
-import {createEnginePrecomputer} from '../../../core/engine-precompute.mjs?v=20260927-1&recovery=20260927-3';
+import {createEnginePrecomputer} from '../../../core/engine-precompute.mjs?v=20260927-1&recovery=20260927-4';
 import {beginEngineTiming} from '../../../core/engine-timing.mjs?v=20260927-1';
 import {prepareForgeSequence} from './paradox-forge-sequence.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1&perf=20260927-1&anchor=20260927-1';
 import {forgePreparationKey as keyOf} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1&perf=20260927-1&anchor=20260927-1';

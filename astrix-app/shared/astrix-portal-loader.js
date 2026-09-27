@@ -1,6 +1,6 @@
 /* =====================================================================
    ASTRIX PARADOX — GLOBAL PORTAL LOADER controller
-   Include on every page AFTER astrix-portal-loader.css.
+   Include on tool pages only, after astrix-portal-loader.css.
    API:
      ForgeLoader.mount()        // shows the portal as soon as <body> exists
      ForgeLoader.set(pct)       // 0..100, updates ring + %
@@ -11,6 +11,20 @@
    ===================================================================== */
 (function(){
   if(window.ForgeLoader?.owner==='astrix-portal')return;
+  var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
+  var breach=null,breachStarted=false;
+  function startBreach(){
+    if(breachStarted||!gate||!loaderScriptSrc||!window.WebGLRenderingContext||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+    breachStarted=true;
+    var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
+    import(new URL('./astrix-breach-loader.mjs?v=20260927-restore-1',loaderScriptSrc).href)
+      .then(function(module){return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4});})
+      .then(function(api){
+        if(!gate||pendingDone){api.dispose();host.remove();return;}
+        breach=api;gate.classList.add('is-breach');api.setProgress(pendingPct/100);
+      }).catch(function(){host.remove();});
+  }
+  function disposeBreach(){if(breach){breach.dispose();breach=null;}}
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
@@ -172,7 +186,7 @@
     if(!document.body)return;
     var wrap=document.createElement('div');wrap.innerHTML=markup();
     gate=wrap.firstElementChild;document.body.appendChild(gate);
-    document.body.classList.add('apx-loading');cache();apply();
+    document.body.classList.add('apx-loading');cache();apply();startBreach();
     clearTimeout(noticeTimer);noticeTimer=setTimeout(function(){
       if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;
       setStatus('Still loading Guardian data');
@@ -184,6 +198,7 @@
     pendingPct=Math.max(pendingPct,v);
     if(prog)prog.style.setProperty('--p',pendingPct);
     if(pct)pct.textContent=pendingPct+'%';
+    if(breach)breach.setProgress(pendingPct/100);
   }
   function setStatus(t){
     pendingStatus=String(t||'Opening portal');
@@ -227,6 +242,7 @@
     });
   }
   function finish(){
+    disposeBreach();
     if(!gate||gate.classList.contains('is-done'))return;
     document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));
     clearTimeout(noticeTimer);pendingPct=100;

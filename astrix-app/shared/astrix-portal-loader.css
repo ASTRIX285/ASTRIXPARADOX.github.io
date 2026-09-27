@@ -128,7 +128,20 @@ body.apx-loading{overflow:hidden!important}
 
 
 
-/* SITE-WIDE V2: calmer loader and a way past a failed live load */
+/* Glass breach is a skin of the existing gate, not another loader. */
+.apx-breach-stage{position:absolute;inset:0;z-index:1;pointer-events:none}
+.apx-breach-stage canvas{display:block;width:100%;height:100%}
+.apx-gate.is-breach{background:radial-gradient(ellipse at 50% 55%,var(--apx-loader-deep-red) 0,color-mix(in srgb,var(--apx-loader-deep-red) 22%,black) 58%,black 100%)}
+.apx-gate.is-breach::before,.apx-gate.is-breach::after{display:none}
+.apx-gate.is-breach :is(.apx-portal,.apx-pct,.apx-brand){display:none}
+.apx-gate.is-breach .apx-stage{align-self:end;padding-bottom:7vh;z-index:2}
+.apx-breach-hud{position:absolute;left:50%;top:calc(50% + 29vh);transform:translateX(-50%);display:grid;justify-items:center;gap:10px;opacity:0;transition:opacity .6s ease}
+.apx-breach-hud.is-on{opacity:1}
+.apx-breach-label{color:var(--apx-loader-gold);font:700 14px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.35em}
+.apx-breach-bar{width:180px;height:2px;overflow:hidden;background:color-mix(in srgb,var(--apx-loader-gold) 18%,transparent)}
+.apx-breach-bar span{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--apx-loader-crimson),var(--apx-loader-gold))}
+.apx-gate.is-live-blocked .apx-breach-hud,.apx-gate.is-auth-required .apx-breach-hud{display:none}
+/* A way past a failed live load. */
 .apx-gate::after{background:radial-gradient(ellipse at 50% 44%,rgba(211,32,47,.05) 0%,rgba(121,8,16,.16) 50%,rgba(8,1,2,.96) 100%),
     linear-gradient(180deg,rgba(10,1,2,.4),rgba(40,3,7,.3) 58%,rgba(7,1,2,.94))}
 .apx-gate::before{opacity:.5}
