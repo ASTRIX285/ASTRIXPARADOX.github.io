@@ -1,0 +1,6 @@
+forge-auth-worker/src/dim-share.ts
+forge-auth-worker/test/dim-share.test.ts
+forge-auth-worker/test/dim-share-runtime.test.ts
+forge-auth-worker/src/index.ts
+forge-auth-worker/src/profile-response.ts
+forge-auth-worker/test/profile-response.test.ts

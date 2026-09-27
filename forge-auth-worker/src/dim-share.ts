@@ -14,7 +14,7 @@ export async function dimShareRoute(request: Request, cache: Pick<Cache, 'match'
   if (!task) {
     task = (async () => {
       try {
-        const upstream = await fetchImpl(`https://api.destinyitemmanager.com/loadout_share?shareId=${id}`, {headers: {Accept: 'application/json'}, credentials: 'omit', redirect: 'error', signal: AbortSignal.timeout(12000)});
+        const upstream = await fetchImpl(`https://api.destinyitemmanager.com/loadout_share?shareId=${id}`, {headers: {Accept: 'application/json'}, credentials: 'omit', redirect: 'manual', signal: AbortSignal.timeout(12000)});
         let response: Response;
         if (upstream.status === 404 || upstream.status === 410) response = json({error: 'expired_link'}, upstream.status, {'Cache-Control': 'public, max-age=60'});
         else if (!upstream.ok || !upstream.body) response = json({error: 'dim_unreachable'}, 503, {'Cache-Control': 'public, max-age=15'});
@@ -27,7 +27,10 @@ export async function dimShareRoute(request: Request, cache: Pick<Cache, 'match'
         }
         await cache.put(key, response.clone()).catch(() => {});
         return response;
-      } catch { return json({error: 'dim_unreachable'}, 503); }
+      } catch (error) {
+        console.error('dim_share_proxy_failed', {message: error instanceof Error ? error.message : String(error)});
+        return json({error: 'dim_unreachable'}, 503);
+      }
     })().finally(() => pending.delete(id));
     pending.set(id, task);
   }
