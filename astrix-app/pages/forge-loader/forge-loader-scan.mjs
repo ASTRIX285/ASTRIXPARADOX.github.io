@@ -109,9 +109,9 @@ function candidateStatMarkup(candidate,{itemRow=false,payload=null,targets={}}={
     const state=target>0?(value>=target?' is-met':' is-short'):'';
     const icon=itemRow?'':armourStatIcon(payload,key);
     if(itemRow)return `<span class="forge-matrix-stat"><small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small><b>${value}</b></span>`;
-    const calculation=target>0?`TARGET ${target}`:'OPEN',label=`${ARMOUR_STAT_LABELS[key]} ${value}, ${calculation}`;
+    const calculation=target>0?`TARGET ${target}`:'OPEN',label=`${ARMOUR_STAT_LABELS[key]} ${value}${target>0?`, ${calculation}`:''}`;
     const proportion=Math.max(0,Math.min(100,Number((value/ARMOUR_STAT_CAP*100).toFixed(2))));
-    return `<span class="forge-matrix-stat${state}" aria-label="${esc(label)}" title="${esc(label)}"><span class="forge-matrix-stat-reading">${icon?`<img class="forge-matrix-stat-icon" src="${esc(icon)}" alt="" aria-hidden="true" decoding="async">`:`<small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small>`}<b>${value}</b></span><em>${calculation}</em><span class="forge-matrix-stat-bar" aria-hidden="true"><i style="--forge-stat-fill:${proportion}%"></i></span></span>`;
+    return `<span class="forge-matrix-stat${state}" aria-label="${esc(label)}" title="${esc(label)}"><span class="forge-matrix-stat-reading">${icon?`<img class="forge-matrix-stat-icon" src="${esc(icon)}" alt="" aria-hidden="true" decoding="async">`:`<small>${esc(ARMOUR_STAT_LABELS[key].toUpperCase())}</small>`}<b>${value}</b></span>${target>0?`<em>${calculation}</em>`:''}<span class="forge-matrix-stat-bar" aria-hidden="true"><i style="--forge-stat-fill:${proportion}%"></i></span></span>`;
   }).join('');
 }
 

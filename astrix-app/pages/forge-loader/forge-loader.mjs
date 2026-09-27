@@ -12,7 +12,7 @@ import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=202
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
