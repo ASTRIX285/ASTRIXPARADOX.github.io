@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const root=new URL('../',import.meta.url);
+const html=readFileSync(new URL('pages/forge-loader/results/index.html',root),'utf8');
+const links=Array.from(html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g),match=>new URL(match[1].replaceAll('&amp;','&'),new URL('pages/forge-loader/results/index.html',root)));
+const base=links.find(url=>url.pathname.endsWith('/shared/astrix-destination-ribbon.css'));
+assert.ok(base,'Results must load the shared base stylesheet that bounds the header logo and defines layout tokens');
+const css=readFileSync(new URL(base.pathname,'file://'),'utf8');
+assert.match(css,/\.apx-destination-brand img\{[^}]*width:var\(--apx-icon-brand-compact,2\.375rem\)/,'Shared logo sizing prevents the full-resolution image from covering the viewport');
+assert.ok(links.indexOf(base)<links.findIndex(url=>url.pathname.endsWith('/forge-loader.css')),'Base styles must precede Forge overrides');
+console.log('FORGE_RESULTS_BASE_STYLES=PASS');
