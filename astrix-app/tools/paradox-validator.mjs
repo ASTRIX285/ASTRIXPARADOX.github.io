@@ -22,6 +22,8 @@ const validators=[
   'test-character-loadout-status.mjs',
   'test-loadout-details.mjs', // Prompt 3: resolved view and guarded actions.
   'test-loadout-details-backend.mjs',
+  'test-dim-import.mjs',
+  'test-dim-import-cache.mjs',
   'validate-super-formation.mjs',
   'validate-responsive-layout-contract.mjs',
   'validate-destination-theming.mjs',

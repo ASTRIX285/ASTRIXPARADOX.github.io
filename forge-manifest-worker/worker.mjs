@@ -68,6 +68,24 @@ export default {
     }
     if(request.method!=='GET')return new Response(null,{status:405});
     if(url.pathname==='/status')return Response.json(index);
+    // Version-pinned, bounded full-definition shards for the DIM browser index.
+    // These are prepared assets, never on-demand Bungie downloads.
+    if(url.pathname==='/import-shard'){
+      if(url.searchParams.get('version')!==index.manifestVersion)return new Response(null,{status:409});
+      const type=url.searchParams.get('type'),archive=url.searchParams.get('archive')==='1';
+      const descriptor=(archive?index.retiredTables:index.tables)?.[type];
+      const shard=Number(url.searchParams.get('shard'));
+      if(!descriptor||!Number.isInteger(shard)||shard<0||shard>=descriptor.shards)return new Response(null,{status:400});
+      if(descriptor.manifestVersion!==index.manifestVersion)return new Response(null,{status:503});
+      const response=await env.ASSETS.fetch(new Request(`https://assets/${archive?'retired/':''}${type}/${shard}.json`));
+      if(!response.ok)return new Response(null,{status:503});
+      const bytes=await response.arrayBuffer();
+      const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join('');
+      if(descriptor.sha256?.[shard]!==digest)return new Response(null,{status:503});
+      const raw=JSON.parse(new TextDecoder().decode(bytes));
+      const definitions=archive?Object.fromEntries(Object.entries(raw).map(([hash,row])=>[hash,retiredIdentity(row,type)])):raw;
+      return Response.json({manifestVersion:index.manifestVersion,type,shard,archive,definitions},{headers:{'Cache-Control':'public, max-age=31536000, immutable'}});
+    }
     // Only these three small official catalogues may be read in full. No Bungie calls.
     if(url.pathname==='/loadout-identifiers'){
       if(url.searchParams.get('version')!==index.manifestVersion)return new Response(null,{status:409});

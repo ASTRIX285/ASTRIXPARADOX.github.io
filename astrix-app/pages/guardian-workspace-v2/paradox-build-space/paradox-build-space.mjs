@@ -1,3 +1,4 @@
+import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';
 import {sizeBuildWeaponCards} from './build-weapon-card-layout.mjs?v=20260925-real-perks-1&20260924-card-width-1';
 import {ForgePreparationClient,preparationVariants,forgePreparationKey} from './paradox-forge-preparation.mjs?v=20260916-weapon-combinations-2&entry=20260921-direct-1&plain=20260925-2&flow=20260926-1';

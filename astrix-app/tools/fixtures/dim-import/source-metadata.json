@@ -1,0 +1,32 @@
+{
+  "version": "244213.26.06.29.2000-1-bnet.65864",
+  "shares": [
+    {
+      "fixture": "fixturea.json",
+      "discoveredAt": "https://builders.gg/destiny/dim-builds"
+    },
+    {
+      "fixture": "fixtureb.json",
+      "discoveredAt": "https://builders.gg/destiny/dim-builds"
+    },
+    {
+      "fixture": "fixturec.json",
+      "discoveredAt": "https://builders.gg/destiny/dim-builds"
+    }
+  ],
+  "retrievedAt": "2026-09-27",
+  "definitionSources": [
+    "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyInventoryItemDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=3824673936%2C738446555%2C2155534128%2C1025347717%2C1806024532%2C3545094011%2C2052186462%2C420604757%2C426902517%2C2894282039%2C2749722041%2C4204413574%2C383852320%2C2628485817%2C1885339915%2C2307689415%2C2470512752%2C262821318%2C262821317%2C4208512221%2C4208512222%2C4208512211%2C4208512223%2C2565108508%2C4021790309%2C1388734897%2C2724068510%2C2595839237%2C1435557120%2C377010989%2C2485657760%2C2447449706%2C3121760799%2C2724608735%2C953234331%2C2407398462%2C2793473444%2C14520248%2C2194294579%2C40751621%2C11126525%2C4160037471%2C3122197216%2C3387424184%2C3387424187%2C3387424188%2C1876183148%2C1876183150",
+    "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyInventoryItemDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=1876183151%2C3153265455%2C3153265453%2C3459646243%2C3459646245%2C2659604391%2C2659604385%2C1720543205%2C2406427719%2C3097902842%2C3873235480%2C4248210736%2C702981643%2C1630553967%2C442736573%2C42435996%2C427899681%2C3489054606%2C3585698380%2C2739996165%2C3768376419%2C2662868359%2C1641172978%2C2550323932%2C2495523341%2C2225231093%2C2747500761%2C852252789%2C1841016428%2C2984351204%2C2984351205%2C1051276351%2C362132288%2C362132294%2C362132300%2C4183296050%2C554409585%2C3832366019%2C455024236%2C3685945823%2C2577472338%2C2526773280%2C2319885414%2C877723168%2C4026414261%2C1755737153%2C3387424191%2C1876183146",
+    "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyInventoryItemDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=3153265450%2C3153265454%2C3459646241%2C3459646247%2C2659604388%2C2659604390%2C208045062%2C3801917265%2C1514974385%2C2798746917%2C2653012761%2C2795461287%2C4129456190%2C2625211587%2C1736135946%2C3946054154%2C925466718%2C2403923088%2C4052965875%2C1963424554%2C3893112950%2C1444664836%2C5333293%2C1869939005%2C3644045871%2C3994381207%2C3696633656%2C1324853482%2C790664815%2C790664812%2C124726498%2C2626922114%2C124726505%2C2626922120%2C124726501%2C1703647492%2C3938489430%2C2831374162%2C3410844187%2C1848187513%2C1750845415%2C1193713026%2C2980357723%2C1361869536%2C2099254712%2C2966219586%2C3736112681%2C715074198",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyInventoryBucketDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyLoadoutNameDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyLoadoutIconDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyLoadoutColorDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyStatDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinySocketCategoryDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinyEquipableItemSetDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
+    "https://www.bungie.net/common/destiny2_content/json/en/DestinySandboxPerkDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json"
+  ],
+  "note": "Item definitions captured from the full backend. Small supplemental tables captured from the same official Bungie manifest version, as the newly merged backend tables are not deployed yet. Offline share fixtures retain only neutral names, class type, item and socket hashes, and build parameters. Donor identifiers, dates, original loadout names and share IDs are removed. Tests never fetch DIM live."
+}

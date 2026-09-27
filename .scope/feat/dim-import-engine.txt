@@ -1,0 +1,24 @@
+# Prompt 4: DIM import engine, entry points and validator consolidation
+.github/workflows/validate-loadout-details-popup.yml
+.github/workflows/validate-manifest-coverage-refresh.yml
+astrix-app/core/dim-import/actions.mjs
+astrix-app/core/dim-import/cache.mjs
+astrix-app/core/dim-import/entry.mjs
+astrix-app/core/dim-import/resolve.mjs
+astrix-app/core/dim-import/share.mjs
+astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/shared/loadout-details.mjs
+astrix-app/tools/build-backend-manifest.py
+astrix-app/tools/fixtures/dim-import/manifest.json
+astrix-app/tools/fixtures/dim-import/fixturea.json
+astrix-app/tools/fixtures/dim-import/fixtureb.json
+astrix-app/tools/fixtures/dim-import/source-metadata.json
+astrix-app/tools/fixtures/dim-import/fixturec.json
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-dim-import-cache.mjs
+astrix-app/tools/test-dim-import.mjs
+forge-auth-worker/src/index.ts
+forge-manifest-worker/worker.mjs

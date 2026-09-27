@@ -2292,6 +2292,13 @@ export default {
       if (request.method === "GET" && url.pathname === "/session/recover") return await sessionRecoveryRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/account") return await bungieAccountRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/manifest") return await manifestMetadataRoute(request, env);
+      if (request.method === "GET" && ["/bungie/manifest/import/status", "/bungie/manifest/import/shard"].includes(url.pathname)) {
+        // Public prepared definitions only. No credentials forwarded and no Bungie fallback.
+        const target = new URL("https://manifest" + (url.pathname.endsWith("/status") ? "/status" : "/import-shard"));
+        target.search = url.search;
+        const response = await env.MANIFEST_DATA?.fetch(new Request(target)).catch(() => null);
+        return withCors(request, env, response || json({ error: "prepared_manifest_unavailable" }, 503));
+      }
       if (request.method === "GET" && url.pathname === "/bungie/manifest/component") return await manifestComponentRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/manifest/definition") return await manifestDefinitionRoute(request, env);
       if (request.method === "GET" && url.pathname === "/bungie/manifest/definitions") return await manifestDefinitionsRoute(request, env);
