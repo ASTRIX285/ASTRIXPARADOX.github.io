@@ -1,5 +1,5 @@
 import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
-import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
+import {readPreparedBundle,savePreparedBundle,rememberPreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
 import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
@@ -181,7 +181,14 @@ async function requestPreparedPageAttempt(page,{fetchImpl=globalThis.fetch?.bind
     const result=useWorker?await runProfileTask('parse',{text:raw,page,cachedPrepared,returnEnvelope:true}):{payload:normalizePreparedPagePayload(joinPreparedBundle(raw,cachedPrepared),page),preparedBundle:raw?.prepared};
     const payload=result.payload;
     assertRenderablePagePayload(payload,page);
-    if(result.preparedBundle?.manifestVersion&&!result.preparedBundle.bundleCached)void savePreparedBundle(page,result.preparedBundle);
+    rememberPreparedBundle(page,result.preparedBundle);
+    if(!useWorker&&result.preparedBundle?.manifestVersion&&!result.preparedBundle.bundleCached){
+      const save=()=>{void savePreparedBundle(page,result.preparedBundle);};
+      // The worker persists normal browser loads. Yield before the fallback
+      // write so callers can render when module workers are unavailable.
+      if(typeof requestIdleCallback==='function')requestIdleCallback(save,{timeout:2000});
+      else setTimeout(save,0);
+    }
     timing.mark('join');
     return payload;
   }catch(error){

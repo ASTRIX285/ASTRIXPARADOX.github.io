@@ -12,7 +12,7 @@ export function profileResponse(payload: Record<string, unknown>, headers?: Head
 import {boundedStringify,jsonByteLength,MAX_JSON_BYTES,MAX_PREPARED_PAGE_BYTES} from '../../astrix-app/core/bounded-json.mjs';
 /** Public definitions have their own prepared-page budget; private profile stays at 20 MB.
  * Emit bounded pieces so no JSON.stringify call ever allocates the whole enriched account. */
-export function preparedAccountChunks(account: Record<string, any>): {chunks: Uint8Array[]; byteLength: number} {
+export function preparedAccountChunks(account: Record<string, any>): {chunks: Iterable<Uint8Array>; byteLength: number} {
   jsonByteLength(account.profile,{limit:MAX_JSON_BYTES,context:'prepared private profile'});
   const expected=jsonByteLength(account,{limit:MAX_PREPARED_PAGE_BYTES,context:'prepared account with definitions'});
   function* pieces(value:any):Generator<string>{
@@ -27,9 +27,14 @@ export function preparedAccountChunks(account: Record<string, any>): {chunks: Ui
     }
     yield array?']':'}';
   }
-  const encoder=new TextEncoder(),chunks:Uint8Array[]=[];let buffer='',byteLength=0;
-  const flush=()=>{if(buffer){const bytes=encoder.encode(buffer);chunks.push(bytes);byteLength+=bytes.byteLength;buffer='';}};
-  for(const piece of pieces(account)){if(buffer.length+piece.length>64*1024)flush();buffer+=piece;}
-  flush();if(byteLength!==expected)throw new Error('prepared_account_encoding_mismatch');
-  return {chunks,byteLength};
+  function* chunks(): Generator<Uint8Array> {
+    const encoder=new TextEncoder();let buffer='',byteLength=0;
+    for(const piece of pieces(account)){
+      if(buffer.length+piece.length>64*1024&&buffer){const bytes=encoder.encode(buffer);byteLength+=bytes.byteLength;yield bytes;buffer='';}
+      buffer+=piece;
+    }
+    if(buffer){const bytes=encoder.encode(buffer);byteLength+=bytes.byteLength;yield bytes;}
+    if(byteLength!==expected)throw new Error('prepared_account_encoding_mismatch');
+  }
+  return {chunks:chunks(),byteLength:expected};
 }

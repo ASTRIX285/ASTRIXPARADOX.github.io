@@ -34,9 +34,9 @@ test('prepared route captures internally then compacts before the guarded envelo
 
 test('public definitions above 20 MB stream losslessly while private profile guard stays intact',()=>{
  const payload={profile:{characters:{data:{}}},definitions:Object.fromEntries(Array.from({length:24},(_,i)=>[String(i),{description:'x'.repeat(1024*1024)}]))};
- const encoded=preparedAccountChunks(payload);assert.ok(encoded.byteLength>MAX_JSON_BYTES);assert.ok(encoded.chunks.length>1);
- assert.deepEqual(JSON.parse(Buffer.concat(encoded.chunks).toString()),payload);
+ const encoded=preparedAccountChunks(payload);assert.ok(encoded.byteLength>MAX_JSON_BYTES);const chunks=Array.from(encoded.chunks);assert.ok(chunks.length>1);
+ assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()),payload);
  assert.throws(()=>preparedAccountChunks({profile:{data:'x'.repeat(MAX_JSON_BYTES)}}),/20 MB/);
- assert.throws(()=>preparedAccountChunks({profile:{},definitions:{data:'x'.repeat(MAX_JSON_BYTES)}}),/20 MB/,'An oversized individual string must not bypass the serialization guard');
+ assert.throws(()=>Array.from(preparedAccountChunks({profile:{},definitions:{data:'x'.repeat(MAX_JSON_BYTES)}}).chunks),/20 MB/,'An oversized individual string must not bypass the serialization guard');
  assert.throws(()=>preparedAccountChunks({profile:{},definitions:Array(70).fill('x'.repeat(1024*1024))}),/64 MB/);
 });

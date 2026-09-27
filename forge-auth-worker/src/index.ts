@@ -1,5 +1,5 @@
 import {profileResponse as deliverProfileResponse, preparedAccountChunks, type PreparedProfileCapture} from './profile-response.ts';
-import {MAX_PREPARED_PAGE_BYTES,PayloadSizeError} from '../../astrix-app/core/bounded-json.mjs';
+import {MAX_PREPARED_PAGE_BYTES,PayloadSizeError,boundedStringify,readBoundedJson} from '../../astrix-app/core/bounded-json.mjs';
 import { OAUTH_TTL_MS, oauthRecovery, oauthIntro, OAUTH_INTRO_COOKIE } from "./oauth-ui";
 import { dimShareRoute } from './dim-share.ts';
 import {
@@ -1436,33 +1436,51 @@ function preparedPageEnvelope(
     definitions: Object.keys((account as any)?.definitions || {}).length,
     coverageComplete: (account as any)?.pageReady?.coverage?.complete === true
   });
+  const chunks = (function* () {
+    yield prefix;
+    yield* encodedAccount.chunks;
+    yield preparedPrefix;
+  })();
+  let totalBytes = prefix.byteLength + accountBytes + preparedPrefix.byteLength + suffix.byteLength;
+  let sentBytes = 0;
+  const startedAt = Date.now();
   const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      controller.enqueue(prefix);
-      for (const chunk of encodedAccount.chunks) controller.enqueue(chunk);
-      controller.enqueue(preparedPrefix);
-      let totalBytes = prefix.byteLength + accountBytes + preparedPrefix.byteLength + suffix.byteLength;
+    async pull(controller) {
       try {
+        if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
+        const chunk = chunks.next();
+        if (!chunk.done) {
+          sentBytes += chunk.value.byteLength;
+          controller.enqueue(chunk.value);
+          return;
+        }
         if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (value) {
-              totalBytes += value.byteLength;
-              if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
-              controller.enqueue(value);
-            }
+          const { done, value } = await reader.read();
+          if (!done && value) {
+            totalBytes += value.byteLength;
+            if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
+            sentBytes += value.byteLength;
+            controller.enqueue(value);
+            return;
           }
         } else {
+          totalBytes += 2;
+          if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
+          sentBytes += 2;
           controller.enqueue(encoder.encode("{}"));
         }
+        sentBytes += suffix.byteLength;
         controller.enqueue(suffix);
         controller.close();
+        console.info("prepared_page_stream_complete", { page: (account as any)?.pageReady?.page, responseBytes: sentBytes, streamWallTimeMs: Date.now() - startedAt });
       } catch (error) {
+        void reader?.cancel(error).catch(() => {});
+        console.error("prepared_page_stream_failed", { page: (account as any)?.pageReady?.page, responseBytes: sentBytes, streamWallTimeMs: Date.now() - startedAt, error: String(error) });
         controller.error(error);
       }
     },
     cancel(reason) {
+      chunks.return();
       return reader?.cancel(reason);
     }
   });
@@ -1488,7 +1506,7 @@ async function readPreparedPage(
   if (!sessionId || !manifestVersion) return null;
   const url = new URL("https://internal/prepared-page");
   url.searchParams.set("page", page);
-  url.searchParams.set("manifestVersion", manifestVersion);
+  url.searchParams.set("manifestVersion", `profile-v1:${manifestVersion}`);
   const response = await recordStub(env, `session:${sessionId}`).fetch(new Request(url)).catch(() => null);
   return response?.ok && response.body ? response : null;
 }
@@ -1497,14 +1515,19 @@ async function storePreparedPage(
   sessionId: string,
   page: PagePayloadKind,
   manifestVersion: string,
-  response: Response,
+  payload: Record<string, any>,
   env: Env
 ): Promise<boolean> {
   if (!sessionId || !manifestVersion) return false;
-  const body = await response.clone().text();
+  // Serialize only the captured private profile before any public enrichment.
+  // The versioned key deliberately excludes legacy whole-envelope snapshots.
+  const body = boundedStringify({
+    authenticated: true, membership: payload.membership, components: payload.components,
+    profile: payload.profile, displaySnapshot: payload.displaySnapshot
+  }, "prepared profile cache");
   const url = new URL("https://internal/prepared-page");
   url.searchParams.set("page", page);
-  url.searchParams.set("manifestVersion", manifestVersion);
+  url.searchParams.set("manifestVersion", `profile-v1:${manifestVersion}`);
   const stored = await recordStub(env, `session:${sessionId}`).fetch(new Request(url, { method: "PUT", body })).catch(() => null);
   return stored?.ok === true;
 }
@@ -1545,7 +1568,7 @@ async function preparedJourneyAccountData(
   return { historicalStats, activityHistoryByCharacter, coverage: { complete: !missing.length, missing } };
 }
 
-async function pagePayloadRoute(
+export async function pagePayloadRoute(
   request: Request,
   env: Env,
   page: PagePayloadKind,
@@ -1558,15 +1581,25 @@ async function pagePayloadRoute(
   const preparedStatusPromise = preparedManifestTables({}, env);
   const preparedStatus = await preparedStatusPromise;
   const hasPreparedBundle = Boolean(preparedStatus.manifestVersion && requestUrl.searchParams.get("manifestVersion") === preparedStatus.manifestVersion);
-  if (!hasPreparedBundle && requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
+  const captured: PreparedProfileCapture = {};
+  if (requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
     const cached = await readPreparedPage(sessionId, page, preparedStatus.manifestVersion, env);
     if (cached) {
-      const headers = new Headers(cached.headers);
-      headers.set("X-Forge-Prepared-Page-Source", "backend-cache");
-      if (page === "journey" && context && options.warmWorkspace !== false) {
-        context.waitUntil(warmPreparedWorkspace(request, env));
+      const snapshot = await readBoundedJson(cached, "prepared profile cache").catch(() => null);
+      const session = await getSession(env, sessionId);
+      if (session && session.absoluteExpiresAt > Date.now() && snapshot?.profile
+        && snapshot.membership?.membershipId === session.activeDestinyMembership?.membershipId
+        && snapshot.membership?.membershipType === session.activeDestinyMembership?.membershipType) {
+        captured.payload = { ...snapshot, definitions: {}, damageDefinitions: {}, breakerDefinitions: {}, gearAssets: {}, manifestResolution: { mode: "client" }, displaySnapshot: { ...snapshot.displaySnapshot, source: "backend-cache" } };
+        if (context) {
+          const refreshUrl = new URL(request.url);
+          refreshUrl.searchParams.set("freshness", "live");
+          refreshUrl.searchParams.set("manifestVersion", preparedStatus.manifestVersion);
+          context.waitUntil(pagePayloadRoute(new Request(refreshUrl, { headers: request.headers }), env, page, undefined, { warmWorkspace: false })
+            .then(response => response.body?.cancel())
+            .catch(error => console.warn("prepared_page_refresh_failed", { page, error: String(error) })));
+        }
       }
-      return withCors(request, env, new Response(cached.body, { status: 200, headers }));
     }
   }
   const profileUrl = new URL(request.url);
@@ -1575,11 +1608,17 @@ async function pagePayloadRoute(
   profileUrl.searchParams.set("freshness", requestedFreshness);
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : page === "character" ? "character" : "forge");
   profileUrl.searchParams.set("definitions", "client-manifest");
-  const captured: PreparedProfileCapture = {};
-  const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env, captured);
+  const fromCache = Boolean(captured.payload);
+  const profileResponse = fromCache ? new Response(null, { status: 204 }) : await profileRoute(new Request(profileUrl, { headers: request.headers }), env, captured);
   if (!profileResponse.ok) return profileResponse;
   const payload = captured.payload;
   if (!payload) throw new Error("prepared_profile_missing");
+  if (!fromCache && sessionId && preparedStatus.manifestVersion) {
+    const cacheTask = storePreparedPage(sessionId, page, preparedStatus.manifestVersion, payload, env)
+      .catch(error => { console.warn("prepared_page_cache_write_failed", { page, error: String(error) }); return false; });
+    if (context) context.waitUntil(cacheTask);
+    else await cacheTask;
+  }
 
   let preparedVersion = preparedStatus.manifestVersion;
   let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
@@ -1709,15 +1748,7 @@ async function pagePayloadRoute(
   compactPreparedProfilePlugLists(payload);
   const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
   const response = preparedPageEnvelope(request, env, payload, prepared);
-  if (!hasPreparedBundle && sessionId && preparedVersion) {
-    const cacheTask = storePreparedPage(sessionId, page, preparedVersion, response, env)
-      .catch(error => {
-        console.warn("prepared_page_cache_write_failed", { page, error: String(error) });
-        return false;
-      });
-    if (context) context.waitUntil(cacheTask);
-    else await cacheTask;
-  }
+  if (fromCache) response.headers.set("X-Forge-Prepared-Page-Source", "backend-cache");
   if (page === "journey" && context && options.warmWorkspace !== false && sessionId) {
     context.waitUntil(warmPreparedWorkspace(request, env));
   }

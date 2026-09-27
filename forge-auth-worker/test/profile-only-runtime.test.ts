@@ -35,7 +35,7 @@ test('runtime serves ten fresh profiles without reloading a matching public bund
   assert.equal(body.account.authenticated,true);assert.equal(body.account.profile.characters.data.c.light,102+i);
   assert.deepEqual(body.prepared,{manifestVersion:'v1',bundleCached:true});sizes.push(text.length);
  }
- assert.equal(bundleReads,1);assert.equal(profileReads,11);assert.equal(cacheWrites,1,'Do not poison the full backend cache with a bundle reference');
+ assert.equal(bundleReads,1);assert.equal(profileReads,11);assert.equal(cacheWrites,11,'Every live profile updates the private cache, including requests with a browser bundle');
  assert.equal(new Set(sizes).size,1);assert.ok(sizes[0]<coldText.length-1024*1024);
  version='v2';const changed=await request('v1');assert.equal((await changed.json() as any).prepared.manifestVersion,'v2');assert.equal(bundleReads,2);await Promise.all(jobs);
  console.log(`PROFILE_ONLY_WORKER_BYTES cold=${coldText.length} warm=${sizes[0]} ten-loads-flat=true`);

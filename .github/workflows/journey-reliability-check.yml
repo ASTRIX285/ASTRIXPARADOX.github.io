@@ -1,0 +1,34 @@
+name: Journey reliability checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'forge-auth-worker/**'
+      - 'astrix-app/core/prepared-*.mjs'
+      - 'astrix-app/core/engine-profile-worker.mjs'
+      - '.github/workflows/journey-reliability-check.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Worker dependencies
+        run: npm install --prefix forge-auth-worker --ignore-scripts --package-lock=false
+      - name: Stream and persistence regression under a 128 MB JS heap limit
+        run: node --max-old-space-size=128 --experimental-strip-types --test forge-auth-worker/test/journey-stream-memory.test.ts forge-auth-worker/test/prepared-bundle-persistence.test.ts
+      - name: Shared page load validator
+        run: node astrix-app/tools/validate-shared-page-load.mjs
+      - name: Scope guard
+        run: node astrix-app/tools/validate-scope-guard.mjs
+      - name: Full PARADOX validator
+        run: node astrix-app/tools/paradox-validator.mjs
