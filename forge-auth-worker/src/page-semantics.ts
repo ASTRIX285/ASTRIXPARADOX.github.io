@@ -1,3 +1,4 @@
+import { enrichLoadoutDetails } from './loadout-details.ts';
 import { bungieDefinitionHash, bungieDefinitionHashes, preparedDefinitions, preparedDefinitionTables, enrichEquipableSets, enrichOwnedWeaponDefinitions } from "./manifest-semantics.ts";
 
 const SUBCLASS_BUCKET_HASH = 3284755031;
@@ -6,7 +7,7 @@ const GUARDIAN_STAT_HASHES = [2996146975, 392767087, 1943323491, 1735777505, 144
 const DESTINY_BREAKER_TYPE_HASHES = [485622768, 2611060930, 3178805705];
 const PREPARED_CHARACTER_DATA_CONTRACT_VERSION = 2;
 const PAGE_INVENTORY_FIELDS = [
-  "hash", "displayProperties", "displaySource", "sourceString",
+  "hash", "displayProperties", "displaySource", "sourceString", "retired", "retirement", "definitionType",
   "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
   "classType", "inventory", "equippable", "collectibleHash",
   "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
@@ -18,7 +19,7 @@ const PAGE_INVENTORY_FIELDS = [
   "resolvedSandboxPerks"
 ] as const;
 const PAGE_PLUG_FIELDS = [
-  "hash", "displayProperties", "displaySource", "sourceString",
+  "hash", "displayProperties", "displaySource", "sourceString", "retired", "retirement", "definitionType",
   "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
   "classType", "inventory", "equippable", "collectibleHash",
   "iconWatermark", "iconWatermarkFeatured", "iconWatermarkShelved",
@@ -448,6 +449,8 @@ async function enrichPreparedPageAccount(
   if (page === "character" || page === "build-forge") {
     payload.characterBuildCoverage = preparedCharacterBuildCoverage(payload);
   }
+  // Prompt 3: saved-only sockets and Vault instances are resolved before compaction.
+  if (page === "character" || page === "build-forge") await enrichLoadoutDetails(payload, env, manifestVersion);
   compactPageInventoryDefinitions(payload);
   logManifestEvidenceGaps(payload, page);
   return payload;

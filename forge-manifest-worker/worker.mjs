@@ -68,6 +68,27 @@ export default {
     }
     if(request.method!=='GET')return new Response(null,{status:405});
     if(url.pathname==='/status')return Response.json(index);
+    // Only these three small official catalogues may be read in full. No Bungie calls.
+    if(url.pathname==='/loadout-identifiers'){
+      if(url.searchParams.get('version')!==index.manifestVersion)return new Response(null,{status:409});
+      const types=['DestinyLoadoutNameDefinition','DestinyLoadoutIconDefinition','DestinyLoadoutColorDefinition'];
+      const tables={};
+      try{
+        for(const type of types){
+          const descriptor=index.tables?.[type];
+          if(!descriptor||descriptor.manifestVersion!==index.manifestVersion||!Number.isInteger(descriptor.shards)||descriptor.shards<1||descriptor.shards>16||descriptor.definitions>2048)throw new Error('identifier_catalogue_unavailable');
+          const rows={};
+          for(let shard=0;shard<descriptor.shards;shard++){
+            const response=await env.ASSETS.fetch(new Request(`https://assets/${type}/${shard}.json`));
+            if(!response.ok)throw new Error('identifier_shard_unavailable');
+            Object.assign(rows,await response.json());
+          }
+          if(Object.keys(rows).length!==descriptor.definitions||Object.values(rows).some(row=>row.retired))throw new Error('identifier_catalogue_incomplete');
+          tables[type]=rows;
+        }
+      }catch{return new Response(null,{status:503});}
+      return Response.json({manifestVersion:index.manifestVersion,tables});
+    }
     if(url.pathname==='/page-bundle'){
       const page=url.searchParams.get('page');
       if(url.searchParams.get('version')!==index.manifestVersion||!['common','journey','loadout'].includes(page))return new Response(null,{status:400});

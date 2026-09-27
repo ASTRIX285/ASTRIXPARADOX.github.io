@@ -1,27 +1,56 @@
-name: Loadout Details validation
+name: Prompt 3 Loadout Details validation
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/validate-loadout-details-popup.yml'
+      - '.scope/feat/loadout-details-popup.txt'
+      - 'astrix-app/shared/loadout-details*'
+      - 'astrix-app/pages/guardian-workspace-v2/guardian-loadout*'
+      - 'astrix-app/tools/test-loadout-details*'
+      - 'astrix-app/tools/fixtures/loadout-details-fixture.mjs'
+      - 'forge-auth-worker/src/loadout-details.ts'
+      - 'forge-auth-worker/src/page-semantics.ts'
+      - 'forge-manifest-worker/worker.mjs'
   push:
     branches: [feat/loadout-details-popup]
 permissions:
   contents: read
 jobs:
-  source:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --experimental-strip-types
+      PYTHONDONTWRITEBYTECODE: 1
+      GITHUB_HEAD_REF: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - name: Export exact source delta for local implementation
-        run: |
-          mkdir -p "$RUNNER_TEMP/loadout-source"
-          git diff --binary 8c3ada1aa2a3666fa907084d0bde84a12e757582 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 > "$RUNNER_TEMP/loadout-source/main.patch"
-          git diff --binary 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 HEAD > "$RUNNER_TEMP/loadout-source/branch.patch"
-          git cat-file commit 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 > "$RUNNER_TEMP/loadout-source/main.commit"
-          git cat-file commit HEAD > "$RUNNER_TEMP/loadout-source/branch.commit"
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/loadout-source/identity.txt"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: loadout-source-delta
-          path: ${{ runner.temp }}/loadout-source
-          retention-days: 1
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Implementation diff
+        run: |
+          git diff --stat origin/main...HEAD
+          git diff --check origin/main...HEAD
+          git diff --name-only origin/main...HEAD | grep -Fx 'astrix-app/shared/loadout-details.mjs'
+          git diff --name-only origin/main...HEAD | grep -Fx 'astrix-app/shared/loadout-details-model.mjs'
+      - name: Scope and Journey
+        run: |
+          node astrix-app/tools/validate-scope-guard.mjs
+          node astrix-app/tools/validate-journey-visual-pass.mjs
+      - name: Registered validation
+        run: node astrix-app/tools/paradox-validator.mjs
+      - name: Install isolated browser dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/loadout-browser" --ignore-scripts --no-audit --no-fund playwright@1.57.0
+          node "$RUNNER_TEMP/loadout-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Actual menu and popup browser tests
+        run: |
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/loadout-browser/node_modules/playwright" node astrix-app/tools/test-loadout-details-browser.mjs
