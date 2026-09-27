@@ -9,6 +9,7 @@ const validators=[
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
+  'test-reports-drilldown.mjs',
   'test-reports-boxes.mjs',
   'validate-reports-catalogue.mjs',
   'validate-plain-language.mjs', // Prompt 19: copy-only language contract.

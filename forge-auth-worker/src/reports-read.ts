@@ -14,6 +14,15 @@ export async function reportsRead(request: Request, session: SessionRecord, apiK
     url.searchParams.set('components', '100,200,202,900');
   } else if (kind === 'aggregate' && /^\d+$/.test(character)) {
     url = new URL(`${root}/Account/${encodeURIComponent(member.membershipId)}/Character/${character}/Stats/AggregateActivityStats/`);
+  } else if (kind === 'history' && /^\d+$/.test(character)) {
+    const page = input.searchParams.get('page') || '0';
+    if (!/^\d+$/.test(page) || !Number.isSafeInteger(Number(page))) {
+      return Response.json({error:'invalid_reports_request'}, {status:400});
+    }
+    url = new URL(`${root}/Account/${encodeURIComponent(member.membershipId)}/Character/${character}/Stats/Activities/`);
+    url.searchParams.set('count', '250');
+    url.searchParams.set('mode', '0');
+    url.searchParams.set('page', page);
   } else {
     return Response.json({error:'invalid_reports_request'}, {status:400});
   }
