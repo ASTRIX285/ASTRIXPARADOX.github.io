@@ -45,8 +45,8 @@ All must exit 0 before a PR.
 Report ONLY: branch, commit, files changed, validator exit codes, PR number. No code in chat.
 
 ## Locked user flow (Forge Loader to Build Forge)
-Changes to any step below need Miguel's sign-off first. Do not add, remove, reorder or move a question between steps.
-1. Forge Loader: the user picks an Exotic, a set bonus and a stat focus. Once both a set bonus and a stat focus are chosen, the page smooth-scrolls to the Staged armour panel.
-2. Enter Build Forge: grey and disabled only when not ready, pulsing charcoal when ready, crimson with a visible progress state while transferring.
-3. Build Forge: element, Build objective and Activity (Raid, Dungeon, Grandmaster, Crucible, General PvE) are all picked in the Elemental Build Options panel. There is no activity popup, and each question is asked once.
-4. Generate stays disabled until all three are picked, and its label says what is missing. The engine receives the activity context exactly as before.
+Changes to any step below need Miguel's sign-off first. Do not add, remove, reorder or move a question between steps. Last changed 27 Sep 2026 (Miguel signed off on moving results to their own page and adding the weapon anchor).
+1. Forge Loader: the user picks an Exotic armour, an optional Exotic weapon anchor and a set bonus and stat focus. A live top-few-loads preview updates instantly as these change, using the shared search module. "Open Forge Matrix" carries the whole selection in a bookmarkable URL to the results page.
+2. Results page (its own URL, reloadable, bookmarkable, shareable): the full ranked list, Staged armour and Enter Build Forge. Enter Build Forge is grey and disabled only when not ready, pulsing charcoal when ready, crimson with a visible progress state while transferring.
+3. Build Forge: element, Build objective and Activity (Raid, Dungeon, Grandmaster, Crucible, General PvE) are all picked in the Elemental Build Options panel. If a weapon anchor is set, its element is pre-selected with a visible reason (e.g. "Solar suggested: One Thousand Voices deals Solar damage."); the user can pick a different one. There is no activity popup, and each question is asked once.
+4. Generate stays disabled until all three are picked, and its label says what is missing. The engine receives the activity context exactly as before. An anchored Exotic weapon stays in its slot through generation.
