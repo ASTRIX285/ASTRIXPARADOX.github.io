@@ -202,9 +202,9 @@ function directHarness(){
     scheduleForgePreparation(){},guardianManifest:{ready:async()=>{},hydratePayload:async()=>{}},assertRenderablePagePayload:value=>value,
     FORGE_PAGE_PAYLOAD:{membership:{membershipId:'98001',membershipType:'3'}},FORGE_BUNGIE_SESSION:{authenticated:true},
     runProfileTask:async()=>structuredClone(equipped),normaliseLiveProfile:()=>structuredClone(equipped),createVaultCatalogue:()=>structuredClone(inventory),prepareArmourSelection:(payload,items)=>structuredClone(items),
-    bindBuildRoute(){},forgeActivityOption:value=>{const key=typeof value==='string'?value:value?.key;return key?{key,label:key.toUpperCase(),domain:'pve'}:null;},ui,buttons,elements,objectives
+    bindBuildRoute(){},forgeActivityOption:value=>{const key=typeof value==='string'?value:value?.key;return key?{key,label:key.toUpperCase(),domain:'pve'}:null;},forgeWeaponElementSuggestion:()=>null,ui,buttons,elements,objectives
   });
-  vm.runInContext(`let value=createBuildState({...${JSON.stringify(equipped)},armour:[]}),directEntryBusy=false,recommendationBusy=false,liveActionBusy=false,selectedRecommendationElement='',selectedRecommendationObjective='',recommendationFailure='',equippedEntryState=null;
+  vm.runInContext(`let value=createBuildState({...${JSON.stringify(equipped)},armour:[]}),directEntryBusy=false,recommendationBusy=false,liveActionBusy=false,selectedRecommendationElement='',weaponElementUserOverride=false,selectedRecommendationObjective='',recommendationFailure='',equippedEntryState=null;
     function readState(){return value;}function writeState(next){value=next;}function currentBuild(){return value.workingBuild;}function render(){renderRecommendationControls(currentBuild());}
     ${between(runtime,'function manualSlotLabels','function currentManualItem')}
     ${between(runtime,'function stageWorkingBuild','function renderForgeActivityFit')}

@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="../guardian-workspace-v2/paradox-item-cards.css?v=20260909-set-list-1&amp;status=20260917-compact-1">
   <link rel="stylesheet" href="../../shared/item-tile.css?v=20260913-breaker-icon-2">
-  <link rel="stylesheet" href="./forge-loader.css?v=20260913-selector-image-1&amp;icons=20260912-global-audit-1&amp;flow=20260926-1">
+  <link rel="stylesheet" href="./forge-loader.css?v=20260913-selector-image-1&amp;icons=20260912-global-audit-1&amp;flow=20260926-1&amp;anchor=20260927-1">
   <link rel="stylesheet" href="../../shared/astrix-desktop-density.css?equipment=20260918-weapons-armour-1&amp;v=20260917-approved-palette-1">
   <script src="../../shared/astrix-destination-ribbon.js?v=20260902-forge-loader-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;reports=20260925-3&amp;reports=20260925-20c&amp;preview=20260925-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;single=20260927-2" defer></script>
 </head>
@@ -57,6 +57,12 @@
           <div class="forge-exotic-slots" id="forgeExoticSlots"></div>
         </section>
 
+        <section class="forge-panel forge-exotic-selector forge-exotic-weapon-selector" aria-labelledby="forgeExoticWeaponTitle">
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">OPTIONAL WEAPON ANCHOR</p><h2 id="forgeExoticWeaponTitle">Anchor an Exotic weapon</h2></div></div>
+          <div class="forge-weapon-slots" id="forgeExoticWeaponSlots"></div>
+          <p class="forge-weapon-anchor-status" id="forgeWeaponAnchorStatus" role="status">Loading Exotic weapons…</p>
+        </section>
+
       </aside>
 
       <section class="forge-loader-directives" aria-label="Stat directive and armour-set protocol">
@@ -70,7 +76,7 @@
             <label data-target-stat="class"><span>CLASS</span><input type="range" min="0" max="200" value="0" step="1" disabled><output>0 / 200</output><button type="button" data-max-stat="class" disabled>MAX</button><select data-stat-priority="class" aria-label="Class priority" disabled><option value="">AUTO</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
             <label data-target-stat="weapon"><span>WEAPON</span><input type="range" min="0" max="200" value="0" step="1" disabled><output>0 / 200</output><button type="button" data-max-stat="weapon" disabled>MAX</button><select data-stat-priority="weapon" aria-label="Weapon priority" disabled><option value="">AUTO</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
           </div>
-          <div class="forge-stat-actions"><button type="button" id="forgeFindBuilds" disabled>REFRESH TOP 50 COMBINATIONS</button><button type="button" id="forgeResetTargets" disabled>RESET TARGETS</button></div>
+          <div class="forge-stat-actions"><button type="button" id="forgeFindBuilds" disabled>SEARCH FORGE MATRIX</button><button type="button" id="forgeResetTargets" disabled>RESET TARGETS</button></div>
           <p class="forge-runtime-status" id="forgeRuntimeStatus" role="status">Choose an Exotic to start.</p>
         </section>
 
@@ -81,17 +87,16 @@
         </section>
       </section>
 
-      <section class="forge-loader-output" aria-label="Working load and matched armour">
-        <section class="forge-panel forge-staged" aria-labelledby="forgeStagedTitle">
-          <div class="forge-panel-heading"><div><p class="apx-eyebrow">WORKING LOAD</p><h2 id="forgeStagedTitle">Staged armour</h2></div><span id="forgeStagedStatus">NO COMBINATION</span></div>
-          <div class="forge-staged-slots" id="forgeStagedSlots"></div>
-          <button class="forge-evaluate" type="button" id="forgeEvaluate" disabled><span class="forge-evaluate-label" id="forgeEvaluateLabel">ENTER BUILD FORGE</span><span class="forge-evaluate-progress" aria-hidden="true"></span></button>
+      <section class="forge-loader-output" aria-label="Live preview and Forge Matrix search">
+        <section class="forge-panel forge-preview" id="forgePreviewPanel" hidden aria-labelledby="forgePreviewTitle">
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">LIVE RANKING</p><h2 id="forgePreviewTitle">Top loads</h2></div><span id="forgePreviewStatus">0 RESULTS</span></div>
+          <div class="forge-candidate-builds forge-preview-builds" id="forgePreviewBuilds" aria-live="polite"></div>
         </section>
 
-        <section class="forge-panel forge-results" id="forgeResults" hidden aria-labelledby="forgeResultsTitle">
-          <div class="forge-panel-heading"><div><p class="apx-eyebrow">CALCULATED LOADS</p><h2 id="forgeResultsTitle">Forge Matrix</h2></div><span id="forgeResultStatus">0 RESULTS</span></div>
-          <div class="forge-candidate-builds" id="forgeCandidateBuilds" aria-live="polite"></div>
-          <button class="forge-show-more" type="button" id="forgeShowMore" hidden></button>
+        <section class="forge-panel forge-search-cta" aria-labelledby="forgeSearchTitle">
+          <div class="forge-panel-heading"><div><p class="apx-eyebrow">FORGE MATRIX</p><h2 id="forgeSearchTitle">Search results</h2></div><span id="forgeSearchStatus">NOT SEARCHED</span></div>
+          <p class="forge-runtime-status" id="forgeSearchSummary" role="status">Choose an Exotic to begin.</p>
+          <a class="forge-search-open" id="forgeOpenResults" aria-disabled="true">OPEN FORGE MATRIX</a>
         </section>
       </section>
     </section>
@@ -105,7 +110,7 @@
 
   <aside class="forge-item-inspect" id="forgeItemInspect" hidden aria-hidden="true"></aside>
   <script type="module" src="../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;navigation=20260920-1&amp;reports=20260925-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4"></script>
-  <script type="module" src="./forge-loader.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;status=20260917-compact-1&amp;navigation=20260920-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;flow=20260926-1&amp;limits=20260927-1&amp;perf=20260927-1&amp;recovery=20260927-4"></script>
+  <script type="module" src="./forge-loader.mjs?v=20260913-workspace-preload-1&amp;transport=20260911-compact-plugs-1&amp;live=20260913-character-safe-2&amp;status=20260917-compact-1&amp;navigation=20260920-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;flow=20260926-1&amp;limits=20260927-1&amp;perf=20260927-1&amp;anchor=20260927-1&amp;recovery=20260927-4"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>

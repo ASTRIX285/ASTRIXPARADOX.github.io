@@ -129,3 +129,23 @@
 .forge-set-selector .forge-set-choice{align-items:center;padding:.4rem}
 .forge-set-selector .forge-set-icon,.forge-set-selector .forge-set-choice .forge-set-trait-icon{width:var(--forge-set-list-icon-size);height:var(--forge-set-list-icon-size)}
 @media(max-width:560px){.forge-set-selector .forge-set{grid-template-columns:minmax(0,.9fr) repeat(2,minmax(0,1.1fr));gap:.3rem;padding:.45rem}.forge-set-selector .forge-set-head,.forge-set-selector .forge-set-detail{gap:.35rem}.forge-set-selector .forge-set-choice{gap:.35rem;padding:.32rem}.forge-set-selector .forge-set-detail b{font-size:.75rem}}
+
+/* Optional Exotic weapon anchor: owned weapons only, catalyst state read from the profile. */
+.forge-weapon-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.6rem}
+.forge-weapon-slot{display:flex;align-items:center;gap:.55rem;padding:.5rem;border:1px solid rgba(201,168,76,.28);border-radius:.4rem;background:rgba(0,0,0,.4);color:#ded7cc;text-align:left;cursor:pointer}
+.forge-weapon-slot img{width:2.4rem;height:2.4rem;object-fit:contain;border:1px solid rgba(201,168,76,.32);border-radius:.3rem;background:#000}
+.forge-weapon-slot span{display:grid;gap:.15rem;min-width:0}
+.forge-weapon-slot b{font:800 .78rem/1.2 bahnschrift-semicondensed,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.forge-weapon-slot small{color:#a99fae;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em}
+.forge-weapon-slot.is-selected{border-color:#d9b84f;background:linear-gradient(135deg,rgba(139,0,0,.5),rgba(24,7,10,.6))}
+.forge-weapon-catalyst{font:800 .58rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.06em;color:#a99fae}
+.forge-weapon-catalyst.is-unlocked{color:#e3c765}
+.forge-weapon-catalyst.is-active{color:#6fe3b6}
+.forge-weapon-anchor-status{margin:.6rem 0 0;color:#a99fae;font-size:.72rem}
+
+/* Forge Matrix search CTA: grey until a search has produced results, then a plain, always-enabled link. */
+.forge-search-open{display:block;margin-top:.75rem;padding:.9rem;border:1px solid rgba(201,168,76,.4);border-radius:.35rem;background:linear-gradient(135deg,rgba(103,7,17,.9),rgba(24,7,10,.94));color:#f5db7e;font:800 .76rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.055em;text-align:center;text-decoration:none;cursor:pointer}
+.forge-search-open[aria-disabled="true"]{opacity:.32;pointer-events:none;cursor:not-allowed}
+
+/* Live preview: same Forge Matrix row styling, just capped to the top few loads. */
+.forge-preview-builds{display:grid;gap:.5rem}

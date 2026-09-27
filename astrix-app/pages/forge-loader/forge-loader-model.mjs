@@ -44,6 +44,38 @@ function ownedExoticGroups(items=[],className=''){
   }).sort((left,right)=>left.slotIndex-right.slotIndex||left.name.localeCompare(right.name));
 }
 
+// Owned Exotic weapons only, grouped by weapon identity, from the profile inventory the same way armour exotics are.
+// Catalyst state comes only from weaponSemantics.catalyst.progress, which itself comes only from Bungie plugObjectives.
+function ownedExoticWeaponGroups(items=[]){
+  const groups=new Map();
+  for(const item of Array.isArray(items)?items:[]){
+    if(!item?.isExotic||item?.equipmentGroup?.kind!=='weapon')continue;
+    const hash=Number(item?.itemHash??item?.hash);
+    if(!Number.isInteger(hash)||hash<=0)continue;
+    const key=exoticIdentityKey({slotIndex:Number(item.bucketHash),name:item.name},hash);
+    if(!groups.has(key))groups.set(key,{key,hash,itemHash:hash,hashes:new Set(),name:item.name||`Exotic ${hash}`,bucketHash:Number(item.bucketHash),weaponType:item.weaponType||'',icon:item.icon||'',description:item.description||'',instances:[]});
+    groups.get(key).hashes.add(hash);
+    groups.get(key).instances.push(item);
+  }
+  return [...groups.values()].map(group=>{
+    group.instances.sort((left,right)=>finite(right.power)-finite(left.power)||String(left.itemInstanceId||'').localeCompare(String(right.itemInstanceId||'')));
+    group.representative=group.instances[0]||null;
+    group.hash=Number(group.representative?.itemHash??group.hash);
+    group.itemHash=group.hash;
+    group.hashes=[...group.hashes].sort((left,right)=>left-right);
+    group.catalyst=weaponCatalystState(group.representative);
+    return group;
+  }).sort((left,right)=>left.bucketHash-right.bucketHash||left.name.localeCompare(right.name));
+}
+
+// Never assumed: no catalyst plug on the instance means no claim is made either way.
+function weaponCatalystState(weapon){
+  const catalyst=weapon?.weaponSemantics?.catalyst;
+  if(!catalyst)return {present:false,unlocked:false,active:false};
+  const progress=catalyst.progress||{};
+  return {present:true,unlocked:Boolean(progress.inserted),active:Boolean(progress.masterworked||progress.active)};
+}
+
 function exoticCatalogueGroups(items=[],definitions={},className='',armourBuckets=[]){
   const owned=ownedExoticGroups(items,className);
   const groups=new Map(owned.map(group=>[group.key,{...group,owned:true,definition:null,preview:group.representative}]));
@@ -297,4 +329,4 @@ function unownedSetTargets({definitions={},setDefinitions={},sandboxPerks={},own
   return targets.sort((left,right)=>right.score-left.score||right.count-left.count||right.ownedSlots-left.ownedSlots||left.setName.localeCompare(right.setName));
 }
 
-export {compatibleWithClass,createOpenProtocolTieBreaker,exoticCatalogueGroups,exoticIdentityKey,naturalSetProtocols,normaliseSelections,openProtocolSolverEvidence,ownedExoticGroups,rankOpenProtocolCandidates,setBonusOptions,setSelectionFeasible,toggleSetSelection,unownedSetTargets};
+export {compatibleWithClass,createOpenProtocolTieBreaker,exoticCatalogueGroups,exoticIdentityKey,naturalSetProtocols,normaliseSelections,openProtocolSolverEvidence,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions,setSelectionFeasible,toggleSetSelection,unownedSetTargets,weaponCatalystState};
