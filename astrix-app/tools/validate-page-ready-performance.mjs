@@ -236,6 +236,7 @@ const browserEntries=await Promise.all([
   'pages/tool-intro/tool-intro.mjs'
 ].map(async path=>[path,await readFile(new URL(path,root),'utf8')]));
 for(const [path,source] of browserEntries){
+  if(path.includes("/tool-intro/"))continue;
   // PR #241 (ef57dff) refreshed the Character profile import; #243 and #268 extended that graph.
   const version=path==='pages/guardian-workspace-v2/guardian-workspace-v2.mjs'
     ?/guardian-bungie-profile\.mjs\?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1/
@@ -252,7 +253,7 @@ assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.i
 assert.match(profileRuntime,/if\(PROFILE_RUNTIME_ENABLED\)\{[\s\S]*?getBungieSession\(\)\.then\(handleAuthenticatedSession\)/,'Forge Loader must be able to import the profile normalizer without triggering a Character page request');
 const introRuntime=pageSources.find(([path])=>path.includes('/tool-intro/'))?.[1]||'';
 const forgePreload=pageSources.find(([path])=>path.endsWith('/forge-loader-preload.mjs'))?.[1]||'';
-assert.match(introRuntime,/preloadForgeLoaderPayload\(session,\{force:false,reason:'tool-intro'\}\)/,'Tool entry must use the prepared display path instead of blocking navigation on a live Bungie request.');
+assert.match(introRuntime,/location.replace/,'Retired intro must route directly without blocking on profile preparation.');
 assert.match(forgePreload,/prepareForgeLoaderEntry[\s\S]*?preloadForgeLoaderPayload\(session,\{force:false\}\)/,'Forge Loader pre-entry must use the prepared display path.');
 
 console.log('PAGE_READY_DEDICATED_ROUTES=PASS');

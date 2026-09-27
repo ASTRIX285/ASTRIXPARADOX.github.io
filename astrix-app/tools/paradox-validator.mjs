@@ -32,6 +32,7 @@ const validators=[
   'validate-destination-theming.mjs',
   'test-gloss-controls.mjs',
   'validate-portal-loader.mjs',
+  'validate-single-loader.mjs',
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
@@ -90,7 +91,7 @@ for(const validator of validators){
   const executable=validator.endsWith('.py')?'python3':process.execPath;
   const result=spawnSync(executable,[`${tools}${validator}`],{cwd:fileURLToPath(new URL('../../',import.meta.url)),stdio:'inherit'});
   if(result.error)throw result.error;
-  if(result.status!==0)process.exit(result.status??1);
+  if(result.status!==0){console.error(`VALIDATOR_FAILED=${validator} exit=${result.status} signal=${result.signal}`);process.exit(result.status??1);}
 }
 
 console.log('PARADOX_VALIDATOR=PASS');

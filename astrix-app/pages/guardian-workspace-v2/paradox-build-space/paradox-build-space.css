@@ -392,13 +392,6 @@ html,body{
 .generate-build-btn{width:100%;margin-top:10px;min-height:42px;border:1px solid rgba(216,50,59,.82);border-radius:8px;background:linear-gradient(180deg,#6f0d14,#3e070b);color:#efd46c;font:800 8px bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
 .generate-build-btn:hover:not(:disabled),.generate-build-btn:focus-visible{border-color:#efd46c;color:#fff;outline:none;box-shadow:0 0 16px rgba(216,50,59,.22)}
 .generate-build-btn:disabled{opacity:.36;cursor:not-allowed}
-.forge-generation-loader[hidden]{display:none!important}
-.forge-generation-loader{min-height:clamp(250px,32vh,440px);display:grid;place-items:start center;padding:18px 0 28px;overflow:hidden;background:transparent}
-.forge-generation-loader .apx-stage{--apx-portal-size:clamp(190px,18vw,290px);gap:8px}
-.forge-generation-loader .apx-portal{filter:drop-shadow(0 0 18px rgba(211,32,47,.2))}
-.forge-generation-loader .apx-brandcore{width:42%;height:42%}
-.forge-generation-loader .apx-logo{width:55%;height:55%}
-.forge-generation-loader p{margin:0;color:#f0bc5c;font:700 9px/1.4 bahnschrift-semicondensed,sans-serif;letter-spacing:.2em;text-align:center;text-transform:uppercase;text-shadow:0 0 12px rgba(211,32,47,.6)}
 
 /* Validation is intentionally isolated from generation and live transfer. */
 .validation-panel{margin:0!important;padding:16px!important}
@@ -565,3 +558,11 @@ body.build-forge-page .recommended-build-rail.guardian-left-rail{overflow:visibl
 @media(max-width:1100px){.recommended-build-rail,.recommended-build-equipment{grid-column:1}}
 /* Full screen only below 720px wide; otherwise a centred popup. */
 @media(max-width:719.98px){.recommended-build-dialog{width:100vw;height:100dvh;border-radius:0;border:0}}
+
+/* Readable action labels, including the baseline and validation controls. */
+body.build-forge-page :is(button,a.restore-btn):not(.guardian-loadout-slot,.el,.selector-card,.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip):not(.apx-gate *){
+  font-size:1rem!important;line-height:1.3!important;letter-spacing:.02em;
+  min-height:44px;
+}
+body.build-forge-page .notice{flex-wrap:wrap;gap:12px;}
+body.build-forge-page .working-build-actions{flex-wrap:wrap;gap:10px;}

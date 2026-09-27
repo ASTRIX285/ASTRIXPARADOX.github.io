@@ -10,7 +10,7 @@
    Set the logo path once:  window.APX_LOGO = '/img/logo.png';
    ===================================================================== */
 (function(){
-  var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
+  if(window.ForgeLoader?.owner==='astrix-portal')return;
   // Keep the outgoing browser snapshot visible until the destination has
   // rendered its data and decoded the images actually inside the viewport.
   var navigationTransition=null,navigationRendered=false,navigationAssets=null,navigationTimer=null,navigationRecovering=false,headerRendered=false;
@@ -94,87 +94,10 @@
     event.viewTransition.finished.then(cleanup,cleanup);
     if(navigationRendered)revealNavigation(false);
   });
-  if(window.APX_SKIP_PORTAL===true){
-    var noop=function(){};
-    document.documentElement.classList.remove('apx-booting');
-    window.ForgeLoader={mount:noop,set:noop,status:noop,done:navigationRenderComplete,ready:function(){navigationRenderComplete();return Promise.resolve();},authRequired:noop,authResolved:noop,blocked:noop,skipped:true};
-    return;
-  }
-  // A matching page cache lets navigation paint without replaying the portal.
-  // This is only a presentation hint. The page client still validates the
-  // cached payload and reopens the gate if it has to fetch missing data.
-  function hasWarmPage(){
-    try{
-      var path=window.location.pathname;
-      var page=path.includes('/paradox-build-space/')?'build-forge':
-        /\/pages\/guardian-workspace-v2\/(?:index\.html)?$/.test(path)?'character':
-        path.includes('/pages/journey/')||path.includes('/pages/mission-reports/')?'journey':
-        path.includes('/pages/vault/')?'vault':
-        path.includes('/pages/loadout/')||path.includes('/pages/forge-loader/')?'loadout':'';
-      if(!page)return false;
-      var session=JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session;
-      var membership=session?.activeDestinyMembership;
-      if(!session?.authenticated||!session?.csrfToken||!session?.capabilities?.destinyActions||!membership?.membershipId)return false;
-      var identity=String(membership.membershipType)+':'+String(membership.membershipId);
-      var marker=JSON.parse(sessionStorage.getItem('astrix:bungie-page-cache:v4:'+page)||'null');
-      var age=Date.now()-Number(marker?.savedAt||0);
-      return marker?.identity===identity&&marker?.scope===page&&age>=0&&age<=12*60*60*1000;
-    }catch{return false;}
-  }
-  var preparedNavigation=false;
-  try{
-    var incoming=JSON.parse(sessionStorage.getItem('astrix:prepared-navigation:v1')||'null');
-    sessionStorage.removeItem('astrix:prepared-navigation:v1');
-    preparedNavigation=incoming?.path===window.location.pathname&&Date.now()-Number(incoming?.at||0)<30000;
-  }catch{}
-  // Unsupported/aborted view transitions retain a real loading gate. A cache
-  // marker alone must never expose the destination before its renderer ends.
-  var warmNavigation=hasWarmPage()&&!preparedNavigation;
-  if(!warmNavigation)document.documentElement.classList.add('apx-booting');
-  else document.documentElement.classList.remove('apx-booting');
+  var warmNavigation=false;
+  document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
-  // Glass breach skin: first visit of a session only. The Forge Loader and Build
-  // Forge recommendation pages always keep the original portal loader.
-  var BREACH_MIN_MS=2800,BREACH_WAIT_MS=1500,breach=null,breachT0=0,breachTimer=null,breachStarted=false;
-  function breachEligible(){
-    try{
-      var path=window.location.pathname;
-      if(window.APX_BREACH===false||!loaderScriptSrc)return false;
-      if(path.includes('/pages/forge-loader/')||path.includes('/paradox-build-space/'))return false;
-      if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
-      var connection=navigator.connection;
-      if((connection&&connection.saveData)||(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=2))return false;
-      if(!window.WebGLRenderingContext)return false;
-      if(sessionStorage.getItem('astrix:breach-seen:v1'))return false;
-      return true;
-    }catch(error){return false;}
-  }
-  function startBreach(){
-    if(breachStarted||!gate||!breachEligible())return;
-    breachStarted=true;
-    var host=document.createElement('div');
-    host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');
-    gate.insertBefore(host,gate.firstChild);
-    var abandoned=false;
-    var give=setTimeout(function(){abandoned=true;host.remove();},BREACH_WAIT_MS);
-    var lowTier=(navigator.hardwareConcurrency||8)<=4;
-    import(new URL('./astrix-breach-loader.mjs?v=20260926-breach-1',loaderScriptSrc).href)
-      .then(function(module){return module.createBreach({host:host,logoUrl:LOGO,lowTier:lowTier});})
-      .then(function(api){
-        clearTimeout(give);
-        if(abandoned||!gate||pendingDone){api.dispose();host.remove();return;}
-        breach=api;breachT0=performance.now();
-        try{sessionStorage.setItem('astrix:breach-seen:v1','1');}catch(error){}
-        gate.classList.add('is-breach');
-        api.setProgress(pendingPct/100);
-      })
-      .catch(function(){clearTimeout(give);abandoned=true;host.remove();});
-  }
-  function disposeBreach(){
-    clearTimeout(breachTimer);
-    if(breach){breach.dispose();breach=null;}
-  }
   var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
   function markup(){
     return ''+
@@ -232,7 +155,7 @@
     failurePanel.hidden=!blocked;
     if(failureMessage)failureMessage.textContent=pendingBlockedMessage;
     if(retryButton)retryButton.onclick=blocked?function(){window.location.reload();}:null;
-    if(continueButton)continueButton.onclick=blocked?function(){pendingBlockedMessage='';pendingDone=true;applyBlocked();finish();}:null;
+    if(continueButton)continueButton.onclick=blocked?function(){pendingBlockedMessage='';pendingAuthUrl='';applyBlocked();applyAuth();done();}:null;
   }
   function apply(){
     if(prog)prog.style.setProperty('--p',pendingPct);
@@ -243,13 +166,13 @@
   }
   function mount(){
     if(warmNavigation||pendingDone)return;
-    if(document.querySelector('.apx-gate')){
+    if(gate||document.querySelector('.apx-gate')){
       cache();gate.classList.remove('is-done');document.body.classList.add('apx-loading');apply();document.documentElement.classList.remove('apx-booting');return;
     }
     if(!document.body)return;
     var wrap=document.createElement('div');wrap.innerHTML=markup();
     gate=wrap.firstElementChild;document.body.appendChild(gate);
-    document.body.classList.add('apx-loading');cache();apply();startBreach();
+    document.body.classList.add('apx-loading');cache();apply();
     clearTimeout(noticeTimer);noticeTimer=setTimeout(function(){
       if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;
       setStatus('Still loading Guardian data');
@@ -261,7 +184,6 @@
     pendingPct=Math.max(pendingPct,v);
     if(prog)prog.style.setProperty('--p',pendingPct);
     if(pct)pct.textContent=pendingPct+'%';
-    if(breach)breach.setProgress(pendingPct/100);
   }
   function setStatus(t){
     pendingStatus=String(t||'Opening portal');
@@ -272,12 +194,14 @@
     warmNavigation=false;mount();
   }
   function authRequired(url){
+    if(pendingDone)return;
     if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
     pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
     warmNavigation=false;mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
+    if(pendingDone)return;
     pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
     warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
   }
@@ -304,26 +228,21 @@
   }
   function finish(){
     if(!gate||gate.classList.contains('is-done'))return;
+    document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));
     clearTimeout(noticeTimer);pendingPct=100;
     if(prog)prog.style.setProperty('--p',100);
     if(pct)pct.textContent='100%';
     gate.classList.add('is-done');document.body.classList.remove('apx-loading');
-    if(navigationTransition){disposeBreach();gate.remove();gate=null;return;}
+    if(navigationTransition){gate.remove();gate=null;return;}
     var removeGate=function(event){
       if(event.target!==gate||!pendingDone)return;
       gate.removeEventListener('transitionend',removeGate);
-      disposeBreach();
+
       if(gate&&gate.parentNode)gate.remove();
     };
     gate.addEventListener('transitionend',removeGate);
   }
-  function holdForBreach(){
-    if(!breach)return false;
-    var wait=BREACH_MIN_MS-(performance.now()-breachT0);
-    if(wait<=0)return false;
-    clearTimeout(breachTimer);breachTimer=setTimeout(done,wait);return true;
-  }
-  function done(){if(pendingAuthUrl||pendingBlockedMessage)return;if(holdForBreach())return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
@@ -333,5 +252,6 @@
     bodyObserver.observe(document.documentElement,{childList:true});
     document.addEventListener('DOMContentLoaded',function(){bodyObserver.disconnect();mount();},{once:true});
   }
-  window.ForgeLoader={requireData:requireData,mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
+  window.ForgeLoader={owner:'astrix-portal',get completed(){return pendingDone;},requireData:requireData,mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
+  if(window.APX_AUTO_READY===true){if(document.readyState==='complete')void ready();else window.addEventListener('load',function(){void ready();},{once:true});}
 })();

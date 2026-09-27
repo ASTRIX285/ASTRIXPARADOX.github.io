@@ -1,0 +1,4 @@
+.tool-welcome{position:relative;max-width:70rem;margin:1.5rem auto;padding:1.25rem;border:1px solid currentColor;border-radius:.5rem;color:inherit;background:inherit}
+.tool-welcome h2{margin-top:0}
+.tool-welcome p{line-height:1.5;max-width:70ch}
+.tool-welcome button{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:.25rem;padding:.5rem 1rem;cursor:pointer}

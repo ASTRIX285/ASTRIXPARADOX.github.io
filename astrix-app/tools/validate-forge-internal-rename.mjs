@@ -77,7 +77,7 @@ const workflows=scanPaths.filter(path=>path.startsWith('.github/workflows/')).ma
 assert.doesNotMatch(workflows,/^name:.*ASTRIX/im,'CI workflow names must use Forge');
 assert.doesNotMatch(workflows,/^\s*group:\s*astrix-/im,'CI concurrency groups must use Forge');
 
-assert.match(read('astrix-app/pages/tool-intro/tool-intro.mjs'),/astrix_intro_seen_\$\{gameId\}/,'The required per game intro compatibility key must remain unchanged');
+assert.match(read('astrix-app/shared/tool-welcome.mjs'),/astrix_intro_seen_\$\{gameId\}/,'The required per game intro compatibility key must remain unchanged');
 assert.match(read('forge-auth-worker/src/index.ts'),/const SESSION_COOKIE = "astrix_session"/,'The active login cookie must remain unchanged to avoid forcing a new Bungie sign in');
 assert.ok(existsSync(new URL('../../astrix-app/',import.meta.url)),'The browser visible astrix-app path must remain unchanged');
 assert.ok(existsSync(new URL('../../astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-artifact-selection.mjs',import.meta.url)),'The protected Artifact module must remain present');
