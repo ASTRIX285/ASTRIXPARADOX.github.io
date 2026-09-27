@@ -31,6 +31,9 @@ const failures=[
   ['503',async()=>Response.json({authenticated:'unknown'},{status:503})],
   ['network',async()=>{throw new TypeError('offline');}],
   ['bad JSON',async()=>new Response('{')],
+  ['unconfirmed 401',async()=>Response.json({authenticated:false},{status:401})],
+  ['oversize 503',async()=>Response.json({error:'profile_payload_too_large'},{status:503})],
+  ['range error',async()=>{throw new RangeError('Invalid string length');}],
   ['malformed 401',async()=>new Response('{',{status:401})],
   ['invalid session shape',async()=>Response.json({})],
   ['timeout',(_url,options)=>new Promise((_,reject)=>options.signal.addEventListener('abort',()=>reject(new Error('aborted'))))]
@@ -55,7 +58,7 @@ for(const [name,fetcher] of failures){
   assert.equal(g.navigations(),0);
 }
 for(const source of [withoutImports(intro).split('if(!config)')[0],withoutImports(guardian).split('\n// The profile normalizer')[0]]){
-  const h=harness(source,async()=>Response.json({authenticated:false},{status:401}));
+  const h=harness(source,async()=>Response.json({authenticated:false,error:"bungie_reauthentication_required"},{status:401}));
   await vm.runInContext(source.includes('continueToGuardianJourney')?'continueToGuardianJourney()':'getBungieSession({force:true})',h.context);
   assert.ok(h.authStarts()>0,'Definitive signed-out response must retain sign-in');
 }

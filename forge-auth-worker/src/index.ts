@@ -1,3 +1,4 @@
+import {boundedStringify,PayloadSizeError} from '../../astrix-app/core/bounded-json.mjs';
 import { OAUTH_TTL_MS, oauthRecovery, oauthIntro, OAUTH_INTRO_COOKIE } from "./oauth-ui";
 import { dimShareRoute } from './dim-share.ts';
 import {
@@ -1422,8 +1423,8 @@ function preparedPageEnvelope(
   prepared: Response
 ): Response {
   const encoder = new TextEncoder();
+  const accountJson = boundedStringify(account, 'prepared account');
   const reader = prepared.body?.getReader();
-  const accountJson = JSON.stringify(account);
   const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":`);
   const accountChunk = encoder.encode(accountJson);
   const preparedPrefix = encoder.encode(`,"prepared":`);
@@ -1834,11 +1835,11 @@ async function oauthCallback(request: Request, env: Env): Promise<Response> {
 
 async function sessionRoute(request: Request, env: Env): Promise<Response> {
   const sessionId = cookieValue(request, SESSION_COOKIE);
-  if (!sessionId) return withCors(request, env, json({ authenticated: false }, 401));
+  if (!sessionId) return withCors(request, env, json({ authenticated: false, error: "bungie_reauthentication_required" }, 401));
   const storedSession = await getSession(env, sessionId);
   if (!storedSession || storedSession.absoluteExpiresAt <= Date.now()) {
     if (storedSession) await revokeSession(env, sessionId, storedSession);
-    return withCors(request, env, json({ authenticated: false }, 401, { "Set-Cookie": clearSessionCookie() }));
+    return withCors(request, env, json({ authenticated: false, error: "bungie_reauthentication_required" }, 401, { "Set-Cookie": clearSessionCookie() }));
   }
   let session: SessionRecord;
   try {
@@ -2379,6 +2380,7 @@ export default {
       if (request.method === "POST" && url.pathname === "/logout") return await logoutRoute(request, env);
       return withCors(request, env, json({ error: "not_found" }, 404));
     } catch (error) {
+      if (error instanceof PayloadSizeError) return withCors(request, env, json({ error: error.code, message: error.message }, 503));
       if (["/bungie/callback", "/bungie/start", "/internal/access/start"].includes(url.pathname)) return oauthRecovery();
       if (error instanceof Error && error.message === "bungie_unavailable") {
         return withCors(request, env, json({ authenticated: "unknown", error: "bungie_unavailable" }, 503, { "Cache-Control": "no-store" }));

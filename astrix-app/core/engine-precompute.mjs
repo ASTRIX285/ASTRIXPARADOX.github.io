@@ -1,3 +1,4 @@
+import {graphFingerprint} from './bounded-json.mjs';
 import {armourStatVector} from '../pages/vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {validateWeaponModel} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs?perf=20260927-1';
 
@@ -8,7 +9,7 @@ export function createEnginePrecomputer(){
   return build=>{
     const weapons=[...(build.weapons||[]),...(build.ownedWeapons||[]),...(build.vaultWeapons||[]),...(build.inventoryWeapons||[])].filter(Boolean);
     const armour=[...(build.armour||[]),...(build.ownedArmour||[])].filter(Boolean);
-    const next=JSON.stringify([build.manifestVersion||null,build.profileSnapshot||null,build.membershipType,build.membershipId,build.characterId,weapons,armour]);
+    const next=graphFingerprint([build.manifestVersion||null,build.profileSnapshot||null,build.membershipType,build.membershipId,build.characterId,weapons,armour]);
     if(next===key)return value;
     const inventoryByHash=new Map(),weaponModels=new Map(),armourStats=new Map(),seen=new Set();
     for(const item of [...weapons,...armour]){

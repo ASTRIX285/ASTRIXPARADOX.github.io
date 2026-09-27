@@ -1,6 +1,6 @@
-import {readCachedBungieSession,cacheBungieSession} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {readCachedBungieSession,cacheBungieSession} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-1';
 import {toolIntroConfig} from './tool-intro-config.mjs?v=20260906-tool-intro-1';
-import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-step-1&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1';
+import {preloadForgeLoaderPayload} from '../forge-loader/forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-step-1&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-1';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com';
 const JOURNEY_URL='../journey/';
@@ -39,7 +39,7 @@ async function getBungieSession(){
       signal:controller.signal
     });
     const session=await response.json();
-    if(response.status===401&&session?.authenticated===false)return {authenticated:false};
+    if(response.status===401&&session?.authenticated===false&&session?.error==="bungie_reauthentication_required")return {authenticated:false,error:"bungie_reauthentication_required",status:401};
     if(!response.ok||session?.authenticated!==true)return {authenticated:null,error:"bungie_unavailable"};
     cacheBungieSession(session);
     return session;

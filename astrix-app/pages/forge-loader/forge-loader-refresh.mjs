@@ -1,4 +1,4 @@
-import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1';
+import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-1';
 
 export const FORGE_REFRESH_MS=5*60*1000;
 export function forgeInventorySignature(payload){
