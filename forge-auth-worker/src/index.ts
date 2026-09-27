@@ -2268,8 +2268,8 @@ export default {
         }
         return json({ error: "not_found" }, 404, { "Cache-Control": "no-store" });
       }
-      if (url.pathname.startsWith("/dim/share/")) return await dimShareRoute(request, (caches as CacheStorage & {default: Cache}).default);
       if (request.method === "OPTIONS") return handlePreflight(request, env);
+      if (url.pathname.startsWith("/dim/share/")) return withCors(request, env, await dimShareRoute(request, (caches as CacheStorage & {default: Cache}).default));
       if (request.method === "GET" && (url.pathname === "/health" || url.pathname === "/v1/health")) {
         return json({ service: "forge-destiny-backend", status: "ready" });
       }

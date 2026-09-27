@@ -9,7 +9,7 @@ if(process.env.DIM_LIVE_SMOKE==='1'){
  const {execFileSync}=await import('node:child_process');
  const upstream=async url=>{const raw=execFileSync('curl',['-fsS','--max-time','20',String(url)],{maxBuffer:1024*1024});return new Response(raw,{headers:{'Content-Type':'application/json'}});};
  const cache={match:async()=>undefined,put:async()=>{}};
- const request=new Request('https://astrixparadox.com/dim/share/qq4sfyi');
+ const request=new Request('https://auth.astrixparadox.com/dim/share/qq4sfyi');
  const response=process.env.DIM_SMOKE_BASE_URL?await upstream(new URL('/dim/share/qq4sfyi',process.env.DIM_SMOKE_BASE_URL)):await dimShareRoute(request,cache,upstream);
  assert.equal(response.status,200);loadout=(await response.json()).loadout;
  assert.equal(loadout.name,'Tether Perfected');

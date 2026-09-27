@@ -10,7 +10,7 @@ const snapshot=await read('manifest'),ids=['fixturea','fixtureb','fixturec'];
 let resolved=0,requested=0;const times=[];
 const memory=new Map(),storage={get:async key=>memory.get(key),put:async(key,value)=>memory.set(key,value)};
 let fetches=0;
-const shares=new DimShareClient({storage,fetchImpl:async url=>{fetches++;return Response.json(await read(new URL(url,'https://astrixparadox.com').pathname.split('/').at(-1)));}});
+const shares=new DimShareClient({storage,fetchImpl:async url=>{assert.equal(new URL(url).origin,'https://auth.astrixparadox.com');fetches++;return Response.json(await read(new URL(url,'https://astrixparadox.com').pathname.split('/').at(-1)));}});
 for(const id of ids){
   const payload=await read(id);
   assert.deepEqual(Object.keys(payload),['loadout']);

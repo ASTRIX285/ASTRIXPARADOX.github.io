@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dimShareRoute } from '../src/dim-share.ts';
+import { withCors, handlePreflight } from '../src/web.ts';
 class EdgeCache {
  rows=new Map<string,Response>();
  async match(key:Request){return this.rows.get(key.url)?.clone();}
@@ -25,4 +26,23 @@ test('DIM expired, unreachable and malformed shares remain honest failures',asyn
   assert.equal((await response.json() as any).error,status===404||status===410?'expired_link':'dim_unreachable');
  }
  assert.equal((await dimShareRoute(new Request('https://astrixparadox.com/dim/share/fixturec'),new EdgeCache(),(async()=>Response.json({})) as any)).status,503);
+});
+
+test('auth-host DIM responses use the shared origin policy without caching CORS headers',async()=>{
+ const origin='https://astrixparadox.com',env={APP_ORIGINS:origin} as Env;
+ const request=new Request('https://auth.astrixparadox.com/dim/share/fixturea',{headers:{Origin:origin}});
+ const preflight=handlePreflight(new Request(request,{method:'OPTIONS'}),env);
+ assert.equal(preflight.status,204);assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),origin);
+ for(const status of [200,404,410,503]){
+  const fixture=JSON.parse(await readFile(new URL('../../astrix-app/tools/fixtures/dim-import/fixturea.json',import.meta.url),'utf8'));
+  const cache=new EdgeCache();
+  const raw=await dimShareRoute(request,cache,(async()=>status===200?Response.json(fixture):new Response(null,{status})) as any);
+  const response=withCors(request,env,raw);
+  assert.equal(response.status,status);assert.equal(response.headers.get('Access-Control-Allow-Origin'),origin);
+  for(const cached of cache.rows.values())assert.equal(cached.headers.has('Access-Control-Allow-Origin'),false);
+ }
+ assert.equal(withCors(new Request(request,{headers:{Origin:'https://unapproved.example'}}),env,new Response()).status,403);
+ const source=await readFile(new URL('../src/index.ts',import.meta.url),'utf8');
+ assert.ok(source.indexOf('if (request.method === "OPTIONS") return handlePreflight')<source.indexOf('if (url.pathname.startsWith("/dim/share/"))'));
+ assert.match(source,/return withCors\(request, env, await dimShareRoute\(request,/);
 });
