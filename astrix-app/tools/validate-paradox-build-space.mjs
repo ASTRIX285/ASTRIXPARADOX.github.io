@@ -151,7 +151,7 @@ assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260916-weapon-combinat
 assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260916-weapon-combinations-2/,'Background preparation must start the terminating Forge worker.');
 assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260916-weapon-combinations-2/,'The Forge worker must load the terminating generation sequence.');
 assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260916-weapon-combinations-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
-assert.match(html,/id="forgeActivityDialog"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="pvp"/,'Generate must capture one of the six required activity contexts in an explicit dialog.');
+assert.match(html,/aria-label="Build activity"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="dungeon"[\s\S]*?data-forge-activity="grandmaster"[\s\S]*?data-forge-activity="crucible"[\s\S]*?data-forge-activity="pve"/,'Generate must capture one of the five required activity contexts in the Elemental Build Options panel.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
 const weaponResult=selectOwnedWeapons({build:{...intelligenceSource,weapons:[currentPrimary,energyWeapon,powerWeapon],ownedWeapons:ownedWeaponCatalogue,vaultWeapons:ownedWeaponCatalogue},objective:'add-clear'});
 assert.equal(weaponResult.workingBuild.weapons[0].itemInstanceId,'weapon-jolt','Owned-weapon ranking must select the exact verified instance with stronger explicit armour-loop and objective evidence.');

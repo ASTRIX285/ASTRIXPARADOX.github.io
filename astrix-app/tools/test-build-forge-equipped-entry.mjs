@@ -202,12 +202,12 @@ function directHarness(){
     scheduleForgePreparation(){},guardianManifest:{ready:async()=>{},hydratePayload:async()=>{}},assertRenderablePagePayload:value=>value,
     FORGE_PAGE_PAYLOAD:{membership:{membershipId:'98001',membershipType:'3'}},FORGE_BUNGIE_SESSION:{authenticated:true},
     normaliseLiveProfile:()=>structuredClone(equipped),createVaultCatalogue:()=>structuredClone(inventory),prepareArmourSelection:(payload,items)=>structuredClone(items),
-    bindBuildRoute(){},ui,buttons,elements,objectives
+    bindBuildRoute(){},forgeActivityOption:value=>{const key=typeof value==='string'?value:value?.key;return key?{key,label:key.toUpperCase(),domain:'pve'}:null;},ui,buttons,elements,objectives
   });
   vm.runInContext(`let value=createBuildState({...${JSON.stringify(equipped)},armour:[]}),directEntryBusy=false,recommendationBusy=false,liveActionBusy=false,selectedRecommendationElement='',selectedRecommendationObjective='',recommendationFailure='',equippedEntryState=null;
     function readState(){return value;}function writeState(next){value=next;}function currentBuild(){return value.workingBuild;}function render(){renderRecommendationControls(currentBuild());}
     ${between(runtime,'function manualSlotLabels','function currentManualItem')}
-    ${between(runtime,'function stageWorkingBuild','function renderForgeActivityDialog')}
+    ${between(runtime,'function stageWorkingBuild','function renderForgeActivityFit')}
     ${between(runtime,'function renderRecommendationControls','function renderSuperSynergyEvidence')}
   `,h);
   return h;
@@ -221,6 +221,10 @@ for(const mode of ['equipped','owned']){
   assert.equal(entry.validateTierFiveArmour(build).ready,false,'The fixture must fail the old Tier 5 maximized gate.');
   assert.equal(build.forgeLoaderDecision.ranking,undefined,'Direct entry cannot impersonate a maximized Forge Loader result.');
   assert.equal(build.forgeLoaderDecision.statDirective.achieved.health,60);
+  // Miguel's locked flow: element, objective and activity are all picked in the panel before Generate unlocks.
+  assert.equal(h.ui.get('generateMaxLoadout').disabled,true,'Generate stays locked until an activity is picked.');
+  assert.match(h.ui.get('generateMaxLoadout').textContent,/PICK AN ACTIVITY/,'The Generate label says what is missing.');
+  h.selectForgeActivity('pve');
   assert.equal(h.ui.get('generateMaxLoadout').disabled,false,'A complete low-tier direct entry must unlock Generate.');
   assert.equal(h.elements[0].disabled,false);assert.equal(h.objectives[0].disabled,false);
   assert.ok(build.ownedWeapons.some(item=>item.itemInstanceId===vaultWeapon.itemInstanceId),'Owned weapon alternatives are available from the equipped baseline.');

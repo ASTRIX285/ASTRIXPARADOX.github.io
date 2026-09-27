@@ -86,7 +86,7 @@ function renderResidency(phase='verifying'){
   panel?.classList.toggle('is-ready',view.ready);
   if(status)status.textContent=view.ready?'ALL SOURCES READY':view.rows.some(row=>row.state==='resident')?'DATA RESIDENT':'LOADING';
   if(summary)summary.textContent=view.summary;
-  const enter=byId('forgeEvaluate');if(enter)enter.disabled=!forgeLoaderEvaluateReady(view,selectedSlots,activeCharacterId);
+  const enter=byId('forgeEvaluate');if(enter){const ready=forgeLoaderEvaluateReady(view,selectedSlots,activeCharacterId);if(!enterBusy){enter.disabled=!ready;enter.classList.toggle('is-ready',ready);}if(ready)warmBuildForge();}
   return view;
 }
 
@@ -437,9 +437,56 @@ function toggleCandidateBreakdown(index){
   renderCandidates();
 }
 
-async function calculateBuilds(){
+const FLOW_TIMING_KEY='astrix:forge-flow-timing:v1';
+let calculationToken=0,calculationController=null,openProtocolChosen=false,enterBusy=false,buildForgeWarmed=false;
+// While the user reviews the staged load, fetch the Build Forge scripts and styles so the handoff navigation finds them cached.
+function warmBuildForge(){
+  if(buildForgeWarmed)return;buildForgeWarmed=true;
+  const run=async()=>{
+    try{
+      const base=new URL('../guardian-workspace-v2/paradox-build-space/',location.href);
+      const response=await fetch(base,{credentials:'same-origin'});if(!response.ok)return;
+      const doc=new DOMParser().parseFromString(await response.text(),'text/html');
+      const add=(rel,href,as)=>{const url=new URL(href,base);if(url.origin!==location.origin)return;const link=document.createElement('link');link.rel=rel;link.href=url.href;if(as)link.as=as;document.head.append(link);};
+      for(const sheet of doc.querySelectorAll('link[rel="stylesheet"][href]'))add('preload',sheet.getAttribute('href'),'style');
+      // Warm the whole static module graph, not only the entry module, so the handoff is not a chain of sequential fetches.
+      const seen=new Set(),queue=[...doc.querySelectorAll('script[type="module"][src]')].map(script=>new URL(script.getAttribute('src'),base).href);
+      const importPattern=/(?:^|[^\w$.])(?:import|export)\s*(?:[^'"()]*?\sfrom\s*)?['"]([^'"]+)['"]/g;
+      const visit=async href=>{
+        if(seen.has(href)||seen.size>=300)return;seen.add(href);
+        const module=await fetch(href,{credentials:'same-origin'}).catch(()=>null);if(!module?.ok)return;
+        const source=await module.text(),next=[];
+        for(const match of source.matchAll(importPattern)){if(!/^(?:\.{1,2}\/|\/)/.test(match[1]))continue;const url=new URL(match[1],href);if(url.origin===location.origin&&!seen.has(url.href))next.push(url.href);}
+        await Promise.all(next.map(visit));
+      };
+      await Promise.all(queue.map(visit));
+    }catch{buildForgeWarmed=false;}
+  };
+  if(typeof requestIdleCallback==='function')requestIdleCallback(run,{timeout:2000});else setTimeout(run,300);
+}
+// Enter Build Forge states: grey and disabled until ready, pulsing charcoal when ready, crimson with real progress while transferring.
+function setEnterState(step,label){
+  const enter=byId('forgeEvaluate'),text=byId('forgeEvaluateLabel');if(!enter)return;
+  enterBusy=step!==null;
+  enter.classList.toggle('is-active',enterBusy);enter.classList.toggle('is-ready',!enterBusy&&!enter.disabled);
+  if(enterBusy){enter.disabled=true;enter.setAttribute('aria-busy','true');enter.style.setProperty('--forge-enter-progress',`${Math.round(step*100)}%`);if(text)text.textContent=label;}
+  else{enter.removeAttribute('aria-busy');enter.style.removeProperty('--forge-enter-progress');if(text)text.textContent='ENTER BUILD FORGE';renderCurrentResidency();}
+}
+function prefersReducedMotion(){return Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);}
+// After a set bonus and a stat focus are both chosen, bring the finished Staged armour panel into view.
+function scrollToStagedArmour(){
+  const panel=document.querySelector('.forge-staged');if(!panel)return;
+  const rect=panel.getBoundingClientRect(),fits=rect.top>=0&&rect.bottom<=innerHeight;
+  if(!fits)panel.scrollIntoView({behavior:prefersReducedMotion()?'auto':'smooth',block:'start'});
+}
+function selectionReadyForStaged(){return Boolean(selectedExotic())&&activePriorityCount()+activeTargetCount()>0&&(setSelections.length>0||openProtocolChosen);}
+async function calculateBuilds(options={}){
   const exotic=selectedExotic(),targets=targetValues();if(!exotic)return;
+  const scrollWhenDone=options?.scrollWhenDone===true;
+  // A newer calculation supersedes an older one, so a slow reply can never overwrite the latest selection.
+  calculationController?.abort();const token=++calculationToken,controller=calculationController=new AbortController();
   const button=byId('forgeFindBuilds');button.disabled=true;button.textContent='CALCULATING LOADS…';
+  byId('forgeStagedStatus').textContent='CALCULATING…';byId('forgeEvaluate')?.setAttribute('aria-busy','true');
   renderCandidateLoading(exotic);
   byId('forgeRuntimeStatus').textContent=activeTargetCount()||activePriorityCount()?'Applying the Exotic anchor, set protocol and ranked stat constraints…':'No stat priority selected. Ranking the complete legal pool by maximum unmodded stats…';
   await new Promise(resolve=>requestAnimationFrame(resolve));
@@ -450,10 +497,11 @@ async function calculateBuilds(){
   }));
   const manifestVersion=text(payload?.pageReady?.manifestVersion||payload?.manifestVersion||guardianManifest.status().version);
   const requestBody={...membershipBinding(),manifestVersion,items:solverItems,...solverOptions(),targets,openProtocolMasks:setSelections.length?[]:openProtocolSolverEvidence(exotic,sourceItems),limit:CANDIDATE_BATCH_SIZE};
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30_000);
+  const timer=setTimeout(()=>controller.abort(),30_000);
   try{
     const response=await fetch(new URL('/bungie/forge/armour-combinations',AUTH_ORIGIN),{method:'POST',credentials:'include',cache:'no-store',headers:{Accept:'application/json','Content-Type':'application/json','X-CSRF-Token':text(session?.csrfToken)},body:JSON.stringify(requestBody),signal:controller.signal});
     const result=await response.json().catch(()=>({}));
+    if(token!==calculationToken)return;
     if(!response.ok)throw new Error(result?.error==='manifest_version_changed'?'The Bungie manifest changed. Refresh Guardian data and calculate again.':result?.error||`Backend armour calculation failed (${response.status}).`);
     const itemsById=new Map(sourceItems.map(item=>[text(item.itemInstanceId),item]));
     targetMaximums=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,Math.min(ARMOUR_STAT_CAP,Math.max(0,Number(result.targetMaximums?.[key]||0)))]));
@@ -461,24 +509,27 @@ async function calculateBuilds(){
     Object.defineProperties(matchedBuilds,{combinationsEvaluated:{value:Number(result.combinationsEvaluated||0),enumerable:false},combinationsReturned:{value:matchedBuilds.length,enumerable:false},completeScan:{value:result.completeScan===true,enumerable:false}});
     if(!setSelections.length)matchedBuilds=rankOpenProtocolCandidates(matchedBuilds,exotic);
   }catch(error){
+    if(token!==calculationToken)return;
     matchedBuilds=[];selectedCandidateIndex=-1;selectedSlots.clear();renderStaged();renderCandidates();
     byId('forgeRuntimeStatus').textContent=error?.name==='AbortError'?'Backend armour calculation timed out. Retry after Guardian data finishes refreshing.':error?.message||'Backend armour calculation is unavailable.';
     button.disabled=false;
     return;
-  }finally{clearTimeout(timer);button.textContent='REFRESH TOP 50 COMBINATIONS';}
+  }finally{clearTimeout(timer);if(token===calculationToken){button.textContent='REFRESH TOP 50 COMBINATIONS';byId('forgeEvaluate')?.removeAttribute('aria-busy');}}
+  if(token!==calculationToken)return;
   const scanDuration=performance.now()-scanStarted;
   visibleCandidateCount=Math.min(CANDIDATE_BATCH_SIZE,matchedBuilds.length);
   selectedCandidateIndex=-1;selectedSlots.clear();configureStats();if(matchedBuilds.length)stageCandidate(0);else{renderStaged();renderCandidates();}
   const evaluated=Number(matchedBuilds.combinationsEvaluated||matchedBuilds.length);
   const durationLabel=scanDuration<1000?`${Math.max(1,Math.round(scanDuration))} ms`:`${(scanDuration/1000).toFixed(2)} s`;
   byId('forgeRuntimeStatus').textContent=matchedBuilds.length?`${evaluated.toLocaleString()} combinations scanned by the backend Worker in ${durationLabel}. Showing the top ${matchedBuilds.length}; Load 1 is the best fit with ${exotic.name} locked${activeSetUpgradeTarget?`; ${activeSetUpgradeTarget.setName} remains an optional target upgrade`:''}.`:'No complete armour combination satisfies the selected Exotic and set protocol.';
+  if(scrollWhenDone&&selectionReadyForStaged()&&selectedSlots.size===5)scrollToStagedArmour();
 }
 
 function resetResults(){matchedBuilds=[];selectedCandidateIndex=-1;expandedCandidateIndex=-1;visibleCandidateCount=0;targetMaximums=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,0]));selectedSlots.clear();renderStaged();renderCandidates();}
 
 function selectExotic(key){
   const next=exoticGroups().find(group=>group.owned&&group.key===String(key||''));if(!next)return;
-  selectedExoticKey=next.key;setSelections=[];resetResults();renderExotics();renderSetBonuses();configureStats({reset:true});
+  selectedExoticKey=next.key;setSelections=[];openProtocolChosen=false;resetResults();renderExotics();renderSetBonuses();configureStats({reset:true});
   const exotic=selectedExotic();
   byId('forgeRuntimeStatus').textContent=exotic?`${exotic.name} anchored. Ranking the maximum-stat load automatically.`:'Choose an Exotic to start.';
   if(exotic)void calculateBuilds();
@@ -487,16 +538,17 @@ function selectExotic(key){
 function toggleBonus(input){
   const exotic=selectedExotic();if(!exotic)return;
   setSelections=toggleSetSelection(armourItems(),exotic,setSelections,{setHash:Number(input.dataset.setHash),count:Number(input.dataset.setCount)},input.checked);
+  openProtocolChosen=false;
   resetResults();renderSetBonuses();configureStats();
   byId('forgeRuntimeStatus').textContent=setSelections.length?`Set protocol active: ${setSelections.map(row=>`${row.count}-piece`).join(' + ')}. Stat ceilings recalculated.`:'No set bonus required. Stat ceilings recalculated from all compatible armour.';
-  void calculateBuilds();
+  void calculateBuilds({scrollWhenDone:true});
 }
 
 function openSetProtocol(){
   if(!selectedExotic())return;
-  setSelections=[];resetResults();renderSetBonuses();configureStats();
+  setSelections=[];openProtocolChosen=true;resetResults();renderSetBonuses();configureStats();
   byId('forgeRuntimeStatus').textContent='Open armour active. Ranking the top combinations with Exotic-to-set perk data.';
-  void calculateBuilds();
+  void calculateBuilds({scrollWhenDone:true});
 }
 
 function setStatPriority(select){
@@ -504,7 +556,7 @@ function setStatPriority(select){
   if(rank>0)for(const other of document.querySelectorAll('[data-stat-priority]'))if(other!==select&&Number(other.value)===rank)other.value='';
   resetResults();configureStats();
   byId('forgeRuntimeStatus').textContent=rank>0?`Priority ${rank} assigned. Re-ranking every legal armour combination.`:'Priority returned to AUTO. Re-ranking by the remaining directives and maximum stats.';
-  if(selectedExotic())void calculateBuilds();
+  if(selectedExotic())void calculateBuilds({scrollWhenDone:true});
 }
 
 function inspectItemFromTarget(target){
@@ -546,8 +598,14 @@ function hideInspect(){const panel=byId('forgeItemInspect');if(panel){panel.hidd
 async function evaluateInBuildForge(){
   const residency=renderCurrentResidency();
   if(!forgeLoaderEvaluateReady(residency,selectedSlots,activeCharacterId))return;
+  if(enterBusy)return;
   const candidate=matchedBuilds[selectedCandidateIndex];if(!candidate)return;
   const binding=membershipBinding();
+  // Timing is measured, not assumed: each step records elapsed milliseconds since the click and Build Forge reports the total.
+  const clickedAt=Date.now(),started=performance.now(),marks={};
+  const mark=name=>{marks[name]=Math.round(performance.now()-started);};
+  const fail=message=>{byId('forgeRuntimeStatus').textContent=message;setEnterState(null);};
+  setEnterState(.1,'PREPARING BUILD FORGE…');
   byId('forgeRuntimeStatus').textContent='Opening Build Forge…';
   let profileBuild=residentProfileBuild?.characterId===activeCharacterId?residentProfileBuild:null;
   try{
@@ -555,13 +613,19 @@ async function evaluateInBuildForge(){
   }catch(error){
     console.error('[Forge Loader] The protected Guardian baseline could not be prepared.',error);
   }
-  if(!profileBuild){byId('forgeRuntimeStatus').textContent='Build Forge could not resolve the equipped Guardian baseline. No build was changed.';return;}
+  mark('baselineReady');
+  if(!profileBuild){fail('Build Forge could not resolve the equipped Guardian baseline. No build was changed.');return;}
+  setEnterState(.35,'PACKING YOUR LOAD…');
+  await new Promise(resolve=>requestAnimationFrame(resolve));
   const snapshotEnvelope=createForgeLoaderBuildSnapshot(profileBuild,binding);
   const selected=prepareArmourSelection(payload,[...selectedSlots.values()]);
   const selection=createVaultArmourSelection({binding,slots:selected.map(item=>({slot:item.slotIndex,item})),sourcePage:'forge-loader',forgeLoaderDecision:forgeLoaderDecision(candidate,selectedCandidateIndex)});
-  if(!snapshotEnvelope||!selection){byId('forgeRuntimeStatus').textContent='Build Forge could not open. Your build is unchanged.';return;}
+  mark('snapshotBuilt');
+  if(!snapshotEnvelope||!selection){fail('Build Forge could not open. Your build is unchanged.');return;}
+  setEnterState(.6,'SECURING TRANSFER…');
   byId('forgeRuntimeStatus').textContent='Securing the complete protected Build Forge transfer…';
   const transferStored=await cacheForgeLoaderTransfer(binding,{snapshotEnvelope,armourSelection:selection});
+  mark('transferStored');
   let baselineStored=transferStored,selectionStored=transferStored;
   // IndexedDB is the atomic primary route. Use quota-limited Web Storage only
   // when that route is unavailable, rather than retaining three large copies.
@@ -570,7 +634,7 @@ async function evaluateInBuildForge(){
     selectionStored=writeVaultArmourSelection(selection);
     if(!selectionStored){releaseGuardianSessionStorageFallbacks();selectionStored=writeVaultArmourSelection(selection);}
   }
-  if(!selectionStored){byId('forgeRuntimeStatus').textContent='The protected staged load could not be stored on this device. No build was changed.';return;}
+  if(!selectionStored){fail('The protected staged load could not be stored on this device. No build was changed.');return;}
   if(!baselineStored&&!transferStored){
     byId('forgeRuntimeStatus').textContent='Browser storage is full. Build Forge will recover the protected Original Build directly from Bungie.';
     console.warn('[Forge Loader] Browser storage rejected the protected baseline; Build Forge will recover it from the authenticated Bungie profile.');
@@ -578,6 +642,9 @@ async function evaluateInBuildForge(){
   const url=new URL('../guardian-workspace-v2/paradox-build-space/',location.href);url.searchParams.set('vault','selection');url.searchParams.set('prewarm','forge-loader');
   if(!baselineStored&&!transferStored)url.searchParams.set('baseline','bungie-recovery');
   for(const [key,value] of Object.entries(binding))if(value)url.searchParams.set(key,value);
+  setEnterState(.9,'OPENING BUILD FORGE…');
+  mark('navigate');
+  try{sessionStorage.setItem(FLOW_TIMING_KEY,JSON.stringify({clickedAt,marks}));}catch{}
   markGuardianFastReturn();location.href=url;
 }
 
@@ -586,7 +653,7 @@ function installEvents(){
   byId('forgeSetList')?.addEventListener('click',event=>{if(event.target.closest('[data-open-set-protocol]'))openSetProtocol();});
   byId('forgeSetList')?.addEventListener('change',event=>{const input=event.target.closest('[data-set-hash]');if(input)toggleBonus(input);});
   byId('forgeStatTargets')?.addEventListener('input',event=>{if(event.target.matches('[data-stat-priority]'))return;const label=event.target.closest('[data-target-stat]');if(!label)return;updateTargetLabel(label);resetResults();configureStats();byId('forgeRuntimeStatus').textContent='Stat target changed. Calculate to rank every legal combination.';});
-  byId('forgeStatTargets')?.addEventListener('change',event=>{if(event.target.matches('[data-stat-priority]')){setStatPriority(event.target);return;}if(event.target.matches('input[type="range"]'))void calculateBuilds();});
+  byId('forgeStatTargets')?.addEventListener('change',event=>{if(event.target.matches('[data-stat-priority]')){setStatPriority(event.target);return;}if(event.target.matches('input[type="range"]'))void calculateBuilds({scrollWhenDone:true});});
   byId('forgeStatTargets')?.addEventListener('click',event=>{const button=event.target.closest('[data-max-stat]');if(!button)return;const label=button.closest('[data-target-stat]'),input=label?.querySelector('input'),key=label?.dataset?.targetStat;if(!input||!key)return;input.value=String(Math.min(ARMOUR_STAT_CAP,Math.max(0,Number(targetMaximums[key]||0))));updateTargetLabel(label);configureStats();void calculateBuilds();});
   byId('forgeFindBuilds')?.addEventListener('click',calculateBuilds);
   byId('forgeResetTargets')?.addEventListener('click',()=>{for(const input of document.querySelectorAll('[data-target-stat] input'))input.value='0';for(const select of document.querySelectorAll('[data-stat-priority]'))select.value='';resetResults();configureStats();byId('forgeRuntimeStatus').textContent='Stat targets and priorities reset. Ranking by maximum unmodded stats.';void calculateBuilds();});
