@@ -120,10 +120,13 @@ const preparedCache=await readFile(new URL('../forge-auth-worker/src/prepared-pa
 assert.match(backend,/preparedPageEnvelope[\s\S]*?prepared\.body\?\.getReader\(\)/,'The auth Worker must stream the prepared page bundle');
 assert.doesNotMatch(backend,/bundleResponse\?\.ok\s*\?\s*await bundleResponse\.json/,'The auth Worker must not parse a prepared page bundle');
 assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'Journey must not copy public manifest tables on the auth Worker heap');
-assert.match(backend,/WORKSPACE_PREPARED_PAGES[^=]*= \["character", "build-forge", "vault", "loadout"\]/,'The backend must enumerate every downstream workspace page in display order.');
+// Production 27 Sep 2026: building four workspace pages inside the Journey request
+// exceeded Worker memory (truncated Journey JSON, then HTTP 503). Never again.
+assert.doesNotMatch(backend,/warmPreparedWorkspace|WORKSPACE_PREPARED_PAGES/,'Journey must never build other pages inside its own Worker request.');
+assert.match(backend,/new ReadableStream<Uint8Array>\(\{\s*async pull\(controller\)/,'The prepared page stream must be pull based so a slow client never buffers the whole bundle.');
+assert.doesNotMatch(backend,/response\.clone\(\)\.text\(\)/,'The backend page cache must never copy a whole streamed page into Worker memory.');
+assert.match(backend,/PREPARED_PAGE_CACHE_MAX_BYTES = 16 \* 1024 \* 1024[\s\S]*?size > PREPARED_PAGE_CACHE_MAX_BYTES[\s\S]*?reader\.cancel/,'The backend page cache copy must be bounded and cancel oversized pages.');
 assert.match(backend,/requestedFreshness === "display"[\s\S]*?readPreparedPage\(sessionId, page, preparedStatus\.manifestVersion/,'Display requests must read a session cache bound to the current live manifest version.');
-assert.match(backend,/page === "journey"[\s\S]*?context\.waitUntil\(warmPreparedWorkspace\(request, env\)\)/,'Journey must trigger backend preparation for its downstream workspace.');
-assert.match(backend,/async function warmPreparedWorkspace[\s\S]*?for \(const page of WORKSPACE_PREPARED_PAGES\)[\s\S]*?freshness", "display"/,'The backend workspace warm must prepare each complete display payload.');
 assert.match(authRecord,/new PreparedPageCache\(this\.ctx\.storage\)[\s\S]*?path === "\/prepared-page"/,'Prepared page data must remain private inside the authenticated session Durable Object.');
 assert.match(preparedCache,/PREPARED_PAGE_TTL_MS = 10 \* 60_000[\s\S]*?meta\.manifestVersion !== manifestVersion/,'Prepared page cache entries must expire and be invalidated by a live manifest change.');
 assert.match(preparedClient,/for\(const value of pages\)[\s\S]*?preferBackend:true[\s\S]*?quiet:true/,'Journey must quietly transfer backend-prepared pages into the existing browser cache in order.');
