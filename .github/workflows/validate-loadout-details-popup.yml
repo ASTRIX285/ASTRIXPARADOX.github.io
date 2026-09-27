@@ -1,0 +1,27 @@
+name: Loadout Details validation
+on:
+  push:
+    branches: [feat/loadout-details-popup]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export exact source delta for local implementation
+        run: |
+          mkdir -p "$RUNNER_TEMP/loadout-source"
+          git diff --binary 8c3ada1aa2a3666fa907084d0bde84a12e757582 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 > "$RUNNER_TEMP/loadout-source/main.patch"
+          git diff --binary 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 HEAD > "$RUNNER_TEMP/loadout-source/branch.patch"
+          git cat-file commit 22f9e46a5058e7bf7a5f612c9833c2136af9ea44 > "$RUNNER_TEMP/loadout-source/main.commit"
+          git cat-file commit HEAD > "$RUNNER_TEMP/loadout-source/branch.commit"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/loadout-source/identity.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loadout-source-delta
+          path: ${{ runner.temp }}/loadout-source
+          retention-days: 1
