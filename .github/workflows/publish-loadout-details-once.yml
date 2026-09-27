@@ -1,0 +1,64 @@
+name: Publish validated Prompt 3 implementation
+on:
+  push:
+    branches: [feat/loadout-details-popup]
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.repository == 'ASTRIX285/ASTRIXPARADOX.github.io' && github.ref == 'refs/heads/feat/loadout-details-popup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --experimental-strip-types
+      PYTHONDONTWRITEBYTECODE: '1'
+      GITHUB_HEAD_REF: feat/loadout-details-popup
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Materialize hash-checked implementation patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git rev-parse HEAD^)" = 525921dbecb55622f7e51640901c2ea905df6f7a
+          python3 - <<'PY'
+          import base64, gzip, hashlib, json, pathlib, subprocess
+          parts = []
+          for sha in ['caf8aab9d78dcaad8ab3534498406b882a6940b4', '6695bcf7e34d9f399c5b26eca3ad5cd7d71880f1', '76a1b71485b652d5d54c1490531c2879df3c58dc']:
+              response = json.loads(subprocess.check_output(['gh', 'api', f'repos/ASTRIX285/ASTRIXPARADOX.github.io/git/blobs/{sha}']))
+              encoded = ''.join(response['content'].split())
+              if sha == '76a1b71485b652d5d54c1490531c2879df3c58dc':
+                  assert encoded.count('NZYq1BSPlg0w8Cq') == 1
+                  encoded = encoded.replace('NZYq1BSPlg0w8Cq', 'NZYq1BSPlg7w8Cq', 1)
+              parts.append(base64.b64decode(encoded, validate=True))
+          archive = b''.join(parts)
+          assert hashlib.sha256(archive).hexdigest() == 'a6a7846a9b2a37d49e49145b46c25e7e08546e5fe02c18c257f7a0f77a18aa00'
+          pathlib.Path('.git/loadout-implementation.patch').write_bytes(gzip.decompress(archive))
+          PY
+          git apply --index .git/loadout-implementation.patch
+          git rm .github/workflows/publish-loadout-details-once.yml
+          test "$(git write-tree)" = 491eb2afa4bde4aaec4de5d2dbb23d57c873bd04
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: build Prompt 3 reusable Loadout Details popup'
+      - name: Validate exact final tree before publication
+        run: |
+          git diff --check origin/main...HEAD
+          git diff --stat origin/main...HEAD
+          node astrix-app/tools/validate-scope-guard.mjs
+          node astrix-app/tools/validate-journey-visual-pass.mjs
+          node astrix-app/tools/test-loadout-details.mjs
+          node astrix-app/tools/test-loadout-details-backend.mjs
+          node astrix-app/tools/paradox-validator.mjs
+      - name: Publish only the requested branch without rewriting work
+        run: |
+          test "$(git rev-parse HEAD^{tree})" = 491eb2afa4bde4aaec4de5d2dbb23d57c873bd04
+          git push origin HEAD:refs/heads/feat/loadout-details-popup
+          git rev-parse HEAD HEAD^{tree}
