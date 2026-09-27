@@ -26,9 +26,9 @@ export class DimShareClient {
     const task=(async()=>{
       const stored=await this.storage.get(`share:${id}`);if(stored){const result=validateLoadout(stored);this.cache.set(id,result);return result;}
       let response;try{response=await this.fetchImpl(`https://auth.astrixparadox.com/dim/share/${encodeURIComponent(id)}`,{credentials:'omit',signal:AbortSignal.timeout(15000),headers:{Accept:'application/json'}});}catch{throw new Error('DIM is unreachable. Please try again later.');}
-      if(response.status===404||response.status===410)throw new Error('This DIM share link has expired or no longer exists.');
+      if(response.status===404||response.status===410){const error=new Error('This DIM share link has expired or no longer exists.');error.expired=true;throw error;}
       if(!response.ok)throw new Error('DIM is unreachable. Please try again later.');
       const payload=await response.json();const loadout=validateLoadout(payload.loadout);this.cache.set(id,loadout);await this.storage.put(`share:${id}`,loadout);return loadout;
-    })().catch(error=>{this.failures.set(id,{error,until:Date.now()+60000});throw error;}).finally(()=>this.pending.delete(id));this.pending.set(id,task);return task;
+    })().catch(error=>{if(error.expired)this.failures.set(id,{error,until:Date.now()+60000});throw error;}).finally(()=>this.pending.delete(id));this.pending.set(id,task);return task;
   }
 }

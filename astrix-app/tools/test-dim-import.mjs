@@ -39,7 +39,7 @@ assert.deepEqual(parseDimInput('dim.gg/fixturea/name'),{shareId:'fixturea'});
 const publicLoadout=await shares.load(ids[0]);
 for(const url of [`https://app.destinyitemmanager.com/loadouts?loadout=${encodeURIComponent(JSON.stringify(publicLoadout))}`,`https://beta.destinyitemmanager.com/#/loadouts?loadout=${encodeURIComponent(JSON.stringify(publicLoadout))}`])assert.deepEqual(parseDimInput(url).loadout,publicLoadout);
 for(const input of ['http://dim.gg/fixturea','https://evil.example/fixturea','https://dim.gg.evil.example/fixturea','https://user@dim.gg/fixturea'])assert.throws(()=>parseDimInput(input));
-for(const status of [404,410,429,503]){let count=0;const client=new DimShareClient({storage:{get:async()=>null,put:async()=>{}},fetchImpl:async()=>{count++;return new Response(null,{status});}});for(let i=0;i<2;i++)await assert.rejects(client.load(ids[0]),status<420?/expired/:/unreachable/);assert.equal(count,1);}
+for(const status of [404,410,429,503]){let count=0;const client=new DimShareClient({storage:{get:async()=>null,put:async()=>{}},fetchImpl:async()=>{count++;return new Response(null,{status});}});for(let i=0;i<2;i++)await assert.rejects(client.load(ids[0]),status<420?/expired/:/unreachable/);assert.equal(count,status===404||status===410?1:2);}
 
 // Synthetic account fixtures exercise matching and mutations, never production content.
 function fixture(){
@@ -72,3 +72,8 @@ a=actions();plan=await a.controller.equip();a.context.characterId='2';await asse
 a=actions();const pending=a.controller.equip();await assert.rejects(a.controller.equip(),/already running/);await pending;
 const max=Math.max(...times);assert.ok(max<1000,`Warm resolve + HTML exceeded budget: ${max}ms`);
 console.log(`DIM_IMPORT=PASS resolve=${resolved}/${requested} (100%) shares=${ids.length} warm_resolve_html_max_ms=${max.toFixed(2)} browser_paint=CLAUDE_QA`);
+
+let retries=0;
+const retryClient=new DimShareClient({storage:{get:async()=>null,put:async()=>{}},fetchImpl:async()=>++retries===1?new Response(null,{status:503}):Response.json({loadout:{name:'Recovered share',classType:1,equipped:[]}})});
+await assert.rejects(retryClient.load('retryid'),/unreachable/);
+assert.equal((await retryClient.load('retryid')).name,'Recovered share');assert.equal(retries,2);

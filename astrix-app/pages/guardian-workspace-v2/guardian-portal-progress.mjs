@@ -1,6 +1,6 @@
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-1";
-import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-1";
-import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-1';
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260906-all-page-data-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-2";
+import {PORTAL_TRANSITION_KEY} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-2";
+import {PREPARED_PAGE_STAGES} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-2';
 
 const loader=window.ForgeLoader;
 const manifestReady=guardianManifest.cached();

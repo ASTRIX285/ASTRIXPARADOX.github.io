@@ -37,6 +37,8 @@ const validators=[
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
   'test-profile-size.mjs',
+  'test-profile-cache-budget.mjs',
+  'test-profile-worker-lifecycle.mjs',
   'validate-visible-release-state.mjs',
   'validate-vault-foundation.mjs',
   'validate-forge-loader.mjs',

@@ -1,5 +1,5 @@
 import {createForgeLoaderBuildSnapshot} from '../pages/forge-loader/forge-loader-build-handoff.mjs?v=20260906-review-layout-1';
-import {createEnginePrecomputer} from './engine-precompute.mjs?v=20260927-1&recovery=20260927-1';
+import {createEnginePrecomputer} from './engine-precompute.mjs?v=20260927-1&recovery=20260927-2';
 const prepare=createEnginePrecomputer();
 export function handleEngineHandoff({id,build,binding},post){
   try{const index=prepare(build);post({id,result:createForgeLoaderBuildSnapshot(build,binding),counts:{hashes:index.inventoryByHash.size,weaponModels:index.weaponModels.size,armourStats:index.armourStats.size}});}
