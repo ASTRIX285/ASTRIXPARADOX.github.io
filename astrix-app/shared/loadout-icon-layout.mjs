@@ -9,11 +9,20 @@ export function loadoutIcon(item,{large=false}={}){
 function group(label,plugs=[]){return plugs.length?`<section class="apx-icon-group" aria-label="${esc(label)}"><h4>${esc(label)}</h4><div class="apx-icon-strip">${plugs.map(item=>loadoutIcon(item)).join('')}</div></section>`:'';}
 export function renderEquipmentIcons(items=[]){return `<div class="apx-icon-strip apx-icon-equipment">${items.map(item=>`<div class="apx-icon-column">${loadoutIcon(item,{large:true})}${(item.groups||[]).map(g=>group(g.label,g.plugs)).join('')}</div>`).join('')}</div>`;}
 export function renderLoadoutIconLayout(model){
-  const rows=model.items||[],equipped=rows.filter(row=>row.equipped!==false),subclass=equipped.find(row=>row.kind==='subclass');
-  const section=(label,content)=>content?`<section class="apx-icon-section" aria-label="${esc(label)}"><h3>${esc(label)}</h3>${content}</section>`:'';
-  const powers=subclass?`<div class="apx-icon-powers">${['Super','Abilities','Aspects','Fragments','Other sockets'].map(label=>group(label,subclass.groups?.find(g=>g.label===label)?.plugs)).join('')}</div>`:'';
-  const gear=(kind,label)=>{const order=kind==='weapon'?WEAPON_BUCKETS:kind==='armour'?ARMOUR_BUCKETS:[];const items=equipped.filter(row=>row.kind===kind).sort((a,b)=>order.indexOf(a.bucketHash)-order.indexOf(b.bucketHash));return items.length?section(label,renderEquipmentIcons(items)):'';};
-  return `${rows.some(row=>row.notOwned)?'<p class="apx-ld-note">Outlined items are not in your inventory. Inspect an icon to check its details.</p>':''}${section('Super & abilities',powers|| (subclass?loadoutIcon(subclass,{large:true}):''))}${gear('weapon','Weapons')}${gear('armour','Armour')}${gear('item','Equipment')}${section('Build settings',equipped.filter(row=>row.kind==='parameters').flatMap(row=>row.groups||[]).map(g=>group(g.label,g.plugs)).join(''))}${rows.some(row=>row.equipped===false)?section('Unequipped items',renderEquipmentIcons(rows.filter(row=>row.equipped===false))):''}`;
+  const rows=(model.items||[]).filter(row=>row.equipped!==false),subclass=rows.find(row=>row.kind==='subclass');
+  const icon=(item,large=false)=>loadoutIcon({...item,description:'',statFocus:[],alternative:null,notOwned:false},{large}).replace(/ data-icon-detail="[^"]*"/,'');
+  const strip=(label,items,large=false)=>items.length?`<div class="apx-compact-strip" role="group" aria-label="${esc(label)}">${items.map(item=>icon(item,large)).join('')}</div>`:'';
+  const cosmetic=plug=>plug.semanticRole==='appearance'||/shader|ornament|memento|skin/.test(plug.definition?.plug?.plugCategoryIdentifier||'');
+  const parameters=rows.filter(row=>row.kind==='parameters').flatMap(row=>row.groups||[]);
+  const powers=['Super','Abilities','Aspects','Fragments','Other sockets'].flatMap(label=>subclass?.groups?.find(g=>g.label===label)?.plugs||[]);
+  const sockets=rows.filter(row=>['weapon','armour'].includes(row.kind)).flatMap(row=>row.sockets||[]);
+  const extras=parameters.filter(g=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers'].includes(g.label)).flatMap(g=>g.plugs||[]);
+  const cosmetics=[...sockets,...extras].filter(cosmetic),mods=[...sockets,...extras].filter(plug=>!cosmetic(plug));
+  const gear=kind=>rows.filter(row=>row.kind===kind).sort((a,b)=>(kind==='weapon'?WEAPON_BUCKETS:ARMOUR_BUCKETS).indexOf(a.bucketHash)-(kind==='weapon'?WEAPON_BUCKETS:ARMOUR_BUCKETS).indexOf(b.bucketHash));
+  const unique=items=>items.filter((item,i)=>items.findIndex(other=>other.hash===item.hash)===i);
+  const weapons=strip('Weapons',gear('weapon'),true),armour=strip('Armour',gear('armour'),true);
+  const equipment=strip('Equipment',rows.filter(row=>row.kind==='item'),true);
+  return `<div class="apx-compact-loadout"><div class="apx-compact-powers">${strip('Super and abilities',powers)}${strip('Mods and artifact perks',mods)}</div><div class="apx-compact-gear">${weapons}${weapons&&armour?'<span class="apx-icon-divider" aria-hidden="true"></span>':''}${armour}</div>${cosmetics.length||equipment?`<div class="apx-compact-cosmetics">${strip('Cosmetics and shaders',unique(cosmetics))}${equipment}</div>`:''}${strip('Unequipped items',(model.items||[]).filter(row=>row.equipped===false),true)}</div>`;
 }
 // One tooltip outside the scrolling content: names remain available to pointer,
 // keyboard and touch users without widening every tile. Text is never HTML.

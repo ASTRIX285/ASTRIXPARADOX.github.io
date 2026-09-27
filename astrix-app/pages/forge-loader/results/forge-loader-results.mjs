@@ -14,7 +14,7 @@ import {forgeLoaderEvaluateReady,forgeLoaderResidency} from '../forge-loader-res
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4';
 import {mountForgeShell} from '../../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup} from '../forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup,resolveForgeSelectionIndex} from '../forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-2';
 import {EngineHandoffClient} from '../../../core/engine-handoff-client.mjs?v=20260927-1';
 import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
 import {beginEngineTiming} from '../../../core/engine-timing.mjs?v=20260927-1';
@@ -192,9 +192,9 @@ async function runSearch(){
     throw error?.name==='AbortError'?new Error('Forge Matrix search timed out. Retry loading the results.'):error;
   }finally{clearTimeout(timer);}
   visibleCandidateCount=Math.min(CANDIDATE_BATCH_SIZE,matchedBuilds.length);
-  if(matchedBuilds.length)stageCandidate(Math.min(selection.selectIndex,matchedBuilds.length-1));else{renderStaged();renderCandidates();}
+  if(matchedBuilds.length)stageCandidate(resolveForgeSelectionIndex(matchedBuilds,selection));else{renderStaged();renderCandidates();}
   const evaluated=Number(matchedBuilds.combinationsEvaluated||matchedBuilds.length);
-  byId('forgeResultsRuntimeStatus').textContent=matchedBuilds.length?`${evaluated.toLocaleString()} combinations scanned. Load 1 is the best fit with ${exoticGroup.name} locked${weaponGroup?`, ${weaponGroup.name} anchored`:''}.`:'No complete armour combination satisfies this Exotic and set protocol.';
+  byId('forgeResultsRuntimeStatus').textContent=matchedBuilds.length?`${evaluated.toLocaleString()} combinations scanned. Load ${selectedCandidateIndex+1} selected with ${exoticGroup.name} locked${weaponGroup?`, ${weaponGroup.name} anchored`:''}.`:'No complete armour combination satisfies this Exotic and set protocol.';
 }
 
 function installEvents(){

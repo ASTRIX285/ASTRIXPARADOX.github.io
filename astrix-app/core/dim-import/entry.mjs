@@ -1,9 +1,10 @@
-import {watchDimContext} from './context.mjs?v=20260927-icons-1';
+import {watchDimContext} from './context.mjs?v=20260927-adapt-1';
 import {DimShareClient} from './share.mjs?v=20260927-fetch-3';
 import {ImportManifest,createImportStorage} from './cache.mjs?v=20260927-fetch-3';
-import {resolveDimLoadout} from './resolve.mjs?v=20260927-icons-1';
-import {createDimActions} from './actions.mjs?v=20260927-icons-1';
-import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-icons-1';
+import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1';
+import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1';
+import {createDimActions} from './actions.mjs?v=20260927-adapt-1';
+import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-adapt-1';
 import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
 let selectedCharacterId='',current=null,currentModel=null;
@@ -11,30 +12,23 @@ function context(){
   let stored='';try{stored=sessionStorage.getItem('astrix:selected-character-id')||'';}catch{}
   const characterId=selectedCharacterId||new URLSearchParams(location.search).get('characterId')||stored;
   const payload=globalThis.FORGE_PAGE_PAYLOAD||{};
-  return {characterId,profile:payload.profile||{},session:globalThis.FORGE_BUNGIE_SESSION||{},manifestVersion:manifest.snapshot?.version||payload.manifestVersion};
+  return {characterId,profile:payload.profile||{},session:globalThis.FORGE_BUNGIE_SESSION||{},currentSeasonNumber:payload.currentSeasonNumber,manifestVersion:manifest.snapshot?.version||payload.manifestVersion};
 }
 function style(){
   if(document.querySelector('[data-dim-style]'))return;
-  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260927-icons-1',import.meta.url).href;document.head.append(link);
-}
-async function send(build){
-  const [{createBuildState},{createHandoffEnvelope}]=await Promise.all([import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs'),import('../../pages/guardian-workspace-v2/paradox-build-binding.mjs')]);
-  sessionStorage.setItem('astrix:paradox-build-space:v1',JSON.stringify(createHandoffEnvelope(createBuildState(build))));
-  const target=new URL('../../pages/guardian-workspace-v2/paradox-build-space/',import.meta.url);
-  for(const key of ['characterId','membershipId','membershipType'])target.searchParams.set(key,String(build[key]));
-  location.assign(target.href);
+  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260927-adapt-1',import.meta.url).href;document.head.append(link);
 }
 export async function importDimLoadout(input,{returnFocus}={}){
   const started=performance.now();const before=context(),binding={...sessionBinding(before.session),characterId:before.characterId};
   const [loadout,snapshot]=await Promise.all([shares.load(input),manifest.ready()]);
   const now=context(),active=sessionBinding(now.session);
-  if(now.characterId!==before.characterId||active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType)throw new Error('The account or Guardian changed. Paste the link again.');
-  const model=resolveDimLoadout(loadout,{snapshot,profile:now.profile,binding,currentSeasonNumber:globalThis.FORGE_PAGE_PAYLOAD?.currentSeasonNumber});
-  const actions=createDimActions(model,{getContext:context,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-4')).saveParadoxLoadout(value),send,refresh:()=>document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'dim-apply'}}))});
+  if(active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType)throw new Error('The account changed. Paste the link again.');
+  const {model}=adaptDimLoadout(loadout,{snapshot,profile:now.profile,binding,preferredCharacterId:now.characterId,currentSeasonNumber:now.currentSeasonNumber});
+  const actions=createDimActions(model,{getContext:context,getSnapshot:()=>manifest.snapshot,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-4')).saveParadoxLoadout(value),send:sendDimToForge});
   current?.close();
-  const disabledReasons={};if(!now.session.authenticated||!binding.characterId)for(const key of ['equip','save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
+  const disabledReasons={};if(!now.session.authenticated||!model.binding.characterId)for(const key of ['save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
   currentModel=model;
-  current=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Build Forge'],['save','Save as PARADOX loadout'],['equip','Equip']],disabledReasons,returnFocus,onClose:()=>{current=null;currentModel=null;}});
+  current=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Build Forge'],['save','Save as PARADOX loadout']],disabledReasons,returnFocus,onClose:()=>{current=null;currentModel=null;}});
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   return {model,handle:current,renderMs:performance.now()-started};
 }

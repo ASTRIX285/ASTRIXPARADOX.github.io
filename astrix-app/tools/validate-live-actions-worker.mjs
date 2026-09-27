@@ -24,7 +24,7 @@ assert.match(worker,/async function verifySessionCharacter[\s\S]*?VERIFIED_CHARA
 assert.match(worker,/async function armourCombinationsRoute[\s\S]*?mutationOriginAllowed[\s\S]*?authenticatedSession[\s\S]*?csrf_validation_failed[\s\S]*?verifySessionCharacter[\s\S]*?currentPreparedManifestVersion[\s\S]*?manifest_version_changed/,'Backend armour calculation must enforce Origin, session, CSRF, Guardian binding and the current live manifest version.');
 assert.match(worker,/possibleCombinations > 25_000_000/,'The exhaustive backend calculation must retain a defensive account-size ceiling.');
 assert.match(armourSolver,/const visit = \(slot: number, exoticCount: number\)[\s\S]*?combinationsEvaluated \+= 1[\s\S]*?visit\(0, 0\)/,'The backend solver must enumerate every legal owned five-slot combination.');
-assert.match(worker,/WORKSPACE_PREPARED_PAGES[^=]*= \["character", "build-forge", "vault", "loadout"\][\s\S]*?warmPreparedWorkspace/,'Journey must initiate private backend preparation for every downstream page.');
+assert.doesNotMatch(worker,/warmPreparedWorkspace/,'Journey must not build downstream pages inside its own Worker request (memory limit).');
 assert.match(preparedPageCache,/PREPARED_PAGE_MAX_BYTES = 24 \* 1024 \* 1024[\s\S]*?new TextEncoder\(\)\.encode\(body\)\.byteLength/,'The private prepared-page cache must enforce an exact byte limit.');
 
 for(const [kind,path] of [
