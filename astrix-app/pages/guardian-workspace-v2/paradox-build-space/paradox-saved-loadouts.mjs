@@ -288,7 +288,7 @@ async function runBackgroundSync(){
   syncRunning=true;syncAgain=false;syncAbort=new AbortController();
   let next=60000;
   try{
-    const {getBungieSession}=await import('../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1');
+    const {getBungieSession}=await import('../guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-1');
     const session=await getBungieSession({force:retryDelay>5000||!globalThis.FORGE_BUNGIE_SESSION?.authenticated});
     activeSyncAccount=session?.authenticated?accountKey(session.activeDestinyMembership):'';
     emitSync('forge:paradox-sync',{state:'syncing'});

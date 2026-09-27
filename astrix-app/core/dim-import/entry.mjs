@@ -29,7 +29,7 @@ export async function importDimLoadout(input,{returnFocus}={}){
   const now=context(),active=sessionBinding(now.session);
   if(now.characterId!==before.characterId||active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType)throw new Error('The account or Guardian changed. Paste the link again.');
   const model=resolveDimLoadout(loadout,{snapshot,profile:now.profile,binding,currentSeasonNumber:globalThis.FORGE_PAGE_PAYLOAD?.currentSeasonNumber});
-  const actions=createDimActions(model,{getContext:context,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1')).saveParadoxLoadout(value),send,refresh:()=>document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'dim-apply'}}))});
+  const actions=createDimActions(model,{getContext:context,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-1')).saveParadoxLoadout(value),send,refresh:()=>document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'dim-apply'}}))});
   current?.close();
   const disabledReasons={};if(!now.session.authenticated||!binding.characterId)for(const key of ['equip','save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
   current=openLoadoutDetails(model,{actions,actionRows:[['forge','Send to Build Forge'],['save','Save as PARADOX loadout'],['equip','Equip']],disabledReasons,returnFocus,onClose:()=>{current=null;}});

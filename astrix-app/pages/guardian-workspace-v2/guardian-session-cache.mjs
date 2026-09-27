@@ -1,3 +1,4 @@
+import {boundedStringify,jsonByteLength} from '../../core/bounded-json.mjs';
 import {createActiveProfileRefresh,notifyProfileRefreshState} from '../../core/active-profile-refresh.mjs?v=20260927-active-profile-1';
 const SESSION_KEY="astrix:bungie-session-cache:v1";
 const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v4:";
@@ -31,7 +32,7 @@ const safeSessionRead=key=>{
 };
 
 const safeSessionWrite=(key,value)=>{
-  try{sessionStorage.setItem(key,JSON.stringify(value));return true;}
+  try{sessionStorage.setItem(key,boundedStringify(value,'session cache'));return true;}
   catch{return false;}
 };
 
@@ -255,6 +256,7 @@ async function cacheBungieProfile(session,payload,page=payload?.pageReady?.page)
   const key=profileRecordKey(identity,scope);
   cacheBungieSession(session);
   safeSessionWrite(profileMarkerKey(scope),{key,identity,scope,savedAt});
+  try{jsonByteLength(payload,{context:'profile cache'});}catch{return false;}
   const written=await writeRecord({key,identity,scope,savedAt,payload});
   if(!written)safeSessionWrite(profileFallbackKey(scope),{key,identity,scope,savedAt,payload});
   return written;

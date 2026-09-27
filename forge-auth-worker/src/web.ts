@@ -1,5 +1,9 @@
+import {boundedStringify} from '../../astrix-app/core/bounded-json.mjs';
 export function json(body: Record<string, unknown>, status = 200, extraHeaders: HeadersInit = {}): Response {
-  return new Response(JSON.stringify(body), {
+  let text: string;
+  try { text = boundedStringify(body, 'worker response'); }
+  catch { return new Response('{"error":"profile_payload_too_large","message":"Profile data exceeds the safety limit. Retry loading the profile."}', { status: 503, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } }); }
+  return new Response(text, {
     status,
     headers: {
       "Content-Type": "application/json; charset=utf-8",
