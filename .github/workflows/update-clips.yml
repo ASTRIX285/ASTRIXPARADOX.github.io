@@ -20,6 +20,9 @@ jobs:
       - name: Validate generated footer
         run: node astrix-app/tools/validate-bungie-footer.mjs
 
+      - name: Validate generated loader
+        run: node astrix-app/tools/validate-single-loader.mjs
+
       - name: Commit updated clips page
         run: |
           git config user.name "github-actions"

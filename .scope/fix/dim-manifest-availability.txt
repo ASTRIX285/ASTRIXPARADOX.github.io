@@ -1,0 +1,9 @@
+.github/workflows/refresh-backend-manifest.yml
+astrix-app/tools/build-backend-manifest.py
+astrix-app/tools/test-manifest-coverage.py
+astrix-app/tools/smoke-dim-manifest.mjs
+astrix-app/tools/test-dim-manifest-smoke.mjs
+astrix-app/tools/paradox-validator.mjs
+pages/clips.html
+scripts/build_clips.py
+.github/workflows/update-clips.yml

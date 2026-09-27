@@ -111,17 +111,86 @@ class ManifestCoverage(unittest.TestCase):
         self.assertEqual(reads, [])
         self.assertEqual(self.snapshot(), before)
 
-    def test_schema_change_cannot_redownload_same_version(self):
+    def test_same_version_missing_table_downloads_only_missing_table(self):
         manifest, tables = self.fixture()
         self.run_build(manifest, tables)
         index = self.index()
         del index['tables']['DestinyLoadoutNameDefinition']
         (self.out / 'index.json').write_text(json.dumps(index))
+        changed, reads, checks = self.run_build(manifest, tables)
+        self.assertTrue(changed)
+        self.assertEqual(reads, ['https://www.bungie.net' + manifest['jsonWorldComponentContentPaths']['en']['DestinyLoadoutNameDefinition']])
+        self.assertEqual(checks, 2)
+        self.assertEqual(set(self.index()['tables']), set(REQUIRED))
+
+    def test_deployed_legacy_snapshot_upgrades_without_redownloading_existing_tables(self):
+        manifest, tables = self.fixture()
+        self.run_build(manifest, tables)
+        index = self.index()
+        # Production's status returned this older shape: no checksums, table
+        # versions or retirement metadata, and eight newer catalogues absent.
+        missing = ['Destiny' + name + 'Definition' for name in
+                   ('InventoryBucket', 'LoadoutName', 'LoadoutIcon', 'LoadoutColor',
+                    'ActivityMode', 'Place', 'StatGroup', 'Vendor')]
+        for name in ('preparationVersion', 'retirementArchiveVersion', 'retiredTables'):
+            index.pop(name, None)
+        for table in missing:
+            del index['tables'][table]
+        for section in ('tables', 'pageTables'):
+            for descriptor in index[section].values():
+                for name in ('sha256', 'manifestVersion', 'sourcePath'):
+                    descriptor.pop(name, None)
+        (self.out / 'index.json').write_text(json.dumps(index))
+        changed, reads, checks = self.run_build(manifest, tables)
+        self.assertTrue(changed)
+        self.assertEqual(set(reads), {'https://www.bungie.net' + manifest['jsonWorldComponentContentPaths']['en'][table] for table in missing})
+        self.assertEqual(checks, 2)
+        upgraded = self.index()
+        self.assertEqual(upgraded['preparationVersion'], builder.PREPARATION_VERSION)
+        for descriptor in upgraded['tables'].values():
+            self.assertEqual(descriptor['manifestVersion'], manifest['version'])
+            self.assertEqual(len(descriptor['sha256']), descriptor['shards'])
+        builder.validate_saved_coverage(upgraded, manifest['version'], REQUIRED)
+        before = self.snapshot()
+        changed, reads, checks = self.run_build(manifest, tables)
+        self.assertFalse(changed)
+        self.assertEqual(reads, [])
+        self.assertEqual(checks, 1)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_upgrade_preserves_retirement_and_fails_before_network_on_corruption(self):
+        self.run_build(*self.fixture())
+        manifest, tables = self.fixture('fixture-v2')
+        tables['DestinyLoadoutNameDefinition'] = {}
+        self.run_build(manifest, tables)
+        archive = (self.out / 'retired/DestinyLoadoutNameDefinition/0.json').read_bytes()
+        index = self.index()
+        index.pop('preparationVersion')
+        (self.out / 'index.json').write_text(json.dumps(index))
+        changed, reads, _ = self.run_build(manifest, tables)
+        self.assertTrue(changed)
+        self.assertEqual(reads, [])
+        self.assertEqual((self.out / 'retired/DestinyLoadoutNameDefinition/0.json').read_bytes(), archive)
+        index = self.index()
+        index.pop('preparationVersion')
+        (self.out / 'index.json').write_text(json.dumps(index))
+        (self.out / 'retired/DestinyLoadoutNameDefinition/0.json').write_text('{}')
         before = self.snapshot()
         with patch.object(builder, 'metadata', return_value=manifest), patch.object(builder, 'fetch') as fetch:
-            with self.assertRaisesRegex(ValueError, 'awaits a new Bungie version'):
+            with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
                 builder.main()
             fetch.assert_not_called()
+        self.assertEqual(self.snapshot(), before)
+
+    def test_upgrade_version_race_keeps_previous_snapshot(self):
+        manifest, tables = self.fixture()
+        self.run_build(manifest, tables)
+        index = self.index()
+        index.pop('preparationVersion')
+        (self.out / 'index.json').write_text(json.dumps(index))
+        before = self.snapshot()
+        with self.assertRaisesRegex(ValueError, 'changed during preparation'):
+            self.run_build(manifest, tables, end_manifest=self.fixture('fixture-v2')[0])
         self.assertEqual(self.snapshot(), before)
 
     def test_retirement_cumulative_names_icons_types_and_reintroduction(self):
@@ -232,7 +301,11 @@ class ManifestCoverage(unittest.TestCase):
         workflow = (root / '.github/workflows/refresh-backend-manifest.yml').read_text()
         self.assertIn("cron: '23 * * * *'", workflow)
         self.assertIn('restore-keys: backend-manifest-v1-', workflow)
-        self.assertEqual(workflow.count("if: steps.manifest.outputs.changed == 'true'"), 2)
+        self.assertIn("push:\n    branches: [main]", workflow)
+        self.assertIn("- 'forge-manifest-worker/**'", workflow)
+        self.assertIn("if: steps.manifest.outputs.changed == 'true' || github.event_name != 'schedule'", workflow)
+        self.assertIn('run: node astrix-app/tools/smoke-dim-manifest.mjs', workflow)
+        self.assertLess(workflow.index('name: Verify live DIM'), workflow.index('name: Retain verified'))
         auth = (root / 'forge-auth-worker/src/index.ts').read_text()
         service = (root / 'astrix-app/pages/guardian-workspace-v2/guardian-manifest-service.mjs').read_text()
         allowlist = auth[auth.index('const MANIFEST_COMPONENT_TYPES'):auth.index('const MANIFEST_COMPONENT_TYPES')+2200]

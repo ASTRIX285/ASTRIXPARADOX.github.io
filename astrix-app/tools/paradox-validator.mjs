@@ -25,6 +25,7 @@ const validators=[
   'test-loadout-details-backend.mjs',
   'test-dim-import.mjs',
   'test-dim-import-cache.mjs',
+  'test-dim-manifest-smoke.mjs',
   'test-worker-limits.mjs',
   'test-dim-tether.mjs',
   'validate-super-formation.mjs',
