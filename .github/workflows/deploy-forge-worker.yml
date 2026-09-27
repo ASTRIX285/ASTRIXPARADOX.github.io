@@ -33,6 +33,8 @@ jobs:
         run: npm install
       - name: Paradox Validator — TypeScript and Wrangler dry-run
         run: npm run check --if-present
+      - name: Validate smoke retry behavior
+        run: node --test ../.github/scripts/worker-smoke-fetch.test.mjs
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
@@ -42,15 +44,16 @@ jobs:
           command: deploy
       - name: Paradox Validator — live health
         run: |
-          node -e "fetch('https://auth.astrixparadox.com/health').then(async r=>{const b=await r.json();if(!r.ok||b.status!=='ready')throw new Error(JSON.stringify(b));console.log('health pass')})"
+          node --input-type=module -e "import {smokeFetch} from '../.github/scripts/worker-smoke-fetch.mjs'; smokeFetch('https://auth.astrixparadox.com/health').then(async r=>{const b=await r.json();if(!r.ok||b.status!=='ready')throw new Error(JSON.stringify(b));console.log('health pass')})"
       - name: Paradox Validator — authentication guard
         run: |
-          node -e "fetch('https://auth.astrixparadox.com/bungie/profile').then(async r=>{const b=await r.json();if(r.status!==401||b.error!=='authentication_required')throw new Error(r.status+' '+JSON.stringify(b));console.log('profile guard pass')})"
+          node --input-type=module -e "import {smokeFetch} from '../.github/scripts/worker-smoke-fetch.mjs'; smokeFetch('https://auth.astrixparadox.com/bungie/profile').then(async r=>{const b=await r.json();if(r.status!==401||b.error!=='authentication_required')throw new Error(r.status+' '+JSON.stringify(b));console.log('profile guard pass')})"
       - name: Paradox Validator — localhost credentialed CORS
         run: |
-          node - <<'NODE'
+          node --input-type=module - <<'NODE'
+          import {smokeFetch} from '../.github/scripts/worker-smoke-fetch.mjs';
           for (const origin of ['http://localhost:8000', 'http://localhost:5500']) {
-            const preflight = await fetch('https://auth.astrixparadox.com/bungie/profile', {
+            const preflight = await smokeFetch('https://auth.astrixparadox.com/bungie/profile', {
               method: 'OPTIONS',
               headers: {
                 Origin: origin,
@@ -62,7 +65,7 @@ jobs:
             if (preflight.headers.get('access-control-allow-origin') !== origin) throw new Error(`${origin} preflight origin mismatch`);
             if (preflight.headers.get('access-control-allow-credentials') !== 'true') throw new Error(`${origin} preflight credentials missing`);
 
-            const profile = await fetch('https://auth.astrixparadox.com/bungie/profile', {
+            const profile = await smokeFetch('https://auth.astrixparadox.com/bungie/profile', {
               headers: { Origin: origin }
             });
             const body = await profile.json();
