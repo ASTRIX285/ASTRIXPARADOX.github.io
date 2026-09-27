@@ -54,6 +54,8 @@ const MANIFEST_COMPONENT_TYPES = new Set([
   "DestinyStatGroupDefinition",
   "DestinySocketCategoryDefinition",
   "DestinyEquipableItemSetDefinition",
+  "DestinyLoadoutNameDefinition", "DestinyLoadoutIconDefinition", "DestinyLoadoutColorDefinition",
+  "DestinyActivityModeDefinition", "DestinyPlaceDefinition", "DestinyVendorDefinition",
   "DestinyPresentationNodeDefinition", "DestinyRecordDefinition", "DestinyObjectiveDefinition",
   "DestinyCollectibleDefinition", "DestinyMetricDefinition", "DestinyGuardianRankDefinition",
   "DestinyGuardianRankConstantsDefinition", "DestinyDestinationDefinition", "DestinyActivityDefinition",

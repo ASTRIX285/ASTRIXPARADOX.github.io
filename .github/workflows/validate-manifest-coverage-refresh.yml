@@ -1,0 +1,59 @@
+name: Manifest coverage and active refresh
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.scope/feat/manifest-coverage-refresh.txt'
+      - '.github/workflows/validate-manifest-coverage-refresh.yml'
+      - 'astrix-app/tools/build-backend-manifest.py'
+      - 'astrix-app/tools/test-manifest-coverage.py'
+      - 'astrix-app/tools/test-active-profile-refresh.mjs'
+      - 'astrix-app/core/active-profile-refresh.mjs'
+      - 'astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs'
+      - 'forge-manifest-worker/**'
+      - 'forge-auth-worker/src/index.ts'
+      - '.github/workflows/refresh-backend-manifest.yml'
+      - 'astrix-app/tools/test-manifest-retirement.mjs'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --experimental-strip-types
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Published implementation diff
+        run: |
+          git branch main origin/main
+          git diff --stat main...HEAD
+          git rev-parse HEAD HEAD^{tree}
+          for file in astrix-app/tools/build-backend-manifest.py astrix-app/core/active-profile-refresh.mjs forge-manifest-worker/worker.mjs astrix-app/tools/test-manifest-coverage.py astrix-app/tools/test-manifest-retirement.mjs astrix-app/tools/test-active-profile-refresh.mjs; do
+            git diff --name-only main...HEAD | grep -Fx "$file"
+          done
+      - name: Branch scope
+        run: node astrix-app/tools/validate-scope-guard.mjs
+      - name: Journey validation
+        if: always()
+        run: node astrix-app/tools/validate-journey-visual-pass.mjs
+      - name: Manifest and refresh regressions
+        if: always()
+        run: |
+          python3 astrix-app/tools/test-manifest-coverage.py
+          node astrix-app/tools/test-manifest-retirement.mjs
+          node astrix-app/tools/test-active-profile-refresh.mjs
+      - name: Registered validation suite
+        if: always()
+        run: node astrix-app/tools/paradox-validator.mjs

@@ -1,4 +1,48 @@
 // Public game definitions only. This Worker has no OAuth or account bindings.
+// Retired definitions carry identity only, not fabricated gameplay fields.
+function retiredIdentity(row,type){
+  if(row.type!==type)throw new Error('retirement_type_mismatch');
+  const label=typeof row.name==='string'&&row.name?`Retired: ${row.name}`:null;
+  const result={hash:row.hash,retired:true,definitionType:type,
+    retirement:{name:row.name,icon:row.icon,type,lastSeenVersion:row.lastSeenVersion,removedInVersion:row.removedInVersion},
+    displayProperties:{...(label?{name:label}:{}),...(row.icon?{icon:row.icon}:{})}};
+  for(const field of ['itemType','itemSubType','itemTypeDisplayName','iconImagePath','colorImagePath']){
+    if(Object.hasOwn(row,field))result[field]=row[field];
+  }
+  if(type==='DestinyLoadoutNameDefinition'&&label)result.name=label;
+  return result;
+}
+
+async function readDefinitions(env,index,type,hashes,projection='full'){
+  const compact=projection==='page'&&index.pageTables?.[type];
+  const current=compact||index.tables[type];
+  async function read(descriptor,root,wanted){
+    if(descriptor.manifestVersion!=null&&descriptor.manifestVersion!==index.manifestVersion)throw new Error('manifest_table_version_mismatch');
+    if(!Number.isInteger(descriptor.shards)||descriptor.shards<1)throw new Error('invalid_shard_count');
+    const groups=new Map(),definitions={};
+    for(const hash of wanted){
+      const shard=Number(hash)%descriptor.shards;
+      if(!groups.has(shard))groups.set(shard,[]);
+      groups.get(shard).push(hash);
+    }
+    // Read only requested bounded shards, never a complete table/archive.
+    await Promise.all([...groups].map(async([shard,keys])=>{
+      const response=await env.ASSETS.fetch(new Request(`https://assets/${root}/${shard}.json`));
+      if(!response.ok)throw new Error('manifest_shard_unavailable');
+      const rows=await response.json();
+      for(const hash of keys)if(Object.hasOwn(rows,hash))definitions[hash]=rows[hash];
+    }));
+    return definitions;
+  }
+  const definitions=await read(current,compact?`page/${type}`:type,hashes);
+  const missing=hashes.filter(hash=>!Object.hasOwn(definitions,hash));
+  const archive=index.retiredTables?.[type];
+  if(missing.length&&archive){
+    const retired=await read(archive,`retired/${type}`,missing);
+    for(const [hash,row] of Object.entries(retired))definitions[hash]=retiredIdentity(row,type);
+  }
+  return definitions;
+}
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
@@ -15,19 +59,9 @@ export default {
       if(total>20000||entries.some(([type,hashes])=>!index.tables[type]||!Array.isArray(hashes)))return new Response(null,{status:400});
       const tables={};
       await Promise.all(entries.map(async([type,hashes])=>{
-        const compact=projection==='page'&&index.pageTables?.[type];
-        const table=compact||index.tables[type],assetRoot=compact?`page/${type}`:type,unique=[...new Set(hashes.map(String))];
+        const unique=[...new Set(hashes.map(String))];
         if(unique.some(hash=>!/^\d+$/.test(hash)||Number(hash)<=0||Number(hash)>0xffffffff))throw new Error('invalid_hash');
-        const groups=new Map();
-        for(const hash of unique){const shard=Number(hash)%table.shards;if(!groups.has(shard))groups.set(shard,[]);groups.get(shard).push(hash);}
-        const definitions={};
-        await Promise.all([...groups].map(async([shard,wanted])=>{
-          const response=await env.ASSETS.fetch(new Request(`https://assets/${assetRoot}/${shard}.json`));
-          if(!response.ok)throw new Error('manifest_shard_unavailable');
-          const rows=await response.json();
-          for(const hash of wanted)if(rows[hash])definitions[hash]=rows[hash];
-        }));
-        tables[type]=definitions;
+        tables[type]=await readDefinitions(env,index,type,unique,projection);
       })).catch(()=>null);
       if(Object.keys(tables).length!==entries.length)return new Response(null,{status:503});
       return Response.json({manifestVersion:index.manifestVersion,projection,tables});
@@ -49,16 +83,9 @@ export default {
     const type=url.searchParams.get('type'),table=index.tables[type];
     const hashes=[...new Set((url.searchParams.get('hashes')||'').split(','))];
     if(!table||hashes.length>48||hashes.some(h=>!/^\d+$/.test(h)||Number(h)<=0||Number(h)>0xffffffff))return new Response(null,{status:400});
-    const groups=new Map();
-    for(const hash of hashes){const shard=Number(hash)%table.shards;if(!groups.has(shard))groups.set(shard,[]);groups.get(shard).push(hash);}
-    const definitions={};
-    // Each shard is <= 2 MiB. Never parse a whole Bungie definition table here.
-    for(const [shard,wanted] of groups){
-      const response=await env.ASSETS.fetch(new Request(`https://assets/${type}/${shard}.json`));
-      if(!response.ok)return new Response(null,{status:503});
-      const rows=await response.json();
-      for(const hash of wanted)if(rows[hash])definitions[hash]=rows[hash];
-    }
+    let definitions;
+    try{definitions=await readDefinitions(env,index,type,hashes);}
+    catch{return new Response(null,{status:503});}
     return Response.json({manifestVersion:index.manifestVersion,type,definitions,unresolved:hashes.filter(h=>!definitions[h])});
   }
 };

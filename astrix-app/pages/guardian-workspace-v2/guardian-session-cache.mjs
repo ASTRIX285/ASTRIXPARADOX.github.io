@@ -1,3 +1,4 @@
+import {createActiveProfileRefresh,notifyProfileRefreshState} from '../../core/active-profile-refresh.mjs?v=20260927-active-profile-1';
 const SESSION_KEY="astrix:bungie-session-cache:v1";
 const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v4:";
 const PROFILE_FALLBACK_PREFIX="astrix:bungie-page-cache-fallback:v4:";
@@ -15,12 +16,14 @@ const BUILD_FORGE_STATE_PREFIX="build-forge-state:v1";
 // verified Guardian available for a full working session so Main <-> Build
 // navigation never collapses to placeholders while Bungie refreshes.
 const PROFILE_TTL_MS=12*60*60*1000;
-const PREPARED_PAGE_REFRESH_MS=10*60*1000;
+const PREPARED_PAGE_REFRESH_MS=5*60*1000;
 const PREPARED_PAGE_RETRY_MS=60*1000;
 const FORGE_TRANSFER_TTL_MS=30*60*1000;
 const FORGE_TRANSFER_IO_TIMEOUT_MS=4000;
 const BUILD_FORGE_STATE_TTL_MS=12*60*60*1000;
 const profileCacheSavedAt=new WeakMap();
+const CHECKS_KEY=Symbol.for('astrix.prepared-page-checks.v1');
+const memoryChecks=globalThis[CHECKS_KEY]||(globalThis[CHECKS_KEY]=new Map());
 
 const safeSessionRead=key=>{
   try{return JSON.parse(sessionStorage.getItem(key)||"null");}
@@ -46,89 +49,40 @@ function preparedPageCheckKey(session,page){
 
 function readPreparedPageCheck(session,page,{storage=globalThis.localStorage}={}){
   const key=preparedPageCheckKey(session,page);
-  if(!key||!storage)return 0;
+  if(!key)return 0;
+  const remembered=memoryChecks.get(key)||0;
   try{
-    const checkedAt=Number(storage.getItem(key)||0);
-    return Number.isFinite(checkedAt)&&checkedAt>0?checkedAt:0;
-  }catch{return 0;}
+    const checkedAt=Number(storage?.getItem(key)||0);
+    return Math.max(remembered,Number.isFinite(checkedAt)&&checkedAt>0?checkedAt:0);
+  }catch{return remembered;}
 }
 
 function markPreparedPageCheckSuccess(session,page,{storage=globalThis.localStorage,now=Date.now}={}){
   const key=preparedPageCheckKey(session,page);
-  if(!key||!storage)return 0;
+  if(!key)return 0;
   const checkedAt=Number(now());
   if(!Number.isFinite(checkedAt)||checkedAt<=0)return 0;
-  try{storage.setItem(key,String(checkedAt));return checkedAt;}
-  catch{return 0;}
+  memoryChecks.set(key,checkedAt);
+  try{storage?.setItem(key,String(checkedAt));}catch{}
+  notifyProfileRefreshState();
+  return checkedAt;
 }
 
 function createPreparedPageRefreshController({
-  session,
-  page,
-  refresh,
-  intervalMs=PREPARED_PAGE_REFRESH_MS,
-  retryMs=PREPARED_PAGE_RETRY_MS,
-  storage=globalThis.localStorage,
-  now=Date.now,
-  setTimer=(callback,delay)=>globalThis.setTimeout(callback,delay),
-  clearTimer=timer=>globalThis.clearTimeout(timer),
-  onError=()=>{}
+  session,page,refresh,intervalMs=PREPARED_PAGE_REFRESH_MS,retryMs=PREPARED_PAGE_RETRY_MS,
+  storage=globalThis.localStorage,now=Date.now,...options
 }={}){
-  if(!sessionIdentity(session))throw new Error("Connect Bungie to refresh.");
-  if(typeof refresh!=="function")throw new TypeError("Prepared page refresh requires a refresh function.");
-  let timer=null;
-  let activeRequest=null;
-  let running=false;
-
-  const cancelTimer=()=>{
-    if(timer===null)return;
-    clearTimer(timer);
-    timer=null;
-  };
-  const schedule=delay=>{
-    cancelTimer();
-    if(!running)return;
-    timer=setTimer(()=>{
-      timer=null;
-      void run("poll").catch(()=>{});
-    },Math.max(0,Number(delay)||0));
-  };
-  const scheduleFromLastSuccess=()=>{
-    const checkedAt=readPreparedPageCheck(session,page,{storage});
-    const elapsed=checkedAt?Math.max(0,Number(now())-checkedAt):intervalMs;
-    schedule(Math.max(0,intervalMs-elapsed));
-  };
-  const run=reason=>{
-    if(activeRequest)return activeRequest;
-    cancelTimer();
-    const request=Promise.resolve().then(()=>refresh({reason,force:true}));
-    activeRequest=request.then(result=>{
-      if(result===null||result===false)throw new Error("Prepared page refresh returned no payload.");
-      markPreparedPageCheckSuccess(session,page,{storage,now});
-      if(running)schedule(intervalMs);
-      return result;
-    }).catch(error=>{
-      if(running)schedule(Math.min(intervalMs,retryMs));
-      onError(error,reason);
-      throw error;
-    }).finally(()=>{
-      activeRequest=null;
-    });
-    return activeRequest;
-  };
-
-  return {
-    start(){if(!running){running=true;scheduleFromLastSuccess();}return this;},
-    stop(){running=false;cancelTimer();},
-    check(){
-      const checkedAt=readPreparedPageCheck(session,page,{storage});
-      if(!checkedAt||Number(now())-checkedAt>=intervalMs)return run("poll");
-      schedule(intervalMs-(Number(now())-checkedAt));
-      return null;
+  const identity=sessionIdentity(session);
+  if(!identity)throw new Error("Connect Bungie to refresh.");
+  return createActiveProfileRefresh({
+    ...options,key:`${identity}:${pageKind(page)}`,page:pageKind(page),refresh,intervalMs,retryMs,now,
+    isCurrent:()=>{
+      const current=globalThis.FORGE_BUNGIE_SESSION;
+      return session?.authenticated===true&&(!current||(current.authenticated===true&&sessionIdentity(current)===identity));
     },
-    refreshNow(){return run("manual");},
-    lastSuccessfulAt(){return readPreparedPageCheck(session,page,{storage});}
-  };
+    readSuccessfulAt:()=>readPreparedPageCheck(session,page,{storage}),
+    saveSuccessfulAt:checkedAt=>markPreparedPageCheckSuccess(session,page,{storage,now:()=>checkedAt})
+  });
 }
 
 function bindPreparedPageRefreshControl(button,controller,{onError=()=>{}}={}){

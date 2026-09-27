@@ -132,7 +132,7 @@ assert.match(journeyCss,/\.journey-page \.journey-vault-summary\{[\s\S]*?linear-
 assert.match(journeyCss,/\.journey-page \.mission-crest\{[\s\S]*?position:absolute;[\s\S]*?inset:0;[\s\S]*?transform:none/,'Journey must remove the inherited decorative diamond and let the emblem own the whole card');
 assert.match(journeyCss,/\.journey-page \.mission-crest img\{[\s\S]*?width:100%;[\s\S]*?height:100%;[\s\S]*?object-fit:cover;[\s\S]*?transform:none/,'Verified Bungie emblem artwork must fill the whole identity card');
 assert.match(journeyCss,/\.journey-page \.mission-identity-copy\{[\s\S]*?width:66\.667%;[\s\S]*?margin-left:33\.333%/,'Guardian class and subclass must overlay the emblem beginning one third into the card');
-assert.match(sessionCache,/const PREPARED_PAGE_REFRESH_MS=10\*60\*1000;/,'Prepared pages must check their merged Bungie payload every ten minutes');
+assert.match(sessionCache,/const PREPARED_PAGE_REFRESH_MS=10\*60\*1000;/,'Prepared pages must check their merged Bungie payload every five minutes');
 assert.match(journeyModule,/loadPreparedPagePayload\(journeySession,'journey',\{force:true\}\)/,'Background refreshes must request the merged Journey page payload through the shared client');
 assert.match(journeyModule,/createPreparedPageRefreshController\(\{[\s\S]*?page:'journey'[\s\S]*?refresh:options=>refreshJourneyProfile\(options\)/,'Journey must use the persistent prepared page refresh schedule');
 assert.match(journeyModule,/journeyRefreshController\.check\(\)[\s\S]*?visibilitychange/,'Journey must immediately check an overdue prepared payload when the page becomes visible');
