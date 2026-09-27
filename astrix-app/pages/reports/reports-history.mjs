@@ -114,11 +114,13 @@ export function createReportsHistory(snapshot,{origin='https://auth.astrixparado
   return {advance,page,readPage,runs,complete,pgcr,detail};
 }
 
+export const normalizeDifficulty=label=>String(label).replace(/(^| · )Normal$/, '$1Standard');
+
 export function difficultyFor(run,activity){
   // The director hash identifies the selected node/version. Reference is the
   // fallback when that node is absent from this family, never variants[0].
   const variant=activity.variants.find(v=>v.hash===run.directorHash)||activity.variants.find(v=>v.hash===run.hash);
-  return variant?.variant?[variant.variant,variant.difficulty==='-'?'':variant.difficulty].filter(Boolean).join(' · '):variant?.difficulty||'Unresolved difficulty';
+  return normalizeDifficulty(variant?.variant?[variant.variant,variant.difficulty==='-'?'':variant.difficulty].filter(Boolean).join(' · '):variant?.difficulty||'Unresolved difficulty');
 }
 export function historyTotals(activity,rows,complete){
   const sum=key=>complete&&rows.every(row=>Number.isFinite(row[key]))?rows.reduce((total,row)=>total+row[key],0):null;

@@ -81,7 +81,7 @@ try{
   await page.goForward();await page.locator('.reports-run-page .reports-player-table').waitFor();
   await page.locator('[data-back-activity]').click();
   await page.locator('.reports-tabs [data-difficulty="Master"]').click();assert.equal(await page.locator('.reports-runs li').count(),0);
-  await page.locator('.reports-detail-card [data-difficulty="Normal"]').click();assert.equal(await page.locator('.reports-runs li').count(),20);
+  await page.locator('.reports-detail-card [data-difficulty="Standard"]').click();assert.equal(await page.locator('.reports-runs li').count(),20);
   await page.getByLabel('Character',{exact:true}).selectOption('2');assert.equal(await page.locator('.reports-runs li').count(),0);
   await page.locator('[data-back]:visible').click();assert.equal((await card.innerText()).trim(),'Fixture Raid');
   assert.deepEqual(errors,[]);
