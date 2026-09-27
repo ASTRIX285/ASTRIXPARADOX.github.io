@@ -3,7 +3,7 @@ import {forgeSetListOptions,forgeSetListMarkup,unresolvedForgeSets} from './forg
 import {startForgeBackgroundRefresh,mergeExoticCheckCatalogue,bindExoticCheckControl,forgeInventorySignature} from './forge-loader-refresh.mjs?v=20260910-source-coverage-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&fix=20260909-set-list-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
-import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey} from '../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS,createVaultCatalogue,itemKey} from '../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {compatibleWithClass,exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
 import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
@@ -12,7 +12,7 @@ import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=202
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -204,11 +204,13 @@ function renderExoticWeapons(){
   const host=byId('forgeExoticWeaponSlots');if(!host)return;
   const groups=exoticWeaponGroups();
   if(!groups.length){host.innerHTML='<div class="forge-empty">No Exotic weapons on this Guardian.</div>';byId('forgeWeaponAnchorStatus').textContent='No Exotic weapon anchor selected.';return;}
-  host.innerHTML=groups.map(group=>{
-    const selected=group.key===selectedExoticWeaponKey;
-    const catalystBadge=!group.catalyst.present?'':`<em class="forge-weapon-catalyst${group.catalyst.active?' is-active':group.catalyst.unlocked?' is-unlocked':''}">${group.catalyst.active?'CATALYST ACTIVE':group.catalyst.unlocked?'CATALYST INSERTED':'CATALYST NOT COMPLETE'}</em>`;
-    return `<button type="button" class="forge-weapon-slot${selected?' is-selected':''}" data-exotic-weapon-key="${esc(group.key)}" aria-pressed="${selected}" data-inspect-item="${esc(itemKey(group.representative))}"><img src="${esc(group.icon)}" alt="">
-      <span><b>${esc(group.name)}</b><small>${esc(group.weaponType)}</small>${catalystBadge}</span></button>`;
+  host.innerHTML=WEAPON_BUCKETS.map(bucket=>{
+    const rows=groups.filter(group=>group.bucketHash===bucket.hash);
+    const label=bucket.key==='special'?'Secondary':bucket.label;
+    return `<section class="forge-exotic-slot"><h3>${esc(label.toUpperCase())}</h3><div class="forge-exotic-grid">${rows.length?rows.map(group=>{
+      const selected=group.key===selectedExoticWeaponKey;
+      return `<button type="button" class="forge-exotic${selected?' is-selected':''}" data-exotic-weapon-key="${esc(group.key)}" aria-pressed="${selected}" aria-label="${selected?'Clear':'Anchor'} ${esc(group.name)}" data-inspect-item="${esc(itemKey(group.representative))}"><img src="${esc(group.icon)}" alt="" loading="lazy" decoding="async"></button>`;
+    }).join(''):'<p class="forge-weapon-empty">No Exotic weapons in this slot.</p>'}</div></section>`;
   }).join('');
   const anchor=selectedExoticWeapon();
   byId('forgeWeaponAnchorStatus').textContent=anchor?`${anchor.name} anchored${anchor.catalyst.present?(anchor.catalyst.active?', catalyst active':anchor.catalyst.unlocked?', catalyst inserted but not complete':', catalyst not unlocked'):''}.`:'No Exotic weapon anchor selected. Optional: pick one to lock it into generation.';
@@ -295,7 +297,7 @@ function configureStats({reset=false}={}){
   byId('forgeStatStatus').textContent=!exotic?'SELECT EXOTIC':available?(count||priorityCount?`${count} TARGET${count===1?'':'S'} · ${priorityCount} PRIORIT${priorityCount===1?'Y':'IES'}`:'AUTO MAXIMUM'):'NO COMPLETE LOAD';
 }
 
-const PREVIEW_COUNT=3;
+const PREVIEW_COUNT=10;
 let calculationToken=0,calculationController=null,openProtocolChosen=false,expandedPreviewIndex=-1;
 
 function canSearch(){return Boolean(selectedExotic())&&(activeTargetCount()>0||activePriorityCount()>0||setSelections.length>0||openProtocolChosen);}

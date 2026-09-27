@@ -1,0 +1,78 @@
+/* Forge selectors use the same capped artwork size as Character and Vault. */
+html:root:has(>body.forge-loader-page){
+  --apx-equipment-icon-size:clamp(32px,calc((100vw - var(--apx-equipment-reference-inset) - 76px) / 20),66px);
+}
+body.forge-loader-page .forge-loader-shell{--forge-matrix-tile-size:3.5rem;min-width:0}
+body.forge-loader-page .forge-loader-workspace{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr);
+  grid-auto-rows:auto;align-items:start;gap:1rem;
+}
+.forge-loader-workspace>.forge-loader-selector,
+.forge-loader-workspace>.forge-loader-directives{display:contents}
+.forge-loader-workspace .forge-selected-guardian,
+.forge-loader-workspace .forge-residency{display:none}
+.forge-loader-workspace .forge-exotic-selector:not(.forge-exotic-weapon-selector){grid-column:1;grid-row:1}
+.forge-loader-workspace .forge-stat-selector{grid-column:2;grid-row:1}
+.forge-loader-workspace .forge-set-selector{grid-column:1/3;grid-row:2}
+.forge-loader-workspace .forge-exotic-weapon-selector{grid-column:1/3;grid-row:3}
+.forge-loader-workspace>.forge-loader-output{grid-column:3;grid-row:1/4;height:auto;align-content:start;grid-template-rows:auto auto;min-width:0}
+.forge-loader-page .forge-panel-heading{flex-wrap:wrap}
+.forge-loader-page .forge-panel-heading h2{overflow-wrap:anywhere}
+.forge-loader-page .forge-exotic-grid{gap:6px}
+.forge-loader-page .forge-weapon-slots{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
+.forge-weapon-empty{grid-column:1/-1;margin:0;color:var(--apx-text-readable);font-size:.9rem}
+.forge-loader-page .forge-weapon-anchor-status{font-size:.9rem;line-height:1.4;overflow-wrap:anywhere}
+/* Two sets per row, each retaining its name, two-piece and four-piece columns. */
+.forge-loader-page .forge-set-selector .forge-set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.forge-loader-page .forge-set-selector .forge-set{grid-template-columns:minmax(0,1fr) repeat(2,minmax(0,1.18fr))}
+.forge-loader-page .forge-set-selector .forge-set-choice{flex-wrap:wrap;min-height:44px}
+.forge-loader-page .forge-set-selector .forge-set-detail{overflow:visible}
+.forge-loader-page .forge-set-selector .forge-set-detail b{font-size:.85rem}
+@container(max-width:48rem){
+  .forge-loader-page .forge-set-selector .forge-set-grid{grid-template-columns:minmax(0,1fr)}
+}
+.forge-loader-page .forge-preview-builds{max-height:70vh;max-height:70dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;align-content:start}
+.forge-loader-page .forge-preview-builds:focus-visible{outline:2px solid var(--apx-gold);outline-offset:3px}
+/* Reflow ranked rows by panel width, including expanded item breakdowns. */
+.forge-loader-page .forge-loader-output{container-type:inline-size}
+.forge-loader-page .forge-matrix-row{grid-template-columns:3.5rem var(--apx-equipment-icon-size) minmax(0,1fr) 3.5rem;gap:.5rem;padding:.5rem}
+.forge-loader-page .forge-matrix-expand{grid-column:1;grid-row:1}
+.forge-loader-page .forge-matrix-exotic{grid-column:2;grid-row:1}
+.forge-loader-page .forge-matrix-protocol{grid-column:3;grid-row:1}
+.forge-loader-page .forge-matrix-total{grid-column:3;grid-row:2}
+.forge-loader-page .forge-matrix-row>.forge-candidate-select{grid-column:4;grid-row:1}
+.forge-loader-page .forge-matrix-stats{grid-column:1/-1;grid-row:3;grid-template-columns:repeat(6,minmax(0,1fr));justify-content:stretch;gap:.25rem}
+.forge-loader-page .forge-matrix-stats>.forge-matrix-stat{width:100%;height:auto;min-height:3.5rem;aspect-ratio:auto;overflow:visible}
+.forge-loader-page .forge-matrix-stat-reading{flex-wrap:wrap}
+.forge-loader-page .forge-matrix-stats .forge-matrix-stat em{font-size:.65rem;overflow-wrap:anywhere}
+.forge-loader-page .forge-breakdown-item{grid-template-columns:minmax(0,1fr) 3.5rem}
+.forge-loader-page .forge-breakdown-stats{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(6,minmax(0,1fr))}
+.forge-loader-page .forge-breakdown-summary{grid-template-columns:minmax(0,1fr)}
+.forge-loader-page .forge-breakdown-actions{grid-column:auto;display:flex;flex-wrap:wrap}
+.forge-loader-page .forge-breakdown-heading{flex-wrap:wrap}
+.forge-loader-page .forge-candidate-evaluate{white-space:normal}
+@container(max-width:24rem){
+  .forge-loader-page .forge-matrix-stats,.forge-loader-page .forge-breakdown-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .forge-loader-page .forge-matrix-stat small{font-size:.75rem}
+}
+@media(max-width:1200px){
+  body.forge-loader-page .forge-loader-workspace{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .forge-loader-workspace>.forge-loader-output{grid-column:1/-1;grid-row:4}
+}
+@media(max-width:760px){
+  body.forge-loader-page .forge-loader-workspace{grid-template-columns:minmax(0,1fr)}
+  .forge-loader-workspace .forge-exotic-selector:not(.forge-exotic-weapon-selector){grid-column:1;grid-row:1}
+  .forge-loader-workspace .forge-stat-selector{grid-column:1;grid-row:2}
+  .forge-loader-workspace .forge-set-selector{grid-column:1;grid-row:3}
+  .forge-loader-workspace .forge-exotic-weapon-selector{grid-column:1;grid-row:4}
+  .forge-loader-workspace>.forge-loader-output{grid-column:1;grid-row:5}
+  .forge-loader-page .forge-panel{padding:.75rem}
+  .forge-loader-page .forge-stat-actions{grid-template-columns:minmax(0,1fr)}
+  .forge-loader-page .forge-stat-targets label{grid-template-columns:minmax(0,1fr) 3.5rem 4.5rem}
+  .forge-loader-page .forge-results-workspace{padding:0}
+  .forge-loader-page .forge-results-back{white-space:normal;line-height:1.3}
+}
+@media(max-width:400px){
+  .forge-loader-page .forge-set-selector .forge-set{grid-template-columns:minmax(0,1fr)}
+  .forge-loader-page .forge-set-selector .forge-set-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+}

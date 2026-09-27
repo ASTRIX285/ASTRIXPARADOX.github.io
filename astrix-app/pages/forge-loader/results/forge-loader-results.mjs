@@ -7,14 +7,14 @@ import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionSt
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1';
 import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
-import {exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions} from '../forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
+import {exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,weaponCatalystState,rankOpenProtocolCandidates,setBonusOptions} from '../forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
 import {writeForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1&perf=20260927-1';
 import {preloadForgeLoaderPayload} from '../forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {forgeLoaderEvaluateReady,forgeLoaderResidency} from '../forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4';
 import {mountForgeShell} from '../../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup} from '../forge-loader-scan.mjs?v=20260927-1';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup} from '../forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1';
 import {EngineHandoffClient} from '../../../core/engine-handoff-client.mjs?v=20260927-1';
 import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
 import {beginEngineTiming} from '../../../core/engine-timing.mjs?v=20260927-1';
@@ -181,15 +181,16 @@ async function runSearch(){
   byId('forgeResultsRuntimeStatus').textContent='Searching Forge Matrix…';
   const sourceItems=armourItems();
   const manifestVersion=text(payload?.pageReady?.manifestVersion||guardianManifest.status().version);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),30_000);
   try{
-    const {matchedBuilds:next,targetMaximums}=await scanArmourCombinations({authOrigin:AUTH_ORIGIN,session,binding:membershipBinding(),manifestVersion,sourceItems,exotic:exoticGroup,setSelections:selection.setSelections,targets:selection.targets,priorities:selection.priorities,limit:CANDIDATE_BATCH_SIZE});
+    const {matchedBuilds:next,targetMaximums}=await scanArmourCombinations({authOrigin:AUTH_ORIGIN,session,binding:membershipBinding(),manifestVersion,sourceItems,exotic:exoticGroup,setSelections:selection.setSelections,targets:selection.targets,priorities:selection.priorities,limit:CANDIDATE_BATCH_SIZE,signal:controller.signal});
     matchedBuilds=selection.setSelections.length?next:rankOpenProtocolCandidates(next,exoticGroup);
     void targetMaximums;
   }catch(error){
     matchedBuilds=[];renderCandidates();
-    byId('forgeResultsRuntimeStatus').textContent=error?.message||'Backend armour calculation is unavailable.';
-    return;
-  }
+    throw error?.name==='AbortError'?new Error('Forge Matrix search timed out. Retry loading the results.'):error;
+  }finally{clearTimeout(timer);}
   visibleCandidateCount=Math.min(CANDIDATE_BATCH_SIZE,matchedBuilds.length);
   if(matchedBuilds.length)stageCandidate(Math.min(selection.selectIndex,matchedBuilds.length-1));else{renderStaged();renderCandidates();}
   const evaluated=Number(matchedBuilds.combinationsEvaluated||matchedBuilds.length);
@@ -239,7 +240,12 @@ async function init(){
     if(!exoticGroup){byId('forgeResultsRuntimeStatus').textContent='This Exotic is no longer in this Guardian’s inventory. Return to Forge Loader and search again.';globalThis.ForgeLoader?.done?.();return;}
     if(selection.weaponInstanceId){
       const weaponGroups=ownedExoticWeaponGroups(weaponItems());
-      weaponGroup=weaponGroups.find(group=>group.representative?.itemInstanceId===selection.weaponInstanceId)||null;
+      const group=weaponGroups.find(group=>group.instances.some(item=>item.itemInstanceId===selection.weaponInstanceId));
+      if(!group)throw new Error('The selected Exotic weapon is no longer in inventory. Return to Forge Loader to choose another weapon or clear the optional anchor.');
+      const representative=group.instances.find(item=>item.itemInstanceId===selection.weaponInstanceId);
+      weaponGroup={...group,representative,catalyst:weaponCatalystState(representative)};
+      byId('forgeResultsWeaponAnchor').textContent=`Weapon anchor: ${weaponGroup.name}`;
+      byId('forgeResultsWeaponAnchor').hidden=false;
     }
     byId('forgeResultsConnectionState').textContent='LOADING';
     await runSearch();
