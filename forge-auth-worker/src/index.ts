@@ -1235,7 +1235,8 @@ type JourneySemanticIndex = {
   definitionHashes?: Record<string, number[]>;
 };
 const PAGE_PAYLOAD_KINDS = new Set<PagePayloadKind>(["character", "build-forge", "journey", "vault", "loadout"]);
-const WORKSPACE_PREPARED_PAGES: readonly PagePayloadKind[] = ["character", "build-forge", "vault", "loadout"];
+// Backend page cache copies above this size are skipped (Worker memory is 128 MB).
+const PREPARED_PAGE_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 const PAGE_READ_VIEWS: Record<PagePayloadKind, readonly string[]> = {
   character: ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact"],
   "build-forge": ["characters", "equipped", "inventory", "saved-loadouts", "subclasses", "artifact", "manual-editor"],
@@ -1436,36 +1437,37 @@ function preparedPageEnvelope(
     definitions: Object.keys((account as any)?.definitions || {}).length,
     coverageComplete: (account as any)?.pageReady?.coverage?.complete === true
   });
+  // Pull based: one chunk is produced only when the consumer asks for it, so a
+  // slow client never makes the Worker hold the whole public bundle in memory.
+  let stage = 0, accountIndex = 0;
+  let totalBytes = prefix.byteLength + accountBytes + preparedPrefix.byteLength + suffix.byteLength;
   const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      controller.enqueue(prefix);
-      for (const chunk of encodedAccount.chunks) controller.enqueue(chunk);
-      controller.enqueue(preparedPrefix);
-      let totalBytes = prefix.byteLength + accountBytes + preparedPrefix.byteLength + suffix.byteLength;
+    async pull(controller) {
       try {
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (value) {
-              totalBytes += value.byteLength;
-              if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
-              controller.enqueue(value);
-            }
-          }
-        } else {
-          controller.enqueue(encoder.encode("{}"));
+        if (stage === 0) { controller.enqueue(prefix); stage = 1; return; }
+        if (stage === 1) {
+          if (accountIndex < encodedAccount.chunks.length) { controller.enqueue(encodedAccount.chunks[accountIndex++]); return; }
+          controller.enqueue(preparedPrefix); stage = 2; return;
         }
-        controller.enqueue(suffix);
-        controller.close();
+        if (stage === 2) {
+          if (!reader) { controller.enqueue(encoder.encode("{}")); controller.enqueue(suffix); controller.close(); stage = 3; return; }
+          const { done, value } = await reader.read();
+          if (done) { controller.enqueue(suffix); controller.close(); stage = 3; return; }
+          if (value) {
+            totalBytes += value.byteLength;
+            if (totalBytes > MAX_PREPARED_PAGE_BYTES) throw new PayloadSizeError("prepared page stream", totalBytes, MAX_PREPARED_PAGE_BYTES);
+            controller.enqueue(value);
+          }
+        }
       } catch (error) {
+        stage = 3;
         controller.error(error);
       }
     },
     cancel(reason) {
       return reader?.cancel(reason);
     }
-  });
+  }, { highWaterMark: 1 });
   return withCors(request, env, new Response(stream, {
     status: 200,
     headers: {
@@ -1501,7 +1503,29 @@ async function storePreparedPage(
   env: Env
 ): Promise<boolean> {
   if (!sessionId || !manifestVersion) return false;
-  const body = await response.clone().text();
+  // Read a bounded copy. A page larger than the cap is simply not cached, so the
+  // cache copy can never hold a full public bundle in Worker memory.
+  const reader = response.clone().body?.getReader();
+  if (!reader) return false;
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    size += value.byteLength;
+    if (size > PREPARED_PAGE_CACHE_MAX_BYTES) {
+      await reader.cancel("prepared_page_too_large_to_cache").catch(() => {});
+      console.info("prepared_page_cache_skipped", { page, reason: "size", limit: PREPARED_PAGE_CACHE_MAX_BYTES });
+      return false;
+    }
+    parts.push(value);
+  }
+  const joined = new Uint8Array(size);
+  let offset = 0;
+  for (const part of parts) { joined.set(part, offset); offset += part.byteLength; }
+  parts.length = 0;
+  const body = new TextDecoder().decode(joined);
   const url = new URL("https://internal/prepared-page");
   url.searchParams.set("page", page);
   url.searchParams.set("manifestVersion", manifestVersion);
@@ -1563,9 +1587,6 @@ async function pagePayloadRoute(
     if (cached) {
       const headers = new Headers(cached.headers);
       headers.set("X-Forge-Prepared-Page-Source", "backend-cache");
-      if (page === "journey" && context && options.warmWorkspace !== false) {
-        context.waitUntil(warmPreparedWorkspace(request, env));
-      }
       return withCors(request, env, new Response(cached.body, { status: 200, headers }));
     }
   }
@@ -1718,23 +1739,12 @@ async function pagePayloadRoute(
     if (context) context.waitUntil(cacheTask);
     else await cacheTask;
   }
-  if (page === "journey" && context && options.warmWorkspace !== false && sessionId) {
-    context.waitUntil(warmPreparedWorkspace(request, env));
-  }
+  // Workspace pages are never built inside a Journey request. Building four more
+  // pages in the same isolate while Journey streams exceeded the Worker memory
+  // limit in production (truncated Journey JSON, then HTTP 503). The browser
+  // prepares destinations itself through the destination ribbon.
+  void options;
   return response;
-}
-
-async function warmPreparedWorkspace(request: Request, env: Env): Promise<void> {
-  for (const page of WORKSPACE_PREPARED_PAGES) {
-    const url = new URL(request.url);
-    url.pathname = `/bungie/page/${page}`;
-    url.search = "";
-    url.searchParams.set("freshness", "display");
-    const response = await pagePayloadRoute(new Request(url, { headers: request.headers }), env, page, undefined, { warmWorkspace: false });
-    if (!response.ok) throw new Error(`prepared_workspace_${page}_failed:${response.status}`);
-    await response.body?.cancel();
-    console.info("prepared_workspace_page_ready", { page });
-  }
 }
 
 async function oauthCallback(request: Request, env: Env): Promise<Response> {
