@@ -56,7 +56,12 @@ assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!im
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadouts-grid\{[^}]*grid-template-columns:repeat\(20,minmax\(32px,1fr\)\)!important;/,'The Bungie 1–20 loadout row must expand across the strip with uncapped fluid tracks');
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadout-slot\{[^}]*aspect-ratio:100\/122!important;/,'Intentional: loadout slots use their own literal 100/122 portrait ratio as requested by Miguel; equipped tiles retain the shared DIM-square ratio');
 
-assert.doesNotMatch(combined,/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden');
+// Intentional exception: Miguel asked for Build Forge at 75% on desktop (28 Sep 2026).
+// Only this exact rule is allowed; popups convert rects via currentCSSZoom and
+// test-build-forge-zoom.mjs proves alignment. Every other page stays native scale.
+const BUILD_FORGE_ZOOM_RULE='@media (min-width:1280px){html:has(body.build-forge-page){zoom:.75}}';
+assert.ok(sources.build.includes(BUILD_FORGE_ZOOM_RULE),'Build Forge keeps its single documented 75% desktop rule');
+assert.doesNotMatch(combined.replace(BUILD_FORGE_ZOOM_RULE,''),/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden outside the documented Build Forge exception');
 const pageLayoutCss=[sources.adaptive,sources.gear,sources.layout,sources.leftLock,sources.mobile,sources.shared,sources.super,sources.build].join('\n');
 assert.doesNotMatch(pageLayoutCss,/(?:html|body|\.workspace|\.build-space|\.design-canvas|\.guardian-left-rail)\s*\{[^{}]*transform\s*:\s*scale\(/,'Page containers must not be scaled to simulate responsiveness');
 assert.doesNotMatch(densityCss,/--forge-desktop-density|(?:^|[;{])\s*zoom\s*:/m,'The shared interface must render at native scale instead of shrinking every tool');

@@ -1,5 +1,8 @@
 import {WEAPON_BUCKETS,ARMOUR_BUCKETS} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {bungieArtwork} from './loadout-details-model.mjs';
+// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// style lengths in the element's own pixels, so convert before positioning.
+const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function loadoutIcon(item,{large=false}={}){
   const name=item.name||'Empty socket',src=bungieArtwork(item.icon);
@@ -39,7 +42,7 @@ export function bindLoadoutIconDetails(root){
     const heading=doc.createElement('strong');heading.textContent=button.dataset.iconName;tip.append(heading);
     if(button.dataset.iconDetail){const copy=doc.createElement('p');copy.textContent=button.dataset.iconDetail;tip.append(copy);}
     tip.hidden=false;button.setAttribute('aria-describedby',tip.id);
-    const rect=button.getBoundingClientRect(),width=doc.documentElement.clientWidth,height=doc.documentElement.clientHeight;
+    const zoom=cssZoomOf(tip),visual=button.getBoundingClientRect(),rect={left:visual.left/zoom,bottom:visual.bottom/zoom},width=doc.documentElement.clientWidth,height=doc.documentElement.clientHeight;
     tip.style.left=`${Math.max(12,Math.min(rect.left,width-tip.offsetWidth-12))}px`;
     tip.style.top=`${Math.max(12,Math.min(rect.bottom+8,height-tip.offsetHeight-12))}px`;
   }

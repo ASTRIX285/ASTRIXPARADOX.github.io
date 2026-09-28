@@ -257,13 +257,29 @@ for(const mode of ['equipped','owned']){
   assert.equal(h.readState().originalBuild.armour[0].itemInstanceId,vaultHelmet.itemInstanceId,'Restore Original returns to the imported build.');
 }
 {
+  // The next-step prompt: analyse first, then build options, then gone once generated.
+  const h=directHarness();for(const id of ['importNextStep','importNextStepTitle','importNextStepText','importNextStepAction'])h.ui.set(id,node({}));
+  const imported={...structuredClone(equipped),source:'dim-import',loadoutSource:'dim-import',name:'Vesper Titan Boss',weapons:[vaultWeapon,directWeapons[1],directWeapons[2]],armour:[vaultHelmet,...directArmour.slice(1)]};
+  h.writeState(state.createBuildState(imported));h.render();
+  assert.equal(h.ui.get('importNextStep').hidden,false);assert.equal(h.ui.get('importNextStep').dataset.step,'analyse');
+  assert.match(h.ui.get('importNextStepTitle').textContent,/SHARED LOADOUT IMPORTED · VESPER TITAN BOSS/);
+  assert.equal(h.ui.get('importNextStepAction').textContent,'Analyse this build');
+  await h.startDirectGeneration('equipped');
+  assert.equal(h.ui.get('importNextStep').dataset.step,'options');assert.match(h.ui.get('importNextStepTitle').textContent,/CHOOSE AN ACTIVITY, THEN GENERATE/);
+  h.stageWorkingBuild(working=>{working.recommendationGeneratedAt='2026-09-28';});h.render();
+  assert.equal(h.ui.get('importNextStep').hidden,true,'The prompt disappears once Paradox has generated a result.');
+  const live=directHarness();for(const id of ['importNextStep','importNextStepTitle','importNextStepText','importNextStepAction'])live.ui.set(id,node({}));
+  live.writeState(state.createBuildState(structuredClone(equipped)));live.render();
+  assert.equal(live.ui.get('importNextStep').hidden,true,'Equipped builds never show the import prompt.');
+}
+{
   const gone={...structuredClone(equipped),source:'dim-import',loadoutSource:'dim-import',weapons:[{...vaultWeapon,itemInstanceId:'99990',name:'Deleted weapon'},directWeapons[1],directWeapons[2]]};
   const h=directHarness();const goneState=state.createBuildState(gone);h.writeState(goneState);
   await h.startDirectGeneration('equipped');
   assert.equal(h.readState(),goneState,'A missing imported item never falls back to the equipped loadout.');
   assert.match(vm.runInContext('recommendationFailure',h),/Deleted weapon from the imported build is no longer in your inventory/);
 }
-console.log('BUILD_FORGE_IMPORTED_ENTRY=PASS improve and build-from-gear keep the imported items, subclass and original; missing items stop with a clear reason');
+console.log('BUILD_FORGE_IMPORTED_ENTRY=PASS improve and build-from-gear keep the imported items, subclass and original; next-step prompt; missing items stop with a clear reason');
 const legal=entry.createDirectGenerationBuild(equipped,{mode:'owned',armour:directArmour,ownedArmour:inventory.armour,ownedWeapons:equipped.ownedWeapons});
 for(const [label,mutate] of [
   ['membership',build=>{build.membershipId='99999';}],

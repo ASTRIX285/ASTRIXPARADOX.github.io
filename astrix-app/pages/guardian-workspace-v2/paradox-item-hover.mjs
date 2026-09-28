@@ -2,6 +2,9 @@ import {WEAPON_SOCKET_CATEGORIES,resolveItemWatermark} from '../../core/bungie-i
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs?v=20260912-click-inspect-1';
 import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from './guardian-weapon-presentation.mjs?v=20260913-square-intrinsic-1';
+// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// style lengths in the element's own pixels, so convert before positioning.
+const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const bindings=new WeakMap();
@@ -181,13 +184,13 @@ function hide(){
 
 function position(host,anchor){
   if(!host||!anchor?.isConnected)return hide();
-  const gap=10,pad=8,bounds=anchor.getBoundingClientRect();
+  const gap=10,pad=8,zoom=cssZoomOf(host),visual=anchor.getBoundingClientRect(),bounds={top:visual.top/zoom,left:visual.left/zoom,width:visual.width/zoom},viewportWidth=innerWidth/zoom;
   const available=Math.max(1,Math.floor(bounds.top-gap-pad));
   host.style.maxHeight=`${available}px`;
   host.style.width=`min(31rem, calc(100vw - ${pad*2}px))`;
   const width=host.offsetWidth;
   const height=Math.min(host.scrollHeight,available);
-  const left=Math.max(pad,Math.min(bounds.left+(bounds.width-width)/2,innerWidth-width-pad));
+  const left=Math.max(pad,Math.min(bounds.left+(bounds.width-width)/2,viewportWidth-width-pad));
   host.style.left=`${Math.round(left)}px`;
   host.style.top=`${Math.max(pad,Math.round(bounds.top-gap-height))}px`;
 }
