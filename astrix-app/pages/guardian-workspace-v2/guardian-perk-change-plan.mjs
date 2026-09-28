@@ -195,7 +195,11 @@ function createLiveTransferPlan({build={},originalBuild={},advice=null,capabilit
   const transfers=[];
   for(const target of targets){const resolved=transferStepsForTarget(target,characterId);transfers.push(...resolved.steps);if(resolved.blocker)blockers.push(resolved.blocker);}
 
-  const inferred=inferredSubclassChanges(build,originalBuild),generated=generatedSocketChanges(build,advice),manual=(build.manualSocketChanges||[]).filter(validChange).map(change=>normalizedChange(change,change.component||'manual-socket'));
+  const inferred=inferredSubclassChanges(build,originalBuild),generated=generatedSocketChanges(build,advice),targetIds=new Set(targets.map(target=>target.itemInstanceId)),manual=(build.manualSocketChanges||[]).filter(validChange).map(change=>normalizedChange(change,change.component||'manual-socket'))
+    // A socket change carried from an imported or earlier build belongs to an
+    // item that may since have been swapped out. It no longer applies, so it
+    // must not block Apply for the items that are actually in this build.
+    .filter(change=>targetIds.has(String(change.itemInstanceId)));
   const bySocket=new Map();
   for(const change of [...generated,...inferred.changes,...manual])bySocket.set(`${change.itemInstanceId}:${change.socketIndex}`,change);
   const socketChanges=[],inGameSteps=[...inferred.manual];

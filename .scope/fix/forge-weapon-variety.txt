@@ -1,0 +1,5 @@
+astrix-app/pages/guardian-workspace-v2/guardian-perk-change-plan.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-apply-stale-socket-changes.mjs
+astrix-app/tools/test-forge-weapon-variety.mjs
