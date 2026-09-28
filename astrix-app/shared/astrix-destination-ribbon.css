@@ -188,3 +188,6 @@ body.apx-destination-page::before{
     [data-forge-destination-ribbon],.apx-destination-ribbon { height:90px!important;min-height:90px!important; }
   }
 }
+
+/* Guardian Home link: first in the ribbon, sized to its label on wide screens. */
+@media (min-width:721px){.apx-destination-ribbon li.apx-destination-ribbon__home{flex:0 0 auto}}
