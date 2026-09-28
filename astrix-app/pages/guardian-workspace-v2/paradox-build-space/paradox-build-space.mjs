@@ -205,9 +205,27 @@ function manualSlotLabels(kind){return kind==='weapon'?['KINETIC','ENERGY','POWE
 function renderDirectGenerationEntry(build={}){
   const mode=directEntryMode(build);
   document.querySelectorAll('[data-generation-entry]').forEach(button=>{button.disabled=directEntryBusy||recommendationBusy||liveActionBusy||!build.characterId;button.setAttribute('aria-pressed',String(button.dataset.generationEntry===mode));});
+  document.querySelectorAll('[data-generation-entry="equipped"]').forEach(button=>{button.textContent=isImportedBuild(build)?'Improve this imported build':'Improve my current build';});
   const host=byId('directOwnedArmour');if(!host)return;
   host.hidden=mode!=='owned';
   if(mode==='owned')host.innerHTML=`<p class="recommendation-copy">Choose any armour for this Guardian. Paradox compares weapons and plans mods for these five pieces.</p><div class="manual-socket-groups">${manualSlotLabels('armour').map((label,index)=>`<label>${label}<select data-generation-armour="${index}"${directEntryBusy||recommendationBusy||liveActionBusy?' disabled':''}>${directArmourChoices(build,index).map(item=>`<option value="${esc(item.itemInstanceId)}"${String(build.armour?.[index]?.itemInstanceId)===String(item.itemInstanceId)?' selected':''}>${esc(item.name)} · ${esc(item.source?.label||item.source?.kind)}</option>`).join('')}</select></label>`).join('')}</div>`;
+}
+const IMPORTED_SOURCES=new Set(['dim-import']);
+function isImportedBuild(build={}){return IMPORTED_SOURCES.has(build?.loadoutSource)||IMPORTED_SOURCES.has(build?.source);}
+const IMPORTED_KEEP=['name','source','loadoutSource','dimImport','importedParameters','equipment','dimTarget','dimAdaptation','manualSocketChanges','statConstraints'];
+function importedGenerationBase(selected,equipped,armourByInstance){
+  const weaponsByInstance=new Map((equipped.ownedWeapons||[]).map(item=>[String(item?.itemInstanceId),item]));
+  const refresh=(item,catalogue,label)=>{
+    const live=catalogue.get(String(item?.itemInstanceId||''));
+    if(!live)throw new Error(`${item?.name||label} from the imported build is no longer in your inventory. Import the loadout again.`);
+    return live;
+  };
+  const base={...equipped,
+    weapons:(selected.weapons||[]).map((item,index)=>refresh(item,weaponsByInstance,`Weapon ${index+1}`)),
+    armour:(selected.armour||[]).map((item,index)=>refresh(item,armourByInstance,`Armour piece ${index+1}`))};
+  for(const key of Object.keys(selected))if(key.startsWith('subclass'))base[key]=selected[key];
+  for(const key of IMPORTED_KEEP)if(Object.hasOwn(selected,key))base[key]=selected[key];
+  return base;
 }
 async function startDirectGeneration(mode){
   if(directEntryBusy||recommendationBusy||liveActionBusy)return;
@@ -222,9 +240,14 @@ async function startDirectGeneration(mode){
     const equipped=await runProfileTask('normalise',{payload,session,characterId:selected.characterId});
     if(!session?.authenticated||readState()!==state||!bindingsEqual(selected,equipped))throw new Error('The selected Guardian or account changed. Choose the entry again.');
     const inventory=createVaultCatalogue(payload),byInstance=new Map(inventory.armour.map(item=>[String(item.itemInstanceId),item]));
-    const armour=prepareArmourSelection(payload,equipped.armour.map(item=>byInstance.get(String(item?.itemInstanceId))||item));
-    const working=createDirectGenerationBuild(equipped,{mode,armour,ownedArmour:inventory.armour,ownedWeapons:equipped.ownedWeapons});
+    // An imported DIM build is the build to improve. Start from its items and
+    // subclass, refreshed from live inventory, never from the equipped loadout.
+    const imported=isImportedBuild(selected)?importedGenerationBase(selected,equipped,byInstance):null;
+    const base=imported||equipped;
+    const armour=prepareArmourSelection(payload,base.armour.map(item=>byInstance.get(String(item?.itemInstanceId))||item));
+    const working=createDirectGenerationBuild(base,{mode,armour,ownedArmour:inventory.armour,ownedWeapons:equipped.ownedWeapons});
     const next=createBuildState(equipped);next.workingBuild=working;
+    if(imported)next.originalBuild=state.originalBuild;
     selectedRecommendationElement='';selectedRecommendationObjective='';recommendationFailure='';
     bindBuildRoute(equipped,{characterChange:true});writeState(next);equippedEntryState=null;
     render();byId('recommendationElements')?.scrollIntoView({block:'nearest'});

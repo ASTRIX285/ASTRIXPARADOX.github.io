@@ -1,0 +1,4 @@
+astrix-app/shared/loadout-details-model.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/tools/test-build-forge-equipped-entry.mjs
+astrix-app/tools/test-dim-tether.mjs
