@@ -85,6 +85,8 @@ const validators=[
   'test-build-space-character-isolation.mjs',
   'test-build-forge-equipped-entry.mjs',
   'test-build-forge-zoom.mjs',
+  'test-build-review.mjs',
+  'test-dim-fit-status.mjs',
   'test-character-live-data.mjs',
   'test-recommended-build-reveal.mjs',
   'validate-paradox-build-space.mjs',

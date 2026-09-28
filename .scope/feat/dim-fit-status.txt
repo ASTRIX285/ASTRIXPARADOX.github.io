@@ -1,0 +1,5 @@
+astrix-app/core/dim-import/review.mjs
+astrix-app/shared/loadout-details.css
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/tools/test-dim-fit-status.mjs
+astrix-app/tools/paradox-validator.mjs
