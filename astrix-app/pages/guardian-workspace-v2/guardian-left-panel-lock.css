@@ -52,7 +52,7 @@ html body .workspace>.left .subclass-option{
 html body .workspace>.left .subclass-option__diamond{
   width:40px!important;
   height:40px!important;
-  border-color:rgba(227,178,60,.30)!important;
+  border-color:rgba(185,185,184,.30)!important;
   background:rgba(14,11,18,.66)!important;
   box-shadow:inset 0 0 12px rgba(0,0,0,.42)!important;
   overflow:hidden!important;
@@ -91,9 +91,9 @@ html[data-subclass="void"] body .workspace>.left .subclass-option[data-subclass-
 html[data-subclass="stasis"] body .workspace>.left .subclass-option[data-subclass-option="stasis"] .subclass-option__diamond,
 html[data-subclass="strand"] body .workspace>.left .subclass-option[data-subclass-option="strand"] .subclass-option__diamond,
 html[data-subclass="prismatic"] body .workspace>.left .subclass-option[data-subclass-option="prismatic"] .subclass-option__diamond{
-  border-color:rgba(227,178,60,.98)!important;
-  background:linear-gradient(135deg,rgba(142,34,48,.92) 0%,rgba(142,34,48,.74) 43%,rgba(227,178,60,.34) 100%)!important;
-  box-shadow:0 0 0 1px rgba(227,178,60,.30),0 0 12px rgba(142,34,48,.70),0 0 22px rgba(var(--subclass-accent-rgb),.45),inset 0 0 16px rgba(227,178,60,.14)!important;
+  border-color:rgba(185,185,184,.98)!important;
+  background:linear-gradient(135deg,rgba(142,34,48,.92) 0%,rgba(142,34,48,.74) 43%,rgba(185,185,184,.34) 100%)!important;
+  box-shadow:0 0 0 1px rgba(185,185,184,.30),0 0 12px rgba(142,34,48,.70),0 0 22px rgba(var(--subclass-accent-rgb),.45),inset 0 0 16px rgba(185,185,184,.14)!important;
 }
 html body .workspace>.left .subclass-option.is-active .subclass-option__icon{
   filter:saturate(1.14) brightness(1.18)!important;
@@ -151,7 +151,7 @@ html body .workspace>.left #fragList>*{
   aspect-ratio:1!important;
   margin:0!important;
   padding:3px!important;
-  border:1px solid rgba(227,178,60,.34)!important;
+  border:1px solid rgba(185,185,184,.34)!important;
   border-radius:8px!important;
   background:linear-gradient(145deg,rgba(142,34,48,.07),rgba(255,255,255,.012))!important;
   box-shadow:inset 0 0 0 1px rgba(142,34,48,.05)!important;
@@ -168,7 +168,7 @@ html body .workspace>.left #aspectList .slot{
   transform:none!important;
   rotate:0deg!important;
   clip-path:none!important;
-  border-color:rgba(227,178,60,.34)!important;
+  border-color:rgba(185,185,184,.34)!important;
   background:linear-gradient(145deg,rgba(142,34,48,.07),rgba(255,255,255,.012))!important;
 }
 html body .workspace>.left #abilityList .ability-row>*,
@@ -184,7 +184,7 @@ html body .workspace>.left .rail-empty-slot::after{
   top:50%!important;
   width:66%!important;
   height:1px!important;
-  background:rgba(227,178,60,.16)!important;
+  background:rgba(185,185,184,.16)!important;
   transform:rotate(45deg)!important;
 }
 html body .workspace>.left .rail-empty-slot::after{transform:rotate(-45deg)!important}
@@ -241,7 +241,7 @@ html body .workspace .guardian-loadout-icon-fallback::after{
   top:50%!important;
   width:68%!important;
   height:1px!important;
-  background:rgba(227,178,60,.28)!important;
+  background:rgba(185,185,184,.28)!important;
   transform:rotate(45deg)!important;
   transform-origin:center!important;
   z-index:2!important;

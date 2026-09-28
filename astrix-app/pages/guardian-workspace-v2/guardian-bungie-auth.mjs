@@ -59,7 +59,7 @@ function installStyles(){
     .bungie-auth-btn:hover{border-color:rgba(167,125,255,.9);background:linear-gradient(180deg,rgba(139,92,246,.28),rgba(20,14,34,.96));transform:translateY(-1px)}
     .bungie-auth-btn[data-state="checking"]{opacity:.68;cursor:wait}
     .bungie-account-visual{position:relative;isolation:isolate;display:grid;width:var(--apx-icon-account-avatar,3.25rem);height:auto;aspect-ratio:1;box-sizing:border-box;padding:.1875rem;place-items:center;overflow:visible;border:0;border-radius:50%;background:conic-gradient(from 218deg,#063d2e 0 18%,#16bd82 34%,#9dffda 49%,#20d795 63%,#087552 82%,#063d2e 100%);box-shadow:0 0 0 1px rgba(84,242,184,.58),0 0 1.15rem rgba(35,218,153,.3)}
-    .bungie-account-visual::before{content:"";position:absolute;z-index:2;inset:.1875rem;border:1px solid rgba(237,198,83,.76);border-radius:50%;box-shadow:inset 0 0 0 2px rgba(126,10,23,.82);pointer-events:none}
+    .bungie-account-visual::before{content:"";position:absolute;z-index:2;inset:.1875rem;border:1px solid rgba(185,185,184,.76);border-radius:50%;box-shadow:inset 0 0 0 2px rgba(126,10,23,.82);pointer-events:none}
     .bungie-account-visual__orbit{position:absolute;z-index:-1;inset:-.3125rem;border:1px solid rgba(84,242,184,.68);border-radius:50%;box-shadow:0 0 .85rem rgba(32,215,149,.25);transform:rotate(-24deg)}
     .bungie-account-visual img,.bungie-account-visual__fallback{display:grid;width:100%;height:100%;box-sizing:border-box;place-items:center;overflow:hidden;border:0;border-radius:50%;background:radial-gradient(circle at 38% 28%,#381017,#11090c 64%,#050505)}
     .bungie-account-visual img{object-fit:cover}

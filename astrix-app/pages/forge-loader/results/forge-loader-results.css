@@ -1,5 +1,5 @@
 /* Forge Matrix results page: same panels as Forge Loader, laid out full width since there is no selector rail. */
 .forge-results-shell{max-width:1400px;margin:0 auto}
 .forge-results-workspace{display:grid;gap:1rem;padding:1rem}
-.forge-results-back{margin-left:auto;padding:.5rem .9rem;border:1px solid rgba(201,168,76,.4);border-radius:.3rem;color:#f4f1ed;font:800 .7rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.05em;text-decoration:none}
-.forge-results-back:hover,.forge-results-back:focus-visible{border-color:#d9b84f}
+.forge-results-back{margin-left:auto;padding:.5rem .9rem;border:1px solid rgba(185,185,184,.4);border-radius:.3rem;color:#f4f1ed;font:800 .7rem/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.05em;text-decoration:none}
+.forge-results-back:hover,.forge-results-back:focus-visible{border-color:#b9b9b8}

@@ -50,7 +50,7 @@
 .guardian-loadouts-head small{font:600 clamp(.38rem,.58vh,.46rem) bahnschrift,sans-serif;letter-spacing:.08em;color:rgba(201,195,218,.55)}
 .guardian-loadouts-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--rail-gap);max-width:calc((var(--guardian-square) * 5) + (var(--rail-gap) * 4))}
 .guardian-loadouts-status{grid-column:1/-1;display:grid;place-items:center;min-height:calc(var(--guardian-square) * 2 + var(--rail-gap));padding:8px;border:1px dashed rgba(181,174,199,.18);border-radius:7px;color:#8b8499;font:700 clamp(.38rem,.58vh,.46rem) bahnschrift,sans-serif;line-height:1.35;letter-spacing:.045em;text-align:center}
-.guardian-loadouts-status.is-pending{border-color:rgba(255,206,64,.28);color:#d4c99b}
+.guardian-loadouts-status.is-pending{border-color:rgba(185,185,184,.28);color:#b9b9b8}
 .guardian-loadouts-status.is-unavailable{border-color:rgba(255,92,112,.3);color:#d9a0a8}
 .guardian-loadout-slot{position:relative;display:grid;place-items:center;aspect-ratio:1;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:rgba(255,255,255,.025);color:#595568;cursor:default;min-width:0}
 .guardian-loadout-slot small{position:absolute;right:4px;bottom:2px;font:700 clamp(.4rem,.62vh,.5rem) bahnschrift,sans-serif;color:#6f687e}
@@ -130,14 +130,14 @@
     min-height:56px!important;
     padding:4px 6px!important;
     border:0!important;
-    border-bottom:1px solid rgba(227,178,60,.13)!important;
+    border-bottom:1px solid rgba(185,185,184,.13)!important;
     border-radius:0!important;
     background:transparent!important;
     box-shadow:none!important;
   }
   html body .workspace .left .class-super-row .subclass-hero::before{
     content:"SUBCLASS"!important;
-    color:rgba(227,178,60,.66)!important;
+    color:rgba(185,185,184,.66)!important;
   }
 
   /* Destiny-style Super formation: active centre, alternate Supers around it. */
@@ -164,9 +164,9 @@
     height:44px!important;
     min-width:44px!important;
     padding:6px!important;
-    border:1px solid rgba(227,178,60,.34)!important;
+    border:1px solid rgba(185,185,184,.34)!important;
     border-radius:2px!important;
-    background:rgba(227,178,60,.045)!important;
+    background:rgba(185,185,184,.045)!important;
     transform:translate(-50%,-50%) rotate(45deg)!important;
   }
   html body .workspace .left .class-super-row .super-option.is-active{
@@ -176,9 +176,9 @@
     height:58px!important;
     min-width:58px!important;
     z-index:5!important;
-    border-color:rgba(227,178,60,.78)!important;
-    background:rgba(227,178,60,.11)!important;
-    box-shadow:0 0 18px rgba(227,178,60,.14)!important;
+    border-color:rgba(185,185,184,.78)!important;
+    background:rgba(185,185,184,.11)!important;
+    box-shadow:0 0 18px rgba(185,185,184,.14)!important;
   }
   html body .workspace .left .class-super-row .super-option.is-inactive:nth-child(1){left:20%!important;top:50%!important}
   html body .workspace .left .class-super-row .super-option.is-inactive:nth-child(2){left:80%!important;top:50%!important}
@@ -203,17 +203,17 @@
   }
   html body .workspace .left #abilityList:empty::after{
     background-image:
-      linear-gradient(45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
-      linear-gradient(-45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
-      linear-gradient(45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
-      linear-gradient(-45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%);
+      linear-gradient(45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%),
+      linear-gradient(-45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%),
+      linear-gradient(45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%),
+      linear-gradient(-45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%);
     background-size:46px 46px,46px 46px,46px 46px,46px 46px;
     background-position:0 0,55px 0,110px 0,165px 0;
   }
   html body .workspace .left #aspectList:empty::after{
     background-image:
-      linear-gradient(45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%),
-      linear-gradient(-45deg,transparent 47%,rgba(227,178,60,.22) 48% 52%,transparent 53%);
+      linear-gradient(45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%),
+      linear-gradient(-45deg,transparent 47%,rgba(185,185,184,.22) 48% 52%,transparent 53%);
     background-size:52px 52px,52px 52px;
     background-position:0 0,62px 0;
   }
@@ -223,8 +223,8 @@
   html body .workspace .left #aspectList .slot{
     border-radius:2px!important;
     transform:rotate(45deg)!important;
-    border-color:rgba(227,178,60,.3)!important;
-    background:rgba(227,178,60,.045)!important;
+    border-color:rgba(185,185,184,.3)!important;
+    background:rgba(185,185,184,.045)!important;
   }
   html body .workspace .left #abilityList .ability-row > *,
   html body .workspace .left #aspectList .slot > *{

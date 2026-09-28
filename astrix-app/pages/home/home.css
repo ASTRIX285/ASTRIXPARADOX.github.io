@@ -1,6 +1,6 @@
 :root{
   --home-bg:#07060a;--home-card:rgba(20,12,18,.84);--home-line:#3a2a34;--home-ink:#ece6ee;--home-muted:#cbbfcb;--home-dim:#a89aa8;
-  --home-crimson:#ff4d64;--home-cta:#c8233a;--home-gold:#e0b84a;--home-cyan:#4fc3e8;
+  --home-crimson:#ff4d64;--home-cta:#c8233a;--home-gold:#b9b9b8;--home-cyan:#4fc3e8;
   --home-warlock:#9b7bff;--home-hunter:#4fa3c7;--home-titan:#d9803a;
   --home-display:"bahnschrift-condensed","Bahnschrift Condensed","bahnschrift",Bahnschrift,"Arial Narrow",sans-serif;
   --home-body:"bahnschrift",Bahnschrift,system-ui,sans-serif;

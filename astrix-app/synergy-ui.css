@@ -38,9 +38,9 @@
 }
 
 .synergy-pill.warning {
-  border-color: rgba(255, 184, 92, 0.3);
-  background: rgba(255, 184, 92, 0.09);
-  color: #ffd8a1;
+  border-color: rgba(185, 185, 184, 0.3);
+  background: rgba(185, 185, 184, 0.09);
+  color: #d6d6d5;
 }
 
 .synergy-group {

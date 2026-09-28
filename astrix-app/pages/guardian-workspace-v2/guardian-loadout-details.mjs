@@ -10,7 +10,7 @@ function ensureStyle(){
   return new Promise((resolve,reject)=>{
     const link=document.getElementById(id)||document.createElement('link');
     link.onload=()=>resolve();link.onerror=()=>{link.remove();reject(new Error('Loadout Details styles could not be loaded. Retry.'));};
-    if(!link.id){link.id=id;link.rel='stylesheet';link.href=new URL('../../shared/loadout-details.css?v=20260927-loadout-details-1',import.meta.url).href;document.head.append(link);}
+    if(!link.id){link.id=id;link.rel='stylesheet';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1',import.meta.url).href;document.head.append(link);}
   });
 }
 async function shareLoadout(data){

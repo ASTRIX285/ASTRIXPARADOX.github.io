@@ -2,11 +2,11 @@
   --mission-purple:#8d63d8;
   --mission-purple-soft:rgba(141,99,216,.18);
   --mission-good:#67c997;
-  --mission-warn:#d8a950;
+  --mission-warn:#b9b9b8;
   --mission-low:#a85a5a;
   --mission-panel:rgba(10,10,12,.92);
   --mission-panel-soft:rgba(15,14,17,.82);
-  --mission-line:rgba(201,168,76,.18);
+  --mission-line:rgba(185,185,184,.18);
   --mission-line-soft:rgba(255,255,255,.07);
 }
 
@@ -26,7 +26,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   position:fixed!important;
   top:0!important;
   z-index:90!important;
-  border-bottom:1px solid rgba(201,168,76,.2)!important;
+  border-bottom:1px solid rgba(185,185,184,.2)!important;
   background:linear-gradient(180deg,rgba(7,7,9,.98),rgba(4,4,5,.98))!important;
   box-shadow:0 18px 40px rgba(0,0,0,.34);
 }
@@ -68,28 +68,28 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   align-items:center;
   justify-content:center;
   padding:0 11px;
-  border:1px solid rgba(201,168,76,.26);
+  border:1px solid rgba(185,185,184,.26);
   border-radius:999px;
-  background:rgba(201,168,76,.055);
+  background:rgba(185,185,184,.055);
   color:var(--apx-gold);
   box-shadow:none;
   font:700 8px/1 bahnschrift-semicondensed,sans-serif;
   letter-spacing:.08em;
   white-space:nowrap;
 }
-.mission-topbar-actions .bungie-auth-btn:hover{border-color:var(--apx-gold);background:rgba(201,168,76,.1);transform:none}
-.mission-topbar-actions .bungie-auth-btn[data-state="connected"]{border-color:rgba(201,168,76,.26);color:var(--apx-gold);background:rgba(201,168,76,.055)}
+.mission-topbar-actions .bungie-auth-btn:hover{border-color:var(--apx-gold);background:rgba(185,185,184,.1);transform:none}
+.mission-topbar-actions .bungie-auth-btn[data-state="connected"]{border-color:rgba(185,185,184,.26);color:var(--apx-gold);background:rgba(185,185,184,.055)}
 
 .mission-auth-shell{min-height:calc(100vh - 133px);padding:7vh 24px}
 .mission-gate-card{
   width:min(760px,100%);
   margin:0 auto;
   padding:46px;
-  border:1px solid rgba(201,168,76,.24);
+  border:1px solid rgba(185,185,184,.24);
   background:linear-gradient(145deg,rgba(18,14,14,.96),rgba(6,6,6,.96));
   box-shadow:0 30px 80px rgba(0,0,0,.46);
 }
-.mission-gate-card h1{margin:0;color:#f4efe4;font:800 clamp(30px,4vw,54px)/1 bahnschrift-semicondensed,sans-serif}
+.mission-gate-card h1{margin:0;color:#d6d6d5;font:800 clamp(30px,4vw,54px)/1 bahnschrift-semicondensed,sans-serif}
 .mission-gate-card>p:last-of-type{max-width:650px;margin:18px 0 0;color:var(--apx-muted);font-size:17px;line-height:1.55}
 .mission-connect-action{display:flex;margin-top:26px}
 .mission-connect-action .bungie-auth-control{margin:0}
@@ -108,7 +108,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   top:35px;
   min-height:calc(100vh - 45px);
   overflow:hidden;
-  border:1px solid rgba(201,168,76,.16);
+  border:1px solid rgba(185,185,184,.16);
   background:linear-gradient(180deg,rgba(13,12,15,.98),rgba(6,6,7,.98));
   box-shadow:0 24px 54px rgba(0,0,0,.34);
 }
@@ -134,17 +134,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   height:auto;
   aspect-ratio:1;
   place-items:center;
-  border:1px solid rgba(201,168,76,.48);
-  background:rgba(201,168,76,.07);
+  border:1px solid rgba(185,185,184,.48);
+  background:rgba(185,185,184,.07);
   color:var(--apx-gold);
   transform:rotate(45deg);
-  box-shadow:0 0 22px rgba(201,168,76,.08);
+  box-shadow:0 0 22px rgba(185,185,184,.08);
 }
 .mission-crest img{width:74%;height:auto;aspect-ratio:1;object-fit:contain;transform:rotate(-45deg)}
 .mission-crest span{font-size:26px;transform:rotate(-45deg)}
 .mission-kicker,.mission-eyebrow{margin:0 0 7px;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.16em;text-transform:uppercase}
 .mission-identity-copy{min-width:0}
-.mission-identity-copy h1{margin:0;overflow:hidden;color:#f4efe4;font:800 17px/1.15 bahnschrift-semicondensed,sans-serif;letter-spacing:.04em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.mission-identity-copy h1{margin:0;overflow:hidden;color:#d6d6d5;font:800 17px/1.15 bahnschrift-semicondensed,sans-serif;letter-spacing:.04em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
 .mission-identity-copy>p:last-child{margin:6px 0 0;color:var(--mission-purple);font:700 12px/1 bahnschrift,sans-serif;letter-spacing:.04em;text-transform:uppercase}
 .mission-verified-badge{color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
 .mission-identity-card>.mission-verified-badge{position:absolute;right:14px;bottom:11px}
@@ -153,7 +153,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-guardian-stats dl{margin:0}
 .mission-guardian-stats dl>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--mission-line-soft)}
 .mission-guardian-stats dt{color:#8e887e;font-size:12px}
-.mission-guardian-stats dd{margin:0;color:#f4efe4;font:700 13px/1 bahnschrift,sans-serif}
+.mission-guardian-stats dd{margin:0;color:#d6d6d5;font:700 13px/1 bahnschrift,sans-serif}
 .mission-xp{margin-top:14px}
 .mission-xp-track{height:3px;overflow:hidden;background:rgba(255,255,255,.08)}
 .mission-xp-track span{display:block;width:0;height:100%;background:var(--apx-gold);transition:width .35s ease}
@@ -173,8 +173,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   text-decoration:none;
 }
 .mission-section-nav a span{color:#676169;font-size:13px;text-align:center}
-.mission-section-nav a:hover{color:#f4efe4;background:rgba(201,168,76,.04)}
-.mission-section-nav a.is-active{border-left-color:var(--apx-gold);color:var(--apx-gold);background:linear-gradient(90deg,rgba(201,168,76,.11),transparent)}
+.mission-section-nav a:hover{color:#d6d6d5;background:rgba(185,185,184,.04)}
+.mission-section-nav a.is-active{border-left-color:var(--apx-gold);color:var(--apx-gold);background:linear-gradient(90deg,rgba(185,185,184,.11),transparent)}
 .mission-section-nav a.is-active span{color:var(--apx-gold)}
 
 .mission-time-filter{display:grid;gap:10px;margin:0;padding:18px 16px;border:0}
@@ -201,8 +201,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   letter-spacing:.09em;
   cursor:pointer;
 }
-.mission-tabs button:hover{color:#f4efe4}
-.mission-tabs button[aria-selected="true"]{border-bottom-color:var(--apx-gold);color:var(--apx-gold);background:rgba(201,168,76,.05)}
+.mission-tabs button:hover{color:#d6d6d5}
+.mission-tabs button[aria-selected="true"]{border-bottom-color:var(--apx-gold);color:var(--apx-gold);background:rgba(185,185,184,.05)}
 .mission-feed-state{display:flex;margin-left:auto;align-items:center;padding:0 14px;color:#80796f;font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.09em}
 
 .mission-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -218,9 +218,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   background:linear-gradient(145deg,rgba(17,15,18,.96),rgba(7,7,8,.94));
 }
 .mission-metric-card--donut{grid-template-columns:42px minmax(0,1fr)}
-.mission-metric-icon{display:grid;width:var(--apx-icon-mission-metric);height:auto;aspect-ratio:1;place-items:center;border:1px solid rgba(201,168,76,.24);color:var(--apx-gold);background:rgba(201,168,76,.05);font-size:17px}
+.mission-metric-icon{display:grid;width:var(--apx-icon-mission-metric);height:auto;aspect-ratio:1;place-items:center;border:1px solid rgba(185,185,184,.24);color:var(--apx-gold);background:rgba(185,185,184,.05);font-size:17px}
 .mission-metric-card small{display:block;color:#77716a;font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em}
-.mission-metric-card strong{display:block;margin-top:7px;color:#f4efe4;font:800 23px/1 bahnschrift-semicondensed,sans-serif}
+.mission-metric-card strong{display:block;margin-top:7px;color:#d6d6d5;font:800 23px/1 bahnschrift-semicondensed,sans-serif}
 .mission-metric-card div>span{display:block;margin-top:6px;overflow:hidden;color:#77716a;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
 .mission-verified-tick{position:absolute;top:9px;right:9px;color:var(--mission-good);font-style:normal;font-size:10px}
 .mission-mini-donut{width:40px;height:40px;rotate:-90deg}
@@ -229,14 +229,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 .mission-panel{min-width:0;border:1px solid var(--mission-line);background:linear-gradient(145deg,var(--mission-panel-soft),var(--mission-panel));box-shadow:0 20px 44px rgba(0,0,0,.22)}
 .mission-panel-heading{display:flex;min-height:52px;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border-bottom:1px solid var(--mission-line-soft)}
-.mission-panel-heading h2{margin:0;color:#f4efe4;font:800 10px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em}
+.mission-panel-heading h2{margin:0;color:#d6d6d5;font:800 10px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em}
 .mission-panel-heading .mission-eyebrow{margin-bottom:6px}
 .mission-panel-heading>span{color:#77716a;font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.09em}
-.mission-panel-heading select{padding:6px 24px 6px 8px;border:1px solid rgba(201,168,76,.18);background:#0a0a0c;color:#9d978e;font-size:10px}
+.mission-panel-heading select{padding:6px 24px 6px 8px;border:1px solid rgba(185,185,184,.18);background:#0a0a0c;color:#9d978e;font-size:10px}
 
 .mission-timeline-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;min-height:178px}
 .mission-timeline{position:relative;display:grid;grid-template-columns:repeat(6,minmax(80px,1fr));align-items:start;padding:26px 18px 16px;overflow-x:auto}
-.mission-timeline::before{content:"";position:absolute;top:49px;right:28px;left:28px;height:1px;background:linear-gradient(90deg,rgba(141,99,216,.24),rgba(201,168,76,.24))}
+.mission-timeline::before{content:"";position:absolute;top:49px;right:28px;left:28px;height:1px;background:linear-gradient(90deg,rgba(141,99,216,.24),rgba(185,185,184,.24))}
 .mission-timeline article{position:relative;z-index:1;min-width:80px;padding:0 7px;text-align:center}
 .mission-timeline article i{display:block;width:26px;height:26px;margin:0 auto 14px;border:1px solid rgba(141,99,216,.54);background:#0b0910;transform:rotate(30deg);box-shadow:0 0 18px rgba(141,99,216,.08)}
 .mission-timeline article h3{margin:0;color:#c4bdca;font:700 7px/1.25 bahnschrift-semicondensed,sans-serif;letter-spacing:.04em;text-transform:uppercase}
@@ -261,8 +261,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   white-space:nowrap;
   cursor:pointer;
 }
-.mission-category-chips button:hover{color:#f4efe4}
-.mission-category-chips button.is-active{border-color:rgba(201,168,76,.36);color:var(--apx-gold);background:rgba(201,168,76,.07)}
+.mission-category-chips button:hover{color:#d6d6d5}
+.mission-category-chips button.is-active{border-color:rgba(185,185,184,.36);color:var(--apx-gold);background:rgba(185,185,184,.07)}
 .mission-mastery-head,.mission-mastery-summary{
   display:grid;
   grid-template-columns:minmax(160px,1.45fr) .65fr .7fr .86fr .72fr .9fr 24px;
@@ -273,7 +273,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-mastery-row{border-top:1px solid var(--mission-line-soft)}
 .mission-mastery-row summary{position:relative;padding:12px 14px;list-style:none;cursor:pointer}
 .mission-mastery-row summary::-webkit-details-marker{display:none}
-.mission-mastery-row summary:hover{background:rgba(201,168,76,.025)}
+.mission-mastery-row summary:hover{background:rgba(185,185,184,.025)}
 .mission-mastery-summary span{min-width:0;overflow:hidden;color:#8f8991;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
 .mission-mastery-summary strong{color:#d9d2dc;font:700 10px/1.2 bahnschrift,sans-serif}
 .mission-mastery-summary .mission-row-activity{display:grid;gap:4px}
@@ -283,7 +283,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-mastery-detail{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px 12px;color:#77716a;font-size:9px}
 .mission-mastery-detail span{padding:8px;border-left:1px solid rgba(141,99,216,.35);background:rgba(141,99,216,.035)}
 
-.mission-data-empty{margin:0 14px 14px;padding:16px;border:1px dashed rgba(201,168,76,.18);color:#77716a;background:rgba(201,168,76,.025);font-size:11px;text-align:center}
+.mission-data-empty{margin:0 14px 14px;padding:16px;border:1px dashed rgba(185,185,184,.18);color:#77716a;background:rgba(185,185,184,.025);font-size:11px;text-align:center}
 .mission-text-action{display:block;margin:0 auto 13px;padding:6px 10px;border:0;background:transparent;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
 .mission-text-action:disabled{color:#58534e;cursor:not-allowed}
 
@@ -297,7 +297,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   border-bottom:1px solid var(--mission-line-soft);
 }
 .mission-evidence-tag{display:grid;min-height:22px;place-items:center;border:1px solid rgba(141,99,216,.32);color:#a989de;background:rgba(141,99,216,.06);font:700 7px/1 bahnschrift-semicondensed,sans-serif}
-.mission-evidence-tag.is-pve{border-color:rgba(201,168,76,.28);color:var(--apx-gold);background:rgba(201,168,76,.045)}
+.mission-evidence-tag.is-pve{border-color:rgba(185,185,184,.28);color:var(--apx-gold);background:rgba(185,185,184,.045)}
 .mission-evidence-name{min-width:0}
 .mission-evidence-name strong{display:block;overflow:hidden;color:#d8d2da;font:700 10px/1.2 bahnschrift-semicondensed,sans-serif;text-overflow:ellipsis;white-space:nowrap}
 .mission-evidence-name small,.mission-evidence-cell{display:block;margin-top:4px;color:#77716a;font-size:9px}
@@ -307,7 +307,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-snapshot-placeholder{display:grid;place-items:center;color:#4f4a50;font-size:8px}
 .mission-analyse-link{display:grid;min-height:26px;place-items:center;border:1px solid rgba(178,34,34,.44);color:#d5cfd6;background:rgba(139,0,0,.14);font:700 7px/1 bahnschrift-semicondensed,sans-serif;text-decoration:none}
 .mission-external-link{color:#716b72;text-decoration:none;text-align:center}
-.mission-history-action{display:block;margin:12px auto 14px;padding:9px 18px;border:1px solid rgba(201,168,76,.26);background:transparent;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
+.mission-history-action{display:block;margin:12px auto 14px;padding:9px 18px;border:1px solid rgba(185,185,184,.26);background:transparent;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
 .mission-history-action:disabled{border-color:rgba(255,255,255,.08);color:#57514e;cursor:not-allowed}
 
 .mission-current-form .mission-panel-heading{align-items:flex-start}
@@ -329,7 +329,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-confidence-donut svg{width:112px;height:112px;rotate:-90deg}
 .mission-confidence-donut circle{fill:none;stroke:rgba(255,255,255,.07);stroke-width:8}
 .mission-confidence-donut>span{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.mission-confidence-donut strong{color:#f4efe4;font:800 20px/1 bahnschrift-semicondensed,sans-serif}
+.mission-confidence-donut strong{color:#d6d6d5;font:800 20px/1 bahnschrift-semicondensed,sans-serif}
 .mission-confidence-donut small{margin-top:5px;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em}
 .mission-confidence-rows{margin:0}
 .mission-confidence-rows>div{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--mission-line-soft)}

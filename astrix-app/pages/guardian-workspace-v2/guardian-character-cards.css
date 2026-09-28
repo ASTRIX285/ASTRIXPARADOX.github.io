@@ -45,7 +45,7 @@ html body .topbar+:is(.workspace,.build-space){min-height:calc(100vh - 108px)!im
   text-align:center;
   backdrop-filter:blur(8px);
 }
-.guardian-character-cards__status.is-pending{border-color:rgba(240,191,62,.38);color:#d9c47f}
+.guardian-character-cards__status.is-pending{border-color:rgba(185,185,184,.38);color:#b9b9b8}
 .guardian-character-cards__status.is-unavailable{border-color:rgba(255,80,96,.36);color:#e3a1aa}
 .guardian-character-card{
   --character-emblem:none;
@@ -112,7 +112,7 @@ html body .topbar+:is(.workspace,.build-space){min-height:calc(100vh - 108px)!im
   position:absolute;
   top:10px;
   right:12px;
-  color:#f2c942;
+  color:#b9b9b8;
   font:800 14px bahnschrift,sans-serif;
   text-shadow:0 1px 5px #000,0 0 9px rgba(0,0,0,.9);
   white-space:nowrap;

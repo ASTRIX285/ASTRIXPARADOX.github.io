@@ -8,7 +8,7 @@
     margin:8px 8px 0!important;
     padding:8px 10px!important;
     border:0!important;
-    border-bottom:1px solid rgba(227,178,60,.16)!important;
+    border-bottom:1px solid rgba(185,185,184,.16)!important;
     border-radius:0!important;
     background:transparent!important;
   }
@@ -23,7 +23,7 @@
     justify-content:flex-start;
     padding:0 8px 6px!important;
     margin-top:-2px!important;
-    border-bottom:1px solid rgba(227,178,60,.16);
+    border-bottom:1px solid rgba(185,185,184,.16);
     overflow:visible;
   }
   .left .super-feature__label{display:none!important}
@@ -39,7 +39,7 @@
   #abilityList,#aspectList,#fragList{display:grid!important;grid-auto-flow:row!important;gap:var(--rail-slot-gap)!important;align-items:start!important;justify-content:start!important}
   #abilityList .ability-row,#abilityList .slot,#abilityList .ico-badge,#aspectList .slot,#aspectList .ico-badge,#fragList .slot,#fragList .ico-badge{box-sizing:border-box!important}
   #abilityList:empty,#aspectList:empty{position:relative!important}
-  #abilityList:empty::before,#aspectList:empty::before{content:""!important;display:block!important;border:1px solid rgba(227,178,60,.14)!important;border-radius:7px!important;background:rgba(255,255,255,.012)!important;box-sizing:border-box!important;transform:none!important}
+  #abilityList:empty::before,#aspectList:empty::before{content:""!important;display:block!important;border:1px solid rgba(185,185,184,.14)!important;border-radius:7px!important;background:rgba(255,255,255,.012)!important;box-sizing:border-box!important;transform:none!important}
   #abilityList:empty::after,#aspectList:empty::after{content:none!important;display:none!important}
   .left .artifact-row .perks{display:grid!important;gap:var(--rail-slot-gap)!important}
   .left .artifact-row .perks>*{box-sizing:border-box!important}

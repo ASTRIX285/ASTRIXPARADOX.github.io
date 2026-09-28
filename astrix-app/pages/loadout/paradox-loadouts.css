@@ -38,12 +38,12 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 .saved-build-art{display:grid;place-items:center;width:var(--saved-icon-size);height:var(--saved-icon-size);border:1px solid #777;background:var(--apx-colour-raised,#1a1a1a);box-sizing:border-box;overflow:hidden}
 .saved-build-art img{display:block;width:100%;height:100%;object-fit:contain;aspect-ratio:1}
 .saved-build-tile:focus-visible,.saved-build-overview:focus-visible{outline:2px solid var(--apx-colour-focus,#82c9ff);outline-offset:2px}
-.saved-item-tooltip{position:fixed;inset:auto;margin:0;width:max-content;max-width:min(280px,calc(100vw - 16px));box-sizing:border-box;padding:8px 10px;background:#111;color:#fff;border:1px solid #b99850;border-radius:3px;font:13px/1.45 var(--apx-font-copy,sans-serif);white-space:pre-line;overflow-wrap:anywhere;pointer-events:none;z-index:10000;box-shadow:0 4px 16px #0009}
+.saved-item-tooltip{position:fixed;inset:auto;margin:0;width:max-content;max-width:min(280px,calc(100vw - 16px));box-sizing:border-box;padding:8px 10px;background:#111;color:#fff;border:1px solid #b9b9b8;border-radius:3px;font:13px/1.45 var(--apx-font-copy,sans-serif);white-space:pre-line;overflow-wrap:anywhere;pointer-events:none;z-index:10000;box-shadow:0 4px 16px #0009}
 .saved-item-tooltip[hidden]{display:none}
 .saved-build-power{display:flex;align-items:center;justify-content:flex-end;gap:3px;height:13px;padding:0 3px;box-sizing:border-box;background:#34434b;color:#fff;font-size:11px;line-height:1}
 .saved-build-power img{width:11px;height:11px;object-fit:contain;margin-right:auto}
-.saved-build-tile.is-exotic .saved-build-art{border-color:#e0b94f}
-.saved-build-tile.is-exotic .saved-build-power{background:#bda637;color:#0a0a0a}
+.saved-build-tile.is-exotic .saved-build-art{border-color:#b9b9b8}
+.saved-build-tile.is-exotic .saved-build-power{background:#8a8a89;color:#0a0a0a}
 .saved-build-appearance{display:flex;gap:2px;margin-top:3px}
 .saved-build-appearance .saved-build-tile{--saved-icon-size:24px}
 .saved-build-stats{display:flex;align-items:center;gap:6px;margin-top:7px;white-space:nowrap;font-size:10px;line-height:1.2}
@@ -65,8 +65,8 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 .paradox-loadout-detail-actions .paradox-trash{display:grid;place-items:center;width:34px;padding:6px}
 .paradox-trash svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7}
 .paradox-loadout-status{margin:0;padding:10px;border-left:2px solid var(--apx-colour-focus,#82c9ff);background:#111}
-.paradox-loadout-status.is-error{border-color:#b22222}
-.paradox-loadout-dialog{width:min(850px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-sizing:border-box;border:1px solid #b99850;border-radius:10px;padding:20px;background:#101014;color:#eee;font:14px/1.4 var(--apx-font-copy,sans-serif)}
+.paradox-loadout-status.is-error{border-color:#ba1f12}
+.paradox-loadout-dialog{width:min(850px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-sizing:border-box;border:1px solid #b9b9b8;border-radius:10px;padding:20px;background:#101014;color:#eee;font:14px/1.4 var(--apx-font-copy,sans-serif)}
 .paradox-loadout-dialog::backdrop{background:rgba(0,0,0,.86)}
 .paradox-loadout-dialog h2{margin:0 0 14px;font-size:20px}
 .paradox-loadout-dialog label{display:grid;gap:5px;margin:10px 0}
@@ -76,7 +76,7 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
 .paradox-loadout-dialog button{padding:8px 12px;background:#1a1a20;color:inherit;border:1px solid #666;border-radius:4px;cursor:pointer;font:inherit}
 .paradox-loadout-dialog button.is-primary{background:#ad1521;border-color:#e24a53}
 .paradox-loadout-dialog button:disabled{opacity:.5;cursor:wait}
-.paradox-loadout-dialog :focus-visible{outline:2px solid #82c9ff;outline-offset:2px}
+.paradox-loadout-dialog :focus-visible{outline:2px solid #d6d6d5;outline-offset:2px}
 .paradox-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
 .paradox-editor-grid fieldset{min-width:0;border:1px solid #444;margin:8px 0;padding:10px}
 .paradox-editor-grid legend{font-weight:700}
@@ -173,7 +173,7 @@ body .paradox-loadout-detail .saved-build-equipment-item>.saved-build-tile{--sav
   position:absolute!important;
   right:2px!important;
   bottom:0!important;
-  color:rgba(255,248,226,.84)!important;
+  color:rgba(214,214,213,.84)!important;
   font:800 .4rem bahnschrift-semicondensed,bahnschrift,sans-serif!important;
   line-height:1!important;
   text-shadow:0 1px 2px #000!important;

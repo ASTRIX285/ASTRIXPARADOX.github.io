@@ -426,7 +426,7 @@ a {
 
 .btn-secondary:hover {
   border-color: var(--gold);
-  background: rgba(201,168,76,0.05);
+  background: rgba(185,185,184,0.05);
 }
 
 .btn-join {
