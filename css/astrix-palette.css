@@ -3,16 +3,22 @@
 @layer astrix-gloss, astrix-ribbon-buttons, astrix-button-tiers;
 :root {
   color-scheme: dark;
-  --apx-colour-canvas: #161616;
-  --apx-colour-panel: #222222;
-  --apx-colour-raised: #2b2b2b;
-  --apx-colour-text: #ededed;
-  --apx-colour-secondary: #b8b8b8;
-  --apx-colour-action: #b22222;
-  --apx-colour-focus: #82c9ff;
+  /* Brand colours taken from the AX logo. */
+  --apx-colour-canvas: #0e0c09;      /* Forge Black, the A */
+  --apx-colour-panel: #16140f;
+  --apx-colour-raised: #1f1c16;
+  --apx-colour-text: #ededeb;
+  --apx-colour-secondary: #b9b9b8;
+  --apx-colour-action: #ba1f12;      /* Ember Red, the arrow */
+  --apx-colour-action-glow: #e6391f;
+  --apx-colour-deep: #732022;        /* Deep Red, the X */
+  --apx-colour-steel: #8a8a89;       /* Steel, the chevron */
+  --apx-colour-steel-dark: #6b6b6a;
+  --apx-colour-focus: #d6d6d5;
   --apx-colour-success: #62d6ad;
-  --apx-colour-border: #414141;
-  --apx-colour-border-strong: #616161;
+  --apx-colour-border: #2e2a22;
+  --apx-colour-border-strong: #4a4538;
+  --apx-notch: 10px;
 }
 
 
@@ -73,6 +79,7 @@
     --apx-button-text: var(--apx-button-primary-text);
     --apx-button-border: var(--apx-button-primary-border);
     --apx-button-weight: var(--apx-button-primary-weight);
+    --apx-button-clip: polygon(0 0, calc(100% - var(--apx-notch)) 0, 100% var(--apx-notch), 100% 100%, 0 100%);
   }
   body[data-apx-button-system].journey-page .apx-data-refresh,
   body[data-apx-button-system] #vaultRefreshButton,
@@ -91,8 +98,19 @@
       .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
       .el, .selector-card, [data-recommendation-element], .apx-loc,
       .gw-tile, .gw-mod-dot, .gw-armour-chip) {
-    background-image: none !important;
-    box-shadow: none !important;
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--apx-button-background) 86%, white) 0%, var(--apx-button-background) 55%, color-mix(in srgb, var(--apx-button-background) 78%, black) 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.45), inset 0 0 0 1px var(--apx-button-border) !important;
+    border-color: transparent !important;
+    clip-path: var(--apx-button-clip, none);
+    transition: background-color .14s ease-out, box-shadow .14s ease-out !important;
+  }
+  body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
+    .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
+    .mission-build-link, .mission-analyse-link, a.btn):active:not(:disabled):not([aria-disabled="true"]):not(
+      .guardian-loadout-slot, .guardian-character-card, .vault-transfer-item,
+      .el, .selector-card, [data-recommendation-element], .apx-loc,
+      .gw-tile, .gw-mod-dot, .gw-armour-chip) {
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px var(--apx-button-border) !important;
   }
   body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
@@ -105,8 +123,8 @@
   body[data-apx-button-system] :is(button, [role="button"], .improve-cta,
     .tool-intro-cta, .vault-connect, .bungie-auth-btn, a.restore-btn,
     .mission-build-link, .mission-analyse-link, a.btn):focus-visible {
-    outline: 2px solid var(--apx-button-focus) !important;
-    outline-offset: 3px !important;
+    outline: none !important;
+    box-shadow: inset 0 0 0 2px var(--apx-button-focus), inset 0 1px 0 rgba(255,255,255,.16) !important;
   }
   body[data-apx-button-system] :is(button, [role="button"]):is(:disabled, [aria-disabled="true"]) {
     opacity: var(--apx-button-disabled-opacity) !important;
@@ -115,6 +133,14 @@
   body[data-apx-button-system] button:not(.guardian-loadout-slot, .guardian-character-card,
     .vault-transfer-item, .el, .selector-card, [data-recommendation-element],
     .apx-loc, .gw-tile, .gw-mod-dot, .gw-armour-chip):is([aria-pressed="true"], [aria-selected="true"]) {
-    border-color: var(--apx-button-focus) !important;
+    box-shadow: inset 3px 0 0 var(--apx-colour-action), inset 0 0 0 1px var(--apx-colour-deep) !important;
+    background-image: linear-gradient(90deg, color-mix(in srgb, var(--apx-colour-deep) 45%, transparent), var(--apx-button-background) 75%) !important;
+    color: #ffffff !important;
   }
+}
+body[data-apx-button-system] :is(a.restore-btn, a.btn, .restore-btn, .improve-cta, .tool-intro-cta, .vault-connect, .bungie-auth-btn, .mission-build-link, .mission-analyse-link) {
+  --apx-button-clip: polygon(0 0, calc(100% - var(--apx-notch)) 0, 100% var(--apx-notch), 100% 100%, 0 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-apx-button-system] :is(button, [role="button"]) { transition: none !important; }
 }

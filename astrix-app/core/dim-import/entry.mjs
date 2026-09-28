@@ -16,7 +16,7 @@ function context(){
 }
 function style(){
   if(document.querySelector('[data-dim-style]'))return;
-  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260927-adapt-1',import.meta.url).href;document.head.append(link);
+  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1',import.meta.url).href;document.head.append(link);
 }
 export async function importDimLoadout(input,{returnFocus}={}){
   const started=performance.now();const before=context(),binding={...sessionBinding(before.session),characterId:before.characterId};

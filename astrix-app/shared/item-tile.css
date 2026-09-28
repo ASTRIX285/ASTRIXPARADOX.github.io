@@ -291,7 +291,7 @@
 }
 .vault-transfer-item.has-item-tile:not(.is-equipped):hover .item-tile,
 .vault-transfer-item.has-item-tile:not(.is-equipped):focus-visible .item-tile {
-  outline: 1px solid #c9a84c;
+  outline: 1px solid #b9b9b8;
   outline-offset: 1px;
 }
 

@@ -1,4 +1,4 @@
-import {mountDimComparison} from '../../../core/dim-import/review.mjs?v=20260927-adapt-1';
+import {mountDimComparison} from '../../../core/dim-import/review.mjs?v=20260928-fit-row-1';
 import {renderEquipmentIcons,bindLoadoutIconDetails} from '../../../shared/loadout-icon-layout.mjs?v=20260927-adapt-1';
 import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1&adapt=20260927-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';

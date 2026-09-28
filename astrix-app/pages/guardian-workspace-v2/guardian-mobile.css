@@ -10,7 +10,7 @@
   .workspace{width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:var(--mobile-gap)!important;gap:var(--mobile-gap)!important;display:flex!important;flex-direction:column!important;align-items:stretch!important}.workspace>*{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;flex:none!important}
   .panel,.stage,.equip{border-radius:14px!important}.left{overflow:visible!important;max-height:none!important;padding:var(--rail-pad)!important}
   .left #superFocus{display:none!important}
-  .left .super-feature{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding:4px 0 10px!important;border-bottom:1px solid rgba(227,178,60,.16)!important}
+  .left .super-feature{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding:4px 0 10px!important;border-bottom:1px solid rgba(185,185,184,.16)!important}
   .left .super-feature__label{display:block!important;position:static!important;margin:0 0 3px!important;line-height:1.1!important;font-size:.55rem!important;text-align:center!important}
   html body .workspace .left .super-feature__name{font-size:.72rem!important;font-weight:800!important;letter-spacing:.1em!important;text-transform:uppercase!important;color:rgba(255,255,255,.84)!important}
   #abilityList{grid-template-columns:repeat(4,var(--guardian-square))!important}#aspectList,#fragList{grid-template-columns:repeat(5,var(--guardian-square))!important}.artifact-row .perks{grid-template-columns:repeat(4,var(--guardian-square))!important;grid-auto-rows:var(--guardian-square)!important}

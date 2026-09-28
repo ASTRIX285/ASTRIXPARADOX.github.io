@@ -8,13 +8,25 @@ function fitSlot(item,state){
   const badge=state==='ok'?`<span class="apx-dim-badge is-ok" role="img" aria-label="In your inventory">${TICK}</span>`:state==='gone'?`<span class="apx-dim-badge is-gone" role="img" aria-label="Not in your inventory">${CROSS}</span>`:'';
   return `<span class="apx-dim-slot is-${state}">${loadoutIcon(item,{large:true})}${badge}</span>`;
 }
-function fitRow(row){
+// One horizontal row, in DIM order: subclass, weapons, armour.
+const SLOT_ORDER=[3284755031,1498876634,2465295065,953998645,3448274439,3551918588,14239492,20886954,1585787867];
+const slotIndex=row=>{const index=SLOT_ORDER.indexOf(Number(row.bucketHash));return index<0?SLOT_ORDER.length:index;};
+function fitTile(row){
   const matched=row.status==='matched',substituted=row.status==='substituted';
-  const title=matched?'In your inventory':substituted?'Not in your inventory · replacement suggested':'Not in your inventory · no replacement found';
-  const target=fitSlot(row.target,matched?'ok':'gone');
-  const pick=matched?'':row.selected?fitSlot(row.selected,'pick'):'<span class="apx-dim-empty">No match</span>';
-  const detail=matched?row.reasons:substituted?[`Replacement: ${row.selected?.name||''}`,...row.reasons]:[];
-  return `<div class="apx-dim-match is-${esc(row.status)}">${target}${matched?'<span></span><span></span>':`<span class="apx-dim-arrow" aria-hidden="true">→</span>${pick}`}<div><strong>${esc(title)}</strong>${detail.length?`<p>${esc(detail.join(' · '))}</p>`:''}${row.missingSockets.length?`<p>Unavailable sockets: ${esc(row.missingSockets.join(', '))}</p>`:''}</div></div>`;
+  const label=matched?'In your inventory':substituted?'Replacement suggested':'No replacement';
+  return `<li class="apx-dim-tile is-${esc(row.status)}">${fitSlot(row.target,matched?'ok':'gone')}${matched?'':`<span class="apx-dim-tile-pick">${row.selected?`<span class="apx-dim-arrow" aria-hidden="true">↓</span>${fitSlot(row.selected,'pick')}`:'<span class="apx-dim-empty">No match</span>'}</span>`}<span class="apx-dim-tile-label">${esc(label)}</span></li>`;
+}
+function fitNotes(rows){
+  const notes=rows.filter(row=>row.status!=='matched').map(row=>{
+    const name=row.target?.name||'Shared item';
+    const text=row.status==='substituted'?`${name} is not in your inventory. Replacement: ${row.selected?.name||''}. ${row.reasons.join(' · ')}`:`${name} is not in your inventory and nothing you have fits this slot.`;
+    return `<li>${esc(text)}${row.missingSockets.length?` ${esc(`Unavailable sockets: ${row.missingSockets.join(', ')}`)}`:''}</li>`;
+  });
+  return notes.length?`<ul class="apx-dim-notes">${notes.join('')}</ul>`:'';
+}
+function fitRow(rows){
+  const ordered=[...rows].sort((a,b)=>slotIndex(a)-slotIndex(b));
+  return `<ul class="apx-dim-fit-row" aria-label="Shared items against your inventory">${ordered.map(fitTile).join('')}</ul>${fitNotes(ordered)}`;
 }
 function fitSummary(rows=[]){
   const count=status=>rows.filter(row=>row.status===status).length,found=count('matched');
@@ -25,7 +37,7 @@ export function renderDimComparison(build){
   const original=build.dimTarget;
   const current=[...(build.weapons||[]),...(build.armour||[]),build.subclassItem].filter(Boolean);
   const changed=report.comparisons.some(row=>String(current.find(item=>item.bucketHash===row.bucketHash)?.itemInstanceId||'')!==String(row.selected?.itemInstanceId||''));
-  return `<h2>SHARED BUILD FIT</h2><p>${esc(report.sourceName)} · ${esc(report.characterClass)}</p><p>Comparison captured when this import was matched to your inventory.</p>${changed?'<p>The Working Build has changed since import. This comparison records the initial recommendation.</p>':''}<div class="apx-icon-strip" aria-label="Original Exotic and Super anchors">${(report.anchors||[]).map(item=>loadoutIcon(item)).join('')}</div>${fitSummary(report.comparisons)}<div class="apx-dim-comparison">${report.comparisons.map(fitRow).join('')}</div>${report.blockers.length?`<ul>${report.blockers.map(text=>`<li>${esc(text)}</li>`).join('')}</ul>`:''}${report.setTargets.length?`<h3>Set targets</h3><ul>${report.setTargets.map(row=>`<li>${esc(row.name)}: ${row.current}/${row.required} pieces</li>`).join('')}</ul>`:''}${report.statTargets.length?`<h3>Stat targets</h3><p>Current item totals, before changes to mods or subclass bonuses.</p><ul>${report.statTargets.map(row=>`<li>${esc(row.name)}: ${row.legacy?'Legacy target, not applied':`${row.current??'Unavailable'} · target ${row.min}–${row.max}`}</li>`).join('')}</ul>`:''}${report.parameterSteps.length?`<details><summary>Mods, cosmetics and artifact targets</summary><p>Retained from the share. Review placement, unlocks and energy costs in Destiny; these have not been applied.</p>${report.parameterSteps.map(group=>`<p>${esc(group.label)}: ${group.items.map(item=>esc(item.name)+(item.retired?' (retired)':item.availableOn?.length?` (socket option on ${esc(item.availableOn.join(', '))})`:' (placement or unlock not confirmed)')).join('; ')}</p>`).join('')}</details>`:''}<details><summary>How this fit was selected</summary><p>${esc(report.method)}</p><p>The shared original is preserved${original?' in this build':''}. A suggested replacement can differ in effects; missing Exotic effects are never treated as equivalent.</p></details>`;
+  return `<h2>SHARED BUILD FIT</h2><p>${esc(report.sourceName)} · ${esc(report.characterClass)}</p><p>Comparison captured when this import was matched to your inventory.</p>${changed?'<p>The Working Build has changed since import. This comparison records the initial recommendation.</p>':''}<div class="apx-icon-strip" aria-label="Original Exotic and Super anchors">${(report.anchors||[]).map(item=>loadoutIcon(item)).join('')}</div>${fitSummary(report.comparisons)}<div class="apx-dim-comparison">${fitRow(report.comparisons)}</div>${report.blockers.length?`<ul>${report.blockers.map(text=>`<li>${esc(text)}</li>`).join('')}</ul>`:''}${report.setTargets.length?`<h3>Set targets</h3><ul>${report.setTargets.map(row=>`<li>${esc(row.name)}: ${row.current}/${row.required} pieces</li>`).join('')}</ul>`:''}${report.statTargets.length?`<h3>Stat targets</h3><p>Current item totals, before changes to mods or subclass bonuses.</p><ul>${report.statTargets.map(row=>`<li>${esc(row.name)}: ${row.legacy?'Legacy target, not applied':`${row.current??'Unavailable'} · target ${row.min}–${row.max}`}</li>`).join('')}</ul>`:''}${report.parameterSteps.length?`<details><summary>Mods, cosmetics and artifact targets</summary><p>Retained from the share. Review placement, unlocks and energy costs in Destiny; these have not been applied.</p>${report.parameterSteps.map(group=>`<p>${esc(group.label)}: ${group.items.map(item=>esc(item.name)+(item.retired?' (retired)':item.availableOn?.length?` (socket option on ${esc(item.availableOn.join(', '))})`:' (placement or unlock not confirmed)')).join('; ')}</p>`).join('')}</details>`:''}<details><summary>How this fit was selected</summary><p>${esc(report.method)}</p><p>The shared original is preserved${original?' in this build':''}. A suggested replacement can differ in effects; missing Exotic effects are never treated as equivalent.</p></details>`;
 }
 let dispose=()=>{};
 export function mountDimComparison(build,host){

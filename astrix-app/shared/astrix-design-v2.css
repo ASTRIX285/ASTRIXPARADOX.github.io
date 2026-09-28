@@ -26,10 +26,10 @@
   --apx-gloss-fill-3: #8c1616;
   --apx-gloss-fill-4: #6a0e0e;
   --apx-gloss-glow-crimson: rgb(178 34 34 / 75%);
-  --apx-gloss-glow-gold: rgb(201 168 76 / 65%);
+  --apx-gloss-glow-gold: rgb(185 185 184 / 65%);
   --apx-pvp: #6f8fb8;
   --apx-ember-crimson: var(--apx-colour-action);
-  --apx-ember-gold: #c9a84c;
+  --apx-ember-gold: #b9b9b8;
 
   /* Spacing */
   --apx-space-1: 4px;

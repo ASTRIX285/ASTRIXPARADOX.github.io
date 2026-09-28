@@ -47,7 +47,7 @@ body.apx-destination-page{background:transparent}
 
 /* ---- two-column focus layout (selector | detail) ---- */
 .apx-loc-layout{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:18px;align-items:start}
-.apx-loc-panel{min-width:0;border:1px solid rgba(201,168,76,.16);background:rgba(6,6,6,.44);padding:6px}
+.apx-loc-panel{min-width:0;border:1px solid rgba(185,185,184,.16);background:rgba(6,6,6,.44);padding:6px}
 .apx-loc-detail{min-width:0;padding:16px 18px}
 @media(max-width:720px){.apx-loc-layout{grid-template-columns:1fr}}
 
@@ -59,7 +59,7 @@ body.apx-destination-page{background:transparent}
 .apx-loc-select-head span{color:var(--apx-muted);font:700 8px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em;text-transform:uppercase}
 .apx-loc-list{display:flex;flex-direction:column;max-height:440px;overflow-y:auto;min-width:0}
 .apx-loc-list::-webkit-scrollbar{width:6px}
-.apx-loc-list::-webkit-scrollbar-thumb{background:rgba(201,168,76,.24);border-radius:3px}
+.apx-loc-list::-webkit-scrollbar-thumb{background:rgba(185,185,184,.24);border-radius:3px}
 
 .apx-loc{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;
   width:100%;min-width:0;max-width:100%;overflow:hidden;text-align:left;cursor:pointer;
@@ -81,7 +81,7 @@ body.apx-destination-page{background:transparent}
 .apx-loc[aria-current="true"] .apx-loc-meta{color:var(--apx-muted)}
 
 /* ---- selected-destination checklist ("what's left to do") ---- */
-.apx-loc-band{margin:0 0 12px;color:rgba(244,239,228,.34);text-align:center;
+.apx-loc-band{margin:0 0 12px;color:rgba(214,214,213,.34);text-align:center;
   font:700 12px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.5em;text-transform:uppercase;transition:color .5s}
 .apx-loc-desc{margin:0 0 12px;color:var(--apx-muted);font-size:14px;line-height:1.5;font-style:italic}
 .apx-loc-prog{display:flex;align-items:center;gap:12px;margin:0 0 4px}
@@ -94,7 +94,7 @@ body.apx-destination-page{background:transparent}
 .apx-loc-item:last-child{border-bottom:0}
 .apx-loc-item .tick{width:15px;height:15px;flex:none;border-radius:3px;display:grid;place-items:center;
   font-size:10px;background:rgba(255,255,255,.05);border:1px solid var(--apx-line);color:#77716a}
-.apx-loc-item.is-done .tick{background:rgba(201,168,76,.16);border-color:transparent;color:var(--apx-gold)}
+.apx-loc-item.is-done .tick{background:rgba(185,185,184,.16);border-color:transparent;color:var(--apx-gold)}
 .apx-loc-item strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--apx-text)}
 .apx-loc-item.is-done strong{font-weight:400;color:var(--apx-muted)}
 .apx-loc-item .where{flex:0 0 auto;color:#77716a;font-size:12px}

@@ -62,7 +62,7 @@
 .mini .big.green{color:var(--green)}
 .champs{display:flex;gap:5px;flex-wrap:wrap}
 .champs .c{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:.7rem;border:1px solid var(--line-2);position:relative}
-.champs .c.ok{color:var(--green);background:rgba(84,227,155,.1)} .champs .c.warn{color:var(--gold);background:rgba(227,178,60,.1)}
+.champs .c.ok{color:var(--green);background:rgba(84,227,155,.1)} .champs .c.warn{color:var(--gold);background:rgba(185,185,184,.1)}
 .champs .c .tick{position:absolute;right:-2px;bottom:-2px;font-size:.5rem;color:var(--green)}
 .conf-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}
 .conf-bar i{display:block;height:100%;width:92%;background:linear-gradient(90deg,var(--violet),var(--violet-hot))}

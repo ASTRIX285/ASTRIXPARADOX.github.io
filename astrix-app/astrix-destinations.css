@@ -16,7 +16,7 @@
 }
 
 :root{--loc:#5fa8e6;--loc-2:#8fd0ff}                 /* default (no location) = blue */
-html[data-location="pale-heart"]{--loc:#d1a25a;--loc-2:#e6c98a}  /* Traveler, warm */
+html[data-location="pale-heart"]{--loc:#b9b9b8;--loc-2:#d6d6d5}  /* Traveler, warm */
 html[data-location="europa"]{--loc:#5fa8e6;--loc-2:#9fd4ff}      /* icy blue */
 html[data-location="dreaming-city"]{--loc:#9a6fd0;--loc-2:#c79af0}/* purple */
 html[data-location="edz"]{--loc:#6fae5c;--loc-2:#a6d68f}         /* forest green */
@@ -25,7 +25,7 @@ html[data-location="moon"]{--loc:#8f9ea0;--loc-2:#c2cec9}        /* pale grey */
 html[data-location="neomuna"]{--loc:#35d6ff;--loc-2:#ff6fd0}     /* neon cyber */
 html[data-location="nessus"]{--loc:#c85a3a;--loc-2:#e88a5a}     /* Vex coral */
 html[data-location="throne-world"]{--loc:#6fae8f;--loc-2:#a6d6bf}/* Savathun teal */
-html[data-location="tower"]{--loc:#c9b78a;--loc-2:#e6d8b0}       /* daylight */
+html[data-location="tower"]{--loc:#b9b9b8;--loc-2:#d6d6d5}       /* daylight */
 
 html{
   transition:--loc 250ms ease,--loc-2 250ms ease;
