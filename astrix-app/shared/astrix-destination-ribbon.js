@@ -7,7 +7,7 @@
     Object.freeze({key:'forge-loader',label:'Forge Loader',href:'/astrix-app/pages/forge-loader/'}),
     Object.freeze({key:'build-forge',label:'Build Forge',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
     Object.freeze({key:'reports',label:'Reports',href:'/astrix-app/pages/reports/'}),
-    Object.freeze({key:'vault',label:'Vault',href:'/astrix-app/pages/vault/'}),
+    Object.freeze({key:'vault',label:'Storage',href:'/astrix-app/pages/vault/'}),
     Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
   ]);
 
@@ -133,6 +133,15 @@
     nav.className='apx-destination-ribbon';
     nav.setAttribute('aria-label','ASTRIX PARADOX destinations');
     const list=document.createElement('ul');
+    // Guardian Home is always one click away, on every tool page.
+    const homeItem=document.createElement('li');
+    homeItem.className='apx-destination-ribbon__home';
+    const homeLink=document.createElement('a');
+    homeLink.href='/astrix-app/pages/home/';
+    homeLink.setAttribute('aria-label','Guardian Home');
+    homeLink.textContent='\u2190 Home';
+    homeItem.append(homeLink);
+    list.append(homeItem);
     destinations.forEach(destination=>{
       const item=document.createElement('li');
       const link=document.createElement('a');

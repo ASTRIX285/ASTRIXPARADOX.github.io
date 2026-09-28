@@ -1,0 +1,6 @@
+astrix-app/shared/astrix-destination-ribbon.js
+astrix-app/shared/astrix-destination-ribbon.css
+astrix-app/pages/journey/index.html
+astrix-app/pages/vault/index.html
+astrix-app/pages/home/index.html
+astrix-app/tools/validate-journey-visual-pass.mjs
