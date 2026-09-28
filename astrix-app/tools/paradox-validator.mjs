@@ -89,6 +89,8 @@ const validators=[
   'test-dim-fit-status.mjs',
   'test-forge-weapon-variety.mjs',
   'test-apply-stale-socket-changes.mjs',
+  'test-apply-readback-lag.mjs',
+  'test-forge-exotic-weapon-synergy.mjs',
   'test-character-live-data.mjs',
   'test-recommended-build-reveal.mjs',
   'validate-paradox-build-space.mjs',

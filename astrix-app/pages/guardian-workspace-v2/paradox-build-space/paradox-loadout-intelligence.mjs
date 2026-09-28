@@ -264,15 +264,31 @@ function weaponEvidence(weapon){
 // element coverage no longer outweighs everything, and a weapon already in the
 // build is kept unless a replacement is clearly better.
 const OBJECTIVE_TERM_POINTS=16,ACTIVITY_TERM_POINTS=16,ELEMENT_COVERAGE_POINTS=60,KEEP_CURRENT_POINTS=30;
-function scoreWeapon(weapon,objective,sources,activity){
+// Synergy (Miguel, 28 Sep 2026): picks looked random and ignored Exotic
+// weapons. Legendaries won on sheer perk text. Now each weapon that matches
+// the subclass element scores, and an Exotic weapon whose own traits work with
+// the Exotic armour, subclass or Artifact counts double and earns the Exotic
+// slot. An Exotic with no build link gets nothing extra, so none is forced in.
+const ELEMENT_MATCH_POINTS=24,EXOTIC_SYNERGY_MULTIPLIER=2,EXOTIC_SLOT_POINTS=40;
+function exoticWeaponTraitText(weapon){
+  if(!isExoticItem(weapon))return '';
+  const semantics=weapon?.weaponSemantics||{};
+  return [semantics.intrinsic,...(semantics.exoticTraits||weapon?.exoticWeaponTraits||[])].filter(item=>item&&!item.unresolved).map(item=>clean(item.description||item.definition?.displayProperties?.description)).join(' · ').toLowerCase();
+}
+function scoreWeapon(weapon,objective,sources,activity,intent={}){
   const text=weaponEvidence(weapon).map(item=>clean(item.description||item.definition?.displayProperties?.description)).join(' · ').toLowerCase().replace(/grenade launchers?/g,'launcher'),tokens=explicitTokens(text).filter(token=>token!=='weapon'),reasons=[];
-  let score=0;
+  const exoticTokens=new Set(explicitTokens(exoticWeaponTraitText(weapon)).filter(token=>token!=='weapon'));
+  let score=0,exoticSynergy=0;
   for(const token of tokens){
     const source=sources.filter(row=>row.tokens.includes(token)).sort((a,b)=>b.weight-a.weight)[0];
     if(!source)continue;
-    const points=12*Math.max(1,Number(source.weight)||1);score+=points;
-    reasons.push({kind:'perk-synergy',label:`${itemName(weapon,'Weapon')}: active perk ${token} wording supports ${source.kind} · ${source.name}.`,score:points,token});
+    const exoticTrait=exoticTokens.has(token),points=12*Math.max(1,Number(source.weight)||1)*(exoticTrait?EXOTIC_SYNERGY_MULTIPLIER:1);score+=points;
+    if(exoticTrait)exoticSynergy++;
+    reasons.push({kind:exoticTrait?'exotic-weapon-synergy':'perk-synergy',label:exoticTrait?`${itemName(weapon,'Exotic')}: Exotic trait ${token} works with ${source.kind} · ${source.name}.`:`${itemName(weapon,'Weapon')}: active perk ${token} wording supports ${source.kind} · ${source.name}.`,score:points,token});
   }
+  if(exoticSynergy){score+=EXOTIC_SLOT_POINTS;reasons.push({kind:'exotic-weapon-slot',label:`${itemName(weapon,'Exotic')} earns the Exotic weapon slot: its traits link to this build.`,score:EXOTIC_SLOT_POINTS});}
+  const element=itemElement(weapon);
+  if(intent.element&&element===intent.element){score+=ELEMENT_MATCH_POINTS;reasons.push({kind:'element-match',label:`${itemName(weapon,'Weapon')} is ${element.toUpperCase()}, matching your ${element.toUpperCase()} subclass.`,score:ELEMENT_MATCH_POINTS,element});}
   const matches=terms=>terms.filter(term=>term!=='weapon'&&new RegExp(`\\b${term}\\b`).test(text));
   for(const term of matches(OBJECTIVE_TERMS[objectiveName(objective)])){score+=OBJECTIVE_TERM_POINTS;reasons.push({kind:'objective',label:`Active perk ${term} wording supports ${objectiveName(objective)}.`,score:OBJECTIVE_TERM_POINTS,term});}
   for(const term of matches(ACTIVITY_WEAPON_TERMS[activity]||[])){score+=ACTIVITY_TERM_POINTS;reasons.push({kind:'activity',label:`Active perk ${term} wording supports ${activity.toUpperCase()}.`,score:ACTIVITY_TERM_POINTS,term});}
@@ -311,7 +327,7 @@ function selectOwnedWeapons({build={},objective='balanced',baselineWeapons=build
     return candidates.flatMap(weapon=>{
       const validation=precomputed?.weaponModels.get(itemIdentity(weapon))?.validation||validateWeaponModel({weapons:[weapon]});
       if(!validation.ready){excluded.push({itemInstanceId:itemIdentity(weapon),name:itemName(weapon),reason:validation.reason});return [];}
-      return [scoreWeapon(weapon,resolvedObjective,sources,activity)];
+      return [scoreWeapon(weapon,resolvedObjective,sources,activity,intent)];
     });
   });
   // Exact dominance: future bonuses depend only on Exotic/element/ammo coverage.

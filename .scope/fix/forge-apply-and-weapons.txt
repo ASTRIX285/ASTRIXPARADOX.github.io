@@ -1,0 +1,6 @@
+astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs
+astrix-app/tools/test-apply-readback-lag.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-manual-build-editor.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs
+astrix-app/tools/test-forge-exotic-weapon-synergy.mjs
