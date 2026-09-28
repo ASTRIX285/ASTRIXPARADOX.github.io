@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {dimShareRoute} from '../../forge-auth-worker/src/dim-share.ts';
-import {resolveDimLoadout} from '../core/dim-import/resolve.mjs';
+import {resolveDimLoadout,dimWorkingBuild} from '../core/dim-import/resolve.mjs';
 import {renderLoadoutIconLayout} from '../shared/loadout-icon-layout.mjs';
 const read=name=>readFile(new URL(`./fixtures/dim-import/${name}.json`,import.meta.url),'utf8').then(JSON.parse);
 const fixture=await read('tether'),snapshot=await read('tether-manifest');
@@ -28,4 +28,6 @@ assert.equal(artifactIcons.length,retired.length,'every artifact perk renders in
 assert.ok(artifactIcons.every(name=>name.startsWith('Retired: ')));
 assert.ok(!modIcons.some(name=>name.startsWith('Retired: ')),'no artifact perk renders among mods');
 assert.match(iconLayout,/<span class="apx-compact-label">Artifact<\/span>/);
+// The subclass element comes from the verified catalogue, so Build Forge never falls back to Void.
+assert.equal(dimWorkingBuild(model,{}).subclass,'prismatic');
 console.log(`DIM_TETHER=PASS resolved=${model.coverage.resolved}/${model.coverage.requested} unknowns=0 retired_artifact_perks=${retired.length} mode=${process.env.DIM_LIVE_SMOKE==='1'?(process.env.DIM_SMOKE_BASE_URL?'deployed-route':'worker-route-live-upstream'):'offline'}`);

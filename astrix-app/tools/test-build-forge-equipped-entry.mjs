@@ -242,6 +242,28 @@ for(const mode of ['equipped','owned']){
   h.resolvedSubclassOptions=()=>[];h.render();
   assert.equal(h.ui.get('generateMaxLoadout').disabled,true,'Direct entry must not bypass verified subclass readiness.');
 }
+// Miguel 28 Sep 2026: "Improve my current build" on an imported DIM build
+// replaced it with the equipped loadout. It must improve the imported build.
+for(const mode of ['equipped','owned']){
+  const imported={...structuredClone(equipped),source:'dim-import',loadoutSource:'dim-import',name:'Vesper Titan Boss',subclass:'arc',subclassName:'Striker',subclassBuild:{super:{hash:'imported-arc-super'}},
+    weapons:[vaultWeapon,directWeapons[1],directWeapons[2]],armour:[vaultHelmet,...directArmour.slice(1)],dimImport:{loadout:{name:'Vesper Titan Boss'}},importedParameters:{mods:[1]},equipment:[{itemHash:1}]};
+  const h=directHarness();const importedState=state.createBuildState(imported);h.writeState(importedState);
+  await h.startDirectGeneration(mode);const build=h.currentBuild();
+  assert.equal(entry.directEntryMode(build),mode);
+  assert.deepEqual(Array.from(build.weapons,item=>item.itemInstanceId),[vaultWeapon,directWeapons[1],directWeapons[2]].map(item=>item.itemInstanceId),'Imported weapons are kept, not the equipped loadout.');
+  assert.deepEqual(Array.from(build.armour,item=>item.itemInstanceId),[vaultHelmet,...directArmour.slice(1)].map(item=>item.itemInstanceId),'Imported armour is kept, not the equipped loadout.');
+  assert.equal(build.subclass,'arc');assert.equal(build.subclassBuild.super.hash,'imported-arc-super','The imported subclass and Super are kept.');
+  assert.equal(build.source,'dim-import');assert.equal(build.dimImport.loadout.name,'Vesper Titan Boss');assert.deepEqual(build.importedParameters,{mods:[1]});
+  assert.equal(h.readState().originalBuild.armour[0].itemInstanceId,vaultHelmet.itemInstanceId,'Restore Original returns to the imported build.');
+}
+{
+  const gone={...structuredClone(equipped),source:'dim-import',loadoutSource:'dim-import',weapons:[{...vaultWeapon,itemInstanceId:'99990',name:'Deleted weapon'},directWeapons[1],directWeapons[2]]};
+  const h=directHarness();const goneState=state.createBuildState(gone);h.writeState(goneState);
+  await h.startDirectGeneration('equipped');
+  assert.equal(h.readState(),goneState,'A missing imported item never falls back to the equipped loadout.');
+  assert.match(vm.runInContext('recommendationFailure',h),/Deleted weapon from the imported build is no longer in your inventory/);
+}
+console.log('BUILD_FORGE_IMPORTED_ENTRY=PASS improve and build-from-gear keep the imported items, subclass and original; missing items stop with a clear reason');
 const legal=entry.createDirectGenerationBuild(equipped,{mode:'owned',armour:directArmour,ownedArmour:inventory.armour,ownedWeapons:equipped.ownedWeapons});
 for(const [label,mutate] of [
   ['membership',build=>{build.membershipId='99999';}],
