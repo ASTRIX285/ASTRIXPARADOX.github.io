@@ -42,13 +42,18 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.CHROMIUM_EXECUTABLE_PATH}:{})});
- async function open(width,{signedIn=true,partial=false}={}){
+ async function open(width,{signedIn=true,partial=false,journey='ready'}={}){
   const page=await browser.newPage({viewport:{width,height:900}});const errors=[];let homeRequests=0;
   page.on('pageerror',error=>errors.push(error.message));
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
    if(url.hostname==='auth.astrixparadox.com'&&url.pathname==='/session')return route.fulfill({json:signedIn?{authenticated:true,csrfToken:'fixture',activeDestinyMembership:{membershipId:'1',membershipType:3}}:{authenticated:false,error:'bungie_reauthentication_required'},status:signedIn?200:401,headers:{'access-control-allow-origin':origin,'access-control-allow-credentials':'true'}});
    if(url.hostname==='auth.astrixparadox.com'&&url.pathname==='/bungie/home'){homeRequests++;return route.fulfill({json:partial?{...summary,topExoticWeapon:null,selfEliminations:null,lastActivity:null}:summary,headers:{'access-control-allow-origin':origin,'access-control-allow-credentials':'true'}});}
+   // Journey preparation: stub the prepared-page client so the bar's states are deterministic.
+   if(url.origin===origin&&url.pathname.endsWith('/core/prepared-page-client.mjs')){
+    const body=journey==='ready'?'export async function loadPreparedPagePayload(){return {ok:true};}':"export async function loadPreparedPagePayload(){throw new Error('fixture failure');}";
+    return route.fulfill({body,headers:{'content-type':'text/javascript'}});
+   }
    if(url.origin!==origin)return route.abort();
    return route.continue();
   });
@@ -66,6 +71,13 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,`no horizontal overflow at ${width}`);
   assert.equal(await page.getByRole('link',{name:/SEE MORE/}).getAttribute('href'),'../journey/');
   assert.equal(homeRequests(),1,'Home makes exactly one data request');
+  await page.waitForFunction(()=>document.getElementById('homeReady')?.dataset.state==='ready',null,{timeout:8000});
+  assert.equal(await page.locator('#homeReadyTitle').textContent(),'READY');
+  assert.match(await page.locator('#homeReadyStage').textContent(),/Safe to enter/);
+  assert.equal(await page.locator('#homeReadyBar').getAttribute('aria-valuenow'),'100');
+  assert.equal(await page.evaluate(()=>document.body.classList.contains('forge-paradox-map-background')),true,'ASTRIX PARADOX background applied');
+  const readyBox=await page.locator('#homeReady .home-ready-inner').boundingBox();
+  assert.ok(readyBox&&readyBox.y+readyBox.height<=900+1,`readiness bar pinned inside the viewport at ${width}`);
   assert.deepEqual(errors,[]);
   if(process.env.HOME_SCREENSHOT_DIR){await page.waitForTimeout(1500);await page.screenshot({path:`${process.env.HOME_SCREENSHOT_DIR}/home-${width}.png`,fullPage:true});}
   await page.close();console.log(`HOME_BROWSER=PASS width=${width}`);
@@ -77,10 +89,18 @@ try{
   assert.deepEqual(errors,[]);await page.close();console.log('HOME_MISSING_DATA_HIDES_CARDS=PASS');
  }
  {
+  const {page,errors}=await open(1440,{journey:'fail'});
+  await page.waitForFunction(()=>document.getElementById('homeReady')?.dataset.state==='slow',null,{timeout:8000});
+  assert.match(await page.locator('#homeReadyStage').textContent(),/You can still enter/);
+  assert.equal(await page.getByRole('link',{name:/SEE MORE/}).getAttribute('href'),'../journey/','SEE MORE never blocked');
+  assert.deepEqual(errors,[]);await page.close();console.log('HOME_READY_BAR_SLOW=PASS');
+ }
+ {
   const {page,errors,homeRequests}=await open(390,{signedIn:false});
   await page.waitForTimeout(800);
   assert.equal(await page.locator('#homeStats').isVisible(),false,'signed out shows no stats');
   assert.equal(homeRequests(),0,'signed out never requests account data');
+  assert.equal(await page.locator('#homeReady').isVisible(),false,'signed out shows no readiness bar');
   assert.deepEqual(errors,[]);await page.close();console.log('HOME_SIGNED_OUT=PASS');
  }
 }finally{await browser?.close();await new Promise(done=>server.close(done));}

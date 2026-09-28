@@ -95,6 +95,54 @@ function prepareNextPages(){
   if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:3000});else setTimeout(run,1500);
 }
 
+const CLIENT_URL='../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+const JOURNEY_SLOW_MS=30000;
+
+function readyStage(state,percent,text){
+  const bar=byId('homeReady');if(!bar)return;
+  bar.hidden=false;bar.dataset.state=state;
+  byId('homeReadyFill').style.width=`${percent}%`;
+  byId('homeReadyBar').setAttribute('aria-valuenow',String(percent));
+  setText('homeReadyTitle',state==='ready'?'READY':state==='slow'?'STILL LOADING':'DATA LOADING');
+  setText('homeReadyStage',text);
+}
+
+// Fetch Journey's page files into the HTTP cache without running them.
+async function warmJourneyFiles(signal){
+  const href=new URL('../journey/',location.href);
+  const response=await fetch(href,{credentials:'same-origin',cache:'force-cache',signal});
+  if(!response.ok)throw new Error('Journey files unavailable');
+  const markup=new DOMParser().parseFromString(await response.text(),'text/html');
+  const urls=new Set();
+  for(const node of markup.querySelectorAll('link[rel="stylesheet"][href],link[rel="modulepreload"][href],script[src]')){
+    const url=new URL(node.getAttribute('href')||node.getAttribute('src'),href);
+    if(url.origin===location.origin)urls.add(url.href);
+  }
+  await Promise.all([...urls].map(url=>fetch(url,{credentials:'same-origin',cache:'force-cache',signal}).then(r=>r.arrayBuffer()).catch(()=>{})));
+}
+
+// Prepare Journey after Home is on screen and show the Guardian when it is safe to enter.
+// SEE MORE is never blocked; the bar only reports progress. Skipped on Data Saver.
+async function prepareJourney(session){
+  if(navigator.connection?.saveData)return;
+  const controller=new AbortController();
+  const slow=setTimeout(()=>readyStage('slow',85,'Journey is taking longer than usual. You can still enter.'),JOURNEY_SLOW_MS);
+  try{
+    readyStage('loading',15,'Preparing Journey: page files');
+    await warmJourneyFiles(controller.signal);
+    readyStage('loading',45,'Preparing Journey: Guardian data');
+    const {loadPreparedPagePayload}=await import(CLIENT_URL);
+    await loadPreparedPagePayload(session,'journey',{quiet:true,publish:false});
+    clearTimeout(slow);
+    readyStage('ready',100,'Journey is prepared. Safe to enter.');
+    document.querySelectorAll('a.home-cta[href="../journey/"]').forEach(link=>link.dataset.ready='true');
+  }catch(error){
+    clearTimeout(slow);
+    console.warn('[Guardian Home] Journey preparation',error);
+    readyStage('slow',85,'Journey is taking longer than usual. You can still enter.');
+  }
+}
+
 async function init(){
   const session=await getBungieSession();
   if(session?.authenticated===false){signedOut();return;}
@@ -106,6 +154,7 @@ async function init(){
     render(result.summary,dailySeed(`${membership.membershipType}:${membership.membershipId}`));
     globalThis.ForgeLoader?.done?.();
     prepareNextPages();
+    prepareJourney(session);
   }catch(error){
     console.error('[Guardian Home]',error);
     setText('homeError',error?.message||'Guardian stats are unavailable right now.');show('homeError',true);

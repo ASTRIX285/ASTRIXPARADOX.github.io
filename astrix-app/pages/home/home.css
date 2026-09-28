@@ -59,3 +59,29 @@ body.home-page{margin:0;min-height:100vh;color:var(--home-ink);font:16px/1.55 va
 .home-signed-out p{margin:0;color:var(--home-muted)}
 .home-error{margin:0;padding:14px 16px;border:1px solid #7a2432;border-radius:8px;background:rgba(122,36,50,.2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ASTRIX PARADOX map art sits behind (astrix-paradox-background.css, z-index -2).
+   This tint keeps card text readable over it. */
+body.home-page.forge-paradox-map-background{padding-bottom:84px}
+body.home-page.forge-paradox-map-background::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at 80% 8%,rgba(58,11,20,.55) 0%,rgba(18,5,9,.55) 45%,transparent 75%),
+  linear-gradient(180deg,rgba(7,6,10,.35),rgba(7,6,10,.62) 60%,rgba(7,6,10,.8))}
+
+/* Readiness bar: tells the Guardian when Journey is prepared and safe to open. */
+.home-ready{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 16px calc(12px + env(safe-area-inset-bottom));pointer-events:none}
+.home-ready-inner{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding:12px 16px;border:1px solid var(--home-line);border-radius:10px;
+  background:rgba(12,8,12,.92);backdrop-filter:blur(8px);box-shadow:0 -8px 30px rgba(0,0,0,.45);pointer-events:auto}
+.home-ready-text{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px}
+.home-ready-title{font:700 13px/1.2 var(--home-mono);letter-spacing:.18em;color:var(--home-gold)}
+.home-ready-stage{font-size:14px;color:var(--home-muted)}
+.home-ready-track{position:relative;height:6px;border-radius:3px;background:#2a1e28;overflow:hidden}
+.home-ready-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:3px;background:linear-gradient(90deg,var(--home-cta),var(--home-crimson));
+  transition:width .6s cubic-bezier(.23,1,.32,1)}
+.home-ready[data-state="loading"] .home-ready-fill::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:home-ready-sheen 1.4s linear infinite}
+@keyframes home-ready-sheen{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.home-ready[data-state="ready"] .home-ready-title{color:#62d6ad}
+.home-ready[data-state="ready"] .home-ready-fill{background:linear-gradient(90deg,var(--home-gold),#62d6ad)}
+.home-ready[data-state="slow"] .home-ready-title{color:var(--home-crimson)}
+.home-cta[data-ready="true"]{box-shadow:0 0 0 2px rgba(98,214,173,.55),0 10px 30px rgba(208,40,63,.3)}
+@media (prefers-reduced-motion:reduce){.home-ready-fill{transition:none}}
