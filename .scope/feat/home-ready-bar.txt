@@ -1,0 +1,4 @@
+astrix-app/pages/home/index.html
+astrix-app/pages/home/home.css
+astrix-app/pages/home/home.mjs
+astrix-app/tools/test-home-browser.mjs

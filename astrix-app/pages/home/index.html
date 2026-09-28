@@ -18,9 +18,10 @@
   <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2">
   <script>window.APX_LOGO='../../../img/logo.png';</script>
   <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2"></script>
-  <link rel="stylesheet" href="./home.css?v=20260928-1">
+  <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
+  <link rel="stylesheet" href="./home.css?v=20260928-2">
 </head>
-<body class="home-page">
+<body class="home-page forge-paradox-map-background">
   <main class="home-shell">
     <header class="home-top">
       <a class="home-brand" href="../../../tools/"><img src="../../../img/logo.png" alt="" width="40" height="40"><span><strong>ASTRIX <em>PARADOX</em></strong><small>GUARDIAN HOME</small></span></a>
@@ -105,7 +106,13 @@
       <a href="../loadout/">LOADOUT</a>
     </nav>
   </main>
-  <script type="module" src="./home.mjs?v=20260928-1"></script>
+  <div class="home-ready" id="homeReady" data-state="loading" hidden>
+    <div class="home-ready-inner">
+      <div class="home-ready-text"><span class="home-ready-title" id="homeReadyTitle">DATA LOADING</span><span class="home-ready-stage" id="homeReadyStage" role="status" aria-live="polite">Preparing Journey</span></div>
+      <div class="home-ready-track" role="progressbar" aria-labelledby="homeReadyTitle" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="homeReadyBar"><span class="home-ready-fill" id="homeReadyFill"></span></div>
+    </div>
+  </div>
+  <script type="module" src="./home.mjs?v=20260928-2"></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>
