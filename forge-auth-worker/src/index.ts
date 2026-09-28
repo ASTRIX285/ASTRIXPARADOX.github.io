@@ -1312,6 +1312,11 @@ function addJourneyHash(target: Map<string, Set<number>>, type: string, value: u
   }
 }
 
+// Generic itemHash references inside records, collectibles, craftables and
+// resolved definitions (reward items, plug sets, collectible items) are not
+// rendered by Journey. Following them resolved ~33 MB of item definitions per
+// request. Item identities Journey renders (equipment, quest steps) are added
+// explicitly in journeyManifestTables instead.
 function collectJourneyHashes(value: unknown, target: Map<string, Set<number>>): void {
   if (!value || typeof value !== "object") return;
   if (Array.isArray(value)) {
@@ -1320,9 +1325,28 @@ function collectJourneyHashes(value: unknown, target: Map<string, Set<number>>):
   }
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
     const type = JOURNEY_HASH_FIELDS[key];
-    if (type) addJourneyHash(target, type, child);
+    if (type && type !== "DestinyInventoryItemDefinition") addJourneyHash(target, type, child);
     collectJourneyHashes(child, target);
   }
+}
+
+// Journey reads names, icons, bucket, type labels and quest links from items.
+const JOURNEY_ITEM_FIELDS = [
+  "hash", "displayProperties", "itemType", "itemSubType", "itemTypeDisplayName", "itemTypeAndTierDisplayName",
+  "classType", "inventory", "equippable", "collectibleHash", "iconWatermark", "secondaryIcon", "objectives"
+] as const;
+function journeyItemProjection(row: Record<string, unknown>): Record<string, unknown> {
+  const projected: Record<string, unknown> = {};
+  for (const field of JOURNEY_ITEM_FIELDS) if (row && Object.hasOwn(row, field)) projected[field] = row[field];
+  const objectives = projected.objectives as Record<string, unknown> | undefined;
+  if (objectives && typeof objectives === "object") {
+    projected.objectives = { questlineItemHash: objectives.questlineItemHash, objectiveHashes: objectives.objectiveHashes };
+  }
+  const inventory = projected.inventory as Record<string, unknown> | undefined;
+  if (inventory && typeof inventory === "object") {
+    projected.inventory = { bucketTypeHash: inventory.bucketTypeHash, tierType: inventory.tierType, tierTypeName: inventory.tierTypeName };
+  }
+  return projected;
 }
 
 function addComponentKeys(target: Map<string, Set<number>>, type: string, component: unknown): void {
@@ -1346,7 +1370,8 @@ async function journeyManifestTables(
   const raw = profile as any;
   addComponentKeys(wanted, "DestinyPresentationNodeDefinition", raw.profilePresentationNodes?.data?.nodes);
   addComponentKeys(wanted, "DestinyRecordDefinition", raw.profileRecords?.data?.records);
-  addComponentKeys(wanted, "DestinyCollectibleDefinition", raw.profileCollectibles?.data?.collectibles);
+  // Every account collectible (7 MB of definitions) is not rendered. Badge
+  // collectibles come from the public Journey catalogue closure.
   addComponentKeys(wanted, "DestinyMetricDefinition", raw.metrics?.data?.metrics || raw.profileMetrics?.data?.metrics);
   addComponentKeys(wanted, "DestinyChecklistDefinition", raw.profileProgression?.data?.checklists);
   for (const component of Object.values(raw.characterPresentationNodes?.data || {}) as any[]) {
@@ -1355,11 +1380,18 @@ async function journeyManifestTables(
   for (const component of Object.values(raw.characterRecords?.data || {}) as any[]) {
     addComponentKeys(wanted, "DestinyRecordDefinition", component?.records);
   }
-  for (const component of Object.values(raw.characterCollectibles?.data || {}) as any[]) {
-    addComponentKeys(wanted, "DestinyCollectibleDefinition", component?.collectibles);
+  // The Vault card splits stored items into armour and weapons/equipment by
+  // itemType. Unique vault identities are a few hundred projected rows.
+  for (const item of raw.profileInventory?.data?.items || []) {
+    if (Number(item?.bucketHash) === 138197802) addJourneyHash(wanted, "DestinyInventoryItemDefinition", item?.itemHash);
   }
-  for (const component of Object.values(raw.characterCraftables?.data || {}) as any[]) {
-    addComponentKeys(wanted, "DestinyInventoryItemDefinition", component?.craftables);
+  // Quest and step items render in the destination Quests tab.
+  for (const component of Object.values(raw.characterProgressions?.data || {}) as any[]) {
+    for (const quest of component?.quests || []) {
+      addJourneyHash(wanted, "DestinyInventoryItemDefinition", quest?.questHash);
+      addJourneyHash(wanted, "DestinyInventoryItemDefinition", quest?.stepHash);
+    }
+    addComponentKeys(wanted, "DestinyInventoryItemDefinition", component?.uninstancedItemObjectives);
   }
   for (const component of Object.values(raw.characterProgressions?.data || {}) as any[]) {
     addComponentKeys(wanted, "DestinyChecklistDefinition", component?.checklists);
@@ -1404,7 +1436,12 @@ async function journeyManifestTables(
     manifestVersion = resolved.manifestVersion || manifestVersion;
     currentSeason = resolved.currentSeason || currentSeason;
     let added = 0;
-    for (const [type, rows] of Object.entries(resolved.tables)) {
+    for (const [type, resolvedRows] of Object.entries(resolved.tables)) {
+      let rows = resolvedRows;
+      if (type === "DestinyInventoryItemDefinition") {
+        rows = Object.fromEntries(Object.entries(resolvedRows).map(([hash, row]) => [hash, journeyItemProjection(row)]));
+        for (const row of Object.values(rows) as any[]) addJourneyHash(wanted, "DestinyInventoryItemDefinition", row?.objectives?.questlineItemHash);
+      }
       if (tables[type]) Object.assign(tables[type], rows);
       else tables[type] = rows;
       added += Object.keys(rows).length;
