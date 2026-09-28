@@ -96,6 +96,7 @@ function prepareNextPages(){
 }
 
 const CLIENT_URL='../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+const BUNDLE_CACHE_URL='../../core/prepared-bundle-cache.mjs';
 const JOURNEY_SLOW_MS=30000;
 
 function readyStage(state,percent,text){
@@ -133,7 +134,17 @@ async function prepareJourney(session){
     readyStage('loading',45,'Preparing Journey: Guardian data');
     const {loadPreparedPagePayload}=await import(CLIENT_URL);
     await loadPreparedPagePayload(session,'journey',{quiet:true,publish:false});
+    // READY only when the public catalogue is really stored for Journey to reuse.
+    // The save runs in the background, so give it a few seconds to land.
+    readyStage('loading',80,'Preparing Journey: saving catalogue');
+    const {hasPreparedBundle}=await import(BUNDLE_CACHE_URL);
+    let stored=false;
+    for(let attempt=0;attempt<10&&!stored;attempt++){
+      stored=await hasPreparedBundle('journey');
+      if(!stored)await new Promise(done=>setTimeout(done,500));
+    }
     clearTimeout(slow);
+    if(!stored){readyStage('slow',85,'Journey could not be stored on this device. The first open may take longer.');return;}
     readyStage('ready',100,'Journey is prepared. Safe to enter.');
     document.querySelectorAll('a.home-cta[href="../journey/"]').forEach(link=>link.dataset.ready='true');
   }catch(error){

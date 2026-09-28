@@ -51,7 +51,9 @@ try{
    if(url.hostname==='auth.astrixparadox.com'&&url.pathname==='/bungie/home'){homeRequests++;return route.fulfill({json:partial?{...summary,topExoticWeapon:null,selfEliminations:null,lastActivity:null}:summary,headers:{'access-control-allow-origin':origin,'access-control-allow-credentials':'true'}});}
    // Journey preparation: stub the prepared-page client so the bar's states are deterministic.
    if(url.origin===origin&&url.pathname.endsWith('/core/prepared-page-client.mjs')){
-    const body=journey==='ready'?'export async function loadPreparedPagePayload(){return {ok:true};}':"export async function loadPreparedPagePayload(){throw new Error('fixture failure');}";
+    // 'ready' stores a public bundle the way the real client does, so Home's real IndexedDB check runs.
+    const store="import {savePreparedBundle} from './prepared-bundle-cache.mjs';export async function loadPreparedPagePayload(){await savePreparedBundle('journey',{manifestVersion:'fixture-1',manifestTables:{}});return {ok:true};}";
+    const body=journey==='ready'?store:journey==='unsaved'?'export async function loadPreparedPagePayload(){return {ok:true};}':"export async function loadPreparedPagePayload(){throw new Error('fixture failure');}";
     return route.fulfill({body,headers:{'content-type':'text/javascript'}});
    }
    if(url.origin!==origin)return route.abort();
@@ -94,6 +96,12 @@ try{
   assert.match(await page.locator('#homeReadyStage').textContent(),/You can still enter/);
   assert.equal(await page.getByRole('link',{name:/SEE MORE/}).getAttribute('href'),'../journey/','SEE MORE never blocked');
   assert.deepEqual(errors,[]);await page.close();console.log('HOME_READY_BAR_SLOW=PASS');
+ }
+ {
+  const {page,errors}=await open(1440,{journey:'unsaved'});
+  await page.waitForFunction(()=>document.getElementById('homeReady')?.dataset.state==='slow',null,{timeout:12000});
+  assert.match(await page.locator('#homeReadyStage').textContent(),/could not be stored/,'never READY unless the catalogue is really stored');
+  assert.deepEqual(errors,[]);await page.close();console.log('HOME_READY_REQUIRES_STORED_BUNDLE=PASS');
  }
  {
   const {page,errors,homeRequests}=await open(390,{signedIn:false});
