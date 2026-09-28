@@ -1,3 +1,6 @@
+// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// style lengths in the element's own pixels, so convert before positioning.
+const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 // Inline-size containment deliberately hides intrinsic widths from the parent.
 // Resolve the existing socket/art/mod tokens, then size all cards explicitly.
 const installed=new WeakMap();
@@ -31,7 +34,7 @@ export function sizeBuildWeaponCards(grid){
         // Explicit block contribution prevents contained subgrid cards from
         // sizing the shared perks track to only the first weapon's row count.
         const rows=[...matrix.querySelectorAll('.weapon-perk-row')],style=getComputedStyle(matrix);
-        const height=rows.reduce((sum,row)=>sum+Math.max(...[...row.querySelectorAll('.weapon-perk-cell')].map(cell=>cell.getBoundingClientRect().height),0),0)
+        const height=rows.reduce((sum,row)=>sum+Math.max(...[...row.querySelectorAll('.weapon-perk-cell')].map(cell=>cell.getBoundingClientRect().height/cssZoomOf(cell)),0),0)
           +Math.max(0,rows.length-1)*number(style.rowGap)+number(style.paddingTop)+number(style.paddingBottom)
           +number(style.borderTopWidth)+number(style.borderBottomWidth);
         if(strip)strip.style.minHeight=`${Math.ceil(height)}px`;

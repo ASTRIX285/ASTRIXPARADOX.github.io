@@ -1,0 +1,12 @@
+astrix-app/pages/guardian-workspace-v2/guardian-loadouts.mjs
+astrix-app/pages/guardian-workspace-v2/guardian-perk-tooltip.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/build-weapon-card-layout.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs
+astrix-app/shared/loadout-icon-layout.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-build-forge-equipped-entry.mjs
+astrix-app/tools/test-build-forge-zoom.mjs
+astrix-app/tools/validate-responsive-layout-contract.mjs

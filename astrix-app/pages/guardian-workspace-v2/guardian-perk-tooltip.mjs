@@ -1,3 +1,6 @@
+// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// style lengths in the element's own pixels, so convert before positioning.
+const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 export function perkTooltipAttributes(item,label=''){
@@ -27,9 +30,9 @@ function show(target){
   }
   host.innerHTML=perkTooltipMarkup(target.dataset);host.hidden=false;
   target.classList.add('is-perk-inspected');target.setAttribute('aria-describedby',host.id);
-  const bounds=target.getBoundingClientRect(),width=host.offsetWidth,height=host.offsetHeight,pad=8;
-  host.style.left=`${Math.max(pad,Math.min(bounds.right+8,innerWidth-width-pad))}px`;
-  host.style.top=`${Math.max(pad,Math.min(bounds.top,innerHeight-height-pad))}px`;
+  const zoom=cssZoomOf(host),visual=target.getBoundingClientRect(),bounds={right:visual.right/zoom,top:visual.top/zoom},width=host.offsetWidth,height=host.offsetHeight,pad=8;
+  host.style.left=`${Math.max(pad,Math.min(bounds.right+8,innerWidth/zoom-width-pad))}px`;
+  host.style.top=`${Math.max(pad,Math.min(bounds.top,innerHeight/zoom-height-pad))}px`;
 }
 if(typeof document!=='undefined'){
   const target=event=>event.target.closest?.('[data-paradox-perk-tooltip]');

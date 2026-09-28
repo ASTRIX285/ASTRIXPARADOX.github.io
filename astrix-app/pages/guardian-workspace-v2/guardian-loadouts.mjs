@@ -3,6 +3,9 @@ import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-chara
 import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 import {isSavedLoadout,loadoutStatus,loadoutGear,acceptedEquipment} from './guardian-loadout-status.mjs?v=20260925-menu-1';
 import {transferFailureReason} from '../vault/vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
+// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// style lengths in the element's own pixels, so convert before positioning.
+const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 
 const SLOT_COUNT=20;
 const host=()=>document.querySelector('#guardianLoadouts');
@@ -22,9 +25,10 @@ const trigger=index=>host()?.querySelector(`[data-loadout-more="${index}"]`);
 function positionMenu(){
   if(menuState?.mode!=='menu')return;
   const menu=ensureMenu(),anchor=trigger(menuState.index)?.closest('.guardian-loadout-entry');if(!anchor){closeMenu();return;}
-  const rect=anchor.getBoundingClientRect(),box=menu.getBoundingClientRect(),gap=4;
-  menu.style.left=`${Math.max(4,Math.min(rect.left,innerWidth-box.width-4))}px`;
-  menu.style.top=`${Math.max(4,Math.min(rect.bottom+gap+box.height<=innerHeight-4?rect.bottom+gap:rect.top-box.height-gap,innerHeight-box.height-4))}px`;
+  const zoom=cssZoomOf(menu),local=node=>{const r=node.getBoundingClientRect();return {left:r.left/zoom,top:r.top/zoom,bottom:r.bottom/zoom,width:r.width/zoom,height:r.height/zoom};};
+  const rect=local(anchor),box=local(menu),gap=4,viewportWidth=innerWidth/zoom,viewportHeight=innerHeight/zoom;
+  menu.style.left=`${Math.max(4,Math.min(rect.left,viewportWidth-box.width-4))}px`;
+  menu.style.top=`${Math.max(4,Math.min(rect.bottom+gap+box.height<=viewportHeight-4?rect.bottom+gap:rect.top-box.height-gap,viewportHeight-box.height-4))}px`;
 }
 function closeMenu({focus=true}={}){
   const index=menuState?.index;menuState=null;ensureMenu().hidden=true;

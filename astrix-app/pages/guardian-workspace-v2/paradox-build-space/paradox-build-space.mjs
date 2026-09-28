@@ -206,12 +206,28 @@ function renderDirectGenerationEntry(build={}){
   const mode=directEntryMode(build);
   document.querySelectorAll('[data-generation-entry]').forEach(button=>{button.disabled=directEntryBusy||recommendationBusy||liveActionBusy||!build.characterId;button.setAttribute('aria-pressed',String(button.dataset.generationEntry===mode));});
   document.querySelectorAll('[data-generation-entry="equipped"]').forEach(button=>{button.textContent=isImportedBuild(build)?'Improve this imported build':'Improve my current build';});
+  renderImportNextStep(build,mode);
   const host=byId('directOwnedArmour');if(!host)return;
   host.hidden=mode!=='owned';
   if(mode==='owned')host.innerHTML=`<p class="recommendation-copy">Choose any armour for this Guardian. Paradox compares weapons and plans mods for these five pieces.</p><div class="manual-socket-groups">${manualSlotLabels('armour').map((label,index)=>`<label>${label}<select data-generation-armour="${index}"${directEntryBusy||recommendationBusy||liveActionBusy?' disabled':''}>${directArmourChoices(build,index).map(item=>`<option value="${esc(item.itemInstanceId)}"${String(build.armour?.[index]?.itemInstanceId)===String(item.itemInstanceId)?' selected':''}>${esc(item.name)} · ${esc(item.source?.label||item.source?.kind)}</option>`).join('')}</select></label>`).join('')}</div>`;
 }
 const IMPORTED_SOURCES=new Set(['dim-import']);
 function isImportedBuild(build={}){return IMPORTED_SOURCES.has(build?.loadoutSource)||IMPORTED_SOURCES.has(build?.source);}
+// A shared loadout lands in Build Forge unanalysed. Say so, and give the one
+// next step, so nobody mistakes the imported build for a Paradox result.
+function importNextStep(build={},mode=directEntryMode(build)){
+  if(!isImportedBuild(build))return null;
+  const name=String(build.name||build.dimImport?.loadout?.name||'Shared loadout');
+  if(build.recommendationGeneratedAt)return null;
+  if(!mode)return {title:`SHARED LOADOUT IMPORTED · ${name.toUpperCase()}`,text:'Paradox has not analysed this build yet. Analyse it to check its gear against your inventory, fill the artifact for this season and rank improvements.',action:'Analyse this build',step:'analyse'};
+  return {title:'NEXT: CHOOSE AN ACTIVITY, THEN GENERATE',text:`${name} is ready to analyse. Pick the element, objective and activity below, then press Generate.`,action:'Go to build options',step:'options'};
+}
+function renderImportNextStep(build,mode){
+  const host=byId('importNextStep');if(!host)return;
+  const next=importNextStep(build,mode);host.hidden=!next;if(!next)return;
+  host.dataset.step=next.step;byId('importNextStepTitle').textContent=next.title;byId('importNextStepText').textContent=next.text;
+  const action=byId('importNextStepAction');action.textContent=next.action;action.disabled=directEntryBusy||recommendationBusy||liveActionBusy||!build.characterId;
+}
 const IMPORTED_KEEP=['name','source','loadoutSource','dimImport','importedParameters','equipment','dimTarget','dimAdaptation','manualSocketChanges','statConstraints'];
 function importedGenerationBase(selected,equipped,armourByInstance){
   const weaponsByInstance=new Map((equipped.ownedWeapons||[]).map(item=>[String(item?.itemInstanceId),item]));
@@ -991,6 +1007,11 @@ byId('manualEditorSearch')?.addEventListener('input',event=>{manualEditorState.s
 byId('restoreOriginal')?.addEventListener('click',restoreOriginal);
 byId('generateMaxLoadout')?.addEventListener('click',generateMaxLoadout);
 document.querySelectorAll('[data-generation-entry]').forEach(button=>button.addEventListener('click',()=>void startDirectGeneration(button.dataset.generationEntry)));
+byId('importNextStepAction')?.addEventListener('click',async()=>{
+  const step=byId('importNextStep')?.dataset.step;
+  if(step==='analyse')await startDirectGeneration('equipped');
+  byId('recommendationElements')?.scrollIntoView({block:'center',behavior:'smooth'});
+});
 byId('directOwnedArmour')?.addEventListener('change',event=>{if(event.target.matches('[data-generation-armour]'))selectDirectArmour(Number(event.target.dataset.generationArmour),event.target.value);});
 byId('closeRecommendedBuild')?.addEventListener('click',closeRecommendedBuild);
 byId('returnToForge')?.addEventListener('click',closeRecommendedBuild);
