@@ -41,4 +41,21 @@
     <priority>0.7</priority>
   </url>
 
+  <url>
+    <loc>https://astrixparadox.com/tools/</loc>
+    <lastmod>2026-09-28</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/tools/destiny-2/</loc>
+    <lastmod>2026-09-28</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/tools/destiny-2/dim-loadout-viewer/</loc>
+    <lastmod>2026-09-28</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/tools/destiny-2/dim-companion/</loc>
+    <lastmod>2026-09-28</lastmod>
+  </url>
+
 </urlset>
