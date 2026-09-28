@@ -1,0 +1,8 @@
+astrix-app/pages/build-review/index.html
+astrix-app/pages/build-review/build-review.mjs
+astrix-app/pages/build-review/build-review.css
+astrix-app/pages/build-review/build-review-url.mjs
+astrix-app/pages/build-review/build-review-model.mjs
+astrix-app/pages/build-review/build-review-pipeline.mjs
+astrix-app/tools/test-build-review.mjs
+astrix-app/tools/paradox-validator.mjs
