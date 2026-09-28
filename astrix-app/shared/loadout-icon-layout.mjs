@@ -16,13 +16,15 @@ export function renderLoadoutIconLayout(model){
   const parameters=rows.filter(row=>row.kind==='parameters').flatMap(row=>row.groups||[]);
   const powers=['Super','Abilities','Aspects','Fragments','Other sockets'].flatMap(label=>subclass?.groups?.find(g=>g.label===label)?.plugs||[]);
   const sockets=rows.filter(row=>['weapon','armour'].includes(row.kind)).flatMap(row=>row.sockets||[]);
-  const extras=parameters.filter(g=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers'].includes(g.label)).flatMap(g=>g.plugs||[]);
+  // The seasonal artifact is its own section, as in DIM and in game, never mixed into mods.
+  const artifact=parameters.filter(g=>g.label==='Artifact unlocks').flatMap(g=>g.plugs||[]);
+  const extras=parameters.filter(g=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers','Artifact unlocks'].includes(g.label)).flatMap(g=>g.plugs||[]);
   const cosmetics=[...sockets,...extras].filter(cosmetic),mods=[...sockets,...extras].filter(plug=>!cosmetic(plug));
   const gear=kind=>rows.filter(row=>row.kind===kind).sort((a,b)=>(kind==='weapon'?WEAPON_BUCKETS:ARMOUR_BUCKETS).indexOf(a.bucketHash)-(kind==='weapon'?WEAPON_BUCKETS:ARMOUR_BUCKETS).indexOf(b.bucketHash));
   const unique=items=>items.filter((item,i)=>items.findIndex(other=>other.hash===item.hash)===i);
   const weapons=strip('Weapons',gear('weapon'),true),armour=strip('Armour',gear('armour'),true);
   const equipment=strip('Equipment',rows.filter(row=>row.kind==='item'),true);
-  return `<div class="apx-compact-loadout"><div class="apx-compact-powers">${strip('Super and abilities',powers)}${strip('Mods and artifact perks',mods)}</div><div class="apx-compact-gear">${weapons}${weapons&&armour?'<span class="apx-icon-divider" aria-hidden="true"></span>':''}${armour}</div>${cosmetics.length||equipment?`<div class="apx-compact-cosmetics">${strip('Cosmetics and shaders',unique(cosmetics))}${equipment}</div>`:''}${strip('Unequipped items',(model.items||[]).filter(row=>row.equipped===false),true)}</div>`;
+  return `<div class="apx-compact-loadout"><div class="apx-compact-powers">${strip('Super and abilities',powers)}<div class="apx-compact-mods">${strip('Mods',mods)}${artifact.length?`<div class="apx-compact-artifact"><span class="apx-compact-label">Artifact</span>${strip('Artifact perks',artifact)}</div>`:''}</div></div><div class="apx-compact-gear">${weapons}${weapons&&armour?'<span class="apx-icon-divider" aria-hidden="true"></span>':''}${armour}</div>${cosmetics.length||equipment?`<div class="apx-compact-cosmetics">${strip('Cosmetics and shaders',unique(cosmetics))}${equipment}</div>`:''}${strip('Unequipped items',(model.items||[]).filter(row=>row.equipped===false),true)}</div>`;
 }
 // One tooltip outside the scrolling content: names remain available to pointer,
 // keyboard and touch users without widening every tile. Text is never HTML.

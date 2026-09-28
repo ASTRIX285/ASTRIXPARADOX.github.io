@@ -1,0 +1,3 @@
+astrix-app/shared/loadout-icon-layout.mjs
+astrix-app/shared/loadout-details.css
+astrix-app/tools/test-dim-tether.mjs
