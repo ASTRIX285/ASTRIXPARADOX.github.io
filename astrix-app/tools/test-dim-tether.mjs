@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {dimShareRoute} from '../../forge-auth-worker/src/dim-share.ts';
 import {resolveDimLoadout} from '../core/dim-import/resolve.mjs';
+import {renderLoadoutIconLayout} from '../shared/loadout-icon-layout.mjs';
 const read=name=>readFile(new URL(`./fixtures/dim-import/${name}.json`,import.meta.url),'utf8').then(JSON.parse);
 const fixture=await read('tether'),snapshot=await read('tether-manifest');
 let loadout=fixture.loadout;
@@ -19,4 +20,12 @@ const model=resolveDimLoadout(loadout,{snapshot});
 assert.equal(model.coverage.rate,1);assert.deepEqual(model.coverage.unresolved,[]);
 const retired=model.items.find(row=>row.kind==='parameters').groups.find(row=>row.label==='Artifact unlocks').plugs;
 assert.equal(retired.length,12);for(const plug of retired){assert.equal(plug.retired,true);assert.match(plug.name,/^Retired: .+/);assert.notEqual(plug.unresolved,true);}
+// The artifact is its own labelled section, never mixed into the mods strip.
+const iconLayout=renderLoadoutIconLayout(model);
+const stripIcons=label=>((iconLayout.split(`aria-label="${label}">`)[1]||'').split('</div>')[0].match(/data-icon-name="([^"]*)"/g)||[]).map(row=>row.slice(16,-1));
+const artifactIcons=stripIcons('Artifact perks'),modIcons=stripIcons('Mods');
+assert.equal(artifactIcons.length,retired.length,'every artifact perk renders in the Artifact section');
+assert.ok(artifactIcons.every(name=>name.startsWith('Retired: ')));
+assert.ok(!modIcons.some(name=>name.startsWith('Retired: ')),'no artifact perk renders among mods');
+assert.match(iconLayout,/<span class="apx-compact-label">Artifact<\/span>/);
 console.log(`DIM_TETHER=PASS resolved=${model.coverage.resolved}/${model.coverage.requested} unknowns=0 retired_artifact_perks=${retired.length} mode=${process.env.DIM_LIVE_SMOKE==='1'?(process.env.DIM_SMOKE_BASE_URL?'deployed-route':'worker-route-live-upstream'):'offline'}`);
