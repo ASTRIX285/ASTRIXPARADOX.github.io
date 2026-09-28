@@ -258,6 +258,12 @@ function weaponEvidence(weapon){
   // mutually exclusive alternative perk as if they were equipped together.
   return [semantics.intrinsic,...(semantics.exoticTraits||[]),...selected,...(catalyst?.progress?.masterworked||catalyst?.progress?.active?[catalyst]:[])].filter(item=>item&&!item.unresolved);
 }
+// Weighting (Miguel, 28 Sep 2026): the same weapons were chosen whatever the
+// objective or activity, and imported weapons were replaced by the same top
+// scorers. Objective and activity wording now counts as much as build synergy,
+// element coverage no longer outweighs everything, and a weapon already in the
+// build is kept unless a replacement is clearly better.
+const OBJECTIVE_TERM_POINTS=16,ACTIVITY_TERM_POINTS=16,ELEMENT_COVERAGE_POINTS=60,KEEP_CURRENT_POINTS=30;
 function scoreWeapon(weapon,objective,sources,activity){
   const text=weaponEvidence(weapon).map(item=>clean(item.description||item.definition?.displayProperties?.description)).join(' · ').toLowerCase().replace(/grenade launchers?/g,'launcher'),tokens=explicitTokens(text).filter(token=>token!=='weapon'),reasons=[];
   let score=0;
@@ -268,8 +274,8 @@ function scoreWeapon(weapon,objective,sources,activity){
     reasons.push({kind:'perk-synergy',label:`${itemName(weapon,'Weapon')}: active perk ${token} wording supports ${source.kind} · ${source.name}.`,score:points,token});
   }
   const matches=terms=>terms.filter(term=>term!=='weapon'&&new RegExp(`\\b${term}\\b`).test(text));
-  for(const term of matches(OBJECTIVE_TERMS[objectiveName(objective)])){score+=7;reasons.push({kind:'objective',label:`Active perk ${term} wording supports ${objectiveName(objective)}.`,score:7,term});}
-  for(const term of matches(ACTIVITY_WEAPON_TERMS[activity]||[])){score+=7;reasons.push({kind:'activity',label:`Active perk ${term} wording supports ${activity.toUpperCase()}.`,score:7,term});}
+  for(const term of matches(OBJECTIVE_TERMS[objectiveName(objective)])){score+=OBJECTIVE_TERM_POINTS;reasons.push({kind:'objective',label:`Active perk ${term} wording supports ${objectiveName(objective)}.`,score:OBJECTIVE_TERM_POINTS,term});}
+  for(const term of matches(ACTIVITY_WEAPON_TERMS[activity]||[])){score+=ACTIVITY_TERM_POINTS;reasons.push({kind:'activity',label:`Active perk ${term} wording supports ${activity.toUpperCase()}.`,score:ACTIVITY_TERM_POINTS,term});}
   reasons.sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label));
   const ammo=Number(weapon.ammoType??weapon.definition?.equippingBlock?.ammoType);
   return {weapon,score,reasons,tokens,ammo:[1,2,3].includes(ammo)?ammo:0};
@@ -277,12 +283,14 @@ function scoreWeapon(weapon,objective,sources,activity){
 const compareWeaponPlans=(a,b)=>b.score-a.score||a.changes-b.changes||a.signature.localeCompare(b.signature);
 function extendWeaponPlan(plan,row,currentIds,intent){
   const weapon=row.weapon,ammo=[...plan.ammo];ammo[row.ammo]++;
-  return {rows:[...plan.rows,row],score:plan.score+row.score,exoticCount:plan.exoticCount+Number(isExoticItem(weapon)),matching:plan.matching||Boolean(intent.element&&itemElement(weapon)===intent.element),ammo,changes:plan.changes+Number(!currentIds.has(itemIdentity(weapon))),signature:`${plan.signature}|${itemIdentity(weapon)}`,typeSignature:`${plan.typeSignature}|${itemHash(weapon)}`};
+  const kept=currentIds.has(itemIdentity(weapon));
+  return {rows:[...plan.rows,row],score:plan.score+row.score+(kept?KEEP_CURRENT_POINTS:0),kept:(plan.kept||0)+Number(kept),exoticCount:plan.exoticCount+Number(isExoticItem(weapon)),matching:plan.matching||Boolean(intent.element&&itemElement(weapon)===intent.element),ammo,changes:plan.changes+Number(!currentIds.has(itemIdentity(weapon))),signature:`${plan.signature}|${itemIdentity(weapon)}`,typeSignature:`${plan.typeSignature}|${itemHash(weapon)}`};
 }
-const emptyWeaponPlan=()=>({rows:[],score:0,exoticCount:0,matching:false,ammo:[0,0,0,0],changes:0,signature:'',typeSignature:''});
+const emptyWeaponPlan=()=>({rows:[],score:0,kept:0,exoticCount:0,matching:false,ammo:[0,0,0,0],changes:0,signature:'',typeSignature:''});
 function finishWeaponPlan(plan,intent,activity){
   let score=plan.score;const reasons=[];
-  if(plan.matching){score+=180;reasons.push({kind:'element-coverage',label:`Includes ${intent.element.toUpperCase()} weapon coverage for matching Siphon and Artifact effects.`,score:180});}
+  if(plan.matching){score+=ELEMENT_COVERAGE_POINTS;reasons.push({kind:'element-coverage',label:`Includes ${intent.element.toUpperCase()} weapon coverage for matching Siphon and Artifact effects.`,score:ELEMENT_COVERAGE_POINTS});}
+  if(plan.kept){reasons.push({kind:'kept',label:`Keeps ${plan.kept} of the build's current weapons; a swap must clearly beat each one.`,score:plan.kept*KEEP_CURRENT_POINTS});}
   if(plan.ammo[1]&&plan.ammo[2]){const points=['grandmaster','crucible','pvp'].includes(activity)?90:60;score+=points;reasons.push({kind:'ammo-coverage',label:'Primary and Special ammo roles are both covered.',score:points});}
   if(plan.ammo[3]){score+=20;reasons.push({kind:'ammo-coverage',label:'Includes a Heavy-ammo weapon.',score:20});}
   return {...plan,score,reasons};
