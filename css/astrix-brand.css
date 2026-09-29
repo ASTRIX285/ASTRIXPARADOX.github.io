@@ -1,0 +1,165 @@
+/* ASTRIX PARADOX brand shell (approved 28 Sep 2026).
+   Colours come from the AX logo: Forge Black, Ember Red, Deep Red and Steel.
+   Gold stays inside the logo only. One red. Michroma for the wordmark and small
+   labels, Barlow Semi Condensed for headings, navigation and buttons, Barlow for
+   reading text. Nothing under 12px.
+
+   Load this file FIRST in <head>, before astrix-palette.css. It declares the
+   astrix-brand layer ahead of the older gloss and button layers, so its
+   important rules are the final word on the surfaces it styles. It only styles
+   what it names: public navigation, public heroes, buttons, the Tools hub,
+   footers and Guardian Home. Tool pages are unchanged by this file. */
+@layer astrix-brand, astrix-gloss, astrix-ribbon-buttons, astrix-button-tiers;
+
+@font-face{font-family:"Michroma";src:url("/fonts/michroma-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow";src:url("/fonts/barlow-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow";src:url("/fonts/barlow-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow";src:url("/fonts/barlow-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow";src:url("/fonts/barlow-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+
+:root{
+  --ax-black:#0e0c09;--ax-panel:#15130f;--ax-raised:#1d1a15;--ax-line:#2a2620;--ax-line-strong:#3d3830;
+  --ax-ember:#ba1f12;--ax-ember-hi:#e6391f;--ax-ember-lo:#8f170c;--ax-deep:#732022;
+  --ax-steel:#8a8a89;--ax-steel-dark:#6b6b6a;--ax-steel-light:#c9c9c8;
+  --ax-ink:#ededeb;--ax-muted:#b9b9b8;--ax-dim:#8a8a89;
+  --ax-font-brand:"Michroma","Barlow Semi Condensed",sans-serif;
+  --ax-font-head:"Barlow Semi Condensed","Barlow","Segoe UI",sans-serif;
+  --ax-font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --ax-notch:12px;
+  --ax-clip:polygon(0 0,calc(100% - var(--ax-notch)) 0,100% var(--ax-notch),100% 100%,0 100%);
+  --ax-ease:cubic-bezier(.23,1,.32,1);
+}
+
+@keyframes ax-strobe{0%,100%{opacity:.35}4%{opacity:1}7%{opacity:.45}10%{opacity:1}16%{opacity:.35}}
+@keyframes ax-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
+@keyframes ax-sheen{0%{transform:translateX(-160%)}100%{transform:translateX(420%)}}
+@keyframes ax-pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+@layer astrix-brand{
+
+/* ---------- Page ground ---------- */
+body.ax-brand{background:var(--ax-black)!important;color:var(--ax-ink)!important;font-family:var(--ax-font-body)!important}
+body.ax-brand::before{background:
+  radial-gradient(1100px 640px at 78% 18%,rgba(115,32,34,.28),transparent 62%),
+  linear-gradient(180deg,rgba(14,12,9,.72),rgba(14,12,9,.9) 70%),
+  url('/astrix-app/shared/astrix-deep-space.jpg') center center / cover no-repeat!important;
+  filter:saturate(.55) sepia(.18)!important}
+body.ax-brand::after{display:none!important}
+/* Content bands sit on warm black, not the old blue-black. */
+body.ax-brand>section:not(.hero),body.ax-brand main>section:not(.tools-hero){background:rgba(14,12,9,.62)!important}
+body.ax-brand :is(h1,h2,h3,h4){font-family:var(--ax-font-head)!important;letter-spacing:.005em!important}
+
+/* ---------- Wordmark ---------- */
+.ax-wordmark{display:inline-flex;flex-direction:column;gap:5px;line-height:1;text-decoration:none!important}
+.ax-wordmark-top{font:400 17px/1 var(--ax-font-brand)!important;letter-spacing:.06em;color:var(--ax-ink);
+  background:linear-gradient(100deg,#9a9a99 0%,#ffffff 30%,#c9c9c8 52%,#ffffff 64%,#7b7b7a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ax-wordmark-top b{font-weight:400;color:var(--ax-ember-hi);-webkit-text-fill-color:var(--ax-ember-hi);text-shadow:0 0 14px rgba(230,57,31,.45)}
+.ax-wordmark-sub{font:400 9.5px/1 var(--ax-font-brand)!important;letter-spacing:.52em;color:var(--ax-steel)}
+
+/* ---------- Public navigation: full ribbon ---------- */
+body.ax-brand .nav{height:68px!important;padding:0 clamp(16px,3vw,40px)!important;background:rgba(14,12,9,.9)!important;
+  border-bottom:1px solid var(--ax-line)!important;box-shadow:0 12px 32px rgba(0,0,0,.35)!important;backdrop-filter:blur(10px)!important;
+  transition:transform .28s var(--ax-ease),height .28s var(--ax-ease)!important}
+body.ax-brand .nav::before{content:""!important;position:absolute!important;left:0!important;right:0!important;top:0!important;height:2px!important;
+  background:linear-gradient(90deg,transparent,var(--ax-ember) 30%,var(--ax-ember) 70%,transparent)!important;opacity:.85!important}
+body.ax-brand .nav-logo{gap:12px!important;font:inherit!important;letter-spacing:0!important}
+body.ax-brand .nav-logo img{height:40px!important;width:auto!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+body.ax-brand .nav-links{gap:2px!important;align-items:stretch!important}
+body.ax-brand .nav-links a{position:relative!important;display:inline-flex!important;align-items:center!important;min-height:44px!important;padding:0 16px!important;
+  background:none!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:var(--ax-muted)!important;font:700 13px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;text-transform:uppercase!important;
+  translate:none!important;transition:color .2s ease!important}
+body.ax-brand .nav-links a::before{content:none!important;display:none!important}
+body.ax-brand .nav-links a::after{content:""!important;display:block!important;position:absolute!important;left:16px!important;right:16px!important;bottom:6px!important;top:auto!important;
+  height:2px!important;padding:0!important;border-radius:0!important;background:var(--ax-ember-hi)!important;-webkit-mask:none!important;mask:none!important;filter:none!important;
+  transform:scaleX(0)!important;transform-origin:left!important;opacity:1!important;animation:none!important;transition:transform .25s var(--ax-ease)!important;z-index:auto!important}
+body.ax-brand .nav-links a:hover{color:#fff!important}
+body.ax-brand .nav-links a:hover::after{transform:scaleX(1)!important;opacity:.55!important}
+body.ax-brand .nav-links a.active{color:#fff!important}
+body.ax-brand .nav-links a.active::after{transform:scaleX(1)!important;box-shadow:0 0 10px rgba(230,57,31,.8)!important;animation:ax-strobe 4.5s linear infinite!important}
+body.ax-brand .nav-links a:focus-visible{outline:2px solid var(--ax-steel-light)!important;outline-offset:-2px!important;box-shadow:none!important}
+body.ax-brand .nav-live-text{font:600 12px/1 var(--ax-font-head)!important;letter-spacing:.2em!important;color:var(--ax-dim)!important}
+body.ax-brand .nav-toggle{background:none!important;background-image:none!important;box-shadow:none!important;border:1px solid var(--ax-line-strong)!important;border-radius:0!important}
+body.ax-brand .nav-toggle::before,body.ax-brand .nav-toggle::after{content:none!important}
+@media (max-width:768px){
+  body.ax-brand .nav-links{background:rgba(14,12,9,.98)!important;border-bottom:1px solid var(--ax-line)!important}
+  body.ax-brand .nav-links a{min-height:48px!important}
+  body.ax-brand .nav-links a::after{left:16px!important;right:auto!important;width:40px!important}
+}
+/* Slim bar: scrolling down hides it, scrolling up brings back a 52px bar. */
+body.ax-brand.ax-nav-slim .nav{height:52px!important}
+body.ax-brand.ax-nav-slim .nav-logo img{height:30px!important}
+body.ax-brand.ax-nav-slim .ax-wordmark-sub{display:none}
+body.ax-brand.ax-nav-hidden .nav{transform:translateY(-100%)!important}
+
+/* ---------- Buttons: machined, notched, one red ---------- */
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn){
+  position:relative!important;isolation:isolate!important;overflow:hidden!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;
+  min-height:48px!important;padding:0 26px!important;border:0!important;border-radius:0!important;clip-path:var(--ax-clip)!important;
+  font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;text-transform:uppercase!important;text-decoration:none!important;text-shadow:none!important;
+  translate:none!important;transition:filter .2s ease,transform .15s var(--ax-ease)!important}
+body.ax-brand :is(.btn-primary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link){color:#fff!important;
+  background:linear-gradient(180deg,#d2291a 0%,var(--ax-ember) 55%,var(--ax-ember-lo) 100%)!important;background-color:var(--ax-ember)!important;
+  box-shadow:inset 0 1px 0 rgba(255,170,150,.8),inset 0 -1px 0 rgba(0,0,0,.45),0 10px 26px rgba(186,31,18,.28)!important}
+body.ax-brand :is(.btn-secondary,.game-card-btn){color:var(--ax-ink)!important;
+  background:linear-gradient(180deg,#2a2721 0%,#1a1813 100%)!important;background-color:var(--ax-raised)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px var(--ax-line-strong)!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn)::before{
+  content:""!important;display:block!important;position:absolute!important;top:0!important;bottom:0!important;left:0!important;right:auto!important;inset:0 auto 0 0!important;width:34%!important;padding:0!important;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent)!important;-webkit-mask:none!important;mask:none!important;filter:none!important;
+  transform:translateX(-160%)!important;animation:none!important;z-index:1!important;pointer-events:none!important;border-radius:0!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn)::after{content:none!important;display:none!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover{filter:brightness(1.1)!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover::before{animation:ax-sheen .9s var(--ax-ease) 1!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):active{transform:translateY(1px)!important}
+body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):focus-visible{outline:2px solid var(--ax-steel-light)!important;outline-offset:3px!important}
+
+/* ---------- Public home hero ---------- */
+body.ax-brand .hero{min-height:100vh!important;padding:calc(68px + 40px) 0 56px!important;align-items:center!important}
+body.ax-brand .hero-bg{background:transparent!important}
+body.ax-brand .hero-bg-video{background:none!important;opacity:0!important}
+body.ax-brand .hero-bg-gradient{background:linear-gradient(90deg,rgba(14,12,9,.92) 0%,rgba(14,12,9,.6) 45%,rgba(14,12,9,.1) 100%)!important}
+body.ax-brand .hero-grid{display:none!important}
+body.ax-brand .hero-content{padding:0 0 0 clamp(16px,7vw,120px)!important;max-width:680px!important}
+body.ax-brand :is(.hero-eyebrow,.section-eyebrow){display:flex!important;align-items:center!important;gap:12px!important;font:400 11px/1.4 var(--ax-font-brand)!important;letter-spacing:.32em!important;color:var(--ax-steel)!important;text-transform:uppercase!important}
+body.ax-brand .hero-title{font:700 clamp(46px,4.6vw,78px)/.94 var(--ax-font-head)!important;letter-spacing:-.005em!important;text-transform:uppercase!important;text-shadow:none!important;margin:18px 0 22px!important}
+body.ax-brand .hero-title .accent{color:var(--ax-ember-hi)!important}
+body.ax-brand .hero-body{font:400 16px/1.65 var(--ax-font-body)!important;color:var(--ax-muted)!important;max-width:58ch!important;margin-bottom:20px!important}
+body.ax-brand .hero-body a,body.ax-brand .hero-body strong{color:#fff!important}
+body.ax-brand .hero-body #heroGameName{color:var(--ax-ember-hi)!important}
+body.ax-brand .hero-tags{gap:8px!important;margin-bottom:26px!important}
+body.ax-brand .hero-tag{border:1px solid var(--ax-line-strong)!important;background:rgba(21,19,15,.6)!important;color:var(--ax-muted)!important;
+  font:600 12px/1 var(--ax-font-head)!important;letter-spacing:.14em!important;padding:9px 14px!important;border-radius:0!important}
+body.ax-brand .hero-tag:hover{border-color:var(--ax-steel)!important;color:#fff!important}
+body.ax-brand .hero-cta{gap:14px!important}
+body.ax-brand .gold-line{background:linear-gradient(90deg,transparent,var(--ax-line-strong),transparent)!important;height:1px!important}
+
+
+/* ---------- Tools hub ---------- */
+body.ax-brand .tools-hero{background:transparent!important;border-bottom:1px solid var(--ax-line)!important}
+body.ax-brand .tools-hero-grid{display:none!important}
+body.ax-brand .tools-hero h1{font:700 clamp(44px,4.2vw,70px)/.95 var(--ax-font-head)!important;text-transform:uppercase!important;letter-spacing:0!important}
+body.ax-brand .tools-hero h2{font:700 clamp(28px,2.4vw,40px)/1 var(--ax-font-head)!important;text-transform:uppercase!important;letter-spacing:0!important}
+body.ax-brand .tools-hero .section-copy,body.ax-brand .platform-card p{font:400 16px/1.65 var(--ax-font-body)!important;color:var(--ax-muted)!important}
+body.ax-brand .tools-hero :is(h1,h2) span{color:var(--ax-ember-hi)!important}
+body.ax-brand .platform-meta span{font:400 11px/1.4 var(--ax-font-brand)!important;letter-spacing:.3em!important;color:var(--ax-steel)!important}
+body.ax-brand .platform-card h2{font:700 clamp(26px,2.2vw,36px)/1 var(--ax-font-head)!important}
+body.ax-brand :is(.platform-card){border:1px solid var(--ax-line)!important;border-radius:0!important;background:linear-gradient(180deg,rgba(29,26,21,.9),rgba(14,12,9,.92))!important;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%)!important;box-shadow:none!important}
+body.ax-brand .platform-card :is(h2,h3){text-transform:uppercase!important}
+body.ax-brand .platform-brand-logo{width:150px!important;height:auto!important;filter:drop-shadow(0 16px 30px rgba(0,0,0,.6))}
+body.ax-brand .platform-brand-name{font:400 26px/1 var(--ax-font-brand)!important;letter-spacing:.04em!important;color:var(--ax-ink)!important}
+body.ax-brand .platform-brand-name span{color:var(--ax-ember-hi)!important}
+body.ax-brand .platform-brand p{font:400 11px/1 var(--ax-font-brand)!important;letter-spacing:.42em!important;color:var(--ax-steel)!important}
+
+/* ---------- Footers and Bungie attribution ---------- */
+body.ax-brand footer,body.ax-brand .apx-bungie-attribution{font-family:var(--ax-font-body)!important}
+body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 auto!important;padding:18px clamp(16px,3vw,40px) 28px!important;
+  color:var(--ax-dim)!important;font:400 12px/1.6 var(--ax-font-body)!important;text-align:center;border-top:1px solid var(--ax-line)}
+
+@media (prefers-reduced-motion:reduce){
+  body.ax-brand .nav-links a.active::after{animation:none!important}
+  body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover::before{animation:none!important}
+}
+}

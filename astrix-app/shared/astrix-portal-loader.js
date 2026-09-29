@@ -23,9 +23,11 @@
   var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;
   var BREACH_READY_MS=1200;
   // A page chooses once. Late imports cannot replace the fallback or revive a gate.
+  // The entry scene plays for at least ENTRY_MIN_MS once shown, so a fast page never just flashes it.
+  var ENTRY_MIN_MS=2400,skinShownAt=0,interrupted=false,holdTimer=null;
   function chooseSkin(next){
     if(skin||pendingDone||!gate)return false;
-    skin=next;clearTimeout(skinTimer);
+    skin=next;skinShownAt=Date.now();clearTimeout(skinTimer);
     gate.classList.add(next==='breach'?'is-breach':'ring-visible');
     gate.classList.remove('breach-pending');
     if(next==='ring')breachAbort?.abort();
@@ -39,7 +41,7 @@
     breachAbort=new AbortController();
     skinTimer=setTimeout(function(){chooseSkin('ring');},BREACH_READY_MS);
     var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
-    import(new URL('./astrix-breach-loader.mjs?v=20260927-single-skin-1',loaderScriptSrc).href)
+    import(new URL('./astrix-breach-loader.mjs?v=20260929-shell-2',loaderScriptSrc).href)
       .then(function(module){
         if(skin||pendingDone||Date.now()>=deadline){chooseSkin('ring');return null;}
         return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4,signal:breachAbort.signal});
@@ -246,13 +248,13 @@
   function authRequired(url){
     if(pendingDone)return;
     if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
-    pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
+    interrupted=true;pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
     warmNavigation=false;mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
     if(pendingDone)return;
-    pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
+    interrupted=true;pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
     warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
   }
   function settleImage(image){
@@ -301,7 +303,7 @@
     if(pendingAuthUrl||pendingBlockedMessage){gate.classList.add('is-recovery');return;}
     gate.remove();gate=null;document.body.classList.remove('apx-loading');
   });
-  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);if(gate)finish();document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);var wait=entryPortal&&skinShownAt&&!interrupted&&!navigationTransition&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?ENTRY_MIN_MS-(Date.now()-skinShownAt):0;if(gate){if(wait>0){clearTimeout(holdTimer);holdTimer=setTimeout(finish,wait);}else finish();}document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){

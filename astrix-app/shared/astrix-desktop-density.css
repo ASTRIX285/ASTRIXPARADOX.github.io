@@ -441,20 +441,21 @@ body #loadout-equipped .saved-build-tile.is-equipment::after{
   pointer-events:none;
 }
 
-/* Approved dark-grey chrome. Presentation only; item art and rarity colours
-   continue to come from Bungie, with existing sizing and interaction rules. */
+/* Brand chrome from the AX logo (28 Sep 2026): Forge Black panels, warm
+   hairlines. Replaces the old dark grey. Item art and rarity colours still come
+   from Bungie, with existing sizing and interaction rules. */
 html:root{
-  --apx-colour-canvas:#161616;
-  --apx-colour-panel:#222222;
-  --apx-colour-raised:#2b2b2b;
-  --apx-colour-text:#ededed;
-  --apx-colour-secondary:#b8b8b8;
-  --apx-colour-border:#414141;
-  --apx-colour-border-strong:#616161;
+  --apx-colour-canvas:#0e0c09;
+  --apx-colour-panel:#15130f;
+  --apx-colour-raised:#1f1c16;
+  --apx-colour-text:#ededeb;
+  --apx-colour-secondary:#b9b9b8;
+  --apx-colour-border:#2e2a22;
+  --apx-colour-border-strong:#4a4538;
 }
 /* Neutralise the decorative page backdrop without filtering maps or item art. */
 html body.forge-token-preview .scene.immersive,
-html body.forge-paradox-map-background::after{filter:grayscale(1) blur(2px)!important}
+html body.forge-paradox-map-background::after{filter:sepia(.35) saturate(.6) brightness(.5) blur(2px)!important}
 html body[class]{
   --surface:var(--apx-colour-panel);
   --surface-2:var(--apx-colour-raised);
@@ -528,7 +529,7 @@ html body[class] :is(
   .mission-tabs button,.journey-destination-action,.journey-map-controls button,.journey-map-locate,
   .tool-intro-cta
 ){
-  background-color:#303030!important;
+  background-color:var(--apx-colour-raised)!important;
   background-image:none!important;
   color:var(--apx-colour-text)!important;
   border-color:var(--apx-colour-border-strong)!important;
@@ -578,7 +579,7 @@ html body[class] :is(.paradox-loadout-card.is-active,.forge-candidate.is-selecte
 html body[class] :is([data-build-action="delete"],.is-danger,[data-loadout-menu-action="clear"]){border-color:var(--apx-colour-action)!important}
 html body[class] .vault-postmaster-section:has(.vault-transfer-item)>header [data-collect-postmaster]:not(:disabled){
   border-color:#e44d56!important;
-  background-color:#303030!important;
+  background-color:var(--apx-colour-raised)!important;
   animation:apx-postmaster-pull-glow 2s ease-in-out infinite;
 }
 @keyframes apx-postmaster-pull-glow{

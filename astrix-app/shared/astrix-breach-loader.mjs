@@ -51,7 +51,7 @@ function buildScene(){
 export async function createBreach({host,signal}={}){
   signal?.throwIfAborted?.();
   // The wordmark face must be ready so the scene never flashes a fallback font.
-  await Promise.race([document.fonts?.load?.('400 118px Michroma'),new Promise(resolve=>setTimeout(resolve,600))]).catch(()=>{});
+  await Promise.race([document.fonts?.load?.('400 118px Michroma'),new Promise(resolve=>setTimeout(resolve,250))]).catch(()=>{});
   signal?.throwIfAborted?.();
 
   const scene=document.createElement('div');
