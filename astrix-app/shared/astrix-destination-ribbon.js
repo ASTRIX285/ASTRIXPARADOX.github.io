@@ -8,7 +8,7 @@
     Object.freeze({key:'build-forge',label:'Build Forge',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
     Object.freeze({key:'reports',label:'Reports',href:'/astrix-app/pages/reports/'}),
     Object.freeze({key:'vault',label:'Storage',href:'/astrix-app/pages/vault/'}),
-    Object.freeze({key:'loadout',label:'Loadout',href:'/astrix-app/pages/loadout/'})
+    Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1',location.href).href;

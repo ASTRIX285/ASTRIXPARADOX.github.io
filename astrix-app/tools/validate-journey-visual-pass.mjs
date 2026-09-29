@@ -205,7 +205,8 @@ for(const [page,title,purpose] of [
   [buildForgeHtml,'BUILD FORGE','OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD'],
   [missionReportsHtml,'MISSION REPORTS','REVIEW GUARDIAN ACTIVITY'],
   [vaultHtml,'STORAGE',null],
-  [loadoutHtml,'LOADOUT','REVIEW SAVED GUARDIAN BUILDS']
+  // Renamed to Armoury (Miguel, 30 Sep 2026).
+  [loadoutHtml,'ARMOURY','YOUR SAVED GUARDIAN BUILDS']
 // Prompt 19 explicitly removes Vault's subtitle; require the header to close immediately.
 ])assert.match(page,new RegExp(purpose===null?`<strong>${title}<\\/strong><\\/div>`:`<strong>${title}<\\/strong><small>${purpose}<\\/small>`),`${title} must expose its page-specific name and purpose inside the shared command header`);
 assert.doesNotMatch(forgeLoaderHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Forge Loader<\/h1>/,'Forge Loader must not repeat its page identity in an oversized content hero');

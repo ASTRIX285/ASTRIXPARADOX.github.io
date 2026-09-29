@@ -28,7 +28,7 @@ export async function importDimLoadout(input,{returnFocus}={}){
   current?.close();
   const disabledReasons={};if(!now.session.authenticated||!model.binding.characterId)for(const key of ['save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
   currentModel=model;
-  current=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Build Forge'],['save','Save as PARADOX loadout']],disabledReasons,returnFocus,onClose:()=>{current=null;currentModel=null;}});
+  current=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Build Forge'],['save','Save to Armoury']],disabledReasons,returnFocus,onClose:()=>{current=null;currentModel=null;}});
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   return {model,handle:current,renderMs:performance.now()-started};
 }

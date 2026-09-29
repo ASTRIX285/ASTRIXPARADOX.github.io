@@ -48,7 +48,7 @@ function renderMenu(){
     if(!panel.open)panel.showModal();return;
   }
   const saved=isSaved(loadout);
-  const actions=[['view','Loadout details'],['equip','Equip'],['edit','Edit in Build Forge'],['save','Save as PARADOX loadout'],['snapshot','Overwrite with equipped gear'],['clear',`Clear slot ${index+1}`]];
+  const actions=[['view','Loadout details'],['equip','Equip'],['edit','Edit in Build Forge'],['save','Save to Armoury'],['snapshot','Overwrite with equipped gear'],['clear',`Clear slot ${index+1}`]];
   menu.innerHTML=actions.map(([value,label])=>`<button type="button" role="menuitem" tabindex="-1" data-loadout-menu-action="${value}" ${!saved&&value!=='snapshot'?'disabled':''} ${value==='clear'?'class="is-danger"':''}>${label}</button>`).join('');
   menu.hidden=false;trigger(index)?.setAttribute('aria-expanded','true');positionMenu();menu.querySelector('button:not(:disabled)')?.focus();
 }

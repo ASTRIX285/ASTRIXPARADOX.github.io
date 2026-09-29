@@ -2,7 +2,7 @@ import {renderLoadoutIconLayout,bindLoadoutIconDetails} from './loadout-icon-lay
 import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaultActionRows=[['equip','Equip'],['prepare','Prepare equip'],['identifiers','Edit identifiers'],['save','Save as PARADOX loadout'],['share','Share'],['clear','Clear slot']];
+const defaultActionRows=[['equip','Equip'],['prepare','Prepare equip'],['identifiers','Edit identifiers'],['save','Save to Armoury'],['share','Share'],['clear','Clear slot']];
 let sequence=0;
 function artwork(icon,label,className=''){
   const src=bungieArtwork(icon);
@@ -65,7 +65,7 @@ export function openLoadoutDetails(model,{presentation='rows',actions={},actionR
     if(target.hasAttribute('data-ld-confirm-clear')){void run(async()=>{await actions.clear();setStatus('Slot cleared.');invalid=true;panel.hidden=true;});return;}
     const key=target.dataset.ldAction;if(!key||!actions[key])return;
     if(key==='identifiers'){showPanel(identifiersHtml());return;}
-    if(key==='save'){showPanel(`<form data-ld-save><h3>Save as PARADOX loadout</h3><label>Name<input name="name" value="${esc(model.name)}" maxlength="80" required></label><div class="apx-ld-form-actions"><button type="submit">Save loadout</button><button type="button" data-ld-cancel>Cancel</button></div></form>`);return;}
+    if(key==='save'){showPanel(`<form data-ld-save><h3>Save to Armoury</h3><label>Name<input name="name" value="${esc(model.name)}" maxlength="80" required></label><div class="apx-ld-form-actions"><button type="submit">Save loadout</button><button type="button" data-ld-cancel>Cancel</button></div></form>`);return;}
     if(key==='clear'){showPanel(`<h3>Clear slot ${esc(model.slotNumber)}</h3><p>Remove ${esc(model.name)} from this in-game slot? This does not delete your items.</p><div class="apx-ld-form-actions"><button type="button" data-ld-confirm-clear>Confirm clear slot</button><button type="button" data-ld-cancel>Cancel</button></div>`);return;}
     void run(async()=>{
       if(key==='equip'||key==='prepare'){setStatus('Checking the saved loadout…');review=await actions[key]();showPanel(reviewHtml(review));setStatus(review.ready?'Ready for your review. Nothing has been equipped.':'Apply is blocked. Review the reasons below.');}

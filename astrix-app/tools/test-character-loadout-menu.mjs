@@ -59,7 +59,7 @@ try{
   assert.ok(Math.abs(geometry[1].x-geometry[0].x-geometry[0].width-4-22-6)<.1,'Prompt 21 exact strip pitch');
   const more=page.locator('[data-loadout-more="1"]');await more.click();await page.keyboard.press('Escape');await more.focus();await page.keyboard.press('Enter');
   const menu=page.getByRole('menu');await menu.waitFor();
-  assert.deepEqual(await menu.getByRole('menuitem').allTextContents(),['Loadout details','Equip','Edit in Build Forge','Save as PARADOX loadout','Overwrite with equipped gear','Clear slot 2']);
+  assert.deepEqual(await menu.getByRole('menuitem').allTextContents(),['Loadout details','Equip','Edit in Build Forge','Save to Armoury','Overwrite with equipped gear','Clear slot 2']);
   const anchor=await more.locator('..').boundingBox(),box=await menu.boundingBox();
   assert.ok(Math.min(Math.abs(box.y-(anchor.y+anchor.height)),Math.abs(box.y+box.height-anchor.y))<=8);
   assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=width&&box.y+box.height<=900);
