@@ -106,7 +106,7 @@ try{
   const mutations=await page.evaluate(()=>window.skinMutations.flatMap(r=>[r.before,r.after]).filter(Boolean));
   assert.ok(!(mutations.some(s=>s.includes('ring-visible'))&&mutations.some(s=>s.includes('is-breach'))),`${label}: no skin change between samples`);
   assert.deepEqual(errors,[],`${label}: no uncaught errors`);
-  assert.equal(threeRequests,1,`${label}: preload and import share one local request`);
+  assert.equal(threeRequests,0,`${label}: the X entry skin loads no three.js`);
   await page.close();console.log(`PORTAL_SINGLE_SKIN_CASE=PASS ${label} skin=${expected||'none'}`);
  }
  for(const route of routes)for(const delay of [1500,200])await run(route,delay);

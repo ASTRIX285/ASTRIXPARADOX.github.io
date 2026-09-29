@@ -279,10 +279,13 @@ try{
      const header=document.querySelector('header:has(>[data-forge-hero-cards])'),ribbon=document.querySelector('[data-forge-destination-ribbon]');
      const cards=[...header.querySelectorAll('.guardian-character-card')];const rect=ribbon.getBoundingClientRect();
      const hits=[];for(const x of [2,innerWidth/2,innerWidth-2])for(const y of [2,rect.top-2,rect.top+rect.height/2]){const e=document.elementFromPoint(x,y);hits.push(Boolean(e&&(header.contains(e)||ribbon.contains(e))));}
-     return {scrollY,headerColor:getComputedStyle(header).backgroundColor,opaque: getComputedStyle(ribbon,'::before').backgroundColor,cardsVisible:cards.every(c=>{const r=c.getBoundingClientRect();return r.top>=0&&r.bottom<=rect.top&&[[r.left+r.width/2,r.top+2],[r.left+2,r.top+r.height/2],[r.right-2,r.top+r.height/2]].every(([x,y])=>c.contains(document.elementFromPoint(x,y)));}),hits};
+     return {scrollY,away:document.body.classList.contains('ax-shell-away'),headerColor:getComputedStyle(header).backgroundColor,opaque:getComputedStyle(ribbon).backgroundColor,cardsVisible:cards.every(c=>{const r=c.getBoundingClientRect();return r.top>=0&&r.bottom<=rect.top&&[[r.left+r.width/2,r.top+2],[r.left+2,r.top+r.height/2],[r.right-2,r.top+r.height/2]].every(([x,y])=>c.contains(document.elementFromPoint(x,y)));}),hits};
     });
     // Loader is the explicitly protected baseline exception.
-    if(name!=='ForgeLoader'){
+    // Approved ribbon (28 Sep 2026): scrolling down slides the ribbon away so the page fills
+    // the screen; scrolling up brings back the slim bar. So heroes are checked at the top only.
+    if(name!=='ForgeLoader'&&y===300)assert.ok(state.away,`${name}: ribbon slides away while scrolling down`);
+    if(name!=='ForgeLoader'&&y===0){
      assert.equal(state.scrollY,y,`${name}: requested scroll position reached`);
      assert.equal(state.opaque,state.headerColor,`${name}: solid ribbon band`);
      assert.ok(state.cardsVisible,`${name} ${width} scroll ${y}: heroes not clipped`);
