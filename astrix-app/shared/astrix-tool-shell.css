@@ -43,37 +43,27 @@ html body header.apx-destination-header{position:fixed!important;top:0!important
   padding-left:clamp(16px,2.6vw,40px)!important;padding-right:clamp(16px,2.6vw,40px)!important;
   background:rgba(14,12,9,.94)!important;backdrop-filter:blur(10px)!important;border:0!important;box-shadow:none!important;
   transition:transform .28s var(--ax-ease)!important}
-/* Brand and tool name on the left, Guardian cards on the right (grid pages keep their own row height). */
-html body header.apx-destination-header:has(>[data-forge-hero-cards]){grid-template-columns:auto auto minmax(0,1fr) auto!important}
-html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;justify-self:start!important}
-html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){grid-column:2!important;justify-self:start!important}
-html body header.apx-destination-header:has(>[data-forge-hero-cards])>[data-forge-hero-cards]{grid-column:3!important;grid-row:1!important;justify-self:end!important;max-width:100%!important;min-width:0!important}
-html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control,.apx-data-refresh){grid-column:4!important;grid-row:1!important}
 html body header.apx-destination-header:not(:has(>[data-forge-hero-cards])){display:flex!important;align-items:center!important;gap:20px!important;min-height:78px!important}
 html body header.apx-destination-header::before{content:""!important;position:absolute!important;left:0!important;right:0!important;top:0!important;height:2px!important;inset:0 0 auto 0!important;
   background:linear-gradient(90deg,transparent,var(--ax-ember) 30%,var(--ax-ember) 70%,transparent)!important;opacity:.85!important;display:block!important;pointer-events:none!important}
 .apx-destination-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:6px!important;text-decoration:none!important}
 .apx-destination-brand img{width:auto!important;height:40px!important;aspect-ratio:auto!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))!important}
-.ax-wordmark{display:inline-flex!important;align-items:baseline!important;gap:10px!important}
-.apx-destination-brand .ax-wordmark span{display:inline!important}
-.apx-destination-brand .ax-wordmark-top b{display:inline!important}
-.ax-wordmark-top{font:400 20px/1 var(--ax-font-brand)!important;letter-spacing:.04em!important;
+/* Wordmark stacked as on the brand board: chrome ASTRI with the red X, PARADOX spaced below. */
+.apx-destination-brand .ax-wordmark{display:inline-flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;line-height:1!important}
+.apx-destination-brand .ax-wordmark>span{display:block!important;gap:0!important}
+.ax-wordmark-top{font:400 18px/1 var(--ax-font-brand)!important;letter-spacing:.06em!important;white-space:nowrap!important;
   background:linear-gradient(100deg,#9a9a99 0%,#ffffff 30%,#c9c9c8 52%,#ffffff 64%,#7b7b7a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.ax-wordmark-top b{font-weight:400!important;-webkit-text-fill-color:var(--ax-ember-hi)!important;color:var(--ax-ember-hi)!important;text-shadow:0 0 14px rgba(230,57,31,.5)}
-.ax-wordmark-sub{font:600 11px/1 var(--ax-font-head)!important;letter-spacing:.3em!important;color:var(--ax-steel)!important}
+.apx-destination-brand .ax-wordmark-top b{display:inline!important;font:inherit!important;font-size:1em!important;letter-spacing:inherit!important;
+  -webkit-text-fill-color:var(--ax-ember-hi)!important;color:var(--ax-ember-hi)!important;text-shadow:0 0 14px rgba(230,57,31,.5)}
+.ax-wordmark-sub{font:400 9.5px/1 var(--ax-font-brand)!important;letter-spacing:.52em!important;color:var(--ax-steel)!important;white-space:nowrap!important}
 html body header.apx-destination-header .apx-destination-header-copy{flex:0 0 auto!important;white-space:nowrap!important;text-align:left!important;position:static!important;transform:none!important;margin:0 0 0 12px!important;padding:0 0 0 20px!important;border-left:1px solid var(--ax-line-strong)!important}
 html body header.apx-destination-header .apx-destination-header-copy strong{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
+/* With the Guardian cards centred (original layout), the active tab names the tool, so the header copy steps aside. */
+html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){display:none!important}
 /* The board shows the tool name only; the long subtitle would crowd the Guardian cards. */
 html body header.apx-destination-header .apx-destination-header-copy small{display:none!important}
 .apx-destination-header-state{font:600 12px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-steel)!important}
 
-/* Guardian cards: notched frame, crimson edge on the active Guardian. The emblem art inside is Bungie's and stays as it is. */
-html body header:has(>[data-forge-hero-cards]) .guardian-character-card{border:0!important;border-radius:0!important;clip-path:var(--ax-clip)!important;
-  box-shadow:inset 0 0 0 1px var(--ax-line-strong),inset 0 1px 0 rgba(255,255,255,.08)!important;outline-offset:-2px!important}
-html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected{box-shadow:inset 0 0 0 1px rgba(230,57,31,.55),inset 3px 0 0 var(--ax-ember-hi),inset 0 1px 0 rgba(255,150,140,.35)!important}
-html body header:has(>[data-forge-hero-cards]) .guardian-character-card::after,
-html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::before,
-html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{animation:none!important;opacity:0!important}
 
 /* ---------- Ribbon row 2: plain-text tabs ---------- */
 html body [data-forge-destination-ribbon]{position:fixed!important;top:var(--ax-shell-top,var(--apx-hero-header,108px))!important;left:0!important;right:0!important;width:auto!important;max-width:none!important;
