@@ -1,0 +1,174 @@
+/* ASTRIX PARADOX tool shell (approved boards, 28 Sep 2026): navigation ribbon,
+   machined buttons and gear tile states for every tool page.
+
+   Ribbon: full at the top (logo, ASTRIX wordmark, tool name, Guardian cards,
+   plain-text tabs with a crimson underline that strobes gently). Scrolling down
+   slides it away; scrolling up brings back a slim 52px bar (logo mark, tool
+   name, icon tabs). The behaviour lives in astrix-destination-ribbon.js.
+
+   Load this file FIRST in <head>. It declares the astrix-brand layer ahead of
+   the older gloss and button layers, so its important rules are the final word
+   on what it styles. Bungie icons are never recoloured: gear rules only draw
+   the frame around them. */
+@layer astrix-brand, astrix-gloss, astrix-ribbon-buttons, astrix-button-tiers;
+
+@font-face{font-family:"Michroma";src:url("/fonts/michroma-400.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Barlow";src:url("/fonts/barlow-500.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-600.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-700.woff2") format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  --ax-black:#0e0c09;--ax-panel:#15130f;--ax-raised:#1d1a15;--ax-line:#2a2620;--ax-line-strong:#3d3830;
+  --ax-ember:#ba1f12;--ax-ember-hi:#e6391f;--ax-ember-lo:#8f170c;--ax-deep:#732022;
+  --ax-steel:#8a8a89;--ax-steel-light:#c9c9c8;--ax-ink:#ededeb;--ax-muted:#b9b9b8;
+  --ax-font-brand:"Michroma","Barlow Semi Condensed",sans-serif;
+  --ax-font-head:"Barlow Semi Condensed","Barlow","Segoe UI",sans-serif;
+  --ax-shell-top:78px;--ax-shell-tabs:46px;--ax-shell-slim:52px;
+  --ax-clip:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  --ax-ease:cubic-bezier(.23,1,.32,1);
+}
+@keyframes ax-strobe{0%,100%{opacity:.2}4%{opacity:1}7%{opacity:.3}10%{opacity:1}15%{opacity:.2}}
+@keyframes ax-orbit{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
+@keyframes ax-breathe{0%,100%{box-shadow:0 0 0 1px rgba(230,57,31,.35),0 0 10px rgba(186,31,18,.15)}50%{box-shadow:0 0 0 1px rgba(230,57,31,.95),0 0 22px rgba(186,31,18,.45)}}
+@keyframes ax-sheen{from{transform:translateX(-160%)}to{transform:translateX(420%)}}
+
+@property --ax-orbit{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes ax-orbit-spin{to{--ax-orbit:360deg}}
+@keyframes ax-frame-breathe{0%,100%{opacity:.45}50%{opacity:1}}
+
+@layer astrix-brand{
+
+/* ---------- Ribbon row 1: brand, tool name, Guardian cards ---------- */
+html body header.apx-destination-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:90!important;margin:0!important;
+  padding-left:clamp(16px,2.6vw,40px)!important;padding-right:clamp(16px,2.6vw,40px)!important;
+  background:rgba(14,12,9,.94)!important;backdrop-filter:blur(10px)!important;border:0!important;box-shadow:none!important;
+  transition:transform .28s var(--ax-ease)!important}
+/* Brand and tool name on the left, Guardian cards on the right (grid pages keep their own row height). */
+html body header.apx-destination-header:has(>[data-forge-hero-cards]){grid-template-columns:auto auto minmax(0,1fr) auto!important}
+html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.brand,.apx-destination-brand){grid-column:1!important;justify-self:start!important}
+html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.ws-label,.workspace-title,.apx-destination-header-copy){grid-column:2!important;justify-self:start!important}
+html body header.apx-destination-header:has(>[data-forge-hero-cards])>[data-forge-hero-cards]{grid-column:3!important;grid-row:1!important;justify-self:end!important;max-width:100%!important;min-width:0!important}
+html body header.apx-destination-header:has(>[data-forge-hero-cards])>:is(.topbar-actions,.source-pill,.bungie-auth-control,.apx-data-refresh){grid-column:4!important;grid-row:1!important}
+html body header.apx-destination-header:not(:has(>[data-forge-hero-cards])){display:flex!important;align-items:center!important;gap:20px!important;min-height:78px!important}
+html body header.apx-destination-header::before{content:""!important;position:absolute!important;left:0!important;right:0!important;top:0!important;height:2px!important;inset:0 0 auto 0!important;
+  background:linear-gradient(90deg,transparent,var(--ax-ember) 30%,var(--ax-ember) 70%,transparent)!important;opacity:.85!important;display:block!important;pointer-events:none!important}
+.apx-destination-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:6px!important;text-decoration:none!important}
+.apx-destination-brand img{width:auto!important;height:40px!important;aspect-ratio:auto!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))!important}
+.ax-wordmark{display:inline-flex!important;align-items:baseline!important;gap:10px!important}
+.apx-destination-brand .ax-wordmark span{display:inline!important}
+.apx-destination-brand .ax-wordmark-top b{display:inline!important}
+.ax-wordmark-top{font:400 20px/1 var(--ax-font-brand)!important;letter-spacing:.04em!important;
+  background:linear-gradient(100deg,#9a9a99 0%,#ffffff 30%,#c9c9c8 52%,#ffffff 64%,#7b7b7a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ax-wordmark-top b{font-weight:400!important;-webkit-text-fill-color:var(--ax-ember-hi)!important;color:var(--ax-ember-hi)!important;text-shadow:0 0 14px rgba(230,57,31,.5)}
+.ax-wordmark-sub{font:600 11px/1 var(--ax-font-head)!important;letter-spacing:.3em!important;color:var(--ax-steel)!important}
+html body header.apx-destination-header .apx-destination-header-copy{flex:0 0 auto!important;white-space:nowrap!important;text-align:left!important;position:static!important;transform:none!important;margin:0 0 0 12px!important;padding:0 0 0 20px!important;border-left:1px solid var(--ax-line-strong)!important}
+html body header.apx-destination-header .apx-destination-header-copy strong{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
+/* The board shows the tool name only; the long subtitle would crowd the Guardian cards. */
+html body header.apx-destination-header .apx-destination-header-copy small{display:none!important}
+.apx-destination-header-state{font:600 12px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-steel)!important}
+
+/* Guardian cards: notched frame, crimson edge on the active Guardian. The emblem art inside is Bungie's and stays as it is. */
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card{border:0!important;border-radius:0!important;clip-path:var(--ax-clip)!important;
+  box-shadow:inset 0 0 0 1px var(--ax-line-strong),inset 0 1px 0 rgba(255,255,255,.08)!important;outline-offset:-2px!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected{box-shadow:inset 0 0 0 1px rgba(230,57,31,.55),inset 3px 0 0 var(--ax-ember-hi),inset 0 1px 0 rgba(255,150,140,.35)!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card::after,
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::before,
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{animation:none!important;opacity:0!important}
+
+/* ---------- Ribbon row 2: plain-text tabs ---------- */
+html body [data-forge-destination-ribbon]{position:fixed!important;top:var(--ax-shell-top)!important;left:0!important;right:0!important;width:auto!important;max-width:none!important;
+  margin:0!important;padding:0 clamp(16px,2.6vw,40px)!important;z-index:80!important;height:var(--ax-shell-tabs)!important;transform:none;
+  background:rgba(14,12,9,.94)!important;backdrop-filter:blur(10px)!important;border-bottom:1px solid var(--ax-line)!important;box-shadow:0 12px 30px rgba(0,0,0,.35)!important;
+  transition:transform .28s var(--ax-ease),top .28s var(--ax-ease)!important}
+html body [data-forge-destination-ribbon]::before,html body [data-forge-destination-ribbon]::after{content:none!important;display:none!important}
+[data-forge-destination-ribbon] :is(.apx-destination-ribbon,.apx-destination-ribbon ul,.apx-destination-ribbon li)::before,
+[data-forge-destination-ribbon] :is(.apx-destination-ribbon,.apx-destination-ribbon ul,.apx-destination-ribbon li)::after{content:none!important;display:none!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon{height:100%!important;display:flex!important;align-items:stretch!important;gap:0!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;width:auto!important;max-width:none!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon ul{display:flex!important;align-items:stretch!important;gap:2px!important;margin:0!important;padding:0!important;list-style:none!important;height:100%!important;
+  grid-template-columns:none!important;width:auto!important;overflow-x:auto!important;scrollbar-width:none!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon ul::-webkit-scrollbar{display:none}
+[data-forge-destination-ribbon] .apx-destination-ribbon li{display:flex!important;flex:none!important;margin:0!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a{position:relative!important;display:inline-flex!important;align-items:center!important;gap:8px!important;height:100%!important;min-height:44px!important;
+  padding:0 16px!important;margin:0!important;border:0!important;border-radius:0!important;background:none!important;background-color:transparent!important;background-image:none!important;
+  box-shadow:none!important;outline-offset:-3px!important;translate:none!important;transform:none!important;width:auto!important;min-width:0!important;
+  color:var(--ax-muted)!important;font:700 13px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;text-transform:uppercase!important;text-shadow:none!important;white-space:nowrap!important;
+  transition:color .2s ease!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a::before{content:none!important;display:none!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a::after{content:""!important;display:block!important;position:absolute!important;inset:auto 16px 0 16px!important;height:2px!important;padding:0!important;
+  border-radius:0!important;background:var(--ax-ember-hi)!important;-webkit-mask:none!important;mask:none!important;filter:none!important;z-index:auto!important;
+  transform:scaleX(0)!important;transform-origin:left!important;opacity:1!important;animation:none!important;transition:transform .25s var(--ax-ease)!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a:hover{color:#fff!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a:hover::after{transform:scaleX(1)!important;opacity:.5!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]{color:#fff!important;background:linear-gradient(180deg,rgba(186,31,18,.2),transparent)!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{transform:scaleX(1)!important;box-shadow:0 0 10px rgba(230,57,31,.85)!important;animation:ax-strobe 4.5s linear infinite!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a:focus-visible{outline:2px solid var(--ax-steel-light)!important}
+.ax-tab-icon{display:none;width:18px;height:18px;flex:none}
+.ax-slim-brand{display:none}
+
+/* ---------- Scroll states ---------- */
+body.ax-shell-away header.apx-destination-header{transform:translateY(-110%)!important}
+body.ax-shell-away [data-forge-destination-ribbon]{transform:translateY(calc(-100% - var(--ax-shell-top) - 10px))!important}
+body.ax-shell-slim header.apx-destination-header{transform:translateY(-110%)!important}
+body.ax-shell-slim [data-forge-destination-ribbon]{top:0!important;height:var(--ax-shell-slim)!important;transform:none!important}
+body.ax-shell-slim .ax-slim-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:auto!important;padding-right:16px!important;color:var(--ax-ink)!important}
+body.ax-shell-slim .ax-slim-brand img{height:28px!important;width:auto!important;max-width:none!important;position:static!important}
+body.ax-shell-slim .ax-slim-brand strong{padding-left:14px!important;border-left:1px solid var(--ax-line-strong)!important;font:700 13px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
+body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon{justify-content:space-between!important;width:100%!important}
+body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon a{padding:0 11px!important;font-size:0!important;letter-spacing:0!important}
+body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon a::after{inset:auto 9px 0 9px!important}
+body.ax-shell-slim .ax-tab-icon{display:block}
+
+/* ---------- Buttons: machined, notched, one red ---------- */
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch){
+  position:relative!important;overflow:hidden!important;isolation:isolate!important;border:0!important;border-radius:0!important;clip-path:var(--ax-clip)!important;color:#fff!important;
+  background:linear-gradient(180deg,#d2291a 0%,var(--ax-ember) 55%,var(--ax-ember-lo) 100%)!important;background-color:var(--ax-ember)!important;
+  box-shadow:inset 0 1px 0 rgba(255,170,150,.8),inset 0 -1px 0 rgba(0,0,0,.45)!important;text-shadow:none!important;
+  font-family:var(--ax-font-head)!important;font-weight:700!important;letter-spacing:.14em!important;transition:filter .14s ease,transform .14s var(--ax-ease)!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch)::before{
+  content:""!important;display:block!important;position:absolute!important;inset:0 auto 0 0!important;width:34%!important;padding:0!important;border-radius:0!important;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent)!important;-webkit-mask:none!important;mask:none!important;filter:none!important;
+  transform:translateX(-160%)!important;animation:none!important;z-index:1!important;pointer-events:none!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch)::after{content:none!important;display:none!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):hover:not(:disabled){filter:brightness(1.1)!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):hover:not(:disabled)::before{animation:ax-sheen .9s var(--ax-ease) 1!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):active:not(:disabled){transform:translateY(1px)!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):disabled{
+  background:linear-gradient(180deg,#24211b,#191712)!important;color:#77756f!important;box-shadow:inset 0 0 0 1px var(--ax-line-strong)!important;filter:none!important}
+
+/* Every other button on a tool page: the secondary machined finish. The two rings the old gloss drew are removed. */
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],a.btn,.mission-build-link,.mission-analyse-link,a.restore-btn):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip,[data-import-dim],.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *):not(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"]){
+  border:0!important;border-radius:0!important;clip-path:var(--ax-clip)!important;color:var(--ax-ink)!important;text-shadow:none!important;
+  background:linear-gradient(180deg,#2a2721 0%,#1a1813 100%)!important;background-color:var(--ax-raised)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--ax-line-strong)!important;font-family:var(--ax-font-head)!important;letter-spacing:.12em!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"]):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,.gw-tile,.gw-mod-dot,.gw-armour-chip,.apx-gate *)::before,
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"]):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,.gw-tile,.gw-mod-dot,.gw-armour-chip,.apx-gate *)::after{animation:none!important;opacity:0!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"]):not(.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,.gw-tile,.gw-mod-dot,.gw-armour-chip,.apx-gate *):hover:not(:disabled){filter:brightness(1.15)!important}
+/* Link-styled actions share the button typeface so a row of controls reads as one set. */
+body[data-apx-button-system] .improve-cta{font-family:var(--ax-font-head)!important;letter-spacing:.12em!important}
+/* Choices (tabs, activity, objective, element): selected gets a crimson left edge and a faint wash, never a heavy fill. */
+/* Three id-level :is/:not parts keep this above the secondary finish in specificity. */
+html body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="tab"]):is([aria-pressed="true"],[aria-selected="true"],.is-active,.active,#ax-never):not(.guardian-character-card,.guardian-loadout-slot,.apx-gate *):not(#ax-never-2):not(#ax-never-3){
+  color:#fff!important;background:linear-gradient(90deg,rgba(115,32,34,.6),rgba(29,26,21,.95) 75%)!important;
+  box-shadow:inset 3px 0 0 var(--ax-ember-hi),inset 0 0 0 1px rgba(230,57,31,.35)!important}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#arm,#armRangeTest,.improve-cta,.bungie-auth-btn,#journeyConnectButton,#vaultConnectButton,button,[role="button"]):focus-visible{outline:2px solid var(--ax-steel-light)!important;outline-offset:2px!important}
+
+/* ---------- Gear tiles: equipped gear breathes crimson, a light circles its frame ---------- */
+.vault-transfer-item.has-item-tile.is-equipped::after{border:2px solid var(--ax-ember-hi)!important;box-shadow:0 0 12px rgba(230,57,31,.45),inset 0 0 10px rgba(186,31,18,.25)!important;
+  animation:ax-frame-breathe 3.2s ease-in-out infinite!important}
+.vault-transfer-item.has-item-tile.is-equipped::before{content:""!important;position:absolute!important;inset:0!important;z-index:7!important;padding:2px!important;pointer-events:none!important;
+  background:conic-gradient(from var(--ax-orbit),transparent 0 84%,rgba(255,217,208,.95) 90%,transparent 96%)!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:ax-orbit-spin 6s linear infinite!important}
+/* Three equipped weapons pulse out of step so it never looks mechanical. */
+.vault-transfer-item.has-item-tile.is-equipped:nth-of-type(3n+2)::after{animation-delay:-1.1s!important}
+.vault-transfer-item.has-item-tile.is-equipped:nth-of-type(3n+2)::before{animation-delay:-2s!important}
+.vault-transfer-item.has-item-tile.is-equipped:nth-of-type(3n)::after{animation-delay:-2.2s!important}
+.vault-transfer-item.has-item-tile.is-equipped:nth-of-type(3n)::before{animation-delay:-4s!important}
+
+@media (prefers-reduced-motion:reduce){
+  [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{animation:none!important}
+  html body header.apx-destination-header,html body [data-forge-destination-ribbon]{transition:none!important}
+  .vault-transfer-item.has-item-tile.is-equipped::after{animation:none!important;opacity:1!important}
+  .vault-transfer-item.has-item-tile.is-equipped::before{display:none!important}
+}
+}

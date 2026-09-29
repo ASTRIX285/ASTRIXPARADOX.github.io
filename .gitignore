@@ -11,3 +11,7 @@ astrix-app/.tmp/
 astrix-app/node_modules/
 forge-worker/node_modules/
 forge-worker/.wrangler/
+
+# Python bytecode
+__pycache__/
+*.pyc

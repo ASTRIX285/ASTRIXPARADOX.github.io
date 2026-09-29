@@ -3,14 +3,16 @@
    Link on every page. Markup is injected by astrix-portal-loader.js.
    Control from your load code:  ForgeLoader.set(pct)  /  ForgeLoader.done()
    ===================================================================== */
-:root{--apx-loader-gold:#ffd36a;--apx-loader-gold-deep:#c88a26;--apx-loader-crimson:#d3202f;--apx-loader-red:#790810;
-  --apx-loader-deep-red:#260205;--apx-loader-text:#fff7e4;
+/* Brand palette from the AX logo (28 Sep 2026): Ember Red, Deep Red, Steel on
+   Forge Black. The old gold tokens now carry steel; no gold outside the logo. */
+:root{--apx-loader-steel:#c9c9c8;--apx-loader-gold:var(--apx-loader-steel);--apx-loader-gold-deep:#8a8a89;--apx-loader-crimson:#ba1f12;--apx-loader-red:#732022;
+  --apx-loader-deep-red:#1a0b0a;--apx-loader-text:#ededeb;--apx-loader-black:#0e0c09;
   --apx-loader-art:image-set(
     url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp") 1x,
     url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp") 1.5x
   );
   --apx-loader-bg:
-    radial-gradient(ellipse at 50% 44%,rgba(211,32,47,.14) 0%,rgba(121,8,16,.32) 48%,rgba(12,1,3,.9) 100%),
+    radial-gradient(ellipse at 50% 44%,rgba(186,31,18,.14) 0%,rgba(121,8,16,.32) 48%,rgba(12,1,3,.9) 100%),
     linear-gradient(180deg,rgba(13,1,3,.34),rgba(74,3,10,.48) 58%,rgba(8,1,2,.92)),
     var(--apx-loader-art) center/cover no-repeat;}
 
@@ -25,66 +27,66 @@ html.apx-booting body{visibility:hidden!important}
 .apx-gate::before{content:"";position:absolute;inset:-4px;pointer-events:none;
   background:var(--apx-loader-art) center/cover no-repeat;filter:blur(1.5px);transform:scale(1.008)}
 .apx-gate::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 44%,rgba(211,32,47,.1) 0%,rgba(121,8,16,.34) 50%,rgba(8,1,2,.94) 100%),
+  background:radial-gradient(ellipse at 50% 44%,rgba(186,31,18,.1) 0%,rgba(121,8,16,.34) 50%,rgba(8,1,2,.94) 100%),
     linear-gradient(180deg,rgba(10,1,2,.32),rgba(91,4,13,.45) 58%,rgba(7,1,2,.9));}
 body.apx-loading{overflow:hidden!important}
 
 .apx-stage{--apx-portal-size:min(520px,84vw,58vh);display:grid;justify-items:center;gap:clamp(12px,2.2vh,26px);position:relative;z-index:2}
 .apx-pct{font:800 2rem bahnschrift-semicondensed,sans-serif;color:#fff;letter-spacing:.02em;
-  text-shadow:0 0 12px rgba(211,32,47,.95),0 0 28px rgba(255,211,106,.6)}
+  text-shadow:0 0 12px rgba(186,31,18,.95),0 0 28px rgba(201,201,200,.6)}
 
 .apx-portal{position:relative;width:var(--apx-portal-size);height:var(--apx-portal-size);display:grid;place-items:center;perspective:1400px}
 .apx-aura{position:absolute;width:88.5%;height:88.5%;border-radius:50%;
-  background:radial-gradient(circle,rgba(211,32,47,.36),rgba(121,8,16,.17) 48%,transparent 70%);filter:blur(20px);
+  background:radial-gradient(circle,rgba(186,31,18,.36),rgba(121,8,16,.17) 48%,transparent 70%);filter:blur(20px);
   animation:apxBreathe 1.7s ease-in-out infinite}
 .apx-tunnel{position:absolute;width:84.6%;height:84.6%;transform-style:preserve-3d}
 .apx-tunnel i{position:absolute;inset:0;margin:auto;width:100%;height:100%;border-radius:50%;
-  border:4px solid rgba(211,32,47,.58);box-shadow:0 0 36px rgba(211,32,47,.44) inset;
+  border:4px solid rgba(186,31,18,.58);box-shadow:0 0 36px rgba(186,31,18,.44) inset;
   animation:apxRush 1.5s linear infinite;opacity:0}
 .apx-tunnel i:nth-child(2){animation-delay:.3s}
 .apx-tunnel i:nth-child(3){animation-delay:.6s}
 .apx-tunnel i:nth-child(4){animation-delay:.9s}
 .apx-tunnel i:nth-child(5){animation-delay:1.2s}
 .apx-ring{position:absolute;border-radius:50%}
-.apx-ring.a{width:81.5%;height:81.5%;border:2px solid rgba(211,32,47,.3);
+.apx-ring.a{width:81.5%;height:81.5%;border:2px solid rgba(186,31,18,.3);
   border-top-color:var(--apx-loader-gold);border-right-color:var(--apx-loader-gold);
-  box-shadow:0 0 44px rgba(211,32,47,.46);animation:apxSpin 3s linear infinite}
-.apx-ring.b{width:67.7%;height:67.7%;border:2px dashed rgba(255,211,106,.42);
+  box-shadow:0 0 44px rgba(186,31,18,.46);animation:apxSpin 3s linear infinite}
+.apx-ring.b{width:67.7%;height:67.7%;border:2px dashed rgba(201,201,200,.42);
   animation:apxSpinRev 4.5s linear infinite}
 .apx-prog{position:absolute;width:76.9%;height:76.9%;border-radius:50%;
-  background:conic-gradient(var(--apx-loader-gold) calc(var(--p,0)*1%),rgba(211,32,47,.13) 0);
+  background:conic-gradient(var(--apx-loader-gold) calc(var(--p,0)*1%),rgba(186,31,18,.13) 0);
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 5px));
           mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 5px));
-  filter:drop-shadow(0 0 12px rgba(255,211,106,.78));transition:background .1s linear}
+  filter:drop-shadow(0 0 12px rgba(201,201,200,.78));transition:background .1s linear}
 .apx-core{position:absolute;width:57.7%;height:57.7%;border-radius:50%;
   background:radial-gradient(circle at 50% 46%,#160104 0%,#4b050b 42%,var(--apx-loader-crimson) 66%,var(--apx-loader-deep-red) 82%,#090102 100%);
-  box-shadow:0 0 80px rgba(211,32,47,.52),0 0 180px rgba(121,8,16,.4)}
+  box-shadow:0 0 80px rgba(186,31,18,.52),0 0 180px rgba(121,8,16,.4)}
 
 .apx-brandcore{position:absolute;z-index:3;display:grid;place-items:center;width:220px;height:220px}
 .apx-pulse{position:absolute;width:87%;height:87%;border-radius:50%;
-  background:radial-gradient(circle,rgba(224,169,78,.55),rgba(192,67,63,.4) 46%,transparent 72%);
+  background:radial-gradient(circle,rgba(138,138,137,.55),rgba(192,67,63,.4) 46%,transparent 72%);
   animation:apxBrandPulse 1.1s ease-in-out infinite}
 .apx-pulse-ring{position:absolute;width:60%;height:60%;border-radius:50%;border:4px solid var(--apx-loader-gold);
   animation:apxEmanate 1.1s ease-out infinite}
 .apx-pulse-ring.two{animation-delay:.55s}
 .apx-logo{position:relative;width:var(--apx-icon-portal-logo,7.5rem);height:auto;aspect-ratio:1;object-fit:contain;
-  filter:drop-shadow(0 0 16px rgba(224,169,78,.5))}
+  filter:drop-shadow(0 0 16px rgba(138,138,137,.5))}
 
 .apx-brand{display:flex;align-items:center;gap:10px;font:800 1.05rem bahnschrift-semicondensed,sans-serif;
   letter-spacing:.14em;color:var(--apx-loader-text)}
 .apx-brand em{font-style:normal;color:var(--apx-loader-gold)}
-.apx-status{font:600 .7rem bahnschrift-semicondensed,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#f0bc5c}
+.apx-status{font:600 .7rem bahnschrift-semicondensed,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#8a8a89}
 .apx-auth-panel,.apx-failure-panel{display:grid;justify-items:center;gap:10px;width:min(420px,82vw);padding:18px 22px;
-  border:1px solid rgba(255,211,106,.42);border-radius:12px;background:rgba(27,2,5,.9);
-  box-shadow:0 18px 54px rgba(0,0,0,.46),inset 0 0 24px rgba(224,169,78,.05);text-align:center}
+  border:1px solid rgba(201,201,200,.42);border-radius:12px;background:rgba(27,2,5,.9);
+  box-shadow:0 18px 54px rgba(0,0,0,.46),inset 0 0 24px rgba(138,138,137,.05);text-align:center}
 .apx-auth-panel[hidden],.apx-failure-panel[hidden]{display:none}
 .apx-auth-panel strong,.apx-failure-panel strong{font:800 .78rem bahnschrift-semicondensed,sans-serif;letter-spacing:.17em;color:#fff}
 .apx-auth-panel span,.apx-failure-panel span{font:600 .65rem/1.55 bahnschrift,sans-serif;color:rgba(255,247,228,.72)}
-.apx-auth-button{appearance:none;min-width:210px;margin-top:4px;padding:12px 18px;border:1px solid rgba(224,169,78,.78);
-  border-radius:8px;background:linear-gradient(180deg,rgba(224,169,78,.24),rgba(192,67,63,.16));color:#fff;
+.apx-auth-button{appearance:none;min-width:210px;margin-top:4px;padding:12px 18px;border:1px solid rgba(138,138,137,.78);
+  border-radius:8px;background:linear-gradient(180deg,rgba(138,138,137,.24),rgba(192,67,63,.16));color:#fff;
   font:800 .68rem bahnschrift-semicondensed,sans-serif;letter-spacing:.13em;cursor:pointer;
-  box-shadow:0 0 22px rgba(224,169,78,.12),inset 0 0 0 1px rgba(255,255,255,.04)}
-.apx-auth-button:hover{border-color:#ffd17c;background:linear-gradient(180deg,rgba(224,169,78,.34),rgba(192,67,63,.24))}
+  box-shadow:0 0 22px rgba(138,138,137,.12),inset 0 0 0 1px rgba(255,255,255,.04)}
+.apx-auth-button:hover{border-color:#d6d6d5;background:linear-gradient(180deg,rgba(138,138,137,.34),rgba(192,67,63,.24))}
 .apx-auth-button:focus-visible{outline:2px solid var(--apx-loader-gold);outline-offset:3px}
 .apx-gate.is-auth-required .apx-pct,.apx-gate.is-live-blocked .apx-pct{visibility:hidden}
 .apx-gate.is-auth-required .apx-status,.apx-gate.is-live-blocked .apx-status{color:var(--apx-loader-gold)}
@@ -142,7 +144,7 @@ body.apx-loading{overflow:hidden!important}
 .apx-breach-bar span{display:block;width:100%;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--apx-loader-crimson),var(--apx-loader-gold))}
 .apx-gate.is-live-blocked .apx-breach-hud,.apx-gate.is-auth-required .apx-breach-hud{display:none}
 /* A way past a failed live load. */
-.apx-gate::after{background:radial-gradient(ellipse at 50% 44%,rgba(211,32,47,.05) 0%,rgba(121,8,16,.16) 50%,rgba(8,1,2,.96) 100%),
+.apx-gate::after{background:radial-gradient(ellipse at 50% 44%,rgba(186,31,18,.05) 0%,rgba(121,8,16,.16) 50%,rgba(8,1,2,.96) 100%),
     linear-gradient(180deg,rgba(10,1,2,.4),rgba(40,3,7,.3) 58%,rgba(7,1,2,.94))}
 .apx-gate::before{opacity:.5}
 .apx-failure-panel span{font-size:.8125rem;line-height:1.5}
@@ -157,3 +159,68 @@ body.apx-loading{overflow:hidden!important}
 /* Transfers can expose recovery actions, never a second loading skin. */
 .apx-gate.is-recovery::before,.apx-gate.is-recovery::after{display:none}
 .apx-gate.is-recovery :is(.apx-portal,.apx-pct,.apx-brand,.apx-breach-stage){display:none}
+
+
+/* ============ ASTRIX brand skin (approved 28 Sep 2026) ============
+   Entry skin: the concept scene built by astrix-breach-loader.mjs: slabs forming
+   the X, edge strobe, chrome ASTRIX wordmark with the red X, notched loading tab.
+   Still skin (reduced motion, slow module): the same wordmark and tab, no motion.
+   No rings, no glass, no gold. */
+@font-face{font-family:"Michroma";src:url("/fonts/michroma-400.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-600.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow Semi Condensed";src:url("/fonts/barlow-semi-condensed-700.woff2") format("woff2");font-weight:700;font-display:swap}
+@keyframes apxXStrobe{0%,100%{opacity:.14}3%{opacity:.95}5%{opacity:.2}8%{opacity:.95}12%{opacity:.14}}
+@keyframes apxXRun{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
+@keyframes apxXSheen{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
+
+html.apx-booting::before{background:var(--apx-loader-black)}
+.apx-gate,.apx-gate.is-breach{background:radial-gradient(900px 520px at 50% 48%,#1c0d0a 0%,var(--apx-loader-black) 55%,#060504 100%)}
+.apx-gate::before{display:none}
+.apx-gate::after{background:none}
+
+/* Wordmark shared by both skins */
+.apx-xscene-word,.apx-brand{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.apx-xscene-kicker,.apx-brand-kicker{font:600 15px/1 "Barlow Semi Condensed",sans-serif;letter-spacing:.62em;padding-left:.62em;color:#c9c9c8}
+.apx-xscene-top,.apx-brand-word{font:400 clamp(52px,9.2vw,118px)/1 Michroma,sans-serif;letter-spacing:.02em;white-space:nowrap}
+.apx-xscene-chrome,.apx-brand-chrome{background:linear-gradient(100deg,#8a8a89 0%,#ffffff 22%,#c9c9c8 40%,#ffffff 50%,#6b6b6a 72%,#e9e9e8 100%);background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:apxXSheen 6s ease-in-out infinite}
+.apx-xscene-top b,.apx-brand-word b{font-weight:400;color:#e6391f;-webkit-text-fill-color:#e6391f;text-shadow:0 0 18px rgba(230,57,31,.75),0 0 42px rgba(186,31,18,.45)}
+.apx-xscene-sub,.apx-brand em{font:400 clamp(16px,2.3vw,30px)/1 Michroma,sans-serif;font-style:normal;letter-spacing:.5em;padding-left:.5em;color:#8a8a89}
+
+/* Still skin */
+.apx-stage{display:flex;flex-direction:column;align-items:center;gap:22px}
+.apx-portal{position:fixed;left:50%;bottom:0;width:auto;height:auto;transform:translateX(-50%);display:block;perspective:none}
+.apx-aura,.apx-tunnel,.apx-ring,.apx-core,.apx-pulse,.apx-pulse-ring,.apx-brandcore,.apx-pct{display:none}
+.apx-prog{position:relative;display:block;width:280px;height:38px;border-radius:0;-webkit-mask:none;mask:none;filter:none;
+  background:var(--apx-loader-black);clip-path:polygon(28px 0,calc(100% - 28px) 0,100% 100%,0 100%);box-shadow:inset 0 1px 0 #2e2a22}
+.apx-prog::after{content:"";position:absolute;left:60px;right:60px;bottom:14px;height:2px;
+  background:linear-gradient(90deg,#e6391f calc(var(--p,0)*1%),#25221c 0)}
+.apx-status{color:#8a8a89}
+.apx-auth-panel,.apx-failure-panel{border:0;border-radius:0;background:rgba(21,19,15,.94);
+  box-shadow:inset 0 0 0 1px #2e2a22,0 18px 54px rgba(0,0,0,.5);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.apx-auth-panel strong,.apx-failure-panel strong{font:700 15px/1.2 "Barlow Semi Condensed",sans-serif;letter-spacing:.16em}
+.apx-auth-panel span,.apx-failure-panel span{font:400 14px/1.55 "Barlow Semi Condensed",sans-serif;color:#c4c3c1}
+.apx-auth-button{min-height:46px;border:0;border-radius:0;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
+  background:linear-gradient(180deg,#d2291a 0%,#ba1f12 55%,#8f170c 100%);box-shadow:inset 0 1px 0 rgba(255,170,150,.8);
+  font:700 13px/1 "Barlow Semi Condensed",sans-serif;letter-spacing:.16em}
+.apx-auth-button:hover{border:0;background:linear-gradient(180deg,#dc3322 0%,#c52516 55%,#9a1b0f 100%)}
+.apx-auth-button:focus-visible{outline:2px solid #d6d6d5}
+.apx-failure-panel .apx-continue-button{background:linear-gradient(180deg,#2a2721,#1a1813);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px #4a4538}
+.apx-failure-panel .apx-continue-button:hover{background:linear-gradient(180deg,#34302a,#211e18)}
+
+/* Entry skin: the concept scene */
+.apx-xscene{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
+.apx-xscene.is-on{opacity:1}
+.apx-xscene svg{position:absolute;inset:0;width:100%;height:100%}
+.apx-xscene-edge{fill:none;stroke:#e6391f;stroke-width:1.5;animation:apxXStrobe 5.2s linear infinite;filter:drop-shadow(0 0 4px rgba(230,57,31,.8))}
+.apx-xscene-streak{fill:none;stroke:#ffe1dc;stroke-width:2;stroke-linecap:round;stroke-dasharray:80 920;animation:apxXRun 3.4s linear infinite;filter:drop-shadow(0 0 4px rgba(230,57,31,.95))}
+.apx-xscene-d1{animation-delay:-2.6s}.apx-xscene-d2{animation-delay:-1.3s}.apx-xscene-d3{animation-delay:-3.9s}
+.apx-xscene-word{position:absolute;left:0;right:0;top:30%}
+.apx-xscene-tab{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:280px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  background:var(--apx-loader-black);box-shadow:inset 0 1px 0 #2e2a22;clip-path:polygon(28px 0,calc(100% - 28px) 0,100% 100%,0 100%)}
+.apx-xscene-label{font:600 10px/1 "Barlow Semi Condensed",sans-serif;letter-spacing:.28em;color:#9b9a98}
+.apx-xscene-track{display:block;width:160px;height:2px;background:#25221c;overflow:hidden}
+.apx-xscene-bar{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:#e6391f;box-shadow:0 0 8px rgba(230,57,31,.9);transition:transform .35s cubic-bezier(.23,1,.32,1)}
+.apx-gate.is-live-blocked .apx-xscene-tab,.apx-gate.is-auth-required .apx-xscene-tab{display:none}
+.apx-gate.is-live-blocked .apx-xscene-word,.apx-gate.is-auth-required .apx-xscene-word{top:14%}
+@media(prefers-reduced-motion:reduce){.apx-xscene-edge,.apx-xscene-streak,.apx-xscene-chrome,.apx-brand-chrome{animation:none}.apx-xscene-streak{display:none}}

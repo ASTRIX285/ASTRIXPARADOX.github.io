@@ -29,7 +29,9 @@ for(const file of files){
  const tool=isTool(file);
  if(tool){
   assertOneLoader(html,file);
-  for(const url of ['/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1','/astrix-app/vendor/three/three.module.js']){
+  // The X entry skin needs no three.js (28 Sep 2026), so only its own module is preloaded.
+  assert.doesNotMatch(html,/vendor\/three\/three\.module\.js/,`${file}: three.js is no longer preloaded`);
+  for(const url of ['/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1']){
    const tag=`<link rel="modulepreload" href="${url}">`;
    assert.equal(html.split(tag).length-1,1,`${file}: exactly one local module preload`);
    assert.ok(html.indexOf(tag)<html.indexOf('astrix-portal-loader.js'),`${file}: preload before controller`);
@@ -94,6 +96,6 @@ for(const options of [
  h.loader.done();h.loader.done();assert.equal(h.ready(),1,'A transfer without a loader still reports readiness once');
 }
 assert.doesNotMatch(read(portal),/holdForBreach|hasWarmPage/);
-assert.match(read(portal),/module.createBreach/,'The one tool loader must use the approved glass breach skin');
+assert.match(read(portal),/module.createBreach/,'The one tool loader must use the approved entry skin module');
 assert.match(read(portal),/RETRY LIVE DATA/);assert.match(read(portal),/CONTINUE WITHOUT LIVE DATA/);
 console.log(`SINGLE_LOADER=PASS tool-pages=${checked} public-pages-without-loader=${publicPages} duplicate-components-rejected lifecycle-once recovery-preserved`);

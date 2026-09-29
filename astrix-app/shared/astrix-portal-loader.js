@@ -167,7 +167,7 @@
             '<img class="apx-logo" src="'+LOGO+'" alt="">'+
           '</div>'+
         '</div>'+
-        '<div class="apx-brand">ASTRIX <em>PARADOX</em></div>'+
+        '<div class="apx-brand"><span class="apx-brand-kicker">AI GAMING INTELLIGENCE</span><span class="apx-brand-word"><span class="apx-brand-chrome">ASTRI</span><b>X</b></span><em>PARADOX</em></div>'+
         '<div class="apx-auth-panel" hidden>'+
           '<strong>BUNGIE SIGN-IN</strong>'+
           '<span>Connect your Bungie account to load your live Guardian.</span>'+

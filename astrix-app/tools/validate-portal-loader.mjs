@@ -57,8 +57,9 @@ assert.doesNotMatch(portalJs,/SLOW_LOAD_NOTICE_MS[\s\S]{0,240}?done\(\)/,'The sl
 assert.match(portalCss,/\.apx-auth-panel/,'Portal must render the full-screen Bungie authentication panel');
 assert.match(portalCss,/\.apx-failure-panel/,'Portal must render an actionable full-screen live-data failure panel');
 assert.match(portalCss,/astrix-paradox-map-placeholder-4k\.webp/,'Portal must use the ASTRIX PARADOX map artwork');
-assert.match(portalCss,/--apx-loader-crimson:#d3202f/,'Portal must use the approved bright crimson treatment');
-assert.match(portalCss,/--apx-loader-gold:#ffd36a/,'Portal must use the approved bright gold treatment');
+assert.match(portalCss,/--apx-loader-crimson:#ba1f12/,'Portal must use Ember Red from the AX logo');
+assert.match(portalCss,/--apx-loader-gold:var\(--apx-loader-steel\)/,'Portal gold tokens carry steel: no gold outside the logo (28 Sep 2026)');
+assert.doesNotMatch(portalCss,/#ffd36a|#c88a26|#f0bc5c/,'Portal must not keep the retired gold treatment');
 assert.doesNotMatch(portalCss,/--apx-(?:cyan|blue|glow|deep):/,'Portal must not retain the old blue palette');
 assert.match(portalJs,/function ready\(root\)[\s\S]*?document\.fonts[\s\S]*?querySelectorAll\('img'\)[\s\S]*?requestAnimationFrame/,'Portal ready state must wait for fonts, visible images and final paint');
 

@@ -21,7 +21,7 @@ const server=createServer(async(req,res)=>{
 });
 let browser;
 try{
- try{browser=await chromium.launch({channel:'chromium',headless:true});}catch(error){if(/Executable doesn't exist/.test(error.message)){console.log('NOT RUN: Chromium missing');process.exitCode=0;}else throw error;}
+ try{browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.CHROMIUM_EXECUTABLE_PATH}:{channel:'chromium'})});}catch(error){if(/Executable doesn't exist/.test(error.message)){console.log('NOT RUN: Chromium missing');process.exitCode=0;}else throw error;}
  if(browser){
   await new Promise(done=>server.listen(0,'127.0.0.1',done));
   const origin=`http://127.0.0.1:${server.address().port}`;
@@ -32,20 +32,23 @@ try{
    await page.addScriptTag({url:origin+'/astrix-app/shared/astrix-destination-ribbon.js'});
    await page.locator('.apx-destination-ribbon a').first().waitFor();
    if(route==='reports')await page.locator('#reportsWorkspace').evaluate(node=>node.innerHTML='<p role="status">Reports unavailable</p>');
-   const links=page.locator('.apx-destination-ribbon a');assert.equal(await links.count(),7);
-   assert.equal(await links.locator('..').first().evaluate(node=>getComputedStyle(node.parentElement).gap),'6px');
+   // Approved ribbon (28 Sep 2026): Home plus seven tools as plain-text tabs.
+   const links=page.locator('.apx-destination-ribbon a');assert.equal(await links.count(),8);
+   assert.equal(await links.locator('..').first().evaluate(node=>getComputedStyle(node.parentElement).gap),'2px');
    const measures=await links.evaluateAll(nodes=>nodes.map(node=>{
     const style=getComputedStyle(node),rect=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect();
     const probe=document.createElement('i');probe.style.background='var(--apx-colour-action)';document.body.append(probe);const crimson=getComputedStyle(probe).backgroundColor;probe.remove();
     const band=document.querySelector('[data-forge-destination-ribbon]');
-    return {radius:style.borderRadius,background:style.backgroundColor,band:getComputedStyle(band,'::before').backgroundColor,active:node.getAttribute('aria-current')==='page',crimson,shadow:style.boxShadow,width:rect.width,height:rect.height,left:text.left,right:text.right};
+    return {radius:style.borderRadius,background:style.backgroundColor,colour:style.color,underline:getComputedStyle(node,'::after').transform,active:node.getAttribute('aria-current')==='page',crimson,shadow:style.boxShadow,width:rect.width,height:rect.height,left:text.left,right:text.right};
    }));
    assert.equal(measures.filter(row=>row.active).length,1);
-   for(const row of measures){assert.equal(row.radius,'8px');assert.notEqual(row.background,row.band);assert.ok(row.left>=12&&row.right<=width-12,JSON.stringify(row));if(row.active){assert.equal(row.background,row.crimson);assert.equal(row.shadow,'none');}}
+   // Plain text, never a boxed or filled button. The current tool shows its crimson underline.
+   for(const row of measures){assert.equal(row.radius,'0px');assert.equal(row.background,'rgba(0, 0, 0, 0)');assert.equal(row.shadow,'none');assert.ok(row.left>=12&&row.right<=width-12,JSON.stringify(row));if(row.active){assert.equal(row.colour,'rgb(255, 255, 255)');assert.equal(row.underline,'matrix(1, 0, 0, 1, 0, 0)');}else assert.notEqual(row.underline,'matrix(1, 0, 0, 1, 0, 0)');}
    for(let index=0;index<7;index++){
     const link=links.nth(index);await link.hover();await link.focus();
     const state=await link.evaluate(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return {width:r.width,height:r.height,outline:s.outlineWidth,border:s.borderTopWidth};});
-    assert.equal(state.width,measures[index].width);assert.equal(state.height,measures[index].height);assert.equal(state.outline,'2px');assert.equal(state.border,'1px');
+    assert.equal(state.width,measures[index].width);assert.equal(state.height,measures[index].height);// Build Forge runs at a reduced desktop density, so its 2px ring computes smaller.
+    assert.ok(parseFloat(state.outline)>=1,`${route} focus ring`);assert.equal(parseFloat(state.border),0);
    }
    const footer=page.locator('.apx-bungie-attribution');assert.ok(await footer.count()>0);await footer.scrollIntoViewIfNeeded();
    const bounds=await footer.evaluate(node=>{const range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].map(r=>({left:r.left,right:r.right}));});

@@ -126,6 +126,62 @@
     links[next].focus();
   }
 
+  // Tab icons for the slim bar (approved Tool navigation ribbon board, 28 Sep 2026).
+  const ICONS=Object.freeze({
+    home:'<path d="M3 11l9-7 9 7v9H3z"/>',
+    journey:'<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>',
+    character:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+    'forge-loader':'<path d="M12 3l8 5v8l-8 5-8-5V8z"/>',
+    'build-forge':'<path d="M4 20l7-7M14 4l6 6-4 4-6-6z"/>',
+    reports:'<path d="M5 20V10M12 20V4M19 20v-7"/>',
+    vault:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M9 12h6"/>',
+    loadout:'<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/>'
+  });
+  function withIcon(link,key,label){
+    link.title=label;
+    const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    icon.setAttribute('class','ax-tab-icon');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');
+    icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','2');icon.setAttribute('stroke-linecap','round');icon.setAttribute('stroke-linejoin','round');
+    icon.innerHTML=ICONS[key]||'';
+    const text=document.createElement('span');text.textContent=label;
+    link.replaceChildren(icon,text);
+  }
+  // Header brand: the AX logo beside the ASTRIX wordmark with the red X.
+  function brandHeader(){
+    document.querySelectorAll('header.apx-destination-header .apx-destination-brand').forEach(brand=>{
+      if(brand.dataset.axBrand)return;brand.dataset.axBrand='1';
+      const image=brand.querySelector('img');if(image){image.src='/img/ax-logo-160.webp';image.alt='';image.width=49;image.height=40;}
+      const words=document.createElement('span');words.className='ax-wordmark';
+      words.innerHTML='<span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span>';
+      brand.querySelector(':scope>span')?.replaceWith(words);
+      if(!brand.getAttribute('aria-label'))brand.setAttribute('aria-label','ASTRIX PARADOX');
+    });
+  }
+  // Full at the top, away while scrolling down, a slim bar the moment you scroll up.
+  let lastY=0,scrollFrame=0;
+  function shellState(){
+    scrollFrame=0;
+    const y=Math.max(0,window.scrollY||0),delta=y-lastY;lastY=y;
+    const body=document.body;if(!body)return;
+    if(y<=8){body.classList.remove('ax-shell-away','ax-shell-slim');return;}
+    if(y<140)return;
+    if(delta>6){body.classList.add('ax-shell-away');body.classList.remove('ax-shell-slim');}
+    else if(delta<-4){body.classList.add('ax-shell-slim');body.classList.remove('ax-shell-away');}
+  }
+  // The tab row sits exactly under the header, whatever height the Guardian cards give it.
+  function trackHeader(){
+    const header=document.querySelector('header.apx-destination-header');
+    if(!header)return;
+    const apply=()=>document.documentElement.style.setProperty('--ax-shell-top',`${header.offsetHeight}px`);
+    apply();
+    if('ResizeObserver' in window)new ResizeObserver(apply).observe(header);
+  }
+  function watchScroll(){
+    trackHeader();
+    lastY=window.scrollY||0;
+    window.addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(shellState);},{passive:true});
+  }
+
   function render(mount){
     const requested=String(mount.dataset.activeDestination||'journey').trim().toLowerCase();
     const active=destinations.some(destination=>destination.key===requested)?requested:'journey';
@@ -139,14 +195,14 @@
     const homeLink=document.createElement('a');
     homeLink.href='/astrix-app/pages/home/';
     homeLink.setAttribute('aria-label','Guardian Home');
-    homeLink.textContent='\u2190 Home';
+    withIcon(homeLink,'home','Home');
     homeItem.append(homeLink);
     list.append(homeItem);
     destinations.forEach(destination=>{
       const item=document.createElement('li');
       const link=document.createElement('a');
       link.href=destination.href;
-      link.textContent=destination.label;
+      withIcon(link,destination.key,destination.label);
       if(destination.key===active)link.setAttribute('aria-current','page');
       item.append(link);
       list.append(item);
@@ -157,7 +213,12 @@
     list.addEventListener('focusin',prepareIntent);
     list.addEventListener('pointerdown',prepareIntent);
     list.addEventListener('pointerleave',()=>clearTimeout(intentTimer));
-    nav.append(list);
+    const slim=document.createElement('span');slim.className='ax-slim-brand';
+    const mark=document.createElement('img');mark.src='/img/ax-logo-160.webp';mark.alt='';mark.width=34;mark.height=28;
+    const name=document.createElement('strong');
+    name.textContent=(document.querySelector('header.apx-destination-header .apx-destination-header-copy strong')?.textContent||destinations.find(row=>row.key===active)?.label||'').trim().toUpperCase();
+    slim.append(mark,name);
+    nav.append(slim,list);
     mount.replaceChildren(nav);
   }
 
@@ -169,7 +230,7 @@
       .then(module=>module.preloadReports(session)).catch(()=>{});
   }
   window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
-  function init(){document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);warmReports(window.FORGE_BUNGIE_SESSION);}
+  function init(){brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
