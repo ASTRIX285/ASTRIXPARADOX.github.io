@@ -217,6 +217,7 @@ def build_html(sections, total):
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20260929-brand-1">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
   <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1&amp;gloss=20260926-4">
 
@@ -289,11 +290,11 @@ def build_html(sections, total):
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
 </head>
-<body>
+<body class="ax-brand">
 <nav class="nav">
   <a class="nav-logo" href="../index.html" aria-label="ASTRIX PARADOX home">
-    <img src="../img/logo.png" alt="ASTRIX PARADOX">
-    <span>ASTRIX<span class="accent"> PARADOX</span></span>
+    <img src="/img/ax-logo-160.webp" width="49" height="40" alt="">
+    <span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span>
   </a>
   <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span></button>
   <div class="nav-links" id="site-navigation">
@@ -428,6 +429,7 @@ __CARDS_HTML__
   document.getElementById('clipModal').addEventListener('click', function(e){ if(e.target===this) closeClip(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeClip(); });
 </script>
+<script src="/js/ax-brand.js?v=20260929-brand-1" defer></script>
 </body>
 </html>'''.replace('__GAME_BUTTONS__', game_buttons).replace('__TOTAL__', str(total)).replace('__CARDS_HTML__', cards_html)
 

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta name="robots" content="noindex, follow">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20260929-brand-1">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,17 +15,29 @@
   <link rel="icon" href="/img/favicon/favicon.ico">
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="modulepreload" href="/astrix-app/shared/astrix-breach-loader.mjs?v=20260927-single-skin-1">
-  <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2">
+  <link rel="modulepreload" href="/astrix-app/shared/astrix-breach-loader.mjs?v=20260929-shell-2">
+  <link rel="stylesheet" href="../../shared/astrix-portal-loader.css?v=20260913-live-gate-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2&amp;shell=20260929-2">
   <script>window.APX_LOGO='/img/ax-logo-640.webp';</script>
-  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2"></script>
+  <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2&amp;shell=20260929-2"></script>
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background">
-  <link rel="stylesheet" href="./home.css?v=20260928-2">
+  <link rel="stylesheet" href="./home.css?v=20260929-brand-1">
 </head>
 <body class="home-page forge-paradox-map-background">
   <main class="home-shell">
     <header class="home-top">
-      <a class="home-brand" href="../../../tools/"><img src="../../../img/logo.png" alt="" width="40" height="40"><span><strong>ASTRIX <em>PARADOX</em></strong><small>GUARDIAN HOME</small></span></a>
+      <a class="home-brand" href="../../../tools/" aria-label="ASTRIX PARADOX Tools">
+        <img src="/img/ax-logo-160.webp" alt="" width="49" height="40">
+        <span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span>
+        <span class="home-brand-page">GUARDIAN HOME</span>
+      </a>
+      <nav class="home-tools" aria-label="Open a tool">
+        <a href="../journey/">JOURNEY</a>
+        <a href="../guardian-workspace-v2/">CHARACTER</a>
+        <a href="../forge-loader/">FORGE LOADER</a>
+        <a href="../guardian-workspace-v2/paradox-build-space/">BUILD FORGE</a>
+        <a href="../vault/">STORAGE</a>
+        <a href="../loadout/">LOADOUT</a>
+      </nav>
     </header>
 
     <section class="home-signed-out" id="homeSignedOut" hidden aria-labelledby="homeSignedOutTitle">
@@ -97,14 +110,7 @@
       </section>
     </div>
 
-    <nav class="home-tools" aria-label="Open a tool">
-      <a href="../journey/">JOURNEY</a>
-      <a href="../guardian-workspace-v2/">CHARACTER</a>
-      <a href="../forge-loader/">FORGE LOADER</a>
-      <a href="../guardian-workspace-v2/paradox-build-space/">BUILD FORGE</a>
-      <a href="../vault/">STORAGE</a>
-      <a href="../loadout/">LOADOUT</a>
-    </nav>
+    <footer class="apx-bungie-attribution home-attribution">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
   </main>
   <div class="home-ready" id="homeReady" data-state="loading" hidden>
     <div class="home-ready-inner">
@@ -113,6 +119,5 @@
     </div>
   </div>
   <script type="module" src="./home.mjs?v=20260928-3"></script>
-<footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 </body>
 </html>
