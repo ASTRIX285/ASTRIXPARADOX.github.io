@@ -273,7 +273,7 @@ async function runBusy(work){
 }
 function draftFor(id){if(id==='equipped'){if(!equipped)throw new Error('Current equipment is unavailable.');return {build:copy(equipped),name:`${equipped.characterClass.toUpperCase()} · ${equipped.subclassName}`,description:''};}const record=recordById(id);if(!record)throw new Error('This saved build is not for the selected Guardian.');return copy(record);}
 function nameFields(record){return `<label>Loadout name<input id="paradoxEditName" maxlength="80" required value="${esc(record.name)}"></label><label>Description<textarea id="paradoxEditDescription" maxlength="400">${esc(record.description||'')}</textarea></label>`;}
-function openSave(record){showDialog('SAVE PARADOX LOADOUT',`${nameFields(record)}<p class="paradox-dialog-note">Saved locally, then synced to your Bungie account in the background. PARADOX copies are separate from Bungie’s 20 slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE PARADOX COPY</button>',{kind:'save',record:{...copy(record),id:null},check:guardContext()});}
+function openSave(record){showDialog('SAVE TO ARMOURY',`${nameFields(record)}<p class="paradox-dialog-note">Saved locally, then synced to your Bungie account in the background. PARADOX copies are separate from Bungie’s 20 slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE PARADOX COPY</button>',{kind:'save',record:{...copy(record),id:null},check:guardContext()});}
 async function saveDialogRecord(){
   const state=dialogState;state.check();
   const name=byId('paradoxEditName').value.trim();if(!name)throw new Error('Enter a loadout name.');
@@ -510,7 +510,7 @@ document.addEventListener('click',event=>{
     if(kind==='save'){await refreshProfile();check();openSave(draftFor(id));}
     else if(kind==='edit')await openEditor(draftFor(id));
     else if(kind==='apply'||kind==='ingame')await reviewBuildAction(id,kind==='ingame');
-    else if(kind==='delete'){const record=draftFor(id);showDialog('DELETE PARADOX LOADOUT',`<p>Delete ${esc(record.name)}? This keeps the Bungie in-game slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="delete-record">DELETE</button>',{kind:'delete',record,check});}
+    else if(kind==='delete'){const record=draftFor(id);showDialog('DELETE ARMOURY BUILD',`<p>Delete ${esc(record.name)}? This keeps the Bungie in-game slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="delete-record">DELETE</button>',{kind:'delete',record,check});}
   });
 });
 document.addEventListener('change',event=>{if(event.target.matches?.('[data-editor-choice]'))try{editChoice(event.target);}catch(error){dialogError(error);}});

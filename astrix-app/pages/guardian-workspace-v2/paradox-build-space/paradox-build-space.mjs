@@ -341,15 +341,15 @@ function stageManualSocket(key){
 function openSaveParadoxDialog(suggestedName=''){
   const build=currentBuild(),dialog=byId('saveParadoxDialog');if(!build||!dialog)return;
   const updating=Boolean(build.savedParadoxLoadoutId),title=byId('saveParadoxTitle'),submit=byId('saveParadoxForm')?.querySelector('[type="submit"]');
-  if(title)title.textContent=updating?'UPDATE PARADOX LOADOUT':'SAVE PARADOX LOADOUT';if(submit)submit.textContent=updating?'UPDATE PARADOX COPY':'SAVE PARADOX COPY';
+  if(title)title.textContent=updating?'UPDATE ARMOURY BUILD':'SAVE TO ARMOURY';if(submit)submit.textContent=updating?'UPDATE PARADOX COPY':'SAVE PARADOX COPY';
   byId('saveParadoxName').value=suggestedName||build.savedParadoxLoadoutName||`${String(build.characterClass||'Guardian').toUpperCase()} · ${build.subclassName||build.subclass||'BUILD'}`;
-  byId('saveParadoxDescription').value=build.savedParadoxLoadoutDescription||'';byId('saveParadoxStatus').textContent=updating?'This updates your PARADOX build and syncs it to your account in the background.':'This saves a named PARADOX build locally and syncs it to your account in the background. It is separate from Bungie slots.';dialog.hidden=false;document.body.classList.add('working-dialog-open');queueMicrotask(()=>byId('saveParadoxName')?.select());
+  byId('saveParadoxDescription').value=build.savedParadoxLoadoutDescription||'';byId('saveParadoxStatus').textContent=updating?'This updates your Armoury build and syncs it to your account in the background.':'This saves a named build to your Armoury locally and syncs it to your account in the background. It is separate from Bungie slots.';dialog.hidden=false;document.body.classList.add('working-dialog-open');queueMicrotask(()=>byId('saveParadoxName')?.select());
 }
 function closeSaveParadoxDialog(){const dialog=byId('saveParadoxDialog');if(dialog)dialog.hidden=true;document.body.classList.remove('working-dialog-open');byId('saveParadoxBuild')?.focus();}
 async function submitParadoxSave(event){
   event.preventDefault();const status=byId('saveParadoxStatus'),button=event.currentTarget.querySelector('[type="submit"]');if(button)button.disabled=true;
-  try{const build=currentBuild(),record=await saveParadoxLoadout({id:build?.savedParadoxLoadoutId||null,expectedRevision:build?.savedParadoxLoadoutRevision,name:byId('saveParadoxName').value,description:byId('saveParadoxDescription').value,build});if(!record)throw new Error('The browser could not persist this PARADOX loadout.');const state=readState();if(state?.workingBuild)writeState({...state,workingBuild:{...state.workingBuild,savedParadoxLoadoutId:record.id,savedParadoxLoadoutRevision:record.revision,savedParadoxLoadoutName:record.name,savedParadoxLoadoutDescription:record.description}});closeSaveParadoxDialog();setLiveActionBanner(`PARADOX loadout “${record.name}” saved separately from Bungie slots.`,'good');}
-  catch(error){if(status){status.className='is-bad';status.textContent=error?.message||'Unable to save this PARADOX loadout.';}}
+  try{const build=currentBuild(),record=await saveParadoxLoadout({id:build?.savedParadoxLoadoutId||null,expectedRevision:build?.savedParadoxLoadoutRevision,name:byId('saveParadoxName').value,description:byId('saveParadoxDescription').value,build});if(!record)throw new Error('The browser could not save this build to your Armoury.');const state=readState();if(state?.workingBuild)writeState({...state,workingBuild:{...state.workingBuild,savedParadoxLoadoutId:record.id,savedParadoxLoadoutRevision:record.revision,savedParadoxLoadoutName:record.name,savedParadoxLoadoutDescription:record.description}});closeSaveParadoxDialog();setLiveActionBanner(`PARADOX loadout “${record.name}” saved separately from Bungie slots.`,'good');}
+  catch(error){if(status){status.className='is-bad';status.textContent=error?.message||'Unable to save this build to your Armoury.';}}
   finally{if(button)button.disabled=false;}
 }
 
