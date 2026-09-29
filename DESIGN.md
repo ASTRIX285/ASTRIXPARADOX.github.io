@@ -74,7 +74,7 @@ Gold `#ffd36a`, deep gold `#c88a26`, crimson `#d3202f`, red `#790810`, deep red 
 ## 4. Component Stylings
 
 - **Buttons (tool pages, `astrix-app/shared/astrix-tool-shell.css`, approved 28 Sep 2026):** machined with one notched corner. Primary (Apply, Arm, Connect Bungie): Ember Red `#ba1f12` bevel with a lit top edge and a single sheen sweep on hover. Everything else: dark bevel with a steel hairline. Choices (activity, objective, element, tabs): selected gets a crimson left edge and a faint deep-red wash, never a heavy fill. Improve stays secondary (only selected items and the one confirm action are red). Focus ring steel. Disabled at 50 percent opacity. Minimum touch target 44px. Labels fit one line at desktop, one to three words, one label per intent.
-- **Tool ribbon (approved 28 Sep 2026):** row 1 is the AX logo beside the ASTRIX wordmark (red X), the tool name, and the Guardian cards on the right (notched, crimson edge on the active Guardian). Row 2 is plain-text tabs, never boxed buttons: the current tool is white with a crimson underline that strobes gently. Scrolling down slides the ribbon away; scrolling up brings back a slim 52px bar with the logo mark, tool name and icon tabs (names on hover). Back at the top it is full again. `astrix-destination-ribbon.js` owns the behaviour (one passive, frame-throttled scroll listener: the only one allowed).
+- **Tool ribbon (approved 28 Sep 2026):** row 1 is the AX logo beside the ASTRIX wordmark (red X), the tool name, and the Guardian cards on the right (notched, crimson edge on the active Guardian). Row 2 is plain-text tabs, never boxed buttons: the current tool is white with a crimson underline that strobes gently. The ribbon stays full and solid at the top while the page scrolls behind it (Miguel, 30 Sep 2026: no slim bar, no hiding).
 - **Equipped gear:** a slow crimson breathing frame with a light travelling round it; equipped weapons pulse out of step. Bungie's icon inside is never recoloured.
 - **Item cards:** dark panel, gold hairline edge, 14px radius, authentic Bungie icon at the shared icon-size tokens (`--apx-icon-*`), perk matrix in a grid. Card heights follow content; rows of cards align edges and baselines.
 - **Super selection:** the approved diamond geometry. Never replaced with a square icon.
@@ -106,7 +106,7 @@ Gold `#ffd36a`, deep gold `#c88a26`, crimson `#d3202f`, red `#790810`, deep red 
 ## 8. Motion and Interaction
 
 - Every animation must communicate hierarchy, sequence, feedback or a state change. Otherwise remove it.
-- Animate `transform` and `opacity` only. No scroll event listeners except the tool ribbon's single passive listener; otherwise use IntersectionObserver or CSS scroll-driven animation.
+- Animate `transform` and `opacity` only. No scroll event listeners; use IntersectionObserver or CSS scroll-driven animation.
 - `prefers-reduced-motion` collapses loops, parallax and count-ups to their final static values.
 - Content is complete at rest. Nothing waits at opacity 0 for an observer.
 - One signature moment per page at most.

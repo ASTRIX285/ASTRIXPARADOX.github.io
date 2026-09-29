@@ -2,9 +2,8 @@
    machined buttons and gear tile states for every tool page.
 
    Ribbon: full at the top (logo, ASTRIX wordmark, tool name, Guardian cards,
-   plain-text tabs with a crimson underline that strobes gently). Scrolling down
-   slides it away; scrolling up brings back a slim 52px bar (logo mark, tool
-   name, icon tabs). The behaviour lives in astrix-destination-ribbon.js.
+   plain-text tabs with a crimson underline that strobes gently). It stays full
+   and solid at the top while the page scrolls behind it.
 
    Load this file FIRST in <head>. It declares the astrix-brand layer ahead of
    the older gloss and button layers, so its important rules are the final word
@@ -23,7 +22,7 @@
   --ax-steel:#8a8a89;--ax-steel-light:#c9c9c8;--ax-ink:#ededeb;--ax-muted:#b9b9b8;
   --ax-font-brand:"Michroma","Barlow Semi Condensed",sans-serif;
   --ax-font-head:"Barlow Semi Condensed","Barlow","Segoe UI",sans-serif;
-  --ax-shell-tabs:46px;--ax-shell-slim:52px;
+  --ax-shell-tabs:46px;
   --ax-clip:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
   --ax-ease:cubic-bezier(.23,1,.32,1);
 }
@@ -99,19 +98,7 @@ html body [data-forge-destination-ribbon]::before,html body [data-forge-destinat
 .ax-tab-icon{display:none;width:18px;height:18px;flex:none}
 .ax-slim-brand{display:none}
 
-/* ---------- Scroll states ---------- */
-body.ax-shell-away header.apx-destination-header{transform:translateY(-110%)!important}
-body.ax-shell-away [data-forge-destination-ribbon]{transform:translateY(calc(-100% - var(--ax-shell-top,108px) - 10px))!important}
-body.ax-shell-slim header.apx-destination-header{transform:translateY(-110%)!important}
-body.ax-shell-slim [data-forge-destination-ribbon]{top:0!important;height:var(--ax-shell-slim)!important;transform:none!important}
-body.ax-shell-slim .ax-slim-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:auto!important;padding-right:16px!important;color:var(--ax-ink)!important}
-body.ax-shell-slim .ax-slim-mark{font:400 20px/1 var(--ax-font-brand)!important;letter-spacing:.02em!important;color:#fff!important}
-body.ax-shell-slim .ax-slim-mark b{font-weight:400!important;color:#ff2e2e!important}
-body.ax-shell-slim .ax-slim-brand strong{padding-left:14px!important;border-left:1px solid var(--ax-line-strong)!important;font:700 13px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
-body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon{justify-content:space-between!important;width:100%!important}
-body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon a{padding:0 11px!important;font-size:0!important;letter-spacing:0!important}
-body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon a::after{inset:auto 9px 0 9px!important}
-body.ax-shell-slim .ax-tab-icon{display:block}
+/* The ribbon stays full and solid while the page scrolls behind it (Miguel, 30 Sep 2026). */
 
 /* ---------- Buttons: machined, notched, one red ---------- */
 body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch){
@@ -163,10 +150,32 @@ body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#arm,#armRangeTest,.i
 /* Loadout slots and Guardian panels share the one notched corner. */
 .guardian-loadout-slot{clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
 
+/* ---------- Ribbon as one inset panel with 15px corners (Miguel, 30 Sep 2026) ---------- */
+html body header.apx-destination-header{top:10px!important;left:clamp(12px,1.6vw,30px)!important;right:clamp(12px,1.6vw,30px)!important;width:auto!important;
+  border-radius:15px 15px 0 0!important;box-shadow:none!important}
+html body header.apx-destination-header::before{border-radius:15px 15px 0 0!important}
+html body [data-forge-destination-ribbon]{top:calc(var(--ax-shell-top,var(--apx-hero-header,108px)) + 10px)!important;left:clamp(12px,1.6vw,30px)!important;right:clamp(12px,1.6vw,30px)!important;
+  border-radius:0 0 15px 15px!important;box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.04)!important}
+
+/* ---------- Guardian cards: 15px corners and a light circling the frame ---------- */
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card{border-radius:15px!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head{border-radius:15px!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::before{content:""!important;position:absolute!important;inset:0!important;border-radius:15px!important;padding:1px!important;
+  background:rgba(255,255,255,.14)!important;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  filter:none!important;animation:none!important;opacity:1!important;pointer-events:none!important;z-index:2!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected .guardian-character-card__head::before{background:rgba(230,57,31,.75)!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{content:""!important;position:absolute!important;inset:0!important;border-radius:15px!important;padding:2px!important;
+  background:conic-gradient(from var(--ax-orbit),transparent 0 84%,rgba(255,217,208,.9) 90%,transparent 96%)!important;background-size:auto!important;background-position:0 0!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  filter:drop-shadow(0 0 4px rgba(230,57,31,.9))!important;animation:ax-orbit-spin 7s linear infinite!important;opacity:.55!important;pointer-events:none!important;z-index:3!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selected .guardian-character-card__head::after{opacity:1!important;animation-duration:5s!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(2) .guardian-character-card__head::after{animation-delay:-2.3s!important}
+html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(3) .guardian-character-card__head::after{animation-delay:-4.6s!important}
+
 @media (prefers-reduced-motion:reduce){
   [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{animation:none!important}
-  html body header.apx-destination-header,html body [data-forge-destination-ribbon]{transition:none!important}
   .vault-transfer-item.has-item-tile.is-equipped::after{animation:none!important;opacity:1!important}
   .vault-transfer-item.has-item-tile.is-equipped::before{display:none!important}
+  html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{animation:none!important;display:none!important}
 }
 }
