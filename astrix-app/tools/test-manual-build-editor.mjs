@@ -354,7 +354,8 @@ const unverifiedEquip=await executeLiveTransferPlan(confirmLiveTransferPlan(plan
 assert.equal(unverifiedEquip.status,'partial');
 assert.deepEqual(verificationPosts,['/bungie/actions/transfer-item','/bungie/actions/equip-items'],'A successful equip response without matching fresh profile evidence must skip both socket phases.');
 assert.equal(unverifiedEquip.steps.find(row=>row.phase==='verify-equipment')?.status,'mismatch','Post-equip verification must use fresh profile state, not only the equip response.');
-assert.equal(verificationProfileReads,4);
+// Snapshot, transfer check, six equip checks while Bungie catches up, then one final read.
+assert.equal(verificationProfileReads,9);
 
 let unsupportedCalls=0;
 await assert.rejects(()=>executeLiveTransferPlan(confirmLiveTransferPlan(plan),{session:{...session,capabilities:{destinyActions:{...session.capabilities.destinyActions,equipItems:false}}},fetchImpl:async()=>{unsupportedCalls+=1;return response({ErrorCode:1});},authOrigin:'https://auth.test'}),/no longer supports/);

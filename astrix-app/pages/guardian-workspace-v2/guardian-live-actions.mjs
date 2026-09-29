@@ -20,6 +20,9 @@ const ACTION_THROTTLE_MS=250;
 const SOCKET_THROTTLE_MS=550;
 const THROTTLE_RETRY_LIMIT=2;
 const TRANSFER_READBACK_DELAYS_MS=Object.freeze([250,750,1500,2500,4000]);
+// Bungie's profile lags behind an accepted equip. Re-read before reporting a
+// mismatch (Miguel, 28 Sep 2026: all nine items reported as not equipped).
+const EQUIP_READBACK_DELAYS_MS=Object.freeze([0,750,1500,2500,4000,6000]);
 const LIVE_INVENTORY_READBACK_DELAYS_MS=Object.freeze([0,150,350,650,1000,1500,2200,3500,6000,10000,10000]);
 const AMBIGUOUS_ACTION_RETRY_LIMIT=1;
 let freshProfileRequestSequence=0;
@@ -317,7 +320,13 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
     if(equipmentApplied&&plan.kind!=='weapon-perk-only'){
       try{
         onProgress({phase:'verify-equipment',status:'running',label:'Checking equipment…'});
-        const equippedProfile=await requestFreshProfile({fetchImpl,authOrigin}),verification=verifyEquippedItems(plan,equippedProfile);
+        let verification={verified:false};
+        for(const delay of EQUIP_READBACK_DELAYS_MS){
+          if(delay)await waitImpl(delay);
+          const equippedProfile=await requestFreshProfile({fetchImpl,authOrigin});
+          verification=verifyEquippedItems(plan,equippedProfile);
+          if(verification.verified)break;
+        }
         if(verification.verified)record('verify-equipment','complete','Equipment applied.',verification);
         else{equipmentApplied=false;record('verify-equipment','mismatch','Some items were not equipped. Socket changes were skipped.',verification);}
       }catch(error){equipmentApplied=false;record('verify-equipment','failed','Equipment could not be checked. Socket changes were skipped.',{message:error.message});}
@@ -342,7 +351,15 @@ async function executeLiveTransferPlan(plan,{session,fetchImpl=fetch,authOrigin=
   }finally{
     try{
       onProgress({phase:'readback',status:'running',label:'Reading back final Bungie state…'});
-      const payload=await requestFreshProfile({fetchImpl,authOrigin}),verification=verifyReadback(plan,payload);
+      // Only wait for Bungie to catch up when every request was accepted. A
+      // known failure is reported after a single read.
+      const everyStepAccepted=!result.steps.some(row=>['failed','mismatch','blocked'].includes(row.status));
+      let verification={verified:false};
+      for(const delay of everyStepAccepted?EQUIP_READBACK_DELAYS_MS:[0]){
+        if(delay)await waitImpl(delay);
+        verification=verifyReadback(plan,await requestFreshProfile({fetchImpl,authOrigin}));
+        if(verification.verified)break;
+      }
       result.readback=verification;record('readback',verification.verified?'complete':'mismatch',verification.verified?'Final Bungie state matches every remotely applied target.':'Final Bungie state differs from one or more requested targets.',verification);
     }catch(error){record('readback','failed','Final Bungie readback failed.',{message:error.message});}
   }
