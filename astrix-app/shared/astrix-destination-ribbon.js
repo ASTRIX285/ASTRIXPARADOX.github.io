@@ -214,7 +214,7 @@
     list.addEventListener('pointerdown',prepareIntent);
     list.addEventListener('pointerleave',()=>clearTimeout(intentTimer));
     const slim=document.createElement('span');slim.className='ax-slim-brand';
-    const mark=document.createElement('img');mark.src='/img/ax-logo-160.webp';mark.alt='';mark.width=34;mark.height=28;
+    const mark=document.createElement('span');mark.className='ax-slim-mark';mark.setAttribute('aria-hidden','true');mark.innerHTML='A<b>X</b>';
     const name=document.createElement('strong');
     name.textContent=(document.querySelector('header.apx-destination-header .apx-destination-header-copy strong')?.textContent||destinations.find(row=>row.key===active)?.label||'').trim().toUpperCase();
     slim.append(mark,name);

@@ -48,14 +48,18 @@ html body header.apx-destination-header::before{content:""!important;position:ab
   background:linear-gradient(90deg,transparent,var(--ax-ember) 30%,var(--ax-ember) 70%,transparent)!important;opacity:.85!important;display:block!important;pointer-events:none!important}
 .apx-destination-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:6px!important;text-decoration:none!important}
 .apx-destination-brand img{width:auto!important;height:40px!important;aspect-ratio:auto!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))!important}
-/* Wordmark stacked as on the brand board: chrome ASTRI with the red X, PARADOX spaced below. */
-.apx-destination-brand .ax-wordmark{display:inline-flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;line-height:1!important}
+/* Wordmark exactly as the Tool navigation board: large chrome ASTRIX with the red X,
+   PARADOX set beside it in spaced steel capitals. */
+.apx-destination-brand .ax-wordmark{display:inline-flex!important;flex-direction:row!important;align-items:baseline!important;gap:18px!important;line-height:1!important}
 .apx-destination-brand .ax-wordmark>span{display:block!important;gap:0!important}
-.ax-wordmark-top{font:400 18px/1 var(--ax-font-brand)!important;letter-spacing:.06em!important;white-space:nowrap!important;
-  background:linear-gradient(100deg,#9a9a99 0%,#ffffff 30%,#c9c9c8 52%,#ffffff 64%,#7b7b7a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ax-wordmark-top{font:400 26px/1 var(--ax-font-brand)!important;letter-spacing:.02em!important;white-space:nowrap!important;
+  background:linear-gradient(100deg,#b9b9b8 0%,#ffffff 30%,#dcdcdb 52%,#ffffff 64%,#9a9a99 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .apx-destination-brand .ax-wordmark-top b{display:inline!important;font:inherit!important;font-size:1em!important;letter-spacing:inherit!important;
-  -webkit-text-fill-color:var(--ax-ember-hi)!important;color:var(--ax-ember-hi)!important;text-shadow:0 0 14px rgba(230,57,31,.5)}
-.ax-wordmark-sub{font:400 9.5px/1 var(--ax-font-brand)!important;letter-spacing:.52em!important;color:var(--ax-steel)!important;white-space:nowrap!important}
+  -webkit-text-fill-color:#ff2e2e!important;color:#ff2e2e!important;text-shadow:0 0 16px rgba(230,57,31,.55)}
+.ax-wordmark-sub{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.34em!important;color:var(--ax-steel)!important;white-space:nowrap!important}
+/* The Guardian cards stay centred, so the wordmark tightens on narrower screens rather than overlap them. */
+@media (max-width:1750px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) :is(.apx-destination-brand img,.ax-wordmark-sub){display:none!important}}
+@media (max-width:1450px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) .ax-wordmark-top{font-size:20px!important}}
 html body header.apx-destination-header .apx-destination-header-copy{flex:0 0 auto!important;white-space:nowrap!important;text-align:left!important;position:static!important;transform:none!important;margin:0 0 0 12px!important;padding:0 0 0 20px!important;border-left:1px solid var(--ax-line-strong)!important}
 html body header.apx-destination-header .apx-destination-header-copy strong{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
 /* With the Guardian cards centred (original layout), the active tab names the tool, so the header copy steps aside. */
@@ -101,7 +105,8 @@ body.ax-shell-away [data-forge-destination-ribbon]{transform:translateY(calc(-10
 body.ax-shell-slim header.apx-destination-header{transform:translateY(-110%)!important}
 body.ax-shell-slim [data-forge-destination-ribbon]{top:0!important;height:var(--ax-shell-slim)!important;transform:none!important}
 body.ax-shell-slim .ax-slim-brand{display:flex!important;align-items:center!important;gap:12px!important;flex:none!important;margin-right:auto!important;padding-right:16px!important;color:var(--ax-ink)!important}
-body.ax-shell-slim .ax-slim-brand img{height:28px!important;width:auto!important;max-width:none!important;position:static!important}
+body.ax-shell-slim .ax-slim-mark{font:400 20px/1 var(--ax-font-brand)!important;letter-spacing:.02em!important;color:#fff!important}
+body.ax-shell-slim .ax-slim-mark b{font-weight:400!important;color:#ff2e2e!important}
 body.ax-shell-slim .ax-slim-brand strong{padding-left:14px!important;border-left:1px solid var(--ax-line-strong)!important;font:700 13px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
 body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon{justify-content:space-between!important;width:100%!important}
 body.ax-shell-slim [data-forge-destination-ribbon] .apx-destination-ribbon a{padding:0 11px!important;font-size:0!important;letter-spacing:0!important}
