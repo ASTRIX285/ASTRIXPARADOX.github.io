@@ -157,17 +157,6 @@
       if(!brand.getAttribute('aria-label'))brand.setAttribute('aria-label','ASTRIX PARADOX');
     });
   }
-  // Full at the top, away while scrolling down, a slim bar the moment you scroll up.
-  let lastY=0,scrollFrame=0;
-  function shellState(){
-    scrollFrame=0;
-    const y=Math.max(0,window.scrollY||0),delta=y-lastY;lastY=y;
-    const body=document.body;if(!body)return;
-    if(y<=8){body.classList.remove('ax-shell-away','ax-shell-slim');return;}
-    if(y<140)return;
-    if(delta>6){body.classList.add('ax-shell-away');body.classList.remove('ax-shell-slim');}
-    else if(delta<-4){body.classList.add('ax-shell-slim');body.classList.remove('ax-shell-away');}
-  }
   // The tab row sits exactly under the header, whatever height the Guardian cards give it.
   function trackHeader(){
     const header=document.querySelector('header.apx-destination-header');
@@ -176,11 +165,8 @@
     apply();
     if('ResizeObserver' in window)new ResizeObserver(apply).observe(header);
   }
-  function watchScroll(){
-    trackHeader();
-    lastY=window.scrollY||0;
-    window.addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(shellState);},{passive:true});
-  }
+  // Miguel, 30 Sep 2026: the ribbon stays full and solid; the page scrolls behind it.
+  function watchScroll(){trackHeader();}
 
   function render(mount){
     const requested=String(mount.dataset.activeDestination||'journey').trim().toLowerCase();
