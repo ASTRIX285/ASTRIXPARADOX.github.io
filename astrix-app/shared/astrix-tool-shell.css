@@ -32,6 +32,8 @@
 @keyframes ax-sheen{from{transform:translateX(-160%)}to{transform:translateX(420%)}}
 
 @property --ax-orbit{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --ax-pulse{syntax:'<percentage>';inherits:false;initial-value:-20%}
+@keyframes ax-stroke-pulse{0%{--ax-pulse:-20%}70%,100%{--ax-pulse:120%}}
 @keyframes ax-orbit-spin{to{--ax-orbit:360deg}}
 @keyframes ax-frame-breathe{0%,100%{opacity:.45}50%{opacity:1}}
 
@@ -172,10 +174,42 @@ html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selec
 html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(2) .guardian-character-card__head::after{animation-delay:-2.3s!important}
 html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(3) .guardian-character-card__head::after{animation-delay:-4.6s!important}
 
+/* ---------- The strobe stroke (Miguel, 30 Sep 2026): the Guardian card effect on every tab and button ----------
+   A crimson line 1.5px wide at the top-left corner that thins and fades to nothing by the bottom-right,
+   with a light pulse running along it every 2.8s (1.4s on hover). Tab underline and selected states are unchanged. */
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1){position:relative!important;isolation:isolate!important}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1)::before{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:1.5px .5px .5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),rgba(255,226,216,.95) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi,#ff4a3d) 0,var(--ax-stroke,#ba1f12) 8px,rgba(186,31,18,.45) 26px,transparent 78px)!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)!important;
+  filter:drop-shadow(0 0 2px rgba(255,60,50,.45))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+/* Tabs are short, so the corner fade is tighter and the line never reads as a divider. */
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1){--ax-stroke-len:44px}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1)::before{margin-top:1px!important;background-image:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),rgba(255,226,216,.95) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),linear-gradient(135deg,#ff4a3d 0,#ba1f12 5px,rgba(186,31,18,.4) 16px,transparent 46px)!important}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1):hover::before,html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1):focus-visible::before{animation-duration:1.4s!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],a.btn,.mission-build-link,.mission-analyse-link,a.restore-btn):not(.improve-cta,.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip,[data-import-dim],.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *,:disabled,[aria-disabled="true"]):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4)::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:1.5px .5px .5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),rgba(255,226,216,.95) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi,#ff4a3d) 0,var(--ax-stroke,#ba1f12) 8px,rgba(186,31,18,.45) 26px,transparent 78px)!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)!important;
+  filter:drop-shadow(0 0 2px rgba(255,60,50,.45))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],a.btn,.mission-build-link,.mission-analyse-link,a.restore-btn):not(.improve-cta,.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip,[data-import-dim],.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *,:disabled,[aria-disabled="true"]):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):hover::after{animation-duration:1.4s!important}
+/* On the red primary buttons the stroke is a lighter ember so it still reads. */
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch){--ax-stroke-hi:#ffd0c6;--ax-stroke:#ff8a74}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):not(:disabled):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):not(#ax-s5)::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:1.5px .5px .5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),rgba(255,226,216,.95) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi,#ff4a3d) 0,var(--ax-stroke,#ba1f12) 8px,rgba(186,31,18,.45) 26px,transparent 78px)!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)!important;
+  filter:drop-shadow(0 0 2px rgba(255,60,50,.45))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+
 @media (prefers-reduced-motion:reduce){
   [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{animation:none!important}
   .vault-transfer-item.has-item-tile.is-equipped::after{animation:none!important;opacity:1!important}
   .vault-transfer-item.has-item-tile.is-equipped::before{display:none!important}
+  body *::after,body *::before{--ax-pulse:-20%}
+  html body [data-forge-destination-ribbon] .apx-destination-ribbon a::before,body[data-apx-button-system] :is(button,[role="button"],a.btn,.improve-cta)::after{animation:none!important}
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{animation:none!important;display:none!important}
 }
 }
