@@ -37,6 +37,8 @@
   --ax-stroke-hi-primary:#ffd0c6;--ax-stroke-primary:#ff8a74;
   /* Wash over the ASTRIX PARADOX map art on public pages. */
   --ax-map-wash-top:rgba(14,12,9,.35);--ax-map-wash-bottom:rgba(14,12,9,.7);--ax-map-glow:rgba(115,32,34,.22);
+  /* Panels over the map: Panel #15130f at 75 percent with the #2e2a22 hairline. */
+  --ax-map-panel:rgba(21,19,15,.75);--ax-hairline:#2e2a22;
 }
 
 @keyframes ax-strobe{0%,100%{opacity:.35}4%{opacity:1}7%{opacity:.45}10%{opacity:1}16%{opacity:.35}}
@@ -172,6 +174,16 @@ body.ax-brand.ax-map::before{inset:-4px!important;background:
   linear-gradient(180deg,var(--ax-map-wash-top),var(--ax-map-wash-bottom) 70%),
   var(--forge-paradox-map-art) center/cover no-repeat!important;
   filter:blur(2px)!important;transform:scale(1.005)!important}
+/* Every band below the hero is transparent so the map runs the whole page. Text blocks that need
+   contrast carry ax-map-panel. This also clears the old navy stream and footer bands (style.css). */
+body.ax-brand.ax-map :is(body>section:not(.hero),.stream-section,.stream-offline-full,.stream-offline-full.has-vod,.stream-live-full,.stream-actions-live,#vodSection,.footer,.apx-bungie-attribution){background:transparent!important}
+body.ax-brand.ax-map .ax-map-panel{background:var(--ax-map-panel)!important;border:1px solid var(--ax-hairline)!important;padding:clamp(20px,3vw,36px)!important}
+body.ax-brand.ax-map .footer.ax-map-panel{border-width:1px 0 0!important}
+body.ax-brand.ax-map .ax-map-panel{box-sizing:border-box!important;min-width:0!important}
+@media (max-width:768px){
+  body.ax-brand.ax-map .ax-map-panel{padding:16px!important}
+  body.ax-brand .ax-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
 body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle){position:relative!important;isolation:isolate!important}
 body.ax-brand.ax-stroke .nav-links a::before,
 body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle):not(:disabled)::after{
