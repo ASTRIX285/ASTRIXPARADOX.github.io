@@ -20,6 +20,11 @@
   --ax-black:#0e0c09;--ax-panel:#15130f;--ax-raised:#1d1a15;--ax-line:#2a2620;--ax-line-strong:#3d3830;
   --ax-ember:#ba1f12;--ax-ember-hi:#e6391f;--ax-ember-lo:#8f170c;--ax-deep:#732022;
   --ax-steel:#8a8a89;--ax-steel-light:#c9c9c8;--ax-ink:#ededeb;--ax-muted:#b9b9b8;
+  /* Strobe stroke: Ember-hi to Ember on dark surfaces, a lighter ember pair on the red primary buttons. */
+  --ax-stroke-hi:#ff4a3d;--ax-stroke:var(--ax-ember);
+  --ax-stroke-fade:rgba(186,31,18,.45);--ax-stroke-fade-tab:rgba(186,31,18,.4);
+  --ax-stroke-pulse:rgba(255,226,216,.95);--ax-stroke-glow:rgba(255,60,50,.45);
+  --ax-stroke-hi-primary:#ffd0c6;--ax-stroke-primary:#ff8a74;
   --ax-font-brand:"Michroma","Barlow Semi Condensed",sans-serif;
   --ax-font-head:"Barlow Semi Condensed","Barlow","Segoe UI",sans-serif;
   --ax-shell-tabs:46px;
@@ -32,6 +37,8 @@
 @keyframes ax-sheen{from{transform:translateX(-160%)}to{transform:translateX(420%)}}
 
 @property --ax-orbit{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --ax-pulse{syntax:'<percentage>';inherits:false;initial-value:-20%}
+@keyframes ax-stroke-pulse{0%{--ax-pulse:-20%}70%,100%{--ax-pulse:120%}}
 @keyframes ax-orbit-spin{to{--ax-orbit:360deg}}
 @keyframes ax-frame-breathe{0%,100%{opacity:.45}50%{opacity:1}}
 
@@ -172,10 +179,42 @@ html body header:has(>[data-forge-hero-cards]) .guardian-character-card.is-selec
 html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(2) .guardian-character-card__head::after{animation-delay:-2.3s!important}
 html body header:has(>[data-forge-hero-cards]) .guardian-character-card:nth-child(3) .guardian-character-card__head::after{animation-delay:-4.6s!important}
 
+/* ---------- The strobe stroke (Miguel, 30 Sep 2026): the Guardian card effect on every tab and button ----------
+   A crimson line 1.5px wide down the left edge and along the bottom, fading to nothing at the bottom-right corner,
+   with a light pulse running along it every 2.8s (1.4s on hover). Tab underline and selected states are unchanged. */
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1){position:relative!important;isolation:isolate!important}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1)::before{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:0 0 1.5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)!important;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+/* Tabs start the line 1px lower and use the lighter tab fade. */
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1){--ax-stroke-len:44px}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1)::before{margin-top:1px!important;background-image:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 5px,var(--ax-stroke-fade-tab) 40%,transparent 100%)!important}
+html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1):hover::before,html body [data-forge-destination-ribbon] .apx-destination-ribbon a:not(#ax-s1):focus-visible::before{animation-duration:1.4s!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],a.btn,.mission-build-link,.mission-analyse-link,a.restore-btn):not(.improve-cta,.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip,[data-import-dim],.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *,:disabled,[aria-disabled="true"]):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4)::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:0 0 1.5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)!important;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+body[data-apx-button-system]:not(.forge-loader-page) :is(button,[role="button"],a.btn,.mission-build-link,.mission-analyse-link,a.restore-btn):not(.improve-cta,.guardian-loadout-slot,.guardian-character-card,.vault-transfer-item,.el,.selector-card,[data-recommendation-element],.apx-loc,.gw-tile,.gw-mod-dot,.gw-armour-chip,[data-import-dim],.apx-gate *,.recommendation-panel *,.recommended-build-reveal *,#forgeGenerationLoader *,:disabled,[aria-disabled="true"]):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):hover::after{animation-duration:1.4s!important}
+/* On the red primary buttons the stroke is a lighter ember so it still reads. */
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch){--ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary)}
+body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity,#arm,#armRangeTest,#journeyConnectButton,#vaultConnectButton,.bungie-auth-btn,[data-loadout-confirm-action],.paradox-loadout-dialog .is-primary,#saveParadoxDialog button[type="submit"],.forge-search-button,#forgeSearch):not(:disabled):not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):not(#ax-s5)::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:0 0 1.5px 1.5px!important;border-radius:inherit!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)!important;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+
 @media (prefers-reduced-motion:reduce){
   [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{animation:none!important}
   .vault-transfer-item.has-item-tile.is-equipped::after{animation:none!important;opacity:1!important}
   .vault-transfer-item.has-item-tile.is-equipped::before{display:none!important}
+  body *::after,body *::before{--ax-pulse:-20%}
+  html body [data-forge-destination-ribbon] .apx-destination-ribbon a::before,body[data-apx-button-system] :is(button,[role="button"],a.btn,.improve-cta)::after{animation:none!important}
   html body header:has(>[data-forge-hero-cards]) .guardian-character-card__head::after{animation:none!important;display:none!important}
 }
 }

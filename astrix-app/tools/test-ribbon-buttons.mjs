@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
-import {resolve,extname} from 'node:path';
+import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
@@ -11,7 +11,7 @@ const pages=['journey','guardian-workspace-v2','forge-loader','guardian-workspac
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  const file=resolve(root,'.'+path+(path.endsWith('/')?'index.html':''));
- if(!file.startsWith(root+'/')){res.writeHead(403).end();return;}
+ if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}
  try{
   let data=await readFile(file);
   // Isolate layout from account/network state, preserving all production styles.
