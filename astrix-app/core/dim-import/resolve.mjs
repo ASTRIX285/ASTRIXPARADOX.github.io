@@ -1,4 +1,4 @@
-import {accountItems,bungieArtwork,hashValue,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1';
+import {accountItems,bungieArtwork,hashValue,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {WEAPON_BUCKETS,ARMOUR_BUCKETS,SUBCLASS_BUCKET} from '../../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {subclassPlugComponent} from '../../pages/guardian-workspace-v2/guardian-subclass-plug-classifier.mjs';
 import {classifyArmourPlug,classifyWeaponPlug} from '../../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';

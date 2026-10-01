@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
-import {resolve,extname} from 'node:path';
+import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {loadoutDetailsFixture} from './fixtures/loadout-details-fixture.mjs';
 const require=createRequire(import.meta.url);
@@ -23,7 +23,7 @@ const server=createServer(async(req,res)=>{
   const path=new URL(req.url,'http://localhost').pathname;
   if(path==='/'){res.setHeader('Content-Type','text/html');res.end(html);return;}
   if(path==='/fixture.mjs'){res.setHeader('Content-Type','text/javascript');res.end(script);return;}
-  const file=resolve(root,'.'+path);if(!file.startsWith(root+'/')){res.writeHead(403).end();return;}
+  const file=resolve(root,'.'+path);if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}
   try{res.setHeader('Content-Type',({'.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json'})[extname(file)]||'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}
 });
 await new Promise(done=>server.listen(0,'127.0.0.1',done));
@@ -55,12 +55,18 @@ try{
     await page.goto(origin);await page.waitForFunction(()=>window.ready);
     const more=page.locator('[data-loadout-more="0"]');await more.click();await page.getByRole('menuitem',{name:'Loadout details',exact:true}).click();
     const dialog=page.locator('.apx-loadout-details');await dialog.waitFor();
-    assert.equal(await dialog.locator('.apx-ld-item').count(),9);assert.equal(await dialog.locator('.apx-ld-item[data-item-kind="weapon"]').count(),3);assert.equal(await dialog.locator('.apx-ld-item[data-item-kind="armour"]').count(),5);
+    // Compact grid (1 Oct 2026): one row per item, no text under the icons.
+    assert.equal(await dialog.locator('.apx-ld-row').count(),9);assert.equal(await dialog.locator('.apx-ld-row[data-item-kind="weapon"]').count(),3);assert.equal(await dialog.locator('.apx-ld-row[data-item-kind="armour"]').count(),5);
+    assert.equal((await dialog.locator('.apx-ld-grid').innerText()).trim(),'','Names live in the tooltip, never under the icons');
     assert.equal(await page.evaluate(()=>selections.length),0,'Details never change the Character selection/build');
     assert.equal(calls.length,0,'Opening details uses only prepared data');
     const geometry=await dialog.evaluate(node=>{const rect=node.getBoundingClientRect(),scroll=node.querySelector('.apx-ld-scroll');return {x:rect.x,y:rect.y,width:rect.width,height:rect.height,overflow:scroll.scrollHeight>scroll.clientHeight,fonts:[...node.querySelectorAll('*')].filter(el=>el.textContent.trim()).map(el=>parseFloat(getComputedStyle(el).fontSize)),filters:[...node.querySelectorAll('img')].map(img=>getComputedStyle(img).filter),horizontal:scroll.scrollWidth-scroll.clientWidth};});
-    const expectedWidth=width<720?width:Math.min(width*.8,1400),expectedHeight=width<720?900:810;
-    assert.ok(Math.abs(geometry.width-expectedWidth)<=1);assert.ok(Math.abs(geometry.height-expectedHeight)<=1);assert.ok(Math.abs(geometry.x-(width-expectedWidth)/2)<=1);assert.ok(Math.abs(geometry.y-(900-expectedHeight)/2)<=1);assert.ok(geometry.fonts.every(size=>size>=12));assert.ok(geometry.filters.every(value=>value==='none'));assert.ok(geometry.horizontal<=1);assert.equal(geometry.overflow,true);
+    // Desktop: centred and sized to the loadout, with no scrolling. Phones: a full-screen sheet.
+    const expectedWidth=width<720?width:Math.min(width-32,1120);
+    assert.ok(Math.abs(geometry.width-expectedWidth)<=1,`width ${geometry.width}`);assert.ok(Math.abs(geometry.x-(width-expectedWidth)/2)<=1);
+    if(width<720)assert.ok(Math.abs(geometry.height-900)<=1,'Phones get a full-screen sheet');
+    else{assert.ok(geometry.height<=900-32+1,`height ${geometry.height}`);if(width>=1363)assert.equal(geometry.overflow,false,'The whole loadout fits without scrolling on desktop');}
+    assert.ok(geometry.fonts.every(size=>size>=12));assert.ok(geometry.filters.every(value=>value==='none'));assert.ok(geometry.horizontal<=1);
     assert.deepEqual(await dialog.locator('.apx-ld-actions button').allTextContents(),['Equip','Prepare equip','Edit identifiers','Save to Armoury','Share','Clear slot']);
     await dialog.getByRole('button',{name:'Prepare equip',exact:true}).click();await dialog.getByRole('button',{name:'Confirm Apply',exact:true}).waitFor();await page.waitForFunction(()=>document.querySelector('.apx-loadout-details').getAttribute('aria-busy')==='false');
     assert.ok(calls.every(row=>row.method==='GET'));await dialog.getByRole('button',{name:'Cancel',exact:true}).click();

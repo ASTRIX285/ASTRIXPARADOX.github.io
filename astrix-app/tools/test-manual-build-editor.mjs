@@ -784,12 +784,11 @@ const pageSource=overviewSource.slice(overviewSource.indexOf('const byId='),over
   .replace(/export (async )?function /g,(_,asyncPart)=>`${asyncPart||''}function `);
 const pageNodes=new Map();
 const pageNode=id=>{
-  if(!pageNodes.has(id))pageNodes.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,value:'',classList:{toggle(){}},querySelector(){return null;},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
+  if(!pageNodes.has(id))pageNodes.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,value:'',classList:{toggle(){},add(){},remove(){}},querySelector(){return null;},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
   return pageNodes.get(id);
 };
 const pageContext={URL,structuredClone,classifyArmourPlug,itemTileMarkup,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
-runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editorSelect,editableSnapshotItem,editChoice,closeDialog,draftFor,preparePayload,setCharacter,
-  setEditor(state){dialogState=state;renderEditor(state);},
+runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editableSnapshotItem,closeDialog,draftFor,preparePayload,setCharacter,
   setState(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload||{definitions:{}};loading=false;},
   openDraft(record){dialogState={kind:'edit',record:copy(record)};dialog().showModal();return dialogState.record;},
   getDialogState(){return dialogState;}};`,pageContext);
@@ -872,15 +871,18 @@ const retainedMod={...currentArmourMod,hash:8299,name:'Retained second mod',sock
 const rawSavedArmour={...clone(armour[0]),slotMods:undefined,armourSemantics:undefined,mods:[currentArmourMod,retainedMod],socketCoverage:{plugs:[currentArmourMod,retainedMod]}};
 const editorArmour=pageApi.editableSnapshotItem(rawSavedArmour,armour[0],'armour');
 const editorDraft={id:'edited',name:'Quick edit',description:'',build:{...clone(baseBuild),armour:[editorArmour,...clone(armour.slice(1))],subclassBuild:{}}};
-pageApi.setEditor({kind:'edit',record:editorDraft,catalogue:[],subclasses:[],check:()=>{}});
-pageNode('paradoxEditName').value='Quick edit';pageNode('paradoxEditDescription').value='';
-const options=pageApi.getDialogState().choices.get('socket:armour:0:2');
-pageApi.editChoice({dataset:{editorChoice:'socket:armour:0:2'},value:String(options.findIndex(row=>row.hash===exactArmourMod.hash))});
-const afterEditor=pageApi.getDialogState().record.build;
+// The visual Armoury editor stages the same socket change through stageSocketChoice.
+const {createArmouryEditor}=await import('../pages/loadout/armoury-editor.mjs');
+const quickEditor=createArmouryEditor({record:editorDraft,catalogue:[],subclasses:[]});
+const modGroup=socketGroups(editorDraft.build.armour[0],'armour').find(group=>group.socketIndex===2);
+assert.ok(quickEditor.setMod(0,2,modGroup.options.find(row=>row.hash===exactArmourMod.hash)),quickEditor.state.error);
+const afterEditor=quickEditor.record.build;
 assert.ok(afterEditor.armour[0].slotMods.some(row=>row.hash===exactArmourMod.hash));
 assert.ok(afterEditor.armour[0].slotMods.some(row=>row.hash===retainedMod.hash),'Editing one socket must preserve the other saved mods, including legacy raw snapshots');
 assert.ok(rawSavedArmour.mods.some(row=>row.hash===currentArmourMod.hash));
-assert.equal(afterEditor.stats.length,0,'An edited build must not retain captured totals as if they were recalculated');
+assert.ok(editorDraft.build.armour[0].slotMods===undefined||!editorDraft.build.armour[0].slotMods.some(row=>row.hash===exactArmourMod.hash),'The editor works on a copy, never the draft it was given');
+quickEditor.undo();
+assert.ok(!quickEditor.record.build.armour[0].slotMods?.some(row=>row.hash===exactArmourMod.hash),'UNDO restores the previous socket');
 console.log('LOADOUT_QUICK_EDITOR=PASS selected socket changes preserve other saved sockets and original records');
 
 // Run the actual page startup, event handlers and renderer with deferred reads.
@@ -892,7 +894,7 @@ const raceRows=clone(manyRecords.slice(0,3));
 function startLoadoutRace(){
   const reads=[],nodes=new Map(),listeners=new Map(),preparing=deferred(),profileReady=deferred();
   const node=id=>{
-    if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,open:false,classList:{toggle(){}},addEventListener(){}});
+    if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',hidden:false,open:false,classList:{toggle(){},add(){},remove(){}},addEventListener(){}});
     return nodes.get(id);
   };
   const forbidden=()=>{throw new Error('Unexpected persistence or network call in Loadout ordering test');};

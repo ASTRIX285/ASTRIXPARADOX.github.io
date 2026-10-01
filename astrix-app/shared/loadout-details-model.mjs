@@ -4,6 +4,7 @@ import {WEAPON_BUCKETS,ARMOUR_BUCKETS,SUBCLASS_BUCKET} from '../pages/guardian-w
 import {subclassPlugComponent} from '../pages/guardian-workspace-v2/guardian-subclass-plug-classifier.mjs';
 import {classifyArmourPlug,classifyWeaponPlug,normaliseArmourSemantics,normaliseWeaponSemantics} from '../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
 
+export const EMPTY_PLUG_HASH=2166136261;
 export const hashValue=value=>Number.isInteger(Number(value))&&Number(value)>0&&Number(value)<=0xffffffff?Number(value):null;
 export function bungieArtwork(path){
   if(typeof path!=='string'||!path||path.startsWith('//'))return '';
@@ -31,6 +32,14 @@ function socketGroups(item){
   }
   return [...groups].map(([label,plugs])=>({label,plugs}));
 }
+// Only an actually missing item earns a warning, and it is named when Bungie still knows it.
+// In-game slots store instance IDs only, so an item that left the account cannot be named.
+function missingItemsWarning(items){
+  const missing=items.filter(item=>item.unresolved);
+  if(!missing.length)return '';
+  const undescribed=missing.filter(item=>item.itemHash).map(item=>`item ${item.itemHash} (Bungie definition unavailable)`),gone=missing.filter(item=>!item.itemHash).length;
+  return `Some saved items are unavailable: ${[...(gone?[`${gone} item${gone===1?'':'s'} no longer in your inventory`]:[]),...undescribed].join(', ')}.`;
+}
 /** Pure adapter. Never fill a missing saved plug with the currently equipped plug. */
 export function resolveInGameLoadout({profile={},definitions={},manifestVersion='',manifest={},characterId,index,membershipId='',membershipType=''}){
   if(!Number.isInteger(index)||index<0||index>=20)throw new Error('Invalid loadout slot.');
@@ -49,7 +58,8 @@ export function resolveInGameLoadout({profile={},definitions={},manifestVersion=
     const socketIndexes=new Set(selected.map((_,i)=>i));
     entries.forEach((entry,i)=>{if(entry.defaultVisible)socketIndexes.add(i);});
     const sockets=[...socketIndexes].sort((a,b)=>a-b).map(socketIndex=>{
-      const hash=hashValue(selected[socketIndex]),plug=hash?definitions[String(hash)]:null;
+      // 2166136261 (FNV-1a of empty input) is Bungie's empty plug in a saved slot, never an item.
+      const hash=Number(selected[socketIndex])===EMPTY_PLUG_HASH?null:hashValue(selected[socketIndex]),plug=hash?definitions[String(hash)]:null;
       const categoryHash=definition?.sockets?.socketCategories?.find(row=>row.socketIndexes?.includes(socketIndex))?.socketCategoryHash;
       const row={hash,socketIndex,name:plug?.displayProperties?.name||'Empty socket',description:plug?.displayProperties?.description||'',icon:bungieArtwork(plug?.displayProperties?.icon),definition:plug||null,socketCategoryHash:categoryHash,socketCategoryDefinition:get('DestinySocketCategoryDefinition',categoryHash),armourItemTierType:definition?.inventory?.tierType,empty:!plug,unresolved:Boolean(hash&&!plug),retired:plug?.retired===true};
       row.componentType=kind==='subclass'?subclassPlugComponent(row):'';
@@ -66,7 +76,7 @@ export function resolveInGameLoadout({profile={},definitions={},manifestVersion=
   const order=item=>[SUBCLASS_BUCKET,...WEAPON_BUCKETS,...ARMOUR_BUCKETS].indexOf(item.bucketHash);
   items.sort((a,b)=>(order(a)<0?99:order(a))-(order(b)<0?99:order(b)));
   const name=get('DestinyLoadoutNameDefinition',loadout.nameHash)?.name||'Saved loadout';
-  return {schemaVersion:1,source:{kind:'in-game',label:'In-game loadout'},name,icon:bungieArtwork(get('DestinyLoadoutIconDefinition',loadout.iconHash)?.iconImagePath),colorIcon:bungieArtwork(get('DestinyLoadoutColorDefinition',loadout.colorHash)?.colorImagePath),slotNumber:index+1,identifiers:{nameHash:loadout.nameHash,iconHash:loadout.iconHash,colorHash:loadout.colorHash},identifierChoices:{names:identity('DestinyLoadoutNameDefinition','name'),icons:identity('DestinyLoadoutIconDefinition','iconImagePath'),colors:identity('DestinyLoadoutColorDefinition','colorImagePath')},items,manifestVersion,binding:{characterId:String(characterId),membershipId:String(membershipId),membershipType:String(membershipType),index},fingerprint:loadoutFingerprint(loadout),characterClass:['titan','hunter','warlock'][profile.characters?.data?.[characterId]?.classType]||'',warning:items.some(item=>item.unresolved||item.sockets.some(plug=>plug.unresolved))?'Some saved items or sockets are unavailable. No current sockets have been substituted.':''};
+  return {schemaVersion:1,source:{kind:'in-game',label:'In-game loadout'},name,icon:bungieArtwork(get('DestinyLoadoutIconDefinition',loadout.iconHash)?.iconImagePath),colorIcon:bungieArtwork(get('DestinyLoadoutColorDefinition',loadout.colorHash)?.colorImagePath),slotNumber:index+1,identifiers:{nameHash:loadout.nameHash,iconHash:loadout.iconHash,colorHash:loadout.colorHash},identifierChoices:{names:identity('DestinyLoadoutNameDefinition','name'),icons:identity('DestinyLoadoutIconDefinition','iconImagePath'),colors:identity('DestinyLoadoutColorDefinition','colorImagePath')},items,manifestVersion,binding:{characterId:String(characterId),membershipId:String(membershipId),membershipType:String(membershipType),index},fingerprint:loadoutFingerprint(loadout),characterClass:['titan','hunter','warlock'][profile.characters?.data?.[characterId]?.classType]||'',warning:missingItemsWarning(items)};
 }
 export function loadoutWorkingBuild(model,profile={}){
   const asGear=item=>{

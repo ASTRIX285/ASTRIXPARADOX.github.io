@@ -58,7 +58,7 @@ async function viewLoadoutDetails(index){
   const characterId=activeCharacterId,identity=loadoutIdentity(currentLoadouts[index]),returnFocus=trigger(index);
   closeMenu();
   try{
-    const {openGuardianLoadoutDetails}=await import('./guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4');
+    const {openGuardianLoadoutDetails}=await import('./guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4&grid=20261001-1');
     await openGuardianLoadoutDetails({characterId,index,getCharacterId:()=>activeCharacterId,returnFocus});
   }catch(error){showToast(identity,error.message||'Loadout details unavailable',true);}
 }

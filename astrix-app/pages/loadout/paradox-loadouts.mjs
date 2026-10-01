@@ -6,13 +6,14 @@ import {normalisePreparedPagePayload,normaliseLiveProfile,profileWithSelectedLoa
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {LOADOUT_DEFINITIONS} from '../guardian-workspace-v2/guardian-loadout-definitions.mjs';
 import {createVaultCatalogue} from '../vault/vault-inventory.mjs?champion=20260924-champion-export-1';
-import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
-import {createLiveTransferPlan,subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
+import {filterManualEquipmentSources} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
+import {createLiveTransferPlan} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
 import {liveActionCapabilities,sessionBinding,inventoryLocations,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,requestFreshProfile,verifyReadback,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&plain=20260925-2';
 import {createPreparedPageRefreshController} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
+import {createArmouryEditor} from './armoury-editor.mjs?v=20261001-editor-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -301,9 +302,9 @@ async function refreshProfile({force=true}={}){
   globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
   emit('forge:prepared-page-refreshed',{page:'loadout',payload});render();return payload;
 }
-function closeDialog(){if(busy)return;dialog()?.close();dialogState=null;}
+function closeDialog(){if(busy)return;dialog()?.close();dialog()?.classList.remove('is-armoury-editor');dialogState=null;}
 function showDialog(title,content,footer,state){
-  const node=dialog();dialogState=state;
+  const node=dialog();dialogState=state;node.classList.remove('is-armoury-editor');
   node.innerHTML=`<h2 id="paradoxDialogTitle">${esc(title)}</h2>${content}<p class="paradox-dialog-error" id="paradoxDialogError" role="alert"></p><footer><button type="button" data-dialog-close>CANCEL</button>${footer}</footer>`;
   if(!node.open)node.showModal();
   node.querySelector('input,select,button')?.focus();
@@ -328,52 +329,32 @@ async function runBusy(work){
 function draftFor(id){if(id==='equipped'){if(!equipped)throw new Error('Current equipment is unavailable.');return {build:copy(equipped),name:`${equipped.characterClass.toUpperCase()} · ${equipped.subclassName}`,description:''};}const record=recordById(id);if(!record)throw new Error('This saved build is not for the selected Guardian.');return copy(record);}
 function nameFields(record){return `<label>Loadout name<input id="paradoxEditName" maxlength="80" required value="${esc(record.name)}"></label><label>Description<textarea id="paradoxEditDescription" maxlength="400">${esc(record.description||'')}</textarea></label>`;}
 function openSave(record){showDialog('SAVE TO ARMOURY',`${nameFields(record)}<p class="paradox-dialog-note">Saved locally, then synced to your Bungie account in the background. PARADOX copies are separate from Bungie’s 20 slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE PARADOX COPY</button>',{kind:'save',record:{...copy(record),id:null},check:guardContext()});}
-async function saveDialogRecord(){
+async function saveDialogRecord({asNew=false}={}){
   const state=dialogState;state.check();
+  const record=state.editor?state.editor.record:state.record;
   const name=byId('paradoxEditName').value.trim();if(!name)throw new Error('Enter a loadout name.');
-  // Saving an editable draft does not equip it; Apply performs compatibility checks.
-  const saved=await saveParadoxLoadout({id:state.record.id||null,expectedRevision:state.record.revision,name,description:byId('paradoxEditDescription').value,build:state.record.build});
+  const build=copy(record.build);
+  // Captured totals are not a prediction for edited equipment.
+  if(state.editor?.state.history.length)build.stats=[];
+  // Saving a draft never equips it; Apply performs compatibility checks. SAVE CHANGES keeps
+  // the build's id so its revision goes up; SAVE AS NEW writes a separate Armoury build.
+  const saved=await saveParadoxLoadout({id:asNew?null:record.id||null,expectedRevision:asNew?undefined:record.revision,name,description:byId('paradoxEditDescription').value,build});
   if(!saved)throw new Error('This browser could not store the loadout. Free some browser storage and try again.');
-  await refreshSavedRecords();selectedId=saved.id;dialog().close();dialogState=null;status(`Saved ${saved.name}.`);
+  await refreshSavedRecords();selectedId=saved.id;dialog().close();dialog().classList.remove('is-armoury-editor');dialogState=null;status(`Saved ${saved.name}${asNew?' as a new build':''}.`);
 }
 
-function editorSelect(key,label,current,options,state){
-  const identity=(row,index)=>itemId(row)?`item:${itemId(row)}`:Number.isFinite(hashOf(row))?`plug:${hashOf(row)}`:`unknown:${index}`;
-  const choices=[current,...options].filter(Boolean).filter((row,index,all)=>all.findIndex((other,otherIndex)=>identity(other,otherIndex)===identity(row,index))===index);
-  state.choices.set(key,choices);
-  return `<label>${esc(label)}<select data-editor-choice="${esc(key)}"${choices.length<2?' disabled':''}>${choices.map((item,index)=>`<option value="${index}">${esc(nameOf(item))}${item.power!=null?` · ${esc(item.power)}`:''}${itemId(item)?` · ${esc(itemId(item).slice(-6))}`:''}</option>`).join('')}</select></label>`;
+// The visual editor (armoury-editor.mjs) owns the build draft, pickers and undo history.
+// This page keeps the dialog, saving and the Guardian guard around it.
+function renderEditor(state){
+  const node=dialog(),focusSearch=document.activeElement?.matches?.('[data-ed-search]');
+  dialogState=state;node.classList.add('is-armoury-editor');
+  node.innerHTML=state.editor.html();
+  if(!node.open)node.showModal();
+  if(focusSearch||state.editor.state.picker){const search=node.querySelector('[data-ed-search]');if(search){search.focus();search.setSelectionRange?.(search.value.length,search.value.length);}}
 }
-function editorBody(state){
-  const build=state.record.build;state.choices=new Map();state.fields=new Map();
-  const equipment=[['weapon','weapons',['Primary','Secondary','Heavy']],['armour','armour',['Helmet','Gauntlets','Chest','Legs','Class item']]].map(([kind,key,labels])=>`<fieldset><legend>${kind==='weapon'?'WEAPONS & PERKS':'ARMOUR & MODS'}</legend>${labels.map((label,index)=>{
-    const item=build[key]?.[index],selectKey=`gear:${kind}:${index}`;
-    state.fields.set(selectKey,{type:'gear',kind,index});
-    const select=editorSelect(selectKey,label,item,eligibleEquipment(state.catalogue,build,kind,index),state);
-    return select+socketGroups(item,kind).map(group=>{
-      const socketKey=`socket:${kind}:${index}:${group.socketIndex}`;state.fields.set(socketKey,{type:'socket',kind,index,socketIndex:group.socketIndex});
-      return editorSelect(socketKey,`${label} · ${group.label} ${group.socketIndex+1}`,group.current,group.options,state);
-    }).join('');
-  }).join('')}</fieldset>`).join('');
-  const sb=build.subclassBuild||{},fresh=state.subclasses.find(item=>item&&itemId(item)===String(build.subclassItemInstanceId))?.subclassBuild||{};
-  const subclassKey='subclass';state.fields.set(subclassKey,{type:'subclass'});
-  let subclass=editorSelect(subclassKey,'Subclass',build.subclassItem,state.subclasses,state);
-  for(const [key,selected,optionsKey] of [['super',[sb.super],'superOptions'],['abilities',sb.abilities||[],'abilityOptionsBySocket'],['aspects',sb.aspects||[],'aspectOptionsBySocket'],['fragments',sb.fragments||[],'fragmentOptionsBySocket']]){
-    const rows=[...selected];
-    if(key!=='super')for(const socketIndex of Object.keys(fresh[optionsKey]||{}))if(!rows.some(row=>Number(row?.socketIndex)===Number(socketIndex)))rows.push({name:'Not saved',socketIndex:Number(socketIndex)});
-    rows.forEach((current,index)=>{
-      if(!current)return;
-      const field=`subclass:${key}:${index}`;
-      const available=key==='super'?fresh.superOptions||[]:fresh[optionsKey]?.[String(current.socketIndex)]||[];
-      const options=available.filter(row=>row?.canInsert===true&&Number(row.socketIndex)===Number(current.socketIndex));
-      state.fields.set(field,{type:'subclass-socket',key,index,socketIndex:Number(current.socketIndex)});
-      subclass+=editorSelect(field,`${key==='super'?'Super':key} ${key==='super'?'':index+1}`,current,options,state);
-    });
-  }
-  return `${nameFields(state.record)}<p class="paradox-dialog-note">Changes are saved to this PARADOX build. Use APPLY separately to equip them.</p><div class="paradox-editor-grid">${equipment}<fieldset><legend>SUBCLASS</legend>${subclass}</fieldset></div>${subclassCompatibilityViolations(build).length?component('BUILD CHECK',subclassCompatibilityViolations(build)):''}`;
-}
-function renderEditor(state){showDialog(`EDIT ${state.record.name}`,editorBody(state),'<button type="button" class="is-primary" data-dialog-action="save-record">SAVE CHANGES</button>',state);}
 async function openEditor(record,{asCopy=false}={}){
   const check=guardContext();await refreshProfile();check();
+  if(!equipped)throw new RetryableLoadError(MISSING_DATA_MESSAGE);
   const draft=copy(record);draft.build=enrichSavedBuild(draft.build);if(asCopy)draft.id=null;
   const all=createVaultCatalogue(payload).items||[];
   const catalogue=filterManualEquipmentSources(all,characterId);
@@ -382,34 +363,20 @@ async function openEditor(record,{asCopy=false}={}){
     const fresh=all.find(row=>itemId(row)===itemId(item));
     return editableSnapshotItem(item,fresh,key==='armour'?'armour':'weapon');
   });
-  if(!equipped)throw new RetryableLoadError(MISSING_DATA_MESSAGE);
-  const state={kind:'edit',record:draft,catalogue,subclasses:(equipped.subclassCatalog||[]).filter(item=>itemId(item)),check};
-  renderEditor(state);
+  // Unlocked perks and the selection limit come from the live Artifact, not the saved snapshot.
+  const artifact=Array.isArray(equipped.artifact?.perks)&&equipped.artifact.perks.length?equipped.artifact:draft.build.artifact||null;
+  const subclasses=(equipped.subclassCatalog||[]).filter(item=>item&&itemId(item));
+  renderEditor({kind:'edit',editor:createArmouryEditor({record:draft,catalogue,subclasses,artifact}),check});
 }
-function editChoice(node){
-  const state=dialogState;if(state?.kind!=='edit'||busy)return;state.check();
-  state.record.name=byId('paradoxEditName').value;state.record.description=byId('paradoxEditDescription').value;
-  const field=state.fields.get(node.dataset.editorChoice),option=state.choices.get(node.dataset.editorChoice)?.[Number(node.value)];if(!field||!option)return;
-  const before=copy(state.record.build),build=state.record.build;
-  try{
-    if(field.type==='gear')stageEquipmentChoice(build,field.kind,field.index,option);
-    else if(field.type==='socket')stageSocketChoice(build,field.kind,field.index,field.socketIndex,option);
-    else if(field.type==='subclass'){
-      const oldId=build.subclassItemInstanceId;
-      build.subclassItem=copy(option);build.subclassItemInstanceId=itemId(option);build.subclass=option.element||option.subclass;build.subclassName=option.name;build.subclassIcon=option.icon;build.subclassBuild=copy(option.subclassBuild);
-      build.manualSocketChanges=(build.manualSocketChanges||[]).filter(change=>String(change.itemInstanceId)!==String(oldId));
-      recordManualEdit(build,{component:'subclass',beforeItemInstanceId:oldId,afterItemInstanceId:itemId(option)});
-    }else{
-      const sb=build.subclassBuild,prior=field.key==='super'?sb.super:(sb[field.key]||[]).find(item=>Number(item?.socketIndex)===field.socketIndex);
-      stageSubclassSocketChoice(build,prior,option,field.key);
-      if(field.key==='super')sb.super=copy(option);else{const rows=[...(sb[field.key]||[])],at=rows.findIndex(item=>Number(item?.socketIndex)===field.socketIndex);if(at>=0)rows[at]=copy(option);else rows.push(copy(option));sb[field.key]=rows;}
-      recordManualEdit(build,{component:`subclass-${field.key}`,beforePlugHash:hashOf(prior),afterPlugHash:hashOf(option)});
-    }
-    for(const key of ['super','abilities','aspects','fragments'])build[key]=copy(build.subclassBuild?.[key]||null);
-    // These were captured totals, not a prediction for the edited equipment.
-    build.stats=[];
-    renderEditor(state);
-  }catch(error){state.record.build=before;renderEditor(state);dialogError(error);}
+function editorClick(control){
+  const state=dialogState;if(state?.kind!=='edit')return;state.check();
+  state.editor.setText(byId('paradoxEditName')?.value,byId('paradoxEditDescription')?.value);
+  if(state.editor.handle(control))renderEditor(state);
+}
+function editorSearch(input){
+  const state=dialogState;if(state?.kind!=='edit')return;
+  state.editor.setText(byId('paradoxEditName')?.value,byId('paradoxEditDescription')?.value);
+  state.editor.search(input.value);renderEditor(state);
 }
 function slotOptions(){return Array.from({length:20},(_,index)=>{const slot=equipped?.loadouts?.[index],saved=Boolean(slot?.items?.length||slot?.subclassOverrides?.length);return `<option value="${index}">${index+1} · ${saved?`${esc(slotIdentity(slot).name)} (overwrite)`:'Empty'}</option>`;}).join('');}
 async function reviewBuildAction(id,toGame){
@@ -514,6 +481,7 @@ async function executeSlotAction(){
 async function handleDialogAction(action){
   const state=dialogState;if(!state)return;state.check();
   if(action==='save-record')return saveDialogRecord();
+  if(action==='save-record-new')return saveDialogRecord({asNew:true});
   if(action==='execute-build')return executeBuildAction();
   if(action==='execute-slot')return executeSlotAction();
   if(action==='delete-record'){
@@ -523,10 +491,16 @@ async function handleDialogAction(action){
   if(action==='equip-slot'||action==='clear-slot')return confirmSlotAction(action==='equip-slot'?'equip':'clear',state);
   if(action==='snapshot-slot'){await reviewBuildAction('equipped',true);byId('paradoxTargetSlot').value=String(state.index);return;}
   await refreshProfile();state.check();
+  // VIEW opens the same compact Loadout details as the Character page, over this page's profile.
+  if(action==='view-slot'){
+    const {openGuardianLoadoutDetails}=await import('../guardian-workspace-v2/guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4&grid=20261001-1');
+    dialog().close();dialogState=null;
+    await openGuardianLoadoutDetails({characterId,index:state.index,getCharacterId:()=>characterId,getPayload:()=>payload});
+    return;
+  }
   const record=await loadoutSnapshot(state.index);
   if(action==='copy-slot')return openSave(record);
   if(action==='edit-slot')return openEditor(record,{asCopy:true});
-  if(action==='view-slot')showDialog(`BUNGIE SLOT ${state.index+1} · ${record.name}`,`<div class="paradox-loadout-detail">${savedBuildOverview(record.build)}</div><p class="paradox-dialog-note">Saved Bungie slot. Equipped stays unchanged above your PARADOX builds.</p>`,'<button type="button" data-dialog-action="copy-slot">SAVE PARADOX COPY</button><button type="button" data-dialog-action="edit-slot">EDIT COPY</button>',{kind:'slot',index:state.index,check:state.check});
 }
 
 let itemTooltip=null,itemTooltipTarget=null,itemTooltipTitle=null;
@@ -564,6 +538,7 @@ document.addEventListener('click',event=>{
   const jump=event.target.closest?.('[data-jump-id]');if(jump){selectedId=jump.dataset.jumpId;render();byId(`loadout-${selectedId}`)?.scrollIntoView({behavior:'smooth',block:'start'});return;}
   if(event.target.closest?.('[data-dialog-close]')){closeDialog();return;}
   if(busy)return;
+  const editorControl=event.target.closest?.('[data-ed],[data-ed-pick]');if(editorControl){try{editorClick(editorControl);}catch(error){dialogError(error);}return;}
   if(event.target.closest?.('[data-dialog-retry]')){const work=retryAction;retryAction=null;dialog().close();dialogState=null;if(work)void runBusy(work);return;}
   const action=event.target.closest?.('[data-dialog-action]');if(action){void runBusy(()=>handleDialogAction(action.dataset.dialogAction));return;}
   const slot=event.target.closest?.('[data-in-game-slot]');if(slot){openSlot(Number(slot.dataset.inGameSlot));return;}
@@ -577,8 +552,12 @@ document.addEventListener('click',event=>{
     else if(kind==='delete'){const record=draftFor(id);showDialog('DELETE ARMOURY BUILD',`<p>Delete ${esc(record.name)}? This keeps the Bungie in-game slots.</p>`,'<button type="button" class="is-primary" data-dialog-action="delete-record">DELETE</button>',{kind:'delete',record,check});}
   });
 });
-document.addEventListener('change',event=>{if(event.target.matches?.('[data-editor-choice]'))try{editChoice(event.target);}catch(error){dialogError(error);}});
-dialog().addEventListener('cancel',event=>{if(busy)event.preventDefault();else dialogState=null;});
+document.addEventListener('input',event=>{if(event.target.matches?.('[data-ed-search]'))try{editorSearch(event.target);}catch(error){dialogError(error);}});
+dialog().addEventListener('cancel',event=>{
+  // Escape closes an open editor picker first, then the dialog.
+  if(dialogState?.editor?.state.picker){event.preventDefault();dialogState.editor.handle({dataset:{ed:'close-picker'}});renderEditor(dialogState);return;}
+  if(busy)event.preventDefault();else{dialog().classList.remove('is-armoury-editor');dialogState=null;}
+});
 document.addEventListener('forge:character-selected',event=>{if(busy)return;void setCharacter(String(event.detail?.characterId||'')).catch(reportError);});
 document.addEventListener('forge:hero-cards-render-complete',()=>{if(!busy&&!loading)void setCharacter(initialCharacter()).catch(reportError);});
 window.addEventListener('forge:bungie-session',event=>{
