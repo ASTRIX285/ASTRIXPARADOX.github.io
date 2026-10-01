@@ -42,7 +42,7 @@ for(const [path,prefix] of mobileNavigationPages){
 const publicHome=read('index.html');
 const publicCss=read('css/style.css');
 const publicJs=read('js/main.js');
-assert.match(publicHome,/<a class="nav-logo" href="index\.html" aria-label="ASTRIX PARADOX home">[\s\S]*?<\/a>[\s\S]*?<button class="nav-toggle"/, 'Homepage logo must close before the mobile navigation button');
+assert.match(publicHome,/<a class="nav-logo" href="\/" aria-label="ASTRIX PARADOX home">[\s\S]*?<\/a>[\s\S]*?<button class="nav-toggle"/, 'Homepage logo must close before the mobile navigation button');
 assert.doesNotMatch(publicHome,/class="logo"\s+<span/, 'Homepage must not restore the malformed logo anchor that captures mobile navigation taps');
 assert.match(publicJs,/function setMenuOpen\(open\)[\s\S]*?aria-expanded[\s\S]*?String\(open\)/, 'Mobile navigation controller must keep its expanded state synchronized');
 assert.match(publicJs,/event\.key === 'Escape'[\s\S]*?setMenuOpen\(false\)[\s\S]*?toggle\.focus\(\)/, 'Mobile navigation must close accessibly with Escape');
