@@ -1,4 +1,4 @@
-import {loadoutIcon,bindLoadoutIconDetails} from '../../shared/loadout-icon-layout.mjs?v=20260927-adapt-1';
+import {loadoutIcon,bindLoadoutIconDetails} from '../../shared/loadout-icon-layout.mjs?v=20260927-adapt-1&grid=20261001-1';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const TICK='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const CROSS='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';

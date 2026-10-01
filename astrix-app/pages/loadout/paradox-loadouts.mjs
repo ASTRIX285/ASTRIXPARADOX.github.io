@@ -491,10 +491,16 @@ async function handleDialogAction(action){
   if(action==='equip-slot'||action==='clear-slot')return confirmSlotAction(action==='equip-slot'?'equip':'clear',state);
   if(action==='snapshot-slot'){await reviewBuildAction('equipped',true);byId('paradoxTargetSlot').value=String(state.index);return;}
   await refreshProfile();state.check();
+  // VIEW opens the same compact Loadout details as the Character page, over this page's profile.
+  if(action==='view-slot'){
+    const {openGuardianLoadoutDetails}=await import('../guardian-workspace-v2/guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4&grid=20261001-1');
+    dialog().close();dialogState=null;
+    await openGuardianLoadoutDetails({characterId,index:state.index,getCharacterId:()=>characterId,getPayload:()=>payload});
+    return;
+  }
   const record=await loadoutSnapshot(state.index);
   if(action==='copy-slot')return openSave(record);
   if(action==='edit-slot')return openEditor(record,{asCopy:true});
-  if(action==='view-slot')showDialog(`BUNGIE SLOT ${state.index+1} · ${record.name}`,`<div class="paradox-loadout-detail">${savedBuildOverview(record.build)}</div><p class="paradox-dialog-note">Saved Bungie slot. Equipped stays unchanged above your PARADOX builds.</p>`,'<button type="button" data-dialog-action="copy-slot">SAVE PARADOX COPY</button><button type="button" data-dialog-action="edit-slot">EDIT COPY</button>',{kind:'slot',index:state.index,check:state.check});
 }
 
 let itemTooltip=null,itemTooltipTarget=null,itemTooltipTitle=null;

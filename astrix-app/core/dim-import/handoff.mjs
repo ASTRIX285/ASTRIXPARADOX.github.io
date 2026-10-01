@@ -1,5 +1,5 @@
 import {boundedStringify} from '../bounded-json.mjs';
-import {createDimForgeState} from './adapt.mjs?v=20260927-adapt-1';
+import {createDimForgeState} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1';
 import {createHandoffEnvelope} from '../../pages/guardian-workspace-v2/paradox-build-binding.mjs';
 export function sendDimToForge(build,{storage=globalThis.sessionStorage,location=globalThis.location}={}){
   const envelope=createHandoffEnvelope(createDimForgeState(build));

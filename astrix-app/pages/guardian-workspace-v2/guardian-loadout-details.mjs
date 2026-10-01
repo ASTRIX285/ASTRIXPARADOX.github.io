@@ -1,6 +1,6 @@
-import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1';
-import {resolveInGameLoadout,loadoutFingerprint} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1';
-import {createLoadoutDetailsActions} from '../../shared/loadout-details-actions.mjs?v=20260927-loadout-details-1';
+import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {resolveInGameLoadout,loadoutFingerprint} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {createLoadoutDetailsActions} from '../../shared/loadout-details-actions.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {sessionBinding,liveActionCapabilities} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 let current=null,opening=null;
 
@@ -10,7 +10,7 @@ function ensureStyle(){
   return new Promise((resolve,reject)=>{
     const link=document.getElementById(id)||document.createElement('link');
     link.onload=()=>resolve();link.onerror=()=>{link.remove();reject(new Error('Loadout Details styles could not be loaded. Retry.'));};
-    if(!link.id){link.id=id;link.rel='stylesheet';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1',import.meta.url).href;document.head.append(link);}
+    if(!link.id){link.id=id;link.rel='stylesheet';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1&grid=20261001-1',import.meta.url).href;document.head.append(link);}
   });
 }
 async function shareLoadout(data){
@@ -18,17 +18,18 @@ async function shareLoadout(data){
   if(navigator.canShare?.({files:[file]})){await navigator.share({title:data.name,files:[file]});return;}
   const url=URL.createObjectURL(file),link=document.createElement('a');link.href=url;link.download='paradox-loadout.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-export function openGuardianLoadoutDetails({characterId,index,getCharacterId,returnFocus}={}){
+// getPayload lets another page (the Armoury) open the same dialog over its own profile payload.
+export function openGuardianLoadoutDetails({characterId,index,getCharacterId,returnFocus,getPayload=()=>globalThis.FORGE_PAGE_PAYLOAD||{}}={}){
   if(opening)return opening;
   opening=(async()=>{
     await ensureStyle();
     if(String(getCharacterId())!==String(characterId))throw new Error('The Guardian changed. Reopen Loadout details.');
     current?.close();if(current)throw new Error('Finish the current loadout action first.');
-    const payload=globalThis.FORGE_PAGE_PAYLOAD||{},session=globalThis.FORGE_BUNGIE_SESSION||{},binding=sessionBinding(session);
+    const payload=getPayload()||{},session=globalThis.FORGE_BUNGIE_SESSION||{},binding=sessionBinding(session);
     const resolve=profile=>resolveInGameLoadout({profile,definitions:payload.definitions,manifestVersion:payload.manifestVersion||payload.prepared?.manifestVersion,manifest:payload.loadoutDetailsManifest||{},characterId,index,...binding});
     let model=resolve(payload.profile||{});
     const capabilities=liveActionCapabilities(session),acceptedFingerprints=new Set([model.fingerprint]);
-    const getContext=()=>({profile:globalThis.FORGE_PAGE_PAYLOAD?.profile,session:globalThis.FORGE_BUNGIE_SESSION,characterId:getCharacterId(),manifestVersion:globalThis.FORGE_PAGE_PAYLOAD?.manifestVersion});
+    const getContext=()=>({profile:getPayload()?.profile,session:globalThis.FORGE_BUNGIE_SESSION,characterId:getCharacterId(),manifestVersion:getPayload()?.manifestVersion});
     const actions=createLoadoutDetailsActions(model,{getContext,resolve,
       save:async input=>(await import('./paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-4')).saveParadoxLoadout(input),
       share:shareLoadout,
@@ -46,7 +47,7 @@ export function openGuardianLoadoutDetails({characterId,index,getCharacterId,ret
       if(!context.session?.authenticated||active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType||String(context.characterId)!==String(characterId))current?.invalidate();
       else if(!acceptedFingerprints.has(loadoutFingerprint(context.profile?.characterLoadouts?.data?.[characterId]?.loadouts?.[index])))current?.invalidate('The saved slot changed. Close and reopen its details.');
     };
-    current=openLoadoutDetails(model,{actions,disabledReasons,returnFocus,onClose:()=>{events.forEach(event=>document.removeEventListener(event,check));globalThis.removeEventListener('forge:bungie-session',check);current=null;}});
+    current=openLoadoutDetails(model,{presentation:'grid',actions,disabledReasons,returnFocus,onClose:()=>{events.forEach(event=>document.removeEventListener(event,check));globalThis.removeEventListener('forge:bungie-session',check);current=null;}});
     events.forEach(event=>document.addEventListener(event,check));globalThis.addEventListener('forge:bungie-session',check);
     return current;
   })().finally(()=>{opening=null;});

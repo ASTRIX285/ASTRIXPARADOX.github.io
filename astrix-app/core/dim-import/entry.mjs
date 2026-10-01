@@ -1,10 +1,10 @@
 import {watchDimContext} from './context.mjs?v=20260927-adapt-1';
 import {DimShareClient} from './share.mjs?v=20260927-fetch-3';
 import {ImportManifest,createImportStorage} from './cache.mjs?v=20260927-fetch-3';
-import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1';
-import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1';
-import {createDimActions} from './actions.mjs?v=20260927-adapt-1';
-import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-adapt-1';
+import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1';
+import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1&grid=20261001-1';
+import {createDimActions} from './actions.mjs?v=20260927-adapt-1&grid=20261001-1';
+import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
 let selectedCharacterId='',current=null,currentModel=null;
@@ -16,7 +16,7 @@ function context(){
 }
 function style(){
   if(document.querySelector('[data-dim-style]'))return;
-  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1',import.meta.url).href;document.head.append(link);
+  const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1&grid=20261001-1',import.meta.url).href;document.head.append(link);
 }
 export async function importDimLoadout(input,{returnFocus}={}){
   const started=performance.now();const before=context(),binding={...sessionBinding(before.session),characterId:before.characterId};
