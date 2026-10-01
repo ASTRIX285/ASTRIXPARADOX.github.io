@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="/css/astrix-brand.css?v=20260929-brand-1">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20260930-home-map-2">
+  <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,7 +65,7 @@
 }
   </script>
 </head>
-<body class="ax-brand">
+<body class="ax-brand ax-map ax-stroke">
 
 <!-- ── NAV ── -->
 <nav class="nav">
@@ -93,7 +94,7 @@
 <!-- 1. HERO ── -->
 <section class="hero">
   <div class="hero-bg">
-        <div class="hero-bg-video" style="background:url('astrix-app/shared/astrix-deep-space.jpg') center center / cover no-repeat !important; -webkit-mask-image:none !important; mask-image:none !important; filter:brightness(.9) !important; opacity:1 !important;">
+        <div class="hero-bg-video">
       <video id="heroBg" autoplay muted loop playsinline poster="img/hero-bg.png">
         <source src="video/Digital Growth 6.mp4" type="video/mp4">
       </video>
@@ -139,7 +140,7 @@
 
 <!-- 2. STATS ── -->
 <section style="padding:40px;background:var(--dark-2);border-top:1px solid rgba(139,0,0,0.2);">
-  <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;">
+  <div class="ax-map-panel ax-stat-grid" style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;">
     <div class="reveal">
       <div style="font-family:'bahnschrift-semicondensed',monospace;font-size:32px;font-weight:900;color:var(--crimson-mid);">25+</div>
       <div style="font-size:13px;letter-spacing:3px;color:var(--grey);margin-top:6px;text-transform:uppercase;">Years in the Field</div>
@@ -171,7 +172,7 @@
 
     <!-- VOD PLAYER -->
     <div id="vodSection" style="display:none;width:100%;position:relative;">
-      <div class="stream-live-header">
+      <div class="stream-live-header ax-map-panel">
         <div class="stream-offline-badge">● TRANSMISSION OFFLINE · LAST BROADCAST</div>
         <div class="section-eyebrow">Live Transmission</div>
         <h2 class="section-title">Watch the <span class="accent">Hunt</span> Unfold</h2>
@@ -191,7 +192,7 @@
     </div>
 
     <!-- FALLBACK if no VOD -->
-    <div class="stream-offline-content" id="vodFallback">
+    <div class="stream-offline-content ax-map-panel" id="vodFallback">
       <div class="section-eyebrow">Live Transmission</div>
       <h2 class="section-title">Watch the <span class="accent">Hunt</span> Unfold</h2>
       <p class="stream-sub">Streaming live from inside the Paradox</p>
@@ -209,7 +210,7 @@
 
   <!-- LIVE STATE -->
   <div class="stream-live-full" id="streamLive" style="display:none;">
-    <div class="stream-live-header">
+    <div class="stream-live-header ax-map-panel">
       <div class="stream-live-badge">🔴 LIVE NOW</div>
       <div class="section-eyebrow">Live Transmission</div>
       <h2 class="section-title">Watch the <span class="accent">Hunt</span> Unfold</h2>
@@ -236,7 +237,7 @@
 
 <!-- 4. CURRENTLY PLAYING ── (content injected from window.CURRENT_GAME, see <head>) -->
 <section class="section">
-  <div style="max-width:1100px;margin:0 auto;">
+  <div class="ax-map-panel" style="max-width:1100px;margin:0 auto;">
     <div class="section-eyebrow reveal" id="cgEyebrow">Active Universe</div>
     <h2 class="section-title reveal reveal-delay-1"><span id="cgNameWhite">Destiny</span> <span class="accent" id="cgNameAccent">2</span></h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:40px;">
@@ -273,7 +274,7 @@
 <!-- DISCORD CTA ── -->
 <section style="padding:80px 40px;background:var(--dark-2);text-align:center;position:relative;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(139,0,0,0.15) 0%,transparent 60%);"></div>
-  <div style="position:relative;z-index:1;max-width:700px;margin:0 auto;">
+  <div class="ax-map-panel" style="position:relative;z-index:1;max-width:700px;margin:0 auto;">
     <div class="section-eyebrow reveal" style="text-align:center;">ASTRIX PARADOX</div>
     <h2 class="section-title reveal reveal-delay-1" style="text-align:center;font-size:clamp(24px,4vw,48px);">
       Choose Your <span class="accent">Universe</span>
@@ -304,7 +305,7 @@
 </section>
 
 <!-- ── FOOTER ── -->
-<footer class="footer">
+<footer class="footer ax-map-panel">
   <div class="footer-social">
     <a href="https://x.com/ASTRIX285" target="_blank">X / Twitter</a>
     <a href="https://discord.com/invite/6dcyrbpdzN" target="_blank">Discord</a>
