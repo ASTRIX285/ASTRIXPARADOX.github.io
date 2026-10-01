@@ -1,0 +1,28 @@
+/* Destiny 2 landing pages on phones (1 Oct 2026): the same collapsed menu as the other
+   public pages. The links stay closed on load and open as a panel under the bar from the
+   nav-toggle button (js/main.js: closes on link tap, outside tap and Escape).
+   body.destiny-landing outranks landing.css, which keeps the desktop row of links. */
+@media (max-width: 768px) {
+  body.destiny-landing .nav { flex-wrap: nowrap; }
+  body.destiny-landing .nav-toggle { display: flex; order: 3; margin-left: auto; }
+  body.destiny-landing .nav-links {
+    position: absolute;
+    z-index: 1002;
+    top: 100%;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-height: calc(100dvh - var(--nav-height));
+    overflow-y: auto;
+    padding: 8px 0 16px;
+    gap: 0;
+    background: var(--apx-colour-canvas);
+    border-top: 1px solid var(--apx-colour-border);
+  }
+  /* Solid panel: an inset Forge Black fill paints over the near-solid shared background and under the links. */
+  body.destiny-landing .nav-links.open { display: flex; box-shadow: inset 0 0 0 100vmax var(--ax-black); }
+  body.destiny-landing .nav-links a { min-height: 48px; padding: 0 20px; font-size: 14px; }
+}
