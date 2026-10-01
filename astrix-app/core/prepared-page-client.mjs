@@ -1,6 +1,6 @@
 import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
 import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
-import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
+import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
 import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';

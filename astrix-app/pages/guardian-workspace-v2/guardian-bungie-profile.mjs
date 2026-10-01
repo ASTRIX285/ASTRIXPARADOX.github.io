@@ -1,5 +1,5 @@
 import {boundedStringify} from '../../core/bounded-json.mjs';
-import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4';
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?plain=20260925-2";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
@@ -12,7 +12,7 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,
@@ -940,7 +940,8 @@ async function activateLiveProfile(payload,session,{fromCache=false}={}){
   if(!preparedPagePayloadResolved){preparedPagePayloadResolved=true;resolvePreparedPagePayload(payload);}
   liveProfilePayload=payload;
   liveProfileSession=session;
-  const preferredCharacterId=explicitlySelectedCharacterId||(location.pathname.includes('/paradox-build-space/')?currentSelectedCharacterId():"");
+  // The last selected Guardian (remembered per account by the tool shell) comes first.
+  const preferredCharacterId=explicitlySelectedCharacterId||currentSelectedCharacterId();
   const explicitCharacter=payload.profile?.characters?.data?.[preferredCharacterId]||null;
   const selectedCharacterId=String(explicitCharacter?.characterId||activeCharacter(payload.profile)?.characterId||"");
   if(selectedCharacterId)rememberCharacterId(selectedCharacterId);
@@ -1110,6 +1111,8 @@ function startGuardianBackgroundRefresh(session){
     onError:error=>console.warn('[Forge] Background profile refresh failed',error)
   });
   guardianRefreshController.start();
+  // The header refresh icon (astrix-destination-ribbon.js) runs this page's own refresh.
+  globalThis.FORGE_REFRESH=()=>guardianRefreshController?.refreshNow();
 }
 
 async function handleAuthenticatedSession(session){

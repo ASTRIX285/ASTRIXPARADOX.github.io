@@ -1,5 +1,5 @@
 import {getBungieSession} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
-import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+import {loadPreparedPagePayload} from '../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 
 const BUNGIE_ORIGIN='https://www.bungie.net';
 const CLASS_NAMES=['titan','hunter','warlock'];
@@ -35,10 +35,12 @@ function mostRecentCharacterId(characters){
   return String([...characters].sort((left,right)=>String(right?.dateLastPlayed||'').localeCompare(String(left?.dateLastPlayed||'')))[0]?.characterId||'');
 }
 
+function storedCharacterId(){try{return String(sessionStorage.getItem(SELECTED_CHARACTER_KEY)||'');}catch{return '';}}
 function initialCharacterId(characters){
-  if(!IS_VAULT_PAGE&&!IS_FORGE_LOADER_PAGE)return mostRecentCharacterId(characters);
-  const requested=new URLSearchParams(location.search).get('characterId')||'';
-  const preferred=[requested].map(String).find(characterId=>characters.some(character=>String(character.characterId)===characterId));
+  // A requested Guardian (Vault, Forge Loader links) first, then the last selected one
+  // (remembered per account by the tool shell), then the most recently played.
+  const requested=IS_VAULT_PAGE||IS_FORGE_LOADER_PAGE?new URLSearchParams(location.search).get('characterId')||'':'';
+  const preferred=[requested,storedCharacterId()].filter(Boolean).map(String).find(characterId=>characters.some(character=>String(character.characterId)===characterId));
   return preferred||mostRecentCharacterId(characters);
 }
 

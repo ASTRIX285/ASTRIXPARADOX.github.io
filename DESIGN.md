@@ -99,7 +99,12 @@ Gold `#ffd36a`, deep gold `#c88a26`, crimson `#d3202f`, red `#790810`, deep red 
 
 ## 7. Responsive Rules
 
-- Designed and tested at 390px and 1440px. No horizontal page scroll at any width.
+- Designed and tested at 390px (phone), 820px (iPad) and 1600px (desktop). No horizontal page scroll at any width.
+- **Tool shell (Miguel, 1 Oct 2026), every tool page including Guardian Home.** Lives in `astrix-tool-shell.css` and `astrix-destination-ribbon.js`.
+  - Breakpoint: phone and tablet layout up to 1199px; the desktop ribbon and three Guardian cards are unchanged above that.
+  - Header bar at every width: ASTRIX wordmark on the left (links to `/`); on the right a refresh icon (circular arrow, 40px hit area, label "Refresh Guardian data", spins while a refresh runs and is disabled while busy), the Bungie emblem, and on phone and tablet a menu icon (three lines, notched button with the strobe stroke). There are no text Refresh buttons; the icon runs the page's own refresh.
+  - Menu: the icon opens a drawer sliding in from the left (DIM style), full height, Panel background, plain-text tabs for all eight tools, the current one with the strobing crimson underline. It closes on outside tap, Escape and link tap; focus is trapped while open and returns to the menu icon. No tab block on phone or tablet.
+  - Guardian card on phone and tablet: only the active Guardian shows, defaulting to the last one selected (remembered per Bungie account). Tapping it lists the other two below it; picking one selects it, collapses the list and fires `forge:character-selected`. Same emblem art, 15px corners and circling strobe on the active card. Desktop keeps all three cards.
 - Every multi-column layout declares its single-column fallback under 768px.
 - Mobile icon rows scroll horizontally inside their own container, never the page.
 - Touch targets at least 44px on phones.
