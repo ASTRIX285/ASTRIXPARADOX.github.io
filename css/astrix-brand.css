@@ -191,9 +191,9 @@ body.ax-brand.ax-map :is(.form-input,.form-select,.form-textarea){background:var
   body.ax-brand.ax-map .ax-map-panel{padding:16px!important}
   body.ax-brand .ax-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
-body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle){position:relative!important;isolation:isolate!important}
+body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close){position:relative!important;isolation:isolate!important}
 body.ax-brand.ax-stroke .nav-links a::before,
-body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle):not(:disabled)::after{
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):not(:disabled)::after{
   content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
   padding:0 0 1.5px 1.5px!important;border-radius:0!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
   background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
@@ -205,7 +205,7 @@ body.ax-brand.ax-stroke .nav-links a::before{background-image:linear-gradient(13
 /* On red and brand-coloured fills the stroke is a lighter ember so it still reads. */
 body.ax-brand.ax-stroke :is(.btn-primary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.btn-facebook){--ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary)}
 body.ax-brand.ax-stroke .nav-links a:is(:hover,:focus-visible)::before,
-body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle):is(:hover,:focus-visible)::after{animation-duration:1.4s!important}
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):is(:hover,:focus-visible)::after{animation-duration:1.4s!important}
 
 /* ---------- Footers and Bungie attribution ---------- */
 body.ax-brand footer,body.ax-brand .apx-bungie-attribution{font-family:var(--ax-font-body)!important}
@@ -214,7 +214,7 @@ body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 au
 
 @media (prefers-reduced-motion:reduce){
   body.ax-brand .nav-links a.active::after{animation:none!important}
-  body.ax-brand.ax-stroke .nav-links a::before,body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle)::after{animation:none!important;--ax-pulse:-20%}
+  body.ax-brand.ax-stroke .nav-links a::before,body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close)::after{animation:none!important;--ax-pulse:-20%}
   body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover::before{animation:none!important}
 }
 }
