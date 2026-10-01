@@ -30,12 +30,23 @@
   --ax-notch:12px;
   --ax-clip:polygon(0 0,calc(100% - var(--ax-notch)) 0,100% var(--ax-notch),100% 100%,0 100%);
   --ax-ease:cubic-bezier(.23,1,.32,1);
+  /* Strobe stroke, same tokens and values as the tool shell (astrix-tool-shell.css). */
+  --ax-stroke-hi:#ff4a3d;--ax-stroke:var(--ax-ember);
+  --ax-stroke-fade:rgba(186,31,18,.45);--ax-stroke-fade-tab:rgba(186,31,18,.4);
+  --ax-stroke-pulse:rgba(255,226,216,.95);--ax-stroke-glow:rgba(255,60,50,.45);
+  --ax-stroke-hi-primary:#ffd0c6;--ax-stroke-primary:#ff8a74;
+  /* Wash over the ASTRIX PARADOX map art on public pages. */
+  --ax-map-wash-top:rgba(14,12,9,.35);--ax-map-wash-bottom:rgba(14,12,9,.7);--ax-map-glow:rgba(115,32,34,.22);
+  /* Panels over the map: Panel #15130f at 75 percent with the #2e2a22 hairline. */
+  --ax-map-panel:rgba(21,19,15,.75);--ax-hairline:#2e2a22;
 }
 
 @keyframes ax-strobe{0%,100%{opacity:.35}4%{opacity:1}7%{opacity:.45}10%{opacity:1}16%{opacity:.35}}
 @keyframes ax-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
 @keyframes ax-sheen{0%{transform:translateX(-160%)}100%{transform:translateX(420%)}}
 @keyframes ax-pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@property --ax-pulse{syntax:'<percentage>';inherits:false;initial-value:-20%}
+@keyframes ax-stroke-pulse{0%{--ax-pulse:-20%}70%,100%{--ax-pulse:120%}}
 
 @layer astrix-brand{
 
@@ -153,6 +164,49 @@ body.ax-brand .platform-brand-name{font:400 26px/1 var(--ax-font-brand)!importan
 body.ax-brand .platform-brand-name span{color:var(--ax-ember-hi)!important}
 body.ax-brand .platform-brand p{font:400 11px/1 var(--ax-font-brand)!important;letter-spacing:.42em!important;color:var(--ax-steel)!important}
 
+/* ---------- Opt-in per public page (Home first, 30 Sep 2026) ----------
+   ax-map: the ASTRIX PARADOX map art from the tool pages as the page ground. The page also links
+   astrix-app/shared/astrix-paradox-background.css, which defines --forge-paradox-map-art.
+   ax-stroke: the tool pages' strobe stroke on every nav tab and button. A crimson 1.5px line down the
+   left edge and along the bottom, fading out at the bottom-right corner, with a light pulse along it. */
+body.ax-brand.ax-map::before{inset:-4px!important;background:
+  radial-gradient(1100px 640px at 78% 18%,var(--ax-map-glow),transparent 62%),
+  linear-gradient(180deg,var(--ax-map-wash-top),var(--ax-map-wash-bottom) 70%),
+  var(--forge-paradox-map-art) center/cover no-repeat!important;
+  filter:blur(2px)!important;transform:scale(1.005)!important}
+/* Every band below the hero is transparent so the map runs the whole page. Text blocks that need
+   contrast carry ax-map-panel. This also clears the old navy stream and footer bands (style.css). */
+body.ax-brand.ax-map :is(body>section:not(.hero),.stream-section,.stream-offline-full,.stream-offline-full.has-vod,.stream-live-full,.stream-actions-live,#vodSection,.footer,.apx-bungie-attribution){background:transparent!important}
+body.ax-brand.ax-map .ax-map-panel{background:var(--ax-map-panel)!important;border:1px solid var(--ax-hairline)!important;padding:clamp(20px,3vw,36px)!important}
+body.ax-brand.ax-map .footer.ax-map-panel{border-width:1px 0 0!important}
+body.ax-brand.ax-map .ax-map-panel{box-sizing:border-box!important;min-width:0!important}
+/* Every public page (Reviews, News, Clips, Universes, Join Us, Tools, Destiny 2), 1 Oct 2026:
+   page heroes and bands are transparent so the map runs the whole page; the old navy and solid
+   backgrounds (style.css and inline section styles) never show. Cards, filters and form fields
+   become the same Panel with a hairline as the home page's text blocks. */
+body.ax-brand.ax-map :is(.reviews-hero,.news-hero,.clips-hero,.games-hero,.join-hero,.tools-hero,.section,.filter-wrap,.tools-principles,.current-platform,.tools-future,main>section,section[style*="background"],div[style*="background:var(--dark"]){background:transparent!important;background-image:none!important}
+body.ax-brand.ax-map :is(.review-card,.news-card,.clip-card,.join-card,.principle,.destination,.platform-overview,.platform-card,.join-grid+.reveal,.ax-panel){background:var(--ax-map-panel)!important;border:1px solid var(--ax-hairline)!important}
+body.ax-brand.ax-map :is(.form-input,.form-select,.form-textarea){background:var(--ax-map-panel)!important;border:1px solid var(--ax-line-strong)!important}
+@media (max-width:768px){
+  body.ax-brand.ax-map .ax-map-panel{padding:16px!important}
+  body.ax-brand .ax-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close){position:relative!important;isolation:isolate!important}
+body.ax-brand.ax-stroke .nav-links a::before,
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):not(:disabled)::after{
+  content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:0 0 1.5px 1.5px!important;border-radius:0!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)!important;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow))!important;animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+body.ax-brand.ax-stroke .nav-links a::before{background-image:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+  linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 5px,var(--ax-stroke-fade-tab) 40%,transparent 100%)!important}
+/* On red and brand-coloured fills the stroke is a lighter ember so it still reads. */
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.btn-facebook){--ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary)}
+body.ax-brand.ax-stroke .nav-links a:is(:hover,:focus-visible)::before,
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):is(:hover,:focus-visible)::after{animation-duration:1.4s!important}
+
 /* ---------- Footers and Bungie attribution ---------- */
 body.ax-brand footer,body.ax-brand .apx-bungie-attribution{font-family:var(--ax-font-body)!important}
 body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 auto!important;padding:18px clamp(16px,3vw,40px) 28px!important;
@@ -160,6 +214,7 @@ body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 au
 
 @media (prefers-reduced-motion:reduce){
   body.ax-brand .nav-links a.active::after{animation:none!important}
+  body.ax-brand.ax-stroke .nav-links a::before,body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close)::after{animation:none!important;--ax-pulse:-20%}
   body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover::before{animation:none!important}
 }
 }

@@ -133,3 +133,11 @@
   html:has(.destiny-landing) { scroll-behavior: auto; }
   .destiny-landing *, .destiny-landing *::before, .destiny-landing *::after { animation: none !important; transition: none !important; }
 }
+
+/* With ax-map (1 Oct 2026) the ASTRIX PARADOX map is the page ground, as on every public page:
+   the body stays transparent and its ::before carries the map (astrix-brand.css). The comparison
+   table sits on the same Panel and hairline as other text blocks so it stays readable. */
+.destiny-landing.ax-map { background: transparent; }
+.destiny-landing.ax-map::before { display: block; }
+.destiny-landing.ax-map .landing-table-wrap { background: var(--ax-map-panel); border-color: var(--ax-hairline); }
+.destiny-landing.ax-map .landing-comparison th { background: transparent; }

@@ -1,0 +1,13 @@
+astrix-app/pages/home/index.html
+css/astrix-brand.css
+index.html
+pages/clips.html
+pages/games.html
+pages/join.html
+pages/news.html
+pages/rebrand.html
+pages/reviews.html
+tools/destiny-2/dim-companion/index.html
+tools/destiny-2/dim-loadout-viewer/index.html
+tools/destiny-2/index.html
+tools/index.html
