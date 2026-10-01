@@ -11,7 +11,7 @@
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
@@ -148,13 +148,16 @@
   }
   // Header brand: the AX logo beside the ASTRIX wordmark with the red X.
   function brandHeader(){
-    document.querySelectorAll('header.apx-destination-header .apx-destination-brand').forEach(brand=>{
-      if(brand.dataset.axBrand)return;brand.dataset.axBrand='1';
+    document.querySelectorAll('header.apx-destination-header .apx-destination-brand').forEach(found=>{
+      if(found.dataset.axBrand)return;
+      // The ASTRIX PARADOX brand always links to the main home page, on every tool page.
+      let brand=found;
+      if(found.tagName!=='A'){brand=document.createElement('a');for(const {name,value} of [...found.attributes])brand.setAttribute(name,value);brand.append(...found.childNodes);found.replaceWith(brand);}
+      brand.dataset.axBrand='1';brand.setAttribute('href','/');brand.setAttribute('aria-label','ASTRIX PARADOX home');
       const image=brand.querySelector('img');if(image){image.src='/img/ax-logo-160.webp';image.alt='';image.width=49;image.height=40;}
       const words=document.createElement('span');words.className='ax-wordmark';
       words.innerHTML='<span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span>';
       brand.querySelector(':scope>span')?.replaceWith(words);
-      if(!brand.getAttribute('aria-label'))brand.setAttribute('aria-label','ASTRIX PARADOX');
     });
   }
   // The tab row sits exactly under the header, whatever height the Guardian cards give it.
