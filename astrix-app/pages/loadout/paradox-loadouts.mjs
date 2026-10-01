@@ -20,6 +20,10 @@ const byId=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameOf=item=>String(item?.name||item?.displayName||'Unresolved item');
 const hashOf=item=>Number(item?.hash??item?.itemHash??item?.bungieHash);
+// Bungie loadouts store 2166136261 (the FNV-1a hash of an empty input) for a socket
+// with no plug. It is never a real item, so it renders and applies as an empty socket.
+const EMPTY_PLUG_HASH=2166136261;
+const isEmptyPlug=item=>item==null||hashOf(item)===EMPTY_PLUG_HASH;
 
 function component(title,rows,{wide=false}={}){return `<section class="paradox-loadout-component${wide?' wide':''}"><h3>${esc(title)}</h3><ul>${rows.length?rows.map(row=>`<li>${esc(row)}</li>`).join(''):'<li>Not staged</li>'}</ul></section>`;}
 // Render the saved snapshot, never substitute the currently equipped Guardian.
@@ -31,6 +35,7 @@ function savedIcon(item){
 }
 function savedTile(item,{compact=false,equipment=false,kind='',tooltip=''}={}){
   if(!item)return '';
+  if(isEmptyPlug(item))return `<figure class="saved-build-tile${compact?' is-compact':''} is-empty" title="Empty socket" aria-label="Empty socket" role="img" tabindex="0"><div class="saved-build-art"><span class="saved-build-empty-socket" aria-hidden="true">◇</span></div></figure>`;
   const name=item.name||item.displayName||item.displayProperties?.name||item.definition?.displayProperties?.name||`Unresolved item ${hashOf(item)||''}`,icon=savedIcon(item);
   const power=item.power==null||item.power===''?null:Number(item.power);
   const label=[name,tooltip,!icon?'No icon':'',equipment&&!Number.isFinite(power)?'Power unavailable':''].filter(Boolean).join('\n');
@@ -40,16 +45,16 @@ function savedTile(item,{compact=false,equipment=false,kind='',tooltip=''}={}){
   return `<figure class="saved-build-tile${compact?' is-compact':''}${equipment?' is-equipment':''}${item.isExotic?' is-exotic':''}" title="${esc(label)}" aria-label="${esc(label)}" role="img" tabindex="0">${shared||`<div class="saved-build-art">${icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:empty}</div>`}${!equipment&&Number.isInteger(count)&&count>1?`<span class="saved-build-count" aria-label="Count ${count}">${count}</span>`:''}</figure>`;
 }
 function savedMods(item){
-  const mods=[...(item.generalMods||item.armourSemantics?.generalMods||[]),...(item.slotMods||item.armourSemantics?.slotMods||[])].filter(Boolean);
+  const mods=[...(item.generalMods||item.armourSemantics?.generalMods||[]),...(item.slotMods||item.armourSemantics?.slotMods||[])].filter(mod=>!isEmptyPlug(mod));
   // Classified legacy rows may lack definitions. Raw sockets require positive
   // mod evidence; archetypes, cosmetics and intrinsic plugs are never mods.
-  return mods.length?mods.filter(mod=>['general-mod','slot-mod','unknown'].includes(classifyArmourPlug(mod))):(item.mods||[]).filter(mod=>mod&&['general-mod','slot-mod'].includes(classifyArmourPlug(mod)));
+  return mods.length?mods.filter(mod=>['general-mod','slot-mod','unknown'].includes(classifyArmourPlug(mod))):(item.mods||[]).filter(mod=>!isEmptyPlug(mod)&&['general-mod','slot-mod'].includes(classifyArmourPlug(mod)));
 }
 function savedEquipment(title,items){
   return `<div class="saved-build-equipment" role="group" aria-label="${esc(title)}">${items.filter(Boolean).map(item=>{
     const model=item.weaponSemantics?.perkModel||item.weaponPerkModel;
     const perks=(model?.columns||[]).map(column=>(column.options||[]).find(option=>hashOf(option)===Number(column.selectedPlugHash))).filter(Boolean);
-    const appearance=title==='Armour'?[item.shader,item.ornament].filter(Boolean):[];
+    const appearance=title==='Armour'?[item.shader,item.ornament].filter(plug=>!isEmptyPlug(plug)):[];
     return `<div class="saved-build-equipment-item">${savedTile(item,{equipment:true,kind:title==='Weapons'?'weapon':title==='Armour'?'armour':'equipment',tooltip:perks.map(nameOf).join('\n')})}${title==='Armour'?`<div class="saved-build-attached-mods" role="group" aria-label="${esc(nameOf(item))} mods">${savedMods(item).map(mod=>savedTile(mod,{compact:true})).join('')}</div>`:''}${appearance.length?`<div class="saved-build-appearance" role="group" aria-label="${esc(nameOf(item))} appearance">${appearance.map(plug=>savedTile(plug,{compact:true})).join('')}</div>`:''}</div>`;
   }).join('')||'<p class="saved-build-missing">Not saved</p>'}</div>`;
 }
@@ -70,8 +75,8 @@ export function savedBuildOverview(build={}){
   const armour=(build.armour||[]).filter(Boolean),mods=armour.flatMap(item=>savedMods(item).map(mod=>({item:mod,owner:nameOf(item)})));
   const equipment=[build.ghost||build.equipment?.ghost,build.ship||build.equipment?.ship,build.sparrow||build.equipment?.sparrow].filter(Boolean);
   const subclassName=build.subclassName||build.subclass||'Subclass';
-  const components=[...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])].filter(Boolean);
-  return `<div class="saved-build-overview" role="region" aria-label="Saved build equipment" tabindex="0"><div class="saved-build-row"><div class="saved-build-subclass" role="group" aria-label="Subclass and abilities"><div class="saved-build-super">${savedTile(sb.super||{name:subclassName,icon:build.subclassIcon},{tooltip:subclassName})}</div><div class="saved-build-subclass-icons">${components.map(item=>savedTile(item)).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div><div class="saved-build-weapons">${savedEquipment('Weapons',build.weapons||[])}</div><div class="saved-build-armour">${savedEquipment('Armour',armour)}${savedStats(build.stats||[])}</div><div class="saved-build-cosmetics">${equipment.length?savedEquipment('Ghost, Ship and Sparrow',equipment):''}</div><div class="saved-build-sockets"><div class="saved-build-mods" role="group" aria-label="Armour mods">${mods.map(mod=>savedTile(mod.item,{tooltip:mod.owner})).join('')||'<p class="saved-build-missing">Mods not saved</p>'}</div><div class="saved-build-artifact" role="group" aria-label="Artifact"><span class="saved-build-section-label">Artifact</span><div class="saved-build-artifact-icons">${[build.artifact,...selected].filter(Boolean).map(item=>savedTile(item,{compact:true})).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div></div></div></div>`;
+  const components=[...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[])].filter(plug=>plug!=null);
+  return `<div class="saved-build-overview" role="region" aria-label="Saved build equipment" tabindex="0"><div class="saved-build-row"><div class="saved-build-subclass" role="group" aria-label="Subclass and abilities"><div class="saved-build-super">${savedTile(sb.super||{name:subclassName,icon:build.subclassIcon},{tooltip:subclassName})}</div><div class="saved-build-subclass-icons">${components.map(item=>savedTile(item)).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div><div class="saved-build-weapons">${savedEquipment('Weapons',build.weapons||[])}</div><div class="saved-build-armour">${savedEquipment('Armour',armour)}${savedStats(build.stats||[])}</div><div class="saved-build-cosmetics">${equipment.length?savedEquipment('Ghost, Ship and Sparrow',equipment):''}</div><div class="saved-build-sockets"><div class="saved-build-mods" role="group" aria-label="Armour mods">${mods.map(mod=>savedTile(mod.item,{tooltip:mod.owner})).join('')||'<p class="saved-build-missing">Mods not saved</p>'}</div><div class="saved-build-artifact" role="group" aria-label="Artifact"><span class="saved-build-section-label">Artifact</span><div class="saved-build-artifact-icons">${[build.artifact,...selected].filter(item=>!isEmptyPlug(item)).map(item=>savedTile(item,{compact:true})).join('')||'<p class="saved-build-missing">Not saved</p>'}</div></div></div></div></div>`;
 }
 function artifactRequiresInGameStep(build={}){const intended=[...new Set((build.artifactConfiguration?.selectedPerkHashes||[]).map(Number).filter(Number.isInteger))].sort((a,b)=>a-b),active=[...new Set((build.artifact?.activePerks||[]).filter(row=>row?.isActive!==false).map(hashOf).filter(Number.isInteger))].sort((a,b)=>a-b);return intended.length>0&&JSON.stringify(intended)!==JSON.stringify(active);}
 
@@ -83,12 +88,12 @@ export function matchingLoadouts(rows,characterId,binding={}){
 }
 const itemId=item=>String(item?.itemInstanceId||item?.instanceId||'');
 const copy=value=>structuredClone(value);
-function subclassRows(build){const sb=build.subclassBuild||{};return [sb.super,...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[]),...(sb.transcendenceSlots||[]).map(row=>row.equipped)].filter(Boolean);}
+function subclassRows(build){const sb=build.subclassBuild||{};return [sb.super,...(sb.abilities||[]),...(sb.aspects||[]),...(sb.fragments||[]),...(sb.transcendenceSlots||[]).map(row=>row?.equipped)].filter(plug=>!isEmptyPlug(plug));}
 export function selectedSocketTargets(build){
   const rows=new Map();
   const add=(item,plug,component)=>{
     const socketIndex=Number(plug?.socketIndex),plugHash=hashOf(plug);
-    if(plug?.source==='bungie-manifest-fixed-intrinsic'||!itemId(item)||plug?.socketIndex==null||!Number.isInteger(socketIndex)||socketIndex<0||!Number.isInteger(plugHash)||plugHash<=0)return;
+    if(plug?.source==='bungie-manifest-fixed-intrinsic'||!itemId(item)||plug?.socketIndex==null||!Number.isInteger(socketIndex)||socketIndex<0||!Number.isInteger(plugHash)||plugHash<=0||plugHash===EMPTY_PLUG_HASH)return;
     rows.set(`${itemId(item)}:${socketIndex}`,{itemInstanceId:itemId(item),itemHash:hashOf(item),itemName:nameOf(item),socketIndex,plugHash,plugName:nameOf(plug),component,reversible:true});
   };
   for(const [key,component] of [['weapons','weapon-perk'],['armour','armour-mod']])for(const item of build[key]||[]){
@@ -96,7 +101,7 @@ export function selectedSocketTargets(build){
     for(const plug of item.socketCoverage?.plugs||[])add(item,plug,component);
     const model=item.weaponSemantics?.perkModel||item.weaponPerkModel;
     for(const column of model?.columns||[]){const plug=(column.options||[]).find(row=>hashOf(row)===Number(column.selectedPlugHash));if(plug)add(item,{...plug,socketIndex:plug.socketIndex??column.socketIndex},component);}
-    for(const plug of [...(item.selectedPerks||item.weaponSemantics?.selectedPerks||[]),...savedMods(item),item.weaponMod,item.shader,item.ornament].filter(Boolean))add(item,plug,component);
+    for(const plug of [...(item.selectedPerks||item.weaponSemantics?.selectedPerks||[]),...savedMods(item),item.weaponMod,item.shader,item.ornament].filter(plug=>!isEmptyPlug(plug)))add(item,plug,component);
   }
   const subclass={...build.subclassItem,itemInstanceId:build.subclassItemInstanceId||itemId(build.subclassItem)};
   for(const plug of subclassRows(build))add(subclass,plug,'subclass-socket');
@@ -172,11 +177,34 @@ async function refreshSavedRecords(){
 }
 const trashIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg>';
 const dialog=()=>byId('paradoxLoadoutDialog');
-const visibleRecords=()=>matchingLoadouts(records,characterId,sessionBinding(session||{}));
+let profileUnavailable=false;
+// When the profile could not load, keep this account's cached builds visible rather than none.
+const visibleRecords=()=>{const binding=sessionBinding(session||{});if(characterId||!profileUnavailable||!binding.membershipId)return matchingLoadouts(records,characterId,binding);return records.filter(row=>String(row.binding?.membershipId)===String(binding.membershipId)&&String(row.binding?.membershipType)===String(binding.membershipType)).sort((a,b)=>String(b.updatedAt||b.createdAt).localeCompare(String(a.updatedAt||a.createdAt)));};
 const recordById=id=>visibleRecords().find(row=>row.id===id);
 const emit=(name,detail)=>document.dispatchEvent(new CustomEvent(name,{detail}));
 function status(message,error=false){const node=byId('paradoxLoadoutStatus');node.hidden=!message;node.textContent=message;node.classList.toggle('is-error',error);}
-function reportError(error){status(error?.message||'The Loadout action could not finish.',true);}
+const OUTAGE_MESSAGE='Bungie is unavailable right now. Your builds are safe. Try again in a few minutes.';
+const MISSING_DATA_MESSAGE='Bungie did not return your Guardian data. Retry.';
+const SLOW_MESSAGE='Loading your Guardian took too long. Retry.';
+const PARTIAL_LOAD_MESSAGE='Some builds could not refresh. Showing the builds saved on this device.';
+// 20s per step. Tests shorten it through ARMOURY_STEP_TIMEOUT_MS on their sandbox global.
+const STEP_TIMEOUT_MS=Number(globalThis.ARMOURY_STEP_TIMEOUT_MS)||20000;
+// A load failure the user can retry: RETRY reruns the same action from the start.
+class RetryableLoadError extends Error{constructor(message,cause){super(message);this.name='RetryableLoadError';this.retryable=true;if(cause)this.cause=cause;}}
+const isOutage=error=>Number(error?.status)>=500||error?.payload?.error==='bungie_unavailable'||/bungie_unavailable/.test(String(error?.message||''));
+function logError(error){globalThis.console?.error?.('[Armoury]',error);}
+function reportError(error){logError(error);status(error?.message||'The Armoury action could not finish.',true);}
+// Every profile step is bounded and logged, so a stalled step names itself in the console.
+async function timedStep(name,work,ms=STEP_TIMEOUT_MS){
+  const started=Date.now();let timer=null;
+  const timeout=typeof globalThis.setTimeout==='function'?new Promise((_,reject)=>{timer=globalThis.setTimeout(()=>reject(new RetryableLoadError(SLOW_MESSAGE)),ms);}):null;
+  try{
+    const value=await (timeout?Promise.race([Promise.resolve().then(work),timeout]):work());
+    globalThis.console?.info?.(`[Armoury] ${name} ${Date.now()-started}ms`);
+    return value;
+  }catch(error){globalThis.console?.info?.(`[Armoury] ${name} failed after ${Date.now()-started}ms`);throw error;}
+  finally{if(timer!==null)globalThis.clearTimeout?.(timer);}
+}
 function guardContext(){
   const version=selectionVersion,binding=sessionBinding(session||{}),id=characterId;
   return ()=>{const now=sessionBinding(session||{});if(version!==selectionVersion||id!==characterId||binding.membershipId!==now.membershipId||binding.membershipType!==now.membershipType)throw new Error('The selected Guardian or membership changed. Reopen this action for the selected Guardian.');};
@@ -240,18 +268,35 @@ async function preparePayload(raw){
   if(normalized.forgeArmourIndex&&!guardianManifest.applyForgeArmourIndex(normalized,normalized.forgeArmourIndex))throw new Error('The armour index does not match this profile. Refresh Loadout to retry.');
   return guardianManifest.hydratePayload(normalized,{allowNetwork:false,waitForManifest:false});
 }
+// The fresh read replaces current equipment, sockets and in-game slots. Components it does
+// not carry (reusable plugs, for example) keep their prepared values instead of vanishing.
+function mergedProfilePayload(base,fresh){
+  const before=base?.profile||{},after=fresh?.profile||{};
+  return {...base,...fresh,profile:{...before,...after,itemComponents:{...before.itemComponents,...after.itemComponents}},definitions:{...base?.definitions,...fresh?.definitions}};
+}
 async function refreshProfile({force=true}={}){
   const request=++refreshVersion,check=guardContext();
-  const nextSession=await getBungieSession({force});
+  const nextSession=await timedStep('session',()=>getBungieSession({force}));
   check();
+  // authenticated null means the session service did not answer: an outage, not a sign-out.
+  if(nextSession?.authenticated!==true&&nextSession?.authenticated!==false)throw new RetryableLoadError(OUTAGE_MESSAGE);
   const previous=sessionBinding(session||{}),next=sessionBinding(nextSession||{});
   if(!nextSession?.authenticated||previous.membershipId!==next.membershipId||previous.membershipType!==next.membershipType){session=nextSession;payload=null;equipped=null;characterId='';selectionVersion++;render();throw new Error('Bungie membership changed. Reload this page before continuing.');}
   session=nextSession;
-  const raw=await requestFreshProfile({scope:'inventory'});check();
-  const prepared=await preparePayload({...payload,...raw,definitions:{...payload?.definitions,...raw.definitions}});check();
+  // Character scope carries sockets, item instances and in-game slots. The inventory
+  // scope has none of them, so Edit and Save to In-Game must never build on it.
+  let raw;
+  try{raw=await timedStep('profile',()=>requestFreshProfile({scope:'character'}));}
+  catch(error){throw error instanceof RetryableLoadError?error:isOutage(error)?new RetryableLoadError(OUTAGE_MESSAGE,error):error;}
+  check();
+  const fresh=raw?.profile;
+  if(!characterId||!fresh?.characters?.data?.[characterId]||!fresh?.characterEquipment?.data?.[characterId])throw new RetryableLoadError(MISSING_DATA_MESSAGE);
+  const prepared=await timedStep('prepare',()=>preparePayload(mergedProfilePayload(payload,raw)));check();
   if(request!==refreshVersion)throw new Error('A newer profile refresh replaced this action. Please try again.');
-  const normalized=await runProfileTask('normalise',{payload:prepared,session,characterId});check();
+  const normalized=await timedStep('normalise',()=>runProfileTask('normalise',{payload:prepared,session,characterId}));check();
   if(request!==refreshVersion)throw new Error('A newer profile refresh replaced this action. Please try again.');
+  if(!normalized)throw new RetryableLoadError(MISSING_DATA_MESSAGE);
+  profileUnavailable=false;
   payload=prepared;equipped=normalized;
   globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
   emit('forge:prepared-page-refreshed',{page:'loadout',payload});render();return payload;
@@ -263,12 +308,21 @@ function showDialog(title,content,footer,state){
   if(!node.open)node.showModal();
   node.querySelector('input,select,button')?.focus();
 }
-function dialogError(error){const node=byId('paradoxDialogError');if(node)node.textContent=error?.message||String(error);else reportError(error);}
+function dialogError(error){logError(error);const node=byId('paradoxDialogError');if(node)node.textContent=error?.message||String(error);else status(error?.message||'The Armoury action could not finish.',true);}
+let retryAction=null;
+// Failures always surface in the dialog. A load failure replaces the checking dialog
+// with its reason and a RETRY button that reruns the same action.
+function showFailure(error,work){
+  logError(error);
+  if(error?.retryable){retryAction=work;showDialog('COULD NOT LOAD',`<p>${esc(error.message)}</p>`,'<button type="button" class="is-primary" data-dialog-retry>RETRY</button>',{kind:'retry',check:()=>{}});return;}
+  if(dialog()?.open&&dialogState?.kind!=='checking'){dialogError(error);return;}
+  showDialog('ACTION NOT COMPLETED',`<p>${esc(error?.message||'The Armoury action could not finish.')}</p>`,'',{kind:'failure',check:()=>{}});
+}
 async function runBusy(work){
   if(busy)return;
   busy=true;render();dialog()?.querySelectorAll('button').forEach(node=>node.disabled=true);
   const hero=byId('guardianCharacterCards');if(hero)hero.inert=true;
-  try{await work();}catch(error){if(dialog()?.open)dialogError(error);else reportError(error);}
+  try{await work();}catch(error){showFailure(error,work);}
   finally{busy=false;if(hero)hero.inert=false;render();dialog()?.querySelectorAll('button').forEach(node=>node.disabled=false);}
 }
 function draftFor(id){if(id==='equipped'){if(!equipped)throw new Error('Current equipment is unavailable.');return {build:copy(equipped),name:`${equipped.characterClass.toUpperCase()} · ${equipped.subclassName}`,description:''};}const record=recordById(id);if(!record)throw new Error('This saved build is not for the selected Guardian.');return copy(record);}
@@ -300,7 +354,7 @@ function editorBody(state){
       return editorSelect(socketKey,`${label} · ${group.label} ${group.socketIndex+1}`,group.current,group.options,state);
     }).join('');
   }).join('')}</fieldset>`).join('');
-  const sb=build.subclassBuild||{},fresh=state.subclasses.find(item=>itemId(item)===String(build.subclassItemInstanceId))?.subclassBuild||{};
+  const sb=build.subclassBuild||{},fresh=state.subclasses.find(item=>item&&itemId(item)===String(build.subclassItemInstanceId))?.subclassBuild||{};
   const subclassKey='subclass';state.fields.set(subclassKey,{type:'subclass'});
   let subclass=editorSelect(subclassKey,'Subclass',build.subclassItem,state.subclasses,state);
   for(const [key,selected,optionsKey] of [['super',[sb.super],'superOptions'],['abilities',sb.abilities||[],'abilityOptionsBySocket'],['aspects',sb.aspects||[],'aspectOptionsBySocket'],['fragments',sb.fragments||[],'fragmentOptionsBySocket']]){
@@ -310,7 +364,7 @@ function editorBody(state){
       if(!current)return;
       const field=`subclass:${key}:${index}`;
       const available=key==='super'?fresh.superOptions||[]:fresh[optionsKey]?.[String(current.socketIndex)]||[];
-      const options=available.filter(row=>row.canInsert===true&&Number(row.socketIndex)===Number(current.socketIndex));
+      const options=available.filter(row=>row?.canInsert===true&&Number(row.socketIndex)===Number(current.socketIndex));
       state.fields.set(field,{type:'subclass-socket',key,index,socketIndex:Number(current.socketIndex)});
       subclass+=editorSelect(field,`${key==='super'?'Super':key} ${key==='super'?'':index+1}`,current,options,state);
     });
@@ -328,6 +382,7 @@ async function openEditor(record,{asCopy=false}={}){
     const fresh=all.find(row=>itemId(row)===itemId(item));
     return editableSnapshotItem(item,fresh,key==='armour'?'armour':'weapon');
   });
+  if(!equipped)throw new RetryableLoadError(MISSING_DATA_MESSAGE);
   const state={kind:'edit',record:draft,catalogue,subclasses:(equipped.subclassCatalog||[]).filter(item=>itemId(item)),check};
   renderEditor(state);
 }
@@ -398,6 +453,13 @@ async function executeBuildAction(){
     if(mutationStarted)try{await refreshProfile();}catch(error){status(`Refresh needed: ${error.message}`,true);}
   }
 }
+// Resolves Bungie's empty-plug sockets to the item's live plug. Returns null (keep live
+// sockets untouched) when an empty-plug socket has no live value to fall back on.
+function livePlugHashes(hashes,liveSockets=[]){
+  if(!Array.isArray(hashes))return null;
+  const resolved=hashes.map((hash,index)=>Number(hash)===EMPTY_PLUG_HASH?liveSockets?.[index]?.plugHash:hash);
+  return resolved.some(hash=>hash==null)?null:resolved;
+}
 async function loadoutSnapshot(index){
   const check=guardContext();
   const slot=equipped?.loadouts?.[index];if(!slot?.items?.length&&!slot?.subclassOverrides?.length)throw new Error('This Bungie slot is empty.');
@@ -407,7 +469,8 @@ async function loadoutSnapshot(index){
     const source=[...(payload.profile.profileInventory?.data?.items||[]),...Object.values(payload.profile.characterInventories?.data||{}).flatMap(value=>value.items||[]),...Object.values(payload.profile.characterEquipment?.data||{}).flatMap(value=>value.items||[])].find(item=>String(item.itemInstanceId)===id);
     if(!source||!locations.has(id))throw new Error(`Bungie slot ${index+1} contains an unavailable item (${id||'no instance ID'}). Resolve missing items in Destiny before copying this build.`);
     const prior=selectedItems.find(item=>String(item.itemInstanceId)===id);
-    if(prior){if(row.plugItemHashes)prior.plugItemHashes=row.plugItemHashes;}else selectedItems.push({...source,plugItemHashes:row.plugItemHashes});
+    const plugItemHashes=livePlugHashes(row.plugItemHashes,payload.profile?.itemComponents?.sockets?.data?.[id]?.sockets);
+    if(prior){if(plugItemHashes)prior.plugItemHashes=plugItemHashes;}else selectedItems.push({...source,...(plugItemHashes?{plugItemHashes}:{})});
   }
   const projected=profileWithSelectedLoadout({...payload,characterId,selectedItems});
   const build=await runProfileTask('normalise',{payload:{...payload,profile:projected},session,characterId});check();
@@ -442,7 +505,7 @@ async function executeSlotAction(){
     if(state.action==='clear'&&(now?.items?.length||now?.subclassOverrides?.length))throw new Error('Bungie accepted Clear, but the slot still has items on readback. Refresh before retrying.');
     if(state.action==='equip'){
       const raw=[...(previous?.items||[]),...(previous?.subclassOverrides||[])];
-      const plan={characterId,equipment:{targets:raw.map(item=>({itemInstanceId:String(item.itemInstanceId)}))},socketChanges:raw.flatMap(item=>(item.plugItemHashes||[]).flatMap((hash,index)=>Number(hash)>0?[{itemInstanceId:String(item.itemInstanceId),socketIndex:index,plugHash:Number(hash)}]:[]))};
+      const plan={characterId,equipment:{targets:raw.map(item=>({itemInstanceId:String(item.itemInstanceId)}))},socketChanges:raw.flatMap(item=>(item.plugItemHashes||[]).flatMap((hash,index)=>Number(hash)>0&&Number(hash)!==EMPTY_PLUG_HASH?[{itemInstanceId:String(item.itemInstanceId),socketIndex:index,plugHash:Number(hash)}]:[]))};
       if(!verifyReadback(plan,payload).verified)throw new Error('Bungie accepted Apply, but the equipped build did not fully verify. Check missing items and mods in Destiny.');
     }
     dialog().close();dialogState=null;status(`Bungie slot ${state.index+1} ${state.action==='clear'?'cleared':'applied'}.`);
@@ -501,6 +564,7 @@ document.addEventListener('click',event=>{
   const jump=event.target.closest?.('[data-jump-id]');if(jump){selectedId=jump.dataset.jumpId;render();byId(`loadout-${selectedId}`)?.scrollIntoView({behavior:'smooth',block:'start'});return;}
   if(event.target.closest?.('[data-dialog-close]')){closeDialog();return;}
   if(busy)return;
+  if(event.target.closest?.('[data-dialog-retry]')){const work=retryAction;retryAction=null;dialog().close();dialogState=null;if(work)void runBusy(work);return;}
   const action=event.target.closest?.('[data-dialog-action]');if(action){void runBusy(()=>handleDialogAction(action.dataset.dialogAction));return;}
   const slot=event.target.closest?.('[data-in-game-slot]');if(slot){openSlot(Number(slot.dataset.inGameSlot));return;}
   const button=event.target.closest?.('[data-build-action]');if(!button)return;
@@ -518,7 +582,7 @@ dialog().addEventListener('cancel',event=>{if(busy)event.preventDefault();else d
 document.addEventListener('forge:character-selected',event=>{if(busy)return;void setCharacter(String(event.detail?.characterId||'')).catch(reportError);});
 document.addEventListener('forge:hero-cards-render-complete',()=>{if(!busy&&!loading)void setCharacter(initialCharacter()).catch(reportError);});
 window.addEventListener('forge:bungie-session',event=>{
-  const next=event.detail;if(!session||!next||next.recovering)return;
+  const next=event.detail;if(!session||!next||next.recovering||(next.authenticated!==true&&next.authenticated!==false))return;
   const before=sessionBinding(session),after=sessionBinding(next);
   if(next.authenticated===true&&before.membershipId===after.membershipId&&before.membershipType===after.membershipType)return;
   session=next;payload=null;equipped=null;characterId='';selectionVersion++;loading=false;
@@ -558,17 +622,24 @@ document.addEventListener('visibilitychange',checkDisplayRefresh);
 
 reportPreparedPageStage('start','loadout');
 const savedPromise=refreshSavedRecords();
+// A cancelled or slow prepared page is retried once with a fresh request. If it still
+// fails, the page keeps this account's cached builds and says that some could not refresh.
+async function loadInitialPayload(){
+  try{return await loadPreparedPagePayload(session,'loadout',{sharedPayload:globalThis.FORGE_HERO_PROFILE_PAYLOAD});}
+  catch(error){logError(error);return loadPreparedPagePayload(session,'loadout',{force:true});}
+}
+let startupNote='';
 try{
   session=await getBungieSession();reportPreparedPageStage('session','loadout');
   if(session?.authenticated){
-    const raw=await loadPreparedPagePayload(session,'loadout',{sharedPayload:globalThis.FORGE_HERO_PROFILE_PAYLOAD});
+    const raw=await loadInitialPayload();
     payload=await preparePayload(raw);globalThis.FORGE_HERO_PROFILE_PAYLOAD=payload;
     characterId=String(initialCharacter());
     if(characterId){const check=guardContext(),normalized=await runProfileTask('normalise',{payload,session,characterId});check();equipped=normalized;}
   }
-}catch(error){reportError(error);}
+}catch(error){logError(error);profileUnavailable=true;startupNote=isOutage(error)?OUTAGE_MESSAGE:PARTIAL_LOAD_MESSAGE;}
 try{await savedPromise;}catch(error){reportError(error);}
-loading=false;reportPreparedPageStage('render','loadout');render();reportPreparedPageStage('ready','loadout');
+loading=false;reportPreparedPageStage('render','loadout');render();if(startupNote)status(startupNote,true);reportPreparedPageStage('ready','loadout');
 window.ForgeLoader?.ready?.(document.querySelector('.apx-page-shell'));
 
 if(session?.authenticated){

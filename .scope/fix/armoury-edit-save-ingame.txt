@@ -1,0 +1,3 @@
+astrix-app/pages/loadout/index.html
+astrix-app/pages/loadout/paradox-loadouts.mjs
+astrix-app/tools/test-armoury-edit-save.mjs
