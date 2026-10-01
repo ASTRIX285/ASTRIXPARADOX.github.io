@@ -10,6 +10,7 @@ import {createLiveTransferPlan,subclassCompatibilityViolations} from '../pages/g
 import {filterManualEquipmentSources,eligibleEquipment,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,recordManualEdit,socketGroups} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
 import {inventoryLocations,sessionBinding,liveActionCapabilities,verifyReadback} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 import {itemTileMarkup} from '../shared/guardian-inventory-workspace.mjs';
+import {createArmouryEditor} from '../pages/loadout/armoury-editor.mjs';
 
 const EMPTY_PLUG=2166136261;
 const CHARACTER_ID='9100001',MEMBERSHIP_ID='9200001',MEMBERSHIP_TYPE='3';
@@ -32,9 +33,9 @@ const savedBuild={...binding,weapons:[null,{itemInstanceId:'7002',hash:7002,name
 const record={id:'saved-1',name:'Saved one',description:'',binding,revision:1,updatedAt:'2026-10-01T00:00:00.000Z',build:savedBuild};
 
 function harness({session:sessionAnswer=()=>session,profile=()=>goodProfile(),normalise=()=>equipped()}={}){
-  const nodes=new Map(),calls={plan:0,profile:0};
+  const nodes=new Map(),calls={plan:0,profile:0},saves=[];
   const node=id=>{
-    if(!nodes.has(id))nodes.set(id,{id,innerHTML:'',textContent:'',hidden:false,open:false,value:'',inert:false,classList:{toggle(){}},
+    if(!nodes.has(id))nodes.set(id,{id,innerHTML:'',textContent:'',hidden:false,open:false,value:'',inert:false,classList:{toggle(){},add(){},remove(){}},
       querySelector(){return {focus(){}};},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
     return nodes.get(id);
   };
@@ -43,19 +44,22 @@ function harness({session:sessionAnswer=()=>session,profile=()=>goodProfile(),no
     createLiveTransferPlan:(...args)=>{calls.plan++;return createLiveTransferPlan(...args);},
     stageLiveTransferPreflight:async plan=>plan,
     LOADOUT_DEFINITIONS:{},hideItemTooltip(){},CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail;}},
-    document:{getElementById:node,querySelector:()=>null,dispatchEvent(){}},
+    createArmouryEditor,
+    document:{getElementById:node,querySelector:()=>null,dispatchEvent(){},activeElement:null},
     getBungieSession:async()=>sessionAnswer(),
     requestFreshProfile:async()=>{calls.profile++;return profile();},
     runProfileTask:async()=>normalise(),
     normalisePreparedPagePayload:value=>value,guardianManifest:{seedPayload(){},applyForgeArmourIndex:()=>true,hydratePayload:value=>value},
     createVaultCatalogue:()=>({items:[]}),
+    saveParadoxLoadout:async input=>{saves.push(input);return {...input,id:input.id||'new-build',revision:(input.expectedRevision||0)+1};},
+    listParadoxLoadouts:async()=>[clone(record)],
     ARMOURY_STEP_TIMEOUT_MS:50,setTimeout,clearTimeout
   };
-  runInNewContext(pageSource+`;this.api={render,runBusy,openEditor,reviewBuildAction,refreshProfile,savedBuildOverview,selectedSocketTargets,livePlugHashes,draftFor,
+  runInNewContext(pageSource+`;this.api={render,runBusy,openEditor,reviewBuildAction,refreshProfile,saveDialogRecord,dialogState:()=>dialogState,savedBuildOverview,selectedSocketTargets,livePlugHashes,draftFor,
     set(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload;loading=false;},
     state(){return {busy,dialogState,records:visibleRecords().length,session};}};`,context);
   context.api.set({records:[clone(record)],session,characterId:CHARACTER_ID,equipped:equipped(),payload:goodProfile()});
-  return {api:context.api,dialog:node('paradoxLoadoutDialog'),status:node('paradoxLoadoutStatus'),calls};
+  return {api:context.api,dialog:node('paradoxLoadoutDialog'),status:node('paradoxLoadoutStatus'),calls,saves,node};
 }
 function goodProfile(){return {definitions:{},profile:{characters:{data:{[CHARACTER_ID]:{characterId:CHARACTER_ID,classType:0}}},characterEquipment:{data:{[CHARACTER_ID]:{items:[]}}},itemComponents:{sockets:{data:{'7001':{sockets:[{plugHash:7101},{plugHash:7102},{plugHash:7100}]}}}}}};}
 function equipped(){return {characterId:CHARACTER_ID,characterClass:'titan',subclassName:'Synthetic',subclassCatalog:[null],loadoutsAvailable:true,loadouts:[],artifact:{activePerks:[]},weapons:[],armour:[]};}
@@ -142,4 +146,23 @@ console.log('ARMOURY_PARTIAL_PROFILE=PASS null, empty and partial profiles never
   assert.match(dialog.innerHTML,/data-dialog-retry/);
   assert.equal(api.state().busy,false,'A hung step can never leave the page busy');
   console.log('ARMOURY_STEP_TIMEOUT=PASS a stalled refresh step times out and releases busy');
+}
+
+// 8. SAVE CHANGES writes to the same Armoury build with its revision; SAVE AS NEW writes a separate build.
+{
+  const {api,saves,node}=harness();
+  await api.runBusy(()=>api.openEditor(api.draftFor('saved-1')));
+  const editor=api.dialogState().editor;
+  editor.handle({dataset:{ed:'artifact',edIndex:'0'}});
+  node('paradoxEditName').value='Saved one';node('paradoxEditDescription').value='';
+  await api.saveDialogRecord();
+  assert.equal(saves[0].id,'saved-1','SAVE CHANGES keeps the build id');
+  assert.equal(saves[0].expectedRevision,1,'and its current revision, so the store bumps it');
+  await api.runBusy(()=>api.openEditor(api.draftFor('saved-1')));
+  node('paradoxEditName').value='Saved one copy';
+  await api.saveDialogRecord({asNew:true});
+  assert.equal(saves[1].id,null,'SAVE AS NEW writes a new build');
+  assert.equal(saves[1].expectedRevision,undefined);
+  assert.equal(saves[1].name,'Saved one copy');
+  console.log('ARMOURY_EDITOR_SAVE=PASS SAVE CHANGES keeps the id and revision, SAVE AS NEW writes a new build');
 }
