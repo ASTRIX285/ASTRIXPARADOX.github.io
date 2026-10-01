@@ -180,6 +180,13 @@ body.ax-brand.ax-map :is(body>section:not(.hero),.stream-section,.stream-offline
 body.ax-brand.ax-map .ax-map-panel{background:var(--ax-map-panel)!important;border:1px solid var(--ax-hairline)!important;padding:clamp(20px,3vw,36px)!important}
 body.ax-brand.ax-map .footer.ax-map-panel{border-width:1px 0 0!important}
 body.ax-brand.ax-map .ax-map-panel{box-sizing:border-box!important;min-width:0!important}
+/* Every public page (Reviews, News, Clips, Universes, Join Us, Tools, Destiny 2), 1 Oct 2026:
+   page heroes and bands are transparent so the map runs the whole page; the old navy and solid
+   backgrounds (style.css and inline section styles) never show. Cards, filters and form fields
+   become the same Panel with a hairline as the home page's text blocks. */
+body.ax-brand.ax-map :is(.reviews-hero,.news-hero,.clips-hero,.games-hero,.join-hero,.tools-hero,.section,.filter-wrap,.tools-principles,.current-platform,.tools-future,main>section,section[style*="background"],div[style*="background:var(--dark"]){background:transparent!important;background-image:none!important}
+body.ax-brand.ax-map :is(.review-card,.news-card,.clip-card,.join-card,.principle,.destination,.platform-overview,.platform-card,.join-grid+.reveal,.ax-panel){background:var(--ax-map-panel)!important;border:1px solid var(--ax-hairline)!important}
+body.ax-brand.ax-map :is(.form-input,.form-select,.form-textarea){background:var(--ax-map-panel)!important;border:1px solid var(--ax-line-strong)!important}
 @media (max-width:768px){
   body.ax-brand.ax-map .ax-map-panel{padding:16px!important}
   body.ax-brand .ax-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
