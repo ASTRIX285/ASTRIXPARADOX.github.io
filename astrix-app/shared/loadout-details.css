@@ -179,3 +179,31 @@
 .apx-dim-notes{margin:12px 0 0;padding:0 0 0 18px;display:grid;gap:6px;font-size:13px;color:var(--apx-colour-secondary);}
 .apx-dim-empty{display:grid;place-items:center;width:56px;height:56px;border:1px dashed var(--apx-colour-border-strong);border-radius:6px;font-size:12px;color:var(--apx-colour-secondary);text-align:center;}
 @media(max-width:500px){.apx-dim-match>div{grid-column:1/-1;}}
+
+/* ---------- Compact grid (in-game loadouts, 1 Oct 2026) ----------
+   One row per item: the item on the left, its sockets as notched icon tiles in the
+   same row. No text under icons; names live in the shared tooltip (hover, focus, tap).
+   The whole loadout fits at 1600x900; phones get a full-screen sheet with wrapping rows. */
+.apx-loadout-details--grid{
+  --apx-ld-notch:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);
+  --apx-ld-plug:40px;--apx-ld-item:52px;
+  width:min(1120px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);
+}
+.apx-loadout-details--grid .apx-ld-scroll{padding-top:10px}
+.apx-ld-grid{display:flex;flex-direction:column;gap:6px}
+.apx-ld-row{display:grid;grid-template-columns:var(--apx-ld-item) minmax(0,1fr);align-items:center;gap:14px;padding:6px 0;border-bottom:1px solid var(--apx-colour-border)}
+.apx-ld-row:last-child{border-bottom:0}
+.apx-ld-row-plugs{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.apx-ld-cell{display:flex;flex-wrap:wrap;gap:6px}
+.apx-ld-cell+.apx-ld-cell{padding-left:18px;border-left:1px solid var(--apx-colour-border)}
+.apx-loadout-details--grid .apx-build-icon{width:var(--apx-ld-plug);height:var(--apx-ld-plug);min-height:var(--apx-ld-plug);clip-path:var(--apx-ld-notch);border-radius:0}
+.apx-loadout-details--grid .apx-ld-row-item .apx-build-icon{width:var(--apx-ld-item);height:var(--apx-ld-item);min-height:var(--apx-ld-item)}
+.apx-ld-socket-empty{display:block;width:calc(var(--apx-ld-plug) - 12px);height:calc(var(--apx-ld-plug) - 12px);margin:6px;border:1px dashed var(--apx-colour-border-strong);clip-path:var(--apx-ld-notch);background:transparent}
+.apx-ld-socket-empty.is-gear{width:var(--apx-ld-item);height:var(--apx-ld-item);margin:0}
+@media(max-width:719.98px){
+  .apx-loadout-details--grid{width:100vw;height:100dvh;max-height:100dvh}
+  .apx-loadout-details--grid{--apx-ld-plug:38px;--apx-ld-item:48px}
+  .apx-ld-row{align-items:start;gap:10px}
+  .apx-ld-row-plugs{gap:6px 10px}
+  .apx-ld-cell+.apx-ld-cell{padding-left:10px}
+}

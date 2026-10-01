@@ -8,7 +8,7 @@ import {BUILD_ELEMENTS,createDirectGenerationBuild,validateForgeGenerationEntry}
 import {filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets} from '../guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs';
 import {createBuildState} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {createVaultCatalogue,prepareArmourSelection} from '../vault/vault-inventory.mjs';
-import {createDimForgeState} from '../../core/dim-import/adapt.mjs';
+import {createDimForgeState} from '../../core/dim-import/adapt.mjs?grid=20261001-1';
 
 // MIRRORED FROM BUILD FORGE: START
 const elementOf=item=>{const text=[item?.element,item?.damageType,item?.name,item?.displayName,item?.definition?.itemTypeDisplayName,...(item?.definition?.traitIds||[])].filter(Boolean).join(' ').toLowerCase();return ['stasis','arc','strand','void','solar','prismatic'].find(value=>text.includes(value))||'unknown';};

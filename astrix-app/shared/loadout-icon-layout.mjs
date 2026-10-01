@@ -1,5 +1,5 @@
 import {WEAPON_BUCKETS,ARMOUR_BUCKETS} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
-import {bungieArtwork} from './loadout-details-model.mjs';
+import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 // Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
 // style lengths in the element's own pixels, so convert before positioning.
 const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
@@ -28,6 +28,27 @@ export function renderLoadoutIconLayout(model){
   const weapons=strip('Weapons',gear('weapon'),true),armour=strip('Armour',gear('armour'),true);
   const equipment=strip('Equipment',rows.filter(row=>row.kind==='item'),true);
   return `<div class="apx-compact-loadout"><div class="apx-compact-powers">${strip('Super and abilities',powers)}<div class="apx-compact-mods">${strip('Mods',mods)}${artifact.length?`<div class="apx-compact-artifact"><span class="apx-compact-label">Artifact</span>${strip('Artifact perks',artifact)}</div>`:''}</div></div><div class="apx-compact-gear">${weapons}${weapons&&armour?'<span class="apx-icon-divider" aria-hidden="true"></span>':''}${armour}</div>${cosmetics.length||equipment?`<div class="apx-compact-cosmetics">${strip('Cosmetics and shaders',unique(cosmetics))}${equipment}</div>`:''}${strip('Unequipped items',(model.items||[]).filter(row=>row.equipped===false),true)}</div>`;
+}
+// Compact grid for in-game loadouts (DIM's layout as reference, our tiles): one row per
+// item, the item on the left and its sockets as icon tiles in the same row. No text under
+// icons: name, description and stat effects live in the shared tooltip (hover, focus, tap).
+const GRID_SUBCLASS_GROUPS=['Super','Abilities','Aspects','Fragments'];
+const hiddenSocket=(group,plug)=>group.label==='Other sockets'&&plug.empty&&!plug.definition;
+function gridPlug(plug){
+  if(plug.empty)return `<span class="apx-ld-socket-empty" role="img" aria-label="Empty socket"></span>`;
+  return loadoutIcon(plug);
+}
+function gridRow(item,label,groups,kind=item?.kind||''){
+  const cells=groups.map(group=>({label:group.label,plugs:(group.plugs||[]).filter(plug=>!hiddenSocket(group,plug))})).filter(group=>group.plugs.length);
+  const art=item?loadoutIcon({...item,name:item.unresolved?`${item.name}. Not in your inventory`:item.name},{large:true}):'<span class="apx-ld-socket-empty is-gear" role="img" aria-label="Empty slot"></span>';
+  return `<div class="apx-ld-row" data-item-kind="${esc(kind)}" role="group" aria-label="${esc(label)}"><div class="apx-ld-row-item">${art}</div><div class="apx-ld-row-plugs">${cells.map(group=>`<div class="apx-ld-cell" role="group" aria-label="${esc(group.label)}">${group.plugs.map(gridPlug).join('')}</div>`).join('')}</div></div>`;
+}
+export function renderLoadoutGridLayout(model){
+  const rows=model.items||[],subclass=rows.find(row=>row.kind==='subclass');
+  const order=(kind,buckets)=>rows.filter(row=>row.kind===kind).sort((a,b)=>buckets.indexOf(a.bucketHash)-buckets.indexOf(b.bucketHash));
+  const artifact=rows.filter(row=>row.kind==='parameters').flatMap(row=>row.groups||[]).filter(group=>group.label==='Artifact unlocks');
+  const subclassGroups=subclass?GRID_SUBCLASS_GROUPS.map(label=>subclass.groups?.find(group=>group.label===label)).filter(Boolean):[];
+  return `<div class="apx-ld-grid">${subclass?gridRow(subclass,'Subclass',subclassGroups):''}${artifact.length?gridRow({name:'Artifact',icon:''},'Artifact',artifact,'artifact'):''}${order('weapon',WEAPON_BUCKETS).map(item=>gridRow(item,item.name,item.groups||[])).join('')}${order('armour',ARMOUR_BUCKETS).map(item=>gridRow(item,item.name,item.groups||[])).join('')}${rows.filter(row=>row.kind==='unresolved').map(item=>gridRow(item,item.name,[])).join('')}</div>`;
 }
 // One tooltip outside the scrolling content: names remain available to pointer,
 // keyboard and touch users without widening every tile. Text is never HTML.
