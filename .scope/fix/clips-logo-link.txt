@@ -1,0 +1,5 @@
+.github/workflows/update-clips.yml
+astrix-app/tools/test-clips-design.mjs
+astrix-app/tools/validate-bungie-footer.mjs
+pages/clips.html
+scripts/build_clips.py

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {readFileSync} from 'node:fs';
+import {readFileSync,copyFileSync,mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 export const FOOTER='Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.';
@@ -14,8 +16,12 @@ for(const path of new Set(files)){
   assert.match(text,/<footer\b[^>]*>[\s\S]*?<\/footer>/i,`${path}: footer missing`);
   assert.ok([...text.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),`${path}: Bungie attribution missing`);
 }
-// Clips footer fix: exercise the workflow's real template without API requests.
-const generated=execFileSync('python3',['-B','-c','from scripts.build_clips import build_html; print(build_html([], 0))'],{cwd:root,encoding:'utf8'});
+// Clips footer fix: pages/clips.html is the template; run the workflow's builder on a copy
+// (cards block only, no API requests) and check what it writes.
+const clipsCopy=join(mkdtempSync(join(tmpdir(),'clips-footer-')),'clips.html');
+copyFileSync(new URL('pages/clips.html',new URL('../../',import.meta.url)),clipsCopy);
+execFileSync('python3',['-B','scripts/build_clips.py','--reuse-cards','--page',clipsCopy],{cwd:root,stdio:'pipe'});
+const generated=readFileSync(clipsCopy,'utf8');
 assert.ok([...generated.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),'Clips generator must retain Bungie attribution');
 // The generator must not reset the stylesheet version tags that the site pages carry.
 const tagOf=(html,file)=>{const match=html.match(new RegExp(`href="[^"]*${file}[?]v=([^"]+)"`));assert.ok(match,`${file} tag missing`);return match[1]};
