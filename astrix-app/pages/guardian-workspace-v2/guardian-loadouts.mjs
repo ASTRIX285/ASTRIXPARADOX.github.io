@@ -1,5 +1,5 @@
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
-import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&swr=20261002-1';
 import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2&stack=20261002-1';
 import {isSavedLoadout,loadoutStatus,loadoutGear,acceptedEquipment} from './guardian-loadout-status.mjs?v=20260925-menu-1&bf=20261002-1';
 import {transferFailureReason} from '../vault/vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
@@ -58,7 +58,7 @@ async function viewLoadoutDetails(index){
   const characterId=activeCharacterId,identity=loadoutIdentity(currentLoadouts[index]),returnFocus=trigger(index);
   closeMenu();
   try{
-    const {openGuardianLoadoutDetails}=await import('./guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4&grid=20261001-1&stack=20261002-1');
+    const {openGuardianLoadoutDetails}=await import('./guardian-loadout-details.mjs?v=20260927-loadout-details-1&recovery=20260927-4&grid=20261001-1&stack=20261002-1&swr=20261002-1');
     await openGuardianLoadoutDetails({characterId,index,getCharacterId:()=>activeCharacterId,returnFocus});
   }catch(error){showToast(identity,error.message||'Loadout details unavailable',true);}
 }

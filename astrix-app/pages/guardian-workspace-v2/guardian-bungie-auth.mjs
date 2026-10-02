@@ -156,23 +156,42 @@ function setAccountVisual(control,account,session){
   control.image.src=source;
 }
 
+// One /bungie/account read per page load and membership, shared on globalThis so every
+// copy of this module (it is imported under more than one URL) reuses the same request.
+function requestAccount(session){
+  const membership=session?.activeDestinyMembership||{};
+  const key=`${membership.membershipType??""}:${membership.membershipId||session?.bungieMembershipId||""}`;
+  const shared=globalThis.FORGE_BUNGIE_ACCOUNT_REQUEST;
+  if(shared?.key===key)return shared.promise;
+  const promise=(async()=>{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),12000);
+    try{
+      const response=await fetch(new URL("/bungie/account",AUTH_ORIGIN),{
+        credentials:"include",
+        headers:{Accept:"application/json"},
+        signal:controller.signal
+      });
+      const account=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(account?.error||`account:${response.status}`);
+      return account;
+    }finally{
+      clearTimeout(timer);
+    }
+  })();
+  const entry={key,promise};
+  globalThis.FORGE_BUNGIE_ACCOUNT_REQUEST=entry;
+  // A failed read is not kept, so a later refresh can try again.
+  promise.catch(()=>{if(globalThis.FORGE_BUNGIE_ACCOUNT_REQUEST===entry)globalThis.FORGE_BUNGIE_ACCOUNT_REQUEST=null;});
+  return promise;
+}
+
 async function hydrateAccountVisual(control,session){
   setAccountVisual(control,null,session);
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),12000);
   try{
-    const response=await fetch(new URL("/bungie/account",AUTH_ORIGIN),{
-      credentials:"include",
-      headers:{Accept:"application/json"},
-      signal:controller.signal
-    });
-    const account=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(account?.error||`account:${response.status}`);
-    setAccountVisual(control,account,session);
+    setAccountVisual(control,await requestAccount(session),session);
   }catch(error){
     console.info("[Forge Bungie auth] account avatar unavailable",error);
-  }finally{
-    clearTimeout(timer);
   }
 }
 
@@ -266,7 +285,7 @@ if(typeof document!=='undefined'){
 installStyles();
 const control=makeControl();
 if(control) refreshAuthState(control);
-if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?plain=20260925-2&refresh=20260927-1&recovery=20260927-4");
+if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?plain=20260925-2&refresh=20260927-1&recovery=20260927-4&swr=20261002-1");
 
 }
 

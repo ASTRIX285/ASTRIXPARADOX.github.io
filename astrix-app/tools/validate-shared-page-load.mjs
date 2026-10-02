@@ -125,10 +125,10 @@ assert.doesNotMatch(backend,/seedTables[\s\S]*?Object\.entries\(seedTables\)/,'J
 assert.doesNotMatch(backend,/warmPreparedWorkspace|WORKSPACE_PREPARED_PAGES/,'Journey must never build other pages inside its own Worker request.');
 assert.match(backend,/new ReadableStream<Uint8Array>\(\{\s*async pull\(controller\)/,'The prepared page stream must be pull based so a slow client never buffers the whole bundle.');
 assert.doesNotMatch(backend,/response\.clone\(\)\.text\(\)/,'The backend page cache must never copy a whole streamed page into Worker memory.');
-assert.match(backend,/PREPARED_PAGE_CACHE_MAX_BYTES = 16 \* 1024 \* 1024[\s\S]*?size > PREPARED_PAGE_CACHE_MAX_BYTES[\s\S]*?reader\.cancel/,'The backend page cache copy must be bounded and cancel oversized pages.');
-assert.match(backend,/requestedFreshness === "display"[\s\S]*?readPreparedPage\(sessionId, page, preparedStatus\.manifestVersion/,'Display requests must read a session cache bound to the current live manifest version.');
-assert.match(authRecord,/new PreparedPageCache\(this\.ctx\.storage\)[\s\S]*?path === "\/prepared-page"/,'Prepared page data must remain private inside the authenticated session Durable Object.');
-assert.match(preparedCache,/PREPARED_PAGE_TTL_MS = 10 \* 60_000[\s\S]*?meta\.manifestVersion !== manifestVersion/,'Prepared page cache entries must expire and be invalidated by a live manifest change.');
+assert.match(backend,/PREPARED_PAGE_CACHE_MAX_BYTES = 16 \* 1024 \* 1024[\s\S]*?encodedAccount\.byteLength > PREPARED_PAGE_CACHE_MAX_BYTES/,'The backend cache holds only the bounded account part and skips oversized accounts.');
+assert.match(backend,/requestedFreshness === "display"[\s\S]*?readPreparedAccount\(sessionId, page, preparedStatus\.manifestVersion/,'Display requests must read a session cache bound to the current live manifest version.');
+assert.match(authRecord,/new PreparedAccountCache\(this\.ctx\.storage\)[\s\S]*?path === "\/prepared-account"[\s\S]*?activeDestinyMembership\.membershipId/,'Prepared account data must remain private inside the authenticated session Durable Object, keyed on its own membership.');
+assert.match(preparedCache,/PREPARED_ACCOUNT_STALE_MS = 12 \* 60 \* 60_000[\s\S]*?meta\.manifestVersion === manifestVersion[\s\S]*?now - meta\.dataAt! < PREPARED_ACCOUNT_STALE_MS/,'Prepared account cache entries must expire and be invalidated by a live manifest change.');
 assert.match(preparedClient,/for\(const value of pages\)[\s\S]*?preferBackend:true[\s\S]*?quiet:true/,'Journey must quietly transfer backend-prepared pages into the existing browser cache in order.');
 
 const shellRuntimes=[

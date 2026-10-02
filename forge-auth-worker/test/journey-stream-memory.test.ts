@@ -15,7 +15,7 @@ const {default:worker}=await import('../src/semantic-wrapper.ts');
 // copies of the Journey stream inside the same request. This guards all three causes.
 test('a 45 MB Journey stream is pulled on demand, arrives complete and builds no other page',async t=>{
  const CHUNK=64*1024,TOTAL=45*1024*1024;
- let produced=0,bundleRequests:string[]=[],cacheWrites=0,profileReads=0;
+ let produced=0,bundleRequests:string[]=[],cacheWrites=0,cacheBytes=0,profileReads=0;
  const bundleStream=()=>{
   const head=new TextEncoder().encode('{"manifestVersion":"v1","publicData":"');
   const tail=new TextEncoder().encode('"}');
@@ -27,10 +27,10 @@ test('a 45 MB Journey stream is pulled on demand, arrives complete and builds no
    controller.enqueue(tail);controller.close();
   }},{highWaterMark:1});
  };
- const session={kind:'session',absoluteExpiresAt:Date.now()+86400000,accessExpiresAt:Date.now()+3600000,activeDestinyMembership:{membershipId:'synthetic',membershipType:3},accessToken:'synthetic',refreshToken:'synthetic'};
+ const session={kind:'session',absoluteExpiresAt:Date.now()+86400000,accessExpiresAt:Date.now()+3600000,activeDestinyMembership:{membershipId:'4611686018400000001',membershipType:3},accessToken:'synthetic',refreshToken:'synthetic'};
  const env:any={APP_ORIGINS:'https://astrixparadox.com',BUNGIE_API_KEY:'synthetic',AUTH_RECORDS:{idFromName:(n:string)=>n,get:()=>({fetch:async(input:any,init:any)=>{
   const r=new Request(input,init),url=new URL(r.url);
-  if(url.pathname==='/prepared-page'){if(r.method==='PUT'){cacheWrites++;return new Response(null,{status:204});}return new Response(null,{status:404});}
+  if(url.pathname==='/prepared-account'){if(r.method==='PUT'){cacheWrites++;cacheBytes+=(await r.arrayBuffer()).byteLength;return new Response(null,{status:204});}return new Response(null,{status:404});}
   return Response.json(session);
  }})},MANIFEST_DATA:{fetch:async(r:Request)=>{
   const url=new URL(r.url);
@@ -59,6 +59,6 @@ test('a 45 MB Journey stream is pulled on demand, arrives complete and builds no
  const parsed=JSON.parse(body);
  assert.equal(parsed.prepared.publicData.length,TOTAL,'The full public bundle must arrive intact');
  assert.deepEqual(bundleRequests,['journey'],'A Journey request must build no other page');
- assert.equal(cacheWrites,0,'A page above the cache cap must not be copied into the backend cache');
+ assert.ok(cacheWrites===1&&cacheBytes<1024*1024,'Only the small account part may enter the backend cache, never the public bundle');
  console.log(`JOURNEY_STREAM_MEMORY=PASS bytes=${received} maxLead<=17MB otherPages=0 cacheWrites=${cacheWrites}`);
 });

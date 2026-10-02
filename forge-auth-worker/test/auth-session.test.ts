@@ -25,7 +25,8 @@ function fixture() {
   let alarmAt = 0;
   const storage = { get: async (key: string) => structuredClone(rows.get(key)),
     put: async (key: string, value: unknown) => { rows.set(key, structuredClone(value)); },
-    delete: async (key: string) => rows.delete(key), deleteAll: async () => rows.clear(),
+    delete: async (key: string | string[]) => Array.isArray(key) ? key.filter(row => rows.delete(row)).length : rows.delete(key), deleteAll: async () => rows.clear(),
+    list: async ({ prefix = '', limit = Infinity }: { prefix?: string; limit?: number } = {}) => new Map([...rows].filter(([key]) => key.startsWith(prefix)).slice(0, limit)),
     setAlarm: async (value: number) => { alarmAt = value; }, deleteAlarm: async () => { alarmAt = 0; } };
   const env: any = { BUNGIE_CLIENT_ID: 'test-client', BUNGIE_CLIENT_SECRET: 'test-secret', APP_ORIGINS: 'https://astrixparadox.com' };
   const record = new AuthRecord({ storage, id: { toString: () => 'synthetic-session-id' }, waitUntil() {} } as any, env);

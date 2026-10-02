@@ -10,11 +10,11 @@ registerHooks({resolve(specifier,context,next){
 }});
 const {default:worker}=await import('../src/semantic-wrapper.ts');
 test('runtime serves ten fresh profiles without reloading a matching public bundle',async t=>{
- let version='v1',bundleReads=0,profileReads=0,cacheWrites=0;
- const session={kind:'session',absoluteExpiresAt:Date.now()+86400000,accessExpiresAt:Date.now()+3600000,activeDestinyMembership:{membershipId:'synthetic',membershipType:3},accessToken:'synthetic',refreshToken:'synthetic'};
+ let version='v1',bundleReads=0,profileReads=0,cacheWrites=0;const cacheBodies:string[]=[];
+ const session={kind:'session',absoluteExpiresAt:Date.now()+86400000,accessExpiresAt:Date.now()+3600000,activeDestinyMembership:{membershipId:'4611686018400000001',membershipType:3},accessToken:'synthetic',refreshToken:'synthetic'};
  const env:any={APP_ORIGINS:'https://astrixparadox.com',BUNGIE_API_KEY:'synthetic',AUTH_RECORDS:{idFromName:(n:string)=>n,get:()=>({fetch:async(input:any,init:any)=>{
   const r=new Request(input,init),url=new URL(r.url);
-  if(url.pathname==='/prepared-page'){if(r.method==='PUT'){cacheWrites++;return new Response(null,{status:204});}return new Response(null,{status:404});}
+  if(url.pathname==='/prepared-account'){if(r.method==='PUT'){cacheWrites++;cacheBodies.push(await r.text());return new Response(null,{status:204});}return new Response(null,{status:404});}
   return Response.json(session);
  }})},MANIFEST_DATA:{fetch:async(r:Request)=>{
   const path=new URL(r.url).pathname;
@@ -35,7 +35,8 @@ test('runtime serves ten fresh profiles without reloading a matching public bund
   assert.equal(body.account.authenticated,true);assert.equal(body.account.profile.characters.data.c.light,102+i);
   assert.deepEqual(body.prepared,{manifestVersion:'v1',bundleCached:true});sizes.push(text.length);
  }
- assert.equal(bundleReads,1);assert.equal(profileReads,11);assert.equal(cacheWrites,1,'Do not poison the full backend cache with a bundle reference');
+ assert.equal(bundleReads,1);assert.equal(profileReads,11);await Promise.all(jobs);assert.equal(cacheWrites,11,'Every live build refreshes the account cache');
+ assert.ok(cacheBodies.every(body=>!body.includes('publicData')&&!body.includes('bundleCached')),'The account cache never holds the public bundle or a bundle reference');
  assert.equal(new Set(sizes).size,1);assert.ok(sizes[0]<coldText.length-1024*1024);
  version='v2';const changed=await request('v1');assert.equal((await changed.json() as any).prepared.manifestVersion,'v2');assert.equal(bundleReads,2);await Promise.all(jobs);
  console.log(`PROFILE_ONLY_WORKER_BYTES cold=${coldText.length} warm=${sizes[0]} ten-loads-flat=true`);

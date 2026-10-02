@@ -1,6 +1,6 @@
 import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
 import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
-import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
+import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
 import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
@@ -109,6 +109,14 @@ function completeEnvelopeCoverage(payload,page){
   return payload;
 }
 
+// A server cached account part is labelled as cached with the time of its data. It is never presented as live.
+function markServerCache(payload,account){
+  const cache=account.preparedCache;
+  if(cache?.source!=='backend-cache')return;
+  const dataAt=Number(cache.dataAt);
+  payload.pageReady={...(payload.pageReady||{}),accountSource:'backend-cache',accountFreshness:'cached',accountDataAt:Number.isFinite(dataAt)&&dataAt>0?dataAt:null};
+}
+
 function normalizePreparedPagePayload(raw,pageValue){
   const page=pageKind(pageValue);
   if(raw?.transport!=='prepared-page-stream-v1'||!raw?.account||!raw?.prepared)return raw;
@@ -131,6 +139,7 @@ function normalizePreparedPagePayload(raw,pageValue){
     payload.artifactCatalog=prepared.artifactCatalog;
   }
   delete payload.journeyAccountManifestTables;
+  markServerCache(payload,account);
   return completeEnvelopeCoverage(payload,page);
 }
 
