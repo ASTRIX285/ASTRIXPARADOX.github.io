@@ -6,7 +6,7 @@
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2&amp;chips=20261002-1">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
   <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1&amp;gloss=20260926-4">
 
@@ -29,12 +29,8 @@
     .filter-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:0}
     .filter-row{display:flex;align-items:center;gap:0;min-height:52px;border-bottom:1px solid rgba(139,0,0,0.1)}
     .filter-row:last-child{border-bottom:none}
-    .filter-label{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:4px;color:var(--grey);text-transform:uppercase;min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:4px;flex-shrink:0}
-    .filter-pills{display:flex;flex-wrap:wrap;gap:2px;padding:8px 0 8px 8px}
-    .filter-btn{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:2px;padding:7px 18px;border:1px solid transparent;color:var(--grey);cursor:pointer;text-transform:uppercase;transition:all 0.2s;background:transparent;white-space:nowrap}
-    .filter-btn:hover{color:var(--white);border-color:rgba(139,0,0,0.5);background:rgba(139,0,0,0.06)}
-    .filter-btn.game-btn.active{color:var(--white);background:rgba(139,0,0,0.2);border-color:var(--crimson-mid)}
-    .filter-btn.type-btn.active{color:var(--dark);background:var(--gold);border-color:var(--gold)}
+    .filter-label{min-width:60px;padding-right:16px;border-right:1px solid rgba(139,0,0,0.2);margin-right:8px;flex-shrink:0}
+    .filter-pills{padding:8px 0}
     .game-section{margin-bottom:48px}
     .game-section.hidden{display:none}
     .game-section-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-top:8px}
@@ -75,7 +71,7 @@
     .clip-modal-source{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:6px}
     .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
     .clips-stats span{color:var(--white)}
-    @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-label{min-width:48px;font-size:7px;letter-spacing:2px}.filter-btn{font-size:11px;padding:6px 12px}}
+    @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px 0}.filter-label{min-width:0;padding:0;margin:0;border-right:0}.filter-pills{padding:0}}
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
   <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
@@ -118,28 +114,30 @@
 <div class="filter-wrap">
   <div class="filter-inner">
     <div class="filter-row">
-      <span class="filter-label">Game</span>
-      <div class="filter-pills">
-        <button class="filter-btn game-btn active" data-game="all" onclick="filterClips(this,'game')">All</button>
-        <button class="filter-btn game-btn" data-game="crimson-desert" onclick="filterClips(this,'game')">Crimson Desert</button>
-        <button class="filter-btn game-btn" data-game="black-myth-wukong" onclick="filterClips(this,'game')">Black Myth: Wukong</button>
-        <button class="filter-btn game-btn" data-game="god-of-war" onclick="filterClips(this,'game')">God of War</button>
-        <button class="filter-btn game-btn" data-game="destiny" onclick="filterClips(this,'game')">Destiny</button>
+      <span class="filter-label ax-chip-label">Game</span>
+      <div class="filter-pills ax-chip-row">
+        <!-- CLIPS-GAMES:START -->
+        <button class="ax-chip filter-btn game-btn active" data-game="all" onclick="filterClips(this,'game')">All</button>
+        <button class="ax-chip filter-btn game-btn" data-game="crimson-desert" onclick="filterClips(this,'game')">Crimson Desert</button>
+        <button class="ax-chip filter-btn game-btn" data-game="black-myth-wukong" onclick="filterClips(this,'game')">Black Myth: Wukong</button>
+        <button class="ax-chip filter-btn game-btn" data-game="god-of-war" onclick="filterClips(this,'game')">God of War</button>
+        <button class="ax-chip filter-btn game-btn" data-game="destiny" onclick="filterClips(this,'game')">Destiny</button>
+        <!-- CLIPS-GAMES:END -->
       </div>
     </div>
     <div class="filter-row">
-      <span class="filter-label">Type</span>
-      <div class="filter-pills">
-        <button class="filter-btn type-btn active" data-type="all" onclick="filterClips(this,'type')">All</button>
-        <button class="filter-btn type-btn" data-type="highlight" onclick="filterClips(this,'type')">Highlight</button>
-        <button class="filter-btn type-btn" data-type="boss" onclick="filterClips(this,'type')">Boss</button>
-        <button class="filter-btn type-btn" data-type="guide" onclick="filterClips(this,'type')">Guide</button>
-        <button class="filter-btn type-btn" data-type="build" onclick="filterClips(this,'type')">Build</button>
-        <button class="filter-btn type-btn" data-type="pve" onclick="filterClips(this,'type')">PvE</button>
-        <button class="filter-btn type-btn" data-type="puzzle" onclick="filterClips(this,'type')">Puzzle</button>
-        <button class="filter-btn type-btn" data-type="challenge" onclick="filterClips(this,'type')">Challenge</button>
-        <button class="filter-btn type-btn" data-type="missions" onclick="filterClips(this,'type')">Missions</button>
-        <button class="filter-btn type-btn" data-type="funny" onclick="filterClips(this,'type')">Funny</button>
+      <span class="filter-label ax-chip-label">Type</span>
+      <div class="filter-pills ax-chip-row">
+        <button class="ax-chip filter-btn type-btn active" data-type="all" onclick="filterClips(this,'type')">All</button>
+        <button class="ax-chip filter-btn type-btn" data-type="highlight" onclick="filterClips(this,'type')">Highlight</button>
+        <button class="ax-chip filter-btn type-btn" data-type="boss" onclick="filterClips(this,'type')">Boss</button>
+        <button class="ax-chip filter-btn type-btn" data-type="guide" onclick="filterClips(this,'type')">Guide</button>
+        <button class="ax-chip filter-btn type-btn" data-type="build" onclick="filterClips(this,'type')">Build</button>
+        <button class="ax-chip filter-btn type-btn" data-type="pve" onclick="filterClips(this,'type')">PvE</button>
+        <button class="ax-chip filter-btn type-btn" data-type="puzzle" onclick="filterClips(this,'type')">Puzzle</button>
+        <button class="ax-chip filter-btn type-btn" data-type="challenge" onclick="filterClips(this,'type')">Challenge</button>
+        <button class="ax-chip filter-btn type-btn" data-type="missions" onclick="filterClips(this,'type')">Missions</button>
+        <button class="ax-chip filter-btn type-btn" data-type="funny" onclick="filterClips(this,'type')">Funny</button>
       </div>
     </div>
   </div>

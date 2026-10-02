@@ -39,6 +39,8 @@
   --ax-map-wash-top:rgba(14,12,9,.35);--ax-map-wash-bottom:rgba(14,12,9,.7);--ax-map-glow:rgba(115,32,34,.22);
   /* Panels over the map: Panel #15130f at 75 percent with the #2e2a22 hairline. */
   --ax-map-panel:rgba(21,19,15,.75);--ax-hairline:#2e2a22;
+  /* Filter chips (Clips, News): hairline edge and the label on the selected Ember chip. */
+  --ax-chip-line:#4a4538;--ax-chip-on:#ffffff;
 }
 
 @keyframes ax-strobe{0%,100%{opacity:.35}4%{opacity:1}7%{opacity:.45}10%{opacity:1}16%{opacity:.35}}
@@ -191,9 +193,9 @@ body.ax-brand.ax-map :is(.form-input,.form-select,.form-textarea){background:var
   body.ax-brand.ax-map .ax-map-panel{padding:16px!important}
   body.ax-brand .ax-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
-body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close){position:relative!important;isolation:isolate!important}
+body.ax-brand.ax-stroke :is(.btn-facebook,.nav-toggle,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close){position:relative!important;isolation:isolate!important}
 body.ax-brand.ax-stroke .nav-links a::before,
-body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):not(:disabled)::after{
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):not(:disabled)::after{
   content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
   padding:0 0 1.5px 1.5px!important;border-radius:0!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;
   background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
@@ -205,7 +207,36 @@ body.ax-brand.ax-stroke .nav-links a::before{background-image:linear-gradient(13
 /* On red and brand-coloured fills the stroke is a lighter ember so it still reads. */
 body.ax-brand.ax-stroke :is(.btn-primary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.btn-facebook){--ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary)}
 body.ax-brand.ax-stroke .nav-links a:is(:hover,:focus-visible)::before,
-body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):is(:hover,:focus-visible)::after{animation-duration:1.4s!important}
+body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close):is(:hover,:focus-visible)::after{animation-duration:1.4s!important}
+
+/* ---------- Filter chips: Clips and News (2 Oct 2026) ----------
+   One set of classes for every filter chip. Flat Panel fill, 1px hairline and the notched corner;
+   the diagonal hairline on the notch is the small gradient in the top-right corner. Steel caps in
+   Barlow Semi Condensed. Selected: Ember fill, white label and the strobe stroke in the lighter
+   primary colours, with no glow. Hover only changes the edge colour. These rules sit in the first
+   layer, so they replace the gloss finish (astrix-gloss-controls.css) completely. */
+body.ax-brand .ax-chip-row{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;min-width:0!important}
+body.ax-brand .ax-chip{--ax-chip-edge:var(--ax-chip-line);--ax-chip-fill:var(--ax-panel);
+  position:relative!important;isolation:isolate!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  box-sizing:border-box!important;min-height:40px!important;height:auto!important;min-width:0!important;margin:0!important;padding:0 18px 0 16px!important;
+  border:1px solid var(--ax-chip-edge)!important;border-radius:0!important;clip-path:var(--ax-clip)!important;
+  background:linear-gradient(to bottom left,transparent calc(50% - .75px),var(--ax-chip-edge) calc(50% - .75px),var(--ax-chip-edge) calc(50% + .75px),transparent calc(50% + .75px)) top right/var(--ax-notch) var(--ax-notch) no-repeat border-box,var(--ax-chip-fill)!important;
+  box-shadow:none!important;text-shadow:none!important;filter:none!important;transform:none!important;translate:none!important;backdrop-filter:none!important;
+  color:var(--ax-steel)!important;-webkit-text-fill-color:currentColor!important;font:600 13px/1 var(--ax-font-head)!important;letter-spacing:.1em!important;text-transform:uppercase!important;white-space:nowrap!important;
+  cursor:pointer!important;transition:border-color .15s var(--ax-ease)!important}
+body.ax-brand .ax-chip::before{content:none!important;display:none!important}
+body.ax-brand .ax-chip:not(.active)::after{content:none!important;display:none!important}
+body.ax-brand .ax-chip:not(.active):is(:hover,:focus-visible){--ax-chip-edge:var(--ax-ember-hi)}
+body.ax-brand .ax-chip:focus-visible{outline:2px solid var(--ax-steel-light)!important;outline-offset:-5px!important}
+body.ax-brand .ax-chip.active{--ax-chip-edge:var(--ax-ember);--ax-chip-fill:var(--ax-ember);--ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary);color:var(--ax-chip-on)!important}
+body.ax-brand .ax-chip.active::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  padding:0 0 1.5px 1.5px!important;border-radius:0!important;pointer-events:none!important;z-index:2!important;opacity:1!important;transform:none!important;box-shadow:none!important;filter:none!important;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)!important;
+  animation:ax-stroke-pulse 2.8s ease-in-out infinite!important}
+/* Row labels (GAME, TYPE): beside the chips on wide screens, above them on phones. */
+body.ax-brand .ax-chip-label{color:var(--ax-steel)!important;font:600 12px/1 var(--ax-font-head)!important;letter-spacing:.24em!important;text-transform:uppercase!important}
 
 /* ---------- Footers and Bungie attribution ---------- */
 body.ax-brand footer,body.ax-brand .apx-bungie-attribution{font-family:var(--ax-font-body)!important}
@@ -214,7 +245,9 @@ body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 au
 
 @media (prefers-reduced-motion:reduce){
   body.ax-brand .nav-links a.active::after{animation:none!important}
-  body.ax-brand.ax-stroke .nav-links a::before,body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.news-filter,.filter-btn,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close)::after{animation:none!important;--ax-pulse:-20%}
+  body.ax-brand.ax-stroke .nav-links a::before,body.ax-brand.ax-stroke :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn,.btn-facebook,.nav-toggle,.universe-pill,.clip-modal-close,.trailer-modal-close,.tools-mission-close)::after{animation:none!important;--ax-pulse:-20%}
   body.ax-brand :is(.btn-primary,.btn-secondary,.btn-join,.form-submit,.tools-mission-trigger,.forge-entry-link,.game-card-btn):hover::before{animation:none!important}
+  body.ax-brand .ax-chip.active::after{animation:none!important;--ax-pulse:-20%}
+  body.ax-brand .ax-chip{transition:none!important}
 }
 }
