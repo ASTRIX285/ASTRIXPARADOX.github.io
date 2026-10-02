@@ -282,6 +282,17 @@ html,body{
 .design-canvas .armour-design-section .armour-set-bonus-icon,
 .design-canvas .armour-design-section .armour-set-threshold{width:var(--build-armour-bonus-icon);height:var(--build-armour-bonus-icon)}
 .design-canvas .armour-design-section .armour-exotic-overlay img{width:82%!important;height:82%!important}
+/* Weapon frames follow rarity only (Exotic gold, every other weapon white). Masterwork level no longer
+   turns a Legendary frame gold; the tile's own art ring still shows masterwork. */
+.design-canvas{--build-weapon-frame:rgba(255,255,255,.92);--build-weapon-frame-exotic:#e0b94f}
+.design-canvas .gear-weapons .weap .art::after,
+.design-canvas .gear-weapons .weap.is-level-gold .art::after{border:2px solid var(--build-weapon-frame)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)!important}
+.design-canvas .gear-weapons .weap.is-exotic .art::after{border-color:var(--build-weapon-frame-exotic)!important}
+.super-synergy-evidence .super-synergy-equipped{display:block;margin:2px 0;font-size:.75rem;opacity:.85}
+/* Exotic perk badge on the armour tile (moved from the strip beside it): bottom-left of the art. */
+.design-canvas .armour-design-section .arm{position:relative}
+.design-canvas .armour-design-section .arm>.armour-exotic-badge{position:absolute;left:3px;bottom:3px;z-index:9;display:grid;place-items:center;width:var(--build-armour-bonus-icon);height:var(--build-armour-bonus-icon);margin:0;overflow:hidden;border:1px solid var(--apx-colour-border,currentColor);border-radius:50%;background:var(--apx-colour-panel,transparent)}
+.design-canvas .armour-design-section .arm>.armour-exotic-badge img{width:100%!important;height:100%!important;object-fit:contain}
 /* Prompt 11c: explicit equal-width cards preserve inline-size containment. */
 .design-canvas .weapon-design-section{container-name:build-weapon-section}
 .design-canvas .weapon-design-section .gear-weapons .weap-grid{

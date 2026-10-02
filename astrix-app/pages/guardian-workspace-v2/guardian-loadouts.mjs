@@ -1,7 +1,7 @@
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
 import {getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
-import {isSavedLoadout,loadoutStatus,loadoutGear,acceptedEquipment} from './guardian-loadout-status.mjs?v=20260925-menu-1';
+import {isSavedLoadout,loadoutStatus,loadoutGear,acceptedEquipment} from './guardian-loadout-status.mjs?v=20260925-menu-1&bf=20261002-1';
 import {transferFailureReason} from '../vault/vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
 // Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
 // style lengths in the element's own pixels, so convert before positioning.
