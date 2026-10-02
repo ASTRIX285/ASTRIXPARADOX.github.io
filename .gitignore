@@ -15,3 +15,16 @@ forge-worker/.wrangler/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Performance measurement: signed-in browser profiles, HAR and trace files, results. Safety net:
+# astrix-app/tools/perf refuses to write any of these inside the repo.
+astrix-live-profile/
+*-profile/
+perf-out/
+astrix-perf/
+perf-results.json
+*.har
+*.trace
+*.trace.zip
+trace.zip
+*.cpuprofile
