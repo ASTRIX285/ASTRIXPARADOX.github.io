@@ -7,7 +7,10 @@
 //   - the bottom bar (WEAPONS, ARMOUR, GENERAL, INVENTORY) is fixed and visible after scrolling,
 //     never covers the last row, and is hidden while the tools drawer is open;
 //   - each tab shows only its own areas; the last tab is remembered for the page;
-//   - a tap still opens the item card.
+//   - a tap still opens the item card; every visible tile image loads (natural width above 0) on all
+//     four tabs; no PULL button and no "double-click" text shows on phone and tablet;
+//   - Character Postmaster: tap a weapon for its item card, tap a stack for the action sheet, each with
+//     Pull to <Guardian> (the Storage system); Storage offers Move to <Guardian> / Move to Vault.
 // At 1600 the bar and the bucket grid are absent (desktop unchanged).
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -36,6 +39,12 @@ try{
   const origin=`http://127.0.0.1:${server.address().port}`,art=await readFile(resolve(root,'img/ax-logo-160.webp'));
   const ready=page=>page.waitForFunction(()=>document.querySelectorAll('.vault-transfer-item.is-equipped').length>=3,null,{timeout:30000});
   // Visible areas: equipment groups outside the Postmaster, plus the Postmaster and Character's left rail.
+  const loadedTiles=async page=>{
+    await page.evaluate(async()=>{for(let y=0;y<=document.documentElement.scrollHeight;y+=innerHeight/2){window.scrollTo(0,y);await new Promise(done=>setTimeout(done,60));}window.scrollTo(0,0);});
+    await page.waitForFunction(()=>[...document.querySelectorAll('.vault-transfer-item img')].filter(img=>img.getBoundingClientRect().width>0).every(img=>img.complete),null,{timeout:10000}).catch(()=>{});
+    return page.evaluate(()=>{const shown=[...document.querySelectorAll('.vault-transfer-item')].filter(node=>node.getBoundingClientRect().height>0);
+      return {total:shown.length,missing:shown.filter(node=>{const img=node.querySelector('.tile-art img,.vault-transfer-art img');return !img||!(img.naturalWidth>0);}).map(node=>node.getAttribute('title')).slice(0,5)};});
+  };
   const visibleAreas=page=>page.evaluate(()=>{
     const shown=node=>node&&node.getBoundingClientRect().height>0;
     return {
@@ -47,9 +56,9 @@ try{
 
   for(const width of [390,820])for(const [name,path] of PAGES){
     const label=`${name} ${width}`,columns=width<600?4:5;
-    const context=await browser.newContext({viewport:{width,height:width<600?844:1180}}),page=await context.newPage(),errors=[];
+    const context=await browser.newContext({viewport:{width,height:width<600?844:1180}}),page=await context.newPage(),errors=[],actions=[];
     page.on('pageerror',error=>errors.push(error.message));
-    await routeWarlockFixture(page,{origin,fixture,art});
+    await routeWarlockFixture(page,{origin,fixture,art,actions});
     await page.goto(origin+path,{waitUntil:'domcontentloaded'});await ready(page);await page.waitForTimeout(300);
     const bar=page.locator('.ax-inv-tabs');
     assert.deepEqual(await bar.locator('.ax-inv-tab').allInnerTexts(),['WEAPONS','ARMOUR','GENERAL','INVENTORY'],`${label}: the four tabs`);
@@ -63,6 +72,12 @@ try{
       if(groups.length)assert.ok(areas.groups.length>0,`${label} ${tab}: its buckets are shown`);
       assert.equal(areas.postmaster,tab==='inventory',`${label} ${tab}: Postmaster only under INVENTORY`);
       if(name==='Character')assert.equal(areas.leftRail,tab==='general',`${label} ${tab}: subclass and artifact only under GENERAL`);
+      // Every visible tile image loads: scroll through so lazy images are requested, then check.
+      const tiles=await loadedTiles(page);
+      assert.ok(tiles.total>0,`${label} ${tab}: tiles are shown`);
+      assert.deepEqual(tiles.missing,[],`${label} ${tab}: every visible tile image loads`);
+      assert.equal(await page.evaluate(()=>[...document.querySelectorAll('.vault-postmaster-pull')].some(node=>node.getBoundingClientRect().width>0)),false,`${label} ${tab}: no PULL buttons`);
+      assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/double.?click/i,`${label} ${tab}: no double-click text`);
       if(tab==='inventory')continue;
       // Bucket geometry: equipped alone in column 1, unequipped rows of 4 or 5.
       const buckets=await page.evaluate(()=>[...document.querySelectorAll('.vault-transfer-items')].filter(node=>node.getBoundingClientRect().height>0&&node.querySelector(':scope>.is-equipped')).map(node=>{
@@ -104,6 +119,36 @@ try{
     await page.locator('.vault-transfer-item.is-equipped[data-inspect-item]').first().click();
     await page.locator('#paradoxItemInspect').waitFor({state:'visible',timeout:3000});
     await page.keyboard.press('Escape');
+
+    // Phone and tablet tap actions (inventory-item-actions.mjs).
+    if(name==='Character'){
+      await bar.locator('[data-inventory-tab="inventory"]').click();await page.waitForTimeout(150);
+      await page.locator('#characterInventoryWorkspace .vault-postmaster-section .vault-transfer-item[data-item-kind="weapon"]').first().click();
+      const cardPull=page.locator('#paradoxItemInspect [data-paradox-inspect-action]');
+      await cardPull.waitFor({state:'visible',timeout:3000});
+      assert.equal(await cardPull.innerText(),'Pull to Warlock',`${label}: Postmaster weapon card offers the pull`);
+      await page.keyboard.press('Escape');await page.waitForTimeout(150);
+      await page.locator('#characterInventoryWorkspace .vault-postmaster-section [data-inspect-item][title="Fixture Material"]').click();
+      const sheet=page.locator('.inventory-item-sheet');
+      await sheet.waitFor({state:'visible',timeout:3000});
+      assert.match(await sheet.locator('header span').innerText(),/WARLOCK POSTMASTER · STACK OF 25/);
+      await sheet.locator('[data-item-sheet-action]').click();
+      const deadline=Date.now()+10000;while(!actions.some(row=>row.path.endsWith('/pull-from-postmaster'))&&Date.now()<deadline)await page.waitForTimeout(150);
+      const pull=actions.find(row=>row.path.endsWith('/pull-from-postmaster'))?.body||{};
+      assert.deepEqual({itemId:String(pull.itemId),itemReferenceHash:Number(pull.itemReferenceHash),stackSize:Number(pull.stackSize)},{itemId:'0',itemReferenceHash:990101,stackSize:25},`${label}: the Character stack pull reaches Bungie`);
+      await bar.locator('[data-inventory-tab="weapons"]').click();
+    }else{
+      await bar.locator('[data-inventory-tab="weapons"]').click();await page.waitForTimeout(150);
+      await page.locator('#vaultTransferWorkspace .vault-only-section .vault-transfer-item[data-item-kind="weapon"]').first().click();
+      const move=page.locator('#paradoxItemInspect [data-paradox-inspect-action]');
+      await move.waitFor({state:'visible',timeout:3000});
+      assert.equal(await move.innerText(),'Move to Warlock',`${label}: a Vault item moves to the active Guardian`);
+      await page.keyboard.press('Escape');await page.waitForTimeout(150);
+      await page.locator('#vaultTransferWorkspace .vault-character-column.is-active .vault-transfer-item[data-item-source="carried"][data-item-kind="weapon"]').first().click();
+      await move.waitFor({state:'visible',timeout:3000});
+      assert.equal(await move.innerText(),'Move to Vault',`${label}: a carried item moves to the Vault`);
+      await page.keyboard.press('Escape');
+    }
 
     // The last tab is remembered for this page.
     await bar.locator('[data-inventory-tab="armour"]').click();

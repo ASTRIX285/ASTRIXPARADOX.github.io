@@ -13,6 +13,7 @@ import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compac
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,stagePostmasterCollectionIntent,stageVaultTransferIntent} from "./guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2&stack=20261002-1";
 import {createVaultCatalogue,itemKey} from "../vault/vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1&stack=20261002-1";
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,postmasterMarkup} from "../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&stack=20261002-1";
+import {bindItemSheet,decoratePostmasterPullButtons,isCompactInventory,postmasterFailure,postmasterPullState} from "../../shared/inventory-item-actions.mjs?inv=20261002-1";
 import {assertRenderablePagePayload} from "../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1";
 import {characterScopedSelectionState} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
 
@@ -109,7 +110,22 @@ function renderCharacterInventory(){
       ${equippedAndCarriedMarkup({characterId,items:characterInventoryState.catalogue.items,capabilities,activeCharacterId:characterId})}
     </div>
   </article>`;
-  bindInventoryWorkspaceHovers(host,{resolveItem:characterInventoryItem,bindInspect:bindParadoxItemInspect});
+  bindInventoryWorkspaceHovers(host,{resolveItem:characterInventoryItem,bindInspect:(target,item,kind,options)=>bindParadoxItemInspect(target,item,kind,{...options,actions:()=>characterItemActions(item)})});
+  decoratePostmasterPullButtons(host,characterPostmasterFailures);
+}
+
+// Phone and tablet: a tap on a Postmaster item opens its item card or the shared action sheet with
+// Pull to <Guardian> (inventory-item-actions.mjs, the same system as Storage). The last failed pull
+// per item keeps its plain reason; it clears once a pull of that item is confirmed.
+const characterPostmasterFailures=new Map();
+function characterItemActions(item){
+  if(!isCompactInventory()||item?.source?.kind!=='postmaster')return [];
+  const characterId=String(item.source.characterId||''),{ready,reason}=postmasterPullState({session:characterInventoryState.session,capabilities:liveActionCapabilities(characterInventoryState.session||{}),failure:characterPostmasterFailures.get(itemKey(item))});
+  return [{label:`Pull to ${activeCharacterLabel()}`,disabled:!ready,reason,run:()=>stageCharacterPostmasterCollection(characterId,itemKey(item))}];
+}
+function characterItemSubtitle(item){
+  const count=Number(item?.quantity||1);
+  return `${activeCharacterLabel().toUpperCase()} POSTMASTER${count>1?` · STACK OF ${count}`:''}`;
 }
 
 function updateCharacterInventory(detail={}){
@@ -130,7 +146,7 @@ function updateCharacterInventory(detail={}){
     characterInventoryState.detail=detail;
     renderCharacterInventory();
     // Phone and tablet: tap, not double click.
-    characterInventoryStatus(`Showing equipped, carried, and Postmaster items for the active Guardian. ${globalThis.matchMedia?.('(max-width: 1199px)')?.matches?'Tap':'Double click'} a Postmaster item to review a direct live equip.`,'good');
+    characterInventoryStatus(`Showing equipped, carried, and Postmaster items for the active Guardian. ${isCompactInventory()?'Tap a Postmaster item to pull it.':'Double click a Postmaster item to review a direct live equip.'}`,'good');
   }catch(error){
     characterInventoryState.payload=null;
     renderCharacterInventory();
@@ -159,9 +175,9 @@ function showCharacterInventoryAction(title,summary,action){
 
 function stageCharacterPostmasterCollection(characterId,requestedItemKey=''){
   try{
-    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}),queueKey=`${characterId}:${requestedItemKey||'all'}`;
+    const items=characterInventoryState.catalogue.postmasterItems.filter(item=>String(item?.source?.characterId||'')===String(characterId||'')&&(/^\d+$/.test(String(item?.itemInstanceId||''))||(!item?.itemInstanceId&&Number(item?.itemHash)>0))&&(!requestedItemKey||itemKey(item)===String(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session:characterInventoryState.session}),queueKey=`${characterId}:${requestedItemKey||'all'}`;
     if(characterInventoryState.queuedPostmasterKeys.has(queueKey)){characterInventoryStatus('That exact Postmaster pull is already queued.');return;}
-    characterInventoryState.queuedPostmasterKeys.add(queueKey);characterInventoryState.postmasterQueue.push({intent,queueKey});
+    characterInventoryState.queuedPostmasterKeys.add(queueKey);characterInventoryState.postmasterQueue.push({intent,queueKey,itemKeys:items.map(itemKey)});
     characterInventoryStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${activeCharacterLabel()} Postmaster. Waiting for Bungie inventory feedback.`);
     void performCharacterPostmasterQueue();
   }catch(error){characterInventoryStatus(error?.message||'The Postmaster pull could not be queued.','error');}
@@ -176,11 +192,16 @@ async function performCharacterPostmasterQueue(){
     characterInventoryState.busy=true;
     result=await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session:characterInventoryState.session,onProgress:row=>characterInventoryStatus(row.label||'Waiting for Bungie inventory feedback.')});
     if(result.attemptCount>0||result.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull',characterId:characterInventoryState.activeCharacterId,liveInventory:result.liveInventory}}));
-    if(result.status==='applied'&&result.readback?.verified)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
-    else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${characterInventoryFailure(result)}`,'error');
+    const confirmed=result.status==='applied'&&result.readback?.verified,failure=confirmed?null:postmasterFailure(result,null,characterInventoryFailure);
+    for(const key of action.itemKeys||[]){if(confirmed)characterPostmasterFailures.delete(key);else if(failure)characterPostmasterFailures.set(key,failure);}
+    if(!result.attemptCount&&!result.mutationCount&&failure)renderCharacterInventory();
+    if(confirmed)characterInventoryStatus('Postmaster pull completed and Bungie inventory confirmed the result.','good');
+    else characterInventoryStatus(`${result.status==='partial'?'The Postmaster pull partially completed':'No Postmaster item moved'}: ${failure?.reason||characterInventoryFailure(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)document.dispatchEvent(new CustomEvent('forge:bungie-profile-refresh-requested',{detail:{reason:'character-postmaster-pull-recovery',characterId:characterInventoryState.activeCharacterId}}));
-    characterInventoryStatus(error?.message||'The Postmaster pull failed.','error');
+    const failure=postmasterFailure(null,error);
+    if(failure){for(const key of action.itemKeys||[])characterPostmasterFailures.set(key,failure);renderCharacterInventory();}
+    characterInventoryStatus(failure?.reason||error?.message||'The Postmaster pull failed.','error');
   }finally{
     characterInventoryState.busy=false;characterInventoryState.queuedPostmasterKeys.delete(action.queueKey);
     if(characterInventoryState.postmasterQueue.length)void performCharacterPostmasterQueue();
@@ -241,6 +262,7 @@ async function performCharacterInventoryAction(){
 function installCharacterInventory(){
   const host=byId('characterInventoryWorkspace');
   bindInventoryWorkspaceInteractions(host,{onPullItem:stageCharacterPostmasterCollection,onPullAll:stageCharacterPostmasterCollection});
+  bindItemSheet(host,{resolveItem:characterInventoryItem,actionsFor:characterItemActions,subtitleFor:characterItemSubtitle});
   byId('characterInventoryActionCancel')?.addEventListener('click',closeCharacterInventoryAction);
   byId('characterInventoryActionConfirm')?.addEventListener('click',performCharacterInventoryAction);
   byId('characterInventoryActionDialog')?.addEventListener('cancel',event=>{event.preventDefault();if(!characterInventoryState.busy)closeCharacterInventoryAction();});

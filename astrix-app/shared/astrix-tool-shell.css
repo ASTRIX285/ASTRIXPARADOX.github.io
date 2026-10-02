@@ -312,6 +312,7 @@ body.ax-drawer-open{overflow:hidden!important}
    the 4px gap themselves. A fixed bottom bar (WEAPONS, ARMOUR, GENERAL, INVENTORY) shows one area at
    a time; it is built in astrix-destination-ribbon.js. */
 .ax-inv-tabs{display:none!important}
+.ax-copy-compact{display:none}
 @media (max-width:1199px){
   :root{--ax-inv-cols:4;--ax-inv-bar:56px}
   html body :is(#characterInventoryWorkspace,#vaultTransferWorkspace) .vault-equipped-carried-section{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
@@ -339,6 +340,24 @@ body.ax-drawer-open{overflow:hidden!important}
   html body.guardian-main-page .equipped-subclass .equipped-subclass__crest{place-self:center!important;width:70.7107%!important;border-radius:0!important;transform:rotate(45deg)!important}
   html body.guardian-main-page .equipped-subclass .equipped-subclass__crest::after{border-radius:0!important}
   html body.guardian-main-page .equipped-subclass .equipped-subclass__crest img{position:absolute!important;left:50%!important;top:50%!important;width:141.4214%!important;height:141.4214%!important;max-width:none!important;max-height:none!important;transform:translate(-50%,-50%) rotate(-45deg)!important;transform-origin:center!important}
+  /* Tap actions (inventory-item-actions.mjs): Postmaster items are icons only on both pages, the pull and
+     the moves live in the item card or the action sheet. Phone and tablet copy says tap; drag text goes. */
+  html body :is(#characterInventoryWorkspace,#vaultTransferWorkspace) .vault-postmaster-pull{display:none!important}
+  html body .ax-copy-desktop{display:none!important}
+  html body .ax-copy-compact{display:inline!important}
+  html body #vaultTransferWorkspace .vault-only-section>p{display:none!important}
+  .paradox-inventory-inspect-actions{position:sticky;bottom:0;z-index:4;display:grid;gap:8px;padding:12px;border-top:1px solid var(--ax-line);background:var(--ax-panel)}
+  .paradox-inventory-inspect-actions>button{min-height:44px}
+  :is(.paradox-inventory-inspect-reason,.inventory-item-sheet-reason){margin:0;color:var(--ax-muted);font:500 13px/1.4 "Barlow","Segoe UI",sans-serif}
+  .inventory-item-sheet-layer{position:fixed;inset:0;z-index:1800;display:grid;align-items:end}
+  .inventory-item-sheet-backdrop{position:absolute;inset:0;background:var(--ax-backdrop)}
+  .inventory-item-sheet{position:relative;display:grid;gap:12px;margin:0 auto;width:min(480px,100%);box-sizing:border-box;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border:1px solid var(--ax-line-strong);border-bottom:0;background:var(--ax-panel);clip-path:var(--ax-clip)}
+  .inventory-item-sheet>header{display:grid;grid-template-columns:56px minmax(0,1fr) 40px;align-items:center;gap:12px}
+  .inventory-item-sheet>header img,.inventory-item-sheet>header>.vault-transfer-icon-unavailable{width:56px;height:56px;object-fit:contain;display:grid;place-items:center;border:1px solid var(--ax-line)}
+  .inventory-item-sheet>header strong{display:block;color:var(--ax-ink);font:600 16px/1.25 var(--ax-font-head);overflow-wrap:anywhere}
+  .inventory-item-sheet>header span{display:block;margin-top:4px;color:var(--ax-steel);font:600 11px/1.2 var(--ax-font-head);letter-spacing:.12em}
+  .inventory-item-sheet-close{width:40px;height:40px;padding:0}
+  .inventory-item-sheet-action{min-height:44px;width:100%}
   /* One area at a time. Postmaster and consumables live under INVENTORY only. */
   body[data-inventory-tab] :is(#characterInventoryWorkspace,#vaultTransferWorkspace) .vault-postmaster-section,
   body[data-inventory-tab]:not([data-inventory-tab="general"]) :is(.guardian-left-rail,.guardian-loadouts-container){display:none!important}

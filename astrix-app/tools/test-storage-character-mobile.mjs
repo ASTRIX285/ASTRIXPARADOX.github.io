@@ -169,14 +169,14 @@ try{
 
     // Engram (no item card): the action sheet with icon, name and the pull.
     await tileByName(page,POSTMASTER.engram.name).click();
-    const sheet=page.locator('.vault-postmaster-sheet');
+    const sheet=page.locator('.inventory-item-sheet');
     await sheet.waitFor({state:'visible',timeout:3000});
-    assert.equal(await sheet.locator('#vaultPostmasterSheetName').innerText(),POSTMASTER.engram.name);
+    assert.equal(await sheet.locator('#inventoryItemSheetName').innerText(),POSTMASTER.engram.name);
     assert.equal(await sheet.locator('header img').count(),1,'The sheet shows the item icon');
-    const sheetPull=sheet.locator('[data-postmaster-sheet-pull]');
+    const sheetPull=sheet.locator('[data-item-sheet-action]');
     assert.equal(await sheetPull.innerText(),'Pull to Warlock');
     assert.equal(await sheetPull.isEnabled(),true);
-    assert.equal(await page.evaluate(()=>document.activeElement?.matches('[data-postmaster-sheet-pull]')),true,'Focus moves to the pull');
+    assert.equal(await page.evaluate(()=>document.activeElement?.matches('[data-item-sheet-action]')),true,'Focus moves to the pull');
     assert.ok((await sheetPull.boundingBox()).height>=44);
     await sheetPull.click();
     assert.equal(await sheet.count(),0,'The sheet closes after the pull');
@@ -195,9 +195,9 @@ try{
     await tileByName(page,POSTMASTER.material.name).click();
     await sheet.waitFor({state:'visible',timeout:3000});
     assert.match(await sheet.locator('header span').innerText(),/STACK OF (25|10)/,'The sheet shows the stack count');
-    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').isEnabled(),true,'Stacks can be pulled');
-    assert.equal(await sheet.locator('.vault-postmaster-sheet-reason').count(),0,'No disabled reason for a pullable stack');
-    await sheet.locator('[data-postmaster-sheet-pull]').click();
+    assert.equal(await sheet.locator('[data-item-sheet-action]').isEnabled(),true,'Stacks can be pulled');
+    assert.equal(await sheet.locator('.inventory-item-sheet-reason').count(),0,'No disabled reason for a pullable stack');
+    await sheet.locator('[data-item-sheet-action]').click();
     await waitFor(async()=>stackBodies(pulls).length===2,`${width}: both stacks were pulled`);
     assert.deepEqual(stackBodies(pulls),expectedStacks,`${width}: stack pulls send itemId 0, the item hash, each stack's size and the character`);
     stackBodySample=pulls.find(body=>String(body.itemId)==='0');
@@ -209,17 +209,18 @@ try{
   {
     // No room: Bungie refuses the stack pull. The plain reason shows and the material stays.
     const {page,context,errors,pulls}=await openStorage(390,{noRoom:true});
+    await inventoryTab(page);
     await tileByName(page,POSTMASTER.material.name).click();
-    const sheet=page.locator('.vault-postmaster-sheet');
+    const sheet=page.locator('.inventory-item-sheet');
     await sheet.waitFor({state:'visible',timeout:3000});
-    await sheet.locator('[data-postmaster-sheet-pull]').click();
+    await sheet.locator('[data-item-sheet-action]').click();
     await waitFor(async()=>/No room for this item/.test(await page.locator('body').innerText()),'The no-room reason is shown');
     assert.ok(stackBodies(pulls).length>=1,'The stack pull reached Bungie');
     assert.equal(await materialTiles(page).count(),2,'The material stays in the Postmaster');
     await tileByName(page,POSTMASTER.material.name).click();
     await sheet.waitFor({state:'visible',timeout:3000});
-    assert.match(await sheet.locator('.vault-postmaster-sheet-reason').innerText(),/No room for this item/,'The sheet shows the reason with the pull');
-    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').isEnabled(),true,'The pull can be tried again after making room');
+    assert.match(await sheet.locator('.inventory-item-sheet-reason').innerText(),/No room for this item/,'The sheet shows the reason with the pull');
+    assert.equal(await sheet.locator('[data-item-sheet-action]').isEnabled(),true,'The pull can be tried again after making room');
     assert.doesNotMatch(await page.locator('body').innerText(),/Collected from Postmaster/,'Never shown as collected');
     assert.deepEqual(errors,[]);await context.close();
   }
@@ -235,8 +236,8 @@ try{
     assert.match(await page.locator('#paradoxItemInspect .paradox-inventory-inspect-reason').innerText(),/has not allowed Postmaster pulls/);
     await page.keyboard.press('Escape');
     await tileByName(page,POSTMASTER.engram.name).click();
-    assert.equal(await page.locator('.vault-postmaster-sheet [data-postmaster-sheet-pull]').isDisabled(),true);
-    assert.match(await page.locator('.vault-postmaster-sheet-reason').innerText(),/has not allowed Postmaster pulls/);
+    assert.equal(await page.locator('.inventory-item-sheet [data-item-sheet-action]').isDisabled(),true);
+    assert.match(await page.locator('.inventory-item-sheet-reason').innerText(),/has not allowed Postmaster pulls/);
     assert.equal(pulls.length,0);
     assert.deepEqual(errors,[]);await context.close();
   }
@@ -253,7 +254,7 @@ try{
     await page.keyboard.press('Escape');
     await tileByName(page,POSTMASTER.engram.name).click();
     await page.waitForTimeout(300);
-    assert.equal(await page.locator('.vault-postmaster-sheet').count(),0,'Desktop opens no action sheet');
+    assert.equal(await page.locator('.inventory-item-sheet').count(),0,'Desktop opens no action sheet');
     // The desktop PULL button on a stack uses the same stack path.
     const materialPull=materialTiles(page).first().locator('.vault-postmaster-pull');
     assert.equal(await materialPull.isEnabled(),true,'Desktop PULL is enabled for a stack');

@@ -60,17 +60,21 @@ export async function warlockInventoryFixture(root,{carriedPerWeaponBucket=9,car
   return {profile,definitions,envelope,manifestVersion,equippedCount:equipped.length};
 }
 
-// Routes a Playwright page to the fixture: Bungie session, prepared pages, live profile, and image stubs.
-export async function routeWarlockFixture(page,{origin,fixture,art,auth='https://auth.astrixparadox.com',capabilities={transferItems:true,equipItems:true,pullFromPostmaster:true}}){
+// Routes a Playwright page to the fixture: Bungie session, prepared pages, live profile, and item art.
+export async function routeWarlockFixture(page,{origin,fixture,art,auth='https://auth.astrixparadox.com',capabilities={transferItems:true,equipItems:true,pullFromPostmaster:true},actions=null}){
   await page.route('**/*',route=>{
     const request=route.request(),url=new URL(request.url());
     if(url.origin===origin)return route.continue();
-    if(url.hostname.endsWith('bungie.net'))return route.fulfill({contentType:'image/webp',body:art});
+    // Item art: Bungie's real icons from its public image CDN when FIXTURE_BUNGIE_ICONS=live (renders),
+    // otherwise (and for the test-only rows) a local stand-in so the tests run offline. Never a sign-in or account call.
+    if(url.hostname.endsWith('bungie.net'))return process.env.FIXTURE_BUNGIE_ICONS==='live'&&/^\/(common|img)\//.test(url.pathname)&&!url.pathname.includes('/fixture-')?route.continue():route.fulfill({contentType:'image/webp',body:art});
     const json=body=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':origin,'access-control-allow-credentials':'true'},body:JSON.stringify(body)});
     if(url.origin===auth&&request.method()==='OPTIONS')return route.fulfill({status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-credentials':'true','access-control-allow-headers':'*','access-control-allow-methods':'GET,POST'}});
     if(url.origin===auth&&url.pathname==='/session')return json({authenticated:true,csrfToken:'fixture-only',activeDestinyMembership:{membershipId:'4611686018000000001',membershipType:3,displayName:'Fixture'},capabilities:{destinyActions:capabilities}});
     if(url.origin===auth&&url.pathname.startsWith('/bungie/page/'))return json(fixture.envelope(url.pathname.split('/').pop()));
     if(url.origin===auth&&url.pathname==='/bungie/profile')return json({profile:fixture.profile,definitions:fixture.definitions});
+    // Bungie mutation routes are only answered when a test collects them; nothing reaches Bungie.
+    if(actions&&url.origin===auth&&url.pathname.startsWith('/bungie/actions/')){actions.push({path:url.pathname,body:request.postDataJSON()});return json({ErrorCode:1,ErrorStatus:'Success',Response:0});}
     return route.abort();
   });
 }

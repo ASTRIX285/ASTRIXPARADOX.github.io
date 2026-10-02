@@ -11,6 +11,7 @@ import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2&stack=20261002-1';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1&stack=20261002-1';
+import {bindItemSheet,decoratePostmasterPullButtons,isCompactInventory,postmasterFailure,postmasterPullState} from '../../shared/inventory-item-actions.mjs?inv=20261002-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -140,102 +141,46 @@ function vaultOnlyMarkup(){
   return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop items here to move them to the Vault.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
 }
 
-// Phone and tablet show Postmaster items as icons only. Tapping one opens its item card
-// (weapons and armour) or a small action sheet (everything else) with the pull. When Bungie
-// cannot pull an item, the button stays visible, disabled, with the reason.
-const COMPACT_STORAGE=globalThis.matchMedia?.('(max-width: 1199px)');
+// Phone and tablet: Postmaster items are icons only and nothing is dragged. A tap opens the item
+// card (weapons and armour) or the shared action sheet with the moves this item can make:
+// Pull to <Guardian> from the Postmaster, Move to <Guardian> from the Vault, Move to Vault from the
+// active Guardian. Shared with Character (inventory-item-actions.mjs).
 // The last failed pull per item, in plain words. Cleared when a pull of that item is confirmed.
 const postmasterFailures=new Map();
-const POSTMASTER_FAILURES=Object.freeze({
-  session:{short:'RECONNECT',retry:true,reason:'Your Bungie session expired. Reconnect Bungie, then pull again.'},
-  room:{short:'NO ROOM',retry:true,reason:"No room for this item. Make space in this Guardian's inventory, then pull again."},
-  locked:{short:"CAN'T PULL",retry:false,reason:'Bungie says this item cannot be pulled from the Postmaster.'}
-});
-function postmasterFailure(result,thrown=null){
-  const row=thrown?null:[...(result?.steps||[])].reverse().find(step=>['failed','mismatch','blocked'].includes(step.status)&&step.phase!=='readback'),detail=thrown?{status:thrown.status,payload:thrown.payload,message:thrown.message}:(row?.detail||{});
-  const payloadText=detail?.payload||{},words=`${payloadText.ErrorStatus||''} ${payloadText.error||''} ${payloadText.Message||''} ${detail?.message||''}`.toLowerCase();
-  if(Number(detail?.status)===401||/reauthentication|webauth|session (?:has )?expired|reconnect bungie|live-action token/.test(words))return POSTMASTER_FAILURES.session;
-  if(/no.?room|not enough (?:inventory |storage )?space|(?:inventory|storage|destination|bucket) (?:is )?full/.test(words))return POSTMASTER_FAILURES.room;
-  if(/not.?transfer|nontransfer|cannot be (?:transferred|pulled)|item ?not ?found|uniqueness/.test(words))return POSTMASTER_FAILURES.locked;
-  const reason=row?actionFailureMessage(result):String(thrown?.message||'');
-  return reason?{short:'RETRY',retry:true,reason}:null;
-}
-function postmasterPullState(item){
-  if(!session?.authenticated)return {ready:false,reason:'Connect Bungie to pull items from the Postmaster.'};
-  if(liveActionCapabilities(session).pullFromPostmaster!==true)return {ready:false,reason:'Bungie has not allowed Postmaster pulls for this session. Reconnect Bungie to try again.'};
-  const failure=postmasterFailures.get(itemKey(item));
-  if(failure)return {ready:failure.retry,reason:failure.reason};
-  return {ready:true,reason:''};
-}
-// Desktop PULL buttons carry the same plain reason after a failed pull.
-function decoratePostmasterPullButtons(host){
-  for(const [key,failure] of postmasterFailures){
-    const button=[...host.querySelectorAll('[data-pull-postmaster-item]')].find(node=>node.dataset.pullPostmasterItem===key);
-    if(!button)continue;
-    button.textContent=failure.short;button.title=failure.reason;button.setAttribute('aria-label',`${failure.short}: ${failure.reason}`);
-    if(!failure.retry)button.disabled=true;
+function vaultPostmasterFailure(result,thrown=null){return postmasterFailure(result,thrown,actionFailureMessage);}
+function moveState(item,destination){
+  const capabilities=liveActionCapabilities(session);
+  if(!session?.authenticated)return {ready:false,reason:'Connect Bungie to move items.'};
+  if(capabilities.transferItems!==true)return {ready:false,reason:'Bungie has not allowed item transfers for this session. Reconnect Bungie to try again.'};
+  if(item.source?.kind==='equipped'&&capabilities.equipItems!==true)return {ready:false,reason:'Bungie has not allowed equipping for this session, so an equipped item cannot be swapped out.'};
+  if(destination.kind==='character'){
+    const targetClass=characterClass(characters().find(row=>text(row.characterId)===destination.characterId));
+    if(item.characterClass&&item.characterClass!=='any'&&item.characterClass!==targetClass)return {ready:false,reason:`This item is for another class, so it cannot move to ${characterLabel(destination.characterId)}.`};
   }
+  try{stageVaultTransferIntent({item,destination,session,replacementItem:item.source?.kind==='equipped'?carriedReplacement(item):null});return {ready:true,reason:''};}
+  catch(error){return {ready:false,reason:error?.message||'This item cannot be moved there.'};}
 }
-function postmasterActions(item){
-  if(item?.source?.kind!=='postmaster'||!COMPACT_STORAGE?.matches)return [];
-  const characterId=text(item.source.characterId),{ready,reason}=postmasterPullState(item);
-  return [{label:`Pull to ${characterLabel(characterId)}`,disabled:!ready,reason,run:()=>stagePostmasterCollection(characterId,itemKey(item))}];
+function itemActions(item){
+  if(!isCompactInventory()||!item)return [];
+  const kind=item.source?.kind;
+  if(kind==='postmaster'){
+    const characterId=text(item.source.characterId),{ready,reason}=postmasterPullState({session,capabilities:liveActionCapabilities(session),failure:postmasterFailures.get(itemKey(item))});
+    return [{label:`Pull to ${characterLabel(characterId)}`,disabled:!ready,reason,run:()=>stagePostmasterCollection(characterId,itemKey(item))}];
+  }
+  const destination=kind==='vault'?(activeCharacterId?{kind:'character',characterId:activeCharacterId}:null):(text(item.source?.characterId)===activeCharacterId&&['carried','equipped'].includes(kind)?{kind:'vault',characterId:null}:null);
+  if(!destination||!validDrop(item,destination))return [];
+  const {ready,reason}=moveState(item,destination);
+  return [{label:destination.kind==='vault'?'Move to Vault':`Move to ${characterLabel(destination.characterId)}`,disabled:!ready,reason,run:()=>stageTransfer(item,destination)}];
 }
-
-let postmasterSheet=null;
-function closePostmasterSheet({restoreFocus=true}={}){
-  if(!postmasterSheet)return;
-  const {node,anchor}=postmasterSheet;postmasterSheet=null;node.remove();
-  if(restoreFocus&&anchor?.isConnected)anchor.focus({preventScroll:true});
-}
-function openPostmasterSheet(item,anchor){
-  closePostmasterSheet({restoreFocus:false});
-  const [action]=postmasterActions(item);
-  if(!action)return;
-  const count=Number(item?.quantity||1),node=document.createElement('div');
-  node.className='vault-postmaster-sheet-layer';
-  node.innerHTML=`<div class="vault-postmaster-sheet-backdrop" data-postmaster-sheet-close></div>
-    <section class="vault-postmaster-sheet" role="dialog" aria-modal="true" aria-labelledby="vaultPostmasterSheetName">
-      <header>${item?.icon?`<img src="${esc(item.icon)}" alt="" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}
-        <div><strong id="vaultPostmasterSheetName">${esc(item?.name||'Postmaster item')}</strong><span>${esc(characterLabel(item?.source?.characterId).toUpperCase())} POSTMASTER${count>1?` · STACK OF ${count}`:''}</span></div>
-        <button type="button" class="vault-postmaster-sheet-close" data-postmaster-sheet-close aria-label="Close">✕</button></header>
-      <button type="button" class="vault-postmaster-sheet-pull" data-postmaster-sheet-pull${action.disabled?' disabled aria-describedby="vaultPostmasterSheetReason"':''}>${esc(action.label)}</button>
-      ${action.reason?`<p class="vault-postmaster-sheet-reason" id="vaultPostmasterSheetReason">${esc(action.reason)}</p>`:''}
-    </section>`;
-  node.addEventListener('click',event=>{
-    if(event.target.closest('[data-postmaster-sheet-close]')){closePostmasterSheet();return;}
-    const pull=event.target.closest('[data-postmaster-sheet-pull]');
-    if(pull&&!pull.disabled){closePostmasterSheet({restoreFocus:false});action.run();}
-  });
-  node.addEventListener('keydown',event=>{
-    if(event.key==='Escape'){event.preventDefault();closePostmasterSheet();return;}
-    if(event.key!=='Tab')return;
-    const focusable=[...node.querySelectorAll('button:not([disabled])')];
-    if(!focusable.length)return;
-    const first=focusable[0],last=focusable.at(-1);
-    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
-    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
-  });
-  document.body.append(node);
-  postmasterSheet={node,anchor};
-  (node.querySelector('[data-postmaster-sheet-pull]:not([disabled])')||node.querySelector('.vault-postmaster-sheet-close')).focus({preventScroll:true});
-}
-// Postmaster items without an item card (engrams, materials, consumables) open the sheet.
-function bindPostmasterSheet(board){
-  const open=event=>{
-    if(!COMPACT_STORAGE?.matches||event.target.closest?.('button'))return false;
-    const tile=event.target.closest?.('.vault-postmaster-section [data-inspect-item]');
-    if(!tile||tile.hasAttribute('data-paradox-item-inspect'))return false;
-    const item=workspaceItem(tile.dataset.inspectItem);
-    if(!item)return false;
-    openPostmasterSheet(item,tile);return true;
-  };
-  board?.addEventListener('click',open);
-  board?.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&open(event))event.preventDefault();});
+function itemSubtitle(item){
+  const kind=item?.source?.kind,count=Number(item?.quantity||1),stack=count>1?` · STACK OF ${count}`:'';
+  if(kind==='postmaster')return `${characterLabel(item.source.characterId).toUpperCase()} POSTMASTER${stack}`;
+  if(kind==='vault')return `VAULT${stack}`;
+  return `${characterLabel(item?.source?.characterId).toUpperCase()} · ${kind==='equipped'?'EQUIPPED':'CARRIED'}${stack}`;
 }
 
 function bindVaultWorkspaceHovers(root){
-  bindInventoryWorkspaceHovers(root,{resolveItem:workspaceItem,bindInspect:(target,item,kind,options)=>bindParadoxItemInspect(target,item,kind,{...options,actions:()=>postmasterActions(item)})});
+  bindInventoryWorkspaceHovers(root,{resolveItem:workspaceItem,bindInspect:(target,item,kind,options)=>bindParadoxItemInspect(target,item,kind,{...options,actions:()=>itemActions(item)})});
 }
 
 function renderTransferWorkspace(){
@@ -243,7 +188,7 @@ function renderTransferWorkspace(){
   if(!host)return;
   host.innerHTML=`<div class="vault-character-columns">${workspaceCharacters().map(characterColumnMarkup).join('')}</div>${vaultOnlyMarkup()}`;
   bindVaultWorkspaceHovers(host);
-  decoratePostmasterPullButtons(host);
+  decoratePostmasterPullButtons(host,postmasterFailures);
   transferFeedback.reconcile();
 }
 
@@ -309,7 +254,7 @@ async function performPendingVaultAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
-    const confirmed=result.status==='applied'&&result.readback?.verified,failure=action.kind==='postmaster'&&!confirmed?postmasterFailure(result):null;
+    const confirmed=result.status==='applied'&&result.readback?.verified,failure=action.kind==='postmaster'&&!confirmed?vaultPostmasterFailure(result):null;
     if(action.kind==='postmaster')for(const key of action.itemKeys||[]){if(confirmed)postmasterFailures.delete(key);else if(failure)postmasterFailures.set(key,failure);}
     if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
     else if(failure)renderTransferWorkspace();
@@ -318,7 +263,7 @@ async function performPendingVaultAction(){
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${failure?.reason||actionFailureMessage(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
-    const failure=action.kind==='postmaster'?postmasterFailure(null,error):null;
+    const failure=action.kind==='postmaster'?vaultPostmasterFailure(null,error):null;
     if(failure){for(const key of action.itemKeys||[])postmasterFailures.set(key,failure);renderTransferWorkspace();}
     transferFeedback.finish(action.queueKey,{success:false,error:failure?.reason||error?.payload?.Message||error?.message});
     setStatus(failure?.reason||error?.message||'The Bungie action failed before confirmation.','error');
@@ -714,7 +659,7 @@ async function settleVisibleImages(){
 async function init(){
   installEvents();
   installTransferEvents();
-  bindPostmasterSheet(byId('vaultTransferWorkspace'));
+  bindItemSheet(byId('vaultTransferWorkspace'),{resolveItem:workspaceItem,actionsFor:itemActions,subtitleFor:itemSubtitle});
 
   try{
     session=await getBungieSession({force:true});
