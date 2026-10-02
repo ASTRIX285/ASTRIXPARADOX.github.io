@@ -1,4 +1,4 @@
-import '../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1&adapt=20260927-1&grid=20261001-1&stack=20261002-1&swr=20261002-1';
+import '../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1&adapt=20260927-1&grid=20261001-1&stack=20261002-1&swr=20261002-1&fit=20261002-1';
 import "./guardian-semantic-interceptor.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1&plain=20260925-2";
 import {
   normaliseLiveProfile,

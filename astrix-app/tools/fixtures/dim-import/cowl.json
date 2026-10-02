@@ -1,0 +1,52 @@
+{
+ "loadout": {
+  "id": "ndttp4i",
+  "name": "Mactics' Arc Assassins Cowl Hunter",
+  "classType": 1,
+  "equipped": [
+   {
+    "id": "6917529810112031072",
+    "hash": 2328211300,
+    "socketOverrides": {
+     "0": 426473317,
+     "1": 95544328,
+     "2": 3769507632,
+     "3": 2716335211,
+     "4": 1713935764,
+     "5": 4194622038,
+     "6": 4194622036,
+     "7": 3277705907,
+     "8": 1727069366,
+     "9": 1727069364,
+     "10": 1727069374
+    }
+   }
+  ],
+  "unequipped": [],
+  "createdAt": 1768507031239,
+  "parameters": {
+   "mods": [
+    3938489430,
+    2414626352,
+    2175577211,
+    2447449706,
+    377010989,
+    377010989,
+    1024379611,
+    2793473444,
+    2793473444,
+    1750845415,
+    4039026690,
+    4188291233,
+    4188291233
+   ],
+   "perks": [],
+   "clearMods": false,
+   "clearArmor": false,
+   "autoStatMods": false,
+   "clearWeapons": false,
+   "assumeArmorMasterwork": 1,
+   "includeRuntimeStatBenefits": false
+  }
+ }
+}

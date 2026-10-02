@@ -28,5 +28,20 @@
     "https://www.bungie.net/common/destiny2_content/json/en/DestinyEquipableItemSetDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json",
     "https://www.bungie.net/common/destiny2_content/json/en/DestinySandboxPerkDefinition-a8ba855a-93c7-4014-8f2e-d92357fdfb42.json"
   ],
-  "note": "Item definitions captured from the full backend. Small supplemental tables captured from the same official Bungie manifest version, as the newly merged backend tables are not deployed yet. Offline share fixtures retain only neutral names, class type, item and socket hashes, and build parameters. Donor identifiers, dates, original loadout names and share IDs are removed. Tests never fetch DIM live."
+  "note": "Item definitions captured from the full backend. Small supplemental tables captured from the same official Bungie manifest version, as the newly merged backend tables are not deployed yet. Offline share fixtures retain only neutral names, class type, item and socket hashes, and build parameters. Donor identifiers, dates, original loadout names and share IDs are removed. Tests never fetch DIM live.",
+  "cowl": {
+    "share": "https://auth.astrixparadox.com/dim/share/ndttp4i",
+    "dimShare": "https://dim.gg/ndttp4i/Mactics'-Arc-Assassins-Cowl-Hunter",
+    "retrievedAt": "2026-10-02",
+    "version": "244213.26.06.29.2000-1-bnet.65864",
+    "definitionSources": [
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyInventoryItemDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=2328211300%2C426473317%2C95544328%2C3769507632%2C2716335211%2C1713935764%2C4194622038%2C4194622036%2C3277705907%2C1727069366%2C1727069364%2C1727069374%2C3938489430%2C2414626352%2C2175577211%2C2447449706%2C377010989%2C1024379611%2C2793473444%2C1750845415%2C4039026690%2C4188291233%2C3400283633%2C2203146422%2C3721047650%2C2749457084%2C368733543%2C656307180%2C4105572261%2C2245093627%2C157934631%2C601809810",
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyInventoryItemDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=1980618587%2C1078080765%2C4248210736%2C2024015888%2C702981643%2C236605015%2C2121121504%2C4197017647%2C2236091344%2C3912049957%2C2819908046%2C929438819%2C4173924323%2C1656746282%2C3723531833%2C3820147479%2C595829387%2C1803434835%2C593361146%2C788990507%2C2269836811%2C3200810407",
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyStatDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=2996146975%2C392767087%2C1943323491%2C1735777505%2C144602215%2C4244567218",
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinyEquipableItemSetDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=741162535",
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinySocketCategoryDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=309722977%2C457473665%2C2140934067%2C1313488945",
+      "https://auth.astrixparadox.com/bungie/manifest/definitions?type=DestinySandboxPerkDefinition&version=244213.26.06.29.2000-1-bnet.65864&hashes=17188252%2C17188253"
+    ],
+    "weaponsFrom": "manifest.json (fixturea, fixtureb, fixturec)"
+  }
 }

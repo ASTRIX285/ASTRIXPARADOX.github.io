@@ -1,9 +1,9 @@
 import {watchDimContext} from './context.mjs?v=20260927-adapt-1&stack=20261002-1';
-import {DimShareClient} from './share.mjs?v=20260927-fetch-3';
+import {DimShareClient,parseDimInput} from './share.mjs?v=20260927-fetch-3';
 import {ImportManifest,createImportStorage} from './cache.mjs?v=20260927-fetch-3';
-import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1';
-import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1&grid=20261001-1';
-import {createDimActions} from './actions.mjs?v=20260927-adapt-1&grid=20261001-1&stack=20261002-1';
+import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1&fit=20261002-1';
+import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1&grid=20261001-1&fit=20261002-1';
+import {createDimActions} from './actions.mjs?v=20260927-adapt-1&grid=20261001-1&stack=20261002-1&fit=20261002-1';
 import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2&stack=20261002-1';
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
@@ -32,6 +32,15 @@ export async function importDimLoadout(input,{returnFocus}={}){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   return {model,handle:current,renderMs:performance.now()-started};
 }
+// A DIM share link opens Build Review on its own URL (Miguel, 28 Sep 2026). Only a
+// loadout embedded in a DIM app link, which cannot travel in a URL, opens here.
+export function buildReviewUrl(input,{characterId='',location:here=globalThis.location}={}){
+  let parsed;try{parsed=parseDimInput(input);}catch{return '';}
+  if(!parsed.shareId)return '';
+  const url=new URL('/astrix-app/pages/build-review/',here.href);
+  url.searchParams.set('dim',parsed.shareId);if(/^\d+$/.test(String(characterId)))url.searchParams.set('characterId',String(characterId));url.searchParams.set('step','1');
+  return url.href;
+}
 export function mountDimImport(){
   if(document.querySelector('[data-import-dim]'))return;
   const host=document.querySelector('.working-build-actions')||document.querySelector('.topbar-actions');if(!host)return;
@@ -41,7 +50,7 @@ export function mountDimImport(){
     dialog.innerHTML='<header class="apx-ld-header dim-import-hero"><div><p class="dim-import-kicker">LOADOUT IMPORT</p><h2>Import DIM loadout</h2><p class="dim-import-intro">Bring your next build to the forge.</p></div><button type="button" data-close aria-label="Close DIM import">Close</button></header><form class="apx-ld-scroll dim-import-form"><label for="dimImportLink">DIM link or share ID</label><p id="dimImportHint">Paste a shared loadout link from DIM, or its share ID.</p><input id="dimImportLink" name="link" type="text" placeholder="https://dim.gg/…" autocomplete="off" spellcheck="false" required aria-describedby="dimImportHint" aria-label="DIM link or share ID"><button class="dim-import-submit" type="submit">Import loadout</button><p class="dim-import-status" role="status" aria-live="polite"></p></form>';
     document.body.append(dialog);dialog.showModal();dialog.querySelector('input').focus();let importing=false;
     const close=()=>{if(importing)return;dialog.close();dialog.remove();button.focus();};dialog.querySelector('[data-close]').onclick=close;dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
-    dialog.querySelector('form').addEventListener('submit',async event=>{event.preventDefault();if(importing)return;importing=true;dialog.querySelector('[type=submit]').disabled=true;dialog.querySelector('[role=status]').textContent='Loading loadout…';try{const input=dialog.querySelector('input').value;await importDimLoadout(input,{returnFocus:button});dialog.close();dialog.remove();}catch(error){dialog.querySelector('[role=status]').textContent=error.message;}finally{importing=false;dialog.querySelector('[type=submit]').disabled=false;}});
+    dialog.querySelector('form').addEventListener('submit',async event=>{event.preventDefault();if(importing)return;importing=true;dialog.querySelector('[type=submit]').disabled=true;dialog.querySelector('[role=status]').textContent='Loading loadout…';try{const input=dialog.querySelector('input').value;const review=buildReviewUrl(input,{characterId:context().characterId});if(review){importing=false;location.assign(review);return;}await importDimLoadout(input,{returnFocus:button});dialog.close();dialog.remove();}catch(error){dialog.querySelector('[role=status]').textContent=error.message;}finally{importing=false;dialog.querySelector('[type=submit]').disabled=false;}});
   });
   // Start indexing after the host has loaded; repeat version checks only on a
   // visible-tab return. Shares themselves never get background refetched.
