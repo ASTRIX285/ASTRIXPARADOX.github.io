@@ -2,8 +2,8 @@
 // Checkpoint 1 renders steps 1 and 2. Build Forge is not modified.
 import {DimShareClient} from '../../core/dim-import/share.mjs';
 import {ImportManifest,createImportStorage} from '../../core/dim-import/cache.mjs';
-import {adaptDimLoadout} from '../../core/dim-import/adapt.mjs?grid=20261001-1';
-import {sendDimToForge} from '../../core/dim-import/handoff.mjs?grid=20261001-1';
+import {adaptDimLoadout} from '../../core/dim-import/adapt.mjs?grid=20261001-1&fit=20261002-1';
+import {sendDimToForge} from '../../core/dim-import/handoff.mjs?grid=20261001-1&fit=20261002-1';
 import {runProfileTask} from '../../core/engine-profile-client.mjs?shell=20261001-mobile-1&swr=20261002-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?shell=20261001-mobile-1&swr=20261002-1';
 import {getBungieSession,authStartUrl} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?swr=20261002-1';
@@ -12,8 +12,10 @@ import {normalisePreparedPagePayload} from '../guardian-workspace-v2/guardian-bu
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {REVIEW_ACTIVITIES,REVIEW_OBJECTIVES,REVIEW_ELEMENTS,decodeReviewUrl,encodeReviewUrl,goalComplete} from './build-review-url.mjs';
-import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1';
-import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs?grid=20261001-1&stack=20261002-1';
+import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
+import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
+import {renderSharedBuild} from './build-review-shared.mjs?fit=20261002-1';
+import {selectOwnedWeapons} from '../guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2&perf=20260927-1&anchor=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -21,7 +23,7 @@ const byId=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
 
-const page={selection:decodeReviewUrl(location.search),session:null,payload:null,adaptation:null,view:null,reviewState:null,supported:new Set(),importElement:'',loading:true,error:''};
+const page={selection:decodeReviewUrl(location.search),session:null,payload:null,adaptation:null,view:null,reviewState:null,supported:new Set(),importElement:'',loading:true,error:'',unresolved:[],weapons:{state:'loading',rows:[],decisions:[]}};
 
 // URL is the single source of truth for the user's answers.
 function writeUrl({push=true}={}){
@@ -52,19 +54,16 @@ function pasteForm(message=''){
 
 function stepOne(){
   const view=page.view;if(!view)return '';
-  const sub=view.subclass,counts=view.counts;
-  const inventory=`<section class="br-card br-side" aria-labelledby="brInventoryTitle"><h2 id="brInventoryTitle" class="br-kicker">YOUR INVENTORY</h2><p class="br-big">${counts.found} <span>of ${counts.total} items found</span></p><div class="br-meter" role="img" aria-label="${counts.found} of ${counts.total} items found"><i style="width:${counts.total?Math.round(counts.found/counts.total*100):0}%"></i></div>
-    <ul class="br-facts"><li>${counts.guardian} on this Guardian</li><li>${counts.vault} in your Vault, moved only if you Apply</li>${counts.other?`<li>${counts.other} on another Guardian or in Postmaster</li>`:''}${counts.substituted?`<li>${counts.substituted} replaced by your closest match</li>`:''}<li>${counts.missing} missing</li></ul>
-    ${view.missingNames.length?`<p class="br-note">Missing: ${esc(view.missingNames.join(', '))}. Paradox suggests swaps from your own gear in Analysis.</p>`:''}${view.blockers.length?`<ul class="br-blockers">${view.blockers.map(line=>`<li>${esc(line)}</li>`).join('')}</ul>`:''}</section>`;
-  const artifact=`<section class="br-card br-side" aria-labelledby="brArtifactTitle"><h2 id="brArtifactTitle" class="br-kicker">ARTIFACT</h2><p>${view.artifactCarried?'This share includes artifact picks. Paradox checks them against this season during analysis.':'The share does not carry this season\'s artifact. Paradox fills it during analysis.'}</p></section>`;
-  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button><button class="br-secondary br-wide" type="button" id="brManual">Edit pieces manually instead</button>`;
+  const counts=view.counts;
+  const inventory=`<section class="br-card br-side" aria-labelledby="brInventoryTitle"><h2 id="brInventoryTitle" class="br-kicker">YOUR INVENTORY</h2>${counts.total?`<p class="br-big">${counts.found} <span>of ${counts.total} shared items found</span></p><div class="br-meter" role="img" aria-label="${counts.found} of ${counts.total} shared items found"><i style="width:${Math.round(counts.found/counts.total*100)}%"></i></div>
+    <ul class="br-facts"><li>${counts.guardian} on this Guardian</li><li>${counts.vault} in your Vault, moved only if you Apply</li>${counts.other?`<li>${counts.other} on another Guardian or in Postmaster</li>`:''}${counts.substituted?`<li>${counts.substituted} replaced by your closest match</li>`:''}<li>${counts.missing} missing</li></ul>`:'<p class="br-note">This share has no weapons or armour. Everything marked "Picked from your inventory" or "Suggestion" is Paradox\'s choice, not the sharer\'s.</p>'}
+    ${view.missingNames.length?`<p class="br-note">Missing: ${esc(view.missingNames.join(', '))}.</p>`:''}${view.blockers.length?`<ul class="br-blockers">${view.blockers.map(line=>`<li>${esc(line)}</li>`).join('')}</ul>`:''}</section>`;
+  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button><button class="br-secondary br-wide" type="button" id="brManual">Send to Build Forge</button>`;
   return `<div class="br-grid">
-  <section class="br-card br-main" aria-labelledby="brStepTitle"><h1 id="brStepTitle">This is the build you imported</h1><p class="br-lede">Nothing has been analysed or changed yet. Check it, then set your goal.</p>
-    <div class="br-subclass" data-element="${esc(sub.element)}"><span class="br-diamond" aria-hidden="true"></span><div><p class="br-kicker">SUBCLASS${view.className?` · ${esc(view.className.toUpperCase())}`:''}</p><p class="br-subclass-name">${esc([elementName(sub.element),sub.name].filter(Boolean).join(' · ')||'Subclass')}</p><p class="br-muted">${esc([sub.superName,...sub.aspects,...sub.fragments].filter(Boolean).join(' · '))}</p></div></div>
-    <h2 class="br-kicker">WEAPONS</h2><ul class="br-items br-items-3">${view.weapons.map(row=>itemCard(row)).join('')}</ul>
-    <h2 class="br-kicker">ARMOUR</h2><ul class="br-items br-items-5">${view.armour.map(row=>itemCard(row,{armour:true})).join('')}</ul>
+  <section class="br-card br-main" aria-labelledby="brStepTitle"><h1 id="brStepTitle">This is the build you imported</h1><p class="br-lede">Nothing has been analysed or changed yet. "From the share" is the sharer's build. Anything else is Paradox's pick from your inventory.</p>
+    ${renderSharedBuild(view,{weapons:page.weapons})}
   </section>
-  <aside class="br-rail">${inventory}${artifact}<div class="br-actions">${next}</div></aside></div>`;
+  <aside class="br-rail">${inventory}<div class="br-actions">${next}</div></aside></div>`;
 }
 
 function pickGroup(name,legend,rows,selected,{disabled=new Map()}={}){
@@ -106,7 +105,7 @@ function render(){
   header();
   if(page.loading){root.innerHTML=`${stepper()}<p class="br-status" role="status">Loading the shared build…</p>`;return;}
   if(!page.selection.dim){root.innerHTML=pasteForm(page.error);return;}
-  if(!page.view){root.innerHTML=`${pasteForm(page.error)}`;return;}
+  if(!page.view){root.innerHTML=`${pasteForm(page.error)}${page.unresolved.length?`<section class="br-card br-paste"><h2 class="br-kicker">UNRESOLVED IN THIS SHARE</h2><ul class="br-facts">${page.unresolved.map(row=>`<li>${esc(row)}</li>`).join('')}</ul></section>`:''}`;return;}
   const body=page.selection.step===1?stepOne():page.selection.step===2?stepTwo():stepLocked();
   root.innerHTML=`${stepper()}${body}`;
   const heading=root.querySelector('h1');if(heading&&document.activeElement===document.body)heading.setAttribute('tabindex','-1');
@@ -117,7 +116,7 @@ document.addEventListener('click',event=>{
   const pick=event.target.closest('[data-pick]');
   if(pick&&!pick.disabled){page.selection={...page.selection,[pick.dataset.pick]:pick.dataset.value,step:2};writeUrl({push:false});render();return;}
   if(event.target.closest('#brAnalyse')){go(3);return;}
-  if(event.target.closest('#brManual')&&page.adaptation?.build){try{sendDimToForge(page.adaptation.build);}catch(error){page.error=error.message;render();}}
+  if(event.target.closest('#brManual')&&page.adaptation?.build){try{sendDimToForge(handoffBuild());}catch(error){page.error=error.message;render();}}
 });
 document.addEventListener('submit',event=>{
   if(event.target.id!=='brPasteForm')return;event.preventDefault();
@@ -126,6 +125,28 @@ document.addEventListener('submit',event=>{
   if(!next.dim){page.error='Paste a DIM share link or share ID.';render();byId('brPasteInput')?.focus();return;}
   page.selection={...page.selection,dim:next.dim,step:1};writeUrl();void load();
 });
+
+// Build Forge receives the share, Paradox's armour picks and, when the share has no
+// weapons, the ranked weapon suggestions. Each carries its marker in dimAdaptation.
+function handoffBuild(){
+  const build=page.adaptation.build,decisions=page.weapons.state==='ready'?page.weapons.decisions:[];
+  if(!decisions.length)return build;
+  const comparisons=[...build.dimAdaptation.comparisons.filter(row=>row.kind!=='weapon'),...decisions.map(row=>({kind:'weapon',bucketHash:row.bucketHash,target:null,selected:row.recommended?{itemHash:Number(row.recommended.itemHash??row.recommended.hash),itemInstanceId:String(row.recommended.itemInstanceId||''),name:row.recommended.name||'',icon:row.recommended.icon||''}:null,status:row.recommended?'suggested':'unfilled',reasons:row.reasons.map(reason=>reason.label||String(reason)),missingSockets:[]}))];
+  return {...build,weapons:decisions.map(row=>row.recommended||null),dimAdaptation:{...build.dimAdaptation,comparisons,weaponSuggestions:true}};
+}
+
+const WEAPON_SLOTS=['Kinetic','Energy','Power'];
+function rankWeapons(equipped){
+  if(page.view?.fill?.weapons.shared!==0){page.weapons={state:'none',rows:[],decisions:[]};return;}
+  try{
+    // The user's owned weapons, ranked by Build Forge's own engine for the shared subclass.
+    const shared=page.adaptation.build;
+    const {recommendation:ranked}=selectOwnedWeapons({build:{...equipped,characterClass:shared.characterClass,subclass:shared.subclass,subclassName:shared.subclassName,subclassBuild:shared.subclassBuild,weapons:[],ownedWeapons:equipped.ownedWeapons||[]},objective:'balanced',baselineWeapons:[]});
+    const decisions=ranked.decisions.filter(row=>row.recommended);
+    page.weapons={state:'ready',decisions,limitations:ranked.limitations||[],rows:decisions.map(row=>({slot:WEAPON_SLOTS[ranked.decisions.indexOf(row)]||'',name:row.recommended.name||row.recommended.definition?.displayProperties?.name||'',icon:row.recommended.icon||'',isExotic:row.isExotic,reasons:row.reasons.map(reason=>reason.label||String(reason))}))};
+  }catch(error){page.weapons={state:'error',rows:[],decisions:[],message:error?.message||'Weapon suggestions are unavailable.'};}
+  performance.mark('br:weapons-ranked');
+}
 
 async function preparedPayload(session){
   const raw=await loadPreparedPagePayload(session,'loadout',{sharedPayload:globalThis.FORGE_HERO_PROFILE_PAYLOAD});
@@ -136,7 +157,8 @@ async function preparedPayload(session){
 }
 
 async function load(){
-  page.loading=true;page.error='';page.view=null;page.adaptation=null;page.reviewState=null;page.supported=new Set();render();
+  performance.mark('br:load-start');
+  page.loading=true;page.error='';page.unresolved=[];page.weapons={state:'loading',rows:[],decisions:[]};page.view=null;page.adaptation=null;page.reviewState=null;page.supported=new Set();render();
   reportPreparedPageStage('start','loadout');
   try{
     const sessionPromise=page.session?Promise.resolve(page.session):getBungieSession();
@@ -152,14 +174,15 @@ async function load(){
       writeUrl({push:false});
       page.importElement=page.view.subclass.element;
       if(!page.selection.element&&page.importElement){page.selection={...page.selection,element:page.importElement};writeUrl({push:false});}
-      page.loading=false;render();
+      page.loading=false;render();performance.mark('br:shared-build-rendered');
       // Step 2 needs the same prepared gear Build Forge uses. It runs after
       // step 1 has painted so the shared build appears first.
       try{
         const equipped=await runProfileTask('normalise',{payload,session,characterId:adaptation.build.characterId});
-        page.reviewState=prepareReviewState(adaptation.build,{payload,equipped});
+        rankWeapons(equipped);render();
+        page.reviewState=prepareReviewState(handoffBuild(),{payload,equipped});
         page.supported=supportedElements(page.reviewState.workingBuild);
-      }catch(error){page.error=error?.message||'Your gear could not be prepared.';}
+      }catch(error){page.error=error?.message||'Your gear could not be prepared.';if(page.weapons.state==='loading')page.weapons={state:'error',rows:[],decisions:[],message:page.error};}
     }else if(session?.authenticated===false){
       // Same sign-in gate as every tool page, but return here with the link.
       globalThis.ForgeLoader?.authRequired?.(authStartUrl(location.href));
@@ -169,6 +192,7 @@ async function load(){
     }
   }catch(error){
     page.error=error?.message||'This DIM loadout could not be loaded.';
+    page.unresolved=Array.isArray(error?.unresolved)?error.unresolved:[];
     console.error('[Build Review]',error);
   }finally{
     page.loading=false;render();

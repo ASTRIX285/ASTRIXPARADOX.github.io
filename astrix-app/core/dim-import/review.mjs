@@ -11,13 +11,17 @@ function fitSlot(item,state){
 // One horizontal row, in DIM order: subclass, weapons, armour.
 const SLOT_ORDER=[3284755031,1498876634,2465295065,953998645,3448274439,3551918588,14239492,20886954,1585787867];
 const slotIndex=row=>{const index=SLOT_ORDER.indexOf(Number(row.bucketHash));return index<0?SLOT_ORDER.length:index;};
+// Paradox's own picks for slots the share left empty. Never shown as the sharer's item.
+const PICK_LABELS={picked:'Picked from your inventory',suggested:'Suggestion from your inventory',unfilled:'Nothing in your inventory fits'};
 function fitTile(row){
+  if(PICK_LABELS[row.status])return `<li class="apx-dim-tile is-${esc(row.status)}">${row.selected?fitSlot(row.selected,'pick'):'<span class="apx-dim-empty">No match</span>'}<span class="apx-dim-tile-label">${esc(PICK_LABELS[row.status])}</span></li>`;
   const matched=row.status==='matched',substituted=row.status==='substituted';
   const label=matched?'In your inventory':substituted?'Replacement suggested':'No replacement';
   return `<li class="apx-dim-tile is-${esc(row.status)}">${fitSlot(row.target,matched?'ok':'gone')}${matched?'':`<span class="apx-dim-tile-pick">${row.selected?`<span class="apx-dim-arrow" aria-hidden="true">↓</span>${fitSlot(row.selected,'pick')}`:'<span class="apx-dim-empty">No match</span>'}</span>`}<span class="apx-dim-tile-label">${esc(label)}</span></li>`;
 }
 function fitNotes(rows){
   const notes=rows.filter(row=>row.status!=='matched').map(row=>{
+    if(PICK_LABELS[row.status])return `<li>${esc(`${PICK_LABELS[row.status]}${row.selected?.name?`: ${row.selected.name}`:''}. ${row.reasons.join(' · ')}`)}</li>`;
     const name=row.target?.name||'Shared item';
     const text=row.status==='substituted'?`${name} is not in your inventory. Replacement: ${row.selected?.name||''}. ${row.reasons.join(' · ')}`:`${name} is not in your inventory and nothing you have fits this slot.`;
     return `<li>${esc(text)}${row.missingSockets.length?` ${esc(`Unavailable sockets: ${row.missingSockets.join(', ')}`)}`:''}</li>`;
@@ -28,9 +32,10 @@ function fitRow(rows){
   const ordered=[...rows].sort((a,b)=>slotIndex(a)-slotIndex(b));
   return `<ul class="apx-dim-fit-row" aria-label="Shared items against your inventory">${ordered.map(fitTile).join('')}</ul>${fitNotes(ordered)}`;
 }
-function fitSummary(rows=[]){
+function fitSummary(all=[]){
+  const rows=all.filter(row=>!PICK_LABELS[row.status]),picks=all.length-rows.length;
   const count=status=>rows.filter(row=>row.status===status).length,found=count('matched');
-  return `<p class="apx-dim-summary"><b>${found} of ${rows.length}</b> in your inventory${count('substituted')?` · ${count('substituted')} replacement${count('substituted')===1?'':'s'} suggested`:''}${count('missing')?` · ${count('missing')} with no replacement`:''}</p>`;
+  return `<p class="apx-dim-summary"><b>${found} of ${rows.length}</b> in your inventory${picks?` · ${picks} slot${picks===1?'':'s'} filled by Paradox from your inventory`:''}${count('substituted')?` · ${count('substituted')} replacement${count('substituted')===1?'':'s'} suggested`:''}${count('missing')?` · ${count('missing')} with no replacement`:''}</p>`;
 }
 export function renderDimComparison(build){
   const report=build?.dimAdaptation;if(!report)return '';

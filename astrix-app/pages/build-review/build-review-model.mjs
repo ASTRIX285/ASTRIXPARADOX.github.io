@@ -3,7 +3,7 @@
 // Nothing here invents a name, count, reason or synergy.
 import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {REVIEW_ACTIVITIES,REVIEW_OBJECTIVES} from './build-review-url.mjs';
-import {elementOf} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1';
+import {elementOf} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
 
 const WEAPON_LABELS=['Kinetic','Energy','Power'];
 const ARMOUR_LABELS=['Helmet','Gauntlets','Chest','Legs','Class item'];
@@ -34,6 +34,16 @@ function subclassView(build={},shareSubclass=null){
   };
 }
 
+// Subclass sockets from the share, labelled by Bungie's own plug categories.
+const SUBCLASS_LABELS=Object.freeze([['super','Super'],['classAbility','Class ability'],['movementAbility','Jump'],['melee','Melee'],['grenade','Grenade'],['aspect','Aspects'],['fragment','Fragments']]);
+function subclassGroups(model){
+  const sockets=(model?.items||[]).find(row=>row.kind==='subclass')?.sockets||[];
+  const groups=SUBCLASS_LABELS.map(([type,label])=>({label,plugs:sockets.filter(plug=>plug.componentType===type)}));
+  const known=new Set(SUBCLASS_LABELS.map(([type])=>type)),other=sockets.filter(plug=>!plug.empty&&!known.has(plug.componentType));
+  if(other.length)groups.push({label:'Other sockets',plugs:other});
+  return groups.filter(group=>group.plugs.length).map(group=>({label:group.label,plugs:group.plugs.map(plug=>({hash:plug.hash,name:text(plug.name),icon:text(plug.icon),description:text(plug.description)}))}));
+}
+
 // Signed in: the adaptation matched the share to this account's inventory.
 export function sharedBuildView(adaptation){
   const build=adaptation?.build||{},report=adaptation?.report||{},characterId=text(build.characterId);
@@ -42,6 +52,8 @@ export function sharedBuildView(adaptation){
   const liveByInstance=new Map([...(build.weapons||[]),...(build.armour||[])].filter(Boolean).map(item=>[text(item.itemInstanceId),item]));
   const slot=(bucket,label)=>{
     const row=byBucket.get(bucket);if(!row)return {label,name:'',icon:'',status:'empty',statusLabel:'Not in this share',isExotic:false};
+    // Paradox's own pick when the share has nothing for this slot. Never shown as the sharer's item.
+    if(row.status==='picked'||row.status==='unfilled'){const live=row.selected?liveByInstance.get(text(row.selected.itemInstanceId)):null;return {label,name:text(row.selected?.name),icon:text(row.selected?.icon),status:row.status,statusLabel:row.status==='picked'?'Picked from your inventory':'Nothing in your inventory fits',isExotic:Boolean(live?.isExotic),reasons:row.reasons||[],picked:true};}
     const live=row.selected?liveByInstance.get(text(row.selected.itemInstanceId)):null;
     const status=row.status==='missing'?'missing':row.status==='substituted'?'substituted':locationOf(live?.source,characterId);
     const statusLabel=status==='missing'?'Missing from your inventory':status==='substituted'?`Closest match: ${text(row.selected?.name)}`:LOCATION_LABELS[status];
@@ -49,7 +61,7 @@ export function sharedBuildView(adaptation){
   };
   const weapons=WEAPON_BUCKETS.map((bucket,index)=>slot(bucket,WEAPON_LABELS[index]));
   const armour=ARMOUR_BUCKETS.map((bucket,index)=>slot(bucket,ARMOUR_LABELS[index]));
-  const gear=[...weapons,...armour].filter(row=>row.status!=='empty');
+  const gear=[...weapons,...armour].filter(row=>row.status!=='empty'&&!row.picked);
   const count=status=>gear.filter(row=>row.status===status).length;
   const missing=gear.filter(row=>row.status==='missing');
   return {
@@ -60,7 +72,9 @@ export function sharedBuildView(adaptation){
     counts:{total:gear.length,found:gear.length-missing.length,guardian:count('guardian'),vault:count('vault'),other:count('other')+count('postmaster'),substituted:count('substituted'),missing:missing.length},
     missingNames:missing.map(row=>row.name).filter(Boolean),
     blockers:(report.blockers||[]).map(text).filter(Boolean),
-    artifactCarried:Boolean(build.importedParameters?.artifactUnlocks?.unlockedItemHashes?.length)
+    artifactCarried:Boolean(build.importedParameters?.artifactUnlocks?.unlockedItemHashes?.length),
+    subclassGroups:subclassGroups(adaptation?.model),
+    fill:report.sharedBuild||null
   };
 }
 

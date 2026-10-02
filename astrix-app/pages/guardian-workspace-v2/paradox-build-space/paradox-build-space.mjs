@@ -1,6 +1,6 @@
-import {mountDimComparison} from '../../../core/dim-import/review.mjs?v=20260928-fit-row-1&grid=20261001-1';
+import {mountDimComparison} from '../../../core/dim-import/review.mjs?v=20260928-fit-row-1&grid=20261001-1&fit=20261002-1';
 import {renderEquipmentIcons,bindLoadoutIconDetails} from '../../../shared/loadout-icon-layout.mjs?v=20260927-adapt-1&grid=20261001-1';
-import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1&adapt=20260927-1&grid=20261001-1&stack=20261002-1&swr=20261002-1';
+import '../../../core/dim-import/entry.mjs?v=20260927-dim-import-3&limits=20260927-1&forge=20260927-1&icons=20260927-1&adapt=20260927-1&grid=20261001-1&stack=20261002-1&swr=20261002-1&fit=20261002-1';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs?v=20260927-1';
 import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {beginEngineTiming,afterEnginePaint} from '../../../core/engine-timing.mjs?v=20260927-1';

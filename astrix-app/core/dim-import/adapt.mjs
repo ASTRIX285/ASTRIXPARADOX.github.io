@@ -4,6 +4,7 @@ import {subclassPlugComponent} from '../../pages/guardian-workspace-v2/guardian-
 import {matchDimGuardian} from './guardian.mjs';
 import {bungieArtwork,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {createBuildState,normalizeBuild} from '../../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
+import {ARMOUR_SLOT_NAMES,TITLE_MATCH_LABEL,itemStats,modsBySlot,pickArmour,rankOwnedExotics,titleNamedExotics} from './fill.mjs?fit=20261002-1';
 const ITEM='DestinyInventoryItemDefinition';
 const setOf=d=>d?.equipableItemSetHash||d?.equippingBlock?.equipableItemSetHash;
 const equal=(a,b)=>a!==undefined&&a!==null&&b!==undefined&&a===b;
@@ -111,6 +112,7 @@ export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredChara
     if(choice)selected.push(choice);
     comparisons.push({kind:row.kind,bucketHash:row.bucketHash,target:{itemHash:row.itemHash,name:row.name,icon:row.icon},selected:choice?{itemHash:choice.itemHash,itemInstanceId:choice.itemInstanceId,name:choice.name,icon:choice.icon}:null,status:!item?'missing':item.itemHash===row.itemHash?'matched':'substituted',reasons:reasons.length?reasons:['Compatible equipment slot'],missingSockets:sockets.gaps});
   }
+  const sharedBuild=fillSharedBuild({portable,model,target,rows,index,profile,snapshot,characterId:guardian.characterId,selected,comparisons});
   const build=loadoutWorkingBuild({...model,items:selected},profile);
   const stats={};let statsAvailable=selected.filter(row=>row.kind==='armour').length===5;
   for(const item of selected.filter(row=>row.kind==='armour')){const data=profile.itemComponents?.stats?.data?.[item.itemInstanceId]?.stats;if(!data)statsAvailable=false;for(const [hash,stat] of Object.entries(data||{}))stats[hash]=(stats[hash]||0)+Number(stat.value||0);}
@@ -120,9 +122,75 @@ export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredChara
   const parameterSteps=model.items.filter(row=>row.kind==='parameters').flatMap(row=>row.groups).filter(group=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers'].includes(group.label)).map(group=>({label:group.label,items:group.plugs.map(plug=>({name:plug.name,icon:plug.icon,hash:plug.hash,retired:plug.retired===true,availableOn:selected.filter(item=>options(item,profile).hashes.has(plug.hash)).map(item=>item.name)}))}));
   const anchors=rows.filter(row=>row.isExotic).map(row=>({name:row.name,description:row.description,icon:row.icon,kind:row.kind}));
   if(target.subclassBuild.super)anchors.push({name:target.subclassBuild.super.name,description:target.subclassBuild.super.description,icon:target.subclassBuild.super.icon,kind:'super'});
-  const report={schemaVersion:1,anchors,sourceName:model.name,characterClass:model.characterClass,comparisons,blockers,statTargets,setTargets,parameterSteps,method:'Weapons prefer matching items and requested sockets, then weapon type and element. Armour prioritises requested sets, current item stat targets, then matching items and sockets. Armour search: up to 32 candidates per slot and 128 retained combinations per step.'};
+  const report={schemaVersion:1,anchors,sourceName:model.name,characterClass:model.characterClass,comparisons,blockers,statTargets,setTargets,parameterSteps,sharedBuild,method:'Weapons prefer matching items and requested sockets, then weapon type and element. Armour prioritises requested sets, current item stat targets, then matching items and sockets. Armour search: up to 32 candidates per slot and 128 retained combinations per step.'};
   const adapted={...build,name:model.name,source:'dim-import',loadoutSource:'dim-import',equipment:target.equipment,dimImport:target.dimImport,importedParameters:structuredClone(model.parameters),statConstraints:target.statConstraints,dimTarget:target,dimAdaptation:report};
   return {model:{...model,autoMatchedGuardian:true},target,build:adapted,report};
+}
+// The share's own content, plus what Paradox filled from the user's inventory.
+// Picks are marked as picks; nothing here is presented as the sharer's item.
+function ownedChoice(row,profile,snapshot){
+  const definition=row.definition,{sockets}=adaptSockets({kind:'armour',sockets:[]},row,profile,snapshot);
+  return {kind:'armour',equipped:true,bucketHash:definition.inventory?.bucketTypeHash,itemHash:row.itemHash,hash:row.itemHash,name:definition.displayProperties?.name||'',icon:bungieArtwork(definition.displayProperties?.icon),description:definition.displayProperties?.description||'',definition,energy:{capacity:profile.itemComponents?.instances?.data?.[row.itemInstanceId]?.energy?.energyCapacity},itemInstanceId:row.itemInstanceId,source:row.source,match:null,alternative:null,notOwned:false,sockets,groups:[],isExotic:definition.inventory?.tierType===6,pickedFromInventory:true};
+}
+function sharedStats(model,rows,tables){
+  const known=rows.length===5&&rows.every(row=>row.stats),totals={};
+  for(const row of rows)for(const [hash,value] of Object.entries(row.stats||{}))totals[hash]=(totals[hash]||0)+value;
+  const name=hash=>tables.DestinyStatDefinition?.[hash]?.displayProperties?.name||`Stat ${hash}`;
+  return {
+    targets:model.statConstraints.filter(row=>!row.legacy).map(row=>{const value=totals[row.statHash]||0;return {statHash:row.statHash,name:row.name,min:row.minStat??0,max:row.maxStat??200,reached:known?value:null,met:known?value>=(row.minStat??0)&&value<=(row.maxStat??200):null};}),
+    totals:known?Object.entries(totals).map(([hash,value])=>({statHash:Number(hash),name:name(hash),value})):[]
+  };
+}
+function fillSharedBuild({portable,model,target,rows,index,profile,snapshot,characterId,selected,comparisons}){
+  const tables=snapshot.tables,parameters=model.parameters||{},sharedArmour=rows.filter(row=>row.kind==='armour');
+  const groupOf=label=>model.items.find(row=>row.kind==='parameters')?.groups.find(group=>group.label===label)?.plugs||[];
+  const owned=hash=>(index.byHash.get(Number(hash))||[]).length>0;
+  const describe=hash=>tables[ITEM]?.[hash]?.displayProperties||{};
+  const pinnedHash=parameters.exoticArmorHash>0?Number(parameters.exoticArmorHash):null,sharedExotic=sharedArmour.find(row=>row.isExotic);
+  const pinned=pinnedHash?{hash:pinnedHash,name:describe(pinnedHash).name||'',icon:bungieArtwork(describe(pinnedHash).icon),owned:owned(pinnedHash),source:'pinned'}
+    :sharedExotic?{hash:sharedExotic.itemHash,name:sharedExotic.name,icon:sharedExotic.icon,owned:owned(sharedExotic.itemHash),source:'share-item'}:null;
+  let titleMatches=[],suggestions=[],exoticChoice=null;
+  if(!pinned){
+    const subclass={name:target.subclassName||'',element:target.subclass,subclassBuild:target.subclassBuild};
+    const ranked=rankOwnedExotics({index,profile,tables,subclass,characterId});
+    titleMatches=titleNamedExotics(portable,tables).map(match=>{
+      const copy=ranked.find(row=>match.hashes.includes(row.hash));
+      const definition=tables[ITEM]?.[copy?.hash??match.hashes[0]];
+      return {name:match.name,hashes:match.hashes,owned:Boolean(copy),itemInstanceId:copy?.itemInstanceId||'',icon:copy?.icon||bungieArtwork(definition?.displayProperties?.icon),bucketHash:definition?.inventory?.bucketTypeHash,slot:ARMOUR_SLOT_NAMES[definition?.inventory?.bucketTypeHash]||'',location:copy?.location||'Not in your inventory',reasons:copy?.reasons||[],label:TITLE_MATCH_LABEL,row:copy?.row||null};
+    });
+    const titled=new Set(titleMatches.flatMap(match=>match.hashes));
+    suggestions=ranked.filter(row=>!titled.has(row.hash)).slice(0,5).map(row=>({...row,label:'Suggestion'}));
+    const first=titleMatches.find(match=>match.owned);
+    exoticChoice=first?{bucketHash:first.bucketHash,row:first.row,reason:`Suggested Exotic. ${TITLE_MATCH_LABEL}.`}
+      :suggestions[0]?{bucketHash:suggestions[0].bucketHash,row:suggestions[0].row,reason:'Suggested Exotic: ranked first of your Exotic armour for this subclass.'}:null;
+  }
+  const mods=modsBySlot(parameters.mods,tables);
+  const armour=sharedArmour.length?null:pickArmour({index,profile,tables,parameters,constraints:model.statConstraints,exotic:exoticChoice});
+  if(armour)for(const pick of armour.picks){
+    if(!pick.row){comparisons.push({kind:'armour',bucketHash:pick.bucketHash,target:null,selected:null,status:'unfilled',reasons:pick.reasons,missingSockets:[]});continue;}
+    const choice=ownedChoice(pick.row,profile,snapshot);selected.push(choice);
+    comparisons.push({kind:'armour',bucketHash:pick.bucketHash,target:null,selected:{itemHash:choice.itemHash,itemInstanceId:choice.itemInstanceId,name:choice.name,icon:choice.icon},status:'picked',reasons:pick.reasons,missingSockets:[]});
+  }
+  const strip=({row,...rest})=>rest;
+  const armourRows=armour
+    ?armour.picks.map(pick=>({bucketHash:pick.bucketHash,slot:pick.slot,from:pick.row?'inventory':'none',itemHash:pick.row?Number(pick.row.itemHash):null,itemInstanceId:pick.row?String(pick.row.itemInstanceId):'',name:pick.row?.definition?.displayProperties?.name||'',icon:pick.row?bungieArtwork(pick.row.definition.displayProperties?.icon):'',isExotic:pick.row?.definition?.inventory?.tierType===6,reasons:pick.reasons,stats:pick.stats||null,mods:mods.slots.get(pick.bucketHash)||[]}))
+    :sharedArmour.map(row=>{
+      const comparison=comparisons.find(entry=>entry.bucketHash===row.bucketHash),chosen=selected.find(entry=>entry.bucketHash===row.bucketHash);
+      return {bucketHash:row.bucketHash,slot:ARMOUR_SLOT_NAMES[row.bucketHash],from:'share',status:comparison?.status||'missing',itemHash:row.itemHash,itemInstanceId:chosen?.itemInstanceId||'',name:row.name,icon:row.icon,isExotic:row.isExotic,selectedName:comparison?.selected?.name||'',reasons:comparison?.reasons||[],stats:chosen?itemStats(chosen,profile):null,mods:mods.slots.get(row.bucketHash)||[]};
+    });
+  const plug=item=>({hash:item.hash,name:item.name,icon:item.icon,description:item.description,retired:item.retired===true});
+  const modSlot=hash=>[...mods.slots].find(([,list])=>list.some(mod=>mod.hash===Number(hash)))?.[0]??null;
+  const emblem=groupOf('In-game identifiers').map(plug);
+  return {
+    exotic:{pinned,titleMatches:titleMatches.map(strip),suggestions:suggestions.map(strip)},
+    armour:{source:armour?'inventory':'share',rows:armourRows},
+    stats:armour?{targets:armour.statTargets,totals:armour.statTotals}:sharedStats(model,armourRows,tables),
+    sets:armour?{requested:armour.requestedSets,formed:armour.formedSets}:{requested:Object.entries(parameters.setBonuses||{}).map(([hash,count])=>({hash:Number(hash),name:tables.DestinyEquipableItemSetDefinition?.[hash]?.displayProperties?.name||'',required:Number(count)})),formed:[]},
+    mods:{all:(parameters.mods||[]).map(hash=>({hash:Number(hash),name:describe(hash).name||'',icon:bungieArtwork(describe(hash).icon),slot:modSlot(hash),unresolved:!tables[ITEM]?.[hash]})),perks:groupOf('Armour perks').map(plug)},
+    artifact:{unlocks:groupOf('Artifact unlocks').map(plug)},
+    emblem:emblem.length?emblem:null,
+    weapons:{shared:rows.filter(row=>row.kind==='weapon').length}
+  };
 }
 export function createDimForgeState(build){
   const state=createBuildState(build.dimTarget||build);

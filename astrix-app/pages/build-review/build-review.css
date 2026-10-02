@@ -94,6 +94,41 @@
 .br-form-status{min-height:20px;margin:10px 0 0;color:var(--apx-colour-secondary);font-size:14px}
 .br-status{padding:40px 0;text-align:center;color:var(--apx-colour-secondary)}
 
+/* Complete shared build (2 Oct 2026). The sharer's items and Paradox's picks are tagged apart. */
+.br-section{margin-top:22px;padding-top:4px;border-top:1px solid var(--apx-colour-border)}
+.br-section:first-of-type{border-top:0;margin-top:8px}
+.br-callout{margin:0 0 12px;padding:10px 14px;border-radius:8px;border:1px solid var(--apx-colour-border-strong);background:var(--apx-colour-raised);font-size:15px;font-weight:600}
+.br-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px 18px;margin-top:14px}
+.br-group-label{margin:12px 0 8px;font:700 13px/1.2 bahnschrift-semicondensed,bahnschrift,sans-serif;letter-spacing:.08em;color:var(--apx-colour-secondary)}
+.br-groups .br-group-label{margin-top:0}
+.br-plugs{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.br-plugs.is-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.br-plug{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px 4px 4px;border-radius:8px;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);font-size:14px;min-width:0}
+.br-plug img,.br-plug .br-item-icon{width:32px;height:32px;flex:none;border-radius:4px}
+.br-plug .br-muted{margin:0 0 0 auto;font-size:12px}
+.br-gear-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.br-gear{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);min-width:0}
+.br-gear.is-exotic{border-color:color-mix(in srgb,var(--apx-gold,var(--apx-colour-focus)) 60%,transparent)}
+.br-gear img,.br-gear .br-item-icon{flex:none;width:48px;height:48px;border-radius:6px;background:var(--apx-colour-panel);object-fit:cover}
+.br-gear-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.br-gear-text strong{font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.br-tags{display:flex;flex-wrap:wrap;gap:6px}
+.br-tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--apx-colour-border-strong);font-size:12px;font-weight:600;letter-spacing:0;color:var(--apx-colour-text)}
+.br-tag.is-share{border-color:color-mix(in srgb,var(--apx-colour-success) 55%,transparent);color:var(--apx-colour-success)}
+.br-tag.is-inventory{border-color:color-mix(in srgb,var(--apx-colour-focus) 60%,transparent);color:var(--apx-colour-focus)}
+.br-tag.is-suggestion,.br-tag.is-title,.br-tag.is-none{border-style:dashed;color:var(--apx-colour-secondary)}
+.br-kicker .br-tag{margin-right:6px}
+.br-perk{margin:0;font-size:13px;font-weight:600}
+.br-reasons{margin:0;padding:0 0 0 18px;font-size:13px;line-height:1.45;color:var(--apx-colour-secondary)}
+.br-mods-on{margin:2px 0 0;font-size:13px}
+.br-mods-on span{color:var(--apx-colour-secondary)}
+.br-table{width:100%;border-collapse:collapse;font-size:14px}
+.br-table th,.br-table td{padding:8px 10px;border-bottom:1px solid var(--apx-colour-border);text-align:left}
+.br-table thead th{font-size:12px;color:var(--apx-colour-secondary);font-weight:600}
+.br-stats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.br-stats li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:8px;border:1px solid var(--apx-colour-border);background:var(--apx-colour-raised);font-size:12px;color:var(--apx-colour-secondary)}
+.br-stats strong{font-size:20px;color:var(--apx-colour-text)}
+
 @media (max-width:1100px){.br-items-5{grid-template-columns:repeat(3,minmax(0,1fr))}.br-picks-5,.br-picks-6{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){.br-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){
@@ -107,5 +142,7 @@
   .br-paste-row{flex-direction:column}
   .br-card{padding:18px}
   .br-titlebar-links{margin-left:0;width:100%}
+  .br-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .br-plugs.is-list,.br-groups{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
