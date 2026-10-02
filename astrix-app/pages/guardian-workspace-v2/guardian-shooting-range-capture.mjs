@@ -1,4 +1,4 @@
-import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+import {AUTH_ORIGIN,getBungieSession} from './guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&swr=20261002-1';
 import {captureMatchesCharacter,mergeCaptureArchive,selectCandidateActivities,chooseCandidateActivity,classifyCandidateEvidence,summarizeCaptureEvidence} from './guardian-shooting-range-evidence.mjs?plain=20260925-2';
 
 const CAPTURE_KEY='astrix:shooting-range-capture:v1';

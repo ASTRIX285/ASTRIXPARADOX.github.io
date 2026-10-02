@@ -1,7 +1,7 @@
 // Forge Matrix results: its own URL, its own page. The whole selection (character, Exotic armour, optional
 // Exotic weapon anchor, set protocol, stat targets and priorities) lives in the query string, so this page
 // reruns the same real backend search on load. A reload, a bookmark or a shared link all work the same way.
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4';
+import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&swr=20261002-1';
 import {guardianManifest} from '../../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&fix=20260909-set-list-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {cacheForgeLoaderTransfer,markGuardianFastReturn,releaseGuardianSessionStorageFallbacks} from '../../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {ARMOUR_BUCKETS,createVaultCatalogue,itemKey,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&stack=20261002-1';
@@ -9,14 +9,14 @@ import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} fr
 import {createVaultArmourSelection,writeVaultArmourSelection} from '../../vault/vault-selection-state.mjs?v=20260904-exotic-equip-rule-1';
 import {exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,weaponCatalystState,rankOpenProtocolCandidates,setBonusOptions} from '../forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
 import {writeForgeLoaderBuildSnapshot} from '../forge-loader-build-handoff.mjs?v=20260906-review-layout-1&results=20260927-1&perf=20260927-1';
-import {preloadForgeLoaderPayload} from '../forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
+import {preloadForgeLoaderPayload} from '../forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {forgeLoaderEvaluateReady,forgeLoaderResidency} from '../forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
-import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
+import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {mountForgeShell} from '../../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {itemTileMarkup} from '../../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2&stack=20261002-1';
 import {CANDIDATE_BATCH_SIZE,candidateMarkup,decodeForgeResultsUrl,forgeLoaderDecision,scanArmourCombinations,stagedMarkup,resolveForgeSelectionIndex} from '../forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-2&stack=20261002-1';
 import {EngineHandoffClient} from '../../../core/engine-handoff-client.mjs?v=20260927-1';
-import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
+import {runProfileTask} from '../../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {beginEngineTiming} from '../../../core/engine-timing.mjs?v=20260927-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});

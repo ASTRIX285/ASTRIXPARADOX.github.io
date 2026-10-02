@@ -225,6 +225,9 @@ body :is(#applyBuild,#applyWorkingBuild,#confirmApplyBuild,#confirmForgeActivity
 .ax-icon-btn:focus-visible{outline:2px solid var(--ax-steel-light)!important;outline-offset:2px!important}
 .ax-icon-btn:disabled{opacity:.5!important;cursor:default!important}
 .ax-refresh-btn[aria-busy="true"] svg{animation:ax-spin .9s linear infinite}
+/* Data age (perf, 2 Oct 2026): how old the Guardian data on the page is, whenever it is not a live read. */
+.ax-refresh-btn .ax-data-age{position:absolute;right:2px;bottom:2px;padding:1px 2px;background:var(--ax-black);color:var(--ax-muted);font:700 9px/1 var(--ax-font-head);letter-spacing:.02em;pointer-events:none;white-space:nowrap}
+.ax-refresh-btn .ax-data-age[hidden]{display:none}
 @keyframes ax-spin{to{transform:rotate(360deg)}}
 .ax-menu-btn{display:none!important}
 .apx-data-refresh{display:none!important}

@@ -22,6 +22,7 @@ import { reportsRead } from './reports-read';
 import { reportsCatalogueResponse } from './reports-catalogue';
 import { fetchBungieDefinitions } from './bungie-definition-fetch';
 import { buildHomeSummary } from './home-summary';
+import { PREPARED_ACCOUNT_REVALIDATE_MS } from './prepared-page-cache';
 
 export { AuthRecord };
 
@@ -1456,25 +1457,45 @@ async function journeyManifestTables(
   return { manifestVersion, tables, currentSeason, coverage: { complete: !Object.keys(unresolved).length, unresolved } };
 }
 
+type EncodedPreparedAccount = { chunks: Uint8Array[]; byteLength: number };
+type PreparedAccountCacheInfo = { source: "backend-cache"; dataAt: number; generatedAt: number; ageMs: number; revalidating: boolean };
+
+function encodePreparedAccount(account: Record<string, unknown>): EncodedPreparedAccount {
+  const encodedAccount = preparedAccountChunks(account);
+  console.info("prepared_page_account_budget", {
+    page: (account as any)?.pageReady?.page || "unknown",
+    accountBytes: encodedAccount.byteLength,
+    definitions: Object.keys((account as any)?.definitions || {}).length,
+    coverageComplete: (account as any)?.pageReady?.coverage?.complete === true
+  });
+  return encodedAccount;
+}
+
+// A cached account part is served as stored, with its cache facts placed first so
+// the page can show the data age. The account JSON is never parsed here.
+function cachedPreparedAccount(body: string, cache: PreparedAccountCacheInfo): EncodedPreparedAccount {
+  const trimmed = body.trimStart();
+  if (!trimmed.startsWith("{")) throw new Error("prepared_account_cache_invalid");
+  const rest = trimmed.slice(1).trimStart();
+  const bytes = new TextEncoder().encode(`{"preparedCache":${JSON.stringify(cache)}${rest.startsWith("}") ? "" : ","}${rest}`);
+  const chunks: Uint8Array[] = [];
+  for (let offset = 0; offset < bytes.byteLength; offset += 64 * 1024) chunks.push(bytes.subarray(offset, offset + 64 * 1024));
+  return { chunks, byteLength: bytes.byteLength };
+}
+
 function preparedPageEnvelope(
   request: Request,
   env: Env,
-  account: Record<string, unknown>,
-  prepared: Response
+  encodedAccount: EncodedPreparedAccount,
+  prepared: Response,
+  extraHeaders: Record<string, string> = {}
 ): Response {
   const encoder = new TextEncoder();
-  const encodedAccount = preparedAccountChunks(account);
   const reader = prepared.body?.getReader();
   const prefix = encoder.encode(`{"schemaVersion":2,"transport":"prepared-page-stream-v1","account":`);
   const preparedPrefix = encoder.encode(`,"prepared":`);
   const suffix = encoder.encode("}");
   const accountBytes = encodedAccount.byteLength;
-  console.info("prepared_page_account_budget", {
-    page: (account as any)?.pageReady?.page || "unknown",
-    accountBytes,
-    definitions: Object.keys((account as any)?.definitions || {}).length,
-    coverageComplete: (account as any)?.pageReady?.coverage?.complete === true
-  });
   // Pull based: one chunk is produced only when the consumer asks for it, so a
   // slow client never makes the Worker hold the whole public bundle in memory.
   let stage = 0, accountIndex = 0;
@@ -1514,60 +1535,61 @@ function preparedPageEnvelope(
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer",
       "X-Forge-Account-Bytes": String(accountBytes),
-      "X-Forge-Page-Transport": "prepared-page-stream-v1"
+      "X-Forge-Page-Transport": "prepared-page-stream-v1",
+      "Access-Control-Expose-Headers": "X-Forge-Prepared-Page-Source, X-Forge-Prepared-Page-Age",
+      ...extraHeaders
     }
   }));
 }
 
-async function readPreparedPage(
+type CachedPreparedAccount = { body: string; dataAt: number; generatedAt: number };
+
+// The session Durable Object keys this cache on its own active Destiny membership.
+async function readPreparedAccount(
   sessionId: string,
   page: PagePayloadKind,
   manifestVersion: string,
   env: Env
-): Promise<Response | null> {
+): Promise<CachedPreparedAccount | null> {
   if (!sessionId || !manifestVersion) return null;
-  const url = new URL("https://internal/prepared-page");
+  const url = new URL("https://internal/prepared-account");
   url.searchParams.set("page", page);
   url.searchParams.set("manifestVersion", manifestVersion);
   const response = await recordStub(env, `session:${sessionId}`).fetch(new Request(url)).catch(() => null);
-  return response?.ok && response.body ? response : null;
+  const dataAt = Number(response?.headers.get("X-Forge-Prepared-Data-At"));
+  const generatedAt = Number(response?.headers.get("X-Forge-Prepared-At"));
+  if (!response?.ok || !response.body || !Number.isFinite(dataAt) || dataAt <= 0 || !/^\d+:\d+$/.test(response.headers.get("X-Forge-Prepared-Membership") || "")) {
+    await response?.body?.cancel().catch(() => {});
+    return null;
+  }
+  const body = await response.text().catch(() => "");
+  return body ? { body, dataAt, generatedAt: Number.isFinite(generatedAt) ? generatedAt : dataAt } : null;
 }
 
-async function storePreparedPage(
+async function storePreparedAccount(
   sessionId: string,
   page: PagePayloadKind,
-  manifestVersion: string,
-  response: Response,
+  built: PreparedAccountBuild,
+  encodedAccount: EncodedPreparedAccount,
   env: Env
 ): Promise<boolean> {
-  if (!sessionId || !manifestVersion) return false;
-  // Read a bounded copy. A page larger than the cap is simply not cached, so the
-  // cache copy can never hold a full public bundle in Worker memory.
-  const reader = response.clone().body?.getReader();
-  if (!reader) return false;
-  const parts: Uint8Array[] = [];
-  let size = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (!value) continue;
-    size += value.byteLength;
-    if (size > PREPARED_PAGE_CACHE_MAX_BYTES) {
-      await reader.cancel("prepared_page_too_large_to_cache").catch(() => {});
-      console.info("prepared_page_cache_skipped", { page, reason: "size", limit: PREPARED_PAGE_CACHE_MAX_BYTES });
-      return false;
-    }
-    parts.push(value);
+  const membership = built.payload.membership;
+  const membershipKey = membership ? `${membership.membershipType}:${membership.membershipId}` : "";
+  if (!sessionId || !built.preparedVersion || !/^\d+:\d+$/.test(membershipKey)) return false;
+  // Only the account part is stored; the public bundle never enters this copy.
+  if (encodedAccount.byteLength > PREPARED_PAGE_CACHE_MAX_BYTES) {
+    console.info("prepared_page_cache_skipped", { page, reason: "size", limit: PREPARED_PAGE_CACHE_MAX_BYTES });
+    return false;
   }
-  const joined = new Uint8Array(size);
+  const joined = new Uint8Array(encodedAccount.byteLength);
   let offset = 0;
-  for (const part of parts) { joined.set(part, offset); offset += part.byteLength; }
-  parts.length = 0;
-  const body = new TextDecoder().decode(joined);
-  const url = new URL("https://internal/prepared-page");
+  for (const part of encodedAccount.chunks) { joined.set(part, offset); offset += part.byteLength; }
+  const url = new URL("https://internal/prepared-account");
   url.searchParams.set("page", page);
-  url.searchParams.set("manifestVersion", manifestVersion);
-  const stored = await recordStub(env, `session:${sessionId}`).fetch(new Request(url, { method: "PUT", body })).catch(() => null);
+  url.searchParams.set("manifestVersion", built.preparedVersion);
+  url.searchParams.set("membership", membershipKey);
+  url.searchParams.set("dataAt", String(built.dataAt));
+  const stored = await recordStub(env, `session:${sessionId}`).fetch(new Request(url, { method: "PUT", body: new TextDecoder().decode(joined) })).catch(() => null);
   return stored?.ok === true;
 }
 
@@ -1607,27 +1629,55 @@ async function preparedJourneyAccountData(
   return { historicalStats, activityHistoryByCharacter, coverage: { complete: !missing.length, missing } };
 }
 
-async function pagePayloadRoute(
+type PreparedManifestStatus = { manifestVersion: string; currentSeason?: Record<string, any> };
+type PreparedAccountBuild = {
+  payload: Record<string, any>;
+  preparedVersion: string;
+  pageBundleResponse: Response | null;
+  dataAt: number;
+};
+
+function pageBundleRequest(page: PagePayloadKind, version: string): Request {
+  const url = new URL("https://manifest/page-bundle");
+  url.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
+  url.searchParams.set("version", version);
+  return new Request(url);
+}
+
+function bundleHeldResponse(version: string): Response {
+  return json({ manifestVersion: version, bundleCached: true });
+}
+
+async function buildPreparedAccount(
   request: Request,
   env: Env,
   page: PagePayloadKind,
-  context?: ExecutionContext,
-  options: { warmWorkspace?: boolean } = {}
-): Promise<Response> {
-  const requestUrl = new URL(request.url);
-  const requestedFreshness = requestUrl.searchParams.get("freshness") === "live" ? "live" : "display";
-  const sessionId = cookieValue(request, SESSION_COOKIE);
-  const preparedStatusPromise = preparedManifestTables({}, env);
-  const preparedStatus = await preparedStatusPromise;
-  const hasPreparedBundle = Boolean(preparedStatus.manifestVersion && requestUrl.searchParams.get("manifestVersion") === preparedStatus.manifestVersion);
-  if (!hasPreparedBundle && requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
-    const cached = await readPreparedPage(sessionId, page, preparedStatus.manifestVersion, env);
-    if (cached) {
-      const headers = new Headers(cached.headers);
-      headers.set("X-Forge-Prepared-Page-Source", "backend-cache");
-      return withCors(request, env, new Response(cached.body, { status: 200, headers }));
-    }
-  }
+  requestedFreshness: "display" | "live",
+  preparedStatus: PreparedManifestStatus,
+  sessionId: string | null,
+  bundleHeld: boolean
+): Promise<PreparedAccountBuild | Response> {
+  let preparedVersion = preparedStatus.manifestVersion;
+  let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
+  // The public bundle and semantic index do not depend on the profile, so they
+  // start together with the profile read instead of after it.
+  const manifestPromise = env.MANIFEST_DATA && preparedVersion
+    ? (() => {
+      const indexUrl = new URL("https://manifest/page-index");
+      indexUrl.searchParams.set("page", page === "journey" ? "journey" : "loadout");
+      indexUrl.searchParams.set("version", preparedVersion);
+      return Promise.all([
+        bundleHeld
+          ? Promise.resolve(bundleHeldResponse(preparedVersion))
+          : env.MANIFEST_DATA.fetch(pageBundleRequest(page, preparedVersion)).catch(() => null),
+        page === "journey" || page === "loadout" || page === "build-forge"
+          ? env.MANIFEST_DATA.fetch(new Request(indexUrl))
+            .then(response => response?.ok ? response.json<LoadoutSemanticIndex & JourneySemanticIndex>().catch(() => null) : null)
+            .catch(() => null)
+          : Promise.resolve(null)
+      ]);
+    })()
+    : null;
   const profileUrl = new URL(request.url);
   profileUrl.pathname = "/bungie/profile";
   profileUrl.search = "";
@@ -1635,41 +1685,30 @@ async function pagePayloadRoute(
   profileUrl.searchParams.set("scope", page === "journey" ? "journey" : page === "character" ? "character" : "forge");
   profileUrl.searchParams.set("definitions", "client-manifest");
   const captured: PreparedProfileCapture = {};
+  const profileStartedAt = Date.now();
   const profileResponse = await profileRoute(new Request(profileUrl, { headers: request.headers }), env, captured);
-  if (!profileResponse.ok) return profileResponse;
+  if (!profileResponse.ok || !captured.payload) {
+    void manifestPromise?.then(([bundle]) => bundle?.body?.cancel()).catch(() => {});
+    if (!profileResponse.ok) return profileResponse;
+    throw new Error("prepared_profile_missing");
+  }
   const payload = captured.payload;
-  if (!payload) throw new Error("prepared_profile_missing");
+  // Age of the account data itself: the snapshot time for display reads, and the
+  // moment the Bungie read started for live reads. Never the build time.
+  const snapshotAt = Number(payload.displaySnapshot?.fetchedAt);
+  const dataAt = Number.isFinite(snapshotAt) && snapshotAt > 0 && snapshotAt <= Date.now() ? snapshotAt : profileStartedAt;
 
-  let preparedVersion = preparedStatus.manifestVersion;
-  let currentSeason: Record<string, any> | undefined = preparedStatus.currentSeason;
   let pageBundleResponse: Response | null = null;
   let loadoutSemanticIndex: LoadoutSemanticIndex | null = null;
   let journeySemanticIndex: JourneySemanticIndex | null = null;
-  if (env.MANIFEST_DATA && preparedVersion) {
-    const bundleUrl = new URL("https://manifest/page-bundle");
-    bundleUrl.searchParams.set("page", page === "journey" ? "journey" : page === "loadout" ? "loadout" : "common");
-    bundleUrl.searchParams.set("version", preparedVersion);
-    const indexUrl = new URL("https://manifest/page-index");
-    indexUrl.searchParams.set("page", page === "journey" ? "journey" : "loadout");
-    indexUrl.searchParams.set("version", preparedVersion);
-    const [bundleResponse, indexResponse] = await Promise.all([
-      hasPreparedBundle
-        ? Promise.resolve(json({ manifestVersion: preparedVersion, bundleCached: true }))
-        : env.MANIFEST_DATA.fetch(new Request(bundleUrl)).catch(() => null),
-      page === "journey" || page === "loadout" || page === "build-forge"
-        ? env.MANIFEST_DATA.fetch(new Request(indexUrl)).catch(() => null)
-        : Promise.resolve(null)
-    ]);
+  if (manifestPromise) {
+    const [bundleResponse, index] = await manifestPromise;
     if (bundleResponse?.ok && bundleResponse.body) pageBundleResponse = bundleResponse;
     if (page === "journey") {
-      journeySemanticIndex = indexResponse?.ok
-        ? await indexResponse.json<JourneySemanticIndex>().catch(() => null)
-        : null;
+      journeySemanticIndex = index;
       if (journeySemanticIndex?.manifestVersion !== preparedVersion) journeySemanticIndex = null;
     } else {
-      loadoutSemanticIndex = indexResponse?.ok
-        ? await indexResponse.json<LoadoutSemanticIndex>().catch(() => null)
-        : null;
+      loadoutSemanticIndex = index;
       if (loadoutSemanticIndex?.manifestVersion !== preparedVersion) loadoutSemanticIndex = null;
     }
   }
@@ -1753,6 +1792,7 @@ async function pagePayloadRoute(
     definitionSource: "prepared-bulk-manifest",
     accountSource: payload.displaySnapshot?.source || (requestedFreshness === "live" ? "bungie" : "snapshot"),
     accountFreshness: requestedFreshness,
+    accountDataAt: dataAt,
     generatedAt: Date.now(),
     views: PAGE_READ_VIEWS[page],
     datasets: {
@@ -1766,10 +1806,86 @@ async function pagePayloadRoute(
   };
   projectPreparedProfileComponents(payload.profile || {}, page);
   compactPreparedProfilePlugLists(payload);
-  const prepared = pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
-  const response = preparedPageEnvelope(request, env, payload, prepared);
-  if (!hasPreparedBundle && sessionId && preparedVersion) {
-    const cacheTask = storePreparedPage(sessionId, page, preparedVersion, response, env)
+  return { payload, preparedVersion, pageBundleResponse, dataAt };
+}
+
+// One background rebuild per session and page at a time, and only for the page
+// that was requested: never several pages in one request (Worker memory limit).
+const preparedAccountRefreshes = new Map<string, Promise<void>>();
+function refreshPreparedAccount(
+  request: Request,
+  env: Env,
+  page: PagePayloadKind,
+  sessionId: string,
+  preparedStatus: PreparedManifestStatus
+): Promise<void> {
+  const key = `${sessionId}\n${page}`;
+  const active = preparedAccountRefreshes.get(key);
+  if (active) return active;
+  const task = (async () => {
+    const built = await buildPreparedAccount(request, env, page, "live", preparedStatus, sessionId, true);
+    if (built instanceof Response) {
+      await built.body?.cancel().catch(() => {});
+      console.warn("prepared_account_refresh_failed", { page, status: built.status });
+      return;
+    }
+    await storePreparedAccount(sessionId, page, built, encodePreparedAccount(built.payload), env);
+  })()
+    .catch(error => console.warn("prepared_account_refresh_failed", { page, error: String(error) }))
+    .finally(() => preparedAccountRefreshes.delete(key));
+  preparedAccountRefreshes.set(key, task);
+  return task;
+}
+
+async function pagePayloadRoute(
+  request: Request,
+  env: Env,
+  page: PagePayloadKind,
+  context?: ExecutionContext,
+  options: { warmWorkspace?: boolean } = {}
+): Promise<Response> {
+  const requestUrl = new URL(request.url);
+  const requestedFreshness = requestUrl.searchParams.get("freshness") === "live" ? "live" : "display";
+  const sessionId = cookieValue(request, SESSION_COOKIE);
+  const preparedStatus = await preparedManifestTables({}, env);
+  const hasPreparedBundle = Boolean(preparedStatus.manifestVersion && requestUrl.searchParams.get("manifestVersion") === preparedStatus.manifestVersion);
+  // Display reads use the cached account part whether or not the client already
+  // holds the public bundle. Live reads (the refresh control) always rebuild.
+  if (requestedFreshness === "display" && sessionId && preparedStatus.manifestVersion) {
+    const cached = await readPreparedAccount(sessionId, page, preparedStatus.manifestVersion, env);
+    if (cached) {
+      const bundle = hasPreparedBundle
+        ? bundleHeldResponse(preparedStatus.manifestVersion)
+        : env.MANIFEST_DATA
+          ? await env.MANIFEST_DATA.fetch(pageBundleRequest(page, preparedStatus.manifestVersion)).then(response => response.ok && response.body ? response : null).catch(() => null)
+          : null;
+      if (bundle) {
+        const ageMs = Math.max(0, Date.now() - cached.dataAt);
+        const revalidating = Boolean(context) && ageMs >= PREPARED_ACCOUNT_REVALIDATE_MS;
+        if (revalidating) context!.waitUntil(refreshPreparedAccount(request, env, page, sessionId, preparedStatus));
+        return preparedPageEnvelope(request, env, cachedPreparedAccount(cached.body, {
+          source: "backend-cache",
+          dataAt: cached.dataAt,
+          generatedAt: cached.generatedAt,
+          ageMs,
+          revalidating
+        }), bundle, {
+          "X-Forge-Prepared-Page-Source": "backend-cache",
+          "X-Forge-Prepared-Page-Age": String(Math.floor(ageMs / 1000))
+        });
+      }
+    }
+  }
+  const built = await buildPreparedAccount(request, env, page, requestedFreshness, preparedStatus, sessionId, hasPreparedBundle);
+  if (built instanceof Response) return built;
+  const encodedAccount = encodePreparedAccount(built.payload);
+  const prepared = built.pageBundleResponse || new Response("{}", { headers: { "Content-Type": "application/json" } });
+  const response = preparedPageEnvelope(request, env, encodedAccount, prepared, {
+    "X-Forge-Prepared-Page-Source": built.payload.pageReady.accountSource,
+    "X-Forge-Prepared-Page-Age": String(Math.floor(Math.max(0, Date.now() - built.dataAt) / 1000))
+  });
+  if (sessionId && built.preparedVersion) {
+    const cacheTask = storePreparedAccount(sessionId, page, built, encodedAccount, env)
       .catch(error => {
         console.warn("prepared_page_cache_write_failed", { page, error: String(error) });
         return false;

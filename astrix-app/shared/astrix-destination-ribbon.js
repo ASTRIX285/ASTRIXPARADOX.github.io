@@ -11,7 +11,7 @@
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1&inv=20261002-1',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1&inv=20261002-1&swr=20261002-1',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
@@ -68,10 +68,10 @@
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
     if(destination.key==='reports'){
-      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1',scriptUrl).href);
+      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1&swr=20261002-1',scriptUrl).href);
       await preloadReports(session);return;
     }
-    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&shell=20261001-mobile-1',scriptUrl).href);
+    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&shell=20261001-mobile-1&swr=20261002-1',scriptUrl).href);
     await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
   }
   function prepare(destination){
@@ -216,7 +216,7 @@
     const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
     if(isJourneyPreview())return;
     if(!session?.authenticated)return;
-    void import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1',scriptUrl).href)
+    void import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1&swr=20261002-1',scriptUrl).href)
       .then(module=>module.preloadReports(session)).catch(()=>{});
   }
   window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
@@ -288,6 +288,7 @@
       sync();
     }
     bind();
+    showDataAge(icon);
     icon.addEventListener('click',async()=>{
       if(icon.disabled)return;
       bind();
@@ -302,6 +303,36 @@
       location.reload();
     });
     sync();
+  }
+
+  // Data age on the refresh icon. Shown whenever this page's Guardian data is not a live
+  // Bungie read (server cache, display snapshot or this browser's copy), with its real age.
+  const PREPARED_KIND_BY_DESTINATION=Object.freeze({home:'journey',journey:'journey',character:'character','forge-loader':'loadout','build-forge':'build-forge',vault:'vault',loadout:'loadout'});
+  function ageParts(ms){
+    const minutes=Math.floor(ms/60000),hours=Math.floor(minutes/60),days=Math.floor(hours/24);
+    if(minutes<1)return ['<1m','less than a minute ago'];
+    if(minutes<60)return [`${minutes}m`,`${minutes} minute${minutes===1?'':'s'} ago`];
+    if(hours<24)return [`${hours}h`,`${hours} hour${hours===1?'':'s'} ago`];
+    return [`${days}d`,`${days} day${days===1?'':'s'} ago`];
+  }
+  function showDataAge(icon){
+    const kind=PREPARED_KIND_BY_DESTINATION[activeShellKey()];if(!kind)return;
+    const badge=document.createElement('span');badge.className='ax-data-age';badge.hidden=true;badge.setAttribute('aria-hidden','true');icon.append(badge);
+    let dataAt=null;
+    const render=()=>{
+      if(dataAt===null){badge.hidden=true;icon.setAttribute('aria-label','Refresh Guardian data');icon.removeAttribute('title');return;}
+      const [short,words]=ageParts(Math.max(0,Date.now()-dataAt)),label=`Refresh Guardian data. Showing data from ${words}.`;
+      badge.textContent=short;badge.hidden=false;icon.setAttribute('aria-label',label);icon.title=label;
+    };
+    document.addEventListener('forge:prepared-page-loaded',event=>{
+      if(event.detail?.page!==kind)return;
+      const payload=event.detail.payload||{},ready=payload.pageReady||{};
+      const at=Number(payload.preparedCache?.dataAt||ready.accountDataAt||payload.displaySnapshot?.fetchedAt||ready.generatedAt);
+      // Only a live read under a minute old counts as live, however the page received it.
+      const live=ready.accountFreshness==='live'&&!payload.preparedCache&&Date.now()-at<60_000;
+      dataAt=live||!Number.isFinite(at)||at<=0?null:at;render();
+    });
+    setInterval(()=>{if(dataAt!==null)render();},30000);
   }
 
   // Tools drawer from the left: focus is trapped while open and returns to the menu icon.

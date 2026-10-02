@@ -27,8 +27,8 @@ test('oversized public profile remains a retryable error, never signed out',asyn
 test('prepared route captures internally then compacts before the guarded envelope',async()=>{
  const source=await readFile(new URL('../src/index.ts',import.meta.url),'utf8');
  assert.match(source,/profileRoute\(new Request\(profileUrl, \{ headers: request.headers \}\), env, captured\)/);
- assert.match(source,/if \(!profileResponse.ok\) return profileResponse;\s*const payload = captured.payload/);
- assert.match(source,/compactPreparedProfilePlugLists\(payload\);[\s\S]*?preparedPageEnvelope\(request, env, payload, prepared\)/);
+ assert.match(source,/if \(!profileResponse.ok\) return profileResponse;[\s\S]{0,80}const payload = captured.payload/);
+ assert.match(source,/compactPreparedProfilePlugLists\(payload\);[\s\S]*?encodePreparedAccount\(built.payload\);[\s\S]*?preparedPageEnvelope\(request, env, encodedAccount, prepared/);
  assert.match(source,/preparedAccountChunks\(account\)/);
 });
 

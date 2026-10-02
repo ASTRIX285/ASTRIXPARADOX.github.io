@@ -2,7 +2,7 @@ import { OAUTH_TTL_MS } from "./oauth-ui";
 import { refreshFailure } from "./refresh-failure";
 import { DurableObject } from "cloudflare:workers";
 import { ProfileSnapshotCache } from "./profile-snapshot-cache";
-import { PreparedPageCache } from "./prepared-page-cache";
+import { PreparedAccountCache, PreparedPageCache, clearSessionCaches } from "./prepared-page-cache";
 import { storedParadoxLoadouts } from "./paradox-loadouts";
 import { fetchProfileSnapshot, snapshotDiagnostics } from "./profile-snapshot-error";
 
@@ -67,6 +67,7 @@ export class AuthRecord extends DurableObject<Env> {
 
   private snapshots = new ProfileSnapshotCache(this.ctx.storage);
   private preparedPages = new PreparedPageCache(this.ctx.storage);
+  private preparedAccounts = new PreparedAccountCache(this.ctx.storage);
   private deferSnapshotWrite(task: Promise<void>): void {
     this.ctx.waitUntil(task.catch(error => console.warn("prepared_account_cache_write_failed", { error: String(error) })));
   }
@@ -183,6 +184,28 @@ export class AuthRecord extends DurableObject<Env> {
         return stored ? new Response(null, { status: 204 }) : new Response(null, { status: 413 });
       } catch { return new Response(null, { status: 503 }); }
     }
+    // Internal route. The key is always the session's own active membership, so a
+    // cached account part can never be read for, or written over, another account.
+    if ((request.method === "GET" || request.method === "PUT") && path === "/prepared-account") {
+      const record = await this.ctx.storage.get<AuthRecordValue>("record");
+      if (!record || record.kind !== "session" || record.absoluteExpiresAt <= Date.now() || !record.activeDestinyMembership) return new Response(null, { status: 401 });
+      const membership = `${record.activeDestinyMembership.membershipType}:${record.activeDestinyMembership.membershipId}`;
+      const url = new URL(request.url);
+      const page = url.searchParams.get("page") || "";
+      const manifestVersion = url.searchParams.get("manifestVersion") || "";
+      if (request.method === "GET") {
+        const snapshot = await this.preparedAccounts.read(membership, page, manifestVersion).catch(() => null);
+        return snapshot
+          ? new Response(snapshot.body, { headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Forge-Prepared-Membership": snapshot.membership, "X-Forge-Prepared-At": String(snapshot.generatedAt), "X-Forge-Prepared-Data-At": String(snapshot.dataAt) } })
+          : new Response(null, { status: 404 });
+      }
+      if (url.searchParams.get("membership") !== membership) return new Response(null, { status: 409 });
+      const body = await request.text();
+      try {
+        const stored = await this.preparedAccounts.write(membership, page, manifestVersion, body, Number(url.searchParams.get("dataAt")));
+        return stored ? new Response(null, { status: 204 }) : new Response(null, { status: 412 });
+      } catch { return new Response(null, { status: 503 }); }
+    }
     // Internal Durable Object route, never exposed by the public Worker router.
     if (request.method === "POST" && path === "/profile-snapshot") {
       const record = await this.ctx.storage.get<AuthRecordValue>("record");
@@ -252,7 +275,8 @@ export class AuthRecord extends DurableObject<Env> {
       return Response.json(used, { headers: { "Cache-Control": "no-store" } });
     }
     if (request.method === "DELETE" && path === "/record") {
-      await this.exclusive(async () => { await this.ctx.storage.delete("record"); await this.ctx.storage.deleteAlarm(); });
+      // Sign-out and revoked sessions also drop every cached page and profile copy.
+      await this.exclusive(async () => { await this.ctx.storage.delete("record"); await this.ctx.storage.deleteAlarm(); await clearSessionCaches(this.ctx.storage); });
       return new Response(null, { status: 204 });
     }
     return new Response(null, { status: 404 });
@@ -270,6 +294,7 @@ export class AuthRecord extends DurableObject<Env> {
         if (latest?.kind === "session" && latest.absoluteExpiresAt <= Date.now()) {
           await this.ctx.storage.delete("record");
           await this.ctx.storage.deleteAlarm();
+          await clearSessionCaches(this.ctx.storage);
         }
       });
       return;
