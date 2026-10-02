@@ -1,6 +1,6 @@
 import {loadoutFingerprint,loadoutWorkingBuild,loadoutShareDocument} from './loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {createLiveTransferPlan} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
-import {sessionBinding,liveActionCapabilities,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
+import {sessionBinding,liveActionCapabilities,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2&stack=20261002-1';
 
 /** Source-specific controller. Preparation is read-only; Apply requires the exact
  * prepared plan object returned by this controller and a separate confirmation. */

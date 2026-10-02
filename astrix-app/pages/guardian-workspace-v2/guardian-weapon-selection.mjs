@@ -1,4 +1,4 @@
-import {inventoryLocations,sessionBinding,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1&plain=20260925-2';
+import {inventoryLocations,sessionBinding,requestFreshProfile,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from './guardian-live-actions.mjs?roll=20260909-apply-1&plain=20260925-2&stack=20261002-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
 import {GuardianManifestService} from './guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 

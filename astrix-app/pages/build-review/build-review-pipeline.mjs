@@ -7,7 +7,7 @@ import {mergeSubclassCatalog} from '../guardian-workspace-v2/guardian-super-cata
 import {BUILD_ELEMENTS,createDirectGenerationBuild,validateForgeGenerationEntry} from '../guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs';
 import {filterExoticCompatibleSubclasses,hasVerifiedSubclassSockets} from '../guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs';
 import {createBuildState} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
-import {createVaultCatalogue,prepareArmourSelection} from '../vault/vault-inventory.mjs';
+import {createVaultCatalogue,prepareArmourSelection} from '../vault/vault-inventory.mjs?stack=20261002-1';
 import {createDimForgeState} from '../../core/dim-import/adapt.mjs?grid=20261001-1';
 
 // MIRRORED FROM BUILD FORGE: START

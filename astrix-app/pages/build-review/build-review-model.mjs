@@ -3,7 +3,7 @@
 // Nothing here invents a name, count, reason or synergy.
 import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {REVIEW_ACTIVITIES,REVIEW_OBJECTIVES} from './build-review-url.mjs';
-import {elementOf} from './build-review-pipeline.mjs?grid=20261001-1';
+import {elementOf} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1';
 
 const WEAPON_LABELS=['Kinetic','Energy','Power'];
 const ARMOUR_LABELS=['Helmet','Gauntlets','Chest','Legs','Class item'];

@@ -1,7 +1,7 @@
 import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1&grid=20261001-1';
 import {resolveInGameLoadout,loadoutFingerprint} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
-import {createLoadoutDetailsActions} from '../../shared/loadout-details-actions.mjs?v=20260927-loadout-details-1&grid=20261001-1';
-import {sessionBinding,liveActionCapabilities} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2';
+import {createLoadoutDetailsActions} from '../../shared/loadout-details-actions.mjs?v=20260927-loadout-details-1&grid=20261001-1&stack=20261002-1';
+import {sessionBinding,liveActionCapabilities} from './guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2&stack=20261002-1';
 let current=null,opening=null;
 
 function ensureStyle(){

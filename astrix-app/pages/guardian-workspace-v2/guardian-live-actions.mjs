@@ -401,10 +401,11 @@ function confirmVaultTransferIntent(intent){
 }
 
 function stagePostmasterCollectionIntent({characterId,targetCharacterId=null,items,session,equipAfterCollection=false,overflowToVault=true}={}){
-  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),bucketHash:Number(item?.bucketHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),name:String(item?.name||`Destiny item ${item?.itemHash}`)})),equipTarget=String(targetCharacterId||characterId||'');
+  const binding=sessionBinding(session),rows=(Array.isArray(items)?items:[]).map(item=>({itemInstanceId:String(item?.itemInstanceId||''),itemHash:Number(item?.itemHash),bucketHash:Number(item?.bucketHash),stackSize:Math.max(1,Math.min(9_999,Number(item?.quantity)||1)),stack:!decimal(String(item?.itemInstanceId||'')),name:String(item?.name||`Destiny item ${item?.itemHash}`)})),equipTarget=String(targetCharacterId||characterId||'');
   if(!decimal(characterId)||!decimal(binding.membershipId)||!decimal(binding.membershipType))throw new TypeError('Reconnect Bungie and choose a valid Guardian before collecting Postmaster.');
-  if(!rows.length||rows.some(item=>!decimal(item.itemInstanceId)||!Number.isInteger(item.itemHash)))throw new TypeError('Collect Postmaster requires at least one exact Bungie item instance.');
-  if(equipAfterCollection&&rows.length!==1)throw new TypeError('Direct Postmaster equip requires one exact Bungie item instance.');
+  // An exact item is pulled by its instance ID; a stack Bungie lists without one is pulled by item hash and size (itemId 0).
+  if(!rows.length||rows.some(item=>!Number.isInteger(item.itemHash)||item.itemHash<=0||(!item.stack&&!decimal(item.itemInstanceId))))throw new TypeError('Collect Postmaster requires an exact Bungie item or a stack with its item hash.');
+  if(equipAfterCollection&&(rows.length!==1||rows[0].stack))throw new TypeError('Direct Postmaster equip requires one exact Bungie item instance.');
   if(equipAfterCollection&&!decimal(equipTarget))throw new TypeError('Direct Postmaster equip requires a valid target Guardian.');
   return {schemaVersion:1,kind:'postmaster-collection-intent',status:'staged',requiresUserConfirmation:true,confirmedAt:null,membershipId:binding.membershipId,membershipType:binding.membershipType,characterId:String(characterId),targetCharacterId:equipAfterCollection?equipTarget:String(characterId),equipAfterCollection:equipAfterCollection===true,overflowToVault:overflowToVault===true&&!equipAfterCollection,items:rows};
 }
@@ -452,6 +453,23 @@ async function waitForInventoryLocation(itemInstanceId,expected,{fetchImpl=fetch
     if(locationMatches(location,expected))return {verified:true,...last};
   }
   return {verified:false,...last};
+}
+
+// Stacks Bungie lists without an exact item ID are counted per item hash in one Guardian's Postmaster.
+function postmasterStackCount(payload,characterId,itemHash){
+  const profile=payload?.profile||payload?.Response||{};
+  return (profile?.characterInventories?.data?.[String(characterId)]?.items||[]).filter(item=>Number(item?.bucketHash)===POSTMASTER_BUCKET&&Number(item?.itemHash)===Number(itemHash)&&!decimal(String(item?.itemInstanceId||''))).reduce((total,item)=>total+Math.max(1,Number(item?.quantity)||1),0);
+}
+
+async function waitForPostmasterStackDrop(characterId,itemHash,expectedMax,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
+  let fresh=null,count=null;
+  for(const delay of LIVE_INVENTORY_READBACK_DELAYS_MS){
+    if(delay)await waitImpl(delay);
+    fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'});
+    count=postmasterStackCount(fresh,characterId,itemHash);
+    if(count<=expectedMax)return {verified:true,fresh,count};
+  }
+  return {verified:false,fresh,count};
 }
 
 async function waitForPostmasterExit(itemInstanceId,characterId,{fetchImpl=fetch,authOrigin=DEFAULT_AUTH_ORIGIN,waitImpl=milliseconds=>new Promise(resolve=>setTimeout(resolve,milliseconds))}={}){
@@ -661,6 +679,8 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
       return false;
     }
   };
+  // Per stack row: the highest Postmaster count for its hash that confirms the pull (unset until pulled).
+  const stackOutcome=new Map();
   let itemFailures=0,completedItems=0;
   try{
     const fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'}),{profile,locations}=inventoryLocations(fresh),blockers=[],collectable=[];
@@ -668,6 +688,10 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     if(intent.equipAfterCollection&&!Object.hasOwn(profile?.characters?.data||{},result.targetCharacterId))blockers.push('The target Guardian is not present in the latest Bungie profile.');
     if(blockers.length){record('preflight','blocked','Postmaster collection unavailable. Nothing changed.',blockers);result.status='blocked';return result;}
     for(const item of intent.items||[]){
+      if(item.stack){
+        if(postmasterStackCount(fresh,result.characterId,item.itemHash)>0){collectable.push(item);continue;}
+        stackOutcome.set(item,0);completedItems+=1;record('collect','complete',`${item.name} already left this Guardian's Postmaster. No duplicate pull was sent.`,{itemHash:item.itemHash,stack:true,alreadyComplete:true});continue;
+      }
       const location=locations.get(String(item.itemInstanceId||''));
       if(location&&Number(location.itemHash)===Number(item.itemHash)&&locationMatches(location,{kind:'postmaster',characterId:result.characterId})){collectable.push(item);continue;}
       if(location&&Number(location.itemHash)===Number(item.itemHash)&&!intent.equipAfterCollection){completedItems+=1;record('collect','complete',`${item.name} already left this Guardian's Postmaster. No duplicate pull was sent.`,{itemInstanceId:item.itemInstanceId,actual:location.source,alreadyComplete:true});continue;}
@@ -676,6 +700,23 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
     record('preflight','complete',`Fresh Postmaster data for ${collectable.length} exact item${collectable.length===1?'':'s'}${itemFailures?`; ${itemFailures} stale item${itemFailures===1?' was':'s were'} isolated so the remaining pulls can continue`:''}.`);
     for(const item of collectable){
       const label=`Collect ${item.name} from Postmaster`;
+      if(item.stack){
+        try{
+          // Count right before each pull, so two stacks of one item hash each confirm their own amount.
+          const before=postmasterStackCount(await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'}),result.characterId,item.itemHash),amount=Math.min(item.stackSize,before);
+          if(amount<1){stackOutcome.set(item,0);completedItems+=1;record('collect','complete',`${item.name} already left this Guardian's Postmaster. No duplicate pull was sent.`,{itemHash:item.itemHash,stack:true,alreadyComplete:true});continue;}
+          const response=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:'0',itemReferenceHash:item.itemHash,stackSize:amount},label);
+          const settled=await waitForPostmasterStackDrop(result.characterId,item.itemHash,before-amount,{fetchImpl,authOrigin,waitImpl});
+          stackOutcome.set(item,before-amount);
+          if(!settled.verified){record('collect','mismatch','Bungie accepted the Postmaster call but fresh inventory did not confirm the stack left Postmaster.',{itemHash:item.itemHash,stack:true,before,expected:before-amount,actual:settled.count,ErrorCode:response?.ErrorCode??1});itemFailures+=1;continue;}
+          record('collect','complete',label,{itemHash:item.itemHash,stack:true,before,after:settled.count,ErrorCode:response?.ErrorCode??1});
+          completedItems+=1;
+        }catch(error){
+          record('collect','failed',label,{itemHash:item.itemHash,stack:true,status:error?.status??null,message:error.message,payload:error.payload||null});
+          itemFailures+=1;
+        }
+        continue;
+      }
       try{
         const response=await mutate('/bungie/actions/pull-from-postmaster',{membershipType:Number(binding.membershipType),characterId:result.characterId,itemId:item.itemInstanceId,itemReferenceHash:item.itemHash,stackSize:item.stackSize},label);
         const settled=await waitForPostmasterExit(item.itemInstanceId,result.characterId,{fetchImpl,authOrigin,waitImpl});
@@ -715,7 +756,7 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
         }
       }catch(error){
         if(isExplicitInventoryCapacityError(error)&&await collectToVaultAfterCapacityError(item,error)){completedItems+=1;continue;}
-        record('collect','failed',label,{itemInstanceId:item.itemInstanceId,message:error.message,payload:error.payload||null});
+        record('collect','failed',label,{itemInstanceId:item.itemInstanceId,status:error?.status??null,message:error.message,payload:error.payload||null});
         itemFailures+=1;
       }
     }
@@ -724,13 +765,15 @@ async function executePostmasterCollectionIntent(intent,{session,fetchImpl=fetch
   }finally{
     try{
       let fresh=null,remaining=[],notEquipped=[],unresolved=[];
-      for(const delay of LIVE_INVENTORY_READBACK_DELAYS_MS){
+      // When Bungie refused every stack pull outright, one fresh read is enough to report it promptly.
+      const readbackDelays=(intent.items||[]).length&&(intent.items||[]).every(item=>item.stack)&&result.mutationCount===0?[0]:LIVE_INVENTORY_READBACK_DELAYS_MS;
+      for(const delay of readbackDelays){
         if(delay)await waitImpl(delay);
         fresh=await requestFreshProfile({fetchImpl,authOrigin,scope:'inventory'});
         const {locations}=inventoryLocations(fresh);
-        remaining=(intent.items||[]).filter(item=>locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.itemInstanceId);
+        remaining=(intent.items||[]).filter(item=>item.stack?!(stackOutcome.has(item)&&postmasterStackCount(fresh,result.characterId,item.itemHash)<=stackOutcome.get(item)):locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'postmaster',characterId:result.characterId})).map(item=>item.stack?`stack:${item.itemHash}`:item.itemInstanceId);
         notEquipped=intent.equipAfterCollection?(intent.items||[]).filter(item=>!locationMatches(locations.get(String(item.itemInstanceId||'')),{kind:'equipped',characterId:result.targetCharacterId})).map(item=>item.itemInstanceId):[];
-        unresolved=(intent.items||[]).filter(item=>Number(locations.get(String(item.itemInstanceId||''))?.itemHash)!==Number(item.itemHash)).map(item=>item.itemInstanceId);
+        unresolved=(intent.items||[]).filter(item=>!item.stack&&Number(locations.get(String(item.itemInstanceId||''))?.itemHash)!==Number(item.itemHash)).map(item=>item.itemInstanceId);
         if(remaining.length===0&&notEquipped.length===0&&unresolved.length===0)break;
       }
       result.readback={verified:remaining.length===0&&notEquipped.length===0&&unresolved.length===0,remaining,notEquipped,unresolved,targetCharacterId:intent.equipAfterCollection?result.targetCharacterId:null};

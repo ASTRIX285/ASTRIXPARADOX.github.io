@@ -2,12 +2,12 @@
    Renders resolved live semantics into the approved Guardian Build Forge without
    redesigning its structure. Unknown evidence is shown as unknown, never inferred. */
 import {paradoxDefinitionId,resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
-import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2';
+import {bindParadoxItemInspect} from './paradox-item-hover.mjs?v=20260913-presentation-consistency-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2&stack=20261002-1';
 import {weaponDetailTile,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup,isEnhancedPerk} from './guardian-weapon-presentation.mjs?v=20260909-weapon-presentation-1';
 import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1&roll=20260909-apply-1';
 import {weaponStatBreakdown,weaponStatMarkup} from './guardian-weapon-stat-model.mjs';
-import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+import {bindWeaponSelection} from './guardian-weapon-selection.mjs?fix=20260917-compact-status-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&stack=20261002-1';
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};

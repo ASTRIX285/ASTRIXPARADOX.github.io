@@ -1,4 +1,4 @@
-import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?stack=20261002-1';
 // A routine profile/session refresh is not an account or Guardian switch.
 export function dimContextChanged(model,context){
   if(model.autoMatchedGuardian&&context.session?.authenticated!==true)return context.session?.authenticated===false;

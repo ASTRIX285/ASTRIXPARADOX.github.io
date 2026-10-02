@@ -7,13 +7,13 @@ import {sendDimToForge} from '../../core/dim-import/handoff.mjs?grid=20261001-1'
 import {runProfileTask} from '../../core/engine-profile-client.mjs?shell=20261001-mobile-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?shell=20261001-mobile-1';
 import {getBungieSession,authStartUrl} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
-import {sessionBinding} from '../guardian-workspace-v2/guardian-live-actions.mjs';
+import {sessionBinding} from '../guardian-workspace-v2/guardian-live-actions.mjs?stack=20261002-1';
 import {normalisePreparedPagePayload} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?shell=20261001-mobile-1';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {REVIEW_ACTIVITIES,REVIEW_OBJECTIVES,REVIEW_ELEMENTS,decodeReviewUrl,encodeReviewUrl,goalComplete} from './build-review-url.mjs';
-import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs?grid=20261001-1';
-import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs?grid=20261001-1';
+import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1';
+import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs?grid=20261001-1&stack=20261002-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
