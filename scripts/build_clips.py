@@ -5,7 +5,7 @@ Fetches YouTube playlists via YouTube Data API v3
 Rewrites pages/clips.html automatically
 """
 
-import os, json, re, urllib.request, urllib.parse
+import os, sys, json, re, urllib.request, urllib.parse
 from datetime import datetime
 
 # ── CONFIG ──────────────────────────────────────────────────
@@ -292,7 +292,7 @@ def build_html(sections, total):
 </head>
 <body class="ax-brand">
 <nav class="nav">
-  <a class="nav-logo" href="../index.html" aria-label="ASTRIX PARADOX home">
+  <a class="nav-logo" href="/" aria-label="ASTRIX PARADOX home">
     <img src="/img/ax-logo-160.webp" width="49" height="40" alt="">
     <span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span>
   </a>
@@ -433,7 +433,43 @@ __CARDS_HTML__
 </body>
 </html>'''.replace('__GAME_BUTTONS__', game_buttons).replace('__TOTAL__', str(total)).replace('__CARDS_HTML__', cards_html)
 
+def reuse_existing_sections(path):
+    """Read the cards already written to clips.html, so the page can be rebuilt
+    from this template without the YouTube API. The clip data stays as it is."""
+    with open(path, encoding='utf-8') as f:
+        text = f.read()
+    labels = {pl['game']: pl['label'] for pl in PLAYLISTS}
+    sections, total = [], 0
+    section_mark = '\n      <div class="game-section" data-section="'
+    card_mark = '\n      <div class="clip-card'
+    card_close = '\n      </div>'
+    # A card ends with its own closing tag; the grid and section close right after the last one.
+    grid_end = card_close + '\n        </div>\n      </div>'
+    for chunk in text.split(section_mark)[1:]:
+        game = chunk.split('"', 1)[0]
+        grid = chunk.split('<div class="clips-grid">\n', 1)[1]
+        cards = []
+        for piece in grid.split(card_mark)[1:]:
+            # Drop the newline build_sections_html puts between cards, so reruns stay identical.
+            card = card_mark + piece.rstrip('\n')
+            end = card.find(grid_end)
+            if end >= 0:
+                card = card[:end + len(card_close)]
+            cards.append(card)
+        total += len(cards)
+        sections.append({'game': game, 'label': labels.get(game, game), 'cards': cards})
+    return sections, total
+
 def main():
+    out = os.path.join(os.path.dirname(__file__), '..', 'pages', 'clips.html')
+    if '--reuse-cards' in sys.argv:
+        # Rebuild the page markup from the template, keeping the clips already written.
+        sections, total = reuse_existing_sections(out)
+        html = build_html(sections, total)
+        with open(out, 'w', encoding='utf-8', newline='\n') as f:
+            f.write(html)
+        print(f'Rebuilt clips.html from the template with {total} existing clips')
+        return
     print('Fetching playlists...')
     sections = []
     total = 0
@@ -458,7 +494,7 @@ def main():
 
     html = build_html(sections, total)
     out = os.path.join(os.path.dirname(__file__), '..', 'pages', 'clips.html')
-    with open(out, 'w', encoding='utf-8') as f:
+    with open(out, 'w', encoding='utf-8', newline='\n') as f:
         f.write(html)
     print(f'Done — {total} clips written to clips.html')
 
