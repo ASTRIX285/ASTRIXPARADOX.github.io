@@ -46,7 +46,7 @@ assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey mu
 // Prompt 24: retain exact resource checks with the marker/readability cache tag.
 assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1&amp;card=20260926-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
 // Local preview request: exact live import remains required behind the host gate.
-assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4')"),'Journey must retain its exact current live runtime through its gated entry');
+assert.ok(html.includes('src="./journey-entry.mjs?v=20260925-local-preview-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4&amp;shell=20261001-mobile-1"')&&journeyEntry.includes("import('./journey.mjs?v=20260913-workspace-preload-1&recovery=20260917-renderable-2&transport=20260911-compact-plugs-1&identity=20260918-emblem-card-1&navigation=20260919-1&maps=20260920-zoom-chests-3&champion=20260924-champion-export-1&activity=20260918-activity-startup-1&markers=20260925-24&chestnote=20260925-25&sources=20260925-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1')"),'Journey must retain its exact current live runtime through its gated entry');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
 assert.doesNotMatch(journey,/const manifestReady=guardianManifest\.ready\(\)/,'Journey must keep the full equipment manifest off its critical loading path');
 assert.match(heroModule,/IS_JOURNEY_PAGE[\s\S]*?FORGE_HERO_PROFILE_PROMISE/,'Journey hero cards must expose their prepared authenticated page request');
@@ -130,7 +130,7 @@ assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*
 assert.match(journey,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
 // Prompt 20 appends Reports support, retaining every existing resource version.
 // Local preview request: preserve exact shared renderer import on the live branch.
-assert.ok(journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4')"),'Journey must retain its exact backend-prepared shared Guardian renderer');
+assert.ok(journeyEntry.includes("import('../../shared/astrix-hero-cards.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&reports=20260925-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1')"),'Journey must retain its exact backend-prepared shared Guardian renderer');
 assert.ok(html.indexOf('journey-2560-visual.css')<html.indexOf('astrix-desktop-density.css'),'Shared desktop density must remain the final stylesheet');
 assert.ok(html.includes('data-forge-destination-ribbon data-active-destination="journey"'),'Journey must retain the shared seven-page ribbon mount');
 assert.doesNotMatch(html,/journeyDestinations|apx-destination-links|apx-destination-link/,'Journey must not duplicate the shared ribbon at the bottom of the page');
@@ -218,7 +218,16 @@ assert.doesNotMatch(characterHtml,/class="top-icons"/,'Character must leave only
 assert.doesNotMatch(missionReportsHtml,/mission-utility-actions/,'Mission Reports must leave only the Bungie account control in the header action position');
 assert.match(heroModule,/from ['"][^'"]*prepared-page-client\.mjs[^'"]*['"][\s\S]*?loadPreparedPagePayload\(session,page/,'Shared hero cards must use the confidential prepared page endpoint through the shared client');
 assert.match(heroModule,/function mostRecentCharacterId\(characters\)[\s\S]*?dateLastPlayed[\s\S]*?const selectedId=mostRecentCharacterId\(characters\)/,'Shared hero cards must automatically select Bungie’s newest dateLastPlayed Guardian');
-assert.doesNotMatch(heroModule,/sessionStorage\.getItem\(SELECTED_CHARACTER_KEY\)/,'A prior tab choice must not replace the newest Bungie Guardian during fresh hero-card startup');
+// Mobile shell (Miguel, 1 Oct 2026): the last selected Guardian, remembered per account, wins; newest played is the fallback.
+assert.match(heroModule,/\[requested,storedCharacterId\(\)\][\s\S]*?mostRecentCharacterId\(characters\)/,'Hero cards must prefer the remembered Guardian and fall back to the newest dateLastPlayed Guardian');
+{
+  // Run the real startup choice: with no stored selection for the account, newest played wins.
+  const slice=heroModule.slice(heroModule.indexOf('function mostRecentCharacterId('),heroModule.indexOf('function rememberCharacterId('));
+  const pick=(stored,search='')=>new Function('sessionStorage','location','characters',`const SELECTED_CHARACTER_KEY='astrix:selected-character-id',IS_VAULT_PAGE=false,IS_FORGE_LOADER_PAGE=false;${slice}return initialCharacterId(characters);`)({getItem:()=>stored},{search},[{characterId:'1',dateLastPlayed:'2026-09-01T00:00:00Z'},{characterId:'2',dateLastPlayed:'2026-09-30T00:00:00Z'},{characterId:'3',dateLastPlayed:'2026-09-15T00:00:00Z'}]);
+  assert.equal(pick(null),'2','No stored selection for the account: the newest played Guardian wins');
+  assert.equal(pick('9'),'2','A stored Guardian the account no longer has: the newest played Guardian wins');
+  assert.equal(pick('3'),'3','A stored Guardian for the account wins over the newest played');
+}
 assert.match(missionReportsData,/preferredCharacterId\|\|mostRecentCharacterId\(rawCharacters\)/,'Mission Reports must use latest-played by default while preserving explicit in-page selection');
 assert.match(heroCss,/var\(--character-emblem\) 28px center\/cover no-repeat/,'Shared hero cards must centre the emblem focal icon horizontally and vertically');
 assert.match(heroCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:var\(--apx-icon-stat,1\.25rem\);height:var\(--apx-icon-stat,1\.25rem\);flex:0 0 var\(--apx-icon-stat,1\.25rem\)[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Shared Character-format stat cells, icons and values must use the shared enlarged contained treatment');

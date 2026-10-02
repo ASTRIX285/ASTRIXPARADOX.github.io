@@ -2,6 +2,7 @@ DESIGN.md
 astrix-app/core/engine-profile-client.mjs
 astrix-app/core/engine-profile-worker.mjs
 astrix-app/core/prepared-page-client.mjs
+astrix-app/data/armor-information.catalogue.json
 astrix-app/pages/build-review/build-review.mjs
 astrix-app/pages/build-review/index.html
 astrix-app/pages/forge-loader/forge-loader-preload.mjs
@@ -31,3 +32,6 @@ astrix-app/shared/astrix-destination-ribbon.js
 astrix-app/shared/astrix-hero-cards.mjs
 astrix-app/shared/astrix-tool-shell.css
 astrix-app/tools/test-mobile-shell.mjs
+astrix-app/tools/validate-journey-visual-pass.mjs
+astrix-app/tools/validate-local-preview.mjs
+astrix-app/tools/validate-main-page-today.mjs

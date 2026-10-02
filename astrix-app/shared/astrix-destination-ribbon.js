@@ -274,14 +274,28 @@
       if(icon.getAttribute('aria-busy')!==String(busy))icon.setAttribute('aria-busy',String(busy));
       if(icon.disabled!==disabled)icon.disabled=disabled;
     };
-    new MutationObserver(records=>{if(records.some(record=>record.target!==icon))sync();}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['aria-busy','disabled'],childList:true});
+    // Watches only the page's own refresh control (aria-busy and disabled). While the page has
+    // not rendered it yet, a child-list watch looks for it and stops as soon as it appears.
+    let watched=null;
+    const controlWatch=new MutationObserver(sync);
+    const finder=new MutationObserver(()=>{if(proxy())bind();});
+    function bind(){
+      const control=proxy();
+      if(control===watched)return;
+      controlWatch.disconnect();watched=control;
+      if(control){finder.disconnect();controlWatch.observe(control,{attributes:true,attributeFilter:['aria-busy','disabled']});}
+      else finder.observe(document.body,{childList:true,subtree:true});
+      sync();
+    }
+    bind();
     icon.addEventListener('click',async()=>{
       if(icon.disabled)return;
+      bind();
       const control=proxy();
       if(control&&!control.disabled){control.click();sync();return;}
       if(typeof window.FORGE_REFRESH==='function'){
         running=true;sync();
-        try{await window.FORGE_REFRESH();}catch(error){console.info('[ASTRIX shell] refresh unavailable',error);}
+        try{await window.FORGE_REFRESH();}catch(error){console.info('[Forge shell] refresh unavailable',error);}
         finally{running=false;sync();}
         return;
       }
