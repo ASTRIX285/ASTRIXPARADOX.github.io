@@ -11,13 +11,14 @@
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
   function accountIdentity(){
     try{
-      const session=window.FORGE_BUNGIE_SESSION||JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session;
+      // An unavailable answer during a Bungie outage must not hide the signed-in account.
+      const session=[window.FORGE_BUNGIE_SESSION,JSON.parse(sessionStorage.getItem('astrix:bungie-session-cache:v1')||'null')?.session].find(row=>row?.authenticated===true);
       const membership=session?.activeDestinyMembership;
       return session?.authenticated&&membership?.membershipId?`${membership.membershipType}:${membership.membershipId}`:'';
     }catch{return '';}
@@ -70,7 +71,7 @@
       const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1',scriptUrl).href);
       await preloadReports(session);return;
     }
-    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1',scriptUrl).href);
+    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&shell=20261001-mobile-1',scriptUrl).href);
     await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
   }
   function prepare(destination){
@@ -219,7 +220,138 @@
       .then(module=>module.preloadReports(session)).catch(()=>{});
   }
   window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
-  function init(){brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
+  // ---------- Tool shell on every tool page (Miguel, 1 Oct 2026) ----------
+  // Header actions at all widths: refresh icon, Bungie emblem, and up to 1199px a menu
+  // icon that opens the tools drawer from the left. Phone and tablet show only the active
+  // Guardian card; tapping it lists the other two. The last Guardian is remembered per account.
+  const SHELL_QUERY='(max-width: 1199px)';
+  const LAST_GUARDIAN_PREFIX='astrix:last-guardian:v1:';
+  const SELECTED_CHARACTER_KEY='astrix:selected-character-id';
+  const REFRESH_ICON='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 1 0-2.34 5.66" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const MENU_ICON='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>';
+  const CLOSE_ICON='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>';
+  const shellHeader=()=>document.querySelector('header.apx-destination-header')||document.querySelector('header.home-top');
+  function iconButton(className,label,icon){const button=document.createElement('button');button.type='button';button.className=`ax-icon-btn ${className}`;button.setAttribute('aria-label',label);button.innerHTML=icon;return button;}
+  function activeShellKey(){
+    const requested=String(document.querySelector('[data-forge-destination-ribbon]')?.dataset.activeDestination||'').trim().toLowerCase();
+    if(requested)return requested;
+    return location.pathname.includes('/pages/home/')?'home':'';
+  }
+
+  // Remember the selected Guardian per account; seed the page's selection before cards render.
+  function rememberGuardian(characterId){try{const account=accountIdentity();if(account&&characterId)localStorage.setItem(LAST_GUARDIAN_PREFIX+account,String(characterId));}catch{}}
+  function seedGuardian(){
+    try{
+      const account=accountIdentity();if(!account||sessionStorage.getItem(SELECTED_CHARACTER_KEY))return;
+      const last=localStorage.getItem(LAST_GUARDIAN_PREFIX+account);if(last)sessionStorage.setItem(SELECTED_CHARACTER_KEY,last);
+    }catch{}
+  }
+  document.addEventListener('forge:character-selected',event=>{rememberGuardian(event.detail?.characterId);closeCardList();});
+  window.addEventListener('forge:bungie-session',seedGuardian);
+
+  // Phone and tablet: only the active card shows; tapping it lists the other two.
+  function closeCardList(){const cards=document.getElementById('guardianCharacterCards');if(cards){cards.classList.remove('ax-cards-open');cards.querySelector('.guardian-character-card.is-selected')?.setAttribute('aria-expanded','false');}}
+  document.addEventListener('click',event=>{
+    if(!matchMedia(SHELL_QUERY).matches)return;
+    const card=event.target.closest?.('#guardianCharacterCards .guardian-character-card');if(!card)return;
+    const cards=card.closest('#guardianCharacterCards');
+    if(card.classList.contains('is-selected')){
+      event.preventDefault();event.stopImmediatePropagation();
+      const open=!cards.classList.contains('ax-cards-open');cards.classList.toggle('ax-cards-open',open);card.setAttribute('aria-expanded',String(open));
+    }
+  },true);
+
+  // Refresh: the page's existing refresh (its bound .apx-data-refresh control or a
+  // registered FORGE_REFRESH), else a reload for pages that only load once.
+  function wireRefresh(icon){
+    let running=false;
+    const proxy=()=>document.querySelector('.apx-data-refresh:not([disabled])')||document.querySelector('.apx-data-refresh');
+    // Writes only on a real change, and ignores the icon's own attributes, so the
+    // observer below can never feed itself.
+    const sync=()=>{
+      const control=proxy(),busy=running||control?.getAttribute('aria-busy')==='true';
+      const disabled=busy||Boolean(control&&control.disabled&&typeof window.FORGE_REFRESH!=='function');
+      if(icon.getAttribute('aria-busy')!==String(busy))icon.setAttribute('aria-busy',String(busy));
+      if(icon.disabled!==disabled)icon.disabled=disabled;
+    };
+    // Watches only the page's own refresh control (aria-busy and disabled). While the page has
+    // not rendered it yet, a child-list watch looks for it and stops as soon as it appears.
+    let watched=null;
+    const controlWatch=new MutationObserver(sync);
+    const finder=new MutationObserver(()=>{if(proxy())bind();});
+    function bind(){
+      const control=proxy();
+      if(control===watched)return;
+      controlWatch.disconnect();watched=control;
+      if(control){finder.disconnect();controlWatch.observe(control,{attributes:true,attributeFilter:['aria-busy','disabled']});}
+      else finder.observe(document.body,{childList:true,subtree:true});
+      sync();
+    }
+    bind();
+    icon.addEventListener('click',async()=>{
+      if(icon.disabled)return;
+      bind();
+      const control=proxy();
+      if(control&&!control.disabled){control.click();sync();return;}
+      if(typeof window.FORGE_REFRESH==='function'){
+        running=true;sync();
+        try{await window.FORGE_REFRESH();}catch(error){console.info('[Forge shell] refresh unavailable',error);}
+        finally{running=false;sync();}
+        return;
+      }
+      location.reload();
+    });
+    sync();
+  }
+
+  // Tools drawer from the left: focus is trapped while open and returns to the menu icon.
+  function buildDrawer(menu){
+    const active=activeShellKey();
+    const drawer=document.createElement('div');drawer.className='ax-drawer';drawer.id='axToolDrawer';drawer.hidden=true;
+    const links=[{key:'home',label:'Home',href:'/astrix-app/pages/home/'},...destinations];
+    drawer.innerHTML=`<div class="ax-drawer-backdrop" data-drawer-close></div><nav class="ax-drawer-panel" role="dialog" aria-modal="true" aria-label="ASTRIX PARADOX tools"><div class="ax-drawer-head"><a class="ax-drawer-brand" href="/" aria-label="ASTRIX PARADOX home"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a></div><ul class="ax-drawer-links">${links.map(row=>`<li><a href="${row.href}"${row.key===active?' aria-current="page"':''}>${row.label}</a></li>`).join('')}</ul></nav>`;
+    const panel=drawer.querySelector('.ax-drawer-panel'),close=iconButton('ax-drawer-close','Close tool menu',CLOSE_ICON);
+    drawer.querySelector('.ax-drawer-head').append(close);
+    const focusable=()=>[...panel.querySelectorAll('a[href],button:not([disabled])')];
+    function setOpen(open){
+      if(open===!drawer.hidden)return;
+      menu.setAttribute('aria-expanded',String(open));document.body.classList.toggle('ax-drawer-open',open);
+      if(open){drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add('is-open'));(panel.querySelector('[aria-current="page"]')||focusable()[0])?.focus();}
+      else{drawer.classList.remove('is-open');drawer.hidden=true;menu.focus();}
+    }
+    menu.addEventListener('click',()=>setOpen(drawer.hidden));
+    drawer.addEventListener('click',event=>{if(event.target.closest('[data-drawer-close],.ax-drawer-close')||event.target.closest('.ax-drawer-links a'))setOpen(false);});
+    drawer.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();setOpen(false);return;}
+      if(event.key!=='Tab')return;
+      const items=focusable(),first=items[0],last=items.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    });
+    matchMedia(SHELL_QUERY).addEventListener?.('change',event=>{if(!event.matches)setOpen(false);});
+    document.body.append(drawer);
+  }
+
+  // The actions wrapper takes the Bungie emblem's place in each header layout (it carries
+  // the same class), so desktop positions are unchanged: refresh, emblem, then menu.
+  function mountShell(){
+    const header=shellHeader();if(!header||document.querySelector('.ax-shell-actions'))return;
+    const actions=document.createElement('div');actions.className='bungie-auth-control ax-shell-actions';
+    const refresh=iconButton('ax-refresh-btn','Refresh Guardian data',REFRESH_ICON),menu=iconButton('ax-menu-btn','Open tool menu',MENU_ICON);
+    menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-controls','axToolDrawer');
+    actions.append(refresh,menu);
+    const place=auth=>{if(auth.parentElement===actions)return;auth.before(actions);actions.insertBefore(auth,menu);};
+    const auth=document.getElementById('bungieAuthControl');
+    if(auth)place(auth);
+    else{
+      (header.querySelector(':scope > .topbar-actions')||header).append(actions);
+      const watch=new MutationObserver(()=>{const found=document.getElementById('bungieAuthControl');if(found){watch.disconnect();place(found);}});
+      watch.observe(header,{childList:true,subtree:true});setTimeout(()=>watch.disconnect(),10000);
+    }
+    wireRefresh(refresh);buildDrawer(menu);
+  }
+
+  function init(){seedGuardian();brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);mountShell();watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

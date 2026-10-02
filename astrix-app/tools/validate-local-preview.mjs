@@ -18,7 +18,7 @@ assert.equal(isJourneyPreview({href:'http://localhost/astrix-app/pages/vault/?pr
 assert.equal(createJourneyPreviewPayload({href:'http://localhost/astrix-app/pages/vault/?preview'}),null);
 const entry=await readFile(new URL('../pages/journey/journey-entry.mjs',import.meta.url),'utf8');
 const html=await readFile(new URL('../pages/journey/index.html',import.meta.url),'utf8');
-assert.match(html,/src="\.\/journey-entry\.mjs\?v=20260925-local-preview-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4"/);
+assert.match(html,/src="\.\/journey-entry\.mjs\?v=20260925-local-preview-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4&amp;shell=20261001-mobile-1"/);
 assert.doesNotMatch(html,/<script[^>]+src="[^\"]*(?:journey\.mjs|astrix-hero-cards\.mjs)/,'No import-time live auth before the gate');
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 // Execute the actual entry control flow; intercept dynamic imports without running auth.

@@ -95,7 +95,7 @@ function prepareNextPages(){
   if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:3000});else setTimeout(run,1500);
 }
 
-const CLIENT_URL='../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+const CLIENT_URL='../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 const BUNDLE_CACHE_URL='../../core/prepared-bundle-cache.mjs';
 const JOURNEY_SLOW_MS=30000;
 
