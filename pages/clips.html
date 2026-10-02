@@ -6,7 +6,7 @@
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/css/astrix-brand.css?v=20260929-brand-1">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
   <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1&amp;gloss=20260926-4">
 
@@ -78,8 +78,9 @@
     @media(max-width:768px){.clips-hero{padding:calc(var(--nav-height) + 40px) 20px 40px}.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-label{min-width:48px;font-size:7px;letter-spacing:2px}.filter-btn{font-size:11px;padding:6px 12px}}
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
+  <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
 </head>
-<body class="ax-brand">
+<body class="ax-brand ax-map ax-stroke">
 <nav class="nav">
   <a class="nav-logo" href="/" aria-label="ASTRIX PARADOX home">
     <img src="/img/ax-logo-160.webp" width="49" height="40" alt="">
@@ -147,11 +148,11 @@
 <section class="section" style="background:var(--dark);padding-top:32px;">
   <div style="max-width:1100px;margin:0 auto;">
     <div class="clips-stats">
-      SHOWING <span id="clipCount">61</span> CLIPS
+      SHOWING <span id="clipCount"><!-- CLIPS-COUNT:START -->61<!-- CLIPS-COUNT:END --></span> CLIPS
       &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--gold);font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
     </div>
     <div id="clipsGrid">
-
+    <!-- CLIPS:START -->
       <div class="game-section" data-section="crimson-desert">
         <div class="game-section-header">
           <div class="game-section-line"></div>
@@ -1472,6 +1473,7 @@
       </div>
         </div>
       </div>
+    <!-- CLIPS:END -->
     </div>
   </div>
 </section>
