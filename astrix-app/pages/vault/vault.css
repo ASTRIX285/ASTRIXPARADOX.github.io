@@ -107,3 +107,41 @@
 @keyframes vault-transfer-shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @keyframes vault-transfer-success{0%{opacity:.5}100%{opacity:.18}}
 @media(prefers-reduced-motion:reduce){#vaultTransferWorkspace .vault-transfer-item.is-moving,.vault-transfer-toast-fill,.vault-transfer-toast.is-moving .vault-transfer-toast-fill::after{animation:none!important;transition:none!important}}
+
+/* Phone and tablet Storage (Miguel, 2 Oct 2026). Desktop (1200px and up) is unchanged.
+   Postmaster items are icons only: the PULL button moves into the item card (tap an icon).
+   The EQUIPPED AND CARRIED box and its WEAPONS subheading go; the item groups sit directly
+   in the Guardian column. Item tiles are at least 64px (72px on tablet) with a 4px gap and
+   stretch so every row is filled edge to edge. Each tile is a size container, so the art,
+   footer and labels scale with the tile. */
+@media (max-width:1199px){
+  #vaultTransferWorkspace{--vault-compact-tile:64px}
+  #vaultTransferWorkspace .vault-postmaster-pull{display:none!important}
+  #vaultTransferWorkspace .vault-equipped-carried-section{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+  #vaultTransferWorkspace .vault-equipped-carried-section>header,
+  #vaultTransferWorkspace .vault-equipped-carried-section>h5.vault-transfer-family:first-of-type{display:none!important}
+  #vaultTransferWorkspace .vault-transfer-items{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(var(--vault-compact-tile),1fr))!important;gap:4px!important;
+    width:100%!important;max-width:none!important;overflow:visible!important;padding-bottom:0!important}
+  #vaultTransferWorkspace .vault-transfer-item{container-type:inline-size;flex:none!important;width:auto!important;min-width:0!important;padding:0!important;
+    --apx-icon-gear-art-width:100cqw;--apx-icon-gear-art-height:calc(100cqw * 1.22);--apx-tile-height:calc(100cqw * 1.22);--apx-tile-art-height:100cqw;
+    --apx-tile-footer-top:100cqw;--apx-tile-label-size:min(calc(100cqw / 5),13px);--apx-tile-badge-height:calc(100cqw * .22)}
+  #vaultTransferWorkspace .vault-transfer-item .vault-transfer-art{width:100%!important;height:auto!important}
+  #vaultTransferWorkspace .vault-transfer-row-empty{width:auto!important}
+  .paradox-inventory-inspect-actions{position:sticky;bottom:0;z-index:4;display:grid;gap:8px;padding:12px;border-top:1px solid var(--ax-line);background:var(--ax-panel)}
+  .paradox-inventory-inspect-actions>button{min-height:44px}
+  :is(.paradox-inventory-inspect-reason,.vault-postmaster-sheet-reason){margin:0;color:var(--ax-muted);font:500 13px/1.4 "Barlow","Segoe UI",sans-serif}
+  /* Action sheet for Postmaster items without an item card (engrams, materials, consumables). */
+  .vault-postmaster-sheet-layer{position:fixed;inset:0;z-index:1800;display:grid;align-items:end}
+  .vault-postmaster-sheet-backdrop{position:absolute;inset:0;background:var(--ax-backdrop)}
+  .vault-postmaster-sheet{position:relative;display:grid;gap:12px;margin:0 auto;width:min(480px,100%);box-sizing:border-box;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+    border:1px solid var(--ax-line-strong);border-bottom:0;background:var(--ax-panel);clip-path:var(--ax-clip)}
+  .vault-postmaster-sheet>header{display:grid;grid-template-columns:56px minmax(0,1fr) 40px;align-items:center;gap:12px}
+  .vault-postmaster-sheet>header img,.vault-postmaster-sheet>header>.vault-transfer-icon-unavailable{width:56px;height:56px;object-fit:contain;display:grid;place-items:center;border:1px solid var(--ax-line)}
+  .vault-postmaster-sheet>header strong{display:block;color:var(--ax-ink);font:600 16px/1.25 var(--ax-font-head);overflow-wrap:anywhere}
+  .vault-postmaster-sheet>header span{display:block;margin-top:4px;color:var(--ax-steel);font:600 11px/1.2 var(--ax-font-head);letter-spacing:.12em}
+  .vault-postmaster-sheet-close{width:40px;height:40px;padding:0}
+  .vault-postmaster-sheet-pull{min-height:44px;width:100%}
+}
+@media (min-width:600px) and (max-width:1199px){
+  #vaultTransferWorkspace{--vault-compact-tile:72px}
+}

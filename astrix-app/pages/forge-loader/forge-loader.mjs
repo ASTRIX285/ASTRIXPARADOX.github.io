@@ -10,7 +10,7 @@ import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-l
 import {forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
 import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
 import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
 import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-2';
 
