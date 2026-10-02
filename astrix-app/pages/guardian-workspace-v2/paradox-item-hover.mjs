@@ -282,7 +282,7 @@ function openInspect(anchor){
   inspectAnchor=anchor;
   // options.actions is a function so the list reflects the page state when the card opens.
   inspectActions=(typeof binding.options?.actions==='function'?binding.options.actions():[])||[];
-  const actions=inspectActions.length?`<div class="paradox-inventory-inspect-actions">${inspectActions.map((action,index)=>`<button type="button" data-paradox-inspect-action="${index}"${action.disabled?' disabled':''}>${esc(action.label)}</button>`).join('')}</div>`:'';
+  const actions=inspectActions.length?`<div class="paradox-inventory-inspect-actions">${inspectActions.map((action,index)=>`<button type="button" data-paradox-inspect-action="${index}"${action.disabled?` disabled${action.reason?` aria-describedby="paradoxInspectActionReason${index}"`:''}`:''}>${esc(action.label)}</button>${action.reason?`<p class="paradox-inventory-inspect-reason" id="paradoxInspectActionReason${index}">${esc(action.reason)}</p>`:''}`).join('')}</div>`:'';
   portal.host.innerHTML=`<button class="paradox-inventory-inspect-close" type="button" data-close-paradox-inspect aria-label="Close item details">✕</button>${cardMarkup(binding.item,binding.kind,{...binding.options,presentation:'inspect'})}${actions}`;
   portal.backdrop.hidden=false;
   portal.host.hidden=false;

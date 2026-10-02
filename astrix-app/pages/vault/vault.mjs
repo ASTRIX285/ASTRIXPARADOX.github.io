@@ -140,12 +140,72 @@ function vaultOnlyMarkup(){
   return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop items here to move them to the Vault.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
 }
 
-// Phone and tablet show Postmaster items as icons only; the pull lives in the item card.
+// Phone and tablet show Postmaster items as icons only. Tapping one opens its item card
+// (weapons and armour) or a small action sheet (everything else) with the pull. When Bungie
+// cannot pull an item, the button stays visible, disabled, with the reason.
 const COMPACT_STORAGE=globalThis.matchMedia?.('(max-width: 1199px)');
+function postmasterPullState(item){
+  if(!session?.authenticated)return {ready:false,reason:'Connect Bungie to pull items from the Postmaster.'};
+  if(liveActionCapabilities(session).pullFromPostmaster!==true)return {ready:false,reason:'Bungie has not allowed Postmaster pulls for this session. Reconnect Bungie to try again.'};
+  if(!/^\d+$/.test(String(item?.itemInstanceId||'')))return {ready:false,reason:'Bungie lists this stack without an exact item ID, so it cannot be pulled from here yet. Collect it in game.'};
+  return {ready:true,reason:''};
+}
 function postmasterActions(item){
   if(item?.source?.kind!=='postmaster'||!COMPACT_STORAGE?.matches)return [];
-  const characterId=text(item.source.characterId),ready=liveActionCapabilities(session).pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||''));
-  return [{label:`Pull to ${characterLabel(characterId)}`,disabled:!ready,run:()=>stagePostmasterCollection(characterId,itemKey(item))}];
+  const characterId=text(item.source.characterId),{ready,reason}=postmasterPullState(item);
+  return [{label:`Pull to ${characterLabel(characterId)}`,disabled:!ready,reason,run:()=>stagePostmasterCollection(characterId,itemKey(item))}];
+}
+
+let postmasterSheet=null;
+function closePostmasterSheet({restoreFocus=true}={}){
+  if(!postmasterSheet)return;
+  const {node,anchor}=postmasterSheet;postmasterSheet=null;node.remove();
+  if(restoreFocus&&anchor?.isConnected)anchor.focus({preventScroll:true});
+}
+function openPostmasterSheet(item,anchor){
+  closePostmasterSheet({restoreFocus:false});
+  const [action]=postmasterActions(item);
+  if(!action)return;
+  const count=Number(item?.quantity||1),node=document.createElement('div');
+  node.className='vault-postmaster-sheet-layer';
+  node.innerHTML=`<div class="vault-postmaster-sheet-backdrop" data-postmaster-sheet-close></div>
+    <section class="vault-postmaster-sheet" role="dialog" aria-modal="true" aria-labelledby="vaultPostmasterSheetName">
+      <header>${item?.icon?`<img src="${esc(item.icon)}" alt="" decoding="async">`:'<span class="vault-transfer-icon-unavailable" aria-hidden="true">◇</span>'}
+        <div><strong id="vaultPostmasterSheetName">${esc(item?.name||'Postmaster item')}</strong><span>${esc(characterLabel(item?.source?.characterId).toUpperCase())} POSTMASTER${count>1?` · STACK OF ${count}`:''}</span></div>
+        <button type="button" class="vault-postmaster-sheet-close" data-postmaster-sheet-close aria-label="Close">✕</button></header>
+      <button type="button" class="vault-postmaster-sheet-pull" data-postmaster-sheet-pull${action.disabled?' disabled aria-describedby="vaultPostmasterSheetReason"':''}>${esc(action.label)}</button>
+      ${action.reason?`<p class="vault-postmaster-sheet-reason" id="vaultPostmasterSheetReason">${esc(action.reason)}</p>`:''}
+    </section>`;
+  node.addEventListener('click',event=>{
+    if(event.target.closest('[data-postmaster-sheet-close]')){closePostmasterSheet();return;}
+    const pull=event.target.closest('[data-postmaster-sheet-pull]');
+    if(pull&&!pull.disabled){closePostmasterSheet({restoreFocus:false});action.run();}
+  });
+  node.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){event.preventDefault();closePostmasterSheet();return;}
+    if(event.key!=='Tab')return;
+    const focusable=[...node.querySelectorAll('button:not([disabled])')];
+    if(!focusable.length)return;
+    const first=focusable[0],last=focusable.at(-1);
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  });
+  document.body.append(node);
+  postmasterSheet={node,anchor};
+  (node.querySelector('[data-postmaster-sheet-pull]:not([disabled])')||node.querySelector('.vault-postmaster-sheet-close')).focus({preventScroll:true});
+}
+// Postmaster items without an item card (engrams, materials, consumables) open the sheet.
+function bindPostmasterSheet(board){
+  const open=event=>{
+    if(!COMPACT_STORAGE?.matches||event.target.closest?.('button'))return false;
+    const tile=event.target.closest?.('.vault-postmaster-section [data-inspect-item]');
+    if(!tile||tile.hasAttribute('data-paradox-item-inspect'))return false;
+    const item=workspaceItem(tile.dataset.inspectItem);
+    if(!item)return false;
+    openPostmasterSheet(item,tile);return true;
+  };
+  board?.addEventListener('click',open);
+  board?.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&open(event))event.preventDefault();});
 }
 
 function bindVaultWorkspaceHovers(root){
@@ -622,6 +682,7 @@ async function settleVisibleImages(){
 async function init(){
   installEvents();
   installTransferEvents();
+  bindPostmasterSheet(byId('vaultTransferWorkspace'));
 
   try{
     session=await getBungieSession({force:true});
