@@ -1,0 +1,6 @@
+.gitignore
+astrix-app/tools/perf/perf-paths.mjs
+astrix-app/tools/perf/perf-signin.mjs
+astrix-app/tools/perf/perf-measure.mjs
+astrix-app/tools/perf/perf-report.mjs
+astrix-app/tools/perf/reports/2026-10-02-live-baseline.md
