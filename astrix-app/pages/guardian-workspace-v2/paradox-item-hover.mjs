@@ -15,6 +15,7 @@ let installed=false;
 let inspectInstalled=false;
 let hideTimer=null;
 let inspectTimer=null;
+let inspectActions=[];
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const finite=value=>Number.isFinite(Number(value))?Number(value):null;
@@ -234,6 +235,7 @@ function closeInspect({restoreFocus=true}={}){
   const backdrop=typeof document==='undefined'?null:document.getElementById('paradoxItemInspectBackdrop');
   const anchor=inspectAnchor;
   inspectAnchor=null;
+  inspectActions=[];
   document?.body?.classList.remove('paradox-inventory-inspect-open');
   if(host){host.hidden=true;host.setAttribute('aria-hidden','true');host.replaceChildren();}
   if(backdrop)backdrop.hidden=true;
@@ -260,7 +262,13 @@ function ensureInspectHost(){
     host.setAttribute('aria-hidden','true');
     host.setAttribute('aria-modal','true');
     host.setAttribute('role','dialog');
-    host.addEventListener('click',event=>{if(event.target.closest?.('[data-close-paradox-inspect]'))closeInspect();});
+    host.addEventListener('click',event=>{
+      if(event.target.closest?.('[data-close-paradox-inspect]')){closeInspect();return;}
+      // Optional item actions (Storage: pull a Postmaster item on phone and tablet).
+      const button=event.target.closest?.('[data-paradox-inspect-action]');
+      const action=button&&!button.disabled?inspectActions[Number(button.dataset.paradoxInspectAction)]:null;
+      if(action){closeInspect({restoreFocus:false});action.run();}
+    });
     document.documentElement.append(host);
   }
   return {host,backdrop};
@@ -272,7 +280,10 @@ function openInspect(anchor){
   if(!binding||!portal)return;
   hide();
   inspectAnchor=anchor;
-  portal.host.innerHTML=`<button class="paradox-inventory-inspect-close" type="button" data-close-paradox-inspect aria-label="Close item details">✕</button>${cardMarkup(binding.item,binding.kind,{...binding.options,presentation:'inspect'})}`;
+  // options.actions is a function so the list reflects the page state when the card opens.
+  inspectActions=(typeof binding.options?.actions==='function'?binding.options.actions():[])||[];
+  const actions=inspectActions.length?`<div class="paradox-inventory-inspect-actions">${inspectActions.map((action,index)=>`<button type="button" data-paradox-inspect-action="${index}"${action.disabled?' disabled':''}>${esc(action.label)}</button>`).join('')}</div>`:'';
+  portal.host.innerHTML=`<button class="paradox-inventory-inspect-close" type="button" data-close-paradox-inspect aria-label="Close item details">✕</button>${cardMarkup(binding.item,binding.kind,{...binding.options,presentation:'inspect'})}${actions}`;
   portal.backdrop.hidden=false;
   portal.host.hidden=false;
   portal.host.setAttribute('aria-hidden','false');

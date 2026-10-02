@@ -8,7 +8,7 @@ import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-sele
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1';
+import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
 import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1';
 
@@ -140,8 +140,16 @@ function vaultOnlyMarkup(){
   return `<section class="vault-only-section" data-drop-kind="vault"><header><div><span>SHARED ACCOUNT STORAGE</span><h3>VAULT ONLY</h3></div><strong>${items.length} SORTED ITEM${items.length===1?'':'S'}</strong></header><p>Drop items here to move them to the Vault.</p>${equipmentGroupsMarkup(items,{includeEmpty:true})}</section>`;
 }
 
+// Phone and tablet show Postmaster items as icons only; the pull lives in the item card.
+const COMPACT_STORAGE=globalThis.matchMedia?.('(max-width: 1199px)');
+function postmasterActions(item){
+  if(item?.source?.kind!=='postmaster'||!COMPACT_STORAGE?.matches)return [];
+  const characterId=text(item.source.characterId),ready=liveActionCapabilities(session).pullFromPostmaster===true&&/^\d+$/.test(String(item?.itemInstanceId||''));
+  return [{label:`Pull to ${characterLabel(characterId)}`,disabled:!ready,run:()=>stagePostmasterCollection(characterId,itemKey(item))}];
+}
+
 function bindVaultWorkspaceHovers(root){
-  bindInventoryWorkspaceHovers(root,{resolveItem:workspaceItem,bindInspect:(target,item,kind,options)=>bindParadoxItemInspect(target,item,kind,options)});
+  bindInventoryWorkspaceHovers(root,{resolveItem:workspaceItem,bindInspect:(target,item,kind,options)=>bindParadoxItemInspect(target,item,kind,{...options,actions:()=>postmasterActions(item)})});
 }
 
 function renderTransferWorkspace(){
