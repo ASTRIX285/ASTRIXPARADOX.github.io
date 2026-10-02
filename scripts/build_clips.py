@@ -6,6 +6,7 @@ Rewrites only the clips block in pages/clips.html (between its markers)
 """
 
 import os, sys, json, re, urllib.request, urllib.parse
+from html import escape
 from datetime import datetime
 
 # ── CONFIG ──────────────────────────────────────────────────
@@ -206,6 +207,8 @@ CARDS_START = '<!-- CLIPS:START -->'
 CARDS_END   = '<!-- CLIPS:END -->'
 COUNT_START = '<!-- CLIPS-COUNT:START -->'
 COUNT_END   = '<!-- CLIPS-COUNT:END -->'
+GAMES_START = '<!-- CLIPS-GAMES:START -->'
+GAMES_END   = '<!-- CLIPS-GAMES:END -->'
 PAGE = os.path.join(os.path.dirname(__file__), '..', 'pages', 'clips.html')
 
 def fail(message):
@@ -252,27 +255,45 @@ def existing_sections(text):
         sections.append({'game': game, 'label': labels.get(game, label_html), 'cards': cards})
     return sections
 
-def write_blocks(page, sections):
-    with open(page, encoding='utf-8', newline='') as f:
-        text = f.read()
+def build_game_chips(text):
+    """One Game chip per playlist in PLAYLISTS, plus All, using the chip classes the
+    page's own All chip carries, so the chip look stays in clips.html."""
+    _, inside, _ = block(text, GAMES_START, GAMES_END)
+    match = re.search(r'<button class="([^"]*)" data-game="all"', inside)
+    if not match:
+        fail(f'The All chip is missing between {GAMES_START} and {GAMES_END}. Nothing was written.')
+    classes = ' '.join(name for name in match.group(1).split() if name != 'active')
+    chips = [f'<button class="{classes} active" data-game="all" onclick="filterClips(this,\'game\')">All</button>']
+    for pl in PLAYLISTS:
+        chips.append(f'<button class="{classes}" data-game="{pl["game"]}" onclick="filterClips(this,\'game\')">{escape(pl["label"], quote=False)}</button>')
+    return ''.join('\n        ' + chip for chip in chips) + '\n        '
+
+def write_blocks(page, text, sections):
     total = sum(len(sec['cards']) for sec in sections)
-    # Check both marker pairs before changing anything.
-    block(text, CARDS_START, CARDS_END)
-    block(text, COUNT_START, COUNT_END)
+    # Check every marker pair before changing anything.
+    for start, end in ((CARDS_START, CARDS_END), (COUNT_START, COUNT_END), (GAMES_START, GAMES_END)):
+        block(text, start, end)
+    games = build_game_chips(text)
     text = replace_block(text, CARDS_START, CARDS_END, build_sections_html(sections) + '\n    ')
     text = replace_block(text, COUNT_START, COUNT_END, str(total))
+    text = replace_block(text, GAMES_START, GAMES_END, games)
     with open(page, 'w', encoding='utf-8', newline='') as f:
         f.write(text)
     return total
 
-def fetch_sections():
+def fetch_sections(existing):
     print('Fetching playlists...')
+    kept = {sec['game']: sec['cards'] for sec in existing}
     sections = []
     delays = ['', ' reveal-delay-1', ' reveal-delay-2']
     for pl in PLAYLISTS:
         print(f'  > {pl["label"]}')
         videos = fetch_playlist(pl['id'])
         if not videos:
+            # An empty playlist on this run keeps the cards already on the page.
+            if kept.get(pl['game']):
+                print(f'    empty this run, keeping its {len(kept[pl["game"]])} clips on the page')
+                sections.append({'game': pl['game'], 'label': pl['label'], 'cards': kept[pl['game']]})
             continue
         video_ids = [v['id'] for v in videos]
         durations = fetch_durations(video_ids)
@@ -287,17 +308,19 @@ def main():
     page = PAGE
     if '--page' in sys.argv:
         page = sys.argv[sys.argv.index('--page') + 1]
+    with open(page, encoding='utf-8', newline='') as f:
+        text = f.read()
+    existing = existing_sections(text)
     if '--reuse-cards' in sys.argv:
-        # Rebuild the cards block from the clips already on the page.
-        with open(page, encoding='utf-8', newline='') as f:
-            sections = existing_sections(f.read())
+        # Rebuild the blocks from the clips already on the page.
+        sections = existing
     else:
         if not API_KEY:
             fail('YOUTUBE_API_KEY is not set. Nothing was written.')
-        sections = fetch_sections()
+        sections = fetch_sections(existing)
     if not any(sec['cards'] for sec in sections):
         fail('No clips found. Nothing was written.')
-    total = write_blocks(page, sections)
+    total = write_blocks(page, text, sections)
     print(f'Done: {total} clips written to the clips block')
 
 if __name__ == '__main__':

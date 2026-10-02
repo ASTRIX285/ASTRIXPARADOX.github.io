@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2&amp;chips=20261002-1">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,16 +29,7 @@
       content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at 100% 50%, rgba(139,0,0,0.12) 0%, transparent 60%);
     }
-    .news-filters { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
-    .news-filter {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
-      padding: 8px 20px; border: 1px solid var(--dark-4);
-      color: var(--grey); cursor: pointer; text-transform: uppercase;
-      transition: all 0.2s; background: transparent;
-    }
-    .news-filter.active, .news-filter:hover {
-      border-color: var(--crimson); color: var(--white); background: rgba(139,0,0,0.1);
-    }
+    .news-filters { margin-bottom: 40px; }
     .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2px; }
     .news-card {
       background: var(--dark-2); border: 1px solid rgba(139,0,0,0.15);
@@ -115,12 +106,12 @@
 
 <section class="section">
   <div style="max-width:1100px;margin:0 auto;">
-    <div class="news-filters">
-      <button class="news-filter active" onclick="filterNews('all', this)">All</button>
-      <button class="news-filter" onclick="filterNews('ign', this)">IGN</button>
-      <button class="news-filter" onclick="filterNews('gamespot', this)">Gamespot</button>
-      <button class="news-filter" onclick="filterNews('pcgamer', this)">PC Gamer</button>
-      <button class="news-filter" onclick="filterNews('polygon', this)">Polygon</button>
+    <div class="news-filters ax-chip-row">
+      <button class="ax-chip news-filter active" onclick="filterNews('all', this)">All</button>
+      <button class="ax-chip news-filter" onclick="filterNews('ign', this)">IGN</button>
+      <button class="ax-chip news-filter" onclick="filterNews('gamespot', this)">Gamespot</button>
+      <button class="ax-chip news-filter" onclick="filterNews('pcgamer', this)">PC Gamer</button>
+      <button class="ax-chip news-filter" onclick="filterNews('polygon', this)">Polygon</button>
     </div>
     <div class="news-grid" id="newsGrid">
       <div class="news-card reveal" data-source="ign">
