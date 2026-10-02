@@ -129,7 +129,8 @@ function updateCharacterInventory(detail={}){
     characterInventoryState.activeCharacterId=String(detail.characterId||'');
     characterInventoryState.detail=detail;
     renderCharacterInventory();
-    characterInventoryStatus('Showing equipped, carried, and Postmaster items for the active Guardian. Double click a Postmaster item to review a direct live equip.','good');
+    // Phone and tablet: tap, not double click.
+    characterInventoryStatus(`Showing equipped, carried, and Postmaster items for the active Guardian. ${globalThis.matchMedia?.('(max-width: 1199px)')?.matches?'Tap':'Double click'} a Postmaster item to review a direct live equip.`,'good');
   }catch(error){
     characterInventoryState.payload=null;
     renderCharacterInventory();

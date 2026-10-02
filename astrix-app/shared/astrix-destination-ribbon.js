@@ -11,7 +11,7 @@
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1&inv=20261002-1',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
@@ -351,7 +351,51 @@
     wireRefresh(refresh);buildDrawer(menu);
   }
 
-  function init(){seedGuardian();brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);mountShell();watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
+  // Phone and tablet inventory bar (Character and Storage): WEAPONS, ARMOUR, GENERAL, INVENTORY.
+  // A tab is offered only when the page holds Bungie data for it. The choice is kept per page for the
+  // session. Visibility of each area is CSS keyed on body[data-inventory-tab] (astrix-tool-shell.css).
+  const INVENTORY_TABS=Object.freeze([
+    {key:'weapons',label:'Weapons',groups:['primary','special','heavy']},
+    {key:'armour',label:'Armour',groups:['helmet','gauntlets','chest','legs','class-item']},
+    {key:'general',label:'General',groups:['ghost','ship','sparrow'],areas:['.guardian-left-rail','.guardian-loadouts-container']},
+    {key:'inventory',label:'Inventory',groups:[],areas:['.vault-postmaster-section']}
+  ]);
+  function mountInventoryTabs(){
+    const roots=[...document.querySelectorAll('#characterInventoryWorkspace,#vaultTransferWorkspace')];
+    if(!roots.length||document.querySelector('.ax-inv-tabs'))return;
+    const media=window.matchMedia?.(SHELL_QUERY),storageKey=`astrix:inventory-tab:v1:${activeShellKey()||location.pathname}`;
+    const bar=document.createElement('nav');bar.className='ax-inv-tabs';bar.setAttribute('aria-label','Inventory areas');bar.setAttribute('role','tablist');
+    // chosen: the tab the player picked (this session); current: the tab shown now.
+    let chosen='',current='';try{chosen=sessionStorage.getItem(storageKey)||'';}catch{}
+    const hasItems=selector=>roots.some(root=>root.querySelector(`${selector} .vault-transfer-item`));
+    const available=()=>INVENTORY_TABS.filter(tab=>
+      tab.groups.some(group=>roots.some(root=>[...root.querySelectorAll(`.vault-transfer-group[data-equipment-group="${group}"]`)].some(node=>!node.closest('.vault-postmaster-section')&&node.querySelector('.vault-transfer-item'))))||
+      (tab.areas||[]).some(selector=>selector==='.vault-postmaster-section'?hasItems(selector):Boolean(document.querySelector(`${selector}:not([hidden])`))));
+    let signature='';
+    const apply=()=>{
+      const compact=Boolean(media?.matches),tabs=compact?available():[];
+      document.body.classList.toggle('ax-inv-compact',compact&&tabs.length>0);
+      if(!tabs.length){delete document.body.dataset.inventoryTab;bar.replaceChildren();signature='';return;}
+      current=tabs.some(tab=>tab.key===chosen)?chosen:tabs[0].key;
+      if(document.body.dataset.inventoryTab!==current)document.body.dataset.inventoryTab=current;
+      const next=tabs.map(tab=>tab.key).join(',')+'|'+current;
+      if(next===signature)return;signature=next;
+      bar.innerHTML=tabs.map(tab=>`<button type="button" class="ax-inv-tab" role="tab" data-inventory-tab="${tab.key}" aria-selected="${tab.key===current}">${tab.label}</button>`).join('');
+    };
+    bar.addEventListener('click',event=>{
+      const button=event.target.closest('[data-inventory-tab]');if(!button)return;
+      chosen=button.dataset.inventoryTab;try{sessionStorage.setItem(storageKey,chosen);}catch{}
+      apply();window.scrollTo({top:0});
+    });
+    document.body.append(bar);
+    // Pages re-render their inventory after Bungie data arrives; recheck which areas have data.
+    let queued=false;const recheck=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply();});};
+    const watched=[...roots,...document.querySelectorAll('.guardian-left-rail,.guardian-loadouts-container')];
+    const observer=new MutationObserver(recheck);watched.forEach(node=>observer.observe(node,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']}));
+    media?.addEventListener?.('change',apply);
+    apply();
+  }
+  function init(){seedGuardian();brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);mountShell();mountInventoryTabs();watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

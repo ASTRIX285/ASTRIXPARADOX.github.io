@@ -113,13 +113,15 @@ try{
       return route.abort();
     });
     await page.goto(origin+'/astrix-app/pages/vault/',{waitUntil:'domcontentloaded'});
-    await page.waitForSelector('#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item]',{timeout:20000}).catch(async error=>{
+    await page.waitForSelector('#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item]',{timeout:20000,state:'attached'}).catch(async error=>{
       console.log('STATUS',await page.evaluate(()=>[document.getElementById('vaultConnectionState')?.textContent,document.querySelector('[role="status"]')?.textContent,document.getElementById('vaultTransferWorkspace')?.innerHTML.slice(0,300)].join(' | ')));
       throw error;
     });
     await page.waitForTimeout(300);
     return {page,context,errors,pulls};
   }
+  // Phone and tablet: the Postmaster lives under the INVENTORY tab of the bottom bar.
+  const inventoryTab=async page=>{const tab=page.locator('.ax-inv-tab[data-inventory-tab="inventory"]');if(await tab.count()&&await tab.isVisible())await tab.click();};
   const tileByName=(page,name)=>page.locator(`#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item][title="${name}"]`).first();
   const materialTiles=page=>page.locator(`#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item][title="${POSTMASTER.material.name}"]`);
   const waitFor=async(check,label,ms=20000)=>{const end=Date.now()+ms;while(Date.now()<end){if(await check())return;await new Promise(done=>setTimeout(done,200));}assert.fail(label);};
@@ -154,6 +156,7 @@ try{
     }
 
     // Weapon: the item card carries the pull.
+    await inventoryTab(page);
     await tileByName(page,POSTMASTER.weapon.name).click();
     const cardPull=page.locator('#paradoxItemInspect [data-paradox-inspect-action]');
     await cardPull.waitFor({state:'visible',timeout:3000});
@@ -224,6 +227,7 @@ try{
   {
     // A session without the Postmaster permission: the pull is disabled with the reason.
     const {page,context,errors,pulls}=await openStorage(390,{pullAllowed:false});
+    await inventoryTab(page);
     await tileByName(page,POSTMASTER.weapon.name).click();
     const cardPull=page.locator('#paradoxItemInspect [data-paradox-inspect-action]');
     await cardPull.waitFor({state:'visible',timeout:3000});
