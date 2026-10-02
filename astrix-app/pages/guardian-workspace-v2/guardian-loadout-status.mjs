@@ -1,16 +1,19 @@
 // Presentation model: exact instance IDs from Bungie's profile, never the viewed build.
-export const isSavedLoadout=loadout=>Boolean(loadout&&(loadout.items?.length||loadout.subclassOverrides?.length));
+// Bungie lists an empty in-game slot with placeholder entries whose instance ID is 0; only real
+// instance IDs make a slot saved, so an empty slot is never reported as missing items.
+const realInstance=item=>/^[1-9]\d*$/.test(String(item?.itemInstanceId||''));
+export const isSavedLoadout=loadout=>Boolean(loadout&&((loadout.items||[]).some(realInstance)||(loadout.subclassOverrides||[]).some(realInstance)));
 const id=item=>String(item?.itemInstanceId||'');
 export function profileItems(profile={}){
   return [...(profile.profileInventory?.data?.items||[]),...Object.values(profile.characterInventories?.data||{}).flatMap(row=>row.items||[]),...Object.values(profile.characterEquipment?.data||{}).flatMap(row=>row.items||[])];
 }
 export function loadoutStatus(loadout,profile={},characterId=''){
-  if(!isSavedLoadout(loadout))return {state:'empty',label:'Empty',missing:0};
+  if(!isSavedLoadout(loadout))return {state:'empty',label:'Empty in game',missing:0};
   const equipment=profile.characterEquipment?.data?.[characterId]?.items||[];
   const equipped=new Set(equipment.map(id));
   const available=new Set([...equipment,...(profile.characterInventories?.data?.[characterId]?.items||[]).filter(item=>Number(item.location)!==4&&Number(item.bucketHash)!==215593132),...(profile.profileInventory?.data?.items||[]).filter(item=>Number(item.location)!==4&&Number(item.bucketHash)!==215593132)].map(id));
   available.delete('');available.delete('0');equipped.delete('');equipped.delete('0');
-  const items=loadout.items||[],missing=items.filter(item=>!available.has(id(item))).length;
+  const items=(loadout.items||[]).filter(realInstance),missing=items.filter(item=>!available.has(id(item))).length;
   if(missing)return {state:'missing',label:`${missing} ${missing===1?'item':'items'} missing`,missing};
   if(!items.length)return {state:'missing',label:'Items unavailable',missing:0};
   const active=items.every(item=>equipped.has(id(item)));

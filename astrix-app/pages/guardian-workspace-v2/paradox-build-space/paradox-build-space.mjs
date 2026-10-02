@@ -12,8 +12,8 @@ import {armBuildTest,collectBuildTestResults,confirmCandidateActivity,captureMat
 import {analyzeLiveGuardian,renderLiveAnalysis} from '../guardian-paradox-live-adapter.mjs?v=20260905-background-forge-1&plain=20260925-2';
 import {createLiveTransferPlan} from '../guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
 import {liveActionCapabilities,stageLiveTransferPreflight,confirmLiveTransferPlan,executeLiveTransferPlan} from '../guardian-live-actions.mjs?v=20260906-live-equip-1&roll=20260909-apply-1&review=20260911-confirmation-1&copy=20260922-readable-block-1&plain=20260925-2';
-import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
-import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2&ui=20260917-no-diagnostics-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
+import {armourCard} from '../guardian-gear-layout.mjs?v=20260908-set-icons-1&weapons=20260909-presentation-1&roll=20260909-apply-1&fix=20260909-apply-refresh-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&bf=20261002-1';
+import {renderWeapons,weaponPerkMatrixMarkup,weaponTraitHierarchyMarkup} from '../guardian-semantic-ui.mjs?v=20260913-breaker-icon-2&ui=20260917-no-diagnostics-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&bf=20261002-1';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=20260905-worker-preflight-1';
 import {renderEquippedSubclass,renderSubclassPicker,renderSuperFormation} from '../guardian-super-formation.mjs?v=20260916-equipped-source-1';
 import {mergeSubclassCatalog,mergeSuperOptions} from '../guardian-super-catalog.mjs?v=20260916-equipped-source-1';
@@ -26,13 +26,13 @@ import {applyVaultArmourSelection,clearVaultArmourSelection,readVaultArmourSelec
 import {applyForgeArtifactRecommendation,artifactPerkCatalogue} from './paradox-artifact-selection.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-2';
 import {BUILD_ELEMENTS,directEntryMode,directArmourChoices,withDirectGenerationContext,createDirectGenerationBuild,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=20260921-direct-1&plain=20260925-2';
 import {composeForgeRecommendation,filterExoticCompatibleSubclasses,forgeWeaponElementSuggestion,hasVerifiedSubclassSockets,rankExoticSuperSynergy,synchroniseSubclassProjection} from './paradox-forge-intelligence.mjs?v=20260909-super-evidence-1&plain=20260925-2&synergy=20260926-1&anchor=20260927-1';
-import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2&anchor=20260927-1';
+import {createLiveTransferPreflight,deriveLoadoutIntent,isExoticItem,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2&anchor=20260927-1';
 import {eligibleEquipment,filterManualEquipmentSources,recordManualEdit,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice} from './paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
 import {saveParadoxLoadout} from './paradox-saved-loadouts.mjs?v=20260919-account-sync-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-4';
 import {createVaultCatalogue,prepareArmourSelection} from '../../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&champion=20260924-champion-export-1';
 import {reportPreparedPageStage} from '../../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import '../guardian-character-cards.mjs?v=20260824-bungie-icons-3&loader=2';
-import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&grid=20261001-1';
+import '../guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&grid=20261001-1&bf=20261002-1';
 import {normaliseLiveProfile} from '../guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&entry=20260916-equipped-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {revealRecommendedBuild,weaponCombinationsMarkup} from './recommended-build-reveal.mjs?v=20260916-weapon-combinations-1&plain=20260925-2';
 import '../guardian-portal-progress.mjs?v=20260913-character-safe-2&loader=3&transport=20260911-compact-plugs-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&shell=20261001-mobile-1';
@@ -192,7 +192,16 @@ function renderBuildEquipment(build){
   byId('equipmentGrid').innerHTML=renderEquipmentIcons(build.equipment||[]);
   disposeEquipmentIcons=bindLoadoutIconDetails(host);
 }
-function renderBuildGear(build={}){if(byId('dimBuildComparison'))mountDimComparison(build,byId('dimBuildComparison'));renderBuildEquipment(build);byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);sizeBuildWeaponCards(byId('weaponGrid'));const weaponState=byId('weaponRecommendationState');weaponState.hidden=!(build.weapons||[]).some(Boolean);weaponState.textContent=weaponState.hidden?'':build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'EQUIPPED LOADOUT';}
+// The Exotic armour perk icon sits on its tile as the Exotic badge (bottom-left corner of the art),
+// not in a separate strip beside the tile. Its perk tooltip and Bungie icon are unchanged.
+function placeExoticTraitBadges(grid){
+  grid?.querySelectorAll('.gear-slot .armour-exotic-trait-strip').forEach(strip=>{
+    const art=strip.closest('.gear-slot')?.querySelector('.arm'),badge=strip.querySelector('.armour-set-threshold');
+    if(!art||!badge)return;
+    badge.classList.add('armour-exotic-badge');art.append(badge);strip.remove();
+  });
+}
+function renderBuildGear(build={}){if(byId('dimBuildComparison'))mountDimComparison(build,byId('dimBuildComparison'));renderBuildEquipment(build);byId('weaponGrid').innerHTML=Array.from({length:3},(_,i)=>gearCard(build.weapons?.[i],`Weapon slot ${i+1}`)).join('');byId('armourGrid').innerHTML=Array.from({length:5},(_,i)=>gearCard(build.armour?.[i],`Armour slot ${i+1}`)).join('');placeExoticTraitBadges(byId('armourGrid'));byId('armourGrid').querySelectorAll('.gear-slot .arm').forEach((node,index)=>bindParadoxItemInspect(node,build.armour?.[index],'armour'));renderArmourRecommendationState(build);renderWeapons(build.weapons||[]);sizeBuildWeaponCards(byId('weaponGrid'));const weaponState=byId('weaponRecommendationState');weaponState.hidden=!(build.weapons||[]).some(Boolean);weaponState.textContent=weaponState.hidden?'':build.recommendationGeneratedAt?'PARADOX SELECTION':build.editMode==='manual'?'MANUAL WORKING BUILD':'EQUIPPED LOADOUT';}
 function currentBuild(){const state=readState();return state?.workingBuild||state?.originalBuild||null;}
 
 const manualItemId=item=>String(item?.itemInstanceId||item?.instanceId||'');
@@ -712,8 +721,18 @@ function renderRecommendationControls(build={}){
   if(hasVerifiedResult)scheduleForgePreparation(build);
 }
 
+// With no staged Forge Loader build, the Exotic and Super panel evaluates the equipped Exotic
+// armour's own perk from Bungie data. This copy is for display only and is never stored, so a
+// staged Forge Loader build still overrides it.
+function equippedExoticAnchor(build={}){
+  const armour=(build.armour||[]).find(isExoticItem),perk=armour?.armourSemantics?.exoticPerk||armour?.exoticPerk||armour?.intrinsicTrait||null;
+  // An unresolved perk keeps the Exotic's own name; the panel then says its effect text is unavailable.
+  return armour?{name:armour.name,perk:perk||{name:armour.name}}:null;
+}
 function renderSuperSynergyEvidence(build={},candidate=null){
   const host=byId('buildSuperSynergy');if(!host)return;
+  const equippedAnchor=build.forgeLoaderDecision?null:equippedExoticAnchor(build);
+  if(equippedAnchor)build={...build,forgeLoaderDecision:{source:'equipped-exotic-display',buildAnchor:equippedAnchor}};
   const report=rankExoticSuperSynergy(build,candidate?[candidate]:[]),byHash=new Map(report.entries.map(row=>[String(row.superHash),row]));
   byId('buildSuperFeatureCluster')?.querySelectorAll('[data-super-slot]').forEach(slot=>{
     const row=byHash.get(String(slot.dataset.bungieHash||''));
@@ -726,7 +745,7 @@ function renderSuperSynergyEvidence(build={},candidate=null){
     slot.title=[slot.title,reason].filter(Boolean).join(' · ');
     slot.setAttribute('aria-label',[row.superName,reason].filter(Boolean).join('. '));
   });
-  if(!build.forgeLoaderDecision){host.className='super-synergy-evidence is-unknown';host.innerHTML='<b>Exotic and Super</b><p>Stage a Forge Loader Exotic to evaluate these Supers.</p>';return;}
+  if(!build.forgeLoaderDecision){host.className='super-synergy-evidence is-unknown';host.innerHTML='<b>Exotic and Super</b><p>No Exotic armour is equipped on this Guardian.</p>';return;}
   const source=report.anchor.description?`<blockquote>${esc(report.anchor.description)}</blockquote>`:'<blockquote>Exotic effect text unavailable.</blockquote>';
   // Only Supers with real synergy are listed, one short line each. No per-Super "no synergy" rows.
   const rows=report.entries.filter(row=>row.evidenceStatus==='evidenced').map(row=>{
@@ -737,7 +756,7 @@ function renderSuperSynergyEvidence(build={},candidate=null){
   const limitations=(report.limitations||[]).map(row=>`<li>${esc(row)}</li>`).join('');
   const investment=report.entries[0]?.context?.[0]?.label||'';
   host.className=`super-synergy-evidence is-${report.status}`;
-  host.innerHTML=`<b>Exotic and Super</b><strong class="super-synergy-perk">${esc(report.anchor.name)}</strong>${source}${rows?`<ol>${rows}</ol>`:`<p>${esc(emptyLine)}</p>`}${rows&&limitations?`<ul class="super-synergy-limitations">${limitations}</ul>`:''}${investment?`<small>${esc(investment)}</small>`:''}`;
+  host.innerHTML=`<b>Exotic and Super</b>${equippedAnchor?`<span class="super-synergy-equipped">Equipped Exotic: ${esc(equippedAnchor.name)}</span>`:''}<strong class="super-synergy-perk">${esc(report.anchor.name)}</strong>${source}${rows?`<ol>${rows}</ol>`:`<p>${esc(emptyLine)}</p>`}${rows&&limitations?`<ul class="super-synergy-limitations">${limitations}</ul>`:''}${investment?`<small>${esc(investment)}</small>`:''}`;
 }
 
 function reviewIcon(item,label='Item'){const icon=abs(iconOf(item)),name=esc(item?.name||item?.displayName||label);return `<span class="review-icon" title="${name}">${icon?`<img src="${esc(icon)}" alt="">`:'◆'}<small>${name}</small></span>`;}

@@ -123,6 +123,7 @@ function renderWeapons(weapons=[]){
     const rank=weaponMasterworkRank(item);
     const hasRank=Number.isFinite(rank)&&rank>0;
     card.classList.toggle("is-level-gold",hasRank&&rank>=10);
+    card.classList.toggle("is-exotic",item?.isExotic===true||String(item?.tier||item?.rarity||"").toLowerCase()==="exotic");
     if(art){
       art.classList.toggle("ph",!icon);
       art.classList.add("has-shared-item-tile");
