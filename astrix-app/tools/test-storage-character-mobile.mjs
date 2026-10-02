@@ -6,7 +6,10 @@
 //   - Postmaster items are icons only. A weapon opens its item card, an engram and a material open
 //     the action sheet; each offers "Pull to <Guardian>".
 //   - The weapon and the engram are pulled with their own character and exact item.
-//   - A material stack Bungie lists without an exact item ID shows the pull disabled, with the reason.
+//   - A material Bungie lists without an exact item ID (two stacks of one hash) is pulled with itemId 0,
+//     its hash, each stack's size and the character, and is confirmed when the Postmaster count drops.
+//   - A no-room answer from Bungie shows the plain reason and leaves the item in the Postmaster.
+//   - Desktop PULL buttons use the same path: stack pull, exact weapon pull unchanged, NO ROOM reason.
 //   - A session without the Postmaster permission shows the pull disabled, with the reason.
 //   - No EQUIPPED AND CARRIED box; tiles at least 64px (72px tablet), 4px gap, rows filled edge to edge.
 //   - Desktop (1600) keeps the PULL buttons and the box, and its item card has no extra action.
@@ -36,7 +39,7 @@ const server=createServer(async(req,res)=>{
 
 // Fixture Bungie data. Hashes and names are test-only; bucket hashes are Bungie's own.
 const BUCKET={postmaster:215593132,vault:138197802,primary:1498876634,special:2465295065,heavy:953998645,engrams:375726501,materials:3865314626};
-const POSTMASTER={weapon:{itemHash:910001,itemInstanceId:'6917529000000000101',name:'Fixture Postmaster Weapon'},engram:{itemHash:910002,itemInstanceId:'6917529000000000102',name:'Fixture Postmaster Engram'},material:{itemHash:910003,name:'Fixture Postmaster Material',quantity:25}};
+const POSTMASTER={weapon:{itemHash:910001,itemInstanceId:'6917529000000000101',name:'Fixture Postmaster Weapon'},engram:{itemHash:910002,itemInstanceId:'6917529000000000102',name:'Fixture Postmaster Engram'},material:{itemHash:910003,name:'Fixture Postmaster Material',stacks:[25,10]}};
 // Storage checks the prepared manifest version against the shipped Forge armour index.
 const MANIFEST_VERSION=(await readFile(resolve(root,'astrix-app/data/forge-armour-index.json'),'utf8')).match(/"manifestVersion":"([^"]+)"/)[1];
 function preparedEnvelope(){
@@ -57,7 +60,7 @@ function preparedEnvelope(){
   const postmaster=[
     {itemHash:POSTMASTER.weapon.itemHash,itemInstanceId:POSTMASTER.weapon.itemInstanceId,bucketHash:BUCKET.postmaster,quantity:1,state:0},
     {itemHash:POSTMASTER.engram.itemHash,itemInstanceId:POSTMASTER.engram.itemInstanceId,bucketHash:BUCKET.postmaster,quantity:1,state:0},
-    {itemHash:POSTMASTER.material.itemHash,bucketHash:BUCKET.postmaster,quantity:POSTMASTER.material.quantity,state:0}
+    ...POSTMASTER.material.stacks.map(quantity=>({itemHash:POSTMASTER.material.itemHash,bucketHash:BUCKET.postmaster,quantity,state:0}))
   ];
   const profile={
     characters:{data:{'2':{characterId:'2',classType:2,light:550,dateLastPlayed:'2026-10-01T00:00:00Z',emblemBackgroundPath:''}}},
@@ -80,7 +83,7 @@ try{
   const art=await readFile(resolve(root,'img/ax-logo-160.webp'));
   const fixture=preparedEnvelope();
 
-  async function openStorage(width,{pullAllowed=true}={}){
+  async function openStorage(width,{pullAllowed=true,noRoom=false}={}){
     const context=await browser.newContext({viewport:{width,height:width<600?844:width<1200?1180:900}});
     const page=await context.newPage(),errors=[],pulls=[];
     // Live profile reads behave like Bungie: a pulled item leaves the Postmaster for its own bucket.
@@ -97,7 +100,14 @@ try{
       if(url.origin===AUTH&&url.pathname==='/bungie/profile')return json({profile:live});
       if(url.origin===AUTH&&url.pathname==='/bungie/actions/pull-from-postmaster'){
         const body=request.postDataJSON();pulls.push(body);
-        for(const item of live.characterInventories.data['2'].items)if(item.itemInstanceId===String(body.itemId)&&home[item.itemInstanceId])item.bucketHash=home[item.itemInstanceId];
+        if(noRoom&&String(body.itemId)==='0')return json({ErrorCode:1642,ErrorStatus:'DestinyNoRoomInDestination',Message:'There are no item slots available to transfer this item.',ThrottleSeconds:0});
+        const items=live.characterInventories.data['2'].items;
+        if(String(body.itemId)==='0'){
+          // Bungie takes the requested amount from that item hash's stacks in this Postmaster.
+          let left=Number(body.stackSize);
+          for(const item of items)if(left>0&&Number(item.bucketHash)===BUCKET.postmaster&&Number(item.itemHash)===Number(body.itemReferenceHash)&&!item.itemInstanceId){const taken=Math.min(item.quantity,left);item.quantity-=taken;left-=taken;}
+          live.characterInventories.data['2'].items=items.filter(item=>!(Number(item.bucketHash)===BUCKET.postmaster&&!item.itemInstanceId&&item.quantity<=0));
+        }else for(const item of items)if(item.itemInstanceId===String(body.itemId)&&home[item.itemInstanceId])item.bucketHash=home[item.itemInstanceId];
         return json({ErrorCode:1,ErrorStatus:'Success',Response:0});
       }
       return route.abort();
@@ -110,7 +120,12 @@ try{
     await page.waitForTimeout(300);
     return {page,context,errors,pulls};
   }
-  const tileByName=(page,name)=>page.locator(`#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item][title="${name}"]`);
+  const tileByName=(page,name)=>page.locator(`#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item][title="${name}"]`).first();
+  const materialTiles=page=>page.locator(`#vaultTransferWorkspace .vault-postmaster-section [data-inspect-item][title="${POSTMASTER.material.name}"]`);
+  const waitFor=async(check,label,ms=20000)=>{const end=Date.now()+ms;while(Date.now()<end){if(await check())return;await new Promise(done=>setTimeout(done,200));}assert.fail(label);};
+  const stackBodies=pulls=>pulls.filter(body=>String(body.itemId)==='0').map(body=>({characterId:String(body.characterId),itemId:String(body.itemId),itemReferenceHash:Number(body.itemReferenceHash),stackSize:Number(body.stackSize)})).sort((a,b)=>a.stackSize-b.stackSize);
+  const expectedStacks=[...POSTMASTER.material.stacks].sort((a,b)=>a-b).map(stackSize=>({characterId:'2',itemId:'0',itemReferenceHash:POSTMASTER.material.itemHash,stackSize}));
+  let stackBodySample=null;
 
   for(const width of [390,820]){
     const {page,context,errors,pulls}=await openStorage(width);
@@ -172,17 +187,37 @@ try{
       {characterId:'2',itemId:POSTMASTER.engram.itemInstanceId,itemReferenceHash:POSTMASTER.engram.itemHash}
     ],`${width}: weapon and engram pulled from Warlock's Postmaster with their exact items`);
 
-    // Material stack without an exact item ID: the pull is shown, disabled, with the reason.
+    // Material with no exact item ID, two stacks of one hash: pulled with itemId 0 and confirmed by the count.
+    assert.equal(await materialTiles(page).count(),2,'Both material stacks are in the Postmaster');
     await tileByName(page,POSTMASTER.material.name).click();
     await sheet.waitFor({state:'visible',timeout:3000});
-    assert.match(await sheet.locator('header span').innerText(),/STACK OF 25/,'The sheet shows the stack count');
-    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').isDisabled(),true,'The material pull is disabled, not hidden');
-    assert.match(await sheet.locator('.vault-postmaster-sheet-reason').innerText(),/without an exact item ID/);
-    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').getAttribute('aria-describedby'),'vaultPostmasterSheetReason');
-    await page.keyboard.press('Escape');
-    assert.equal(await sheet.count(),0,'Escape closes the sheet');
-    await page.waitForTimeout(300);
-    assert.equal(pulls.length,2,'No request is sent for the material');
+    assert.match(await sheet.locator('header span').innerText(),/STACK OF (25|10)/,'The sheet shows the stack count');
+    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').isEnabled(),true,'Stacks can be pulled');
+    assert.equal(await sheet.locator('.vault-postmaster-sheet-reason').count(),0,'No disabled reason for a pullable stack');
+    await sheet.locator('[data-postmaster-sheet-pull]').click();
+    await waitFor(async()=>stackBodies(pulls).length===2,`${width}: both stacks were pulled`);
+    assert.deepEqual(stackBodies(pulls),expectedStacks,`${width}: stack pulls send itemId 0, the item hash, each stack's size and the character`);
+    stackBodySample=pulls.find(body=>String(body.itemId)==='0');
+    await waitFor(async()=>await materialTiles(page).count()===0,`${width}: the material leaves the Postmaster once the count drops`);
+    await waitFor(async()=>/Collected from Postmaster/.test(await page.locator('body').innerText()),`${width}: shown as collected only after the readback`);
+    assert.deepEqual(errors,[]);await context.close();
+  }
+
+  {
+    // No room: Bungie refuses the stack pull. The plain reason shows and the material stays.
+    const {page,context,errors,pulls}=await openStorage(390,{noRoom:true});
+    await tileByName(page,POSTMASTER.material.name).click();
+    const sheet=page.locator('.vault-postmaster-sheet');
+    await sheet.waitFor({state:'visible',timeout:3000});
+    await sheet.locator('[data-postmaster-sheet-pull]').click();
+    await waitFor(async()=>/No room for this item/.test(await page.locator('body').innerText()),'The no-room reason is shown');
+    assert.ok(stackBodies(pulls).length>=1,'The stack pull reached Bungie');
+    assert.equal(await materialTiles(page).count(),2,'The material stays in the Postmaster');
+    await tileByName(page,POSTMASTER.material.name).click();
+    await sheet.waitFor({state:'visible',timeout:3000});
+    assert.match(await sheet.locator('.vault-postmaster-sheet-reason').innerText(),/No room for this item/,'The sheet shows the reason with the pull');
+    assert.equal(await sheet.locator('[data-postmaster-sheet-pull]').isEnabled(),true,'The pull can be tried again after making room');
+    assert.doesNotMatch(await page.locator('body').innerText(),/Collected from Postmaster/,'Never shown as collected');
     assert.deepEqual(errors,[]);await context.close();
   }
 
@@ -204,9 +239,9 @@ try{
 
   {
     // Desktop keeps the PULL buttons and the box; the item card has no extra action and no sheet opens.
-    const {page,context,errors}=await openStorage(1600);
+    const {page,context,errors,pulls}=await openStorage(1600);
     const desktop=await page.evaluate(()=>({pull:[...document.querySelectorAll('.vault-postmaster-pull')].filter(node=>node.getBoundingClientRect().width>0).length,box:[...document.querySelectorAll('.vault-equipped-carried-section>header')].filter(node=>node.getBoundingClientRect().height>0).length}));
-    assert.equal(desktop.pull,3,'Desktop keeps a PULL button on every Postmaster item');
+    assert.equal(desktop.pull,4,'Desktop keeps a PULL button on every Postmaster item');
     assert.ok(desktop.box>=1,'Desktop keeps the EQUIPPED AND CARRIED box');
     await tileByName(page,POSTMASTER.weapon.name).click();
     await page.locator('#paradoxItemInspect').waitFor({state:'visible',timeout:3000});
@@ -215,6 +250,28 @@ try{
     await tileByName(page,POSTMASTER.engram.name).click();
     await page.waitForTimeout(300);
     assert.equal(await page.locator('.vault-postmaster-sheet').count(),0,'Desktop opens no action sheet');
+    // The desktop PULL button on a stack uses the same stack path.
+    const materialPull=materialTiles(page).first().locator('.vault-postmaster-pull');
+    assert.equal(await materialPull.isEnabled(),true,'Desktop PULL is enabled for a stack');
+    await materialPull.click();
+    await waitFor(async()=>stackBodies(pulls).length===2,'Desktop: both stacks were pulled');
+    assert.deepEqual(stackBodies(pulls),expectedStacks,'Desktop: same stack request bodies');
+    await waitFor(async()=>await materialTiles(page).count()===0,'Desktop: the material leaves the Postmaster once the count drops');
+    // An exact-item weapon pull is unchanged: its instance ID, hash and character.
+    await tileByName(page,POSTMASTER.weapon.name).locator('.vault-postmaster-pull').click();
+    await waitFor(async()=>pulls.some(body=>String(body.itemId)===POSTMASTER.weapon.itemInstanceId),'Desktop: the weapon was pulled');
+    const weaponBody=pulls.find(body=>String(body.itemId)===POSTMASTER.weapon.itemInstanceId);
+    assert.deepEqual({characterId:String(weaponBody.characterId),itemReferenceHash:Number(weaponBody.itemReferenceHash),stackSize:Number(weaponBody.stackSize)},{characterId:'2',itemReferenceHash:POSTMASTER.weapon.itemHash,stackSize:1});
+    assert.deepEqual(errors,[]);await context.close();
+  }
+
+  {
+    // Desktop no room: the PULL button itself carries the plain reason; the material stays.
+    const {page,context,errors}=await openStorage(1600,{noRoom:true});
+    await materialTiles(page).first().locator('.vault-postmaster-pull').click();
+    await waitFor(async()=>(await materialTiles(page).first().locator('.vault-postmaster-pull').innerText())==='NO ROOM','Desktop: the PULL button shows NO ROOM');
+    assert.match(await materialTiles(page).first().locator('.vault-postmaster-pull').getAttribute('title'),/No room for this item/);
+    assert.equal(await materialTiles(page).count(),2,'Desktop: the material stays in the Postmaster');
     assert.deepEqual(errors,[]);await context.close();
   }
 
@@ -246,5 +303,6 @@ try{
     }
     assert.deepEqual(errors,[]);await page.close();
   }
-  console.log('STORAGE_CHARACTER_MOBILE=PASS real Storage page at 390 and 820: weapon (item card) and engram (action sheet) pulled from the right Postmaster with their exact items, material stack and missing permission shown disabled with the reason, icons only, no EQUIPPED AND CARRIED box, filled rows of 64px/72px tiles with a 4px gap; 1600 unchanged; selected Super framed in Ember on phone and tablet only');
+  console.log(`STACK_PULL_BODY=${JSON.stringify(stackBodySample)}`);
+  console.log('STORAGE_CHARACTER_MOBILE=PASS real Storage page at 390 and 820: weapon (item card) and engram (action sheet) pulled from the right Postmaster with their exact items, material stacks pulled with itemId 0 and confirmed by the Postmaster count, no-room reason with the item left in place, missing permission shown disabled with the reason, icons only, no EQUIPPED AND CARRIED box, filled rows of 64px/72px tiles with a 4px gap; 1600 PULL buttons: stack pull, exact weapon pull unchanged, NO ROOM reason; selected Super framed in Ember on phone and tablet only');
 }finally{await browser?.close();server.close();}

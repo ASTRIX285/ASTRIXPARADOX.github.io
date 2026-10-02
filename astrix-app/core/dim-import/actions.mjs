@@ -1,5 +1,5 @@
 import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1';
-import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs';
+import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?stack=20261002-1';
 // Import actions only stage and save. They never mutate equipment in Destiny.
 export function createDimActions(model,{getContext,getSnapshot,save,send}){
   let busy=false;

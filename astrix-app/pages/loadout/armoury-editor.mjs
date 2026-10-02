@@ -7,7 +7,7 @@
 import {eligibleEquipment,filterManualEquipmentSources,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,recordManualEdit} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
 import {toggleIntendedArtifactPerk} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
-import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&stack=20261002-1';
 
 export const EMPTY_PLUG_HASH=2166136261;
 const HISTORY_LIMIT=100;

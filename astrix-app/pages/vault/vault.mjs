@@ -2,15 +2,15 @@ import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
-import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1';
+import {ARMOUR_BUCKETS,createVaultCatalogue,filterVaultArmour,itemKey,prepareArmourSelection} from './vault-inventory.mjs?v=20260913-breaker-icon-2&champion=20260924-champion-export-1&stack=20261002-1';
 import {ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector,armourTargetMaximums,matchArmourBuilds,statKey} from './vault-armour-matcher.mjs';
 import {createVaultArmourSelection,writeVaultArmourSelection} from './vault-selection-state.mjs';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1';
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2';
-import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1';
+import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2&stack=20261002-1';
+import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1&stack=20261002-1';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -144,11 +144,37 @@ function vaultOnlyMarkup(){
 // (weapons and armour) or a small action sheet (everything else) with the pull. When Bungie
 // cannot pull an item, the button stays visible, disabled, with the reason.
 const COMPACT_STORAGE=globalThis.matchMedia?.('(max-width: 1199px)');
+// The last failed pull per item, in plain words. Cleared when a pull of that item is confirmed.
+const postmasterFailures=new Map();
+const POSTMASTER_FAILURES=Object.freeze({
+  session:{short:'RECONNECT',retry:true,reason:'Your Bungie session expired. Reconnect Bungie, then pull again.'},
+  room:{short:'NO ROOM',retry:true,reason:"No room for this item. Make space in this Guardian's inventory, then pull again."},
+  locked:{short:"CAN'T PULL",retry:false,reason:'Bungie says this item cannot be pulled from the Postmaster.'}
+});
+function postmasterFailure(result,thrown=null){
+  const row=thrown?null:[...(result?.steps||[])].reverse().find(step=>['failed','mismatch','blocked'].includes(step.status)&&step.phase!=='readback'),detail=thrown?{status:thrown.status,payload:thrown.payload,message:thrown.message}:(row?.detail||{});
+  const payloadText=detail?.payload||{},words=`${payloadText.ErrorStatus||''} ${payloadText.error||''} ${payloadText.Message||''} ${detail?.message||''}`.toLowerCase();
+  if(Number(detail?.status)===401||/reauthentication|webauth|session (?:has )?expired|reconnect bungie|live-action token/.test(words))return POSTMASTER_FAILURES.session;
+  if(/no.?room|not enough (?:inventory |storage )?space|(?:inventory|storage|destination|bucket) (?:is )?full/.test(words))return POSTMASTER_FAILURES.room;
+  if(/not.?transfer|nontransfer|cannot be (?:transferred|pulled)|item ?not ?found|uniqueness/.test(words))return POSTMASTER_FAILURES.locked;
+  const reason=row?actionFailureMessage(result):String(thrown?.message||'');
+  return reason?{short:'RETRY',retry:true,reason}:null;
+}
 function postmasterPullState(item){
   if(!session?.authenticated)return {ready:false,reason:'Connect Bungie to pull items from the Postmaster.'};
   if(liveActionCapabilities(session).pullFromPostmaster!==true)return {ready:false,reason:'Bungie has not allowed Postmaster pulls for this session. Reconnect Bungie to try again.'};
-  if(!/^\d+$/.test(String(item?.itemInstanceId||'')))return {ready:false,reason:'Bungie lists this stack without an exact item ID, so it cannot be pulled from here yet. Collect it in game.'};
+  const failure=postmasterFailures.get(itemKey(item));
+  if(failure)return {ready:failure.retry,reason:failure.reason};
   return {ready:true,reason:''};
+}
+// Desktop PULL buttons carry the same plain reason after a failed pull.
+function decoratePostmasterPullButtons(host){
+  for(const [key,failure] of postmasterFailures){
+    const button=[...host.querySelectorAll('[data-pull-postmaster-item]')].find(node=>node.dataset.pullPostmasterItem===key);
+    if(!button)continue;
+    button.textContent=failure.short;button.title=failure.reason;button.setAttribute('aria-label',`${failure.short}: ${failure.reason}`);
+    if(!failure.retry)button.disabled=true;
+  }
 }
 function postmasterActions(item){
   if(item?.source?.kind!=='postmaster'||!COMPACT_STORAGE?.matches)return [];
@@ -217,6 +243,7 @@ function renderTransferWorkspace(){
   if(!host)return;
   host.innerHTML=`<div class="vault-character-columns">${workspaceCharacters().map(characterColumnMarkup).join('')}</div>${vaultOnlyMarkup()}`;
   bindVaultWorkspaceHovers(host);
+  decoratePostmasterPullButtons(host);
   transferFeedback.reconcile();
 }
 
@@ -239,10 +266,10 @@ function stageTransfer(item,destination){
 
 function stagePostmasterCollection(characterId,requestedItemKey=''){
   try{
-    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&/^\d+$/.test(String(item?.itemInstanceId||''))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session});
+    const items=catalogue.postmasterItems.filter(item=>text(item?.source?.characterId)===text(characterId)&&(/^\d+$/.test(String(item?.itemInstanceId||''))||(!item?.itemInstanceId&&Number(item?.itemHash)>0))&&(!requestedItemKey||itemKey(item)===text(requestedItemKey))),intent=stagePostmasterCollectionIntent({characterId,items,session});
     const queueKey=`postmaster:${characterId}:${requestedItemKey||'all'}`;
     if(queuedVaultActionKeys.has(queueKey)){setStatus('That exact Postmaster pull is already queued.');return;}
-    queuedVaultActionKeys.add(queueKey);vaultActionQueue.push({kind:'postmaster',intent,queueKey});
+    queuedVaultActionKeys.add(queueKey);vaultActionQueue.push({kind:'postmaster',intent,queueKey,itemKeys:items.map(itemKey)});
     setStatus(`Pulling ${items.length===1?items[0].name:`${items.length} exact items`} from ${characterLabel(characterId)} Postmaster. Waiting for Bungie inventory feedback.`);
     void performPendingVaultAction();
   }catch(error){setStatus(error?.message||'The Postmaster pull could not be queued.','error');}
@@ -282,14 +309,19 @@ async function performPendingVaultAction(){
     result=action.kind==='transfer'
       ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
       :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
+    const confirmed=result.status==='applied'&&result.readback?.verified,failure=action.kind==='postmaster'&&!confirmed?postmasterFailure(result):null;
+    if(action.kind==='postmaster')for(const key of action.itemKeys||[]){if(confirmed)postmasterFailures.delete(key);else if(failure)postmasterFailures.set(key,failure);}
     if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
-    transferFeedback.finish(action.queueKey,{success:result.status==='applied'&&result.readback?.verified,error:actionFailureMessage(result)});
-    if(result.status==='applied'&&result.readback?.verified)setStatus(action.kind==='transfer'?'Transfer complete.':'Collected from Postmaster.','good');
-    else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${actionFailureMessage(result)}`,'error');
+    else if(failure)renderTransferWorkspace();
+    transferFeedback.finish(action.queueKey,{success:confirmed,error:failure?.reason||actionFailureMessage(result)});
+    if(confirmed)setStatus(action.kind==='transfer'?'Transfer complete.':'Collected from Postmaster.','good');
+    else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${failure?.reason||actionFailureMessage(result)}`,'error');
   }catch(error){
     if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
-    transferFeedback.finish(action.queueKey,{success:false,error:error?.payload?.Message||error?.message});
-    setStatus(error?.message||'The Bungie action failed before confirmation.','error');
+    const failure=action.kind==='postmaster'?postmasterFailure(null,error):null;
+    if(failure){for(const key of action.itemKeys||[])postmasterFailures.set(key,failure);renderTransferWorkspace();}
+    transferFeedback.finish(action.queueKey,{success:false,error:failure?.reason||error?.payload?.Message||error?.message});
+    setStatus(failure?.reason||error?.message||'The Bungie action failed before confirmation.','error');
   }finally{
     vaultActionBusy=false;
     if(confirm)confirm.disabled=false;
