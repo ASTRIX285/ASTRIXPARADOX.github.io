@@ -250,16 +250,26 @@ body.ax-drawer-open{overflow:hidden!important}
   html body header.home-top .home-tools{display:none!important}
   html body:has(header>[data-forge-hero-cards]){padding-top:0!important}
   html body header.apx-destination-header{position:relative!important;inset:auto!important;top:auto!important;transform:none!important;height:auto!important;min-height:0!important;
-    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;align-items:center!important;gap:12px!important;padding:12px 16px!important;margin:0!important}
-  html body header.apx-destination-header>:is(.apx-destination-brand,.brand){grid-column:1!important;grid-row:1!important;justify-self:start!important;display:inline-flex!important}
+    display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto auto!important;grid-auto-rows:auto!important;align-items:center!important;gap:12px 8px!important;padding:12px 16px!important;margin:0!important}
+  html body header.apx-destination-header>:is(.apx-destination-brand,.brand){grid-column:1!important;grid-row:1!important;justify-self:start!important;display:inline-flex!important;min-width:max-content!important}
   html body header.apx-destination-header>:is(.apx-destination-header-copy,.ws-label,.workspace-title,.apx-destination-header-state,.source-pill){display:none!important}
-  html body header.apx-destination-header>:is(.topbar-actions,.ax-shell-actions){grid-column:2!important;grid-row:1!important;justify-self:end!important;position:static!important;transform:none!important}
-  html body header.apx-destination-header>#guardianCharacterCards.guardian-character-cards{position:static!important;inset:auto!important;transform:none!important;grid-column:1/-1!important;grid-row:2!important;
+  /* Logo, refresh, Bungie control and menu are each their own grid item, so none can sit on another. */
+  html body header.apx-destination-header>.topbar-actions:has(>.ax-shell-actions),html body header.apx-destination-header .ax-shell-actions{display:contents!important}
+  html body header.apx-destination-header .ax-shell-actions>.ax-refresh-btn{grid-column:3!important;grid-row:1!important}
+  html body header.apx-destination-header .ax-shell-actions>#bungieAuthControl{grid-column:4!important;grid-row:1!important;justify-self:end!important;position:static!important;transform:none!important;min-width:0!important}
+  html body header.apx-destination-header .ax-shell-actions>.ax-menu-btn{grid-column:5!important;grid-row:1!important}
+  html body header.apx-destination-header>.topbar-actions:not(:has(>.ax-shell-actions)){grid-column:3/-1!important;grid-row:1!important;justify-self:end!important;position:static!important;transform:none!important}
+  html body header.apx-destination-header>#guardianCharacterCards.guardian-character-cards{position:static!important;inset:auto!important;transform:none!important;grid-column:1/-1!important;grid-row:auto!important;
     display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important}
   html body header.apx-destination-header>#guardianCharacterCards .guardian-character-card{width:100%!important;max-width:none!important;min-width:0!important;height:72px!important;min-height:72px!important;border-radius:15px!important;order:1}
   html body header.apx-destination-header>#guardianCharacterCards .guardian-character-card.is-selected{order:0}
   html body header.apx-destination-header>#guardianCharacterCards:not(.ax-cards-open) .guardian-character-card:not(.is-selected){display:none!important}
   html body header.home-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+}
+@media (max-width:599px){
+  /* A status pill (signed out, Bungie offline) takes its own full-width row under the bar. */
+  html body header.apx-destination-header .ax-shell-actions>#bungieAuthControl:has(>#bungieAuthButton:not([hidden])){grid-column:1/-1!important;grid-row:2!important;justify-self:stretch!important}
+  html body header.apx-destination-header .ax-shell-actions>#bungieAuthControl>#bungieAuthButton:not([hidden]){width:100%!important;max-width:none!important;white-space:normal!important}
 }
 @media (min-width:600px) and (max-width:1199px){
   html body header.apx-destination-header>#guardianCharacterCards .guardian-character-card{height:84px!important;min-height:84px!important}

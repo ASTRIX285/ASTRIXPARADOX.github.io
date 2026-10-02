@@ -90,6 +90,29 @@ try{
     assert.deepEqual(errors,[]);
     await page.close();
   }
+  for(const width of [390,820]){
+    // Signed in (emblem), signed out and Bungie offline (status pill): logo, refresh icon,
+    // Bungie control and menu icon never overlap.
+    const {page,errors}=await open(width);
+    for(const [state,text] of [['signed-in',''],['signed-out','CONNECT BUNGIE'],['offline','Bungie is not responding. Retry']]){
+      const boxes=await page.evaluate(({state,text})=>{
+        const wrap=document.getElementById('bungieAuthControl'),button=document.getElementById('bungieAuthButton'),visual=document.getElementById('bungieAccountVisual');
+        wrap.hidden=false;button.hidden=state==='signed-in';visual.hidden=state!=='signed-in';
+        button.dataset.state=state==='signed-out'?'disconnected':'unknown';button.textContent=text;
+        const box=el=>{const b=el?.getBoundingClientRect();return b&&b.width&&b.height?{left:b.left,right:b.right,top:b.top,bottom:b.bottom}:null;};
+        return {logo:box(document.querySelector('header .apx-destination-brand')),refresh:box(document.querySelector('.ax-refresh-btn')),bungie:box(state==='signed-in'?visual:button),menu:box(document.querySelector('.ax-menu-btn'))};
+      },{state,text});
+      for(const [name,b] of Object.entries(boxes))assert.ok(b,`${width} ${state}: ${name} is visible`);
+      const names=Object.keys(boxes);
+      for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){
+        const a=boxes[names[i]],b=boxes[names[j]];
+        assert.ok(!(a.left<b.right-0.5&&b.left<a.right-0.5&&a.top<b.bottom-0.5&&b.top<a.bottom-0.5),`${width} ${state}: ${names[i]} overlaps ${names[j]}`);
+      }
+      for(const [name,b] of Object.entries(boxes))assert.ok(b.left>=0&&b.right<=width,`${width} ${state}: ${name} stays on screen`);
+    }
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}: no sideways scroll with the status pill`);
+    assert.deepEqual(errors,[]);await page.close();
+  }
   {
     // Desktop keeps the ribbon and all three cards; the refresh icon is present, the menu is not.
     const {page,errors}=await open(1600);
@@ -111,5 +134,5 @@ try{
     assert.equal(await page.evaluate(mode=>mode==='registered'?window.refreshed:window.proxied,mode),1,`${mode}: the page refresh ran once`);
     await page.close();
   }
-  console.log('MOBILE_SHELL=PASS 390 and 820: header icons, left drawer with focus trap and closing, single Guardian card with list and memory; 1600: ribbon and three cards; refresh icon runs the page refresh');
+  console.log('MOBILE_SHELL=PASS 390 and 820: header icons with no overlap signed in, signed out and offline, left drawer with focus trap and closing, single Guardian card with list and memory; 1600: ribbon and three cards; refresh icon runs the page refresh');
 }finally{await browser?.close();server.close();}
