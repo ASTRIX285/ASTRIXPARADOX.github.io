@@ -54,7 +54,7 @@ const tools=read('hub/index.html');
 const toolsCss=read('hub/tools.css');
 const toolsMission=read('hub/tools.mjs');
 assert.ok(tools.includes('href="index.html" class="active">The Hub</a>'),'The Hub navigation item must be active');
-assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261003-2"'),'The Hub must request its stylesheet without stale cache reuse');
+assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261003-3"'),'The Hub must request its stylesheet without stale cache reuse');
 assert.ok(tools.includes('<title>The Hub | ASTRIX PARADOX</title>')&&tools.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'The Hub title and canonical');
 const redirect=read('tools/index.html');
 assert.ok(redirect.includes("location.replace('/hub/'+location.search+location.hash)")&&redirect.includes('content="0; url=/hub/"')&&redirect.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'/tools/ redirects to /hub/ keeping the query and hash');
@@ -76,6 +76,11 @@ assert.ok(tools.includes('The goal is not to play the game for you.'),'Mission p
 const list=tools.slice(tools.indexOf('var HUB_TOOLS=['),tools.indexOf('];',tools.indexOf('var HUB_TOOLS=[')));
 assert.match(list,/name:'The Forge'[\s\S]*?action:\{label:'Enter The Forge',href:'\.\.\/astrix-app\/pages\/home\/'\}/,'The Forge card enters the Destiny 2 tool by its unchanged route');
 assert.match(list,/name:'WorkBench'[\s\S]*?status:'Coming soon'[\s\S]*?action:\{label:'Enter WorkBench'\}/,'WorkBench card is coming soon with no link');
+// No Division art until it is approved in games/division/td2/assets/manifest.json.
+assert.match(list,/name:'WorkBench',art:null,/,'WorkBench card shows the key art pending panel, not an image');
+assert.doesNotMatch(tools,/BG_the_divition|divition/i,'No unapproved Division image on The Hub');
+assert.ok(tools.includes('<div class="platform-art platform-art-pending" aria-hidden="true"><span>Key art pending</span></div>'),'Cards without approved art render the pending panel');
+assert.ok(toolsCss.includes('.platform-art-pending'),'The pending art panel is styled');
 assert.match(list,/\{kind:'future'\}/,'The future slot card stays');
 assert.equal((tools.match(/ENTER THE FORGE/g)??[]).length,1,'The mission popup keeps its Forge action');
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
