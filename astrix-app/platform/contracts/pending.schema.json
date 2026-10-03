@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/platform/contracts/pending.schema.json",
+  "title": "Pending value",
+  "description": "Used per field in place of any value that has no source yet. A record can be partly pending. Never replaced by a guess.",
+  "type": "object",
+  "required": ["pending", "reason"],
+  "additionalProperties": false,
+  "properties": {
+    "pending": { "const": true },
+    "reason": { "type": "string", "minLength": 1 }
+  }
+}

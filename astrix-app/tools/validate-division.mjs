@@ -4,8 +4,9 @@
 import {existsSync, readdirSync, readFileSync, statSync} from 'node:fs';
 import {basename, extname, join, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {checkRecords} from './validate-game-folders.mjs';
 
-const SHARED_DIRS=new Set(['schema','engine']);
+const SHARED_DIRS=new Set(['schema','engine','docs']);
 const TITLE_DIRS=new Set(['data','assets']);
 const CODE_EXT=new Set(['.mjs','.js','.cjs','.ts']);
 const IGNORED=new Set(['README.md','.gitkeep']);
@@ -28,25 +29,16 @@ function readJson(path,errors,rel){
 
 const filled=value=>typeof value==='string'&&value.trim()!=='';
 
-// A catalogue file is an array of entries, or an object with an entries array.
-// Every entry carries source (an http(s) URL) and gameVersion. An entry that
-// cannot be sourced yet says so: status "pending" plus a non-empty missing list.
+// Division records use the shared contracts (platform/contracts/provenance.schema.json
+// and pending.schema.json). Only official posts and in-game captures are accepted:
+// client data tables would mean datamined values, which the Division gate forbids.
+export const DIVISION_SOURCE_KINDS=Object.freeze(['official-post','in-game-capture']);
+
 function checkCatalogue(file,rel,errors){
   const data=readJson(file,errors,rel);
   if(data===undefined)return;
-  const entries=Array.isArray(data)?data:data?.entries;
-  if(!Array.isArray(entries)){errors.push(`${rel}: catalogue must be an array or an object with an entries array`);return;}
-  entries.forEach((entry,index)=>{
-    const label=`${rel} entry ${filled(entry?.id)?entry.id:`#${index}`}`;
-    if(!entry||typeof entry!=='object'||Array.isArray(entry)){errors.push(`${label}: entry must be an object`);return;}
-    if(entry.status==='pending'){
-      if(!Array.isArray(entry.missing)||!entry.missing.length||!entry.missing.every(filled))errors.push(`${label}: pending entry needs a non-empty missing list`);
-      return;
-    }
-    if(!filled(entry.source))errors.push(`${label}: missing source`);
-    else if(!/^https?:\/\//.test(entry.source))errors.push(`${label}: source must be an http(s) URL`);
-    if(!filled(entry.gameVersion))errors.push(`${label}: missing gameVersion`);
-  });
+  if(!Array.isArray(data)&&!Array.isArray(data?.records)&&!Array.isArray(data?.entries)){errors.push(`${rel}: catalogue must be an array or an object with a records or entries array`);return;}
+  checkRecords(data,rel,errors,{kinds:DIVISION_SOURCE_KINDS});
 }
 
 // Every file in an assets folder must be listed in that folder's manifest.json,
@@ -94,7 +86,7 @@ export function validateDivision(root){
     for(const name of readdirSync(division).sort()){
       const path=join(division,name);
       if(!statSync(path).isDirectory()||SHARED_DIRS.has(name))continue;
-      if(!/^td\d+$/.test(name)){errors.push(`astrix-app/games/division/${name}: unknown folder; use schema/, engine/ or a title folder like td2/`);continue;}
+      if(!/^td\d+$/.test(name)){errors.push(`astrix-app/games/division/${name}: unknown folder; use schema/, engine/, docs/ or a title folder like td2/`);continue;}
       for(const child of readdirSync(path).sort()){
         const childPath=join(path,child);
         const rel=`astrix-app/games/division/${name}/${child}`;

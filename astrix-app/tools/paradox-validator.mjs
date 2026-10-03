@@ -5,6 +5,8 @@ const tools=fileURLToPath(new URL('./',import.meta.url));
 const validators=[
   'validate-scope-guard.mjs',
   'test-scope-guard.mjs',
+  'test-game-folders.mjs',
+  'validate-game-folders.mjs',
   'test-division-validator.mjs',
   'validate-division.mjs',
   'validate-local-preview.mjs',

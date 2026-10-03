@@ -4,10 +4,12 @@ WorkBench is the ASTRIX PARADOX build advisor for The Division. One WorkBench co
 
 ```
 astrix-app/games/division/
+  index.mjs          game module (platform contract); returns pending until data exists
+  docs/SCOPE.md      project scope
   schema/            shared JSON schemas (all titles)
   engine/            shared WorkBench engine (never forked per title)
   td2/               The Division 2
-    data/            TD2 catalogue (source + gameVersion on every entry)
+    data/            TD2 catalogue (provenance on every record)
     assets/          approved images only
     assets/manifest.json
 astrix-app/platform/adapters/division/   manual, json, ubisoft (stub)
@@ -20,7 +22,7 @@ A later title (td3/) gets the same data/ and assets/ folders and reuses schema/ 
 The full gate is in `astrix-app/ARCHITECTURE-GATES.md` (Division gate). In short:
 
 - No hardcoded item tables in engine, adapter or UI code. Game data comes from catalogue files through the schema loader.
-- Every catalogue entry has `source` (an http(s) URL to an official source) and `gameVersion`. An entry that can't be sourced yet has `"status": "pending"` and a `missing` list. Never a guessed value.
+- Every catalogue record has a `provenance` block (`platform/contracts/provenance.schema.json`): an `official-post` or an `in-game-capture`, each with a `gameVersion`. Datamined client data is never accepted. A field with no source yet is `{ "pending": true, "reason": "..." }`. Never a guessed value.
 - Title folders hold `data/` and `assets/` only. No code in a title folder.
 - Every file in an `assets/` folder is listed in that folder's `manifest.json` with `"useAllowed": "yes"` and `"approvedByMiguel": true`. A file matches the entry whose `id` is its name without extension. A web-sized copy is named `<id>.web.<ext>`.
 - No Ubisoft sign-in, session tokens, scraping or private endpoints.
@@ -30,6 +32,8 @@ The full gate is in `astrix-app/ARCHITECTURE-GATES.md` (Division gate). In short
 ```
 node astrix-app/tools/validate-division.mjs
 node astrix-app/tools/test-division-validator.mjs
+node astrix-app/tools/validate-game-folders.mjs
+node astrix-app/tools/test-game-folders.mjs
 ```
 
-Both run on every PR through `.github/workflows/validate-division.yml`, and inside `paradox-validator.mjs`.
+All four run on every PR through `.github/workflows/validate-division.yml`, and inside `paradox-validator.mjs`.

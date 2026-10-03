@@ -5,8 +5,10 @@ import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {validateDivision} from './validate-division.mjs';
 
-const good={id:'brand-example',source:'https://www.ubisoft.com/example',gameVersion:'TU-example'};
-const pending={id:'set-example',status:'pending',missing:['source','gameVersion']};
+const post={kind:'official-post',url:'https://www.ubisoft.com/example',gameVersion:'TU-example',retrievedOn:'2026-10-03'};
+const capture={kind:'in-game-capture',capturedBy:'Miguel',capturedOn:'2026-10-05',gameVersion:'TU-example',where:'Brand set screen',note:'Read from the 1-piece bonus line.'};
+const good={id:'brand-example',name:'Example',provenance:post};
+const pending={id:'set-example',name:'Example set',provenance:capture,fourPiece:{pending:true,reason:'Not captured yet.'}};
 const approved={id:'hub-card',useAllowed:'yes',approvedByMiguel:true};
 
 function repo(files){
@@ -39,10 +41,12 @@ check('clean layout passes',{
   [`${base}/engine/stats.mjs`]:'export const total=values=>values.reduce((a,b)=>a+b,0);\n',
   'astrix-app/platform/adapters/division/manual.mjs':'export const adapter={};\n'
 },null);
-check('entry without source',{[`${base}/td2/data/brands.json`]:[{id:'x',gameVersion:'1'}]},'missing source');
-check('entry without gameVersion',{[`${base}/td2/data/brands.json`]:[{id:'x',source:'https://a.example'}]},'missing gameVersion');
-check('source not a URL',{[`${base}/td2/data/brands.json`]:[{id:'x',source:'wiki',gameVersion:'1'}]},'http(s) URL');
-check('pending without missing list',{[`${base}/td2/data/brands.json`]:[{id:'x',status:'pending'}]},'non-empty missing list');
+check('record without provenance',{[`${base}/td2/data/brands.json`]:[{id:'x',name:'X'}]},'no provenance');
+check('capture without gameVersion',{[`${base}/td2/data/brands.json`]:[{id:'x',provenance:{...capture,gameVersion:''}}]},'in-game-capture needs gameVersion');
+check('official post without URL',{[`${base}/td2/data/brands.json`]:[{id:'x',provenance:{...post,url:'wiki'}}]},'http(s) url');
+check('pending field without reason',{[`${base}/td2/data/brands.json`]:[{id:'x',provenance:post,twoPiece:{pending:true}}]},'pending field needs a reason');
+check('client data rejected for Division',{[`${base}/td2/data/brands.json`]:[{id:'x',provenance:{product:'p',build:'1',table:'T',rowId:1,sourceSha256:'a'.repeat(64)}}]},'not allowed here');
+check('catalogue not a record list',{[`${base}/td2/data/brands.json`]:{id:'x'}},'records or entries array');
 check('catalogue not JSON',{[`${base}/td2/data/brands.csv`]:'a,b'},'must be JSON');
 check('image not in manifest',{[`${base}/td2/assets/stray.png`]:'png'},'not listed');
 check('image not approved',{
