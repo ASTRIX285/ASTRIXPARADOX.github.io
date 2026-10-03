@@ -1,0 +1,27 @@
+# WoW Forever follow-up: schema/ move, game README, rules engine, sourced Legacy rules
+astrix-app/games/wow-forever/README.md
+astrix-app/games/wow-forever/data/README.md
+astrix-app/games/wow-forever/data/rules.json
+astrix-app/games/wow-forever/data/schema/character-build.schema.json
+astrix-app/games/wow-forever/data/schema/item-set.schema.json
+astrix-app/games/wow-forever/data/schema/item.schema.json
+astrix-app/games/wow-forever/data/schema/pending.schema.json
+astrix-app/games/wow-forever/data/schema/provenance.schema.json
+astrix-app/games/wow-forever/data/schema/spell.schema.json
+astrix-app/games/wow-forever/data/schema/talent-tree.schema.json
+astrix-app/games/wow-forever/data/schema/talent.schema.json
+astrix-app/games/wow-forever/docs/SCOPE.md
+astrix-app/games/wow-forever/engine/build-rules.mjs
+astrix-app/games/wow-forever/pipeline/build-forever-db.mjs
+astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs
+astrix-app/games/wow-forever/schema/character-build.schema.json
+astrix-app/games/wow-forever/schema/item-set.schema.json
+astrix-app/games/wow-forever/schema/item.schema.json
+astrix-app/games/wow-forever/schema/pending.schema.json
+astrix-app/games/wow-forever/schema/provenance.schema.json
+astrix-app/games/wow-forever/schema/rule.schema.json
+astrix-app/games/wow-forever/schema/spell.schema.json
+astrix-app/games/wow-forever/schema/talent-tree.schema.json
+astrix-app/games/wow-forever/schema/talent.schema.json
+astrix-app/module-versions.json
+astrix-app/tools/validate-game-folders.mjs

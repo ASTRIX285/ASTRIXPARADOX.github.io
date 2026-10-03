@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/item-set.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/item-set.schema.json",
   "title": "Forever item set",
   "type": "object",
   "required": ["id", "name", "itemIds", "bonuses", "provenance"],

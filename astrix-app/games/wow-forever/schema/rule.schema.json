@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/rule.schema.json",
+  "title": "Forever rule value",
+  "description": "A game rule the client tables do not hold. Only added once an official source states it. Unsourced rules are left out, so the engine treats them as pending.",
+  "type": "object",
+  "required": ["id", "value", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9.-]*$" },
+    "value": {},
+    "provenance": { "$ref": "https://astrixparadox.com/astrix-app/platform/contracts/provenance.schema.json" }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/item.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/item.schema.json",
   "title": "Forever item",
   "type": "object",
   "required": ["id", "name", "quality", "itemLevel", "requiredLevel", "inventoryType", "itemClass", "itemSubclass", "stats", "itemSetId", "allowableClassMask", "provenance"],

@@ -15,7 +15,9 @@ import {
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FIX = path.join(HERE, 'test-fixtures');
-const SCHEMA_DIR = path.join(HERE, '..', 'data', 'schema');
+const SCHEMA_DIR = path.join(HERE, '..', 'schema');
+const RULES_FILE = path.join(HERE, '..', 'data', 'rules.json');
+const PLATFORM_PROVENANCE = path.join(HERE, '..', '..', '..', 'platform', 'contracts', 'provenance.schema.json');
 const results = [];
 const test = async (name, fn) => {
   try { await fn(); results.push(`PASS ${name}`); } catch (err) { results.push(`FAIL ${name}: ${err.message}`); }
@@ -126,7 +128,10 @@ await test('output is deterministic and validates against the schemas', async ()
     assert.equal(await readFile(path.join(a, f), 'utf8'), await readFile(path.join(b, f), 'utf8'), f);
   }
   const { default: Ajv2020 } = await import('ajv/dist/2020.js');
+  const { default: addFormats } = await import('ajv-formats');
   const ajv = new Ajv2020({ allErrors: true, strict: true });
+  addFormats(ajv);
+  ajv.addSchema(JSON.parse(await readFile(PLATFORM_PROVENANCE, 'utf8')));
   for (const f of await readdir(SCHEMA_DIR)) {
     const schema = JSON.parse(await readFile(path.join(SCHEMA_DIR, f), 'utf8'));
     ajv.addSchema(schema, f);
@@ -141,6 +146,7 @@ await test('output is deterministic and validates against the schemas', async ()
   check('spell.schema.json', db.spells);
   const build = { schemaVersion: 1, dataBuild: '0.0.0.0-test', classId: 1, raceId: null, level: 60, ruleset: null, talents: { 900601: 2 }, legacy: {}, gear: { chest: 900101 }, goal: 'raid' };
   check('character-build.schema.json', [build]);
+  check('rule.schema.json', JSON.parse(await readFile(RULES_FILE, 'utf8')).records);
 });
 
 await test('game module passes the platform contract and resolves a fixture build', async () => {
@@ -157,6 +163,46 @@ await test('game module passes the platform contract and resolves a fixture buil
   assert.equal(mod.normaliseAbilities(build)[1].spell.name.pending, true);
   assert.equal(mod.explainRecommendation({ summary: 'no evidence' }).pending, true);
   assert.equal(WOW_FOREVER_GAME_MODULE.normaliseEquipment(build)[0].record.pending, true);
+});
+
+await test('rules engine passes a legal build and reports unsourced rules as pending', async () => {
+  const { reviewBuild } = await import('../engine/build-rules.mjs');
+  const rules = JSON.parse(await readFile(RULES_FILE, 'utf8'));
+  const build = { classId: 1, level: 60, talents: { 900601: 2, 900602: 1 }, legacy: { a: 10, b: 6 }, gear: { chest: 900101, ring: 900102 } };
+  const r = reviewBuild(build, db, rules);
+  assert.equal(r.valid, true, JSON.stringify(r.findings.filter(f => f.severity === 'error')));
+  assert.equal(r.talents.spent, 3);
+  assert.equal(r.legacy.cap, 16);
+  assert.deepEqual(r.findings.filter(f => f.severity === 'pending').map(f => f.code).sort(), ['legacy.perk-costs', 'talent.points-available', 'talent.row-unlock']);
+  assert.deepEqual(r.stats.map(s => [s.statTypeId, s.amount]), [[900, 10]]);
+  assert.equal(r.stats[0].name.pending, true);
+  assert.equal(r.stats[0].evidence.length, 2);
+});
+
+await test('rules engine catches prerequisites, max rank, class, Legacy cap and unknown items with evidence', async () => {
+  const { reviewBuild } = await import('../engine/build-rules.mjs');
+  const rules = JSON.parse(await readFile(RULES_FILE, 'utf8'));
+  const codes = b => reviewBuild(b, db, rules).findings.filter(f => f.severity === 'error').map(f => f.code);
+  assert.deepEqual(codes({ classId: 1, talents: { 900602: 1 } }), ['talent.prereq-missing']);
+  assert.deepEqual(codes({ classId: 1, talents: { 900601: 1, 900602: 1 } }), ['talent.prereq-missing']);
+  assert.deepEqual(codes({ classId: 1, talents: { 900601: 3 } }), ['talent.over-max']);
+  assert.deepEqual(codes({ classId: 2, talents: { 900601: 1 } }), ['talent.wrong-class']);
+  assert.deepEqual(codes({ classId: 1, talents: { 123: 1 } }), ['talent.unknown']);
+  assert.deepEqual(codes({ classId: 1, legacy: { a: 17 } }), ['legacy.over-cap']);
+  assert.deepEqual(codes({ classId: 1, gear: { chest: 5 } }), ['gear.unknown']);
+  const over = reviewBuild({ classId: 1, legacy: { a: 17 } }, db, rules).findings.find(f => f.code === 'legacy.over-cap');
+  assert.equal(over.evidence[0].kind, 'official-post');
+  const prereq = reviewBuild({ classId: 1, talents: { 900602: 1 } }, db, rules).findings[0];
+  assert.deepEqual(prereq.evidence.map(e => e.rowId), [900602, 900601]);
+});
+
+await test('rules engine names stats only from a sourced map and drops the Legacy cap when unsourced', async () => {
+  const { reviewBuild } = await import('../engine/build-rules.mjs');
+  const named = reviewBuild({ classId: 1, gear: { chest: 900101 } }, db, { records: [] }, { source: 'test', types: { 900: 'TEST Stat' } });
+  assert.equal(named.stats[0].name, 'TEST Stat');
+  assert.ok(named.findings.some(f => f.code === 'legacy.cap-unknown' && f.severity === 'pending'));
+  const unsourced = reviewBuild({ classId: 1, gear: { chest: 900101 } }, db, { records: [] }, { source: null, types: { 900: 'TEST Stat' } });
+  assert.equal(unsourced.stats[0].name.pending, true);
 });
 
 console.log(results.join('\n'));

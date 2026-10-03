@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/pending.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/pending.schema.json",
   "title": "Pending value",
   "description": "Used in place of any value the pipeline could not resolve from source. Never replaced by a guess.",
   "type": "object",

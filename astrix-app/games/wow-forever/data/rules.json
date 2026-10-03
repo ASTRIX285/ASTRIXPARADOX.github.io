@@ -1,0 +1,37 @@
+{
+  "records": [
+    {
+      "id": "legacy.points-cap-per-character",
+      "value": 16,
+      "provenance": {
+        "kind": "official-post",
+        "url": "https://news.blizzard.com/en-us/article/24307383/get-to-know-the-world-of-warcraft-forever-legacy-system",
+        "gameVersion": "WoW Forever launch",
+        "retrievedOn": "2026-10-03",
+        "quote": "at the launch of the game, you will be able to spend up to 16 points total on each character"
+      }
+    },
+    {
+      "id": "legacy.trees",
+      "value": ["Professions", "Adventure", "Resourcefulness"],
+      "provenance": {
+        "kind": "official-post",
+        "url": "https://news.blizzard.com/en-us/article/24307383/get-to-know-the-world-of-warcraft-forever-legacy-system",
+        "gameVersion": "WoW Forever launch",
+        "retrievedOn": "2026-10-03",
+        "quote": "Professions, Adventure, and Resourcefulness"
+      }
+    },
+    {
+      "id": "legacy.account-wide",
+      "value": true,
+      "provenance": {
+        "kind": "official-post",
+        "url": "https://news.blizzard.com/en-us/article/24307383/get-to-know-the-world-of-warcraft-forever-legacy-system",
+        "gameVersion": "WoW Forever launch",
+        "retrievedOn": "2026-10-03",
+        "quote": "These points are Battle.net account-wide and available to all your non-Hardcore characters."
+      }
+    }
+  ]
+}

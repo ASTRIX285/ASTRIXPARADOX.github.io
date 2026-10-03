@@ -19,9 +19,6 @@ export const EXEMPTIONS=Object.freeze([
   {game:'destiny-2',check:'file:README.md',reason:'No Destiny README in the game folder yet.'},
   {game:'destiny-2',check:'module',reason:'index.mjs is a facade (DESTINY_GAME_MODULE metadata plus domain re-exports), not a contract implementation. Importing it would load Destiny domains.'},
   {game:'destiny-2',check:'data-location',reason:'Destiny data lives in astrix-app/data/ and the manifest workers, outside the game folder, so it has no record checks here.'},
-  {game:'wow-forever',check:'file:schema/',reason:'WoW Forever schemas sit in data/schema/. Moves to schema/ on the WoW follow-up.'},
-  {game:'wow-forever',check:'file:README.md',reason:'WoW Forever has data/README.md but no README.md at the game root yet.'},
-  {game:'wow-forever',check:'schema-in-data',reason:'WoW Forever schemas sit in data/schema/. Moves to schema/ on the WoW follow-up.'},
   {game:'wow-forever',check:'record:data/stat-types.json',reason:'stat-types.json is an empty id map with source null, not a sourced record yet.'}
 ]);
 
