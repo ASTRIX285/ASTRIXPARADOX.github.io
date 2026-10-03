@@ -1668,6 +1668,8 @@ body .gear-weapons .weapon-support-icon{background:#367fa6;box-shadow:inset 0 0 
 body .weapon-perk-cell.is-selected>img,
 body .gear-weapons .weapon-support-icon>img{mix-blend-mode:screen}
 body .weapon-support-icon.is-icon-unavailable{color:#d9efff;font:700 13px/1 sans-serif}
+/* A plug without an icon names itself and its hash, never a placeholder glyph. */
+body .weapon-plug-label{display:block;max-width:100%;padding:2px;box-sizing:border-box;font:600 8px/1.1 sans-serif;text-align:center;overflow-wrap:anywhere;color:inherit}
 
 body .gear-slot,body .gear-weapons .weap{container-type:inline-size}
 body .gear-weapons .weapon-perk-matrix.is-compact{--gear-weapon-socket:var(--apx-icon-weapon-socket-fluid);--gear-weapon-gap:5px}

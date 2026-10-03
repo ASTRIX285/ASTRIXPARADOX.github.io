@@ -22,7 +22,7 @@
 
   "/astrix-app/core/dim-import/actions.mjs": "6dbd99c5d1",
 
-  "/astrix-app/core/dim-import/adapt.mjs": "12d20cd48c",
+  "/astrix-app/core/dim-import/adapt.mjs": "4bac3dcaba",
 
   "/astrix-app/core/dim-import/cache.mjs": "991972f4f4",
 
@@ -30,15 +30,19 @@
 
   "/astrix-app/core/dim-import/entry.mjs": "e2b62db546",
 
-  "/astrix-app/core/dim-import/fill.mjs": "f8c78bf5d2",
+  "/astrix-app/core/dim-import/fill.mjs": "dd683543b8",
+
+  "/astrix-app/core/dim-import/fit.mjs": "65f3a6f275",
 
   "/astrix-app/core/dim-import/guardian.mjs": "ad8705051e",
 
   "/astrix-app/core/dim-import/handoff.mjs": "6daff2c594",
 
+  "/astrix-app/core/dim-import/mods.mjs": "5071f71dff",
+
   "/astrix-app/core/dim-import/resolve.mjs": "291e4d1401",
 
-  "/astrix-app/core/dim-import/review.mjs": "72f1cd9667",
+  "/astrix-app/core/dim-import/review.mjs": "656a277fc5",
 
   "/astrix-app/core/dim-import/share.mjs": "7f9958e9e7",
 
@@ -86,6 +90,10 @@
 
   "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8c07c3800b",
 
+  "/astrix-app/pages/build-fit/build-fit-url.mjs": "b69cb33f83",
+
+  "/astrix-app/pages/build-fit/build-fit.mjs": "07a7e087de",
+
   "/astrix-app/pages/build-review/build-review-model.mjs": "54ecca3953",
 
   "/astrix-app/pages/build-review/build-review-pipeline.mjs": "4957f326eb",
@@ -94,7 +102,7 @@
 
   "/astrix-app/pages/build-review/build-review-url.mjs": "550f080c50",
 
-  "/astrix-app/pages/build-review/build-review.mjs": "606e8a1180",
+  "/astrix-app/pages/build-review/build-review.mjs": "66f3c06914",
 
   "/astrix-app/pages/forge-loader/forge-loader-build-handoff.mjs": "b90a8f2688",
 
@@ -156,7 +164,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-fixture-loader.mjs": "97b88eca16",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "ba160b4321",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "9e65077864",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs": "652744845b",
 
@@ -182,9 +190,9 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-interceptor.mjs": "62613ae770",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-resolver.mjs": "2b4bbe609a",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-resolver.mjs": "ee8df72e36",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs": "c860b8b8fe",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs": "c1c0964fed",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs": "e8325e7602",
 
@@ -208,7 +216,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-weapon-diagnostics.mjs": "2c65895dad",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-weapon-presentation.mjs": "f2e23a3dda",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-weapon-presentation.mjs": "bf582a73f1",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-weapon-roll-advisor.mjs": "fa3d823fc4",
 
@@ -380,7 +388,7 @@
 
   "/astrix-app/shared/loadout-details.mjs": "fca2fd30d5",
 
-  "/astrix-app/shared/loadout-icon-layout.mjs": "a31637195c",
+  "/astrix-app/shared/loadout-icon-layout.mjs": "de485c63ff",
 
   "/astrix-app/shared/local-preview.mjs": "07999f6adb",
 

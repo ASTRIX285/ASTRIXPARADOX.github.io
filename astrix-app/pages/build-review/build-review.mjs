@@ -16,6 +16,7 @@ import {prepareReviewState,supportedElements,entryReadiness} from './build-revie
 import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs';
 import {renderSharedBuild} from './build-review-shared.mjs';
 import {selectOwnedWeapons} from '../guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
+import {buildFitUrl} from '../build-fit/build-fit-url.mjs';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -58,7 +59,10 @@ function stepOne(){
   const inventory=`<section class="br-card br-side" aria-labelledby="brInventoryTitle"><h2 id="brInventoryTitle" class="br-kicker">YOUR INVENTORY</h2>${counts.total?`<p class="br-big">${counts.found} <span>of ${counts.total} shared items found</span></p><div class="br-meter" role="img" aria-label="${counts.found} of ${counts.total} shared items found"><i style="width:${Math.round(counts.found/counts.total*100)}%"></i></div>
     <ul class="br-facts"><li>${counts.guardian} on this Guardian</li><li>${counts.vault} in your Vault, moved only if you Apply</li>${counts.other?`<li>${counts.other} on another Guardian or in Postmaster</li>`:''}${counts.substituted?`<li>${counts.substituted} replaced by your closest match</li>`:''}<li>${counts.missing} missing</li></ul>`:'<p class="br-note">This share has no weapons or armour. Everything marked "Picked from your inventory" or "Suggestion" is Paradox\'s choice, not the sharer\'s.</p>'}
     ${view.missingNames.length?`<p class="br-note">Missing: ${esc(view.missingNames.join(', '))}.</p>`:''}${view.blockers.length?`<ul class="br-blockers">${view.blockers.map(line=>`<li>${esc(line)}</li>`).join('')}</ul>`:''}</section>`;
-  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button><button class="br-secondary br-wide" type="button" id="brManual">Send to Builder</button>`;
+  // Shared items you do not own are never swapped without your decision: they go through Build Fit.
+  const toFit=counts.missing+counts.substituted>0;
+  const handoff=toFit?`<a class="br-secondary br-wide" id="brFit" href="${esc(buildFitUrl({dim:page.selection.dim,characterId:page.selection.characterId,membershipId:page.selection.membershipId,membershipType:page.selection.membershipType}))}">Fit to your inventory</a>`:'<button class="br-secondary br-wide" type="button" id="brManual">Send to Builder</button>';
+  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button>${handoff}`;
   return `<div class="br-grid">
   <section class="br-card br-main" aria-labelledby="brStepTitle"><h1 id="brStepTitle">This is the build you imported</h1><p class="br-lede">Nothing has been analysed or changed yet. "From the share" is the sharer's build. Anything else is Paradox's pick from your inventory.</p>
     ${renderSharedBuild(view,{weapons:page.weapons})}

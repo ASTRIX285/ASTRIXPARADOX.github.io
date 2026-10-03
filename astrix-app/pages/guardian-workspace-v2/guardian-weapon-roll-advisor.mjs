@@ -1,5 +1,5 @@
 import {adviseWeaponRoll} from "../../core/weapon-roll-advisor.mjs?v=7ffb785242";
-import {classifyWeaponPlug} from './guardian-semantic-resolver.mjs?v=2b4bbe609a';
+import {classifyWeaponPlug} from './guardian-semantic-resolver.mjs?v=ee8df72e36';
 
 const INTELLIGENCE_URL=new URL("../../data/paradox-forge/intelligence/weapon-perk-intelligence.json",import.meta.url);
 let intelligencePromise=null;
