@@ -1,0 +1,22 @@
+name: Validate Division WorkBench
+# Runs on every PR and every push to main. Needs no secrets and no browser,
+# so it can be a required status check for main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  division-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Division gate self-test
+        run: node astrix-app/tools/test-division-validator.mjs
+      - name: Division gate
+        run: node astrix-app/tools/validate-division.mjs

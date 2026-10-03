@@ -1,0 +1,12 @@
+# chore/division-gate-ci: Division gate, validator, CI and empty folder layout.
+.github/workflows/validate-division.yml
+astrix-app/ARCHITECTURE-GATES.md
+astrix-app/games/division/README.md
+astrix-app/games/division/engine/.gitkeep
+astrix-app/games/division/schema/.gitkeep
+astrix-app/games/division/td2/assets/.gitkeep
+astrix-app/games/division/td2/data/.gitkeep
+astrix-app/platform/adapters/division/.gitkeep
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-division-validator.mjs
+astrix-app/tools/validate-division.mjs
