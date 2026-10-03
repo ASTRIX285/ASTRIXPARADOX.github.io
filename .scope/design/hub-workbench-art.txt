@@ -1,0 +1,4 @@
+# design/hub-workbench-art: crop the WorkBench card art to show the agent.
+astrix-app/tools/validate-tools-hub.mjs
+hub/index.html
+hub/tools.css

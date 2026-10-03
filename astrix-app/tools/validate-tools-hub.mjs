@@ -54,7 +54,7 @@ const tools=read('hub/index.html');
 const toolsCss=read('hub/tools.css');
 const toolsMission=read('hub/tools.mjs');
 assert.ok(tools.includes('href="index.html" class="active">The Hub</a>'),'The Hub navigation item must be active');
-assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261003-1"'),'The Hub must request its stylesheet without stale cache reuse');
+assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261003-2"'),'The Hub must request its stylesheet without stale cache reuse');
 assert.ok(tools.includes('<title>The Hub | ASTRIX PARADOX</title>')&&tools.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'The Hub title and canonical');
 const redirect=read('tools/index.html');
 assert.ok(redirect.includes("location.replace('/hub/'+location.search+location.hash)")&&redirect.includes('content="0; url=/hub/"')&&redirect.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'/tools/ redirects to /hub/ keeping the query and hash');
