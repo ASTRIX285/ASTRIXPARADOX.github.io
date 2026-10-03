@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/talent-tree.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/talent-tree.schema.json",
   "title": "Forever talent tree",
   "type": "object",
   "required": ["id", "name", "classIds", "order", "talents", "provenance"],

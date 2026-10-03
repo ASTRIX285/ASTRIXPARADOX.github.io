@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/character-build.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/character-build.schema.json",
   "title": "Forever character build",
   "description": "User-entered build. This is user data, not game data, so it has no provenance block. Shareable via URL.",
   "type": "object",

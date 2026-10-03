@@ -78,11 +78,13 @@
 
   "/astrix-app/games/division/index.mjs": "51d1761661",
 
+  "/astrix-app/games/wow-forever/engine/build-rules.mjs": "a3a39cb2d7",
+
   "/astrix-app/games/wow-forever/index.mjs": "bdf8bf2b9e",
 
-  "/astrix-app/games/wow-forever/pipeline/build-forever-db.mjs": "ec99632e36",
+  "/astrix-app/games/wow-forever/pipeline/build-forever-db.mjs": "0980943d9f",
 
-  "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "696d4f384a",
+  "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8c07c3800b",
 
   "/astrix-app/pages/build-review/build-review-model.mjs": "54ecca3953",
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/provenance.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/provenance.schema.json",
   "title": "Provenance",
   "description": "Where a generated record came from. Every generated record carries one.",
   "type": "object",

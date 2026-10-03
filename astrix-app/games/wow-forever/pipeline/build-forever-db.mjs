@@ -3,7 +3,7 @@
  * WoW Forever database builder.
  *
  * Turns client DB2 CSV exports (wago.tools, pinned build) into the JSON records
- * described in ../data/schema/. Rules:
+ * described in ../schema/. Rules:
  *   - Every record carries provenance: product, build, table, row id, source sha256.
  *   - A field the pipeline cannot resolve from a real column becomes
  *     { pending: true, reason } and is never filled with a guess.

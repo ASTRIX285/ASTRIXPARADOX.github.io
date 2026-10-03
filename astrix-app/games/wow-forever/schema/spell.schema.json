@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/spell.schema.json",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/spell.schema.json",
   "title": "Forever spell",
   "description": "Only spells referenced by talents, set bonuses or items are kept.",
   "type": "object",

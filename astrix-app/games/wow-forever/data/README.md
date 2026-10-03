@@ -1,6 +1,6 @@
 # WoW Forever data
 
-- `schema/` JSON Schemas (2020-12) for every generated record and for a user's saved build.
+- `rules.json` rule values that are not in the client tables, each with an official-post source.
 - `stat-types.json` stat type id to name map. Empty until each entry has a cited source.
 - `generated/` does not exist yet. It is created from a reviewed run of the pipeline, never by hand.
 
