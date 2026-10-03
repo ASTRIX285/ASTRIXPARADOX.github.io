@@ -1,0 +1,5 @@
+{
+  "$comment": "Client stat type id to display name. Empty on purpose. Each entry must cite a source (wiki enum page or client table) before the advisor may name a stat. Until then the UI shows the raw id as pending.",
+  "source": null,
+  "types": {}
+}

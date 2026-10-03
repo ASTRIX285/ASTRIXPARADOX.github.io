@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/character-build.schema.json",
+  "title": "Forever character build",
+  "description": "User-entered build. This is user data, not game data, so it has no provenance block. Shareable via URL.",
+  "type": "object",
+  "required": ["schemaVersion", "dataBuild", "classId", "level", "talents", "gear"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "dataBuild": { "type": "string", "description": "The pinned client build the ids refer to." },
+    "classId": { "type": "integer" },
+    "raceId": { "type": ["integer", "null"] },
+    "level": { "type": "integer", "minimum": 1, "maximum": 60 },
+    "ruleset": { "type": ["string", "null"] },
+    "talents": {
+      "type": "object",
+      "description": "Talent id to chosen rank (1-based).",
+      "patternProperties": { "^[0-9]+$": { "type": "integer", "minimum": 1 } },
+      "additionalProperties": false
+    },
+    "legacy": {
+      "type": "object",
+      "description": "Legacy perk key to points. Keys stay pending until Blizzard publishes the trees.",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "gear": {
+      "type": "object",
+      "description": "Inventory slot key to item id.",
+      "additionalProperties": { "type": "integer" }
+    },
+    "goal": { "type": ["string", "null"], "enum": ["leveling", "dungeons", "raid", "pvp", null] }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/provenance.schema.json",
+  "title": "Provenance",
+  "description": "Where a generated record came from. Every generated record carries one.",
+  "type": "object",
+  "required": ["product", "build", "table", "rowId", "sourceSha256"],
+  "additionalProperties": false,
+  "properties": {
+    "product": { "type": "string", "description": "wago.tools product, e.g. wow_classic_beta while Forever is in beta." },
+    "build": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(-test)?$" },
+    "table": { "type": "string", "description": "Client DB2 table name." },
+    "rowId": { "type": "integer" },
+    "sourceSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

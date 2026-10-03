@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/talent.schema.json",
+  "title": "Forever talent",
+  "type": "object",
+  "required": ["id", "treeId", "row", "column", "rankSpellIds", "prerequisites", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "integer" },
+    "treeId": { "type": "integer" },
+    "row": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "$ref": "pending.schema.json" }] },
+    "column": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "$ref": "pending.schema.json" }] },
+    "rankSpellIds": {
+      "oneOf": [{ "type": "array", "items": { "type": "integer" }, "minItems": 1 }, { "$ref": "pending.schema.json" }],
+      "description": "One spell id per rank. Max rank is the array length."
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["talentId", "rank"],
+        "additionalProperties": false,
+        "properties": {
+          "talentId": { "type": "integer" },
+          "rank": { "type": "integer", "minimum": 1, "description": "1-based rank the prerequisite needs." }
+        }
+      }
+    },
+    "provenance": { "$ref": "provenance.schema.json" }
+  }
+}
