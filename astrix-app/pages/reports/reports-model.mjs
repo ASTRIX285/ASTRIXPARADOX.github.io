@@ -80,6 +80,20 @@ export function slimCatalogue(activities){
     const others=[...groups.values()].filter(other=>other!==group&&other.series===group.series);
     if(others.some(other=>other.image===group.image))group.image=group.imageCandidates.find(image=>!others.some(other=>other.image===image))||group.image;
   }
+  // Art per activity (3 Oct 2026): Bungie's generic placeholder.jpg is not an activity's own art. A
+  // Conquest or Nightfall that carries only that uses the base strike's own art (same name); with no
+  // specific image in Bungie data the tile shows the series fallback (no image) and artFallback is set.
+  const generic=image=>!image||/\/placeholder\.jpg$/i.test(image);
+  const baseName=name=>name.replace(/^(?:(?:Expert|Ultimate|Master|Grandmaster|Legend|Hero) Conquest|Nightfall(?: Grandmaster)?|Armsweek Nightfall):\s*/i,'').replace(/^The\s+/i,'').toLocaleLowerCase('en');
+  for(const group of groups.values()){
+    if(!generic(group.image))continue;
+    const own=group.imageCandidates.find(image=>!generic(image));
+    const base=own?null:[...groups.values()].filter(other=>other!==group&&baseName(other.name)===baseName(group.name)&&other.imageCandidates.some(image=>!generic(image)))
+      .sort((a,b)=>(a.series==='vanguard'?0:1)-(b.series==='vanguard'?0:1))[0];
+    group.image=own||base?.imageCandidates.find(image=>!generic(image))||'';
+    if(base)group.artFrom=base.id;
+    if(!group.image)group.artFallback=true;
+  }
   // Prompt 20a-fix2: retain unknown labels only for entirely unlabelled activities.
   for(const group of groups.values())if(group.variants.some(row=>row.difficulty!=='-')){
     for(const row of group.variants)if(row.difficulty==='-')row.difficulty=group.series==='vanguard'?'Standard':'Normal';

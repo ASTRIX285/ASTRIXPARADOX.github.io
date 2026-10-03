@@ -62,14 +62,14 @@ try{
   });
   await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
   const card=page.locator('.reports-card').filter({has:page.getByRole('heading',{name:'Fixture Raid',exact:true})});
-  // Reports restyle (3 Oct 2026): the name over the art, then one row per difficulty with clears and fastest.
+  // Reports design pass (3 Oct 2026): the tile is the art and name only; numbers are on the activity page.
   assert.equal((await card.locator('.reports-art h2').innerText()).trim(),'Fixture Raid','Front card names the activity over its art');
-  assert.equal(await card.locator('.rp-band .rp-band-name').count()>0,true,'Front card shows one stats row per difficulty');
+  assert.equal(await card.locator('.rp-band,table,dl').count(),0,'Front card shows no numbers');
   assert.equal(await card.locator('.reports-band-row,[data-expand]').count(),0,'Front cards have no encounter lists');
   await noOverflow(page,`Reports ${width} cards`);
   await card.getByRole('button').click();await page.waitForFunction(()=>document.querySelector('.reports-history').textContent.includes('All available history pages loaded.'));
   assert.equal(await page.locator('.reports-runs li').count(),20);
-  assert.match(await page.locator('.reports-detail-card table').first().innerText(),/Master\s+Not played\s+Not played/);
+  assert.doesNotMatch(await page.locator('.reports-detail-card table').first().innerText(),/Master/,'A difficulty with no clears is not listed');
   assert.match(await page.locator('.reports-detail-card table').last().innerText(),/Titan\s+22/);
   await noOverflow(page,`Reports ${width} activity`);
   await page.getByRole('button',{name:'Next',exact:true}).click();assert.match(await page.locator('.reports-paging').innerText(),/Page 2/);
@@ -82,7 +82,7 @@ try{
   await page.goBack();assert.equal(await page.locator('.reports-run-page').count(),0);
   await page.goForward();await page.locator('.reports-run-page .reports-player-table').waitFor();
   await page.locator('[data-back-activity]').click();
-  await page.locator('.reports-tabs [data-difficulty="Master"]').click();assert.equal(await page.locator('.reports-runs li').count(),0);
+  assert.equal(await page.locator('.reports-tabs [data-difficulty="Master"]').count(),0,'No tab for a difficulty that was never played');
   await page.locator('.reports-detail-card [data-difficulty="Standard"]').click();assert.equal(await page.locator('.reports-runs li').count(),20);
   // Desktop: the Reports select. Phone and tablet (up to 1199px): the shell's single Guardian card picks the character.
   if(width>1199)await page.getByLabel('Character',{exact:true}).selectOption('2');
@@ -91,19 +91,13 @@ try{
   await page.locator('[data-back]:visible').click();assert.equal((await card.locator('.reports-art h2').innerText()).trim(),'Fixture Raid');
   assert.equal(await page.locator('.rp-tile.is-selected').count(),1,'Back at the grid, the activity just opened is the one selected tile');
   assert.deepEqual(errors,[]);
-  // Real public catalogue: all grouped variants must survive on the activity page.
+  // Real public catalogue with no clears for these characters (3 Oct 2026, completed only): no tiles and no
+  // series tabs, one plain line. Variant and encounter handling is covered by test-reports-completed.
   await page.goto(origin+'/astrix-app/pages/reports/?real');await page.waitForFunction(()=>window.fixtureReady);
-  for(const name of ['The Pantheon','The Desert Perpetual']){
-   const realCard=page.locator('.reports-card').filter({has:page.getByRole('heading',{name,exact:true})});
-   assert.equal(await realCard.count(),1);assert.equal(await realCard.locator('.reports-band-row,[data-expand]').count(),0);
-   await realCard.getByRole('button').click();const labels=await page.locator('.reports-detail:visible table').first().locator('tbody th').allTextContents();
-   if(name==='The Pantheon')assert.equal(labels.length,14);else assert.ok(labels.includes('Epic'));
-   await noOverflow(page,`Real ${name} ${width}`);await page.locator('[data-back]:visible').click();
-  }
-  for(const series of ['raids','dungeons','vanguard','conquests','lost-sectors','exotic','story']){
-   await page.locator(`[data-series="${series}"]`).click();assert.ok(await page.locator('.reports-card:visible').count()>0);
-   await noOverflow(page,`Real ${series} ${width}`);
-  }
+  assert.equal(await page.locator('.reports-card').count(),0,'No tiles for activities never completed');
+  assert.equal(await page.locator('.reports-sidebar [data-series]').count(),0,'No series tabs with nothing completed');
+  assert.equal(await page.locator('.reports-empty').innerText(),'No completed raids yet');
+  await noOverflow(page,`Real catalogue ${width}`);
   if(width===390){
    await page.goto(origin+'/astrix-app/pages/mission-reports/');
    await page.evaluate(()=>{document.querySelectorAll('.mission-auth-shell').forEach(node=>node.hidden=true);document.querySelector('#missionWorkspace').hidden=false;});
