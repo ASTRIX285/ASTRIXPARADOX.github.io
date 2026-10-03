@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/item.schema.json",
+  "title": "Forever item",
+  "type": "object",
+  "required": ["id", "name", "quality", "itemLevel", "requiredLevel", "inventoryType", "itemClass", "itemSubclass", "stats", "itemSetId", "allowableClassMask", "provenance"],
+  "additionalProperties": false,
+  "$defs": {
+    "int": { "oneOf": [{ "type": "integer" }, { "$ref": "pending.schema.json" }] },
+    "stat": {
+      "type": "object",
+      "required": ["statTypeId", "amount"],
+      "additionalProperties": false,
+      "properties": {
+        "statTypeId": { "type": "integer", "description": "Raw client stat type id. Names come from stat-types.json, never hardcoded." },
+        "amount": { "type": "integer" }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "oneOf": [{ "type": "string" }, { "$ref": "pending.schema.json" }] },
+    "quality": { "$ref": "#/$defs/int" },
+    "itemLevel": { "$ref": "#/$defs/int" },
+    "requiredLevel": { "$ref": "#/$defs/int" },
+    "inventoryType": { "$ref": "#/$defs/int" },
+    "itemClass": { "$ref": "#/$defs/int" },
+    "itemSubclass": { "$ref": "#/$defs/int" },
+    "stats": { "oneOf": [{ "type": "array", "items": { "$ref": "#/$defs/stat" } }, { "$ref": "pending.schema.json" }] },
+    "itemSetId": { "$ref": "#/$defs/int" },
+    "allowableClassMask": { "$ref": "#/$defs/int" },
+    "provenance": { "$ref": "provenance.schema.json" }
+  }
+}

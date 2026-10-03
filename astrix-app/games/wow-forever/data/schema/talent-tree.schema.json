@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/data/schema/talent-tree.schema.json",
+  "title": "Forever talent tree",
+  "type": "object",
+  "required": ["id", "name", "classIds", "order", "talents", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "oneOf": [{ "type": "string" }, { "$ref": "pending.schema.json" }] },
+    "classIds": { "type": "array", "items": { "type": "integer" }, "description": "Decoded from the ClassMask column: bit (classId - 1)." },
+    "order": { "oneOf": [{ "type": "integer" }, { "$ref": "pending.schema.json" }] },
+    "talents": { "type": "array", "items": { "$ref": "talent.schema.json" } },
+    "provenance": { "$ref": "provenance.schema.json" }
+  }
+}

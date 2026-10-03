@@ -1,0 +1,11 @@
+{
+  "$comment": "Synthetic test config. Not game data. Used only by test-build-forever-db.mjs.",
+  "product": "test_product",
+  "build": "0.0.0.0-test",
+  "baseUrl": "https://invalid.test",
+  "csvRoute": "/{table}/{build}",
+  "buildsRoute": "/builds",
+  "tables": ["ChrClasses", "Item", "ItemSparse", "ItemSet", "ItemSetSpell", "Spell", "SpellName", "Talent", "TalentTab"],
+  "prereqRankBase": 0,
+  "lockedHeaders": null
+}

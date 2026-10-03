@@ -1,0 +1,3 @@
+ID,TabID,TierID,ColumnIndex,SpellRank_0,SpellRank_1,SpellRank_2,PrereqTalent_0,PrereqTalent_1,PrereqRank_0,PrereqRank_1
+900601,900501,0,1,900401,900403,0,0,0,0,0
+900602,900501,1,1,900404,0,0,900601,0,1,0

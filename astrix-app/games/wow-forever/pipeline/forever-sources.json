@@ -1,0 +1,22 @@
+{
+  "$comment": "Pinned source for every generated Forever record. Change the build only in a reviewed PR. Build seen on wago.tools in public Forever projects (alcaras/forever-ref, rdimascio/wow-ai PR 28). Confirm with: node build-forever-db.mjs --list-builds",
+  "product": "wow_classic_beta",
+  "build": "1.60.1.70094",
+  "baseUrl": "https://wago.tools",
+  "csvRoute": "/db2/{table}/csv?build={build}",
+  "buildsRoute": "/api/builds?product={product}",
+  "tables": [
+    "ChrClasses",
+    "Item",
+    "ItemSparse",
+    "ItemSet",
+    "ItemSetSpell",
+    "Spell",
+    "SpellName",
+    "Talent",
+    "TalentTab"
+  ],
+  "lockedHeaders": null,
+  "prereqRankBase": null,
+  "$comment_prereqRankBase": "Whether Talent.PrereqRank is 0-based or 1-based. Left null on purpose: the build stops until someone checks one known talent with a prerequisite in the pinned build and sets 0 or 1."
+}

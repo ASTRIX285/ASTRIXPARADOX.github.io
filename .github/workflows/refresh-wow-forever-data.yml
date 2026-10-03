@@ -1,0 +1,55 @@
+name: Refresh WoW Forever data
+
+# Manual only. Builds the Forever database from the pinned client build and
+# uploads it as an artifact for review. It never commits to main.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: build = generate the database, list-builds = show builds wago.tools has for the product
+        required: true
+        default: build
+        type: choice
+        options: [build, list-builds]
+  pull_request:
+    paths:
+      - 'astrix-app/games/wow-forever/**'
+      - '.github/workflows/refresh-wow-forever-data.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  forever-data:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: astrix-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dev dependencies
+        run: npm ci
+
+      - name: Pipeline tests (synthetic fixtures)
+        run: node games/wow-forever/pipeline/test-build-forever-db.mjs
+
+      - name: List builds
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'list-builds'
+        run: node games/wow-forever/pipeline/build-forever-db.mjs --list-builds
+
+      - name: Build database from pinned build
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'build'
+        run: node games/wow-forever/pipeline/build-forever-db.mjs --fetch --cache "$RUNNER_TEMP/forever-csv" --out "$RUNNER_TEMP/forever-db"
+
+      - name: Upload generated database for review
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'build'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-forever-db
+          path: ${{ runner.temp }}/forever-db
+          retention-days: 14
