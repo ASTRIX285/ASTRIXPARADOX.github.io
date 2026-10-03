@@ -60,25 +60,31 @@ assert.match(journeyHtml,/id="journeyConnectButton"[\s\S]*?return=https%3A%2F%2F
 assert.match(journeyModule,/function showSignedOut\(\)\{[\s\S]*?signedOut\.hidden=false;[\s\S]*?connectButton\.href=authStartUrl\(\)/,'Signed-out visitors must stay on Journey and connect through the active-origin Bungie return URL');
 assert.doesNotMatch(journeyModule,/location\.replace\([^\n]*guardian-workspace-v2/,'Journey must not redirect signed-out visitors to Character');
 assert.doesNotMatch(journeyHtml,/>ACTIVE GUARDIAN</,'Journey identity must let the verified emblem lead without a redundant active label');
-assert.match(journeyHtml,/journey-2560-visual\.css\?v=20260903-command-header-1/,'Journey must load the cache-busted command-header cleanup');
-assert.match(journeyHtml,/journey\.mjs\?v=20260913-workspace-preload-1/,'Journey must load the backend workspace preload runtime');
+// Exact cache keys go stale on every bump; check the lasting intent (6c308cae changed this CSS key, #415 moved JS versions).
+assert.match(journeyHtml,/<link rel="stylesheet" href="[^"]*journey-2560-visual\.css\?v=[^"]+">/,'Journey must load its command-header stylesheet with a cache key');
+const journeyVersion=JSON.parse(read('astrix-app/module-versions.json')).modules['/astrix-app/pages/journey/journey.mjs'];
+assert.ok(journeyVersion&&journeyHtml.includes(`journey.mjs?v=${journeyVersion}`),'Journey must load the backend workspace preload runtime at its current version');
 assert.match(journeyModule,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey must not block on the full equipment manifest');
 assert.match(journeyModule,/FORGE_HERO_PROFILE_PROMISE/,'Journey must reuse the authenticated hero-card profile request');
 assert.doesNotMatch(journeyModule,/guardianManifest\.hydratePayload\(payload\)/,'Journey must not hydrate every equipment definition before binding records');
-assert.match(journeyModule,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;[\s\S]*?const JOURNEY_LOADER_READY_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile, UI and final-image waits');
+// 90bb9c28 (13 Sep) removed the fixed final-image loader timer: the page reveals when ready, never on a timer.
+assert.match(journeyModule,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile and UI waits');
+assert.doesNotMatch(journeyModule,/JOURNEY_LOADER_READY_WAIT_MS/,'Journey must not hold the loader on a fixed timer');
 assert.match(journeyModule,/function showSignedOut\(\)\{[\s\S]*?ForgeLoader\.authResolved\(\);[\s\S]*?finishJourneyLoader\(signedOut\)/,'Disconnected Journey must reveal its own Bungie connection screen instead of trapping the portal at 12 percent');
 assert.match(journeyModule,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?bindProfileCards\(profile\);[\s\S]*?const mapReady=showJourney\(\);/,'Journey must keep its resolving state until the prepared profile is renderable, then reveal and bind the dashboard in that order');
 assert.match(journeyModule,/function showJourneyUnavailable[\s\S]*?resolving\.hidden=false;[\s\S]*?dashboard\.hidden=true;[\s\S]*?JOURNEY DATA UNAVAILABLE/,'An authenticated Journey failure must show an honest unavailable state instead of an empty dashboard shell');
 assert.doesNotMatch(journeyHtml,/GUARDIAN JOURNEY · SUMMARY HUB|Your top-line Guardian record|VERIFIED DATA ONLY/,'Journey must not repeat its title in a standalone dashboard banner');
 assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy\{[^}]*display:grid!important;[^}]*justify-items:center!important/,'Journey command-console descriptor must inherit the shared centred title layout');
 assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy small\{[^}]*color:var\(--apx-gold,#c9a84c\)!important/,'Journey command-console descriptor must inherit the shared gold purpose treatment');
-assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) 910px minmax\(0,1fr\)!important/,'Journey must keep the three Guardian cards centred in the shared command header');
+// 3ac9e576 (14 Sep) moved the 910px row onto the --apx-hero-row token; the layout is unchanged.
+assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) var\(--apx-hero-row,910px\) minmax\(0,1fr\)!important/,'Journey must keep the three Guardian cards centred in the shared command header');
 assert.match(sharedHeroCss,/\.apx-destination-header-copy\{position:absolute!important;top:50%!important;left:calc\(25% - 5rem\)!important;[^}]*transform:translate\(-50%,-50%\)!important/,'Journey page identity must remain compact and centred between the brand and first Guardian card');
 assert.match(sharedHeroCss,/\.apx-destination-header-state\{[^}]*position:absolute!important;[^}]*clip-path:inset\(50%\)!important/,'Journey connection state must remain accessible without displaying redundant authenticated copy');
 assert.doesNotMatch(journeyHtml,/id="journeyAccountVisual"|id="journeyAccountAvatar"/,'Journey must not duplicate the shared Bungie account visual');
 assert.match(guardianAuth,/\.bungie-account-visual\{[\s\S]*?background:conic-gradient\(from 218deg,#063d2e[\s\S]*?#16bd82[\s\S]*?#9dffda/,'The shared account visual must use a green outer ring as the connected confirmation');
-assert.match(guardianAuth,/if\(session\?\.authenticated\)\{[\s\S]*?control\.button\.hidden=true;[\s\S]*?control\.visual\.hidden=false;/,'Connected destinations must hide the old text button and show only the account visual');
-assert.match(guardianAuth,/fetch\(new URL\("\/bungie\/account",AUTH_ORIGIN\)[\s\S]*?setAccountVisual\(control,account,session\)/,'The shared header must load the signed-in user’s Bungie account avatar without another OAuth prompt');
+assert.match(guardianAuth,/if\(session\?\.authenticated===true\)\{[\s\S]*?control\.button\.hidden=true;[\s\S]*?control\.visual\.hidden=false;/,'Connected destinations must hide the old text button and show only the account visual');
+// The account read is now shared per page load (requestAccount); the avatar still comes from /bungie/account.
+assert.match(guardianAuth,/fetch\(new URL\("\/bungie\/account",AUTH_ORIGIN\)[\s\S]*?setAccountVisual\(control,await requestAccount\(session\),session\)/,'The shared header must load the signed-in user’s Bungie account avatar without another OAuth prompt');
 assert.match(authWorker,/function bungieAccountRoute[\s\S]*?membershipData\.Response\?\.bungieNetUser[\s\S]*?profilePicturePath/,'The auth Worker must expose the authenticated Bungie profile picture safely');
 assert.match(authWorker,/url\.pathname === "\/bungie\/account"[\s\S]*?bungieAccountRoute/,'The Bungie account route must be available to authenticated Journey sessions');
 assert.match(authWorker,/const BUNGIE_AUTHORIZE = "https:\/\/www\.bungie\.net\/en\/oauth\/authorize"/,'OAuth must always begin at Bungie.');
@@ -124,15 +130,19 @@ assert.match(journeyCss,/\.journey-page \.journey-rank-badge\{[\s\S]*?background
 assert.match(journeyHtml,/id="journeyGuardianStats"[\s\S]*?aria-label="Selected Guardian statistics"/,'The Journey identity panel must provide the selected Guardian stat mount');
 assert.doesNotMatch(journeyHtml,/VERIFIED GUARDIAN|id="journeyVerifiedGuardian"/,'The sandbox must remove the redundant visible verified-Guardian label');
 assert.match(journeyModule,/const STAT_ORDER=\[2996146975,392767087,1943323491,1735777505,144602215,4244567218\];[\s\S]*?function bindGuardianStats[\s\S]*?payload\?\.statDefinitions[\s\S]*?character\?\.stats/,'The sandbox must bind all six official stats for the selected Guardian');
-assert.match(journeyCss,/\.journey-page \.journey-identity-stats\{[\s\S]*?left:33\.333%;[\s\S]*?grid-template-columns:repeat\(6,minmax\(0,1fr\)\)[\s\S]*?overflow:hidden/,'Guardian stats must remain within the identity-card boundary');
+// 6c308cae (17 Sep, approved palette) moved the six stats into an in-flow grid inside the card.
+assert.match(journeyCss,/\.journey-page \.journey-identity-stats\{grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/,'Guardian stats must remain a six-column grid inside the identity card');
 assert.match(journeyHtml,/journey-vault-card[\s\S]*?>Vault inventory<[\s\S]*?id="journeyVault"/,'The sandbox must expose the redesigned Vault inventory card');
 assert.match(journeyModule,/function bindVault[\s\S]*?ARMOUR_ITEM_TYPE[\s\S]*?journey-vault-total[\s\S]*?>ALL<[\s\S]*?journey-vault-breakdown[\s\S]*?>ARMOUR<[\s\S]*?WEAPONS &amp; EQUIPMENT/,'The sandbox must split Vault inventory into All, Armour and Weapons & Equipment');
 assert.match(journeyModule,/if\(postmasterMax>=18\)[\s\S]*?POSTMASTER NEAR CAPACITY/,'Postmaster must remain a conditional warning rather than the card identity');
-assert.match(journeyCss,/\.journey-page \.journey-vault-summary\{[\s\S]*?linear-gradient[\s\S]*?\.journey-page \.journey-vault-breakdown\{[\s\S]*?grid-template-columns/,'Vault inventory must use the approved crimson-and-gold split-card treatment');
+// 6c308cae (17 Sep) replaced the gradient with the raised panel and a crimson edge; the split breakdown stays.
+assert.match(journeyCss,/\.journey-page \.journey-vault-summary\{[^}]*background:var\(--apx-colour-raised\)[^}]*inset 3px 0 0[\s\S]*?\.journey-page \.journey-vault-breakdown\{[^}]*grid-template-columns/,'Vault inventory must use the raised split card with its crimson edge');
 assert.match(journeyCss,/\.journey-page \.mission-crest\{[\s\S]*?position:absolute;[\s\S]*?inset:0;[\s\S]*?transform:none/,'Journey must remove the inherited decorative diamond and let the emblem own the whole card');
 assert.match(journeyCss,/\.journey-page \.mission-crest img\{[\s\S]*?width:100%;[\s\S]*?height:100%;[\s\S]*?object-fit:cover;[\s\S]*?transform:none/,'Verified Bungie emblem artwork must fill the whole identity card');
-assert.match(journeyCss,/\.journey-page \.mission-identity-copy\{[\s\S]*?width:66\.667%;[\s\S]*?margin-left:33\.333%/,'Guardian class and subclass must overlay the emblem beginning one third into the card');
-assert.match(sessionCache,/const PREPARED_PAGE_REFRESH_MS=10\*60\*1000;/,'Prepared pages must check their merged Bungie payload every five minutes');
+// 6c308cae (17 Sep) right-aligns the class and subclass over the emblem instead of starting one third in.
+assert.match(journeyCss,/\.journey-page \.mission-identity-copy\{[^}]*position:relative;[^}]*z-index:1;[^}]*text-align:right;/,'Guardian class and subclass must overlay the emblem, right-aligned');
+// 6277f93b (27 Sep) set the interval to five minutes, as this message always said.
+assert.match(sessionCache,/const PREPARED_PAGE_REFRESH_MS=5\*60\*1000;/,'Prepared pages must check their merged Bungie payload every five minutes');
 assert.match(journeyModule,/loadPreparedPagePayload\(journeySession,'journey',\{force:true\}\)/,'Background refreshes must request the merged Journey page payload through the shared client');
 assert.match(journeyModule,/createPreparedPageRefreshController\(\{[\s\S]*?page:'journey'[\s\S]*?refresh:options=>refreshJourneyProfile\(options\)/,'Journey must use the persistent prepared page refresh schedule');
 assert.match(journeyModule,/journeyRefreshController\.check\(\)[\s\S]*?visibilitychange/,'Journey must immediately check an overdue prepared payload when the page becomes visible');
