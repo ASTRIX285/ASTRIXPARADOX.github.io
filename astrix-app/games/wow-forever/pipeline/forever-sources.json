@@ -18,5 +18,5 @@
   ],
   "lockedHeaders": null,
   "prereqRankBase": null,
-  "$comment_prereqRankBase": "Whether Talent.PrereqRank is 0-based or 1-based. Left null on purpose: the build stops until someone checks one known talent with a prerequisite in the pinned build and sets 0 or 1."
+  "$comment_prereqRankBase": "Whether Talent.PrereqRank is 0-based or 1-based. Left null: the importer proves it from the data (a 0 value means 0-based, a value equal to the required talent's max rank means 1-based) and records the proof in manifest.json. If set, the data must agree or the build stops."
 }

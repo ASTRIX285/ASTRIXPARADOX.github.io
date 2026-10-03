@@ -152,6 +152,42 @@ export function decodeClassMask(mask, classIds) {
   return classIds.filter(id => id >= 1 && id <= 31 && (mask & (1 << (id - 1))) !== 0);
 }
 
+/* Works out whether Talent.PrereqRank is 0-based or 1-based from the data itself.
+   A value of 0 is only possible when 0-based. A value equal to the required
+   talent's max rank is only possible when 1-based. Both seen, or neither seen,
+   or a value above max rank, stops the build. */
+export function detectPrereqRankBase(talentTable) {
+  const t = talentTable;
+  const maxRank = new Map();
+  for (const [id, r] of t.byId) {
+    const ranks = t.ints(r, 'rankArray');
+    if (!isPending(ranks)) maxRank.set(id, ranks.filter(n => n > 0).length);
+  }
+  const proof = { zeroBased: [], oneBased: [], impossible: [] };
+  for (const [id, r] of [...t.byId.entries()].sort((a, b) => a[0] - b[0])) {
+    const preIds = t.ints(r, 'prereqTalentArray');
+    const preRanks = t.ints(r, 'prereqRankArray');
+    if (isPending(preIds) || isPending(preRanks)) continue;
+    preIds.forEach((preId, i) => {
+      if (!(preId > 0)) return;
+      const value = preRanks[i];
+      const max = maxRank.get(preId);
+      if (!Number.isInteger(max) || max < 1) return;
+      const row = { talentId: id, prereqTalentId: preId, prereqRankValue: value, prereqMaxRank: max };
+      if (value === 0) proof.zeroBased.push(row);
+      else if (value === max) proof.oneBased.push(row);
+      else if (value > max || value < 0) proof.impossible.push(row);
+    });
+  }
+  const sample = list => list.slice(0, 3);
+  if (proof.impossible.length) throw new Error(`Talent.PrereqRank has values outside any rank range, e.g. ${JSON.stringify(sample(proof.impossible))}.`);
+  if (proof.zeroBased.length && proof.oneBased.length) throw new Error(`Talent.PrereqRank evidence conflicts: ${proof.zeroBased.length} rows only fit 0-based, ${proof.oneBased.length} only fit 1-based.`);
+  if (!proof.zeroBased.length && !proof.oneBased.length) return { value: null, method: 'not provable from data', rowsSupporting: 0, examples: [] };
+  const base = proof.zeroBased.length ? 0 : 1;
+  const used = base === 0 ? proof.zeroBased : proof.oneBased;
+  return { value: base, method: 'detected', rowsSupporting: used.length, examples: sample(used) };
+}
+
 export function buildDatabase(tables, sources) {
   const t = tables;
   const pendingCounts = {};
@@ -218,7 +254,18 @@ export function buildDatabase(tables, sources) {
     count('itemSet', rec); return rec;
   });
 
-  const rankBase = sources.prereqRankBase;
+  const detected = detectPrereqRankBase(t.Talent);
+  const configured = sources.prereqRankBase;
+  if (Number.isInteger(configured) && detected.value !== null && configured !== detected.value) {
+    throw new Error(`forever-sources.json sets prereqRankBase ${configured} but the data proves ${detected.value}.`);
+  }
+  if (!Number.isInteger(configured) && detected.value === null) {
+    throw new Error('Talent.PrereqRank cannot be proven 0-based or 1-based from this build. Check one known talent with a prerequisite and set prereqRankBase in forever-sources.json.');
+  }
+  const prereqRankBase = detected.value === null
+    ? { ...detected, value: configured, method: 'configured by hand, data silent' }
+    : (Number.isInteger(configured) ? { ...detected, method: 'configured and confirmed by data' } : detected);
+  const rankBase = prereqRankBase.value;
   const talentsByTree = new Map();
   for (const [id, r] of [...t.Talent.byId.entries()].sort((a, b) => a[0] - b[0])) {
     const treeId = t.Talent.int(r, 'treeId');
@@ -230,7 +277,6 @@ export function buildDatabase(tables, sources) {
     const preRanks = t.Talent.ints(r, 'prereqRankArray');
     let prerequisites = [];
     if (!isPending(preIds) && !isPending(preRanks)) {
-      if (!Number.isInteger(rankBase)) throw new Error('forever-sources.json prereqRankBase must be set (0 or 1) and verified against a known talent before talents are built.');
       prerequisites = preIds
         .map((talentId, i) => ({ talentId, rank: preRanks[i] - rankBase + 1 }))
         .filter(p => p.talentId > 0);
@@ -278,6 +324,7 @@ export function buildDatabase(tables, sources) {
     tables: Object.fromEntries(Object.values(t).sort((a, b) => a.name.localeCompare(b.name)).map(x => [x.name, { rows: x.rows.length, sha256: x.sha }])),
     counts: { classes: classes.length, items: items.length, itemSets: itemSets.length, talentTrees: talentTrees.length, talents: talentTrees.reduce((n, x) => n + x.talents.length, 0), spells: spells.length },
     itemShards: Math.ceil(items.length / ITEM_SHARD_SIZE),
+    prereqRankBase,
     pendingCounts: Object.fromEntries(Object.entries(pendingCounts).sort())
   };
   return { manifest, classes, items, itemSets, talentTrees, spells };
@@ -382,6 +429,7 @@ async function main() {
   const db = buildDatabase(tables, sources);
   await writeDatabase(db, snapshot, opt.out);
   console.log(JSON.stringify(db.manifest.counts));
+  console.log(`PREREQ_RANK_BASE ${JSON.stringify(db.manifest.prereqRankBase)}`);
   const pendings = Object.entries(db.manifest.pendingCounts);
   if (pendings.length) console.log(`PENDING ${pendings.map(([k, v]) => `${k}=${v}`).join(' ')}`);
   console.log('FOREVER_DB=PASS');
