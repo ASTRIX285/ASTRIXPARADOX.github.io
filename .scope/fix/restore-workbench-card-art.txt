@@ -1,0 +1,9 @@
+# fix/restore-workbench-card-art: revert PRs #432 and #429, framed Division art back on the WorkBench card.
+astrix-app/tools/validate-tools-hub.mjs
+hub/index.html
+hub/tools.css
+img/games/BG_the_divition.jpg
+img/games/the-division-2-rescue-team-ksvwkrsdg1v5pg4w_edited.jpg
+img/games/the-division-title-d85u7dme62n4f1u0_edited.jpg
+img/reviews/the-division.png
+img/reviews/the-division2.png

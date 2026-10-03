@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1&amp;gloss=20260926-4">
-  <link rel="stylesheet" href="tools.css?v=20260830-mission-popup&amp;hub=20261003-3">
+  <link rel="stylesheet" href="tools.css?v=20260830-mission-popup&amp;hub=20261003-4">
 
   <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/favicon-16x16.png">
@@ -89,7 +89,7 @@
           {kind:'live',game:'Destiny 2',name:'The Forge',art:'/img/games/D2_JB.jpg',
             copy:'Connect your Bungie account to review your Guardian, equipped gear, saved loadouts and build analysis in one connected workspace.',
             action:{label:'Enter The Forge',href:'../astrix-app/pages/home/'},more:{label:'About the Destiny 2 tools',href:'/tools/destiny-2/'}},
-          {kind:'coming',game:'The Division',name:'WorkBench',art:null,status:'Coming soon',
+          {kind:'coming',game:'The Division',name:'WorkBench',art:'/img/games/BG_the_divition.jpg',artPos:'6% 20%',status:'Coming soon',
             copy:'A companion workspace for your agent, gear and builds, built around The Division\'s own systems.',
             action:{label:'Enter WorkBench'}},
           {kind:'future'}
@@ -101,8 +101,7 @@
           var action=live?'<a class="btn-primary forge-entry-link" href="'+esc(tool.action.href)+'">'+esc(tool.action.label)+'</a>'
             :'<button class="btn-primary forge-entry-link" type="button" disabled aria-describedby="'+id+'-status">'+esc(tool.action.label)+'</button>';
           return '<article class="platform-card platform-card-active'+(live?'':' platform-card-soon')+' reveal'+(index?' reveal-delay-'+index:'')+'" aria-labelledby="'+id+'">'
-            +(tool.art?'<div class="platform-art" aria-hidden="true" style="--platform-art:url(\''+esc(tool.art)+'\')'+(tool.artPos?';--platform-art-pos:'+esc(tool.artPos):'')+'"></div>'
-              :'<div class="platform-art platform-art-pending" aria-hidden="true"><span>Key art pending</span></div>')
+            +'<div class="platform-art" aria-hidden="true" style="--platform-art:url(\''+esc(tool.art)+'\')'+(tool.artPos?';--platform-art-pos:'+esc(tool.artPos):'')+'"></div>'
             +'<div class="platform-copy"><div class="platform-meta"><span>'+esc(tool.game)+'</span>'+(tool.status?'<span class="platform-status" id="'+id+'-status">'+esc(tool.status)+'</span>':'')+'</div>'
             +'<h2 id="'+id+'">'+esc(tool.name)+'</h2><p>'+esc(tool.copy)+'</p>'+action
             +(tool.more?'<p><a href="'+esc(tool.more.href)+'">'+esc(tool.more.label)+'</a></p>':'')+'</div></article>';

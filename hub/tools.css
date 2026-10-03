@@ -146,22 +146,6 @@
     var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
 }
 
-/* A tool without approved key art: panel fill, hairline edge, muted label. The
-   double class outranks the art background at every breakpoint. */
-.platform-art.platform-art-pending {
-  display: grid;
-  place-items: center;
-  background: var(--apx-colour-panel);
-  box-shadow: inset 0 0 0 1px var(--apx-colour-border);
-}
-
-.platform-art-pending span {
-  color: var(--apx-colour-steel);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
 .platform-copy {
   display: flex;
   flex-direction: column;
