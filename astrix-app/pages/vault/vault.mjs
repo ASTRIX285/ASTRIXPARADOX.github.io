@@ -1,4 +1,4 @@
-import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1';
+import {createVaultTransferFeedback} from './vault-transfer-feedback.mjs?v=20260925-feedback-1&columns=20260925-1&toast=20260925-1&xfer=20261003-1';
 import {authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?plain=20260925-2&refresh=20260927-1&recovery=20260927-4&swr=20261002-1';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
 import {bindPreparedPageRefreshControl,createPreparedPageRefreshController,markGuardianFastReturn} from '../guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
@@ -9,7 +9,7 @@ import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
 import {bindParadoxItemInspect} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260913-presentation-consistency-1&status=20260917-compact-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1';
-import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2&stack=20261002-1';
+import {confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executePostmasterCollectionIntent,executeVaultTransferIntent,inventoryLocations,liveActionCapabilities,requestFreshProfile,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../guardian-workspace-v2/guardian-live-actions.mjs?v=20260914-fast-transfer-2&plain=20260925-2&stack=20261002-1';
 import {bindInventoryWorkspaceHovers,bindInventoryWorkspaceInteractions,equippedAndCarriedMarkup,inventoryGroupsMarkup,itemTileMarkup,postmasterMarkup as sharedPostmasterMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&copy=20260925-1&stack=20261002-1';
 import {bindItemSheet,decoratePostmasterPullButtons,isCompactInventory,postmasterFailure,postmasterPullState} from '../../shared/inventory-item-actions.mjs?inv=20261002-1';
 
@@ -238,6 +238,25 @@ async function refreshAfterLiveAction(liveInventory=null){
   await applyVaultRefresh(next,{reason:'mutation'});
 }
 
+// Every move ends within a fixed time: a tick, or a plain reason with the tile back
+// where Bungie last showed it. Same transfer path as the item card and tap actions.
+const LIVE_ACTION_DEADLINE_MS=30000,LIVE_REQUEST_TIMEOUT_MS=12000;
+function boundedLiveFetch(signal,seen){
+  return async(input,init={})=>{
+    const response=await fetch(input,{...init,signal:AbortSignal.any([signal,AbortSignal.timeout(LIVE_REQUEST_TIMEOUT_MS)])});
+    // Keep Bungie's own refusal so a timed-out move can still say why.
+    if(String(init.method||'').toUpperCase()==='POST')response.clone().json().then(body=>{if(body&&Number(body.ErrorCode)>1&&body.Message)seen.message=String(body.Message);}).catch(()=>{});
+    return response;
+  };
+}
+// After a deadline, one fresh read decides: the item is at the destination (done) or not (failed).
+async function settleTransfer(action){
+  const intent=action.intent,live=await requestFreshProfile({scope:'inventory',fetchImpl:(input,init={})=>fetch(input,{...init,signal:AbortSignal.timeout(LIVE_REQUEST_TIMEOUT_MS)})});
+  const location=inventoryLocations(live).locations.get(String(intent?.item?.itemInstanceId||''))?.source,destination=intent?.destination||{};
+  const arrived=Boolean(location)&&(destination.kind==='vault'?location.kind==='vault':['carried','equipped'].includes(location.kind)&&String(location.characterId)===String(destination.characterId));
+  return {arrived,live};
+}
+
 async function performPendingVaultAction(){
   if(vaultActionBusy)return;
   if(!pendingVaultAction)pendingVaultAction=vaultActionQueue.shift()||null;
@@ -247,13 +266,18 @@ async function performPendingVaultAction(){
   if(confirm)confirm.disabled=true;
   if(cancel)cancel.disabled=true;
   if(progress)progress.textContent='Transferring…';
-  let result=null;
+  let result=null,expired=false;
+  const abort=new AbortController(),seen={message:''},fetchImpl=boundedLiveFetch(abort.signal,seen);
+  let deadline=null;
   try{
-    const onProgress=row=>{const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,row);setStatus(label);};
-    const onAccepted=async({liveInventory})=>{await refreshAfterLiveAction(liveInventory);setStatus('Item moved. Updating inventory…','good');};
-    result=action.kind==='transfer'
-      ?await executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,onProgress,onAccepted})
-      :await executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,onProgress});
+    const onProgress=row=>{if(expired)return;const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,row);setStatus(label);};
+    const onAccepted=async({liveInventory})=>{if(expired)return;await refreshAfterLiveAction(liveInventory);setStatus('Item moved. Updating inventory…','good');};
+    const running=action.kind==='transfer'
+      ?executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,fetchImpl,onProgress,onAccepted})
+      :executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,fetchImpl,onProgress});
+    running.catch(()=>{});
+    result=await Promise.race([running,new Promise((_,reject)=>{deadline=setTimeout(()=>{expired=true;abort.abort();reject(Object.assign(new Error('Bungie did not confirm the move in time.'),{deadline:true}));},LIVE_ACTION_DEADLINE_MS);})]);
+    clearTimeout(deadline);
     const confirmed=result.status==='applied'&&result.readback?.verified,failure=action.kind==='postmaster'&&!confirmed?vaultPostmasterFailure(result):null;
     if(action.kind==='postmaster')for(const key of action.itemKeys||[]){if(confirmed)postmasterFailures.delete(key);else if(failure)postmasterFailures.set(key,failure);}
     if(result.attemptCount>0||result.mutationCount>0||result.readback?.verified)await refreshAfterLiveAction(result.liveInventory);
@@ -262,6 +286,17 @@ async function performPendingVaultAction(){
     if(confirmed)setStatus(action.kind==='transfer'?'Transfer complete.':'Collected from Postmaster.','good');
     else setStatus(`${result.status==='partial'?'Live action partially completed':'No live change confirmed'}: ${failure?.reason||actionFailureMessage(result)}`,'error');
   }catch(error){
+    clearTimeout(deadline);expired=true;abort.abort();
+    if(action.kind==='transfer'){
+      // Decide from Bungie's own inventory, then show it: a moved item lands, anything else goes back.
+      let settled=null;try{settled=await settleTransfer(action);}catch{}
+      if(settled){try{await refreshAfterLiveAction(settled.live);}catch{}}
+      if(settled?.arrived){transferFeedback.finish(action.queueKey,{success:true});setStatus('Transfer complete.','good');return;}
+      const reason=seen.message||(error?.deadline?error.message:error?.payload?.Message||error?.message)||'Bungie did not confirm the move.';
+      transferFeedback.finish(action.queueKey,{success:false,error:reason});
+      setStatus(`No move confirmed: ${reason}`,'error');
+      return;
+    }
     if(result?.attemptCount>0||result?.mutationCount>0)try{await refreshAfterLiveAction();}catch{}
     const failure=action.kind==='postmaster'?vaultPostmasterFailure(null,error):null;
     if(failure){for(const key of action.itemKeys||[])postmasterFailures.set(key,failure);renderTransferWorkspace();}

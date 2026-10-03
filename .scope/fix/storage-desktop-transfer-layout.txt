@@ -1,0 +1,13 @@
+astrix-app/pages/guardian-workspace-v2/guardian-loadouts.mjs
+astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/pages/vault/index.html
+astrix-app/pages/vault/vault-transfer-feedback.mjs
+astrix-app/pages/vault/vault.mjs
+astrix-app/shared/guardian-inventory-workspace.css
+astrix-app/tools/fixtures/storage-three-guardians.mjs
+astrix-app/tools/test-storage-desktop-transfer.mjs
+astrix-app/tools/validate-responsive-layout-contract.mjs
+astrix-app/tools/validate-vault-foundation.mjs
