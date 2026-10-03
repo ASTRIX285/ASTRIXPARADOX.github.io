@@ -340,7 +340,7 @@
     const active=activeShellKey();
     const drawer=document.createElement('div');drawer.className='ax-drawer';drawer.id='axToolDrawer';drawer.hidden=true;
     const links=[{key:'home',label:'Home',href:'/astrix-app/pages/home/'},...destinations];
-    drawer.innerHTML=`<div class="ax-drawer-backdrop" data-drawer-close></div><nav class="ax-drawer-panel" role="dialog" aria-modal="true" aria-label="ASTRIX PARADOX tools"><div class="ax-drawer-head"><a class="ax-drawer-brand" href="/" aria-label="ASTRIX PARADOX home"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a></div><ul class="ax-drawer-links">${links.map(row=>`<li><a href="${row.href}"${row.key===active?' aria-current="page"':''}>${row.label}</a></li>`).join('')}</ul></nav>`;
+    drawer.innerHTML=`<div class="ax-drawer-backdrop" data-drawer-close></div><nav class="ax-drawer-panel" role="dialog" aria-modal="true" aria-label="ASTRIX PARADOX tools"><div class="ax-drawer-head"><a class="ax-drawer-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a></div><ul class="ax-drawer-links">${links.map(row=>`<li><a href="${row.href}"${row.key===active?' aria-current="page"':''}>${row.label}</a></li>`).join('')}</ul></nav>`;
     const panel=drawer.querySelector('.ax-drawer-panel'),close=iconButton('ax-drawer-close','Close tool menu',CLOSE_ICON);
     drawer.querySelector('.ax-drawer-head').append(close);
     const focusable=()=>[...panel.querySelectorAll('a[href],button:not([disabled])')];
