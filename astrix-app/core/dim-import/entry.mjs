@@ -19,6 +19,7 @@ function style(){
   const link=document.createElement('link');link.rel='stylesheet';link.dataset.dimStyle='';link.href=new URL('../../shared/loadout-details.css?v=20260928-fit-row-1&grid=20261001-1',import.meta.url).href;document.head.append(link);
 }
 export async function importDimLoadout(input,{returnFocus}={}){
+  parseDimInput(input); // A link we never fetch (Mobalytics) stops here, before any request.
   const started=performance.now();const before=context(),binding={...sessionBinding(before.session),characterId:before.characterId};
   const [loadout,snapshot]=await Promise.all([shares.load(input),manifest.ready()]);
   const now=context(),active=sessionBinding(now.session);

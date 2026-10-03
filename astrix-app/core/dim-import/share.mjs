@@ -1,6 +1,9 @@
 import {createImportStorage} from './cache.mjs';
 const SHARE_ID=/^[a-z0-9]{7,64}$/i;
 const MAX_INPUT=250000;
+// Mobalytics builds are never fetched (Miguel, 3 Oct 2026): their page carries a DIM link, so the user pastes that instead.
+export const MOBALYTICS_HINT='Mobalytics builds import through DIM. Press COPY DIM LINK on the build page and paste it here.';
+const MOBALYTICS=/^(?:https?:\/\/)?(?:[\w-]+\.)*mobalytics\.gg(?:[\/?#]|$)/i;
 export function validateLoadout(value){
   if(!value||typeof value!=='object'||!Array.isArray(value.equipped)||!Array.isArray(value.unequipped||[])||typeof value.name!=='string'||![0,1,2,3].includes(value.classType))throw new Error('This DIM loadout is invalid.');
   if(value.equipped.length+(value.unequipped||[]).length>500)throw new Error('This DIM loadout is too large.');
@@ -8,6 +11,7 @@ export function validateLoadout(value){
 }
 export function parseDimInput(input){
   const text=String(input||'').trim();if(text.length>MAX_INPUT)throw new Error('This DIM link is too large.');
+  if(MOBALYTICS.test(text)){const error=new Error(MOBALYTICS_HINT);error.mobalytics=true;throw error;}
   if(SHARE_ID.test(text))return {shareId:text.toLowerCase()};
   let url;try{url=new URL(/^dim\.gg\//i.test(text)?`https://${text}`:text);}catch{throw new Error('Paste a DIM share link or share ID.');}
   if(url.protocol!=='https:'||url.username||url.password)throw new Error('Paste a valid HTTPS DIM link.');
