@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
 import {createRequire} from 'node:module';
-import {resolve,extname} from 'node:path';
+import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
@@ -25,7 +25,7 @@ const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(pages.has(path)){res.setHeader('Content-Type','text/html');res.end(pages.get(path));return;}
  if(path==='/reports-fixture.mjs'){res.setHeader('Content-Type','text/javascript');res.end(fixture);return;}
- const file=resolve(root,'.'+path);if(!file.startsWith(root+'/')){res.writeHead(403).end();return;}
+ const file=resolve(root,'.'+path);if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}
  try{res.setHeader('Content-Type',({'.mjs':'text/javascript','.js':'text/javascript','.json':'application/json','.css':'text/css','.png':'image/png'})[extname(file)]||'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}
 });
 await new Promise(done=>server.listen(0,'127.0.0.1',done));
@@ -62,7 +62,9 @@ try{
   });
   await page.goto(origin+'/astrix-app/pages/reports/');await page.waitForFunction(()=>window.fixtureReady);
   const card=page.locator('.reports-card').filter({has:page.getByRole('heading',{name:'Fixture Raid',exact:true})});
-  assert.equal((await card.innerText()).trim(),'Fixture Raid','Front card contains only the activity name and image');
+  // Reports restyle (3 Oct 2026): the name over the art, then one row per difficulty with clears and fastest.
+  assert.equal((await card.locator('.reports-art h2').innerText()).trim(),'Fixture Raid','Front card names the activity over its art');
+  assert.equal(await card.locator('.rp-band .rp-band-name').count()>0,true,'Front card shows one stats row per difficulty');
   assert.equal(await card.locator('.reports-band-row,[data-expand]').count(),0,'Front cards have no encounter lists');
   await noOverflow(page,`Reports ${width} cards`);
   await card.getByRole('button').click();await page.waitForFunction(()=>document.querySelector('.reports-history').textContent.includes('All available history pages loaded.'));
@@ -82,8 +84,12 @@ try{
   await page.locator('[data-back-activity]').click();
   await page.locator('.reports-tabs [data-difficulty="Master"]').click();assert.equal(await page.locator('.reports-runs li').count(),0);
   await page.locator('.reports-detail-card [data-difficulty="Standard"]').click();assert.equal(await page.locator('.reports-runs li').count(),20);
-  await page.getByLabel('Character',{exact:true}).selectOption('2');assert.equal(await page.locator('.reports-runs li').count(),0);
-  await page.locator('[data-back]:visible').click();assert.equal((await card.innerText()).trim(),'Fixture Raid');
+  // Desktop: the Reports select. Phone and tablet (up to 1199px): the shell's single Guardian card picks the character.
+  if(width>1199)await page.getByLabel('Character',{exact:true}).selectOption('2');
+  else{assert.equal(await page.locator('#reportCharacter').isVisible(),false,'Phone and tablet use the shell Guardian card, not a second select');await page.evaluate(()=>document.dispatchEvent(new CustomEvent('forge:character-selected',{detail:{characterId:'2'}})));}
+  assert.equal(await page.locator('.reports-runs li').count(),0);
+  await page.locator('[data-back]:visible').click();assert.equal((await card.locator('.reports-art h2').innerText()).trim(),'Fixture Raid');
+  assert.equal(await page.locator('.rp-tile.is-selected').count(),1,'Back at the grid, the activity just opened is the one selected tile');
   assert.deepEqual(errors,[]);
   // Real public catalogue: all grouped variants must survive on the activity page.
   await page.goto(origin+'/astrix-app/pages/reports/?real');await page.waitForFunction(()=>window.fixtureReady);
