@@ -1,4 +1,0 @@
-# fix/hub-workbench-art-pending: key art pending panel on the WorkBench card.
-astrix-app/tools/validate-tools-hub.mjs
-hub/index.html
-hub/tools.css
