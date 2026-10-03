@@ -112,3 +112,18 @@ body.home-page.forge-paradox-map-background::before{content:"";position:fixed;in
 .home-ready[data-state="slow"] .home-ready-title{color:var(--home-crimson)}
 .home-cta[data-ready="true"]{box-shadow:inset 0 1px 0 rgba(255,170,150,.8),inset 0 -1px 0 rgba(0,0,0,.45),0 0 0 2px rgba(98,214,173,.55)}
 @media (prefers-reduced-motion:reduce){.home-ready-fill{transition:none}}
+
+/* Fresh facts (3 Oct 2026): three facts from the player's own numbers, in the same cards, with a shuffle. */
+.home-facts{display:flex;flex-direction:column;gap:14px}
+.home-facts-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.home-facts-head h2{margin:0}
+.home-facts-shuffle{min-height:44px;padding:0 20px;font-size:13px;cursor:pointer;border:0}
+.home-fact-text{margin:0;font-size:17px;line-height:1.5;color:var(--home-muted)}
+.home-fact-text strong{display:block;margin-bottom:4px;font:700 30px/1.05 var(--home-display);text-transform:uppercase;color:var(--home-crimson);overflow-wrap:anywhere}
+/* The shared strobe stroke on NEW FACTS: 1.5px left and bottom edges, Ember at the bottom-left fading out, with the pulse. */
+.home-facts-shuffle::after{content:"";position:absolute;inset:0;z-index:2;padding:0 0 1.5px 1.5px;pointer-events:none;
+  background:linear-gradient(135deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
+    linear-gradient(135deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8px,var(--ax-stroke-fade) 40%,transparent 100%);
+  -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0);-webkit-mask-composite:xor;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0);
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow));animation:ax-stroke-pulse 2.8s ease-in-out infinite}
+.home-facts-shuffle:hover::after{animation-duration:1.4s}

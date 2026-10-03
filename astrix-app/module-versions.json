@@ -256,7 +256,9 @@
 
   "/astrix-app/pages/home/home-copy.mjs": "f92434ba2f",
 
-  "/astrix-app/pages/home/home.mjs": "14dc3e9f28",
+  "/astrix-app/pages/home/home-facts.mjs": "5b7d58847d",
+
+  "/astrix-app/pages/home/home.mjs": "1d50de3b5e",
 
   "/astrix-app/pages/journey/assets/map-data/cosmodrome.mjs": "daaf664caf",
 
