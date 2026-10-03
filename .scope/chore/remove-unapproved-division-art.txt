@@ -1,0 +1,6 @@
+# chore/remove-unapproved-division-art: delete five unreferenced, unapproved Division images.
+img/games/BG_the_divition.jpg
+img/games/the-division-2-rescue-team-ksvwkrsdg1v5pg4w_edited.jpg
+img/games/the-division-title-d85u7dme62n4f1u0_edited.jpg
+img/reviews/the-division.png
+img/reviews/the-division2.png
