@@ -197,6 +197,7 @@ function carriedReplacement(item){
 }
 
 function stageTransfer(item,destination){
+  if(transferFeedback.isSettling(itemKey(item))){setStatus(`${item.name} moved. Bungie is still updating its inventory, so it can move again in a moment.`);return;}
   if(transferFeedback.isMoving(itemKey(item)))return;
   try{
     const replacement=item?.source?.kind==='equipped'?carriedReplacement(item):null,intent=stageVaultTransferIntent({item,destination,session,replacementItem:replacement}),target=destination.kind==='vault'?'Vault':characterLabel(destination.characterId),replacementCopy=replacement?` ${replacement.name} will be equipped on ${characterLabel(item.source.characterId)} first so the currently equipped item can move.`:'';
@@ -271,7 +272,8 @@ async function performPendingVaultAction(){
   let deadline=null;
   try{
     const onProgress=row=>{if(expired)return;const label=row.label||'Waiting for Bungie confirmation.';if(progress)progress.textContent=label;transferFeedback.progress(action.queueKey,row);setStatus(label);};
-    const onAccepted=async({liveInventory})=>{if(expired)return;await refreshAfterLiveAction(liveInventory);setStatus('Item moved. Updating inventory…','good');};
+    // Show the move as done the moment Bungie accepts it; the fresh readback continues behind it.
+    const onAccepted=async({liveInventory})=>{if(expired)return;if(action.kind==='transfer')transferFeedback.accept(action.queueKey);setStatus('Item moved.','good');await refreshAfterLiveAction(liveInventory);};
     const running=action.kind==='transfer'
       ?executeVaultTransferIntent(confirmVaultTransferIntent(action.intent),{session,fetchImpl,onProgress,onAccepted})
       :executePostmasterCollectionIntent(confirmPostmasterCollectionIntent(action.intent),{session,fetchImpl,onProgress});

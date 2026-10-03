@@ -53,7 +53,10 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
     const rendered=tileFor(state.key);
     if(rendered&&rendered!==state.node)state.node=rendered;
     const previous=state.node.parentElement;
-    state.node.classList.remove('is-dragging');state.node.classList.add('is-moving');state.node.setAttribute('aria-busy','true');state.node.setAttribute('aria-disabled','true');state.node.draggable=false;
+    state.node.classList.remove('is-dragging');state.node.setAttribute('aria-disabled','true');state.node.draggable=false;
+    // Once accepted, renders come from Bungie inventory, so the tile stays where that render put it.
+    if(state.accepted){state.node.classList.remove('is-moving');state.node.classList.add('is-accepted');state.node.removeAttribute('aria-busy');return;}
+    state.node.classList.add('is-moving');state.node.setAttribute('aria-busy','true');
     row.append(state.node);resetEmpty(previous);resetEmpty(row);
   }
   function begin(queueKey,item,destination){
@@ -62,10 +65,21 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
     const state={key,item,destination,origin,parent,index,marker,node,original:node,originalDraggable:node.draggable,toast:toast(item,destination)};
     pending.set(queueKey,state);land(state);
   }
+  // Bungie accepted the final transfer call (ErrorCode 1): the move is done for the player. The
+  // executor's fresh readback keeps running; finish() only changes the toast again if it disagrees.
+  function showSuccess(toast){
+    const {node,mark,dismiss,setProgress,stop}=toast;stop();setProgress(1);node.className='vault-transfer-toast is-success';
+    dismiss.hidden=true;mark.hidden=false;mark.textContent='✓';setTimeout(()=>node.remove(),2000);
+  }
+  function accept(queueKey){
+    const state=pending.get(queueKey);if(!state||state.accepted)return;
+    state.accepted=true;land(state);showSuccess(state.toast);
+  }
   function finish(queueKey,{success,error}={}){
     const state=pending.get(queueKey);if(!state)return;
     pending.delete(queueKey);
-    if(!success){
+    // After acceptance the page re-renders from Bungie's fresh inventory, so the tile is never moved back by hand.
+    if(!success&&!state.accepted){
       const row=state.marker.isConnected?state.marker.parentElement:groupFor(state.item,state.origin)?.querySelector('.vault-transfer-items');
       const current=state.node.parentElement;
       if(state.node!==state.original)state.node.remove();
@@ -73,10 +87,11 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
       if(row){if(state.marker.isConnected)state.marker.after(state.node);else row.insertBefore(state.node,row.children[state.index]||null);}
       resetEmpty(current);resetEmpty(row);
     }
-    state.marker.remove();state.node.classList.remove('is-moving','is-dragging');state.node.removeAttribute('aria-busy');state.node.removeAttribute('aria-disabled');state.node.draggable=state.originalDraggable;
-    const {node,status,mark,dismiss,setProgress,stop}=state.toast;stop();setProgress(1);node.className=`vault-transfer-toast is-${success?'success':'error'}`;
-    if(success){dismiss.hidden=true;mark.hidden=false;mark.textContent='✓';setTimeout(()=>node.remove(),2000);}
-    else{status.hidden=false;status.setAttribute('role','alert');status.textContent=transferFailureReason(error);}
+    state.marker.remove();state.node.classList.remove('is-moving','is-accepted','is-dragging');state.node.removeAttribute('aria-busy');state.node.removeAttribute('aria-disabled');state.node.draggable=state.originalDraggable;
+    if(success){if(!state.accepted)showSuccess(state.toast);return;}
+    const {node,status,mark,dismiss,setProgress,stop}=state.toast;stop();setProgress(1);node.className='vault-transfer-toast is-error';
+    mark.hidden=true;dismiss.hidden=false;if(!node.isConnected)host.append(node);
+    status.hidden=false;status.setAttribute('role','alert');status.textContent=transferFailureReason(error);
   }
   function clearHover(){board.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));}
   function clearDrag(){
@@ -96,8 +111,9 @@ export function createVaultTransferFeedback({board,itemKey,characterLabel,canDro
   }
   function moveGhost(x,y){if(dragTile)dragScroll.update(x,y);if(ghost){ghost.style.left=`${x+12}px`;ghost.style.top=`${y+12}px`;}}
   function hover(target){clearHover();const group=target?.closest('.vault-transfer-group');if(group?.classList.contains('is-drop-active'))group.classList.add('is-drop-target');}
-  return {begin,finish,clearHover,clearDrag,startDrag,moveGhost,hover,
+  return {begin,accept,finish,clearHover,clearDrag,startDrag,moveGhost,hover,
     isMoving:key=>[...pending.values()].some(state=>state.key===key),
+    isSettling:key=>[...pending.values()].some(state=>state.key===key&&state.accepted),
     progress:(key,row)=>{
       const state=pending.get(key);if(!state||row?.phase!=='transfer'||!['accepted','complete'].includes(row.status))return;
       const {expected}=row.detail||{};if(!expected)return;
