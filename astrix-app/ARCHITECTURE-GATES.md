@@ -60,6 +60,18 @@ The rules engine must first be designed for the Armor 3.0 system introduced with
 
 The prototype may display neutral placeholder cards and labels, but it must not imply that legacy-stat calculations are valid.
 
+## Division gate
+
+Applies to the Division WorkBench (`astrix-app/games/division/` and `astrix-app/platform/adapters/division/`). Added 3 October 2026, before any Division feature code.
+
+1. No hardcoded item tables in engine, adapter or UI code. All game data comes from catalogue files through the schema loader.
+2. Every catalogue entry carries `source` (an http(s) URL to an official source) and `gameVersion`. An entry that cannot be sourced yet is marked `"status": "pending"` with a `missing` list, never filled with a guess.
+3. Engine code lives in `games/division/engine/` and never forks per title. Title folders (`td2/`, later `td3/`) hold `data/` and `assets/` only.
+4. Every image under `games/division/*/assets/` appears in that folder's `manifest.json` with `"useAllowed": "yes"` and `"approvedByMiguel": true`. No image is committed until Ubisoft's fan content terms are confirmed.
+5. No Ubisoft sign-in, session token capture, scraping of authenticated services or private endpoints. The Ubisoft adapter stays a stub until Ubisoft gives authorised access.
+
+Enforced by `astrix-app/tools/validate-division.mjs` and its self-test `test-division-validator.mjs`, run on every PR by `.github/workflows/validate-division.yml`.
+
 ## Next implementation sequence
 
 1. Review and approve the visual prototype.
