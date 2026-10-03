@@ -13,5 +13,5 @@ const welcome=read('astrix-app/shared/tool-welcome.mjs');
 assert.match(welcome,/forge:portal-ready/);assert.match(welcome,/config.purpose,config.limitations/);
 assert.ok(toolIntroConfig('destiny-2').purpose);assert.ok(toolIntroConfig('destiny-2').limitations);
 assert.match(welcome,/astrix_intro_seen_\$\{gameId\}/);
-assert.match(read('tools/index.html'),/href="\.\.\/astrix-app\/pages\/home\/"/);
+assert.match(read('hub/index.html'),/href:'\.\.\/astrix-app\/pages\/home\/'/);
 console.log('TOOLS_DIRECT_ROUTE_AND_POST_LOAD_WELCOME=PASS');

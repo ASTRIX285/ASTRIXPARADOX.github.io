@@ -59,7 +59,7 @@ try{
    if(url.origin!==origin)return route.abort();
    return route.continue();
   });
-  await page.goto(origin+'/astrix-app/pages/home/',{referer:origin+'/tools/'});
+  await page.goto(origin+'/astrix-app/pages/home/',{referer:origin+'/hub/'});
   return {page,errors,homeRequests:()=>homeRequests};
  }
  for(const width of [1440,390]){

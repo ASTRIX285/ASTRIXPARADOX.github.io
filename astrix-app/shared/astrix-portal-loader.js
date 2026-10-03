@@ -11,13 +11,13 @@
    ===================================================================== */
 (function(){
   if(window.ForgeLoader?.owner==='astrix-portal')return;
-  // Only a fresh navigation from the public Tools entry can show animation.
+  // Only a fresh navigation from the public entry, The Hub (/hub/, formerly /tools/), can show animation.
   // Reloads, bookmarks, history and transfers between tools never mount it.
   var entryPortal=false;
   try{
     var source=new URL(document.referrer);
     var navigationType=window.performance?.getEntriesByType('navigation')[0]?.type;
-    entryPortal=source.origin===window.location.origin&&/^\/tools(?:\/|\/index\.html)?$/.test(source.pathname)&&(!navigationType||navigationType==='navigate');
+    entryPortal=source.origin===window.location.origin&&/^\/(?:hub|tools)(?:\/|\/index\.html)?$/.test(source.pathname)&&(!navigationType||navigationType==='navigate');
   }catch{}
   var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
   var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;

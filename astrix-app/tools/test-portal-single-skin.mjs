@@ -77,7 +77,7 @@ try{
    }).observe(document,{subtree:true,childList:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
    setInterval(sample,100);
   },{noWebGL});
-  await page.goto(origin+`/astrix-app/pages/${route}/`,{waitUntil:'domcontentloaded',referer:origin+(entry?'/tools/':'/astrix-app/pages/loadout/')});
+  await page.goto(origin+`/astrix-app/pages/${route}/`,{waitUntil:'domcontentloaded',referer:origin+(entry?'/hub/':'/astrix-app/pages/loadout/')});
   if(earlyDone)await page.evaluate(()=>ForgeLoader.done());
   await page.waitForTimeout(2500);
   const label=`${route} breachReady=${delay}ms real=${real} reduced=${reduced} noWebGL=${noWebGL} earlyDone=${earlyDone} entry=${entry}`;
