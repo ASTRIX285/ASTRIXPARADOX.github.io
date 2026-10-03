@@ -1,4 +1,4 @@
-import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=8cbc2b2658";
+import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=e8325e7602";
 
 const AUTH_ORIGIN = globalThis.FORGE_AUTH_ORIGIN || "https://auth.astrixparadox.com";
 const CANONICAL_APP_ORIGIN = "https://astrixparadox.com";

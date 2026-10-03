@@ -10,8 +10,8 @@ let buildRenderStatus='',profileSettled=false,profileFailed=false,finishRevision
 const buildHeaderSettled=()=>!document.querySelector('#guardianCharacterCards .is-pending');
 const maybeFinishBuild=()=>{
   if(!isBuildSpace||!buildHeaderSettled())return;
-  if(buildRenderStatus==='ready')finishAfterPaint('Build Forge rendered');
-  else if(buildRenderStatus==='pending'&&profileSettled)finishAfterPaint(profileFailed?'Build Forge recovery available':'Guardian selection ready');
+  if(buildRenderStatus==='ready')finishAfterPaint('Builder rendered');
+  else if(buildRenderStatus==='pending'&&profileSettled)finishAfterPaint(profileFailed?'Builder recovery available':'Guardian selection ready');
 };
 const set=(percent,label)=>{loader?.set(percent);if(label)loader?.status(label);};
 const setStage=stage=>{const row=PREPARED_PAGE_STAGES[stage];set(row.percent,row.label);};
@@ -56,7 +56,7 @@ const finishAfterPaint=async label=>{
 try{
   const transition=JSON.parse(sessionStorage.getItem(PORTAL_TRANSITION_KEY)||'null');
   sessionStorage.removeItem(PORTAL_TRANSITION_KEY);
-  if(transition&&Date.now()-Number(transition.armedAt||0)<30_000)set(0,transition.label||'Opening Build Forge');
+  if(transition&&Date.now()-Number(transition.armedAt||0)<30_000)set(0,transition.label||'Opening Builder');
 }catch{}
 
 setStage('start');

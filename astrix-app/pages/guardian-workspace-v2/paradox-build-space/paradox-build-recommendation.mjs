@@ -19,7 +19,7 @@ function directArmourChoices(build={},slotIndex){
 // Adapt real owned-instance evidence to the existing engine input contract.
 // No Loader ranking, maximized flag, stat target or optimiser result is invented.
 function withDirectGenerationContext(build,mode=directEntryMode(build)){
-  if(!DIRECT_ENTRY_MODES.has(mode))throw new Error('Choose a direct Build Forge entry.');
+  if(!DIRECT_ENTRY_MODES.has(mode))throw new Error('Choose a direct Builder entry.');
   const anchor=(build.armour||[]).find(isExoticItem),perk=anchor?.armourSemantics?.exoticPerk||anchor?.exoticPerk||anchor?.intrinsicTrait||null;
   const rawStats=(build.armour||[]).map(armourStatVector),achieved=Object.fromEntries(ARMOUR_STAT_KEYS.map(key=>[key,rawStats.reduce((sum,stats)=>sum+stats[key],0)]));
   const setProtocol=[],seen=new Set();

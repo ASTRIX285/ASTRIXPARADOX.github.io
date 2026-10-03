@@ -87,7 +87,7 @@ try{
     assert.equal(shown.share,0,`${width}: no pick is tagged as the sharer's`);
     assert.ok(shown.overflow<=0,`${width}: no sideways scroll (${shown.overflow}px)`);
     assert.match(shown.url,/dim=ndttp4i/,'The build is on its own reloadable URL');
-    assert.equal(shown.handoff,'Send to Build Forge');
+    assert.equal(shown.handoff,'Send to Builder');
     assert.deepEqual(errors,[],`${width}: page errors`);
     if(process.env.TEST_SHOT_DIR)await page.screenshot({path:resolve(process.env.TEST_SHOT_DIR,`dim-complete-build-${width}.png`),fullPage:true});
     await context.close();

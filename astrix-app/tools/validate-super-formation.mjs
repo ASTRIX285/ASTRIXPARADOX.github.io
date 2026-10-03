@@ -77,7 +77,7 @@ const gap=Number(css.match(/gap:clamp\((\d+)px,3vw,40px\)!important/)?.[1]);
 assert.ok(gap>=32,`Subclass/Super minimum gap is ${gap||0}px; expected at least 32px`);
 assert.match(css,/@media\(max-width:720px\)\{[\s\S]*?gap:32px!important/,'Phone/tablet rule must preserve the 32px subclass-to-Super gap');
 assert.match(css,/width:min\(var\(--apx-super-cluster,300px\),100%\)!important/,'The single fluid Super cluster definition must fit desktop and phone containers');
-assert.match(css,/\.super-feature \.super-feature__name\{[\s\S]*?font:700 var\(--apx-type-subsection-title,\.875rem\)\/1\.3 bahnschrift[\s\S]*?white-space:normal!important;[\s\S]*?overflow:visible!important;[\s\S]*?text-overflow:clip!important;/,'Super name must stay readable and fully visible on Main and Build Forge');
+assert.match(css,/\.super-feature \.super-feature__name\{[\s\S]*?font:700 var\(--apx-type-subsection-title,\.875rem\)\/1\.3 bahnschrift[\s\S]*?white-space:normal!important;[\s\S]*?overflow:visible!important;[\s\S]*?text-overflow:clip!important;/,'Super name must stay readable and fully visible on Main and Builder');
 
 assert.match(css,/flex:0 0 auto!important;/,'Equipped subclass/Super wrapper must not collapse inside the scroll rail');
 
@@ -257,7 +257,7 @@ for(const characterClass of CLASS_NAMES){
 }
 assert.match(syncModule,/onSelect:item=>\{const nextBuild=/,'Character page does not stage clicked Super state');
 assert.match(syncModule,/dispatchGuardianSelection/,'Character page does not publish clicked subclass/Super state');
-assert.match(buildModule,/working\.super=candidate/,'Build Forge does not synchronise its top-level Super after a click');
+assert.match(buildModule,/working\.super=candidate/,'Builder does not synchronise its top-level Super after a click');
 
 const obsoleteFiles=[
   'guardian-main-correction.css',

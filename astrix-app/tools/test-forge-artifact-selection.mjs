@@ -65,7 +65,7 @@ assert.equal(result.state.workingBuild.artifactConfiguration.source,'paradox-for
 assert.equal(result.state.workingBuild.artifactConfiguration.provenance.state,'recommended-working-build-only');
 assert.equal(result.state.workingBuild.artifactRecommendation.source,'paradox-forge-loader-artifact-fit');
 assert.equal(result.state.workingBuild.artifactRecommendation.selectionStatus,'ready');
-assert.equal(result.state.workingBuild.artifactRecommendation.selectionLimit,5,'Build Forge must stage the complete target tree rather than stopping at currently spent points');
+assert.equal(result.state.workingBuild.artifactRecommendation.selectionLimit,5,'Builder must stage the complete target tree rather than stopping at currently spent points');
 assert.deepEqual(result.state.workingBuild.artifactConfiguration.selectedPerkHashes,[101,102,103,105,106]);
 assert.equal('confirmed' in result.state.workingBuild.artifactConfiguration,false,'a recommendation must not masquerade as user confirmation');
 assert.equal('liveApplied' in result.state.workingBuild.artifactConfiguration,false,'a recommendation must not claim a live mutation');
@@ -85,7 +85,7 @@ const zeroPointSource={
 const zeroPointState=createBuildState(zeroPointSource);
 const zeroPointOriginal=JSON.stringify(zeroPointState.originalBuild);
 const zeroPointResult=applyForgeArtifactRecommendation(zeroPointState,{currentSeasonNumber:31});
-assert.equal(zeroPointResult.applied,true,'Build Forge must stage the complete Artifact target plan even when no unused live unlock points are reported');
+assert.equal(zeroPointResult.applied,true,'Builder must stage the complete Artifact target plan even when no unused live unlock points are reported');
 assert.equal(zeroPointResult.recommendation.planMode,'full-build-target');
 assert.equal(zeroPointResult.recommendation.liveSelectionLimit,0);
 assert.equal(zeroPointResult.state.workingBuild.artifactConfiguration.selectedPerkHashes.length,source.artifact.perks.length);

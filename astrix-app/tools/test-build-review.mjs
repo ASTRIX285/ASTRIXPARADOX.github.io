@@ -5,7 +5,7 @@ import {adaptDimLoadout} from '../core/dim-import/adapt.mjs';
 import {decodeReviewUrl,encodeReviewUrl,reachableStep,goalComplete} from '../pages/build-review/build-review-url.mjs';
 import {sharedBuildView,goalButtonLabel,goalSentence,elementReason} from '../pages/build-review/build-review-model.mjs';
 
-// 1. Build Review mirrors Build Forge logic verbatim. Build Forge is the
+// 1. Build Review mirrors Builder logic verbatim. Builder is the
 // source: if it changes, this fails until the mirror is updated to match.
 const pipeline=await readFile(new URL('../pages/build-review/build-review-pipeline.mjs',import.meta.url),'utf8');
 const forge=await readFile(new URL('../pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs',import.meta.url),'utf8');
@@ -13,7 +13,7 @@ const mirror=pipeline.slice(pipeline.indexOf('// MIRRORED FROM BUILD FORGE: STAR
 assert.ok(mirror.includes('function importedGenerationBase('),'The mirror block is present.');
 const chunks=mirror.split(/\n(?=const |function )/);
 assert.ok(chunks.length>=8,'Every mirrored declaration is checked.');
-for(const chunk of chunks)assert.ok(forge.includes(chunk),`Build Review drifted from Build Forge: ${chunk.slice(0,60)}`);
+for(const chunk of chunks)assert.ok(forge.includes(chunk),`Build Review drifted from Builder: ${chunk.slice(0,60)}`);
 
 // 2. URL contract.
 let s=decodeReviewUrl('?dim=https%3A%2F%2Fdim.gg%2Fabc1234%2FVesper&activity=raid&objective=dps&element=arc&step=3&characterId=123&membershipId=456&membershipType=3');
@@ -62,4 +62,4 @@ assert.equal(goalSentence({activity:'raid'},{buildName:'X'}),'');
 assert.equal(elementReason('arc','Striker'),'Arc is pre-selected: the imported build runs Arc Striker. Pick another to rebuild around it.');
 assert.equal(elementReason('',''),'');
 
-console.log('BUILD_REVIEW=PASS Build Forge mirror, URL contract, step 1 ownership views, step 2 labels and summary');
+console.log('BUILD_REVIEW=PASS Builder mirror, URL contract, step 1 ownership views, step 2 labels and summary');

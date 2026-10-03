@@ -109,7 +109,7 @@ async function loadVerifiedPayload({force=false,showProgress=true}={}){
   if(!next?.profile)throw new Error('Inventory unavailable. Retry.');
   guardianManifest.seedPayload(next);
   if(next.forgeArmourIndex)guardianManifest.applyForgeArmourIndex(next,next.forgeArmourIndex);
-  if(next.forgeArmourIndex&&!next.forgeArmourIndexCoverage)throw new Error('Forge armour index version does not match the prepared account data.');
+  if(next.forgeArmourIndex&&!next.forgeArmourIndexCoverage)throw new Error('The Forge armour index version does not match the prepared account data.');
   if(showProgress)reportPreparedPageStage('join','loadout');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,armourOnly:Boolean(next.forgeArmourIndex),includeReusable:true,allowNetwork:false});
   return next;
@@ -135,7 +135,7 @@ function renderHero(){
   const displayName=text(payload?.membership?.displayName||session?.activeDestinyMembership?.displayName),subclassName=text(residentProfileBuild?.subclassName);
   byId('forgeGuardianTitle').textContent=displayName||'Bungie identity unavailable';
   byId('forgeGuardianClass').textContent=character?`${label.toUpperCase()} · ${subclassName?subclassName.toUpperCase():'LOADING SUBCLASS'} · POWER ${Number(character.light||0)||'—'}`:'UNAVAILABLE';
-  byId('forgeHeaderState').textContent=character?`${label.toUpperCase()} FORGE`:'BUNGIE ARMOUR';
+  byId('forgeHeaderState').textContent=character?`${label.toUpperCase()} · THE FORGE`:'BUNGIE ARMOUR';
   if(!host)return;
   const emblem=character?.emblemBackgroundPath||character?.emblemPath||'';
   host.style.backgroundImage=emblem?`url("${esc(new URL(emblem,'https://www.bungie.net').toString())}")`:'';
@@ -313,7 +313,7 @@ function resultsUrl({selectIndex=0}={}){
 
 // The top few loads update instantly here, on every slider or selection change, using the same
 // forge-loader-scan.mjs markup the results page renders. Selecting or evaluating a previewed load
-// hands off to the results page (its full list, staged armour and Enter Build Forge live there),
+// hands off to the results page (its full list, staged armour and Enter Builder live there),
 // carrying that load's position so it opens already staged.
 function renderPreview(){
   const panel=byId('forgePreviewPanel'),host=byId('forgePreviewBuilds'),status=byId('forgePreviewStatus');
@@ -328,7 +328,7 @@ function renderPreview(){
   })).join('');
 }
 
-// Forge Matrix results, staged armour and Enter Build Forge all live on their own page now, at their own
+// Forge Matrix results, staged armour and Enter Builder all live on their own page now, at their own
 // URL, so a result can be reloaded, bookmarked and shared. The whole selection travels in the query string.
 function renderResultsCta(){
   const status=byId('forgeSearchStatus'),summary=byId('forgeSearchSummary'),open=byId('forgeOpenResults');
@@ -475,7 +475,7 @@ function installEvents(){
   document.addEventListener('focusin',event=>{const target=event.target.closest('[data-inspect-item]');if(target)showInspect(target);});
   document.addEventListener('focusout',event=>{const target=event.target.closest('[data-inspect-item]');if(target&&!target.contains(event.relatedTarget))hideInspect();});
   addEventListener('resize',hideInspect,{passive:true});addEventListener('scroll',hideInspect,{passive:true,capture:true});
-  document.addEventListener('forge:character-selected',event=>{if(!payload)return;void(async()=>{resolveActiveCharacter(event.detail?.characterId);selectedExoticKey='';selectedExoticWeaponKey='';setSelections=[];resetResults();renderHero();renderExotics();renderExoticWeapons();renderSetBonuses();configureStats({reset:true});byId('forgeRuntimeStatus').textContent=`${classLabel()} selected. Loading resident Forge sources.`;try{await completeResidentPreparation();renderHero();byId('forgeRuntimeStatus').textContent=residentReady?`${classLabel()} ready. Select an Exotic.`:'One or more Forge sources remain unavailable.';}catch(error){console.error('[Forge Loader] Resident character preparation failed.',error);renderResidency('resident');byId('forgeRuntimeStatus').textContent=error?.message||'Character sources remain unavailable.';}})();});
+  document.addEventListener('forge:character-selected',event=>{if(!payload)return;void(async()=>{resolveActiveCharacter(event.detail?.characterId);selectedExoticKey='';selectedExoticWeaponKey='';setSelections=[];resetResults();renderHero();renderExotics();renderExoticWeapons();renderSetBonuses();configureStats({reset:true});byId('forgeRuntimeStatus').textContent=`${classLabel()} selected. Loading resident sources.`;try{await completeResidentPreparation();renderHero();byId('forgeRuntimeStatus').textContent=residentReady?`${classLabel()} ready. Select an Exotic.`:'One or more sources remain unavailable.';}catch(error){console.error('[Forge Loader] Resident character preparation failed.',error);renderResidency('resident');byId('forgeRuntimeStatus').textContent=error?.message||'Character sources remain unavailable.';}})();});
   document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','loadout'));
 }
 
@@ -556,8 +556,8 @@ async function init(){
     reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);renderExoticWeapons();renderResidency('resident');await completeResidentPreparation();
     renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});
     void forgeRefreshController.refreshNow().catch(()=>{});
-    byId('forgeConnectionState').textContent=residentReady?'FORGE SOURCES READY':'FORGE SOURCES INCOMPLETE';
-    const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=!residentReady?'One or more Forge sources remain unavailable. Build Forge handoff stays locked.':ownedCount?`${ownedCount} in inventory of ${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select a piece to begin.`:`${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no instance can be selected.`;
+    byId('forgeConnectionState').textContent=residentReady?'SOURCES READY':'SOURCES INCOMPLETE';
+    const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=!residentReady?'One or more sources remain unavailable. Builder handoff stays locked.':ownedCount?`${ownedCount} in inventory of ${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select a piece to begin.`:`${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no instance can be selected.`;
     reportPreparedPageStage('ready','loadout');await settleVisibleImages();globalThis.ForgeLoader?.done?.();
   }catch(error){console.error('[Forge Loader]',error);byId('forgeConnectionState').textContent='ARMOUR UNAVAILABLE';byId('forgeRuntimeStatus').textContent=error?.message||'Bungie armour is unavailable.';globalThis.ForgeLoader?.blocked?.(error?.message||'Bungie armour is unavailable.');}
 }

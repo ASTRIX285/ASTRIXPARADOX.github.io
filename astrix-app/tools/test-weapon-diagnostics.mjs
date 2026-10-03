@@ -56,7 +56,7 @@ await button.click();
 assert.equal(button.disabled,false);
 assert.match(status.textContent,/No file was downloaded/);
 assert.ok(!status.textContent.includes(secret));
-// Build Forge creates its weapon panel dynamically without the Character HTML button.
+// Builder creates its weapon panel dynamically without the Character HTML button.
 const nodes=new Map();
 function element(){return {dataset:{},children:[],listeners:0,setAttribute(){},addEventListener(){this.listeners++;},append(...children){this.children=children;for(const child of children)if(child.id)nodes.set(child.id,child);}};}
 const panel={bar:null,querySelector(){return this.bar;},prepend(node){this.bar=node;}};

@@ -55,9 +55,9 @@ assert.match(sessionCache,/PROFILE_TTL_MS=12\*60\*60\*1000/,'Cached Guardian evi
 assert.match(sessionCache,/async function invalidateBungieLoadoutDetail[\s\S]*?deleteRecord\(key\)/,'Bungie loadout mutations must invalidate the exact durable slot cache.');
 assert.match(profile,/const BUILD_SPACE_KEY="astrix:paradox-build-space:v1";/,'Character must identify the stale explicit Build snapshot before securing a fresh handoff');
 assert.match(profile,/function persistResolvedBuildSnapshot\(\)\{[\s\S]*?store\.removeItem\(BUILD_SPACE_KEY\);store\.setItem\(BUILD_SNAPSHOT_KEY,json\)/,'Improve My Guardian must free the stale Build snapshot before writing the full current Character payload');
-assert.match(profile,/latestEquippedBuilds\.get\(selectedId\)[\s\S]*?isEquippedSelection\(latestResolvedBuild\)/,'The persisted Build Forge source must be the selected Guardian’s live equipped build, including an automatically matched slot, never a viewed saved slot');
+assert.match(profile,/latestEquippedBuilds\.get\(selectedId\)[\s\S]*?isEquippedSelection\(latestResolvedBuild\)/,'The persisted Builder source must be the selected Guardian’s live equipped build, including an automatically matched slot, never a viewed saved slot');
 assert.match(profile,/INITIAL_PROFILE_HYDRATION=Object\.freeze\(\{equippedOnly:true,allowNetwork:false,waitForManifest:false\}\)/,'Initial Character paint must use its prepared payload without waiting for a full manifest index');
-assert.match(profile,/location\.pathname\.includes\('\/paradox-build-space\/'\)\?String\(new URLSearchParams\(location\.search\)\.get\('characterId'\)/,'Build Forge recovery must honour the character bound in its route');
+assert.match(profile,/location\.pathname\.includes\('\/paradox-build-space\/'\)\?String\(new URLSearchParams\(location\.search\)\.get\('characterId'\)/,'Builder recovery must honour the character bound in its route');
 assert.match(profile,/if\(!isCurrentCharacter\(characterId\)\)return/,'Late saved-loadout responses must not repaint a different selected Guardian');
 assert.match(binding,/function characterScopedSelectionState\(previous=\{\},detail=\{\}\)[\s\S]*?else if\(!sameCharacter\)next\[field\]=\[\]/,'A Guardian switch must clear absent character-owned arrays instead of inheriting the previous Guardian');
 assert.match(workspace,/characterScopedSelectionState\(workspaceState, detail\)/,'The primary Character renderer must enforce the Guardian ownership boundary');
@@ -168,44 +168,44 @@ assert.match(loadoutsCss,/background-image:var\(--loadout-color-image/,'Saved lo
 assert.match(loadoutsCss,/guardian-loadout-icon\{width:var\(--pf-mod-size,var\(--apx-icon-loadout\)\)/,'Loadout icon must consume the shared loadout tier while retaining the armour-mod override');
 assert.match(loadoutsModule,/data-bungie-icon-hash/,'Rendered loadouts must retain Bungie iconHash provenance');
 assert.match(loadoutsModule,/data-bungie-color-hash/,'Rendered loadouts must retain Bungie colorHash provenance');
-assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/" aria-label="Improve My Guardian">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Build Forge link when JavaScript or storage fails');
-assert.match(workspaceHtml,/guardian-workspace-v2-compact\.css\?v=20260829-build-cta-anchor-1/,'Main must load the native Build Forge link styling without stale button CSS');
-assert.match(await read('guardian-workspace-v2-compact.css'),/\.improve-cta\{[^}]*display:inline-flex;[^}]*text-decoration:none/,'The native Build Forge link must preserve the approved button presentation');
+assert.match(workspaceHtml,/<a class="improve-cta" href="\.\/paradox-build-space\/" aria-label="Improve My Guardian">✦ IMPROVE MY GUARDIAN<\/a>/,'Improve My Guardian must retain a native Builder link when JavaScript or storage fails');
+assert.match(workspaceHtml,/guardian-workspace-v2-compact\.css\?v=20260829-build-cta-anchor-1/,'Main must load the native Builder link styling without stale button CSS');
+assert.match(await read('guardian-workspace-v2-compact.css'),/\.improve-cta\{[^}]*display:inline-flex;[^}]*text-decoration:none/,'The native Builder link must preserve the approved button presentation');
 assert.match(workspaceHtml,/paradox-build-space-handoff\.mjs(?:\?v=[0-9a-f]{10})?/,'Main must load the live-equipped Bungie-to-PARADOX handoff without stale code');
 const genericBuildSource=handoff.slice(handoff.indexOf('function resolveBuildSource()'),handoff.indexOf('function currentProfileBuildSource()'));
 assert.match(genericBuildSource,/equippedByCharacter\.get\(selectedId\)/,'Improve My Guardian must prefer the selected Guardian’s live equipped snapshot');
 assert.doesNotMatch(genericBuildSource,/LAST_LOADOUT_KEY|latestExplicitLoadout/,'A previously viewed saved slot must not become the generic Improve source');
 assert.match(handoff,/loadoutsAvailable:detail\.loadoutsAvailable===true/,'Build handoff must carry the exact Bungie in-game loadout catalogue');
 // Prompt 21: six exact plain menu actions replace the six-box popup, with the same complete action coverage.
-assert.match(loadoutsModule,/Loadout details[\s\S]*?'Equip'[\s\S]*?Edit in Build Forge[\s\S]*?Save to Armoury[\s\S]*?Overwrite with equipped gear[\s\S]*?Clear slot \$\{index\+1\}/,'Every saved slot exposes all six exact menu actions in order');
+assert.match(loadoutsModule,/Loadout details[\s\S]*?'Equip'[\s\S]*?Edit in Builder[\s\S]*?Save to Armoury[\s\S]*?Overwrite with equipped gear[\s\S]*?Clear slot \$\{index\+1\}/,'Every saved slot exposes all six exact menu actions in order');
 // Prompt 21: compact slot identity, gear and two-button confirmation replace the old explanation.
 assert.match(loadoutsModule,/guardianLoadoutConfirmName[\s\S]*?guardian-loadout-confirm-gear[\s\S]*?data-loadout-confirm-action[\s\S]*?'Equip'[\s\S]*?>Cancel<\/button>/,'Equip confirmation contains identity, gear, Equip and Cancel');
 assert.match(loadoutsModule,/stageBungieLoadoutAction[\s\S]*?confirmBungieLoadoutAction\(menuState\.intent\)[\s\S]*?executeBungieLoadoutAction/,'In-game loadout changes must preserve the staged intent through the final confirmation handler.');
-assert.match(handoff,/function openContextualLoadout[\s\S]*?edit-paradox-copy[\s\S]*?save-paradox-copy[\s\S]*?safeStore\(BUILD_SPACE_KEY,createBuildState\(source\)[\s\S]*?location\.href=`\.\/paradox-build-space/,'Edit and Save-as-PARADOX actions must carry the exact selected Bungie slot into Build Forge.');
+assert.match(handoff,/function openContextualLoadout[\s\S]*?edit-paradox-copy[\s\S]*?save-paradox-copy[\s\S]*?safeStore\(BUILD_SPACE_KEY,createBuildState\(source\)[\s\S]*?location\.href=`\.\/paradox-build-space/,'Edit and Save-as-PARADOX actions must carry the exact selected Bungie slot into Builder.');
 assert.match(handoff,/super:detail\.super\|\|null/,'Build handoff must preserve fixture and legacy subclass fields without an empty subclassBuild');
 assert.match(handoff,/subclassCatalog:clone\(detail\.subclassCatalog\|\|\[\]\)/,'Build handoff must preserve verified subclass choices');
 assert.match(handoff,/const profileSource=currentProfileBuildSource\(\);[\s\S]*?const source=profileSource\|\|resolveBuildSource\(\)/,'Main to Build must prefer the freshly persisted, post-enrichment Character snapshot');
 assert.match(handoff,/if\(profileSource\)clearStored\(BUILD_SPACE_KEY\);[\s\S]*?else if\(!safeStore\(BUILD_SPACE_KEY,state,\{durable:true\}\)\)/,'A fresh protected Character snapshot must replace the stale Build key without duplicating the full payload');
 assert.match(handoff,/else if\(!safeStore\(BUILD_SPACE_KEY,state,\{durable:true\}\)\)\{[\s\S]*?Recovering current Guardian[\s\S]*?\}[\s\S]*?await afterPortalPaint\(\)/,'Main to Build must continue to native navigation and authenticated recovery when Web Storage rejects the handoff');
-assert.match(handoff,/await afterPortalPaint\(\);[\s\S]*?markGuardianFastReturn\(\);location\.href=target;/,'Main to Build must paint the portal before entering Build Forge');
+assert.match(handoff,/await afterPortalPaint\(\);[\s\S]*?markGuardianFastReturn\(\);location\.href=target;/,'Main to Build must paint the portal before entering Builder');
 assert.doesNotMatch(superSync,/paradox-build-space-handoff\.mjs/,'The subclass bridge must not register a duplicate Build handoff owner');
 
 assert.match(buildHtml,/data-guardian-profile-mode="roster-only"/,'Build Tool must load the roster without replacing its protected snapshot');
 // PR #237 (ed5ffcf) added fluid icons; PR #291 (693c952) added the shared button opt-in.
-assert.match(buildHtml,/<body data-apx-button-system class="forge-token-preview build-forge-page apx-fluid-icons">/,'Build Forge must own a page-scoped Journey-style header presentation');
-assert.match(buildHtml,/<header class="apx-destination-header topbar build-forge-header forge-command-header">/,'Build Forge header must use the shared command-header structure');
-assert.match(buildHtml,/<div class="apx-destination-header-copy workspace-title build-forge-header-copy"><strong>BUILD FORGE<\/strong><small>OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD<\/small><\/div>/,'Build Forge must show its centred page name and plain-language purpose');
+assert.match(buildHtml,/<body data-apx-button-system class="forge-token-preview build-forge-page apx-fluid-icons">/,'Builder must own a page-scoped Journey-style header presentation');
+assert.match(buildHtml,/<header class="apx-destination-header topbar build-forge-header forge-command-header">/,'Builder header must use the shared command-header structure');
+assert.match(buildHtml,/<div class="apx-destination-header-copy workspace-title build-forge-header-copy"><strong>BUILDER<\/strong><small>OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD<\/small><\/div>/,'Builder must show its centred page name and plain-language purpose');
 assert.match(buildHtml,/<span class="visually-hidden build-source-state" id="sourcePill"/,'Build Source must remain available to runtime logic without showing beside the Bungie avatar');
-assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy strong\{[^}]*color:var\(--apx-crimson-bright,#b22222\)!important/,'Build Forge page name must inherit the shared crimson command-header treatment');
-assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy small\{[^}]*max-width:100%!important;[^}]*color:var\(--apx-gold,#c9a84c\)!important;[^}]*text-wrap:balance!important/,'Build Forge purpose line must inherit the shared gold wrapping treatment');
-assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__stats\{display:none!important\}/,'Build Forge Guardian cards must omit the irrelevant six-stat row without changing the shared renderer');
-assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__identity\{[^}]*top:50%!important;[^}]*left:50%!important;[^}]*text-align:center!important;[^}]*translate\(-50%,-50%\)/,'Build Forge class labels must be centred vertically and horizontally');
-assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__power\{[^}]*top:50%!important;[^}]*right:\.625rem!important;[^}]*translateY\(-50%\)/,'Build Forge Power must be vertically centred on the right edge');
-assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card\.is-selected\{[^}]*border-color:rgba\(138,138,137,\.92\)!important;[^}]*box-shadow:[^}]*rgba\(138,138,137,\.5\)[^}]*opacity:1!important\}/,'Build Forge must give the selected Working Build Guardian a fully opaque glow-backed card');
-assert.match(buildCss,/\.guardian-character-card\.is-selected::before\{opacity:1!important;filter:none!important\}/,'Build Forge must remove selected-card emblem opacity and filtering');
-assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) var\(--apx-hero-row,910px\) minmax\(0,1fr\)!important/,'Build Forge must keep the three-card Guardian rail centred in the page');
-assert.match(sharedHeroCss,/\.apx-destination-header-copy\{position:absolute!important;top:50%!important;left:calc\(25% - 5rem\)!important;[^}]*transform:translate\(-50%,-50%\)!important/,'Build Forge page identity must be centred between the brand and the first Guardian card');
-assert.doesNotMatch(buildModule,/balanceBuildForgeHeader|--build-forge-command-centre|--build-forge-command-width/,'Build Forge must not retain a page-specific header positioning layer');
+assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy strong\{[^}]*color:var\(--apx-crimson-bright,#b22222\)!important/,'Builder page name must inherit the shared crimson command-header treatment');
+assert.match(sharedHeroCss,/header\.forge-command-header:has\(>\[data-forge-hero-cards\]\) \.apx-destination-header-copy small\{[^}]*max-width:100%!important;[^}]*color:var\(--apx-gold,#c9a84c\)!important;[^}]*text-wrap:balance!important/,'Builder purpose line must inherit the shared gold wrapping treatment');
+assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__stats\{display:none!important\}/,'Builder Guardian cards must omit the irrelevant six-stat row without changing the shared renderer');
+assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__identity\{[^}]*top:50%!important;[^}]*left:50%!important;[^}]*text-align:center!important;[^}]*translate\(-50%,-50%\)/,'Builder class labels must be centred vertically and horizontally');
+assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card__power\{[^}]*top:50%!important;[^}]*right:\.625rem!important;[^}]*translateY\(-50%\)/,'Builder Power must be vertically centred on the right edge');
+assert.match(buildCss,/html body\.build-forge-page header:has\(>\[data-forge-hero-cards\]\) \.guardian-character-card\.is-selected\{[^}]*border-color:rgba\(138,138,137,\.92\)!important;[^}]*box-shadow:[^}]*rgba\(138,138,137,\.5\)[^}]*opacity:1!important\}/,'Builder must give the selected Working Build Guardian a fully opaque glow-backed card');
+assert.match(buildCss,/\.guardian-character-card\.is-selected::before\{opacity:1!important;filter:none!important\}/,'Builder must remove selected-card emblem opacity and filtering');
+assert.match(sharedHeroCss,/grid-template-columns:minmax\(0,1fr\) var\(--apx-hero-row,910px\) minmax\(0,1fr\)!important/,'Builder must keep the three-card Guardian rail centred in the page');
+assert.match(sharedHeroCss,/\.apx-destination-header-copy\{position:absolute!important;top:50%!important;left:calc\(25% - 5rem\)!important;[^}]*transform:translate\(-50%,-50%\)!important/,'Builder page identity must be centred between the brand and the first Guardian card');
+assert.doesNotMatch(buildModule,/balanceBuildForgeHeader|--build-forge-command-centre|--build-forge-command-width/,'Builder must not retain a page-specific header positioning layer');
 assert.match(buildHtml,/id="guardianCharacterCards"/,'Build Tool character cards are missing');
 assert.match(buildHtml,/class="panel build-rail guardian-left-rail"/,'Build Tool must mount the shared Main left rail');
 assert.match(buildHtml,/id="guardianLoadouts"/,'Build Tool in-game loadout selector is missing');
@@ -227,7 +227,7 @@ assert.match(buildModule,/function writeState\(next,\{retainPreparation=false\}=
 const writeStateSource=buildModule.slice(buildModule.indexOf('function writeState('),buildModule.indexOf('function requestedTransferBinding'));
 assert.doesNotMatch(writeStateSource,/sessionStorage|localStorage|JSON\.stringify/,'Build edits must not synchronously JSON-encode or duplicate state into Web Storage.');
 assert.match(buildModule,/cacheBuildForgeState\(binding,snapshot\)[\s\S]*?could not be saved for refresh/,'Async persistence failure must be surfaced visibly instead of silently becoming memory-only.');
-assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Build Forge state must persist asynchronously through the IndexedDB session cache.');
+assert.match(sessionCache,/async function cacheBuildForgeState\(binding,snapshot,\{writeRecord:writeBuildRecord=writeRecord[\s\S]*?writeBuildRecord\(\{key,binding:normalized,savedAt:now\(\),snapshot\}\)/,'Builder state must persist asynchronously through the IndexedDB session cache.');
 assert.match(buildModule,/function stageWorkingBuild\(mutator\)[\s\S]*?createWorkingBuildPatch\(state\.workingBuild\|\|state\.originalBuild\)/,'Representative manual edits must use a small mutable patch instead of cloning the full snapshot.');
 assert.match(buildModule,/for\(const key of \[BUILD_SPACE_KEY,BUILD_SNAPSHOT_KEY\]\)/,'Build must prefer the explicit post-enrichment Character handoff so resolved armour set bonuses survive');
 assert.match(buildModule,/import \{armourCard\} from '\.\.\/guardian-gear-layout\.mjs(?:\?v=[0-9a-f]{10})?'/,'Build Armour must import the same current renderer and hover wiring as Character');
@@ -236,8 +236,8 @@ assert.match(buildHtml,/paradox-build-space\.mjs(?:\?v=[0-9a-f]{10})?/,'Build mu
 assert.match(buildModule,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderWeapons/,'Build Weapons must route through the shared Main renderer');
 assert.match(buildModule,/document\.addEventListener\('forge:guardian-loadout-context',event=>recoverMissingBuild\(event\.detail\|\|\{\}\)\)/,'Build must recover a missing handoff from the verified live Guardian context');
 assert.match(buildModule,/const artifactItems=resolvedOptions\(build,'artifact'\)/,'Build Artifact selector must expose the verified Artifact 2.0 catalogue for Forge ranking');
-assert.match(buildModule,/applyForgeArtifactRecommendation/,'Build Forge must calculate Artifact choices from its staged Forge Loader decision');
-assert.match(buildModule,/FORGE_PAGE_PAYLOAD[\s\S]*?currentSeasonNumber/,'Build Forge must verify Artifact freshness from the prepared page payload');
+assert.match(buildModule,/applyForgeArtifactRecommendation/,'Builder must calculate Artifact choices from its staged Forge Loader decision');
+assert.match(buildModule,/FORGE_PAGE_PAYLOAD[\s\S]*?currentSeasonNumber/,'Builder must verify Artifact freshness from the prepared page payload');
 assert.match(buildModule,/Working Build only · currently unlocked and equipped perks remain unchanged/,'Artifact recommendations must remain explicit non-live Working Build state');
 assert.match(buildCss,/\.artifact-perk\.is-recommended-choice\{[^}]*border-color:#b9b9b8!important/,'PARADOX-recommended Artifact perks must have a unique gold selection state');
 assert.match(buildModule,/forge:build-render-complete/,'Build Tool must publish render completion');
@@ -293,7 +293,7 @@ console.log('ARMOUR_WEAPON_HERO_PRESENTATION=PASS');
 console.log('BUILD_TOOL_PARITY=PASS');
 
 // Prompt 21: UI contracts are stricter than the retired popup text pins.
-assert.doesNotMatch(loadoutsModule,/LOADOUT ACTION COMPLETED|BUNGIE READBACK REQUESTED|Build Forge Apply|verified|authoritative|readback/i,'Retired popup and reassurance copy must not return');
+assert.doesNotMatch(loadoutsModule,/LOADOUT ACTION COMPLETED|BUNGIE READBACK REQUESTED|Builder Apply|verified|authoritative|readback/i,'Retired popup and reassurance copy must not return');
 assert.match(loadoutsModule,/menu\.setAttribute\('role','menu'\)/,'Actions must use an anchored menu, not a dialog');
 assert.match(loadoutsModule,/mode:\['equip','clear'\]\.includes\(value\)\?'confirm':'menu'/,'Only Equip and Clear open confirmations');
 assert.match(loadoutsModule,/if\(value==='snapshot'\)void confirmLoadoutMutation\(value\)/,'Overwrite is the direct selected action');

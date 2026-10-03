@@ -257,7 +257,7 @@ function evidenceRow(activity){
   const external=document.createElement('a');
   external.className='mission-external-link';
   external.href='../guardian-workspace-v2/paradox-build-space/';
-  external.setAttribute('aria-label',`Open ${activity.activityName} in Build Forge`);
+  external.setAttribute('aria-label',`Open ${activity.activityName} in Builder`);
   external.textContent='↗';
   row.append(
     tagElement,

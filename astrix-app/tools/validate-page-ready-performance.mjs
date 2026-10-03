@@ -190,7 +190,7 @@ const pageSources=await Promise.all([
 for(const [path,source] of pageSources){
   assert.doesNotMatch(source,/bungie\/manifest\/definitions?/,`${path} contains a client definition route`);
   if(path.includes('/journey/'))assert.doesNotMatch(source,/\/bungie\/(?:historical-stats|activity-history|current-season)/,`${path} contains a Journey follow up read`);
-  if(path.includes('/paradox-build-space/'))assert.doesNotMatch(source,/\/bungie\/(?:page\/build-forge|current-season)/,`${path} contains a Build Forge follow up read`);
+  if(path.includes('/paradox-build-space/'))assert.doesNotMatch(source,/\/bungie\/(?:page\/build-forge|current-season)/,`${path} contains a Builder follow up read`);
 }
 const backend=await readFile(new URL('../forge-auth-worker/src/index.ts',root),'utf8');
 const semanticWrapper=await readFile(new URL('../forge-auth-worker/src/semantic-wrapper.ts',root),'utf8');
@@ -252,7 +252,7 @@ const journeyRuntime=pageSources.find(([path])=>path.includes('/journey/'))?.[1]
 assert.match(journeyRuntime,/classificationComplete[\s\S]*?UNAVAILABLE/,'Journey must not display false Vault category counts when account item definitions are intentionally absent');
 
 const profileRuntime=pageSources.find(([path])=>path.includes('guardian-bungie-profile'))?.[1]||'';
-assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.includes\('\/pages\/guardian-workspace-v2\/'\)/,'Character runtime side effects must be limited to Character and Build Forge routes');
+assert.match(profileRuntime,/const PROFILE_RUNTIME_ENABLED=location\.pathname\.includes\('\/pages\/guardian-workspace-v2\/'\)/,'Character runtime side effects must be limited to Character and Builder routes');
 assert.match(profileRuntime,/if\(PROFILE_RUNTIME_ENABLED\)\{[\s\S]*?getBungieSession\(\)\.then\(handleAuthenticatedSession\)/,'Forge Loader must be able to import the profile normalizer without triggering a Character page request');
 const introRuntime=pageSources.find(([path])=>path.includes('/tool-intro/'))?.[1]||'';
 const forgePreload=pageSources.find(([path])=>path.endsWith('/forge-loader-preload.mjs'))?.[1]||'';

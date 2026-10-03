@@ -295,7 +295,7 @@ try{
    if(name==='BuildForge'){
     row.catalogue=await page.evaluate(()=>{const grid=document.querySelector('.manual-item-grid');grid.innerHTML=window.fixtureCatalogue;grid.closest('.manual-editor-overlay').hidden=false;return [...grid.querySelectorAll('.tile-art')].map(e=>e.getBoundingClientRect().width);});
     assert.ok(row.catalogue.length);for(const size of row.catalogue)assert.equal(size,44,'Catalogue remains 44px');
-    await page.screenshot({path:resolve(output,`BuildForge-${width}-catalogue.png`)});captures.push({name:'Build Forge owned catalogue',width,file:`BuildForge-${width}-catalogue.png`});
+    await page.screenshot({path:resolve(output,`BuildForge-${width}-catalogue.png`)});captures.push({name:'Builder owned catalogue',width,file:`BuildForge-${width}-catalogue.png`});
    }
   }
  }

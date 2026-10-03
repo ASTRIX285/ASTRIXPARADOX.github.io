@@ -83,7 +83,7 @@ function persistVaultBuildSource(){
   if(!source?.characterId)return false;
   return safeStore(BUILD_SNAPSHOT_KEY,createBuildState(source),{durable:true});
 }
-function armBuildSpacePortal(){globalThis.ForgeLoader?.mount?.();globalThis.ForgeLoader?.set?.(0);globalThis.ForgeLoader?.status?.('Opening Build Forge');}
+function armBuildSpacePortal(){globalThis.ForgeLoader?.mount?.();globalThis.ForgeLoader?.set?.(0);globalThis.ForgeLoader?.status?.('Opening Builder');}
 const afterPortalPaint=()=>new Promise(resolve=>{
   let settled=false,timer=0;
   const finish=()=>{if(settled)return;settled=true;if(timer)clearTimeout(timer);resolve();};
@@ -108,7 +108,7 @@ async function openBuildSpace(event){
       // The current protected profile snapshot is already safely stored under
       // BUILD_SNAPSHOT_KEY. Do not duplicate the same large build into a second
       // storage key: that can exhaust Web Storage and make the CTA appear dead.
-      // Clear only the stale explicit copy so Build Forge consumes the fresh key.
+      // Clear only the stale explicit copy so Builder consumes the fresh key.
       if(profileSource)clearStored(BUILD_SPACE_KEY);
       else if(!safeStore(BUILD_SPACE_KEY,state,{durable:true})){
         console.warn('[Forge Build] Build snapshot storage was rejected; recovering from the authenticated Bungie session.');
@@ -136,7 +136,7 @@ async function openContextualLoadout(detail={}){
   if(!['edit-paradox-copy','save-paradox-copy'].includes(intent)||location.pathname.includes('/paradox-build-space/'))return;
   const source=compactBuild(detail),binding=bindingOf(source);
   if(!binding.characterId||!safeStore(BUILD_SPACE_KEY,createBuildState(source),{durable:true})){
-    document.dispatchEvent(new CustomEvent('forge:loadout-error',{detail:{characterId:binding.characterId,index:detail.selectedLoadoutIndex,message:'The selected Bungie loadout could not be staged safely for Build Forge.'}}));
+    document.dispatchEvent(new CustomEvent('forge:loadout-error',{detail:{characterId:binding.characterId,index:detail.selectedLoadoutIndex,message:'The selected Bungie loadout could not be staged safely for Builder.'}}));
     return;
   }
   armBuildSpacePortal();globalThis.ForgeLoader?.status?.(intent==='save-paradox-copy'?'Opening named PARADOX save':'Opening PARADOX editor');

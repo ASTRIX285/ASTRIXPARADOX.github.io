@@ -32,7 +32,7 @@ function modal(title,body){
   qs('#astrixClassArtifactModal')?.remove();
   const wrap=document.createElement('div');
   wrap.id='astrixClassArtifactModal';wrap.className='beta-modal-backdrop';
-  wrap.innerHTML=`<section class="beta-modal beta-selection-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><div><small>GUARDIAN BUILD FORGE</small><h2>${esc(title)}</h2></div><button type="button" data-close aria-label="Close">✕</button></header><div class="beta-modal-body">${body}</div></section>`;
+  wrap.innerHTML=`<section class="beta-modal beta-selection-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><div><small>THE FORGE</small><h2>${esc(title)}</h2></div><button type="button" data-close aria-label="Close">✕</button></header><div class="beta-modal-body">${body}</div></section>`;
   document.body.appendChild(wrap);
   wrap.addEventListener('click',e=>{if(e.target===wrap||e.target.closest('[data-close]'))wrap.remove()});
   return wrap;
@@ -99,7 +99,7 @@ function renderArtifactSelection(){
 function openArtifactPicker(){
   const tiers=allArtifactTiers();
   if(!tiers.length)return toast('Artifact catalogue is not available.');
-  const body=`<p class="beta-note">DIM does not preserve Artifact selections in the shared build. Choose perks here so Guardian Build Forge can evaluate the build with an Artifact configuration. Selection is limited to 12 perks.</p><div class="beta-artifact-summary"><b>${esc(artifactIdentity()?.name||'Seasonal Artifact')}</b><span id="betaArtifactCount">${selectedArtifactHashes.length}/12 selected</span></div><div class="beta-artifact-tiers">${tiers.map(t=>`<section><h3>TIER ${t.tier}</h3><div class="beta-artifact-grid">${t.perks.map(p=>`<button type="button" class="beta-artifact-choice ${selectedArtifactHashes.includes(p.hash)?'selected':''}" data-artifact-hash="${p.hash}" title="${esc(p.description)}"><span>${p.icon?`<img src="${esc(p.icon)}" alt="">`:'◆'}</span><b>${esc(p.name)}</b></button>`).join('')}</div></section>`).join('')}</div><div class="beta-artifact-actions"><button type="button" class="beta-menu-item" id="betaArtifactClear">CLEAR</button><button type="button" class="beta-primary" id="betaArtifactApply">APPLY ARTIFACT</button></div>`;
+  const body=`<p class="beta-note">DIM does not preserve Artifact selections in the shared build. Choose perks here so The Forge can evaluate the build with an Artifact configuration. Selection is limited to 12 perks.</p><div class="beta-artifact-summary"><b>${esc(artifactIdentity()?.name||'Seasonal Artifact')}</b><span id="betaArtifactCount">${selectedArtifactHashes.length}/12 selected</span></div><div class="beta-artifact-tiers">${tiers.map(t=>`<section><h3>TIER ${t.tier}</h3><div class="beta-artifact-grid">${t.perks.map(p=>`<button type="button" class="beta-artifact-choice ${selectedArtifactHashes.includes(p.hash)?'selected':''}" data-artifact-hash="${p.hash}" title="${esc(p.description)}"><span>${p.icon?`<img src="${esc(p.icon)}" alt="">`:'◆'}</span><b>${esc(p.name)}</b></button>`).join('')}</div></section>`).join('')}</div><div class="beta-artifact-actions"><button type="button" class="beta-menu-item" id="betaArtifactClear">CLEAR</button><button type="button" class="beta-primary" id="betaArtifactApply">APPLY ARTIFACT</button></div>`;
   const wrap=modal('Artifact Loadout',body);
   qsa('[data-artifact-hash]',wrap).forEach(btn=>btn.addEventListener('click',()=>{
     const hash=Number(btn.dataset.artifactHash);

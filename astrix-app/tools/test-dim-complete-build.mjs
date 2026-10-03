@@ -7,7 +7,7 @@
 //     labelled as named in the title, never as pinned. Ranked picks are labelled suggestions.
 //   - Armour picks come from the user's inventory, state their reason, and meet stat targets or
 //     say which they miss. Nothing in the share is left out; unresolved hashes are named.
-//   - Send to Build Forge carries the picks and the missing markers.
+//   - Send to Builder carries the picks and the missing markers.
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
 import {cowlFixture} from './fixtures/dim-import/cowl-inventory.mjs';
@@ -109,12 +109,12 @@ assert.doesNotMatch(html,/Unresolved/,'Every hash resolves from the recorded man
 const missingMod=p.mods[0],partial={...f.snapshot,tables:{...f.snapshot.tables,[ITEM]:{...f.snapshot.tables[ITEM]}}};delete partial.tables[ITEM][missingMod];
 assert.throws(()=>resolveDimLoadout(share,{snapshot:partial}),error=>error.unresolved.includes(`${ITEM}:${missingMod}`));
 
-// 9. Send to Build Forge carries the picks and the missing markers.
+// 9. Send to Builder carries the picks and the missing markers.
 const store=new Map(),go={assigned:''};
 sendDimToForge(adaptation.build,{storage:{setItem:(key,value)=>store.set(key,value)},location:{assign:href=>{go.assigned=href;}}});
 const handed=JSON.parse(store.get('astrix:paradox-build-space:v1'));
 const handedText=JSON.stringify(handed);
-for(const row of fill.armour.rows)assert.ok(handedText.includes(row.itemInstanceId),`${row.slot} pick travels to Build Forge`);
+for(const row of fill.armour.rows)assert.ok(handedText.includes(row.itemInstanceId),`${row.slot} pick travels to Builder`);
 assert.equal((handedText.match(/"status":"picked"/g)||[]).length>=5,true,'Each pick keeps its marker');
 assert.match(go.assigned,/paradox-build-space\//);
 const noCloak={...f.profile,characterEquipment:{data:{[f.characterId]:{items:f.profile.characterEquipment.data[f.characterId].items.filter(item=>item.itemHash!==601809810)}}}};

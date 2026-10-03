@@ -25,7 +25,7 @@ const forgeLoaderCss=await readFile(new URL('../forge-loader/forge-loader.css',R
 const appPages=[
   ['Journey',await readFile(new URL('../journey/index.html',ROOT),'utf8')],
   ['Character',mainHtml],
-  ['Build Forge',buildHtml],
+  ['Builder',buildHtml],
   ['Mission Reports',await readFile(new URL('../mission-reports/index.html',ROOT),'utf8')],
   ['Vault',await readFile(new URL('../vault/index.html',ROOT),'utf8')],
   ['Forge Loader',await readFile(new URL('../forge-loader/index.html',ROOT),'utf8')],
@@ -49,19 +49,19 @@ assert.match(sources.items,/\.paradox-item-card \.weapon-perk-cell\{[^}]*border:
 assert.match(sources.items,/\.paradox-socket-icon\{[^}]*border-radius:8px/,'Armour mods and cosmetics must retain square sockets');
 assert.match(sources.items,/@media\(max-width:700px\)\{[\s\S]*?\.weapon-detail-drawer\.paradox-item-shell,\.armour-drawer\.paradox-item-shell\{inset:0;width:100%;height:100dvh/,'Both item-card inspectors must become contained full-screen mobile surfaces');
 assert.match(mainHtml,/paradox-item-cards\.css\?v=20260913-compact-inspect-1/,'Character must load the shared Paradox item-card and click-inspect framework');
-assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Build Forge must load the same Paradox item-card and hover framework');
+assert.match(buildHtml,/paradox-item-cards\.css\?v=20260908-icon-hover-1/,'Builder must load the same Paradox item-card and hover framework');
 
 assert.match(sources.shared,/guardian-loadouts-strip\{[\s\S]*?overflow-x:auto!important/,'The 1–20 loadout strip must contain its own narrow-screen overflow');
 // Intentional: loadout tracks fill the strip and slots retain their own portrait ratio.
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadouts-grid\{[^}]*grid-template-columns:repeat\(20,minmax\(32px,1fr\)\)!important;/,'The Bungie 1–20 loadout row must expand across the strip with uncapped fluid tracks');
 assert.match(sources.shared,/\.guardian-loadouts-strip \.guardian-loadout-slot\{[^}]*aspect-ratio:100\/122!important;/,'Intentional: loadout slots use their own literal 100/122 portrait ratio as requested by Miguel; equipped tiles retain the shared DIM-square ratio');
 
-// Intentional exception: Miguel asked for Build Forge at 75% on desktop (28 Sep 2026).
+// Intentional exception: Miguel asked for Builder at 75% on desktop (28 Sep 2026).
 // Only this exact rule is allowed; popups convert rects via currentCSSZoom and
 // test-build-forge-zoom.mjs proves alignment. Every other page stays native scale.
 const BUILD_FORGE_ZOOM_RULE='@media (min-width:1280px){html:has(body.build-forge-page){zoom:.75}}';
-assert.ok(sources.build.includes(BUILD_FORGE_ZOOM_RULE),'Build Forge keeps its single documented 75% desktop rule');
-assert.doesNotMatch(combined.replace(BUILD_FORGE_ZOOM_RULE,''),/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden outside the documented Build Forge exception');
+assert.ok(sources.build.includes(BUILD_FORGE_ZOOM_RULE),'Builder keeps its single documented 75% desktop rule');
+assert.doesNotMatch(combined.replace(BUILD_FORGE_ZOOM_RULE,''),/(?:^|[;{])\s*zoom\s*:/m,'Page-level CSS zoom is forbidden outside the documented Builder exception');
 const pageLayoutCss=[sources.adaptive,sources.gear,sources.layout,sources.leftLock,sources.mobile,sources.shared,sources.super,sources.build].join('\n');
 assert.doesNotMatch(pageLayoutCss,/(?:html|body|\.workspace|\.build-space|\.design-canvas|\.guardian-left-rail)\s*\{[^{}]*transform\s*:\s*scale\(/,'Page containers must not be scaled to simulate responsiveness');
 assert.doesNotMatch(densityCss,/--forge-desktop-density|(?:^|[;{])\s*zoom\s*:/m,'The shared interface must render at native scale instead of shrinking every tool');
@@ -101,7 +101,7 @@ assert.match(destinationRibbonCss,/@media\(max-width:720px\)\{[\s\S]*?grid-templ
 assert.match(sources.build,/@media\(max-width:1100px\)\{\.build-space\{grid-template-columns:1fr\}/,'Build must share the single-column compact breakpoint');
 assert.match(sources.build,/@media\s*\(max-width:720px\)\{[\s\S]*?\.build-space\{grid-template-columns:1fr/,'Build must collapse to one document-flow column on phones');
 assert.match(sources.build,/@media\(max-width:720px\)\{[\s\S]*?\.design-canvas \.gear-weapons \.weap-grid\{grid-template-columns:1fr!important\}/,'Build weapon models must use their complete single-column composition on phones');
-for(const [label,source] of [['Journey',journeyCss],['Build Forge',sources.build],['Mission Reports',missionCss]]){
+for(const [label,source] of [['Journey',journeyCss],['Builder',sources.build],['Mission Reports',missionCss]]){
   assert.match(source,/grid-template-columns:var\(--apx-workspace-columns,/u,label+' must consume the shared wide workspace tracks');
   assert.match(source,/grid-template-columns:var\(--apx-workspace-compact-columns,/u,label+' must consume the shared compact workspace tracks');
 }

@@ -47,7 +47,7 @@ assert.match(service,/options\.waitForManifest!==false/,'Selective payload hydra
 assert.match(service,/allowNetwork=!this\.backend&&options\.allowNetwork!==false/,'The compact Forge join must forbid live definition expansion for prepared page payloads.');
 assert.match(service,/const profile=payload\?\.profile\|\|\{\};[\s\S]*?profile\?\.profilePlugSets/,'Reusable plug-set hydration must read from the current private profile without an undeclared runtime binding.');
 if(forgeIndex){
-  assert.equal(forgeIndex.schemaVersion,4,'The compact Forge armour and Artifact index schema must remain explicit.');
+  assert.equal(forgeIndex.schemaVersion,4,'The compact The Forge armour and Artifact index schema must remain explicit.');
   assert.ok(Object.keys(forgeIndex.definitions).length>5000,'The compact Forge index must contain the complete verified armour definition catalogue.');
   assert.ok(Object.values(forgeIndex.definitions).every(row=>row.itemType===2),'The compact Forge index must never include non-armour inventory definitions.');
   assert.ok(Object.keys(forgeIndex.plugDefinitions).length>0,'The compact Forge index must carry pre-resolved armour plug definitions so Forge Loader never expands them one request at a time.');

@@ -55,7 +55,7 @@ const renderedSources=[
   'astrix-app/pages/tool-intro/tool-intro.mjs'
 ].map(read).join('\n');
 
-const retiredLabels=/ALPHA NOTE|BUNGIE SECURED|GUARDIAN BUILD FORGE (?:ALPHA|BETA)|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only|AUTHENTICATED JOURNEY|BUNGIE CONNECTED|Public v1|Public static version|Season Preview|PREVIEW GUARDIAN|Loading verified preview state|v1\.0\.0-alpha|Preview data only|Beta Loadouts|selected for alpha preview|Copy this beta link|Telemetry synchronized from Paradox beta fixture|Waiting for authenticated Guardian build|Loading authenticated account inventory|Resolving authenticated Bungie inventory|Fixture\/DIM builds can supply Artifact selections here/i;
+const retiredLabels=/ALPHA NOTE|BUNGIE SECURED|THE FORGE (?:ALPHA|BETA)|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only|AUTHENTICATED JOURNEY|BUNGIE CONNECTED|Public v1|Public static version|Season Preview|PREVIEW GUARDIAN|Loading verified preview state|v1\.0\.0-alpha|Preview data only|Beta Loadouts|selected for alpha preview|Copy this beta link|Telemetry synchronized from Paradox beta fixture|Waiting for authenticated Guardian build|Loading authenticated account inventory|Resolving authenticated Bungie inventory|Fixture\/DIM builds can supply Artifact selections here/i;
 assert.doesNotMatch(renderedSources,retiredLabels,'Runtime rendered copy must not restore retired release or authentication labels');
 
 const readiness=read('astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs');

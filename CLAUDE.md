@@ -59,13 +59,20 @@ Read this file at the start of every session. It survives chat compaction. The c
 - Restores mean restore: if a brief says "restore", match the earlier commit exactly and change nothing else.
 - Standing UX principle: a user should never have to struggle with the UI. Hold to DIM-level polish.
 
+## Naming (visible labels)
+- The Hub = the page that lists every tool (/hub/).
+- The Forge = the Destiny 2 tool. Builder = its build page.
+- WorkBench = the Division tool (not built yet).
+- "Forge" is never used on its own for anything else a player can see.
+- Labels only: file and folder names, URLs, CSS classes, JS identifiers, design tokens (e.g. "Forge Black"), Worker names, storage keys and the sandbox track name "FORGE AI INT DEV" keep their names.
+
 ## Speed standard (permanent)
 - Every tool page usable in 3 to 4 seconds on a phone (Slow 4G, 4x CPU), signed in. Measure with `astrix-app/tools/perf/` before and after any change that can affect load, and report the numbers.
 - Item moves land on screen as soon as Bungie accepts them. Reconcile with one background read, never block the UI on profile polling.
 - Load only what the page needs. No full manifest or data files for features not on screen.
 
 ## Tool entry and navigation rule
-- Show the portal loader only on a fresh navigation from the public Tools entry. Never show its ring or breach skin on internal tool transfers, reloads, history traversal or direct links.
+- Show the portal loader only on a fresh navigation from the public entry, The Hub (/hub/, formerly /tools/). Never show its ring or breach skin on internal tool transfers, reloads, history traversal or direct links.
 - Retain the outgoing page until the selected destination has fully rendered and reported readiness. Never show a half-built page. Reveal immediately when ready; 3 to 4 seconds is the maximum target, never an artificial delay.
 - A failed transfer exposes recovery actions without a loader animation. Preserve authentication and retry controls.
 
@@ -93,9 +100,9 @@ Report ONLY:
 - "Decisions I made" (if any)
 No code in chat.
 
-## Locked user flow (Forge Loader to Build Forge)
+## Locked user flow (Forge Loader to Builder)
 Changes to any step below need Miguel's sign-off first. Do not add, remove, reorder or move a question between steps. Last changed 27 Sep 2026 (Miguel signed off on moving results to their own page and adding the weapon anchor).
-1. Forge Loader: the user picks an Exotic armour, an optional Exotic weapon anchor and a set bonus and stat focus. A live top-few-loads preview updates instantly as these change, using the shared search module. "Open Forge Matrix" carries the whole selection in a bookmarkable URL to the results page.
-2. Results page (its own URL, reloadable, bookmarkable, shareable): the full ranked list, Staged armour and Enter Build Forge. Enter Build Forge is grey and disabled only when not ready, pulsing charcoal when ready, crimson with a visible progress state while transferring.
-3. Build Forge: element, Build objective and Activity (Raid, Dungeon, Grandmaster, Crucible, General PvE) are all picked in the Elemental Build Options panel. If a weapon anchor is set, its element is pre-selected with a visible reason (e.g. "Solar suggested: One Thousand Voices deals Solar damage."); the user can pick a different one. There is no activity popup, and each question is asked once.
+1. Forge Loader (page title "Preparing The Forge"): the user picks an Exotic armour, an optional Exotic weapon anchor and a set bonus and stat focus. A live top-few-loads preview updates instantly as these change, using the shared search module. "Open Forge Matrix" carries the whole selection in a bookmarkable URL to the results page.
+2. Results page (its own URL, reloadable, bookmarkable, shareable): the full ranked list, Staged armour and Enter Builder. Enter Builder is grey and disabled only when not ready, pulsing charcoal when ready, crimson with a visible progress state while transferring.
+3. Builder: element, Build objective and Activity (Raid, Dungeon, Grandmaster, Crucible, General PvE) are all picked in the Elemental Build Options panel. If a weapon anchor is set, its element is pre-selected with a visible reason (e.g. "Solar suggested: One Thousand Voices deals Solar damage."); the user can pick a different one. There is no activity popup, and each question is asked once.
 4. Generate stays disabled until all three are picked, and its label says what is missing. The engine receives the activity context exactly as before. An anchored Exotic weapon stays in its slot through generation.

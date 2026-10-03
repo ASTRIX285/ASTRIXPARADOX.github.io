@@ -66,10 +66,10 @@ assert.match(portalJs,/function ready\(root\)[\s\S]*?document\.fonts[\s\S]*?quer
 
 assert.doesNotMatch(mainHtml,/guardian-loading-gate|guardianLoadingProgress|data-lit-edges/,'Main legacy red-diamond gate must be removed');
 assert.doesNotMatch(buildHtml,/build-loading-gate|buildLoadingProgress|data-lit-edges/,'Build legacy hex gate must be removed');
-assert.match(mainProgress,/forge:guardian-render-complete',\(\)=>\{if\(!isBuildSpace\)finishAfterPaint/,'Character completion must not reveal Build Forge before its own render completes');
+assert.match(mainProgress,/forge:guardian-render-complete',\(\)=>\{if\(!isBuildSpace\)finishAfterPaint/,'Character completion must not reveal Builder before its own render completes');
 assert.match(mainProgress,/document\.querySelectorAll\('\.scene\.immersive'\)/,'Portal completion must inspect the shared scene background');
 assert.match(mainProgress,/image\.addEventListener\('load',async\(\)=>\{try\{await image\.decode\(\);\}/,'Portal completion must wait for CSS background decoding');
-assert.match(mainProgress,/const BACKGROUND_DECODE_TIMEOUT_MS=5\*1000;[\s\S]*?const timeout=setTimeout\(finish,BACKGROUND_DECODE_TIMEOUT_MS\)/,'A stalled decorative background must not strand Character and Build Forge at the manifest milestone');
+assert.match(mainProgress,/const BACKGROUND_DECODE_TIMEOUT_MS=5\*1000;[\s\S]*?const timeout=setTimeout\(finish,BACKGROUND_DECODE_TIMEOUT_MS\)/,'A stalled decorative background must not strand Character and Builder at the manifest milestone');
 assert.match(mainProgress,/const manifestReady=guardianManifest\.cached\(\)/,'Portal completion may inspect only the cached manifest state on the critical path');
 assert.doesNotMatch(mainProgress,/await manifestReady|await sceneBackgroundReady/,'Portal completion must not block interaction on full manifest indexing or decorative imagery');
 assert.match(mainProgress,/Promise\.allSettled\(\[manifestReady,sceneBackgroundReady\]\)/,'Non-critical manifest and background work must continue after the page becomes usable');
@@ -84,7 +84,7 @@ assert.doesNotMatch(mainProgress,/window\.addEventListener\('load'/,'Main progre
 assert.match(buildModule,/const ready=Boolean\(build\),status=ready\?'ready':'pending'/,'An empty initial Build render must remain pending while the live profile resolves');
 assert.match(buildModule,/emitLoad\('render',ready\?LOAD_STAGES\.READY:LOAD_STAGES\.SNAPSHOT,label,status\)/,'Only a populated Build render may report the ready milestone');
 assert.match(mainHtml,/guardian-portal-progress\.mjs(?:\?v=[0-9a-f]{10})?/,'Character must load the partial-data-safe progress module without a stale cache');
-assert.match(buildHtml,/paradox-build-space\.mjs(?:\?v=[0-9a-f]{10})?/,'Build Forge must refresh its partial-data-safe module graph');
+assert.match(buildHtml,/paradox-build-space\.mjs(?:\?v=[0-9a-f]{10})?/,'Builder must refresh its partial-data-safe module graph');
 assert.match(buildModule,/guardian-portal-progress\.mjs(?:\?v=[0-9a-f]{10})?/,'Build must load the partial-data-safe progress module without a stale cache');
 assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build real milestones must update the shared prepared page controller');
 
@@ -128,9 +128,9 @@ const loading=await loaderHarness();loading.emit('forge:build-render-complete',{
 loading.settleHeader();loading.emit('forge:bungie-character-roster');loading.emit('forge:guardian-loadout-context');await loading.flush();assert.equal(loading.done(),0,'Resolved profile still needs its populated build render.');
 loading.emit('forge:build-render-complete',{status:'ready'});await loading.flush();assert.equal(loading.done(),1,'Ready build plus settled header releases the loader.');
 const delayedHeader=await loaderHarness();delayedHeader.emit('forge:build-render-complete',{status:'ready'});await delayedHeader.flush();assert.equal(delayedHeader.done(),0);delayedHeader.settleHeader();delayedHeader.emit('forge:bungie-character-roster');await delayedHeader.flush();assert.equal(delayedHeader.done(),1);
-const failed=await loaderHarness();failed.emit('forge:build-render-complete',{status:'pending'});failed.settleHeader();failed.emit('forge:guardian-error');await failed.flush();assert.equal(failed.done(),0,'A terminal profile error must not expose an empty Build Forge.');assert.equal(failed.blocked(),1,'A terminal profile error must expose retry inside the portal.');
+const failed=await loaderHarness();failed.emit('forge:build-render-complete',{status:'pending'});failed.settleHeader();failed.emit('forge:guardian-error');await failed.flush();assert.equal(failed.done(),0,'A terminal profile error must not expose an empty Builder.');assert.equal(failed.blocked(),1,'A terminal profile error must expose retry inside the portal.');
 const stale=await loaderHarness();stale.settleHeader();stale.emit('forge:build-render-complete',{status:'ready'});stale.emit('forge:guardian-loading');await stale.flush();assert.equal(stale.done(),0,'A new load must cancel old completion.');
-const stalledBackground=await loaderHarness({stalledBackground:true});stalledBackground.settleHeader();stalledBackground.emit('forge:build-render-complete',{status:'ready'});await stalledBackground.flush();assert.equal(stalledBackground.done(),1,'A decorative background that never loads or errors must not delay a genuinely ready Build Forge.');
+const stalledBackground=await loaderHarness({stalledBackground:true});stalledBackground.settleHeader();stalledBackground.emit('forge:build-render-complete',{status:'ready'});await stalledBackground.flush();assert.equal(stalledBackground.done(),1,'A decorative background that never loads or errors must not delay a genuinely ready Builder.');
 const stalledCharacterBackground=await loaderHarness({stalledBackground:true,isBuildSpace:false});stalledCharacterBackground.emit('forge:guardian-render-complete');await stalledCharacterBackground.flush();assert.equal(stalledCharacterBackground.done(),1,'A decorative background that never loads or errors must not delay a genuinely rendered Character page.');
 console.log('BUILD_LOADER_EVENT_ORDER=PASS');
 

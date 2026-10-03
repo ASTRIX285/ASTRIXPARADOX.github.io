@@ -1,5 +1,5 @@
 import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=fb01849b04';
-import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=875e9c1a7d';
+import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=813c0b7d03';
 
 const clone=value=>{
   try{return structuredClone(value);}

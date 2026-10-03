@@ -9,12 +9,12 @@ const {chromium}=process.env.PLAYWRIGHT_MODULE_PATH
  ?await import(process.env.PLAYWRIGHT_MODULE_PATH)
  :require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 
-// Build Forge renders at CSS zoom 0.75 on desktop (Miguel, 28 Sep 2026). Rects
+// Builder renders at CSS zoom 0.75 on desktop (Miguel, 28 Sep 2026). Rects
 // are visual pixels while style lengths are local, so every popup that positions
 // from a rect must convert, or it lands at 75% of the intended spot.
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const css=await readFile(resolve(root,'astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.css'),'utf8');
-assert.match(css,/@media \(min-width:1280px\)\{html:has\(body\.build-forge-page\)\{zoom:\.75\}\}/,'Build Forge desktop default is 75%');
+assert.match(css,/@media \(min-width:1280px\)\{html:has\(body\.build-forge-page\)\{zoom:\.75\}\}/,'Builder desktop default is 75%');
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/zoom.html'){res.setHeader('Content-Type','text/html');res.end(`<!doctype html><link rel="stylesheet" href="/astrix-app/shared/loadout-details.css"><style>html{zoom:.75}body{margin:0}</style><body class="build-forge-page">

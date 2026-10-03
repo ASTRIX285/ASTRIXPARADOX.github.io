@@ -158,18 +158,18 @@ assert.match(journey,/function renderJourneyActivityEvidence[\s\S]*?renderRecent
 assert.match(journey,/await bindJourneyActivityEvidence\(journeySession,\{force:true\}\)/,'The silent ten-minute refresh must also update activity-backed Journey summaries');
 assert.match(html,/id="journeyConfidenceDonutValue"[\s\S]*?id="journeyConfidenceHighPercent"[\s\S]*?id="journeyConfidenceHigh"[\s\S]*?id="journeyConfidenceMedium"[\s\S]*?id="journeyConfidenceLow"/,'Evidence Confidence must expose live activity-backed display mounts');
 assert.match(journey,/function renderEvidenceConfidence[\s\S]*?confidence\.highPercent[\s\S]*?confidence\.mediumPercent[\s\S]*?confidence\.lowPercent/,'Evidence Confidence must render only calculated live-source coverage');
-assert.match(journey,/const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';[\s\S]*?const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';[\s\S]*?const LAST_LOADOUT_KEY='astrix:paradox-last-bungie-loadout:v1';/,'Journey must recognize every existing Build Forge handoff source');
-assert.match(journey,/validateHandoffEnvelope[\s\S]*?function readJourneyBuildState[\s\S]*?expectedCharacterId[\s\S]*?expectedMembershipId[\s\S]*?expectedMembershipType[\s\S]*?allowLegacy:false/,'Build Forge summaries must reject stale, legacy or cross-account build state');
+assert.match(journey,/const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';[\s\S]*?const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';[\s\S]*?const LAST_LOADOUT_KEY='astrix:paradox-last-bungie-loadout:v1';/,'Journey must recognize every existing Builder handoff source');
+assert.match(journey,/validateHandoffEnvelope[\s\S]*?function readJourneyBuildState[\s\S]*?expectedCharacterId[\s\S]*?expectedMembershipId[\s\S]*?expectedMembershipType[\s\S]*?allowLegacy:false/,'Builder summaries must reject stale, legacy or cross-account build state');
 assert.match(journey,/function captureEvidenceRows[\s\S]*?readCapture\(\)[\s\S]*?readCaptureArchive\(\)[\s\S]*?const completed=[\s\S]*?capture\?\.status!=='collected'/,'Most-used build tracking must count only completed verified Build Test evidence');
 assert.match(journey,/function renderMostUsed[\s\S]*?activity\?\.buildSnapshot[\s\S]*?winner\.count\/evidence\.length\*100/,'Most-used build tracking must combine future Mission Report snapshots with verified Build Test samples');
-assert.match(html,/id="journeyMostUsed"[\s\S]*?No build activity recorded yet\.[\s\S]*?id="journeyBuildSummary"[\s\S]*?No Build Forge state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
+assert.match(html,/id="journeyMostUsed"[\s\S]*?No build activity recorded yet\.[\s\S]*?id="journeyBuildSummary"[\s\S]*?No Builder state[\s\S]*?id="journeyMissionHighlights"[\s\S]*?No activity history/,'Unreturned cross-page evidence must retain explicit honest empty states');
 assert.match(css,/\.journey-column-summaries \.journey-evidence-rows[\s\S]*?grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)/,'Connected Journey evidence must remain readable inside the existing compact cards');
 // Prompt 20 adds Reports; retain exactly these seven ribbon routes in order.
 const ribbonRoutes=[...ribbon.matchAll(/Object\.freeze\(\{key:'([^']+)'/g)].map(match=>match[1]);
 assert.equal((ribbon.match(/Object\.freeze\(\{key:/g)??[]).length,7,'Shared Journey ribbon must retain exactly seven destination routes');
 assert.deepEqual(ribbonRoutes,['journey','character','forge-loader','build-forge','reports','vault','loadout'],'Shared Journey ribbon must retain the approved destination order');
 assert.ok(!ribbonRoutes.includes('mission-reports'),'Mission Reports must remain absent from the ribbon');
-assert.ok(ribbon.indexOf("key:'forge-loader'")<ribbon.indexOf("key:'build-forge'"),'Forge Loader must appear before Build Forge');
+assert.ok(ribbon.indexOf("key:'forge-loader'")<ribbon.indexOf("key:'build-forge'"),'Forge Loader must appear before Builder');
 for(const page of globalHeroPages){
   assert.equal((page.match(/data-forge-hero-cards/g)??[]).length,1,'Every destination page must contain exactly one shared hero-card mount');
   assert.ok(page.includes('astrix-hero-cards.css?v=20260904-mobile-crosscheck-1'),'Every destination page must load the current centred, mobile-contained command-header presentation');
@@ -180,7 +180,7 @@ assert.ok(plainOrStamped(loadoutHtml,'astrix-hero-cards.mjs'),'Loadout must reta
 assert.ok(plainOrStamped(forgeLoaderHtml,'astrix-hero-cards.mjs'),'Forge Loader must load the backend-prepared persistent Guardian renderer');
 // PR #231 (a6974b1) superseded fast-transfer-2; #241, #242, #243 and #268 refreshed its graph.
 assert.ok(plainOrStamped(characterHtml,'guardian-workspace-v2.mjs'),'Character must load the current resilient transfer module graph');
-assert.ok(plainOrStamped(buildForgeHtml,'paradox-build-space.mjs'),'Build Forge must load the partial-data-safe live module graph');
+assert.ok(plainOrStamped(buildForgeHtml,'paradox-build-space.mjs'),'Builder must load the partial-data-safe live module graph');
 assert.ok(plainOrStamped(missionReportsHtml,'mission-reports.mjs'),'Mission Reports must load the prepared page payload module graph');
 assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1&amp;drilldown=20260927-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');
@@ -205,8 +205,8 @@ assert.match(heroModule,/const CLASS_ORDER=\{hunter:0,warlock:1,titan:2\}/,'Warl
 for(const [page,title,purpose] of [
   [html,'JOURNEY','GUARDIAN COMMAND CONSOLE'],
   [characterHtml,'CHARACTER','INSPECT YOUR LIVE GUARDIAN LOADOUT'],
-  [forgeLoaderHtml,'FORGE LOADER','SELECT AND MAXIMISE ARMOUR'],
-  [buildForgeHtml,'BUILD FORGE','OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD'],
+  [forgeLoaderHtml,'PREPARING THE FORGE','SELECT AND MAXIMISE ARMOUR'],
+  [buildForgeHtml,'BUILDER','OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD'],
   [missionReportsHtml,'MISSION REPORTS','REVIEW GUARDIAN ACTIVITY'],
   [vaultHtml,'STORAGE',null],
   // Renamed to Armoury (Miguel, 30 Sep 2026).
@@ -235,7 +235,7 @@ assert.match(heroModule,/\[requested,storedCharacterId\(\)\][\s\S]*?mostRecentCh
 assert.match(missionReportsData,/preferredCharacterId\|\|mostRecentCharacterId\(rawCharacters\)/,'Mission Reports must use latest-played by default while preserving explicit in-page selection');
 assert.match(heroCss,/var\(--character-emblem\) 28px center\/cover no-repeat/,'Shared hero cards must centre the emblem focal icon horizontally and vertically');
 assert.match(heroCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:var\(--apx-icon-stat,1\.25rem\);height:var\(--apx-icon-stat,1\.25rem\);flex:0 0 var\(--apx-icon-stat,1\.25rem\)[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Shared Character-format stat cells, icons and values must use the shared enlarged contained treatment');
-assert.doesNotMatch(heroModule,/from ['"][^'"]*(?:guardian-bungie-profile|guardian-manifest-service|paradox-build)[^'"]*['"]|CLIENT_SECRET|API_KEY/,'Shared hero cards must not import or alter Character, manifest, Build Forge or secret internals');
+assert.doesNotMatch(heroModule,/from ['"][^'"]*(?:guardian-bungie-profile|guardian-manifest-service|paradox-build)[^'"]*['"]|CLIENT_SECRET|API_KEY/,'Shared hero cards must not import or alter Character, manifest, Builder or secret internals');
 for(const page of mapBackgroundPages){
   assert.ok(page.includes('astrix-paradox-background.css?v=20260830-global-map-background'),'Each approved page must load the shared ASTRIX PARADOX map background');
 }

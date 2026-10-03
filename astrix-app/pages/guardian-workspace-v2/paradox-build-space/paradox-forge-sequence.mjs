@@ -1,9 +1,9 @@
 // Worker-safe Forge sequence. Selection and Artifact rules are shared with the established UI flow.
-import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=875e9c1a7d';
+import {protectBuildState,createBuildState} from './paradox-build-state.mjs?v=813c0b7d03';
 import {composeForgeRecommendation,hasVerifiedSubclassSockets,filterExoticCompatibleSubclasses,refreshForgeIntelligence} from './paradox-forge-intelligence.mjs?v=fb405abd54';
 import {analyzeLiveGuardian} from '../guardian-paradox-live-adapter.mjs?v=555dc9e289';
 import {applyForgeArtifactRecommendation} from './paradox-artifact-selection.mjs?v=9f03f9aff1';
-import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=7387cd5fee';
+import {directEntryMode,validateForgeGenerationEntry} from './paradox-build-recommendation.mjs?v=73016f37ff';
 import {createLiveTransferPreflight,deriveLoadoutIntent,recommendArmourMods,selectOwnedWeapons,validateArmourModLoadout,validateExoticLoadout,validateLoadoutCoherence} from './paradox-loadout-intelligence.mjs?v=2849ed8d35';
 import {adviseLiveWeaponRolls} from '../guardian-weapon-roll-advisor.mjs?v=fa3d823fc4';
 const FORGE_COMPUTATION_FIELDS=Object.freeze(['version','source','characterId','membershipId','membershipType','characterClass','selectedLoadoutIndex','subclass','subclassName','subclassIcon','subclassBuild','super','superOptions','classAbility','movement','melee','grenade','abilities','aspects','fragments','artifact','artifactConfiguration','weapons','armour','mods','stats','hashCoverage','statModel','coverage','semanticCoverage','paradoxEvidence','forgeLoaderDecision','objective','activityContext','locks']);

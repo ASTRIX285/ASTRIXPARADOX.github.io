@@ -127,7 +127,7 @@ const exactWeapon=(hash,instance,name,description,bucketHash,extra={})=>{
 };
 const currentPrimary=exactWeapon(601,'weapon-current','Plain Rifle','A reliable rifle.',1498876634),joltPrimary=exactWeapon(602,'weapon-jolt','Jolt Rifle','Final blows jolt nearby targets and grant grenade energy.',1498876634),energyWeapon=exactWeapon(603,'weapon-energy','Energy Weapon','Verified energy weapon.',2465295065),powerWeapon=exactWeapon(604,'weapon-power','Power Weapon','Verified power weapon.',953998645);
 const expandedTierFiveWeapon=exactWeapon(609,'weapon-expanded-tier-five','Expanded Tier Five Weapon','A verified crafted weapon with an additional perk choice.',1498876634,{perkColumnCounts:[2,3,3,3,2]});
-assert.equal(validateWeaponModel({weapons:[expandedTierFiveWeapon]}).ready,true,'Verified Tier 5 weapon columns may exceed the baseline row count without blocking Build Forge generation.');
+assert.equal(validateWeaponModel({weapons:[expandedTierFiveWeapon]}).ready,true,'Verified Tier 5 weapon columns may exceed the baseline row count without blocking Builder generation.');
 const incompleteTierFiveWeapon=structuredClone(currentPrimary);incompleteTierFiveWeapon.weaponSemantics.perkModel.columns[0].expectedRowCount=1;
 assert.equal(validateWeaponModel({weapons:[incompleteTierFiveWeapon]}).ready,false,'Invalid Tier 5 display-row capacity metadata must still be rejected.');
 const [praxicCatalogue,praxicIntrinsicCatalogue,praxicBladeCatalogue,praxicGripCatalogue,praxicTraitCatalogue,praxicSandboxCatalogue]=await Promise.all([
@@ -147,7 +147,7 @@ const praxicPerks=[[3514694513,praxicBladeCatalogue],[1958555234,praxicGripCatal
 const praxicTierZeroModel=normaliseWeaponPerkModel({gearTier:0,selectedPerks:praxicPerks,alternativePerkColumns:praxicPerks.map(perk=>({socketIndex:perk.socketIndex,options:[perk]}))});
 assert.equal(praxicTierZeroModel.weaponTier,0,'Bungie gearTier 0 must remain Tier 0 instead of being coerced to unknown.');
 assert.equal(validateWeaponModel({weapons:[{itemHash:3049715579,name:'Praxic Blade',gearTier:0,weaponSemantics:{gearTier:0,perkModel:praxicTierZeroModel}}]}).ready,true,'Praxic Blade real Tier 0 one-row perk evidence must be valid.');
-assert.match(runtime,/paradox-forge-preparation\.mjs(?:\?v=[0-9a-f]{10})?/,'Build Forge must load the terminating background preparation graph.');
+assert.match(runtime,/paradox-forge-preparation\.mjs(?:\?v=[0-9a-f]{10})?/,'Builder must load the terminating background preparation graph.');
 assert.match(preparationRuntime,/paradox-forge-worker\.mjs(?:\?v=[0-9a-f]{10})?/,'Background preparation must start the terminating Forge worker.');
 assert.match(workerRuntime,/paradox-forge-sequence\.mjs(?:\?v=[0-9a-f]{10})?/,'The Forge worker must load the terminating generation sequence.');
 assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs(?:\?v=[0-9a-f]{10})?/,'The generation sequence must load the Tier 0 weapon evidence validator.');
@@ -281,33 +281,33 @@ const loadoutsAt=html.indexOf('loadouts-design-section'),armourAt=html.indexOf('
 assert.ok(loadoutsAt>0&&loadoutsAt<armourAt&&armourAt<weaponsAt&&weaponsAt<recommendationAt&&recommendationAt<rightRailAt,'Centre column order must be In-game Loadouts, Armour & Mods, Weapons & Perks, then Elemental Build Options.');
 assert.ok(rightRailAt<validationAt&&validationAt<intelligenceAt,'The right rail must contain the Validation Loop above Paradox Intelligence.');
 assert.match(html,/PARADOX RECOMMENDATION[\s\S]*?ELEMENTAL BUILD OPTIONS/,'The armour-driven recommendation controls must not be presented as a second subclass picker.');
-assert.doesNotMatch(html,/CHOOSE SUBCLASS/,'Build Forge must not label elemental damage recommendations as a subclass picker.');
-assert.match(css,/\.build-space\{grid-template-columns:var\(--apx-workspace-columns,minmax\(360px,20%\) minmax\(720px,1fr\) minmax\(420px,24%\)\)/,'Build Forge must consume the shared Journey workspace proportions.');
-assert.match(css,/\.build-space\{grid-template-columns:var\(--apx-workspace-columns,[^;]+\);gap:var\(--apx-workspace-gap,\.625rem\);align-items:stretch\}/,'Loaded Build Forge columns must share the common gutter and stretch to the centre-column height.');
+assert.doesNotMatch(html,/CHOOSE SUBCLASS/,'Builder must not label elemental damage recommendations as a subclass picker.');
+assert.match(css,/\.build-space\{grid-template-columns:var\(--apx-workspace-columns,minmax\(360px,20%\) minmax\(720px,1fr\) minmax\(420px,24%\)\)/,'Builder must consume the shared Journey workspace proportions.');
+assert.match(css,/\.build-space\{grid-template-columns:var\(--apx-workspace-columns,[^;]+\);gap:var\(--apx-workspace-gap,\.625rem\);align-items:stretch\}/,'Loaded Builder columns must share the common gutter and stretch to the centre-column height.');
 assert.match(css,/\.build-space>\.build-rail,\.build-space>\.design-canvas,\.build-space>\.build-right-rail,\.build-right-rail>\.intelligence\{height:100%\}/,'All three desktop columns must consume the same loaded row height.');
-assert.match(css,/@media\(max-width:1760px\)\{\.build-space\{grid-template-columns:var\(--apx-workspace-compact-columns,392px minmax\(0,1fr\)\)\}/,'Build Forge must share Journey\'s compact workspace before the right rail moves below.');
-assert.match(css,/\.build-forge-page \.forge-platform-shell\{grid-template-columns:0 minmax\(0,1fr\) 0!important\}/,'Build Forge must reclaim the obsolete external media rails for the working columns.');
+assert.match(css,/@media\(max-width:1760px\)\{\.build-space\{grid-template-columns:var\(--apx-workspace-compact-columns,392px minmax\(0,1fr\)\)\}/,'Builder must share Journey\'s compact workspace before the right rail moves below.');
+assert.match(css,/\.build-forge-page \.forge-platform-shell\{grid-template-columns:0 minmax\(0,1fr\) 0!important\}/,'Builder must reclaim the obsolete external media rails for the working columns.');
 assert.match(css,/\.build-rail\{container-type:inline-size;--build-rail-icon:clamp\(40px,21cqi,128px\)/,'Build left-rail icons must remain proportional to their column without taking ownership of the shared Character token.');
 assert.match(css,/\.armour-design-section \.gear-columns\{grid-template-columns:repeat\(auto-fit,minmax\(min\(calc\(3 \* var\(--guardian-square\) \+ 2 \* var\(--guardian-square-gap\) \+ 34px\),100%\),1fr\)\)!important/,'Armour cards must wrap instead of forcing five cards into a narrow column.');
 assert.match(css,/--build-armour-art-width:var\(--apx-icon-gear-art-width\);[\s\S]*?--build-armour-art-height:var\(--apx-icon-gear-art-height\)/,'Build Armour art must consume the shared portrait gear-art tokens.');
 assert.match(css,/--build-armour-mod:var\(--guardian-square\)/,'Build Armour mods must consume the original shared Character socket size.');
-assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-gear-art-width\);[\s\S]*?--gear-weapon-socket:var\(--apx-icon-weapon-socket\)/,'Character and Build Forge must consume the shared portrait gear-art and socket tokens.');
+assert.match(gearCss,/--gear-weapon-art:var\(--apx-icon-gear-art-width\);[\s\S]*?--gear-weapon-socket:var\(--apx-icon-weapon-socket\)/,'Character and Builder must consume the shared portrait gear-art and socket tokens.');
 const itemCardCss=await readFile(new URL('paradox-item-cards.css',root),'utf8');
 assert.doesNotMatch(itemCardCss,/body \.gear-combined \.gear-mod(?:s)?\{[^}]*--apx-icon-socket-compact/,'Shared item styling must not shrink Character armour mods to the compact weapon-perk tier.');
 assert.match(itemCardCss,/body \.gear-weapons,body \.recommended-weapons-summary\{--gear-weapon-art:var\(--paradox-equipment-width\)/,'Recommended weapon cards must consume the canonical shared equipment-art owner');
 assert.doesNotMatch(css,/--gear-weapon-art:/,'Build must not reintroduce a competing review thumbnail size');
 // Prompt 23 replaces the art-based fallback with max-content; equal widths and containment remain strict.
-assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{\s*--build-weapon-card:max-content;\s*grid-template-columns:repeat\(3,var\(--build-weapon-card\)\)!important;[\s\S]*?width:max-content!important;max-width:none!important;\s*margin-inline:auto;column-gap:12px!important/,'Build Forge must centre three equal content-sized weapon cards with the existing gap.');
+assert.match(css,/\.weapon-design-section \.gear-weapons \.weap-grid\{\s*--build-weapon-card:max-content;\s*grid-template-columns:repeat\(3,var\(--build-weapon-card\)\)!important;[\s\S]*?width:max-content!important;max-width:none!important;\s*margin-inline:auto;column-gap:12px!important/,'Builder must centre three equal content-sized weapon cards with the existing gap.');
 assert.match(css,/grid-row:span 5;grid-template-columns:minmax\(0,1fr\)!important;\s*grid-template-rows:subgrid!important;\s*grid-template-areas:"art" "cap" "perks" "support" "apply"!important/,'All three weapon cards must share aligned art, label/divider, perk, mod and Apply rows.');
 assert.match(css,/\.design-canvas\{--build-armour-mod:var\(--guardian-square\)\}/,'Armour and weapon mods must inherit one common mod token.');
 assert.match(css,/\.weapon-support-icon\{width:var\(--build-armour-mod\)!important;height:var\(--build-armour-mod\)!important/,'Prompt 23: every support icon must use the Armour mod size without changing perk size.');
 assert.doesNotMatch(html+runtime,/MANUAL OR PARADOX/,'The ambiguous weapon status fallback must never be rendered.');
 assert.match(html,/<span id="weaponRecommendationState" hidden><\/span>/,'Empty weapon status must start hidden.');
 // Prompt 11c advances both resources for the explicit card-width helper.
-for(const [file,tag] of [['paradox-build-space.css','20260925-rows-4']])assert.ok(html.includes(file+'?')&&html.split(file+'?')[1].split('"')[0].includes('weaponcards='+tag),'Changed Build Forge resources must invalidate their cache tags.');
+for(const [file,tag] of [['paradox-build-space.css','20260925-rows-4']])assert.ok(html.includes(file+'?')&&html.split(file+'?')[1].split('"')[0].includes('weaponcards='+tag),'Changed Builder resources must invalidate their cache tags.');
 // JS modules carry their generated version (module-versions.json); validate-single-module-urls checks it is current.
-assert.match(html,/paradox-build-space\.mjs\?v=[0-9a-f]{10}"/,'Build Forge must load its module under its generated version.');
-assert.doesNotMatch(css,/\.weapon-design-section[^{}]*\.gear-weapons[^{}]*\{[^}]*overflow-x\s*:\s*(?:auto|scroll)/,'Build Forge weapons must never introduce horizontal section scrolling.');
+assert.match(html,/paradox-build-space\.mjs\?v=[0-9a-f]{10}"/,'Builder must load its module under its generated version.');
+assert.doesNotMatch(css,/\.weapon-design-section[^{}]*\.gear-weapons[^{}]*\{[^}]*overflow-x\s*:\s*(?:auto|scroll)/,'Builder weapons must never introduce horizontal section scrolling.');
 assert.match(css,/\.design-canvas \.weapon-design-section\{container-name:build-weapon-section\}/,'The weapon section must own the named size container.');
 // Prompt 11c replaces the fixed threshold with the measured three-card width.
 const cardLayout=await readFile(new URL('paradox-build-space/build-weapon-card-layout.mjs',root),'utf8');
@@ -317,8 +317,8 @@ assert.ok(cardLayout.includes('grid-template-columns:var(--build-weapon-card)!im
 assert.ok(cardLayout.includes('twoThreshold=2*width+gap'),'Prompt 23: two cards fit before the one-card fallback.');
 assert.ok(css.includes('flex-wrap:nowrap;width:max-content;max-width:none'),'Prompt 23: support icons stay on one row.');
 assert.match(runtime,/sizeBuildWeaponCards\(byId\('weaponGrid'\)\)/,'Rendered weapon cards must update their explicit geometry.');
-assert.doesNotMatch(css,/container-type:normal/,'Build Forge must preserve card inline-size containment.');
-assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Build Forge must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
+assert.doesNotMatch(css,/container-type:normal/,'Builder must preserve card inline-size containment.');
+assert.match(css,/Build Forge readability:[\s\S]*?\.build-forge-page[\s\S]*?--dim:#b8b2bd;[\s\S]*?font-family:bahnschrift,system-ui,sans-serif!important/,'Builder must retain the readable Bahnschrift text hierarchy and high-contrast working colours.');
 
 const elementButtons=[...html.matchAll(/data-recommendation-element="([^"]+)"/g)].map(match=>match[1]);
 assert.deepEqual(elementButtons,BUILD_ELEMENTS,'Recommendation buttons must be ARC, SOLAR, STRAND, STASIS, VOID and PRISMATIC only.');
@@ -340,7 +340,7 @@ assert.match(html,/id="weaponExoticRule">VAULT \+ CHARACTER INVENTORY · 1 EXOTI
 assert.match(runtime,/byId\('recommendedBuildSubtitle'\)\.textContent=reviewCopy\.subtitle/,'The recommendation heading must use the sentence-case presentation model, whose anchor identity is covered by the review-copy tests.');
 assert.match(runtime,/changedItems=\(plan\.items\|\|\[\]\)[\s\S]*?filter\(row=>row\.action!=='KEEP'\)/,'The review must omit unchanged mod sockets and present only proposed changes.');
 assert.match(runtime,/review-artifact-synergy[\s\S]*?ARTIFACT SYNERGY/,'The review must expose the evidence behind the Artifact recommendation.');
-assert.match(artifactSelectionRuntime,/recommendArtifactPerks\(build,effectiveArtifact,\{currentSeasonNumber:season,planFullBuild:true\}\)/,'Build Forge must produce a complete target Artifact plan when only the current CharacterProgressions tree is available.');
+assert.match(artifactSelectionRuntime,/recommendArtifactPerks\(build,effectiveArtifact,\{currentSeasonNumber:season,planFullBuild:true\}\)/,'Builder must produce a complete target Artifact plan when only the current CharacterProgressions tree is available.');
 assert.match(artifactSelectionRuntime,/artifactPlanVersion:4/,'The cross-system Artifact-plan release must invalidate previously cached recommendation fingerprints.');
 assert.match(runtime,/PARADOX FULL TARGET PLAN[\s\S]*?currently unlocked and equipped perks remain unchanged/,'The Artifact recommendation must distinguish the complete target plan from the live unlocked and equipped state.');
 assert.match(css,/\.recommended-build-dialog\{display:grid;grid-template-areas:"header" "safety" "status" "content" "actions";grid-template-rows:auto auto auto minmax\(0,1fr\) auto;width:min\(80vw,1400px\);height:90vh;height:90dvh;max-width:none;min-height:0;border:1px solid/,'The recommendation review must be a centred popup (min(80vw,1400px) by 90vh) with an independently scrollable content row.');
@@ -349,7 +349,7 @@ assert.match(css,/\.recommended-build-content\{[^}]*min-height:0[^}]*overflow-x:
 assert.match(css,/\.recommended-armour-summary \.gear-arm-anchor \.arm\{width:var\(--apx-icon-gear-art-width\)!important;height:var\(--apx-icon-gear-art-height\)!important;aspect-ratio:100\/122!important\}/,'Recommended armour must retain the same shared portrait scale as Character and Build Design.');
 assert.match(html,/id="continueToBuildTest">TEST THIS BUILD/,'The recommendation review must lead into the user-run Build Test.');
 assert.match(runtime,/function renderParadoxTestReview\(capture=readCapture\(\)\)[\s\S]*?Causal perk activation, DPS and uptime remain inference/,'Paradox must review confirmed post-test Bungie evidence without inventing causal telemetry.');
-assert.deepEqual([...html.matchAll(/data-build-objective="([^"]+)"/g)].map(match=>match[1]),['balanced','dps','add-clear','survivability','ability-uptime'],'Build Forge must expose the five deterministic tuning objectives used by weapon and mod ranking.');
+assert.deepEqual([...html.matchAll(/data-build-objective="([^"]+)"/g)].map(match=>match[1]),['balanced','dps','add-clear','survivability','ability-uptime'],'Builder must expose the five deterministic tuning objectives used by weapon and mod ranking.');
 assert.match(html,/id="generateMaxLoadout" disabled>GENERATE MAX LOADOUT/,'Generation must begin locked until verified inputs pass.');
 assert.match(runtime,/function generateMaxLoadout\(\{weaponInstanceIds=\[\]\}=\{\}\)/,'Generation must accept an exact owned combination for full build recalculation.');
 assert.match(runtime,/const variant=\{\.\.\.requestedForgeVariant\(build\),weaponInstanceIds\};[\s\S]*?forgePreparation\.get\(variant,\{first:true\}\)/,'The selected combination must reach the background generation request.');
@@ -357,21 +357,21 @@ assert.match(html,/id="recommendedWeaponCombinations"/,'The full review must exp
 assert.doesNotMatch(runtime,/CURRENT BEST FIT/,'Keeping an item is not proof of measured superiority.');
 assert.match(runtime,/function blankArmourModCanvas\(\)[\s\S]*?Array\.from\(\{length:6\}[\s\S]*?AI recommendation pending[\s\S]*?grid\.innerHTML=blankSlots/,'Every staged armour item must present six blank AI recommendation slots before generation.');
 assert.match(runtime,/function renderArmourRecommendationState\(build=\{\}\)[\s\S]*?staged=Boolean\(build\.forgeLoaderDecision\)[\s\S]*?ARMOUR & INSTALLED MODS[\s\S]*?if\(staged&&!generated&&!manual&&!directEntryMode\(build\)\)blankArmourModCanvas\(\)/,'Only untouched Forge Loader staging may hide installed mods behind pending recommendation slots; equipped, saved, manual and generated builds retain their mod display.');
-assert.match(runtime,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderArmourRecommendationState\(build\)[\s\S]*?renderWeapons/,'Build Forge must apply the blank-or-generated mod presentation on every gear render.');
+assert.match(runtime,/function renderBuildGear\(build=\{\}\)[\s\S]*?renderArmourRecommendationState\(build\)[\s\S]*?renderWeapons/,'Builder must apply the blank-or-generated mod presentation on every gear render.');
 assert.match(sequenceRuntime,/composeForgeRecommendation\(\{build:forgeComputationProjection\(working\),candidate,element:element,analyzeBuild:analyzeLiveGuardian,bounded:true\}\)/,'Generation must compare verified subclass sockets through a memory-bounded deterministic Forge intelligence projection.');
 const computationFields=runtime.match(/const FORGE_COMPUTATION_FIELDS=Object\.freeze\(\[([^\]]+)\]\)/)?.[1]||'';
 assert.doesNotMatch(computationFields,/ownedWeapons|vaultWeapons|inventoryWeapons|subclassCatalog|availableArtifacts|loadouts/,'Combination scoring must never deep-copy full inventory and catalogue collections.');
 assert.match(runtime,/async function updateForgeGenerationPhase\(message\)[\s\S]*?setTimeout\(resolve,0\)/,'Recommendation phases must yield to the browser so the loader and page remain responsive.');
 assert.match(runtime,/resolvedSubclassOptions\(build\)\.filter\(hasVerifiedSubclassSockets\)/,'Element buttons must enable only complete live Bungie subclass socket sets, not canonical catalogue placeholders.');
 assert.match(runtime,/filterExoticCompatibleSubclasses\(build,verified\)/,'Element buttons must remove subclass options that conflict with an explicitly named selected-Exotic ability.');
-assert.match(html,/id="buildSuperSynergy"[^>]*role="status"/,'Build Forge must expose per-Super Exotic evidence beside the selectable Super formation.');
+assert.match(html,/id="buildSuperSynergy"[^>]*role="status"/,'Builder must expose per-Super Exotic evidence beside the selectable Super formation.');
 assert.match(runtime,/rankExoticSuperSynergy\(build,candidate\?\[candidate\]:\[\]\)/,'The visible Super formation must use the same evidence-backed ranking as generation.');
-assert.match(runtime,/No Super synergy for \$\{report\.anchor\.name\}\./,'Build Forge must state plainly when the staged Exotic does not support a Super.');
+assert.match(runtime,/No Super synergy for \$\{report\.anchor\.name\}\./,'Builder must state plainly when the staged Exotic does not support a Super.');
 assert.match(css,/\.super-diamond\.is-exotic-super-best\{[^}]*box-shadow/,'Only Supers with the strongest real Exotic evidence may receive the evidence highlight.');
 assert.match(intelligenceRuntime,/status:!description\?'unknown':strongest>0\?'evidenced':'no-direct-super-synergy'/,'Missing Super synergy evidence must remain an explicit no-ranking result.');
 assert.match(sequenceRuntime,/working\.paradoxAnalysis=analyzeLiveGuardian\(working\)[\s\S]*?advise\(working,working\.paradoxAnalysis\|\|\{\}, \{insertSocketPlugFree:false\}\)/,'Generation must re-run directed analysis after Artifact selection before recommendation-only weapon advice.');
 assert.match(sequenceRuntime,/working\.objective=objective[\s\S]*?selectOwnedWeapons\(\{build:working,objective,baselineWeapons:build\.weapons,weaponInstanceIds(?:,precomputed)?\}\)[\s\S]*?recommendArmourMods\(\{build:working,objective:objective\}\)/,'Generation must rank exact owned weapons before producing the verified per-socket armour-mod plan for the selected tuning objective.');
-assert.match(sequenceRuntime,/recommendArmourMods\(\{build:working,objective:objective\}\)[\s\S]*?validateArmourModLoadout\(working\)[\s\S]*?throw new Error\(generatedModValidation\.reason\)/,'Build Forge must block an invalid single-copy armour-mod plan before opening the review.');
+assert.match(sequenceRuntime,/recommendArmourMods\(\{build:working,objective:objective\}\)[\s\S]*?validateArmourModLoadout\(working\)[\s\S]*?throw new Error\(generatedModValidation\.reason\)/,'Builder must block an invalid single-copy armour-mod plan before opening the review.');
 assert.match(sequenceRuntime,/applyForgeArtifactRecommendation\(next,\{currentSeasonNumber,force:true\}\)/,'Generation must refresh the verified legal Artifact fit.');
 assert.match(sequenceRuntime,/validateExoticLoadout\(working,\{requireArmourAnchor:true\}\)[\s\S]*?throw new Error\(generatedExoticValidation\.reason\)/,'Generation must stop before review if any recommendation violates the Destiny Exotic equip rule.');
 assert.match(runtime,/await refreshForgeArtifactRecommendation\(\);[\s\S]*?const state=readState\(\),build=/,'Generation must settle the current Artifact refresh before capturing its guarded source state.');
@@ -404,7 +404,7 @@ assert.match(css,/\.review-weapon em\{[^}]*font:800 13px\/1\.25/,'Owned candidat
 assert.match(css,/body\.build-forge-page \.review-weapon small\{font-size:11px!important/,'Compact weapon supporting copy must remain readable.');
 assert.match(gearCss,/\.weapon-detail-drawer\{[^}]*width:min\(1120px,96vw\)[^}]*font-size:16px/,'The weapon detail drawer must use the enlarged readable layout.');
 assert.match(gearCss,/\.weapon-exotic-traits\{[^}]*border-left:2px/,'Exotic weapon traits must have a subordinate visual stack beneath the intrinsic.');
-assert.doesNotMatch(runtime,/armour-verification-line|decorateBuildArmour/,'Build Forge must not render the internal T5 or masterwork gate as repeated armour-card footer text.');
+assert.doesNotMatch(runtime,/armour-verification-line|decorateBuildArmour/,'Builder must not render the internal T5 or masterwork gate as repeated armour-card footer text.');
 assert.doesNotMatch(html,/T5 BASE REQUIRED|T5 VERIFIED|MASTERWORK NOT REPORTED/,'Internal armour validation must not clutter the user-facing armour layout.');
 assert.match(gearRuntime,/return \[masterwork, \.\.\.clean\(generalSource\)\.slice\(0, 2\), \.\.\.clean\(slotSource\)\.slice\(0, 3\)\]/,'Armour mapping must remain masterwork, two general slots and three armour slots.');
 
@@ -414,9 +414,9 @@ assert.match(html,/LIVE GUARDIAN UNCHANGED/,'The review must state that generati
 assert.doesNotMatch(runtime,/if\(!build\?\.recommendationGeneratedAt\)throw new Error/,'Manual Apply must not depend on generating an AI recommendation first.');
 const planStart=runtime.indexOf('function buildLivePlan()'),applyEnd=runtime.indexOf('function verifiedActivities',planStart),applySource=runtime.slice(planStart,applyEnd);
 assert.ok(applySource.indexOf('createLiveTransferPreflight(build)')<applySource.indexOf('createLiveTransferPlan'),'The live route must validate exact loadout coherence before constructing its ordered transfer plan.');
-assert.match(applySource,/liveActionCapabilities\(globalThis\.FORGE_BUNGIE_SESSION\)[\s\S]*?async function openApplyConfirmation\(\)[\s\S]*?stageLiveTransferPreflight\(plan,\{session\}\)[\s\S]*?pendingApplyPlan=staged[\s\S]*?async function executeConfirmedApply\(\)[\s\S]*?executeLiveTransferPlan\(confirmLiveTransferPlan\(plan\)/,'Build Forge must run a GET-only live preflight, retain the reviewed plan, and call the executor only from the final confirmation handler.');
+assert.match(applySource,/liveActionCapabilities\(globalThis\.FORGE_BUNGIE_SESSION\)[\s\S]*?async function openApplyConfirmation\(\)[\s\S]*?stageLiveTransferPreflight\(plan,\{session\}\)[\s\S]*?pendingApplyPlan=staged[\s\S]*?async function executeConfirmedApply\(\)[\s\S]*?executeLiveTransferPlan\(confirmLiveTransferPlan\(plan\)/,'Builder must run a GET-only live preflight, retain the reviewed plan, and call the executor only from the final confirmation handler.');
 assert.doesNotMatch(applySource,/window\.confirm|confirmPerkChangePlan|applyConfirmedPerkChangePlan|fetch\(/,'The UI must not expose a hidden confirm prompt, direct fetch, or obsolete partial perk-only mutation path.');
-assert.match(runtime,/stageEquipmentChoice[\s\S]*?stageSocketChoice/,'Build Forge must expose manual exact-item and socket staging independently of Generate.');
+assert.match(runtime,/stageEquipmentChoice[\s\S]*?stageSocketChoice/,'Builder must expose manual exact-item and socket staging independently of Generate.');
 assert.match(html,/id="saveParadoxBuild" disabled>SAVE PARADOX<\/button>[\s\S]*?SEPARATE FROM BUNGIE LOADOUT SLOTS/,'Named PARADOX copies must remain explicit and separate from Bungie slots.');
 
 console.log('PARADOX_BUILD_SPACE_STATE=PASS');

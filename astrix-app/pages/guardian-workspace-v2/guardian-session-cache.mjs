@@ -329,7 +329,7 @@ async function invalidateBungieLoadoutDetail(session,characterId,index){
 
 function armGuardianPortalTransition(){
   const fromBuild=String(globalThis.location?.pathname||"").includes("/paradox-build-space/");
-  const label=fromBuild?"Opening Guardian workspace":"Opening Build Forge";
+  const label=fromBuild?"Opening Guardian workspace":"Opening Builder";
   try{
     sessionStorage.removeItem(FAST_RETURN_KEY);
     sessionStorage.setItem(PORTAL_TRANSITION_KEY,JSON.stringify({armedAt:Date.now(),label}));

@@ -5,7 +5,7 @@
     Object.freeze({key:'journey',label:'Journey',href:'/astrix-app/pages/journey/'}),
     Object.freeze({key:'character',label:'Character',href:'/astrix-app/pages/guardian-workspace-v2/'}),
     Object.freeze({key:'forge-loader',label:'Forge Loader',href:'/astrix-app/pages/forge-loader/'}),
-    Object.freeze({key:'build-forge',label:'Build Forge',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
+    Object.freeze({key:'build-forge',label:'Builder',href:'/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'}),
     Object.freeze({key:'reports',label:'Reports',href:'/astrix-app/pages/reports/'}),
     Object.freeze({key:'vault',label:'Storage',href:'/astrix-app/pages/vault/'}),
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})

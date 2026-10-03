@@ -817,7 +817,7 @@ assert.ok(stacked.indexOf('#1 EQUIPPED')<stacked.indexOf('#2 Saved 124'));
 assert.ok(stacked.indexOf('#2 Saved 124')<stacked.indexOf('#3 Saved 123'));
 assert.match(stacked,/#126 Saved 0/);
 assert.match(navigation,/#2 Saved 124/);
-assert.doesNotMatch(stacked,/other-character|other-membership|other-platform|DOWNLOAD JSON|OPEN IN BUILD FORGE/);
+assert.doesNotMatch(stacked,/other-character|other-membership|other-platform|DOWNLOAD JSON|OPEN IN BUILDER/);
 assert.match(stacked,/data-build-action="edit" data-build-id="saved-124"/,'Each action binds to its own saved record');
 assert.match(stacked,/class="is-danger paradox-trash"[^>]+aria-label="Delete Saved 124"/);
 assert.equal((pageNode('guardianLoadouts').innerHTML.match(/data-in-game-slot=/g)||[]).length,20);

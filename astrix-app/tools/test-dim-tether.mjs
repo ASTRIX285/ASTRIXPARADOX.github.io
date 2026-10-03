@@ -28,6 +28,6 @@ assert.equal(artifactIcons.length,retired.length,'every artifact perk renders in
 assert.ok(artifactIcons.every(name=>name.startsWith('Retired: ')));
 assert.ok(!modIcons.some(name=>name.startsWith('Retired: ')),'no artifact perk renders among mods');
 assert.match(iconLayout,/<span class="apx-compact-label">Artifact<\/span>/);
-// The subclass element comes from the verified catalogue, so Build Forge never falls back to Void.
+// The subclass element comes from the verified catalogue, so Builder never falls back to Void.
 assert.equal(dimWorkingBuild(model,{}).subclass,'prismatic');
 console.log(`DIM_TETHER=PASS resolved=${model.coverage.resolved}/${model.coverage.requested} unknowns=0 retired_artifact_perks=${retired.length} mode=${process.env.DIM_LIVE_SMOKE==='1'?(process.env.DIM_SMOKE_BASE_URL?'deployed-route':'worker-route-live-upstream'):'offline'}`);
