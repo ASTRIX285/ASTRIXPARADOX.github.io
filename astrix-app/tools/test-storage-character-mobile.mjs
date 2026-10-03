@@ -13,8 +13,9 @@
 //   - A session without the Postmaster permission shows the pull disabled, with the reason.
 //   - No EQUIPPED AND CARRIED box; tiles at least 64px (72px tablet), 4px gap, rows filled edge to edge.
 //   - Desktop (1600) keeps the PULL buttons and the box, and its item card has no extra action.
-// Character (page scripts stripped, real Super formation modules): only the selected Super has the
-// Ember diamond frame and nothing is laid over the icon; desktop keeps the framed formation.
+// Character (page scripts stripped, real Super formation modules): the Super formation keeps its own
+// diamond frames at every width (restored 3 Oct 2026), with no machined button finish or strobe on the
+// diamonds or the subclass tabs; on phone and tablet nothing is laid over the icon.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -294,20 +295,20 @@ try{
     });
     const supers=await page.evaluate(()=>[...document.querySelectorAll('.super-feature .super-diamond.has-live-icon')].map(node=>{
       const style=getComputedStyle(node),before=getComputedStyle(node,'::before'),after=getComputedStyle(node,'::after'),img=node.querySelector('img');
-      return {selected:node.classList.contains('is-selected-super'),before:before.display,after:after.display,afterColor:after.borderTopColor,afterWidth:after.borderTopWidth,background:style.backgroundColor,filter:style.filter,imgFilter:img?getComputedStyle(img).filter:'none'};
+      return {selected:node.classList.contains('is-selected-super'),before:before.display,after:after.display,afterAnimation:after.animationName,clip:style.clipPath,filter:style.filter,imgFilter:img?getComputedStyle(img).filter:'none'};
     }));
     const selected=supers.filter(row=>row.selected);
     assert.equal(selected.length,1,`${width}: one selected Super`);
-    if(compact){
-      for(const row of supers.filter(row=>!row.selected))assert.ok(row.before==='none'&&row.after==='none',`${width}: unselected Supers are plain`);
-      assert.equal(selected[0].afterColor,'rgb(230, 57, 31)',`${width}: Ember diamond frame on the selected Super`);
-      assert.equal(selected[0].afterWidth,'2px');
-      for(const row of supers)assert.ok(row.filter==='none'&&row.imgFilter==='none'&&/rgba\(0, 0, 0, 0\)|transparent/.test(row.background),`${width}: nothing is laid over the Bungie icon`);
-    }else{
-      assert.ok(supers.every(row=>row.before!=='none'),'Desktop keeps the framed Super formation');
+    for(const row of supers){
+      assert.ok(row.before!=='none'&&row.after!=='none',`${width}: every Super keeps its formation frame`);
+      assert.ok(!/ax-stroke-pulse|ax-strobe/.test(row.afterAnimation)&&row.clip==='none',`${width}: no machined finish or strobe on a Super diamond`);
+      if(compact)assert.ok(row.filter==='none'&&row.imgFilter==='none',`${width}: nothing is laid over the Bungie icon`);
     }
+    const tabs=await page.evaluate(()=>[...document.querySelectorAll('#subclassPicker > .el')].map(node=>{const style=getComputedStyle(node),after=getComputedStyle(node,'::after');return {active:node.classList.contains('is-active')||node.getAttribute('aria-selected')==='true',shadow:style.boxShadow,image:style.backgroundImage,clip:style.clipPath,afterAnimation:after.animationName};}));
+    assert.ok(tabs.length>=5,`${width}: subclass tabs render`);
+    for(const tab of tabs)assert.ok(!/230, 57, 31/.test(tab.shadow)&&!/115, 32, 34/.test(tab.image)&&tab.clip==='none'&&!/ax-stroke-pulse/.test(tab.afterAnimation),`${width}: subclass tabs keep their diamond look, no crimson wash or notch`);
     assert.deepEqual(errors,[]);await page.close();
   }
   console.log(`STACK_PULL_BODY=${JSON.stringify(stackBodySample)}`);
-  console.log('STORAGE_CHARACTER_MOBILE=PASS real Storage page at 390 and 820: weapon (item card) and engram (action sheet) pulled from the right Postmaster with their exact items, material stacks pulled with itemId 0 and confirmed by the Postmaster count, no-room reason with the item left in place, missing permission shown disabled with the reason, icons only, no EQUIPPED AND CARRIED box, filled rows of 64px/72px tiles with a 4px gap; 1600 PULL buttons: stack pull, exact weapon pull unchanged, NO ROOM reason; selected Super framed in Ember on phone and tablet only');
+  console.log('STORAGE_CHARACTER_MOBILE=PASS real Storage page at 390 and 820: weapon (item card) and engram (action sheet) pulled from the right Postmaster with their exact items, material stacks pulled with itemId 0 and confirmed by the Postmaster count, no-room reason with the item left in place, missing permission shown disabled with the reason, icons only, no EQUIPPED AND CARRIED box, filled rows of 64px/72px tiles with a 4px gap; 1600 PULL buttons: stack pull, exact weapon pull unchanged, NO ROOM reason; Super formation frames and diamond subclass tabs at every width');
 }finally{await browser?.close();server.close();}
