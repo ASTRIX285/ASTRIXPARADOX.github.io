@@ -2,7 +2,8 @@
 // The AX logo in the tool shell (restored 3 Oct 2026), real pages with the Warlock fixture.
 // At 390 and 820: the header bar shows the AX logo beside ASTRIX; the drawer head shows the logo,
 // ASTRIX (red X) over PARADOX, and the close button stays inside the drawer. No sideways scroll.
-// At 1600 the header brand is unchanged (the logo is hidden there beside the Guardian cards).
+// At 1200, 1440 and 1600 the logo also shows beside ASTRIX (CLAUDE.md: every header, desktop and phone) and does
+// not overlap the Guardian cards.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -27,7 +28,7 @@ try{
   catch(error){if(/Executable doesn't exist/.test(error.message)){console.log('NOT RUN: Chromium missing');process.exit(0);}throw error;}
   await new Promise(done=>server.listen(0,'127.0.0.1',done));
   const origin=`http://127.0.0.1:${server.address().port}`,art=await readFile(resolve(root,'img/ax-logo-160.webp'));
-  for(const [name,path] of PAGES)for(const width of [390,820,1600]){
+  for(const [name,path] of PAGES)for(const width of [390,820,1200,1440,1600]){
     const context=await browser.newContext({viewport:{width,height:width<600?844:width<1200?1180:900}}),page=await context.newPage(),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
     await routeWarlockFixture(page,{origin,fixture,art});
@@ -35,7 +36,8 @@ try{
     await page.waitForFunction(()=>document.querySelector('header.apx-destination-header .apx-destination-brand[data-ax-brand] img')?.complete,null,{timeout:30000});
     const header=await page.evaluate(()=>{
       const img=document.querySelector('header.apx-destination-header .apx-destination-brand img'),r=img.getBoundingClientRect();
-      return {src:new URL(img.src).pathname,width:r.width,height:r.height,loaded:img.naturalWidth>0,sideways:document.documentElement.scrollWidth>innerWidth};
+      const cards=document.querySelector('header.apx-destination-header [data-forge-hero-cards]')?.getBoundingClientRect(),brand=document.querySelector('header.apx-destination-header .apx-destination-brand').getBoundingClientRect();
+      return {src:new URL(img.src).pathname,width:r.width,height:r.height,loaded:img.naturalWidth>0,sideways:document.documentElement.scrollWidth>innerWidth,clear:!cards||!cards.width||brand.right<=cards.left+1||brand.bottom<=cards.top+1||cards.bottom<=brand.top+1};
     });
     assert.equal(header.src,'/img/ax-logo-160.webp',`${name} ${width}: the AX logo file`);
     assert.equal(header.sideways,false,`${name} ${width}: no sideways scroll`);
@@ -57,9 +59,10 @@ try{
       assert.equal(drawer.x,'rgb(255, 46, 46)',`${name} ${width}: the red X in the drawer wordmark`);
       assert.equal(drawer.sub,'PARADOX');
     }else{
-      assert.equal(header.width,0,`${name} 1600: desktop header brand unchanged`);
+      assert.ok(header.loaded&&header.height>=32&&header.width>30,`${name} ${width}: the AX logo shows in the desktop header`);
+      assert.ok(header.clear,`${name} ${width}: the logo and wordmark do not overlap the Guardian cards`);
     }
     assert.deepEqual(errors,[]);await context.close();
   }
-  console.log('SHELL_LOGO_MARK=PASS Character, Storage and Journey: AX logo in the phone and tablet header bar and in the drawer (red X, close button inside); desktop unchanged');
+  console.log('SHELL_LOGO_MARK=PASS Character, Storage and Journey: AX logo in the phone and tablet header bar and in the drawer (red X, close button inside); desktop header logo at 1200, 1440 and 1600 without overlapping the Guardian cards');
 }finally{await browser?.close();server.close();}

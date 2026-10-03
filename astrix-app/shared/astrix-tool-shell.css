@@ -66,7 +66,9 @@ html body header.apx-destination-header::before{content:""!important;position:ab
   -webkit-text-fill-color:#ff2e2e!important;color:#ff2e2e!important;text-shadow:0 0 16px rgba(230,57,31,.55)}
 .ax-wordmark-sub{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.34em!important;color:var(--ax-steel)!important;white-space:nowrap!important}
 /* The Guardian cards stay centred, so the wordmark tightens on narrower screens rather than overlap them. */
-@media (max-width:1750px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) :is(.apx-destination-brand img,.ax-wordmark-sub){display:none!important}}
+/* The AX logo stays beside ASTRIX at every width (CLAUDE.md); only the PARADOX line gives way to the Guardian cards. */
+@media (max-width:1750px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) .ax-wordmark-sub{display:none!important}}
+@media (max-width:1750px) and (min-width:1200px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) .apx-destination-brand img{height:32px!important}}
 @media (max-width:1450px){html body header.apx-destination-header:has(>[data-forge-hero-cards]) .ax-wordmark-top{font-size:20px!important}}
 html body header.apx-destination-header .apx-destination-header-copy{flex:0 0 auto!important;white-space:nowrap!important;text-align:left!important;position:static!important;transform:none!important;margin:0 0 0 12px!important;padding:0 0 0 20px!important;border-left:1px solid var(--ax-line-strong)!important}
 html body header.apx-destination-header .apx-destination-header-copy strong{font:700 14px/1 var(--ax-font-head)!important;letter-spacing:.16em!important;color:var(--ax-ink)!important}
