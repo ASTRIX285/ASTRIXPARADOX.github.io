@@ -13,7 +13,7 @@ const model=resolveDimLoadout(loadout,{snapshot:{version:f.manifestVersion,table
 model.autoMatchedGuardian=true;
 const events=[];
 const actions=createDimActions(model,{getContext:()=>context,getSnapshot:()=>({version:f.manifestVersion,tables:{...f.manifest.tables,DestinyInventoryItemDefinition:f.definitions}}),save:value=>events.push(['save',value]),send:value=>events.push(['forge',value])});
-const handle=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Build Forge'],['save','Save to Armoury']]});
+const handle=openLoadoutDetails(model,{presentation:'icons',actions,actionRows:[['forge','Send to Builder'],['save','Save to Armoury']]});
 const dispose=watchDimContext({document,window,getModel:()=>model,getContext:()=>context,onCharacter:id=>{context.characterId=id;},invalidate:message=>handle.invalidate(message)});
 try{
   for(let i=0;i<10;i++){
@@ -22,7 +22,7 @@ try{
   }
   assert([...handle.dialog.querySelectorAll('[data-ld-action]')].every(button=>!button.disabled),'Same-Guardian refresh disabled actions');
   handle.dialog.querySelector('[data-ld-action="forge"]').click();await settle();
-  assert(events[0]?.[0]==='forge','Send to Build Forge did not run');
+  assert(events[0]?.[0]==='forge','Send to Builder did not run');
   handle.dialog.querySelector('[data-ld-action="save"]').click();
   handle.dialog.querySelector('[data-ld-save]').requestSubmit();await settle();
   assert(events[1]?.[0]==='save','Save did not run');
@@ -43,4 +43,4 @@ try{
 finally{dispose();handle.close();}
 const [share,snapshot]=await Promise.all(['fixtureb','manifest'].map(name=>fetch(new URL(`./dim-import/${name}.json`,import.meta.url)).then(response=>response.json())));
 const visual=resolveDimLoadout(share.loadout,{snapshot});visual.name='Imported loadout';
-openLoadoutDetails(visual,{presentation:'icons',actions:{forge:()=>{},save:()=>{}},actionRows:[['forge','Send to Build Forge'],['save','Save to Armoury']]});
+openLoadoutDetails(visual,{presentation:'icons',actions:{forge:()=>{},save:()=>{}},actionRows:[['forge','Send to Builder'],['save','Save to Armoury']]});

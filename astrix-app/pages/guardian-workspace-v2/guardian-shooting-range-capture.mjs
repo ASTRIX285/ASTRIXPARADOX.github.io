@@ -325,7 +325,7 @@ async function collectBuildTestResults({maxCandidates=5,expectedCharacterId=null
   const capture=readCapture();
   if(!capture)throw new Error('No Build Test is armed.');
   if(expectedCharacterId&&!captureMatchesCharacter(capture,expectedCharacterId)){
-    const error=new Error(`The saved capture belongs to character ${asString(capture.characterId)||'unknown'}, not the current Build Forge Guardian ${asString(expectedCharacterId)||'unknown'}.`);
+    const error=new Error(`The saved capture belongs to character ${asString(capture.characterId)||'unknown'}, not the current Builder Guardian ${asString(expectedCharacterId)||'unknown'}.`);
     error.code='capture-character-mismatch';
     error.captureCharacterId=asString(capture.characterId);
     error.currentCharacterId=asString(expectedCharacterId);

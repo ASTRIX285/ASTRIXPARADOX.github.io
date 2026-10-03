@@ -30,7 +30,7 @@ const nothing=armour('Nothing Manacles');
 const skull=armour('Skull of Dire Ahamkara');
 assert.equal(nothing?.verified,true);
 assert.equal(skull?.verified,true);
-assert.equal(prototype.exotic.hash,3982932616,'The current Nothing Manacles identity must remain the real Build Forge test anchor.');
+assert.equal(prototype.exotic.hash,3982932616,'The current Nothing Manacles identity must remain the real Builder test anchor.');
 
 const scatter=resolved(1514173218);
 const novaWarp=resolved(1656118680);

@@ -70,7 +70,7 @@ export function openLoadoutDetails(model,{presentation='rows',actions={},actionR
     if(key==='clear'){showPanel(`<h3>Clear slot ${esc(model.slotNumber)}</h3><p>Remove ${esc(model.name)} from this in-game slot? This does not delete your items.</p><div class="apx-ld-form-actions"><button type="button" data-ld-confirm-clear>Confirm clear slot</button><button type="button" data-ld-cancel>Cancel</button></div>`);return;}
     void run(async()=>{
       if(key==='equip'||key==='prepare'){setStatus('Checking the saved loadout…');review=await actions[key]();showPanel(reviewHtml(review));setStatus(review.ready?'Ready for your review. Nothing has been equipped.':'Apply is blocked. Review the reasons below.');}
-      else{await actions[key]();setStatus(key==='forge'?'Sent to Build Forge.':'Share file prepared.');}
+      else{await actions[key]();setStatus(key==='forge'?'Sent to Builder.':'Share file prepared.');}
     });
   });
   dialog.addEventListener('submit',event=>{

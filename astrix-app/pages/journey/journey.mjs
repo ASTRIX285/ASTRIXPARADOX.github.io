@@ -1868,7 +1868,7 @@ function readJourneyBuildState(session,characterId){
 }
 
 function renderBuildSummary(session=journeySession){
-  setEvidenceEmpty(buildSummaryCard,'No Build Forge state is available for this Guardian.');
+  setEvidenceEmpty(buildSummaryCard,'No Builder state is available for this Guardian.');
   if(session?.authenticated!==true||!selectedCharacterId)return;
   const result=readJourneyBuildState(session,selectedCharacterId);
   if(!result)return;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Build Forge default load (no staged Forge Loader build), real page code.
+// Builder default load (no staged Forge Loader build), real page code.
 // A fixture Bungie session and a prepared build-forge payload are served through the auth routes.
 // The payload is the PF-BETA-09 Warlock loadout with its real Bungie definitions from the beta
 // manifest cache. Test-only additions are marked: an Exotic intrinsic perk for the chest (the cache

@@ -54,7 +54,7 @@ const item=createVaultCatalogue(payload).items.find(row=>row.itemInstanceId==='s
 assert.equal(item.breakerDefinition.hash,485622768,'Real Vault normalization must carry the resolved badge');
 assert.match(itemTileMarkup(item),/tile-breaker[\s\S]*tile-element[\s\S]*tile-power/);
 const profileSource=readFileSync(new URL('../pages/guardian-workspace-v2/guardian-bungie-profile.mjs',import.meta.url),'utf8');
-assert.match(profileSource,/breakerDefinition:resolveWeaponBreakerTypeDefinition\(instance,base\.definition,payload\?\.breakerDefinitions,\{plugs,sandboxPerks:payload\?\.sandboxPerks,activePerks:profile\?\.itemComponents\?\.perks/,'Character and Build Forge must use the same attached-perk resolver');
+assert.match(profileSource,/breakerDefinition:resolveWeaponBreakerTypeDefinition\(instance,base\.definition,payload\?\.breakerDefinitions,\{plugs,sandboxPerks:payload\?\.sandboxPerks,activePerks:profile\?\.itemComponents\?\.perks/,'Character and Builder must use the same attached-perk resolver');
 console.log('CHAMPION_OVERLAYS=PASS all '+Object.keys(WEAPON_TYPE_LABELS).length+' archetypes, three champion types, actual Praxic Blade definitions');
 console.log('MANIFEST_CHAMPION_COVERAGE='+JSON.stringify(audit));
 

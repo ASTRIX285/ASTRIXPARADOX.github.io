@@ -47,7 +47,7 @@ try{
    for(let index=0;index<7;index++){
     const link=links.nth(index);await link.hover();await link.focus();
     const state=await link.evaluate(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return {width:r.width,height:r.height,outline:s.outlineWidth,border:s.borderTopWidth};});
-    assert.equal(state.width,measures[index].width);assert.equal(state.height,measures[index].height);// Build Forge runs at a reduced desktop density, so its 2px ring computes smaller.
+    assert.equal(state.width,measures[index].width);assert.equal(state.height,measures[index].height);// Builder runs at a reduced desktop density, so its 2px ring computes smaller.
     assert.ok(parseFloat(state.outline)>=1,`${route} focus ring`);assert.equal(parseFloat(state.border),0);
    }
    const footer=page.locator('.apx-bungie-attribution');assert.ok(await footer.count()>0);await footer.scrollIntoViewIfNeeded();

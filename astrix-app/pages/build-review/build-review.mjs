@@ -1,5 +1,5 @@
 // Build Review: DIM link to a reviewed, applyable build in four steps.
-// Checkpoint 1 renders steps 1 and 2. Build Forge is not modified.
+// Checkpoint 1 renders steps 1 and 2. Builder is not modified.
 import {DimShareClient} from '../../core/dim-import/share.mjs';
 import {ImportManifest,createImportStorage} from '../../core/dim-import/cache.mjs';
 import {adaptDimLoadout} from '../../core/dim-import/adapt.mjs';
@@ -58,7 +58,7 @@ function stepOne(){
   const inventory=`<section class="br-card br-side" aria-labelledby="brInventoryTitle"><h2 id="brInventoryTitle" class="br-kicker">YOUR INVENTORY</h2>${counts.total?`<p class="br-big">${counts.found} <span>of ${counts.total} shared items found</span></p><div class="br-meter" role="img" aria-label="${counts.found} of ${counts.total} shared items found"><i style="width:${Math.round(counts.found/counts.total*100)}%"></i></div>
     <ul class="br-facts"><li>${counts.guardian} on this Guardian</li><li>${counts.vault} in your Vault, moved only if you Apply</li>${counts.other?`<li>${counts.other} on another Guardian or in Postmaster</li>`:''}${counts.substituted?`<li>${counts.substituted} replaced by your closest match</li>`:''}<li>${counts.missing} missing</li></ul>`:'<p class="br-note">This share has no weapons or armour. Everything marked "Picked from your inventory" or "Suggestion" is Paradox\'s choice, not the sharer\'s.</p>'}
     ${view.missingNames.length?`<p class="br-note">Missing: ${esc(view.missingNames.join(', '))}.</p>`:''}${view.blockers.length?`<ul class="br-blockers">${view.blockers.map(line=>`<li>${esc(line)}</li>`).join('')}</ul>`:''}</section>`;
-  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button><button class="br-secondary br-wide" type="button" id="brManual">Send to Build Forge</button>`;
+  const next=`<button class="br-primary br-wide" type="button" data-go-step="2">NEXT: SET YOUR GOAL</button><button class="br-secondary br-wide" type="button" id="brManual">Send to Builder</button>`;
   return `<div class="br-grid">
   <section class="br-card br-main" aria-labelledby="brStepTitle"><h1 id="brStepTitle">This is the build you imported</h1><p class="br-lede">Nothing has been analysed or changed yet. "From the share" is the sharer's build. Anything else is Paradox's pick from your inventory.</p>
     ${renderSharedBuild(view,{weapons:page.weapons})}
@@ -126,7 +126,7 @@ document.addEventListener('submit',event=>{
   page.selection={...page.selection,dim:next.dim,step:1};writeUrl();void load();
 });
 
-// Build Forge receives the share, Paradox's armour picks and, when the share has no
+// Builder receives the share, Paradox's armour picks and, when the share has no
 // weapons, the ranked weapon suggestions. Each carries its marker in dimAdaptation.
 function handoffBuild(){
   const build=page.adaptation.build,decisions=page.weapons.state==='ready'?page.weapons.decisions:[];
@@ -139,7 +139,7 @@ const WEAPON_SLOTS=['Kinetic','Energy','Power'];
 function rankWeapons(equipped){
   if(page.view?.fill?.weapons.shared!==0){page.weapons={state:'none',rows:[],decisions:[]};return;}
   try{
-    // The user's owned weapons, ranked by Build Forge's own engine for the shared subclass.
+    // The user's owned weapons, ranked by Builder's own engine for the shared subclass.
     const shared=page.adaptation.build;
     const {recommendation:ranked}=selectOwnedWeapons({build:{...equipped,characterClass:shared.characterClass,subclass:shared.subclass,subclassName:shared.subclassName,subclassBuild:shared.subclassBuild,weapons:[],ownedWeapons:equipped.ownedWeapons||[]},objective:'balanced',baselineWeapons:[]});
     const decisions=ranked.decisions.filter(row=>row.recommended);
@@ -175,7 +175,7 @@ async function load(){
       page.importElement=page.view.subclass.element;
       if(!page.selection.element&&page.importElement){page.selection={...page.selection,element:page.importElement};writeUrl({push:false});}
       page.loading=false;render();performance.mark('br:shared-build-rendered');
-      // Step 2 needs the same prepared gear Build Forge uses. It runs after
+      // Step 2 needs the same prepared gear Builder uses. It runs after
       // step 1 has painted so the shared build appears first.
       try{
         const equipped=await runProfileTask('normalise',{payload,session,characterId:adaptation.build.characterId});

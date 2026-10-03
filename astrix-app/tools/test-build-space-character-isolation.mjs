@@ -58,7 +58,7 @@ const loadoutRepaired=mergePreparedLoadoutContext(protectedWarlockForge,{...auto
 assert.deepEqual(loadoutRepaired.originalBuild.loadouts,preparedLoadouts,'same Guardian hydration must repair missing in-game loadout slots on the protected Original Build');
 assert.deepEqual(loadoutRepaired.workingBuild.loadouts,preparedLoadouts,'same Guardian hydration must repair missing in-game loadout slots without discarding the Working Build');
 assert.deepEqual(loadoutRepaired.workingBuild.forgeLoaderDecision,protectedWarlockForge.workingBuild.forgeLoaderDecision,'loadout repair must preserve the staged Forge Loader decision');
-assert.equal(mergePreparedLoadoutContext(loadoutRepaired,{...automaticHunterProfile,characterId:'warlock-1',loadoutsAvailable:true,loadouts:preparedLoadouts}),loadoutRepaired,'unchanged prepared loadouts must not rewrite Build Forge state');
+assert.equal(mergePreparedLoadoutContext(loadoutRepaired,{...automaticHunterProfile,characterId:'warlock-1',loadoutsAvailable:true,loadouts:preparedLoadouts}),loadoutRepaired,'unchanged prepared loadouts must not rewrite Builder state');
 assert.equal(mergePreparedLoadoutContext(protectedWarlockForge,{...automaticHunterProfile,loadoutsAvailable:true,loadouts:preparedLoadouts}),protectedWarlockForge,'a different Guardian cannot repair protected loadout context');
 rememberGuardian(warlockEquipped);
 rememberGuardian(warlockLoadout);
@@ -145,7 +145,7 @@ await improveClick({target:{closest:selector=>selector==='.improve-cta'?{}:null}
 assert.match(location.href,/^\.\/paradox-build-space\/\?characterId=warlock-1/,'Improve My Guardian must navigate with the current Guardian binding');
 assert.equal(sessionStorage.getItem(BUILD_SPACE_KEY),null,'stale session Build copy must be cleared before navigation');
 assert.equal(localStorage.getItem(BUILD_SPACE_KEY),null,'stale durable Build copy must be cleared before navigation');
-assert.ok(sessionStorage.getItem(BUILD_SNAPSHOT_KEY),'the already-protected current Character snapshot must remain available for Build Forge');
+assert.ok(sessionStorage.getItem(BUILD_SNAPSHOT_KEY),'the already-protected current Character snapshot must remain available for Builder');
 
 for(const store of [sessionStorage,localStorage]){store.removeItem(BUILD_SNAPSHOT_KEY);store.rejectWrites=true;}
 location.href='';
@@ -158,7 +158,7 @@ location.href='';
 const suspendedFrameStartedAt=Date.now();
 await improveClick({target:{closest:selector=>selector==='.improve-cta'?{}:null},preventDefault(){},stopPropagation(){},stopImmediatePropagation(){}});
 assert.match(location.href,/^\.\/paradox-build-space\/\?characterId=warlock-1/,'Improve My Guardian must navigate when animation frames are suspended');
-assert.ok(Date.now()-suspendedFrameStartedAt<1000,'Build Forge navigation must use its bounded paint fallback');
+assert.ok(Date.now()-suspendedFrameStartedAt<1000,'Builder navigation must use its bounded paint fallback');
 
 console.log('Build Space character isolation tests passed.');
 

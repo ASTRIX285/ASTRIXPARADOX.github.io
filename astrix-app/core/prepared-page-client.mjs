@@ -3,7 +3,7 @@ import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepar
 import {runProfileTask} from './engine-profile-client.mjs?v=07c0d11e6f';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=bed8960779';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=a5fcd4c480';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=8cbc2b2658';
+import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=e8325e7602';
 
 const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loadout']);
 const PAGE_KIND_SET=new Set(PAGE_KINDS);

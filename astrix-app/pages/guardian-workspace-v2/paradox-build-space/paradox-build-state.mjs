@@ -118,12 +118,12 @@ function portableArtifactMatches(build,configuration){
   return resolvedHash===null||resolvedHash===numberOrNull(configuration?.artifactHash);
 }
 function serializePortableBuild(state,{kind='saved-build'}={}){
-  if(!PORTABLE_BUILD_KINDS.includes(kind))throw new TypeError('Unsupported portable Build Forge snapshot kind.');
+  if(!PORTABLE_BUILD_KINDS.includes(kind))throw new TypeError('Unsupported portable Builder snapshot kind.');
   const source=state?.workingBuild||state;
   const build=normalizeBuild(source||{});
-  if(!build.characterId)throw new TypeError('Portable Build Forge snapshots require a characterId.');
-  if(!completePortableArtifactConfiguration(build.artifactConfiguration))throw new TypeError('Portable Build Forge snapshots require an explicit intended Artifact configuration.');
-  if(!portableArtifactMatches(build,build.artifactConfiguration))throw new TypeError('Portable Build Forge Artifact identity does not match the intended configuration.');
+  if(!build.characterId)throw new TypeError('Portable Builder snapshots require a characterId.');
+  if(!completePortableArtifactConfiguration(build.artifactConfiguration))throw new TypeError('Portable Builder snapshots require an explicit intended Artifact configuration.');
+  if(!portableArtifactMatches(build,build.artifactConfiguration))throw new TypeError('Portable Builder Artifact identity does not match the intended configuration.');
   return JSON.stringify({schemaVersion:PORTABLE_BUILD_SCHEMA_VERSION,kind,createdAt:new Date().toISOString(),build});
 }
 function deserializePortableBuild(serialized,{expectedKind=null}={}){

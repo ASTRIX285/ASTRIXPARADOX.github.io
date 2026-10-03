@@ -13,7 +13,7 @@ const baseline=process.env.BUILD_WEAPON_LAYOUT_BASELINE==='1';
 const output=process.env.BUILD_WEAPON_LAYOUT_OUTPUT||'/tmp/build-weapon-card-layout';
 await mkdir(output,{recursive:true});
 const shell=(await readFile(resolve(root,base+'paradox-build-space.mjs'),'utf8')).match(/^function weaponCardShell\(index\).*$/m)[0];
-// Actual Build Forge document and all its styles; account/bootstrap scripts are
+// Actual Builder document and all its styles; account/bootstrap scripts are
 // disabled. The shared production weapon renderer receives synthetic weapons.
 const html=(await readFile(resolve(root,base+'index.html'),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*rel="modulepreload"[^>]*>/gi,'');
 const server=createServer(async(req,res)=>{

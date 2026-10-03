@@ -44,7 +44,7 @@ function checkBuild(build,expected){
 }
 for(const selected of guardians)for(const stale of guardians){
   const h=harness();h.seed(stale);h.seed(stale,'snapshot');
-  assert.equal(h.readState(),null,'A plain Build Forge visit must not adopt an unrequested cached build.');
+  assert.equal(h.readState(),null,'A plain Builder visit must not adopt an unrequested cached build.');
   h.recoverMissingBuild(selected);
   await h.initialiseBuildForge();
   checkBuild(h.currentBuild(),selected);
@@ -108,7 +108,7 @@ await refreshed.initialiseBuildForge();
 refreshed.recoverMissingBuild(guardians[2]);
 assert.equal(refreshed.currentBuild().armour[0].itemInstanceId,'titan-manual-armour','Refreshing an explicitly bound Working Build must retain its edits.');
 
-// Profile startup must select the same ID as Build Forge, including a click
+// Profile startup must select the same ID as Builder, including a click
 // while the first profile request is still in flight.
 for(const selected of guardians){
   const h=vm.createContext({URLSearchParams,console,location:{pathname:'/paradox-build-space/',search:''},sessionStorage:store(),document:{documentElement:{dataset:{guardianProfileMode:'roster-only'}},dispatchEvent(){}},
@@ -131,7 +131,7 @@ for(const selected of guardians){
 }
 console.log('BUILD_FORGE_EQUIPPED_ENTRY=PASS stale caches, all three Guardians, six switches, URL binding, protected staging and delayed restore/selection');
 
-// Run the real armour-card and Build Forge render functions against a small
+// Run the real armour-card and Builder render functions against a small
 // DOM adapter, including the post-render step that used to erase installed mods.
 const gearSource=await readFile(new URL('../pages/guardian-workspace-v2/guardian-gear-layout.mjs',import.meta.url),'utf8');
 let modGrids=[];

@@ -1,4 +1,4 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=8cbc2b2658";
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=e8325e7602";
 import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=b4dd5e6bbf";
 import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs?v=4c40749881';
 import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=b367ae7d9a';
@@ -336,17 +336,17 @@ class GuardianManifestService{
 
   loadForgeArmourIndex(url){
     const key=String(url||"");
-    if(!key)return Promise.reject(new Error("Forge armour index URL is missing."));
+    if(!key)return Promise.reject(new Error("The Forge armour index URL is missing."));
     if(!this.forgeIndexPromises.has(key))this.forgeIndexPromises.set(key,(async()=>{
       await this.checkVersion();
       const requestUrl=new URL(key,globalThis.location?.href||this.authOrigin);
       requestUrl.searchParams.set("manifest",this.version);
       const payload=await this.fetchJson(requestUrl);
       const version=String(payload?.manifestVersion||"").trim();
-      if(!version||version!==this.version)throw new Error(`Forge armour index is stale (${version||"unknown"}; expected ${this.version||"current"}).`);
-      if(![4,5].includes(Number(payload?.schemaVersion)))throw new Error("Forge armour and Artifact index schema is unsupported.");
-      if(!payload?.definitions||typeof payload.definitions!=="object"||Array.isArray(payload.definitions))throw new Error("Forge armour index contains no definition map.");
-      if(!Array.isArray(payload?.artifactCatalog)||payload.artifactCatalog.length===0)throw new Error("Forge index contains no Artifact 2.0 catalogue.");
+      if(!version||version!==this.version)throw new Error(`The Forge armour index is stale (${version||"unknown"}; expected ${this.version||"current"}).`);
+      if(![4,5].includes(Number(payload?.schemaVersion)))throw new Error("The Forge armour and Artifact index schema is unsupported.");
+      if(!payload?.definitions||typeof payload.definitions!=="object"||Array.isArray(payload.definitions))throw new Error("The Forge armour index contains no definition map.");
+      if(!Array.isArray(payload?.artifactCatalog)||payload.artifactCatalog.length===0)throw new Error("The Forge index contains no Artifact 2.0 catalogue.");
       return payload;
     })());
     return this.forgeIndexPromises.get(key);
@@ -387,7 +387,7 @@ class GuardianManifestService{
       complete:Object.keys(index.definitions||{}).length>0,
       source:"hourly-compact-manifest"
     };
-    payload.manifestResolution={mode:"forge-index",version,versionMatched:true,source:"hourly compact Forge armour manifest"};
+    payload.manifestResolution={mode:"forge-index",version,versionMatched:true,source:"hourly compact armour manifest"};
     return true;
   }
 

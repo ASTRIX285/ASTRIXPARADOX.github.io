@@ -22,7 +22,7 @@ import {beginEngineTiming} from '../../../core/engine-timing.mjs';
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
 // Same worker pattern as Forge Loader: the packed handoff envelope is built off the main thread, kept
-// warm from the moment the profile resolves, so Enter Build Forge only waits on whatever prewarming
+// warm from the moment the profile resolves, so Enter Builder only waits on whatever prewarming
 // has not yet finished.
 const engineHandoff=new EngineHandoffClient();
 window.addEventListener('pagehide',()=>engineHandoff.dispose());
@@ -132,7 +132,7 @@ function setEnterState(step,label){
   enterBusy=step!==null;
   enter.classList.toggle('is-active',enterBusy);
   if(enterBusy){enter.disabled=true;enter.setAttribute('aria-busy','true');enter.style.setProperty('--forge-enter-progress',`${Math.round(step*100)}%`);if(labelNode)labelNode.textContent=label;}
-  else{enter.removeAttribute('aria-busy');enter.style.removeProperty('--forge-enter-progress');if(labelNode)labelNode.textContent='ENTER BUILD FORGE';renderStaged();}
+  else{enter.removeAttribute('aria-busy');enter.style.removeProperty('--forge-enter-progress');if(labelNode)labelNode.textContent='ENTER BUILDER';renderStaged();}
 }
 
 async function evaluateInBuildForge(){
@@ -153,7 +153,7 @@ async function evaluateInBuildForge(){
   timing.mark('handoff');
   const selected=prepareArmourSelection(payload,[...selectedSlots.values()]);
   const armourSelection=createVaultArmourSelection({binding,slots:selected.map(item=>({slot:item.slotIndex,item})),sourcePage:'forge-loader',forgeLoaderDecision:decision});
-  if(!snapshotEnvelope||!armourSelection){fail('Build Forge could not open. Your build is unchanged.');return;}
+  if(!snapshotEnvelope||!armourSelection){fail('Builder could not open. Your build is unchanged.');return;}
   setEnterState(.65,'SECURING TRANSFER…');
   const transferStored=await cacheForgeLoaderTransfer(binding,{snapshotEnvelope,armourSelection});
   let baselineStored=transferStored,selectionStored=transferStored;
@@ -166,13 +166,13 @@ async function evaluateInBuildForge(){
   }
   if(!selectionStored){fail('The protected staged load could not be stored on this device. No build was changed.');return;}
   if(!baselineStored&&!transferStored){
-    byId('forgeResultsRuntimeStatus').textContent='Browser storage is full. Build Forge will recover the protected Original Build directly from Bungie.';
-    console.warn('[Forge Loader Results] Browser storage rejected the protected baseline; Build Forge will recover it from the authenticated Bungie profile.');
+    byId('forgeResultsRuntimeStatus').textContent='Browser storage is full. Builder will recover the protected Original Build directly from Bungie.';
+    console.warn('[Forge Loader Results] Browser storage rejected the protected baseline; Builder will recover it from the authenticated Bungie profile.');
   }
   const url=new URL('../../guardian-workspace-v2/paradox-build-space/',location.href);url.searchParams.set('vault','selection');url.searchParams.set('prewarm','forge-loader');
   if(!baselineStored&&!transferStored)url.searchParams.set('baseline','bungie-recovery');
   for(const [key,value] of Object.entries(binding))if(value)url.searchParams.set(key,value);
-  setEnterState(.9,'OPENING BUILD FORGE…');
+  setEnterState(.9,'OPENING BUILDER…');
   timing.mark('navigate');timing.end();
   markGuardianFastReturn();location.href=url;
 }

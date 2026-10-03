@@ -120,7 +120,7 @@ assert.doesNotMatch(vaultHtml,/id="vaultItemInspect"/,'Vault must not retain its
 assert.match(vaultRuntime,/loadPreparedPagePayload\(session,'vault'/);
 assert.match(vaultRuntime,/guardianManifest\.hydratePayload/);
 assert.match(vaultRuntime,/matchArmourBuilds\(optimiserItems\(\),targets,\{limit:5\}\)/);
-assert.match(vaultCss,/\.vault-item-inspect,\.vault-selection-inspect,\.vault-candidate-inspect\{[^}]*width:var\(--apx-icon-gear-art-width\);height:var\(--apx-icon-gear-art-height\)/,'Vault inventory and optimiser item surfaces must consume the exact shared Build Forge portrait geometry.');
+assert.match(vaultCss,/\.vault-item-inspect,\.vault-selection-inspect,\.vault-candidate-inspect\{[^}]*width:var\(--apx-icon-gear-art-width\);height:var\(--apx-icon-gear-art-height\)/,'Vault inventory and optimiser item surfaces must consume the exact shared Builder portrait geometry.');
 assert.match(vaultCss,/\.vault-candidate-item\{[^}]*grid-template-columns:var\(--apx-icon-gear-art-width\) minmax\(0,1fr\)/,'Vault optimiser candidates must consume the canonical shared tile width.');
 assert.match(sharedTileCss,/\.tile-season-icon\s*\{[^}]*aspect-ratio:\s*1/,'Vault season art must come from the shared item tile contract.');
 assert.match(sharedTileCss,/\.tile-tier-pip--5 \{top:63\.50%\}/,'Vault tier pips must come from the shared item tile contract.');

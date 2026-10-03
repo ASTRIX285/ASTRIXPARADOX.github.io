@@ -77,7 +77,7 @@ const list=tools.slice(tools.indexOf('var HUB_TOOLS=['),tools.indexOf('];',tools
 assert.match(list,/name:'The Forge'[\s\S]*?action:\{label:'Enter The Forge',href:'\.\.\/astrix-app\/pages\/home\/'\}/,'The Forge card enters the Destiny 2 tool by its unchanged route');
 assert.match(list,/name:'WorkBench'[\s\S]*?status:'Coming soon'[\s\S]*?action:\{label:'Enter WorkBench'\}/,'WorkBench card is coming soon with no link');
 assert.match(list,/\{kind:'future'\}/,'The future slot card stays');
-assert.equal((tools.match(/ENTER FORGE/g)??[]).length,1,'The mission popup keeps its Forge action');
+assert.equal((tools.match(/ENTER THE FORGE/g)??[]).length,1,'The mission popup keeps its Forge action');
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
 assert.ok(tools.includes('<script type="module" src="tools.mjs"></script>'),'Tools page must load its isolated mission controller');
 assert.ok(list.includes("game:'Destiny 2'")&&list.includes("game:'The Division'"),'Each card names its game');
@@ -114,13 +114,13 @@ assert.ok(toolsMission.includes("event.key!=='Tab'"),'Mission popup must manage 
 assert.ok(toolsMission.includes("document.body.classList.add('tools-mission-open')"),'Mission popup must prevent background scrolling');
 
 const games=read('pages/games.html');
-assert.doesNotMatch(games,/guardian-alpha|tools-section|Guardian Build Forge/,'Universes page must remain separate from the Tools catalogue');
+assert.doesNotMatch(games,/guardian-alpha|tools-section|The Forge/,'Universes page must remain separate from the Tools catalogue');
 assert.ok(games.includes('Gaming <span class="accent">Universes</span>'),'Universes page must keep its own purpose');
 
 const workspaceReadiness=read('astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs');
 assert.doesNotMatch(workspaceReadiness,/PARADOX285|astrix-paradox-beta-access|beta-access-gate|Enter the tester access code|accessGate/,'Workspace must not restore the tester access-code overlay');
 assert.match(workspaceReadiness,/waitForBungieAuthentication\(\)\.then\(wireControls\);/,'Workspace controls must initialise after Bungie authentication without a tester gate');
-assert.doesNotMatch(workspaceReadiness,/GUARDIAN BUILD FORGE (?:ALPHA|BETA)|Alpha Settings|Alpha Help|Beta Loadouts|alpha preview|beta link/i,'Workspace controls must not render test state labels');
+assert.doesNotMatch(workspaceReadiness,/THE FORGE (?:ALPHA|BETA)|Alpha Settings|Alpha Help|Beta Loadouts|alpha preview|beta link/i,'Workspace controls must not render test state labels');
 
 console.log('MULTI_GAME_TOOLS_HUB=PASS');
 console.log('COMPACT_TOOLS_INTRO=PASS');

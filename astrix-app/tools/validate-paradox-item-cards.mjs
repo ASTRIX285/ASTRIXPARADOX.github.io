@@ -33,8 +33,8 @@ for(const section of ['ARMOUR STATS','ENERGY','ARCHETYPE &amp; TRAITS','ARMOUR C
   assert.ok(armourRuntime.includes(section),`Armour detail framework is missing ${section}`);
 }
 assert.match(interceptor,/payload\?\.statDefinitions\?\.\[String\(hash\)\][\s\S]*?name:String\(definition\?\.displayProperties\?\.name/,'Per-item armour stat labels must come from the live Bungie stat definitions');
-assert.match(buildRuntime,/renderWeapons\(build\.weapons\|\|\[\]\)/,'Build Forge weapon models must reuse the shared Character weapon renderer');
-assert.match(buildRuntime,/bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Build Forge armour models must open the shared click inspector');
+assert.match(buildRuntime,/renderWeapons\(build\.weapons\|\|\[\]\)/,'Builder weapon models must reuse the shared Character weapon renderer');
+assert.match(buildRuntime,/bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Builder armour models must open the shared click inspector');
 assert.match(cardCss,/\.paradox-item-card \.weapon-perk-row\{grid-template-columns:repeat\(var\(--weapon-perk-columns\),var\(--paradox-perk-size,var\(--apx-icon-detail-identity\)\)\)/,'Weapon perk rows must use one shared-token aligned column grid');
 assert.match(cardCss,/font:550 13px\/1\.45 bahnschrift/,'Item-card supporting copy must remain readable');
 assert.match(cardCss,/\.paradox-item-hover\{position:fixed;[^}]*pointer-events:none/,'Shared item hover must remain a non-blocking viewport layer');
@@ -42,9 +42,9 @@ assert.match(cardCss,/\.paradox-item-hover-card\{--paradox-card-violet:#b51e2a;-
 assert.match(sharedTileRuntime,/item\?\.releaseWatermark\?\.icon\|\|item\?\.tierIcon/,'Shared armour and weapon season art must prefer the prepared Bungie watermark');
 assert.match(gearRuntime,/bindParadoxItemInspect\(art,armour\[idx\],"armour"\)/,'Character armour art must expose the shared click inspector');
 assert.match(weaponUi,/bindParadoxItemInspect\(art\|\|card,item,'weapon'\)/,'Character and Build weapon art must expose the shared click inspector');
-assert.match(buildRuntime,/manualEditorItems[\s\S]*?bindParadoxItemInspect\(node,rows\[Number\(node\.dataset\.manualItemInspect\)\],manualEditorState\.kind\)/,'Build Forge manual item choices must expose exact-item click inspection');
-assert.match(buildRuntime,/recommendedArmourSummary[\s\S]*?bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Build Forge recommended armour must expose exact-item click inspection');
-assert.match(buildRuntime,/data-review-weapon[\s\S]*?bindParadoxItemInspect\(node\.querySelector\('\.review-item-inspect'\),item,'weapon'\)/,'Build Forge recommended weapons must expose exact-item click inspection');
+assert.match(buildRuntime,/manualEditorItems[\s\S]*?bindParadoxItemInspect\(node,rows\[Number\(node\.dataset\.manualItemInspect\)\],manualEditorState\.kind\)/,'Builder manual item choices must expose exact-item click inspection');
+assert.match(buildRuntime,/recommendedArmourSummary[\s\S]*?bindParadoxItemInspect\(node,build\.armour\?\.\[index\],'armour'\)/,'Builder recommended armour must expose exact-item click inspection');
+assert.match(buildRuntime,/data-review-weapon[\s\S]*?bindParadoxItemInspect\(node\.querySelector\('\.review-item-inspect'\),item,'weapon'\)/,'Builder recommended weapons must expose exact-item click inspection');
 assert.match(vaultRuntime,/function bindVaultItemInspectors\(root\)[\s\S]*?bindParadoxItemInspect\(target,inspectedItem\(target\.dataset\.inspectItem\),'armour'\)/,'Vault must expose exact owned instances through the shared click inspector');
 assert.match(forgeLoaderRuntime,/function bindSelectorExoticHovers\(host,groups\)[\s\S]*?bindParadoxItemHover\(target,selectorExoticHoverItem\(group\),'armour',\{contextLabel:'BUILD ANCHOR',definitionOnly:true\}\)/,'Forge Loader must retain its intentional type-level hover-only Exotic selector behavior');
 assert.match(hoverRuntime,/resolveItemWatermark\(item\?\?\{\},item\?\.definition\?\?\{\}\)/,'Hover season art must come from Bungie item identity data');

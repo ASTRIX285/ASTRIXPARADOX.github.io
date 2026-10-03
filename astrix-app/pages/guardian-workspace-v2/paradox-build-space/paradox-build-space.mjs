@@ -160,10 +160,10 @@ function readState(){
         }
         if(raw)store.removeItem(key);
       }
-      catch{activeLoadError='The protected Build Forge snapshot could not be read on this device.';}
+      catch{activeLoadError='The protected Builder snapshot could not be read on this device.';}
     }
   }
-  activeLoadError=activeLoadError||(params.get('baseline')==='bungie-recovery'?'Recovering the protected Original Build from the Bungie profile.':'No current Build Forge snapshot was found. Return to the Guardian page and choose Improve My Guardian again.');
+  activeLoadError=activeLoadError||(params.get('baseline')==='bungie-recovery'?'Recovering the protected Original Build from the Bungie profile.':'No current Builder snapshot was found. Return to the Guardian page and choose Improve My Guardian again.');
   return null;
 }
 function emitLoad(stage,preparedStage,label,status='loading',message=''){
@@ -222,7 +222,7 @@ function renderDirectGenerationEntry(build={}){
 }
 const IMPORTED_SOURCES=new Set(['dim-import']);
 function isImportedBuild(build={}){return IMPORTED_SOURCES.has(build?.loadoutSource)||IMPORTED_SOURCES.has(build?.source);}
-// A shared loadout lands in Build Forge unanalysed. Say so, and give the one
+// A shared loadout lands in Builder unanalysed. Say so, and give the one
 // next step, so nobody mistakes the imported build for a Paradox result.
 function importNextStep(build={},mode=directEntryMode(build)){
   if(!isImportedBuild(build))return null;
@@ -554,7 +554,7 @@ function applyPendingVaultSelection(state){
     result.state.workingBuild.paradoxAnalysis=analysis||null;
   }catch(error){
     result.state.workingBuild.paradoxAnalysis=null;
-    console.error('Build Forge retained the protected Forge Loader selection after PARADOX analysis failed.',error);
+    console.error('Builder retained the protected Forge Loader selection after PARADOX analysis failed.',error);
   }
   clearVaultArmourSelection();
   return result.state;
@@ -598,7 +598,7 @@ function completeBuildRender(build){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(sequence!==buildRenderSequence)return;
     const images=[...document.querySelectorAll('.build-space img,.build-character-selector img')].filter(image=>!image.closest('[hidden]'));
-    const ready=Boolean(build),status=ready?'ready':'pending',label=ready?'Build Forge rendered':'Waiting for Guardian build';
+    const ready=Boolean(build),status=ready?'ready':'pending',label=ready?'Builder rendered':'Waiting for Guardian build';
     emitLoad('render',ready?LOAD_STAGES.READY:LOAD_STAGES.SNAPSHOT,label,status);
     document.dispatchEvent(new CustomEvent('forge:build-render-complete',{detail:{status,characterId:String(build?.characterId||''),selectedLoadoutIndex:Number.isInteger(build?.selectedLoadoutIndex)?build.selectedLoadoutIndex:null,renderedImages:images.filter(image=>image.complete&&image.naturalWidth>0).length}}));
   }));
@@ -870,7 +870,7 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
   try{
     let recoveredState=readState();
     if(!recoveredState){recoveredState=await restorePersistedBuildState();if(recoveredState)render();}
-    if(!recoveredState)throw new Error(activeLoadError||'No protected Build Forge snapshot is available. Return to Forge Loader and evaluate the armour build again.');
+    if(!recoveredState)throw new Error(activeLoadError||'No protected Builder snapshot is available. Return to Forge Loader and evaluate the armour build again.');
     // Finish any in-flight Artifact refresh before capturing the generation
     // snapshot so an unrelated refresh cannot invalidate this review request.
     await refreshForgeArtifactRecommendation();
@@ -897,7 +897,7 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
     let next=protectBuildState({...state,workingBuild:working,recommendation:prepared.recommendation});
     await updateForgeGenerationPhase('PREPARING BUILD REVIEW…');
     if(readState()!==state)throw new Error('The source build changed. Generate again for the current selection.');
-    next=protectBuildState({...next,workingBuild:working});writeState(next,{retainPreparation:true});render();hideForgeGenerationLoader();if(!await openRecommendedBuild())throw new Error('The recommendation was generated, but its protected review could not be opened. Reload this Build Forge page and try again.');
+    next=protectBuildState({...next,workingBuild:working});writeState(next,{retainPreparation:true});render();hideForgeGenerationLoader();if(!await openRecommendedBuild())throw new Error('The recommendation was generated, but its protected review could not be opened. Reload this Builder page and try again.');
     await afterEnginePaint();engineTiming.mark('first-paint');
     const completed=await completedPromise;
     if(readState()===next&&completed.patch?.weaponSelectionRecommendation){
@@ -908,7 +908,7 @@ async function generateMaxLoadout({weaponInstanceIds=[]}={}){
     }
     engineTiming.mark('alternatives');
 
-  }catch(error){failureMessage=error?.message||'Unable to generate a recommendation.';recommendationFailure=failureMessage;console.error('Build Forge recommendation generation failed.',error);}
+  }catch(error){failureMessage=error?.message||'Unable to generate a recommendation.';recommendationFailure=failureMessage;console.error('Builder recommendation generation failed.',error);}
   finally{
     engineTiming.end(failureMessage?'error':'complete');
     hideForgeGenerationLoader();recommendationBusy=false;renderRecommendationControls(currentBuild()||{});
@@ -949,7 +949,7 @@ function renderBuildSurface(){
   for(const [kind,nodeId] of [['aspects','aspectOptions'],['fragments','fragmentOptions']]){const markup=subclassSocketGroups(build,kind);byId(nodeId).innerHTML=markup||unavailableCard('Compatible '+kind+' unavailable');}
   }catch(error){
     activeLoadError=error?.message||'The recovered subclass presentation could not be completed.';
-    console.error('Build Forge retained the protected transfer after recovered subclass rendering failed.',error);
+    console.error('Builder retained the protected transfer after recovered subclass rendering failed.',error);
     byId('buildStateDetail').textContent='The transferred build remains protected while the remaining equipment data is displayed.';
   }
   emitLoad('sockets',LOAD_STAGES.SOCKETS,'Resolving equipped sockets and selections…');
@@ -964,13 +964,13 @@ function renderBuildSurface(){
 function render(){
   try{return renderBuildSurface();}
   catch(error){
-    console.error('Build Forge recovered from a synchronous render failure after protecting the transferred build.',error);
-    activeLoadError=error?.message||'A Build Forge presentation stage could not be rendered.';
+    console.error('Builder recovered from a synchronous render failure after protecting the transferred build.',error);
+    activeLoadError=error?.message||'A Builder presentation stage could not be rendered.';
     let build=null;
     try{const state=readState();build=state?.workingBuild||state?.originalBuild||null;}catch{}
     const detail=byId('buildStateDetail');
-    if(detail)detail.textContent='The transferred build remains protected while the available Build Forge data is displayed.';
-    emitLoad('recovery',LOAD_STAGES.ARTIFACT,'Completing Build Forge with protected data…','loading',activeLoadError);
+    if(detail)detail.textContent='The transferred build remains protected while the available Builder data is displayed.';
+    emitLoad('recovery',LOAD_STAGES.ARTIFACT,'Completing Builder with protected data…','loading',activeLoadError);
     completeBuildRender(build);
     return null;
   }
@@ -987,11 +987,11 @@ function renderParadoxTestReview(capture=readCapture()){
   title.textContent=verified?'RESULT REVIEWED':'RESULT DATA LIMITED';summary.textContent=verified?'Paradox reviewed the confirmed Bungie activity and PGCR metrics. Causal perk activation, DPS and uptime remain inference until direct telemetry exists.':'Activity completed. Performance details unavailable.';
   const labels={kills:'KILLS',deaths:'DEATHS',assists:'ASSISTS',efficiency:'EFFICIENCY',score:'SCORE',timePlayedSeconds:'TIME PLAYED'};const metricRows=Object.keys(labels).filter(key=>Object.hasOwn(claims,key)).map(key=>`<span><small>${labels[key]}</small><b>${esc(claims[key])}${key==='timePlayedSeconds'?'s':''}</b></span>`).join('');metricsHost.innerHTML=metricRows||`<span><small>PGCR DATA</small><b>${verified?'':'LIMITED'}</b></span>`;
 }
-function renderCandidateConfirmation(capture){const node=byId('candidateConfirmation');if(!node)return;const selection=capture?.candidateSelection,rows=Array.isArray(capture?.candidates)?capture.candidates:[];if(!selection?.requiresUserConfirmation||!rows.length){node.hidden=true;node.innerHTML='';return;}node.hidden=false;node.innerHTML='<strong>CONFIRM COMPLETED ACTIVITY</strong><p>Confirm the exact post-arm activity before Paradox reviews its result. Build Forge will not guess.</p><div>'+rows.map(row=>{const activity=row.activity||{},pgcr=row.pgcr||{},name=capture.expectedActivity?.name||'Completed Bungie activity';return `<button type="button" data-confirm-instance="${esc(activity.instanceId)}"><b>${esc(name)}</b><span>${esc(activity.period||pgcr.period||'Time unavailable')} · ${esc(activity.instanceId)}</span></button>`;}).join('')+'</div>';}
+function renderCandidateConfirmation(capture){const node=byId('candidateConfirmation');if(!node)return;const selection=capture?.candidateSelection,rows=Array.isArray(capture?.candidates)?capture.candidates:[];if(!selection?.requiresUserConfirmation||!rows.length){node.hidden=true;node.innerHTML='';return;}node.hidden=false;node.innerHTML='<strong>CONFIRM COMPLETED ACTIVITY</strong><p>Confirm the exact post-arm activity before Paradox reviews its result. Builder will not guess.</p><div>'+rows.map(row=>{const activity=row.activity||{},pgcr=row.pgcr||{},name=capture.expectedActivity?.name||'Completed Bungie activity';return `<button type="button" data-confirm-instance="${esc(activity.instanceId)}"><b>${esc(name)}</b><span>${esc(activity.period||pgcr.period||'Time unavailable')} · ${esc(activity.instanceId)}</span></button>`;}).join('')+'</div>';}
 function downloadRangeEvidence(){const capture=readCapture();if(!capture)return;const evidence={...capture,evidenceArchive:readCaptureArchive()};const blob=new Blob([JSON.stringify(evidence,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`${capture.testId||'BF-TEST-EVIDENCE'}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);}
 function refreshRangeCapture(){const capture=readCapture();const build=currentBuild(),characterId=String(build?.characterId||'').trim(),matches=captureMatchesCharacter(capture,characterId);const pull=byId('pullRangeResults');const arm=byId('armRangeTest');const download=byId('downloadRangeEvidence');renderCandidateConfirmation(capture);renderParadoxTestReview(capture);if(arm)arm.disabled=!characterId;if(download)download.disabled=capture?.status!=='collected';if(capture?.status==='armed'){arm?.classList.toggle('is-armed',matches);if(pull)pull.disabled=!matches;if(!matches)setRangeStatus(`CAPTURE GUARDIAN MISMATCH · saved character ${capture.characterId||'unknown'} · current character ${characterId||'unknown'}. Return to the captured Guardian before pulling results.`,'bad');else setRangeStatus(`ARMED ${String(capture.testDomain||'pve').toUpperCase()} BUILD TEST · ${capture.testId} · character ${capture.characterId}`,'warn');}else if(capture?.status==='collected'){arm?.classList.remove('is-armed');if(pull)pull.disabled=!matches;if(!matches)setRangeStatus(`RESULTS PRESERVED FOR DIFFERENT GUARDIAN · ${capture.testId} · saved character ${capture.characterId||'unknown'}. Raw data remains available to download.`,'bad');else setRangeStatus(`RESULTS COLLECTED · ${capture.testId} · ${capture.candidates?.length||0} completed candidate activity instance(s)`,'good');}else{arm?.classList.remove('is-armed');if(pull)pull.disabled=true;setRangeStatus('Choose PvE or PvP, then arm the exact Working Build before playing.');}}
-async function armRange(){const build=currentBuild();if(!build?.characterId){setRangeStatus('No Guardian characterId is present in this Build Forge snapshot.','bad');return;}const button=byId('armRangeTest');try{if(button)button.disabled=true;setRangeStatus('Taking the pre-test Activity History baseline…','warn');const capture=await armBuildTest({characterId:build.characterId,buildSnapshot:build,testDomain,calibrationType:testDomain==='pve'&&byId('shootingRangeCalibration')?.checked?'shooting-range':null,expectedActivity:selectedExpectedActivity()});refreshRangeCapture();showRangeOutput(capture);if(capture.baselineError)setRangeStatus(`ARMED, but Activity History baseline failed: ${capture.baselineError.message}`,'warn');}catch(error){setRangeStatus(error?.message||'Unable to arm Build Test.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null});}finally{if(button)button.disabled=!String(currentBuild()?.characterId||'').trim();}}
-async function pullRange(){const button=byId('pullRangeResults'),build=currentBuild(),capture=readCapture();if(!captureMatchesCharacter(capture,build?.characterId)){setRangeStatus(`Capture blocked: saved character ${capture?.characterId||'unknown'} does not match current Build Forge Guardian ${build?.characterId||'unknown'}.`,'bad');showRangeOutput({error:'Build Test Guardian mismatch.',code:'capture-character-mismatch',captureCharacterId:capture?.characterId||null,currentCharacterId:build?.characterId||null});return;}try{if(button)button.disabled=true;setRangeStatus('Pulling completed post-arm activities and candidate PGCRs…','warn');const result=await collectBuildTestResults({expectedCharacterId:build.characterId});refreshRangeCapture();showRangeOutput(result);if(!result.candidates?.length)setRangeStatus('No completed post-arm Bungie activity candidate was found.','warn');else if(result.candidateSelection?.requiresUserConfirmation)setRangeStatus(`${result.candidates.length} candidates found. Confirm the correct completed activity; Build Forge will not guess.`,'warn');else if(!result.evidenceSummary?.verifiedActivityPgcrCount)setRangeStatus('Candidates pulled, but none has complete activity-hash + PGCR proof.','warn');else setRangeStatus(`${result.evidenceSummary.verifiedActivityPgcrCount} activity result(s) loaded. Perk effects and uptime are estimates.`,'good');}catch(error){setRangeStatus(error?.message||'Unable to pull Build Test results.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null,captureCharacterId:error?.captureCharacterId||null,currentCharacterId:error?.currentCharacterId||null});}finally{if(button)button.disabled=!captureMatchesCharacter(readCapture(),currentBuild()?.characterId);}}
+async function armRange(){const build=currentBuild();if(!build?.characterId){setRangeStatus('No Guardian characterId is present in this Builder snapshot.','bad');return;}const button=byId('armRangeTest');try{if(button)button.disabled=true;setRangeStatus('Taking the pre-test Activity History baseline…','warn');const capture=await armBuildTest({characterId:build.characterId,buildSnapshot:build,testDomain,calibrationType:testDomain==='pve'&&byId('shootingRangeCalibration')?.checked?'shooting-range':null,expectedActivity:selectedExpectedActivity()});refreshRangeCapture();showRangeOutput(capture);if(capture.baselineError)setRangeStatus(`ARMED, but Activity History baseline failed: ${capture.baselineError.message}`,'warn');}catch(error){setRangeStatus(error?.message||'Unable to arm Build Test.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null});}finally{if(button)button.disabled=!String(currentBuild()?.characterId||'').trim();}}
+async function pullRange(){const button=byId('pullRangeResults'),build=currentBuild(),capture=readCapture();if(!captureMatchesCharacter(capture,build?.characterId)){setRangeStatus(`Capture blocked: saved character ${capture?.characterId||'unknown'} does not match current Builder Guardian ${build?.characterId||'unknown'}.`,'bad');showRangeOutput({error:'Build Test Guardian mismatch.',code:'capture-character-mismatch',captureCharacterId:capture?.characterId||null,currentCharacterId:build?.characterId||null});return;}try{if(button)button.disabled=true;setRangeStatus('Pulling completed post-arm activities and candidate PGCRs…','warn');const result=await collectBuildTestResults({expectedCharacterId:build.characterId});refreshRangeCapture();showRangeOutput(result);if(!result.candidates?.length)setRangeStatus('No completed post-arm Bungie activity candidate was found.','warn');else if(result.candidateSelection?.requiresUserConfirmation)setRangeStatus(`${result.candidates.length} candidates found. Confirm the correct completed activity; Builder will not guess.`,'warn');else if(!result.evidenceSummary?.verifiedActivityPgcrCount)setRangeStatus('Candidates pulled, but none has complete activity-hash + PGCR proof.','warn');else setRangeStatus(`${result.evidenceSummary.verifiedActivityPgcrCount} activity result(s) loaded. Perk effects and uptime are estimates.`,'good');}catch(error){setRangeStatus(error?.message||'Unable to pull Build Test results.','bad');showRangeOutput({error:error?.message||String(error),code:error?.code||null,status:error?.status||null,url:error?.url||null,captureCharacterId:error?.captureCharacterId||null,currentCharacterId:error?.currentCharacterId||null});}finally{if(button)button.disabled=!captureMatchesCharacter(readCapture(),currentBuild()?.characterId);}}
 document.addEventListener('click',event=>{const activity=event.target.closest('[data-forge-activity]');if(activity){if(!activity.disabled)selectForgeActivity(activity.dataset.forgeActivity||'');return;}const recommendationElement=event.target.closest('[data-recommendation-element]');if(recommendationElement&&!recommendationElement.disabled){recommendationFailure='';weaponElementUserOverride=true;selectedRecommendationElement=recommendationElement.dataset.recommendationElement||'';renderRecommendationControls(currentBuild()||{});return;}const objective=event.target.closest('[data-build-objective]');if(objective&&!objective.disabled){recommendationFailure='';selectedRecommendationObjective=objective.dataset.buildObjective||'balanced';renderRecommendationControls(currentBuild()||{});return;}const artifactRecommend=event.target.closest('[data-artifact-recommend]');if(artifactRecommend){artifactRecommend.disabled=true;void refreshForgeArtifactRecommendation({force:true});return;}const candidate=event.target.closest('[data-confirm-instance]');if(candidate){try{const confirmed=confirmCandidateActivity(candidate.dataset.confirmInstance,{expectedCharacterId:currentBuild()?.characterId});refreshRangeCapture();showRangeOutput(confirmed);setRangeStatus(`COMPLETED ACTIVITY CONFIRMED · ${candidate.dataset.confirmInstance}`,'good');}catch(error){setRangeStatus(error?.message||'Unable to confirm this activity.','bad');}return;}const toggle=event.target.closest('[data-toggle-panel]');if(toggle){const panel=byId(toggle.dataset.togglePanel),expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));if(panel)panel.hidden=expanded;return;}const option=event.target.closest('[data-select-kind]');if(option){const kind=option.dataset.selectKind;stageSelection(kind,Number(option.dataset.selectIndex));if(kind!=='artifactPerks')queueMicrotask(()=>void refreshForgeArtifactRecommendation());}});
 document.addEventListener('click',event=>{
   const opener=event.target.closest('[data-open-manual-editor]');if(opener){void openManualEditor(opener.dataset.openManualEditor);return;}
@@ -1042,13 +1042,13 @@ async function initialiseBuildForge(){
     const initialVaultState=atomicTransfer||readState()||await restorePersistedBuildState();
     if(initialVaultState){const nextVaultState=atomicTransfer||applyPendingVaultSelection(initialVaultState),artifactResult=applyForgeArtifactRecommendation(nextVaultState);if(artifactResult.state!==initialVaultState)writeState(artifactResult.state);}
   }catch(error){
-    console.error('Build Forge could not complete the protected Forge Loader handoff. Rendering the existing Working Build instead.',error);
+    console.error('Builder could not complete the protected Forge Loader handoff. Rendering the existing Working Build instead.',error);
   }finally{
     initialisingBuild=false;
     if(pendingEquippedContext){const detail=pendingEquippedContext;pendingEquippedContext=null;recoverMissingBuild(detail);}
     render();
-    // Report the measured Forge Loader to Build Forge handoff (console only; nothing is shown on the page).
-    try{const raw=sessionStorage.getItem('astrix:forge-flow-timing:v1');if(raw){sessionStorage.removeItem('astrix:forge-flow-timing:v1');const flow=JSON.parse(raw),totalMs=Date.now()-Number(flow.clickedAt),marks=flow.marks||{};globalThis.FORGE_FLOW_TIMING={totalMs,marks,afterNavigateMs:totalMs-Number(marks.navigate||0)};console.info('[Forge flow] Forge Loader to Build Forge',globalThis.FORGE_FLOW_TIMING);}}catch{}
+    // Report the measured Forge Loader to Builder handoff (console only; nothing is shown on the page).
+    try{const raw=sessionStorage.getItem('astrix:forge-flow-timing:v1');if(raw){sessionStorage.removeItem('astrix:forge-flow-timing:v1');const flow=JSON.parse(raw),totalMs=Date.now()-Number(flow.clickedAt),marks=flow.marks||{};globalThis.FORGE_FLOW_TIMING={totalMs,marks,afterNavigateMs:totalMs-Number(marks.navigate||0)};console.info('[Forge flow] Forge Loader to Builder',globalThis.FORGE_FLOW_TIMING);}}catch{}
     const staged=currentBuild();if(new URLSearchParams(location.search).get('prewarm')==='forge-loader')scheduleForgePreparation(staged,{immediate:true});
     queueMicrotask(()=>void refreshForgeArtifactRecommendation());
   }

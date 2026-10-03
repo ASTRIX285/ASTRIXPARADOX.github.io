@@ -22,7 +22,7 @@ const PROFILE_DIR=outsideRepo(process.env.ASTRIX_PERF_PROFILE||DEFAULT_PROFILE_D
 const AUTH_HOST='auth.astrixparadox.com';
 export const TOOL_PAGES=[
   ['Home','/astrix-app/pages/home/'],['Journey','/astrix-app/pages/journey/'],['Character','/astrix-app/pages/guardian-workspace-v2/'],
-  ['Forge Loader','/astrix-app/pages/forge-loader/'],['Build Forge','/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'],
+  ['Forge Loader','/astrix-app/pages/forge-loader/'],['Builder','/astrix-app/pages/guardian-workspace-v2/paradox-build-space/'],
   ['Reports','/astrix-app/pages/reports/'],['Storage','/astrix-app/pages/vault/'],['Armoury','/astrix-app/pages/loadout/']
 ];
 export const PROFILES={

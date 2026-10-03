@@ -1,4 +1,4 @@
-// Miguel, 28 Sep 2026: Build Forge picked the same weapons whatever the
+// Miguel, 28 Sep 2026: Builder picked the same weapons whatever the
 // objective or activity, and replaced imported weapons with the same top
 // scorers. These cases pin the corrected weighting.
 import assert from 'node:assert/strict';

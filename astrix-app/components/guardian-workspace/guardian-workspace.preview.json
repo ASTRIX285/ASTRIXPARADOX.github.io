@@ -117,7 +117,7 @@
     },
     "gaps": ["This interface data cannot confirm live ownership or equipped state."],
     "recommendations": [
-      {"id":"preview-connect","title":"Connect Bungie for verified analysis","reason":"Live identity, inventory and activity state are required before Guardian Build Forge can make a personal recommendation.","tradeOff":"This view remains read only.","verified":true},
+      {"id":"preview-connect","title":"Connect Bungie for verified analysis","reason":"Live identity, inventory and activity state are required before The Forge can make a personal recommendation.","tradeOff":"This view remains read only.","verified":true},
       {"id":"preview-counter","title":"Counter coverage demonstration","reason":"The activity panel shows how missing encounter coverage will be surfaced.","tradeOff":"This is illustrative until live build data is connected.","verified":false},
       {"id":"preview-surge","title":"Element match demonstration","reason":"Void is shown matching the selected activity surge.","tradeOff":"No live activity has been selected.","verified":false}
     ]

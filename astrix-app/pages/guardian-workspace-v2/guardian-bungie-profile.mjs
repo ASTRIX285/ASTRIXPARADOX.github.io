@@ -4,8 +4,8 @@ import {getBungieSession} from "./guardian-bungie-auth.mjs?v=669819c723";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?v=c08ed347fe";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs?v=3cc08a9e69";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=2b4bbe609a";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=63e35a2244";
-import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs?v=875e9c1a7d";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=ead5c822c5";
+import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs?v=813c0b7d03";
 import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=764da1b8ed";
 import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=e21688a166";
 import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=b367ae7d9a';
@@ -20,7 +20,7 @@ import {
   cacheBungieLoadoutDetail,
   readCachedBungieLoadoutDetail,
   invalidateBungieLoadoutDetail
-} from "./guardian-session-cache.mjs?v=8cbc2b2658";
+} from "./guardian-session-cache.mjs?v=e8325e7602";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const SELECTION_RESOLUTION_VERSION=3; // Rebuild saved details classified from display text instead of the equipped hash.

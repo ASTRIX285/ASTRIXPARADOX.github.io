@@ -25,7 +25,7 @@ function modal(title,body,actions=''){
   wrap.id='astrixBetaModal';
   wrap.className='beta-modal-backdrop';
   wrap.innerHTML=`<section class="beta-modal" role="dialog" aria-modal="true" aria-label="${title}">
-    <header><div><small>GUARDIAN BUILD FORGE</small><h2>${title}</h2></div><button type="button" data-beta-close aria-label="Close">✕</button></header>
+    <header><div><small>THE FORGE</small><h2>${title}</h2></div><button type="button" data-beta-close aria-label="Close">✕</button></header>
     <div class="beta-modal-body">${body}</div>
     ${actions?`<footer>${actions}</footer>`:''}
   </section>`;

@@ -1,4 +1,4 @@
-// Test-only Warlock inventory for real-page browser tests (Character, Storage, Build Forge).
+// Test-only Warlock inventory for real-page browser tests (Character, Storage, Builder).
 // Item definitions are Bungie's own, from the beta manifest cache (PF-BETA-09 equipped loadout plus
 // other cached weapons, Warlock armour, Ghost, ship, Sparrow, emblem and artifact). Instance IDs,
 // counts, and the two marked test-only rows (a Postmaster material and a consumable stack, which the

@@ -59,7 +59,7 @@ try{
   assert.ok(Math.abs(geometry[1].x-geometry[0].x-geometry[0].width-4-22-6)<.1,'Prompt 21 exact strip pitch');
   const more=page.locator('[data-loadout-more="1"]');await more.click();await page.keyboard.press('Escape');await more.focus();await page.keyboard.press('Enter');
   const menu=page.getByRole('menu');await menu.waitFor();
-  assert.deepEqual(await menu.getByRole('menuitem').allTextContents(),['Loadout details','Equip','Edit in Build Forge','Save to Armoury','Overwrite with equipped gear','Clear slot 2']);
+  assert.deepEqual(await menu.getByRole('menuitem').allTextContents(),['Loadout details','Equip','Edit in Builder','Save to Armoury','Overwrite with equipped gear','Clear slot 2']);
   const anchor=await more.locator('..').boundingBox(),box=await menu.boundingBox();
   assert.ok(Math.min(Math.abs(box.y-(anchor.y+anchor.height)),Math.abs(box.y+box.height-anchor.y))<=8);
   assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=width&&box.y+box.height<=900);
@@ -70,7 +70,7 @@ try{
   assert.deepEqual(await dialog.getByRole('button').allTextContents(),['Equip','Cancel']);
   assert.equal(await dialog.locator('.guardian-loadout-confirm-gear img').count(),8);
   for(const size of await dialog.locator('.guardian-loadout-confirm-gear img').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().width)))assert.ok(Math.abs(size-slotSize)<=1);
-  assert.doesNotMatch(await dialog.innerText(),/membership|123|orbit|social space|readback|authoritative|verified|Build Forge/i);
+  assert.doesNotMatch(await dialog.innerText(),/membership|123|orbit|social space|readback|authoritative|verified|Builder/i);
   release={};await dialog.getByRole('button',{name:'Equip',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-loadout-confirm-action]')?.disabled);
   assert.equal(await page.locator('[data-loadout-slot="1"]').getAttribute('data-loadout-state'),'ready','No green status while request is pending');
   for(let attempt=0;!release.done&&attempt<300;attempt++)await new Promise(done=>setTimeout(done,10));assert.equal(typeof release.done,'function');release.done();release=null;

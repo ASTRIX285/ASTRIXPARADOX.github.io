@@ -3,7 +3,7 @@ import {getBungieSession} from './guardian-bungie-auth.mjs';
 import {stageBungieLoadoutAction,confirmBungieLoadoutAction,executeBungieLoadoutAction} from './guardian-live-actions.mjs';
 import {isSavedLoadout,loadoutStatus,loadoutGear,acceptedEquipment} from './guardian-loadout-status.mjs';
 import {transferFailureReason} from '../vault/vault-transfer-feedback.mjs';
-// Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
+// Builder renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
 // style lengths in the element's own pixels, so convert before positioning.
 const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};
 
@@ -48,7 +48,7 @@ function renderMenu(){
     if(!panel.open)panel.showModal();return;
   }
   const saved=isSaved(loadout);
-  const actions=[['view','Loadout details'],['equip','Equip'],['edit','Edit in Build Forge'],['save','Save to Armoury'],['snapshot','Overwrite with equipped gear'],['clear',`Clear slot ${index+1}`]];
+  const actions=[['view','Loadout details'],['equip','Equip'],['edit','Edit in Builder'],['save','Save to Armoury'],['snapshot','Overwrite with equipped gear'],['clear',`Clear slot ${index+1}`]];
   menu.innerHTML=actions.map(([value,label])=>`<button type="button" role="menuitem" tabindex="-1" data-loadout-menu-action="${value}" ${!saved&&value!=='snapshot'?'disabled':''} ${value==='clear'?'class="is-danger"':''}>${label}</button>`).join('');
   menu.hidden=false;trigger(index)?.setAttribute('aria-expanded','true');positionMenu();menu.querySelector('button:not(:disabled)')?.focus();
 }
