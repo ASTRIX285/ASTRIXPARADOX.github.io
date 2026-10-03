@@ -2,9 +2,10 @@
 // Guardian Home fresh facts (3 Oct 2026), with the fixture account (fixtures/home-facts-fixture.mjs).
 //   Engine: at least 25 templates; facts with missing or zero data never appear; every comparison
 //   equals the stat divided by its constant from the COMPARISONS table, rounded, between 1 and 100,000;
-//   no em or en dashes; one fact per group; five visits in a row never repeat the last two visits.
-//   Page (390 and 1600): three fact cards in the Home card style; NEW FACTS shuffles in three new
-//   ones; a reload never repeats the facts of the last two visits; missing-data facts never show.
+//   no em or en dashes; one fact per group; twelve visits in a row never repeat any of the last 5 visits;
+//   a player with only the basic summary still gets 3 facts every visit.
+//   Page (390 and 1600): three random fact cards in the Home card style on every visit, nothing to
+//   press; six reloads never repeat the facts of the last 5 visits; missing-data facts never show.
 // Prints a sample of 10 generated facts. Writes screenshots when HOME_RENDER_DIR is set (outside the repo).
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -12,7 +13,7 @@ import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {TEMPLATES,COMPARISONS,COMPARISON_MIN,COMPARISON_MAX,compare,buildFacts,pickFacts,readHistory,writeHistory,recentIds,factData} from '../pages/home/home-facts.mjs';
+import {TEMPLATES,COMPARISONS,COMPARISON_MIN,COMPARISON_MAX,compare,buildFacts,pickFacts,chooseForVisit,readHistory,writeHistory,factData,HISTORY_VISITS} from '../pages/home/home-facts.mjs';
 import {summary,historical,MISSING_FACTS} from './fixtures/home-facts-fixture.mjs';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
@@ -41,18 +42,26 @@ for(const [id,[amount,key,pattern]] of Object.entries(expected)){
 assert.equal(compare(1000,'wembleyCapacity'),null,'Below 1 is never shown');
 assert.equal(compare(1e12,'footballPitchMetres'),null,'Above 100,000 is never shown');
 assert.equal(compare(450,'marathonMinutes'),2,'Rounded');
-// Picking and history: three facts, one per group, never repeating the last two visits.
+// Picking and history: three facts, one per group, never repeating the last 5 visits.
+assert.equal(HISTORY_VISITS,5,'History covers 5 visits');
 const memory=new Map(),storage={getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v)};
 const visits=[];
-for(let visit=0;visit<6;visit++){
-  const chosen=pickFacts(facts,recentIds(readHistory('3:1',storage)));
+for(let visit=0;visit<12;visit++){
+  const chosen=chooseForVisit(facts,readHistory('3:1',storage));
   assert.equal(chosen.length,3,`visit ${visit+1}: three facts`);
   assert.equal(new Set(chosen.map(f=>f.group)).size,3,`visit ${visit+1}: one fact per group`);
-  for(const previous of visits.slice(-2))assert.ok(!chosen.some(f=>previous.includes(f.id)),`visit ${visit+1}: no repeat of the last two visits`);
+  for(const previous of visits.slice(-5))assert.ok(!chosen.some(f=>previous.includes(f.id)),`visit ${visit+1}: no repeat of the last 5 visits`);
   visits.push(chosen.map(f=>f.id));writeHistory('3:1',visits.at(-1),storage);
 }
 assert.equal(readHistory('3:1',{getItem(){throw new Error('blocked');}}).length,0,'Blocked storage still works');
-console.log(`HOME_FACTS_ENGINE=PASS ${TEMPLATES.length} templates, ${facts.length} facts from the fixture, comparisons match the table, missing data skipped, no repeats across six visits`);
+assert.equal(readHistory('3:1',storage).length,5,'Only the last 5 visits are kept');
+// A player with only the basic summary (no career stats read) still gets 3 facts on every visit.
+{
+  const few=buildFacts(summary,null),seen=[];
+  for(let visit=0;visit<8;visit++){const chosen=chooseForVisit(few,seen.slice(-5));assert.equal(chosen.length,3,`summary only, visit ${visit+1}: three facts`);seen.push(chosen.map(f=>f.id));}
+  for(let visit=1;visit<5;visit++)assert.ok(!seen[visit].some(id=>seen.slice(0,visit).flat().includes(id)),`summary only, visit ${visit+1}: no repeat within the first 5 visits`);
+}
+console.log(`HOME_FACTS_ENGINE=PASS ${TEMPLATES.length} templates, ${facts.length} facts from the fixture, comparisons match the table, missing data skipped, no repeat within 5 visits across twelve visits`);
 console.log('SAMPLE_FACTS:');for(const fact of pickFacts(facts,new Set(),10,(()=>{let s=7;return()=>(s=(s*16807)%2147483647)/2147483647;})()).concat(pickFacts(facts,new Set(),10,(()=>{let s=11;return()=>(s=(s*16807)%2147483647)/2147483647;})())).filter((f,i,a)=>a.findIndex(x=>x.id===f.id)===i).slice(0,10))console.log(`  ${fact.text}`);
 
 // Page.
@@ -82,28 +91,24 @@ try{
     });
     const shown=async()=>{await page.locator('#homeFactsList .home-fact').first().waitFor();return page.locator('#homeFactsList .home-fact').evaluateAll(nodes=>nodes.map(n=>n.dataset.fact));};
     const history=[];
-    for(let visit=0;visit<3;visit++){
+    for(let visit=0;visit<6;visit++){
       await page.goto(origin+'/astrix-app/pages/home/');
       const now=await shown();
       assert.equal(now.length,3,`${width} visit ${visit+1}: three facts`);
-      for(const previous of history.slice(-2))assert.ok(!now.some(id=>previous.includes(id)),`${width} visit ${visit+1}: no repeat of the last two visits`);
+      for(const previous of history.slice(-5))assert.ok(!now.some(id=>previous.includes(id)),`${width} visit ${visit+1}: no repeat of the last 5 visits`);
       assert.ok(!now.some(id=>MISSING_FACTS.includes(id)),`${width}: missing-data facts never show`);
       history.push(now);
     }
     // The cards match the Home card style.
     const style=await page.locator('#homeFactsList .home-fact').first().evaluate(n=>{const s=getComputedStyle(n),ref=getComputedStyle(document.querySelector('.home-card:not(.home-fact)'));return {clip:s.clipPath===ref.clipPath,bg:s.backgroundImage===ref.backgroundImage,shadow:s.boxShadow===ref.boxShadow};});
     assert.deepEqual(style,{clip:true,bg:true,shadow:true},`${width}: facts use the Home card style`);
-    assert.match(await page.locator('#homeFactsShuffle').evaluate(n=>getComputedStyle(n,'::after').animationName),/ax-stroke-pulse/,`${width}: NEW FACTS carries the strobe`);
-    // NEW FACTS shuffles in three different facts.
-    const before=await shown();
-    await page.locator('#homeFactsShuffle').click();
-    await page.waitForFunction(old=>{const now=[...document.querySelectorAll('#homeFactsList .home-fact')].map(n=>n.dataset.fact);return now.length===3&&!now.some(id=>old.includes(id));},before);
+    assert.equal(await page.locator('#homeFacts button').count(),0,`${width}: nothing to press, the facts change on their own`);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,`${width}: no sideways scroll`);
     if(shots)await page.locator('#homeFacts').screenshot({path:resolve(shots,`home-facts-${width}.png`)});
     assert.deepEqual(errors,[],`${width}: page errors`);
     await context.close();
   }
-  console.log('HOME_FACTS_PAGE=PASS 1600 and 390: three facts in Home cards, no repeat across three visits, NEW FACTS shuffles in three new ones, missing-data facts never shown');
+  console.log('HOME_FACTS_PAGE=PASS 1600 and 390: three facts in Home cards, random on every visit with nothing to press, no repeat of the last 5 visits across six reloads, missing-data facts never shown');
 }finally{
   await browser?.close();server.close();
 }

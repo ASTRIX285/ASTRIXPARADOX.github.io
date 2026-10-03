@@ -101,15 +101,26 @@ export function buildFacts(summary,historical){
   return TEMPLATES.flatMap(template=>{const made=template.make(data);return made?[{id:template.id,group:template.group,label:template.label,value:made.value,rest:made.rest,text:`${made.value}${made.rest}`}]:[];});
 }
 // Up to count facts, none from the excluded ids, at most one per group, in random order.
-export function pickFacts(facts,excluded=new Set(),count=3,random=Math.random){
+export function pickFacts(facts,excluded=new Set(),count=3,random=Math.random,{oneEachGroup=true}={}){
   const pool=facts.filter(fact=>!excluded.has(fact.id));
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   const chosen=[],groups=new Set();
-  for(const fact of pool){if(chosen.length>=count)break;if(groups.has(fact.group))continue;groups.add(fact.group);chosen.push(fact);}
+  for(const fact of pool){if(chosen.length>=count)break;if(oneEachGroup&&groups.has(fact.group))continue;groups.add(fact.group);chosen.push(fact);}
   return chosen;
 }
-// The fact ids shown on the last two visits (or shuffles), per account, in this browser only.
-const HISTORY_VISITS=2;
+// Miguel (3 Oct 2026): no fact comes back for at least 5 visits.
+// Three facts for this visit, none shown in the last 5 visits. Only when the player has too few facts
+// does it relax, in this order: allow two facts from one group, then let the oldest visit's facts back.
+export function chooseForVisit(facts,visits,count=3,random=Math.random){
+  for(let keep=visits.length;keep>=0;keep--){
+    const excluded=recentIds(visits.slice(visits.length-keep));
+    const strict=pickFacts(facts,excluded,count,random);if(strict.length>=count)return strict;
+    const loose=pickFacts(facts,excluded,count,random,{oneEachGroup:false});if(loose.length>=count)return loose;
+  }
+  return pickFacts(facts,new Set(),count,random,{oneEachGroup:false});
+}
+// The fact ids shown on the last 5 visits, per account, in this browser only.
+export const HISTORY_VISITS=5;
 const historyKey=account=>`astrix_home_facts_v1:${account}`;
 export function readHistory(account,storage=globalThis.localStorage){
   try{const visits=JSON.parse(storage?.getItem(historyKey(account))||'[]');return Array.isArray(visits)?visits.filter(Array.isArray).slice(-HISTORY_VISITS):[];}catch{return [];}

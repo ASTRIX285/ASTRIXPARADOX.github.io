@@ -1,6 +1,6 @@
 import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {abilityCopy,classLine,dailySeed,durationCopy,format,modeCopy,selfCopy,sinceCopy,timeCopy,weaponLine} from './home-copy.mjs';
-import {buildFacts,pickFacts,readHistory,recentIds,writeHistory} from './home-facts.mjs';
+import {buildFacts,chooseForVisit,readHistory,writeHistory} from './home-facts.mjs';
 
 const byId=id=>document.getElementById(id);
 const REQUEST_TIMEOUT_MS=15000;
@@ -104,13 +104,12 @@ function renderFacts(chosen){
   }));
   show('homeFacts',chosen.length>0);
 }
-// Three facts per visit, never one from the last two visits; NEW FACTS shuffles in three more.
+// Three random facts on every visit, none from the last 5 visits. Nothing to press.
 async function showFacts(summary,account){
   const facts=buildFacts(summary,await requestHistorical());
-  const next=()=>{const chosen=pickFacts(facts,recentIds(readHistory(account)));writeHistory(account,chosen.map(fact=>fact.id));renderFacts(chosen);return chosen;};
-  next();
-  const button=byId('homeFactsShuffle');
-  if(button)button.addEventListener('click',()=>{if(!next().length)renderFacts(pickFacts(facts));});
+  const chosen=chooseForVisit(facts,readHistory(account));
+  writeHistory(account,chosen.map(fact=>fact.id));
+  renderFacts(chosen);
 }
 
 // Warm the next pages' documents once Home is on screen. Never on data saver.
