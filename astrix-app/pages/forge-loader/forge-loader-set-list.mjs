@@ -1,4 +1,4 @@
-import {setBonusOptions} from './forge-loader-model.mjs?v=20260904-top-50-scan-1&plain=20260925-2';
+import {setBonusOptions} from './forge-loader-model.mjs';
 import {resolveArmourSet} from '../guardian-workspace-v2/guardian-armour-set-resolver.mjs';
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

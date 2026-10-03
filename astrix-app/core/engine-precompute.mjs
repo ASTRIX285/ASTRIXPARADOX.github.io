@@ -1,6 +1,6 @@
-import {graphFingerprint} from './bounded-json.mjs';
-import {armourStatVector} from '../pages/vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
-import {validateWeaponModel} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs?perf=20260927-1';
+import {graphFingerprint} from './bounded-json.mjs?v=3fb7642429';
+import {armourStatVector} from '../pages/vault/vault-armour-matcher.mjs?v=692ace7f00';
+import {validateWeaponModel} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs?v=2849ed8d35';
 
 // Worker-owned cache. The complete supplied inventory is the snapshot identity;
 // no TTL and no reuse across manifest, account, character, socket or stat changes.

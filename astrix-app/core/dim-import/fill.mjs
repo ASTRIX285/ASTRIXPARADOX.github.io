@@ -3,7 +3,7 @@
 // definitions or the user's item instances; nothing here is invented.
 import {ARMOUR_BUCKETS} from '../../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
 import {subclassCompatibilityEvidence} from '../../pages/guardian-workspace-v2/paradox-build-space/paradox-forge-intelligence.mjs';
-import {bungieArtwork} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {bungieArtwork} from '../../shared/loadout-details-model.mjs';
 const ITEM='DestinyInventoryItemDefinition';
 export const ARMOUR_SLOT_NAMES=Object.freeze({3448274439:'Helmet',3551918588:'Gauntlets',14239492:'Chest',20886954:'Legs',1585787867:'Class item'});
 // Armor 3.0 stat order as Destiny shows it.

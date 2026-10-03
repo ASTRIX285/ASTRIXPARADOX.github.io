@@ -58,14 +58,16 @@ assert.match(profileSource,/breakerDefinition:resolveWeaponBreakerTypeDefinition
 console.log('CHAMPION_OVERLAYS=PASS all '+Object.keys(WEAPON_TYPE_LABELS).length+' archetypes, three champion types, actual Praxic Blade definitions');
 console.log('MANIFEST_CHAMPION_COVERAGE='+JSON.stringify(audit));
 
-// A new named export must never be requested through the previous cached URL.
-const championModuleTag='20260924-champion-export-1';
+// A new named export must never be requested through a previous cached URL. Since the one-URL
+// change (3 Oct 2026) the version comes from module-versions.json: an import is plain (the import
+// map adds it) or, inside a worker graph, carries exactly that version.
+const championModuleTag=JSON.parse(readFileSync(new URL('../module-versions.json',import.meta.url),'utf8')).modules['/astrix-app/core/bungie-item-identity.mjs'];
 for(const path of [
   '../pages/guardian-workspace-v2/guardian-bungie-profile.mjs',
   '../pages/guardian-workspace-v2/guardian-manifest-service.mjs',
   '../pages/vault/vault-inventory.mjs'
 ]){
   const source=readFileSync(new URL(path,import.meta.url),'utf8');
-  const tags=[...source.matchAll(/bungie-item-identity\.mjs\?v=([^'"&]+)/g)].map(match=>match[1]);
-  assert.deepEqual(tags,[championModuleTag],`${path} must share the current champion export tag`);
+  const tags=[...source.matchAll(/bungie-item-identity\.mjs(\?[^'"]*)?['"]/g)].map(match=>match[1]||'');
+  assert.ok(tags.length&&tags.every(tag=>tag===''||tag===`?v=${championModuleTag}`),`${path} must load the champion export module under its one current URL`);
 }

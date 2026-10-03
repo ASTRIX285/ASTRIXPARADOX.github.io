@@ -1,5 +1,5 @@
-import {boundedStringify,jsonByteLength,MAX_JSON_BYTES,MAX_PREPARED_PAGE_BYTES} from '../../core/bounded-json.mjs';
-import {createActiveProfileRefresh,notifyProfileRefreshState} from '../../core/active-profile-refresh.mjs?v=20260927-active-profile-1';
+import {boundedStringify,jsonByteLength,MAX_JSON_BYTES,MAX_PREPARED_PAGE_BYTES} from '../../core/bounded-json.mjs?v=3fb7642429';
+import {createActiveProfileRefresh,notifyProfileRefreshState} from '../../core/active-profile-refresh.mjs?v=5006e8dadc';
 const SESSION_KEY="astrix:bungie-session-cache:v1";
 const PROFILE_MARKER_PREFIX="astrix:bungie-page-cache:v4:";
 const PROFILE_FALLBACK_PREFIX="astrix:bungie-page-cache-fallback:v4:";

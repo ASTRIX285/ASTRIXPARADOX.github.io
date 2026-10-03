@@ -1,4 +1,4 @@
-import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4";
+import {cacheBungieSession,readCachedBungieSession} from "./guardian-session-cache.mjs?v=8cbc2b2658";
 
 const AUTH_ORIGIN = globalThis.FORGE_AUTH_ORIGIN || "https://auth.astrixparadox.com";
 const CANONICAL_APP_ORIGIN = "https://astrixparadox.com";
@@ -285,7 +285,7 @@ if(typeof document!=='undefined'){
 installStyles();
 const control=makeControl();
 if(control) refreshAuthState(control);
-if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?plain=20260925-2&refresh=20260927-1&recovery=20260927-4&swr=20261002-1");
+if(new URLSearchParams(location.search).has("rangeTest")) import("./guardian-shooting-range-inline.mjs?v=d0f95ff0bd");
 
 }
 

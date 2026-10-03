@@ -41,7 +41,7 @@
     breachAbort=new AbortController();
     skinTimer=setTimeout(function(){chooseSkin('ring');},BREACH_READY_MS);
     var host=document.createElement('div');host.className='apx-breach-stage';host.setAttribute('aria-hidden','true');gate.insertBefore(host,gate.firstChild);
-    import(new URL('./astrix-breach-loader.mjs?v=20260929-shell-2',loaderScriptSrc).href)
+    import(new URL('./astrix-breach-loader.mjs',loaderScriptSrc).href)
       .then(function(module){
         if(skin||pendingDone||Date.now()>=deadline){chooseSkin('ring');return null;}
         return module.createBreach({host:host,logoUrl:LOGO,lowTier:(navigator.hardwareConcurrency||8)<=4,signal:breachAbort.signal});

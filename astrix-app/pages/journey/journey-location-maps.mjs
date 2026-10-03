@@ -1,6 +1,6 @@
 // Journey-owned interactive map registry and viewer.
-import {createJourneyMapExplorer} from './journey-map-explorer.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1&plain=20260925-2';
-import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1';
+import {createJourneyMapExplorer} from './journey-map-explorer.mjs';
+import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs';
 
 const destinationMap=(key,name)=>Object.freeze({
   src:`./assets/maps/${key}-director-map-4k.webp`,

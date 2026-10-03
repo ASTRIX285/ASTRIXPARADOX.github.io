@@ -1,5 +1,5 @@
-import {renderLoadoutIconLayout,renderLoadoutGridLayout,bindLoadoutIconDetails} from './loadout-icon-layout.mjs?v=20260927-adapt-1&grid=20261001-1';
-import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {renderLoadoutIconLayout,renderLoadoutGridLayout,bindLoadoutIconDetails} from './loadout-icon-layout.mjs';
+import {bungieArtwork} from './loadout-details-model.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const defaultActionRows=[['equip','Equip'],['prepare','Prepare equip'],['identifiers','Edit identifiers'],['save','Save to Armoury'],['share','Share'],['clear','Clear slot']];

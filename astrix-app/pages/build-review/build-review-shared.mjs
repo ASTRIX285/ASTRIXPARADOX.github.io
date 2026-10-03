@@ -1,8 +1,8 @@
 // Build Review step 1: the complete shared build. Pure HTML from the view model.
 // What came from the sharer and what Paradox picked from the user's gear are
 // always labelled apart. Anything unresolved shows its hash.
-import {TITLE_MATCH_LABEL,ARMOUR_SLOT_NAMES} from '../../core/dim-import/fill.mjs?fit=20261002-1';
-import {elementName} from './build-review-model.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
+import {TITLE_MATCH_LABEL,ARMOUR_SLOT_NAMES} from '../../core/dim-import/fill.mjs';
+import {elementName} from './build-review-model.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const NO_EXOTIC='This share pins no exotic armour.';

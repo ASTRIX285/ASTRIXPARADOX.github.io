@@ -221,7 +221,8 @@ const preparedClient=await readFile(new URL('core/prepared-page-client.mjs',root
 assert.match(preparedClient,/prepared\.forgeArmourIndex[\s\S]*?prepared\.collectibleDefinitions[\s\S]*?prepared\.loadoutCoverage/,'The shared client must join the streamed Loadout bundle');
 assert.match(preparedClient,/expandPreparedPlugLists\(account\.profile\)/,'The shared client must restore compact exact plug evidence before page rendering');
 for(const [path,source] of pageSources){
-  if(source.includes('prepared-page-client.mjs'))assert.match(source,/transport=20260911-compact-plugs-1/,`${path} must load the deployed prepared transport client instead of a stale browser cache entry`);
+  // The version now comes from module-versions.json through the import map (or a worker stamp).
+  if(source.includes('prepared-page-client.mjs'))assert.match(source,/prepared-page-client\.mjs(?:\?v=[0-9a-f]{10})?['"]/,`${path} must load the prepared transport client under its generated version`);
 }
 const browserEntries=await Promise.all([
   'pages/guardian-workspace-v2/index.html',
@@ -239,10 +240,12 @@ for(const [path,source] of browserEntries){
   if(path.includes("/tool-intro/"))continue;
   // PR #241 (ef57dff) refreshed the Character profile import; #243 and #268 extended that graph.
   const version=path==='pages/guardian-workspace-v2/guardian-workspace-v2.mjs'
-    ?/guardian-bungie-profile\.mjs\?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1/
+    ?/guardian-bungie-profile\.mjs(?:\?v=[0-9a-f]{10})?/
     // Local preview request: HTML pins the gate; its entry retains the exact live transport pin.
-    :path==='pages/journey/index.html'?/journey-entry\.mjs\?v=20260925-local-preview-1/
-    :/transport=20260911-compact-plugs-1/;
+    :path==='pages/journey/index.html'?/journey-entry\.mjs(?:\?v=[0-9a-f]{10})?/
+    // HTML entries carry their generated version from module-versions.json (one URL per module).
+    :path.endsWith('.html')?/\.mjs\?v=[0-9a-f]{10}"/
+    :/\.mjs(?:\?v=[0-9a-f]{10})?['"]/;
   assert.match(source,version,`${path} must invalidate the prior prepared page module graph`);
 }
 const journeyRuntime=pageSources.find(([path])=>path.includes('/journey/'))?.[1]||'';

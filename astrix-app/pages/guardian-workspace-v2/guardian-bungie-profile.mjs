@@ -1,18 +1,18 @@
-import {boundedStringify} from '../../core/bounded-json.mjs';
-import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&swr=20261002-1";
-import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?plain=20260925-2";
-import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs";
-import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1";
-import {guardianManifest} from "./guardian-manifest-service.mjs?v=20260913-character-safe-2&roll=20260909-apply-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4";
-import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs";
-import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=20260916-equipped-source-1";
-import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=20260916-equipped-source-1";
-import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
-import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
-import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=20260914-live-equipped-1';
-import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=20260906-page-data-recovery-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260919-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
+import {boundedStringify} from '../../core/bounded-json.mjs?v=3fb7642429';
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=07c0d11e6f';
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=669819c723";
+import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?v=c08ed347fe";
+import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs?v=3cc08a9e69";
+import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=2b4bbe609a";
+import {guardianManifest} from "./guardian-manifest-service.mjs?v=63e35a2244";
+import {createBuildState} from "./paradox-build-space/paradox-build-state.mjs?v=875e9c1a7d";
+import {createHandoffEnvelope,isEquippedSelection} from "./paradox-build-binding.mjs?v=764da1b8ed";
+import {mergeSubclassCatalog,SUBCLASSES} from "./guardian-super-catalog.mjs?v=e21688a166";
+import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWatermark,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=b367ae7d9a';
+import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs?v=11043b9a74';
+import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=29457982b9';
+import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=a5fcd4c480';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=7ca1a2d187';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,
@@ -20,7 +20,7 @@ import {
   cacheBungieLoadoutDetail,
   readCachedBungieLoadoutDetail,
   invalidateBungieLoadoutDetail
-} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4";
+} from "./guardian-session-cache.mjs?v=8cbc2b2658";
 
 const BUNGIE_ORIGIN="https://www.bungie.net";
 const SELECTION_RESOLUTION_VERSION=3; // Rebuild saved details classified from display text instead of the equipped hash.

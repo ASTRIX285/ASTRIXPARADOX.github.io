@@ -11,7 +11,7 @@
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
 
-  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2&refresh=20260927-1&logo=20261001-1&shell=20261001-mobile-1&inv=20261002-1&swr=20261002-1',location.href).href;
+  const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
@@ -62,16 +62,16 @@
     }finally{clearTimeout(timer);}
   }
   async function prepareData(destination){
-    const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
+    const {isJourneyPreview}=await import(new URL('./local-preview.mjs',scriptUrl).href);
     if(isJourneyPreview())return;
-    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1',scriptUrl).href);
+    const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
     if(destination.key==='reports'){
-      const {preloadReports}=await import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1&swr=20261002-1',scriptUrl).href);
+      const {preloadReports}=await import(new URL('./reports-preload.mjs',scriptUrl).href);
       await preloadReports(session);return;
     }
-    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&shell=20261001-mobile-1&swr=20261002-1',scriptUrl).href);
+    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs',scriptUrl).href);
     await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
   }
   function prepare(destination){
@@ -213,10 +213,10 @@
   }
 
   async function warmReports(session){
-    const {isJourneyPreview}=await import(new URL('./local-preview.mjs?v=20260925-local-preview-1',scriptUrl).href);
+    const {isJourneyPreview}=await import(new URL('./local-preview.mjs',scriptUrl).href);
     if(isJourneyPreview())return;
     if(!session?.authenticated)return;
-    void import(new URL('./reports-preload.mjs?v=20260925-reports-20c&refresh=20260927-1&swr=20261002-1',scriptUrl).href)
+    void import(new URL('./reports-preload.mjs',scriptUrl).href)
       .then(module=>module.preloadReports(session)).catch(()=>{});
   }
   window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));

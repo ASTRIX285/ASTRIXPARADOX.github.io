@@ -1,5 +1,5 @@
-import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=20260916-unique-artifact-picks-1&plain=20260925-2';
-import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=20260904-memory-safe-transfer-1';
+import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=fb01849b04';
+import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=875e9c1a7d';
 
 const clone=value=>{
   try{return structuredClone(value);}

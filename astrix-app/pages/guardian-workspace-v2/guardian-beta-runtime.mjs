@@ -5,7 +5,7 @@
    ========================================================================== */
 
 import {resolveItemWatermark} from '../../core/bungie-item-identity.mjs';
-import {characterScopedSelectionState} from './paradox-build-binding.mjs?v=20260913-character-isolation-1';
+import {characterScopedSelectionState} from './paradox-build-binding.mjs';
 
 const PLAYER_POWER_CAP = 550;
 const STAT_CAP = 200;

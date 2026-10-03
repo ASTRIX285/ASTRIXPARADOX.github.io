@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {moduleUrl} from './module-url.mjs';
 
 globalThis.CustomEvent=class CustomEvent{
   constructor(type,options={}){this.type=type;this.detail=options.detail;}
@@ -9,7 +10,7 @@ globalThis.document={documentElement:{dataset:{}},dispatchEvent:event=>{events.p
 globalThis.ForgeLoader={set(){},status(){}};
 
 const root=new URL('../',import.meta.url);
-const {PAGE_KINDS,PREPARED_PAGE_STAGES,WORKSPACE_PRELOAD_PAGES,normalizePreparedPagePayload,preloadPreparedWorkspace,requestPreparedPagePayload}=await import('../core/prepared-page-client.mjs');
+const {PAGE_KINDS,PREPARED_PAGE_STAGES,WORKSPACE_PRELOAD_PAGES,normalizePreparedPagePayload,preloadPreparedWorkspace,requestPreparedPagePayload}=await import(moduleUrl('../core/prepared-page-client.mjs',import.meta.url));
 
 assert.deepEqual(Object.values(PREPARED_PAGE_STAGES).map(row=>row.percent),[8,18,42,72,92,96]);
 assert.equal(PREPARED_PAGE_STAGES.request.label,'Loading prepared bulk manifest and Guardian data');
@@ -67,7 +68,7 @@ await assert.rejects(requestPreparedPagePayload('journey',{fetchImpl:async()=>ne
 await assert.rejects(requestPreparedPagePayload('journey',{fetchImpl:async()=>Response.json({error:'bungie_reauthentication_required'},{status:401})}),error=>error.status===401&&error.code==='bungie_reauthentication_required');
 
 // Ten fresh profiles, one public bundle download. Account rows never enter the bundle cache.
-const {readPreparedBundle}=await import('../core/prepared-bundle-cache.mjs');
+const {readPreparedBundle}=await import(moduleUrl('../core/prepared-bundle-cache.mjs',import.meta.url));
 const publicBundle={...envelope('journey').prepared,manifestVersion:'bundle-budget-v2',publicData:'x'.repeat(1024*1024)};
 let bundleDownloads=0;const warmBytes=[];
 for(let i=0;i<10;i++){
@@ -153,8 +154,8 @@ console.log('WORKER_STREAMING_PAGE_BUNDLE=PASS');
 console.log('BACKEND_PREPARED_WORKSPACE=PASS');
 
 // Synthetic browser storage: exercise warm navigation through the real client.
-const {loadPreparedPagePayload}=await import('../core/prepared-page-client.mjs');
-const {cacheBungieProfile}=await import('../pages/guardian-workspace-v2/guardian-session-cache.mjs');
+const {loadPreparedPagePayload}=await import(moduleUrl('../core/prepared-page-client.mjs',import.meta.url));
+const {cacheBungieProfile}=await import(moduleUrl('../pages/guardian-workspace-v2/guardian-session-cache.mjs',import.meta.url));
 const memoryStorage=()=>{const rows=new Map();return {getItem:key=>rows.get(key)||null,setItem:(key,value)=>rows.set(key,String(value)),removeItem:key=>rows.delete(key)};};
 globalThis.sessionStorage=memoryStorage();globalThis.localStorage=memoryStorage();
 const account={authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};

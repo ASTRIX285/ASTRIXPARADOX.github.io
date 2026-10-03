@@ -1,11 +1,11 @@
-import {watchDimContext} from './context.mjs?v=20260927-adapt-1&stack=20261002-1';
-import {DimShareClient,parseDimInput} from './share.mjs?v=20260927-fetch-3';
-import {ImportManifest,createImportStorage} from './cache.mjs?v=20260927-fetch-3';
-import {adaptDimLoadout} from './adapt.mjs?v=20260927-adapt-1&grid=20261001-1&fit=20261002-1';
-import {sendDimToForge} from './handoff.mjs?v=20260927-adapt-1&grid=20261001-1&fit=20261002-1';
-import {createDimActions} from './actions.mjs?v=20260927-adapt-1&grid=20261001-1&stack=20261002-1&fit=20261002-1';
-import {openLoadoutDetails} from '../../shared/loadout-details.mjs?v=20260927-loadout-details-1&grid=20261001-1';
-import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs?v=20260905-manual-editor-2&plain=20260925-2&stack=20261002-1';
+import {watchDimContext} from './context.mjs';
+import {DimShareClient,parseDimInput} from './share.mjs';
+import {ImportManifest,createImportStorage} from './cache.mjs';
+import {adaptDimLoadout} from './adapt.mjs';
+import {sendDimToForge} from './handoff.mjs';
+import {createDimActions} from './actions.mjs';
+import {openLoadoutDetails} from '../../shared/loadout-details.mjs';
+import {sessionBinding} from '../../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 const storage=createImportStorage(),shares=new DimShareClient({storage}),manifest=new ImportManifest({storage});
 let selectedCharacterId='',current=null,currentModel=null;
 function context(){
@@ -24,7 +24,7 @@ export async function importDimLoadout(input,{returnFocus}={}){
   const now=context(),active=sessionBinding(now.session);
   if(active.membershipId!==binding.membershipId||active.membershipType!==binding.membershipType)throw new Error('The account changed. Paste the link again.');
   const {model}=adaptDimLoadout(loadout,{snapshot,profile:now.profile,binding,preferredCharacterId:now.characterId,currentSeasonNumber:now.currentSeasonNumber});
-  const actions=createDimActions(model,{getContext:context,getSnapshot:()=>manifest.snapshot,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs?v=20260905-manual-editor-2&plain=20260925-2&refresh=20260927-1&limits=20260927-1&recovery=20260927-4&swr=20261002-1')).saveParadoxLoadout(value),send:sendDimToForge});
+  const actions=createDimActions(model,{getContext:context,getSnapshot:()=>manifest.snapshot,save:async value=>(await import('../../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs')).saveParadoxLoadout(value),send:sendDimToForge});
   current?.close();
   const disabledReasons={};if(!now.session.authenticated||!model.binding.characterId)for(const key of ['save','forge'])disabledReasons[key]='Connect Bungie and select a Guardian to use this action.';
   currentModel=model;

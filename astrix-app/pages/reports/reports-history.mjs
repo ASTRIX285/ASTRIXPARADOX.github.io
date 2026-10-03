@@ -1,5 +1,5 @@
-import {bungieImage,stat} from './reports-model.mjs?v=20260925-reports-20c';
-import {createReportsStore} from './reports-data.mjs?v=20260925-reports-20c';
+import {bungieImage,stat} from './reports-model.mjs';
+import {createReportsStore} from './reports-data.mjs';
 
 export const RUN_PAGE_SIZE=20;
 const completed=values=>{const value=stat(values,'completed');return value===1?true:value===0?false:null;};

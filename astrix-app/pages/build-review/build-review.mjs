@@ -2,20 +2,20 @@
 // Checkpoint 1 renders steps 1 and 2. Build Forge is not modified.
 import {DimShareClient} from '../../core/dim-import/share.mjs';
 import {ImportManifest,createImportStorage} from '../../core/dim-import/cache.mjs';
-import {adaptDimLoadout} from '../../core/dim-import/adapt.mjs?grid=20261001-1&fit=20261002-1';
-import {sendDimToForge} from '../../core/dim-import/handoff.mjs?grid=20261001-1&fit=20261002-1';
-import {runProfileTask} from '../../core/engine-profile-client.mjs?shell=20261001-mobile-1&swr=20261002-1';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?shell=20261001-mobile-1&swr=20261002-1';
-import {getBungieSession,authStartUrl} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?swr=20261002-1';
-import {sessionBinding} from '../guardian-workspace-v2/guardian-live-actions.mjs?stack=20261002-1';
-import {normalisePreparedPagePayload} from '../guardian-workspace-v2/guardian-bungie-profile.mjs?shell=20261001-mobile-1&swr=20261002-1';
+import {adaptDimLoadout} from '../../core/dim-import/adapt.mjs';
+import {sendDimToForge} from '../../core/dim-import/handoff.mjs';
+import {runProfileTask} from '../../core/engine-profile-client.mjs';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs';
+import {getBungieSession,authStartUrl} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
+import {sessionBinding} from '../guardian-workspace-v2/guardian-live-actions.mjs';
+import {normalisePreparedPagePayload} from '../guardian-workspace-v2/guardian-bungie-profile.mjs';
 import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {REVIEW_ACTIVITIES,REVIEW_OBJECTIVES,REVIEW_ELEMENTS,decodeReviewUrl,encodeReviewUrl,goalComplete} from './build-review-url.mjs';
-import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
-import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs?grid=20261001-1&stack=20261002-1&fit=20261002-1';
-import {renderSharedBuild} from './build-review-shared.mjs?fit=20261002-1';
-import {selectOwnedWeapons} from '../guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs?v=20260916-weapon-combinations-1&plain=20260925-2&perf=20260927-1&anchor=20260927-1';
+import {prepareReviewState,supportedElements,entryReadiness} from './build-review-pipeline.mjs';
+import {sharedBuildView,goalButtonLabel,goalSentence,elementReason,elementName} from './build-review-model.mjs';
+import {renderSharedBuild} from './build-review-shared.mjs';
+import {selectOwnedWeapons} from '../guardian-workspace-v2/paradox-build-space/paradox-loadout-intelligence.mjs';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 

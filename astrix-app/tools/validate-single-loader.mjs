@@ -8,6 +8,10 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const read=path=>readFileSync(resolve(root,path),'utf8');
 const portal='astrix-app/shared/astrix-portal-loader.js';
 const files=execFileSync('git',['ls-files','*.html'],{cwd:root,encoding:'utf8'}).trim().split('\n').filter(path=>!path.startsWith('ASTRIX285.github.io/'));
+// JS module versions come from module-versions.json (one URL per module, 3 Oct 2026).
+const breachUrl=`/astrix-app/shared/astrix-breach-loader.mjs?v=${JSON.parse(read('astrix-app/module-versions.json')).modules['/astrix-app/shared/astrix-breach-loader.mjs']}`;
+// The generated import map lists module paths only; it loads nothing by itself.
+const withoutImportMap=html=>html.replace(/<script type="importmap" data-module-versions>[\s\S]*?<\/script>/,'');
 const componentPattern=/<(?:div|section|main|aside|dialog|output)\b[^>]*(?:data-page-loader|(?:class|id)=["'][^"']*(?:apx-gate|apx-breach|forgeGenerationLoader|(?:[\w-]+-)?(?:loader|preloader|loading-gate|loading-screen|loading-overlay|splash))(?:\s|["']))/gi;
 function assertOneLoader(html,label){
  const controllers=[...html.matchAll(/<script\b[^>]*src=["'][^"']*astrix-portal-loader\.js[^"']*["']/g)].length;
@@ -15,8 +19,8 @@ function assertOneLoader(html,label){
  assert.equal(controllers,1,`${label}: must have exactly one portal controller`);
  assert.equal(extra,0,`${label}: additional loader component`);
  // A preload fetches bytes only. No executable breach entry point is allowed.
- const preload='<link rel="modulepreload" href="/astrix-app/shared/astrix-breach-loader.mjs?v=20260929-shell-2">';
- assert.doesNotMatch(html.replace(preload,''),/astrix-breach-loader|tool-intro-panel|apx-navigation-progress/,`${label}: retired loader`);
+ const preload=`<link rel="modulepreload" href="${breachUrl}">`;
+ assert.doesNotMatch(withoutImportMap(html).replace(preload,''),/astrix-breach-loader|tool-intro-panel|apx-navigation-progress/,`${label}: retired loader`);
 }
 function isTool(file){return file.startsWith('astrix-app/')&&!file.startsWith('astrix-app/pages/sign-in/');}
 function assertNoLoader(html,label){
@@ -32,7 +36,7 @@ for(const file of files){
   assertOneLoader(html,file);
   // The X entry skin needs no three.js (28 Sep 2026), so only its own module is preloaded.
   assert.doesNotMatch(html,/vendor\/three\/three\.module\.js/,`${file}: three.js is no longer preloaded`);
-  for(const url of ['/astrix-app/shared/astrix-breach-loader.mjs?v=20260929-shell-2']){
+  for(const url of [breachUrl]){
    const tag=`<link rel="modulepreload" href="${url}">`;
    assert.equal(html.split(tag).length-1,1,`${file}: exactly one local module preload`);
    assert.ok(html.indexOf(tag)<html.indexOf('astrix-portal-loader.js'),`${file}: preload before controller`);

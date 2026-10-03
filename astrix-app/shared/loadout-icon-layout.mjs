@@ -1,5 +1,5 @@
 import {WEAPON_BUCKETS,ARMOUR_BUCKETS} from '../pages/guardian-workspace-v2/guardian-perk-change-plan.mjs';
-import {bungieArtwork} from './loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {bungieArtwork} from './loadout-details-model.mjs';
 // Build Forge renders at CSS zoom 0.75 on desktop. Rects are in visual pixels,
 // style lengths in the element's own pixels, so convert before positioning.
 const cssZoomOf=node=>{const own=Number(node?.currentCSSZoom);if(own>0)return own;try{const root=parseFloat(getComputedStyle(document.documentElement).zoom);return root>0?root:1;}catch{return 1;}};

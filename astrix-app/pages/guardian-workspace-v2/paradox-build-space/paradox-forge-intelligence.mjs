@@ -1,4 +1,4 @@
-import {superDefinitionsFor} from '../guardian-super-catalog.mjs?v=20260911-evidence-isolation-1';
+import {superDefinitionsFor} from '../guardian-super-catalog.mjs?v=e21688a166';
 
 /* Deterministic Build Forge recommendation composer.
  *
