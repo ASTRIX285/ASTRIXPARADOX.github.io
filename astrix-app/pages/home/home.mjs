@@ -1,5 +1,6 @@
 import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {abilityCopy,classLine,dailySeed,durationCopy,format,modeCopy,selfCopy,sinceCopy,timeCopy,weaponLine} from './home-copy.mjs';
+import {buildFacts,chooseForVisit,readHistory,writeHistory} from './home-facts.mjs';
 
 const byId=id=>document.getElementById(id);
 const REQUEST_TIMEOUT_MS=15000;
@@ -85,6 +86,32 @@ async function requestSummary(){
   }finally{clearTimeout(timer);}
 }
 
+// Fresh facts: Bungie's account historical stats are one extra read; without them the facts use the summary only.
+async function requestHistorical(){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),REQUEST_TIMEOUT_MS);
+  try{
+    const response=await fetch(new URL('/bungie/historical-stats',AUTH_ORIGIN),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:controller.signal});
+    return response.ok?await response.json():null;
+  }catch{return null;}finally{clearTimeout(timer);}
+}
+function renderFacts(chosen){
+  const list=byId('homeFactsList');if(!list)return;
+  list.replaceChildren(...chosen.map(fact=>{
+    const card=el('article','home-card home-fact');card.dataset.fact=fact.id;
+    const text=el('p','home-fact-text');text.append(el('strong',null,fact.value),document.createTextNode(fact.rest.replace(/^[.,]?\s*/,'')));
+    card.append(el('span','home-label',fact.label),text);
+    return card;
+  }));
+  show('homeFacts',chosen.length>0);
+}
+// Three random facts on every visit, none from the last 5 visits. Nothing to press.
+async function showFacts(summary,account){
+  const facts=buildFacts(summary,await requestHistorical());
+  const chosen=chooseForVisit(facts,readHistory(account));
+  writeHistory(account,chosen.map(fact=>fact.id));
+  renderFacts(chosen);
+}
+
 // Warm the next pages' documents once Home is on screen. Never on data saver.
 function prepareNextPages(){
   if(navigator.connection?.saveData||document.visibilityState!=='visible')return;
@@ -162,7 +189,9 @@ async function init(){
     const result=await requestSummary();
     if(result.signedOut){signedOut();return;}
     const membership=session.activeDestinyMembership||{};
-    render(result.summary,dailySeed(`${membership.membershipType}:${membership.membershipId}`));
+    const account=`${membership.membershipType}:${membership.membershipId}`;
+    render(result.summary,dailySeed(account));
+    void showFacts(result.summary,account);
     globalThis.ForgeLoader?.done?.();
     prepareNextPages();
     prepareJourney(session);

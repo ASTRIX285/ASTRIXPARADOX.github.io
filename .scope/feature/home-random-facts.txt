@@ -1,0 +1,7 @@
+astrix-app/module-versions.json
+astrix-app/pages/home/home-facts.mjs
+astrix-app/pages/home/home.css
+astrix-app/pages/home/home.mjs
+astrix-app/pages/home/index.html
+astrix-app/tools/fixtures/home-facts-fixture.mjs
+astrix-app/tools/test-home-facts.mjs
