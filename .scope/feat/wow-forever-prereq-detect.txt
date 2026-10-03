@@ -1,0 +1,6 @@
+# WoW Forever: prove Talent.PrereqRank base from data, upload source tables for review
+.github/workflows/refresh-wow-forever-data.yml
+astrix-app/games/wow-forever/pipeline/build-forever-db.mjs
+astrix-app/games/wow-forever/pipeline/forever-sources.json
+astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs
+astrix-app/module-versions.json

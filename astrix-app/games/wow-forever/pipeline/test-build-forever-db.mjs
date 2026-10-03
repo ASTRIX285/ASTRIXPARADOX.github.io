@@ -104,9 +104,32 @@ await test('missing column becomes pending with the columns it tried', async () 
   assert.equal(d.manifest.pendingCounts['item.itemLevel'], 1);
 });
 
-await test('talents refuse to build until prereqRankBase is verified', async () => {
-  const tables = await loadAll();
-  assert.throws(() => buildDatabase(tables, { ...sources, prereqRankBase: null }), /prereqRankBase/);
+await test('prereq rank base is proven from the data, recorded, and checked against config', async () => {
+  const head = 'ID,TabID,TierID,ColumnIndex,SpellRank_0,SpellRank_1,SpellRank_2,PrereqTalent_0,PrereqRank_0\n';
+  const base = '900601,900501,0,1,900401,900403,0,0,0\n';
+  const zero = head + base + '900602,900501,1,1,900404,0,0,900601,0\n';
+  const one = head + base + '900602,900501,1,1,900404,0,0,900601,2\n';
+  const both = zero + '900603,900501,2,1,900404,0,0,900601,2\n';
+  const silent = head + base + '900602,900501,1,1,900404,0,0,900601,1\n';
+  const bad = head + base + '900602,900501,1,1,900404,0,0,900601,3\n';
+  const run = async (talentCsv, prereqRankBase) => buildDatabase(await loadAll({ Talent: talentCsv }), { ...sources, prereqRankBase });
+
+  const z = await run(zero, null);
+  assert.equal(z.manifest.prereqRankBase.value, 0);
+  assert.equal(z.manifest.prereqRankBase.method, 'detected');
+  assert.deepEqual(z.manifest.prereqRankBase.examples[0], { talentId: 900602, prereqTalentId: 900601, prereqRankValue: 0, prereqMaxRank: 2 });
+  assert.deepEqual(z.talentTrees[0].talents[1].prerequisites, [{ talentId: 900601, rank: 1 }]);
+
+  const o = await run(one, null);
+  assert.equal(o.manifest.prereqRankBase.value, 1);
+  assert.deepEqual(o.talentTrees[0].talents[1].prerequisites, [{ talentId: 900601, rank: 2 }]);
+
+  assert.equal((await run(zero, 0)).manifest.prereqRankBase.method, 'configured and confirmed by data');
+  await assert.rejects(run(zero, 1), /data proves 0/);
+  await assert.rejects(run(both, null), /conflicts/);
+  await assert.rejects(run(bad, null), /outside any rank range/);
+  await assert.rejects(run(silent, null), /cannot be proven/);
+  assert.equal((await run(silent, 0)).manifest.prereqRankBase.method, 'configured by hand, data silent');
 });
 
 await test('header drift is reported both ways', async () => {
