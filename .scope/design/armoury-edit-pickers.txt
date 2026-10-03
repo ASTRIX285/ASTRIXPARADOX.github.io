@@ -1,4 +1,5 @@
 astrix-app/module-versions.json
+astrix-app/pages/build-fit/index.html
 astrix-app/pages/forge-loader/forge-loader.mjs
 astrix-app/pages/forge-loader/index.html
 astrix-app/pages/guardian-workspace-v2/guardian-advisor-layer.mjs
