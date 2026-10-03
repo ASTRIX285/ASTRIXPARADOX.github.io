@@ -143,7 +143,7 @@
   background:
     linear-gradient(to right, transparent 45%, #080808 100%),
     linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent 55%),
-    var(--platform-art, url('../img/games/D2_JB.jpg')) center / cover no-repeat;
+    var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
 }
 
 .platform-copy {
@@ -412,7 +412,7 @@ body.tools-mission-open {
     background:
       linear-gradient(to top, #080808 0%, transparent 45%),
       linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 70%),
-      var(--platform-art, url('../img/games/D2_JB.jpg')) center / cover no-repeat;
+      var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
   }
 }
 
