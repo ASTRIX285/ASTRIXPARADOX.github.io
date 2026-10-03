@@ -16,6 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Game folder contract self-test
+        run: node astrix-app/tools/test-game-folders.mjs
+      - name: Game folder contract
+        run: node astrix-app/tools/validate-game-folders.mjs
       - name: Division gate self-test
         run: node astrix-app/tools/test-division-validator.mjs
       - name: Division gate

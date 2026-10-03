@@ -1,0 +1,14 @@
+# chore/game-folder-contract: shared game-folder layout, provenance and pending contracts.
+.github/workflows/validate-division.yml
+astrix-app/ARCHITECTURE-GATES.md
+astrix-app/games/division/README.md
+astrix-app/games/division/docs/SCOPE.md
+astrix-app/games/division/index.mjs
+astrix-app/module-versions.json
+astrix-app/platform/contracts/pending.schema.json
+astrix-app/platform/contracts/provenance.schema.json
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-division-validator.mjs
+astrix-app/tools/test-game-folders.mjs
+astrix-app/tools/validate-division.mjs
+astrix-app/tools/validate-game-folders.mjs

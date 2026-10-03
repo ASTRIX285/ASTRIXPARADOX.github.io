@@ -65,12 +65,23 @@ The prototype may display neutral placeholder cards and labels, but it must not 
 Applies to the Division WorkBench (`astrix-app/games/division/` and `astrix-app/platform/adapters/division/`). Added 3 October 2026, before any Division feature code.
 
 1. No hardcoded item tables in engine, adapter or UI code. All game data comes from catalogue files through the schema loader.
-2. Every catalogue entry carries `source` (an http(s) URL to an official source) and `gameVersion`. An entry that cannot be sourced yet is marked `"status": "pending"` with a `missing` list, never filled with a guess.
+2. Every catalogue record carries a `provenance` block from the shared contract (`astrix-app/platform/contracts/provenance.schema.json`). Division accepts two kinds: `official-post` (url, gameVersion, retrievedOn) and `in-game-capture` (capturedBy, capturedOn, gameVersion, where, note; only the value is committed, never a screenshot). `client-data` is rejected for Division because it would mean datamined values. A field with no source yet is `{ "pending": true, "reason": "..." }` (`pending.schema.json`), never a guess. A record can be partly pending.
 3. Engine code lives in `games/division/engine/` and never forks per title. Title folders (`td2/`, later `td3/`) hold `data/` and `assets/` only.
 4. Every image under `games/division/*/assets/` appears in that folder's `manifest.json` with `"useAllowed": "yes"` and `"approvedByMiguel": true`. No image is committed until Ubisoft's fan content terms are confirmed.
 5. No Ubisoft sign-in, session token capture, scraping of authenticated services or private endpoints. The Ubisoft adapter stays a stub until Ubisoft gives authorised access.
 
 Enforced by `astrix-app/tools/validate-division.mjs` and its self-test `test-division-validator.mjs`, run on every PR by `.github/workflows/validate-division.yml`.
+
+## Game folder contract
+
+Applies to every folder under `astrix-app/games/`. Added 3 October 2026.
+
+1. Each game folder has `index.mjs` (a module that passes `platform/contracts/game-module.mjs`), `schema/`, `docs/SCOPE.md` and `README.md`.
+2. Data lives in `data/` for a single-title game, or `<title>/data/` for a multi-title game (Division: `td2/data/`). Schemas live in `schema/`, never in a data folder.
+3. Every data record has a valid provenance block (`platform/contracts/provenance.schema.json`): `official-post`, `in-game-capture` or `client-data`. Every pending field is `{ "pending": true, "reason": "..." }` (`platform/contracts/pending.schema.json`).
+4. A game that can't meet a rule yet is listed by name and rule in `EXEMPTIONS` in `astrix-app/tools/validate-game-folders.mjs`, with a reason. An exemption that is no longer needed fails the check, so it gets removed.
+
+Enforced by `astrix-app/tools/validate-game-folders.mjs` and its self-test `test-game-folders.mjs`, run inside `paradox-validator.mjs` and by `.github/workflows/validate-division.yml`.
 
 ## Next implementation sequence
 

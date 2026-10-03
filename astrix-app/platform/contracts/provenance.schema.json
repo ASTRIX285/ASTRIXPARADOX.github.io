@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/platform/contracts/provenance.schema.json",
+  "title": "Provenance",
+  "description": "Where a game data record came from. Every record in every game folder carries one (or a non-empty array of them). Enforced by astrix-app/tools/validate-game-folders.mjs.",
+  "oneOf": [
+    { "$ref": "#/$defs/source" },
+    { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } }
+  ],
+  "$defs": {
+    "source": {
+      "oneOf": [
+        { "$ref": "#/$defs/officialPost" },
+        { "$ref": "#/$defs/inGameCapture" },
+        { "$ref": "#/$defs/clientData" }
+      ]
+    },
+    "officialPost": {
+      "title": "Official post",
+      "description": "A publisher or developer post: patch notes, news, developer blog, official forum.",
+      "type": "object",
+      "required": ["kind", "url", "gameVersion", "retrievedOn"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "official-post" },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "gameVersion": { "type": "string", "minLength": 1 },
+        "retrievedOn": { "type": "string", "format": "date" },
+        "quote": { "type": "string", "minLength": 1, "description": "Optional exact wording from the post." }
+      }
+    },
+    "inGameCapture": {
+      "title": "In-game capture",
+      "description": "A value read in game by a named person. Only the value is committed. No image is stored or committed.",
+      "type": "object",
+      "required": ["kind", "capturedBy", "capturedOn", "gameVersion", "where", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "in-game-capture" },
+        "capturedBy": { "type": "string", "minLength": 1 },
+        "capturedOn": { "type": "string", "format": "date" },
+        "gameVersion": { "type": "string", "minLength": 1 },
+        "where": { "type": "string", "minLength": 1, "description": "The in-game screen the value was read from." },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "clientData": {
+      "title": "Client data",
+      "description": "A row from a published client data table, as the WoW Forever pipeline records it today. kind is optional so existing records stay valid.",
+      "type": "object",
+      "required": ["product", "build", "table", "rowId", "sourceSha256"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "client-data" },
+        "product": { "type": "string", "minLength": 1 },
+        "build": { "type": "string", "minLength": 1 },
+        "table": { "type": "string", "minLength": 1 },
+        "rowId": { "type": "integer" },
+        "sourceSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}
