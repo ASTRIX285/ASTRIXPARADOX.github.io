@@ -122,7 +122,8 @@
 .ae-choices.ae-icon-grid.is-gear{grid-template-columns:repeat(auto-fill,calc(var(--ae-tile) + 8px))}
 .ae-choices.ae-icon-grid>li{display:block}
 .ae-choices.ae-icon-grid .ae-choice{display:block;width:calc(var(--ae-tile) + 8px);height:calc(var(--ae-tile) + 8px);min-height:0;padding:0}
-.ae-choices.ae-icon-grid .ae-choice .vault-transfer-item{width:100%;height:100%}
+/* The shell clips item tiles to the notch; an inline wrapper has no box to clip to and would hide the art. */
+.ae-choices.ae-icon-grid .ae-choice .vault-transfer-item{display:block;width:100%;height:100%}
 /* Abilities, Aspects and Fragments: the same size as the slot buttons, compact over about two rows. */
 .ae-picker:not(.is-card) .ae-choices.ae-icon-grid:not(.is-gear){max-height:calc(2 * var(--ae-tile) + 8px + 12px)}
 .ae-picker.is-card .ae-card{display:grid;gap:12px;overflow:auto;min-height:0}
@@ -139,6 +140,11 @@
 .ae-artifact-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(var(--ae-tile),max-content);gap:12px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
 .ae-artifact-column{display:grid;gap:8px;align-content:start;justify-items:center}
 .ae-artifact-column h4{margin:0;font:700 11px/1.2 var(--ax-font-head);letter-spacing:.08em;color:var(--ax-muted);white-space:nowrap}
+/* Every tier fits the panel (no sideways scroll): columns share the width and tiles scale down to fit. */
+.ae-panel-artifact .ae-artifact-grid{grid-auto-columns:minmax(0,1fr);gap:6px;overflow-x:visible}
+.ae-panel-artifact .ae-artifact-column .ae-tile{width:100%;max-width:var(--ae-tile);height:auto;aspect-ratio:1/1;min-width:0;min-height:0}
+.ae-panel-artifact .ae-artifact-column h4{display:grid;justify-items:center;gap:2px;white-space:nowrap;font-size:10px;letter-spacing:.02em}
+.ae-panel-artifact .ae-artifact-column h4 .ae-count{display:block;margin:0}
 @media (max-width:720px){
   /* Phone: pickers as bottom sheets. */
   .ae-picker{inset:auto 0 0 0;max-height:82vh;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--ax-line-strong)}

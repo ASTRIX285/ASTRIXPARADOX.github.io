@@ -1,3 +1,4 @@
+astrix-app/module-versions.json
 astrix-app/pages/forge-loader/forge-loader.mjs
 astrix-app/pages/forge-loader/index.html
 astrix-app/pages/guardian-workspace-v2/guardian-advisor-layer.mjs
@@ -16,5 +17,5 @@ astrix-app/pages/vault/index.html
 astrix-app/pages/vault/vault.mjs
 astrix-app/tools/test-armoury-editor.mjs
 astrix-app/tools/test-armoury-pickers.mjs
+astrix-app/tools/test-armoury-render.mjs
 astrix-app/tools/validate-main-page-today.mjs
-astrix-app/module-versions.json
