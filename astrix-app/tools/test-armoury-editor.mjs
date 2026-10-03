@@ -23,7 +23,7 @@ const catalogue=[
   ...startWeapons.filter(Boolean),weapon(1,{id:211}),weapon(1,{id:212,exotic:true}),weapon(0,{id:213}),
   {...weapon(1,{id:214}),source:{kind:'carried',characterId:'other-guardian'}}
 ];
-const artifact={availabilityModel:'artifact-2-socket-buckets',selectionLimit:3,selectionSlots:[{tierIndex:0,capacity:2},{tierIndex:1,capacity:1}],
+const artifact={hash:880,name:'Synthetic Artifact',availabilityModel:'artifact-2-socket-buckets',selectionLimit:3,selectionSlots:[{tierIndex:0,capacity:2},{tierIndex:1,capacity:1}],
   perks:[{hash:801,name:'Perk A',tierIndex:0},{hash:802,name:'Perk B',tierIndex:0},{hash:803,name:'Perk C',tierIndex:0},{hash:804,name:'Perk D',tierIndex:1},{hash:805,name:'Locked perk',tierIndex:1,tierUnlocked:false}]};
 const aspect=(hash,slots,socketIndex)=>({hash,name:`Aspect ${hash}`,fragmentSlots:slots,socketIndex,canInsert:true});
 const fragment=(hash,socketIndex)=>({hash,name:`Fragment ${hash}`,socketIndex,canInsert:true});
@@ -33,7 +33,8 @@ const subclass={itemInstanceId:'300',hash:300,name:'Synthetic subclass',subclass
   fragmentOptionsBySocket:Object.fromEntries([7,8,9,10,11].map(index=>[index,[fragment(970,index),fragment(971,index),fragment(972,index)]]))}};
 const record={id:'saved-1',name:'Saved one',description:'Notes',binding,revision:4,build:{...binding,weapons:startWeapons,armour:startArmour,subclassItem:subclass,subclassItemInstanceId:'300',subclassName:'Synthetic subclass',
   subclassBuild:{super:{hash:901,name:'Super A',socketIndex:0},aspects:[aspect(950,2,5),{hash:EMPTY_PLUG_HASH,socketIndex:6}],fragments:[fragment(970,7),null]},artifactConfiguration:{selectedPerkHashes:[801]}}};
-const make=()=>createArmouryEditor({record,catalogue,subclasses:[subclass],artifact});
+const otherArtifact={hash:881,name:'Other Artifact',availabilityModel:'artifact-2-socket-buckets',selectionLimit:2,selectionSlots:[{tierIndex:0,capacity:2}],perks:[{hash:861,name:'Other perk X',tierIndex:0},{hash:862,name:'Other perk Y',tierIndex:0}]};
+const make=()=>createArmouryEditor({record,catalogue,subclasses:[subclass],artifact,artifacts:[artifact,otherArtifact]});
 
 // Layout: name and notes on top, five panels, footer buttons, empty tiles are clickable.
 {
@@ -121,11 +122,22 @@ const make=()=>createArmouryEditor({record,catalogue,subclasses:[subclass],artif
 {
   const editor=make();
   assert.match(editor.html(),/ARTIFACT<span class="ae-count">1\/3<\/span>/,'Counter uses the Artifact selection limit from data');
-  assert.doesNotMatch(editor.html(),/Locked perk/,'Locked perks are not offered');
+  // 3 Oct 2026: step 1 picks the artifact, step 2 is that artifact's own perk grid by tier.
+  assert.match(editor.html(),/TIER 1[\s\S]*TIER 2/,'Perks sit in the artifact\'s tier columns');
+  assert.match(editor.html(),/class="ae-tile ae-plug ae-tip is-locked"[^>]*data-name="Locked perk"[^>]*disabled/,'A locked perk shows in its column but cannot be chosen');
+  assert.doesNotMatch(editor.html(),/Other perk/,'Only the chosen artifact\'s perks are offered');
+  assert.doesNotMatch(editor.html(),/ae-choices/,'No flat list of every artifact mod');
   assert.ok(editor.toggleArtifact(1));assert.match(editor.html(),/2\/3/);
   assert.ok(editor.toggleArtifact(3));assert.match(editor.html(),/3\/3/);
   assert.equal(editor.toggleArtifact(4),false,'A locked perk cannot be chosen');
-  console.log('ARMOURY_EDITOR_ARTIFACT=PASS unlocked perks, n/limit from data, limits');
+  // Step 1 again: the owned artifacts as icons; picking another opens its own perks only.
+  assert.ok(editor.open('artifact'));
+  assert.deepEqual(editor.pickerOptions().map(row=>row.item.hash),[880,881]);
+  assert.doesNotMatch(editor.html(),/ae-choice-name/,'Picker tiles carry no visible name text');
+  editor.handle({dataset:{edPreview:'1'}});assert.match(editor.html(),/Other Artifact[\s\S]*SELECT/,'Clicking a tile opens its card with Select');
+  assert.ok(editor.pick(1));
+  const chosenHtml=editor.html();assert.match(chosenHtml,/Other perk X/);assert.doesNotMatch(chosenHtml,/data-name="Perk A"/);assert.match(chosenHtml,/ARTIFACT<span class="ae-count">0\/2<\/span>/);
+  console.log('ARMOURY_EDITOR_ARTIFACT=PASS step 1 owned artifacts, step 2 its own tier grid only, locked perks disabled, n/limit from data, limits');
 }
 
 // Subclass: tiles, click to swap, Fragment slots follow the Aspects.
@@ -133,7 +145,7 @@ const make=()=>createArmouryEditor({record,catalogue,subclasses:[subclass],artif
   const editor=make();
   assert.equal(fragmentSlotLimit(editor.record.build.subclassBuild),2);
   assert.match(editor.html(),/FRAGMENTS<span class="ae-count">1\/2<\/span>/);
-  assert.equal((editor.html().match(/ is-locked"/g)||[]).length,3,'Sockets beyond the Aspect total are locked');
+  assert.equal((editor.html().split('<h4>FRAGMENTS')[1].split('</section>')[0].match(/ is-locked"/g)||[]).length,3,'Sockets beyond the Aspect total are locked');
   editor.open('subclass-socket:aspects:6');
   assert.ok(editor.pick(editor.pickerOptions().findIndex(row=>row.item.hash===951)));
   assert.equal(fragmentSlotLimit(editor.record.build.subclassBuild),5,'Fragment slots grow with the new Aspect');
@@ -165,7 +177,7 @@ const make=()=>createArmouryEditor({record,catalogue,subclasses:[subclass],artif
 {
   const broken=createArmouryEditor({record:{...record,build:{...binding,weapons:[null,null,null],armour:[null,{...startArmour[1],armourModOptions:{0:[null,generalOptions[0]]},socketCoverage:{plugs:[null,{hash:EMPTY_PLUG_HASH,socketIndex:0}]}},null,null,null],subclassBuild:null}},catalogue:[],subclasses:[],artifact:null});
   const html=broken.html();
-  assert.match(html,/Artifact perks are unavailable/);
+  assert.match(html,/No artifact on this account in the Bungie data/);
   assert.match(html,/aria-label="ARMS mod 1: Empty mod socket"/);
   broken.open('weapon:0');assert.match(broken.html(),/You own nothing else for this slot/);
   console.log('ARMOURY_EDITOR_EMPTY=PASS empty slots, null sockets and missing data render without errors');

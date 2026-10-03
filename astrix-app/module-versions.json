@@ -260,7 +260,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs": "adbd076673",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "749510b260",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "751bcc79b3",
 
   "/astrix-app/pages/guardian-workspace-v2/platform-forge-shell.mjs": "44195c60d1",
 
@@ -312,9 +312,9 @@
 
   "/astrix-app/pages/journey/journey.mjs": "8b19ca1433",
 
-  "/astrix-app/pages/loadout/armoury-editor.mjs": "dab07b1fe8",
+  "/astrix-app/pages/loadout/armoury-editor.mjs": "bada689998",
 
-  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "470174faed",
+  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "7e8181c548",
 
   "/astrix-app/pages/mission-reports/mission-reports-data.mjs": "1ccdc76bca",
 
