@@ -3,7 +3,8 @@ export function transferFailureReason(error){
   const message=String(error||'');
   if(/vault.*(?:full|capacity)|(?:full|capacity).*vault/i.test(message))return 'Vault full';
   if(/equipped|must.*unequip/i.test(message))return 'Item is equipped';
-  if(/full|capacity|no (?:room|space)/i.test(message))return 'Inventory full';
+  if(/full|capacity|no (?:item )?(?:room|space|slots?)/i.test(message))return 'Inventory full';
+  if(/did not confirm the move in time/i.test(message))return 'Bungie did not confirm in time';
   if(/unavailable|maintenance|network|fetch|timeout|timed out|service|throttl/i.test(message))return 'Bungie unavailable';
   return 'Transfer failed';
 }

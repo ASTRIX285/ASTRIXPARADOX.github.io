@@ -6,7 +6,7 @@ import {
   characterRoster,
   selectLiveCharacter
 } from "./guardian-bungie-profile.mjs?v=20260916-equipped-source-1&subclass=20260916-hash-1&navigation=20260919-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&limits=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1";
-import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&recovery=20260927-4&grid=20261001-1&bf=20261002-1&stack=20261002-1&swr=20261002-1";
+import { renderGuardianLoadouts } from "./guardian-loadouts.mjs?v=20260905-loadout-actions-1&menu=20260925-1&plain=20260925-2&refresh=20260927-1&details=20260927-1&recovery=20260927-4&grid=20261001-1&bf=20261002-1&stack=20261002-1&swr=20261002-1&xfer=20261003-1";
 import {renderEquippedSubclass,renderSuperFormation} from "./guardian-super-formation.mjs?v=20260916-equipped-source-1";
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&swr=20261002-1";
 import {bindParadoxItemInspect} from "./paradox-item-hover.mjs?v=20260913-compact-inspect-1&champion=20260924-champion-export-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1";
