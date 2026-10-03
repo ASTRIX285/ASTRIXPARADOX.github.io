@@ -1,7 +1,7 @@
-import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4";
-import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=20260904-artifact-sandbox-effects-1";
-import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs';
-import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=20260924-champion-export-1';
+import {openGuardianDatabase,MANIFEST_STORE_NAME} from "./guardian-session-cache.mjs?v=8cbc2b2658";
+import {resolveArtifactTwoCatalog} from "./guardian-artifact-catalog.mjs?v=b4dd5e6bbf";
+import {expandForgeArmourIndex} from '../../core/forge-index-transport.mjs?v=4c40749881';
+import {DESTINY_BREAKER_TYPE_HASHES,paradoxDefinitionId} from '../../core/bungie-item-identity.mjs?v=b367ae7d9a';
 
 const AUTH_ORIGIN=globalThis.FORGE_AUTH_ORIGIN||"https://auth.astrixparadox.com";
 const BUNGIE_ORIGIN="https://www.bungie.net";

@@ -1,10 +1,10 @@
-import {resolveDimLoadout,inventoryIndex,dimWorkingBuild} from './resolve.mjs?v=20260927-adapt-1&grid=20261001-1';
+import {resolveDimLoadout,inventoryIndex,dimWorkingBuild} from './resolve.mjs';
 import {classifyArmourPlug,classifyWeaponPlug} from '../../pages/guardian-workspace-v2/guardian-semantic-resolver.mjs';
 import {subclassPlugComponent} from '../../pages/guardian-workspace-v2/guardian-subclass-plug-classifier.mjs';
 import {matchDimGuardian} from './guardian.mjs';
-import {bungieArtwork,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs?v=20260927-loadout-details-1&grid=20261001-1';
+import {bungieArtwork,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs';
 import {createBuildState,normalizeBuild} from '../../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
-import {ARMOUR_SLOT_NAMES,TITLE_MATCH_LABEL,itemStats,modsBySlot,pickArmour,rankOwnedExotics,titleNamedExotics} from './fill.mjs?fit=20261002-1';
+import {ARMOUR_SLOT_NAMES,TITLE_MATCH_LABEL,itemStats,modsBySlot,pickArmour,rankOwnedExotics,titleNamedExotics} from './fill.mjs';
 const ITEM='DestinyInventoryItemDefinition';
 const setOf=d=>d?.equipableItemSetHash||d?.equippingBlock?.equipableItemSetHash;
 const equal=(a,b)=>a!==undefined&&a!==null&&b!==undefined&&a===b;

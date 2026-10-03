@@ -1,5 +1,5 @@
-import {SERIES,viewModel,display,duration} from './reports-model.mjs?v=20260925-reports-20c';
-import {createReportsHistory,normalizeDifficulty,difficultyFor,activityAnalysis,clearsConsistent,RUN_PAGE_SIZE} from './reports-history.mjs?v=20260927-difficulty-lists-1';
+import {SERIES,viewModel,display,duration} from './reports-model.mjs';
+import {createReportsHistory,normalizeDifficulty,difficultyFor,activityAnalysis,clearsConsistent,RUN_PAGE_SIZE} from './reports-history.mjs';
 import {boxRows} from './reports-boxes.mjs';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>Number.isFinite(value)?display(value):'Pending';

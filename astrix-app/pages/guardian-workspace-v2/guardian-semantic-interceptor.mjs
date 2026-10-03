@@ -1,4 +1,4 @@
-import "./guardian-paradox-live-adapter.mjs?v=20260905-weapon-audit-1&plain=20260925-2";
+import "./guardian-paradox-live-adapter.mjs";
 import { resolveArmourSet } from "./guardian-armour-set-resolver.mjs";
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs';
 import {
@@ -7,7 +7,7 @@ import {
   normaliseWeaponSemantics,
   normaliseGuardianStats,
   validateArtifact
-} from "./guardian-semantic-resolver.mjs?v=20260905-weapon-audit-1&roll=20260909-apply-1";
+} from "./guardian-semantic-resolver.mjs";
 
 const rawFetch=globalThis.fetch?.bind(globalThis);
 let livePayload=null;

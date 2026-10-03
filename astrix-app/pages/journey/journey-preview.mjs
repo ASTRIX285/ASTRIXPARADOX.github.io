@@ -1,4 +1,4 @@
-import {isJourneyPreview} from '../../shared/local-preview.mjs?v=20260925-local-preview-1';
+import {isJourneyPreview} from '../../shared/local-preview.mjs';
 const SAMPLE_STATS=['Weapons','Health','Class','Grenade','Super','Melee'];
 // Deliberately fabricated visual fixture. These are not Bungie hashes or records.
 export function createJourneyPreviewPayload(location=globalThis.location){
@@ -63,8 +63,8 @@ export async function mountJourneyPreview(){
   text('journeyTrendEmpty','Sample chart area. No real activity history.');
   // Map layout may use the existing local artwork; it receives no account state.
   const [{initLocationSelector},{initJourneyLocationMaps}]=await Promise.all([
-    import('../../shared/astrix-location-selector.mjs?v=20260920-map-links-1'),
-    import('./journey-location-maps.mjs?v=20260920-zoom-chests-3')
+    import('../../shared/astrix-location-selector.mjs'),
+    import('./journey-location-maps.mjs')
   ]);
   initLocationSelector({mount:doc.getElementById('journeyLocationSelector'),detail:doc.getElementById('journeyLocationDetail')});
   await initJourneyLocationMaps(doc.getElementById('journeyLocationDetail'));

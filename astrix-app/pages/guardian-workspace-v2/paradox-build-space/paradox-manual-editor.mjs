@@ -1,5 +1,5 @@
-import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs?plain=20260925-2';
-import {classifyArmourPlug,classifyWeaponPlug,normaliseWeaponPerkModel} from '../guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS} from '../guardian-perk-change-plan.mjs';
+import {classifyArmourPlug,classifyWeaponPlug,normaliseWeaponPerkModel} from '../guardian-semantic-resolver.mjs';
 
 const CLASS_TYPES={titan:0,hunter:1,warlock:2};
 const clone=value=>{try{return structuredClone(value);}catch{return JSON.parse(JSON.stringify(value??null));}};

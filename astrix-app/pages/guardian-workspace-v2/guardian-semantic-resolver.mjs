@@ -1,6 +1,6 @@
 // Canonical semantic classification for live Bungie Guardian data.
 // Keep this module deterministic and conservative: unknown evidence stays unknown.
-import {paradoxDefinitionId,weaponSocketSection,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs';
+import {paradoxDefinitionId,weaponSocketSection,weaponTypeIdentity} from '../../core/bungie-item-identity.mjs?v=b367ae7d9a';
 
 const norm=value=>String(value??"").trim().toLowerCase();
 const WEAPON_PERK_MANIFEST_AUDIT=Object.freeze({source:'astrix-app/data/paradox-weapon-audit-report.json',method:'exhaustive-manifest-socket-and-plug-set-references'});

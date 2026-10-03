@@ -1,18 +1,18 @@
-import {runProfileTask} from '../../core/engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
-import {forgeSetListOptions,forgeSetListMarkup,unresolvedForgeSets} from './forge-loader-set-list.mjs?v=20260909-layout-2&plain=20260925-2';
-import {startForgeBackgroundRefresh,mergeExoticCheckCatalogue,bindExoticCheckControl,forgeInventorySignature} from './forge-loader-refresh.mjs?v=20260910-source-coverage-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
-import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&swr=20261002-1';
-import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs?v=20260906-all-page-data-1&fix=20260909-set-list-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
-import {ARMOUR_BUCKETS,WEAPON_BUCKETS,createVaultCatalogue,itemKey} from '../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&stack=20261002-1';
-import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
-import {compatibleWithClass,exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
-import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs?v=20260913-workspace-preload-1&resident=20260910-source-coverage-2&transport=20260911-compact-plugs-1&navigation=20260920-1&plain=20260925-2&refresh=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
-import {forgeLoaderResidency} from './forge-loader-residency.mjs?v=20260910-source-coverage-1&plain=20260925-2';
-import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=20260913-workspace-preload-1&transport=20260911-compact-plugs-1&navigation=20260920-ready-1&plain=20260925-2&refresh=20260927-1&perf=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
-import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs?v=20260907-shared-page-load-1';
-import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs?v=20260911-forge-selector-hover-1&status=20260917-compact-1&plain=20260925-2&refresh=20260927-1&mobile=20261002-1&stack=20261002-1';
-import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs?v=20260910-tier-zero-evidence-1';
-import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs?v=20260927-1&layoutfix=20260927-1&statlabels=20260927-2&stack=20261002-1';
+import {runProfileTask} from '../../core/engine-profile-client.mjs';
+import {forgeSetListOptions,forgeSetListMarkup,unresolvedForgeSets} from './forge-loader-set-list.mjs';
+import {startForgeBackgroundRefresh,mergeExoticCheckCatalogue,bindExoticCheckControl,forgeInventorySignature} from './forge-loader-refresh.mjs';
+import {AUTH_ORIGIN,authStartUrl,getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mjs';
+import {guardianManifest} from '../guardian-workspace-v2/guardian-manifest-service.mjs';
+import {ARMOUR_BUCKETS,WEAPON_BUCKETS,createVaultCatalogue,itemKey} from '../vault/vault-inventory.mjs';
+import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourStatVector} from '../vault/vault-armour-matcher.mjs';
+import {compatibleWithClass,exoticCatalogueGroups,ownedExoticGroups,ownedExoticWeaponGroups,rankOpenProtocolCandidates,setBonusOptions,toggleSetSelection,unownedSetTargets} from './forge-loader-model.mjs';
+import {preloadForgeLoaderPayload,readForgeLoaderPreloadReceipt} from './forge-loader-preload.mjs';
+import {forgeLoaderResidency} from './forge-loader-residency.mjs';
+import {reportPreparedPageStage} from '../../core/prepared-page-client.mjs';
+import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
+import {bindParadoxItemHover} from '../guardian-workspace-v2/paradox-item-hover.mjs';
+import {classifyArmourPlug} from '../guardian-workspace-v2/guardian-semantic-resolver.mjs';
+import {CANDIDATE_BATCH_SIZE,candidateMarkup,encodeForgeResultsUrl,scanArmourCombinations} from './forge-loader-scan.mjs';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 

@@ -1,4 +1,4 @@
-import {createVaultDragScroll} from './vault-drag-scroll.mjs?v=20260925-four-columns-1';
+import {createVaultDragScroll} from './vault-drag-scroll.mjs';
 export function transferFailureReason(error){
   const message=String(error||'');
   if(/vault.*(?:full|capacity)|(?:full|capacity).*vault/i.test(message))return 'Vault full';

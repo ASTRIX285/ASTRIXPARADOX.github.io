@@ -1,6 +1,6 @@
 // Keep the latest profile's packed handoff ready while the player browses.
 export class EngineHandoffClient{
-  constructor({workerFactory=()=>new Worker(new URL('./engine-handoff-worker.mjs?v=20260927-1',import.meta.url),{type:'module',name:'paradox-handoff'})}={}){this.workerFactory=workerFactory;this.next=0;this.pending=new Map();this.worker=null;}
+  constructor({workerFactory=()=>new Worker(new URL('./engine-handoff-worker.mjs?v=eda893926b',import.meta.url),{type:'module',name:'paradox-handoff'})}={}){this.workerFactory=workerFactory;this.next=0;this.pending=new Map();this.worker=null;}
   prepare(build,binding){
     const bindingKey=JSON.stringify(binding);
     if(this.build===build&&this.bindingKey===bindingKey&&this.promise)return this.promise;

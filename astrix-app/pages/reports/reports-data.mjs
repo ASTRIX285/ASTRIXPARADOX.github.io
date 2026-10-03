@@ -1,4 +1,4 @@
-import {slimCatalogue} from './reports-model.mjs?v=20260925-reports-20c';
+import {slimCatalogue} from './reports-model.mjs';
 const DB_NAME='astrix-reports-v1';
 const VERSION=1;
 export function accountKey(session){const m=session?.activeDestinyMembership;return session?.authenticated&&m?.membershipId?`${m.membershipType}:${m.membershipId}`:'';}

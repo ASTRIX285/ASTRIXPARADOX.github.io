@@ -1,9 +1,9 @@
-import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs';
-import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs';
-import {runProfileTask} from './engine-profile-client.mjs?v=20260927-1&recovery=20260927-4&shell=20261001-mobile-1&swr=20261002-1';
-import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=20260927-1';
-import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=20260907-shared-page-load-1';
-import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=20260913-live-character-2&plain=20260925-2&refresh=20260927-1&recovery=20260927-4';
+import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs?v=3fb7642429';
+import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs?v=2da7748b41';
+import {runProfileTask} from './engine-profile-client.mjs?v=07c0d11e6f';
+import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=bed8960779';
+import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=a5fcd4c480';
+import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=8cbc2b2658';
 
 const PAGE_KINDS=Object.freeze(['character','build-forge','journey','vault','loadout']);
 const PAGE_KIND_SET=new Set(PAGE_KINDS);

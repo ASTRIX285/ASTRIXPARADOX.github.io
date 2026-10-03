@@ -1,5 +1,5 @@
 import {paradoxDefinitionId} from '../../core/bungie-item-identity.mjs';
-import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs?v=20260909-weapon-presentation-1';
+import {perkTooltipAttributes} from './guardian-perk-tooltip.mjs';
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bungieIcon=v=>{const s=String(v??"");return !s?"":s.startsWith("http")?s:`https://www.bungie.net${s}`;};
 const text=v=>String(v?.name??v?.displayName??v??"").trim();

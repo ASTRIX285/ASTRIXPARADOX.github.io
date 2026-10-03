@@ -1,6 +1,6 @@
-import {cleanImageElement} from './guardian-bungie-icon-cleaner.mjs?v=20260824-icon-cleaner-2';
+import {cleanImageElement} from './guardian-bungie-icon-cleaner.mjs';
 import {LOADOUT_DEFINITIONS} from './guardian-loadout-definitions.mjs';
-import {mergeSuperOptions} from './guardian-super-catalog.mjs?v=20260916-equipped-source-1';
+import {mergeSuperOptions} from './guardian-super-catalog.mjs';
 
 const BUNGIE='https://www.bungie.net';
 const SUBCLASS_KEYS=Object.freeze(['void','arc','solar','strand','stasis','prismatic']);

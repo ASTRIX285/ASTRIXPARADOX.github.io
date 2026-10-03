@@ -35,6 +35,7 @@ const validators=[
   'test-gloss-controls.mjs',
   'validate-portal-loader.mjs',
   'validate-single-loader.mjs',
+  'validate-single-module-urls.mjs',
   'test-portal-single-skin.mjs',
   'test-home-browser.mjs',
   'validate-tools-hub.mjs',

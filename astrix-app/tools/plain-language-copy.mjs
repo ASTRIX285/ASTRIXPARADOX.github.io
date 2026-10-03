@@ -63,7 +63,7 @@ export function visibleCopySegments(file,source){
   if(file.endsWith('.html')){
     const masked=source.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,match=>' '.repeat(match.length));
     for(const range of htmlCopyRanges(masked))add(range.start,range.end,'html');
-    for(const match of source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi))if(match[2].trim()&&!/\bsrc\s*=|application\/(?:ld\+)?json/i.test(match[1]))parseJS(match[2],match.index+match[0].indexOf('>')+1);
+    for(const match of source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi))if(match[2].trim()&&!/\bsrc\s*=|application\/(?:ld\+)?json|type=["']importmap/i.test(match[1]))parseJS(match[2],match.index+match[0].indexOf('>')+1);
   }else if(file.endsWith('.css')){
     const masked=source.replace(/\/\*[\s\S]*?\*\//g,match=>' '.repeat(match.length));
     for(const match of masked.matchAll(/\bcontent\s*:\s*(["'])(.*?)\1/g)){const start=match.index+match[0].indexOf(match[1])+1;add(start,start+match[2].length,'css content');}

@@ -1,11 +1,11 @@
 // Shared, parametrised Forge Matrix scanning and rendering. Used by both the Forge Loader selector
 // page (which runs the search) and the Forge Loader results page (which recomputes the same search
 // from a bookmarked or shared URL, or shows a cached result from the same browser tab).
-import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourSetHash,armourStatVector} from '../vault/vault-armour-matcher.mjs?v=20260904-top-50-scan-1';
-import {itemKey} from '../vault/vault-inventory.mjs?v=20260910-fixed-intrinsic-evidence-1&stack=20261002-1';
-import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260913-breaker-icon-2&stack=20261002-1';
+import {ARMOUR_STAT_CAP,ARMOUR_STAT_KEYS,ARMOUR_STAT_LABELS,armourSetHash,armourStatVector} from '../vault/vault-armour-matcher.mjs';
+import {itemKey} from '../vault/vault-inventory.mjs';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs';
 import {perkTooltipAttributes} from '../guardian-workspace-v2/guardian-perk-tooltip.mjs';
-import {naturalSetProtocols,openProtocolSolverEvidence} from './forge-loader-model.mjs?v=20260913-backend-solver-1&plain=20260925-2&anchor=20260927-1';
+import {naturalSetProtocols,openProtocolSolverEvidence} from './forge-loader-model.mjs';
 
 const CANDIDATE_BATCH_SIZE=50;
 const ARMOUR_STAT_DEFINITION_HASHES=Object.freeze({health:392767087,melee:4244567218,grenade:1735777505,super:144602215,class:1943323491,weapon:2996146975});

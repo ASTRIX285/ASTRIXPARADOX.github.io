@@ -35,6 +35,12 @@ Static site, vanilla HTML/CSS/JS. GitHub Pages deploys from `main`. `main` is th
 - No visible alpha/beta labels, "authenticated" badges or build/version numbers on pages.
 - Standing UX principle: a user should never have to struggle with the UI. Hold to DIM-level polish.
 
+## Cache keys (one URL per JS module, since 3 Oct 2026)
+- JS module versions live in one place: `astrix-app/module-versions.json`, generated from each file's source. After changing any `.mjs`/`.js`, run `node astrix-app/tools/build-module-versions.mjs`. That updates the versions, the import map in every page head, the stamped entry and preload URLs, and the worker imports.
+- Never hand-write `?v=` on a JS import. Imports are plain paths; the page import map adds the version. Modules reachable from a module worker are the one exception: the script stamps their imports, because workers cannot read the page import map.
+- CSS and image `?v=` keys, and classic (non-module) `<script src>` keys, are still bumped by hand.
+- `validate-single-module-urls.mjs` (part of `paradox-validator.mjs`) fails if the versions are stale, if an import carries a hand-written `?v=`, or if any tool page requests a JS file under more than one URL.
+
 ## Validation (run after every change)
 - `node astrix-app/tools/validate-scope-guard.mjs`
 - `node astrix-app/tools/validate-journey-visual-pass.mjs`

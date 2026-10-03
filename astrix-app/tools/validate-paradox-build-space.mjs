@@ -147,10 +147,10 @@ const praxicPerks=[[3514694513,praxicBladeCatalogue],[1958555234,praxicGripCatal
 const praxicTierZeroModel=normaliseWeaponPerkModel({gearTier:0,selectedPerks:praxicPerks,alternativePerkColumns:praxicPerks.map(perk=>({socketIndex:perk.socketIndex,options:[perk]}))});
 assert.equal(praxicTierZeroModel.weaponTier,0,'Bungie gearTier 0 must remain Tier 0 instead of being coerced to unknown.');
 assert.equal(validateWeaponModel({weapons:[{itemHash:3049715579,name:'Praxic Blade',gearTier:0,weaponSemantics:{gearTier:0,perkModel:praxicTierZeroModel}}]}).ready,true,'Praxic Blade real Tier 0 one-row perk evidence must be valid.');
-assert.match(runtime,/paradox-forge-preparation\.mjs\?v=20260916-weapon-combinations-2/,'Build Forge must load the terminating background preparation graph.');
-assert.match(preparationRuntime,/paradox-forge-worker\.mjs\?v=20260916-weapon-combinations-2/,'Background preparation must start the terminating Forge worker.');
-assert.match(workerRuntime,/paradox-forge-sequence\.mjs\?v=20260916-weapon-combinations-2/,'The Forge worker must load the terminating generation sequence.');
-assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs\?v=20260916-weapon-combinations-1/,'The generation sequence must load the Tier 0 weapon evidence validator.');
+assert.match(runtime,/paradox-forge-preparation\.mjs(?:\?v=[0-9a-f]{10})?/,'Build Forge must load the terminating background preparation graph.');
+assert.match(preparationRuntime,/paradox-forge-worker\.mjs(?:\?v=[0-9a-f]{10})?/,'Background preparation must start the terminating Forge worker.');
+assert.match(workerRuntime,/paradox-forge-sequence\.mjs(?:\?v=[0-9a-f]{10})?/,'The Forge worker must load the terminating generation sequence.');
+assert.match(sequenceRuntime,/paradox-loadout-intelligence\.mjs(?:\?v=[0-9a-f]{10})?/,'The generation sequence must load the Tier 0 weapon evidence validator.');
 assert.match(html,/aria-label="Build activity"[\s\S]*?data-forge-activity="raid"[\s\S]*?data-forge-activity="dungeon"[\s\S]*?data-forge-activity="grandmaster"[\s\S]*?data-forge-activity="crucible"[\s\S]*?data-forge-activity="pve"/,'Generate must capture one of the five required activity contexts in the Elemental Build Options panel.');
 const ownedWeaponCatalogue=[currentPrimary,joltPrimary,energyWeapon,powerWeapon];
 const weaponResult=selectOwnedWeapons({build:{...intelligenceSource,weapons:[currentPrimary,energyWeapon,powerWeapon],ownedWeapons:ownedWeaponCatalogue,vaultWeapons:ownedWeaponCatalogue},objective:'add-clear'});
@@ -304,8 +304,9 @@ assert.match(css,/\.weapon-support-icon\{width:var\(--build-armour-mod\)!importa
 assert.doesNotMatch(html+runtime,/MANUAL OR PARADOX/,'The ambiguous weapon status fallback must never be rendered.');
 assert.match(html,/<span id="weaponRecommendationState" hidden><\/span>/,'Empty weapon status must start hidden.');
 // Prompt 11c advances both resources for the explicit card-width helper.
-for(const [file,tag] of [['paradox-build-space.css','20260925-rows-4'],['paradox-build-space.mjs','20260925-rows-4']])assert.ok(html.includes(file+'?')&&html.split(file+'?')[1].split('"')[0].includes('weaponcards='+tag),'Changed Build Forge resources must invalidate their cache tags.');
-assert.ok(html.split('paradox-build-space.mjs?')[1].split('"')[0].includes('champion=20260924-champion-export-1'),'The rebase must retain the merged champion export cache tag.');
+for(const [file,tag] of [['paradox-build-space.css','20260925-rows-4']])assert.ok(html.includes(file+'?')&&html.split(file+'?')[1].split('"')[0].includes('weaponcards='+tag),'Changed Build Forge resources must invalidate their cache tags.');
+// JS modules carry their generated version (module-versions.json); validate-single-module-urls checks it is current.
+assert.match(html,/paradox-build-space\.mjs\?v=[0-9a-f]{10}"/,'Build Forge must load its module under its generated version.');
 assert.doesNotMatch(css,/\.weapon-design-section[^{}]*\.gear-weapons[^{}]*\{[^}]*overflow-x\s*:\s*(?:auto|scroll)/,'Build Forge weapons must never introduce horizontal section scrolling.');
 assert.match(css,/\.design-canvas \.weapon-design-section\{container-name:build-weapon-section\}/,'The weapon section must own the named size container.');
 // Prompt 11c replaces the fixed threshold with the measured three-card width.

@@ -1,19 +1,19 @@
-import {POINT_TYPES,canRenderSourcedMapMarker,applySourcedMapMarkers,hasMapPosition,canRenderMapMarker,markerGlyphMarkup,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs?v=20260920-zoom-chests-3&markers=20260925-24&sources=20260925-1';
+import {POINT_TYPES,canRenderSourcedMapMarker,applySourcedMapMarkers,hasMapPosition,canRenderMapMarker,markerGlyphMarkup,mapCatalogueEntries,filterMapEntries,regionChestEntries,directorIconUrl,directorViewPosition} from './journey-map-model.mjs';
 
 const loaders=Object.freeze({
-  edz:()=>import('./assets/map-data/edz.mjs?v=20260920-1'),
-  nessus:()=>import('./assets/map-data/nessus.mjs?v=20260920-1'),
-  moon:()=>import('./assets/map-data/moon.mjs?v=20260920-1'),
+  edz:()=>import('./assets/map-data/edz.mjs'),
+  nessus:()=>import('./assets/map-data/nessus.mjs'),
+  moon:()=>import('./assets/map-data/moon.mjs'),
   europa:async()=>{
-    const [{default:catalogue},{default:audit}]=await Promise.all([import('./assets/map-data/europa.mjs?v=20260920-1'),import('./europa-marker-data.mjs?v=20260925-sources-1')]);
+    const [{default:catalogue},{default:audit}]=await Promise.all([import('./assets/map-data/europa.mjs'),import('./europa-marker-data.mjs')]);
     return {default:applySourcedMapMarkers(catalogue,audit)};
   },
-  neomuna:()=>import('./assets/map-data/neomuna.mjs?v=20260920-1'),
-  kepler:()=>import('./assets/map-data/kepler.mjs?v=20260920-1'),
-  'pale-heart':()=>import('./assets/map-data/pale-heart.mjs?v=20260920-1'),
-  'dreaming-city':()=>import('./assets/map-data/dreaming-city.mjs?v=20260920-1'),
-  'throne-world':()=>import('./assets/map-data/throne-world.mjs?v=20260920-1'),
-  cosmodrome:()=>import('./assets/map-data/cosmodrome.mjs?v=20260920-1')
+  neomuna:()=>import('./assets/map-data/neomuna.mjs'),
+  kepler:()=>import('./assets/map-data/kepler.mjs'),
+  'pale-heart':()=>import('./assets/map-data/pale-heart.mjs'),
+  'dreaming-city':()=>import('./assets/map-data/dreaming-city.mjs'),
+  'throne-world':()=>import('./assets/map-data/throne-world.mjs'),
+  cosmodrome:()=>import('./assets/map-data/cosmodrome.mjs')
 });
 const make=(tag,className,text)=>{
   const node=document.createElement(tag);

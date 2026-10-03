@@ -4,10 +4,10 @@
 // routes clicks here, so this module never touches the DOM and is unit testable.
 // Every choice goes through the existing staging helpers, so the same rules apply
 // here as in Build Forge. Nothing is equipped until the user presses APPLY.
-import {eligibleEquipment,filterManualEquipmentSources,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,recordManualEdit} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs?v=20260910-tier-zero-evidence-1&plain=20260925-2';
+import {eligibleEquipment,filterManualEquipmentSources,socketGroups,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,recordManualEdit} from '../guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs';
 import {toggleIntendedArtifactPerk} from '../guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
-import {subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs?v=20260920-empty-sockets-1&plain=20260925-2';
-import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs?v=20260914-direct-transfer-1&stack=20261002-1';
+import {subclassCompatibilityViolations} from '../guardian-workspace-v2/guardian-perk-change-plan.mjs';
+import {itemTileMarkup} from '../../shared/guardian-inventory-workspace.mjs';
 
 export const EMPTY_PLUG_HASH=2166136261;
 const HISTORY_LIMIT=100;

@@ -18,7 +18,7 @@ assert.equal(isJourneyPreview({href:'http://localhost/astrix-app/pages/vault/?pr
 assert.equal(createJourneyPreviewPayload({href:'http://localhost/astrix-app/pages/vault/?preview'}),null);
 const entry=await readFile(new URL('../pages/journey/journey-entry.mjs',import.meta.url),'utf8');
 const html=await readFile(new URL('../pages/journey/index.html',import.meta.url),'utf8');
-assert.match(html,/src="\.\/journey-entry\.mjs\?v=20260925-local-preview-1&amp;plain=20260925-2&amp;refresh=20260927-1&amp;recovery=20260927-4&amp;shell=20261001-mobile-1&amp;swr=20261002-1"/);
+assert.match(html,/src="\.\/journey-entry\.mjs(?:\?v=[0-9a-f]{10})?"/);
 assert.doesNotMatch(html,/<script[^>]+src="[^\"]*(?:journey\.mjs|astrix-hero-cards\.mjs)/,'No import-time live auth before the gate');
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 // Execute the actual entry control flow; intercept dynamic imports without running auth.
@@ -35,7 +35,7 @@ const ribbon=await readFile(new URL('../shared/astrix-destination-ribbon.js',imp
 for(const [name,end] of [['prepareData','setNavigationProgress'],['warmReports',null]]){
  const start=ribbon.indexOf(`  async function ${name}(`);assert.ok(start>=0);
  const body=ribbon.slice(start,end?ribbon.indexOf(`  function ${end}(`,start):undefined);
- assert.match(body,/await import\(new URL\('\.\/local-preview\.mjs\?v=20260925-local-preview-1',scriptUrl\)\.href\);\s*if\(isJourneyPreview\(\)\)return;/);
+ assert.match(body,/await import\(new URL\('\.\/local-preview\.mjs(?:\?v=[0-9a-f]{10})?',scriptUrl\)\.href\);\s*if\(isJourneyPreview\(\)\)return;/);
 }
 const sample=await readFile(new URL('../pages/journey/journey-preview.mjs',import.meta.url),'utf8');
 assert.match(sample,/const payload=createJourneyPreviewPayload\(\);if\(!payload\)return false;/);

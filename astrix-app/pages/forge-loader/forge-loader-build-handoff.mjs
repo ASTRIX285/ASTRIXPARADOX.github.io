@@ -1,4 +1,4 @@
-import {bindingOf,bindingsEqual,compactBungieLoadouts,createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs';
+import {bindingOf,bindingsEqual,compactBungieLoadouts,createHandoffEnvelope} from '../guardian-workspace-v2/paradox-build-binding.mjs?v=764da1b8ed';
 
 const BUILD_SPACE_KEY='astrix:paradox-build-space:v1';
 const BUILD_SNAPSHOT_KEY='astrix:guardian-build-snapshot:v1';

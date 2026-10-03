@@ -36,7 +36,8 @@ for(const [label,path] of Object.entries(pages)){
 }
 // Every destination must opt into the same prepared navigation asset generation.
 for(const label of ['Guardian Main','Build Space','Journey','Mission Reports','Vault','Forge Loader','Loadout']){
-  const html=await read(pages[label]);
+  // The generated import map lists module paths only; the classic script tags keep their keys.
+  const html=(await read(pages[label])).replace(/<script type="importmap" data-module-versions>[\s\S]*?<\/script>/,'');
   for(const resource of ['astrix-portal-loader.css','astrix-portal-loader.js','astrix-destination-ribbon.js']){
     const url=html.match(new RegExp(resource.replaceAll('.', '\\.')+'\\?[^"<>]+'))?.[0];
     assert.ok(url?.includes('ready=20260920-1'),`${label} must refresh ${resource} for prepared navigation`);
@@ -82,9 +83,9 @@ assert.match(buildModule,/markGuardianFastReturn\(\)/,'Build Back must preserve 
 assert.doesNotMatch(mainProgress,/window\.addEventListener\('load'/,'Main progress must not use the generic window load event');
 assert.match(buildModule,/const ready=Boolean\(build\),status=ready\?'ready':'pending'/,'An empty initial Build render must remain pending while the live profile resolves');
 assert.match(buildModule,/emitLoad\('render',ready\?LOAD_STAGES\.READY:LOAD_STAGES\.SNAPSHOT,label,status\)/,'Only a populated Build render may report the ready milestone');
-assert.match(mainHtml,/guardian-portal-progress\.mjs\?v=20260913-character-safe-2/,'Character must load the partial-data-safe progress module without a stale cache');
-assert.match(buildHtml,/paradox-build-space\.mjs\?v=20260913-character-safe-2/,'Build Forge must refresh its partial-data-safe module graph');
-assert.match(buildModule,/guardian-portal-progress\.mjs\?v=20260913-character-safe-2/,'Build must load the partial-data-safe progress module without a stale cache');
+assert.match(mainHtml,/guardian-portal-progress\.mjs(?:\?v=[0-9a-f]{10})?/,'Character must load the partial-data-safe progress module without a stale cache');
+assert.match(buildHtml,/paradox-build-space\.mjs(?:\?v=[0-9a-f]{10})?/,'Build Forge must refresh its partial-data-safe module graph');
+assert.match(buildModule,/guardian-portal-progress\.mjs(?:\?v=[0-9a-f]{10})?/,'Build must load the partial-data-safe progress module without a stale cache');
 assert.match(buildModule,/reportPreparedPageStage\(preparedStage,'build-forge'/,'Build real milestones must update the shared prepared page controller');
 
 assert.match(appModule,/forge:build-catalogue-rendered/,'Build library must publish catalogue render completion');

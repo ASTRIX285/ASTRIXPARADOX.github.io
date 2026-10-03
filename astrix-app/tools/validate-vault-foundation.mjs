@@ -134,8 +134,8 @@ assert.match(vaultRuntime,/ForgeLoader\?\.done\?\.\(\)[\s\S]*?void refreshAfterL
 assert.match(vaultRuntime,/profile:\{\.\.\.\(payload\?\.profile\|\|\{\}\),\.\.\.\(live\?\.profile\|\|\{\}\)\}/,'A lightweight live inventory result must merge into the complete rendered profile without discarding item components.');
 assert.match(vaultRuntime,/session=await getBungieSession\(\{force:true\}\)/,'Vault must refresh the live Worker session, CSRF token, and mutation capabilities before enabling transfers.');
 assert.match(vaultRuntime,/failures\.find\(row=>row\.phase!=='readback'\)/,'Vault must report the operational Bungie blocker instead of masking it with a final readback mismatch.');
-assert.match(vaultRuntime,/guardian-inventory-workspace\.mjs\?v=20260914-direct-transfer-1/,'Vault must load the current shared drag-and-drop interaction module instead of a stale cached contract.');
-assert.match(characterRuntime,/guardian-inventory-workspace\.mjs\?v=20260914-direct-transfer-1/,'Character must load the same current shared inventory interaction module as Vault.');
+assert.match(vaultRuntime,/guardian-inventory-workspace\.mjs(?:\?v=[0-9a-f]{10})?/,'Vault must load the current shared drag-and-drop interaction module instead of a stale cached contract.');
+assert.match(characterRuntime,/guardian-inventory-workspace\.mjs(?:\?v=[0-9a-f]{10})?/,'Character must load the same current shared inventory interaction module as Vault.');
 assert.doesNotMatch(liveActionsRuntime,/vaultActionActivityBlockers/,'Simple inventory movement must not have an inferred activity blocker; Bungie is authoritative.');
 assert.match(liveActionsRuntime,/scope='character'[\s\S]*?scope===\s*'inventory'\?'inventory':'character'/,'Live profile requests must explicitly constrain the lightweight inventory scope.');
 assert.match(liveActionsRuntime,/allowAcceptedWithoutReadback\?\{verified:false,fresh:null,location:null\}/,'An accepted intermediate transfer leg must continue without a redundant full-profile download.');
