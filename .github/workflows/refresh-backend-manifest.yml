@@ -19,7 +19,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -43,7 +43,7 @@ jobs:
           workingDirectory: forge-manifest-worker
           wranglerVersion: 4.114.0
           command: deploy
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Verify live DIM manifest import route
