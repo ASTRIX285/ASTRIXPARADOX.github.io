@@ -9,13 +9,13 @@ export const ARMOUR_SLOT_NAMES=Object.freeze({3448274439:'Helmet',3551918588:'Ga
 // Armor 3.0 stat order as Destiny shows it.
 export const ARMOUR_STATS=Object.freeze([392767087,4244567218,1943323491,1735777505,144602215,2996146975]);
 // The mod's own plug category names the armour slot it fits.
-const MOD_SLOT=Object.freeze({'enhancements.v2_head':3448274439,'enhancements.v2_arms':3551918588,'enhancements.v2_chest':14239492,'enhancements.v2_legs':20886954,'enhancements.v2_class_item':1585787867});
+export const MOD_SLOT=Object.freeze({'enhancements.v2_head':3448274439,'enhancements.v2_arms':3551918588,'enhancements.v2_chest':14239492,'enhancements.v2_legs':20886954,'enhancements.v2_class_item':1585787867});
 export const TITLE_MATCH_LABEL="Named in the share's title, not pinned in the share";
 const setOf=definition=>definition?.equipableItemSetHash||definition?.equippingBlock?.equipableItemSetHash||null;
 const nameOf=definition=>String(definition?.displayProperties?.name||'').trim();
 const stable=(a,b)=>String(a.itemInstanceId).localeCompare(String(b.itemInstanceId));
 
-function locationOf(row,characterId){
+export function locationOf(row,characterId){
   const kind=row?.source?.kind;
   if(kind==='vault')return 'In your Vault';
   if(kind==='equipped'||kind==='carried')return String(row.source.characterId)===String(characterId)?'On this Guardian':'On another Guardian';

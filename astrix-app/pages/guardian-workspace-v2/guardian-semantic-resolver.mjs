@@ -54,7 +54,8 @@ function classifyArmourPlug(plug){
   if(category.includes("masterwork")||/armou?r[\s._-]*masterwork|masterwork[\s._-]*level/.test(text))return "masterwork";
   if(category.includes("set_bonus")||category.includes("setbonus")||/\b[24][ -]?piece\b|set bonus/.test(text))return "set-bonus";
   if((Number(plug?.armourItemTierType)===6&&category.includes("intrinsic"))||(category.includes("exotic")&&(category.includes("intrinsic")||category.includes("perk")))||/exotic (armou?r )?(intrinsic|perk)/.test(text))return "exotic-perk";
-  if(category.includes("armor.mods.general")||category.includes("armour.mods.general")||/general armou?r mod/.test(text))return "general-mod";
+  // Armor 3.0 general mods use the "enhancements.v2_general" plug category.
+  if(category.includes("armor.mods.general")||category.includes("armour.mods.general")||category.includes("enhancements.v2_general")||/general armou?r mod/.test(text))return "general-mod";
   if((category.includes("armor.mods")||category.includes("armour.mods")||/armou?r mod/.test(text))&&!/general armou?r mod/.test(text))return "slot-mod";
   return "unknown";
 }

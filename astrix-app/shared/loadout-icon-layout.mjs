@@ -69,7 +69,11 @@ export function bindLoadoutIconDetails(root){
   }
   const tile=event=>event.target.closest?.('[data-icon-name]');
   root.addEventListener('pointerover',event=>{if(event.pointerType!=='touch')show(tile(event));},options);
-  root.addEventListener('pointerout',event=>{if(active&&!active.contains(event.relatedTarget)&&!tip.contains(event.relatedTarget)&&doc.activeElement!==active)hide();},options);
+  // A tooltip stays with a keyboard-focused icon only. After a click the pointer owns it, so it never
+  // lingers over another tile and seems to name that tile's item.
+  const keyboardFocused=()=>doc.activeElement===active&&active.matches(':focus-visible');
+  root.addEventListener('pointerout',event=>{if(active&&!active.contains(event.relatedTarget)&&!tip.contains(event.relatedTarget)&&!keyboardFocused())hide();},options);
+  doc.addEventListener('pointerover',event=>{if(active&&!root.contains(event.target)&&!tip.contains(event.target))hide();},options);
   root.addEventListener('focusin',event=>show(tile(event)),options);
   root.addEventListener('focusout',hide,options);
   root.addEventListener('click',event=>{const button=tile(event);if(button)show(button);else hide();},options);

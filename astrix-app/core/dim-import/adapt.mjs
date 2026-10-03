@@ -5,6 +5,7 @@ import {matchDimGuardian} from './guardian.mjs';
 import {bungieArtwork,loadoutWorkingBuild} from '../../shared/loadout-details-model.mjs';
 import {createBuildState,normalizeBuild} from '../../pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs';
 import {ARMOUR_SLOT_NAMES,TITLE_MATCH_LABEL,itemStats,modsBySlot,pickArmour,rankOwnedExotics,titleNamedExotics} from './fill.mjs';
+import {placeMods} from './mods.mjs';
 const ITEM='DestinyInventoryItemDefinition';
 const setOf=d=>d?.equipableItemSetHash||d?.equippingBlock?.equipableItemSetHash;
 const equal=(a,b)=>a!==undefined&&a!==null&&b!==undefined&&a===b;
@@ -67,6 +68,27 @@ function selectArmour(rows,index,profile,parameters,constraints){
   }
   return new Map(rows.map((row,i)=>[row.bucketHash,beam[0]?.items[i]||null]));
 }
+// The shared mods and per-slot cosmetics written into the chosen armour's own sockets.
+function placeChoiceMods(selected,parameters,snapshot,profile){
+  const tables=snapshot.tables,armour=selected.filter(row=>row.kind==='armour');
+  const {byBucket,unplaced}=placeMods(new Map(armour.map(row=>[row.bucketHash,row])),parameters,tables,profile);
+  for(const row of armour){
+    const mods=byBucket.get(row.bucketHash)||[],taken=new Set(mods.map(mod=>mod.socketIndex));
+    const plugs=mods.map(mod=>{
+      const categoryHash=row.definition?.sockets?.socketCategories?.find(entry=>entry.socketIndexes?.includes(mod.socketIndex))?.socketCategoryHash;
+      const plug={hash:mod.hash,socketIndex:mod.socketIndex,definition:mod.definition,name:mod.name,description:mod.definition?.displayProperties?.description||'',icon:mod.icon,empty:false,unresolved:!mod.definition,socketCategoryHash:categoryHash,socketCategoryDefinition:tables.DestinySocketCategoryDefinition?.[categoryHash],armourItemTierType:row.definition?.inventory?.tierType,componentType:''};
+      plug.semanticRole=classifyArmourPlug(plug);return plug;
+    });
+    row.sockets=[...row.sockets.filter(plug=>!taken.has(plug.socketIndex)),...plugs].sort((a,b)=>a.socketIndex-b.socketIndex);
+  }
+  const slot=bucket=>ARMOUR_SLOT_NAMES[bucket]||'';
+  return {placed:armour.map(row=>({bucketHash:row.bucketHash,slot:slot(row.bucketHash),item:row.name,mods:(byBucket.get(row.bucketHash)||[]).map(({hash,name,icon,socketIndex,cost})=>({hash,name,icon,socketIndex,cost}))})),unplaced:unplaced.map(({hash,name,icon,reason})=>({hash,name,icon,reason}))};
+}
+/** Names of the shared plugs an owned item cannot take. */
+export function sharedSocketGaps(target,item,profile){
+  const {desired,bySocket}=requestedSocketMatches(target,item,profile),matched=new Set(bySocket.values());
+  return desired.filter((plug,i)=>!matched.has(i)&&!plug.empty&&plug.semanticRole!=='appearance').map(plug=>plug.name);
+}
 function adaptSockets(target,item,profile,snapshot){
   const {current}=options(item,profile),{desired,bySocket}=requestedSocketMatches(target,item,profile);
   const used=new Set(bySocket.keys()),matched=new Set(bySocket.values());
@@ -83,7 +105,9 @@ function adaptSockets(target,item,profile,snapshot){
   });
   return {sockets:sockets.sort((a,b)=>a.socketIndex-b.socketIndex),gaps};
 }
-export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredCharacterId='',currentSeasonNumber=null}){
+// choices (Build Fit): the user's decision per slot, Map(bucketHash -> {itemInstanceId|null,status,reasons}).
+// With choices the shared mods are also placed on the chosen pieces.
+export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredCharacterId='',currentSeasonNumber=null,choices=null}){
   const guardian=matchDimGuardian(loadout,snapshot,profile,preferredCharacterId);
   const portable=compactLoadout({...loadout,classType:guardian.classType});
   const model=resolveDimLoadout(portable,{snapshot,profile,binding:{...binding,characterId:guardian.characterId},currentSeasonNumber});
@@ -99,19 +123,24 @@ export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredChara
   const ordered=[...rows].sort((a,b)=>Number(b.kind==='weapon'&&b.isExotic)-Number(a.kind==='weapon'&&a.isExotic));
   for(const row of ordered){
     let item=null,reasons=[];
-    if(row.kind==='armour')item=armour.get(row.bucketHash);
+    const decided=choices?.get(row.bucketHash);
+    if(decided)item=decided.itemInstanceId?(index.byBucket.get(row.bucketHash)||[]).find(candidate=>String(candidate.itemInstanceId)===String(decided.itemInstanceId))||null:null;
+    else if(row.kind==='armour')item=armour.get(row.bucketHash);
     else{
       const pool=(index.byBucket.get(row.bucketHash)||[]).filter(candidate=>row.kind==='subclass'||row.isExotic?candidate.itemHash===row.itemHash:candidate.definition.inventory?.tierType!==6);
       const ranked=pool.map(candidate=>({item:candidate,...candidateScore(row,candidate,profile)})).sort((a,b)=>b.score-a.score||stable(a.item,b.item));
       item=ranked[0]?.item||null;
     }
-    if(item){reasons=candidateScore(row,item,profile).reasons;}
+    if(decided)reasons=decided.reasons||[];
+    else if(item){reasons=candidateScore(row,item,profile).reasons;}
     const sockets=item?adaptSockets(row,item,profile,snapshot):{sockets:[],gaps:row.sockets.map(p=>p.name)};
-    if(!item){blockers.push(`${row.name}: ${row.isExotic?'the original Exotic is missing; its effect cannot be reproduced':'no compatible item in your inventory'}.`);}
+    if(!item&&decided?.status==='empty')blockers.push(`${row.name}: left empty by your choice.`);
+    else if(!item){blockers.push(`${row.name}: ${row.isExotic?'the original Exotic is missing; its effect cannot be reproduced':'no compatible item in your inventory'}.`);}
     const choice=item?{...row,itemHash:item.itemHash,hash:item.itemHash,name:item.definition.displayProperties?.name||'',icon:bungieArtwork(item.definition.displayProperties?.icon),description:item.definition.displayProperties?.description||'',definition:item.definition,energy:{capacity:profile.itemComponents?.instances?.data?.[item.itemInstanceId]?.energy?.energyCapacity},itemInstanceId:item.itemInstanceId,source:item.source,match:null,alternative:null,notOwned:false,sockets:sockets.sockets,groups:[],isExotic:item.definition.inventory?.tierType===6}:null;
     if(choice)selected.push(choice);
-    comparisons.push({kind:row.kind,bucketHash:row.bucketHash,target:{itemHash:row.itemHash,name:row.name,icon:row.icon},selected:choice?{itemHash:choice.itemHash,itemInstanceId:choice.itemInstanceId,name:choice.name,icon:choice.icon}:null,status:!item?'missing':item.itemHash===row.itemHash?'matched':'substituted',reasons:reasons.length?reasons:['Compatible equipment slot'],missingSockets:sockets.gaps});
+    comparisons.push({kind:row.kind,bucketHash:row.bucketHash,target:{itemHash:row.itemHash,name:row.name,icon:row.icon},selected:choice?{itemHash:choice.itemHash,itemInstanceId:choice.itemInstanceId,name:choice.name,icon:choice.icon}:null,status:decided?.status&&decided.status!=='matched'?decided.status:!item?'missing':item.itemHash===row.itemHash?'matched':'substituted',reasons:reasons.length?reasons:[`Same slot as ${row.name}. It shares no set, requested socket or weapon type with it.`],missingSockets:sockets.gaps});
   }
+  const placed=choices?placeChoiceMods(selected,model.parameters,snapshot,profile):null;
   const sharedBuild=fillSharedBuild({portable,model,target,rows,index,profile,snapshot,characterId:guardian.characterId,selected,comparisons});
   const build=loadoutWorkingBuild({...model,items:selected},profile);
   const stats={};let statsAvailable=selected.filter(row=>row.kind==='armour').length===5;
@@ -122,7 +151,7 @@ export function adaptDimLoadout(loadout,{snapshot,profile,binding,preferredChara
   const parameterSteps=model.items.filter(row=>row.kind==='parameters').flatMap(row=>row.groups).filter(group=>!['Stat targets','Set bonuses','Exotic armour','In-game identifiers'].includes(group.label)).map(group=>({label:group.label,items:group.plugs.map(plug=>({name:plug.name,icon:plug.icon,hash:plug.hash,retired:plug.retired===true,availableOn:selected.filter(item=>options(item,profile).hashes.has(plug.hash)).map(item=>item.name)}))}));
   const anchors=rows.filter(row=>row.isExotic).map(row=>({name:row.name,description:row.description,icon:row.icon,kind:row.kind}));
   if(target.subclassBuild.super)anchors.push({name:target.subclassBuild.super.name,description:target.subclassBuild.super.description,icon:target.subclassBuild.super.icon,kind:'super'});
-  const report={schemaVersion:1,anchors,sourceName:model.name,characterClass:model.characterClass,comparisons,blockers,statTargets,setTargets,parameterSteps,sharedBuild,method:'Weapons prefer matching items and requested sockets, then weapon type and element. Armour prioritises requested sets, current item stat targets, then matching items and sockets. Armour search: up to 32 candidates per slot and 128 retained combinations per step.'};
+  const report={schemaVersion:1,fit:Boolean(choices),mods:placed,anchors,sourceName:model.name,characterClass:model.characterClass,comparisons,blockers,statTargets,setTargets,parameterSteps,sharedBuild,method:'Weapons prefer matching items and requested sockets, then weapon type and element. Armour prioritises requested sets, current item stat targets, then matching items and sockets. Armour search: up to 32 candidates per slot and 128 retained combinations per step.'};
   const adapted={...build,name:model.name,source:'dim-import',loadoutSource:'dim-import',equipment:target.equipment,dimImport:target.dimImport,importedParameters:structuredClone(model.parameters),statConstraints:target.statConstraints,dimTarget:target,dimAdaptation:report};
   return {model:{...model,autoMatchedGuardian:true},target,build:adapted,report};
 }

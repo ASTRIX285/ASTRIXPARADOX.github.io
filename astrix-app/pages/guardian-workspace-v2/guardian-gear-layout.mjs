@@ -82,8 +82,11 @@ function armourModSequence(item, armourTier, archetype) {
     const rawMatches = raw.filter(plug => roleMatches(plug, role));
     return rawMatches.length ? rawMatches : socketPlugs.filter(plug => roleMatches(plug, role));
   };
-  const generalSource = sourceFor(item?.generalMods, semantics.generalMods, "general-mod");
-  const slotSource = sourceFor(item?.slotMods, semantics.slotMods, "slot-mod");
+  // Armor 3.0: one general socket and one tuning socket share the two general places; the three slot mods follow.
+  const isTuning = plug => String(plug?.definition?.plug?.plugCategoryIdentifier ?? "").includes("armor_tiering.plugs.tuning");
+  const slotMods = sourceFor(item?.slotMods, semantics.slotMods, "slot-mod");
+  const generalSource = [...sourceFor(item?.generalMods, semantics.generalMods, "general-mod"), ...slotMods.filter(isTuning)];
+  const slotSource = slotMods.filter(plug => !isTuning(plug));
   const clean = rows => rows.filter(plug => plug && !isArmourTypeSymbol(plug) && !isIgnoredArmourPlug(plug));
   return [masterwork, ...clean(generalSource).slice(0, 2), ...clean(slotSource).slice(0, 3)];
 }

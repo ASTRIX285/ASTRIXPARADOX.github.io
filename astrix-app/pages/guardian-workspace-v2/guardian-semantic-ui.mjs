@@ -106,7 +106,7 @@ function weaponSupportIconsMarkup(item){
     const icon=bungieIcon(plug.icon||plug.displayProperties?.icon||plug.definition?.displayProperties?.icon),name=text(plug)||'Resolved support socket';
     const role=bungieHash(plug)===bungieHash(semantics.masterwork)?'masterwork':bungieHash(plug)===bungieHash(semantics.catalyst)?'catalyst':'mod';
     const index=Number.isInteger(plug.socketIndex)?` data-socket-index="${plug.socketIndex}"`:'';
-    return `<span class="weapon-support-icon is-${role}${icon?'':' is-icon-unavailable'}" data-slot-shape="square"${index}${hashAttribute(plug)} ${perkTooltipAttributes(plug,role)}>${icon?`<img src="${esc(icon)}"${hashAttribute(plug)} alt="${esc(name)}">`:'<span aria-label="Icon unavailable">?</span>'}</span>`;
+    return `<span class="weapon-support-icon is-${role}${icon?'':' is-icon-unavailable'}" data-slot-shape="square"${index}${hashAttribute(plug)} ${perkTooltipAttributes(plug,role)}>${icon?`<img src="${esc(icon)}"${hashAttribute(plug)} alt="${esc(name)}">`:`<span class="weapon-plug-label" title="Icon unavailable">${esc(name)} ${esc(String(bungieHash(plug)))}</span>`}</span>`;
   }).join('');
 }
 
