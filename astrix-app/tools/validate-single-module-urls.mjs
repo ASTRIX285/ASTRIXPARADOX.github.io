@@ -29,6 +29,46 @@ for(const module of modules.values())for(const ref of module.refs){
 assert.deepEqual(versioned,[],'Imports must not carry ?v= (the import map adds it); only worker stamps from the versions file are allowed');
 for(const page of pages.values())if(page.refs.some(ref=>ref.isModule))assert.match(page.source,/<script type="importmap" data-module-versions>/,`${page.site} loads modules but has no import map`);
 
+// 4. Merge-friendly layout (3 Oct 2026): one module per line, sorted by path, a blank line between entries,
+//    and every version equal to module-versions.json. Two PRs that bump different modules then merge cleanly.
+const layoutProblems=[];
+function checkEntries(label,lines,parse){
+  const sites=[];
+  lines.forEach((line,index)=>{
+    if(index%2===1){if(line!=='')layoutProblems.push(`${label}: line ${index+1} between entries must be blank`);return;}
+    const last=index===lines.length-1,row=parse(line);
+    if(!row){layoutProblems.push(`${label}: not one module per line: ${line.slice(0,80)}`);return;}
+    if(line.endsWith(',')===last)layoutProblems.push(`${label}: ${row.site} ${last?'must not':'must'} end with a comma`);
+    if(result.versions[row.site]!==row.version)layoutProblems.push(`${label}: ${row.site} version ${row.version} does not match module-versions.json (${result.versions[row.site]})`);
+    sites.push(row.site);
+  });
+  if(lines.length%2===0)layoutProblems.push(`${label}: entries must alternate with blank lines`);
+  const sorted=[...sites].sort((a,b)=>a<b?-1:a>b?1:0);
+  if(sites.join('\n')!==sorted.join('\n'))layoutProblems.push(`${label}: modules are not sorted by path`);
+  return sites.length;
+}
+for(const page of pages.values()){
+  const match=page.source.match(/<script type="importmap" data-module-versions>\n\{"imports":\{\n([\s\S]*?)\n\}\}\n  <\/script>/);
+  if(!/<script type="importmap" data-module-versions>/.test(page.source))continue;
+  if(!match){layoutProblems.push(`${page.site}: import map is not in the one-module-per-line layout`);continue;}
+  checkEntries(page.site,match[1].split('\n'),line=>{const m=line.match(/^"([^"]+)":"([^"?]+)\?v=([0-9a-f]+)",?$/);return m&&m[1]===m[2]?{site:m[1],version:m[3]}:null;});
+}
+const versionsBlock=current.match(/\n "modules": \{\n([\s\S]*?)\n \},\n/);
+if(!versionsBlock)layoutProblems.push('module-versions.json: modules are not in the one-module-per-line layout');
+else assert.equal(checkEntries('module-versions.json',versionsBlock[1].split('\n'),line=>{const m=line.match(/^  "([^"]+)": "([0-9a-f]+)",?$/);return m&&{site:m[1],version:m[2]};}),Object.keys(result.versions).length,'module-versions.json lists every module');
+assert.deepEqual(layoutProblems,[],'Import maps and module-versions.json must list one module per line, sorted, blank-line separated, matching the versions file');
+// The check itself: an unsorted list, a missing blank line, a wrong version and a squashed map are all reported.
+{
+  const [a,b]=Object.keys(result.versions).sort((x,y)=>x<y?-1:x>y?1:0),row=(site,version,comma)=>`"${site}":"${site}?v=${version}"${comma?',':''}`;
+  const parse=line=>{const m=line.match(/^"([^"]+)":"([^"?]+)\?v=([0-9a-f]+)",?$/);return m&&m[1]===m[2]?{site:m[1],version:m[3]}:null;};
+  const problems=lines=>{layoutProblems.length=0;checkEntries('self-test',lines,parse);return layoutProblems.length;};
+  assert.equal(problems([row(a,result.versions[a],true),'',row(b,result.versions[b],false)]),0,'Layout check accepts a good map');
+  assert.ok(problems([row(b,result.versions[b],true),'',row(a,result.versions[a],false)])>0,'Layout check reports an unsorted map');
+  assert.ok(problems([row(a,result.versions[a],true),row(b,result.versions[b],false)])>0,'Layout check reports a missing blank line');
+  assert.ok(problems([row(a,'0000000000',true),'',row(b,result.versions[b],false)])>0,'Layout check reports a version that differs from module-versions.json');
+  assert.ok(problems([`${row(a,result.versions[a],true)}${row(b,result.versions[b],false)}`])>0,'Layout check reports two modules on one line');
+}
+
 // 3: browser.
 let chromium;
 try{({chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright'));}

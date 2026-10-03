@@ -79,6 +79,7 @@ Read this file at the start of every session. It survives chat compaction. The c
 ## Cache keys
 - Until `perf/single-module-instances` (#415) is merged: bump `?v=` on every changed shared file and on every page and module that loads it.
 - After it merges: JS module versions live in one versions file and the generated import map. Bump the module there only. CSS and image `?v=` keys still bump in place.
+- Run `node astrix-app/tools/build-module-versions.mjs` after changing any JS file. Import maps and `module-versions.json` list one module per line, sorted, with a blank line between entries, so PRs that bump different modules merge without conflicts. Never hand-edit or reflow them; `validate-single-module-urls.mjs` checks the layout.
 
 ## Validation (run after every change)
 - `node astrix-app/tools/validate-scope-guard.mjs`
