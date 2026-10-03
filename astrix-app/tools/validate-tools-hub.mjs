@@ -6,17 +6,18 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const read=path=>readFileSync(`${root}${path}`,'utf8');
 
 const publicPages=new Map([
-  ['index.html','href="tools/">Tools</a>'],
-  ['pages/reviews.html','href="../tools/">Tools</a>'],
-  ['pages/news.html','href="../tools/">Tools</a>'],
-  ['pages/clips.html','href="../tools/">Tools</a>'],
-  ['pages/games.html','href="../tools/">Tools</a>'],
-  ['pages/join.html','href="../tools/">Tools</a>']
+  // The Hub (3 Oct 2026): the Tools page moved to /hub/; /tools/ redirects there.
+  ['index.html','href="hub/">The Hub</a>'],
+  ['pages/reviews.html','href="../hub/">The Hub</a>'],
+  ['pages/news.html','href="../hub/">The Hub</a>'],
+  ['pages/clips.html','href="../hub/">The Hub</a>'],
+  ['pages/games.html','href="../hub/">The Hub</a>'],
+  ['pages/join.html','href="../hub/">The Hub</a>']
 ]);
 
 for(const [path,toolsLink] of publicPages){
   const html=read(path);
-  assert.ok(html.includes(toolsLink),`${path} must link to the Tools hub`);
+  assert.ok(html.includes(toolsLink),`${path} must link to The Hub`);
 }
 
 const mobileNavigationPages=[
@@ -27,7 +28,7 @@ const mobileNavigationPages=[
   ['pages/games.html','../'],
   ['pages/join.html','../'],
   ['pages/rebrand.html','../'],
-  ['tools/index.html','../']
+  ['hub/index.html','../']
 ];
 for(const [path,prefix] of mobileNavigationPages){
   const html=read(path);
@@ -49,11 +50,14 @@ assert.match(publicJs,/event\.key === 'Escape'[\s\S]*?setMenuOpen\(false\)[\s\S]
 assert.match(publicCss,/@media \(max-width: 768px\)[\s\S]*?\.nav-links \{[\s\S]*?position: absolute;[\s\S]*?z-index: 1002;[\s\S]*?pointer-events: auto;/, 'Mobile navigation links must occupy a protected tappable layer');
 assert.match(publicCss,/@media \(max-width: 768px\)[\s\S]*?\.nav-links a \{[\s\S]*?min-height: 48px;[\s\S]*?touch-action: manipulation;/, 'Mobile navigation destinations must provide reliable phone tap targets');
 
-const tools=read('tools/index.html');
-const toolsCss=read('tools/tools.css');
-const toolsMission=read('tools/tools.mjs');
-assert.ok(tools.includes('href="index.html" class="active">Tools</a>'),'Tools navigation item must be active');
-assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup"'),'Tools page must request the mission-popup stylesheet without stale cache reuse');
+const tools=read('hub/index.html');
+const toolsCss=read('hub/tools.css');
+const toolsMission=read('hub/tools.mjs');
+assert.ok(tools.includes('href="index.html" class="active">The Hub</a>'),'The Hub navigation item must be active');
+assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261003-1"'),'The Hub must request its stylesheet without stale cache reuse');
+assert.ok(tools.includes('<title>The Hub | ASTRIX PARADOX</title>')&&tools.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'The Hub title and canonical');
+const redirect=read('tools/index.html');
+assert.ok(redirect.includes("location.replace('/hub/'+location.search+location.hash)")&&redirect.includes('content="0; url=/hub/"')&&redirect.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'/tools/ redirects to /hub/ keeping the query and hash');
 assert.ok(tools.includes('Tools for the games we play'),'Tools page must explain the multi-game purpose');
 assert.doesNotMatch(tools,/astrix-desktop-density\.css/,'Public Tools page must remain at native scale on large monitors');
 assert.equal((tools.match(/<section class="tools-hero">/g)??[]).length,1,'Tools introduction must use one hero section');
@@ -68,15 +72,20 @@ assert.ok(tools.includes('aria-controls="toolsMissionDialog"'),'Mission trigger 
 assert.ok(tools.includes('id="toolsMissionDialog" role="dialog" aria-modal="true"'),'Mission message must be exposed as a modal dialog');
 assert.ok(tools.includes('Gaming is better with<br><span>an intelligent partner.</span>'),'Mission popup must carry the approved campaign headline');
 assert.ok(tools.includes('The goal is not to play the game for you.'),'Mission popup must explain the AI partner boundary');
-assert.equal((tools.match(/ENTER FORGE/g)??[]).length,2,'Tools card and mission popup must use the finished Forge action');
+// Cards come from one data list (HUB_TOOLS): The Forge, WorkBench (coming soon, disabled) and the future slot.
+const list=tools.slice(tools.indexOf('var HUB_TOOLS=['),tools.indexOf('];',tools.indexOf('var HUB_TOOLS=[')));
+assert.match(list,/name:'The Forge'[\s\S]*?action:\{label:'Enter The Forge',href:'\.\.\/astrix-app\/pages\/home\/'\}/,'The Forge card enters the Destiny 2 tool by its unchanged route');
+assert.match(list,/name:'WorkBench'[\s\S]*?status:'Coming soon'[\s\S]*?action:\{label:'Enter WorkBench'\}/,'WorkBench card is coming soon with no link');
+assert.match(list,/\{kind:'future'\}/,'The future slot card stays');
+assert.equal((tools.match(/ENTER FORGE/g)??[]).length,1,'The mission popup keeps its Forge action');
 assert.equal((tools.match(/data-mission-close/g)??[]).length,3,'Mission popup must provide backdrop, icon and button close controls');
 assert.ok(tools.includes('<script type="module" src="tools.mjs"></script>'),'Tools page must load its isolated mission controller');
-assert.ok(tools.includes('Destiny 2 Guardian Platform'),'Tools page must identify the current platform');
-assert.equal((tools.match(/\.\.\/astrix-app\/pages\/home\//g)??[]).length,2,'Tools card and mission popup must enter Guardian Home, the light landing page');
+assert.ok(list.includes("game:'Destiny 2'")&&list.includes("game:'The Division'"),'Each card names its game');
+assert.equal((tools.match(/\.\.\/astrix-app\/pages\/home\//g)??[]).length,3,'The Forge card, its no-script link and the mission popup enter Guardian Home, the light landing page');
 assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
 assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
-assert.equal((tools.match(/<article class="platform-card /g)??[]).length,2,'Tools catalogue must use one active card and one reusable future card');
-assert.ok(tools.includes('class="platform-card platform-card-active'),'Current tool must use the active platform card');
+assert.equal((list.match(/\{kind:'/g)??[]).length,3,'One card per tool: The Forge, WorkBench and the future slot');
+assert.ok(tools.includes('class="platform-card platform-card-active'),'Tools use the active platform card');
 assert.ok(tools.includes('class="platform-card platform-card-coming'),'Future slot must use the reusable platform card');
 assert.ok(tools.includes('src="../img/logo.png"'),'Future tool card must use the official ASTRIX PARADOX logo');
 assert.ok(tools.includes('WATCH THIS SPACE'),'Future tool card must carry the approved brand message');

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261001-pages-2&amp;chips=20261002-1">
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The Hub lists every ASTRIX PARADOX tool. The Forge for Destiny 2 is live: build advice, DIM loadout import, Guardian career stats, activity reports and storage. WorkBench for The Division is coming soon.">
+  <link rel="canonical" href="https://astrixparadox.com/hub/">
+  <meta property="og:title" content="The Hub | ASTRIX PARADOX">
+  <meta property="og:description" content="The Hub lists every ASTRIX PARADOX tool. The Forge for Destiny 2 is live: build advice, DIM loadout import, Guardian career stats, activity reports and storage. WorkBench for The Division is coming soon.">
+  <meta property="og:url" content="https://astrixparadox.com/hub/">
+  <meta property="og:image" content="https://astrixparadox.com/img/games/D2_JB.jpg">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>The Hub | ASTRIX PARADOX</title>
+  <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
+  <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
+  <link rel="stylesheet" href="../css/style.css?v=20260917-approved-palette-1&amp;gloss=20260926-4">
+  <link rel="stylesheet" href="tools.css?v=20260830-mission-popup&amp;hub=20261003-1">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../img/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../img/favicon/android-chrome-512x512.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <link rel="icon" href="../img/favicon/favicon.ico">
+  <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
+  <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
+</head>
+<body class="ax-brand ax-map ax-stroke">
+
+<nav class="nav">
+  <a class="nav-logo" href="/" aria-label="ASTRIX PARADOX home">
+    <img src="/img/ax-logo-160.webp" width="49" height="40" alt="">
+    <span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span>
+  </a>
+  <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="site-navigation">
+    <a href="../index.html">Home</a>
+    <a href="../pages/reviews.html">Reviews</a>
+    <a href="../pages/news.html">News</a>
+    <a href="../pages/clips.html">Clips</a>
+    <a href="../pages/games.html">Universes</a>
+    <a href="index.html" class="active">The Hub</a>
+    <a href="../pages/join.html">Join Us</a>
+  </div>
+  <div class="nav-live">
+    <div class="nav-live-dot" id="navDot"></div>
+    <span class="nav-live-text" id="navText">OFFLINE</span>
+  </div>
+</nav>
+
+<main>
+  <section class="tools-hero">
+    <div class="tools-hero-grid" aria-hidden="true"></div>
+    <div class="tools-hero-inner">
+      <div class="tools-intro-layout">
+        <div class="tools-intro-copy">
+          <div class="section-eyebrow">Tools for the games we play</div>
+          <h1>Better tools.<br><span>Built for each game.</span></h1>
+        </div>
+        <div class="tools-intro-summary">
+          <div class="section-eyebrow">Why we are building them</div>
+          <h2 id="tools-purpose-title" class="section-title">Useful information.<br><span class="accent">One clear workspace.</span></h2>
+          <p class="section-copy">
+            ASTRIX PARADOX builds focused companion tools that bring character, gear, builds, inventory, progress
+            and activity into one place. Each tool follows its game's own systems and is clear about what is available.
+          </p>
+        </div>
+      </div>
+      <div class="tools-actions">
+        <button class="btn-primary tools-mission-trigger" type="button" aria-haspopup="dialog" aria-controls="toolsMissionDialog">See what we are building</button>
+        <a class="btn-secondary" href="../pages/games.html">Browse Universes</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="current-platform" id="current-platform" aria-labelledby="destiny-platform-title">
+    <div class="tools-shell">
+      <div class="platform-grid" id="hubCards"></div>
+      <script>
+      // The Hub cards: one card per tool. Edit this list only; the markup below is built from it.
+      (function(){
+        var HUB_TOOLS=[
+          {kind:'live',game:'Destiny 2',name:'The Forge',art:'/img/games/D2_JB.jpg',
+            copy:'Connect your Bungie account to review your Guardian, equipped gear, saved loadouts and build analysis in one connected workspace.',
+            action:{label:'Enter The Forge',href:'../astrix-app/pages/home/'},more:{label:'About the Destiny 2 tools',href:'/tools/destiny-2/'}},
+          {kind:'coming',game:'The Division',name:'WorkBench',art:'/img/games/BG_the_divition.jpg',status:'Coming soon',
+            copy:'A companion workspace for your agent, gear and builds, built around The Division\'s own systems.',
+            action:{label:'Enter WorkBench'}},
+          {kind:'future'}
+        ];
+        var esc=function(value){return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+        var card=function(tool,index){
+          if(tool.kind==='future')return '<article class="platform-card platform-card-coming reveal reveal-delay-'+index+'" aria-label="Future ASTRIX PARADOX tool"><div class="platform-brand"><img class="platform-brand-logo" src="../img/logo.png" alt="" aria-hidden="true"><div class="platform-brand-name">ASTRIX <span>PARADOX</span></div><p>WATCH THIS SPACE</p></div></article>';
+          var id='hub-tool-'+index,live=tool.kind==='live';
+          var action=live?'<a class="btn-primary forge-entry-link" href="'+esc(tool.action.href)+'">'+esc(tool.action.label)+'</a>'
+            :'<button class="btn-primary forge-entry-link" type="button" disabled aria-describedby="'+id+'-status">'+esc(tool.action.label)+'</button>';
+          return '<article class="platform-card platform-card-active'+(live?'':' platform-card-soon')+' reveal'+(index?' reveal-delay-'+index:'')+'" aria-labelledby="'+id+'">'
+            +'<div class="platform-art" aria-hidden="true" style="--platform-art:url(\''+esc(tool.art)+'\')"></div>'
+            +'<div class="platform-copy"><div class="platform-meta"><span>'+esc(tool.game)+'</span>'+(tool.status?'<span class="platform-status" id="'+id+'-status">'+esc(tool.status)+'</span>':'')+'</div>'
+            +'<h2 id="'+id+'">'+esc(tool.name)+'</h2><p>'+esc(tool.copy)+'</p>'+action
+            +(tool.more?'<p><a href="'+esc(tool.more.href)+'">'+esc(tool.more.label)+'</a></p>':'')+'</div></article>';
+        };
+        document.getElementById('hubCards').innerHTML=HUB_TOOLS.map(card).join('');
+      })();
+      </script>
+      <noscript><p class="platform-noscript"><a href="../astrix-app/pages/home/">Enter The Forge</a> (Destiny 2). WorkBench (The Division) is coming soon.</p></noscript>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="tools-mission-modal" id="toolsMissionModal" hidden>
+  <div class="tools-mission-backdrop" data-mission-close></div>
+  <section class="tools-mission-dialog" id="toolsMissionDialog" role="dialog" aria-modal="true" aria-labelledby="toolsMissionTitle" aria-describedby="toolsMissionCopy" tabindex="-1">
+    <button class="tools-mission-close" type="button" aria-label="Close the ASTRIX PARADOX mission" data-mission-close>×</button>
+    <div class="tools-mission-brand" aria-hidden="true">
+      <img src="../img/logo.png" alt="">
+      <span>ASTRIX <strong>PARADOX</strong></span>
+    </div>
+    <div class="section-eyebrow">The ASTRIX PARADOX mission</div>
+    <h2 id="toolsMissionTitle">Gaming is better with<br><span>an intelligent partner.</span></h2>
+    <div class="tools-mission-copy" id="toolsMissionCopy">
+      <p>
+        ASTRIX PARADOX is building AI gaming companions that help players understand their character, gear,
+        builds, progress and choices in one clear place. The goal is not to play the game for you. It is to give
+        you the information and insight to play it your way.
+      </p>
+      <p>
+        Destiny 2 is our first proving ground. Every tool that follows will be built around its own game, its own
+        systems and the way its community plays.
+      </p>
+    </div>
+    <div class="tools-mission-actions">
+      <a class="btn-primary" href="../astrix-app/pages/home/">ENTER FORGE</a>
+      <button class="btn-secondary" type="button" data-mission-close>CLOSE</button>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <div class="footer-social">
+    <a href="https://x.com/ASTRIX285" target="_blank">X / Twitter</a>
+    <a href="https://discord.com/invite/6dcyrbpdzN" target="_blank">Discord</a>
+    <a href="https://www.twitch.tv/astrix285x" target="_blank">Twitch</a>
+    <a href="https://www.facebook.com/xASTRIX285x" target="_blank">Facebook</a>
+    <a href="https://www.youtube.com/c/ASTRIX285Gaming" target="_blank">YouTube</a>
+  </div>
+  <div class="gold-line tools-footer-line"></div>
+  <div class="footer-copy">© 2026 ASTRIX PARADOX. Built for the community and shaped around the games players understand best.</div>
+</footer>
+
+<script src="../js/main.js?v=20260913-mobile-nav-1"></script>
+<script type="module" src="tools.mjs"></script>
+<footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
+<script src="/js/ax-brand.js?v=20260929-brand-1" defer></script>
+</body>
+</html>

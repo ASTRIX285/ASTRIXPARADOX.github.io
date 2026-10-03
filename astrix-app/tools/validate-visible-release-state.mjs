@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const read=path=>readFileSync(`${root}${path}`,'utf8');
 
 const activePages=[
-  'tools/index.html',
+  'hub/index.html',
   'astrix-app/index.html',
   'astrix-app/components/guardian-workspace/guardian-workspace.html',
   'astrix-app/pages/guardian-workspace-v1/index.html',
