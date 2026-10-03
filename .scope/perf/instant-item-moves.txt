@@ -8,3 +8,5 @@ astrix-app/pages/vault/vault-transfer-feedback.mjs
 astrix-app/pages/vault/vault.mjs
 astrix-app/tools/test-instant-item-moves.mjs
 astrix-app/tools/validate-vault-foundation.mjs
+astrix-app/tools/test-vault-transfer-feedback.mjs
+astrix-app/module-versions.json

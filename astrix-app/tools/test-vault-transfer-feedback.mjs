@@ -16,7 +16,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${proce
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const source=await readFile(resolve(root,'astrix-app/pages/vault/vault.mjs'),'utf8');
 // Exercise the actual page handlers without booting authentication or a live account.
-const names=['characters','characterClass','characterLabel','workspaceCharacters','equipmentGroupsMarkup','postmasterMarkup','characterColumnMarkup','vaultOnlyMarkup','workspaceItem','carriedReplacement','stageTransfer','transferToActiveCharacter','actionFailureMessage','performPendingVaultAction','dropDestination','validDrop','validFeedbackDrop','clearDropTargets','installTransferEvents'];
+const names=['characters','characterClass','characterLabel','workspaceCharacters','equipmentGroupsMarkup','postmasterMarkup','characterColumnMarkup','vaultOnlyMarkup','workspaceItem','carriedReplacement','stageTransfer','transferToActiveCharacter','actionFailureMessage','performPendingVaultAction','dropDestination','validDrop','validFeedbackDrop','clearDropTargets','installTransferEvents','boundedLiveFetch','settleTransfer'];
 const handlers=names.map(name=>{
  const start=source.search(new RegExp(`^(?:async )?function ${name}\\(`,'m'));
  assert.ok(start>=0,`Production handler ${name} exists`);
@@ -24,7 +24,7 @@ const handlers=names.map(name=>{
  if(firstLine.endsWith('}'))return firstLine;
  const end=source.indexOf('\n}',lineEnd);assert.ok(end>start,`Production handler ${name} closes`);
  return source.slice(start,end+2);
-}).join('\n');
+}).join('\n')+'\n'+source.match(/^const LIVE_ACTION_DEADLINE_MS=[^\n]*$/m)[0];
 const fixture=`
 import {createVaultTransferFeedback} from '/astrix-app/pages/vault/vault-transfer-feedback.mjs';
 import {inventoryGroupsMarkup,equippedAndCarriedMarkup,postmasterMarkup as sharedPostmasterMarkup,bindInventoryWorkspaceInteractions,INVENTORY_GROUPS} from '/astrix-app/shared/guardian-inventory-workspace.mjs';
