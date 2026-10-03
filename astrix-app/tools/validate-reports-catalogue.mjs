@@ -45,6 +45,9 @@ assert.ok(exotic.every((row,index)=>!index||(exotic[index-1].releaseOrder??Infin
 assert.equal(exotic[0].name,'Oblation');
 for(const group of grouped){
  const peers=grouped.filter(other=>other!==group&&other.series===group.series);
- if(group.image&&peers.some(other=>other.image===group.image))assert.ok(group.imageCandidates.every(image=>peers.some(other=>other.image===image)),`${group.name}: shared art despite an available alternative`);
- assert.ok(!group.image||group.imageCandidates.includes(group.image),'Art comes from a variant of this box');
+ // Bungie's generic placeholder.jpg is not an alternative to an activity's own art (3 Oct 2026).
+ if(group.image&&peers.some(other=>other.image===group.image))assert.ok(group.imageCandidates.filter(image=>!/\/placeholder\.jpg$/i.test(image)).every(image=>peers.some(other=>other.image===image)),`${group.name}: shared art despite an available alternative`);
+ // A Conquest or Nightfall with only Bungie's generic placeholder art borrows its base strike's own art (3 Oct 2026).
+ const base=grouped.find(other=>other.id===group.artFrom);
+ assert.ok(!group.image||group.imageCandidates.includes(group.image)||base?.imageCandidates.includes(group.image),'Art comes from a variant of this box or its base strike');
 }

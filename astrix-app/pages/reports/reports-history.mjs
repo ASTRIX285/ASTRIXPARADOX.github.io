@@ -138,11 +138,20 @@ export function modifierNames(hashes,collections){
 
 // Both breakdowns use the same exact-hash run ledger. Aggregate buckets are
 // deliberately excluded: they can collapse historical variants into one hash.
-export function activityAnalysis(activity,records,characters,complete=false){
+// Fastest is a full clear only (3 Oct 2026). A run's start comes from its PGCR
+// (activityWasStartedFromBeginning): starts maps run id to true, false or null. Checkpoint clears stay in
+// Clears (Bungie counts them as completions) and are counted separately. While any clear's start is
+// unknown, fastest covers every clear and fastestAnyStart says so; nothing is guessed.
+export function fastestClear(clears,starts=new Map()){
+  const timed=clears.filter(r=>r.duration>0),start=r=>starts.get(r.id);
+  const unknown=timed.some(r=>typeof start(r)!=='boolean'),pool=unknown?timed:timed.filter(r=>start(r)===true);
+  return {fastest:pool.length?Math.min(...pool.map(r=>r.duration)):null,fastestAnyStart:unknown&&pool.length>0,
+    checkpointClears:clears.filter(r=>start(r)===false).length};
+}
+export function activityAnalysis(activity,records,characters,complete=false,starts=new Map()){
   const rows=[...new Map(records.filter(row=>runMatches(row,activity)).map(row=>[`${row.id}:${row.characterId}`,row])).values()];
-  const count=selected=>({entered:selected.length,cleared:selected.filter(r=>r.completed===true).length,
-    fastest:selected.some(r=>r.completed===true&&r.duration>0)?Math.min(...selected.filter(r=>r.completed===true&&r.duration>0).map(r=>r.duration)):null,
-    notPlayed:complete&&selected.length===0});
+  const count=selected=>{const clears=selected.filter(r=>r.completed===true);return {entered:selected.length,cleared:clears.length,
+    ...fastestClear(clears,starts),notPlayed:complete&&selected.length===0};};
   const labels=[...new Set(activity.variants.map(v=>difficultyFor({hash:v.hash,directorHash:v.hash},activity)))];
   for(const row of rows)if(!labels.includes(difficultyFor(row,activity)))labels.push(difficultyFor(row,activity));
   const difficulties=labels.map(difficulty=>({difficulty,...count(rows.filter(r=>difficultyFor(r,activity)===difficulty))}));

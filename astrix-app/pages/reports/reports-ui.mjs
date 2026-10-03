@@ -1,6 +1,6 @@
 import {SERIES,viewModel,display,duration} from './reports-model.mjs';
 import {createReportsHistory,normalizeDifficulty,difficultyFor,activityAnalysis,clearsConsistent,RUN_PAGE_SIZE} from './reports-history.mjs';
-import {boxRows} from './reports-boxes.mjs';
+import {completed,isEncounter} from './reports-boxes.mjs';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>Number.isFinite(value)?display(value):'Pending';
 const elapsed=value=>Number.isFinite(value)?(value===0?'00:00':duration(value)):'Pending';
@@ -8,7 +8,7 @@ const date=value=>value?new Date(value).toLocaleString('en-GB',{dateStyle:'mediu
 const completion=value=>value===true?'Completed':value===false?'Not completed':'Pending';
 export const difficultyLabel=value=>value==='-'?'Completed':value;
 const className=row=>['Titan','Hunter','Warlock'][row?.classType]||'Guardian';
-const art=activity=>`<div class="reports-art">${activity.image?`<img src="${escape(activity.image)}" alt="" width="320" height="180" loading="lazy" decoding="async">`:''}<h2>${escape(activity.name)}</h2></div>`;
+const art=activity=>`<div class="reports-art${activity.image?'':' is-fallback'}">${activity.image?`<img src="${escape(activity.image)}" alt="" width="320" height="180" loading="lazy" decoding="async">`:''}<h2>${escape(activity.name)}</h2></div>`;
 export const statList=(totals,keys)=>`<dl class="reports-stats">${keys.map(([key,label])=>`<div><dt>${label}</dt><dd>${key==='time'||key==='fastest'?elapsed(totals[key]):number(totals[key])}</dd></div>`).join('')}</dl>`;
 
 export const difficultyRows=activity=>[...activity.difficulties].sort((a,b)=>(b.cleared??0)-(a.cleared??0)).map(row=>`<tr><th scope="row">${escape(row.difficulty==='-'?'Pending':row.difficulty)}</th><td>${number(row.cleared)}</td><td>${elapsed(row.fastest)}</td></tr>`).join('');
@@ -26,14 +26,19 @@ export function runGroups(activity,rows){
   for(const row of rows){const label=difficultyFor(row,activity);if(!groups.has(label))groups.set(label,[]);groups.get(label).push(row);}
   return [...groups].map(([difficulty,runs])=>({difficulty,runs}));
 }
-export function runRows(activity,rows){
-  return runGroups(activity,rows).map(group=>`<section class="reports-run-group" aria-label="${escape(difficultyLabel(group.difficulty))} runs"><h3>${escape(difficultyLabel(group.difficulty))}</h3><ol class="reports-runs">${group.runs.map(r=>`<li><button type="button" data-run="${escape(r.id)}"><time datetime="${escape(r.period)}">${escape(date(r.period))}</time><span class="reports-run-result" data-result="${r.completed===true?'completed':r.completed===false?'incomplete':'pending'}">${completion(r.completed)}</span></button></li>`).join('')}</ol></section>`).join('');
+export function runRows(activity,rows,starts=new Map()){
+  return runGroups(activity,rows).map(group=>`<section class="reports-run-group" aria-label="${escape(difficultyLabel(group.difficulty))} runs"><h3>${escape(difficultyLabel(group.difficulty))}</h3><ol class="reports-runs">${group.runs.map(r=>`<li><button type="button" data-run="${escape(r.id)}"><time datetime="${escape(r.period)}">${escape(date(r.period))}</time><span class="reports-run-result" data-result="${r.completed===true?'completed':r.completed===false?'incomplete':'pending'}">${completion(r.completed)}${r.completed===true&&starts.get(r.id)===false?' · from checkpoint':''}</span></button></li>`).join('')}</ol></section>`).join('');
 }
 export const selectionArt=activity=>activity.image||'';
-// Activity tile (3 Oct 2026): art at 16:9 with the name over it, then one row per difficulty with
-// clears and fastest time from the same view model, "-" when there is none.
-const none=value=>!Number.isFinite(value)||value<=0;
-export const tileBand=activity=>`<span class="rp-band" aria-label="Clears and fastest times"><span class="rp-band-head">Difficulty</span><span class="rp-band-head">Clears</span><span class="rp-band-head">Fastest</span>${boxRows(activity).map(row=>`<span class="rp-band-name">${escape(row.difficulty)}</span><span>${none(row.cleared)?'-':display(row.cleared)}</span><span>${none(row.fastest)?'-':duration(row.fastest)}</span>`).join('')}</span>`;
+// Activity tile (Miguel, 3 Oct 2026): the activity art at 16:9 with its name, in the raised bevel. No
+// numbers on the tile; clears, Fastest and encounters are on the activity page it opens.
+// Completed only: a series lists the activities with at least one clear for the selected characters.
+export const completedActivities=(snapshot,series,character)=>viewModel(snapshot,series,character).activities.filter(completed);
+const NOUNS={raids:'raids',dungeons:'dungeons',vanguard:'Vanguard strikes',conquests:'Conquests','lost-sectors':'Lost Sectors',exotic:'Exotic missions',story:'story missions'};
+export const noneCompleted=series=>`No completed ${NOUNS[series]||'activities'} yet`;
+// Fastest cell: a full clear, or "(any start)" while Bungie has not said how every clear started.
+const fastestCell=row=>`${elapsed(row.fastest)}${row.fastestAnyStart?' <span class="reports-any-start">(any start)</span>':''}`;
+const clearsCell=row=>`${number(row.cleared)}${row.checkpointClears>0?` <span class="reports-checkpoint">(${number(row.checkpointClears)} from checkpoint)</span>`:''}`;
 
 export function mountReports(root,snapshot,{history=createReportsHistory(snapshot)}={}){
   let state=readReportsRoute(location.href,snapshot),disposed=false,busy=false,error='',runData=null,runId=null,runError='',token=0;
@@ -49,8 +54,10 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
     }
     window.history.pushState({},'',url);sync();restoreFocus(previous);
   }
-  const analysis=a=>activityAnalysis(a,history.runs(a,state.character),snapshot.characters,history.complete(state.character));
-  function difficultyTable(data){return data.difficulties.map(d=>`<tr><th scope="row"><button data-difficulty="${escape(d.difficulty)}" aria-pressed="${d.difficulty===state.difficulty}">${escape(difficultyLabel(d.difficulty))}</button></th><td>${d.notPlayed?'Not played':data.pending?'Pending':number(d.cleared)}</td><td>${d.notPlayed?'Not played':data.pending?'Pending':elapsed(d.fastest)}</td></tr>`).join('');}
+  const starts=()=>new Map([...reports].map(([id,model])=>[id,model?.startedFromBeginning]));
+  const analysis=a=>activityAnalysis(a,history.runs(a,state.character),snapshot.characters,history.complete(state.character),starts());
+  function difficultyTable(data,rows){return rows.map(d=>`<tr><th scope="row"><button data-difficulty="${escape(d.difficulty)}" aria-pressed="${d.difficulty===state.difficulty}">${escape(difficultyLabel(d.difficulty))}</button></th><td>${data.pending?'Pending':clearsCell(d)}</td><td>${data.pending?'Pending':fastestCell(d)}</td></tr>`).join('');}
+  const shown=(data,rows)=>rows.filter(d=>data.pending?!d.notPlayed:d.cleared>0);
   function details(a){
     const all=history.runs(a,state.character),data=analysis(a),totals={...data.totals};
     if(!clearsConsistent(data))throw new Error('Reports clear breakdown is inconsistent');
@@ -59,14 +66,15 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
     const known=all.filter(r=>r.completed===true),finished=totals.entered!==null&&history.complete(state.character)&&known.every(r=>reports.has(r.id)&&reports.get(r.id).flawless!==null);
     if(finished&&all.every(r=>r.completed!==null))totals.flawless=known.filter(r=>reports.get(r.id).flawless).length;
     const entered=totals.entered===null&&lowerBound>0?`At least ${number(lowerBound)} · history pending`:number(totals.entered);
-    return `${art(a)}<dl class="reports-stats"><div><dt>Entered</dt><dd>${entered}</dd></div></dl>${statList(totals,[['cleared','Cleared'],['flawless','Flawless'],['kills','Kills']])}<details class="reports-explainer"><summary>About these totals</summary><p>Kills cover all returned history pages for the selected characters. Flawless means completed with no recorded fireteam deaths.</p></details><table><thead><tr><th>Difficulty</th><th>Cleared</th><th>Fastest</th></tr></thead><tbody>${difficultyTable(data)}</tbody></table><h3>Clears by character</h3><table><thead><tr><th>Character</th><th>Cleared</th></tr></thead><tbody>${data.characters.map(c=>`<tr><th scope="row">${className(c)}</th><td>${data.pending?'Pending':number(c.cleared)}</td></tr>`).join('')}</tbody></table>${data.pending?'<p class="reports-note">Clear breakdown pending complete history.</p>':''}${data.aggregateMismatch?`<p class="reports-note">Bungie aggregate: ${number(data.aggregateCleared)} clears. Available run history: ${number(data.totals.cleared)}. Breakdowns use returned runs; historical coverage differs.</p>`:''}`;
+    return `${art(a)}<dl class="reports-stats"><div><dt>Entered</dt><dd>${entered}</dd></div></dl>${statList(totals,[['cleared','Cleared'],['flawless','Flawless'],['kills','Kills']])}<details class="reports-explainer"><summary>About these totals</summary><p>Kills cover all returned history pages for the selected characters. Flawless means completed with no recorded fireteam deaths.</p></details>${(()=>{const tiers=shown(data,data.difficulties.filter(d=>!isEncounter(d.difficulty))),parts=shown(data,data.difficulties.filter(d=>isEncounter(d.difficulty)));
+      return `${tiers.length?`<table><thead><tr><th>Difficulty</th><th>Cleared</th><th>Fastest</th></tr></thead><tbody>${difficultyTable(data,tiers)}</tbody></table>`:''}${parts.length?`<h3>Encounters</h3><table class="reports-encounters"><thead><tr><th>Encounter</th><th>Cleared</th><th>Fastest</th></tr></thead><tbody>${difficultyTable(data,parts)}</tbody></table>`:''}<p class="reports-note">Fastest is a full clear. Runs started from a checkpoint count as clears and are marked.</p>`;})()}<h3>Clears by character</h3><table><thead><tr><th>Character</th><th>Cleared</th></tr></thead><tbody>${data.characters.map(c=>`<tr><th scope="row">${className(c)}</th><td>${data.pending?'Pending':number(c.cleared)}</td></tr>`).join('')}</tbody></table>${data.pending?'<p class="reports-note">Clear breakdown pending complete history.</p>':''}${data.aggregateMismatch?`<p class="reports-note">Bungie aggregate: ${number(data.aggregateCleared)} clears. Available run history: ${number(data.totals.cleared)}. Breakdowns use returned runs; historical coverage differs.</p>`:''}`;
   }
   function runList(a){
     const list=rows(a),page=list.slice(state.page*RUN_PAGE_SIZE,(state.page+1)*RUN_PAGE_SIZE);
-    return `<div class="reports-tabs" aria-label="Difficulty">${['All',...analysis(a).difficulties.map(d=>d.difficulty)].map(d=>{
+    return `<div class="reports-tabs" aria-label="Difficulty">${['All',...analysis(a).difficulties.filter(d=>!d.notPlayed&&(d.cleared>0||d.entered>0)).map(d=>d.difficulty)].map(d=>{
       const never=d!=='All'&&analysis(a).difficulties.find(row=>row.difficulty===d)?.notPlayed;
       return `<button data-difficulty="${escape(d)}" aria-pressed="${d===state.difficulty}" class="rp-tab${never?' reports-unplayed':''}">${escape(difficultyLabel(d))}</button>`;
-    }).join('')}</div><header class="reports-history-heading"><h2>Runs <span>${number(list.length)}</span></h2><p>Newest first within each difficulty. Local date and time.</p></header><p class="reports-history-status" role="status">${error|| (busy?'Loading all history pages…':history.complete(state.character)?'All available history pages loaded.':'History pending.')}</p>${error||failedReports.size?'<button class="rp-tab" data-retry>Retry pending data</button>':''}${runRows(a,page)}${!page.length?`<p>${history.complete(state.character)?'No runs returned for this selection.':'Runs pending.'}</p>`:''}<nav class="reports-paging" aria-label="Run pages"><button class="rp-tab" data-page="${state.page-1}" ${state.page===0?'disabled':''}>Previous</button><span>Page ${state.page+1}</span><button class="rp-tab" data-page="${state.page+1}" ${(state.page+1)*RUN_PAGE_SIZE>=list.length?'disabled':''}>Next</button></nav>`;
+    }).join('')}</div><header class="reports-history-heading"><h2>Runs <span>${number(list.length)}</span></h2><p>Newest first within each difficulty. Local date and time.</p></header><p class="reports-history-status" role="status">${error|| (busy?'Loading all history pages…':history.complete(state.character)?'All available history pages loaded.':'History pending.')}</p>${error||failedReports.size?'<button class="rp-tab" data-retry>Retry pending data</button>':''}${runRows(a,page,starts())}${!page.length?`<p>${history.complete(state.character)?'No runs returned for this selection.':'Runs pending.'}</p>`:''}<nav class="reports-paging" aria-label="Run pages"><button class="rp-tab" data-page="${state.page-1}" ${state.page===0?'disabled':''}>Previous</button><span>Page ${state.page+1}</span><button class="rp-tab" data-page="${state.page+1}" ${(state.page+1)*RUN_PAGE_SIZE>=list.length?'disabled':''}>Next</button></nav>`;
   }
   function memberLink(p){const url=new URL(location.href);url.searchParams.set('subjectId',p.membershipId);url.searchParams.set('subjectType',p.membershipType);for(const key of ['run','page','character','difficulty'])url.searchParams.delete(key);return url.href;}
   const percent=value=>Number.isFinite(value)?`${value.toFixed(1)}%`:'Not available';
@@ -87,29 +95,29 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
     const focusKey=focused&&stage.contains(focused)?['data-run','data-difficulty','data-series','data-page'].find(k=>focused.hasAttribute(k)):null;
     const focusValue=focusKey?focused.getAttribute(focusKey):null;
     const characterFocused=focused?.id==='reportCharacter';
-    const a=activity(),model=viewModel(snapshot,state.series,state.character);
+    const a=activity(),done=completedActivities(snapshot,state.series,state.character),visibleSeries=SERIES.filter(s=>s.id===state.series&&done.length||completedActivities(snapshot,s.id,state.character).length);
     if(a&&state.run){
       const key=`${state.run}:${runData?'ready':runError}`;
       if(key!==renderedRunKey){stage.innerHTML=runPage(a);renderedRunKey=key;stage.querySelector('h1')?.focus({preventScroll:true});}
       return;
     }
     renderedRunKey='';
-    stage.innerHTML=`<aside class="reports-sidebar"><h1>Reports</h1>${snapshot.subject?'<p>Viewing fireteam member</p>':''}<nav class="rp-strip" aria-label="Activity series">${SERIES.map(s=>`<button class="rp-tab" data-series="${s.id}" aria-pressed="${s.id===state.series}">${s.name}</button>`).join('')}</nav><div class="reports-character-filter"><label for="reportCharacter">Character</label><select id="reportCharacter" class="rp-select"><option value="all">All characters</option>${snapshot.characters.map(c=>`<option value="${escape(c.characterId)}" ${c.characterId===state.character?'selected':''}>${className(c)}</option>`).join('')}</select></div></aside><section class="reports-content">${a?`<button class="rp-tab" data-back>Back to Reports</button><div class="reports-detail"><article class="reports-detail-card rp-panel is-open">${details(a)}</article><section class="reports-history rp-panel">${runList(a)}</section></div>`:`<header class="reports-collection-heading"><h2>${escape(SERIES.find(s=>s.id===state.series)?.name||'Activities')}</h2><p>Select an activity to explore its runs.</p></header><div class="reports-grid rp-section">${model.activities.map(a=>`<article class="reports-card rp-tile${a.id===opened?' is-selected':''}"><button class="reports-open rp-tile-face" data-activity="${escape(a.id)}"${a.id===opened?' aria-current="true"':''}>${art(a)}${tileBand(a)}</button></article>`).join('')}</div>`}</section>`;
+    stage.innerHTML=`<aside class="reports-sidebar"><h1>Reports</h1>${snapshot.subject?'<p>Viewing fireteam member</p>':''}<nav class="rp-strip" aria-label="Activity series">${visibleSeries.map(s=>`<button class="rp-tab" data-series="${s.id}" aria-pressed="${s.id===state.series}">${s.name}</button>`).join('')}</nav><div class="reports-character-filter"><label for="reportCharacter">Character</label><select id="reportCharacter" class="rp-select"><option value="all">All characters</option>${snapshot.characters.map(c=>`<option value="${escape(c.characterId)}" ${c.characterId===state.character?'selected':''}>${className(c)}</option>`).join('')}</select></div></aside><section class="reports-content">${a&&!completed(a)?`<button class="rp-tab" data-back>Back to Reports</button><p class="reports-empty" role="status">No completed runs of ${escape(a.name)} yet</p>`:a?`<button class="rp-tab" data-back>Back to Reports</button><div class="reports-detail"><article class="reports-detail-card rp-panel is-open">${details(a)}</article><section class="reports-history rp-panel">${runList(a)}</section></div>`:`<header class="reports-collection-heading"><h2>${escape(SERIES.find(s=>s.id===state.series)?.name||'Activities')}</h2>${done.length?'<p>Select an activity to explore its runs.</p>':''}</header>${done.length?`<div class="reports-grid rp-section">${done.map(a=>`<article class="reports-card rp-tile${a.id===opened?' is-selected':''}"><button class="reports-open rp-tile-face" data-activity="${escape(a.id)}"${a.id===opened?' aria-current="true"':''}>${art(a)}</button></article>`).join('')}</div>`:`<p class="reports-empty" role="status">${noneCompleted(state.series)}</p>`}`}</section>`;
     if(characterFocused)stage.querySelector('#reportCharacter').focus({preventScroll:true});
     if(focusKey)[...stage.querySelectorAll(`[${focusKey}]`)].find(e=>e.getAttribute(focusKey)===focusValue)?.focus({preventScroll:true});
   }
 
   async function enrich(){
-    if(enriching||disposed||!state.activity)return;enriching=true;
+    if(enriching||disposed||!state.activity||!activity()||!completed(activity()))return;enriching=true;
     try{
       const a=activity();if(!a)return;
       const all=history.runs(a,state.character),visible=rows(a).slice(state.page*RUN_PAGE_SIZE,(state.page+1)*RUN_PAGE_SIZE);
-      const ids=[...new Set([...visible,...all.filter(r=>r.completed===true)].map(r=>r.id))].filter(id=>!reports.has(id)&&!failedReports.has(id));
+      const ids=[...new Set([...visible,...all].filter(r=>r.completed===true).map(r=>r.id))].filter(id=>!reports.has(id)&&!failedReports.has(id));
       let next=0;await Promise.all(Array.from({length:Math.min(3,ids.length)},async()=>{while(next<ids.length&&!disposed&&state.activity===a.id){const id=ids[next++];try{reports.set(id,await history.pgcr(id));}catch{failedReports.add(id);}render();}}));
-    }finally{enriching=false;if(!disposed&&state.activity&&history.runs(activity(),state.character).some(r=>(r.completed===true||rows(activity()).slice(state.page*RUN_PAGE_SIZE,(state.page+1)*RUN_PAGE_SIZE).some(v=>v.id===r.id))&&!reports.has(r.id)&&!failedReports.has(r.id)))void enrich();}
+    }finally{enriching=false;if(!disposed&&state.activity&&activity()&&history.runs(activity(),state.character).some(r=>r.completed===true&&!reports.has(r.id)&&!failedReports.has(r.id)))void enrich();}
   }
   async function scan(){
-    if(busy||disposed||!state.activity)return;busy=true;error='';render();
+    if(busy||disposed||!state.activity||!activity()||!completed(activity()))return;busy=true;error='';render();
     try{while(!history.complete()&&!disposed&&state.activity){await history.advance();render();void enrich();}}catch{error='History pending. Retry to continue.';}
     finally{busy=false;render();void enrich();}
   }

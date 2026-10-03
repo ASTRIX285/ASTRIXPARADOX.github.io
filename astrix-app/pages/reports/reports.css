@@ -127,56 +127,70 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution{paddi
 .reports-run-page :is(.reports-meta-label,.reports-run-modifiers,.reports-explainer,.reports-badges span){font-size:14px}
 .reports-run-page>.reports-paging button{font-size:14px}
 
-/* ---------- Reports restyle (Miguel, 3 Oct 2026) ----------
-   One shared set of classes on every series tab and drill-down level:
-   .rp-tab     shell button (Raised fill, hairline, notched corner); the selected one carries the strobe.
-   .rp-tile    raised bevel tile (frame shadow) with .rp-tile-face (notch, bevel, art, stats band).
-   .rp-panel   the same bevel on the activity page, run history and run report.
-   The bevel and the strobe sit on the frame; Bungie art is never tinted. Tokens from astrix-tool-shell.css. */
+/* ---------- Reports design pass (Miguel, 3 Oct 2026) ----------
+   .rp-tile    the activity art in a raised bevel tile, nothing else: Raised fill, a light top and left
+               inner edge and a dark bottom and right inner edge drawn on a frame layer above the art (the
+               art is never tinted), a soft drop shadow under it, the notched top-right corner. The open
+               tile carries the strobe. Clears and times are on the activity page.
+   .rp-strip   series tabs in the shell tab style (the ribbon tabs): uppercase, no box; the selected tab
+               carries the strobe stroke.
+   .rp-tab     shell buttons (difficulty, paging, Back). .rp-select the shell select, no native look.
+   .rp-panel   the same bevel on the activity page, run history and run report. Tokens from astrix-tool-shell.css. */
 .reports-workspace{
-  --rp-bevel-hi:color-mix(in srgb,var(--ax-ink) 16%,transparent);
-  --rp-bevel-hi-lift:color-mix(in srgb,var(--ax-ink) 30%,transparent);
-  --rp-bevel-lo:color-mix(in srgb,var(--ax-black) 88%,transparent);
-  --rp-shadow:color-mix(in srgb,var(--ax-black) 72%,transparent);
-  --rp-shadow-lift:color-mix(in srgb,var(--ax-black) 88%,transparent);
+  --rp-bevel-hi:color-mix(in srgb,var(--ax-ink) 34%,transparent);
+  --rp-bevel-hi-lift:color-mix(in srgb,var(--ax-ink) 52%,transparent);
+  --rp-bevel-lo:color-mix(in srgb,var(--ax-black) 92%,transparent);
+  --rp-shadow:color-mix(in srgb,var(--ax-black) 78%,transparent);
+  --rp-shadow-lift:color-mix(in srgb,var(--ax-black) 92%,transparent);
   --rp-section:color-mix(in srgb,var(--ax-panel) 72%,transparent);
+  --rp-tab-wash:color-mix(in srgb,var(--ax-ember) 20%,transparent);
 }
-/* Shell buttons. */
+/* Shell buttons and the shell select. */
 .reports-workspace .rp-tab,.reports-workspace .rp-select{position:relative;isolation:isolate;min-height:44px;padding:10px 16px;border:1px solid var(--ax-line-strong);border-radius:0;background:var(--ax-raised);color:var(--ax-ink);clip-path:var(--ax-clip);font:600 13px/1.2 var(--ax-font-head);letter-spacing:.04em;white-space:nowrap}
 .reports-workspace .rp-tab:hover{background:var(--ax-raised);border-color:var(--ax-steel)}
 .reports-workspace .rp-tab:focus-visible,.reports-workspace .rp-select:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:2px}
 .reports-workspace .rp-tab[aria-pressed=true]{color:var(--ax-ink);border-color:var(--ax-line-strong);background:color-mix(in srgb,var(--ax-deep) 22%,var(--ax-raised))}
 .reports-workspace .reports-tabs .rp-tab.reports-unplayed:not([aria-pressed=true]){color:var(--ax-muted);background:var(--ax-panel);border-color:var(--ax-line)}
-.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab{padding:10px 16px;border:1px solid var(--ax-line-strong);border-bottom:1px solid var(--ax-line-strong);background:var(--ax-raised);color:var(--ax-ink)}
-.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab[aria-pressed=true]{background:color-mix(in srgb,var(--ax-deep) 22%,var(--ax-raised))}
 .reports-workspace .reports-tabs .rp-tab{font-size:12px;min-height:40px;padding:8px 14px}
+.reports-workspace select.rp-select{-webkit-appearance:none;appearance:none;width:auto;min-width:200px;padding-right:40px;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ax-ink) 50%),linear-gradient(135deg,var(--ax-ink) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  box-shadow:inset 1px 1px 0 var(--rp-bevel-hi),inset -1px -1px 0 var(--rp-bevel-lo)}
+.reports-workspace select.rp-select:hover{border-color:var(--ax-steel)}
+.reports-workspace select.rp-select option{background:var(--ax-panel);color:var(--ax-ink)}
+/* Series tabs: the shell tab style. */
+.reports-workspace .reports-sidebar nav.rp-strip{gap:2px}
+.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab{min-height:44px;padding:0 16px;border:0;border-radius:0;clip-path:none;background:none;box-shadow:none;
+  color:var(--ax-muted);font:700 13px/1 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;text-align:left;transition:color .2s ease}
+.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab:hover{color:var(--ax-ink);background:none}
+.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab[aria-pressed=true]{color:var(--ax-ink);background:linear-gradient(180deg,var(--rp-tab-wash),transparent)}
 /* The strobe stroke: 1.5px on the left and bottom edges, Ember-hi at the bottom-left, fading to the bottom-right, with the pulse. */
-.reports-workspace :is(.rp-tab[aria-pressed=true],.rp-tile.is-selected .rp-tile-face,.rp-panel.is-open)::after{content:"";position:absolute;inset:0;padding:0 0 1.5px 1.5px;pointer-events:none;z-index:3;
+.reports-workspace :is(.rp-tab[aria-pressed=true],.rp-tile.is-selected .rp-tile-face,.rp-panel.is-open)::after{content:"";position:absolute;inset:0;padding:0 0 1.5px 1.5px;pointer-events:none;z-index:4;
   background:linear-gradient(45deg,transparent calc(var(--ax-pulse) - 7%),var(--ax-stroke-pulse) var(--ax-pulse),transparent calc(var(--ax-pulse) + 7%)),
     linear-gradient(45deg,var(--ax-stroke-hi) 0,var(--ax-stroke) 8%,var(--ax-stroke-fade) 45%,transparent 100%);
   -webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0);-webkit-mask-composite:xor;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0);
   filter:drop-shadow(0 0 2px var(--ax-stroke-glow));animation:ax-stroke-pulse 2.8s ease-in-out infinite}
 .reports-workspace :is(.rp-tab[aria-pressed=true]:hover,.rp-tile.is-selected:hover .rp-tile-face)::after{animation-duration:1.4s}
-/* Series and difficulty tabs: one row; on phone and tablet the strip scrolls inside itself. */
-.reports-workspace .reports-sidebar nav.rp-strip{gap:6px}
 .reports-workspace .reports-tabs{gap:6px}
-/* Activity grid on the translucent Panel section. */
-.reports-workspace .reports-grid.rp-section{padding:16px;background:var(--rp-section);border:1px solid var(--ax-line);gap:18px}
-.reports-workspace .reports-card.rp-tile{position:relative;overflow:visible;border:0;border-radius:0;background:transparent;filter:drop-shadow(0 6px 10px var(--rp-shadow));transition:filter 180ms var(--ax-ease)}
-.reports-workspace .rp-tile-face{position:relative;isolation:isolate;display:flex!important;flex-direction:column;width:100%;padding:1px!important;border:0!important;border-radius:0!important;background:var(--ax-raised)!important;clip-path:var(--ax-clip);
-  box-shadow:inset 1px 1px 0 var(--rp-bevel-hi),inset -1px -1px 0 var(--rp-bevel-lo);transition:box-shadow 180ms var(--ax-ease);text-align:left}
-.reports-workspace .rp-tile:hover{filter:drop-shadow(0 8px 14px var(--rp-shadow-lift))}
-.reports-workspace .rp-tile:hover .rp-tile-face{box-shadow:inset 1px 1px 0 var(--rp-bevel-hi-lift),inset -1px -1px 0 var(--rp-bevel-lo)}
-.reports-workspace .rp-tile .reports-art{aspect-ratio:16/9;background:var(--ax-panel)}
+/* Activity grid on the translucent Panel section. Every tile in a row is the same height (16:9 art). */
+.reports-workspace .reports-grid.rp-section{padding:16px;background:var(--rp-section);border:1px solid var(--ax-line);gap:18px;align-items:stretch}
+.reports-workspace .reports-card.rp-tile{position:relative;display:flex;overflow:visible;border:0;border-radius:0;background:transparent;filter:drop-shadow(0 8px 12px var(--rp-shadow));transition:filter 180ms var(--ax-ease)}
+.reports-workspace .rp-tile-face{position:relative;isolation:isolate;display:flex!important;flex:1 1 auto;flex-direction:column;width:100%;padding:0!important;border:0!important;border-radius:0!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ax-ink) 8%,var(--ax-raised)),var(--ax-raised) 45%,color-mix(in srgb,var(--ax-black) 30%,var(--ax-raised)))!important;clip-path:var(--ax-clip);
+  box-shadow:inset 2px 2px 0 var(--rp-bevel-hi),inset -2px -2px 0 var(--rp-bevel-lo);text-align:left}
+/* The bevel edges sit on a frame layer above the art, so they show on every tile. */
+.reports-workspace .rp-tile-face::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 2px 2px 0 var(--rp-bevel-hi),inset -2px -2px 0 var(--rp-bevel-lo);transition:box-shadow 180ms var(--ax-ease)}
+.reports-workspace .rp-tile:hover{filter:drop-shadow(0 10px 16px var(--rp-shadow-lift))}
+.reports-workspace .rp-tile:hover .rp-tile-face::before{box-shadow:inset 2px 2px 0 var(--rp-bevel-hi-lift),inset -2px -2px 0 var(--rp-bevel-lo)}
+.reports-workspace .rp-tile .reports-art{aspect-ratio:16/9;background:var(--ax-panel);margin:0}
+/* Series fallback art when Bungie has no specific image for the activity: a plain panel, never another activity's art. */
+.reports-workspace .reports-art.is-fallback{background:linear-gradient(135deg,color-mix(in srgb,var(--ax-ember) 22%,var(--ax-panel)),var(--ax-panel) 60%)}
 .reports-workspace .rp-tile .reports-art h2{padding:20px 16px 12px;font:600 18px/1.15 var(--ax-font-head);letter-spacing:.01em}
 .reports-workspace .rp-tile:hover .reports-art img{transform:none}
 .reports-workspace .rp-tile-face:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:-3px}
-/* Stats band: one row per difficulty. */
-.reports-workspace .rp-band{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 14px;padding:10px 14px 12px;font:500 13px/1.3 var(--ax-font-head);font-variant-numeric:tabular-nums;color:var(--ax-ink)}
-.reports-workspace .rp-band>span:not(.rp-band-name,.rp-band-head){text-align:right}
-.reports-workspace .rp-band-head{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ax-muted);text-align:right}
-.reports-workspace .rp-band-head:first-child{text-align:left}
-.reports-workspace .rp-band-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ax-muted)}
+/* Completed only: one plain line when nothing is completed. */
+.reports-workspace .reports-empty{margin:0;padding:16px 0;color:var(--ax-muted);font:500 15px/1.4 var(--ax-font-head)}
+.reports-workspace :is(.reports-any-start,.reports-checkpoint){color:var(--ax-muted);font-size:.85em;white-space:nowrap}
 /* Drill-down levels share the bevel. */
 .reports-workspace .rp-panel{position:relative;isolation:isolate;border:0!important;border-radius:0!important;background:var(--ax-raised)!important;clip-path:var(--ax-clip);box-shadow:inset 1px 1px 0 var(--rp-bevel-hi),inset -1px -1px 0 var(--rp-bevel-lo)}
 .reports-workspace .reports-detail-card.rp-panel{padding:1px}
@@ -194,4 +208,4 @@ body.apx-destination-page:has(#reportsWorkspace) > .apx-bungie-attribution{paddi
   .reports-workspace .reports-grid.rp-section{grid-template-columns:minmax(0,1fr)}
   .reports-workspace .reports-grid .rp-tile .reports-art h2{font-size:18px;padding:16px 14px 12px}
 }
-@media(prefers-reduced-motion:reduce){.reports-workspace :is(.rp-tab,.rp-tile-face,.rp-panel)::after{animation:none}.reports-workspace .rp-tile{transition:none}}
+@media(prefers-reduced-motion:reduce){.reports-workspace :is(.rp-tab,.rp-tile-face,.rp-panel)::after{animation:none}.reports-workspace .rp-tile,.reports-workspace .rp-tile-face::before,.reports-workspace .reports-sidebar nav.rp-strip button.rp-tab{transition:none}}
