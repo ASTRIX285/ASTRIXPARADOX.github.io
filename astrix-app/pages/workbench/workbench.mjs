@@ -7,17 +7,12 @@ import { loadCatalogue } from '../../games/division/catalogue.mjs';
 import { createDivisionModule } from '../../games/division/index.mjs';
 import { PLATFORMS, PLATFORM_LABELS } from '../../core/build-format/build.mjs';
 import { createManualAdapter } from '../../platform/adapters/division/manual.mjs';
-import { OBJECTIVES, coreCounts, loadPlatform, openingBuild, pieceCounts, saveBuild, savePlatform, shareLink } from './workbench-state.mjs';
+import { OBJECTIVES, coreCounts, loadItems, loadPlatform, openingBuild, pieceCounts, putItem, removeItem, saveBuild, saveItems, savePlatform, shareLink } from './workbench-state.mjs';
+// The inspect view loads on first use, so it stays off the first paint.
+let inspectView = null;
+const loadInspect = () => (inspectView ??= import('./workbench-inspect.mjs'));
 
 const TITLE = 'td2';
-const FILTERS = Object.freeze([
-  { id: 'all', label: 'All' },
-  { id: 'brand', label: 'Brand sets' },
-  { id: 'gear-set', label: 'Gear sets' },
-  { id: 'named', label: 'Named' },
-  { id: 'exotic', label: 'Exotic' }
-]);
-const TYPE_LABELS = Object.freeze({ brand: 'Brand set', 'gear-set': 'Gear set', named: 'Named', exotic: 'Exotic' });
 
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -25,7 +20,7 @@ const isPending = value => Boolean(value && typeof value === 'object' && value.p
 const storage = (() => { try { return window.localStorage; } catch { return null; } })();
 
 // platform: this device's platform. foreign: the open build is a shared build on another platform (view and duplicate only).
-const state = { module: null, adapter: null, build: null, picker: null, platform: null, foreign: false };
+const state = { module: null, adapter: null, build: null, picker: null, platform: null, foreign: false, items: [], inspect: null };
 
 function pendingNote(reason) {
   return `<p class="wb-pending"><span class="wb-tag">PENDING</span><span>${esc(reason)}</span></p>`;
@@ -35,8 +30,9 @@ function slotCard(slot) {
   const entry = state.build.slots[slot.id];
   const record = entry ? state.module.resolveItem(entry.itemId) : null;
   const itemName = !entry ? 'Empty' : isPending(record) ? entry.itemId : record.name;
-  const cores = entry?.attributes ? state.module.listCoreAttributes().filter(core => core.id in entry.attributes) : [];
-  const meta = !entry ? 'Choose an item' : isPending(record) ? 'Not in the catalogue' : cores.map(core => `${core.name} ${entry.attributes[core.id]}`).join(' · ') || 'No core attribute set';
+  const core = entry?.core ? state.module.listCoreAttributes().find(row => row.id === entry.core.attributeId) : null;
+  const rules = entry && !isPending(record) ? state.module.itemRules(entry.itemId) : null;
+  const meta = !entry ? 'Choose an item' : isPending(record) ? 'Not in the catalogue' : rules?.fixed ? 'Exotic' : core ? `${core.name} ${entry.core.value}` : 'No core attribute set';
   return `<div class="wb-slot${entry ? ' is-filled' : ''}">
     <button class="wb-slot-open" type="button" data-open-slot="${esc(slot.id)}" aria-label="${esc(slot.name)}: ${esc(itemName)}. Change item">
       <span class="wb-slot-label">${esc(slot.name)}</span>
@@ -163,65 +159,27 @@ function toast(text) {
   toast.timer = setTimeout(() => { node.hidden = true; }, 3200);
 }
 
-/* ---------- Item picker and roll editor (screen E) ---------- */
-
-function pickerMarkup() {
-  const { slot, filter, query, selected, coreId, value } = state.picker;
-  const options = state.module.listOptions(slot.id)
-    .filter(row => filter === 'all' || row.type === filter)
-    .filter(row => !query || row.name.toLowerCase().includes(query.toLowerCase()));
-  const anyOptions = state.module.listOptions(slot.id).length > 0;
-  const list = options.length
-    ? `<ul class="wb-options" role="listbox" aria-label="Items for ${esc(slot.name)}">${options.map(row => `<li><button type="button" role="option" class="wb-option" data-pick="${esc(row.id)}" aria-selected="${selected === row.id}" ${row.equippable ? '' : 'disabled aria-disabled="true"'}>
-        <span class="wb-option-name">${esc(row.name)}</span><span class="wb-option-type">${esc(TYPE_LABELS[row.type] ?? row.type)}</span>
-        ${row.equippable ? '' : `<span class="wb-tag">PENDING</span><span class="wb-option-reason">${esc(row.reason)}</span>`}
-      </button></li>`).join('')}</ul>`
-    : `<p class="wb-empty">${anyOptions ? 'Nothing matches that search.' : `No sourced items for ${esc(slot.name)} yet. Items appear here as they are added to the catalogue.`}</p>`;
-  const cores = state.module.listCoreAttributes();
-  const range = coreId ? state.module.attributeRange(coreId) : null;
-  const rangeBody = !coreId ? '<p class="wb-small">Pick a core attribute to set its roll.</p>'
-    : isPending(range) ? pendingNote(range.reason)
-    : `<label class="wb-field"><span>Roll (${range.min} to ${range.max}${range.unit === 'percent' ? '%' : range.unit === 'tier' ? ' tier' : ''})</span><input id="wbRoll" type="number" inputmode="decimal" min="${range.min}" max="${range.max}" step="any" value="${esc(value ?? '')}"></label>`;
-  return `<form method="dialog" class="wb-picker-inner">
-    <header class="wb-picker-head"><h2 id="wbPickerTitle">Choose item · ${esc(slot.name)}</h2><button type="button" class="ax-icon-btn" data-picker-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
-    <div class="wb-picker-body">
-      <div class="wb-picker-list">
-        <label class="wb-field"><span>Search</span><input id="wbSearch" type="search" autocomplete="off" placeholder="Brands, sets, named, exotics" value="${esc(query)}"></label>
-        <div class="wb-filters" role="group" aria-label="Filter">${FILTERS.map(row => `<button type="button" class="wb-chip" data-filter="${row.id}" aria-pressed="${filter === row.id}">${row.label}</button>`).join('')}</div>
-        ${list}
-      </div>
-      <div class="wb-roll">
-        <h3 class="wb-panel-title">Roll editor</h3>
-        <div class="wb-filters" role="group" aria-label="Core attribute">${cores.map(core => `<button type="button" class="wb-chip" data-core="${esc(core.id)}" aria-pressed="${coreId === core.id}">${esc(core.name)}</button>`).join('')}</div>
-        ${rangeBody}
-        <p class="wb-small">Roll limits come from the catalogue. Values outside the min and max are refused.</p>
-      </div>
-    </div>
-    <footer class="wb-picker-foot">
-      <button type="button" data-picker-close>Cancel</button>
-      <button type="button" class="wb-primary" id="wbApply" ${selected ? '' : 'disabled'}>Apply to ${esc(slot.name.toLowerCase())}</button>
-    </footer>
-  </form>`;
-}
+/* ---------- Inspect view (screen N): agent summary, your items, info card ---------- */
 
 function renderPicker() {
   const dialog = $('#wbPicker');
   const focusId = document.activeElement?.id;
-  dialog.innerHTML = pickerMarkup();
-  if (focusId && dialog.querySelector(`#${focusId}`)) {
-    const node = dialog.querySelector(`#${focusId}`);
+  dialog.innerHTML = state.inspect.inspectMarkup({ slot: state.picker.slot, module: state.module, build: state.build, items: state.items, view: state.picker });
+  const node = focusId ? dialog.querySelector(`#${CSS.escape(focusId)}`) : null;
+  if (node) {
     node.focus();
     if (node.setSelectionRange && node.type !== 'number') node.setSelectionRange(node.value.length, node.value.length);
   }
 }
 
-function openPicker(slotId) {
+async function openPicker(slotId) {
+  state.inspect ??= await loadInspect();
   const slots = state.module.listSlots('gear');
   const slot = isPending(slots) ? null : slots.find(row => row.id === slotId);
   if (!slot) return;
-  const entry = state.build.slots[slotId];
-  const coreId = entry?.attributes ? Object.keys(entry.attributes).find(id => state.module.listCoreAttributes().some(core => core.id === id)) ?? null : null;
-  state.picker = { slot, filter: 'all', query: '', selected: entry?.itemId ?? null, coreId, value: coreId ? entry.attributes[coreId] : null, opener: document.activeElement };
+  const equipped = state.build.slots[slotId];
+  const match = equipped ? state.items.find(row => row.slotId === slotId && JSON.stringify(row.entry) === JSON.stringify(equipped)) : null;
+  state.picker = { slot, filter: 'all', query: '', selectedKey: match?.key ?? null, draft: match ? null : equipped ? { ...equipped } : null, editing: false, opener: document.activeElement };
   renderPicker();
   $('#wbPicker').showModal();
   $('#wbSearch')?.focus();
@@ -234,18 +192,51 @@ function closePicker() {
   state.picker = null;
 }
 
-function applyPicker() {
-  const { slot, selected, coreId } = state.picker;
-  const roll = $('#wbRoll');
-  let result = state.adapter.equip(state.build, slot.id, selected, { attributes: state.build.slots[slot.id]?.itemId === selected ? state.build.slots[slot.id].attributes : undefined });
+const currentEntry = () => (state.picker.selectedKey ? state.items.find(row => row.key === state.picker.selectedKey)?.entry : state.picker.draft) ?? null;
+
+/** Read the roll editor fields into the draft. Empty fields are left out; nothing is guessed. */
+function readDraft() {
+  const dialog = $('#wbPicker');
+  const draft = { ...state.picker.draft };
+  const num = id => { const node = dialog.querySelector(`#${id}`); return node && node.value !== '' ? Number(node.value) : undefined; };
+  if (draft.core) { const value = num('wbDraftCore'); draft.core = value === undefined ? draft.core : { attributeId: draft.core.attributeId, value }; }
+  const attributes = {};
+  dialog.querySelectorAll('[data-draft-attr]').forEach(node => { if (node.value !== '') attributes[node.dataset.draftAttr] = Number(node.value); });
+  const lockedAttribute = state.module.itemRules(draft.itemId).lockedAttribute;
+  if (lockedAttribute && !isPending(lockedAttribute.value)) attributes[lockedAttribute.attributeId] = lockedAttribute.value;
+  if (Object.keys(attributes).length) draft.attributes = attributes; else delete draft.attributes;
+  const talent = dialog.querySelector('#wbDraftTalent');
+  if (talent) { if (talent.value) draft.talentId = talent.value; else delete draft.talentId; }
+  const modIds = [...dialog.querySelectorAll('[data-draft-mod]:checked')].map(node => node.dataset.draftMod);
+  if (modIds.length) draft.modIds = modIds; else delete draft.modIds;
+  for (const [id, key] of [['wbDraftExpertise', 'expertise'], ['wbDraftLevel', 'itemLevel']]) { const value = num(id); if (value === undefined) delete draft[key]; else draft[key] = value; }
+  if (draft.core && !Number.isFinite(draft.core.value)) delete draft.core;
+  return draft;
+}
+
+function saveDraft() {
+  const draft = readDraft();
+  const result = putItem(state.items, state.module, { key: state.picker.selectedKey, slotId: state.picker.slot.id, entry: draft });
   if (!result.ok) { toast(result.reason); return; }
-  if (coreId && roll && roll.value !== '') {
-    const withRoll = state.adapter.setAttribute(result.build, slot.id, coreId, Number(roll.value));
-    if (!withRoll.ok) { toast(withRoll.reason); return; }
-    result = withRoll;
+  const wasEquipped = state.picker.selectedKey && JSON.stringify(state.build.slots[state.picker.slot.id]) === JSON.stringify(currentEntry());
+  state.items = result.list;
+  saveItems(storage ?? { setItem() {} }, state.items);
+  state.picker.selectedKey = result.key;
+  state.picker.draft = null;
+  state.picker.editing = false;
+  if (wasEquipped) commit(state.adapter.equip(state.build, state.picker.slot.id, draft.itemId, draft));
+  renderPicker();
+  toast('Item saved to your items on this device.');
+}
+
+function equipCurrent() {
+  const entry = state.picker.editing ? readDraft() : currentEntry();
+  if (!entry) return;
+  const { itemId, ...instance } = entry;
+  if (commit(state.adapter.equip(state.build, state.picker.slot.id, itemId, instance))) {
+    toast(`Equipped in ${state.picker.slot.name.toLowerCase()}.`);
+    closePicker();
   }
-  commit(result);
-  closePicker();
 }
 
 /* ---------- Wiring ---------- */
@@ -288,16 +279,21 @@ function wireEditor() {
     if (event.target === dialog) { closePicker(); return; }
     const target = event.target.closest('button');
     if (!target || !state.picker) return;
+    const view = state.picker;
     if (target.hasAttribute('data-picker-close')) closePicker();
-    else if (target.dataset.filter) { state.picker.filter = target.dataset.filter; renderPicker(); }
-    else if (target.dataset.pick && !target.disabled) { state.picker.selected = target.dataset.pick; renderPicker(); }
-    else if (target.dataset.core) { state.picker.coreId = state.picker.coreId === target.dataset.core ? null : target.dataset.core; state.picker.value = null; renderPicker(); }
-    else if (target.id === 'wbApply') applyPicker();
+    else if (target.dataset.filter) { view.filter = target.dataset.filter; renderPicker(); }
+    else if (target.dataset.selectItem) { view.selectedKey = target.dataset.selectItem; view.draft = null; view.editing = false; renderPicker(); }
+    else if (target.dataset.newItem && !target.disabled) { view.selectedKey = null; view.draft = { itemId: target.dataset.newItem }; view.editing = true; renderPicker(); }
+    else if (target.id === 'wbEditRolls') { view.draft = { ...currentEntry() }; view.editing = true; renderPicker(); }
+    else if (target.id === 'wbCancelEdit') { view.editing = false; if (!view.selectedKey) view.draft = null; renderPicker(); }
+    else if (target.dataset.draftCore) { const draft = readDraft(); view.draft = { ...draft, core: draft.core?.attributeId === target.dataset.draftCore ? undefined : { attributeId: target.dataset.draftCore, value: NaN } }; if (!view.draft.core) delete view.draft.core; renderPicker(); }
+    else if (target.id === 'wbSaveItem') saveDraft();
+    else if (target.id === 'wbEquip') equipCurrent();
+    else if (target.id === 'wbRemoveItem') { state.items = removeItem(state.items, view.selectedKey); saveItems(storage ?? { setItem() {} }, state.items); view.selectedKey = null; renderPicker(); toast('Removed from your items.'); }
   });
   dialog.addEventListener('input', event => {
     if (!state.picker) return;
     if (event.target.id === 'wbSearch') { state.picker.query = event.target.value; renderPicker(); }
-    if (event.target.id === 'wbRoll') state.picker.value = event.target.value;
   });
   dialog.addEventListener('cancel', event => { event.preventDefault(); closePicker(); });
 }
@@ -339,12 +335,14 @@ async function start() {
     state.module = createDivisionModule(catalogue);
     state.adapter = createManualAdapter({ module: state.module, title: TITLE, catalogueVersion: catalogue.catalogueVersion });
     state.platform = loadPlatform(storage);
+    state.items = loadItems(storage);
     const { build, notice, foreign } = await openingBuild({ search: location.search, storage, adapter: state.adapter, platform: state.platform });
     state.build = build;
     state.foreign = foreign;
     if (notice) { const node = $('#wbNotice'); node.textContent = notice; node.hidden = false; }
     render();
     wireEditor();
+    (window.requestIdleCallback ?? setTimeout)(() => loadInspect());
   } catch (error) {
     $('#wbRoot').innerHTML = `<div class="wb-panel wb-error" role="alert"><h2 class="wb-panel-title">The catalogue did not load</h2><p>${esc(error.message)}</p><button type="button" id="wbRetry">Try again</button></div>`;
     $('#wbRetry').addEventListener('click', () => location.reload());

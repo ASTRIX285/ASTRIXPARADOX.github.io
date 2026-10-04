@@ -5,6 +5,7 @@ astrix-app/games/division/catalogue.mjs
 astrix-app/games/division/footer.json
 astrix-app/games/division/index.mjs
 astrix-app/module-versions.json
+astrix-app/pages/workbench/workbench-inspect.mjs
 astrix-app/pages/workbench/workbench-state.mjs
 astrix-app/pages/workbench/workbench.css
 astrix-app/pages/workbench/workbench.mjs

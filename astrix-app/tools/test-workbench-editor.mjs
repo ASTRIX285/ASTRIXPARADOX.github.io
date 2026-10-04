@@ -7,7 +7,8 @@ import {readFileSync, readdirSync} from 'node:fs';
 import {CATALOGUE_FILES, buildCatalogue} from '../games/division/catalogue.mjs';
 import {createDivisionModule} from '../games/division/index.mjs';
 import {createManualAdapter} from '../platform/adapters/division/manual.mjs';
-import {OBJECTIVES, PLATFORM_KEY, STORAGE_KEY, coreCounts, loadPlatform, openingBuild, pieceCounts, saveBuild, savePlatform, shareLink} from '../pages/workbench/workbench-state.mjs';
+import {ITEMS_KEY, OBJECTIVES, PLATFORM_KEY, STORAGE_KEY, agentSummary, compareInstance, coreCounts, itemsForSlot, loadItems, loadPlatform, openingBuild, pieceCounts, putItem, removeItem, saveBuild, saveItems, savePlatform, shareLink} from '../pages/workbench/workbench-state.mjs';
+import {inspectMarkup, rollEditor} from '../pages/workbench/workbench-inspect.mjs';
 import {PLATFORMS} from '../core/build-format/build.mjs';
 
 const dataDir=new URL('../games/division/td2/data/',import.meta.url);
@@ -70,15 +71,17 @@ assert.ok(options.find(row=>row.id==='fixture-brand'&&row.equippable),'A brand c
 // Brand pieces count up; core attributes count up only inside catalogue ranges.
 for(const slot of ['mask','chest','holster'])build=adapter.equip(build,slot,'fixture-brand').build;
 assert.deepEqual(pieceCounts(build,module),[{id:'fixture-brand',name:'Fixture Brand',count:3,pending:false}],'Three brand pieces counted');
-let step=adapter.setAttribute(build,'mask','skill-tier',1);
+let step=adapter.update(build,'mask',{core:{attributeId:'skill-tier',value:1}});
 assert.equal(step.ok,true,'Skill Tier 1 is inside the catalogue range');
 build=step.build;
-assert.equal(adapter.setAttribute(build,'chest','skill-tier',2).ok,false,'A roll above the catalogue max is refused');
-assert.equal(adapter.setAttribute(build,'chest','weapon-damage',10).ok,false,'A roll with no sourced range is refused');
-assert.equal(adapter.setAttribute(build,'gloves','skill-tier',1).ok,false,'An empty slot cannot take a roll');
-assert.deepEqual(coreCounts(build,module).map(row=>[row.id,row.count]),[['weapon-damage',0],['armor',0],['skill-tier',1]],'Core counts follow the rolls');
-build=adapter.clearAttribute(build,'mask','skill-tier').build;
-assert.equal(coreCounts(build,module).find(row=>row.id==='skill-tier').count,0,'Clearing a roll lowers the count');
+assert.equal(adapter.update(build,'chest',{core:{attributeId:'skill-tier',value:2}}).ok,false,'A roll above the catalogue max is refused');
+assert.equal(adapter.update(build,'chest',{core:{attributeId:'weapon-damage',value:10}}).ok,false,'A roll with no sourced range is refused');
+assert.equal(adapter.update(build,'gloves',{core:{attributeId:'skill-tier',value:1}}).ok,false,'An empty slot cannot take a roll');
+assert.deepEqual(coreCounts(build,module).map(row=>[row.id,row.count]),[['weapon-damage',0],['armor',0],['skill-tier',1]],'Core counts follow the core rolls');
+assert.equal(agentSummary(build,module).stats.find(row=>row.id==='skill-tier').value,1,'Skill Tier in the agent summary counts Skill Tier cores');
+assert.ok(agentSummary(build,module).stats.filter(row=>row.id!=='skill-tier').every(row=>row.value.pending),'Damage, armor and health stay pending until the calculation engine exists');
+build=adapter.update(build,'mask',{core:null}).build;
+assert.equal(coreCounts(build,module).find(row=>row.id==='skill-tier').count,0,'Clearing a core lowers the count');
 build=adapter.rename(build,'Fixture build').build;
 build=adapter.setObjective(build,OBJECTIVES[0].id).build;
 assert.equal(OBJECTIVES.length,5,'Five objectives');
@@ -147,5 +150,63 @@ for(const name of CATALOGUE_FILES.td2)assert.ok(page.includes(`<link rel="preloa
 const css=readFileSync(new URL('../pages/workbench/workbench.css',import.meta.url),'utf8');
 assert.doesNotMatch(css,/url\(/,'No background art in the WorkBench styles');
 assert.doesNotMatch(page+css+readFileSync(new URL('../pages/workbench/workbench.mjs',import.meta.url),'utf8'),/[\u2013\u2014]/,'No en or em dashes in WorkBench copy');
+
+// Your items: rolled instances kept on this device, validated, compared against the equipped item.
+const itemModule=createDivisionModule({...fixture,
+  attributes:[...fixture.attributes,{id:'crit-chance',name:'Critical Hit Chance',provenance:capture,kind:'secondary',roll:{min:1,max:6,unit:'percent'}}],
+  items:[...fixture.items,
+    {id:'fixture-named-chest',name:'Fixture Named Chest',provenance:capture,rarity:'named',itemType:'gear',slotId:'chest',talentId:'fixture-locked',lockedAttribute:{attributeId:'crit-chance',value:7,unit:'percent'}},
+    {id:'fixture-exotic-mask',name:'Fixture Exotic Mask',provenance:capture,rarity:'exotic',itemType:'gear',slotId:'mask',talentId:'fixture-exotic-talent'}],
+  talents:[{id:'fixture-locked',name:'Fixture Locked',provenance:capture,appliesTo:'gear',effect:'Fixture talent text.'},{id:'fixture-exotic-talent',name:'Fixture Exotic Talent',provenance:capture,appliesTo:'gear',effect:'Fixture exotic text.'}],
+  mods:[{id:'fixture-mod',name:'Fixture Mod',provenance:capture,modType:'gear'}]});
+let items=[];
+let put=putItem(items,itemModule,{slotId:'mask',entry:{itemId:'fixture-brand',core:{attributeId:'skill-tier',value:1},attributes:{'crit-chance':4},expertise:5,itemLevel:40}});
+assert.equal(put.ok,true,'A high-end instance is added to your items');
+items=put.list;
+put=putItem(items,itemModule,{slotId:'mask',entry:{itemId:'fixture-brand',attributes:{'crit-chance':6}}});
+items=put.list;
+assert.equal(itemsForSlot(items,'mask').length,2,'Two copies of the same item are two instances');
+assert.equal(putItem(items,itemModule,{slotId:'mask',entry:{itemId:'fixture-exotic-mask',talentId:'fixture-locked'}}).ok,false,'An exotic instance with a talent is refused');
+assert.equal(putItem(items,itemModule,{slotId:'mask',entry:{itemId:'fixture-brand',attributes:{'crit-chance':9}}}).ok,false,'A roll above max is refused');
+put=putItem(items,itemModule,{slotId:'mask',entry:{itemId:'fixture-exotic-mask',modIds:['fixture-mod'],expertise:10,itemLevel:40}});
+assert.equal(put.ok,true,'An exotic keeps mods, expertise and item level');
+items=put.list;
+const itemStore=new Map();
+saveItems({setItem:(key,value)=>itemStore.set(key,value)},items);
+assert.deepEqual(loadItems({getItem:key=>itemStore.get(key)??null}),items,'Your items survive a reload');
+assert.ok(itemStore.has(ITEMS_KEY));
+assert.deepEqual(loadItems({getItem(){throw new Error('blocked');}}),[],'Blocked storage gives an empty list, not an error');
+const equippedEntry=items[0].entry;
+assert.deepEqual(compareInstance(items[1].entry,equippedEntry),[{id:'crit-chance',value:6,versus:4,arrow:'up'}],'Compare arrows show a higher roll than the equipped item');
+assert.deepEqual(compareInstance(equippedEntry,items[1].entry).find(row=>row.id==='crit-chance').arrow,'down','and a lower one');
+assert.equal(compareInstance(equippedEntry,null)[0].arrow,null,'No arrow when nothing is equipped');
+items=removeItem(items,items[1].key);
+assert.equal(itemsForSlot(items,'mask').length,2);
+
+// The inspect view: summary, your items with arrows, info card; exotics have no roll editor.
+const slotMask=gearSlots.find(slot=>slot.id==='mask');
+const inspectBuild=createManualAdapter({module:itemModule,title:'td2'}).equip((await adapter.load({platform:'pc'})).build,'mask','fixture-brand',{core:{attributeId:'skill-tier',value:1},attributes:{'crit-chance':4},expertise:5,itemLevel:40}).build;
+const view={filter:'all',query:'',selectedKey:items.find(row=>row.entry.itemId==='fixture-exotic-mask').key,draft:null,editing:false};
+let html=inspectMarkup({slot:slotMask,module:itemModule,build:inspectBuild,items,view});
+for(const label of ['Primary DMG','Primary PvP DMG','RPM','MAG','Total armor','Total health','Skill Tier'])assert.ok(html.includes(`<dt>${label}</dt>`),`Agent summary shows ${label}`);
+assert.ok(html.includes('Mask · Your items (each one rolled differently)'),'Your items for the slot sit in the middle');
+assert.ok(html.includes('Fixture Exotic Talent')&&html.includes('Fixture exotic text.'),'The info card shows the full exotic talent text');
+assert.ok(html.includes('Fixed on this exotic.'),'and says it is fixed');
+assert.ok(!html.includes('id="wbEditRolls">Edit rolls'),'An exotic has no roll editor');
+assert.ok(html.includes('Edit mods and expertise'),'only mods and expertise');
+assert.ok(html.includes('Where to get it')&&html.includes('Drop sources are not in the catalogue yet'),'Where to get it stays pending until sourced');
+assert.ok(html.includes('Equipped'),'The equipped instance is marked');
+const editorHtml=rollEditor(slotMask,itemModule,{itemId:'fixture-exotic-mask'},itemModule.itemRules('fixture-exotic-mask'));
+assert.ok(!editorHtml.includes('data-draft-core')&&!editorHtml.includes('data-draft-attr')&&!editorHtml.includes('wbDraftTalent'),'The exotic editor has no core, attribute or talent fields');
+assert.ok(editorHtml.includes('data-draft-mod')&&editorHtml.includes('wbDraftExpertise')&&editorHtml.includes('wbDraftLevel'),'only mods, expertise and item level');
+const namedEditor=rollEditor(gearSlots.find(slot=>slot.id==='chest'),itemModule,{itemId:'fixture-named-chest'},itemModule.itemRules('fixture-named-chest'));
+assert.ok(namedEditor.includes('locked on this named item')&&!namedEditor.includes('data-draft-attr="crit-chance"')&&!namedEditor.includes('wbDraftTalent'),'A named item shows its locked attribute and talent, not as editable fields');
+view.selectedKey=items.find(row=>row.entry.itemId==='fixture-brand').key;
+html=inspectMarkup({slot:slotMask,module:itemModule,build:inspectBuild,items,view});
+assert.ok(html.includes('id="wbEditRolls">Edit rolls'),'A high-end item has a roll editor');
+assert.match(html,/Critical Hit Chance <strong>4%<\/strong> <small>max 6%<\/small>/,'Each roll is shown against its max');
+assert.doesNotMatch(html,/<img|url\(/,'No art in the inspect view');
+assert.match(css,/body\.workbench-page\{\s*--ax-ember:var\(--wb-accent\)/,'The orange accent is scoped to Division pages (body.workbench-page), not the shared shell');
+assert.doesNotMatch(page+css+html,/SHD|Strategic Homeland/i,'No SHD logo or SHD wording');
 
 console.log('WORKBENCH_EDITOR=PASS every gear slot, pending blocked, rolls in range, share link and reload round trips');

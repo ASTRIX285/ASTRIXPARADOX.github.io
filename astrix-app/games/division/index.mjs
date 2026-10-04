@@ -87,6 +87,31 @@ export function createDivisionModule(catalogue = null) {
       return [...specializations.values()].filter(record => !isPending(record.name));
     },
 
+    /** Attributes of one kind (core or secondary) from the catalogue, in catalogue order. */
+    listAttributes(kind) {
+      return [...attributes.values()].filter(record => !kind || record.kind === kind);
+    },
+
+    /** A talent record (name and full effect text), or a pending value when it is not sourced yet. */
+    resolveTalent(talentId) {
+      return lookup(talents, talentId, 'Talent');
+    },
+
+    /** Talents that apply to gear or weapons. */
+    listTalents(appliesTo) {
+      return [...talents.values()].filter(record => !appliesTo || record.appliesTo === appliesTo);
+    },
+
+    /** A mod record, or a pending value when it is not sourced yet. */
+    resolveMod(modId) {
+      return lookup(mods, modId, 'Mod');
+    },
+
+    /** Mods of one type (gear, skill, weapon). */
+    listMods(modType) {
+      return [...mods.values()].filter(record => !modType || record.modType === modType);
+    },
+
     /** Core attributes from the catalogue, in catalogue order. */
     listCoreAttributes() {
       return [...attributes.values()].filter(record => record.kind === 'core');

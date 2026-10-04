@@ -26,7 +26,7 @@ export function coreCounts(build, module) {
   return module.listCoreAttributes().map(attribute => ({
     id: attribute.id,
     name: attribute.name,
-    count: slots.filter(slot => slot.attributes && attribute.id in slot.attributes).length
+    count: slots.filter(slot => slot.core?.attributeId === attribute.id).length
   }));
 }
 
@@ -106,4 +106,96 @@ export async function openingBuild({ search = '', storage, adapter, platform = n
 /** The full share link for a build on this site. */
 export function shareLink(build, origin) {
   return `${origin}${shareUrl(build)}`;
+}
+
+/* ---------- Your items: the player's own rolled instances, kept on this device ---------- */
+
+export const ITEMS_KEY = 'astrix.workbench.td2.items';
+const ITEM_FIELDS = Object.freeze(['itemId', 'core', 'attributes', 'talentId', 'modIds', 'expertise', 'itemLevel']);
+
+/** The player's saved item instances: [{ key, slotId, entry }]. Anything that no longer reads cleanly is dropped. */
+export function loadItems(storage) {
+  try {
+    const list = JSON.parse(storage?.getItem(ITEMS_KEY) ?? '[]');
+    return Array.isArray(list) ? list.filter(row => row && typeof row.key === 'string' && typeof row.slotId === 'string' && row.entry && typeof row.entry.itemId === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveItems(storage, list) {
+  try {
+    storage.setItem(ITEMS_KEY, JSON.stringify(list));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const cleanEntry = entry => Object.fromEntries(ITEM_FIELDS.filter(key => entry[key] !== undefined && entry[key] !== null).map(key => [key, entry[key]]));
+
+/** Add or replace one instance after the game module accepts it. Returns { ok, list, key } or { ok: false, reason }. */
+export function putItem(list, module, { key = null, slotId, entry }) {
+  const clean = cleanEntry(entry);
+  const errors = module.validateSlot(slotId, clean);
+  if (errors.length) return { ok: false, reason: errors[0] };
+  const nextKey = key ?? `item-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  const next = list.filter(row => row.key !== nextKey);
+  next.push({ key: nextKey, slotId, entry: clean });
+  return { ok: true, list: next, key: nextKey };
+}
+
+export function removeItem(list, key) {
+  return list.filter(row => row.key !== key);
+}
+
+export function itemsForSlot(list, slotId) {
+  return list.filter(row => row.slotId === slotId);
+}
+
+const sameInstance = (a, b) => Boolean(a && b) && JSON.stringify(cleanEntry(a)) === JSON.stringify(cleanEntry(b));
+export { sameInstance };
+
+/**
+ * Compare one instance against the equipped one, stat by stat, like the in-game list: for each core or
+ * attribute both carry, up, down or same. Stats only one of them carries are listed without an arrow.
+ */
+export function compareInstance(entry, equipped) {
+  const rows = [];
+  const value = (instance, id) => (instance?.core?.attributeId === id ? instance.core.value : instance?.attributes?.[id]);
+  const ids = new Set([entry.core?.attributeId, ...Object.keys(entry.attributes ?? {})].filter(Boolean));
+  for (const id of ids) {
+    const mine = value(entry, id);
+    const theirs = value(equipped, id);
+    rows.push({ id, value: mine, versus: theirs ?? null, arrow: theirs === undefined || theirs === null ? null : mine > theirs ? 'up' : mine < theirs ? 'down' : 'same' });
+  }
+  return rows;
+}
+
+/**
+ * The agent summary on the left of the inspect view. Core counts and Skill Tier come from the build
+ * and the catalogue; every stat that needs the calculation engine stays pending until it exists.
+ */
+export function agentSummary(build, module) {
+  const cores = coreCounts(build, module);
+  const tierRecord = module.listCoreAttributes().find(core => core.id === 'skill-tier');
+  let skillTier = { pending: true, reason: 'Skill Tier is not in the catalogue yet.' };
+  if (tierRecord) {
+    const total = Object.values(build.slots).reduce((sum, slot) => sum + (slot.core?.attributeId === 'skill-tier' ? slot.core.value : 0), 0);
+    const cap = tierRecord.cap && !isPending(tierRecord.cap) && !isPending(tierRecord.cap.value) ? tierRecord.cap.value : null;
+    skillTier = cap === null ? total : Math.min(total, cap);
+  }
+  const engine = { pending: true, reason: 'Worked out by the calculation engine, which comes next.' };
+  return {
+    cores,
+    stats: [
+      { id: 'primary-damage', label: 'Primary DMG', value: engine },
+      { id: 'primary-pvp-damage', label: 'Primary PvP DMG', value: engine },
+      { id: 'rpm', label: 'RPM', value: engine },
+      { id: 'magazine', label: 'MAG', value: engine },
+      { id: 'armor', label: 'Total armor', value: engine },
+      { id: 'health', label: 'Total health', value: engine },
+      { id: 'skill-tier', label: 'Skill Tier', value: skillTier }
+    ]
+  };
 }
