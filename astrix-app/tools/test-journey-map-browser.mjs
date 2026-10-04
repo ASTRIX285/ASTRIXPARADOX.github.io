@@ -39,13 +39,15 @@ try{
   await page.goto(`http://127.0.0.1:${server.address().port}/astrix-app/pages/journey/__map-test.html`);
   await page.evaluate(()=>window.ready);
   await page.waitForFunction(()=>document.querySelector('.journey-map-point-count')?.textContent.startsWith('61 points'));
-  assert.equal(await page.locator('.journey-map-image').evaluate(image=>image.naturalWidth),3840);
+  // The map loads the smallest tier (2560, 4K, 6K) that covers its on-screen device pixels.
+  const mapTier=scale=>page.locator('.journey-map-image').evaluate((image,scale)=>{const viewport=image.closest('.journey-map-viewport');const need=viewport.clientWidth*devicePixelRatio*scale*parseFloat(image.style.width)/100;return {natural:image.naturalWidth,expected:[2560,3840,5760].find(width=>width>=need)||5760};},scale);
+  {const tier=await mapTier(1);assert.equal(tier.natural,tier.expected);}
   assert(!requests.some(url=>url.includes('-6k.webp')),'6K must stay lazy until zoom');
   const search=page.getByRole('searchbox');
   await search.fill('Inverted Spire');
   assert.equal(await page.locator('.journey-map-point-list button').count(),1);
   await page.locator('.journey-map-point-list button').click();
-  await page.waitForFunction(()=>document.querySelector('.journey-map-image')?.naturalWidth===5760);
+  await page.waitForFunction(()=>{const image=document.querySelector('.journey-map-image'),viewport=image?.closest('.journey-map-viewport');if(!viewport)return false;const need=viewport.clientWidth*devicePixelRatio*2*parseFloat(image.style.width)/100;return image.naturalWidth===([2560,3840,5760].find(width=>width>=need)||5760);});
   assert.match(await page.locator('.journey-map-point-details h4').innerText(),/Inverted Spire/);
   assert.equal(await page.locator('.journey-map-zoom').innerText(),'200%');
   const viewport=page.locator('.journey-map-viewport');
@@ -65,7 +67,7 @@ try{
     await page.waitForFunction(()=>!document.querySelector('.journey-map-point-count')?.textContent.includes('loading'));
     assert.equal(await page.locator('.journey-location-map').count(),1);
     assert(await page.locator('.journey-map-point-list button').count()>0);
-    assert.equal(await page.locator('.journey-map-image').evaluate(image=>image.naturalWidth),key==='pale-heart'?5760:3840);
+    {const tier=await mapTier(key==='pale-heart'?2:1);assert.equal(tier.natural,tier.expected,`${key} map tier`);}
     assert.equal(await page.locator('.journey-map-zoom').innerText(),key==='pale-heart'?'200%':'100%');
     if(key==='pale-heart'){
       const ratio=await page.locator('.journey-map-viewport').evaluate(node=>node.clientWidth/node.clientHeight);
@@ -165,5 +167,5 @@ try{
     assert(await marker.locator('.journey-map-marker-copy').isVisible());
   }
   await fixturePage.close();
-  console.log('JOURNEY_MAP_BROWSER=PASS switching, 4K/6K, search, keyboard, filters, chest reset, mobile');
+  console.log('JOURNEY_MAP_BROWSER=PASS switching, 2560/4K/6K tiers, search, keyboard, filters, chest reset, mobile');
 }catch(error){if(/Executable doesn't exist/.test(error.message))console.error('NOT RUN: Chromium missing');throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

@@ -262,7 +262,8 @@ for(const key of ['pale-heart','dreaming-city','neomuna','europa','throne-world'
 assert.equal((mapModule.match(/:destinationMap\(/g)??[]).length,9,'Journey must register exactly nine destination-specific Director maps alongside Cosmodrome');
 assert.ok(mapModule.includes("src:'./assets/maps/cosmodrome-director-map-4k.webp'"),'Journey map registry must mount the page-owned Cosmodrome map asset');
 assert.ok(mapModule.includes("detailSrc:'./assets/maps/cosmodrome-director-map-6k.webp'"),'Journey map registry must provide its high-resolution zoom asset');
-assert.ok(mapModule.includes("if(state.scale>1)requestDetailSource();"),'Journey map must request its high-resolution asset only after zoom begins');
+assert.ok(mapModule.includes('viewSrc:`./assets/maps/${key}-director-map-2560.webp`'),'Journey must provide a 2560 Director map for screens that need no more');
+assert.ok(mapModule.includes("    useSourceFor(state.scale);"),'Journey map must request a larger asset only when zoom needs it');
 assert.ok(mapModule.includes("addEventListener('pointermove'"),'Journey map must support pointer panning');
 assert.ok(mapModule.includes("addEventListener('wheel'"),'Journey map must support wheel zooming');
 for(const marker of [

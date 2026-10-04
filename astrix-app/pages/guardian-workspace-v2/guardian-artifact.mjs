@@ -5,7 +5,9 @@
 import { resolveArtifactViewState,resolveIntendedArtifactConfiguration } from './guardian-artifact-state.mjs';
 import {guardianManifest} from './guardian-manifest-service.mjs';
 
-const MANIFEST_URL='../../data/paradox-forge/beta/beta-bungie-manifest-cache.json';
+// The current artifact seed (14 KB) carries the one value this page reads: the artifact hash.
+// The 1.9 MB beta manifest cache stays for tools and tests only.
+const MANIFEST_URL='../../data/paradox-forge/beta/beta-current-artifact.json';
 const BUNGIE_ROOT='https://www.bungie.net';
 const MAX_PERKS=12;
 const PANEL_ICONS=7;
@@ -34,8 +36,7 @@ async function ensureManifest(){
   const [res]=await Promise.all([fetch(MANIFEST_URL,{cache:'no-store'}),guardianManifest.ready()]);
   if(!res.ok)throw new Error(`Artifact manifest load failed: ${res.status}`);
   manifest=await res.json();
-  const curated=Object.values(manifest.artifacts??{})[0]??null;
-  fixtureArtifactHash=Number(curated?.bungieHash??curated?.hash);
+  fixtureArtifactHash=Number(manifest.artifactHash);
   artifactDef=Number.isFinite(fixtureArtifactHash)?await guardianManifest.getAsync('DestinyArtifactDefinition',fixtureArtifactHash):null;
 }
 

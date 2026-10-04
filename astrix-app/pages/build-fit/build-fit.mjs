@@ -167,11 +167,15 @@ async function load(){
   reportPreparedPageStage('start','loadout');
   try{
     if(!page.selection.dim)return;
-    const [loadout,snapshot,session]=await Promise.all([shares.load(page.selection.dim),manifest.ready(),getBungieSession().catch(()=>null)]);
+    // The account payload needs only the session, so it loads alongside the share and manifest.
+    const sessionPromise=getBungieSession().catch(()=>null);
+    const payloadPromise=sessionPromise.then(session=>session?.authenticated?preparedPayload(session):null);
+    payloadPromise.catch(()=>{});
+    const [loadout,snapshot,session]=await Promise.all([shares.load(page.selection.dim),manifest.ready(),sessionPromise]);
     reportPreparedPageStage('session','loadout');
     if(session?.authenticated===false){globalThis.ForgeLoader?.authRequired?.(authStartUrl(location.href));return;}
     if(!session?.authenticated)throw new Error('Bungie is not responding. Reload to retry.');
-    const payload=await preparedPayload(session),binding=sessionBinding(session);
+    const payload=await payloadPromise,binding=sessionBinding(session);
     const adaptation=adaptDimLoadout(loadout,{snapshot,profile:payload.profile,binding,preferredCharacterId:page.selection.characterId,currentSeasonNumber:payload.currentSeasonNumber??null});
     page.inputs={loadout,snapshot,profile:payload.profile,binding,currentSeasonNumber:payload.currentSeasonNumber??null};
     page.adaptation=adaptation;page.plan=createFitPlan(adaptation,{snapshot,profile:payload.profile});

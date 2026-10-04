@@ -53,11 +53,12 @@ export function mountDimImport(){
     const close=()=>{if(importing)return;dialog.close();dialog.remove();button.focus();};dialog.querySelector('[data-close]').onclick=close;dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
     dialog.querySelector('form').addEventListener('submit',async event=>{event.preventDefault();if(importing)return;importing=true;dialog.querySelector('[type=submit]').disabled=true;dialog.querySelector('[role=status]').textContent='Loading loadout…';try{const input=dialog.querySelector('input').value;const review=buildReviewUrl(input,{characterId:context().characterId});if(review){importing=false;location.assign(review);return;}await importDimLoadout(input,{returnFocus:button});dialog.close();dialog.remove();}catch(error){dialog.querySelector('[role=status]').textContent=error.message;}finally{importing=false;dialog.querySelector('[type=submit]').disabled=false;}});
   });
-  // Start indexing after the host has loaded; repeat version checks only on a
-  // visible-tab return. Shares themselves never get background refetched.
+  // The import tables load only when the player reaches for Import (hover, focus or tap),
+  // never on a plain page visit. Version checks repeat on a visible-tab return only once
+  // they are loaded. Shares themselves never get background refetched.
   const warm=()=>{void manifest.ready().catch(()=>{});};
-  if(globalThis.requestIdleCallback)requestIdleCallback(warm,{timeout:5000});else setTimeout(warm,1000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void manifest.refresh().catch(()=>{});});
+  for(const type of ['pointerenter','focus','click'])button.addEventListener(type,warm,{once:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&manifest.snapshot)void manifest.refresh().catch(()=>{});});
   watchDimContext({document,window:globalThis,getModel:()=>currentModel,getContext:context,onCharacter:id=>{selectedCharacterId=id;},invalidate:message=>current?.invalidate(message)});
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountDimImport,{once:true});else mountDimImport();}

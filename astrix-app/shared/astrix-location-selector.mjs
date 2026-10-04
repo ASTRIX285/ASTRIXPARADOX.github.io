@@ -43,18 +43,29 @@ export function initLocationSelector(opts = {}) {
     ph.className = 'apx-atmo-photo';
     ph.dataset.loc = key;
     photos.appendChild(ph);
-    const src = VIS[key] && VIS[key].image;
-    if (src) {
+  });
+  // Photos load on demand: the selected destination first, the others when selected or
+  // hovered/focused in the list. A right-sized WebP first, the original file as fallback.
+  function loadPhoto(key) {
+    const ph = photos.querySelector(`[data-loc="${key}"]`);
+    const vis = VIS[key] || {};
+    if (!ph || ph.dataset.requested || !vis.image) return;
+    ph.dataset.requested = '1';
+    const sources = [vis.image, vis.imageFallback].filter(Boolean);
+    const attempt = (index) => {
+      const src = sources[index];
+      if (!src) return; /* no art yet: colour atmosphere carries this destination */
       const probe = new Image();
       probe.onload = () => {
         ph.style.backgroundImage = `url('${src}')`;
         ph.dataset.loaded = '1';
         if (AD.current() === key) ph.classList.add('is-on');
       };
-      probe.onerror = () => { /* no art yet — colour atmosphere carries this destination */ };
+      probe.onerror = () => attempt(index + 1);
       probe.src = src;
-    }
-  });
+    };
+    attempt(0);
+  }
 
   // ---- selector blocks ----
   const mount = opts.mount;
@@ -80,6 +91,8 @@ export function initLocationSelector(opts = {}) {
       meta.textContent = 'Awaiting data';
       b.append(name, meta);
       b.addEventListener('click', () => AD.set(key));
+      b.addEventListener('pointerenter', () => loadPhoto(key), { once: true });
+      b.addEventListener('focus', () => loadPhoto(key), { once: true });
       list.appendChild(b);
     });
     mount.replaceChildren(list);
@@ -89,6 +102,7 @@ export function initLocationSelector(opts = {}) {
   const detail = opts.detail || null;
 
   function reflectSelection(key) {
+    loadPhoto(key);
     // photos
     [...photos.children].forEach((p) =>
       p.classList.toggle('is-on', p.dataset.loc === key && p.dataset.loaded === '1'));

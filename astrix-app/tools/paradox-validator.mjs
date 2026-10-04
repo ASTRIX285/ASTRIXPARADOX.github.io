@@ -44,6 +44,7 @@ const validators=[
   'validate-single-module-urls.mjs',
   'test-portal-single-skin.mjs',
   'test-home-browser.mjs',
+  'test-asset-weight.mjs', // perf/asset-weight: no first-load image over 300 KB, no full manifest.
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
