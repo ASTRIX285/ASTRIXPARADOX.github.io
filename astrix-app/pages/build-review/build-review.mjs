@@ -167,10 +167,13 @@ async function load(){
   try{
     const sessionPromise=page.session?Promise.resolve(page.session):getBungieSession();
     if(!page.selection.dim){page.session=await sessionPromise.catch(()=>null);return;}
+    // The account payload needs only the session, so it loads alongside the share and manifest.
+    const payloadPromise=page.payload?Promise.resolve(page.payload):sessionPromise.then(session=>session?.authenticated?preparedPayload(session):null);
+    payloadPromise.catch(()=>{});
     const [loadout,snapshot,session]=await Promise.all([shares.load(page.selection.dim),manifest.ready(),sessionPromise.catch(()=>null)]);
     page.session=session;reportPreparedPageStage('session','loadout');
     if(session?.authenticated){
-      page.payload=page.payload||await preparedPayload(session);
+      page.payload=page.payload||await payloadPromise;
       const binding=sessionBinding(session),payload=page.payload;
       const adaptation=adaptDimLoadout(loadout,{snapshot,profile:payload.profile,binding,preferredCharacterId:page.selection.characterId,currentSeasonNumber:payload.currentSeasonNumber??null});
       page.adaptation=adaptation;page.view=sharedBuildView(adaptation);

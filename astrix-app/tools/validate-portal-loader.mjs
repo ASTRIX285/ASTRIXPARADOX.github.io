@@ -97,7 +97,7 @@ assert.match(journeyPageModule,/await Promise\.all\(\[[\s\S]*?waitWithin\(heroCa
 assert.match(journeyPageModule,/function finishJourneyLoader\(root=document\)[\s\S]*?ForgeLoader\.ready\(root\)[\s\S]*?finishJourneyLoader\(document\)/,'Journey final readiness must include the header and body-level artwork');
 assert.doesNotMatch(journeyPageModule,/ForgeLoader\.ready\(dashboard\)/,'Journey must not limit loader readiness to the dashboard subtree');
 assert.match(journeyMaps,/forge:journey-location-map-render-complete/,'Journey location map must publish a durable render-complete event');
-assert.match(journeyMaps,/if\(image\.complete\)queueMicrotask\(\(\)=>finish\(image\.naturalWidth>0\?'ready':'unavailable'\)\)/,'Journey map completion must reconcile cached images');
+assert.match(journeyMaps,/useSourceFor\(state\.scale\);\n\s*if\(image\.complete\)finish\(image\.naturalWidth>0\?'ready':'unavailable'\)/,'Journey map completion must reconcile cached images');
 assert.match(journeyMaps,/try\{if\(status==='ready'&&image\.decode\)await image\.decode\(\);\}catch\{\}/,'Journey map completion must wait for image decoding');
 
 console.log('GLOBAL_PORTAL_SINGLE_OWNER=PASS');

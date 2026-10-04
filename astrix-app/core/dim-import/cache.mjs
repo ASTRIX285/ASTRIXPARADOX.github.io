@@ -12,7 +12,7 @@ export function createImportStorage(indexedDB=globalThis.indexedDB){
     async put(key,value){const db=await open();if(!db)return false;return new Promise(resolve=>{const tx=db.transaction('public','readwrite');tx.objectStore('public').put({key,value});tx.oncomplete=()=>resolve(true);tx.onerror=tx.onabort=()=>resolve(false);});}
   };
 }
-export const IMPORT_TABLES=Object.freeze(['DestinyInventoryItemDefinition','DestinySeasonDefinition','DestinySandboxPerkDefinition','DestinyStatDefinition','DestinySocketCategoryDefinition','DestinySocketTypeDefinition','DestinyPlugSetDefinition','DestinyEquipableItemSetDefinition','DestinyInventoryBucketDefinition','DestinyLoadoutNameDefinition','DestinyLoadoutIconDefinition','DestinyLoadoutColorDefinition']);
+export const IMPORT_TABLES=Object.freeze(['DestinyInventoryItemDefinition','DestinySeasonDefinition','DestinySandboxPerkDefinition','DestinyStatDefinition','DestinySocketCategoryDefinition','DestinySocketTypeDefinition','DestinyEquipableItemSetDefinition','DestinyInventoryBucketDefinition','DestinyLoadoutNameDefinition','DestinyLoadoutIconDefinition','DestinyLoadoutColorDefinition']);
 export class ImportManifest {
   constructor({storage=createImportStorage(),fetchImpl=globalThis.fetch,origin=globalThis.FORGE_AUTH_ORIGIN||'https://auth.astrixparadox.com'}={}){Object.assign(this,{storage,fetchImpl,origin});this.snapshot=null;this.pending=null;this.restorePending=null;}
   async json(path){const response=await this.fetchImpl.call(globalThis,`${this.origin}/bungie/manifest/import/${path}`,{credentials:'omit',signal:AbortSignal.timeout(30000)});if(!response.ok)throw new Error('The full manifest is unavailable. Retry when it finishes updating.');return response.json();}
@@ -32,25 +32,29 @@ export class ImportManifest {
       const index=await this.json('status');const version=index.manifestVersion;
       if(!version)throw new Error('The manifest version is unavailable.');
       if(version===this.snapshot?.version)return this.snapshot;
-      const tables={};
-      // Bounded downloads; an incomplete generation never replaces the usable snapshot.
-      for(const type of IMPORT_TABLES){
+      // Every table's shards share one bounded pool, so the small tables never wait behind the
+      // item table. An incomplete generation never replaces the usable snapshot.
+      const tables={},plans=[],jobs=[];
+      await Promise.all(IMPORT_TABLES.map(async type=>{
         const cached=await this.storage.get(`manifest:${version}:${type}`);
-        if(cached){tables[type]=cached;continue;}
+        if(cached){tables[type]=cached;return;}
         const current=index.tables?.[type],archive=index.retiredTables?.[type];
         if(!current)throw new Error(`Full manifest table unavailable: ${type}`);
-        const rows={},jobs=[];
+        // Keep archives and current definitions separate so current always wins.
+        const plan={type,current,archive,old:{},live:{}};plans.push(plan);
         for(const [descriptor,retired] of [[archive,true],[current,false]]){
           if(!descriptor)continue;
           if(!Number.isInteger(descriptor.shards)||descriptor.shards<1||descriptor.shards>4096)throw new Error('Invalid manifest shard index.');
-          for(let shard=0;shard<descriptor.shards;shard++)jobs.push({shard,retired});
+          for(let shard=0;shard<descriptor.shards;shard++)jobs.push({plan,shard,retired});
         }
-        // Keep archives and current definitions separate so current always wins.
-        const old={},live={};let cursor=0;
-        await Promise.all(Array.from({length:Math.min(4,jobs.length)},async()=>{while(cursor<jobs.length){const {shard,retired}=jobs[cursor++];const query=new URLSearchParams({type,version,shard:String(shard),archive:retired?'1':'0'});const result=await this.json(`shard?${query}`);if(result.manifestVersion!==version||result.type!==type||result.shard!==shard||result.archive!==retired||!result.definitions)throw new Error('Manifest generation changed. Retry.');Object.assign(retired?old:live,result.definitions);}}));
+      }));
+      let cursor=0;
+      await Promise.all(Array.from({length:Math.min(6,jobs.length)},async()=>{while(cursor<jobs.length){const {plan,shard,retired}=jobs[cursor++],type=plan.type;const query=new URLSearchParams({type,version,shard:String(shard),archive:retired?'1':'0'});const result=await this.json(`shard?${query}`);if(result.manifestVersion!==version||result.type!==type||result.shard!==shard||result.archive!==retired||!result.definitions)throw new Error('Manifest generation changed. Retry.');Object.assign(retired?plan.old:plan.live,result.definitions);}}));
+      for(const {type,current,archive,old,live} of plans){
         if(Object.keys(live).length!==current.definitions||(archive&&Object.keys(old).length!==archive.definitions))throw new Error('The full manifest is incomplete.');
-        Object.assign(rows,old,live);tables[type]=rows;await this.storage.put(`manifest:${version}:${type}`,rows);
+        tables[type]={...old,...live};
       }
+      await Promise.all(plans.map(({type})=>this.storage.put(`manifest:${version}:${type}`,tables[type])));
       this.snapshot={version,tables};await this.storage.put('manifest:current',{version});return this.snapshot;
     })().finally(()=>{this.pending=null;});return this.pending;
   }

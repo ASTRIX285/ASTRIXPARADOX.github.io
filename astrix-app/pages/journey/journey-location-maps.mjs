@@ -3,6 +3,7 @@ import {createJourneyMapExplorer} from './journey-map-explorer.mjs';
 import {directorViewBox,directorViewPosition,normaliseRegionChestProgress} from './journey-map-model.mjs';
 
 const destinationMap=(key,name)=>Object.freeze({
+  viewSrc:`./assets/maps/${key}-director-map-2560.webp`,
   src:`./assets/maps/${key}-director-map-4k.webp`,
   detailSrc:`./assets/maps/${key}-director-map-6k.webp`,
   alt:`${name} Director map. Select an activity or point of interest for details.`,
@@ -20,6 +21,7 @@ const JOURNEY_LOCATION_MAPS=Object.freeze({
   'moon':destinationMap('moon','Moon'),
   'kepler':destinationMap('kepler','Kepler'),
   cosmodrome:Object.freeze({
+    viewSrc:'./assets/maps/cosmodrome-director-map-2560.webp',
     src:'./assets/maps/cosmodrome-director-map-4k.webp',
     detailSrc:'./assets/maps/cosmodrome-director-map-6k.webp',
     alt:'Cosmodrome Director map showing Mothyards, The Steps, Skywatch, Forgotten Shore, The Divide and The Breach.',
@@ -448,8 +450,6 @@ function createLocationMap(key,spec){
 
   const image=document.createElement('img');
   image.className='journey-map-image';
-  image.src=initialScale>1&&spec.detailSrc?spec.detailSrc:spec.src;
-  if(initialScale>1&&spec.detailSrc)image.dataset.detailRequested='true';
   image.alt=spec.alt||`${label} Director map.`;
   image.draggable=false;
   image.style.width=`${3840/viewBox.width*100}%`;
@@ -476,10 +476,19 @@ function createLocationMap(key,spec){
   const state={scale:initialScale,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0};
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
 
-  function requestDetailSource(){
-    if(!spec.detailSrc||image.dataset.detailRequested==='true')return;
-    image.dataset.detailRequested='true';
-    image.src=spec.detailSrc;
+  // The smallest map that still covers the device pixels on screen: 2560, then 4K, then 6K.
+  // Zoom and resize upgrade it; it never downgrades.
+  const tiers=[[2560,spec.viewSrc],[3840,spec.src],[5760,spec.detailSrc]].filter(([,src])=>src);
+  let tierIndex=-1;
+  function useSourceFor(scale){
+    const shown=viewport.clientWidth||Math.min(window.innerWidth||1600,1600);
+    const need=shown*(window.devicePixelRatio||1)*scale*3840/viewBox.width;
+    let index=tiers.findIndex(([width])=>width>=need);
+    if(index<0)index=tiers.length-1;
+    if(index<=tierIndex)return;
+    tierIndex=index;
+    image.src=tiers[index][1];
+    if(tiers[index][1]===spec.detailSrc)image.dataset.detailRequested='true';
   }
 
   function applyMapPosition(){
@@ -496,7 +505,7 @@ function createLocationMap(key,spec){
 
   function setScale(next){
     state.scale=Math.round(clamp(next,1,3)*4)/4;
-    if(state.scale>1)requestDetailSource();
+    useSourceFor(state.scale);
     if(state.scale===1){state.x=0;state.y=0;}
     applyMapPosition();
     explorer.refreshMarkers(state.scale);
@@ -562,14 +571,19 @@ function createLocationMap(key,spec){
       document.dispatchEvent(new CustomEvent(MAP_RENDER_EVENT,{detail}));
       resolve(detail);
     };
-    if(image.complete)queueMicrotask(()=>finish(image.naturalWidth>0?'ready':'unavailable'));
-    else{
-      image.addEventListener('load',()=>finish('ready'),{once:true});
-      image.addEventListener('error',()=>finish('unavailable'),{once:true});
-    }
+    // The caller mounts the figure in the same task, so the viewport can be measured first.
+    queueMicrotask(()=>{
+      useSourceFor(state.scale);
+      if(image.complete)finish(image.naturalWidth>0?'ready':'unavailable');
+      else{
+        image.addEventListener('load',()=>finish('ready'),{once:true});
+        image.addEventListener('error',()=>finish('unavailable'),{once:true});
+      }
+    });
   });
   const resizeObserver=new ResizeObserver(()=>{
     if(!figure.isConnected){resizeObserver.disconnect();return;}
+    if(tierIndex>=0)useSourceFor(state.scale);
     applyMapPosition();explorer.refreshMarkers(state.scale);
   });
   resizeObserver.observe(viewport);
