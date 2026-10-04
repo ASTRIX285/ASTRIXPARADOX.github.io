@@ -1,0 +1,22 @@
+# perf/module-preload: generated modulepreload, font preload and preconnect head hints; DIM import lazy.
+astrix-app/index.html
+astrix-app/module-versions.json
+astrix-app/pages/build-fit/index.html
+astrix-app/pages/build-review/index.html
+astrix-app/pages/forge-loader/index.html
+astrix-app/pages/forge-loader/results/index.html
+astrix-app/pages/guardian-workspace-v2/guardian-workspace-v2.mjs
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs
+astrix-app/pages/home/index.html
+astrix-app/pages/journey/index.html
+astrix-app/pages/loadout/index.html
+astrix-app/pages/mission-reports/index.html
+astrix-app/pages/reports/index.html
+astrix-app/pages/sign-in/index.html
+astrix-app/pages/tool-intro/index.html
+astrix-app/pages/vault/index.html
+astrix-app/tools/build-module-versions.mjs
+astrix-app/tools/module-graph.mjs
+astrix-app/tools/validate-single-module-urls.mjs

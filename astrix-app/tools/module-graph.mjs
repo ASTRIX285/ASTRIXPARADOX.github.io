@@ -28,7 +28,11 @@ export function moduleRefs(source){
   const refs=[];
   for(const match of source.matchAll(MODULE_REF)){
     if(match[1]==='`'&&match[2].includes('${'))continue;
-    refs.push({quote:match[1],path:match[2],query:match[3]||'',index:match.index,length:match[0].length});
+    // static: import/export ... from, or a bare import. dynamic: import(). other: any other string
+    // (worker entry URLs, stylesheet helpers), which never loads with the page on its own.
+    const before=source.slice(Math.max(0,match.index-24),match.index);
+    const kind=/\bimport\s*\(\s*$/.test(before)?'dynamic':/(?:\bfrom|(?:^|[^.\w$])import)\s*$/.test(before)?'static':'other';
+    refs.push({quote:match[1],path:match[2],query:match[3]||'',index:match.index,length:match[0].length,kind});
   }
   return refs;
 }
@@ -65,6 +69,16 @@ export async function appGraph(){
     if(/astrix-app\/.*\.m?js/.test(source))pages.set(site,{site,file,source,refs:htmlRefs(source).map(ref=>({...ref,target:resolveSite(site,ref.path)}))});
   }
   return {modules,pages};
+}
+
+/** Modules a page needs on first render: entries plus their static imports, transitively. */
+export function staticReachable(modules,entries){
+  const seen=new Set(),queue=[...entries];
+  while(queue.length){
+    const site=queue.shift();if(seen.has(site)||!modules.has(site))continue;seen.add(site);
+    for(const ref of modules.get(site).refs)if(ref.kind==='static'&&!seen.has(ref.target))queue.push(ref.target);
+  }
+  return seen;
 }
 
 /** Modules reachable from a set of entry sites through static and literal dynamic references. */

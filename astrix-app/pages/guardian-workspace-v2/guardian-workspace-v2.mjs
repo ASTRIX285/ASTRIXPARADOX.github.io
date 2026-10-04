@@ -1,4 +1,3 @@
-import '../../core/dim-import/entry.mjs';
 import "./guardian-semantic-interceptor.mjs";
 import {
   normaliseLiveProfile,
@@ -500,3 +499,5 @@ installCharacterInventory();
 setStageState("ready");
 
 export { renderSubclassBuild, renderStats, renderVerifiedPreview, resolvedDisplayIcon };
+// DIM import sits behind a click: it loads after the first screen, on idle.
+if(typeof document!=='undefined'){const loadDimImport=()=>import('../../core/dim-import/entry.mjs');if(globalThis.requestIdleCallback)requestIdleCallback(loadDimImport,{timeout:3000});else setTimeout(loadDimImport,1);}
