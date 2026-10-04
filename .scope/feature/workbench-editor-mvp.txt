@@ -1,13 +1,20 @@
-# feature/workbench-editor-mvp: WorkBench editor screen (brief 6).
+# feature/workbench-editor-mvp: WorkBench editor screen (brief 6), platform switch, per-game footers, hub/workbench import map.
 .github/workflows/validate-division.yml
+astrix-app/games/destiny-2/footer.json
 astrix-app/games/division/catalogue.mjs
+astrix-app/games/division/footer.json
 astrix-app/games/division/index.mjs
 astrix-app/module-versions.json
 astrix-app/pages/workbench/workbench-state.mjs
 astrix-app/pages/workbench/workbench.css
 astrix-app/pages/workbench/workbench.mjs
 astrix-app/platform/adapters/division/manual.mjs
+astrix-app/tools/footer-rules.mjs
+astrix-app/tools/module-graph.mjs
 astrix-app/tools/paradox-validator.mjs
 astrix-app/tools/test-division-build-format.mjs
+astrix-app/tools/test-game-footers.mjs
 astrix-app/tools/test-workbench-editor.mjs
+astrix-app/tools/validate-bungie-footer.mjs
+astrix-app/tools/validate-single-module-urls.mjs
 hub/workbench/td2/index.html

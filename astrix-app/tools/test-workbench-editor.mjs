@@ -7,7 +7,8 @@ import {readFileSync, readdirSync} from 'node:fs';
 import {CATALOGUE_FILES, buildCatalogue} from '../games/division/catalogue.mjs';
 import {createDivisionModule} from '../games/division/index.mjs';
 import {createManualAdapter} from '../platform/adapters/division/manual.mjs';
-import {OBJECTIVES, STORAGE_KEY, coreCounts, openingBuild, pieceCounts, saveBuild, shareLink} from '../pages/workbench/workbench-state.mjs';
+import {OBJECTIVES, PLATFORM_KEY, STORAGE_KEY, coreCounts, loadPlatform, openingBuild, pieceCounts, saveBuild, savePlatform, shareLink} from '../pages/workbench/workbench-state.mjs';
+import {PLATFORMS} from '../core/build-format/build.mjs';
 
 const dataDir=new URL('../games/division/td2/data/',import.meta.url);
 const files=readdirSync(dataDir).filter(name=>name.endsWith('.json')).sort();
@@ -42,7 +43,8 @@ const fixture={...real,
 };
 const module=createDivisionModule(fixture);
 const adapter=createManualAdapter({module,title:'td2',catalogueVersion:fixture.catalogueVersion});
-let {build}=await adapter.load();
+let {build}=await adapter.load({platform:'pc'});
+assert.equal(build.platform,'pc','A new build carries the device platform');
 assert.equal(build.catalogueVersion,fixture.catalogueVersion,'A new build records the catalogue it was made against');
 
 // Add and remove an item in every gear slot.
@@ -84,32 +86,63 @@ assert.equal(OBJECTIVES.length,5,'Five objectives');
 // Share link round trip, and a reload keeps the build.
 const link=shareLink(build,'https://astrixparadox.com');
 assert.match(link,/^https:\/\/astrixparadox\.com\/hub\/workbench\/td2\/\?b=1\.[A-Za-z0-9_-]+$/,'Share link uses the WorkBench route');
-const fromLink=await openingBuild({search:link.slice(link.indexOf('?')),storage:null,adapter});
-assert.deepEqual(fromLink,{build,source:'link',notice:''},'Opening a share link gives back the identical build');
+const fromLink=await openingBuild({search:link.slice(link.indexOf('?')),storage:null,adapter,platform:'pc'});
+assert.deepEqual(fromLink,{build,source:'link',notice:'',foreign:false},'Opening a share link gives back the identical build');
 
 const store=new Map();
 const storage={getItem:key=>store.get(key)??null,setItem:(key,value)=>store.set(key,value)};
 assert.equal(saveBuild(storage,build),true);
 assert.ok(store.has(STORAGE_KEY));
-const reloaded=await openingBuild({search:'',storage,adapter});
-assert.deepEqual(reloaded,{build,source:'saved',notice:''},'A reload brings back the saved build');
-const broken=await openingBuild({search:'?b=1.not-a-build',storage,adapter});
+const reloaded=await openingBuild({search:'',storage,adapter,platform:'pc'});
+assert.deepEqual(reloaded,{build,source:'saved',notice:'',foreign:false},'A reload brings back the saved build');
+assert.equal(JSON.parse(store.get(STORAGE_KEY)).platform,'pc','The saved build carries its platform');
+const broken=await openingBuild({search:'?b=1.not-a-build',storage,adapter,platform:'pc'});
 assert.equal(broken.source,'saved','A broken link falls back to the saved build');
 assert.match(broken.notice,/could not be read/,'A broken link says so');
 const blocked={getItem(){throw new Error('blocked');},setItem(){throw new Error('blocked');}};
 assert.equal(saveBuild(blocked,build),false,'Blocked storage is reported, not thrown');
-assert.equal((await openingBuild({search:'',storage:blocked,adapter})).source,'new','Blocked storage opens a new build');
+assert.equal((await openingBuild({search:'',storage:blocked,adapter,platform:'xbox'})).source,'new','Blocked storage opens a new build');
+
+// Platform: remembered per device, never assumed, carried by every saved build and share link.
+const device=new Map();
+const deviceStore={getItem:key=>device.get(key)??null,setItem:(key,value)=>device.set(key,value)};
+assert.equal(loadPlatform(deviceStore),null,'No platform until the player picks one');
+const firstVisit=await openingBuild({search:'',storage:deviceStore,adapter,platform:loadPlatform(deviceStore)});
+assert.deepEqual({build:firstVisit.build,source:firstVisit.source},{build:null,source:'needs-platform'},'A first visit asks for a platform instead of assuming one');
+assert.equal(savePlatform(deviceStore,'switch'),false,'An unknown platform is not remembered');
+assert.equal(savePlatform(deviceStore,'playstation'),true);
+assert.equal(device.get(PLATFORM_KEY),'playstation');
+assert.equal(loadPlatform(deviceStore),'playstation','The platform is remembered on this device');
+assert.equal(loadPlatform(blocked),null,'Blocked storage gives no platform rather than a guess');
+const mine=(await openingBuild({search:'',storage:deviceStore,adapter,platform:'playstation'})).build;
+assert.equal(mine.platform,'playstation','A new build is made on the remembered platform');
+for(const platform of PLATFORMS){
+  const onPlatform=adapter.duplicate(build,platform).build;
+  const opened=await openingBuild({search:shareLink(onPlatform,'https://astrixparadox.com').replace(/^[^?]+/,''),storage:null,adapter,platform:'playstation'});
+  assert.equal(opened.build.platform,platform,`A ${platform} share link opens on ${platform}`);
+  assert.equal(opened.foreign,platform!=='playstation',`A ${platform} build is ${platform==='playstation'?'yours':'shared from another platform'} on a PlayStation device`);
+  const store2=new Map();
+  saveBuild({setItem:(key,value)=>store2.set(key,value)},onPlatform);
+  assert.equal(JSON.parse(store2.get(STORAGE_KEY)).platform,platform,`A saved ${platform} build keeps its platform`);
+}
+const sharedPc=(await openingBuild({search:shareLink(build,'https://astrixparadox.com').replace(/^[^?]+/,''),storage:null,adapter,platform:'xbox'}));
+assert.equal(sharedPc.foreign,true,'A PC build opened on an Xbox device opens as a shared build');
+const copied=adapter.duplicate(sharedPc.build,'xbox');
+assert.equal(copied.build.platform,'xbox','It can be duplicated onto your platform');
+assert.deepEqual({...copied.build,platform:'pc'},sharedPc.build,'The duplicate keeps everything else');
+assert.equal(sharedPc.build.platform,'pc','The shared build itself is unchanged');
 
 // The page: disclaimers, no unapproved art, typography, plain module path.
 const page=readFileSync(new URL('../../hub/workbench/td2/index.html',import.meta.url),'utf8');
-assert.ok(page.includes('Unofficial fan-made tool. Not affiliated with or endorsed by Ubisoft or Massive Entertainment.'),'Unofficial Ubisoft disclaimer in the footer');
-assert.ok(page.includes('Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.'),'Site-wide Bungie attribution kept');
+const divisionFooter=JSON.parse(readFileSync(new URL('../games/division/footer.json',import.meta.url),'utf8'));
+for(const line of divisionFooter.lines)assert.ok(page.includes(line),`Division footer line present word for word: ${line.slice(0,50)}`);
+assert.doesNotMatch(page,/Bungie/,'No Bungie line on a Division page');
 const images=[...page.matchAll(/<img[^>]+src="([^"]+)"/g)].map(match=>match[1]);
 assert.ok(images.every(src=>src==='/img/ax-logo-160.webp'),`Only the ASTRIX logo, no game art: ${images.join(', ')}`);
 assert.doesNotMatch(page,/divition|ubisoft[^"]*\.(?:jpe?g|png|webp)|url\(/i,'No Ubisoft or Division image on the page');
 assert.ok(page.includes('https://use.typekit.net/tnp6kbq.css')&&page.includes('/css/astrix-site-typography.css'),'Site typography loaded');
-assert.ok(page.includes('<script type="module" src="/astrix-app/pages/workbench/workbench.mjs"></script>'),'One module entry, plain path');
-assert.doesNotMatch(page,/\.mjs\?v=/,'No hand-written ?v= on a JS import');
+assert.match(page,/<script type="importmap" data-module-versions>/,'The page carries a generated import map like every other tool page');
+assert.match(page,/<script type="module" src="\/astrix-app\/pages\/workbench\/workbench\.mjs\?v=[0-9a-f]{10}"><\/script>/,'One module entry, stamped by build-module-versions.mjs');
 for(const name of CATALOGUE_FILES.td2)assert.ok(page.includes(`<link rel="preload" href="/astrix-app/games/division/td2/data/${name}" as="fetch" crossorigin>`),`${name} is preloaded, so the catalogue does not wait for the modules`);
 const css=readFileSync(new URL('../pages/workbench/workbench.css',import.meta.url),'utf8');
 assert.doesNotMatch(css,/url\(/,'No background art in the WorkBench styles');

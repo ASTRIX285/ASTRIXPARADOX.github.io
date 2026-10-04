@@ -5,8 +5,9 @@
  */
 import { loadCatalogue } from '../../games/division/catalogue.mjs';
 import { createDivisionModule } from '../../games/division/index.mjs';
+import { PLATFORMS, PLATFORM_LABELS } from '../../core/build-format/build.mjs';
 import { createManualAdapter } from '../../platform/adapters/division/manual.mjs';
-import { OBJECTIVES, coreCounts, openingBuild, pieceCounts, saveBuild, shareLink } from './workbench-state.mjs';
+import { OBJECTIVES, coreCounts, loadPlatform, openingBuild, pieceCounts, saveBuild, savePlatform, shareLink } from './workbench-state.mjs';
 
 const TITLE = 'td2';
 const FILTERS = Object.freeze([
@@ -23,7 +24,8 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&a
 const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 const storage = (() => { try { return window.localStorage; } catch { return null; } })();
 
-const state = { module: null, adapter: null, build: null, picker: null };
+// platform: this device's platform. foreign: the open build is a shared build on another platform (view and duplicate only).
+const state = { module: null, adapter: null, build: null, picker: null, platform: null, foreign: false };
 
 function pendingNote(reason) {
   return `<p class="wb-pending"><span class="wb-tag">PENDING</span><span>${esc(reason)}</span></p>`;
@@ -75,9 +77,30 @@ function countsPanels() {
       <p class="wb-small">Catalogue ${esc(state.module.getMetadata().catalogueVersion)}. Every value comes from an official Ubisoft post or an in-game capture, with its game version. Anything without a source shows PENDING and can't be equipped.</p></section>`;
 }
 
+function switches() {
+  return `<div class="wb-switches">
+    <div class="wb-switch" role="group" aria-label="Game"><span class="wb-switch-label">Game</span><button type="button" class="wb-chip" aria-pressed="true" disabled>The Division 2</button></div>
+    <div class="wb-switch" role="group" aria-label="Platform"><span class="wb-switch-label">Platform</span>${PLATFORMS.map(platform => `<button type="button" class="wb-chip" data-platform="${platform}" aria-pressed="${state.platform === platform}">${PLATFORM_LABELS[platform]}</button>`).join('')}</div>
+  </div>`;
+}
+
+function sharedBanner() {
+  if (!state.foreign) return '';
+  const theirs = PLATFORM_LABELS[state.build.platform];
+  const action = state.platform
+    ? `<button type="button" class="wb-primary" id="wbDuplicate">Duplicate onto ${PLATFORM_LABELS[state.platform]}</button>`
+    : '<span class="wb-small">Choose your platform above to duplicate it.</span>';
+  return `<div class="wb-shared" role="status"><p>Shared build for <strong>${esc(theirs)}</strong>. It stays as shared until you duplicate it onto your platform.</p>${action}</div>`;
+}
+
 function render() {
   const build = state.build;
-  $('#wbRoot').innerHTML = `
+  if (!build) {
+    $('#wbRoot').innerHTML = `${switches()}<section class="wb-panel wb-start" aria-labelledby="wbStartTitle"><h2 class="wb-panel-title" id="wbStartTitle">Choose your platform</h2>
+      <p class="wb-small">Builds are saved and shared with their platform. PC covers Ubisoft Connect, Steam, Epic and Luna, which share one agent. Pick yours above to start.</p></section>`;
+    return;
+  }
+  $('#wbRoot').innerHTML = `${switches()}${sharedBanner()}
     <section class="wb-toolbar" aria-label="Build">
       <label class="wb-field wb-name"><span>Build name</span><input id="wbName" type="text" maxlength="80" autocomplete="off" value="${esc(build.name)}" placeholder="Name this build"></label>
       <div class="wb-objectives" role="group" aria-label="Objective">
@@ -86,7 +109,7 @@ function render() {
       <div class="wb-actions">
         <button type="button" id="wbNew">New build</button>
         <button type="button" id="wbSave">Save</button>
-        <button type="button" id="wbShare" class="wb-primary">Share link</button>
+        <button type="button" id="wbShare"${state.foreign ? '' : ' class="wb-primary"'}>Share link</button>
       </div>
     </section>
     <div class="wb-layout">
@@ -105,9 +128,31 @@ function render() {
 function commit(result) {
   if (!result.ok) { toast(result.reason); return false; }
   state.build = result.build;
-  saveBuild(storage ?? { setItem() {} }, state.build);
+  if (!state.foreign) saveBuild(storage ?? { setItem() {} }, state.build);
   render();
   return true;
+}
+
+/** A shared build from another platform is view only until it is duplicated. */
+function editable() {
+  if (!state.foreign) return true;
+  toast(state.platform ? `Duplicate this build onto ${PLATFORM_LABELS[state.platform]} to edit it.` : 'Choose your platform, then duplicate this build to edit it.');
+  return false;
+}
+
+async function choosePlatform(platform) {
+  state.platform = platform;
+  savePlatform(storage ?? { setItem() {} }, platform);
+  if (!state.build) { commit(await state.adapter.load({ platform })); return; }
+  if (state.foreign) {
+    state.foreign = state.build.platform !== platform;
+    if (!state.foreign) saveBuild(storage ?? { setItem() {} }, state.build);
+    render();
+    return;
+  }
+  // The player's own build moves with their platform, so every saved build and link carries it.
+  if (state.build.platform !== platform) { commit(state.adapter.duplicate(state.build, platform)); toast(`Build set to ${PLATFORM_LABELS[platform]}.`); }
+  else render();
 }
 
 function toast(text) {
@@ -210,11 +255,22 @@ function wireEditor() {
   root.addEventListener('click', event => {
     const target = event.target.closest('button');
     if (!target) return;
+    if (target.dataset.platform) { choosePlatform(target.dataset.platform); return; }
+    if (target.id === 'wbDuplicate') {
+      const copy = state.adapter.duplicate(state.build, state.platform);
+      if (!copy.ok) { toast(copy.reason); return; }
+      state.foreign = false;
+      history.replaceState(null, '', location.pathname);
+      commit(copy);
+      toast(`Duplicated onto ${PLATFORM_LABELS[state.platform]} and saved on this device.`);
+      return;
+    }
+    if ((target.dataset.openSlot || target.dataset.clearSlot || target.dataset.objective || target.id === 'wbSave' || target.id === 'wbNew') && !editable()) return;
     if (target.dataset.openSlot) openPicker(target.dataset.openSlot);
     else if (target.dataset.clearSlot) commit(state.adapter.unequip(state.build, target.dataset.clearSlot));
     else if (target.dataset.objective) commit(state.adapter.setObjective(state.build, state.build.objective === target.dataset.objective ? null : target.dataset.objective));
     else if (target.id === 'wbSave') toast(saveBuild(storage ?? { setItem() { throw new Error(); } }, state.build) ? 'Build saved on this device.' : 'This browser blocks saving. Use Share link to keep the build.');
-    else if (target.id === 'wbNew') state.adapter.load().then(({ build }) => { commit({ ok: true, build }); toast('New build started.'); });
+    else if (target.id === 'wbNew') state.adapter.load({ platform: state.platform }).then(result => { if (commit(result)) toast('New build started.'); });
     else if (target.id === 'wbShare') {
       const link = shareLink(state.build, location.origin);
       history.replaceState(null, '', link.slice(location.origin.length));
@@ -222,6 +278,7 @@ function wireEditor() {
     }
   });
   root.addEventListener('change', event => {
+    if ((event.target.id === 'wbName' || event.target.id === 'wbSpecialization') && !editable()) { render(); return; }
     if (event.target.id === 'wbName') commit(state.adapter.rename(state.build, event.target.value.trim().slice(0, 80)));
     if (event.target.id === 'wbSpecialization' && event.target.value) commit(state.adapter.select(state.build, 'specialization', event.target.value));
   });
@@ -281,8 +338,10 @@ async function start() {
     const catalogue = await loadCatalogue(TITLE);
     state.module = createDivisionModule(catalogue);
     state.adapter = createManualAdapter({ module: state.module, title: TITLE, catalogueVersion: catalogue.catalogueVersion });
-    const { build, notice } = await openingBuild({ search: location.search, storage, adapter: state.adapter });
+    state.platform = loadPlatform(storage);
+    const { build, notice, foreign } = await openingBuild({ search: location.search, storage, adapter: state.adapter, platform: state.platform });
     state.build = build;
+    state.foreign = foreign;
     if (notice) { const node = $('#wbNotice'); node.textContent = notice; node.hidden = false; }
     render();
     wireEditor();

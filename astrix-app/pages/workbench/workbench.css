@@ -25,6 +25,16 @@ body.workbench-page{
   padding:calc(var(--ax-shell-top,78px) + var(--ax-shell-tabs,46px) + 34px) var(--wb-gutter) 40px;outline:none}
 .wb-placeholder{color:var(--ax-muted)}
 
+/* Game and platform switches, shared-build banner, first-visit panel */
+.wb-switches{display:flex;flex-wrap:wrap;gap:12px 28px;margin-bottom:14px}
+.wb-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.wb-switch-label{font:700 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ax-steel);margin-right:4px}
+.workbench-page .wb-switch .wb-chip:disabled[aria-pressed="true"]{opacity:1}
+.wb-shared{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:var(--wb-gap);padding:14px 18px;
+  border:1px solid color-mix(in srgb,var(--wb-gold) 45%,transparent);background:color-mix(in srgb,var(--wb-gold) 6%,transparent)}
+.wb-shared p{margin:0;color:var(--ax-ink)}
+.wb-start{max-width:640px}
+
 /* Toolbar: name, objective chips, actions */
 .wb-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;margin-bottom:var(--wb-gap)}
 .wb-field{display:grid;gap:6px;min-width:0}
@@ -115,7 +125,7 @@ body.workbench-page .wb-option:not(#ax-r1):not(#ax-r2):not(#ax-r3):not(#ax-r4):n
 /* Footer */
 .wb-footer{padding:18px var(--wb-gutter) 24px;border-top:1px solid var(--ax-line);background:rgba(14,12,9,.9);color:var(--ax-steel);font-size:12px;line-height:1.5}
 .wb-footer p{max-width:1600px;margin:0 auto 6px}
-.wb-footer .apx-bungie-attribution{margin-bottom:0}
+.wb-footer p:last-child{margin-bottom:0}
 
 /* Tablet: totals move under the build */
 @media (max-width:1199px){

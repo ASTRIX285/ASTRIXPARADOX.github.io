@@ -2,7 +2,7 @@
  * WorkBench editor state: counts, saving and share links. No DOM here, so the
  * test can drive it directly. Game data comes only from the game module.
  */
-import { normaliseBuild } from '../../core/build-format/build.mjs';
+import { isPlatform, normaliseBuild } from '../../core/build-format/build.mjs';
 import { readShareParam, shareUrl } from '../../platform/adapters/division/share.mjs';
 
 /** Build objectives the player can tag a build with. They have no effect on counts yet. */
@@ -15,6 +15,8 @@ export const OBJECTIVES = Object.freeze([
 ]);
 
 export const STORAGE_KEY = 'astrix.workbench.td2.build';
+/** The player's platform, remembered per device and written into every build they make. */
+export const PLATFORM_KEY = 'astrix.workbench.platform';
 
 const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 
@@ -38,6 +40,27 @@ export function pieceCounts(build, module) {
   })).sort((a, b) => b.count - a.count || String(a.name).localeCompare(String(b.name)));
 }
 
+/** The platform this device last chose, or null when none has been chosen (never assumed). */
+export function loadPlatform(storage) {
+  try {
+    const value = storage?.getItem(PLATFORM_KEY);
+    return isPlatform(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Remember the platform on this device. Returns false when the browser blocks storage. */
+export function savePlatform(storage, platform) {
+  if (!isPlatform(platform)) return false;
+  try {
+    storage.setItem(PLATFORM_KEY, platform);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Save a build. Returns false when the browser blocks storage. */
 export function saveBuild(storage, build) {
   try {
@@ -59,21 +82,25 @@ export function loadSavedBuild(storage) {
 }
 
 /**
- * The build to open with: a share link wins, then the saved build, then a new one.
+ * The build to open with: a share link wins, then the saved build, then a new one on the
+ * device platform. A shared build keeps its own platform; when that is not the device
+ * platform it opens as someone else's build (foreign) that the player can duplicate.
+ * With no build and no platform chosen yet, it asks for a platform (build is null).
  * A broken link never blocks the page; it says so and falls back.
  */
-export async function openingBuild({ search = '', storage, adapter }) {
+export async function openingBuild({ search = '', storage, adapter, platform = null }) {
   let notice = '';
   try {
     const shared = readShareParam(search);
-    if (shared) return { build: shared, source: 'link', notice };
+    if (shared) return { build: shared, source: 'link', notice, foreign: shared.platform !== platform };
   } catch (error) {
     notice = `That share link could not be read. ${error.message}`;
   }
   const saved = storage ? loadSavedBuild(storage) : null;
-  if (saved) return { build: saved, source: 'saved', notice };
-  const { build } = await adapter.load();
-  return { build, source: 'new', notice };
+  if (saved) return { build: saved, source: 'saved', notice, foreign: false };
+  const fresh = await adapter.load({ platform });
+  if (!fresh.ok) return { build: null, source: 'needs-platform', notice, foreign: false };
+  return { build: fresh.build, source: 'new', notice, foreign: false };
 }
 
 /** The full share link for a build on this site. */

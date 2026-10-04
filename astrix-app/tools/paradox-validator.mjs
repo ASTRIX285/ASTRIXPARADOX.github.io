@@ -14,6 +14,7 @@ const validators=[
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
+  'test-game-footers.mjs',
   'validate-bungie-footer.mjs',
   'test-reports-data.mjs',
   'test-reports-drilldown.mjs',
