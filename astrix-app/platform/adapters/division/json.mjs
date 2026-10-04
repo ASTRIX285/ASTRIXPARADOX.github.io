@@ -6,7 +6,7 @@ import { PLATFORMS, isPlatform, normaliseBuild, validateBuild } from '../../../c
 
 export const BUILD_FILE_MAX_BYTES = 64 * 1024;
 
-export function createJsonAdapter() {
+export function createJsonAdapter({ module = null } = {}) {
   return Object.freeze({
     id: 'json',
     label: 'Import a build file',
@@ -36,6 +36,12 @@ export function createJsonAdapter() {
       const errors = validateBuild(parsed);
       if (errors.length) return { ok: false, state: 'invalid', reason: `That file is not a valid build. ${errors[0]}` };
       if (parsed.game !== 'division') return { ok: false, state: 'wrong-game', reason: 'That build is for another game.' };
+      if (module && typeof module.validateSlot === 'function') {
+        for (const [slotId, entry] of Object.entries(parsed.slots)) {
+          const slotErrors = module.validateSlot(slotId, entry);
+          if (slotErrors.length) return { ok: false, state: 'invalid', reason: `That build has an item that is not valid in the ${slotId} slot. ${slotErrors[0]}` };
+        }
+      }
       return { ok: true, build: normaliseBuild(parsed) };
     },
 

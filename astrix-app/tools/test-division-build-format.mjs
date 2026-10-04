@@ -96,13 +96,77 @@ assert.match(pendingEquip.reason,/catalogue/,'The pending reason names the catal
 assert.equal(manual.setAbility(start,0,'turret-assault').ok,false,'A pending skill cannot be slotted');
 assert.equal(manual.select(start,'specialization','sharpshooter').ok,false,'A pending specialization cannot be picked');
 
-// With a sourced catalogue record the same item equips, and edits stay valid builds.
+// Item instances. The fixture catalogue below is synthetic and exists only in this test.
 const provenance={kind:'in-game-capture',capturedBy:'Test',capturedOn:'2026-10-05',gameVersion:'TU-test',where:'Gear tooltip',note:'Fixture only.'};
-const sourced=createManualAdapter({module:createDivisionModule({title:'td2',items:[{id:'brand-a-mask',provenance}],skills:[{id:'turret-assault',provenance}]})});
-let step=sourced.equip(start,'mask','brand-a-mask',{attributes:{'weapon-damage':15}});
-assert.equal(step.ok,true,'A sourced item equips');
-assert.deepEqual(step.build.slots,{mask:{itemId:'brand-a-mask',attributes:{'weapon-damage':15}}});
-assert.equal(sourced.equip(step.build,'chest','not-in-catalogue').ok,false,'An item missing from the catalogue stays blocked');
+const range=(min,max,unit)=>({min,max,unit});
+const fixture={title:'td2',catalogueVersion:'td2-fixture',
+  brands:[{id:'fixture-brand',name:'Fixture Brand',provenance,slotIds:['mask','chest']}],
+  items:[
+    {id:'fixture-named-mask',name:'Fixture Named Mask',provenance,rarity:'named',itemType:'gear',slotId:'mask',talentId:'fixture-locked-talent',lockedAttribute:{attributeId:'crit-chance',value:8,unit:'percent'}},
+    {id:'fixture-exotic-chest',name:'Fixture Exotic Chest',provenance,rarity:'exotic',itemType:'gear',slotId:'chest',talentId:'fixture-exotic-talent'}
+  ],
+  attributes:[
+    {id:'weapon-damage',name:'Weapon Damage',provenance,kind:'core',roll:range(10,15,'percent')},
+    {id:'skill-tier',name:'Skill Tier',provenance,kind:'core',roll:range(1,1,'tier')},
+    {id:'crit-chance',name:'Critical Hit Chance',provenance,kind:'secondary',roll:range(1,6,'percent')},
+    {id:'crit-damage',name:'Critical Hit Damage',provenance,kind:'secondary',roll:{pending:true,reason:'Not captured yet.'}}
+  ],
+  talents:[{id:'fixture-talent',name:'Fixture Talent',provenance,appliesTo:'gear'},{id:'fixture-locked-talent',name:'Fixture Locked',provenance,appliesTo:'gear'}],
+  mods:[{id:'fixture-mod',name:'Fixture Mod',provenance,modType:'gear'}],
+  skills:[{id:'turret-assault',name:'Assault Turret',provenance}]
+};
+const sourced=createManualAdapter({module:createDivisionModule(fixture)});
+const highEnd={core:{attributeId:'weapon-damage',value:15},attributes:{'crit-chance':6},talentId:'fixture-talent',modIds:['fixture-mod'],expertise:12,itemLevel:40};
+let step=sourced.equip(start,'mask','fixture-brand',highEnd);
+assert.equal(step.ok,true,'A high-end instance with its own core, rolls, talent, mods, expertise and item level equips');
+assert.deepEqual(step.build.slots.mask,{itemId:'fixture-brand',...highEnd},'Every instance field is kept');
+const named=sourced.equip(step.build,'mask','fixture-named-mask',{core:{attributeId:'skill-tier',value:1},attributes:{'crit-chance':8},talentId:'fixture-locked-talent',expertise:3,itemLevel:40});
+assert.equal(named.ok,true,'A named instance keeps its locked talent and attribute; the rest rolls');
+const exotic=sourced.equip(start,'chest','fixture-exotic-chest',{modIds:['fixture-mod'],expertise:20,itemLevel:40});
+assert.equal(exotic.ok,true,'An exotic stores only its mods, expertise level and item level');
+
+// The rules are enforced.
+const refused=(result,pattern,name)=>{assert.equal(result.ok,false,name);assert.match(result.reason,pattern,name);};
+refused(sourced.equip(start,'chest','fixture-exotic-chest',{core:{attributeId:'weapon-damage',value:12}}),/exotic/,'An exotic refuses a core roll');
+refused(sourced.equip(start,'chest','fixture-exotic-chest',{attributes:{'crit-chance':3}}),/exotic/,'An exotic refuses attribute rolls');
+refused(sourced.equip(start,'chest','fixture-exotic-chest',{talentId:'fixture-talent'}),/exotic/,'An exotic refuses a talent');
+refused(sourced.equip(start,'mask','fixture-named-mask',{talentId:'fixture-talent'}),/locked talent/,'A named item keeps its locked talent');
+refused(sourced.equip(start,'mask','fixture-named-mask',{attributes:{'crit-chance':5}}),/locked attribute/,'A named item keeps its locked attribute');
+refused(sourced.equip(start,'mask','fixture-brand',{core:{attributeId:'weapon-damage',value:16}}),/outside 10 to 15/,'A core roll above the catalogue max is refused');
+refused(sourced.equip(start,'mask','fixture-brand',{attributes:{'crit-chance':0.5}}),/outside 1 to 6/,'An attribute roll below the catalogue min is refused');
+refused(sourced.equip(start,'mask','fixture-brand',{attributes:{'crit-damage':10}}),/Not captured/,'A roll with no sourced range is refused');
+refused(sourced.equip(start,'mask','fixture-brand',{core:{attributeId:'crit-chance',value:3}}),/not a core attribute/,'Only a core attribute can be the core');
+refused(sourced.equip(start,'mask','fixture-brand',{talentId:'not-sourced'}),/not in the td2 catalogue/,'A talent must be in the catalogue');
+refused(sourced.equip(start,'mask','fixture-brand',{modIds:['not-sourced']}),/not in the td2 catalogue/,'A mod must be in the catalogue');
+refused(sourced.equip(start,'kneepads','fixture-brand'),/does not go in/,'An item only goes in its own slots');
+refused(sourced.equip(start,'chest','not-in-catalogue'),/not in the td2 catalogue/,'An item missing from the catalogue stays blocked');
+assert.equal(validateBuild({...full,slots:{mask:{itemId:'x',expertise:-1}}}).length>0,true,'Expertise is a whole number of 0 or more');
+assert.equal(validateBuild({...full,slots:{mask:{itemId:'x',itemLevel:2.5}}}).length>0,true,'Item level is a whole number');
+assert.equal(validateBuild({...full,slots:{mask:{itemId:'x',core:{attributeId:'weapon-damage'}}}}).length>0,true,'A core needs a value');
+
+// Update one field of an instance; the rules still apply.
+let updated=sourced.update(step.build,'mask',{core:{attributeId:'weapon-damage',value:11},expertise:13});
+assert.equal(updated.ok,true);
+assert.deepEqual(updated.build.slots.mask.core,{attributeId:'weapon-damage',value:11});
+assert.equal(updated.build.slots.mask.expertise,13);
+refused(sourced.update(step.build,'mask',{core:{attributeId:'weapon-damage',value:99}}),/outside/,'An update outside the range is refused');
+refused(sourced.update(exotic.build,'chest',{talentId:'fixture-talent'}),/exotic/,'An exotic stays fixed on update');
+updated=sourced.update(updated.build,'mask',{talentId:null});
+assert.ok(!('talentId' in updated.build.slots.mask),'Clearing a field removes it');
+refused(sourced.update(start,'gloves',{expertise:1}),/Equip an item/,'An empty slot cannot be updated');
+
+// Round trip: a high-end, a named and an exotic instance survive the share string and a build file.
+let mixed=sourced.equip(start,'mask','fixture-named-mask',{core:{attributeId:'skill-tier',value:1},attributes:{'crit-chance':8},expertise:3,itemLevel:40}).build;
+mixed=sourced.equip(mixed,'chest','fixture-exotic-chest',{modIds:['fixture-mod'],expertise:20,itemLevel:40}).build;
+const sourcedBrand=createManualAdapter({module:createDivisionModule({...fixture,brands:[{...fixture.brands[0],slotIds:['mask','chest','backpack']}]})});
+mixed=sourcedBrand.equip(mixed,'backpack','fixture-brand',highEnd).build;
+assert.deepEqual(decodeBuild(encodeBuild(mixed)),mixed,'High-end, named and exotic instances round trip through the share string');
+assert.equal(encodeBuild(decodeBuild(encodeBuild(mixed))),encodeBuild(mixed),'and back again to the same string');
+const fileJson=createJsonAdapter({module:createDivisionModule({...fixture,brands:[{...fixture.brands[0],slotIds:['mask','chest','backpack']}]})});
+assert.deepEqual(await fileJson.load(fileJson.export(mixed)),{ok:true,build:mixed},'and through a build file');
+const tampered=JSON.parse(fileJson.export(mixed));tampered.slots.chest.talentId='fixture-talent';
+assert.equal((await fileJson.load(JSON.stringify(tampered))).state,'invalid','A build file that rolls an exotic is refused');
+
 step=sourced.setAbility(step.build,0,'turret-assault');
 assert.deepEqual(step.build.abilities,['turret-assault'],'A sourced skill slots');
 step=sourced.rename(step.build,'My build');

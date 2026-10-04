@@ -90,6 +90,23 @@
           "itemId": {
             "$ref": "#/$defs/id"
           },
+          "core": {
+            "type": "object",
+            "required": [
+              "attributeId",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "attributeId": {
+                "$ref": "#/$defs/id"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "description": "The core attribute and its roll."
+          },
           "attributes": {
             "type": "object",
             "propertyNames": {
@@ -97,7 +114,8 @@
             },
             "additionalProperties": {
               "type": "number"
-            }
+            },
+            "description": "Attribute rolls, by attribute id."
           },
           "talentId": {
             "$ref": "#/$defs/id"
@@ -107,8 +125,19 @@
             "items": {
               "$ref": "#/$defs/id"
             }
+          },
+          "expertise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Expertise level of this instance."
+          },
+          "itemLevel": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Item level of this instance."
           }
-        }
+        },
+        "description": "One item instance in a slot. Each high-end or named item is its own instance with its own rolls. Game rules (which fields an item may carry, roll ranges, locked talents) live in the game module, never here."
       }
     },
     "abilities": {

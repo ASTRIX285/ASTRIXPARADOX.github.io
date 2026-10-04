@@ -13,7 +13,8 @@ export const BUILD_KEYS = Object.freeze(['format', 'formatVersion', 'game', 'tit
 export const PLATFORMS = Object.freeze(['pc', 'playstation', 'xbox']);
 export const PLATFORM_LABELS = Object.freeze({ pc: 'PC', playstation: 'PlayStation', xbox: 'Xbox' });
 export const isPlatform = value => PLATFORMS.includes(value);
-export const SLOT_KEYS = Object.freeze(['itemId', 'attributes', 'talentId', 'modIds']);
+/** One item instance per slot: the item, its core roll, attribute rolls, talent, mods, expertise level and item level. */
+export const SLOT_KEYS = Object.freeze(['itemId', 'core', 'attributes', 'talentId', 'modIds', 'expertise', 'itemLevel']);
 export const NAME_MAX = 80;
 export const SHARE_PREFIX = '1.';
 export const SHARE_MAX_LENGTH = 6000;
@@ -50,7 +51,9 @@ export function validateBuild(build) {
     for (const key of Object.keys(slot)) if (!SLOT_KEYS.includes(key)) errors.push(`Slot ${slotId} has unknown field ${key}.`);
     if (!isId(slot.itemId)) errors.push(`Slot ${slotId} needs an itemId.`);
     if ('attributes' in slot && (!isObject(slot.attributes) || !Object.entries(slot.attributes).every(([id, value]) => isId(id) && typeof value === 'number' && Number.isFinite(value)))) errors.push(`Slot ${slotId} attributes must map ids to numbers.`);
+    if ('core' in slot && !(isObject(slot.core) && Object.keys(slot.core).every(key => key === 'attributeId' || key === 'value') && isId(slot.core.attributeId) && typeof slot.core.value === 'number' && Number.isFinite(slot.core.value))) errors.push(`Slot ${slotId} core must be an attribute id and a number.`);
     if ('talentId' in slot && !isId(slot.talentId)) errors.push(`Slot ${slotId} talentId must be an id.`);
+    for (const key of ['expertise', 'itemLevel']) if (key in slot && !(Number.isInteger(slot[key]) && slot[key] >= 0)) errors.push(`Slot ${slotId} ${key} must be a whole number of 0 or more.`);
     if ('modIds' in slot && !(Array.isArray(slot.modIds) && slot.modIds.every(isId))) errors.push(`Slot ${slotId} modIds must be a list of ids.`);
   }
   if (!Array.isArray(build.abilities) || !build.abilities.every(isId)) errors.push('abilities must be a list of ids.');
@@ -69,9 +72,12 @@ export function normaliseBuild(build) {
   const slots = {};
   for (const [slotId, slot] of sortedEntries(build.slots)) {
     const out = { itemId: slot.itemId };
+    if (slot.core) out.core = { attributeId: slot.core.attributeId, value: slot.core.value };
     if (slot.attributes) out.attributes = Object.fromEntries(sortedEntries(slot.attributes));
     if (slot.talentId) out.talentId = slot.talentId;
     if (slot.modIds) out.modIds = [...slot.modIds];
+    if ('expertise' in slot) out.expertise = slot.expertise;
+    if ('itemLevel' in slot) out.itemLevel = slot.itemLevel;
     slots[slotId] = out;
   }
   return {

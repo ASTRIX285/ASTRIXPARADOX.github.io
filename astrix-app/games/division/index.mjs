@@ -23,9 +23,10 @@ export const DIVISION_CONCEPTS = Object.freeze({
 });
 
 const pending = reason => ({ pending: true, reason });
+const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 
 /**
- * @param {object} catalogue  Loaded title catalogue: { title, catalogueVersion, items, brands, gearSets, skills, specializations }.
+ * @param {object} catalogue  Loaded title catalogue: { title, catalogueVersion, items, brands, gearSets, attributes, talents, mods, skills, specializations }.
  *                            May be partial or absent; lookups then return pending values.
  */
 export function createDivisionModule(catalogue = null) {
@@ -36,6 +37,9 @@ export function createDivisionModule(catalogue = null) {
   const gearSets = index('gearSets');
   const skills = index('skills');
   const specializations = index('specializations');
+  const attributes = index('attributes');
+  const talents = index('talents');
+  const mods = index('mods');
 
   const lookup = (map, id, what) => {
     if (!catalogue) return pending(`${what} needs the ${title} catalogue, which is not loaded.`);
@@ -60,9 +64,76 @@ export function createDivisionModule(catalogue = null) {
       return { gameId: 'division', title, identitySource: 'manual', accountLinked: false, buildCount: build ? 1 : 0 };
     },
 
-    /** The catalogue record for an item id, or a pending value when it is not sourced yet. */
+    /**
+     * The catalogue record for something that can sit in a slot: a named or exotic item, or a
+     * brand or gear set piece (a high-end instance). Pending when it is not sourced yet.
+     */
     resolveItem(itemId) {
-      return lookup(items, itemId, 'Item');
+      if (!catalogue) return lookup(items, itemId, 'Item');
+      return items.get(itemId) ?? brands.get(itemId) ?? gearSets.get(itemId) ?? pending(`Item ${itemId} is not in the ${title} catalogue yet.`);
+    },
+
+    /** Min, max and unit for an attribute roll, or a pending value when the catalogue does not hold them. */
+    attributeRange(attributeId) {
+      const record = attributes.get(attributeId);
+      if (!record) return pending(`Attribute ${attributeId} is not in the ${title} catalogue yet.`);
+      const roll = record.roll;
+      if (!roll || isPending(roll)) return pending(roll?.reason ?? `The roll range for ${record.name} is not sourced yet.`);
+      if ([roll.min, roll.max, roll.unit].some(isPending)) return pending(`Part of the roll range for ${record.name} is not sourced yet.`);
+      return { min: roll.min, max: roll.max, unit: roll.unit };
+    },
+
+    /**
+     * What an item instance may carry. Exotics are standard: talent and attributes are fixed, so only
+     * mods, expertise and item level are stored. Named items have a locked talent or attribute from the
+     * catalogue; everything else rolls. Brand and gear set pieces (high-end) roll freely within range.
+     */
+    itemRules(itemId) {
+      const record = this.resolveItem(itemId);
+      if (isPending(record)) return record;
+      const kind = brands.has(itemId) ? 'high-end' : gearSets.has(itemId) ? 'gear-set' : record.rarity;
+      const locked = value => (value === undefined || isPending(value) ? null : value);
+      return {
+        kind,
+        fixed: kind === 'exotic',
+        lockedTalentId: kind === 'named' ? locked(record.talentId) : null,
+        lockedAttribute: kind === 'named' ? locked(record.lockedAttribute) : null
+      };
+    },
+
+    /** Every reason an item instance is not valid in a slot. An empty list means it is valid. */
+    validateSlot(slotId, entry) {
+      const errors = [];
+      const record = this.resolveItem(entry.itemId);
+      if (isPending(record)) return [record.reason];
+      const fits = record.slotIds ?? (record.slotId === undefined ? undefined : [record.slotId]);
+      if (fits === undefined || isPending(fits) || fits.some(isPending)) errors.push(`Which slot ${record.name} goes in is not sourced yet.`);
+      else if (!fits.includes(slotId)) errors.push(`${record.name} does not go in the ${slotId} slot.`);
+      const rules = this.itemRules(entry.itemId);
+      if (rules.fixed) {
+        for (const key of ['core', 'attributes', 'talentId']) if (key in entry) errors.push(`${record.name} is exotic: its ${key === 'talentId' ? 'talent' : key === 'core' ? 'core attribute' : 'attributes'} are fixed and cannot be rolled.`);
+      }
+      if (rules.lockedTalentId && entry.talentId && entry.talentId !== rules.lockedTalentId) errors.push(`${record.name} has a locked talent that cannot be changed.`);
+      const lockedAttribute = rules.lockedAttribute;
+      if (lockedAttribute && entry.attributes && lockedAttribute.attributeId in entry.attributes && !isPending(lockedAttribute.value) && entry.attributes[lockedAttribute.attributeId] !== lockedAttribute.value) {
+        errors.push(`${record.name} has a locked attribute that cannot be changed.`);
+      }
+      const checkRoll = (attributeId, value) => {
+        const range = this.attributeRange(attributeId);
+        if (isPending(range)) errors.push(range.reason);
+        else if (value < range.min || value > range.max) errors.push(`${attributeId} roll ${value} is outside ${range.min} to ${range.max}.`);
+      };
+      if (entry.core) {
+        if (attributes.get(entry.core.attributeId)?.kind !== 'core') errors.push(`${entry.core.attributeId} is not a core attribute.`);
+        checkRoll(entry.core.attributeId, entry.core.value);
+      }
+      for (const [attributeId, value] of Object.entries(entry.attributes ?? {})) {
+        if (lockedAttribute?.attributeId === attributeId) continue;
+        checkRoll(attributeId, value);
+      }
+      if (entry.talentId && entry.talentId !== rules.lockedTalentId && !talents.has(entry.talentId)) errors.push(`Talent ${entry.talentId} is not in the ${title} catalogue yet.`);
+      for (const modId of entry.modIds ?? []) if (!mods.has(modId)) errors.push(`Mod ${modId} is not in the ${title} catalogue yet.`);
+      return errors;
     },
 
     normaliseCharacter(build) {

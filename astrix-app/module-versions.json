@@ -16,7 +16,7 @@
 
   "/astrix-app/core/bounded-json.mjs": "3fb7642429",
 
-  "/astrix-app/core/build-format/build.mjs": "a2176c6335",
+  "/astrix-app/core/build-format/build.mjs": "1a0bac493c",
 
   "/astrix-app/core/bungie-item-identity.mjs": "b367ae7d9a",
 
@@ -82,7 +82,7 @@
 
   "/astrix-app/games/destiny-2/index.mjs": "a5dae81a23",
 
-  "/astrix-app/games/division/index.mjs": "709e28f6f6",
+  "/astrix-app/games/division/index.mjs": "9bba7f8195",
 
   "/astrix-app/games/wow-forever/engine/build-rules.mjs": "a3a39cb2d7",
 
@@ -354,9 +354,9 @@
 
   "/astrix-app/platform/adapters/division/index.mjs": "3de6d3621b",
 
-  "/astrix-app/platform/adapters/division/json.mjs": "cae98e07da",
+  "/astrix-app/platform/adapters/division/json.mjs": "619eade803",
 
-  "/astrix-app/platform/adapters/division/manual.mjs": "255f4c0b8e",
+  "/astrix-app/platform/adapters/division/manual.mjs": "a286f51c91",
 
   "/astrix-app/platform/adapters/division/share.mjs": "0ebd6bb4af",
 

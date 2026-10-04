@@ -49,6 +49,8 @@ A catalogue file in `<title>/data/` is `{ "title": "td2", "kind": "<record kind>
 
 A build uses the neutral format in `astrix-app/core/build-format/` (`build.schema.json`, `build.mjs`): game, title, platform, `catalogueVersion`, slots, abilities and selections. It never stores a game version.
 
+Each slot holds one item instance: `itemId`, `core` (core attribute and its roll), `attributes` (rolls), `talentId`, `modIds`, `expertise` and `itemLevel`. The game module (`validateSlot`) enforces the rules from the catalogue: exotics are standard, so only mods, expertise and item level are stored and any roll or talent is refused; a named item keeps its locked talent or attribute; every roll stays inside the catalogue min and max, and a roll with no sourced range is refused.
+
 Platform is required: `pc` (Ubisoft Connect, Steam, Epic and Luna share one agent), `playstation` or `xbox`. It is never guessed. A new build or a build file with no platform asks for one.
 
 `astrix-app/platform/adapters/division/` holds three adapters on one interface (`platform/contracts/build-adapter.mjs`):
