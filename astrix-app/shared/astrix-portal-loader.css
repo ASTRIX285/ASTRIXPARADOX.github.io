@@ -116,6 +116,15 @@ body.apx-loading{overflow:hidden!important}
 /* Native cross-document transitions retain the outgoing rendered page while
    the destination resolves. No page geometry or equipment sizes change. */
 @view-transition{navigation:auto}
+/* Internal tool transfer: the destination stays under a still cover until it reports ready
+   (forge:portal-ready), so a half-built page is never on screen. No animation: the stage label
+   appears only if the wait passes 300 ms. */
+html.apx-transfer::before{content:"";position:fixed;inset:0;z-index:99996;pointer-events:auto;
+  background:linear-gradient(180deg,rgba(14,12,9,.5),rgba(14,12,9,.72)),var(--apx-loader-art) center/cover no-repeat,var(--apx-loader-black)}
+html.apx-transfer::after{content:attr(data-transfer-status);position:fixed;left:50%;bottom:28px;z-index:99997;transform:translateX(-50%);
+  max-width:calc(100vw - 32px);color:var(--apx-loader-text);font:600 .72rem/1.3 "Barlow Semi Condensed",sans-serif;letter-spacing:.18em;
+  text-transform:uppercase;text-align:center;visibility:hidden;animation:apxTransferLabel 0s .3s forwards}
+@keyframes apxTransferLabel{to{visibility:visible}}
 @keyframes apxNavigationHold{from{opacity:1}to{opacity:1}}
 @keyframes apxNavigationOut{from{opacity:1}to{opacity:0}}
 @keyframes apxNavigationIn{from{opacity:0}to{opacity:1}}

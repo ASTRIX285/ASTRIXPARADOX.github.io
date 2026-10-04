@@ -213,9 +213,9 @@ function install(){
   if(installed||typeof document==='undefined')return;
   installed=true;
   document.addEventListener('pointerover',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&bindings.has(anchor)&&!anchor.contains(event.relatedTarget))show(anchor);});
-  document.addEventListener('pointerout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor===activeAnchor&&!anchor.contains(event.relatedTarget)&&!document.getElementById('paradoxItemHover')?.contains(event.relatedTarget))hideTimer=setTimeout(hide,180);});
+  document.addEventListener('pointerout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&anchor===activeAnchor&&!anchor.contains(event.relatedTarget)&&!document.getElementById('paradoxItemHover')?.contains(event.relatedTarget))hideTimer=setTimeout(hide,180);});
   document.addEventListener('focusin',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&bindings.has(anchor)&&!anchor.contains(event.relatedTarget))show(anchor);});
-  document.addEventListener('focusout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor===activeAnchor&&!anchor.contains(event.relatedTarget))hide();});
+  document.addEventListener('focusout',event=>{const anchor=event.target.closest?.('[data-paradox-item-hover]');if(anchor&&anchor===activeAnchor&&!anchor.contains(event.relatedTarget))hide();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape')hide();});
   addEventListener('resize',hide,{passive:true});
   addEventListener('scroll',hide,{passive:true,capture:true});

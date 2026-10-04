@@ -19,6 +19,33 @@
     var navigationType=window.performance?.getEntriesByType('navigation')[0]?.type;
     entryPortal=source.origin===window.location.origin&&/^\/(?:hub|tools)(?:\/|\/index\.html)?$/.test(source.pathname)&&(!navigationType||navigationType==='navigate');
   }catch{}
+  // Seamless tool transitions (4 Oct 2026). A move from one tool page to another never shows
+  // the page half-built: the destination stays under a still cover (map art and its real stage
+  // label, no animation) until it reports ready once with forge:portal-ready. With a native view
+  // transition the outgoing page is held on screen over it; a prerendered page is ready before
+  // it is shown, so the cover is already gone. Reloads, history and direct links are untouched.
+  var internalTransfer=false;
+  try{
+    var from=new URL(document.referrer),kind=window.performance?.getEntriesByType('navigation')[0]?.type;
+    internalTransfer=!entryPortal&&from.origin===window.location.origin&&/^\/astrix-app\/pages\//.test(from.pathname)&&from.pathname!==window.location.pathname&&(!kind||kind==='navigate');
+  }catch{}
+  if(internalTransfer){
+    document.documentElement.classList.add('apx-transfer');
+    setTimeout(function(){if(!pendingDone&&document.documentElement.classList.contains('apx-transfer'))window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');},30000);
+  }
+  function uncover(){document.documentElement.classList.remove('apx-transfer');}
+  // Prerender the tool pages a player is about to open (hover or touch start). Same-origin tool
+  // pages only: never sign-in, sign-out or the Worker's auth routes, which are not in this list.
+  var TOOL_PAGES=['/astrix-app/pages/home/','/astrix-app/pages/journey/','/astrix-app/pages/guardian-workspace-v2/','/astrix-app/pages/guardian-workspace-v2/paradox-build-space/','/astrix-app/pages/forge-loader/','/astrix-app/pages/reports/','/astrix-app/pages/vault/','/astrix-app/pages/loadout/'];
+  function installSpeculationRules(){
+    if(!document.head||!window.HTMLScriptElement?.supports?.('speculationrules')||document.querySelector('script[data-tool-prerender]'))return;
+    var targets=TOOL_PAGES.filter(function(path){return path!==window.location.pathname;});
+    if(!targets.length||TOOL_PAGES.indexOf(window.location.pathname)<0)return;
+    var rules=document.createElement('script');rules.type='speculationrules';rules.dataset.toolPrerender='';
+    rules.textContent=JSON.stringify({prerender:[{where:{or:targets.map(function(path){return {href_matches:{pathname:path}};})},eagerness:'moderate'}]});
+    document.head.appendChild(rules);
+  }
+  installSpeculationRules();
   var loaderScriptSrc=(document.currentScript&&document.currentScript.src)||'';
   var breach=null,breachStarted=false,skin='',skinTimer=null,breachAbort=null;
   var BREACH_READY_MS=1200;
@@ -239,6 +266,7 @@
   }
   function setStatus(t){
     pendingStatus=String(t||'Opening portal');
+    if(internalTransfer&&t)document.documentElement.dataset.transferStatus=pendingStatus;
     if(status)status.textContent=pendingStatus;
   }
   function requireData(){
@@ -249,13 +277,13 @@
     if(pendingDone)return;
     if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
     interrupted=true;pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
-    warmNavigation=false;mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
+    warmNavigation=false;uncover();mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
   function blocked(message){
     if(pendingDone)return;
     interrupted=true;pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
-    warmNavigation=false;mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
+    warmNavigation=false;uncover();mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
   }
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
@@ -297,13 +325,14 @@
   window.addEventListener?.('pageshow',function(event){
     if(!event.persisted)return;
     entryPortal=false;disposeBreach();clearTimeout(noticeTimer);
+    uncover();
     document.documentElement.classList.remove('apx-booting');
     if(!gate)return;
     gate.classList.remove('breach-pending','ring-visible','is-breach');
     if(pendingAuthUrl||pendingBlockedMessage){gate.classList.add('is-recovery');return;}
     gate.remove();gate=null;document.body.classList.remove('apx-loading');
   });
-  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;set(100);var wait=entryPortal&&skinShownAt&&!interrupted&&!navigationTransition&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?ENTRY_MIN_MS-(Date.now()-skinShownAt):0;if(gate){if(wait>0){clearTimeout(holdTimer);holdTimer=setTimeout(finish,wait);}else finish();}document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;uncover();set(100);var wait=entryPortal&&skinShownAt&&!interrupted&&!navigationTransition&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?ENTRY_MIN_MS-(Date.now()-skinShownAt):0;if(gate){if(wait>0){clearTimeout(holdTimer);holdTimer=setTimeout(finish,wait);}else finish();}document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){

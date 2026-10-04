@@ -279,6 +279,8 @@ async function syncParadoxAccount({session,readAll=readAllStored,read=readStored
 let syncTimer=null,syncRunning=false,syncAgain=false,syncAbort=null,retryDelay=5000,activeSyncAccount='',observedAccount='';
 function scheduleParadoxSync(delay=250){
   if(typeof window==='undefined')return;
+  // A prerendered page writes nothing until the player actually opens it.
+  if(document.prerendering){document.addEventListener('prerenderingchange',()=>scheduleParadoxSync(delay),{once:true});return;}
   if(syncRunning){syncAgain=true;return;}
   clearTimeout(syncTimer);syncTimer=setTimeout(runBackgroundSync,delay);
 }

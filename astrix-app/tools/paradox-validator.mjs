@@ -43,6 +43,7 @@ const validators=[
   'validate-single-loader.mjs',
   'validate-single-module-urls.mjs',
   'test-portal-single-skin.mjs',
+  'test-seamless-transitions.mjs', // feature/seamless-tool-transitions: no frame before readiness.
   'test-home-browser.mjs',
   'validate-tools-hub.mjs',
   'validate-tool-intro.mjs',

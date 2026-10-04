@@ -108,7 +108,9 @@ function renderFacts(chosen){
 async function showFacts(summary,account){
   const facts=buildFacts(summary,await requestHistorical());
   const chosen=chooseForVisit(facts,readHistory(account));
-  writeHistory(account,chosen.map(fact=>fact.id));
+  // A prerendered Home counts as a visit only once the player opens it.
+  const record=()=>writeHistory(account,chosen.map(fact=>fact.id));
+  if(document.prerendering)document.addEventListener('prerenderingchange',record,{once:true});else record();
   renderFacts(chosen);
 }
 
