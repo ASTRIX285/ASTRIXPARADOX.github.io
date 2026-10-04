@@ -37,3 +37,15 @@ node astrix-app/tools/test-game-folders.mjs
 ```
 
 All four run on every PR through `.github/workflows/validate-division.yml`, and inside `paradox-validator.mjs`.
+
+## Builds, adapters and share links
+
+A build uses the neutral format in `astrix-app/core/build-format/` (`build.schema.json`, `build.mjs`): game, title, `catalogueVersion`, slots, abilities and selections. It never stores a game version.
+
+`astrix-app/platform/adapters/division/` holds three adapters on one interface (`platform/contracts/build-adapter.mjs`):
+
+- `manual`: build by hand. Every change goes through the game module, so a pending item can't be equipped.
+- `json`: import and export a build file.
+- `ubisoft`: always "not authorised". No network call, no cookies or storage, never asks for a sign-in.
+
+`share.mjs` turns a build into a link, `/hub/workbench/td2/?b=<share string>`, and back. A round trip gives back the identical build.

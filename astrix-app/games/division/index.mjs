@@ -4,7 +4,8 @@
  * Translates Division concepts into the generic ASTRIX PARADOX platform contract
  * (platform/contracts/game-module.mjs). It holds no game values of its own: every
  * id, name and number comes from a title catalogue (td2/data/) or the player's
- * build. Until the catalogue holds a record, every lookup returns pending.
+ * build (core/build-format, the neutral build). Until the catalogue holds a
+ * record, every lookup returns pending.
  */
 
 export const DIVISION_TITLES = Object.freeze(['td2']);
@@ -59,27 +60,33 @@ export function createDivisionModule(catalogue = null) {
       return { gameId: 'division', title, identitySource: 'manual', accountLinked: false, buildCount: build ? 1 : 0 };
     },
 
+    /** The catalogue record for an item id, or a pending value when it is not sourced yet. */
+    resolveItem(itemId) {
+      return lookup(items, itemId, 'Item');
+    },
+
     normaliseCharacter(build) {
+      const specializationId = build?.selections?.specialization;
       return {
         gameId: 'division',
         title,
-        specialization: build?.specializationId ? lookup(specializations, build.specializationId, 'Specialization') : null,
+        specialization: specializationId ? lookup(specializations, specializationId, 'Specialization') : null,
         objective: build?.objective ?? null,
         catalogueVersion: build?.catalogueVersion ?? null
       };
     },
 
     normaliseEquipment(build) {
-      return Object.entries({ ...(build?.weapons ?? {}), ...(build?.gear ?? {}) })
+      return Object.entries(build?.slots ?? {})
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([slot, itemId]) => {
+        .map(([slot, { itemId }]) => {
           const record = lookup(items, itemId, 'Item');
           return { slot, itemId, concept: 'equipment', record, evidence: record.pending ? [] : [record.provenance] };
         });
     },
 
     normaliseAbilities(build) {
-      return (build?.skills ?? []).map(skillId => {
+      return (build?.abilities ?? []).map(skillId => {
         const record = lookup(skills, skillId, 'Skill');
         return { skillId, concept: 'ability', record, evidence: record.pending ? [] : [record.provenance] };
       });
@@ -87,7 +94,7 @@ export function createDivisionModule(catalogue = null) {
 
     normalisePassives(build) {
       const counts = new Map();
-      for (const itemId of Object.values(build?.gear ?? {})) {
+      for (const { itemId } of Object.values(build?.slots ?? {})) {
         const item = items.get(itemId);
         for (const key of ['brandId', 'gearSetId']) if (item?.[key] && !item[key].pending) counts.set(item[key], (counts.get(item[key]) ?? 0) + 1);
       }
