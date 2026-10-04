@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/attribute.schema.json",
+  "title": "Attribute",
+  "description": "A core or secondary attribute with its roll range.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "kind"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "core",
+        "secondary"
+      ]
+    },
+    "category": {
+      "oneOf": [
+        {
+          "enum": [
+            "offensive",
+            "defensive",
+            "utility"
+          ]
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "roll": {
+      "$ref": "common.schema.json#/$defs/rollRange"
+    },
+    "cap": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "$ref": "common.schema.json#/$defs/number"
+            },
+            "unit": {
+              "$ref": "common.schema.json#/$defs/unit"
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "slotIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    }
+  },
+  "unevaluatedProperties": false
+}

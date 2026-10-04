@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/mod.schema.json",
+  "title": "Mod",
+  "description": "A gear, skill or weapon mod.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "modType"
+  ],
+  "properties": {
+    "modType": {
+      "enum": [
+        "gear",
+        "skill",
+        "weapon"
+      ]
+    },
+    "slotIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    },
+    "effects": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "effect"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "effect": {
+                "$ref": "common.schema.json#/$defs/effect"
+              },
+              "roll": {
+                "$ref": "common.schema.json#/$defs/rollRange"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "requirements": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/requirement"
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    }
+  },
+  "unevaluatedProperties": false
+}

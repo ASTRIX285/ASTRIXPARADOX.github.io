@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/account-state.schema.json",
+  "title": "Account state (locked)",
+  "description": "Equipped items, saved loadouts and stash locations. Modelled now, kept empty: these only fill if Ubisoft gives authorised read access. Never scraped, never read from the game client.",
+  "type": "object",
+  "required": [
+    "access",
+    "equipped",
+    "loadouts",
+    "stash"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "access": {
+      "const": "requires-ubisoft-authorised-access"
+    },
+    "equipped": {
+      "type": "array",
+      "maxItems": 0,
+      "items": {
+        "type": "object",
+        "required": [
+          "slotId",
+          "itemInstanceId"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "slotId": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "itemInstanceId": {
+            "type": "string"
+          },
+          "itemId": {
+            "$ref": "common.schema.json#/$defs/id"
+          }
+        }
+      }
+    },
+    "loadouts": {
+      "type": "array",
+      "maxItems": 0,
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "equipped": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "stash": {
+      "type": "array",
+      "maxItems": 0,
+      "items": {
+        "type": "object",
+        "required": [
+          "itemInstanceId",
+          "location"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemInstanceId": {
+            "type": "string"
+          },
+          "itemId": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "location": {
+            "enum": [
+              "inventory",
+              "stash",
+              "loadout"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

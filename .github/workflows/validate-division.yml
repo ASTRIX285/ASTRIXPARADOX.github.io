@@ -24,3 +24,7 @@ jobs:
         run: node astrix-app/tools/test-division-validator.mjs
       - name: Division gate
         run: node astrix-app/tools/validate-division.mjs
+      - name: Install schema test dependencies
+        run: npm ci --prefix astrix-app --ignore-scripts --no-audit --no-fund
+      - name: Division schemas and catalogue
+        run: node astrix-app/tools/test-division-schema.mjs
