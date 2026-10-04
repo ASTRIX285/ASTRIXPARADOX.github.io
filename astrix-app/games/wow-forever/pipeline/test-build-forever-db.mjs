@@ -132,6 +132,19 @@ await test('prereq rank base is proven from the data, recorded, and checked agai
   assert.equal((await run(silent, 0)).manifest.prereqRankBase.method, 'configured by hand, data silent');
 });
 
+await test('allocation-only builds keep raw allocations, leave amounts pending and drop non-equippable items', async () => {
+  const sparse = 'ID,Display_lang,OverallQualityID,ItemLevel,RequiredLevel,InventoryType,ItemSet,AllowableClass,StatModifier_bonusStat_0,StatModifier_bonusStat_1,StatPercentEditor_0,StatPercentEditor_1\n'
+    + '900101,TEST Chest,4,60,55,5,0,-1,900,901,4000,0\n'
+    + '900102,TEST Quest Paper,1,1,0,0,0,-1,-1,-1,0,0\n';
+  const d = buildDatabase(await loadAll({ ItemSparse: sparse }), sources);
+  assert.equal(d.items.length, 1);
+  assert.equal(d.manifest.counts.nonEquippableDropped, 1);
+  assert.deepEqual(d.items[0].statAllocations, [{ statTypeId: 900, allocation: 4000 }]);
+  assert.equal(d.items[0].stats.pending, true);
+  assert.match(d.items[0].stats.reason, /allocations, not amounts/);
+  assert.equal(d.manifest.pendingCounts['item.stats'], 1);
+});
+
 await test('header drift is reported both ways', async () => {
   const snap = headerSnapshot(await loadAll());
   assert.deepEqual(headerDrift(snap, snap), []);
@@ -145,9 +158,9 @@ await test('output is deterministic and validates against the schemas', async ()
   const a = await mkdtemp(path.join(tmpdir(), 'forever-a-'));
   const b = await mkdtemp(path.join(tmpdir(), 'forever-b-'));
   const snap = headerSnapshot(await loadAll());
-  await writeDatabase(db, snap, a);
-  await writeDatabase(buildDatabase(await loadAll(), sources), snap, b);
-  for (const f of ['manifest.json', 'classes.json', 'itemSets.json', 'talentTrees.json', 'spells.json', 'items/items-000.json']) {
+  await writeDatabase(db, snap, a, path.join(a, 'meta'));
+  await writeDatabase(buildDatabase(await loadAll(), sources), snap, b, path.join(b, 'meta'));
+  for (const f of ['meta/manifest.json', 'meta/header-snapshot.json', 'classes.json', 'itemSets.json', 'talentTrees.json', 'spells.json', 'items/items-000.json']) {
     assert.equal(await readFile(path.join(a, f), 'utf8'), await readFile(path.join(b, f), 'utf8'), f);
   }
   const { default: Ajv2020 } = await import('ajv/dist/2020.js');

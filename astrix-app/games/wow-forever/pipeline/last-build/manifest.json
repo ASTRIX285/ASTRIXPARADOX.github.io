@@ -1,0 +1,83 @@
+{
+ "product": "wow_classic_beta",
+ "build": "1.60.1.70094",
+ "tables": {
+  "ChrClasses": {
+   "rows": 9,
+   "sha256": "140b8ecf36832e9bedffdaebaa434707fdc344d11bb10645d47ef2b31a2e4aac"
+  },
+  "Item": {
+   "rows": 31818,
+   "sha256": "b043792ab6cd47f4b8685a1b0f1cc111a7724071bb9b483761e6736e3961f788"
+  },
+  "ItemSet": {
+   "rows": 536,
+   "sha256": "9180aa9bd764bdeb08defd2c66358c23ee71c776c1552bf501c376c63e230979"
+  },
+  "ItemSetSpell": {
+   "rows": 1465,
+   "sha256": "ae25a8da413e5083692a3afc14691d7aa8be445e0bf2c688cf80b2b6a286566b"
+  },
+  "ItemSparse": {
+   "rows": 19224,
+   "sha256": "192f24313ec18d880ac32dfd51bd6bcbe387618dd34195121460e7e2a8c8f33b"
+  },
+  "Spell": {
+   "rows": 31716,
+   "sha256": "291e588d209182febd2f5f8554d13373aa8dc0262b33f325ac4fbe78e2791f93"
+  },
+  "SpellName": {
+   "rows": 31716,
+   "sha256": "b9a0d125fd47e02c13790504e2f10c4e67a3e5d5c4a91295bd96514ba36610a6"
+  },
+  "Talent": {
+   "rows": 432,
+   "sha256": "ef5518c5a3aaa7458e074a7e41e87837f8a1c74da00938244019e2e8c0428b4a"
+  },
+  "TalentTab": {
+   "rows": 27,
+   "sha256": "9539a388c0e697381f7574247488da528f2647099db4c39096bdb2a8695139b9"
+  }
+ },
+ "counts": {
+  "classes": 9,
+  "items": 8043,
+  "nonEquippableDropped": 11181,
+  "itemSets": 536,
+  "talentTrees": 27,
+  "talents": 432,
+  "spells": 2149
+ },
+ "itemShards": 5,
+ "prereqRankBase": {
+  "value": 0,
+  "method": "detected",
+  "rowsSupporting": 26,
+  "examples": [
+   {
+    "talentId": 32,
+    "prereqTalentId": 29,
+    "prereqRankValue": 0,
+    "prereqMaxRank": 1
+   },
+   {
+    "talentId": 71,
+    "prereqTalentId": 72,
+    "prereqRankValue": 0,
+    "prereqMaxRank": 1
+   },
+   {
+    "talentId": 77,
+    "prereqTalentId": 85,
+    "prereqRankValue": 0,
+    "prereqMaxRank": 1
+   }
+  ]
+ },
+ "pendingCounts": {
+  "item.stats": 8043,
+  "spell.description": 849,
+  "spell.name": 849,
+  "spell.rank": 849
+ }
+}

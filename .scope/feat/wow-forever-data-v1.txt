@@ -1,0 +1,20 @@
+# WoW Forever data v1: first generated database from build 1.60.1.70094, stat allocations, locked headers
+.github/workflows/refresh-wow-forever-data.yml
+astrix-app/games/wow-forever/data/README.md
+astrix-app/games/wow-forever/data/generated/classes.json
+astrix-app/games/wow-forever/data/generated/itemSets.json
+astrix-app/games/wow-forever/data/generated/items/items-000.json
+astrix-app/games/wow-forever/data/generated/items/items-001.json
+astrix-app/games/wow-forever/data/generated/items/items-002.json
+astrix-app/games/wow-forever/data/generated/items/items-003.json
+astrix-app/games/wow-forever/data/generated/items/items-004.json
+astrix-app/games/wow-forever/data/generated/spells.json
+astrix-app/games/wow-forever/data/generated/talentTrees.json
+astrix-app/games/wow-forever/docs/SCOPE.md
+astrix-app/games/wow-forever/pipeline/build-forever-db.mjs
+astrix-app/games/wow-forever/pipeline/forever-sources.json
+astrix-app/games/wow-forever/pipeline/last-build/header-snapshot.json
+astrix-app/games/wow-forever/pipeline/last-build/manifest.json
+astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs
+astrix-app/games/wow-forever/schema/item.schema.json
+astrix-app/module-versions.json

@@ -44,7 +44,7 @@ jobs:
 
       - name: Build database from pinned build
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'build'
-        run: node games/wow-forever/pipeline/build-forever-db.mjs --fetch --cache "$RUNNER_TEMP/forever-csv" --out "$RUNNER_TEMP/forever-db"
+        run: node games/wow-forever/pipeline/build-forever-db.mjs --fetch --cache "$RUNNER_TEMP/forever-csv" --out "$RUNNER_TEMP/forever-db" --meta "$RUNNER_TEMP/forever-db/meta"
 
       - name: Upload generated database for review
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'build'

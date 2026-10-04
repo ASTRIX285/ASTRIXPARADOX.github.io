@@ -94,7 +94,7 @@ The game module translates Forever concepts into the generic ASTRIX PARADOX cont
 
 ## Milestone (2 to 4 weeks)
 
-1. Week 1: run the pipeline against the pinned beta build, commit generated items, sets, spells and talents. Header snapshot reviewed.
+1. Week 1 (done, build 1.60.1.70094): 9 classes, 27 talent trees, 432 talents, 536 item sets, 8,043 equippable items. Headers locked. Item stat amounts stay pending: this build stores stat allocations, and the client formula that turns them into amounts is not verified yet.
 2. Week 2 (done in `engine/build-rules.mjs`): talent ownership, rank and prerequisite checks, Legacy cap, stat totals by raw stat id. Row unlock and total points stay pending until sourced.
 3. Week 3: advisor v0: weak points, conflicts and first cause-and-effect chains, every claim citing its record.
 4. Week 4: build the pages from the approved wireframes (published as the "The Caster Wireframes" artifact, kept out of the repo so no unfinished page goes live) into the ASTRIX tool shell. Re-pin to the launch build after 4 Nov.

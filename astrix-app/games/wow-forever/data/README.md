@@ -2,7 +2,7 @@
 
 - `rules.json` rule values that are not in the client tables, each with an official-post source.
 - `stat-types.json` stat type id to name map. Empty until each entry has a cited source.
-- `generated/` does not exist yet. It is created from a reviewed run of the pipeline, never by hand.
+- `generated/` the Forever database (classes, talent trees, spells, item sets, equippable items), built from the pinned client build by the pipeline, never by hand. The run manifest and header snapshot sit in `../pipeline/last-build/`.
 
 ## How data gets here
 
