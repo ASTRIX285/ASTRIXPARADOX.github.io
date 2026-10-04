@@ -142,10 +142,41 @@ try{
     }
     await context.close();
   }
+  // Prerender supported, but the tab is tapped with no hover or touch start first, so nothing was
+  // prerendered or warmed. The outgoing page must stay on screen, its tab pressed, until the warm
+  // step (its warm fetch of the destination page, held back here for 1.2 s) has finished.
+  if(!ONLY){
+    const context=await browser.newContext({viewport:{width:1600,height:900}});
+    await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});
+    let hold=false,releasedAt=null;
+    await context.route(origin+'/astrix-app/pages/vault/',async route=>{
+      // Only the warm step's fetch; the navigation itself is a document request.
+      if(hold&&route.request().resourceType()==='fetch'){hold=false;await new Promise(done=>setTimeout(done,1200));releasedAt=Date.now();}
+      return route.fallback();
+    });
+    const page=await context.newPage();
+    await page.goto(origin+'/astrix-app/pages/journey/',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>window.ForgeLoader?.completed===true,null,{timeout:30000});
+    const supported=await page.evaluate(()=>Boolean(HTMLScriptElement.supports?.('speculationrules')));
+    if(!supported)failures.push('no-hover tap: this Chromium must support speculation rules for this case');
+    let navigatedAt=null;
+    page.on('framenavigated',frame=>{if(frame===page.mainFrame()&&new URL(frame.url()).pathname==='/astrix-app/pages/vault/'&&navigatedAt===null)navigatedAt=Date.now();});
+    hold=true;
+    const tab=page.locator('.apx-destination-ribbon a[href="/astrix-app/pages/vault/"]');
+    // A click event only: no pointer movement, hover or touch start before it.
+    await tab.dispatchEvent('click',{button:0});
+    await page.waitForTimeout(600);
+    const during=await page.evaluate(()=>({path:location.pathname,busy:document.querySelector('.apx-destination-ribbon a[href="/astrix-app/pages/vault/"]')?.getAttribute('aria-busy')}));
+    if(during.path!=='/astrix-app/pages/journey/')failures.push('no-hover tap: the outgoing page left before the warm step finished');
+    if(during.busy!=='true')failures.push('no-hover tap: the tab must show its pressed state while warming');
+    await page.waitForURL(url=>new URL(url).pathname==='/astrix-app/pages/vault/',{timeout:15000});
+    if(releasedAt===null||navigatedAt===null||navigatedAt<releasedAt)failures.push(`no-hover tap: navigated before the warm step finished (${navigatedAt&&releasedAt?navigatedAt-releasedAt:'?'} ms)`);
+    await context.close();
+  }
 }finally{await browser?.close();server.close();}
 console.log('| Tab | Width | From | Tap to new page shown | Prerendered | Frames shown before ready |\n|---|---|---|---|---|---|');
 for(const row of timings)console.log(`| ${row.name} | ${row.width} | ${row.from} | ${row.shownMs===null?'not shown':`${row.shownMs} ms`} | ${row.prerendered?'yes':'no'} | ${row.earlyFrames} |`);
 if(!measureOnly){
   assert.deepEqual(failures,[],`Seamless transitions:\n${failures.join('\n')}`);
-  console.log(`SEAMLESS_TRANSITIONS=PASS ${TABS.length} tool tabs at 1600 and 390: no frame before readiness, readiness once, no portal loader on internal moves, no layout jump after reveal; a failed transfer shows still recovery with retry`);
+  console.log(`SEAMLESS_TRANSITIONS=PASS ${TABS.length} tool tabs at 1600 and 390: no frame before readiness, readiness once, no portal loader on internal moves, no layout jump after reveal; a failed transfer shows still recovery with retry; a tap with no hover keeps the outgoing page until the warm step finishes`);
 }else console.log(`SEAMLESS_TRANSITIONS=MEASURED ${failures.length} problem(s)${failures.length?`:\n${failures.join('\n')}`:''}`);

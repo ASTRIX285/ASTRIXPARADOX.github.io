@@ -100,10 +100,11 @@
     const link=event.target.closest('a'),destination=destinationFor(link);
     if(!destination)return;
     event.preventDefault();clearTimeout(intentTimer);clearNavigation();
-    // Browsers with prerender already hold the destination ready (speculation rules from the portal
-    // loader): go now. Elsewhere, warm the destination's files and prepared data first, with the tab
-    // in its pressed state, then go. Never more than WARM_LIMIT_MS; the destination covers itself.
-    if(window.HTMLScriptElement?.supports?.('speculationrules')||navigator.connection?.saveData){location.assign(destination.href);return;}
+    // Always warm the destination's files and prepared data first, with the tab in its pressed state,
+    // then go. Prerender support alone is no promise the page is ready: a tap with no hover never
+    // started one. An already warmed or prerendered page resolves at once, so nothing waits. Never more
+    // than WARM_LIMIT_MS; the destination's cover stays the last fallback. Save-Data goes straight there.
+    if(navigator.connection?.saveData){location.assign(destination.href);return;}
     const revision=navigationRevision;
     document.querySelectorAll(`.apx-destination-ribbon a[href="${destination.href}"],.ax-drawer-links a[href="${destination.href}"]`).forEach(row=>row.setAttribute("aria-busy","true"));
     await Promise.race([prepare(destination).catch(()=>{}),new Promise(resolve=>setTimeout(resolve,WARM_LIMIT_MS))]);

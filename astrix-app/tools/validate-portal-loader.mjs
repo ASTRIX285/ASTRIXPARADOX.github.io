@@ -213,11 +213,18 @@ function navigationHarness({prerender=true}={}){
   const click=(path,extra={})=>{let prevented=false;const link=makeLink(path);const event={button:0,target:link,preventDefault(){prevented=true;},...extra};const task=window.testNavigation.navigatePrepared(event);return {task,prevented:()=>prevented};};
   return {click,assigned,requests,pending,storage,events,indicators:()=>indicators};
 }
+// With prerender supported the tap still warms first (#448): a tap with no hover never started a
+// prerender, so support alone is no promise the page is ready. A warmed page resolves at once.
 const navigation=navigationHarness();
-const firstNavigation=navigation.click('/astrix-app/pages/vault/');await firstNavigation.task;
-assert.equal(firstNavigation.prevented(),true);assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/']);
+const firstNavigation=navigation.click('/astrix-app/pages/vault/');await settleMicrotasks();
+assert.equal(firstNavigation.prevented(),true);assert.deepEqual(navigation.requests,['vault'],'A tap warms the destination even when prerender is supported');
+assert.deepEqual(navigation.assigned,[],'The outgoing page stays until the warm step finishes');
+navigation.pending.get('vault').resolve();await firstNavigation.task;
+assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/'],'The tap goes once warm');
 assert.equal(navigation.indicators(),0,'Outgoing page must not show a second loading component');
-assert.equal(navigation.requests.length,0,'Clicks must not block on prefetch');
+const again=navigation.click('/astrix-app/pages/vault/');await again.task;
+assert.deepEqual(navigation.requests,['vault'],'An already warmed destination is not fetched again');
+assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/','/astrix-app/pages/vault/'],'An already warmed destination goes at once');
 const modified=navigation.click('/astrix-app/pages/vault/',{ctrlKey:true});await modified.task;assert.equal(modified.prevented(),false);
 assert.doesNotMatch(ribbonSource,/createElement\(['"]iframe|type=['"]speculationrules/,'Preparation must not execute another page or duplicate its account actions');
 // Without prerender (Safari, Firefox) the tap warms the destination first, then goes; never longer than the cap.
