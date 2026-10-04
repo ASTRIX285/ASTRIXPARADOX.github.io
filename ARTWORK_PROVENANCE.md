@@ -24,3 +24,11 @@ masters, not native captures at those resolutions. Cosmodrome retains its existi
 approved artwork. `astrix-app/data/journey-map-assets.json` records all 18 export
 checksums and the corresponding master checksums. See the Journey integration
 notes for coordinate calibration and public-data provenance.
+
+## Link share image, 4 October 2026
+
+`img/share/astrix-paradox-share-1200x630.jpg` is a 1200 x 630 crop of the
+existing `astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp`
+map art with a lighter Forge Black wash, an Ember glow and a brightness lift.
+It is presentation of the existing art for link previews, not new artwork. The
+home page and The Hub use it as their `og:image` and `twitter:image`.
