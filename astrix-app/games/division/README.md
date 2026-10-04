@@ -44,3 +44,15 @@ All five run on every PR through `.github/workflows/validate-division.yml`. The 
 `schema/` holds one JSON Schema per record kind, shared by every title: weapon families, weapons, gear slots, attributes, brands, gear sets, named and exotic items, talents, mods, skills (variants and tier scaling), specializations, expertise and proficiency. `common.schema.json` holds the building blocks; every record builds on its `recordBase` (id, name, provenance, notes). `account-state.schema.json` models equipped items, loadouts and stash locations and keeps them empty until Ubisoft gives authorised access.
 
 A catalogue file in `<title>/data/` is `{ "title": "td2", "kind": "<record kind>", "records": [ ... ] }`. Title-specific facts (the slot list, caps, counts) are records in the title's data, never part of a schema.
+
+## Builds, adapters and share links
+
+A build uses the neutral format in `astrix-app/core/build-format/` (`build.schema.json`, `build.mjs`): game, title, `catalogueVersion`, slots, abilities and selections. It never stores a game version.
+
+`astrix-app/platform/adapters/division/` holds three adapters on one interface (`platform/contracts/build-adapter.mjs`):
+
+- `manual`: build by hand. Every change goes through the game module, so a pending item can't be equipped.
+- `json`: import and export a build file.
+- `ubisoft`: always "not authorised". No network call, no cookies or storage, never asks for a sign-in.
+
+`share.mjs` turns a build into a link, `/hub/workbench/td2/?b=<share string>`, and back. A round trip gives back the identical build.

@@ -1,0 +1,17 @@
+# feature/division-build-format: neutral build format, Division adapters and share links.
+.github/workflows/validate-division.yml
+astrix-app/core/build-format/build.mjs
+astrix-app/core/build-format/build.schema.json
+astrix-app/games/division/README.md
+astrix-app/games/division/index.mjs
+astrix-app/module-versions.json
+astrix-app/platform/adapters/division/.gitkeep
+astrix-app/platform/adapters/division/index.mjs
+astrix-app/platform/adapters/division/json.mjs
+astrix-app/platform/adapters/division/manual.mjs
+astrix-app/platform/adapters/division/share.mjs
+astrix-app/platform/adapters/division/ubisoft.mjs
+astrix-app/platform/contracts/build-adapter.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-division-build-format.mjs
+astrix-app/tools/test-division-ubisoft-adapter.mjs
