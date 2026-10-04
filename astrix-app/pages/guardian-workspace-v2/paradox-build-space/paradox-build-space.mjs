@@ -1,6 +1,5 @@
 import {mountDimComparison} from '../../../core/dim-import/review.mjs';
 import {renderEquipmentIcons,bindLoadoutIconDetails} from '../../../shared/loadout-icon-layout.mjs';
-import '../../../core/dim-import/entry.mjs';
 import {recommendedBuildCopy,collectReviewDiagnostics,restoreReviewDiagnostics} from './recommended-build-copy.mjs';
 import {runProfileTask} from '../../../core/engine-profile-client.mjs';
 import {beginEngineTiming,afterEnginePaint} from '../../../core/engine-timing.mjs';
@@ -1056,3 +1055,5 @@ async function initialiseBuildForge(){
   if(intent==='save-paradox-copy')queueMicrotask(()=>openSaveParadoxDialog(`BUNGIE SLOT ${Number(build?.selectedLoadoutIndex)+1} · ${String(build?.characterClass||'GUARDIAN').toUpperCase()}`));
 }
 void initialiseBuildForge();
+// DIM import sits behind a click: it loads after the first screen, on idle.
+if(typeof document!=='undefined'){const loadDimImport=()=>import('../../../core/dim-import/entry.mjs');if(globalThis.requestIdleCallback)requestIdleCallback(loadDimImport,{timeout:3000});else setTimeout(loadDimImport,1);}

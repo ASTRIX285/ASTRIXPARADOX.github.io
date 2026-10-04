@@ -18,7 +18,7 @@ const require=createRequire(import.meta.url);
 // 1 and 2: static.
 const result=await plan(),current=await readFile(resolve(ROOT,'astrix-app/module-versions.json'),'utf8').catch(()=>'');
 assert.equal(current,result.versionsJson,'module-versions.json is stale. Run: node astrix-app/tools/build-module-versions.mjs');
-assert.deepEqual([...result.writes.keys()],[],'Imports or import maps are stale. Run: node astrix-app/tools/build-module-versions.mjs');
+assert.deepEqual([...result.writes.keys()],[],'Imports, import maps or head hints (preload lists) are stale. Run: node astrix-app/tools/build-module-versions.mjs');
 const {modules,pages}=await appGraph(),workerGraph=reachable(modules,WORKER_ENTRIES),workerEntries=new Set(WORKER_ENTRIES);
 const versioned=[];
 for(const module of modules.values())for(const ref of module.refs){
@@ -52,6 +52,23 @@ for(const page of pages.values()){
   if(!/<script type="importmap" data-module-versions>/.test(page.source))continue;
   if(!match){layoutProblems.push(`${page.site}: import map is not in the one-module-per-line layout`);continue;}
   checkEntries(page.site,match[1].split('\n'),line=>{const m=line.match(/^"([^"]+)":"([^"?]+)\?v=([0-9a-f]+)",?$/);return m&&m[1]===m[2]?{site:m[1],version:m[3]}:null;});
+}
+// 5. Head hints (perf, 4 Oct 2026): directly after the import map, one per line, blank-line separated,
+//    exactly what the generator writes for the page now (a stale preload list fails here and in step 1),
+//    every modulepreload at its import-map URL, and no module behind import() preloaded.
+for(const page of pages.values()){
+  const hintLines=page.source.split('\n').filter(line=>/data-head-hint>/.test(line));
+  if(!hintLines.length)continue;
+  const block=page.source.match(/<\/script>\n((?:  <link\b[^>]*data-head-hint>\n\n?)+)/);
+  if(!block||block[1].split('\n').filter(line=>/data-head-hint>/.test(line)).length!==hintLines.length){layoutProblems.push(`${page.site}: head hints must sit together directly after the import map`);continue;}
+  const lines=block[1].replace(/\n$/,'').split('\n');
+  lines.forEach((line,index)=>{if(index%2===1&&line!=='')layoutProblems.push(`${page.site}: head hint line ${index+1} must be blank`);});
+  const map=JSON.parse(page.source.match(/<script type="importmap" data-module-versions>\n([\s\S]*?)\n  <\/script>/)[1]).imports;
+  for(const line of hintLines){
+    const href=line.match(/rel="modulepreload" href="([^"]+)"/)?.[1];
+    if(href&&map[href.split('?')[0]]!==href)layoutProblems.push(`${page.site}: modulepreload ${href} does not match the import map URL`);
+    if(href&&/\/core\/dim-import\/entry\.mjs/.test(href))layoutProblems.push(`${page.site}: DIM import is behind a click and must not be preloaded`);
+  }
 }
 const versionsBlock=current.match(/\n "modules": \{\n([\s\S]*?)\n \},\n/);
 if(!versionsBlock)layoutProblems.push('module-versions.json: modules are not in the one-module-per-line layout');
