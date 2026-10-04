@@ -1,0 +1,13 @@
+# feature/workbench-editor-mvp: WorkBench editor screen (brief 6).
+.github/workflows/validate-division.yml
+astrix-app/games/division/catalogue.mjs
+astrix-app/games/division/index.mjs
+astrix-app/module-versions.json
+astrix-app/pages/workbench/workbench-state.mjs
+astrix-app/pages/workbench/workbench.css
+astrix-app/pages/workbench/workbench.mjs
+astrix-app/platform/adapters/division/manual.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-division-build-format.mjs
+astrix-app/tools/test-workbench-editor.mjs
+hub/workbench/td2/index.html

@@ -82,7 +82,9 @@
 
   "/astrix-app/games/destiny-2/index.mjs": "a5dae81a23",
 
-  "/astrix-app/games/division/index.mjs": "9bba7f8195",
+  "/astrix-app/games/division/catalogue.mjs": "029479b955",
+
+  "/astrix-app/games/division/index.mjs": "a12bbb97ec",
 
   "/astrix-app/games/wow-forever/engine/build-rules.mjs": "a3a39cb2d7",
 
@@ -351,6 +353,10 @@
   "/astrix-app/pages/vault/vault-transfer-feedback.mjs": "9393c70924",
 
   "/astrix-app/pages/vault/vault.mjs": "b35614bfb0",
+
+  "/astrix-app/pages/workbench/workbench-state.mjs": "55ad6f609e",
+
+  "/astrix-app/pages/workbench/workbench.mjs": "1827404604",
 
   "/astrix-app/platform/adapters/division/index.mjs": "3de6d3621b",
 
