@@ -49,6 +49,7 @@ astrix-app/shared/astrix-portal-loader.css
 astrix-app/shared/astrix-portal-loader.js
 astrix-app/tools/paradox-validator.mjs
 astrix-app/tools/test-capped-gear-layout.mjs
+astrix-app/tools/test-logo-home-link.mjs
 astrix-app/tools/test-manual-build-editor.mjs
 astrix-app/tools/test-mobile-shell.mjs
 astrix-app/tools/test-portal-single-skin.mjs
