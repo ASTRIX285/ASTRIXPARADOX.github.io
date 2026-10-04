@@ -13,7 +13,7 @@
  * Usage:
  *   node build-forever-db.mjs --list-builds
  *   node build-forever-db.mjs --fetch --cache <dir> --out <dir>
- *   node build-forever-db.mjs --in <dir> --out <dir> [--sources <file>]
+ *   node build-forever-db.mjs --in <dir> --out <dir> [--meta <dir>] [--sources <file>]
  *
  * Exit codes: 0 pass, 1 error, 2 header drift.
  */
@@ -42,7 +42,8 @@ export const COLUMNS = Object.freeze({
     itemSetId: ['ItemSet'],
     allowableClassMask: ['AllowableClass'],
     statTypeArray: ['StatModifier_bonusStat', 'StatType'],
-    statAmountArray: ['StatModifier_bonusAmount', 'StatValue']
+    statAmountArray: ['StatModifier_bonusAmount', 'StatValue'],
+    statAllocArray: ['StatPercentEditor']
   },
   ItemSet: { name: ['Name_lang'], itemArray: ['ItemID'] },
   ItemSetSpell: { setId: ['ItemSetID'], spellId: ['SpellID'], threshold: ['Threshold'] },
@@ -201,12 +202,19 @@ export function buildDatabase(tables, sources) {
   });
   const classIds = classes.map(c => c.id);
 
-  const items = [...t.ItemSparse.byId.entries()].sort((a, b) => a[0] - b[0]).map(([id, r]) => {
+  const allItems = [...t.ItemSparse.byId.entries()].sort((a, b) => a[0] - b[0]).map(([id, r]) => {
     const base = t.Item.byId.get(id);
     const types = t.ItemSparse.ints(r, 'statTypeArray');
     const amounts = t.ItemSparse.ints(r, 'statAmountArray');
+    const allocs = t.ItemSparse.ints(r, 'statAllocArray');
+    let statAllocations;
+    if (isPending(types)) statAllocations = types;
+    else if (isPending(allocs)) statAllocations = allocs;
+    else if (types.length !== allocs.length) statAllocations = pending('ItemSparse stat type and allocation arrays differ in length.');
+    else statAllocations = types.map((statTypeId, i) => ({ statTypeId, allocation: allocs[i] })).filter(s => s.allocation !== 0 && s.statTypeId >= 0);
     let stats;
     if (isPending(types)) stats = types;
+    else if (isPending(amounts) && !isPending(allocs)) stats = pending('This build stores stat allocations, not amounts. The client works amounts out from item level and quality; that formula is not verified yet.');
     else if (isPending(amounts)) stats = amounts;
     else if (types.length !== amounts.length) stats = pending('ItemSparse stat type and amount arrays differ in length.');
     else stats = types.map((statTypeId, i) => ({ statTypeId, amount: amounts[i] })).filter(s => s.amount !== 0 && s.statTypeId >= 0);
@@ -220,12 +228,17 @@ export function buildDatabase(tables, sources) {
       itemClass: base ? t.Item.int(base, 'itemClass') : pending('No Item row for this id.'),
       itemSubclass: base ? t.Item.int(base, 'itemSubclass') : pending('No Item row for this id.'),
       stats,
+      statAllocations,
       itemSetId: t.ItemSparse.int(r, 'itemSetId'),
       allowableClassMask: t.ItemSparse.int(r, 'allowableClassMask'),
       provenance: t.ItemSparse.provenance(id)
     };
-    count('item', rec); return rec;
+    return rec;
   });
+  // Items that cannot be equipped (InventoryType 0) are out of scope for a build tool.
+  const nonEquippableDropped = allItems.filter(i => i.inventoryType === 0).length;
+  const items = allItems.filter(i => i.inventoryType !== 0);
+  items.forEach(rec => count('item', rec));
 
   const referencedSpells = new Set();
 
@@ -322,7 +335,7 @@ export function buildDatabase(tables, sources) {
     product: sources.product,
     build: sources.build,
     tables: Object.fromEntries(Object.values(t).sort((a, b) => a.name.localeCompare(b.name)).map(x => [x.name, { rows: x.rows.length, sha256: x.sha }])),
-    counts: { classes: classes.length, items: items.length, itemSets: itemSets.length, talentTrees: talentTrees.length, talents: talentTrees.reduce((n, x) => n + x.talents.length, 0), spells: spells.length },
+    counts: { classes: classes.length, items: items.length, nonEquippableDropped, itemSets: itemSets.length, talentTrees: talentTrees.length, talents: talentTrees.reduce((n, x) => n + x.talents.length, 0), spells: spells.length },
     itemShards: Math.ceil(items.length / ITEM_SHARD_SIZE),
     prereqRankBase,
     pendingCounts: Object.fromEntries(Object.entries(pendingCounts).sort())
@@ -378,15 +391,19 @@ async function loadTables(sources, inDir) {
 }
 
 const json = v => `${JSON.stringify(v, null, 1)}\n`;
+const compact = v => `${JSON.stringify(v)}\n`;
 
-export async function writeDatabase(db, snapshot, outDir) {
+/* Records go to outDir (compact, served to the site). The run manifest and
+   header snapshot are not records, so they go to metaDir. */
+export async function writeDatabase(db, snapshot, outDir, metaDir = outDir) {
   await mkdir(path.join(outDir, 'items'), { recursive: true });
-  await writeFile(path.join(outDir, 'manifest.json'), json(db.manifest));
-  await writeFile(path.join(outDir, 'header-snapshot.json'), json(snapshot));
-  for (const key of ['classes', 'itemSets', 'talentTrees', 'spells']) await writeFile(path.join(outDir, `${key}.json`), json(db[key]));
+  await mkdir(metaDir, { recursive: true });
+  await writeFile(path.join(metaDir, 'manifest.json'), json(db.manifest));
+  await writeFile(path.join(metaDir, 'header-snapshot.json'), json(snapshot));
+  for (const key of ['classes', 'itemSets', 'talentTrees', 'spells']) await writeFile(path.join(outDir, `${key}.json`), compact(db[key]));
   for (let i = 0; i < db.manifest.itemShards; i += 1) {
     const shard = db.items.slice(i * ITEM_SHARD_SIZE, (i + 1) * ITEM_SHARD_SIZE);
-    await writeFile(path.join(outDir, 'items', `items-${String(i).padStart(3, '0')}.json`), json(shard));
+    await writeFile(path.join(outDir, 'items', `items-${String(i).padStart(3, '0')}.json`), compact(shard));
   }
 }
 
@@ -427,7 +444,7 @@ async function main() {
     }
   }
   const db = buildDatabase(tables, sources);
-  await writeDatabase(db, snapshot, opt.out);
+  await writeDatabase(db, snapshot, opt.out, opt.meta ?? opt.out);
   console.log(JSON.stringify(db.manifest.counts));
   console.log(`PREREQ_RANK_BASE ${JSON.stringify(db.manifest.prereqRankBase)}`);
   const pendings = Object.entries(db.manifest.pendingCounts);

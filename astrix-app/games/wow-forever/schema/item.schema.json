@@ -3,7 +3,7 @@
   "$id": "https://astrixparadox.com/astrix-app/games/wow-forever/schema/item.schema.json",
   "title": "Forever item",
   "type": "object",
-  "required": ["id", "name", "quality", "itemLevel", "requiredLevel", "inventoryType", "itemClass", "itemSubclass", "stats", "itemSetId", "allowableClassMask", "provenance"],
+  "required": ["id", "name", "quality", "itemLevel", "requiredLevel", "inventoryType", "itemClass", "itemSubclass", "stats", "statAllocations", "itemSetId", "allowableClassMask", "provenance"],
   "additionalProperties": false,
   "$defs": {
     "int": { "oneOf": [{ "type": "integer" }, { "$ref": "pending.schema.json" }] },
@@ -27,6 +27,10 @@
     "itemClass": { "$ref": "#/$defs/int" },
     "itemSubclass": { "$ref": "#/$defs/int" },
     "stats": { "oneOf": [{ "type": "array", "items": { "$ref": "#/$defs/stat" } }, { "$ref": "pending.schema.json" }] },
+    "statAllocations": {
+      "description": "Raw client stat allocation (ItemSparse.StatPercentEditor) per stat type. Not an amount.",
+      "oneOf": [{ "type": "array", "items": { "type": "object", "required": ["statTypeId", "allocation"], "additionalProperties": false, "properties": { "statTypeId": { "type": "integer" }, "allocation": { "type": "integer" } } } }, { "$ref": "pending.schema.json" }]
+    },
     "itemSetId": { "$ref": "#/$defs/int" },
     "allowableClassMask": { "$ref": "#/$defs/int" },
     "provenance": { "$ref": "provenance.schema.json" }
