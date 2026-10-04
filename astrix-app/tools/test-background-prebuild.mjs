@@ -171,8 +171,13 @@ try{
     const {context,page}=await signedIn({historyDelay:400});
     await page.goto(origin+'/astrix-app/pages/reports/',{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.ForgeLoader?.completed===true&&document.querySelector('.reports-open'),null,{timeout:30000});
-    await page.waitForFunction(async()=>{const client=await import('/astrix-app/core/prepared-page-client.mjs');return client.preparationQueue(window.FORGE_BUNGIE_SESSION)?.list().filter(row=>/^reports:(?!history$)/.test(row.key)).length>=2;},null,{timeout:30000,polling:200});
-    const before=await queueState(page);
+    // Poll from Node, like waitForQueue: until at least two Reports sections are queued.
+    let before=null;
+    for(const end=Date.now()+30000;Date.now()<end;await page.waitForTimeout(200)){
+      before=await queueState(page).catch(()=>null);
+      if(before&&before.filter(row=>/^reports:(?!history$)/.test(row.key)).length>=2)break;
+    }
+    before=before||[];
     const sections=before.filter(row=>/^reports:(?!history$)/.test(row.key)&&row.state==='queued');
     const target=sections.at(-1);
     if(!target)failures.push(`front: no queued section to pick (${JSON.stringify(before)})`);
