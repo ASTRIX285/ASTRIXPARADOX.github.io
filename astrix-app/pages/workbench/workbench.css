@@ -1,0 +1,148 @@
+/* WorkBench editor (The Division 2). Tool shell tokens (--ax-*) from astrix-tool-shell.css;
+   no wireframe colours. One red primary per view, notched machined corners, hairline panels. */
+
+:root{
+  --wb-gutter:clamp(16px,2.6vw,40px);
+  --wb-gap:16px;
+  --wb-notch:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%);
+  --wb-gold:#c9a84c;
+}
+
+html{background:var(--ax-black)}
+body.workbench-page{
+  margin:0;min-height:100vh;display:flex;flex-direction:column;color:var(--ax-ink);
+  font:500 15px/1.5 "Barlow","Segoe UI",sans-serif;
+  background:
+    radial-gradient(ellipse at 20% -10%,rgba(115,32,34,.22),transparent 55%),
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px) 0 0/48px 48px,
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/48px 48px,
+    var(--ax-black);
+}
+.wb-skip{position:absolute;left:-9999px;top:0;z-index:100;padding:10px 14px;background:var(--ax-raised);color:var(--ax-ink)}
+.wb-skip:focus{left:16px;top:16px}
+
+.wb-main{flex:1;width:100%;max-width:1600px;box-sizing:border-box;margin:0 auto;
+  padding:calc(var(--ax-shell-top,78px) + var(--ax-shell-tabs,46px) + 34px) var(--wb-gutter) 40px;outline:none}
+.wb-placeholder{color:var(--ax-muted)}
+
+/* Toolbar: name, objective chips, actions */
+.wb-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;margin-bottom:var(--wb-gap)}
+.wb-field{display:grid;gap:6px;min-width:0}
+.wb-field>span{font:700 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ax-steel)}
+.wb-field input,.wb-field select{box-sizing:border-box;width:100%;min-height:44px;padding:0 12px;border:1px solid var(--ax-line-strong);border-radius:0;
+  background:var(--ax-panel);color:var(--ax-ink);font:500 15px/1 "Barlow","Segoe UI",sans-serif}
+.wb-field input:focus-visible,.wb-field select:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:1px}
+.wb-name{flex:1 1 260px;max-width:380px}
+.wb-objectives,.wb-filters{display:flex;flex-wrap:wrap;gap:8px}
+.wb-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.workbench-page button{min-height:44px;padding:0 16px;font:700 13px/1 var(--ax-font-head);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.workbench-page .wb-chip{min-height:40px;padding:0 14px;text-transform:none;letter-spacing:.06em;font-size:14px}
+.workbench-page button:disabled{opacity:.5;cursor:default}
+
+/* The one red action in each view */
+body.workbench-page .wb-primary:not(#ax-p1):not(#ax-p2):not(#ax-p3):not(#ax-p4){
+  color:#fff!important;clip-path:var(--ax-clip)!important;
+  background:linear-gradient(180deg,#d2291a 0%,var(--ax-ember) 55%,var(--ax-ember-lo) 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,170,150,.8),inset 0 -1px 0 rgba(0,0,0,.45)!important;
+  --ax-stroke-hi:var(--ax-stroke-hi-primary);--ax-stroke:var(--ax-stroke-primary)}
+body.workbench-page .wb-primary:disabled:not(#ax-p1):not(#ax-p2):not(#ax-p3):not(#ax-p4){
+  background:linear-gradient(180deg,#24211b,#191712)!important;color:#77756f!important;box-shadow:inset 0 0 0 1px var(--ax-line-strong)!important}
+
+/* Layout: main column and totals */
+.wb-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:var(--wb-gap);align-items:start}
+.wb-col-main,.wb-col-side{display:grid;gap:var(--wb-gap);min-width:0}
+.wb-col-side{position:sticky;top:calc(var(--ax-shell-top,78px) + var(--ax-shell-tabs,46px) + 26px)}
+.wb-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--wb-gap)}
+
+.wb-panel{min-width:0;padding:18px 20px 20px;background:rgba(21,19,15,.92);border:1px solid var(--ax-line);clip-path:var(--wb-notch)}
+.wb-panel-title{margin:0 0 14px;font:400 15px/1.2 var(--ax-font-brand);letter-spacing:.08em;text-transform:uppercase;color:var(--ax-ink)}
+.wb-small{margin:10px 0 0;color:var(--ax-muted);font-size:13px;line-height:1.5}
+
+.wb-pending{display:flex;align-items:flex-start;gap:10px;margin:0;color:var(--ax-muted);font-size:14px;line-height:1.5}
+.wb-tag{flex:none;display:inline-block;padding:3px 7px;border:1px solid color-mix(in srgb,var(--wb-gold) 55%,transparent);color:var(--wb-gold);font:700 10px/1.2 var(--ax-font-head);letter-spacing:.16em}
+
+/* Gear slots: 3 by 2 on desktop */
+.wb-slot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.wb-slot{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--ax-raised);border:1px solid var(--ax-line);clip-path:var(--wb-notch)}
+.wb-slot.is-filled{border-color:var(--ax-line-strong)}
+body.workbench-page .wb-slot-open:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){
+  display:grid;gap:6px;align-content:start;justify-items:start;width:100%;min-height:112px;padding:14px 16px;text-align:left;
+  clip-path:none!important;background:transparent!important;box-shadow:none!important;text-transform:none;letter-spacing:0;color:var(--ax-ink)!important}
+body.workbench-page .wb-slot-open:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5)::after{opacity:.55!important}
+.wb-slot-open:hover{background:rgba(255,255,255,.03)!important}
+.wb-slot-label{font:700 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ax-steel)}
+.wb-slot-item{font:700 17px/1.25 var(--ax-font-head);letter-spacing:.02em;color:var(--ax-ink);overflow-wrap:anywhere}
+.wb-slot:not(.is-filled) .wb-slot-item{color:var(--ax-muted)}
+.wb-slot-meta{font-size:13px;line-height:1.4;color:var(--ax-muted)}
+.workbench-page .wb-slot-clear{align-self:flex-start;margin:0 16px 14px;min-height:36px;padding:0 12px;font-size:11px}
+
+/* Totals */
+.wb-counts{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.wb-counts li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--ax-line)}
+.wb-counts li:last-child{border-bottom:0}
+.wb-counts span{color:var(--ax-muted)}
+.wb-counts strong{font:700 22px/1 var(--ax-font-head);color:var(--ax-ink)}
+.wb-source .wb-small{margin:0}
+
+/* Notices and toasts */
+.wb-notice{margin:0 0 var(--wb-gap);padding:12px 16px;border:1px solid color-mix(in srgb,var(--wb-gold) 45%,transparent);background:color-mix(in srgb,var(--wb-gold) 6%,transparent);color:var(--ax-ink)}
+.wb-error p{color:var(--ax-muted)}
+.wb-toast{position:fixed;left:50%;bottom:24px;z-index:2147483100;transform:translateX(-50%);max-width:min(520px,calc(100vw - 32px));padding:12px 18px;
+  background:var(--ax-raised);border:1px solid var(--ax-line-strong);color:var(--ax-ink);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+
+/* Item picker (screen E) */
+.wb-picker{width:min(1040px,calc(100vw - 32px));max-height:calc(100vh - 48px);padding:0;border:1px solid var(--ax-line-strong);background:var(--ax-panel);color:var(--ax-ink);
+  clip-path:var(--wb-notch);overflow:hidden}
+.wb-picker::backdrop{background:var(--ax-backdrop)}
+.wb-picker[open]{display:flex}
+.wb-picker-inner{display:flex;flex-direction:column;width:100%;max-height:calc(100vh - 48px);margin:0}
+.wb-picker-head,.wb-picker-foot{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--ax-line)}
+.wb-picker-head h2{flex:1;margin:0;font:400 16px/1.2 var(--ax-font-brand);letter-spacing:.08em;text-transform:uppercase}
+.wb-picker-foot{justify-content:flex-end;border-top:1px solid var(--ax-line);border-bottom:0}
+.wb-picker-body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;padding:18px 20px;overflow:auto}
+.wb-picker-list,.wb-roll{display:grid;gap:14px;align-content:start;min-width:0}
+.wb-roll{padding:16px;background:var(--ax-raised);border:1px solid var(--ax-line)}
+.wb-roll .wb-panel-title{margin:0}
+.wb-options{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+body.workbench-page .wb-option:not(#ax-r1):not(#ax-r2):not(#ax-r3):not(#ax-r4):not(#ax-r5){display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;width:100%;min-height:56px;padding:10px 14px;text-align:left;
+  text-transform:none;letter-spacing:0}
+.wb-option-name{font:700 15px/1.3 var(--ax-font-head)}
+.wb-option-type{color:var(--ax-muted);font-size:13px}
+.wb-option .wb-tag{justify-self:start}
+.wb-option-reason{grid-column:1/-1;color:var(--ax-muted);font-size:13px;line-height:1.4}
+.wb-empty{margin:0;padding:18px;border:1px dashed var(--ax-line-strong);color:var(--ax-muted);line-height:1.5}
+
+/* Footer */
+.wb-footer{padding:18px var(--wb-gutter) 24px;border-top:1px solid var(--ax-line);background:rgba(14,12,9,.9);color:var(--ax-steel);font-size:12px;line-height:1.5}
+.wb-footer p{max-width:1600px;margin:0 auto 6px}
+.wb-footer .apx-bungie-attribution{margin-bottom:0}
+
+/* Tablet: totals move under the build */
+@media (max-width:1199px){
+  /* The shell's flex header (no Guardian cards) keeps the menu next to the wordmark; push it to the right edge. */
+  html body.workbench-page header.apx-destination-header .ax-menu-btn{margin-left:auto!important}
+  .wb-main{padding-top:24px}
+  .wb-layout{grid-template-columns:minmax(0,1fr)}
+  .wb-col-side{position:static;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .wb-actions{margin-left:0}
+}
+/* Phone: one column, the picker opens as a full-screen sheet */
+@media (max-width:767px){
+  .wb-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wb-row{grid-template-columns:minmax(0,1fr)}
+  .wb-name{max-width:none;flex-basis:100%}
+  .wb-actions{width:100%}
+  .wb-actions button{flex:1 1 auto}
+  .wb-picker{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border:0;clip-path:none}
+  .wb-picker-inner{max-height:100dvh;height:100%}
+  .wb-picker-body{grid-template-columns:minmax(0,1fr);flex:1;padding:16px}
+  .wb-picker-head,.wb-picker-foot{padding:12px 16px}
+  .wb-picker-foot button{flex:1 1 0}
+}
+@media (max-width:420px){
+  .wb-slot-grid{grid-template-columns:minmax(0,1fr)}
+  .workbench-page .wb-slot-open{min-height:88px}
+}
+@media (prefers-reduced-motion:reduce){
+  .workbench-page *{animation:none!important;transition:none!important}
+}

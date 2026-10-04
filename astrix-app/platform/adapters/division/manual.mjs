@@ -31,8 +31,35 @@ export function createManualAdapter({ module = DIVISION_GAME_MODULE, title = 'td
     equip(build, slotId, itemId, { attributes, talentId, modIds } = {}) {
       const record = module.resolveItem(itemId);
       if (isPending(record)) return blocked(record);
+      if (typeof module.canEquip === 'function') {
+        const check = module.canEquip(slotId, itemId);
+        if (!check.ok) return { ok: false, state: 'pending', reason: check.reason };
+      }
       return change(build, next => {
         next.slots[slotId] = { itemId, ...(attributes ? { attributes } : {}), ...(talentId ? { talentId } : {}), ...(modIds ? { modIds } : {}) };
+      });
+    },
+
+    /** Set one attribute roll on an equipped slot. Only values inside the catalogue min and max are accepted. */
+    setAttribute(build, slotId, attributeId, value) {
+      const slot = normaliseBuild(build).slots[slotId];
+      if (!slot) return { ok: false, state: 'empty', reason: 'Equip an item in this slot first.' };
+      const range = module.attributeRange(attributeId);
+      if (isPending(range)) return blocked(range);
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < range.min || value > range.max) {
+        return { ok: false, state: 'out-of-range', reason: `Enter a value from ${range.min} to ${range.max}.` };
+      }
+      return change(build, next => { next.slots[slotId] = { ...next.slots[slotId], attributes: { ...(next.slots[slotId].attributes ?? {}), [attributeId]: value } }; });
+    },
+
+    /** Remove one attribute roll from an equipped slot. */
+    clearAttribute(build, slotId, attributeId) {
+      return change(build, next => {
+        const slot = next.slots[slotId];
+        if (!slot?.attributes) return;
+        const { [attributeId]: removed, ...rest } = slot.attributes;
+        next.slots[slotId] = { ...slot };
+        if (Object.keys(rest).length) next.slots[slotId].attributes = rest; else delete next.slots[slotId].attributes;
       });
     },
 

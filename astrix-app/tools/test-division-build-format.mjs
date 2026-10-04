@@ -93,7 +93,7 @@ assert.equal(manual.select(start,'specialization','sharpshooter').ok,false,'A pe
 
 // With a sourced catalogue record the same item equips, and edits stay valid builds.
 const provenance={kind:'in-game-capture',capturedBy:'Test',capturedOn:'2026-10-05',gameVersion:'TU-test',where:'Gear tooltip',note:'Fixture only.'};
-const sourced=createManualAdapter({module:createDivisionModule({title:'td2',items:[{id:'brand-a-mask',provenance}],skills:[{id:'turret-assault',provenance}]})});
+const sourced=createManualAdapter({module:createDivisionModule({title:'td2',items:[{id:'brand-a-mask',name:'Fixture Mask',provenance,rarity:'named',itemType:'gear',slotId:'mask'}],skills:[{id:'turret-assault',provenance}]})});
 let step=sourced.equip(start,'mask','brand-a-mask',{attributes:{'weapon-damage':15}});
 assert.equal(step.ok,true,'A sourced item equips');
 assert.deepEqual(step.build.slots,{mask:{itemId:'brand-a-mask',attributes:{'weapon-damage':15}}});

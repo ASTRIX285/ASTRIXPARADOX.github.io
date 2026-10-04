@@ -11,6 +11,7 @@ const validators=[
   'validate-division.mjs',
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
+  'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
