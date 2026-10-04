@@ -329,4 +329,6 @@ function bindParadoxItemHovers(root,items,kind,selector){
   [...root.querySelectorAll(selector)].forEach((target,index)=>bindParadoxItemHover(target,items?.[index],kind));
 }
 
-export {bindParadoxItemHover,bindParadoxItemHovers,bindParadoxItemInspect};
+// The card markup on its own, for pickers that show the card inside a dialog (Armoury editor).
+const paradoxItemCardMarkup=(item,kind,options={})=>cardMarkup(item,kind,options);
+export {bindParadoxItemHover,bindParadoxItemHovers,bindParadoxItemInspect,paradoxItemCardMarkup};

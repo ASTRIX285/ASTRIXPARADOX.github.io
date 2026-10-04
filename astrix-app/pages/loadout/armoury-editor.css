@@ -113,3 +113,40 @@
   .ae-choices,.ae-choices.is-gear{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){.ae-editor *{transition:none!important;animation:none!important}}
+
+/* ---------- Pickers (Miguel, 3 Oct 2026): icon tiles only, name on hover and focus, card with Select ---------- */
+.ae-tip{position:relative}
+.ae-floating-tip{position:absolute;z-index:10;transform:translate(-50%,calc(-100% - 6px));max-width:240px;width:max-content;padding:5px 8px;background:var(--ax-black);border:1px solid var(--ax-line-strong);color:var(--ax-ink);font:600 12px/1.25 var(--ax-font-head);letter-spacing:.02em;text-align:center;pointer-events:none}
+/* The tile clips its notch; the tooltip needs the tile's own box to stay visible. */
+.ae-choices.ae-icon-grid{grid-template-columns:repeat(auto-fill,var(--ae-tile));gap:8px;padding:8px 2px 2px;max-height:calc(5 * var(--ae-tile) + 4 * 8px + 10px);overflow:auto;justify-content:start}
+.ae-choices.ae-icon-grid.is-gear{grid-template-columns:repeat(auto-fill,calc(var(--ae-tile) + 8px))}
+.ae-choices.ae-icon-grid>li{display:block}
+.ae-choices.ae-icon-grid .ae-choice{display:block;width:calc(var(--ae-tile) + 8px);height:calc(var(--ae-tile) + 8px);min-height:0;padding:0}
+/* The shell clips item tiles to the notch; an inline wrapper has no box to clip to and would hide the art. */
+.ae-choices.ae-icon-grid .ae-choice .vault-transfer-item{display:block;width:100%;height:100%}
+/* Abilities, Aspects and Fragments: the same size as the slot buttons, compact over about two rows. */
+.ae-picker:not(.is-card) .ae-choices.ae-icon-grid:not(.is-gear){max-height:calc(2 * var(--ae-tile) + 8px + 12px)}
+.ae-picker.is-card .ae-card{display:grid;gap:12px;overflow:auto;min-height:0}
+.ae-card .paradox-item-card,.ae-card>article{max-width:100%}
+.ae-plug-card{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:start;padding:12px;background:var(--ax-raised);border:1px solid var(--ax-line-strong);clip-path:var(--ax-clip)}
+.ae-plug-card img,.ae-plug-card .ae-empty-mark{width:64px;height:64px}
+.ae-plug-card h4{margin:0 0 4px;font:700 16px/1.2 var(--ax-font-head)}
+.ae-plug-card p{margin:4px 0 0;font:500 13px/1.4 var(--ax-font-head);color:var(--ax-muted)}
+.ae-plug-type{color:var(--ax-steel-light)!important;font-size:12px!important;letter-spacing:.04em}
+.ae-card-note{margin:0;font:700 14px/1.3 var(--ax-font-head);color:var(--ax-ember-hi)}
+.ae-card-actions{display:flex;justify-content:flex-end;gap:10px}
+.ae-card-actions button{min-height:44px;padding:0 18px}
+/* Artifact: its own perks in tier columns. */
+.ae-artifact-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(var(--ae-tile),max-content);gap:12px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
+.ae-artifact-column{display:grid;gap:8px;align-content:start;justify-items:center}
+.ae-artifact-column h4{margin:0;font:700 11px/1.2 var(--ax-font-head);letter-spacing:.08em;color:var(--ax-muted);white-space:nowrap}
+/* Every tier fits the panel (no sideways scroll): columns share the width and tiles scale down to fit. */
+.ae-panel-artifact .ae-artifact-grid{grid-auto-columns:minmax(0,1fr);gap:6px;overflow-x:visible}
+.ae-panel-artifact .ae-artifact-column .ae-tile{width:100%;max-width:var(--ae-tile);height:auto;aspect-ratio:1/1;min-width:0;min-height:0}
+.ae-panel-artifact .ae-artifact-column h4{display:grid;justify-items:center;gap:2px;white-space:nowrap;font-size:10px;letter-spacing:.02em}
+.ae-panel-artifact .ae-artifact-column h4 .ae-count{display:block;margin:0}
+@media (max-width:720px){
+  /* Phone: pickers as bottom sheets. */
+  .ae-picker{inset:auto 0 0 0;max-height:82vh;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--ax-line-strong)}
+  .ae-choices.ae-icon-grid,.ae-choices.ae-icon-grid.is-gear{grid-template-columns:repeat(auto-fill,calc(var(--ae-tile) + 8px))}
+}

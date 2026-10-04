@@ -162,7 +162,9 @@ export async function applyThenSaveSlot({plan,index,session,assertCurrent,onProg
 function editableSnapshotItem(item,fresh,kind){
   if(!item)return item;
   const semantics=kind==='armour'?normaliseArmourSemantics({plugs:item.socketCoverage?.plugs||item.mods||[]}):null;
-  return {...copy(item),...(semantics?{armourSemantics:{...semantics,...item.armourSemantics},generalMods:item.generalMods||item.armourSemantics?.generalMods||semantics.generalMods,slotMods:item.slotMods||item.armourSemantics?.slotMods||semantics.slotMods}:{}),socketOptions:fresh?.socketOptions||{},armourModOptions:fresh?.armourModOptions||{}};
+  return {...copy(item),...(semantics?{armourSemantics:{...semantics,...item.armourSemantics},generalMods:item.generalMods||item.armourSemantics?.generalMods||semantics.generalMods,slotMods:item.slotMods||item.armourSemantics?.slotMods||semantics.slotMods}:{}),socketOptions:fresh?.socketOptions||{},armourModOptions:fresh?.armourModOptions||{},
+    // Stats and energy come from the live instance: a saved snapshot may predate them.
+    ...(fresh?.stats?.length?{stats:copy(fresh.stats),totalStats:fresh.totalStats}:{}),...(fresh?.energy?{energy:copy(fresh.energy)}:{})};
 }
 // End pure Loadout-page boundaries.
 
@@ -345,8 +347,24 @@ async function saveDialogRecord({asNew=false}={}){
 
 // The visual editor (armoury-editor.mjs) owns the build draft, pickers and undo history.
 // This page keeps the dialog, saving and the Guardian guard around it.
+// Picker tiles are icon only: their name shows in a small tooltip on hover and keyboard focus.
+// It lives inside the dialog so the modal top layer never hides it.
+function bindPickerTooltip(node){
+  if(!node?.dataset||typeof node.addEventListener!=='function'||node.dataset.pickerTip)return;node.dataset.pickerTip='1';
+  const show=target=>{
+    const tile=target?.closest?.('.ae-choices [data-name]');let tip=node.querySelector('.ae-floating-tip');
+    if(!tile||!tile.dataset.name){tip?.remove();return;}
+    if(!tip){tip=document.createElement('div');tip.className='ae-floating-tip';tip.setAttribute('role','tooltip');node.append(tip);}
+    const box=tile.getBoundingClientRect(),frame=node.getBoundingClientRect();
+    tip.textContent=tile.dataset.name;tip.style.left=`${box.left-frame.left+box.width/2}px`;tip.style.top=`${box.top-frame.top+node.scrollTop}px`;
+  };
+  node.addEventListener('pointerover',event=>show(event.target));
+  node.addEventListener('focusin',event=>show(event.target));
+  node.addEventListener('pointerleave',()=>node.querySelector('.ae-floating-tip')?.remove());
+}
 function renderEditor(state){
   const node=dialog(),focusSearch=document.activeElement?.matches?.('[data-ed-search]');
+  bindPickerTooltip(node);
   dialogState=state;node.classList.add('is-armoury-editor');
   node.innerHTML=state.editor.html();
   if(!node.open)node.showModal();
@@ -366,7 +384,8 @@ async function openEditor(record,{asCopy=false}={}){
   // Unlocked perks and the selection limit come from the live Artifact, not the saved snapshot.
   const artifact=Array.isArray(equipped.artifact?.perks)&&equipped.artifact.perks.length?equipped.artifact:draft.build.artifact||null;
   const subclasses=(equipped.subclassCatalog||[]).filter(item=>item&&itemId(item));
-  renderEditor({kind:'edit',editor:createArmouryEditor({record:draft,catalogue,subclasses,artifact}),check});
+  const artifacts=(equipped.availableArtifacts||[]).filter(row=>Array.isArray(row?.perks)&&row.perks.length);
+  renderEditor({kind:'edit',editor:createArmouryEditor({record:draft,catalogue,subclasses,artifact,artifacts}),check});
 }
 function editorClick(control){
   const state=dialogState;if(state?.kind!=='edit')return;state.check();
