@@ -51,7 +51,7 @@ function paradoxIdentity(item, label) {
 function armourDetailTile(item, label) {
   if (!item) return "";
   const icon = itemIcon(item);
-  return `<div class="paradox-socket-tile"${itemHash(item) ? ` data-bungie-hash="${itemHash(item)}"` : ""} title="${escapeHtml([itemName(item), itemDescription(item)].filter(Boolean).join(" — "))}">
+  return `<div class="paradox-socket-tile"${itemHash(item) ? ` data-bungie-hash="${itemHash(item)}"` : ""} title="${escapeHtml([itemName(item), itemDescription(item)].filter(Boolean).join(": "))}">
     <div class="paradox-socket-icon">${icon ? `<img src="${escapeHtml(icon)}" alt="">` : '<span aria-hidden="true">◆</span>'}</div>
     <small>${escapeHtml(label)}</small><b>${escapeHtml(itemName(item))}</b>
   </div>`;
@@ -177,7 +177,7 @@ function renderWeapons(weapons = []) {
     if (!weapon) {
       if (art) {
         art.classList.add("ph");
-        art.innerHTML = '<span class="pw">—</span><span class="ph-glyph">⌖</span>';
+        art.innerHTML = '<span class="pw"></span><span class="ph-glyph">⌖</span>';
       }
       if (meta) meta.textContent = "awaiting build data";
       return;
@@ -196,7 +196,7 @@ function renderWeapons(weapons = []) {
       const details = [weapon.weaponType, weapon.element, weapon.ammoType].filter(Boolean);
       meta.textContent = details.join(" · ") || "Bungie identity resolved";
     }
-    card.title = [weapon.name, weapon.weaponType, weapon.element, weapon.ammoType].filter(Boolean).join(" — ");
+    card.title = [weapon.name, weapon.weaponType, weapon.element, weapon.ammoType].filter(Boolean).join(" · ");
   });
 }
 
@@ -211,7 +211,7 @@ function createArmourDrawer() {
        <header class="paradox-item-header armour-drawer-head">
          <div class="weapon-detail-icon" id="armourDrawerIcon"></div>
          <div class="paradox-item-identity"><h2 id="armourDrawerTitle">Armour slot</h2><p id="armourDrawerType">Armour</p></div>
-         <div class="weapon-detail-power"><small>POWER</small><b id="armourDrawerPower">—</b></div>
+         <div class="weapon-detail-power"><small>POWER</small><b id="armourDrawerPower">None</b></div>
        </header>
        <div class="armour-drawer-tabs paradox-card-tabs" role="tablist">
          <button class="armour-tab" data-tab="build" aria-selected="true">OVERVIEW</button>
@@ -242,7 +242,7 @@ export function openArmourDrawer(index, item) {
   const resolved = item || null;
   byId("armourDrawerTitle").textContent = resolved?.name || names[index] || "Armour";
   byId("armourDrawerType").textContent = resolved?.itemTypeDisplayName || names[index] || "Armour";
-  byId("armourDrawerPower").textContent = resolved?.power ?? "—";
+  byId("armourDrawerPower").textContent = resolved?.power ?? "None";
   const resolvedIcon = itemIcon(resolved);
   const release=resolveItemWatermark(resolved||{},resolved?.definition||{});
   byId("armourDrawerIcon").innerHTML = resolvedIcon ? `<img src="${escapeHtml(resolvedIcon)}" alt="">${release.icon?`<img class="paradox-release-watermark" src="${escapeHtml(release.icon)}" data-watermark-source="${escapeHtml(release.source)}" alt="Release watermark">`:''}` : '<span class="ph-glyph" aria-hidden="true">◇</span>';

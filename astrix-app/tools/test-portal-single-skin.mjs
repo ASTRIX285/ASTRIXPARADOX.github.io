@@ -96,8 +96,8 @@ try{
    await page.evaluate(()=>{ForgeLoader.authRequired('/connect');ForgeLoader.mount();});
    await page.locator('.apx-auth-button').first().waitFor({state:'visible'});
    await page.evaluate(()=>{ForgeLoader.authResolved();ForgeLoader.blocked('Fixture failure');});
-   await page.getByRole('button',{name:'RETRY LIVE DATA',exact:true}).waitFor({state:'visible'});
-   await page.getByRole('button',{name:'CONTINUE WITHOUT LIVE DATA',exact:true}).click();
+   await page.getByRole('button',{name:'Retry',exact:true}).waitFor({state:'visible'});
+   await page.getByRole('button',{name:'Continue without live data',exact:true}).click();
    await page.waitForTimeout(500);
    assert.equal(await page.evaluate(()=>ForgeLoader.completed),true);
    await page.evaluate(()=>{ForgeLoader.mount();ForgeLoader.blocked('Late');ForgeLoader.authRequired('/late');});

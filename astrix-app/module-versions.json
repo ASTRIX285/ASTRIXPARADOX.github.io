@@ -114,7 +114,7 @@
 
   "/astrix-app/pages/build-fit/build-fit-url.mjs": "b69cb33f83",
 
-  "/astrix-app/pages/build-fit/build-fit.mjs": "a89050a941",
+  "/astrix-app/pages/build-fit/build-fit.mjs": "52d4fe3cc5",
 
   "/astrix-app/pages/build-review/build-review-model.mjs": "54ecca3953",
 
@@ -124,7 +124,7 @@
 
   "/astrix-app/pages/build-review/build-review-url.mjs": "550f080c50",
 
-  "/astrix-app/pages/build-review/build-review.mjs": "4f0698acae",
+  "/astrix-app/pages/build-review/build-review.mjs": "51db9fdaae",
 
   "/astrix-app/pages/forge-loader/forge-loader-build-handoff.mjs": "b90a8f2688",
 
@@ -140,9 +140,9 @@
 
   "/astrix-app/pages/forge-loader/forge-loader-set-list.mjs": "cd3db7b072",
 
-  "/astrix-app/pages/forge-loader/forge-loader.mjs": "d7778f537f",
+  "/astrix-app/pages/forge-loader/forge-loader.mjs": "751ba1c5f0",
 
-  "/astrix-app/pages/forge-loader/results/forge-loader-results.mjs": "397c5bbf2f",
+  "/astrix-app/pages/forge-loader/results/forge-loader-results.mjs": "9a98fe26e6",
 
   "/astrix-app/pages/guardian-workspace-v2/archive/guardian-fixture-loader.mjs": "267e08277d",
 
@@ -154,23 +154,23 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-provenance.mjs": "c08ed347fe",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs": "fb01849b04",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs": "1bf5e794fd",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-state.mjs": "37932d6567",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs": "29f54e84ad",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-armour-layout.mjs": "0d9832ed6d",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-armour-layout.mjs": "456fea806b",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-beta-readiness.mjs": "8d78bad2a1",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs": "436be4f9d5",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-runtime.mjs": "3850a6d1f3",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-selection.mjs": "5dda2a083a",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-beta-selection.mjs": "bd2c1050ea",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bottom-equal-height.mjs": "e891f5c8fa",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs": "669819c723",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs": "e99f26d5d0",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-icon-cleaner.mjs": "b47b9d6379",
 
@@ -186,7 +186,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-fixture-loader.mjs": "97b88eca16",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "9e65077864",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "7b727f65f6",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs": "652744845b",
 
@@ -208,13 +208,13 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-perk-tooltip.mjs": "63b02a0685",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-portal-progress.mjs": "87d9e97250",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-portal-progress.mjs": "8b3826f6b4",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-interceptor.mjs": "62613ae770",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-resolver.mjs": "ee8df72e36",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs": "c1c0964fed",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-semantic-ui.mjs": "536d88974f",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-session-cache.mjs": "e8325e7602",
 
@@ -260,7 +260,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs": "73016f37ff",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs": "134019d0e6",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs": "26ea7a0a10",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs": "813c0b7d03",
 
@@ -278,23 +278,23 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs": "de855cc2c4",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-copy.mjs": "b36a116f57",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-copy.mjs": "dc4671b6f4",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs": "adbd076673",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "c9c338ec2b",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "16b47906a7",
 
-  "/astrix-app/pages/guardian-workspace-v2/platform-forge-shell.mjs": "44195c60d1",
+  "/astrix-app/pages/guardian-workspace-v2/platform-forge-shell.mjs": "91996d63ca",
 
   "/astrix-app/pages/home/home-copy.mjs": "f92434ba2f",
 
   "/astrix-app/pages/home/home-facts.mjs": "48028fe8b9",
 
-  "/astrix-app/pages/home/home.mjs": "db58f567d1",
+  "/astrix-app/pages/home/home.mjs": "f35e803fc1",
 
   "/astrix-app/pages/journey/assets/map-data/cosmodrome.mjs": "daaf664caf",
 
-  "/astrix-app/pages/journey/assets/map-data/dreaming-city.mjs": "4de51fb694",
+  "/astrix-app/pages/journey/assets/map-data/dreaming-city.mjs": "4f29d090d8",
 
   "/astrix-app/pages/journey/assets/map-data/edz.mjs": "d63dfb7e94",
 
@@ -320,7 +320,7 @@
 
   "/astrix-app/pages/journey/journey-entry.mjs": "bb5ba17c72",
 
-  "/astrix-app/pages/journey/journey-location-maps.mjs": "a94721bc63",
+  "/astrix-app/pages/journey/journey-location-maps.mjs": "e3df1d3bfc",
 
   "/astrix-app/pages/journey/journey-manifest.mjs": "aaf43ab8a7",
 
@@ -332,11 +332,11 @@
 
   "/astrix-app/pages/journey/journey-record-model.mjs": "c7c8197931",
 
-  "/astrix-app/pages/journey/journey.mjs": "8b19ca1433",
+  "/astrix-app/pages/journey/journey.mjs": "33fffdd03f",
 
   "/astrix-app/pages/loadout/armoury-editor.mjs": "bada689998",
 
-  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "7e8181c548",
+  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "70ced5c28c",
 
   "/astrix-app/pages/mission-reports/mission-reports-data.mjs": "1ccdc76bca",
 
@@ -346,13 +346,13 @@
 
   "/astrix-app/pages/reports/reports-data.mjs": "6b6971fb21",
 
-  "/astrix-app/pages/reports/reports-history.mjs": "a967c10766",
+  "/astrix-app/pages/reports/reports-history.mjs": "492cdd8079",
 
   "/astrix-app/pages/reports/reports-model.mjs": "bd9d115855",
 
   "/astrix-app/pages/reports/reports-ui.mjs": "2ea6f20ce2",
 
-  "/astrix-app/pages/reports/reports.mjs": "4df6a848e3",
+  "/astrix-app/pages/reports/reports.mjs": "c106b29215",
 
   "/astrix-app/pages/sign-in/sign-in.mjs": "018cb69071",
 
@@ -370,7 +370,7 @@
 
   "/astrix-app/pages/vault/vault-transfer-feedback.mjs": "9393c70924",
 
-  "/astrix-app/pages/vault/vault.mjs": "46d0849ec7",
+  "/astrix-app/pages/vault/vault.mjs": "6e3a3387ce",
 
   "/astrix-app/pages/workbench/workbench-inspect.mjs": "03e4590475",
 
@@ -412,13 +412,13 @@
 
   "/astrix-app/shared/astrix-embers.js": "a93c4a3187",
 
-  "/astrix-app/shared/astrix-hero-cards.mjs": "bd0b90e01e",
+  "/astrix-app/shared/astrix-hero-cards.mjs": "90116b2469",
 
   "/astrix-app/shared/astrix-location-selector.mjs": "246e820c1e",
 
   "/astrix-app/shared/astrix-location-visuals.js": "ae6e714bf8",
 
-  "/astrix-app/shared/astrix-portal-loader.js": "a04a2cbb4f",
+  "/astrix-app/shared/astrix-portal-loader.js": "d753fdd1a0",
 
   "/astrix-app/shared/guardian-inventory-workspace.mjs": "dc2cf7aa57",
 

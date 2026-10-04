@@ -94,7 +94,7 @@ try{
     // Signed in (emblem), signed out and Bungie offline (status pill): logo, refresh icon,
     // Bungie control and menu icon never overlap.
     const {page,errors}=await open(width);
-    for(const [state,text] of [['signed-in',''],['signed-out','CONNECT BUNGIE'],['offline','Bungie is not responding. Retry']]){
+    for(const [state,text] of [['signed-in',''],['signed-out','Sign in with Bungie'],['offline','Retry']]){
       const boxes=await page.evaluate(({state,text})=>{
         const wrap=document.getElementById('bungieAuthControl'),button=document.getElementById('bungieAuthButton'),visual=document.getElementById('bungieAccountVisual');
         wrap.hidden=false;button.hidden=state==='signed-in';visual.hidden=state!=='signed-in';

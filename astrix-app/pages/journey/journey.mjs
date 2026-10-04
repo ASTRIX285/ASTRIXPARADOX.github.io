@@ -138,7 +138,7 @@ function waitWithin(promise,timeoutMs){
 
 async function finishJourneyLoader(root=document){
   reportPreparedPageStage('ready','journey');
-  await Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(error=>globalThis.ForgeLoader.blocked(error?.message||'Journey could not finish rendering data.'));
+  await Promise.resolve(globalThis.ForgeLoader.ready(root)).catch(error=>globalThis.ForgeLoader.recover(error||'Journey could not finish rendering data.'));
 }
 
 function waitForHeroCards(){
@@ -284,14 +284,14 @@ function bindGuardianStats(payload,character){
       item.appendChild(icon);
     }
     const output=document.createElement('strong');
-    output.textContent=value===null?'—':numberFormatter.format(value);
+    output.textContent=value===null?'None':numberFormatter.format(value);
     item.appendChild(output);
     guardianStats.appendChild(item);
   }
 }
 
 function formatPlaytime(minutes){
-  if(!Number.isFinite(minutes))return '—';
+  if(!Number.isFinite(minutes))return 'None';
   const total=Math.max(0,Math.round(minutes));
   const hours=Math.floor(total/60);
   return `${numberFormatter.format(hours)}h ${total%60}m`;
@@ -304,11 +304,11 @@ function bindActiveGuardian(payload){
   guardianCrest.hidden=true;
   guardianCrest.removeAttribute('src');
   guardianCrestEmpty.hidden=false;
-  totalPlaytime.textContent='—';
+  totalPlaytime.textContent='None';
 
   const characters=Object.values(payload?.profile?.characters?.data||{});
   const accountMinutes=characters.map(character=>finiteNumber(character?.minutesPlayedTotal)).filter(Number.isFinite);
-  totalPlaytime.textContent=accountMinutes.length?formatPlaytime(accountMinutes.reduce((sum,minutes)=>sum+minutes,0)):'—';
+  totalPlaytime.textContent=accountMinutes.length?formatPlaytime(accountMinutes.reduce((sum,minutes)=>sum+minutes,0)):'None';
   const selected=characters.find(character=>String(character?.characterId||'')===selectedCharacterId)
     ||[...characters].sort((left,right)=>String(right?.dateLastPlayed||'').localeCompare(String(left?.dateLastPlayed||'')))[0];
   if(!selected)return;
@@ -947,7 +947,7 @@ function renderJourneyRecordList(list,rows,emptyText,onSelect=null){
     if(rows.length>pageSize){
       controls.replaceChildren();
       for(const [label,next] of [['Previous',offset-pageSize],['Next',offset+pageSize]]){const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=next<0||next>=rows.length;button.addEventListener('click',()=>{offset=next;paint();});controls.appendChild(button);}
-      const count=document.createElement('span');count.textContent=` ${offset+1}–${Math.min(offset+pageSize,rows.length)} of ${rows.length}`;controls.appendChild(count);list.appendChild(controls);
+      const count=document.createElement('span');count.textContent=` ${offset+1} to ${Math.min(offset+pageSize,rows.length)} of ${rows.length}`;controls.appendChild(count);list.appendChild(controls);
     }
   };
   paint();
@@ -1696,7 +1696,7 @@ const historicalValue=(mode,key)=>finiteNumber(mode?.allTime?.[key]?.basic?.valu
 
 function resetMetric(element,text){
   if(!element)return;
-  element.textContent='—';
+  element.textContent='None';
   const card=element.closest('.mission-metric-card');
   const label=element.nextElementSibling;
   if(label)label.textContent=text;
@@ -1753,7 +1753,7 @@ function resetCurrentForm(){
   trendChart.setAttribute('aria-label','No performance trend available');
   trendEmpty.hidden=false;
   const dates=trendChart.closest('.mission-current-form')?.querySelectorAll('.mission-chart-dates span');
-  if(dates?.length===2){dates[0].textContent='—';dates[1].textContent='—';}
+  if(dates?.length===2){dates[0].textContent='None';dates[1].textContent='None';}
 }
 
 function renderCurrentForm(view){
@@ -1779,10 +1779,10 @@ function renderCurrentForm(view){
 
 function resetEvidenceConfidence(){
   confidenceDonutValue?.setAttribute('stroke-dasharray','0 100');
-  if(confidenceHighPercent)confidenceHighPercent.textContent='—';
-  if(confidenceHigh)confidenceHigh.textContent='—';
-  if(confidenceMedium)confidenceMedium.textContent='—';
-  if(confidenceLow)confidenceLow.textContent='—';
+  if(confidenceHighPercent)confidenceHighPercent.textContent='None';
+  if(confidenceHigh)confidenceHigh.textContent='None';
+  if(confidenceMedium)confidenceMedium.textContent='None';
+  if(confidenceLow)confidenceLow.textContent='None';
   if(confidenceStatus)confidenceStatus.textContent='Confidence is calculated only from returned live activity fields.';
 }
 
@@ -2041,7 +2041,7 @@ async function bindTitleAndProgression(payload){
     const legacyScore=finiteNumber(records?.legacyScore);
     triumphStatsCard.replaceChildren();
     const total=document.createElement('div');total.className='journey-triumph-total';total.innerHTML=`<span>TRIUMPH SCORE</span><strong>${numberFormatter.format(lifetimeScore)}</strong>`;
-    const breakdown=document.createElement('dl');breakdown.className='journey-triumph-breakdown';breakdown.innerHTML=`<div><dt>ACTIVE</dt><dd>${activeScore===null?'—':numberFormatter.format(activeScore)}</dd></div><div><dt>LEGACY</dt><dd>${legacyScore===null?'—':numberFormatter.format(legacyScore)}</dd></div>`;
+    const breakdown=document.createElement('dl');breakdown.className='journey-triumph-breakdown';breakdown.innerHTML=`<div><dt>ACTIVE</dt><dd>${activeScore===null?'None':numberFormatter.format(activeScore)}</dd></div><div><dt>LEGACY</dt><dd>${legacyScore===null?'None':numberFormatter.format(legacyScore)}</dd></div>`;
     triumphStatsCard.append(total,breakdown);
   }
 
@@ -2254,18 +2254,17 @@ function showSignedOut(){
   status.textContent='BUNGIE CONNECTION REQUIRED';
   if(refreshButton)refreshButton.hidden=true;
   if(connectButton)connectButton.href=authStartUrl();
-  globalThis.ForgeLoader.authResolved();
-  void finishJourneyLoader(signedOut);
+  globalThis.ForgeLoader.authRequired(authStartUrl());
 }
 
-function showJourneyUnavailable(message='Journey data is unavailable. Retry the page or reconnect Bungie.'){
+function showJourneyUnavailable(error=null){
   resolving.hidden=false;
   dashboard.hidden=true;
   signedOut.hidden=true;
   status.textContent='JOURNEY DATA UNAVAILABLE';
+  const kind=globalThis.ForgeLoader.recover(error);
   const copy=resolving.querySelector('p:last-child');
-  if(copy)copy.textContent=message;
-  globalThis.ForgeLoader.blocked(message);
+  if(copy)copy.textContent=globalThis.ForgeLoader.messages?.[kind]||'';
 }
 
 let locationSelectorReady=false;
@@ -2316,10 +2315,8 @@ try{
     await finishJourneyLoader(document);
   }
   else if(session?.authenticated===false)showSignedOut();
-  else showJourneyUnavailable("Bungie is not responding. Retry");
+  else showJourneyUnavailable({code:session?.error||'bungie_unavailable'});
 }catch(error){
   console.info('[Forge Journey] existing Bungie session unavailable',error);
-  if(journeySession?.authenticated===true){
-    showJourneyUnavailable(error?.message||'Journey data is unavailable. Retry the page or reconnect Bungie.');
-  }else showJourneyUnavailable("Bungie is not responding. Retry");
+  showJourneyUnavailable(journeySession?.authenticated===true?error:{code:globalThis.FORGE_BUNGIE_SESSION?.error||'bungie_unavailable'});
 }

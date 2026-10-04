@@ -40,10 +40,10 @@ export function createReportsHistory(snapshot,{origin='https://auth.astrixparado
         const delay=Number(payload?.ThrottleSeconds)||Number(retry)||(Date.parse(retry)-now())/1000||1;
         if(attempt<3){await sleep(Math.max(1,Math.min(delay,60))*1000);continue;}
       }
-      if(!response.ok||payload?.ErrorCode!==1||!payload.Response)throw new Error('Reports pending. Retry.');
+      if(!response.ok||payload?.ErrorCode!==1||!payload.Response)throw new Error('Your reports are not ready yet.');
       return payload.Response;
     }
-    throw new Error('Reports pending. Retry.');
+    throw new Error('Your reports are not ready yet.');
   }
   function selection(characterId){return [...streams].filter(([id])=>characterId==='all'||id===characterId).map(([,row])=>row);}
   function runs(activity,characterId='all'){

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ASTRIX PARADOX — Auto Clips Builder
+ASTRIX PARADOX: Auto Clips Builder
 Fetches YouTube playlists via YouTube Data API v3
 Rewrites only the clips block in pages/clips.html (between its markers)
 """
@@ -24,8 +24,29 @@ PLAYLISTS = [
     # {'game': 'destiny-2',       'label': 'Destiny 2',       'id': 'PLxxxxxxx'},
 ]
 
+# ── FALLBACK ART ─────────────────────────────────────────────
+# When YouTube has no thumbnail, a card shows the game's existing site image.
+# Only images already on the site are listed; no new game art is added here.
+# A game with no image falls back to the neutral ASTRIX PARADOX share image.
+FALLBACK_IMAGES = {
+    'crimson-desert':    '../img/games/crimsondesert.jpg',
+    'black-myth-wukong': '../img/games/black-myth-wukong.png',
+    'god-of-war':        '../img/games/god-of-war.jpg',
+    'destiny':           '../img/games/destiny2.jpg',
+    'warframe':          '../img/games/warframe.jpg',
+}
+NEUTRAL_FALLBACK = '../img/share/astrix-paradox-share-1200x630.jpg'
+
+def fallback_for(game_key):
+    return FALLBACK_IMAGES.get(game_key, NEUTRAL_FALLBACK)
+
+# Visible copy has no en or em dashes (house style). YouTube titles keep their words;
+# a dash between words becomes a plain hyphen.
+def clean_text(text):
+    return text.replace('\u2014', '-').replace('\u2013', '-')
+
 # ── TYPE DETECTION ───────────────────────────────────────────
-# Order matters — first match wins
+# Order matters: first match wins
 TYPE_RULES = [
     ('boss',      ['boss', 'boss kill', 'killed', 'defeated', 'slain', 'fight']),
     ('guide',     ['guide', 'how to', 'how-to', 'tutorial', 'tips', 'explained']),
@@ -51,7 +72,7 @@ BADGE_LABELS = {
 }
 
 def detect_type(title):
-    # First: check for explicit |Tag| bracket in title — this always wins
+    # First: check for explicit |Tag| bracket in title; this always wins
     bracket = re.search(r'\|([^\|]+)\|', title)
     if bracket:
         tag = bracket.group(1).strip().lower()
@@ -148,15 +169,15 @@ def fetch_durations(video_ids):
 
 def build_card(video, game_key, game_label, delay_class=''):
     vid_id     = video['id']
-    title      = video['title']
+    title      = clean_text(video['title'])
     date       = format_date(video['published'])
     duration   = video['duration']
     type_key   = detect_type(title)
     type_label = BADGE_LABELS.get(type_key, 'Highlight')
     thumb      = f'https://img.youtube.com/vi/{vid_id}/maxresdefault.jpg'
-    fallback   = f'../img/games/{game_key}.jpg'
+    fallback   = fallback_for(game_key)
     yt_url     = f'https://www.youtube.com/watch?v={vid_id}'
-    ml = f'{game_label} — {title}'.replace("'", "\\'")
+    ml = f'{game_label} | {title}'.replace("'", "\\'")
     ms = f'{game_label} · {type_label}'.replace("'", "\\'")
 
     return f'''
@@ -181,12 +202,20 @@ def build_card(video, game_key, game_label, delay_class=''):
         </div>
       </div>'''
 
+def tidy_card(card, game_key, game_label):
+    """Bring a card kept from an earlier run up to the current rules: the fallback
+    image that exists for its game, the modal label with a bar, and no en or em
+    dashes. A fresh card already matches, so running this twice changes nothing."""
+    card = re.sub(r"onerror=\"this\.src='[^']*'\"", f"onerror=\"this.src='{fallback_for(game_key)}'\"", card)
+    card = card.replace(f"'{game_label} \u2014 ", f"'{game_label} | ")
+    return clean_text(card)
+
 def build_sections_html(sections):
     html = []
     for sec in sections:
         game  = sec['game']
         label = sec['label']
-        section_cards = '\n'.join(sec['cards'])
+        section_cards = '\n'.join(tidy_card(card, game, label) for card in sec['cards'])
         html.append(f'''
       <div class="game-section" data-section="{game}">
         <div class="game-section-header">

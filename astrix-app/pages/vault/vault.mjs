@@ -89,7 +89,7 @@ async function fetchProfile(){
 async function loadVerifiedPayload(){
   const shared=globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
   const next=await loadPreparedPagePayload(session,'vault',{sharedPayload:shared});
-  if(!next?.profile)throw new Error('Inventory unavailable. Retry.');
+  if(!next?.profile)throw new Error('Your inventory is unavailable right now.');
   assertRenderablePagePayload(next,'vault');
   reportPreparedPageStage('join','vault');
   await guardianManifest.hydratePayload(next,{waitForManifest:false,includeReusable:true,allowNetwork:false});
@@ -365,7 +365,7 @@ function updateTargetControl(label){
   const input=label?.querySelector('input');
   const output=label?.querySelector('output');
   if(!key||!input||!output)return;
-  output.textContent=`${input.value} / ${targetMaximums[key]||'—'}`;
+  output.textContent=`${input.value} / ${targetMaximums[key]||'None'}`;
 }
 
 function configureOptimiser({reset=false}={}){
@@ -710,7 +710,7 @@ async function init(){
     if(session?.authenticated==null){
       byId('vaultSignedOut').hidden=true;
       byId('vaultConnectionState').textContent='CONNECTION UNAVAILABLE';
-      setStatus('Bungie is not responding. Retry');
+      setStatus(globalThis.ForgeLoader?.messages?.[session?.error==='worker_unreachable'?'worker':'bungie']||'');
       globalThis.ForgeLoader?.authResolved?.();
       globalThis.ForgeLoader?.done?.();
       return;
@@ -719,8 +719,8 @@ async function init(){
       byId('vaultConnectButton').href=authStartUrl();
       byId('vaultSignedOut').hidden=false;
       byId('vaultConnectionState').textContent='SIGNED OUT';
-      byId('vaultHeaderState').textContent='CONNECT BUNGIE';
-      setStatus('Connect Bungie to load your inventory.');
+      byId('vaultHeaderState').textContent='SIGNED OUT';
+      setStatus('Sign in with Bungie to load your Guardian.');
       globalThis.ForgeLoader?.authRequired?.(authStartUrl());
       return;
     }
@@ -748,7 +748,7 @@ async function init(){
     byId('vaultConnectionState').textContent='INVENTORY UNAVAILABLE';
     setStatus(error?.message||'Bungie inventory is unavailable.','error');
     globalThis.ForgeLoader?.status?.(error?.message||'Bungie inventory is unavailable.');
-    globalThis.ForgeLoader?.blocked?.(error?.message||'Bungie inventory is unavailable.');
+    globalThis.ForgeLoader?.recover?.(error);
   }
 }
 

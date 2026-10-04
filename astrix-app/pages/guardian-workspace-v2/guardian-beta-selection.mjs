@@ -89,7 +89,7 @@ function renderArtifactSelection(){
     host.innerHTML=Array.from({length:7},(_,i)=>{
       const p=perks[i];
       if(!p)return '<span class="artifact-perk empty" title="Select Artifact perk"><span class="ph-glyph">◆</span></span>';
-      const title=[p.name,p.description].filter(Boolean).join(' — ');
+      const title=[p.name,p.description].filter(Boolean).join(': ');
       return `<span class="artifact-perk" tabindex="0" title="${esc(title)}"><img src="${esc(p.icon)}" alt="${esc(p.name)}"><span class="ph-glyph" style="display:none">◆</span></span>`;
     }).join('');
   }

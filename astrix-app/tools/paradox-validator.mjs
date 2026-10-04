@@ -28,6 +28,8 @@ const validators=[
   'test-reports-boxes.mjs',
   'test-background-prebuild.mjs', // feature/background-page-prebuild: tabs and Reports sections open from what was built.
   'validate-reports-catalogue.mjs',
+  'validate-no-dashes.mjs', // Forge final pass: no en or em dash in visible copy.
+  'test-recovery-states.mjs', // Forge final pass: one recovery panel, three states.
   'validate-plain-language.mjs', // Prompt 19: copy-only language contract.
   'validate-forge-internal-rename.mjs',
   'validate-site-typography.mjs',

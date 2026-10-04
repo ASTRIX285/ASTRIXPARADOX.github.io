@@ -112,7 +112,7 @@ function armourSetStrip(set) {
   if (!set.identity || set.unresolved) return "";
   const thresholds = [set.twoPiece, set.fourPiece].filter(Boolean);
   return `<div class="armour-set-strip" title="${esc(set.identity.name ?? "Resolved armour set")}">
-    <span class="armour-set-thresholds">${thresholds.map(effect => { const effectIcon = bungieIcon(effect.icon); return `<span class="armour-set-threshold ${effect.active ? "is-active" : ""}" title="${esc([`${effect.requiredSetCount}-piece`, effect.name, effect.description].filter(Boolean).join(" — "))}">${effectIcon ? `<img src="${esc(effectIcon)}" alt="${esc(effect.name ?? `${effect.requiredSetCount}-piece set perk`)}">` : ""}</span>`; }).join("")}</span>
+    <span class="armour-set-thresholds">${thresholds.map(effect => { const effectIcon = bungieIcon(effect.icon); return `<span class="armour-set-threshold ${effect.active ? "is-active" : ""}" title="${esc([`${effect.requiredSetCount}-piece`, effect.name, effect.description].filter(Boolean).join(": "))}">${effectIcon ? `<img src="${esc(effectIcon)}" alt="${esc(effect.name ?? `${effect.requiredSetCount}-piece set perk`)}">` : ""}</span>`; }).join("")}</span>
   </div>`;
 }
 
@@ -133,9 +133,9 @@ export function armourCard(index, item) {
   const twoPieceActive = armourSet?.twoPiece?.active === true;
   const fourPieceActive = armourSet?.fourPiece?.active === true;
   const setBonusIcon = bungieIcon(armourSet?.identity?.icon || armourSet?.twoPiece?.icon || armourSet?.fourPiece?.icon);
-  const setBonusTitle = [armourSet?.identity?.name, "Bungie armour set bonus"].filter(Boolean).join(" — ");
+  const setBonusTitle = [armourSet?.identity?.name, "Bungie armour set bonus"].filter(Boolean).join(": ");
   const traitIcon = bungieIcon(trait?.icon ?? trait?.displayProperties?.icon);
-  const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(" — ");
+  const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(": ");
 
   return `<article class="gear-slot ${isExotic ? "exotic" : ""} ${isTierFive ? "is-level-gold" : ""} ${armourSet?.identity ? "has-set-bonus" : ""} ${twoPieceActive ? "is-set-2-active" : ""} ${fourPieceActive ? "is-set-4-active" : ""}" data-armour-index="${index}">
     <div class="gear-slot-label">${esc(armourNames[index]||`Armour slot ${index+1}`)}</div>

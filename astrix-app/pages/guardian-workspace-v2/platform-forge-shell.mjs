@@ -17,7 +17,7 @@ function mediaRail(side,{gameId,developerName,gameName}){
   rail.dataset.mediaSide=side;
   rail.dataset.mediaState='empty';
   rail.dataset.game=gameId;
-  rail.setAttribute('aria-label',`${developerName || gameName || 'Game developer'} media — ${side}`);
+  rail.setAttribute('aria-label',`${developerName || gameName || 'Game developer'} media, ${side}`);
 
   const slot=document.createElement('div');
   slot.className='developer-media-slot';

@@ -1,5 +1,5 @@
 // Presentation only. Do not change selection, evidence or scoring here.
-const text=value=>String(value??'').trim().replace(/\s+/g,' ').replace(/\s*\u2014\s*/g,', ');
+const text=value=>String(value??'').trim().replace(/\s+/g,' ').replace(/\s*\u2014\s*/g,', '); // dash-ok: removes em dashes from copy
 const description=item=>text(item?.description||item?.definition?.displayProperties?.description);
 const name=item=>text(item?.name||item?.displayName||item?.definition?.displayProperties?.name);
 

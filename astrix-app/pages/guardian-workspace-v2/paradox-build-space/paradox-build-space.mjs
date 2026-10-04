@@ -616,7 +616,7 @@ function artifactPerkCard(perk,index,{compact=false,selected=null,recommended=fa
   const active=selected===null?perk?.isActive===true:selected===true,liveActive=perk?.isActive===true,locked=!active&&(perk?.isVisible===false||perk?.tierUnlocked===false),reason=esc(recommendation?.reasons?.[0]?.label||'');
   const classes=['selector-card','artifact-perk',active?'is-selected':'',recommended?'is-recommended-choice':'',liveActive?'was-live-active':'',locked?'is-locked':'',compact?'is-compact':''].filter(Boolean).join(' ');
   const recommendationLabel=recommended?'<span class="artifact-best-badge">BEST</span>':'';
-  return '<button type="button" class="'+classes+'" data-select-kind="artifactPerks" data-select-index="'+index+'" '+(locked?'disabled':'')+' title="'+name+' — '+description+(reason?' — PARADOX fit: '+reason:'')+'" data-evidence-name="'+name+'" data-evidence-description="'+description+'">'+recommendationLabel+(icon?'<img src="'+esc(icon)+'" alt="">':'<span class="selector-glyph">◆</span>')+'<small>'+name+'</small></button>';
+  return '<button type="button" class="'+classes+'" data-select-kind="artifactPerks" data-select-index="'+index+'" '+(locked?'disabled':'')+' title="'+name+': '+description+(reason?' | PARADOX fit: '+reason:'')+'" data-evidence-name="'+name+'" data-evidence-description="'+description+'">'+recommendationLabel+(icon?'<img src="'+esc(icon)+'" alt="">':'<span class="selector-glyph">◆</span>')+'<small>'+name+'</small></button>';
 }
 function artifactRecommendationMarkup(build){
   const recommendation=build?.artifactRecommendation;

@@ -129,7 +129,7 @@ async function initForgeHeroCards(){
     const session=await getBungieSession();
     if(session?.authenticated!==true){
       publishJourneyProfile(null);
-      renderStatus('CONNECT BUNGIE TO LOAD CHARACTERS');
+      renderStatus(session?.authenticated===false?'SIGN IN WITH BUNGIE TO LOAD CHARACTERS':'BUNGIE CHARACTERS UNAVAILABLE');
       return;
     }
     const page=heroProfilePage();

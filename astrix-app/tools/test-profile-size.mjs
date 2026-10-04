@@ -59,7 +59,7 @@ const loader=readFileSync(new URL('../pages/forge-loader/forge-loader.mjs',impor
 const init=loader.slice(loader.indexOf('async function init(){'),loader.lastIndexOf('\ninit();'));
 for(const checkedSession of [{authenticated:null,error:'profile_payload_too_large'},session,{authenticated:false},{authenticated:false,status:401,error:'bungie_reauthentication_required'}]){
   let prompts=0,blocked=0;const elements=new Map();const byId=id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id);};
-  const ctx={console:{error(){}},installEvents(){},byId,authStartUrl:()=>'/fresh-sign-in',renderResidency(){},renderStaged(){},renderResultsCta(){},startForgeRefresh(){},getBungieSession:async()=>checkedSession,loadVerifiedPayload:async()=>{throw new RangeError('Invalid string length');},ForgeLoader:{authRequired(){prompts++;},blocked(){blocked++;}}};
+  const ctx={console:{error(){}},installEvents(){},byId,authStartUrl:()=>'/fresh-sign-in',renderResidency(){},renderStaged(){},renderResultsCta(){},startForgeRefresh(){},getBungieSession:async()=>checkedSession,loadVerifiedPayload:async()=>{throw new RangeError('Invalid string length');},ForgeLoader:{authRequired(){prompts++;},blocked(){blocked++;},recover(){blocked++;return 'bungie';}}};
   await runInNewContext(init+'\ninit()',ctx);
   assert.equal(prompts,checkedSession.error==='bungie_reauthentication_required'?1:0);
   if(!prompts)assert.equal(blocked,1);

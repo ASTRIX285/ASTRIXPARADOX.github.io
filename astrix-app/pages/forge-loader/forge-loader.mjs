@@ -106,7 +106,7 @@ async function loadVerifiedPayload({force=false,showProgress=true}={}){
   if(showProgress)reportPreparedPageStage('session','loadout');
   const shared=force?null:globalThis.FORGE_LOADER_PRELOAD_PAYLOAD||globalThis.FORGE_HERO_PROFILE_PAYLOAD||await globalThis.FORGE_HERO_PROFILE_PROMISE;
   const next=await preloadForgeLoaderPayload(session,{force,sharedPayload:shared});
-  if(!next?.profile)throw new Error('Inventory unavailable. Retry.');
+  if(!next?.profile)throw new Error('Your inventory is unavailable right now.');
   guardianManifest.seedPayload(next);
   if(next.forgeArmourIndex)guardianManifest.applyForgeArmourIndex(next,next.forgeArmourIndex);
   if(next.forgeArmourIndex&&!next.forgeArmourIndexCoverage)throw new Error('The Forge armour index version does not match the prepared account data.');
@@ -134,12 +134,12 @@ function renderHero(){
   const character=selectedCharacter(),host=byId('forgeHeroCard'),label=classLabel();
   const displayName=text(payload?.membership?.displayName||session?.activeDestinyMembership?.displayName),subclassName=text(residentProfileBuild?.subclassName);
   byId('forgeGuardianTitle').textContent=displayName||'Bungie identity unavailable';
-  byId('forgeGuardianClass').textContent=character?`${label.toUpperCase()} · ${subclassName?subclassName.toUpperCase():'LOADING SUBCLASS'} · POWER ${Number(character.light||0)||'—'}`:'UNAVAILABLE';
+  byId('forgeGuardianClass').textContent=character?`${label.toUpperCase()} · ${subclassName?subclassName.toUpperCase():'LOADING SUBCLASS'}${Number(character.light||0)?` · POWER ${Number(character.light)}`:''}`:'UNAVAILABLE';
   byId('forgeHeaderState').textContent=character?`${label.toUpperCase()} · THE FORGE`:'BUNGIE ARMOUR';
   if(!host)return;
   const emblem=character?.emblemBackgroundPath||character?.emblemPath||'';
   host.style.backgroundImage=emblem?`url("${esc(new URL(emblem,'https://www.bungie.net').toString())}")`:'';
-  host.innerHTML=character?`<strong>${esc(displayName||'BUNGIE IDENTITY UNAVAILABLE')}</strong><span>${esc(label)} · ${esc(subclassName||'Loading subclass')}</span><b>✦ ${esc(character.light??'—')}</b>`:'<span>Guardian unavailable.</span>';
+  host.innerHTML=character?`<strong>${esc(displayName||'BUNGIE IDENTITY UNAVAILABLE')}</strong><span>${esc(label)} · ${esc(subclassName||'Loading subclass')}</span><b>✦ ${esc(character.light??'None')}</b>`:'<span>Guardian unavailable.</span>';
 }
 
 function definitionIdentity(hash){
@@ -553,8 +553,8 @@ async function init(){
   installEvents();byId('forgeConnectButton').href=authStartUrl();renderResidency();renderResultsCta();
   try{
     session=await getBungieSession();
-    if(session?.authenticated!==true&&!(session?.authenticated===false&&session?.status===401&&session?.error==='bungie_reauthentication_required'))throw new Error('Bungie session could not be checked. Retry loading the profile.');
-    if(session?.authenticated===false){byId('forgeSignedOut').hidden=false;byId('forgeConnectionState').textContent='SIGNED OUT';byId('forgeHeaderState').textContent='CONNECT BUNGIE';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
+    if(session?.authenticated!==true&&!(session?.authenticated===false&&session?.status===401&&session?.error==='bungie_reauthentication_required')){globalThis.ForgeLoader?.recover?.({code:session?.error||'bungie_unavailable'});return;}
+    if(session?.authenticated===false){byId('forgeSignedOut').hidden=false;byId('forgeConnectionState').textContent='SIGNED OUT';byId('forgeHeaderState').textContent='SIGNED OUT';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
     startForgeRefresh();
     byId('forgeConnectionState').textContent='LOADING';payload=await loadVerifiedPayload();
     reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);renderExoticWeapons();renderResidency('resident');await completeResidentPreparation();
@@ -564,7 +564,7 @@ async function init(){
     byId('forgeConnectionState').textContent=residentReady?'SOURCES READY':'SOURCES INCOMPLETE';
     const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=!residentReady?'One or more sources remain unavailable. Builder handoff stays locked.':ownedCount?`${ownedCount} in inventory of ${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select a piece to begin.`:`${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no instance can be selected.`;
     reportPreparedPageStage('ready','loadout');await settleVisibleImages();globalThis.ForgeLoader?.done?.();
-  }catch(error){console.error('[Forge Loader]',error);byId('forgeConnectionState').textContent='ARMOUR UNAVAILABLE';byId('forgeRuntimeStatus').textContent=error?.message||'Bungie armour is unavailable.';globalThis.ForgeLoader?.blocked?.(error?.message||'Bungie armour is unavailable.');}
+  }catch(error){console.error('[Forge Loader]',error);byId('forgeConnectionState').textContent='ARMOUR UNAVAILABLE';byId('forgeRuntimeStatus').textContent=error?.message||'Bungie armour is unavailable.';globalThis.ForgeLoader?.recover?.(error);}
 }
 
 init();

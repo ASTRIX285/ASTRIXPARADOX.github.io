@@ -219,11 +219,11 @@ async function init(){
   if(!selection.characterId||!selection.exoticHash){byId('forgeResultsRuntimeStatus').textContent='This link is missing its Forge Loader selection. Return to Forge Loader and search again.';globalThis.ForgeLoader?.done?.();return;}
   try{
     session=await getBungieSession();
-    if(session?.authenticated!==true&&!(session?.authenticated===false&&session?.status===401&&session?.error==='bungie_reauthentication_required'))throw new Error('Bungie session could not be checked. Retry loading the profile.');
+    if(session?.authenticated!==true&&!(session?.authenticated===false&&session?.status===401&&session?.error==='bungie_reauthentication_required')){globalThis.ForgeLoader?.recover?.({code:session?.error||'bungie_unavailable'});return;}
     if(session?.authenticated===false){byId('forgeSignedOut').hidden=false;byId('forgeResultsConnectionState').textContent='SIGNED OUT';globalThis.ForgeLoader?.authRequired?.(authStartUrl());return;}
     reportPreparedPageStage('session','loadout');
     const next=await preloadForgeLoaderPayload(session,{});
-    if(!next?.profile)throw new Error('Inventory unavailable. Retry.');
+    if(!next?.profile)throw new Error('Your inventory is unavailable right now.');
     guardianManifest.seedPayload(next);
     if(next.forgeArmourIndex)guardianManifest.applyForgeArmourIndex(next,next.forgeArmourIndex);
     await guardianManifest.hydratePayload(next,{waitForManifest:false,armourOnly:Boolean(next.forgeArmourIndex),includeReusable:true,allowNetwork:false});
@@ -254,7 +254,7 @@ async function init(){
   }catch(error){
     console.error('[Forge Loader Results]',error);
     byId('forgeResultsRuntimeStatus').textContent=error?.message||'Bungie armour is unavailable.';
-    globalThis.ForgeLoader?.blocked?.(error?.message||'Bungie armour is unavailable.');
+    globalThis.ForgeLoader?.recover?.(error);
   }
 }
 

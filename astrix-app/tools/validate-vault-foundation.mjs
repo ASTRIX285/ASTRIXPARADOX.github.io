@@ -168,6 +168,7 @@ assert.match(accessRuntime,/pages\/forge-loader/,'Character and Build armour int
 assert.match(accessRuntime,/forge:vault-open/);
 assert.match(characterHandoff,/persistVaultBuildSource/);
 assert.doesNotMatch(vaultHtml,/mock inventory|vault scaffold/i,'Vault must not present invented inventory data.');
-assert.match(vaultHtml,/id="vaultTotalCount">—</,'Vault totals must begin in an unresolved state.');
+// Empty counts show 0, never a dash (Forge final pass, 4 Oct 2026); the portal hides them until live data lands.
+assert.match(vaultHtml,/id="vaultTotalCount">0</,'Vault totals must begin at 0 until live data resolves.');
 
 console.log('VAULT_FOUNDATION=PASS');

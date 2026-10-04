@@ -65,7 +65,7 @@ function savedStats(stats=[]){
   const total=rows.length===6&&rows.every(row=>Number.isFinite(valueOf(row)))?rows.reduce((sum,row)=>sum+valueOf(row),0):null;
   return `<div class="saved-build-stats" role="group" aria-label="Saved build stats">${total!==null?`<b class="saved-build-stat-total">Total: ${esc(total)}</b>`:''}${rows.map(row=>{
     const value=valueOf(row),label=`${row.name||'Stat'}: ${Number.isFinite(value)?value:'unavailable'}`,icon=savedIcon(row);
-    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="saved-build-empty-socket" aria-hidden="true">◇</span>'}<b>${Number.isFinite(value)?esc(value):'—'}</b></span>`;
+    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="saved-build-empty-socket" aria-hidden="true">◇</span>'}<b>${Number.isFinite(value)?esc(value):'None'}</b></span>`;
   }).join('')||'<span class="saved-build-missing">Stats not saved</span>'}</div>`;
 }
 export function savedBuildOverview(build={}){
@@ -187,8 +187,8 @@ const recordById=id=>visibleRecords().find(row=>row.id===id);
 const emit=(name,detail)=>document.dispatchEvent(new CustomEvent(name,{detail}));
 function status(message,error=false){const node=byId('paradoxLoadoutStatus');node.hidden=!message;node.textContent=message;node.classList.toggle('is-error',error);}
 const OUTAGE_MESSAGE='Bungie is unavailable right now. Your builds are safe. Try again in a few minutes.';
-const MISSING_DATA_MESSAGE='Bungie did not return your Guardian data. Retry.';
-const SLOW_MESSAGE='Loading your Guardian took too long. Retry.';
+const MISSING_DATA_MESSAGE='Bungie did not return your Guardian data. Try again in a moment.';
+const SLOW_MESSAGE='Loading your Guardian took too long. Try again in a moment.';
 const PARTIAL_LOAD_MESSAGE='Some builds could not refresh. Showing the builds saved on this device.';
 // 20s per step. Tests shorten it through ARMOURY_STEP_TIMEOUT_MS on their sandbox global.
 const STEP_TIMEOUT_MS=Number(globalThis.ARMOURY_STEP_TIMEOUT_MS)||20000;
@@ -635,7 +635,9 @@ try{
     characterId=String(initialCharacter());
     if(characterId){const check=guardContext(),normalized=await runProfileTask('normalise',{payload,session,characterId});check();equipped=normalized;}
   }
-}catch(error){logError(error);profileUnavailable=true;startupNote=isOutage(error)?OUTAGE_MESSAGE:PARTIAL_LOAD_MESSAGE;}
+}catch(error){logError(error);profileUnavailable=true;startupNote=isOutage(error)?OUTAGE_MESSAGE:PARTIAL_LOAD_MESSAGE;window.ForgeLoader?.recover?.(error);}
+// No live session: the shared panel says why. Continuing shows the builds saved on this device.
+if(session&&session.authenticated!==true&&session.authenticated!==false){profileUnavailable=true;window.ForgeLoader?.recover?.({code:session.error||'bungie_unavailable'});}
 try{await savedPromise;}catch(error){reportError(error);}
 loading=false;reportPreparedPageStage('render','loadout');render();if(startupNote)status(startupNote,true);reportPreparedPageStage('ready','loadout');
 window.ForgeLoader?.ready?.(document.querySelector('.apx-page-shell'));

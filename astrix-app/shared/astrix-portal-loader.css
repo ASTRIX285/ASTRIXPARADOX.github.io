@@ -80,8 +80,13 @@ body.apx-loading{overflow:hidden!important}
   border:1px solid rgba(201,201,200,.42);border-radius:12px;background:rgba(27,2,5,.9);
   box-shadow:0 18px 54px rgba(0,0,0,.46),inset 0 0 24px rgba(138,138,137,.05);text-align:center}
 .apx-auth-panel[hidden],.apx-failure-panel[hidden]{display:none}
-.apx-auth-panel strong,.apx-failure-panel strong{font:800 .78rem bahnschrift-semicondensed,sans-serif;letter-spacing:.17em;color:#fff}
-.apx-auth-panel span,.apx-failure-panel span{font:600 .65rem/1.55 bahnschrift,sans-serif;color:rgba(255,247,228,.72)}
+/* One recovery panel on every tool page: one font, one message, Retry or Sign in as the one primary button. */
+.apx-recovery-panel{font-family:bahnschrift,"Segoe UI",sans-serif}
+/* Some pages force inherited fonts with !important; the panel keeps its one font everywhere. */
+.apx-gate .apx-recovery-panel,.apx-gate .apx-recovery-panel :is(p,button,a){font-family:bahnschrift,"Segoe UI",sans-serif!important}
+.apx-recovery-message{margin:0;font:600 1rem/1.5 bahnschrift,"Segoe UI",sans-serif;letter-spacing:.01em;color:#fff}
+.apx-recovery-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%}
+.apx-recovery-actions [hidden]{display:none}
 .apx-auth-button{appearance:none;min-width:210px;margin-top:4px;padding:12px 18px;border:1px solid rgba(138,138,137,.78);
   border-radius:8px;background:linear-gradient(180deg,rgba(138,138,137,.24),rgba(192,67,63,.16));color:#fff;
   font:800 .68rem bahnschrift-semicondensed,sans-serif;letter-spacing:.13em;cursor:pointer;
@@ -156,8 +161,13 @@ html.apx-transfer:not(.apx-transfer-label)::after{visibility:hidden}
 .apx-gate::after{background:radial-gradient(ellipse at 50% 44%,rgba(186,31,18,.05) 0%,rgba(121,8,16,.16) 50%,rgba(8,1,2,.96) 100%),
     linear-gradient(180deg,rgba(10,1,2,.4),rgba(40,3,7,.3) 58%,rgba(7,1,2,.94))}
 .apx-gate::before{opacity:.5}
-.apx-failure-panel span{font-size:.8125rem;line-height:1.5}
-.apx-failure-panel .apx-continue-button{border-color:rgba(255,247,228,.34);background:transparent}
+/* Primary tier: the Ember action fill, as every tool page's primary button. */
+.apx-recovery-panel .apx-recovery-primary{border:1px solid var(--apx-colour-action,#ba1f12);
+  background:linear-gradient(180deg,var(--apx-colour-action-glow,#e6391f) 0%,var(--apx-colour-action,#ba1f12) 60%,var(--apx-colour-deep,#732022) 100%);
+  box-shadow:inset 0 1px 0 rgba(255,170,150,.7),inset 0 -1px 0 rgba(0,0,0,.45)}
+.apx-recovery-panel .apx-recovery-primary:hover{filter:brightness(1.1);background:linear-gradient(180deg,var(--apx-colour-action-glow,#e6391f) 0%,var(--apx-colour-action,#ba1f12) 60%,var(--apx-colour-deep,#732022) 100%)}
+/* Secondary tier: a hairline, no fill. */
+.apx-failure-panel .apx-continue-button{border-color:rgba(255,247,228,.34);background:transparent;box-shadow:none}
 .apx-failure-panel .apx-continue-button:hover{border-color:rgba(255,247,228,.7);background:rgba(255,247,228,.08)}
 
 /* Neutral first paint. Only the controller's final choice reveals a skin. */
