@@ -1,0 +1,9 @@
+astrix-app/tools/fixtures/aion2/eu/ENDPOINTS.md
+astrix-app/tools/fixtures/aion2/eu/servers.json
+astrix-app/tools/fixtures/aion2/eu/classes.json
+astrix-app/tools/fixtures/aion2/eu/astrix285-search.json
+astrix-app/tools/fixtures/aion2/eu/astrix285-info.json
+astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json
+astrix-app/tools/fixtures/aion2/eu/astrix285-item-mainhand.json
+astrix-app/tools/fixtures/aion2/eu/astrix285-daevanion-11.json
+astrix-app/tools/test-aion2-eu-fixtures.mjs

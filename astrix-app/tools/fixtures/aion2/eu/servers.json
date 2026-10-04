@@ -1,0 +1,112 @@
+{
+  "serverList": [
+    {
+      "raceId": 1,
+      "serverId": 1301,
+      "serverName": "Siel",
+      "serverShortName": "SIE"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1302,
+      "serverName": "Nezekan",
+      "serverShortName": "NEZ"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1303,
+      "serverName": "Vaizel",
+      "serverShortName": "VAI"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1304,
+      "serverName": "Kaisinel",
+      "serverShortName": "KAI"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1305,
+      "serverName": "Yustiel",
+      "serverShortName": "YUS"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1306,
+      "serverName": "Ariel",
+      "serverShortName": "ARI"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1307,
+      "serverName": "Fregion",
+      "serverShortName": "FRE"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1308,
+      "serverName": "Meslamtaeda",
+      "serverShortName": "MES"
+    },
+    {
+      "raceId": 1,
+      "serverId": 1309,
+      "serverName": "Hithanya",
+      "serverShortName": "HIT"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2301,
+      "serverName": "Israphel",
+      "serverShortName": "ISR"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2302,
+      "serverName": "Zikel",
+      "serverShortName": "ZIK"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2303,
+      "serverName": "Triniel",
+      "serverShortName": "TRI"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2304,
+      "serverName": "Lumiel",
+      "serverShortName": "LUM"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2305,
+      "serverName": "Marchutan",
+      "serverShortName": "MAR"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2306,
+      "serverName": "Azphel",
+      "serverShortName": "AZP"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2307,
+      "serverName": "Ereshkigal",
+      "serverShortName": "ERE"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2308,
+      "serverName": "Beritra",
+      "serverShortName": "BER"
+    },
+    {
+      "raceId": 2,
+      "serverId": 2309,
+      "serverName": "Nemon",
+      "serverShortName": "NEM"
+    }
+  ]
+}
