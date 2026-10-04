@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/brand.schema.json",
+  "title": "Brand",
+  "description": "A gear brand with 1 to 3 piece bonuses.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [],
+  "properties": {
+    "coreAttributeId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "bonuses": {
+      "oneOf": [
+        {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "common.schema.json#/$defs/pieceBonus"
+              },
+              {
+                "properties": {
+                  "pieces": {
+                    "maximum": 3
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "slotIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    }
+  },
+  "unevaluatedProperties": false
+}

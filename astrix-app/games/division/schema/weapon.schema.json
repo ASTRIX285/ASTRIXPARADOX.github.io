@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/weapon.schema.json",
+  "title": "Weapon",
+  "description": "A weapon with base statistics.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "familyId"
+  ],
+  "properties": {
+    "familyId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "rarity": {
+      "oneOf": [
+        {
+          "enum": [
+            "standard",
+            "named",
+            "exotic"
+          ]
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "baseStats": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "damage": {
+              "$ref": "common.schema.json#/$defs/number"
+            },
+            "rpm": {
+              "$ref": "common.schema.json#/$defs/number"
+            },
+            "magazine": {
+              "$ref": "common.schema.json#/$defs/integer"
+            },
+            "reloadSeconds": {
+              "$ref": "common.schema.json#/$defs/number"
+            },
+            "optimalRange": {
+              "$ref": "common.schema.json#/$defs/number"
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "coreAttribute": {
+      "$ref": "common.schema.json#/$defs/effect"
+    },
+    "attributes": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "attributeId",
+              "roll"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "attributeId": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "roll": {
+                "$ref": "common.schema.json#/$defs/rollRange"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "talentIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    },
+    "modSlots": {
+      "$ref": "common.schema.json#/$defs/idList"
+    }
+  },
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,174 @@
+{
+  "title": "td2",
+  "kind": "gear-slot",
+  "records": [
+    {
+      "id": "mask",
+      "name": "Mask",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "chest",
+      "name": "Chest",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "holster",
+      "name": "Holster",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "backpack",
+      "name": "Backpack",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "gloves",
+      "name": "Gloves",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "kneepads",
+      "name": "Kneepads",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/457wEeFBWn5tPKbqZpPhPm/gear-transmogrification-breakdown",
+          "gameVersion": "TU11",
+          "retrievedOn": "2026-10-04",
+          "quote": "Now you can change your mask, backpack, chest, kneepads, gloves, and holster to look like a similar piece of a different brand."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/OXv7UvEmNo1Ne3baADKyF/tips-tutorials-how-to-handle-your-gear",
+          "gameVersion": "Launch (March 2019)",
+          "retrievedOn": "2026-10-04",
+          "quote": "You have 6 gear slots available in total."
+        }
+      ],
+      "talentSlot": {
+        "pending": true,
+        "reason": "Which slots can roll a gear talent is only stated in a pre-release 2020 preview. Needs an in-game capture for the current version."
+      },
+      "coreAttributeIds": {
+        "pending": true,
+        "reason": "Which core attributes each slot can roll is not stated in an official post. Needs an in-game capture."
+      }
+    }
+  ]
+}

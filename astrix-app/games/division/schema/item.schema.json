@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/item.schema.json",
+  "title": "Named or exotic item",
+  "description": "A named or exotic gear piece or weapon, with what is locked and any equip restriction.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "rarity",
+    "itemType"
+  ],
+  "properties": {
+    "rarity": {
+      "enum": [
+        "named",
+        "exotic"
+      ]
+    },
+    "itemType": {
+      "enum": [
+        "gear",
+        "weapon"
+      ]
+    },
+    "slotId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "brandId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "gearSetId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "lockedAttribute": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "attributeId",
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "attributeId": {
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "value": {
+              "$ref": "common.schema.json#/$defs/number"
+            },
+            "unit": {
+              "$ref": "common.schema.json#/$defs/unit"
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "talentId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "restrictions": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "rule"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "enum": [
+                  "one-exotic-gear",
+                  "one-exotic-weapon",
+                  "other"
+                ]
+              },
+              "text": {
+                "$ref": "common.schema.json#/$defs/text"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    }
+  },
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/expertise.schema.json",
+  "title": "Expertise and proficiency",
+  "description": "An upgrade track (expertise or proficiency) and what each level does.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "track"
+  ],
+  "properties": {
+    "track": {
+      "enum": [
+        "expertise",
+        "proficiency"
+      ]
+    },
+    "appliesTo": {
+      "$ref": "common.schema.json#/$defs/idList"
+    },
+    "maxLevel": {
+      "$ref": "common.schema.json#/$defs/integer"
+    },
+    "levels": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "level",
+              "effects"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "effects": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "common.schema.json#/$defs/effect"
+                    }
+                  },
+                  {
+                    "$ref": "common.schema.json#/$defs/pending"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    }
+  },
+  "unevaluatedProperties": false
+}

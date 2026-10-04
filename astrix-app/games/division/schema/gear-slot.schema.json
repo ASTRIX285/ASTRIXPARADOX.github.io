@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/gear-slot.schema.json",
+  "title": "Gear slot",
+  "description": "A gear slot an agent equips (e.g. mask). The slot list itself is title data.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [],
+  "properties": {
+    "order": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "talentSlot": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ],
+      "description": "Whether a gear talent can roll in this slot."
+    },
+    "coreAttributeIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    }
+  },
+  "unevaluatedProperties": false
+}

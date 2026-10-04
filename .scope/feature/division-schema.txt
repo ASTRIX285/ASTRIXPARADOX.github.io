@@ -1,0 +1,23 @@
+# feature/division-schema: shared Division schemas and TD2 catalogue seed (gear slots, core attributes).
+.github/workflows/validate-division.yml
+astrix-app/games/division/README.md
+astrix-app/games/division/schema/.gitkeep
+astrix-app/games/division/td2/data/.gitkeep
+astrix-app/games/division/schema/account-state.schema.json
+astrix-app/games/division/schema/attribute.schema.json
+astrix-app/games/division/schema/brand.schema.json
+astrix-app/games/division/schema/catalogue-file.schema.json
+astrix-app/games/division/schema/common.schema.json
+astrix-app/games/division/schema/expertise.schema.json
+astrix-app/games/division/schema/gear-set.schema.json
+astrix-app/games/division/schema/gear-slot.schema.json
+astrix-app/games/division/schema/item.schema.json
+astrix-app/games/division/schema/mod.schema.json
+astrix-app/games/division/schema/skill.schema.json
+astrix-app/games/division/schema/specialization.schema.json
+astrix-app/games/division/schema/talent.schema.json
+astrix-app/games/division/schema/weapon-family.schema.json
+astrix-app/games/division/schema/weapon.schema.json
+astrix-app/games/division/td2/data/core-attributes.json
+astrix-app/games/division/td2/data/gear-slots.json
+astrix-app/tools/test-division-schema.mjs
