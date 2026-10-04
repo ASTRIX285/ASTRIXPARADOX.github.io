@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/skill.schema.json",
+  "title": "Skill",
+  "description": "A skill with its variants and how each variant scales by skill tier.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [],
+  "properties": {
+    "variants": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "name": {
+                "$ref": "common.schema.json#/$defs/text"
+              },
+              "description": {
+                "$ref": "common.schema.json#/$defs/text"
+              },
+              "tierScaling": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "tier",
+                        "effects"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "tier": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "effects": {
+                          "oneOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "$ref": "common.schema.json#/$defs/effect"
+                              }
+                            },
+                            {
+                              "$ref": "common.schema.json#/$defs/pending"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "common.schema.json#/$defs/pending"
+                  }
+                ]
+              },
+              "modSlots": {
+                "$ref": "common.schema.json#/$defs/idList"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    }
+  },
+  "unevaluatedProperties": false
+}

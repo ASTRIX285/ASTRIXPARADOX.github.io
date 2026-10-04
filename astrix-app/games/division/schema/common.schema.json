@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/common.schema.json",
+  "title": "Division shared definitions",
+  "description": "Building blocks for every Division record schema, for every title (td2, td3). Title-specific values (slot lists, caps, counts) live in <title>/data/, never here.",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "pattern": "^td[0-9]+$",
+      "description": "Division title folder, e.g. td2."
+    },
+    "pending": {
+      "$ref": "../../../platform/contracts/pending.schema.json"
+    },
+    "source": {
+      "description": "Division accepts official posts and in-game captures only. Client data would mean datamined values.",
+      "oneOf": [
+        {
+          "$ref": "../../../platform/contracts/provenance.schema.json#/$defs/officialPost"
+        },
+        {
+          "$ref": "../../../platform/contracts/provenance.schema.json#/$defs/inGameCapture"
+        }
+      ]
+    },
+    "provenance": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/source"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      ]
+    },
+    "text": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "number": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "integer": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "unit": {
+      "oneOf": [
+        {
+          "enum": [
+            "percent",
+            "flat",
+            "tier",
+            "seconds",
+            "count"
+          ]
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "rollRange": {
+      "description": "Min and max roll for an attribute or bonus, with its unit.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "min",
+            "max",
+            "unit"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "min": {
+              "$ref": "#/$defs/number"
+            },
+            "max": {
+              "$ref": "#/$defs/number"
+            },
+            "unit": {
+              "$ref": "#/$defs/unit"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "effect": {
+      "description": "One stat change: an attribute id plus its value and unit, or a described effect.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/id"
+        },
+        "value": {
+          "$ref": "#/$defs/number"
+        },
+        "unit": {
+          "$ref": "#/$defs/unit"
+        },
+        "text": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "pieceBonus": {
+      "type": "object",
+      "required": [
+        "pieces",
+        "effects"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pieces": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "effects": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/effect"
+              }
+            },
+            {
+              "$ref": "#/$defs/pending"
+            }
+          ]
+        }
+      }
+    },
+    "requirement": {
+      "description": "A condition a talent needs before it activates, e.g. a stance, a skill state or an attribute count.",
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/text"
+        },
+        "attributeId": {
+          "$ref": "#/$defs/id"
+        },
+        "count": {
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "idList": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        {
+          "$ref": "#/$defs/pending"
+        }
+      ]
+    },
+    "recordBase": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

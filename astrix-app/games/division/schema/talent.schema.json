@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/talent.schema.json",
+  "title": "Talent",
+  "description": "A weapon or gear talent with its activation requirements.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [
+    "appliesTo"
+  ],
+  "properties": {
+    "appliesTo": {
+      "enum": [
+        "weapon",
+        "gear"
+      ]
+    },
+    "slotIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    },
+    "effect": {
+      "$ref": "common.schema.json#/$defs/text"
+    },
+    "requirements": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/requirement"
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "perfectVariantOf": {
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  },
+  "unevaluatedProperties": false
+}
