@@ -1,0 +1,2 @@
+# chore/build-fit-module-versions: regenerate stale build-fit import map after 429bd6b6.
+astrix-app/pages/build-fit/index.html
