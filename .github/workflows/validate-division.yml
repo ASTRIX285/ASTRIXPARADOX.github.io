@@ -24,3 +24,7 @@ jobs:
         run: node astrix-app/tools/test-division-validator.mjs
       - name: Division gate
         run: node astrix-app/tools/validate-division.mjs
+      - name: Build format, share links and adapters
+        run: node astrix-app/tools/test-division-build-format.mjs
+      - name: Ubisoft adapter makes no network call
+        run: node astrix-app/tools/test-division-ubisoft-adapter.mjs
