@@ -56,5 +56,11 @@ export function createReportsLoader({origin='https://auth.astrixparadox.com',fet
     })();
     flights.set(identity,task);try{return await task;}finally{flights.delete(identity);}
   }
-  return {load};
+  // The last stored overview of any age (up to 12 h), for when Bungie is not responding. Never live.
+  async function stored(session){
+    const owner=accountKey(session);if(!owner)return null;const identity=subject?`${owner}:subject:${subject.membershipType}:${subject.membershipId}`:owner;
+    const cached=await store.get(`account:catalogue-v3-boxes20c:${identity}`);
+    return cached&&now()-cached.fetchedAt<12*60*60_000?cached:null;
+  }
+  return {load,stored};
 }

@@ -68,7 +68,7 @@
 
   "/astrix-app/core/prepared-bundle-cache.mjs": "2da7748b41",
 
-  "/astrix-app/core/prepared-page-client.mjs": "7ca1a2d187",
+  "/astrix-app/core/prepared-page-client.mjs": "2a9dfbd7b2",
 
   "/astrix-app/core/weapon-roll-advisor.mjs": "7ffb785242",
 
@@ -126,7 +126,7 @@
 
   "/astrix-app/pages/forge-loader/forge-loader-set-list.mjs": "cd3db7b072",
 
-  "/astrix-app/pages/forge-loader/forge-loader.mjs": "5e21eab128",
+  "/astrix-app/pages/forge-loader/forge-loader.mjs": "d7778f537f",
 
   "/astrix-app/pages/forge-loader/results/forge-loader-results.mjs": "397c5bbf2f",
 
@@ -160,7 +160,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-icon-cleaner.mjs": "b47b9d6379",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs": "22677d9424",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs": "33ffce3326",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-character-cards.mjs": "4aac6753eb",
 
@@ -330,15 +330,15 @@
 
   "/astrix-app/pages/reports/reports-boxes.mjs": "312d76c54f",
 
-  "/astrix-app/pages/reports/reports-data.mjs": "5c10f950b4",
+  "/astrix-app/pages/reports/reports-data.mjs": "6b6971fb21",
 
-  "/astrix-app/pages/reports/reports-history.mjs": "8c942c3303",
+  "/astrix-app/pages/reports/reports-history.mjs": "a967c10766",
 
   "/astrix-app/pages/reports/reports-model.mjs": "bd9d115855",
 
-  "/astrix-app/pages/reports/reports-ui.mjs": "591b60fec3",
+  "/astrix-app/pages/reports/reports-ui.mjs": "2ea6f20ce2",
 
-  "/astrix-app/pages/reports/reports.mjs": "722392962c",
+  "/astrix-app/pages/reports/reports.mjs": "4df6a848e3",
 
   "/astrix-app/pages/sign-in/sign-in.mjs": "018cb69071",
 
@@ -356,7 +356,7 @@
 
   "/astrix-app/pages/vault/vault-transfer-feedback.mjs": "9393c70924",
 
-  "/astrix-app/pages/vault/vault.mjs": "402cad8335",
+  "/astrix-app/pages/vault/vault.mjs": "46d0849ec7",
 
   "/astrix-app/pages/workbench/workbench-inspect.mjs": "03e4590475",
 
@@ -392,7 +392,7 @@
 
   "/astrix-app/shared/astrix-breach-loader.mjs": "97635d8d9a",
 
-  "/astrix-app/shared/astrix-destination-ribbon.js": "d01739f270",
+  "/astrix-app/shared/astrix-destination-ribbon.js": "f021649673",
 
   "/astrix-app/shared/astrix-destination-theme.js": "bd777bf85e",
 
@@ -420,7 +420,7 @@
 
   "/astrix-app/shared/local-preview.mjs": "07999f6adb",
 
-  "/astrix-app/shared/reports-preload.mjs": "e27fe11d3e",
+  "/astrix-app/shared/reports-preload.mjs": "091f51732d",
 
   "/astrix-app/shared/tool-welcome.mjs": "3d6c958faf",
 

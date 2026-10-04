@@ -525,6 +525,10 @@ async function checkForNewExotic(){
   return next;
 }
 
+function dataAgeMs(value){
+  const ready=value?.pageReady||{},at=Number(value?.preparedCache?.dataAt||ready.accountDataAt||value?.displaySnapshot?.fetchedAt||ready.generatedAt);
+  return Number.isFinite(at)&&at>0?Date.now()-at:Infinity;
+}
 function startForgeRefresh(){
   if(forgeRefreshController)return;
   forgeRefreshController=startForgeBackgroundRefresh({
@@ -555,7 +559,8 @@ async function init(){
     byId('forgeConnectionState').textContent='LOADING';payload=await loadVerifiedPayload();
     reportPreparedPageStage('render','loadout');catalogue=createVaultCatalogue(payload);resolveActiveCharacter(activeCharacterId);renderExoticWeapons();renderResidency('resident');await completeResidentPreparation();
     renderHero();renderExotics();renderSetBonuses();configureStats({reset:true});
-    void forgeRefreshController.refreshNow().catch(()=>{});
+    // Refresh stale data quietly: armour read from Bungie under a minute ago is not read again on open.
+    if(!(dataAgeMs(payload)<60_000))void forgeRefreshController.refreshNow().catch(()=>{});
     byId('forgeConnectionState').textContent=residentReady?'SOURCES READY':'SOURCES INCOMPLETE';
     const groups=exoticGroups(),ownedCount=groups.filter(group=>group.owned).length;byId('forgeRuntimeStatus').textContent=!residentReady?'One or more sources remain unavailable. Builder handoff stays locked.':ownedCount?`${ownedCount} in inventory of ${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'}. Select a piece to begin.`:`${groups.length} ${classLabel()} Exotic definition${groups.length===1?'':'s'} shown; no instance can be selected.`;
     reportPreparedPageStage('ready','loadout');await settleVisibleImages();globalThis.ForgeLoader?.done?.();

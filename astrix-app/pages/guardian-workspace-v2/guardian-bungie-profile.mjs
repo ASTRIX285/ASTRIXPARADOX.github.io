@@ -1,4 +1,5 @@
 import {boundedStringify} from '../../core/bounded-json.mjs?v=3fb7642429';
+import {beginEngineTiming} from '../../core/engine-timing.mjs?v=bed8960779';
 import {runProfileTask} from '../../core/engine-profile-client.mjs?v=07c0d11e6f';
 import {getBungieSession} from "./guardian-bungie-auth.mjs?v=669819c723";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?v=c08ed347fe";
@@ -12,7 +13,7 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs?v=11043b9a74';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=29457982b9';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=a5fcd4c480';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=7ca1a2d187';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=2a9dfbd7b2';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,
@@ -1056,10 +1057,13 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
   if(liveProfileReady)return Promise.resolve(null);
   if(liveProfileRequest)return liveProfileRequest;
   liveProfileRequest=(async()=>{
-    let displayedDetail=null;
+    let displayedDetail=null,displayedPayload=null;
+    // Timed like every prepared page load, so a page built in the background shows its real read time.
+    const cacheTiming=beginEngineTiming('profile.load');
     const cachedPayload=await readCachedBungieProfile(session,currentPagePayloadKind());
+    cacheTiming.end(cachedPayload?.profile?'complete':'miss');
     if(cachedPayload?.profile){
-      try{assertRenderablePagePayload(cachedPayload,currentPagePayloadKind());displayedDetail=await activateLiveProfile(await hydrateManifestPayload(cachedPayload,INITIAL_PROFILE_HYDRATION),session,{fromCache:true});}
+      try{assertRenderablePagePayload(cachedPayload,currentPagePayloadKind());displayedDetail=await activateLiveProfile(await hydrateManifestPayload(cachedPayload,INITIAL_PROFILE_HYDRATION),session,{fromCache:true});displayedPayload=cachedPayload;}
       catch(error){console.warn("[Forge Bungie profile] cached live profile could not render; requesting a fresh profile",error);}
     }
     if(!displayedDetail){
@@ -1067,6 +1071,7 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
       try{
         const displayPayload=await loadPreparedPagePayload(session,page);
         displayedDetail=await activateLiveProfile(await hydrateManifestPayload(displayPayload,INITIAL_PROFILE_HYDRATION),session);
+        displayedPayload=displayPayload;
       }catch(displayError){
         console.warn("[Forge Bungie profile] prepared display snapshot unavailable; validating the session and requesting live data",displayError);
         const verifiedSession=await getBungieSession({force:true});
@@ -1078,6 +1083,9 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
       }
     }
     liveProfileReady=true;
+    // Refresh stale data quietly. Data read from Bungie under a minute ago (for example built in
+    // the background moments before) is not read again on open.
+    if(preparedDataAgeMs(displayedPayload)<FRESH_DISPLAY_MS)return displayedDetail;
     void loadLiveProfile(session,{background:true}).catch(error=>{
       console.warn("[Forge Bungie profile] fresh Bungie refresh failed; retaining the displayed profile",error);
     });
@@ -1095,6 +1103,12 @@ function ensureLiveProfile(session,{background=false,silent=false}={}){
       if(!liveProfileReady)liveProfileRequest=null;
     });
   return liveProfileRequest;
+}
+
+const FRESH_DISPLAY_MS=60_000;
+function preparedDataAgeMs(payload){
+  const ready=payload?.pageReady||{},at=Number(payload?.preparedCache?.dataAt||ready.accountDataAt||payload?.displaySnapshot?.fetchedAt||ready.generatedAt);
+  return Number.isFinite(at)&&at>0?Date.now()-at:Infinity;
 }
 
 let guardianRefreshController=null;

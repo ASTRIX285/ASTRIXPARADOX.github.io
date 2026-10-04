@@ -273,6 +273,115 @@ async function loadPreparedPagePayload(session,pageValue,options={}){
   catch(error){timing.end('error');throw error;}
 }
 
+// Background preparation (4 Oct 2026). One queue per signed-in account builds every tool tab and
+// each Reports section before the player picks it:
+//   1. the page the player is on (it builds itself) and anything they just picked;
+//   2. the other tool tabs, in BACKGROUND_PAGE_ORDER;
+//   3. each completed Reports activity, one at a time (queued by shared/reports-preload.mjs);
+//   4. picking something not built yet moves it to the front (front()).
+// One item runs at a time, so background work never has more than one Bungie read of its own in
+// flight. Items wait for idle time and pause while the tab is hidden. With Save-Data or a 2G
+// connection only the next likely tab is built. Built items are kept per account; signing out or
+// switching account stops the queue and forgets them.
+const BACKGROUND_PAGE_ORDER=Object.freeze(['character','build-forge','journey','vault','loadout']);
+const preparationQueues=new Map();
+function constrainedNetwork(){
+  const connection=globalThis.navigator?.connection;
+  return Boolean(connection?.saveData||/(^|-)2g$/.test(String(connection?.effectiveType||'')));
+}
+function whenIdle(){
+  return new Promise(resolve=>typeof globalThis.requestIdleCallback==='function'?globalThis.requestIdleCallback(()=>resolve(),{timeout:2000}):setTimeout(resolve,40));
+}
+function whenVisible(){
+  const document=globalThis.document;
+  if(!document||document.visibilityState!=='hidden')return Promise.resolve();
+  return new Promise(resolve=>{
+    const show=()=>{if(document.visibilityState==='hidden')return;document.removeEventListener('visibilitychange',show);resolve();};
+    document.addEventListener('visibilitychange',show);
+  });
+}
+function createPreparationQueue(identity){
+  const items=new Map();
+  let order=0,pump=null,stopped=false;
+  const dispatch=(item,state)=>globalThis.document?.dispatchEvent?.(new CustomEvent('forge:background-prepared',{detail:{identity,key:item.key,state}}));
+  const nextItem=()=>[...items.values()].filter(item=>item.state==='queued').sort((a,b)=>a.order-b.order)[0]||null;
+  function schedule(){
+    if(pump||stopped)return;
+    pump=(async()=>{
+      try{
+        while(!stopped){
+          let item=nextItem();if(!item)break;
+          // Something the player picked runs at once; everything else waits for idle time.
+          if(!item.urgent){await whenVisible();await whenIdle();}
+          if(stopped)break;
+          item=nextItem();if(!item)break;
+          item.state='running';
+          try{item.result=await item.run();item.state='ready';item.readyAt=Date.now();item.resolve(item.result);dispatch(item,'ready');}
+          catch(error){item.state='failed';item.error=error;item.reject(error);dispatch(item,'failed');}
+        }
+      }finally{pump=null;if(!stopped&&nextItem())schedule();}
+    })();
+  }
+  return {
+    identity,
+    add(key,run,{front=false}={}){
+      if(stopped)return Promise.reject(new Error('Background preparation stopped.'));
+      let item=items.get(key);
+      if(!item||item.state==='failed'){
+        item={key,run,state:'queued',order:front?-(++order):++order,urgent:front};
+        item.promise=new Promise((resolve,reject)=>{item.resolve=resolve;item.reject=reject;});
+        item.promise.catch(()=>{});
+        items.set(key,item);
+      }else if(front&&item.state==='queued'){item.order=-(++order);item.urgent=true;}
+      schedule();
+      return item.promise;
+    },
+    front(key){
+      const item=items.get(key);
+      if(item?.state==='queued'){item.order=-(++order);item.urgent=true;schedule();}
+      return item?.promise||null;
+    },
+    status(key){return items.get(key)?.state||'missing';},
+    list(){return [...items.values()].sort((a,b)=>a.order-b.order).map(item=>({key:item.key,state:item.state}));},
+    idle(){return Promise.all([...items.values()].map(item=>item.promise.catch(()=>{})));},
+    stop(){
+      stopped=true;
+      for(const item of items.values())if(item.state==='queued'){item.state='cancelled';item.reject(new Error('Background preparation stopped.'));}
+      items.clear();
+    }
+  };
+}
+function preparationQueue(session){
+  if(session?.authenticated!==true)return null;
+  const identity=membershipIdentity(session);
+  for(const [key,queue] of preparationQueues)if(key!==identity){queue.stop();preparationQueues.delete(key);}
+  if(!preparationQueues.has(identity))preparationQueues.set(identity,createPreparationQueue(identity));
+  return preparationQueues.get(identity);
+}
+// Built pages are found again through this tab's page markers; signing out removes them too.
+function stopBackgroundPreparation({signedOut=false}={}){
+  for(const queue of preparationQueues.values())queue.stop();
+  preparationQueues.clear();
+  if(!signedOut)return;
+  try{
+    const storage=globalThis.sessionStorage;
+    for(let index=storage.length-1;index>=0;index--){const key=storage.key(index);if(/^astrix:bungie-page-cache(?:-fallback)?:v4:/.test(key||''))storage.removeItem(key);}
+  }catch{}
+}
+function startBackgroundPreparation(session,{current=null,fetchImpl}={}){
+  const queue=preparationQueue(session);
+  if(!queue)return null;
+  const pages=BACKGROUND_PAGE_ORDER.filter(page=>page!==current);
+  for(const page of constrainedNetwork()?pages.slice(0,1):pages)void queue.add(`page:${page}`,()=>preparePreparedPage(session,page,{fetchImpl}));
+  return queue;
+}
+// A player picked this page: build it now if it is not built yet.
+function frontPreparedPage(session,value,{fetchImpl}={}){
+  const page=pageKind(value),queue=preparationQueue(session);
+  if(!queue)return null;
+  return queue.front(`page:${page}`)||queue.add(`page:${page}`,()=>preparePreparedPage(session,page,{fetchImpl}),{front:true});
+}
+
 async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,fetchImpl}={}){
   if(session?.authenticated!==true)return {complete:false,ready:[],failed:[]};
   const ready=[],failed=[];
@@ -282,10 +391,7 @@ async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,f
     try{
       // Revisiting Journey must not download the entire workspace again.
       // Active pages retain their existing background freshness controllers.
-      const cached=await readCachedBungieProfile(session,page);
-      let usable=false;
-      try{assertRenderablePagePayload(cached,page);usable=true;}catch{}
-      if(!usable)await loadPreparedPagePayload(session,page,{preferBackend:true,fetchImpl,quiet:true});
+      await preparePreparedPage(session,page,{fetchImpl});
       ready.push(page);
       globalThis.document?.dispatchEvent?.(new CustomEvent('forge:workspace-page-prepared',{detail:{page}}));
     }catch(error){
@@ -297,4 +403,15 @@ async function preloadPreparedWorkspace(session,{pages=WORKSPACE_PRELOAD_PAGES,f
   return result;
 }
 
+// One page built in the background: a renderable copy already in this browser counts as built;
+// otherwise the prepared payload is fetched quietly (no loader, no page events) and cached.
+async function preparePreparedPage(session,value,{fetchImpl}={}){
+  const page=pageKind(value);
+  const cached=await readCachedBungieProfile(session,page);
+  try{assertRenderablePagePayload(cached,page);return 'cached';}catch{}
+  await loadPreparedPagePayload(session,page,{preferBackend:true,fetchImpl,quiet:true,publish:false});
+  return 'built';
+}
+
+export {BACKGROUND_PAGE_ORDER,frontPreparedPage,preparationQueue,preparePreparedPage,startBackgroundPreparation,stopBackgroundPreparation};
 export {PAGE_KINDS,PREPARED_PAGE_STAGES,WORKSPACE_PRELOAD_PAGES,loadPreparedPagePayload,normalizePreparedPagePayload,preloadPreparedWorkspace,preparedPageUrl,reportPreparedPageStage,requestPreparedPagePayload};

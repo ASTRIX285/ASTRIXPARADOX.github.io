@@ -1,5 +1,8 @@
 import {AUTH_ORIGIN} from '../pages/guardian-workspace-v2/guardian-bungie-auth.mjs';
 import {accountKey,createReportsLoader} from '../pages/reports/reports-data.mjs';
+import {loadReportsHistory} from '../pages/reports/reports-history.mjs';
+import {SERIES,viewModel} from '../pages/reports/reports-model.mjs';
+import {completed} from '../pages/reports/reports-boxes.mjs';
 const retainedImages=new Map();
 async function warmImages(groups){
   const urls=[...new Set(groups.map(row=>row.image).filter(Boolean))];
@@ -33,4 +36,32 @@ export async function preloadReports(session,options){
   globalThis.APX_REPORTS_SNAPSHOT=snapshot;
   globalThis.dispatchEvent(new CustomEvent('forge:reports-ready',{detail:{identity}}));
   return snapshot;
+}
+
+// Background preparation (4 Oct 2026): after the overview, the account's run history is scanned
+// once (kept per account by reports-history.mjs), then each completed activity's section is built
+// one at a time, newest runs first. One history controller per account, shared with the page.
+const histories=new Map();
+export function reportsHistoryFor(snapshot){
+  const key=snapshot?.identity||'';
+  if(!histories.has(key)){for(const other of histories.keys())if(other!==key)histories.delete(other);histories.set(key,loadReportsHistory(snapshot,{origin:AUTH_ORIGIN}));}
+  return histories.get(key);
+}
+export const reportSectionKey=activityId=>`reports:${activityId}`;
+export function completedReportActivities(snapshot){
+  const seen=new Map();
+  for(const series of SERIES)for(const activity of viewModel(snapshot,series.id,'all').activities.filter(completed))if(!seen.has(activity.id))seen.set(activity.id,activity);
+  return [...seen.values()];
+}
+export function queueReportsPreparation(session,queue,{constrained=false}={}){
+  if(!queue)return null;
+  const overview=queue.add('reports',()=>preloadReports(session));
+  if(constrained)return overview;
+  void overview.then(async snapshot=>{
+    if(!snapshot)return;
+    const history=await reportsHistoryFor(snapshot);
+    void queue.add('reports:history',()=>history.prepareSection(null,{limit:0}));
+    for(const activity of completedReportActivities(snapshot))void queue.add(reportSectionKey(activity.id),()=>history.prepareSection(activity));
+  }).catch(()=>{});
+  return overview;
 }

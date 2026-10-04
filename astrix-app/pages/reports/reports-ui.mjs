@@ -128,7 +128,8 @@ export function mountReports(root,snapshot,{history=createReportsHistory(snapsho
   function sync(){if(!state.run){token++;runId=null;runData=null;runError='';}render();void scan();void enrich();void loadRun();}
   function click(event){
     const b=event.target.closest('button');if(!b||!root.contains(b))return;
-    if(b.hasAttribute('data-activity'))navigate({activity:b.dataset.activity,difficulty:'All',page:0,run:null});
+    // A picked section that is not built yet moves to the front of background preparation.
+    if(b.hasAttribute('data-activity')){document.dispatchEvent(new CustomEvent('forge:reports-section-picked',{detail:{activity:b.dataset.activity}}));navigate({activity:b.dataset.activity,difficulty:'All',page:0,run:null});}
     else if(b.hasAttribute('data-series'))navigate({series:b.dataset.series,activity:null,run:null,page:0,difficulty:'All'});
     else if(b.hasAttribute('data-difficulty'))navigate({difficulty:b.dataset.difficulty,page:0,run:null});
     else if(b.hasAttribute('data-run'))navigate({run:b.dataset.run});
