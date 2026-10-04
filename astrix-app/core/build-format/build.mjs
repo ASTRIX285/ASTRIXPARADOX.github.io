@@ -8,7 +8,11 @@
 
 export const BUILD_FORMAT = 'astrix-build';
 export const BUILD_FORMAT_VERSION = 1;
-export const BUILD_KEYS = Object.freeze(['format', 'formatVersion', 'game', 'title', 'catalogueVersion', 'name', 'objective', 'slots', 'abilities', 'selections']);
+export const BUILD_KEYS = Object.freeze(['format', 'formatVersion', 'game', 'title', 'platform', 'catalogueVersion', 'name', 'objective', 'slots', 'abilities', 'selections']);
+/** Platforms an agent can live on. pc covers Ubisoft Connect, Steam, Epic and Luna, which share one agent. */
+export const PLATFORMS = Object.freeze(['pc', 'playstation', 'xbox']);
+export const PLATFORM_LABELS = Object.freeze({ pc: 'PC', playstation: 'PlayStation', xbox: 'Xbox' });
+export const isPlatform = value => PLATFORMS.includes(value);
 export const SLOT_KEYS = Object.freeze(['itemId', 'attributes', 'talentId', 'modIds']);
 export const NAME_MAX = 80;
 export const SHARE_PREFIX = '1.';
@@ -20,9 +24,9 @@ const isId = value => typeof value === 'string' && value.length <= 64 && ID.test
 const isObject = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const sortedEntries = object => Object.entries(object).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 
-/** A new, empty build for a game and title. */
-export function createBuild({ game, title = null, catalogueVersion = null, name = '', objective = null } = {}) {
-  return normaliseBuild({ format: BUILD_FORMAT, formatVersion: BUILD_FORMAT_VERSION, game, title, catalogueVersion, name, objective, slots: {}, abilities: [], selections: {} });
+/** A new, empty build for a game, title and platform. The platform is required, never assumed. */
+export function createBuild({ game, title = null, platform, catalogueVersion = null, name = '', objective = null } = {}) {
+  return normaliseBuild({ format: BUILD_FORMAT, formatVersion: BUILD_FORMAT_VERSION, game, title, platform, catalogueVersion, name, objective, slots: {}, abilities: [], selections: {} });
 }
 
 /** Every problem with a build, as plain sentences. An empty list means valid. */
@@ -35,6 +39,7 @@ export function validateBuild(build) {
   if (build.formatVersion !== BUILD_FORMAT_VERSION) errors.push(`formatVersion must be ${BUILD_FORMAT_VERSION}.`);
   if (!isId(build.game)) errors.push('game must be a game module id.');
   if (build.title !== null && !(typeof build.title === 'string' && TITLE.test(build.title))) errors.push('title must be a title id or null.');
+  if (!isPlatform(build.platform)) errors.push(`platform must be one of ${PLATFORMS.join(', ')}.`);
   if (build.catalogueVersion !== null && !(typeof build.catalogueVersion === 'string' && build.catalogueVersion.length)) errors.push('catalogueVersion must be a string or null.');
   if (typeof build.name !== 'string' || build.name.length > NAME_MAX) errors.push(`name must be text up to ${NAME_MAX} characters.`);
   if (build.objective !== null && !isId(build.objective)) errors.push('objective must be an id or null.');
@@ -74,6 +79,7 @@ export function normaliseBuild(build) {
     formatVersion: BUILD_FORMAT_VERSION,
     game: build.game,
     title: build.title,
+    platform: build.platform,
     catalogueVersion: build.catalogueVersion,
     name: build.name,
     objective: build.objective,

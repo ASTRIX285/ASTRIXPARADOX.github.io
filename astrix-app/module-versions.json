@@ -16,7 +16,7 @@
 
   "/astrix-app/core/bounded-json.mjs": "3fb7642429",
 
-  "/astrix-app/core/build-format/build.mjs": "c14657c710",
+  "/astrix-app/core/build-format/build.mjs": "a2176c6335",
 
   "/astrix-app/core/bungie-item-identity.mjs": "b367ae7d9a",
 
@@ -354,9 +354,9 @@
 
   "/astrix-app/platform/adapters/division/index.mjs": "3de6d3621b",
 
-  "/astrix-app/platform/adapters/division/json.mjs": "e9552efb6b",
+  "/astrix-app/platform/adapters/division/json.mjs": "cae98e07da",
 
-  "/astrix-app/platform/adapters/division/manual.mjs": "ad73766f27",
+  "/astrix-app/platform/adapters/division/manual.mjs": "255f4c0b8e",
 
   "/astrix-app/platform/adapters/division/share.mjs": "0ebd6bb4af",
 

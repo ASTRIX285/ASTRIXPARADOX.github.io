@@ -4,35 +4,136 @@
   "title": "ASTRIX build",
   "description": "Neutral player build, shared by every game. A build names its game, title and the catalogue version it was made against, then lists what sits in each slot. Game rules live in the game module, never here. Enforced in code by core/build-format/build.mjs (validateBuild).",
   "type": "object",
-  "required": ["format", "formatVersion", "game", "title", "catalogueVersion", "name", "objective", "slots", "abilities", "selections"],
+  "required": [
+    "format",
+    "formatVersion",
+    "game",
+    "title",
+    "platform",
+    "catalogueVersion",
+    "name",
+    "objective",
+    "slots",
+    "abilities",
+    "selections"
+  ],
   "additionalProperties": false,
   "properties": {
-    "format": { "const": "astrix-build" },
-    "formatVersion": { "const": 1 },
-    "game": { "$ref": "#/$defs/id", "description": "Game module id, e.g. division." },
-    "title": { "oneOf": [{ "type": "string", "pattern": "^[a-z0-9]+$" }, { "type": "null" }], "description": "Title within the game, e.g. td2. Null for a single-title game." },
-    "catalogueVersion": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }], "description": "Catalogue revision the build was made against. Not a game version." },
-    "name": { "type": "string", "maxLength": 80 },
-    "objective": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "format": {
+      "const": "astrix-build"
+    },
+    "formatVersion": {
+      "const": 1
+    },
+    "game": {
+      "$ref": "#/$defs/id",
+      "description": "Game module id, e.g. division."
+    },
+    "title": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z0-9]+$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Title within the game, e.g. td2. Null for a single-title game."
+    },
+    "platform": {
+      "enum": [
+        "pc",
+        "playstation",
+        "xbox"
+      ],
+      "description": "Where the agent lives. pc covers Ubisoft Connect, Steam, Epic and Luna, which share one agent. Never guessed: a build without a platform asks for one."
+    },
+    "catalogueVersion": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Catalogue revision the build was made against. Not a game version."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "objective": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "slots": {
       "type": "object",
-      "propertyNames": { "$ref": "#/$defs/id" },
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["itemId"],
+        "required": [
+          "itemId"
+        ],
         "additionalProperties": false,
         "properties": {
-          "itemId": { "$ref": "#/$defs/id" },
-          "attributes": { "type": "object", "propertyNames": { "$ref": "#/$defs/id" }, "additionalProperties": { "type": "number" } },
-          "talentId": { "$ref": "#/$defs/id" },
-          "modIds": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+          "itemId": {
+            "$ref": "#/$defs/id"
+          },
+          "attributes": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/id"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "talentId": {
+            "$ref": "#/$defs/id"
+          },
+          "modIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            }
+          }
         }
       }
     },
-    "abilities": { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "Skills, spells or other active abilities, in slot order." },
-    "selections": { "type": "object", "propertyNames": { "$ref": "#/$defs/id" }, "additionalProperties": { "$ref": "#/$defs/id" }, "description": "One-of choices such as a specialization." }
+    "abilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "description": "Skills, spells or other active abilities, in slot order."
+    },
+    "selections": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/id"
+      },
+      "description": "One-of choices such as a specialization."
+    }
   },
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 64 }
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64
+    }
   }
 }

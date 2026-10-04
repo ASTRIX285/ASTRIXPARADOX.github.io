@@ -1,7 +1,7 @@
 // Neutral build format, share strings and the manual and json Division adapters.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {BUILD_KEYS, SLOT_KEYS, SHARE_MAX_LENGTH, createBuild, decodeBuild, encodeBuild, normaliseBuild, validateBuild} from '../core/build-format/build.mjs';
+import {BUILD_KEYS, PLATFORMS, SLOT_KEYS, SHARE_MAX_LENGTH, createBuild, decodeBuild, encodeBuild, normaliseBuild, validateBuild} from '../core/build-format/build.mjs';
 import {validateBuildAdapter} from '../platform/contracts/build-adapter.mjs';
 import {DIVISION_ADAPTERS, createJsonAdapter, createManualAdapter, readShareParam, shareUrl} from '../platform/adapters/division/index.mjs';
 import {createDivisionModule} from '../games/division/index.mjs';
@@ -12,7 +12,10 @@ assert.deepEqual([...schema.required].sort(),[...BUILD_KEYS].sort(),'build.schem
 assert.deepEqual(Object.keys(schema.properties.slots.additionalProperties.properties).sort(),[...SLOT_KEYS].sort(),'build.schema.json slot fields match SLOT_KEYS');
 assert.ok(!JSON.stringify(schema).includes('gameVersion'),'The build records catalogueVersion, never gameVersion');
 
-const empty=createBuild({game:'division',title:'td2'});
+const empty=createBuild({game:'division',title:'td2',platform:'pc'});
+assert.deepEqual(PLATFORMS,['pc','playstation','xbox'],'Three platforms: PC (Ubisoft Connect, Steam, Epic, Luna), PlayStation, Xbox');
+assert.deepEqual(schema.properties.platform.enum,PLATFORMS,'build.schema.json platform enum matches PLATFORMS');
+assert.throws(()=>createBuild({game:'division',title:'td2'}),TypeError,'A build without a platform is refused, never assumed');
 assert.deepEqual(validateBuild(empty),[],'A new build is valid');
 assert.equal(empty.catalogueVersion,null,'A new build has no catalogue version until one is loaded');
 const full=normaliseBuild({
@@ -29,8 +32,8 @@ const full=normaliseBuild({
   selections:{specialization:'sharpshooter'}
 });
 
-// Round trip: build to share string and back comes out identical.
-for(const build of [empty,full]){
+// Round trip: build to share string and back comes out identical, on every platform.
+for(const build of [empty,full,...PLATFORMS.map(platform=>({...full,platform}))]){
   const text=encodeBuild(build);
   assert.match(text,/^[A-Za-z0-9._-]+$/,'Share string is URL-safe');
   assert.deepEqual(decodeBuild(text),build,'build to share string to build is identical');
@@ -82,8 +85,10 @@ for(const [input,state] of [[undefined,'invalid'],['{',"invalid"],['{}','invalid
 
 // Manual adapter: with no catalogue every item is pending and can't be equipped.
 const manual=createManualAdapter();
-const {build:start}=await manual.load();
-assert.deepEqual(start,createBuild({game:'division',title:'td2'}),'Manual entry starts from an empty TD2 build');
+const noPlatform=await manual.load();
+assert.deepEqual({ok:noPlatform.ok,state:noPlatform.state},{ok:false,state:'needs-platform'},'A new build asks for a platform instead of assuming one');
+const {build:start}=await manual.load({platform:'xbox'});
+assert.deepEqual(start,createBuild({game:'division',title:'td2',platform:'xbox'}),'Manual entry starts from an empty TD2 build on the chosen platform');
 const pendingEquip=manual.equip(start,'mask','brand-a-mask');
 assert.equal(pendingEquip.ok,false,'A pending item cannot be equipped');
 assert.equal(pendingEquip.state,'pending');
@@ -108,5 +113,26 @@ assert.deepEqual(decodeBuild(encodeBuild(step.build)),step.build,'A hand-made bu
 step=sourced.unequip(step.build,'mask');
 assert.deepEqual(step.build.slots,{},'Unequip empties the slot');
 assert.deepEqual(start.slots,{},'Edits never change the build they started from');
+
+// Platform: every share string keeps it; JSON without one asks; duplicate moves a build onto yours.
+for(const platform of PLATFORMS){
+  const onPlatform={...full,platform};
+  assert.equal(decodeBuild(encodeBuild(onPlatform)).platform,platform,`${platform} survives the share string`);
+  assert.equal(readShareParam(shareUrl(onPlatform).slice(shareUrl(onPlatform).indexOf('?'))).platform,platform,`${platform} survives the share link`);
+}
+invalid({...empty,platform:'switch'},'an unknown platform');
+invalid((({platform,...rest})=>rest)(empty),'a missing platform');
+const legacy=JSON.stringify((({platform,...rest})=>rest)(full));
+const asked=await json.load(legacy);
+assert.deepEqual({ok:asked.ok,state:asked.state},{ok:false,state:'needs-platform'},'A JSON build with no platform asks for one');
+assert.match(asked.reason,/platform/,'and says why');
+assert.deepEqual(await json.load(legacy,{platform:'playstation'}),{ok:true,build:{...full,platform:'playstation'}},'With the platform the player picked, it imports');
+assert.equal((await json.load(legacy,{platform:'switch'})).state,'needs-platform','An unknown platform is not accepted');
+assert.equal((await json.load(JSON.stringify({...full,platform:'switch'}))).state,'invalid','A file naming an unknown platform is refused');
+const dup=manual.duplicate({...full,platform:'pc'},'xbox');
+assert.equal(dup.ok,true);
+assert.equal(dup.build.platform,'xbox','Duplicate moves a shared build onto your platform');
+assert.deepEqual({...dup.build,platform:'pc'},{...full,platform:'pc'},'Duplicate changes nothing but the platform');
+assert.equal(manual.duplicate(full,'switch').state,'needs-platform');
 
 console.log('DIVISION_BUILD_FORMAT=PASS');

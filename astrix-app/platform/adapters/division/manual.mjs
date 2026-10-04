@@ -3,13 +3,14 @@
  * through the Division game module, so an item with no sourced catalogue record
  * (pending) can't be equipped.
  */
-import { createBuild, normaliseBuild } from '../../../core/build-format/build.mjs';
+import { PLATFORMS, createBuild, isPlatform, normaliseBuild } from '../../../core/build-format/build.mjs';
 import { DIVISION_GAME_MODULE } from '../../../games/division/index.mjs';
 
 const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 const blocked = record => ({ ok: false, state: 'pending', reason: record.reason });
 
-export function createManualAdapter({ module = DIVISION_GAME_MODULE, title = 'td2', catalogueVersion = null } = {}) {
+export function createManualAdapter({ module = DIVISION_GAME_MODULE, title = 'td2', catalogueVersion = null, platform = null } = {}) {
+  const needsPlatform = { ok: false, state: 'needs-platform', reason: `Choose your platform: ${PLATFORMS.join(', ')}.` };
   const change = (build, edit) => {
     const next = normaliseBuild(build);
     edit(next);
@@ -24,8 +25,16 @@ export function createManualAdapter({ module = DIVISION_GAME_MODULE, title = 'td
       return { available: true, state: 'ready', reason: 'Build it slot by slot from the catalogue.' };
     },
 
-    async load() {
-      return { ok: true, build: createBuild({ game: 'division', title, catalogueVersion }) };
+    /** A new, empty build on a platform. Without a valid platform it asks for one instead of assuming. */
+    async load({ platform: chosen = platform } = {}) {
+      if (!isPlatform(chosen)) return { ...needsPlatform };
+      return { ok: true, build: createBuild({ game: 'division', title, platform: chosen, catalogueVersion }) };
+    },
+
+    /** A copy of a build (for example a shared one) on another platform. The original is unchanged. */
+    duplicate(build, toPlatform) {
+      if (!isPlatform(toPlatform)) return { ...needsPlatform };
+      return change(build, next => { next.platform = toPlatform; });
     },
 
     equip(build, slotId, itemId, { attributes, talentId, modIds } = {}) {

@@ -47,7 +47,9 @@ A catalogue file in `<title>/data/` is `{ "title": "td2", "kind": "<record kind>
 
 ## Builds, adapters and share links
 
-A build uses the neutral format in `astrix-app/core/build-format/` (`build.schema.json`, `build.mjs`): game, title, `catalogueVersion`, slots, abilities and selections. It never stores a game version.
+A build uses the neutral format in `astrix-app/core/build-format/` (`build.schema.json`, `build.mjs`): game, title, platform, `catalogueVersion`, slots, abilities and selections. It never stores a game version.
+
+Platform is required: `pc` (Ubisoft Connect, Steam, Epic and Luna share one agent), `playstation` or `xbox`. It is never guessed. A new build or a build file with no platform asks for one.
 
 `astrix-app/platform/adapters/division/` holds three adapters on one interface (`platform/contracts/build-adapter.mjs`):
 
