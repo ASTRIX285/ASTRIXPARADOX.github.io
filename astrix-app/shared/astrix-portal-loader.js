@@ -31,9 +31,17 @@
   }catch{}
   if(internalTransfer){
     document.documentElement.classList.add('apx-transfer');
+    // The stage label is skipped when the page is ready within 150 ms; once shown it stays 300 ms, so it never flashes.
+    labelTimer=setTimeout(function(){if(document.documentElement.classList.contains('apx-transfer')){document.documentElement.classList.add('apx-transfer-label');labelShownAt=Date.now();}},150);
     setTimeout(function(){if(!pendingDone&&document.documentElement.classList.contains('apx-transfer'))window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');},30000);
   }
-  function uncover(){document.documentElement.classList.remove('apx-transfer');}
+  var labelTimer=null,labelShownAt=0;
+  function uncover(settled){
+    clearTimeout(labelTimer);
+    var html=document.documentElement,rest=settled&&labelShownAt?300-(Date.now()-labelShownAt):0;
+    var lift=function(){html.classList.remove('apx-transfer','apx-transfer-label');};
+    if(rest>0)setTimeout(lift,rest);else lift();
+  }
   // Prerender the tool pages a player is about to open (hover or touch start). Same-origin tool
   // pages only: never sign-in, sign-out or the Worker's auth routes, which are not in this list.
   var TOOL_PAGES=['/astrix-app/pages/home/','/astrix-app/pages/journey/','/astrix-app/pages/guardian-workspace-v2/','/astrix-app/pages/guardian-workspace-v2/paradox-build-space/','/astrix-app/pages/forge-loader/','/astrix-app/pages/reports/','/astrix-app/pages/vault/','/astrix-app/pages/loadout/'];
@@ -332,7 +340,7 @@
     if(pendingAuthUrl||pendingBlockedMessage){gate.classList.add('is-recovery');return;}
     gate.remove();gate=null;document.body.classList.remove('apx-loading');
   });
-  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;uncover();set(100);var wait=entryPortal&&skinShownAt&&!interrupted&&!navigationTransition&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?ENTRY_MIN_MS-(Date.now()-skinShownAt):0;if(gate){if(wait>0){clearTimeout(holdTimer);holdTimer=setTimeout(finish,wait);}else finish();}document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
+  function done(){if(pendingAuthUrl||pendingBlockedMessage||pendingDone)return;pendingDone=true;uncover(true);set(100);var wait=entryPortal&&skinShownAt&&!interrupted&&!navigationTransition&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?ENTRY_MIN_MS-(Date.now()-skinShownAt):0;if(gate){if(wait>0){clearTimeout(holdTimer);holdTimer=setTimeout(finish,wait);}else finish();}document.dispatchEvent?.(new CustomEvent('forge:portal-ready'));navigationRenderComplete();}
   if(document.body)mount();
   else{
     var bodyObserver=new MutationObserver(function(){
