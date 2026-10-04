@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/catalogue-file.schema.json",
+  "title": "Division catalogue file",
+  "description": "One file in <title>/data/. Every record in it is the same kind and is checked against that kind's schema.",
+  "type": "object",
+  "required": [
+    "title",
+    "kind",
+    "records"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "$ref": "common.schema.json#/$defs/title"
+    },
+    "kind": {
+      "enum": [
+        "weapon-family",
+        "weapon",
+        "gear-slot",
+        "attribute",
+        "brand",
+        "gear-set",
+        "item",
+        "talent",
+        "mod",
+        "skill",
+        "specialization",
+        "expertise"
+      ]
+    },
+    "catalogueVersion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Catalogue revision the file belongs to. Not the game version: each record carries its own gameVersion in provenance."
+    },
+    "records": {
+      "type": "array"
+    }
+  }
+}

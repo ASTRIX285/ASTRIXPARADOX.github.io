@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/gear-set.schema.json",
+  "title": "Gear set",
+  "description": "A gear set with 1 to 4 piece bonuses and its chest and backpack talents.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [],
+  "properties": {
+    "bonuses": {
+      "oneOf": [
+        {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "$ref": "common.schema.json#/$defs/pieceBonus"
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "fourPieceTalentId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "chestTalentId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "backpackTalentId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "slotIds": {
+      "$ref": "common.schema.json#/$defs/idList"
+    }
+  },
+  "unevaluatedProperties": false
+}

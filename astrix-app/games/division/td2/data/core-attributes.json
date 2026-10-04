@@ -1,0 +1,126 @@
+{
+  "title": "td2",
+  "kind": "attribute",
+  "records": [
+    {
+      "id": "weapon-damage",
+      "name": "Weapon Damage",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://news.ubisoft.com/en-ca/article/pF3WFLbotaMmKrsvItuU2/the-division-2-state-of-the-game-recap-new-gear-system-coming-after-episode-3",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Core Attributes are being added to items, which either add weapon damage, a Skill tier, or more armor."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/usnJamHaVKQ3UZN5R85dJ/warlords-of-new-york-expansion-overview",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Core attributes for all items"
+        }
+      ],
+      "kind": "core",
+      "category": {
+        "pending": true,
+        "reason": "The colour category (offensive, defensive, utility) is not stated per core attribute in an official post. Needs an in-game capture."
+      },
+      "roll": {
+        "pending": true,
+        "reason": "Min and max roll and unit are not in an official post. Needs an in-game capture from a gear tooltip."
+      },
+      "cap": {
+        "pending": true,
+        "reason": "No official post states a cap. Needs an in-game capture."
+      },
+      "slotIds": {
+        "pending": true,
+        "reason": "Which slots can roll this core attribute is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "armor",
+      "name": "Armor",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://news.ubisoft.com/en-ca/article/pF3WFLbotaMmKrsvItuU2/the-division-2-state-of-the-game-recap-new-gear-system-coming-after-episode-3",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Core Attributes are being added to items, which either add weapon damage, a Skill tier, or more armor."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/usnJamHaVKQ3UZN5R85dJ/warlords-of-new-york-expansion-overview",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Core attributes for all items"
+        }
+      ],
+      "kind": "core",
+      "category": {
+        "pending": true,
+        "reason": "The colour category (offensive, defensive, utility) is not stated per core attribute in an official post. Needs an in-game capture."
+      },
+      "roll": {
+        "pending": true,
+        "reason": "Min and max roll and unit are not in an official post. Needs an in-game capture from a gear tooltip."
+      },
+      "cap": {
+        "pending": true,
+        "reason": "No official post states a cap. Needs an in-game capture."
+      },
+      "slotIds": {
+        "pending": true,
+        "reason": "Which slots can roll this core attribute is not stated in an official post. Needs an in-game capture."
+      }
+    },
+    {
+      "id": "skill-tier",
+      "name": "Skill Tier",
+      "provenance": [
+        {
+          "kind": "official-post",
+          "url": "https://news.ubisoft.com/en-ca/article/pF3WFLbotaMmKrsvItuU2/the-division-2-state-of-the-game-recap-new-gear-system-coming-after-episode-3",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Core Attributes are being added to items, which either add weapon damage, a Skill tier, or more armor."
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/usnJamHaVKQ3UZN5R85dJ/warlords-of-new-york-expansion-overview",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "6 Skill Tiers; each item with the Skill Tier core attribute will add one tier"
+        },
+        {
+          "kind": "official-post",
+          "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/usnJamHaVKQ3UZN5R85dJ/warlords-of-new-york-expansion-overview",
+          "gameVersion": "TU8",
+          "retrievedOn": "2026-10-04",
+          "quote": "Skill Tier is replacing skill power"
+        }
+      ],
+      "kind": "core",
+      "category": {
+        "pending": true,
+        "reason": "The colour category (offensive, defensive, utility) is not stated per core attribute in an official post. Needs an in-game capture."
+      },
+      "roll": {
+        "min": 1,
+        "max": 1,
+        "unit": "tier"
+      },
+      "cap": {
+        "value": 6,
+        "unit": "tier"
+      },
+      "slotIds": {
+        "pending": true,
+        "reason": "Which slots can roll this core attribute is not stated in an official post. Needs an in-game capture."
+      },
+      "notes": "Roll (one tier per item) and cap (6 tiers) are from the TU8 Warlords of New York overview. Recheck against the current version with an in-game capture."
+    }
+  ]
+}

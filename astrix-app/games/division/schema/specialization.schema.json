@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/division/schema/specialization.schema.json",
+  "title": "Specialization",
+  "description": "A specialization with its signature weapon and bonuses.",
+  "type": "object",
+  "$ref": "common.schema.json#/$defs/recordBase",
+  "required": [],
+  "properties": {
+    "signatureWeapon": {
+      "$ref": "common.schema.json#/$defs/text"
+    },
+    "bonuses": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/effect"
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    },
+    "skillTreeNodes": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "effects"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "name": {
+                "$ref": "common.schema.json#/$defs/text"
+              },
+              "effects": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "common.schema.json#/$defs/effect"
+                    }
+                  },
+                  {
+                    "$ref": "common.schema.json#/$defs/pending"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "$ref": "common.schema.json#/$defs/pending"
+        }
+      ]
+    }
+  },
+  "unevaluatedProperties": false
+}

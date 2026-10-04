@@ -34,6 +34,13 @@ node astrix-app/tools/validate-division.mjs
 node astrix-app/tools/test-division-validator.mjs
 node astrix-app/tools/validate-game-folders.mjs
 node astrix-app/tools/test-game-folders.mjs
+node astrix-app/tools/test-division-schema.mjs   (needs npm install --prefix astrix-app)
 ```
 
-All four run on every PR through `.github/workflows/validate-division.yml`, and inside `paradox-validator.mjs`.
+All five run on every PR through `.github/workflows/validate-division.yml`. The first four also run inside `paradox-validator.mjs`.
+
+## Schemas and catalogue files
+
+`schema/` holds one JSON Schema per record kind, shared by every title: weapon families, weapons, gear slots, attributes, brands, gear sets, named and exotic items, talents, mods, skills (variants and tier scaling), specializations, expertise and proficiency. `common.schema.json` holds the building blocks; every record builds on its `recordBase` (id, name, provenance, notes). `account-state.schema.json` models equipped items, loadouts and stash locations and keeps them empty until Ubisoft gives authorised access.
+
+A catalogue file in `<title>/data/` is `{ "title": "td2", "kind": "<record kind>", "records": [ ... ] }`. Title-specific facts (the slot list, caps, counts) are records in the title's data, never part of a schema.
