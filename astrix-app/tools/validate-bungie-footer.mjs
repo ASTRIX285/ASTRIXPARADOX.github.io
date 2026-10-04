@@ -4,17 +4,24 @@ import {readFileSync,copyFileSync,mkdtempSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {footerErrors,footerRuleFor,loadFooterRules} from './footer-rules.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 export const FOOTER='Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.';
+// Each game folder supplies its own footer lines (astrix-app/games/<game>/footer.json, see footer-rules.mjs).
+const rules=loadFooterRules(root);
+assert.ok(rules.find(rule=>rule.default)?.lines.includes(FOOTER),'Destiny is the default footer and keeps the Bungie line');
 const files=execFileSync('git',['ls-files','--cached','--others','--exclude-standard'],{cwd:root,encoding:'utf8'}).split('\n').filter(path=>path.endsWith('.html'));
 let checked=0;
+const byGame={};
 for(const path of new Set(files)){
   const text=readFileSync(new URL(path,new URL('../../',import.meta.url)),'utf8');
   // Verification tokens and embeddable component fragments are not pages.
   if(/^google-site-verification:/.test(text.trim())||path.includes('/components/'))continue;
   checked++;
-  assert.match(text,/<footer\b[^>]*>[\s\S]*?<\/footer>/i,`${path}: footer missing`);
-  assert.ok([...text.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)].some(match=>match[1].includes(FOOTER)),`${path}: Bungie attribution missing`);
+  const errors=footerErrors(path,text,rules);
+  assert.deepEqual(errors,[],errors.join('\n'));
+  const game=footerRuleFor(path,rules).game;
+  byGame[game]=(byGame[game]??0)+1;
 }
 // Clips footer fix: pages/clips.html is the template; run the workflow's builder on a copy
 // (cards block only, no API requests) and check what it writes.
@@ -32,4 +39,4 @@ for(const file of ['style.css','astrix-palette.css']){
   assert.equal(tagOf(read('pages/clips.html'),file),current,`Committed clips page uses the current ${file} tag`);
 }
 assert.ok(checked>0);
-console.log(`BUNGIE_FOOTER=PASS (${checked} pages)`);
+console.log(`BUNGIE_FOOTER=PASS (${checked} pages: ${Object.entries(byGame).map(([game,count])=>`${game} ${count}`).join(', ')})`);

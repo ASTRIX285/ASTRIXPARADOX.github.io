@@ -87,7 +87,8 @@ try{
   const origin=`http://127.0.0.1:${server.address().port}`;
   // Classic scripts keep their own key; they are still checked for a single URL.
   const classic=new Set([...pages.values()].flatMap(page=>page.refs.filter(ref=>ref.tag==='script'&&!ref.isModule).map(ref=>ref.target)));
-  const toolPages=[...pages.keys()].filter(site=>/^\/astrix-app\/(index\.html|pages\/[^/]+\/(?:[^/]+\/)?index\.html)$/.test(site)&&!/guardian-workspace-v1|shooting-range-test/.test(site));
+  const toolPages=[...pages.keys()].filter(site=>(/^\/astrix-app\/(index\.html|pages\/[^/]+\/(?:[^/]+\/)?index\.html)$/.test(site)||/^\/hub\/workbench\/[^/]+\/index\.html$/.test(site))&&!/guardian-workspace-v1|shooting-range-test/.test(site));
+  assert.ok(toolPages.includes('/hub/workbench/td2/index.html'),'The WorkBench page is checked like every other tool page');
   const report=[];
   for(const site of toolPages){
     const context=await browser.newContext({viewport:{width:1600,height:900}}),urls=new Map();
@@ -104,7 +105,7 @@ try{
   }
   const failed=report.filter(row=>row.duplicates.length||row.unversioned.length);
   assert.deepEqual(failed.map(row=>({site:row.site,duplicates:row.duplicates,unversioned:row.unversioned})),[],'Every JS file must be requested under one versioned URL');
-  console.log(`SINGLE_MODULE_URLS=PASS ${Object.keys(result.versions).length} modules; ${report.map(row=>`${row.site.replace('/astrix-app/','').replace('/index.html','')||'app'} ${row.files}`).join(', ')} JS files, each under one versioned URL`);
+  console.log(`SINGLE_MODULE_URLS=PASS ${Object.keys(result.versions).length} modules; ${report.map(row=>`${row.site.replace('/astrix-app/','').replace(/^\/hub\//,'hub/').replace('/index.html','')||'app'} ${row.files}`).join(', ')} JS files, each under one versioned URL`);
 }finally{
   await browser?.close();server.close();
 }

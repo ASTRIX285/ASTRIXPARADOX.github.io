@@ -1,0 +1,7 @@
+{
+  "$comment": "Footer lines every Destiny page carries. Default game: any page no other game claims. Checked by astrix-app/tools/validate-bungie-footer.mjs.",
+  "default": true,
+  "lines": [
+    "Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie."
+  ]
+}

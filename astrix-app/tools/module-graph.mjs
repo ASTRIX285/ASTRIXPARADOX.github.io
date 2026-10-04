@@ -9,6 +9,8 @@ import {fileURLToPath} from 'node:url';
 export const ROOT=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 export const APP='astrix-app';
 const SKIP=new Set(['tools','node_modules','vendor','ASTRIX285.github.io']);
+// Page folders outside astrix-app/ whose pages load app modules (The Division WorkBench lives at /hub/workbench/<title>/).
+export const PAGE_DIRS=Object.freeze(['hub/workbench']);
 export const toSite=file=>'/'+relative(ROOT,file).split(sep).join('/');
 export const toFile=site=>resolve(ROOT,'.'+decodeURIComponent(site));
 
@@ -63,6 +65,15 @@ export async function appGraph(){
     if(!name.endsWith('.html'))continue;
     const file=resolve(ROOT,name),source=await readFile(file,'utf8'),site='/'+name;
     if(/astrix-app\/.*\.m?js/.test(source))pages.set(site,{site,file,source,refs:htmlRefs(source).map(ref=>({...ref,target:resolveSite(site,ref.path)}))});
+  }
+  for(const dir of PAGE_DIRS){
+    const full=resolve(ROOT,dir);
+    if(!(await stat(full).catch(()=>null))?.isDirectory())continue;
+    for(const file of await walk(full)){
+      if(!file.endsWith('.html'))continue;
+      const source=await readFile(file,'utf8'),site=toSite(file);
+      pages.set(site,{site,file,source,refs:htmlRefs(source).map(ref=>({...ref,target:resolveSite(site,ref.path)}))});
+    }
   }
   return {modules,pages};
 }

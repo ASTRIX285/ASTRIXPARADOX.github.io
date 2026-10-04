@@ -1,0 +1,10 @@
+{
+  "$comment": "Footer lines every Division page carries, word for word. Division pages must not carry another game's footer line. Checked by astrix-app/tools/validate-bungie-footer.mjs.",
+  "pagePrefixes": [
+    "hub/workbench/"
+  ],
+  "lines": [
+    "ASTRIX PARADOX WorkBench is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by Ubisoft or Massive Entertainment. Tom Clancy's The Division, The Division 2 and related names are trademarks of Ubisoft Entertainment.",
+    "Game data is gathered by hand from official Ubisoft posts and in-game checks. Every value shows its source and game version."
+  ]
+}

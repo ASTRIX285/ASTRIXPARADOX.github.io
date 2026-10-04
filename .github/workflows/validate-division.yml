@@ -28,6 +28,8 @@ jobs:
         run: node astrix-app/tools/test-division-build-format.mjs
       - name: Ubisoft adapter makes no network call
         run: node astrix-app/tools/test-division-ubisoft-adapter.mjs
+      - name: WorkBench editor
+        run: node astrix-app/tools/test-workbench-editor.mjs
       - name: Install schema test dependencies
         run: npm ci --prefix astrix-app --ignore-scripts --no-audit --no-fund
       - name: Division schemas and catalogue
