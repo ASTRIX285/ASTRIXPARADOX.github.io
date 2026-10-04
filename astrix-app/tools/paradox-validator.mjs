@@ -9,6 +9,8 @@ const validators=[
   'validate-game-folders.mjs',
   'test-division-validator.mjs',
   'validate-division.mjs',
+  'test-division-build-format.mjs',
+  'test-division-ubisoft-adapter.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
   'validate-bungie-footer.mjs',
