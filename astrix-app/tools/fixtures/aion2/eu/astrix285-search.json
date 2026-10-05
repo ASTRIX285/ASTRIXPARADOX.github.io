@@ -1,0 +1,21 @@
+{
+  "list": [
+    {
+      "characterId": "B-3zbauf5-iJdckceurTzQ1SfZM1-ybQ-6ZSTDt3tHs%3D",
+      "name": "<strong>ASTRIX285</strong>",
+      "race": 1,
+      "pcId": 6,
+      "level": 12,
+      "serverId": 1308,
+      "serverName": "Meslamtaeda",
+      "profileImageUrl": "/game_profile_images/aion2global/images?gameServerKey=1308&charKey=368169269537731287",
+      "region": "eu"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "size": 40,
+    "total": 1,
+    "endPage": 1
+  }
+}

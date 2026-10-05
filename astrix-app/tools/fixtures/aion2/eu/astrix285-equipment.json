@@ -1,0 +1,463 @@
+{
+  "equipment": {
+    "equipmentList": [
+      {
+        "enchantLevel": 2,
+        "exceedLevel": 0,
+        "grade": "Rare",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WP_GS_0014_T03.png",
+        "id": 110150028,
+        "name": "Twilight Greatsword",
+        "slotPos": 1,
+        "slotPosName": "MainHand"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Weapon_Guarder_C_012.png",
+        "id": 115060026,
+        "name": "Twilight Guard",
+        "slotPos": 2,
+        "slotPosName": "SubHand"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Torso.png",
+        "id": 210160026,
+        "name": "Twilight Breastplate",
+        "slotPos": 5,
+        "slotPosName": "Torso"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Pants.png",
+        "id": 210260026,
+        "name": "Twilight Greaves",
+        "slotPos": 6,
+        "slotPosName": "Pants"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Helmet.png",
+        "id": 210360026,
+        "name": "Twilight Helm",
+        "slotPos": 3,
+        "slotPosName": "Helmet"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Shoulder.png",
+        "id": 210460026,
+        "name": "Twilight Pauldrons",
+        "slotPos": 4,
+        "slotPosName": "Shoulder"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Gloves.png",
+        "id": 210560026,
+        "name": "Twilight Gloves",
+        "slotPos": 7,
+        "slotPosName": "Gloves"
+      },
+      {
+        "enchantLevel": 0,
+        "exceedLevel": 0,
+        "grade": "Common",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0063_T03_Boots.png",
+        "id": 210660026,
+        "name": "Twilight Boots",
+        "slotPos": 8,
+        "slotPosName": "Boots"
+      }
+    ],
+    "skinList": []
+  },
+  "petwing": {
+    "pet": {
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AshGuard_01.png",
+      "id": 1058,
+      "level": 1,
+      "name": "Black Smoke Murute"
+    },
+    "wing": {
+      "enchantLevel": 0,
+      "grade": "Common",
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingB_006.png",
+      "id": 30200600,
+      "name": "Lesser Daeva Wings"
+    },
+    "wingSkin": {
+      "enchantLevel": 0,
+      "grade": "Common",
+      "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingB_006.png",
+      "id": 30200600,
+      "name": "Lesser Daeva Wings"
+    }
+  },
+  "skill": {
+    "skillList": [
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_002.png",
+        "id": 11020000,
+        "name": "Keen Strike",
+        "needLevel": 1,
+        "skillLevel": 3
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_001.png",
+        "id": 11010000,
+        "name": "Rending Blow",
+        "needLevel": 1,
+        "skillLevel": 3
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_019.png",
+        "id": 11190000,
+        "name": "Leaping Slam",
+        "needLevel": 1,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_028.png",
+        "id": 11290000,
+        "name": "Mocking Blade",
+        "needLevel": 3,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_017.png",
+        "id": 11170000,
+        "name": "Overhead Slam",
+        "needLevel": 4,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_034.png",
+        "id": 11280000,
+        "name": "Sword Aura Rampage",
+        "needLevel": 5,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_020.png",
+        "id": 11200000,
+        "name": "Ankle Slice",
+        "needLevel": 7,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_005.png",
+        "id": 11050000,
+        "name": "Crushing Wave",
+        "needLevel": 8,
+        "skillLevel": 2
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_036.png",
+        "id": 11360000,
+        "name": "Rush Strike",
+        "needLevel": 10,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 1,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_015.png",
+        "id": 11300000,
+        "name": "Aerial Snare",
+        "needLevel": 12,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 0,
+        "category": "Active",
+        "equip": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_010.png",
+        "id": 11100000,
+        "name": "Ruinous Blow",
+        "needLevel": 14,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Active",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
+        "id": 11260000,
+        "name": "Defiance",
+        "needLevel": 16,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 1,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_001.png",
+        "id": 11710000,
+        "name": "Survival Stance",
+        "needLevel": 1,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 1,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_002.png",
+        "id": 11720000,
+        "name": "Protection Armor",
+        "needLevel": 6,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 1,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_003.png",
+        "id": 11730000,
+        "name": "Blood Absorption",
+        "needLevel": 9,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 1,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_004.png",
+        "id": 11740000,
+        "name": "Identify Weakness",
+        "needLevel": 11,
+        "skillLevel": 1
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_005.png",
+        "id": 11750000,
+        "name": "Attack Preparation",
+        "needLevel": 13,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_006.png",
+        "id": 11760000,
+        "name": "Impact Hit",
+        "needLevel": 15,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_007.png",
+        "id": 11770000,
+        "name": "Destructive Impulse",
+        "needLevel": 17,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_008.png",
+        "id": 11780000,
+        "name": "Experienced Counterstrike",
+        "needLevel": 21,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png",
+        "id": 11790000,
+        "name": "Survival Willpower",
+        "needLevel": 23,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Passive",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_010.png",
+        "id": 11800000,
+        "name": "Murderous Burst",
+        "needLevel": 25,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_007.png",
+        "id": 11240000,
+        "name": "Wrath Wave",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_024.png",
+        "id": 11400000,
+        "name": "Lunge Stance",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_040.png",
+        "id": 11250000,
+        "name": "Zikel's Blessing",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_011.png",
+        "id": 11110000,
+        "name": "Focused Block",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_013.png",
+        "id": 11130000,
+        "name": "Armor of Balance",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_008.png",
+        "id": 11080000,
+        "name": "Blade Toss",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_038.png",
+        "id": 11380000,
+        "name": "Tenaciousness",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_034.png",
+        "id": 11340000,
+        "name": "Lifestealing Blade",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_039.png",
+        "id": 11390000,
+        "name": "Rage Burst",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_041.png",
+        "id": 11410000,
+        "name": "Wave Armor",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_043.png",
+        "id": 11430000,
+        "name": "Forced Restraint",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
+        "id": 11700000,
+        "name": "Assault Strike",
+        "needLevel": 22,
+        "skillLevel": 0
+      },
+      {
+        "acquired": 0,
+        "category": "Dp",
+        "equip": 0,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_045.png",
+        "id": 11450000,
+        "name": "Fracturing Rush",
+        "needLevel": 22,
+        "skillLevel": 0
+      }
+    ]
+  }
+}
