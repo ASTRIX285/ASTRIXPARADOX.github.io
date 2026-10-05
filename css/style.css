@@ -696,6 +696,17 @@ body.stream-locked .stream-live-embed.expanded iframe {
   border: none;
 }
 
+/* Portrait screens (phones): fit the whole 16:9 picture across the width
+   instead of covering the screen, which cropped away most of the stream. */
+@media (orientation: portrait) {
+  body.stream-locked .stream-live-embed.expanded iframe {
+    width: 100vw;
+    height: 56.25vw;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
 body.stream-locked .stream-actions,
 body.stream-locked .footer {
   display: none !important;

@@ -512,6 +512,8 @@ async function checkTwitchLive() {
 
       document.body.classList.add('is-live');
 
+      upgradeTwitchPlayer();
+
       setupStreamExpansion();
 
     }
@@ -798,6 +800,94 @@ function setupHeroVideo() {
     armLoopFade();
 
   }
+
+}
+
+// ── TWITCH PLAYER: SOURCE QUALITY ───────────────────────────
+// The plain iframe embed always starts on Twitch's "Auto" quality, which
+// picks a low rendition for a while and looks soft once the stream goes
+// full screen. When live, swap the iframe for Twitch's own embed player
+// so we can ask for Source quality ("chunked") on desktop-size screens.
+// Phones stay on Auto to spare mobile data. If Twitch's script can't
+// load, the original iframe stays in place and works as before.
+let twitchPlayerState = 'none';   // none | loading | done
+
+function upgradeTwitchPlayer() {
+
+  const iframe = document.getElementById('twitchIframe');
+  if (!iframe || twitchPlayerState !== 'none') return;
+  twitchPlayerState = 'loading';
+
+  const start = () => {
+
+    if (!window.Twitch || !window.Twitch.Player) {
+      twitchPlayerState = 'none';
+      return;
+    }
+
+    twitchPlayerState = 'done';
+
+    const mount = document.createElement('div');
+    mount.id = 'twitchPlayerMount';
+    iframe.replaceWith(mount);
+
+    const parents = Array.from(new Set([
+      location.hostname,
+      'astrixparadox.com',
+      'www.astrixparadox.com'
+    ]));
+
+    let player;
+    try {
+      player = new Twitch.Player('twitchPlayerMount', {
+        channel: TWITCH_CHANNEL,
+        parent: parents,
+        width: '100%',
+        height: '100%',
+        autoplay: true,
+        muted: false
+      });
+    } catch (err) {
+      mount.replaceWith(iframe);   // fall back to the plain embed
+      twitchPlayerState = 'none';
+      return;
+    }
+
+    const inner = mount.querySelector('iframe');
+    if (inner) inner.id = 'twitchIframe';
+
+    const wantSource = () =>
+      window.matchMedia('(min-width: 1024px)').matches;
+
+    const setSource = () => {
+      if (!wantSource()) return;
+      try {
+        const list = player.getQualities() || [];
+        const names = list.map(q => (q && q.group) || q);
+        if (names.includes('chunked')) {
+          player.setQuality('chunked');
+        } else {
+          const best = names.find(n => n && n !== 'auto');
+          if (best) player.setQuality(best);
+        }
+      } catch (err) { /* keep Auto */ }
+    };
+
+    player.addEventListener(Twitch.Player.PLAYING, setSource);
+
+  };
+
+  if (window.Twitch && window.Twitch.Player) {
+    start();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://player.twitch.tv/js/embed/v1.js';
+  script.async = true;
+  script.onload = start;
+  script.onerror = () => { twitchPlayerState = 'none'; };
+  document.head.appendChild(script);
 
 }
 
