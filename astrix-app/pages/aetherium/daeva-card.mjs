@@ -31,6 +31,8 @@ function renderSummary() {
   const boardsOpen = model.daevanion.filter(board => board.open).length;
   const stigmas = model.skills.filter(skill => skill.category === 'Dp');
   const stigmaLevel = Math.min(...stigmas.map(skill => skill.needLevel));
+  // At or past the unlock level the armory can still report none acquired (stigmas also need a quest).
+  const stigmaNote = p.level >= stigmaLevel ? 'None unlocked yet' : `Unlock at Lv ${stigmaLevel}`;
   const stigmasOpen = stigmas.filter(skill => skill.acquired).length;
   const eyebrow = [source.kind === 'demo' ? 'Example' : 'Your Daeva', p.title ? `Title: ${p.title}` : null].filter(Boolean).join(' · ');
   el.hidden = false;
@@ -47,7 +49,7 @@ function renderSummary() {
           <div class="ae-tile"><dt>Combat power</dt><dd>${number(p.combatPower)}</dd></div>
           <div class="ae-tile"><dt>Item level</dt><dd>${isPending(p.itemLevel) ? '-' : number(p.itemLevel)}</dd></div>
           <div class="ae-tile"><dt>Daevanion boards open</dt><dd>${boardsOpen} <span>/ ${model.daevanion.length}</span></dd></div>
-          <div class="ae-tile"><dt>Stigmas</dt><dd>${stigmasOpen ? `${stigmasOpen} <span>/ ${stigmas.length}</span>` : `<small>Unlock at Lv ${stigmaLevel}</small>`}</dd></div>
+          <div class="ae-tile"><dt>Stigmas</dt><dd>${stigmasOpen ? `${stigmasOpen} <span>/ ${stigmas.length}</span>` : `<small>${stigmaNote}</small>`}</dd></div>
         </dl>
       </div>
     </article>

@@ -1,11 +1,11 @@
 /**
  * The Aetherium page config. One place for the armory Worker address.
  *
- * AETHERIUM_WORKER_URL stays null until aetherium-worker is deployed. While it is null the
- * pages show the ASTRIX285 fixtures as a labelled demo. Once live, set it to the Worker origin
- * (for example "https://aion2.astrixparadox.com") with no trailing slash.
+ * The aetherium-worker origin, no trailing slash (deployed by Miguel, 5 Oct 2026). If the Worker
+ * answers with an error or can't be reached, the pages fall back to the ASTRIX285 fixtures as a
+ * labelled demo. Set it to null to run the pages on the demo only.
  */
-export const AETHERIUM_WORKER_URL = null;
+export const AETHERIUM_WORKER_URL = 'https://aetherium-worker.astrix285.workers.dev';
 
 export const AETHERIUM_REGION = 'eu';
 

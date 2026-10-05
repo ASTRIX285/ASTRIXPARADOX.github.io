@@ -41,8 +41,14 @@ const asmoInfo=structuredClone(info);
 Object.assign(asmoInfo.profile,{characterName:'NOCTIS',characterId:'Zm9vYmFyMTIz=',raceId:2,raceName:'Asmodian',serverId:2301,serverName:'Israphel'});
 const asmoSearch={list:[{...search.list[0],name:'<strong>NOCTIS</strong>',characterId:'Zm9vYmFyMTIz%3D',race:2,serverId:2301,serverName:'Israphel'}],pagination:search.pagination};
 const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
+// A Lv 22 Daeva (as ASTRIX285 is on the live armory, 5 Oct 2026): stigmas still not acquired, an amulet worn in slot 22.
+const lv22Info=structuredClone(info);
+Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDIy=',characterLevel:22,serverId:1309,serverName:'Hithanya'});
+const lv22Equipment=structuredClone(equipment);
+lv22Equipment.equipment.equipmentList.push({...lv22Equipment.equipment.equipmentList[0],id:999000022,name:'Test Amulet',slotPos:22,slotPosName:'Amulet'});
 
 const browser=await chromium.launch();
+const realCalls=[];
 let failures=0;
 const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
@@ -52,7 +58,10 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
     let body=await response.text();
-    if(live)body=body.replace('export const AETHERIUM_WORKER_URL = null;',`export const AETHERIUM_WORKER_URL = '${WORKER}';`);
+    // The committed config points at the real Worker; every test swaps it for the mock (live) or null (demo).
+    const swapped=body.replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,`export const AETHERIUM_WORKER_URL = ${live?`'${WORKER}'`:'null'};`);
+    assert.notEqual(swapped,body,'Config Worker URL line found and swapped');
+    body=swapped;
     await route.fulfill({response,body});
   });
   await context.route(`${WORKER}/**`,async route=>{
@@ -60,9 +69,10 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     calls.push(url.pathname);
     if(down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
     const asmo=url.searchParams.get('name')==='NOCTIS'||url.searchParams.get('serverId')==='2301';
+    const lv22=url.searchParams.get('serverId')==='1309';
     const bodies={
       '/aion2/search':asmo?asmoSearch:search,
-      '/aion2/character':{info:asmo?asmoInfo:info,equipment},
+      '/aion2/character':lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment},
       '/aion2/item':item,
       '/aion2/daevanion':board
     };
@@ -72,6 +82,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   });
   // Icons and portraits come from the NCSOFT CDN; never fetched in tests.
   await context.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+  // Never the real Worker or NCSOFT: a request to either is blocked and fails the run. Registered last, so it wins over the CDN stub above.
+  await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{realCalls.push(route.request().url());return route.abort();});
   if(storage)await context.addInitScript(value=>{localStorage.setItem('aetherium.roster.v1',value);},JSON.stringify(storage));
   const page=await context.newPage();
   const errors=[];
@@ -149,6 +161,21 @@ await check('live Gear Ledger: one call for first paint, item and board on deman
   await context.close();
 });
 
+await check('Lv 22 with no stigma acquired, extra worn slot: honest copy',async()=>{
+  const ref=new URLSearchParams({serverId:'1309',characterId:lv22Info.profile.characterId});
+  const card=await open(`/hub/aetherium/?${ref}`,{live:true});
+  assert.match(await card.page.textContent('.ae-tiles'),/StigmasNone unlocked yet/);
+  await card.context.close();
+  const {page,context,errors}=await open(`/hub/aetherium/gear/?${ref}`,{live:true});
+  assert.match(await page.textContent('#aeStigmaNote'),/13 stigmas · none unlocked yet/);
+  assert.equal(await page.locator('.ae-stigma small',{hasText:'Not unlocked yet'}).count(),13);
+  assert.equal(await page.locator('#aeGear [data-slot]').count(),9,'The extra worn slot is shown');
+  assert.match(await page.textContent('#aeGear'),/AmuletTest Amulet/);
+  assert.match(await page.textContent('#aeAccessories'),/Other slots, such as accessories, show here once something is worn in them\./);
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
 await check('roster add and remove, faction colour switch',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true});
   assert.equal(await page.getAttribute('body','data-faction'),'elyos');
@@ -222,6 +249,8 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
     }
   });
 }
+
+await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
 await browser.close();
 server.close();

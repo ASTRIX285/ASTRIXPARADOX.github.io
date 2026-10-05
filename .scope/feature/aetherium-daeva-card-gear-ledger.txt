@@ -20,3 +20,4 @@ astrix-app/tools/test-aetherium-pages.mjs
 astrix-app/games/aion2/footer.json
 img/games/aion2-the-aetherium.jpg
 ARTWORK_PROVENANCE.md
+aetherium-worker/wrangler.toml

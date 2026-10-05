@@ -2,11 +2,11 @@
  * Gear Ledger (The Aetherium): the full setup of one Daeva. Gear with an item detail card,
  * stigmas, Daevanion boards (open or locked from the data), stats, pet and wings.
  */
-import { ArmoryUnavailable, loadBoard, loadCharacter, loadItemDetail, refFromUrl, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, loadBoard, loadCatalogue, loadCharacter, loadItemDetail, refFromUrl, roster } from './aetherium-data.mjs';
 import { $, esc, iconImg, isPending, markCharacterShown, markReady, number, setFaction, showNotice, showSource, slotLabel, wireDrawer } from './aetherium-ui.mjs';
 
 const PRIMARY_STATS = ['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS'];
-const state = { model: null, source: null, selected: null, boards: new Map() };
+const state = { model: null, source: null, selected: null, boards: new Map(), listedSlots: new Set() };
 
 const enchantText = slot => `+${slot.enchant}${isPending(slot.maxEnchant) ? '' : ` of ${slot.maxEnchant}`}`;
 
@@ -31,9 +31,13 @@ function renderGear() {
         <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(slot.grade)} · ${esc(enchantText(slot))}</span></span>
       </button></li>`).join('');
   const accessories = state.model.accessorySlots;
-  $('#aeAccessories').textContent = isPending(accessories)
-    ? 'Accessories: none worn. The armory only lists an accessory slot once something is worn in it.'
-    : `Accessories: ${accessories.filter(slot => !slot.empty).length} worn.`;
+  // Slots outside the slot list (cape, belt, accessories) only reach the armory once something is worn there.
+  const extra = gear.filter(slot => !state.listedSlots.has(slot.slotPos)).length;
+  $('#aeAccessories').textContent = !isPending(accessories)
+    ? `Accessories: ${accessories.filter(slot => !slot.empty).length} worn.`
+    : extra
+      ? 'Other slots, such as accessories, show here once something is worn in them.'
+      : 'Accessories: none worn. The armory only lists an accessory slot once something is worn in it.';
 }
 
 async function selectSlot(index) {
@@ -78,12 +82,14 @@ async function selectSlot(index) {
 function renderSide() {
   const { model } = state;
   const stigmas = model.skills.filter(skill => skill.category === 'Dp');
+  const level = model.profile.level;
   const lockedLevel = Math.min(...stigmas.filter(skill => !skill.acquired).map(skill => skill.needLevel));
+  // At or past the unlock level the armory can still report none acquired (stigmas also need a quest).
   $('#aeStigmaNote').textContent = stigmas.every(skill => !skill.acquired)
-    ? `${stigmas.length} stigmas · unlock at Lv ${lockedLevel}`
+    ? `${stigmas.length} stigmas · ${level >= lockedLevel ? 'none unlocked yet' : `unlock at Lv ${lockedLevel}`}`
     : `${stigmas.filter(skill => skill.acquired).length} of ${stigmas.length} stigmas unlocked`;
   $('#aeStigmas').innerHTML = stigmas.map(skill => `<li class="ae-stigma${skill.acquired ? '' : ' is-locked'}">
-      ${iconImg(skill.icon, '', 36)}<span><strong>${esc(skill.name)}</strong><small>${skill.acquired ? `Skill Lv ${esc(skill.skillLevel)}` : `Unlocks at Lv ${esc(skill.needLevel)}`}</small></span>
+      ${iconImg(skill.icon, '', 36)}<span><strong>${esc(skill.name)}</strong><small>${skill.acquired ? `Skill Lv ${esc(skill.skillLevel)}` : (level >= skill.needLevel ? 'Not unlocked yet' : `Unlocks at Lv ${esc(skill.needLevel)}`)}</small></span>
     </li>`).join('');
 
   $('#aeBoards').innerHTML = model.daevanion.map(board => {
@@ -155,6 +161,7 @@ async function start() {
     const button = event.target.closest('[data-slot]');
     if (button) selectSlot(Number(button.dataset.slot));
   });
+  state.listedSlots = new Set((await loadCatalogue()).slots.map(slot => slot.slotPos));
   const active = roster.active();
   const ref = refFromUrl() ?? (active ? { serverId: active.serverId, characterId: active.characterId } : null);
   try {
