@@ -200,26 +200,42 @@ assert.match(portalCss,/prefers-reduced-motion:reduce[\s\S]*?apx-navigation-read
 console.log('DESTINATION_RENDER_AND_VISIBLE_ASSET_REVEAL=PASS');
 
 const ribbonSource=await read('astrix-app/shared/astrix-destination-ribbon.js');
-function navigationHarness(){
+function navigationHarness({prerender=true}={}){
   const events=new Map(),requests=[],assigned=[],pending=new Map(),storage=new Map();let indicators=0;
   storage.set('astrix:bungie-session-cache:v1',JSON.stringify({session:{authenticated:true,activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}}}));
   const makeLink=path=>({href:`https://astrixparadox.com${path}`,target:'',hasAttribute:()=>false,setAttribute(){},removeAttribute(){},closest(){return this;}});
   const location={href:'https://astrixparadox.com/astrix-app/pages/journey/',origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/journey/',assign:path=>assigned.push(path)};
   const document={referrer:'https://astrixparadox.com/tools/',currentScript:{src:'https://astrixparadox.com/astrix-app/shared/astrix-destination-ribbon.js?plain=20260925-2'},readyState:'loading',visibilityState:'visible',body:{append(){indicators++;}},createElement:()=>({setAttribute(){},remove(){indicators--;}}),querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set(name,fn)};
-  const window={addEventListener:(name,fn)=>events.set(name,fn)};
+  const window={addEventListener:(name,fn)=>events.set(name,fn),HTMLScriptElement:prerender?{supports:type=>type==='speculationrules'}:undefined};
   const fixturePrepare=destination=>{requests.push(destination.key);return new Promise((resolve,reject)=>pending.set(destination.key,{resolve,reject}));};
   const source=ribbonSource.replace('  function init(){','  prepareData=fixturePrepare;prepareResources=async()=>{};window.testNavigation={navigatePrepared,prepare};\n  function init(){');
   runInNewContext(source,{window,document,location,navigator:{},sessionStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},URL,Date,Promise,fixturePrepare,setTimeout,clearTimeout});
   const click=(path,extra={})=>{let prevented=false;const link=makeLink(path);const event={button:0,target:link,preventDefault(){prevented=true;},...extra};const task=window.testNavigation.navigatePrepared(event);return {task,prevented:()=>prevented};};
   return {click,assigned,requests,pending,storage,events,indicators:()=>indicators};
 }
+// With prerender supported the tap still warms first (#448): a tap with no hover never started a
+// prerender, so support alone is no promise the page is ready. A warmed page resolves at once.
 const navigation=navigationHarness();
-const firstNavigation=navigation.click('/astrix-app/pages/vault/');await firstNavigation.task;
-assert.equal(firstNavigation.prevented(),true);assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/']);
+const firstNavigation=navigation.click('/astrix-app/pages/vault/');await settleMicrotasks();
+assert.equal(firstNavigation.prevented(),true);assert.deepEqual(navigation.requests,['vault'],'A tap warms the destination even when prerender is supported');
+assert.deepEqual(navigation.assigned,[],'The outgoing page stays until the warm step finishes');
+navigation.pending.get('vault').resolve();await firstNavigation.task;
+assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/'],'The tap goes once warm');
 assert.equal(navigation.indicators(),0,'Outgoing page must not show a second loading component');
-assert.equal(navigation.requests.length,0,'Clicks must not block on prefetch');
+const again=navigation.click('/astrix-app/pages/vault/');await again.task;
+assert.deepEqual(navigation.requests,['vault'],'An already warmed destination is not fetched again');
+assert.deepEqual(navigation.assigned,['/astrix-app/pages/vault/','/astrix-app/pages/vault/'],'An already warmed destination goes at once');
 const modified=navigation.click('/astrix-app/pages/vault/',{ctrlKey:true});await modified.task;assert.equal(modified.prevented(),false);
 assert.doesNotMatch(ribbonSource,/createElement\(['"]iframe|type=['"]speculationrules/,'Preparation must not execute another page or duplicate its account actions');
+// Without prerender (Safari, Firefox) the tap warms the destination first, then goes; never longer than the cap.
+const fallback=navigationHarness({prerender:false});
+const warmed=fallback.click('/astrix-app/pages/vault/');await settleMicrotasks();
+assert.equal(warmed.prevented(),true);assert.deepEqual(fallback.requests,['vault'],'Fallback warms the destination data');
+assert.deepEqual(fallback.assigned,[],'Fallback keeps the current page until the destination is warm');
+fallback.pending.get('vault').resolve();await warmed.task;
+assert.deepEqual(fallback.assigned,['/astrix-app/pages/vault/'],'Fallback goes once warm');
+assert.equal(fallback.indicators(),0,'The outgoing page shows no loading component, only the pressed tab');
+assert.match(ribbonSource,/const WARM_LIMIT_MS=2500;/,'Warming never delays a tap by more than 2.5 s');
 console.log('DIRECT_NAVIGATION_NO_OUTGOING_LOADER_AND_NATIVE_LINKS=PASS');
 
 const delayedNavigationHeader=transitionHarness({headerPending:true});delayedNavigationHeader.emit();delayedNavigationHeader.loader.done();await settleMicrotasks();

@@ -686,7 +686,10 @@ function installEvents(){
 
 async function settleVisibleImages(){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const images=[...document.querySelectorAll('#vaultTransferWorkspace img')].slice(0,24).filter(image=>!image.complete);
+  // Ready means the first screen: only images inside the viewport. Lazy images further down never
+  // load until scrolled to, so waiting on them only ran out the cap.
+  const onScreen=image=>{const box=image.getBoundingClientRect();return box.width>0&&box.height>0&&box.bottom>0&&box.top<innerHeight&&box.right>0&&box.left<innerWidth;};
+  const images=[...document.querySelectorAll('#vaultTransferWorkspace img')].filter(image=>!image.complete&&onScreen(image)).slice(0,24);
   await Promise.race([
     Promise.all(images.map(image=>new Promise(resolve=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true});}))),
     new Promise(resolve=>setTimeout(resolve,3500))

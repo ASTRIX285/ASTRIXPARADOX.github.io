@@ -106,6 +106,10 @@ html body [data-forge-destination-ribbon]::before,html body [data-forge-destinat
 [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]{color:#fff!important;background:linear-gradient(180deg,rgba(186,31,18,.2),transparent)!important}
 [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{transform:scaleX(1)!important;box-shadow:0 0 10px rgba(230,57,31,.85)!important;animation:ax-strobe 4.5s linear infinite!important}
 [data-forge-destination-ribbon] .apx-destination-ribbon a:focus-visible{outline:2px solid var(--ax-steel-light)!important}
+/* Transfer in progress (browsers without prerender): the tapped tab holds its crimson pressed state
+   while the destination warms, then the page changes. */
+[data-forge-destination-ribbon] .apx-destination-ribbon a[aria-busy="true"],.ax-drawer-links a[aria-busy="true"]{color:#fff!important;background:linear-gradient(180deg,var(--ax-ember) 0%,var(--ax-ember-lo) 100%)!important}
+[data-forge-destination-ribbon] .apx-destination-ribbon a[aria-busy="true"]::after{transform:scaleX(1)!important;box-shadow:0 0 10px rgba(230,57,31,.85)!important}
 .ax-tab-icon{display:none;width:18px;height:18px;flex:none}
 .ax-slim-brand{display:none}
 

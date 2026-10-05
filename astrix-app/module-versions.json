@@ -258,13 +258,13 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs": "3ec56d26ce",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs": "74bde35742",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs": "de855cc2c4",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-copy.mjs": "b36a116f57",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-reveal.mjs": "adbd076673",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "751bcc79b3",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-item-hover.mjs": "c9c338ec2b",
 
   "/astrix-app/pages/guardian-workspace-v2/platform-forge-shell.mjs": "44195c60d1",
 
@@ -272,7 +272,7 @@
 
   "/astrix-app/pages/home/home-facts.mjs": "48028fe8b9",
 
-  "/astrix-app/pages/home/home.mjs": "429ee6d75f",
+  "/astrix-app/pages/home/home.mjs": "db58f567d1",
 
   "/astrix-app/pages/journey/assets/map-data/cosmodrome.mjs": "daaf664caf",
 
@@ -352,7 +352,7 @@
 
   "/astrix-app/pages/vault/vault-transfer-feedback.mjs": "9393c70924",
 
-  "/astrix-app/pages/vault/vault.mjs": "b35614bfb0",
+  "/astrix-app/pages/vault/vault.mjs": "402cad8335",
 
   "/astrix-app/pages/workbench/workbench-inspect.mjs": "03e4590475",
 
@@ -388,7 +388,7 @@
 
   "/astrix-app/shared/astrix-breach-loader.mjs": "97635d8d9a",
 
-  "/astrix-app/shared/astrix-destination-ribbon.js": "7d9d4d0d41",
+  "/astrix-app/shared/astrix-destination-ribbon.js": "d01739f270",
 
   "/astrix-app/shared/astrix-destination-theme.js": "bd777bf85e",
 
@@ -400,7 +400,7 @@
 
   "/astrix-app/shared/astrix-location-visuals.js": "ae6e714bf8",
 
-  "/astrix-app/shared/astrix-portal-loader.js": "8208b45045",
+  "/astrix-app/shared/astrix-portal-loader.js": "a04a2cbb4f",
 
   "/astrix-app/shared/guardian-inventory-workspace.mjs": "dc2cf7aa57",
 

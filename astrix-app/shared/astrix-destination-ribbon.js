@@ -14,6 +14,7 @@
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
   const prepared=new Map();
   let navigationRevision=0,intentTimer=null;
+  const WARM_LIMIT_MS=2500;
   const pageKinds={'journey':'journey','character':'character','forge-loader':'loadout','build-forge':'build-forge','vault':'vault','loadout':'loadout','mission-reports':'journey','reports':'journey'};
   function accountIdentity(){
     try{
@@ -85,7 +86,7 @@
   }
   function clearNavigation(){
     navigationRevision++;
-    document.querySelectorAll('.apx-destination-ribbon [aria-busy]').forEach(link=>link.removeAttribute('aria-busy'));
+    document.querySelectorAll('.apx-destination-ribbon [aria-busy],.ax-drawer-links [aria-busy]').forEach(link=>link.removeAttribute('aria-busy'));
   }
   function prepareIntent(event){
     clearTimeout(intentTimer);
@@ -99,8 +100,16 @@
     const link=event.target.closest('a'),destination=destinationFor(link);
     if(!destination)return;
     event.preventDefault();clearTimeout(intentTimer);clearNavigation();
-    // Hover/focus prefetch stays opportunistic. Only the destination shows a loader.
-    clearNavigation();location.assign(destination.href);
+    // Always warm the destination's files and prepared data first, with the tab in its pressed state,
+    // then go. Prerender support alone is no promise the page is ready: a tap with no hover never
+    // started one. An already warmed or prerendered page resolves at once, so nothing waits. Never more
+    // than WARM_LIMIT_MS; the destination's cover stays the last fallback. Save-Data goes straight there.
+    if(navigator.connection?.saveData){location.assign(destination.href);return;}
+    const revision=navigationRevision;
+    document.querySelectorAll(`.apx-destination-ribbon a[href="${destination.href}"],.ax-drawer-links a[href="${destination.href}"]`).forEach(row=>row.setAttribute("aria-busy","true"));
+    await Promise.race([prepare(destination).catch(()=>{}),new Promise(resolve=>setTimeout(resolve,WARM_LIMIT_MS))]);
+    if(revision!==navigationRevision)return;
+    location.assign(destination.href);
   }
   window.addEventListener('pageshow',clearNavigation);
   let observedIdentity=accountIdentity();
@@ -351,6 +360,9 @@
       else{drawer.classList.remove('is-open');drawer.hidden=true;menu.focus();}
     }
     menu.addEventListener('click',()=>setOpen(drawer.hidden));
+    // Drawer links move between tools exactly like the tabs.
+    const drawerLinks=drawer.querySelector('.ax-drawer-links');
+    drawerLinks.addEventListener('click',navigatePrepared);drawerLinks.addEventListener('focusin',prepareIntent);drawerLinks.addEventListener('pointerdown',prepareIntent);
     drawer.addEventListener('click',event=>{if(event.target.closest('[data-drawer-close],.ax-drawer-close')||event.target.closest('.ax-drawer-links a'))setOpen(false);});
     drawer.addEventListener('keydown',event=>{
       if(event.key==='Escape'){event.preventDefault();setOpen(false);return;}

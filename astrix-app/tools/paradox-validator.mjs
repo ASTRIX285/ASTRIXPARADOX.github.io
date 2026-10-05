@@ -45,6 +45,7 @@ const validators=[
   'validate-single-loader.mjs',
   'validate-single-module-urls.mjs',
   'test-portal-single-skin.mjs',
+  'test-seamless-transitions.mjs', // feature/seamless-tool-transitions: no frame before readiness.
   'test-home-browser.mjs',
   'test-asset-weight.mjs', // perf/asset-weight: no first-load image over 300 KB, no full manifest.
   'validate-tools-hub.mjs',
