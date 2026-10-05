@@ -47,7 +47,7 @@ jobs:
               with urllib.request.urlopen(req) as r:
                   return json.loads(r.read())
 
-          # Step 1 - Get token
+          # Step 1 — Get token
           try:
               tok = post('https://id.twitch.tv/oauth2/token', {
                   'client_id': CLIENT_ID,
@@ -60,12 +60,12 @@ jobs:
               print(f'Auth failed: {e}', file=sys.stderr)
               sys.exit(1)
 
-          # Step 2 - Get user_id
+          # Step 2 — Get user_id
           users = api('https://api.twitch.tv/helix/users?login=astrix285x', token)
           user_id = users['data'][0]['id'] if users.get('data') else ''
           print(f'User ID: {user_id}')
 
-          # Step 3 - Check if live
+          # Step 3 — Check if live
           streams = api('https://api.twitch.tv/helix/streams?user_login=astrix285x', token)
           is_live = len(streams.get('data', [])) > 0
           print(f'is_live = {is_live}')
@@ -79,7 +79,7 @@ jobs:
               result['viewers'] = s.get('viewer_count', 0)
               print(f'LIVE: {result["title"]} | Game: {result["game"]} | Viewers: {result["viewers"]}')
           else:
-              # Step 4 - Fetch latest VOD
+              # Step 4 — Fetch latest VOD
               vods = api(f'https://api.twitch.tv/helix/videos?user_id={user_id}&type=archive&first=1', token)
               if vods.get('data'):
                   v = vods['data'][0]
