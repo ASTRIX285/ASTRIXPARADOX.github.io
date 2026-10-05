@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/gear-slot.schema.json",
+  "title": "AION 2 gear slot",
+  "description": "One record in data/gear-slots.json: a slot position and the name the armory gives it.",
+  "type": "object",
+  "required": [
+    "id",
+    "slotPos",
+    "slotPosName",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slotPos": {
+      "type": "integer"
+    },
+    "slotPosName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "$ref": "../../../platform/contracts/provenance.schema.json"
+    }
+  }
+}

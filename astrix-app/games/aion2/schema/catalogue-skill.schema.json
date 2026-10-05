@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/catalogue-skill.schema.json",
+  "title": "AION 2 class skill or stigma",
+  "description": "One record in data/<class>/skills.json or stigmas.json. Identity comes from the armory; cooldown, MP cost, Specialty lines and stigma text come from in-game captures.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "category",
+    "needLevel",
+    "provenance",
+    "cooldownSeconds",
+    "mpCost",
+    "specialties"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "enum": [
+        "Active",
+        "Passive",
+        "Dp"
+      ]
+    },
+    "needLevel": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "provenance": {
+      "$ref": "../../../platform/contracts/provenance.schema.json"
+    },
+    "cooldownSeconds": {
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "mpCost": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "specialties": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "unlockSkillLevel",
+              "text"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "unlockSkillLevel": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "text": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    }
+  }
+}

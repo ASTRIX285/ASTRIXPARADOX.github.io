@@ -8,6 +8,7 @@ import {validateGameFolders} from './validate-game-folders.mjs';
 
 const capture={kind:'in-game-capture',capturedBy:'Miguel',capturedOn:'2026-10-05',gameVersion:'TU-example',where:'Gear tooltip',note:'Core attribute line.'};
 const post={kind:'official-post',url:'https://news.example.com/patch',gameVersion:'TU-example',retrievedOn:'2026-10-03'};
+const armory={kind:'armory',region:'eu',endpoint:'/api/character/equipment',capturedOn:'2026-10-05',fixture:'astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json'};
 const client={product:'example_beta',build:'1.2.3.4',table:'Item',rowId:7,sourceSha256:'a'.repeat(64)};
 const moduleSource=`const pending=reason=>({pending:true,reason});
 export const MODULE={getMetadata:()=>({id:'demo',name:'Demo',version:'0.1.0'}),normalisePlayer:()=>pending('x'),normaliseCharacter:()=>pending('x'),normaliseEquipment:()=>[],normaliseAbilities:()=>[],normalisePassives:()=>[],normaliseEncounter:()=>pending('x'),explainRecommendation:()=>pending('x')};
@@ -40,6 +41,9 @@ await check('empty games folder passes',{},null);
 await check('valid in-game capture passes',{...shell,[`${base}/data/items.json`]:[{id:'mask',name:'Mask',provenance:capture}]},null);
 await check('partly pending record passes',{...shell,[`${base}/data/items.json`]:{records:[{id:'mask',provenance:[post,capture],maxRoll:{pending:true,reason:'Not captured yet.'}}]}},null);
 await check('client data passes without kind',{...shell,[`${base}/data/items.json`]:[{id:7,provenance:client}]},null);
+await check('armory source passes',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:armory}]},null);
+await check('armory source with no endpoint fails',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:{...armory,endpoint:''}}]},'armory needs the endpoint path');
+await check('armory source with no date fails',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:{...armory,capturedOn:'5 Oct'}}]},'armory needs capturedOn');
 await check('multi-title data folder passes',{...shell,[`${base}/t1/data/items.json`]:[{id:'a',provenance:post}]},null);
 
 await check('record with no provenance fails',{...shell,[`${base}/data/items.json`]:[{id:'mask',name:'Mask'}]},'no provenance');
