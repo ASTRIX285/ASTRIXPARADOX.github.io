@@ -134,23 +134,47 @@
 }
 
 .platform-card-active {
+  position: relative;
+  isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(180px, 0.82fr) minmax(0, 1.18fr);
+  grid-template-columns: 1fr;
 }
 
+/* Full-bleed cards (5 Oct 2026): the art runs under the whole card from the right and the copy sits
+   on a dark backdrop that fades out across the card, so the art's subject stays clear of the text. */
 .platform-art {
-  min-height: 340px;
+  position: absolute;
+  inset: 0 0 0 30%;
+  z-index: -2;
+  background: var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  transition: transform 0.6s ease;
+}
+
+.platform-card-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    linear-gradient(to right, transparent 45%, #080808 100%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent 55%),
-    var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
+    linear-gradient(90deg, rgba(6, 6, 6, 0.97) 0%, rgba(6, 6, 6, 0.92) 30%, rgba(6, 6, 6, 0.5) 52%, rgba(6, 6, 6, 0.06) 78%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 45%);
+}
+
+.platform-card-active:hover .platform-art {
+  transform: scale(1.03);
 }
 
 .platform-copy {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-width: 56%;
   padding: clamp(28px, 3vw, 46px);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
 }
 
 .platform-meta {
@@ -203,6 +227,19 @@
   background:
     radial-gradient(circle at center, rgba(139, 0, 0, 0.12), transparent 45%),
     linear-gradient(145deg, rgba(15, 15, 17, 0.96), rgba(5, 5, 7, 0.98));
+}
+
+/* The spare card shows the brighter ASTRIX PARADOX map (the share image) behind the logo, so the logo
+   reads in front of it like the art on the tool cards (5 Oct 2026). Zoomed to its top right corner so the
+   image's own wordmark stays out of frame. astrix-brand.css sets every card's
+   background inside @layer astrix-brand with !important, so this override sits in the same layer. */
+@layer astrix-brand {
+  body.ax-brand.ax-map .platform-card.platform-card-coming {
+    background:
+      radial-gradient(ellipse at center, rgba(6, 6, 6, 0.62) 0%, rgba(6, 6, 6, 0.22) 60%, rgba(6, 6, 6, 0.45) 100%),
+      url('../img/share/astrix-paradox-share-1200x630.jpg') 100% 0 / auto 210% no-repeat,
+      #080808 !important;
+  }
 }
 
 .platform-brand {
@@ -407,12 +444,21 @@ body.tools-mission-open {
     border-top: 1px solid rgba(201, 168, 76, 0.28);
   }
 
+  /* Stacked: the art shows at the top and the backdrop darkens down behind the copy. */
   .platform-art {
-    min-height: 300px;
-    background:
-      linear-gradient(to top, #080808 0%, transparent 45%),
-      linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 70%),
-      var(--platform-art, url('../img/games/D2_JB.jpg')) var(--platform-art-pos, center) / cover no-repeat;
+    inset: 0 0 auto 0;
+    height: 72%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+
+  .platform-card-active::before {
+    background: linear-gradient(to top, rgba(6, 6, 6, 0.96) 0%, rgba(6, 6, 6, 0.88) 48%, rgba(6, 6, 6, 0.25) 78%, rgba(6, 6, 6, 0.05) 100%);
+  }
+
+  .platform-copy {
+    max-width: none;
+    padding-top: 200px;
   }
 }
 
@@ -431,12 +477,8 @@ body.tools-mission-open {
     grid-template-columns: 1fr;
   }
 
-  .platform-art {
-    min-height: 235px;
-  }
-
   .platform-copy {
-    padding: 30px 22px 36px;
+    padding: 170px 22px 36px;
   }
 
   .platform-meta {

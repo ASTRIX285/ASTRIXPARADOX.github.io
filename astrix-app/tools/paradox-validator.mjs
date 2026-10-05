@@ -12,6 +12,7 @@ const validators=[
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
   'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.
+  'test-hub-cards.mjs', // The Hub: full-bleed card art, text backdrop, spare card map image.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
