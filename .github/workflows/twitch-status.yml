@@ -5,6 +5,14 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+# Never run two status checks at once; a newer run replaces an older one
+concurrency:
+  group: twitch-status
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
   check-twitch:
     runs-on: ubuntu-latest
@@ -39,7 +47,7 @@ jobs:
               with urllib.request.urlopen(req) as r:
                   return json.loads(r.read())
 
-          # Step 1 — Get token
+          # Step 1 - Get token
           try:
               tok = post('https://id.twitch.tv/oauth2/token', {
                   'client_id': CLIENT_ID,
@@ -52,12 +60,12 @@ jobs:
               print(f'Auth failed: {e}', file=sys.stderr)
               sys.exit(1)
 
-          # Step 2 — Get user_id
+          # Step 2 - Get user_id
           users = api('https://api.twitch.tv/helix/users?login=astrix285x', token)
           user_id = users['data'][0]['id'] if users.get('data') else ''
           print(f'User ID: {user_id}')
 
-          # Step 3 — Check if live
+          # Step 3 - Check if live
           streams = api('https://api.twitch.tv/helix/streams?user_login=astrix285x', token)
           is_live = len(streams.get('data', [])) > 0
           print(f'is_live = {is_live}')
@@ -71,7 +79,7 @@ jobs:
               result['viewers'] = s.get('viewer_count', 0)
               print(f'LIVE: {result["title"]} | Game: {result["game"]} | Viewers: {result["viewers"]}')
           else:
-              # Step 4 — Fetch latest VOD
+              # Step 4 - Fetch latest VOD
               vods = api(f'https://api.twitch.tv/helix/videos?user_id={user_id}&type=archive&first=1', token)
               if vods.get('data'):
                   v = vods['data'][0]
@@ -96,5 +104,22 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add twitch-status.json
-          git diff --cached --quiet || git commit -m "Update Twitch status [$(date -u '+%H:%M:%S UTC')]"
-          git push
+          if git diff --cached --quiet; then
+            echo "No status change, nothing to commit."
+            exit 0
+          fi
+          git commit -m "Update Twitch status [$(date -u '+%H:%M:%S UTC')]"
+
+          # Other bots push to main often. If main moved while this job ran,
+          # pull the new commits, keep our status file, and push again.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt). Rebasing onto latest main..."
+            git pull --rebase -X theirs origin main || { git rebase --abort; exit 1; }
+            sleep $(( attempt * 5 ))
+          done
+          echo "Could not push after 5 attempts." >&2
+          exit 1
