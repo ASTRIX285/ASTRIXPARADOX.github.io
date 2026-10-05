@@ -1,0 +1,7 @@
+# feature/aetherium-armory-worker: read-only AION 2 armory Worker, its offline tests and validator entry.
+aetherium-worker/.gitignore
+aetherium-worker/package.json
+aetherium-worker/src/index.mjs
+aetherium-worker/wrangler.toml
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-aetherium-worker.mjs
