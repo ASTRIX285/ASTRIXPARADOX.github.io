@@ -510,6 +510,8 @@ async function checkTwitchLive() {
       document.title =
         `🔴 LIVE — ${data.game || 'Gaming'} | ASTRIX PARADOX`;
 
+      document.body.classList.add('is-live');
+
       setupStreamExpansion();
 
     }
@@ -799,6 +801,47 @@ function setupHeroVideo() {
 
 }
 
+// ── WATCH LIVE ON SITE ──────────────────────────────────────
+// While the channel is live, any "watch live" link to the Twitch channel
+// (hero button, featured game card, etc.) scrolls to the stream on this
+// page instead of leaving for twitch.tv. Centring the embed triggers the
+// full-screen expansion. Links inside the live section itself (Watch on
+// Twitch, Past Broadcasts) still open Twitch as before.
+function setupWatchLiveOnSite() {
+
+  document.addEventListener('click', (e) => {
+
+    if (!document.body.classList.contains('is-live')) return;
+
+    const link = e.target.closest('a[href]');
+    if (!link || link.closest('#streamLive')) return;
+
+    let url;
+    try { url = new URL(link.href); } catch (err) { return; }
+
+    const isChannel =
+      /(^|\.)twitch\.tv$/.test(url.hostname) &&
+      url.pathname.replace(/\/+$/, '').toLowerCase() === '/' + TWITCH_CHANNEL;
+
+    if (!isChannel) return;
+
+    const embed =
+      document.querySelector('#streamLive .stream-live-embed');
+
+    if (!embed) return;   // not on the home page: keep the Twitch link
+
+    e.preventDefault();
+
+    const rect = embed.getBoundingClientRect();
+    const target =
+      window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2;
+
+    window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+
+  });
+
+}
+
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener(
   'DOMContentLoaded',
@@ -808,6 +851,7 @@ document.addEventListener(
     setupReveal();
     setupMobileNav();
     setupHeroVideo();
+    setupWatchLiveOnSite();
     checkTwitchLive();
 
     // Re-check Twitch live status every 10 minutes
