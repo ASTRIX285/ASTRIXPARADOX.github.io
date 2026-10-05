@@ -67,7 +67,13 @@ export function checkSource(source,label,errors,{kinds}={}){
     for(const key of ['product','build','table'])if(!filled(source[key]))errors.push(`${label}: client-data needs ${key}`);
     if(!Number.isInteger(source.rowId))errors.push(`${label}: client-data needs an integer rowId`);
     if(!/^[0-9a-f]{64}$/.test(source.sourceSha256??''))errors.push(`${label}: client-data needs a sha256 sourceSha256`);
-  } else errors.push(`${label}: provenance kind must be official-post, in-game-capture or client-data`);
+  } else if(kind==='armory'){
+    onlyKeys(source,['kind','region','endpoint','capturedOn','fixture'],label,errors);
+    if(!filled(source.region))errors.push(`${label}: armory needs region`);
+    if(!filled(source.endpoint)||!source.endpoint.startsWith('/'))errors.push(`${label}: armory needs the endpoint path`);
+    if(!DATE.test(source.capturedOn??''))errors.push(`${label}: armory needs capturedOn (YYYY-MM-DD)`);
+    if('fixture' in source&&!filled(source.fixture))errors.push(`${label}: armory fixture is empty`);
+  } else errors.push(`${label}: provenance kind must be official-post, in-game-capture, client-data or armory`);
 }
 
 export function checkProvenance(provenance,label,errors,options){

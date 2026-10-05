@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/character.schema.json",
+  "title": "AION 2 character",
+  "description": "One normalised character, the same shape for every class. Built from the public armory by engine/armory-adapter.mjs. A value the armory does not send is pending, never guessed.",
+  "type": "object",
+  "required": [
+    "profile",
+    "gear",
+    "accessorySlots",
+    "skills",
+    "daevanion",
+    "pet",
+    "wings",
+    "source"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "profile": {
+      "type": "object",
+      "required": [
+        "name",
+        "class",
+        "level",
+        "raceName",
+        "server",
+        "title",
+        "combatPower",
+        "itemLevel"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "raceName": {
+          "enum": [
+            "Elyos",
+            "Asmodian"
+          ]
+        },
+        "server": {
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "combatPower": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "itemLevel": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "$ref": "../../../platform/contracts/pending.schema.json"
+            }
+          ]
+        }
+      }
+    },
+    "gear": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "slot",
+              "slotPos",
+              "empty"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "minLength": 1
+              },
+              "slotPos": {
+                "type": "integer"
+              },
+              "empty": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "slot",
+              "slotPos",
+              "empty",
+              "itemId",
+              "name",
+              "grade",
+              "enchant",
+              "maxEnchant",
+              "manastoneSlots"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "minLength": 1
+              },
+              "slotPos": {
+                "type": "integer"
+              },
+              "empty": {
+                "const": false
+              },
+              "itemId": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "grade": {
+                "type": "string",
+                "minLength": 1
+              },
+              "enchant": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxEnchant": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ]
+              },
+              "manastoneSlots": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "accessorySlots": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "slot",
+                  "slotPos",
+                  "empty"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slotPos": {
+                    "type": "integer"
+                  },
+                  "empty": {
+                    "const": true
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "slot",
+                  "slotPos",
+                  "empty",
+                  "itemId",
+                  "name",
+                  "grade",
+                  "enchant",
+                  "maxEnchant",
+                  "manastoneSlots"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slotPos": {
+                    "type": "integer"
+                  },
+                  "empty": {
+                    "const": false
+                  },
+                  "itemId": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "grade": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "enchant": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "maxEnchant": {
+                    "oneOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ]
+                  },
+                  "manastoneSlots": {
+                    "oneOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "needLevel",
+          "skillLevel",
+          "acquired",
+          "equipped"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "enum": [
+              "Active",
+              "Passive",
+              "Dp"
+            ]
+          },
+          "needLevel": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "skillLevel": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "acquired": {
+            "type": "boolean"
+          },
+          "equipped": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "daevanion": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "open",
+          "nodesTaken",
+          "nodesTotal"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "open": {
+            "type": "boolean"
+          },
+          "nodesTaken": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nodesTotal": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "nodeId",
+                "boardId",
+                "row",
+                "col",
+                "type",
+                "grade",
+                "name",
+                "taken",
+                "effects"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "nodeId": {
+                  "type": "integer"
+                },
+                "boardId": {
+                  "type": "integer"
+                },
+                "row": {
+                  "type": "integer"
+                },
+                "col": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "grade": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string"
+                },
+                "taken": {
+                  "type": "boolean"
+                },
+                "effects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "pet": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "level"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "wings": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "grade",
+            "enchant"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "grade": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enchant": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "kind",
+        "region",
+        "capturedOn"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "armory"
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capturedOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

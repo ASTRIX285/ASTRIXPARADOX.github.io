@@ -1,0 +1,101 @@
+{
+  "kind": "gear-slot",
+  "records": [
+    {
+      "id": "main-hand",
+      "slotPos": 1,
+      "slotPosName": "MainHand",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "sub-hand",
+      "slotPos": 2,
+      "slotPosName": "SubHand",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "helmet",
+      "slotPos": 3,
+      "slotPosName": "Helmet",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "shoulder",
+      "slotPos": 4,
+      "slotPosName": "Shoulder",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "torso",
+      "slotPos": 5,
+      "slotPosName": "Torso",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "pants",
+      "slotPos": 6,
+      "slotPosName": "Pants",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "gloves",
+      "slotPos": 7,
+      "slotPosName": "Gloves",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    },
+    {
+      "id": "boots",
+      "slotPos": 8,
+      "slotPosName": "Boots",
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      }
+    }
+  ]
+}

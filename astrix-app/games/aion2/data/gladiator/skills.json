@@ -1,0 +1,556 @@
+{
+  "class": "Gladiator",
+  "kind": "skill",
+  "records": [
+    {
+      "id": 11020000,
+      "name": "Keen Strike",
+      "category": "Active",
+      "needLevel": 1,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11010000,
+      "name": "Rending Blow",
+      "category": "Active",
+      "needLevel": 1,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11190000,
+      "name": "Leaping Slam",
+      "category": "Active",
+      "needLevel": 1,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11290000,
+      "name": "Mocking Blade",
+      "category": "Active",
+      "needLevel": 3,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11170000,
+      "name": "Overhead Slam",
+      "category": "Active",
+      "needLevel": 4,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11280000,
+      "name": "Sword Aura Rampage",
+      "category": "Active",
+      "needLevel": 5,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11200000,
+      "name": "Ankle Slice",
+      "category": "Active",
+      "needLevel": 7,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11050000,
+      "name": "Crushing Wave",
+      "category": "Active",
+      "needLevel": 8,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11360000,
+      "name": "Rush Strike",
+      "category": "Active",
+      "needLevel": 10,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11300000,
+      "name": "Aerial Snare",
+      "category": "Active",
+      "needLevel": 12,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11100000,
+      "name": "Ruinous Blow",
+      "category": "Active",
+      "needLevel": 14,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11260000,
+      "name": "Defiance",
+      "category": "Active",
+      "needLevel": 16,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11710000,
+      "name": "Survival Stance",
+      "category": "Passive",
+      "needLevel": 1,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11720000,
+      "name": "Protection Armor",
+      "category": "Passive",
+      "needLevel": 6,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11730000,
+      "name": "Blood Absorption",
+      "category": "Passive",
+      "needLevel": 9,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11740000,
+      "name": "Identify Weakness",
+      "category": "Passive",
+      "needLevel": 11,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11750000,
+      "name": "Attack Preparation",
+      "category": "Passive",
+      "needLevel": 13,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11760000,
+      "name": "Impact Hit",
+      "category": "Passive",
+      "needLevel": 15,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11770000,
+      "name": "Destructive Impulse",
+      "category": "Passive",
+      "needLevel": 17,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11780000,
+      "name": "Experienced Counterstrike",
+      "category": "Passive",
+      "needLevel": 21,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11790000,
+      "name": "Survival Willpower",
+      "category": "Passive",
+      "needLevel": 23,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    },
+    {
+      "id": 11800000,
+      "name": "Murderous Burst",
+      "category": "Passive",
+      "needLevel": 25,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+astrix-app/games/aion2/index.mjs
+astrix-app/games/aion2/README.md
+astrix-app/games/aion2/docs/SCOPE.md
+astrix-app/games/aion2/engine/armory-adapter.mjs
+astrix-app/games/aion2/schema/character.schema.json
+astrix-app/games/aion2/schema/catalogue-skill.schema.json
+astrix-app/games/aion2/schema/gear-slot.schema.json
+astrix-app/games/aion2/data/gear-slots.json
+astrix-app/games/aion2/data/gladiator/skills.json
+astrix-app/games/aion2/data/gladiator/stigmas.json
+astrix-app/platform/contracts/provenance.schema.json
+astrix-app/tools/validate-game-folders.mjs
+astrix-app/tools/test-game-folders.mjs
+astrix-app/tools/test-aion2-adapter.mjs
+astrix-app/module-versions.json

@@ -80,6 +80,10 @@
 
   "/astrix-app/domains/player-identity/player-identity-service.mjs": "ffe9f66ede",
 
+  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "97239d3401",
+
+  "/astrix-app/games/aion2/index.mjs": "4c6dfb3a1a",
+
   "/astrix-app/games/destiny-2/index.mjs": "a5dae81a23",
 
   "/astrix-app/games/division/catalogue.mjs": "029479b955",

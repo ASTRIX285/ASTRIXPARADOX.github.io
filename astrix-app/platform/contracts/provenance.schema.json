@@ -12,7 +12,8 @@
       "oneOf": [
         { "$ref": "#/$defs/officialPost" },
         { "$ref": "#/$defs/inGameCapture" },
-        { "$ref": "#/$defs/clientData" }
+        { "$ref": "#/$defs/clientData" },
+        { "$ref": "#/$defs/armory" }
       ]
     },
     "officialPost": {
@@ -57,6 +58,20 @@
         "table": { "type": "string", "minLength": 1 },
         "rowId": { "type": "integer" },
         "sourceSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "armory": {
+      "title": "Armory",
+      "description": "A value read from a publisher's public character armory (no login, no key), such as the AION 2 armory. The response is kept as a test fixture.",
+      "type": "object",
+      "required": ["kind", "region", "endpoint", "capturedOn"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "armory" },
+        "region": { "type": "string", "minLength": 1 },
+        "endpoint": { "type": "string", "pattern": "^/", "description": "The armory path the value came from." },
+        "capturedOn": { "type": "string", "format": "date" },
+        "fixture": { "type": "string", "minLength": 1, "description": "Optional repo path of the saved response." }
       }
     }
   }

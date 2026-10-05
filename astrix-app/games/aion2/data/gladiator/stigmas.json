@@ -1,0 +1,383 @@
+{
+  "class": "Gladiator",
+  "kind": "stigma",
+  "records": [
+    {
+      "id": 11240000,
+      "name": "Wrath Wave",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11400000,
+      "name": "Lunge Stance",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11250000,
+      "name": "Zikel's Blessing",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11110000,
+      "name": "Focused Block",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11130000,
+      "name": "Armor of Balance",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11080000,
+      "name": "Blade Toss",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11380000,
+      "name": "Tenaciousness",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11340000,
+      "name": "Lifestealing Blade",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11390000,
+      "name": "Rage Burst",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11410000,
+      "name": "Wave Armor",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11430000,
+      "name": "Forced Restraint",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11700000,
+      "name": "Assault Strike",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    },
+    {
+      "id": 11450000,
+      "name": "Fracturing Rush",
+      "category": "Dp",
+      "needLevel": 22,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-05",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "mpCost": {
+        "pending": true,
+        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
+      },
+      "text": {
+        "pending": true,
+        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
+      }
+    }
+  ]
+}
