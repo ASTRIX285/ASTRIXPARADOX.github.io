@@ -85,22 +85,22 @@ function setupStreamExpansion() {
 
     if (!nav) return;
 
-    nav.style.opacity = '1';
-    nav.style.background = '';
-    nav.style.borderBottomColor = '';
-    nav.style.backdropFilter = '';
-    nav.style.pointerEvents = '';
+    nav.style.setProperty('opacity', '1', 'important');
+    nav.style.removeProperty('background');
+    nav.style.removeProperty('border-bottom-color');
+    nav.style.removeProperty('backdrop-filter');
+    nav.style.removeProperty('pointer-events');
 
     navLinks.forEach(link => {
 
-      link.style.color = '';
-      link.style.textShadow = '';
+      link.style.removeProperty('color');
+      link.style.removeProperty('text-shadow');
 
     });
 
     if (accent) {
 
-      accent.style.color = '';
+      accent.style.removeProperty('color');
 
     }
 
@@ -124,34 +124,27 @@ function setupStreamExpansion() {
 
     if (!nav) return;
 
-    nav.style.opacity = '1';
+    nav.style.setProperty('opacity', '1', 'important');
 
-    nav.style.background =
-      'transparent';
+    nav.style.setProperty('background', 'transparent', 'important');
 
-    nav.style.borderBottomColor =
-      'transparent';
+    nav.style.setProperty('border-bottom-color', 'transparent', 'important');
 
-    nav.style.backdropFilter =
-      'none';
+    nav.style.setProperty('backdrop-filter', 'none', 'important');
 
-    nav.style.pointerEvents =
-      'auto';
+    nav.style.setProperty('pointer-events', 'auto', 'important');
 
     navLinks.forEach(link => {
 
-      link.style.color =
-        '#b22222';
+      link.style.setProperty('color', '#b22222', 'important');
 
-      link.style.textShadow =
-        '0 0 12px rgba(178,34,34,0.7)';
+      link.style.setProperty('text-shadow', '0 0 12px rgba(178,34,34,0.7)', 'important');
 
     });
 
     if (accent) {
 
-      accent.style.color =
-        '#ff1a1a';
+      accent.style.setProperty('color', '#ff1a1a', 'important');
 
     }
 
@@ -211,13 +204,11 @@ function setupStreamExpansion() {
 
     if (nav && progress < 0.985) {
 
-      nav.style.opacity = '1';
+      nav.style.setProperty('opacity', '1', 'important');
 
-      nav.style.background =
-        `rgba(6,6,6,${Math.max(0, 0.95 - progress)})`;
+      nav.style.setProperty('background', `rgba(6,6,6,${Math.max(0, 0.95 - progress)})`, 'important');
 
-      nav.style.borderBottomColor =
-        `rgba(139,0,0,${Math.max(0, 0.3 - progress * 0.3)})`;
+      nav.style.setProperty('border-bottom-color', `rgba(139,0,0,${Math.max(0, 0.3 - progress * 0.3)})`, 'important');
 
     }
 

@@ -250,4 +250,14 @@ body.ax-brand .apx-bungie-attribution{display:block;max-width:1320px;margin:0 au
   body.ax-brand .ax-chip.active::after{animation:none!important;--ax-pulse:-20%}
   body.ax-brand .ax-chip{transition:none!important}
 }
+
+
+/* Live stream immersion (home page): when the Twitch embed locks full screen,
+   the ribbon goes transparent and its tabs glow crimson over the stream, as
+   originally built. main.js sets the colours inline with !important; these
+   rules clear the brand ribbon's shadow, top rule and tab chrome. */
+body.ax-brand.stream-locked .nav{box-shadow:none!important;border-bottom-color:transparent!important}
+body.ax-brand.stream-locked .nav::before{opacity:0!important}
+body.ax-brand.stream-locked .nav-links a{border-color:transparent!important;background:none!important}
+body.ax-brand.ax-stroke.stream-locked .nav-links a::before{opacity:0!important;animation:none!important}
 }
