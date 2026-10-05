@@ -11,6 +11,7 @@ const validators=[
   'validate-division.mjs',
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
+  'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',

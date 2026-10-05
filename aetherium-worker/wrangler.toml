@@ -1,0 +1,28 @@
+# AION 2 armory read proxy (The Aetherium). Deployed by hand only: no GitHub
+# Action deploys this folder. See the PR description for Miguel's deploy steps.
+name = "aetherium-worker"
+main = "src/index.mjs"
+compatibility_date = "2026-08-13"
+workers_dev = true
+
+[vars]
+ENVIRONMENT = "production"
+
+# 10 minute response cache per normalised request.
+# Create it with: npx wrangler kv namespace create AION2_CACHE
+# then paste the id it prints below.
+[[kv_namespaces]]
+binding = "AION2_CACHE"
+id = "PASTE_AION2_CACHE_ID_HERE"
+
+# 30 requests a minute per visitor IP (CF-Connecting-IP). The Worker also keeps
+# its own per-isolate 30 a minute guard, so it stays limited without this binding.
+[[ratelimits]]
+name = "AION2_RATE_LIMITER"
+namespace_id = "2851"
+simple = { limit = 30, period = 60 }
+
+# Custom domain. Uncomment after the first deploy works on workers.dev.
+# [[routes]]
+# pattern = "aion2.astrixparadox.com"
+# custom_domain = true
