@@ -18,3 +18,5 @@ astrix-app/tools/paradox-validator.mjs
 astrix-app/tools/test-aion2-adapter.mjs
 astrix-app/tools/test-aetherium-pages.mjs
 astrix-app/games/aion2/footer.json
+img/games/aion2-the-aetherium.jpg
+ARTWORK_PROVENANCE.md
