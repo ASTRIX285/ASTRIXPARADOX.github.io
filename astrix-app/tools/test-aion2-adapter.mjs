@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
-import {adaptCharacter,adaptDaevanionBoard,ITEM_LEVEL_LABEL} from '../games/aion2/engine/armory-adapter.mjs';
+import {adaptCharacter,adaptDaevanionBoard,adaptItemDetail,adaptSearch,ITEM_LEVEL_LABEL} from '../games/aion2/engine/armory-adapter.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {validateGameModule} from '../platform/contracts/game-module.mjs';
 
@@ -87,6 +87,25 @@ for(const record of [...skills,...stigmas]){
   for(const field of ['cooldownSeconds','mpCost','specialties'])assert.equal(record[field].pending,true,`${record.name} ${field} pending until captured`);
   assert.equal(record.provenance.kind,'armory');
 }
+
+// Icons, portrait and stats for the pages (NCSOFT CDN URLs, never re-hosted)
+assert.ok(model.profile.portrait.startsWith('https://profileimg.plaync.com/'));
+assert.equal(model.profile.characterId,'B-3zbauf5-iJdckceurTzQ1SfZM1-ybQ-6ZSTDt3tHs=');
+assert.ok(model.gear.every(slot=>slot.icon.startsWith('https://assets.playnccdn.com/')),'Every worn item has its CDN icon');
+assert.ok(nezekan.icon.startsWith('https://assets.playnccdn.com/'));
+assert.ok(model.stats.some(row=>row.name==='Might'),'Primary stats listed');
+assert.ok(!model.stats.some(row=>row.name===ITEM_LEVEL_LABEL),'Item level row is not a stat');
+
+// Item detail card and search rows
+const detail=adaptItemDetail(raw.items[1]);
+assert.equal(detail.name,'Twilight Greatsword');
+assert.equal(detail.maxEnchant,5);
+assert.deepEqual(detail.mainStats.find(row=>row.name==='Attack'),{name:'Attack',value:'48',extra:'2'});
+assert.deepEqual(detail.sources,['Quest']);
+const [hit]=adaptSearch(fixture('astrix285-search'));
+assert.equal(hit.name,'ASTRIX285','Highlight tags stripped');
+assert.equal(hit.characterId,model.profile.characterId,'Search id decodes to the info id');
+assert.equal(hit.serverId,1308);
 
 // Game module on the platform contract
 const module=validateGameModule(createAion2Module({slots,classes:{Gladiator:{skills,stigmas}}}));

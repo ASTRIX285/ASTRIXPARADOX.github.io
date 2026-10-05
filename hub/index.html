@@ -96,6 +96,9 @@
           {kind:'coming',game:'The Division',name:'WorkBench',art:'/img/games/BG_the_divition.jpg',artPos:'6% 20%',status:'Coming soon',
             copy:'A companion workspace for your agent, gear and builds, built around The Division\'s own systems.',
             action:{label:'Enter WorkBench'}},
+          {kind:'live',game:'AION 2',name:'The Aetherium',art:'https://fizz-download.playnccdn.com/download/v2/buckets/marketing-platform/files/1a0f3211893-7c962f09-62b7-4a8c-a22c-addac86eb352',artPos:'50% 45%',
+            copy:'Look up a Daeva on the EU servers by name and see class, level, combat power, gear, stigmas and Daevanion boards in one place. No login needed.',
+            action:{label:'Enter The Aetherium',href:'/hub/aetherium/'}},
           {kind:'future'}
         ];
         var esc=function(value){return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
@@ -113,7 +116,7 @@
         document.getElementById('hubCards').innerHTML=HUB_TOOLS.map(card).join('');
       })();
       </script>
-      <noscript><p class="platform-noscript"><a href="../astrix-app/pages/home/">Enter The Forge</a> (Destiny 2). WorkBench (The Division) is coming soon.</p></noscript>
+      <noscript><p class="platform-noscript"><a href="../astrix-app/pages/home/">Enter The Forge</a> (Destiny 2). <a href="/hub/aetherium/">Enter The Aetherium</a> (AION 2). WorkBench (The Division) is coming soon.</p></noscript>
       </div>
     </div>
   </section>

@@ -8,6 +8,7 @@
     "profile",
     "gear",
     "accessorySlots",
+    "stats",
     "skills",
     "daevanion",
     "pet",
@@ -26,7 +27,9 @@
         "server",
         "title",
         "combatPower",
-        "itemLevel"
+        "itemLevel",
+        "characterId",
+        "portrait"
       ],
       "additionalProperties": false,
       "properties": {
@@ -85,6 +88,17 @@
               "$ref": "../../../platform/contracts/pending.schema.json"
             }
           ]
+        },
+        "characterId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "portrait": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^https://"
         }
       }
     },
@@ -124,7 +138,8 @@
               "grade",
               "enchant",
               "maxEnchant",
-              "manastoneSlots"
+              "manastoneSlots",
+              "icon"
             ],
             "additionalProperties": false,
             "properties": {
@@ -174,6 +189,13 @@
                     "$ref": "../../../platform/contracts/pending.schema.json"
                   }
                 ]
+              },
+              "icon": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^https://"
               }
             }
           }
@@ -218,7 +240,8 @@
                   "grade",
                   "enchant",
                   "maxEnchant",
-                  "manastoneSlots"
+                  "manastoneSlots",
+                  "icon"
                 ],
                 "additionalProperties": false,
                 "properties": {
@@ -268,6 +291,13 @@
                         "$ref": "../../../platform/contracts/pending.schema.json"
                       }
                     ]
+                  },
+                  "icon": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^https://"
                   }
                 }
               }
@@ -290,7 +320,8 @@
           "needLevel",
           "skillLevel",
           "acquired",
-          "equipped"
+          "equipped",
+          "icon"
         ],
         "additionalProperties": false,
         "properties": {
@@ -321,6 +352,13 @@
           },
           "equipped": {
             "type": "boolean"
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^https://"
           }
         }
       }
@@ -334,7 +372,8 @@
           "name",
           "open",
           "nodesTaken",
-          "nodesTotal"
+          "nodesTotal",
+          "icon"
         ],
         "additionalProperties": false,
         "properties": {
@@ -408,6 +447,13 @@
                 }
               }
             }
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^https://"
           }
         }
       }
@@ -419,7 +465,8 @@
           "required": [
             "id",
             "name",
-            "level"
+            "level",
+            "icon"
           ],
           "additionalProperties": false,
           "properties": {
@@ -433,6 +480,13 @@
             "level": {
               "type": "integer",
               "minimum": 0
+            },
+            "icon": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^https://"
             }
           }
         },
@@ -449,7 +503,8 @@
             "id",
             "name",
             "grade",
-            "enchant"
+            "enchant",
+            "icon"
           ],
           "additionalProperties": false,
           "properties": {
@@ -467,6 +522,13 @@
             "enchant": {
               "type": "integer",
               "minimum": 0
+            },
+            "icon": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^https://"
             }
           }
         },
@@ -494,6 +556,30 @@
         "capturedOn": {
           "type": "string",
           "format": "date"
+        }
+      }
+    },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "name",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "number"
+          }
         }
       }
     }

@@ -104,8 +104,9 @@ try{
   const origin=`http://127.0.0.1:${server.address().port}`;
   // Classic scripts keep their own key; they are still checked for a single URL.
   const classic=new Set([...pages.values()].flatMap(page=>page.refs.filter(ref=>ref.tag==='script'&&!ref.isModule).map(ref=>ref.target)));
-  const toolPages=[...pages.keys()].filter(site=>(/^\/astrix-app\/(index\.html|pages\/[^/]+\/(?:[^/]+\/)?index\.html)$/.test(site)||/^\/hub\/workbench\/[^/]+\/index\.html$/.test(site))&&!/guardian-workspace-v1|shooting-range-test/.test(site));
+  const toolPages=[...pages.keys()].filter(site=>(/^\/astrix-app\/(index\.html|pages\/[^/]+\/(?:[^/]+\/)?index\.html)$/.test(site)||/^\/hub\/workbench\/[^/]+\/index\.html$/.test(site)||/^\/hub\/aetherium\/(?:[^/]+\/)?index\.html$/.test(site))&&!/guardian-workspace-v1|shooting-range-test/.test(site));
   assert.ok(toolPages.includes('/hub/workbench/td2/index.html'),'The WorkBench page is checked like every other tool page');
+  for(const page of ['/hub/aetherium/index.html','/hub/aetherium/gear/index.html'])assert.ok(toolPages.includes(page),`${page} is checked like every other tool page`);
   const report=[];
   for(const site of toolPages){
     const context=await browser.newContext({viewport:{width:1600,height:900}}),urls=new Map();
