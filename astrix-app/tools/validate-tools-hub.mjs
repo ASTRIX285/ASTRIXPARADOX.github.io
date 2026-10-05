@@ -84,6 +84,7 @@ assert.ok(list.includes("game:'Destiny 2'")&&list.includes("game:'The Division'"
 assert.equal((tools.match(/\.\.\/astrix-app\/pages\/home\//g)??[]).length,3,'The Forge card, its no-script link and the mission popup enter Guardian Home, the light landing page');
 assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
 assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
+assert.ok(list.indexOf("name:'The Aetherium'")<list.indexOf("name:'The Forge'"),'The Aetherium card sits first, top left');
 assert.equal((list.match(/\{kind:'/g)??[]).length,4,'One card per tool: The Forge, WorkBench, The Aetherium and the future slot');
 // The Aetherium (AION 2, 5 Oct 2026): live card into the Daeva Card. Art is NCSOFT's own share image, linked from its CDN, never re-hosted.
 assert.match(list,/game:'AION 2',name:'The Aetherium',art:'https:\/\/fizz-download\.playnccdn\.com\/[^']+'[\s\S]*?action:\{label:'Enter The Aetherium',href:'\/hub\/aetherium\/'\}/,'The Aetherium card enters the Daeva Card');
