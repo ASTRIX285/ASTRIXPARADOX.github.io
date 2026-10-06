@@ -44,6 +44,11 @@ await check('client data passes without kind',{...shell,[`${base}/data/items.jso
 await check('armory source passes',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:armory}]},null);
 await check('armory source with no endpoint fails',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:{...armory,endpoint:''}}]},'armory needs the endpoint path');
 await check('armory source with no date fails',{...shell,[`${base}/data/items.json`]:[{id:'a',provenance:{...armory,capturedOn:'5 Oct'}}]},'armory needs capturedOn');
+const guide={kind:'community-guide',ref:'mb-gladiator',title:'Gladiator build',publisher:'MetaBot',url:'https://metabot.gg/en/aion-2/classes/gladiator/build',retrievedOn:'2026-10-06',region:'global',reliability:'high'};
+await check('community guide source passes',{...shell,[`${base}/data/builds.json`]:[{id:'a',provenance:[guide]}]},null);
+await check('community guide with http url fails',{...shell,[`${base}/data/builds.json`]:[{id:'a',provenance:{...guide,url:'http://metabot.gg'}}]},'community-guide needs an https url');
+await check('community guide with no reliability fails',{...shell,[`${base}/data/builds.json`]:[{id:'a',provenance:{...guide,reliability:'great'}}]},'reliability must be');
+await check('community guide with unknown region fails',{...shell,[`${base}/data/builds.json`]:[{id:'a',provenance:{...guide,region:'eu'}}]},'region must be');
 await check('multi-title data folder passes',{...shell,[`${base}/t1/data/items.json`]:[{id:'a',provenance:post}]},null);
 
 await check('record with no provenance fails',{...shell,[`${base}/data/items.json`]:[{id:'mask',name:'Mask'}]},'no provenance');

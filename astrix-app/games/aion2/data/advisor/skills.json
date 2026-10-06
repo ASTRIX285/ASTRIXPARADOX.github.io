@@ -1,0 +1,2273 @@
+{
+  "description": "Core skills for the Ascent Plan: unlock level, cooldown and Specialty perks, read from MetaBot skill pages built from the global client.",
+  "records": [
+    {
+      "id": "gladiator-keen-strike",
+      "class": "Gladiator",
+      "name": "Keen Strike",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies, raises Enmity and restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Ruinous Blow cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Adds Reckless Strike chain skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-keen-strike",
+          "title": "Keen Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/keen-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-rending-blow",
+      "class": "Gladiator",
+      "name": "Rending Blow",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies, raises Enmity and deals light stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+200 Block while using the skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Restores 50 MP on Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-rending-blow",
+          "title": "Rending Blow skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/rending-blow",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-overhead-slam",
+      "class": "Gladiator",
+      "name": "Overhead Slam",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Heavy hit on a knocked down target; can proc on targets with Incapacitated Immunity.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes an AoE skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Adds Upward Strike chain skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Always lands as a Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Removes the cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-overhead-slam",
+          "title": "Overhead Slam skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/overhead-slam",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-ruinous-blow",
+      "class": "Gladiator",
+      "name": "Ruinous Blow",
+      "unlockLevel": 14,
+      "cooldownSeconds": 45,
+      "summary": "Rushes a target to hit up to 4 enemies and buffs damage and crit chance.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+12.5m range"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+30% skill Critical Hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Extra damage on hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-ruinous-blow",
+          "title": "Ruinous Blow skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/ruinous-blow",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-rush-strike",
+      "class": "Gladiator",
+      "name": "Rush Strike",
+      "unlockLevel": 10,
+      "cooldownSeconds": 20,
+      "summary": "Gap closer to a target within 10m with a chance to knock down.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Restores 300 Stamina on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+10m range"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a charge skill dealing AoE damage"
+        },
+        {
+          "skillLevel": 12,
+          "text": "10s shorter cooldown"
+        },
+        {
+          "skillLevel": 16,
+          "text": "+25% Knockdown chance"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-rush-strike",
+          "title": "Rush Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/rush-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-crushing-wave",
+      "class": "Gladiator",
+      "name": "Crushing Wave",
+      "unlockLevel": 8,
+      "cooldownSeconds": 20,
+      "summary": "AoE strike hitting up to 4 enemies around the caster.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 50 MP on Critical Hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 20% more damage with more targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Cooldown resets on Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "50% chance to pull targets"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-crushing-wave",
+          "title": "Crushing Wave skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/crushing-wave",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-defiance",
+      "class": "Gladiator",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": 60,
+      "summary": "Clears hard crowd control and grants Tenacity (status immunity) for 5s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Wrath Burst chain skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1,000 Stamina on use"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 20% HP on use"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Tenacity lasts 2s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Big PvE and PvP damage tolerance during Tenacity"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-defiance",
+          "title": "Defiance skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/defiance",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-mocking-blade",
+      "class": "Gladiator",
+      "name": "Mocking Blade",
+      "unlockLevel": 3,
+      "cooldownSeconds": 20,
+      "summary": "Single target hit that knocks down for 3s; different motion versus Incapacitated Immunity.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP, much more against immune targets"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Downward strike becomes AoE"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Adds 2 extra strikes"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Knockdown lasts 1s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-mocking-blade",
+          "title": "Mocking Blade skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/mocking-blade",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-judgment",
+      "class": "Templar",
+      "name": "Judgment",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Strong single target hit within 4m that raises Enmity.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage against targets with Impact-type status"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Always lands as a Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Removes the cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-judgment",
+          "title": "Judgment skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/judgment",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-punishment",
+      "class": "Templar",
+      "name": "Punishment",
+      "unlockLevel": 14,
+      "cooldownSeconds": 30,
+      "summary": "Chargeable AoE around a target; grants Executor buff (accuracy and damage boost) for 20s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Applies damage over time on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "30% faster skill speed"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-punishment",
+          "title": "Punishment skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/punishment",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-pummel",
+      "class": "Templar",
+      "name": "Pummel",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies, raises Enmity and deals light stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Punishing Strike absorbs HP"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Punishment cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Punishing Strike deals extra damage on hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-pummel",
+          "title": "Pummel skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/pummel",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-warding-strike",
+      "class": "Templar",
+      "name": "Warding Strike",
+      "unlockLevel": 8,
+      "cooldownSeconds": 30,
+      "summary": "AoE hit that heals the caster, grants Warding damage tolerance and triggers Judgment.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "5s shorter cooldown"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+100 Block during Warding"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Heal over time during Warding"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Warding tolerance scales up with more targets hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Party gains damage tolerance on skill use"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-warding-strike",
+          "title": "Warding Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/warding-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-vicious-strike",
+      "class": "Templar",
+      "name": "Vicious Strike",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies, raises Enmity and restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Warding Strike cooldown by 2s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Adds Threatening Blow chain skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-vicious-strike",
+          "title": "Vicious Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/vicious-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-punishing-strike",
+      "class": "Templar",
+      "name": "Punishing Strike",
+      "unlockLevel": {
+        "pending": true,
+        "reason": "MetaBot has no page for this skill. It looks like a chain skill reached through Pummel."
+      },
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "MetaBot has no page for this skill."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "MetaBot has no page for this skill."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "MetaBot has no page for this skill."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-templar",
+          "title": "Templar build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "assassin-quick-slice",
+      "class": "Assassin",
+      "name": "Quick Slice",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies and restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Insignia Explosion cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-quick-slice",
+          "title": "Quick Slice skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/quick-slice",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "assassin-shadowstrike",
+      "class": "Assassin",
+      "name": "Shadowstrike",
+      "unlockLevel": 1,
+      "cooldownSeconds": 20,
+      "summary": "Teleports behind a target within 20m, strikes, turns them around and stuns 3s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Stun lasts 1s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+20% Critical Damage Boost for 10s on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% chance to Seal for 5s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "50% chance to Root for 5s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Becomes an AoE skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-shadowstrike",
+          "title": "Shadowstrike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/shadowstrike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "assassin-insignia-explosion",
+      "class": "Assassin",
+      "name": "Insignia Explosion",
+      "unlockLevel": 14,
+      "cooldownSeconds": 10,
+      "summary": "Detonates Insignia stacks for AoE damage around a target with a stun.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds a rotate effect"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Keeps 2 Insignia stacks after detonating"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Stun lasts 1s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "3s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-insignia-explosion",
+          "title": "Insignia Explosion skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/insignia-explosion",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "assassin-heart-gore",
+      "class": "Assassin",
+      "name": "Heart Gore",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Unlocks after a Critical Hit; AoE strike on up to 4 enemies that restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Engraves 1 Insignia on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 20% more crit with fewer targets"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Cooldown resets on Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-heart-gore",
+          "title": "Heart Gore skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/heart-gore",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "assassin-savage-roar",
+      "class": "Assassin",
+      "name": "Savage Roar",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies and engraves 1 Insignia for 10s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Shadowstrike cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Savage Smash pulls nearby targets"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-savage-roar",
+          "title": "Savage Roar skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/savage-roar",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-deadshot",
+      "class": "Ranger",
+      "name": "Deadshot",
+      "unlockLevel": 14,
+      "cooldownSeconds": 20,
+      "summary": "Chargeable Wind shot on one target; 35% more damage while Precision is active.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "No MP cost"
+        },
+        {
+          "skillLevel": 8,
+          "text": "30% faster skill speed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Extra damage on hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-deadshot",
+          "title": "Deadshot skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/deadshot",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-snipe",
+      "class": "Ranger",
+      "name": "Snipe",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Basic Wind shot on one target within 20m that restores MP; usable while moving.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Deadshot cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Adds Tempest Arrow chain skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-snipe",
+          "title": "Snipe skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/snipe",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-tempest-shot",
+      "class": "Ranger",
+      "name": "Tempest Shot",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Wind damage to up to 4 enemies around a target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+10% skill Critical Hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "5% chance to Knock Back on Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "20% faster skill speed"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-tempest-shot",
+          "title": "Tempest Shot skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/tempest-shot",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-drill-dart",
+      "class": "Ranger",
+      "name": "Drill Dart",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Fire AoE around a target that applies Bleed and cuts healing received.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Bleed lasts 2s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Fires Drill Dart one extra time"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-drill-dart",
+          "title": "Drill Dart skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/drill-dart",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-gale-arrow",
+      "class": "Ranger",
+      "name": "Gale Arrow",
+      "unlockLevel": 7,
+      "cooldownSeconds": 20,
+      "summary": "Wind AoE around a target; grants Gale buff for combat speed and damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Buff lasts 5s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% chance to Knock Back on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Gale buff gets stronger when fewer targets hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "10s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-gale-arrow",
+          "title": "Gale Arrow skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/gale-arrow",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "ranger-marking-shot",
+      "class": "Ranger",
+      "name": "Marking Shot",
+      "unlockLevel": 3,
+      "cooldownSeconds": 10,
+      "summary": "Wind shot that repositions the caster and grants Precision (+300 Critical Hit) for 10s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "+5% Perfect chance while active"
+        },
+        {
+          "skillLevel": 8,
+          "text": "30% chance to Knock Back on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Precision lasts 5s longer"
+        },
+        {
+          "skillLevel": 12,
+          "text": "One extra consecutive use"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-marking-shot",
+          "title": "Marking Shot skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/marking-shot",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-firestorm",
+      "class": "Sorcerer",
+      "name": "Firestorm",
+      "unlockLevel": 1,
+      "cooldownSeconds": 5,
+      "summary": "Fire damage to a single target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "50% lower MP cost"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Cuts target healing received by 60% for 5s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Each fireball cuts Hellfire cooldown by 2s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "15% more damage per fireball, max 75%"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-firestorm",
+          "title": "Firestorm skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/firestorm",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-blaze",
+      "class": "Sorcerer",
+      "name": "Blaze",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Fire hit on a target with Fire Mark that restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Adds delayed damage after 3s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Hits cut Wish of Concentration cooldown by 3s"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-blaze",
+          "title": "Blaze skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/blaze",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-hellfire",
+      "class": "Sorcerer",
+      "name": "Hellfire",
+      "unlockLevel": 14,
+      "cooldownSeconds": 45,
+      "summary": "Chargeable Fire AoE on up to 4 enemies around a target.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "30% faster skill speed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Fire damage over time for 10s"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "15s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-hellfire",
+          "title": "Hellfire skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/hellfire",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-flame-arrow",
+      "class": "Sorcerer",
+      "name": "Flame Arrow",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Basic Fire attack on one target within 20m that restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "+5% Fire damage for 10s when Pyroclasm activates"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Pyroclasm hits reset Blaze cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-flame-arrow",
+          "title": "Flame Arrow skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/flame-arrow",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-bittercold-wind",
+      "class": "Sorcerer",
+      "name": "Bittercold Wind",
+      "unlockLevel": 3,
+      "cooldownSeconds": 15,
+      "summary": "Places a 2s Water zone at a target that damages and may Root enemies.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Zone lasts 1s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile cast"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Adds a pull effect"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Hits cut Frost cooldown by 1s"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-bittercold-wind",
+          "title": "Bittercold Wind skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/bittercold-wind",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-wish-of-concentration",
+      "class": "Sorcerer",
+      "name": "Wish of Concentration",
+      "unlockLevel": 12,
+      "cooldownSeconds": 60,
+      "summary": "Self buff: +10% Attack and +100 Accuracy for 30s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "10% lower MP cost"
+        },
+        {
+          "skillLevel": 8,
+          "text": "An extra 10% Attack"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+500 Max MP"
+        },
+        {
+          "skillLevel": 12,
+          "text": "+10% Combat Speed"
+        },
+        {
+          "skillLevel": 16,
+          "text": "All skill cooldowns reduced by 10s"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-wish-of-concentration",
+          "title": "Wish of Concentration skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/wish-of-concentration",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-winters-shackles",
+      "class": "Sorcerer",
+      "name": "Winter's Shackles",
+      "unlockLevel": 8,
+      "cooldownSeconds": 45,
+      "summary": "Water AoE around a target that Slows enemies for 3s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "30% chance to Frost for 3s"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Damage boost for 5s on landing"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Adds Winter's Illusion chain skill"
+        },
+        {
+          "skillLevel": 16,
+          "text": "15s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-winters-shackles",
+          "title": "Winter's Shackles skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/winters-shackles",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-cold-shock",
+      "class": "Spiritmaster",
+      "name": "Cold Shock",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Basic Water attack on one target within 20m that restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Earth Tremor hits stack +2% Attack, up to 5"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Earth Tremor hits may strip 1 buff (10%)"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-cold-shock",
+          "title": "Cold Shock skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/cold-shock",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-combustion",
+      "class": "Spiritmaster",
+      "name": "Combustion",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Fire AoE on up to 4 enemies around a target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+100 skill Accuracy"
+        },
+        {
+          "skillLevel": 12,
+          "text": "20% faster skill speed"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Adds Ashy Call chain skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-combustion",
+          "title": "Combustion skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/combustion",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-summon-fire-spirit",
+      "class": "Spiritmaster",
+      "name": "Summon: Fire Spirit",
+      "unlockLevel": 1,
+      "cooldownSeconds": 15,
+      "summary": "Summons a Fire Spirit that rushes targets and uses an AoE skill.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "50% lower MP cost"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Fire Spirit gains 20% critical damage"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra 10% chance for the spirit to use its skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Spirit attacks have 5% chance to knock down 3s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Fire Spirit stats +20%"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-summon-fire-spirit",
+          "title": "Summon: Fire Spirit skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/summon-fire-spirit",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-summon-water-spirit",
+      "class": "Spiritmaster",
+      "name": "Summon: Water Spirit",
+      "unlockLevel": 3,
+      "cooldownSeconds": 15,
+      "summary": "Summons a Water Spirit that attacks from range and restores the caster's MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "50% lower MP cost"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Water Spirit Attack +10%"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra 10% chance for the spirit to use its skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Spirit attacks have 5% chance to Root for 2s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Water Spirit stats +20%"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-summon-water-spirit",
+          "title": "Summon: Water Spirit skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/summon-water-spirit",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-elemental-fusion",
+      "class": "Spiritmaster",
+      "name": "Elemental Fusion",
+      "unlockLevel": 14,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Builds element stacks from spirit skills; at 4 stacks unlocks a strong ranged attack.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Becomes an AoE skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage 3s after hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+10 to all Element Boost on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Becomes a charge skill, up to 200% more damage"
+        },
+        {
+          "skillLevel": 16,
+          "text": "25% chance to regain Four Elements"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-elemental-fusion",
+          "title": "Elemental Fusion skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/elemental-fusion",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-dimensional-control",
+      "class": "Spiritmaster",
+      "name": "Dimensional Control",
+      "unlockLevel": 8,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Briefly enabled when a spirit uses its skill; AoE that Slows and restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Stronger Slow, +20%"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage 3s after hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Pulls in nearby targets"
+        },
+        {
+          "skillLevel": 16,
+          "text": "30% chance to Root for 3s"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-dimensional-control",
+          "title": "Dimensional Control skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/dimensional-control",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-jointstrike-curse",
+      "class": "Spiritmaster",
+      "name": "Jointstrike: Curse",
+      "unlockLevel": 4,
+      "cooldownSeconds": 10,
+      "summary": "AoE around a target that applies Curse damage over time and reduces their damage to you.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Curse lasts 2s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "2s shorter cooldown"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-jointstrike-curse",
+          "title": "Jointstrike: Curse skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/jointstrike-curse",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-earths-retribution",
+      "class": "Cleric",
+      "name": "Earth's Retribution",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Basic Earth attack on one target within 20m that restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Discharge chain skill trigger chance +20%"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Landing Discharge cuts Bolt cooldown by 7s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-earths-retribution",
+          "title": "Earth's Retribution skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/earths-retribution",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-judgment-thunder",
+      "class": "Cleric",
+      "name": "Judgment Thunder",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Wind AoE on up to 4 enemies around a target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Divine Punishment cuts enemy Combat Speed 10% for 5s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Divine Punishment has 10% chance to Root 2s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Divine Punishment fires one extra time"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-judgment-thunder",
+          "title": "Judgment Thunder skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/judgment-thunder",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-light-of-regeneration",
+      "class": "Cleric",
+      "name": "Light of Regeneration",
+      "unlockLevel": 7,
+      "cooldownSeconds": 30,
+      "summary": "Party heal over time every 2s for 30s within 40m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "+5% Defense while healing"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% more healing at or below 50% HP"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+5% Incoming Heal while healing"
+        },
+        {
+          "skillLevel": 12,
+          "text": "+5% Move Speed while healing"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Extra PvE and PvP damage tolerance while healing"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-light-of-regeneration",
+          "title": "Light of Regeneration skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/light-of-regeneration",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-healing-light",
+      "class": "Cleric",
+      "name": "Healing Light",
+      "unlockLevel": 10,
+      "cooldownSeconds": 6,
+      "summary": "Heals the caster and the lowest HP party member within 40m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Two extra consecutive uses"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% more healing at or below 50% HP"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% chance to remove 1 debuff"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Restores 2% more HP"
+        },
+        {
+          "skillLevel": 16,
+          "text": "2s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-healing-light",
+          "title": "Healing Light skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/healing-light",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-radiant-recovery",
+      "class": "Cleric",
+      "name": "Radiant Recovery",
+      "unlockLevel": 12,
+      "cooldownSeconds": 12,
+      "summary": "Party heal within 40m that also removes 1 debuff.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Removes up to 2 debuffs"
+        },
+        {
+          "skillLevel": 8,
+          "text": "One extra consecutive use"
+        },
+        {
+          "skillLevel": 8,
+          "text": "3s shorter cooldown"
+        },
+        {
+          "skillLevel": 12,
+          "text": "+10% Incoming Heal for 10s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Restores 5% more HP"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-radiant-recovery",
+          "title": "Radiant Recovery skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/radiant-recovery",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-condemnation",
+      "class": "Cleric",
+      "name": "Condemnation",
+      "unlockLevel": 8,
+      "cooldownSeconds": 3,
+      "summary": "Earth AoE on a target afflicted with Chain of Torment and nearby enemies.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Restores 100 MP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% chance to Root for 3s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Cooldown resets on Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Lands as Multi-Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-condemnation",
+          "title": "Condemnation skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/condemnation",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-bolt",
+      "class": "Cleric",
+      "name": "Bolt",
+      "unlockLevel": 14,
+      "cooldownSeconds": 45,
+      "summary": "Chargeable Wind AoE on up to 4 enemies around a target.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "30% chance to Stun 3s when fully charged"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+300 skill Accuracy"
+        },
+        {
+          "skillLevel": 8,
+          "text": "30% faster skill speed"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Up to 20% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Always lands as a Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-bolt",
+          "title": "Bolt skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/bolt",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cleric-divine-aura",
+      "class": "Cleric",
+      "name": "Divine Aura",
+      "unlockLevel": 3,
+      "cooldownSeconds": 30,
+      "summary": "Places a stationary aura for 5s that repeatedly deals Earth damage to a target.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Aura slows up to 4 nearby enemies by 40% for 3s"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes an AoE skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Aura attacks 50% faster"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Aura lasts 3s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "10s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-divine-aura",
+          "title": "Divine Aura skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/divine-aura",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-onslaught",
+      "class": "Chanter",
+      "name": "Onslaught",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies and restores MP.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% more MP restored"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Spinning Strike cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Adds Storm Chain chain skill"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-onslaught",
+          "title": "Onslaught skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/onslaught",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-dark-crush",
+      "class": "Chanter",
+      "name": "Dark Crush",
+      "unlockLevel": 4,
+      "cooldownSeconds": 5,
+      "summary": "Strong single target hit within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage against targets with Impact-type status"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Always lands as a Critical Hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Adds Piercing Strike chain skill"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Removes the cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-dark-crush",
+          "title": "Dark Crush skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/dark-crush",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-incandescent-blow",
+      "class": "Chanter",
+      "name": "Incandescent Blow",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
+      },
+      "summary": "Hits up to 4 nearby enemies with light stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% less MP consumed"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+200 Block while using the skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Bursting Blow lowers enemy Accuracy by 200 for 3s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-incandescent-blow",
+          "title": "Incandescent Blow skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/incandescent-blow",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-spinning-strike",
+      "class": "Chanter",
+      "name": "Spinning Strike",
+      "unlockLevel": 14,
+      "cooldownSeconds": 30,
+      "summary": "Big AoE hit that stacks Critical Damage Boost and briefly enables Dark Crush.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "5s shorter cooldown"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Adds Heal Boost, stacking to 20%"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 20% more damage when fewer targets hit"
+        },
+        {
+          "skillLevel": 12,
+          "text": "40% chance to Seal for 3s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-spinning-strike",
+          "title": "Spinning Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/spinning-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-recuperation",
+      "class": "Chanter",
+      "name": "Recuperation",
+      "unlockLevel": 8,
+      "cooldownSeconds": 15,
+      "summary": "Party heal within 40m that removes a debuff and adds a short heal over time.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Extra consecutive use, heal over time stacks twice"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Removes up to 2 debuffs"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Healing lasts 4s longer"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Restores 5% more HP"
+        },
+        {
+          "skillLevel": 16,
+          "text": "3s shorter cooldown"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-recuperation",
+          "title": "Recuperation skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/recuperation",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-impactful-crush",
+      "class": "Chanter",
+      "name": "Impactful Crush",
+      "unlockLevel": 3,
+      "cooldownSeconds": 15,
+      "summary": "Single target hit with 60% Stun chance (100% on NPCs); briefly enables Dark Crush.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Becomes AoE damage"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Stun lasts 1s longer"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "30% faster skill speed"
+        },
+        {
+          "skillLevel": 16,
+          "text": "+20% Stun chance"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-impactful-crush",
+          "title": "Impactful Crush skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/impactful-crush",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 import {
   ArmoryUnavailable,
   armoryLive,
+  ascentUrl,
   gearUrl,
   loadCatalogue,
   loadCharacter,
@@ -55,9 +56,10 @@ function renderSummary() {
     </article>
     <aside class="ae-panel ae-plan-card" aria-labelledby="aePlanTitle">
       <p class="ae-eyebrow">Ascent Plan</p>
-      <h2 class="ae-plan-title" id="aePlanTitle">Fix list on the way</h2>
-      <p>The ranked fix list for ${esc(p.name)} arrives with the Ascent Plan page. Each fix will say what to change and why.</p>
-      <a class="btn ae-primary" id="aeGearLink" href="${esc(gearUrl(state.ref))}">View full setup</a>
+      <h2 class="ae-plan-title" id="aePlanTitle">What to do next</h2>
+      <p>The Ascent Plan for ${esc(p.name)}: what to fix now, which skills and Specialty perks to take, stigmas, Daevanion order and a macro, for ${esc(p.class)} at Lv ${esc(p.level)}.</p>
+      <a class="btn ae-primary" id="aeAscentLink" href="${esc(ascentUrl(state.ref, p.class))}">Open Ascent Plan</a>
+      <a class="btn" id="aeGearLink" href="${esc(gearUrl(state.ref))}">View full setup</a>
     </aside>`;
 }
 

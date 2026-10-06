@@ -224,3 +224,39 @@ export function refFromUrl(search = location.search) {
 export const gearUrl = ref => ref
   ? `/hub/aetherium/gear/?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId })}`
   : '/hub/aetherium/gear/';
+
+/** The Ascent Plan link for a Daeva. The class (when known) lets the page fetch its builds while the armory answers. */
+export const ascentUrl = (ref, className = null) => ref
+  ? `/hub/aetherium/ascent/?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId, ...(className ? { class: String(className).toLowerCase() } : {}) })}`
+  : '/hub/aetherium/ascent/';
+
+const ADVISOR = '/astrix-app/games/aion2/data/advisor/';
+let advisorBase;
+const advisorBuilds = new Map();
+
+/**
+ * Ascent Plan data: game-wide progression and the skill catalogue (shared, loaded once), plus the
+ * role builds for one class (loaded when that class is picked). Static files, no armory call.
+ */
+export function loadAdvisorBase() {
+  advisorBase ??= Promise.all([getJson(`${ADVISOR}progression.json`), getJson(`${ADVISOR}skills.json`)])
+    .catch(error => { advisorBase = undefined; throw error; });
+  return advisorBase;
+}
+
+function loadBuilds(className) {
+  const slug = String(className).toLowerCase();
+  if (!advisorBuilds.has(slug)) advisorBuilds.set(slug, getJson(`${ADVISOR}builds/${slug}.json`).catch(error => { advisorBuilds.delete(slug); throw error; }));
+  return advisorBuilds.get(slug);
+}
+
+/** Starts fetching a class's builds early (no await), so a later loadAdvisor finds them ready. */
+export function prefetchAdvisor(className) {
+  loadAdvisorBase().catch(() => {});
+  if (className) loadBuilds(className).catch(() => {});
+}
+
+export async function loadAdvisor(className) {
+  const [[progression, skills], builds] = await Promise.all([loadAdvisorBase(), loadBuilds(className)]);
+  return { progression, skills, builds };
+}

@@ -13,7 +13,8 @@
         { "$ref": "#/$defs/officialPost" },
         { "$ref": "#/$defs/inGameCapture" },
         { "$ref": "#/$defs/clientData" },
-        { "$ref": "#/$defs/armory" }
+        { "$ref": "#/$defs/armory" },
+        { "$ref": "#/$defs/communityGuide" }
       ]
     },
     "officialPost": {
@@ -72,6 +73,24 @@
         "endpoint": { "type": "string", "pattern": "^/", "description": "The armory path the value came from." },
         "capturedOn": { "type": "string", "format": "date" },
         "fixture": { "type": "string", "minLength": 1, "description": "Optional repo path of the saved response." }
+      }
+    },
+    "communityGuide": {
+      "title": "Community guide",
+      "description": "A third-party guide, database or press article (for example MetaBot, ExpCarry). Used for build advice, never for character data. Reliability is our own rating of the source.",
+      "type": "object",
+      "required": ["kind", "title", "publisher", "url", "retrievedOn", "region", "reliability"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "community-guide" },
+        "ref": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Short id that fields cite in their refs list." },
+        "title": { "type": "string", "minLength": 1 },
+        "publisher": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "pattern": "^https://" },
+        "retrievedOn": { "type": "string", "format": "date" },
+        "publishedOn": { "type": "string", "format": "date" },
+        "region": { "enum": ["global", "korea", "not-stated"] },
+        "reliability": { "enum": ["high", "medium", "low"] }
       }
     }
   }

@@ -36,8 +36,12 @@ No page name repeats another tool's names or The Hub.
    recommended macro stack.
 7. Faction theme and the standing 3 to 4 second load bar.
 
-Cut to go fast, back after launch: Ladder Watch, Atreia Atlas, other classes' advisor rules (their pages
-still work), NA and other regions, saved builds, compare.
+Cut to go fast, back after launch: Ladder Watch, Atreia Atlas, NA and other regions, saved builds, compare.
+
+Update 6 Oct 2026 (Miguel): the Ascent Plan covers all 8 classes from day one, not Gladiator only. A new
+player picks class, role (Tank, Healer, Support or DPS) and level and gets skills to level, Specialty
+picks, stigmas by slot level, Daevanion order, stats and a macro, each with its sources. With a Daeva
+loaded it adds fixes from the armory first. Roles with no published build stay pending.
 
 ## Decisions
 
@@ -48,6 +52,10 @@ still work), NA and other regions, saved builds, compare.
   (Nezekan is open at Lv 12).
 - Macros: a vertical stack of up to 4 rows on one key, the lowest row fires first, a no-cooldown filler
   on top. Macros are not in the armory data, so macro advice is recommendation-only.
+- Global facts the advisor uses (6 Oct 2026 research): level cap 45 on EU and NA; stigma slots at Lv 22,
+  27, 32 and 37; Daevanion boards at 12, 20, 30, 40 and 45; Specialty perks at skill Lv 8, 12 and 16 with
+  slots at 8, 12 and 20 (three sources, to check in game). Guides disagree on macro order, so the page
+  asks the player to check it in game until Miguel confirms it.
 - Roster: up to 8 characters per account, added by name and saved on the device.
 - The "equip the upgrades in your Cube" fix cannot be automatic (the Cube is not in the public data).
   It is replaced by "spend your open Nezekan nodes".

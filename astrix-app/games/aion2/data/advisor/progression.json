@@ -1,0 +1,342 @@
+{
+  "description": "Game-wide progression facts for the global (EU and NA) servers.",
+  "records": [
+    {
+      "id": "level-cap",
+      "label": "Level cap",
+      "value": 45,
+      "text": "The global servers (EU and NA) cap at Lv 45. Korea is at 50, so Korean guides past 45 do not apply.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        }
+      ]
+    },
+    {
+      "id": "stigma-unlock",
+      "label": "Stigmas unlock",
+      "value": {
+        "level": 22,
+        "quest": "The One Who Hears the Voice",
+        "needs": "Third Ascension"
+      },
+      "text": "Stigmas open at Lv 22 through the quest The One Who Hears the Voice. All 13 class stigmas unlock at once.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-level",
+          "title": "Levelling guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/leveling-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "stigma-slots",
+      "label": "Stigma slots",
+      "value": [
+        22,
+        27,
+        32,
+        37
+      ],
+      "text": "One stigma slot at Lv 22, then one more at 27, 32 and 37. Four is the most you can equip.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-level",
+          "title": "Levelling guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/leveling-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "stigma-specialty-levels",
+      "label": "Stigma Specialty perks",
+      "value": [
+        5,
+        10,
+        15,
+        20
+      ],
+      "text": "Stigma Specialty perks unlock at stigma Lv 5, 10, 15 and 20.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "daevanion-boards",
+      "label": "Daevanion boards",
+      "value": [
+        {
+          "id": 11,
+          "name": "Nezekan",
+          "unlockLevel": 12,
+          "focus": "Combat Speed and Cooldown Reduction"
+        },
+        {
+          "id": 12,
+          "name": "Zikel",
+          "unlockLevel": 20,
+          "focus": "Damage Boost and Damage Tolerance"
+        },
+        {
+          "id": 13,
+          "name": "Vaizel",
+          "unlockLevel": 30,
+          "focus": "Critical Damage Boost and Tolerance"
+        },
+        {
+          "id": 14,
+          "name": "Triniel",
+          "unlockLevel": 40,
+          "focus": "Multi-hit Chance and Resist"
+        },
+        {
+          "id": 16,
+          "name": "Azphel",
+          "unlockLevel": 45,
+          "focus": "PvP damage and status effects"
+        }
+      ],
+      "text": "Five boards, the same layout for every class. Each core skill has one +1 level node on each of the first four boards.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-level",
+          "title": "Levelling guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/leveling-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "daevanion-priority",
+      "label": "Daevanion order",
+      "value": [
+        "Skill nodes for your rotation skills near the centre",
+        "Paths to the 4-point unique corner nodes",
+        "Passive skill pairs on the way",
+        "Boards in unlock order"
+      ],
+      "text": "Respec is almost free, so you can try a path and change it.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "specialty-perks",
+      "label": "Skill Specialty perks",
+      "value": {
+        "perkLevels": {
+          "8": 3,
+          "12": 1,
+          "16": 1
+        },
+        "slotLevels": [
+          8,
+          12,
+          20
+        ]
+      },
+      "text": "Every active skill has 5 Specialty perks: three open at skill Lv 8, one at 12 and one at 16. Three sources say you can equip one perk at skill Lv 8, a second at 12 and a third at 20.",
+      "confidence": "three sources, not yet checked in game",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-classes",
+          "title": "AION 2 classes",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ec-ranger",
+          "title": "Ranger guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-ranger-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "skill-level-cap",
+      "label": "Skill levels",
+      "value": 10,
+      "text": "Wisdom Stones take a skill to Lv 10. Gear, Daevanion skill nodes and Arcana push it higher.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "dungeons",
+      "label": "Group dungeons",
+      "value": [
+        {
+          "level": 20,
+          "name": "Krao Cave"
+        },
+        {
+          "level": 28,
+          "name": "Urugugu Canyon"
+        },
+        {
+          "level": 35,
+          "name": "Fire Temple"
+        },
+        {
+          "level": 45,
+          "name": "Three expeditions"
+        }
+      ],
+      "text": "Group content opens at these levels on the global servers.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        }
+      ]
+    },
+    {
+      "id": "macro-order",
+      "label": "How macros fire",
+      "value": {
+        "pending": true,
+        "reason": "Sources disagree. games.gg says skills fire in the listed order; mein-mmo says the macro checks from the bottom row up and fires the first skill that is ready. Needs an in-game check."
+      },
+      "text": "Holding the macro key runs it. Pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gg-macro",
+          "title": "How to add skills, items and macros",
+          "publisher": "games.gg",
+          "url": "https://games.gg/aion-2/guides/aion-2-how-to-add-skills-items-and-macros/",
+          "retrievedOn": "2026-10-06",
+          "region": "not-stated",
+          "reliability": "medium",
+          "publishedOn": "2026-09-30"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mm-macro",
+          "title": "Macro trick for more damage",
+          "publisher": "mein-mmo",
+          "url": "https://mein-mmo.de/en/aion-2-macro-this-trick-instantly-increases-your-damage-while-you-only-hold-down-2-keys,1590032/",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-09-30"
+        }
+      ]
+    }
+  ]
+}

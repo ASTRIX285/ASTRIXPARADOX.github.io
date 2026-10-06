@@ -1,0 +1,219 @@
+{
+  "class": "Ranger",
+  "description": "Ranger role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "ranger-dps",
+      "class": "Ranger",
+      "role": "dps",
+      "main": true,
+      "label": "Bow DPS",
+      "beginner": "medium",
+      "summary": "Ranged physical damage. Gale Arrow is the core buff; charged Deadshot is the big hit.",
+      "coreSkills": [
+        {
+          "name": "Snipe",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "MP filler. At skill Lv 12 each hit cuts the Deadshot cooldown.",
+          "refs": [
+            "mb-ranger",
+            "ec-ranger"
+          ]
+        },
+        {
+          "name": "Tempest Shot",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "No-cooldown damage skill. Top players put Daevanion points into it.",
+          "refs": [
+            "mb-ranger",
+            "ec-ranger"
+          ]
+        },
+        {
+          "name": "Gale Arrow",
+          "priority": 3,
+          "target": "Lv 16 for the cooldown cut",
+          "why": "Unlocks at Lv 7. Self buff for combat speed and damage.",
+          "refs": [
+            "mb-ranger",
+            "mb-builds"
+          ]
+        },
+        {
+          "name": "Drill Dart",
+          "priority": 4,
+          "target": "Keep levelled",
+          "why": "Core damage skill.",
+          "refs": [
+            "mb-ranger",
+            "ec-ranger"
+          ]
+        },
+        {
+          "name": "Deadshot",
+          "priority": 5,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 14. Charged shot, up to 3 levels.",
+          "refs": [
+            "mb-ranger",
+            "ec-ranger"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Gale Arrow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving, for fights where you move a lot",
+              "refs": [
+                "ec-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Deadshot",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving, for fights where you move a lot",
+              "refs": [
+                "ec-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Tempest Shot",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Lower MP cost, if you run short of MP",
+              "refs": [
+                "ec-ranger"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Vaizel's Authority"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Bow of Blessing"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Supporting Fire"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Griffon Arrow"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Explosive Arrow",
+            "why": "ExpCarry boss and AoE sets, MetaBot stigma guide.",
+            "refs": [
+              "ec-ranger",
+              "mb-stigma"
+            ]
+          },
+          {
+            "name": "Arrow Storm",
+            "why": "ExpCarry boss and AoE sets, MetaBot stigma guide.",
+            "refs": [
+              "ec-ranger",
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "top-player data",
+        "refs": [
+          "mb-ranger"
+        ],
+        "note": "ExpCarry boss set: Bow of Blessing, Explosive Arrow, Griffon Arrow, Arrow Storm."
+      },
+      "daevanion": {
+        "priorities": [
+          "Tempest Shot +1",
+          "Drill Dart, Snipe and Deadshot +1",
+          "Gale Arrow +1"
+        ],
+        "refs": [
+          "mb-ranger"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Accuracy (enough for your content)",
+          "Attack and damage bonuses",
+          "Combat Speed",
+          "Survival"
+        ],
+        "refs": [
+          "ec-ranger"
+        ]
+      },
+      "rotation": {
+        "pending": true,
+        "reason": "No reliable Ranger rotation is published yet. ExpCarry advises keeping charged shots, movement and traps on manual keys and only macroing filler such as Snipe."
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-ranger",
+          "title": "Ranger guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-ranger-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-06"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-builds",
+          "title": "Class builds guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/class-builds-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-ranger",
+          "title": "Ranger build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/ranger/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+{
+  "class": "Chanter",
+  "description": "Chanter role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "chanter-support",
+      "class": "Chanter",
+      "role": "support",
+      "main": true,
+      "label": "Mantra support",
+      "beginner": "medium",
+      "summary": "Party buffs with Undefeated Mantra, plus solid melee damage. Undefeated Mantra is in every build.",
+      "coreSkills": [
+        {
+          "name": "Onslaught",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "MP filler, usable on the move. Each hit cuts the Spinning Strike cooldown from skill Lv 12.",
+          "refs": [
+            "mb-chanter",
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Dark Crush",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "Main hit. Top players put Daevanion points into it.",
+          "refs": [
+            "mb-chanter",
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Incandescent Blow",
+          "priority": 3,
+          "target": "Lv 8 to 12",
+          "why": "No-cooldown damage skill.",
+          "refs": [
+            "mb-chanter",
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Spinning Strike",
+          "priority": 4,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 14. The core buff skill.",
+          "refs": [
+            "ec-chanter",
+            "mb-builds"
+          ]
+        },
+        {
+          "name": "Recuperation",
+          "priority": 5,
+          "target": "As needed",
+          "why": "Unlocks at Lv 8. Self and party recovery.",
+          "refs": [
+            "ec-chanter"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Dark Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ec-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Incandescent Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Lower MP cost (early levels)",
+              "refs": [
+                "ec-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Undefeated Mantra"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Sprint Mantra"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Power of the Storm"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Marchutan's Wrath"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Obliterate",
+            "why": "ExpCarry boss support set.",
+            "refs": [
+              "ec-chanter"
+            ]
+          },
+          {
+            "name": "Impeding Authority",
+            "why": "MetaBot stigma guide pick.",
+            "refs": [
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "top-player data",
+        "refs": [
+          "mb-chanter",
+          "ec-chanter"
+        ],
+        "note": "ExpCarry boss set: Undefeated Mantra, Power of the Storm, Marchutan's Wrath, Obliterate."
+      },
+      "daevanion": {
+        "priorities": [
+          "Nezekan and Zikel first",
+          "Dark Crush +1",
+          "Onslaught +1"
+        ],
+        "refs": [
+          "mb-chanter"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Attack",
+          "Accuracy",
+          "Critical Hit",
+          "Critical Damage Boost"
+        ],
+        "refs": [
+          "ec-chanter"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Undefeated Mantra (keep up)",
+          "Spinning Strike",
+          "Dark Crush",
+          "Impactful Crush",
+          "Dark Crush"
+        ],
+        "filler": "Onslaught or Incandescent Blow",
+        "manual": [
+          "Recuperation as needed",
+          "Obliterate for stagger windows"
+        ],
+        "refs": [
+          "ec-chanter"
+        ]
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-chanter",
+          "title": "Chanter guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-chanter-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-builds",
+          "title": "Class builds guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/class-builds-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-chanter",
+          "title": "Chanter build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/chanter/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "chanter-healer",
+      "class": "Chanter",
+      "role": "healer",
+      "main": false,
+      "label": "Defensive support",
+      "beginner": "medium",
+      "status": "partial",
+      "summary": "A tankier Chanter that leans on shields and healing. Only the stigma set is sourced.",
+      "coreSkills": [
+        {
+          "name": "Recuperation",
+          "priority": 1,
+          "target": "Keep levelled",
+          "why": "Self and party recovery.",
+          "refs": [
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Dark Crush",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "Main hit.",
+          "refs": [
+            "ec-chanter"
+          ]
+        }
+      ],
+      "specialties": [],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Undefeated Mantra"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Healing Touch"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Impeding Authority"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Barrier Spell"
+          }
+        ],
+        "alternatives": [],
+        "confidence": "single-source",
+        "refs": [
+          "ec-chanter"
+        ],
+        "note": "ExpCarry defensive set. Slot order follows the list, not a sourced order."
+      },
+      "daevanion": {
+        "pending": true,
+        "reason": "No source gives a healer-focused Chanter Daevanion plan yet."
+      },
+      "stats": {
+        "order": [
+          "HP",
+          "Defense",
+          "Attack"
+        ],
+        "refs": [
+          "ec-chanter"
+        ]
+      },
+      "rotation": {
+        "pending": true,
+        "reason": "No source gives a healer-focused Chanter rotation yet."
+      },
+      "levelNotes": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-chanter",
+          "title": "Chanter guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-chanter-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "chanter-dps",
+      "class": "Chanter",
+      "role": "dps",
+      "main": false,
+      "label": "Solo and AoE",
+      "beginner": "medium",
+      "summary": "For levelling alone: the support core with damage stigmas.",
+      "coreSkills": [
+        {
+          "name": "Dark Crush",
+          "priority": 1,
+          "target": "Keep levelled",
+          "why": "Main hit.",
+          "refs": [
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Onslaught",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "MP filler.",
+          "refs": [
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Spinning Strike",
+          "priority": 3,
+          "target": "Keep levelled",
+          "why": "Core buff skill.",
+          "refs": [
+            "ec-chanter"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Dark Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ec-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Undefeated Mantra"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Sprint Mantra"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Marchutan's Wrath"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Guardian Blessing"
+          }
+        ],
+        "alternatives": [],
+        "confidence": "single-source",
+        "refs": [
+          "ec-chanter"
+        ],
+        "note": "ExpCarry solo and AoE set."
+      },
+      "daevanion": {
+        "priorities": [
+          "Dark Crush +1",
+          "Onslaught +1"
+        ],
+        "refs": [
+          "mb-chanter"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Attack",
+          "Accuracy",
+          "Critical Hit"
+        ],
+        "refs": [
+          "ec-chanter"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Undefeated Mantra",
+          "Spinning Strike",
+          "Dark Crush",
+          "Impactful Crush"
+        ],
+        "filler": "Onslaught",
+        "manual": [
+          "Recuperation"
+        ],
+        "refs": [
+          "ec-chanter"
+        ]
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-chanter",
+          "title": "Chanter guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-chanter-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-chanter",
+          "title": "Chanter build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/chanter/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    }
+  ]
+}

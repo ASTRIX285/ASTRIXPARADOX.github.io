@@ -1,0 +1,224 @@
+{
+  "class": "Sorcerer",
+  "description": "Sorcerer role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "sorcerer-dps",
+      "class": "Sorcerer",
+      "role": "dps",
+      "main": true,
+      "label": "Fire and frost caster",
+      "beginner": "medium",
+      "summary": "Ranged magic damage built around Firestorm feeding Hellfire. Keep your MP above 25 percent.",
+      "coreSkills": [
+        {
+          "name": "Flame Arrow",
+          "priority": 1,
+          "target": "Lv 8 to 16",
+          "why": "MP filler.",
+          "refs": [
+            "ec-sorcerer"
+          ]
+        },
+        {
+          "name": "Firestorm",
+          "priority": 2,
+          "target": "Lv 20",
+          "why": "Each fireball cuts the Hellfire cooldown from skill Lv 12.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ]
+        },
+        {
+          "name": "Blaze",
+          "priority": 3,
+          "target": "Lv 20",
+          "why": "Core damage skill.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ]
+        },
+        {
+          "name": "Hellfire",
+          "priority": 4,
+          "target": "Lv 20",
+          "why": "Unlocks at Lv 14. Big AoE nuke.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ]
+        },
+        {
+          "name": "Wish of Concentration",
+          "priority": 5,
+          "target": "Lv 20",
+          "why": "Unlocks at Lv 12. Attack buff.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ]
+        },
+        {
+          "name": "Bittercold Wind",
+          "priority": 6,
+          "target": "Lv 20",
+          "why": "Frost damage skill used by nearly every top player.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Firestorm",
+          "picks": [
+            {
+              "skillLevel": 12,
+              "pick": "Each fireball lowers the Hellfire cooldown",
+              "refs": [
+                "ec-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Blaze",
+          "picks": [
+            {
+              "skillLevel": 16,
+              "pick": "Hits cut the Wish of Concentration cooldown",
+              "refs": [
+                "ec-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Wish of Concentration",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "An extra 10% Attack",
+              "refs": [
+                "ec-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "All skill cooldowns 10 s shorter",
+              "refs": [
+                "ec-sorcerer"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Element Enhancement"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Delayed Explosion"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Fire Wall"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Cold Storm"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Steel Barrier",
+            "why": "ExpCarry: swap in if you keep dying.",
+            "refs": [
+              "ec-sorcerer"
+            ]
+          },
+          {
+            "name": "Arctic Armor",
+            "why": "ExpCarry: swap in if you keep dying.",
+            "refs": [
+              "ec-sorcerer"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "mb-sorcerer",
+          "ec-sorcerer"
+        ]
+      },
+      "daevanion": {
+        "priorities": [
+          "Reach the Specialty thresholds on your core skills first",
+          "Nezekan nodes for Hellfire, Firestorm and Wish of Concentration"
+        ],
+        "refs": [
+          "ec-sorcerer"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Accuracy",
+          "Attack and damage",
+          "Combat Speed and cooldown",
+          "HP and Damage Tolerance"
+        ],
+        "refs": [
+          "ec-sorcerer"
+        ]
+      },
+      "rotation": {
+        "pending": true,
+        "reason": "No reliable Sorcerer rotation is published yet. Keep MP above 25 percent: Grace of Enhancement only adds PvE damage at 25 percent MP or more."
+      },
+      "levelNotes": [],
+      "roleRefs": [
+        "mb-builds"
+      ],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-sorcerer",
+          "title": "Sorcerer guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-sorcerer-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-09-29"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-builds",
+          "title": "Class builds guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/class-builds-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-sorcerer",
+          "title": "Sorcerer build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/sorcerer/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    }
+  ]
+}
