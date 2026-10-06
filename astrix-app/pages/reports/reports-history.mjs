@@ -2,6 +2,7 @@ import {bungieImage,stat} from './reports-model.mjs';
 import {createReportsStore} from './reports-data.mjs';
 
 export const RUN_PAGE_SIZE=20;
+export const HISTORY_TTL_MS=10*60_000;
 const completed=values=>{const value=stat(values,'completed');return value===1?true:value===0?false:null;};
 export function historyRun(row,characterId){
   const details=row?.activityDetails;
@@ -68,8 +69,31 @@ export function createReportsHistory(snapshot,{origin='https://auth.astrixparado
         if(rows.length)state.through=Math.min(...rows.map(row=>Date.parse(row.period)));
       }));
       const failed=results.find(row=>row.status==='rejected');if(failed)throw failed.reason;
+      await save();
     })();
     try{await flight;}finally{flight=null;}
+  }
+  // Scanned history is kept per account for HISTORY_TTL_MS, so a scan built in the background on
+  // another page (or before a reload) opens at once. Older copies are scanned again.
+  const historyKey=`reports-history-v1:${snapshot.identity}`;
+  async function save(){
+    if(!snapshot.identity)return;
+    await store.set(historyKey,{fetchedAt:now(),streams:[...streams].map(([id,row])=>[id,{page:row.page,done:row.done,through:row.through,runs:[...row.runs.values()]}])}).catch(()=>{});
+  }
+  async function restore(){
+    const saved=snapshot.identity?await store.get(historyKey).catch(()=>null):null;
+    if(!saved||!Array.isArray(saved.streams)||now()-saved.fetchedAt>=HISTORY_TTL_MS)return false;
+    for(const [id,row] of saved.streams){
+      const stream=streams.get(id);if(!stream||!Array.isArray(row?.runs))continue;
+      Object.assign(stream,{page:row.page,done:row.done,through:row.through,runs:new Map(row.runs.map(run=>[`${run.id}:${id}`,run]))});
+    }
+    return true;
+  }
+  // Every run page and each completed run's report for one activity, newest first (the first
+  // screen of its section). Used by background preparation; one request at a time.
+  async function prepareSection(activity,{limit=RUN_PAGE_SIZE}={}){
+    while(!complete())await advance();
+    for(const run of runs(activity).filter(row=>row.completed===true).slice(0,limit))await pgcr(run.id).catch(()=>null);
   }
   async function page(activity,characterId='all',pageIndex=0){
     // Bounded work per interaction, with an explicit continuation if this activity
@@ -111,7 +135,13 @@ export function createReportsHistory(snapshot,{origin='https://auth.astrixparado
     }catch{/* PGCR remains usable when a definition is unavailable. */}
     return {...model,name:activity?.displayProperties?.name||null,image:bungieImage(activity?.pgcrImage),modifiers:modifierNames(model.selectedSkullHashes,collections)};
   }
-  return {advance,page,readPage,runs,complete,pgcr,detail};
+  return {advance,page,readPage,runs,complete,pgcr,detail,restore,prepareSection};
+}
+// A history controller with any saved scan for this account already applied.
+export async function loadReportsHistory(snapshot,options){
+  const history=createReportsHistory(snapshot,options);
+  await history.restore();
+  return history;
 }
 
 export const normalizeDifficulty=label=>String(label).replace(/(^| · )Normal$/, '$1Standard');

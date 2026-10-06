@@ -183,7 +183,8 @@ const startupContext={
   assertRenderablePagePayload(){},hydrateManifestPayload:async value=>value,INITIAL_PROFILE_HYDRATION:{},
   activateLiveProfile:async()=>{startupActivations++;return syntheticDisplay;},
   loadLiveProfile:async(_session,options)=>{assert.equal(options.background,true);backgroundStarts++;return new Promise(resolve=>{releaseLive=resolve;});},
-  reportProfileError:error=>{throw error;}
+  reportProfileError:error=>{throw error;},
+  beginEngineTiming:()=>({end(){}}),Date
 };
 runInNewContext(startupSource,startupContext);
 let startupFinished=false;

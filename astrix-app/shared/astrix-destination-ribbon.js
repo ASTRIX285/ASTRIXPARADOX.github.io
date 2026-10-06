@@ -68,12 +68,14 @@
     const {readCachedBungieSession}=await import(new URL('../pages/guardian-workspace-v2/guardian-session-cache.mjs',scriptUrl).href);
     const session=readCachedBungieSession();
     if(!session?.authenticated)return;
+    // A tab the player reaches for moves to the front of background preparation.
+    const client=await import(new URL('../core/prepared-page-client.mjs',scriptUrl).href);
     if(destination.key==='reports'){
+      const queue=client.preparationQueue(session);
       const {preloadReports}=await import(new URL('./reports-preload.mjs',scriptUrl).href);
-      await preloadReports(session);return;
+      await (queue?.front('reports')||preloadReports(session));return;
     }
-    const {loadPreparedPagePayload}=await import(new URL('../core/prepared-page-client.mjs',scriptUrl).href);
-    await loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false});
+    await (client.frontPreparedPage(session,pageKinds[destination.key])||client.loadPreparedPagePayload(session,pageKinds[destination.key],{quiet:true,publish:false}));
   }
   function prepare(destination){
     const identity=accountIdentity(),key=`${identity}:${destination.key}`;
@@ -221,14 +223,34 @@
     mount.replaceChildren(nav);
   }
 
-  async function warmReports(session){
+  // Background preparation (4 Oct 2026): once this page has reported ready (forge:portal-ready),
+  // every other tool tab and each Reports section is built for the signed-in account, on idle.
+  // Signing out or switching account stops it and forgets what was built.
+  let preparedFor='';
+  function pageIsReady(){return window.ForgeLoader?.completed===true;}
+  async function startPreparation(session){
+    if(!session?.authenticated||!pageIsReady())return;
+    const identity=accountIdentity();if(!identity||identity===preparedFor)return;
     const {isJourneyPreview}=await import(new URL('./local-preview.mjs',scriptUrl).href);
     if(isJourneyPreview())return;
-    if(!session?.authenticated)return;
-    void import(new URL('./reports-preload.mjs',scriptUrl).href)
-      .then(module=>module.preloadReports(session)).catch(()=>{});
+    preparedFor=identity;
+    try{
+      const [client,reports]=await Promise.all([import(new URL('../core/prepared-page-client.mjs',scriptUrl).href),import(new URL('./reports-preload.mjs',scriptUrl).href)]);
+      const constrained=Boolean(navigator.connection?.saveData||/(^|-)2g$/.test(String(navigator.connection?.effectiveType||'')));
+      const queue=client.startBackgroundPreparation(session,{current:pageKinds[activeShellKey()]||null});
+      if(!constrained||activeShellKey()==='reports')reports.queueReportsPreparation(session,queue,{constrained});
+    }catch{preparedFor='';}
   }
-  window.addEventListener('forge:bungie-session',event=>warmReports(event.detail));
+  const currentSession=()=>[window.FORGE_BUNGIE_SESSION].find(row=>row?.authenticated===true)||null;
+  document.addEventListener('forge:portal-ready',()=>{void startPreparation(currentSession());});
+  window.addEventListener('forge:bungie-session',event=>{
+    const signedOut=event.detail?.authenticated===false;
+    if(signedOut||(event.detail?.authenticated&&preparedFor&&accountIdentity()!==preparedFor)){
+      preparedFor='';
+      void import(new URL('../core/prepared-page-client.mjs',scriptUrl).href).then(client=>client.stopBackgroundPreparation({signedOut})).catch(()=>{});
+    }
+    void startPreparation(event.detail);
+  });
   // ---------- Tool shell on every tool page (Miguel, 1 Oct 2026) ----------
   // Header actions at all widths: refresh icon, Bungie emblem, and up to 1199px a menu
   // icon that opens the tools drawer from the left. Phone and tablet show only the active
@@ -316,7 +338,7 @@
 
   // Data age on the refresh icon. Shown whenever this page's Guardian data is not a live
   // Bungie read (server cache, display snapshot or this browser's copy), with its real age.
-  const PREPARED_KIND_BY_DESTINATION=Object.freeze({home:'journey',journey:'journey',character:'character','forge-loader':'loadout','build-forge':'build-forge',vault:'vault',loadout:'loadout'});
+  const PREPARED_KIND_BY_DESTINATION=Object.freeze({home:'journey',journey:'journey',character:'character','forge-loader':'loadout','build-forge':'build-forge',vault:'vault',loadout:'loadout',reports:'reports'});
   function ageParts(ms){
     const minutes=Math.floor(ms/60000),hours=Math.floor(minutes/60),days=Math.floor(hours/24);
     if(minutes<1)return ['<1m','less than a minute ago'];
@@ -438,7 +460,7 @@
     media?.addEventListener?.('change',apply);
     apply();
   }
-  function init(){seedGuardian();brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);mountShell();mountInventoryTabs();watchScroll();warmReports(window.FORGE_BUNGIE_SESSION);}
+  function init(){seedGuardian();brandHeader();document.querySelectorAll('[data-forge-destination-ribbon]').forEach(render);mountShell();mountInventoryTabs();watchScroll();void startPreparation(currentSession());}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

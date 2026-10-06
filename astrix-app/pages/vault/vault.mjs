@@ -234,6 +234,10 @@ function actionFailureMessage(result){
   return detail?.payload?.Message||detail?.message||(Array.isArray(detail)?detail[0]:'')||failed?.label||'Bungie did not confirm the requested inventory state.';
 }
 
+function dataAgeMs(value){
+  const ready=value?.pageReady||{},at=Number(value?.preparedCache?.dataAt||ready.accountDataAt||value?.displaySnapshot?.fetchedAt||ready.generatedAt);
+  return Number.isFinite(at)&&at>0?Date.now()-at:Infinity;
+}
 async function refreshAfterLiveAction(liveInventory=null){
   const live=liveInventory||await requestFreshProfile(),next={...payload,...live,profile:{...(payload?.profile||{}),...(live?.profile||{})},definitions:payload?.definitions||{},damageDefinitions:payload?.damageDefinitions||{},breakerDefinitions:payload?.breakerDefinitions||{},statDefinitions:payload?.statDefinitions||{},collectibleDefinitions:payload?.collectibleDefinitions||{},gearAssets:payload?.gearAssets||{}};
   await applyVaultRefresh(next,{reason:'mutation'});
@@ -737,7 +741,8 @@ async function init(){
     setStatus(`${catalogue.items.length} exact grouped inventory item${catalogue.items.length===1?'':'s'} loaded across ${characters().length} Guardian${characters().length===1?'':'s'} and Vault${unresolved?` · ${unresolved} item definition${unresolved===1?'':'s'} unresolved`:''}. Live transfer ${liveReady?'ready':'unavailable for this session'}.`,'good');
     await settleVisibleImages();
     globalThis.ForgeLoader?.done?.();
-    void refreshAfterLiveAction().catch(error=>console.info('[Forge Vault] initial live inventory overlay unavailable',error));
+    // Refresh stale data quietly: inventory read from Bungie under a minute ago is not read again on open.
+    if(!(dataAgeMs(payload)<60_000))void refreshAfterLiveAction().catch(error=>console.info('[Forge Vault] initial live inventory overlay unavailable',error));
   }catch(error){
     console.error('[Forge Vault]',error);
     byId('vaultConnectionState').textContent='INVENTORY UNAVAILABLE';

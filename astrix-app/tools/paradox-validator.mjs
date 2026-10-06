@@ -26,6 +26,7 @@ const validators=[
   'test-reports-drilldown.mjs',
   'test-reports-three-stage.mjs',
   'test-reports-boxes.mjs',
+  'test-background-prebuild.mjs', // feature/background-page-prebuild: tabs and Reports sections open from what was built.
   'validate-reports-catalogue.mjs',
   'validate-plain-language.mjs', // Prompt 19: copy-only language contract.
   'validate-forge-internal-rename.mjs',

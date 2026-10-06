@@ -32,7 +32,7 @@ for(const [location,preview] of [[href('localhost'),true],[href('127.0.0.1'),tru
  assert.equal(imports.some(path=>path.includes('./journey.mjs')),!preview);
 }
 const ribbon=await readFile(new URL('../shared/astrix-destination-ribbon.js',import.meta.url),'utf8');
-for(const [name,end] of [['prepareData','setNavigationProgress'],['warmReports',null]]){
+for(const [name,end] of [['prepareData','setNavigationProgress'],['startPreparation',null]]){
  const start=ribbon.indexOf(`  async function ${name}(`);assert.ok(start>=0);
  const body=ribbon.slice(start,end?ribbon.indexOf(`  function ${end}(`,start):undefined);
  assert.match(body,/await import\(new URL\('\.\/local-preview\.mjs(?:\?v=[0-9a-f]{10})?',scriptUrl\)\.href\);\s*if\(isJourneyPreview\(\)\)return;/);
