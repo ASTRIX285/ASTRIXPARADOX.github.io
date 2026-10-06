@@ -260,6 +260,20 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   });
 }
 
+await check('wide screens use the width: three plan columns at 1920, two at 1280',async()=>{
+  const lefts=async page=>page.$$eval('#aeNowTitle,#aeStigmaPlanTitle,#aeDaevTitle',items=>items.map(el=>Math.round(el.closest('.ae-panel').getBoundingClientRect().left)));
+  const wide=await open(ascent(ref),{viewport:{width:1920,height:1000}});
+  const [now,stigma,daev]=await lefts(wide.page);
+  assert.ok(now<stigma&&stigma<daev,`three columns at 1920 (${now}, ${stigma}, ${daev})`);
+  const width=await wide.page.$eval('main',el=>el.getBoundingClientRect().width);
+  assert.ok(width>=1640,`content spans the screen at 1920 (${width}px)`);
+  await wide.context.close();
+  const mid=await open(ascent(ref),{viewport:{width:1280,height:900}});
+  const [a,b,c]=await lefts(mid.page);
+  assert.ok(a<b&&b===c,`two columns at 1280 (${a}, ${b}, ${c})`);
+  await mid.context.close();
+});
+
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
 await browser.close();
