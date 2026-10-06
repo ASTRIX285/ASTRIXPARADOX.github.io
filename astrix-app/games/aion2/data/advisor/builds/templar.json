@@ -1,0 +1,359 @@
+{
+  "class": "Templar",
+  "description": "Templar role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "templar-tank",
+      "class": "Templar",
+      "role": "tank",
+      "main": true,
+      "label": "Shield tank",
+      "beginner": "very high",
+      "summary": "The main tank. Hold threat with Taunt, use Judgment in shield windows and keep Warding Strike for damage tolerance.",
+      "coreSkills": [
+        {
+          "name": "Vicious Strike",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "Your MP filler. Its Lv 12 perk lowers the Warding Strike cooldown.",
+          "refs": [
+            "ec-templar"
+          ]
+        },
+        {
+          "name": "Judgment",
+          "priority": 2,
+          "target": "Lv 20 (Lv 16 perks matter most)",
+          "why": "Main damage hit. Top players put Daevanion points into it on Nezekan.",
+          "refs": [
+            "ec-templar",
+            "mb-templar"
+          ]
+        },
+        {
+          "name": "Pummel",
+          "priority": 3,
+          "target": "Lv 20",
+          "why": "Core shield attack.",
+          "refs": [
+            "ec-templar",
+            "mb-templar"
+          ]
+        },
+        {
+          "name": "Punishment",
+          "priority": 4,
+          "target": "Lv 20",
+          "why": "Unlocks at Lv 14. 20 m charged hit that grants Executor: more accuracy and PvE damage.",
+          "refs": [
+            "ec-templar",
+            "mb-templar"
+          ]
+        },
+        {
+          "name": "Warding Strike",
+          "priority": 5,
+          "target": "Keep levelled",
+          "why": "Self heal and damage tolerance buff. At skill Lv 16 it helps the whole party.",
+          "refs": [
+            "mb-templar"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Judgment",
+          "picks": [
+            {
+              "skillLevel": 12,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ec-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "refs": [
+                "ec-templar"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Taunt"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Empyrean Lord's Punishment"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Battlefield Banner"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Doom Shield"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Nezekan's Shield",
+            "why": "ExpCarry main PvE tank set and MetaBot stigma guide pick.",
+            "refs": [
+              "ec-templar",
+              "mb-stigma"
+            ]
+          },
+          {
+            "name": "Shield of Protection",
+            "why": "ExpCarry main PvE tank set.",
+            "refs": [
+              "ec-templar"
+            ]
+          },
+          {
+            "name": "Second Skin",
+            "why": "ExpCarry main PvE tank set.",
+            "refs": [
+              "ec-templar"
+            ]
+          }
+        ],
+        "confidence": "top-player data",
+        "refs": [
+          "mb-templar",
+          "ec-templar"
+        ],
+        "note": "Taunt is in every PvE list. For pure survival ExpCarry runs Shield of Protection, Taunt, Nezekan's Shield and Second Skin."
+      },
+      "daevanion": {
+        "priorities": [
+          "Punishment +1 on Zikel",
+          "Judgment +1 on Nezekan",
+          "Vicious Strike +1 on Zikel"
+        ],
+        "refs": [
+          "mb-templar"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Block and Defense",
+          "HP and Damage Tolerance",
+          "Accuracy",
+          "Combat Speed and damage"
+        ],
+        "refs": [
+          "ec-templar"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Pummel",
+          "Judgment (in the shield skill window)",
+          "Punishment (charged)",
+          "Vicious Strike"
+        ],
+        "filler": "Vicious Strike for MP",
+        "manual": [
+          "Taunt",
+          "Defiance",
+          "pulls and protection skills"
+        ],
+        "refs": [
+          "ec-templar"
+        ],
+        "note": "ExpCarry gives the priorities, not a fixed order. Keep defensive skills on manual keys."
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-templar",
+          "title": "Templar guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-templar-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-05"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-templar",
+          "title": "Templar build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "templar-dps",
+      "class": "Templar",
+      "role": "dps",
+      "main": false,
+      "label": "Offensive tank (solo and AoE)",
+      "beginner": "very high",
+      "summary": "For solo levelling and AoE farming: the same core skills with damage stigmas.",
+      "coreSkills": [
+        {
+          "name": "Judgment",
+          "priority": 1,
+          "target": "Lv 20",
+          "why": "Main damage hit.",
+          "refs": [
+            "ec-templar"
+          ]
+        },
+        {
+          "name": "Punishment",
+          "priority": 2,
+          "target": "Lv 20",
+          "why": "Big charged hit with the Executor buff.",
+          "refs": [
+            "ec-templar"
+          ]
+        },
+        {
+          "name": "Pummel",
+          "priority": 3,
+          "target": "Lv 20",
+          "why": "Core shield attack.",
+          "refs": [
+            "ec-templar"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Judgment",
+          "picks": [
+            {
+              "skillLevel": 12,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ec-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "refs": [
+                "ec-templar"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Doom Shield"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Battlefield Banner"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Empyrean Lord's Punishment"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Taunt"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Noble Armor",
+            "why": "ExpCarry solo and AoE set.",
+            "refs": [
+              "ec-templar"
+            ]
+          },
+          {
+            "name": "Executing Blade",
+            "why": "ExpCarry solo and AoE set.",
+            "refs": [
+              "ec-templar"
+            ]
+          }
+        ],
+        "confidence": "single-source",
+        "refs": [
+          "ec-templar"
+        ],
+        "note": "Slot order follows the ExpCarry list, not a sourced order."
+      },
+      "daevanion": {
+        "priorities": [
+          "Punishment +1 on Zikel",
+          "Judgment +1 on Nezekan"
+        ],
+        "refs": [
+          "mb-templar"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Accuracy",
+          "Combat Speed and damage",
+          "Block and Defense"
+        ],
+        "refs": [
+          "ec-templar"
+        ]
+      },
+      "rotation": {
+        "pending": true,
+        "reason": "No source gives a solo Templar rotation. Use the tank priorities."
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-templar",
+          "title": "Templar guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-templar-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-05"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-templar",
+          "title": "Templar build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    }
+  ]
+}

@@ -73,7 +73,16 @@ export function checkSource(source,label,errors,{kinds}={}){
     if(!filled(source.endpoint)||!source.endpoint.startsWith('/'))errors.push(`${label}: armory needs the endpoint path`);
     if(!DATE.test(source.capturedOn??''))errors.push(`${label}: armory needs capturedOn (YYYY-MM-DD)`);
     if('fixture' in source&&!filled(source.fixture))errors.push(`${label}: armory fixture is empty`);
-  } else errors.push(`${label}: provenance kind must be official-post, in-game-capture, client-data or armory`);
+  } else if(kind==='community-guide'){
+    onlyKeys(source,['kind','ref','title','publisher','url','retrievedOn','publishedOn','region','reliability'],label,errors);
+    for(const key of ['title','publisher'])if(!filled(source[key]))errors.push(`${label}: community-guide needs ${key}`);
+    if(!filled(source.url)||!/^https:\/\//.test(source.url))errors.push(`${label}: community-guide needs an https url`);
+    if(!DATE.test(source.retrievedOn??''))errors.push(`${label}: community-guide needs retrievedOn (YYYY-MM-DD)`);
+    if('publishedOn' in source&&!DATE.test(source.publishedOn??''))errors.push(`${label}: community-guide publishedOn must be YYYY-MM-DD`);
+    if(!['global','korea','not-stated'].includes(source.region))errors.push(`${label}: community-guide region must be global, korea or not-stated`);
+    if(!['high','medium','low'].includes(source.reliability))errors.push(`${label}: community-guide reliability must be high, medium or low`);
+    if('ref' in source&&!/^[a-z0-9-]+$/.test(source.ref??''))errors.push(`${label}: community-guide ref must be lower-case words and hyphens`);
+  } else errors.push(`${label}: provenance kind must be official-post, in-game-capture, client-data, armory or community-guide`);
 }
 
 export function checkProvenance(provenance,label,errors,options){

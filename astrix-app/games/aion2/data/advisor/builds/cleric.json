@@ -1,0 +1,267 @@
+{
+  "class": "Cleric",
+  "description": "Cleric role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "cleric-healer",
+      "class": "Cleric",
+      "role": "healer",
+      "main": true,
+      "label": "Healer",
+      "beginner": "very high",
+      "summary": "The main healer, with real damage through Condemnation. Healing scales with Attack, so damage stats help your heals.",
+      "coreSkills": [
+        {
+          "name": "Earth's Retribution",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "MP filler.",
+          "refs": [
+            "mb-cleric"
+          ]
+        },
+        {
+          "name": "Light of Regeneration",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 7. Party heal over time, usable on the move.",
+          "refs": [
+            "mb-cleric",
+            "ec-cleric"
+          ]
+        },
+        {
+          "name": "Condemnation",
+          "priority": 3,
+          "target": "Lv 20+",
+          "why": "Unlocks at Lv 8. Your main damage skill.",
+          "refs": [
+            "ec-cleric"
+          ]
+        },
+        {
+          "name": "Healing Light",
+          "priority": 4,
+          "target": "Lv 16+",
+          "why": "Unlocks at Lv 10. Heals you and the lowest-health ally at 40 m.",
+          "refs": [
+            "ec-cleric",
+            "mb-builds"
+          ]
+        },
+        {
+          "name": "Radiant Recovery",
+          "priority": 5,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 12. Party heal that also cleanses.",
+          "refs": [
+            "mb-cleric",
+            "ec-cleric"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Healing Light",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Two extra uses in a row",
+              "refs": [
+                "ec-cleric"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Restores 2% more HP",
+              "refs": [
+                "ec-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Radiant Recovery",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "One extra use in a row",
+              "refs": [
+                "ec-cleric"
+              ]
+            },
+            {
+              "skillLevel": 8,
+              "pick": "3 s shorter cooldown",
+              "refs": [
+                "ec-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Condemnation",
+          "picks": [
+            {
+              "skillLevel": 12,
+              "pick": "Cooldown resets on a critical hit",
+              "refs": [
+                "ec-cleric"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Lands as a multi-hit",
+              "refs": [
+                "ec-cleric"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Light of Protection"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Noble Aura"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Earth Punishment"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Summon Resurrection"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Prayer of Amplification",
+            "why": "ExpCarry fourth pick.",
+            "refs": [
+              "ec-cleric"
+            ]
+          },
+          {
+            "name": "Yustiel's Power",
+            "why": "MetaBot stigma guide pick.",
+            "refs": [
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "mb-cleric",
+          "ec-cleric"
+        ],
+        "note": "Earth Punishment makes Condemnation always crit."
+      },
+      "daevanion": {
+        "priorities": [
+          "Light of Regeneration +1",
+          "Condemnation +1",
+          "Judgment Thunder +1",
+          "Healing Light and Radiant Recovery nodes"
+        ],
+        "refs": [
+          "mb-cleric",
+          "mb-daev"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Attack (also raises healing)",
+          "Accuracy",
+          "Cooldown Reduction",
+          "Combat Speed",
+          "Critical Damage Boost",
+          "Survival"
+        ],
+        "refs": [
+          "ec-cleric"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Earth Punishment",
+          "Condemnation",
+          "Divine Aura",
+          "Judgment Thunder",
+          "Condemnation",
+          "Bolt (fully charged, in stagger windows)"
+        ],
+        "filler": "Earth's Retribution for MP",
+        "manual": [
+          "Healing Light",
+          "Radiant Recovery",
+          "Light of Regeneration (heal when needed)"
+        ],
+        "refs": [
+          "ec-cleric"
+        ]
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-cleric",
+          "title": "Cleric guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-cleric-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-06"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-builds",
+          "title": "Class builds guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/class-builds-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-cleric",
+          "title": "Cleric build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/cleric/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    }
+  ]
+}

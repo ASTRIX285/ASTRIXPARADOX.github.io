@@ -1,0 +1,210 @@
+{
+  "class": "Spiritmaster",
+  "description": "Spiritmaster role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "spiritmaster-dps",
+      "class": "Spiritmaster",
+      "role": "dps",
+      "main": true,
+      "label": "Spirit summoner",
+      "beginner": "medium",
+      "summary": "Ranged magic damage with spirits that take the hits, which makes solo levelling easy.",
+      "coreSkills": [
+        {
+          "name": "Cold Shock",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "MP filler. From skill Lv 12 each hit adds a little attack.",
+          "refs": [
+            "mb-spiritmaster",
+            "ec-spiritmaster"
+          ]
+        },
+        {
+          "name": "Combustion",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "Core damage skill.",
+          "refs": [
+            "mb-spiritmaster",
+            "ec-spiritmaster"
+          ]
+        },
+        {
+          "name": "Summon: Fire Spirit",
+          "priority": 3,
+          "target": "Keep levelled",
+          "why": "Your damage spirit. Keep a spirit out at all times.",
+          "refs": [
+            "mb-spiritmaster",
+            "ec-spiritmaster"
+          ]
+        },
+        {
+          "name": "Jointstrike: Curse",
+          "priority": 4,
+          "target": "Keep levelled",
+          "why": "Core skill, used through your spirit.",
+          "refs": [
+            "mb-builds",
+            "ec-spiritmaster"
+          ]
+        },
+        {
+          "name": "Dimensional Control",
+          "priority": 5,
+          "target": "Lv 8 first, then 10",
+          "why": "Unlocks at Lv 8.",
+          "refs": [
+            "ec-spiritmaster"
+          ]
+        },
+        {
+          "name": "Elemental Fusion",
+          "priority": 6,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 14. Cast it once you have 4 element stacks.",
+          "refs": [
+            "mb-spiritmaster",
+            "ec-spiritmaster"
+          ]
+        }
+      ],
+      "specialties": [],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Summon: Ancient Spirit"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Enhance: Spirit's Benediction"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Jointstrike: Corrode"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Flame Blessing"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Cursed Cloud",
+            "why": "ExpCarry solo and AoE set, MetaBot stigma guide.",
+            "refs": [
+              "ec-spiritmaster",
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "mb-spiritmaster",
+          "ec-spiritmaster"
+        ]
+      },
+      "daevanion": {
+        "priorities": [
+          "Combustion +1",
+          "Elemental Fusion +1",
+          "Spirit Strike +1"
+        ],
+        "refs": [
+          "mb-spiritmaster"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Accuracy",
+          "Attack and damage",
+          "Cooldown Reduction",
+          "Critical stats",
+          "MP sustain",
+          "HP and Defense"
+        ],
+        "refs": [
+          "ec-spiritmaster"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Keep a spirit summoned",
+          "Jointstrike: Curse",
+          "Combustion",
+          "Dimensional Control",
+          "Elemental Fusion when ready"
+        ],
+        "filler": "Cold Shock for MP",
+        "manual": [
+          "Line up buffs with Elemental Fusion"
+        ],
+        "refs": [
+          "ec-spiritmaster"
+        ]
+      },
+      "levelNotes": [],
+      "roleRefs": [
+        "mb-tier"
+      ],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-spiritmaster",
+          "title": "Spiritmaster guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-spiritmaster-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-09-29"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-builds",
+          "title": "Class builds guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/class-builds-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-spiritmaster",
+          "title": "Spiritmaster build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/spiritmaster/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-tier",
+          "title": "Best class tier list",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/best-class-tier-list",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}

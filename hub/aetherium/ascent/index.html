@@ -5,9 +5,9 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Gear Ledger for AION 2: equipped gear with item detail, stigmas, Daevanion boards and stats for one character on the EU servers.">
-  <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/gear/">
-  <title>Gear Ledger | The Aetherium | AION 2 | ASTRIX PARADOX</title>
+  <meta name="description" content="Ascent Plan for AION 2: what to do next for any class, role and level. Skills, Specialty perks, stigmas, Daevanion order and macros, with sources.">
+  <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/ascent/">
+  <title>Ascent Plan | The Aetherium | AION 2 | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
@@ -17,10 +17,13 @@
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261006-2">
-  <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
+  <link rel="preload" href="/astrix-app/games/aion2/data/advisor/progression.json" as="fetch" crossorigin>
+  <link rel="preload" href="/astrix-app/games/aion2/data/advisor/skills.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05",
+
+"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=67d1039b9d",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a",
 
@@ -30,10 +33,12 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85",
 
-"/astrix-app/pages/aetherium/gear-ledger.mjs":"/astrix-app/pages/aetherium/gear-ledger.mjs?v=10de910050"
+"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=620165d453"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=67d1039b9d" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a" data-head-hint>
 
@@ -43,11 +48,11 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/gear-ledger.mjs?v=10de910050" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/gear-ledger.mjs?v=10de910050"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=620165d453" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=620165d453"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
-  <a class="ae-skip" href="#aeMain">Skip to the Gear Ledger</a>
+  <a class="ae-skip" href="#aeMain">Skip to the Ascent Plan</a>
   <header class="apx-destination-header">
     <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>
     <div class="apx-destination-header-copy"><strong>THE AETHERIUM</strong><small>AION 2 · EU</small></div>
@@ -59,8 +64,8 @@
     <nav class="apx-destination-ribbon" aria-label="The Aetherium">
       <ul>
         <li><a href="/hub/aetherium/">Daeva Card</a></li>
-        <li><a href="/hub/aetherium/gear/" aria-current="page">Gear Ledger</a></li>
-        <li><a href="/hub/aetherium/ascent/">Ascent Plan</a></li>
+        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
+        <li><a href="/hub/aetherium/ascent/" aria-current="page">Ascent Plan</a></li>
         <li><a href="/hub/">The Hub</a></li>
       </ul>
     </nav>
@@ -74,8 +79,8 @@
       </div>
       <ul class="ax-drawer-links">
         <li><a href="/hub/aetherium/">Daeva Card</a></li>
-        <li><a href="/hub/aetherium/gear/" aria-current="page">Gear Ledger</a></li>
-        <li><a href="/hub/aetherium/ascent/">Ascent Plan</a></li>
+        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
+        <li><a href="/hub/aetherium/ascent/" aria-current="page">Ascent Plan</a></li>
         <li><a href="/hub/">The Hub</a></li>
       </ul>
     </nav>
@@ -84,42 +89,28 @@
   <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <p class="ae-source" id="aeSource" hidden></p>
-    <div class="ae-ledger-head" id="aeHeader"><p class="ae-muted">Reading the armory.</p></div>
-    <div class="ae-ledger" id="aeLedger">
-      <div class="ae-col">
-        <section class="ae-panel" aria-labelledby="aeGearTitle">
-          <h2 class="ae-section-title" id="aeGearTitle">Equipped gear <small id="aeGearCount"></small></h2>
-          <ul class="ae-gear" id="aeGear"><li class="ae-loading">Reading the armory.</li></ul>
-          <p class="ae-accessories" id="aeAccessories"></p>
-        </section>
-        <section class="ae-panel ae-item" id="aeItem" aria-live="polite" aria-label="Item detail"></section>
+    <section class="ae-panel ae-ascent-setup" aria-labelledby="aeAscentTitle">
+      <div class="ae-ascent-intro">
+        <p class="ae-eyebrow">Ascent Plan</p>
+        <h1 id="aeAscentTitle">What to do next</h1>
+        <p class="ae-muted" id="aeAscentFor">Pick a class, the role you want to play and your level. Every pick shows where it comes from.</p>
       </div>
-      <div class="ae-col">
-        <section class="ae-panel" aria-labelledby="aeStigmaTitle">
-          <h2 class="ae-section-title" id="aeStigmaTitle">Stigmas <small id="aeStigmaNote"></small></h2>
-          <ul class="ae-stigmas" id="aeStigmas"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeBoardTitle">
-          <h2 class="ae-section-title" id="aeBoardTitle">Daevanion boards <small>nodes taken</small></h2>
-          <ul class="ae-boards" id="aeBoards"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeStatTitle">
-          <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the armory</small></h2>
-          <dl class="ae-stats" id="aeStats"></dl>
-          <p class="ae-note">Attack, Defense and other combat stats are not in the public armory data.</p>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeExtraTitle">
-          <h2 class="ae-section-title" id="aeExtraTitle">Pet, wings and title</h2>
-          <ul class="ae-extras" id="aeExtras"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-      </div>
-    </div>
-    <noscript><p class="ae-muted">The Gear Ledger needs JavaScript to read the armory.</p></noscript>
+      <form class="ae-ascent-form" id="aeAscentForm">
+        <label class="ae-field"><span>Class</span><select id="aeClass" name="class"></select></label>
+        <label class="ae-field"><span>Role</span><select id="aeRole" name="role"></select></label>
+        <label class="ae-field"><span>Level</span><input id="aeLevel" name="level" type="number" inputmode="numeric" min="1" max="45" step="1" value="1"></label>
+        <button class="btn ae-primary" type="submit">Show plan</button>
+      </form>
+      <p class="ae-ascent-daeva" id="aeDaeva" hidden></p>
+    </section>
+    <div id="aePlan" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Building your plan.</p></div></div>
+    <noscript><p class="ae-muted">The Ascent Plan needs JavaScript.</p></noscript>
   </main>
 
   <footer class="ae-footer">
     <p>The Aetherium by ASTRIX PARADOX is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by NCSOFT. AION 2 and related names, images and icons are trademarks of NCSOFT.</p>
     <p>Character data is read from the public AION 2 armory. No login is needed and nothing is stored on our servers. Item and skill icons load from the NCSOFT CDN.</p>
+    <p>Build advice comes from the public guides listed under Sources, checked against each other. Early guides change often, so check a pick in game before you spend rare materials on it.</p>
   </footer>
 </body>
 </html>

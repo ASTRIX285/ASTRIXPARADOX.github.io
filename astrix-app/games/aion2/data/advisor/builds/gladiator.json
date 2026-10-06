@@ -1,0 +1,325 @@
+{
+  "class": "Gladiator",
+  "description": "Gladiator role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "gladiator-dps",
+      "class": "Gladiator",
+      "role": "dps",
+      "main": true,
+      "label": "Greatsword bruiser DPS",
+      "beginner": "high",
+      "summary": "Front-line damage with a big health pool. Keep Prepare for Battle up with Ruinous Blow and spend MP on Rending Blow.",
+      "coreSkills": [
+        {
+          "name": "Keen Strike",
+          "priority": 1,
+          "target": "Lv 10 early",
+          "why": "Your MP builder. Use it to refill MP between big hits.",
+          "refs": [
+            "ds-glad",
+            "mb-gladiator"
+          ]
+        },
+        {
+          "name": "Rending Blow",
+          "priority": 2,
+          "target": "Lv 10 early, then 16 and 20",
+          "why": "Main MP spender and filler. Top players put Daevanion points into it on every board.",
+          "refs": [
+            "ds-glad",
+            "ec-gladiator",
+            "mb-gladiator"
+          ]
+        },
+        {
+          "name": "Overhead Slam",
+          "priority": 3,
+          "target": "Lv 20 first once you have it",
+          "why": "Hardest regular hit. At skill Lv 16 its cooldown can be removed.",
+          "refs": [
+            "ec-gladiator",
+            "ds-glad",
+            "mb-gladiator"
+          ]
+        },
+        {
+          "name": "Ruinous Blow",
+          "priority": 4,
+          "target": "Lv 16, then 20",
+          "why": "Unlocks at Lv 14. Grants Prepare for Battle: more PvE damage and crit for 20 s.",
+          "refs": [
+            "ec-gladiator",
+            "mb-gladiator"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Overhead Slam",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Upward Strike chain",
+              "refs": [
+                "ec-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ec-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "refs": [
+                "ec-gladiator",
+                "ds-glad"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Rending Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving",
+              "refs": [
+                "ec-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "More damage against fewer targets",
+              "refs": [
+                "ec-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Restores MP on a critical hit",
+              "refs": [
+                "ec-gladiator"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Ruinous Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Faster skill speed",
+              "refs": [
+                "ec-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Extra damage",
+              "refs": [
+                "ec-gladiator"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Lunge Stance"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Zikel's Blessing"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Rage Burst"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Focused Block"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Wrath Wave",
+            "why": "MetaBot stigma guide pick: multi-target knockdown.",
+            "refs": [
+              "mb-stigma"
+            ]
+          },
+          {
+            "name": "Blade Toss",
+            "why": "MetaBot stigma guide pick: lowers enemy defence.",
+            "refs": [
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "mb-gladiator",
+          "ec-gladiator",
+          "ds-glad"
+        ],
+        "note": "Three sources agree on these four. MetaBot stigma guide prefers Wrath Wave and Blade Toss instead of Lunge Stance and Focused Block."
+      },
+      "daevanion": {
+        "priorities": [
+          "Overhead Slam +1 on Nezekan",
+          "Rending Blow +1 on every board you open",
+          "Ruinous Blow and Crushing Wave skill nodes"
+        ],
+        "refs": [
+          "mb-gladiator",
+          "mb-daev"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Accuracy (enough for your content)",
+          "Double Chance",
+          "Combat Speed",
+          "Weapon Damage Boost",
+          "Front Attack Damage Boost",
+          "Attack"
+        ],
+        "refs": [
+          "ec-gladiator"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Ruinous Blow (keep Prepare for Battle up)",
+          "Rage Burst",
+          "Overhead Slam",
+          "Rending Blow"
+        ],
+        "filler": "Keen Strike when MP is low",
+        "manual": [
+          "Defiance",
+          "Rush Strike"
+        ],
+        "refs": [
+          "ds-glad",
+          "ec-gladiator"
+        ]
+      },
+      "levelNotes": [
+        {
+          "from": 1,
+          "to": 16,
+          "text": "Use Keen Strike for MP and Rending Blow to spend it. Overhead Slam joins at Lv 4, Rush Strike at 10, Ruinous Blow at 14.",
+          "refs": [
+            "ds-glad",
+            "mb-gladiator"
+          ]
+        }
+      ],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ds-glad",
+          "title": "Best Gladiator build",
+          "publisher": "Destructoid",
+          "url": "https://www.destructoid.com/best-gladiator-build-in-aion-2/",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ec-gladiator",
+          "title": "Gladiator guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-gladiator-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-05"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-gladiator",
+          "title": "Gladiator build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/gladiator/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-tank",
+      "class": "Gladiator",
+      "role": "tank",
+      "main": false,
+      "label": "Off-tank",
+      "beginner": "high",
+      "status": "pending",
+      "summary": "Gladiator can step in as a second tank thanks to its health pool, and Defiance clears stuns and knockdowns.",
+      "build": {
+        "pending": true,
+        "reason": "No source gives an off-tank Gladiator build yet (stigmas, stats or rotation). Use the DPS build until one is published."
+      },
+      "roleRefs": [
+        "ah-glad",
+        "mb-classes"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ah-glad",
+          "title": "Gladiator class page",
+          "publisher": "aion2hub",
+          "url": "https://aion2hub.com/classes/gladiator",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-classes",
+          "title": "AION 2 classes",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    }
+  ]
+}

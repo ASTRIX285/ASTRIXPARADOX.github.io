@@ -1,0 +1,193 @@
+{
+  "class": "Assassin",
+  "description": "Assassin role builds for the Ascent Plan.",
+  "records": [
+    {
+      "id": "assassin-dps",
+      "class": "Assassin",
+      "role": "dps",
+      "main": true,
+      "label": "Dagger burst DPS",
+      "beginner": "low",
+      "summary": "Burst damage from behind. Build Insignia stacks, then cash them in with Insignia Explosion.",
+      "coreSkills": [
+        {
+          "name": "Quick Slice",
+          "priority": 1,
+          "target": "Keep levelled for MP",
+          "why": "MP filler. At skill Lv 12 each hit cuts the Insignia Explosion cooldown.",
+          "refs": [
+            "mb-assassin",
+            "ezg-assassin"
+          ]
+        },
+        {
+          "name": "Heart Gore",
+          "priority": 2,
+          "target": "Lv 16 for the cooldown reset",
+          "why": "Main hit, triggers on crits.",
+          "refs": [
+            "mb-assassin",
+            "ezg-assassin"
+          ]
+        },
+        {
+          "name": "Insignia Explosion",
+          "priority": 3,
+          "target": "Lv 16",
+          "why": "Unlocks at Lv 14. Spends 1 to 5 Insignia stacks and stuns.",
+          "refs": [
+            "mb-assassin",
+            "ezg-assassin"
+          ]
+        },
+        {
+          "name": "Shadowstrike",
+          "priority": 4,
+          "target": "Keep levelled",
+          "why": "Teleport behind the target and stun.",
+          "refs": [
+            "mb-assassin"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Heart Gore",
+          "picks": [
+            {
+              "skillLevel": 16,
+              "pick": "Reset cooldown on a critical hit",
+              "refs": [
+                "ezg-assassin"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Insignia Explosion",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Keep 2 stacks after use",
+              "refs": [
+                "ezg-assassin"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Savage Roar",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Lower MP cost and faster skill speed",
+              "refs": [
+                "ezg-assassin"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Illusive Clone"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Swift Contract"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Savage Fang"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Triniel's Dagger"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Aerial Bind",
+            "why": "MetaBot stigma guide pick.",
+            "refs": [
+              "mb-stigma"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "mb-assassin",
+          "ezg-assassin"
+        ],
+        "note": "Upgrade order from EZG: Triniel's Dagger to Lv 10, then Illusive Clone to Lv 20, then Swift Contract, then Savage Fang."
+      },
+      "daevanion": {
+        "priorities": [
+          "Heart Gore +1 on Nezekan",
+          "Insignia Explosion +1 on Zikel"
+        ],
+        "refs": [
+          "mb-assassin"
+        ]
+      },
+      "stats": {
+        "pending": true,
+        "reason": "No reliable source ranks Assassin stats yet. Fight from behind: back attacks are central to the class."
+      },
+      "rotation": {
+        "steps": [
+          "Savage Fang",
+          "Insignia Explosion",
+          "Heart Gore",
+          "Savage Roar"
+        ],
+        "filler": "Quick Slice, woven in by hand",
+        "manual": [
+          "Opener: Illusive Clone and Swift Contract, Shadowstrike, Triniel's Dagger"
+        ],
+        "refs": [
+          "ezg-assassin"
+        ]
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ezg-assassin",
+          "title": "Assassin PvE build, stigma and macro",
+          "publisher": "EZG",
+          "url": "https://www.ezg.com/blog/aion-2-assassin-pve-build-skills-stigma-macro-rotation",
+          "retrievedOn": "2026-10-06",
+          "region": "not-stated",
+          "reliability": "medium",
+          "publishedOn": "2026-09-27"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-assassin",
+          "title": "Assassin build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/assassin/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    }
+  ]
+}
