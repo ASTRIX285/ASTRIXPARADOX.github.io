@@ -270,6 +270,16 @@ check('players never see another site: no guide names in text a page shows',()=>
   for(const text of [...visible(progression.records),...visible(skills.records),...Object.values(builds).flatMap(file=>visible(file.records))])assert.doesNotMatch(text,names,text);
 });
 
+check('macro order is settled by the in-game capture: listed order, 10 ms delay',()=>{
+  const record=progression.records.find(item=>item.id==='macro-order');
+  assert.deepEqual(record.value,{order:'listed',delayMs:10});
+  assert.ok(record.provenance.some(source=>source.kind==='in-game-capture'&&source.where.includes('Macro window')));
+  const wrath=json('games/aion2/data/gladiator/stigmas.json').records.find(item=>item.name==='Wrath Wave');
+  assert.equal(wrath.cooldownSeconds,60);
+  assert.equal(wrath.mpCost,200);
+  assert.deepEqual(wrath.specialties.map(line=>line.unlockSkillLevel),[5,10,15,20]);
+});
+
 check('unknown class throws',()=>{
   assert.throws(()=>buildAscentPlan({className:'Brawler',data:data('Gladiator')}),/Unknown AION 2 class/);
 });

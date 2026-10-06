@@ -82,10 +82,11 @@ assert.equal(model.wings.name,'Lesser Daeva Wings');
 
 // Catalogue: identity matches the armory, captured values pending with a reason
 assert.equal(skills.length+stigmas.length,35);
-assert.ok(stigmas.every(record=>record.category==='Dp'&&record.text.pending===true));
+assert.ok(stigmas.every(record=>record.category==='Dp'&&(record.text.pending===true||(typeof record.text==='string'&&[].concat(record.provenance).some(source=>source.kind==='in-game-capture')))),'Stigma text is pending until captured in game');
 for(const record of [...skills,...stigmas]){
-  for(const field of ['cooldownSeconds','mpCost','specialties'])assert.equal(record[field].pending,true,`${record.name} ${field} pending until captured`);
-  assert.equal(record.provenance.kind,'armory');
+  const captured=[].concat(record.provenance).some(source=>source.kind==='in-game-capture');
+  for(const field of ['cooldownSeconds','mpCost','specialties'])assert.ok(record[field]?.pending===true||(captured&&record[field]!==undefined&&record[field]?.pending!==true),`${record.name} ${field} pending until captured in game`);
+  assert.equal([].concat(record.provenance)[0].kind,'armory','Identity comes from the armory first');
 }
 
 // Icons, portrait and stats for the pages (NCSOFT CDN URLs, never re-hosted)

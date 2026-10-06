@@ -140,7 +140,18 @@ await check('level change re-plans and clamps to the cap',async()=>{
   assert.match(page.url(),/level=45$/);
   assert.equal(await page.locator('.ae-board-plan li.is-open').count(),5,'All five boards open at 45');
   assert.equal(await page.locator('.ae-stigma-plan li.is-open').count(),4);
-  assert.equal(await page.locator('.ae-macro li.is-locked').count(),0);
+  assert.equal(await page.locator('.ae-macro-entry').count(),6,'All six Cleric macro skills usable at 45');
+  assert.equal(await page.locator('.ae-macro-delay').count(),5,'A delay between each pair, like the game');
+  await context.close();
+});
+
+await check('macro reads like the game: listed order, delay between, locked skills added later',async()=>{
+  const {page,context}=await open(ascent('class=gladiator&role=dps&level=5'));
+  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Overhead Slam','Rending Blow']);
+  assert.match(await plain(page,'.ae-macro-delay'),/Delay\s*10\s*ms/);
+  assert.match(await plain(page,'#aeMacroTitle ~ p'),/Add later: Ruinous Blow \(keep Prepare for Battle up\) \(Lv 14\), Rage Burst \(Lv 32\)/);
+  assert.match(await plain(page,'.ae-macro-howto'),/runs its skills in the listed order/);
+  assert.doesNotMatch(await page.textContent('#aeMacroTitle ~ *'),/Check in game/);
   await context.close();
 });
 
@@ -181,6 +192,13 @@ await check('Daevanion planner: real board, numbered route, points budget rememb
   assert.equal(await page.getAttribute('[data-board-tab="11"]','aria-selected'),'true');
   assert.equal(await page.locator('.ae-board-grid .ae-node').count(),89,'88 nodes plus Start');
   assert.equal(await page.locator('.ae-node[data-kind="start"]').count(),1);
+  const art=await page.$$eval('.ae-board-grid .ae-node',items=>items.map(el=>[el.dataset.kind,el.dataset.status,el.querySelector('img.ae-node-art')?.getAttribute('src')??'']));
+  const base='https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_';
+  for(const [kind,status,src] of art){
+    const grade={'active-skill':'legend','passive-skill':'rare',unique:'unique',stat:'common'}[kind];
+    const want=kind==='start'?`${base}start_gladiator.png`:`${base}${grade}${status==='taken'?'_open':''}.png`;
+    assert.equal(src,want,`${kind} ${status} uses the game's node art`);
+  }
   assert.equal(await page.locator('.ae-node[data-key="true"]').count(),4,'Overhead Slam, Rending Blow, Ruinous Blow, Crushing Wave');
   assert.match(await plain(page,'#aeRouteSummary'),/Enter the points you have/);
   const first=await page.$$eval('.ae-route-list li',items=>items.slice(0,7).map(li=>li.querySelector('strong').textContent));

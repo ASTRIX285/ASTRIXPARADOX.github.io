@@ -7,29 +7,44 @@
       "name": "Wrath Wave",
       "category": "Dp",
       "needLevel": 22,
-      "provenance": {
-        "kind": "armory",
-        "region": "eu",
-        "endpoint": "/api/character/equipment",
-        "capturedOn": "2026-10-05",
-        "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
-      },
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "Cooldown is not in the armory data. Needs an in-game capture of the skill tooltip."
-      },
-      "mpCost": {
-        "pending": true,
-        "reason": "MP cost is not in the armory data. Needs an in-game capture of the skill tooltip."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Specialty lines and their unlock skill levels are not in the armory data. Needs an in-game capture of the skill tooltip."
-      },
-      "text": {
-        "pending": true,
-        "reason": "Stigma text is not in the armory data. Needs an in-game capture of the stigma tooltip."
-      }
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-05",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-06",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Stigma > Wrath Wave tooltip, stigma Lv 1",
+          "note": "Cooldown, MP, Specialty lines and Lv 1 text read from the tooltip. The Lv 5 line is cut off on screen after \"more target\"."
+        }
+      ],
+      "cooldownSeconds": 60,
+      "mpCost": 200,
+      "specialties": [
+        {
+          "unlockSkillLevel": 5,
+          "text": "Up to +20% damage when more targets are hit"
+        },
+        {
+          "unlockSkillLevel": 10,
+          "text": "Reduces Attack by 20% for 5s"
+        },
+        {
+          "unlockSkillLevel": 15,
+          "text": "Deals damage 1 additional time"
+        },
+        {
+          "unlockSkillLevel": 20,
+          "text": "+25% Knockdown Chance"
+        }
+      ],
+      "text": "Lv 1: deals 1345 to 1383 damage to up to 4 enemies within 5m of the caster, with a 50% chance to inflict Knockdown for 3s (100% on NPC targets). Instant cast, 4m range, Greatsword only."
     },
     {
       "id": 11400000,
