@@ -1,0 +1,8 @@
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/module-versions.json
+hub/aetherium/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/ascent/index.html
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aetherium-pages.mjs

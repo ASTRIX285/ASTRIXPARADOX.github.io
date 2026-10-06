@@ -250,6 +250,17 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   });
 }
 
+await check('wide screens: Gear Ledger side panels in two columns, roster on one row at 1920',async()=>{
+  const gear=await open('/hub/aetherium/gear/',{viewport:{width:1920,height:1000}});
+  const [stig,boards]=await gear.page.$$eval('#aeStigmaTitle,#aeBoardTitle',items=>items.map(el=>el.closest('.ae-panel').getBoundingClientRect()).map(r=>[Math.round(r.left),Math.round(r.top)]));
+  assert.ok(boards[0]>stig[0]&&Math.abs(boards[1]-stig[1])<4,`stigmas and boards side by side (${stig} / ${boards})`);
+  await gear.context.close();
+  const card=await open('/hub/aetherium/',{viewport:{width:1920,height:1000}});
+  const tops=await card.page.$$eval('.ae-roster-slot',items=>[...new Set(items.map(el=>Math.round(el.getBoundingClientRect().top)))]);
+  assert.equal(tops.length,1,'8 roster slots on one row');
+  await card.context.close();
+});
+
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
 await browser.close();

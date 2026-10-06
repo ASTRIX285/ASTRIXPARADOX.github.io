@@ -214,8 +214,11 @@ function renderPlan() {
   } else {
     $('#aePlan').innerHTML = `${header}
       <div class="ae-ascent-grid">
-        <div class="ae-col">${renderNow(plan)}${renderSkills(plan)}${renderRotation(plan)}</div>
-        <div class="ae-col">${renderStigmas(plan)}${renderBoards(plan)}${renderStats(plan)}${renderUpcoming(plan)}</div>
+        <div class="ae-col ae-ascent-main">${renderNow(plan)}${renderSkills(plan)}</div>
+        <div class="ae-ascent-side">
+          <div class="ae-col">${renderStigmas(plan)}${renderRotation(plan)}</div>
+          <div class="ae-col">${renderBoards(plan)}${renderStats(plan)}${renderUpcoming(plan)}</div>
+        </div>
       </div>
       ${renderSources(plan)}`;
   }

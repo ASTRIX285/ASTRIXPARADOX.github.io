@@ -199,6 +199,7 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-ascent-head .ae-eyebrow{color:var(--ae-gold);margin:0 0 6px}
 .ae-ascent-head .ae-chips{margin:0}
 .ae-ascent-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;align-items:start;margin-bottom:var(--ae-gap)}
+.ae-ascent-side{display:grid;gap:var(--ae-gap);min-width:0;align-items:start}
 .ae-now,.ae-skills,.ae-macro,.ae-stigma-plan,.ae-board-plan,.ae-list,.ae-timeline,.ae-alts,.ae-sources ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .ae-now{counter-reset:now}
 .ae-now-item{counter-increment:now;position:relative;display:grid;gap:4px;padding:12px 14px 12px 50px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
@@ -258,6 +259,24 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-sources li:target{outline:1px solid var(--ae-gold);outline-offset:4px}
 .ae-pending{margin:0;padding:10px 12px;border:1px dashed var(--ae-navy-line-strong);color:var(--ae-muted);font-size:14px}
 .ae-pending span{color:var(--ae-ink);font-weight:700}
+
+/* Wide screens (Miguel, 6 Oct 2026: "a lot of wasted space"): the content grows to 1640px and every page
+   uses the extra width. Ascent Plan goes to three columns, Gear Ledger flows its side panels into two,
+   and the Daeva Card roster sits on one row. */
+@media (min-width:1500px){
+  :root{--ae-max:1640px}
+  .ae-ascent-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,2fr)}
+  .ae-ascent-side{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+  .ae-ascent-setup{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
+  .ae-ledger{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .ae-ledger>.ae-col:last-child{display:block;columns:2;column-gap:var(--ae-gap)}
+  .ae-ledger>.ae-col:last-child>*{break-inside:avoid;margin:0 0 var(--ae-gap)}
+  .ae-summary{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}
+  .ae-roster{grid-template-columns:repeat(8,minmax(0,1fr))}
+  .ae-summary-card .ae-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ae-sources ol{display:block;columns:3;column-gap:32px}
+  .ae-sources li{break-inside:avoid;margin-bottom:8px}
+}
 
 /* Under 1200 the shell puts the header in the page flow and hides the ribbon (the menu drawer takes over). */
 @media (max-width:1199px){.ae-main{padding-top:20px}}
