@@ -4,7 +4,7 @@
 // the slash path, keeping the query string. Checks, at 390, 820 and 1600:
 //   - /tools/, /tools and /tools/?x=1#top end on /hub/ (keeping ?x=1 and #top) with no 404;
 //   - the redirect page shows no text while it leaves (no visible flash);
-//   - The Hub shows The Forge (Enter The Forge, unchanged route), WorkBench (Coming soon, disabled,
+//   - The Hub shows The Aetherium (Enter The Aetherium), The Forge (Enter The Forge, unchanged route), WorkBench (Coming soon, disabled,
 //     no link) and the future slot; its logo links to "/"; no sideways scroll.
 // Writes screenshots when HUB_RENDER_DIR is set (outside the repo).
 import assert from 'node:assert/strict';
@@ -58,10 +58,12 @@ try{
         const cards=await page.locator('#hubCards > article').evaluateAll(nodes=>nodes.map(node=>({name:node.querySelector('h2')?.textContent||'',future:node.classList.contains('platform-card-coming'),
           link:node.querySelector('a.forge-entry-link')?.getAttribute('href')||null,linkText:node.querySelector('.forge-entry-link')?.textContent||'',
           disabled:node.querySelector('button.forge-entry-link')?.disabled??null,status:node.querySelector('.platform-status')?.textContent||'',anyLink:node.querySelectorAll('a').length})));
-        assert.equal(cards.length,3,`${width}: one card per tool and the future slot`);
-        assert.deepEqual(cards[0],{name:'The Forge',future:false,link:'../astrix-app/pages/home/',linkText:'Enter The Forge',disabled:null,status:'',anyLink:2},`${width}: The Forge card`);
-        assert.deepEqual(cards[1],{name:'WorkBench',future:false,link:null,linkText:'Enter WorkBench',disabled:true,status:'Coming soon',anyLink:0},`${width}: WorkBench is coming soon, disabled, no link`);
-        assert.ok(cards[2].future,`${width}: the future slot card`);
+        // The Aetherium card leads The Hub (Miguel, #454): The Aetherium, The Forge, WorkBench, then the future slot.
+        assert.equal(cards.length,4,`${width}: one card per tool and the future slot`);
+        assert.deepEqual(cards[0],{name:'The Aetherium',future:false,link:'/hub/aetherium/',linkText:'Enter The Aetherium',disabled:null,status:'',anyLink:1},`${width}: The Aetherium card`);
+        assert.deepEqual(cards[1],{name:'The Forge',future:false,link:'../astrix-app/pages/home/',linkText:'Enter The Forge',disabled:null,status:'',anyLink:2},`${width}: The Forge card`);
+        assert.deepEqual(cards[2],{name:'WorkBench',future:false,link:null,linkText:'Enter WorkBench',disabled:true,status:'Coming soon',anyLink:0},`${width}: WorkBench is coming soon, disabled, no link`);
+        assert.ok(cards[3].future,`${width}: the future slot card`);
         assert.equal(await page.title(),'The Hub | ASTRIX PARADOX');
         assert.equal((await page.locator('.nav-links a.active').textContent()).trim(),'The Hub');
         assert.equal(await page.locator('.nav-logo').getAttribute('href'),'/','The logo links to "/"');
@@ -70,14 +72,14 @@ try{
         // Cards fade in on scroll (site reveal): scroll through, then every card is visible.
         await page.evaluate(async()=>{for(const card of document.querySelectorAll('#hubCards > article')){card.scrollIntoView({behavior:'instant',block:'center'});await new Promise(done=>setTimeout(done,250));}window.scrollTo({top:0,behavior:'instant'});});
         await page.waitForTimeout(900);
-        assert.deepEqual(await page.locator('#hubCards > article').evaluateAll(nodes=>nodes.map(node=>Number(getComputedStyle(node).opacity))),[1,1,1],`${width}: every card is visible after scrolling`);
+        assert.deepEqual(await page.locator('#hubCards > article').evaluateAll(nodes=>nodes.map(node=>Number(getComputedStyle(node).opacity))),[1,1,1,1],`${width}: every card is visible after scrolling`);
         if(shots)await page.screenshot({path:resolve(shots,`hub-${width}.png`),fullPage:true});
       }
       assert.deepEqual(errors,[],`${width} ${from}: page errors`);
       await page.close();
     }
   }
-  console.log('HUB_REDIRECT=PASS /tools/, /tools, /tools/?x=1#top and /tools?x=1 land on /hub/ keeping query and hash, no 404, no visible flash; The Hub shows The Forge (Enter The Forge, unchanged route), WorkBench (Coming soon, disabled, no link) and the future slot; logo links to "/"; 390, 820 and 1600');
+  console.log('HUB_REDIRECT=PASS /tools/, /tools, /tools/?x=1#top and /tools?x=1 land on /hub/ keeping query and hash, no 404, no visible flash; The Hub shows The Aetherium (Enter The Aetherium), The Forge (Enter The Forge, unchanged route), WorkBench (Coming soon, disabled, no link) and the future slot; logo links to "/"; 390, 820 and 1600');
 }finally{
   await browser?.close();server.close();
 }
