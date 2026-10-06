@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/astrix-app/shared/astrix-tool-shell.css?v=20260930-stroke-4&amp;shell=20261001-mobile-1&amp;mobile=20261002-1&amp;bf=20261002-1&amp;inv=20261002-1&amp;swr=20261002-1&amp;formation=20261003-1">
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Daeva Card for AION 2: find a character on the EU servers and see class, level, combat power, Daevanion boards and gear in one place.">
+  <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/">
+  <title>Daeva Card | The Aetherium | AION 2 | ASTRIX PARADOX</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/img/favicon/favicon.ico">
+  <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
+  <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
+  <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261006-1">
+  <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
+  <link rel="preload" href="/astrix-app/tools/fixtures/aion2/eu/servers.json" as="fetch" crossorigin>
+  <script type="importmap" data-module-versions>
+{"imports":{
+"/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05",
+
+"/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a",
+
+"/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=7775be2108",
+
+"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=abd5dbfcab",
+
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85",
+
+"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=edacc1e6da"
+}}
+  </script>
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=7775be2108" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=abd5dbfcab" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=edacc1e6da" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=edacc1e6da"></script>
+</head>
+<body class="aetherium-page" data-faction="astrix" data-apx-button-system>
+  <a class="ae-skip" href="#aeMain">Skip to the Daeva Card</a>
+  <header class="apx-destination-header">
+    <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>
+    <div class="apx-destination-header-copy"><strong>THE AETHERIUM</strong><small>AION 2 · EU</small></div>
+    <div class="ax-shell-actions">
+      <button class="ax-icon-btn ax-menu-btn" id="aeMenu" type="button" aria-label="Open tool menu" aria-expanded="false" aria-controls="aeDrawer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </header>
+  <div data-forge-destination-ribbon>
+    <nav class="apx-destination-ribbon" aria-label="The Aetherium">
+      <ul>
+        <li><a href="/hub/aetherium/" aria-current="page">Daeva Card</a></li>
+        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
+        <li><a href="/hub/">The Hub</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="ax-drawer" id="aeDrawer" hidden>
+    <div class="ax-drawer-backdrop" data-drawer-close></div>
+    <nav class="ax-drawer-panel" role="dialog" aria-modal="true" aria-label="The Aetherium menu">
+      <div class="ax-drawer-head">
+        <a class="ax-drawer-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>
+        <button class="ax-icon-btn" type="button" data-drawer-close aria-label="Close tool menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <ul class="ax-drawer-links">
+        <li><a href="/hub/aetherium/" aria-current="page">Daeva Card</a></li>
+        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
+        <li><a href="/hub/">The Hub</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
+    <section class="ae-panel ae-search" aria-labelledby="aeSearchTitle">
+      <p class="ae-eyebrow">Find your Daeva</p>
+      <h1 id="aeSearchTitle">Type a character name. See your whole setup.</h1>
+      <form class="ae-search-form" id="aeSearch" autocomplete="off">
+        <label class="ae-field"><span>Character name</span><input id="aeNameInput" name="name" type="text" maxlength="24" spellcheck="false" placeholder="ASTRIX285"></label>
+        <label class="ae-field"><span>EU server</span><select id="aeServer" name="server"><option value="">Any EU server</option></select></label>
+        <button type="submit" class="ae-primary" id="aeFind">Find character</button>
+      </form>
+      <p class="ae-search-note">Reads public armory data. No login, nothing to install. Results are cached for 10 minutes.</p>
+      <div class="ae-results" id="aeResults" hidden></div>
+    </section>
+    <p class="ae-notice" id="aeNotice" role="status" hidden></p>
+    <section class="ae-summary" id="aeSummary" aria-label="Character summary"><div class="ae-panel ae-skeleton"><p>Reading the armory.</p></div><div class="ae-panel ae-skeleton"><p>Ascent Plan</p></div></section>
+    <p class="ae-source" id="aeSource" hidden></p>
+    <section aria-labelledby="aeRosterTitle">
+      <div class="ae-roster-head"><h2 id="aeRosterTitle">Your Daevas · <span id="aeRosterCount">0 of 8 slots</span></h2></div>
+      <ul class="ae-roster" id="aeRoster"><li class="ae-loading">Loading your Daevas.</li></ul>
+      <p class="ae-roster-note">Up to 8 Daevas, added by name and saved on this device. The public data can't tell which characters share an account. The active Daeva sets the page colour by faction.</p>
+    </section>
+    <noscript><p class="ae-muted">The Daeva Card needs JavaScript to read the armory.</p></noscript>
+  </main>
+
+  <footer class="ae-footer">
+    <p>The Aetherium by ASTRIX PARADOX is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by NCSOFT. AION 2 and related names, images and icons are trademarks of NCSOFT.</p>
+    <p>Character data is read from the public AION 2 armory. No login is needed and nothing is stored on our servers. Item and skill icons load from the NCSOFT CDN.</p>
+  </footer>
+</body>
+</html>

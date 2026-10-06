@@ -38,6 +38,9 @@ export const byPath=(a,b)=>a<b?-1:a>b?1:0;
 export const HEAD_HINT=/[ \t]*<link\b[^>]*\bdata-head-hint>\r?\n(?:[ \t]*\r?\n)?/g;
 export const AUTH_HOST='https://auth.astrixparadox.com';
 export const BUNGIE_IMAGE_HOST='https://www.bungie.net';
+// Page folders outside astrix-app/ that also get head hints (The Aetherium, 5 Oct 2026: its module chain
+// otherwise loads one file per round trip before the character call can start).
+export const HINT_PAGE_DIRS=Object.freeze(['hub/aetherium']);
 // Modules a page imports with import() at startup, unconditionally, before its first screen.
 export const FIRST_RENDER_DYNAMIC=Object.freeze({
   '/astrix-app/pages/journey/index.html':['/astrix-app/pages/journey/journey.mjs','/astrix-app/shared/astrix-hero-cards.mjs']
@@ -126,7 +129,7 @@ export async function plan(){
       const block=formatImportMap(map.imports);
       // Before the first script or modulepreload, so every module load sees it.
       const first=source.search(/[ \t]*<(script\b|link\b[^>]*rel="modulepreload")/);
-      const hints=page.site.startsWith(`/${APP}/`)?headHintBlock(pageHeadHints(page,refs,classicTargets,modules,versions)):'';
+      const hints=page.site.startsWith(`/${APP}/`)||HINT_PAGE_DIRS.some(dir=>page.site.startsWith(`/${dir}/`))?headHintBlock(pageHeadHints(page,refs,classicTargets,modules,versions)):'';
       source=first<0?source.replace('</head>',`${block}${hints}</head>`):source.slice(0,first)+block+hints+source.slice(first);
     }
     if(source!==page.source)writes.set(page.file,source);

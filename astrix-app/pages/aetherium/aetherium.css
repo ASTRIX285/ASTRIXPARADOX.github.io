@@ -1,0 +1,241 @@
+/* The Aetherium (AION 2): Daeva Card and Gear Ledger. Tool shell tokens (--ax-*) from astrix-tool-shell.css.
+   Base follows the game UI and the wireframes: midnight navy, gold actions, ice-blue highlights.
+   The accent follows the active character's faction (body[data-faction]): Elyos gold and sky blue,
+   Asmodian violet and crimson, ASTRIX crimson before a character loads. */
+
+:root{
+  --ae-navy:#0a1120;--ae-navy-panel:#111a2e;--ae-navy-raised:#17233d;
+  --ae-navy-line:#24314f;--ae-navy-line-strong:#34466c;
+  --ae-gold:#e2b54f;--ae-gold-hi:#f4d27c;--ae-gold-lo:#a8812e;--ae-gold-ink:#1b1406;
+  --ae-ice:#8fd0ff;--ae-ink:#e8edf6;--ae-muted:#a3b1ca;--ae-dim:#6f7d99;
+  --ae-elyos:#e2b54f;--ae-elyos-2:#7cc4ff;
+  --ae-asmodian:#9a6bff;--ae-asmodian-hi:#c2a6ff;--ae-asmodian-2:#d13a52;
+  --ae-astrix:#ba1f12;--ae-astrix-hi:#e6391f;
+  --ae-panel-alpha:rgba(17,26,46,.92);
+  --ae-gutter:16px;--ae-gap:16px;--ae-max:1216px;
+  --ae-notch:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  --ae-bevel:inset 1px 1px 0 rgba(255,255,255,.07),inset -1px -1px 0 rgba(0,0,0,.45);
+}
+
+html{background:var(--ae-navy)}
+body.aetherium-page{
+  --ae-accent:var(--ae-astrix);--ae-accent-hi:var(--ae-astrix-hi);--ae-accent-2:var(--ae-ice);
+  --ax-black:var(--ae-navy);--ax-panel:var(--ae-navy-panel);--ax-raised:var(--ae-navy-raised);
+  --ax-line:var(--ae-navy-line);--ax-line-strong:var(--ae-navy-line-strong);--ax-ink:var(--ae-ink);--ax-muted:var(--ae-muted);
+  --ax-ember:var(--ae-accent);--ax-ember-hi:var(--ae-accent-hi);
+  --ax-stroke-hi:var(--ae-accent-hi);--ax-stroke:var(--ae-accent);
+  --ax-stroke-fade:color-mix(in srgb,var(--ae-accent) 45%,transparent);--ax-stroke-fade-tab:color-mix(in srgb,var(--ae-accent) 40%,transparent);
+  --ax-stroke-glow:color-mix(in srgb,var(--ae-accent-hi) 45%,transparent);
+  margin:0;min-height:100vh;display:flex;flex-direction:column;color:var(--ae-ink);
+  font:500 15px/1.5 "Barlow","Segoe UI",sans-serif;
+  background:
+    radial-gradient(ellipse at 15% -10%,color-mix(in srgb,var(--ae-accent) 14%,transparent),transparent 55%),
+    radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--ae-accent-2) 8%,transparent),transparent 50%),
+    linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px) 0 0/48px 48px,
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px) 0 0/48px 48px,
+    var(--ae-navy);
+}
+/* ASTRIX crimson is the fallback before a character loads. */
+body.aetherium-page[data-faction="astrix"]{--ae-accent:var(--ae-astrix);--ae-accent-hi:var(--ae-astrix-hi);--ae-accent-2:var(--ae-ice)}
+body.aetherium-page[data-faction="elyos"]{--ae-accent:var(--ae-elyos);--ae-accent-hi:var(--ae-gold-hi);--ae-accent-2:var(--ae-elyos-2)}
+body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae-accent-hi:var(--ae-asmodian-hi);--ae-accent-2:var(--ae-asmodian-2)}
+
+.ae-skip{position:absolute;left:-9999px;top:0;z-index:100;padding:10px 14px;background:var(--ae-navy-raised);color:var(--ae-ink)}
+.ae-skip:focus{left:16px;top:16px}
+
+.ae-main{flex:1;width:100%;max-width:calc(var(--ae-max) + 2 * var(--ae-gutter));box-sizing:border-box;margin:0 auto;
+  padding:calc(var(--ax-shell-top,108px) + 10px + var(--ax-shell-tabs,46px) + 24px) var(--ae-gutter) 40px;outline:none}
+@media (min-width:820px){:root{--ae-gutter:clamp(24px,3vw,40px)}}
+
+.ae-eyebrow{margin:0 0 8px;font:700 12px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-accent)}
+.ae-muted{color:var(--ae-muted)}
+.ae-panel{position:relative;min-width:0;box-sizing:border-box;padding:22px 24px;background:var(--ae-panel-alpha);
+  border:1px solid var(--ae-navy-line);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel)}
+
+.ae-source,.ae-notice{margin:0 0 var(--ae-gap);padding:10px 14px;font-size:14px;line-height:1.45;border-left:3px solid var(--ae-accent-2);background:rgba(143,208,255,.06);color:var(--ae-ink)}
+.ae-source[data-kind="demo"]{border-left-color:var(--ae-gold);background:rgba(226,181,79,.08)}
+.ae-notice[data-tone="warn"]{border-left-color:var(--ae-gold);background:rgba(226,181,79,.1)}
+.ae-notice[data-tone="error"]{border-left-color:var(--ae-asmodian-2);background:rgba(209,58,82,.12)}
+
+/* Buttons. The shell's button system adds the strobe stroke; these set size and the one gold action per view. */
+.aetherium-page button,.aetherium-page a.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;box-sizing:border-box;
+  font:700 13px/1 var(--ax-font-head);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;color:var(--ae-ink)}
+.aetherium-page button:disabled{cursor:default}
+
+/* Search */
+.ae-search h1{margin:0 0 18px;font:400 clamp(22px,3.2vw,36px)/1.15 var(--ax-font-brand);letter-spacing:.01em;color:var(--ae-ink)}
+.ae-search-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,300px) auto;gap:12px;align-items:end}
+.ae-field{display:grid;gap:6px;min-width:0}
+.ae-field>span{font:700 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ae-muted)}
+.ae-field input,.ae-field select{box-sizing:border-box;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--ae-navy-line-strong);border-radius:0;
+  background:var(--ae-navy);color:var(--ae-ink);font:500 16px/1 "Barlow","Segoe UI",sans-serif}
+.ae-field input:focus-visible,.ae-field select:focus-visible{outline:2px solid var(--ae-ice);outline-offset:1px}
+.ae-search-note{margin:12px 0 0;color:var(--ae-muted);font-size:14px}
+.ae-results{margin-top:16px}
+.ae-results ul{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.aetherium-page .ae-result{width:100%;flex-direction:column;align-items:flex-start;gap:4px;min-height:64px;padding:10px 14px;text-transform:none;letter-spacing:0;font:500 14px/1.3 "Barlow",sans-serif}
+.ae-result strong{font:700 16px/1.2 var(--ax-font-head)}
+
+/* Summary */
+.ae-summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:var(--ae-gap);margin:var(--ae-gap) 0}
+.ae-summary-card{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:start}
+.ae-portrait{aspect-ratio:5/6;overflow:hidden;background:var(--ae-navy);border:1px solid var(--ae-navy-line);display:grid;place-items:center;color:var(--ae-dim);font-size:13px}
+.ae-portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.ae-name{margin:0;font:400 clamp(26px,3.4vw,38px)/1.1 var(--ax-font-brand);color:var(--ae-ink);overflow-wrap:break-word}
+.ae-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px;padding:0;list-style:none}
+.ae-chips li{padding:5px 10px;border:1px solid var(--ae-navy-line-strong);font:600 13px/1.2 var(--ax-font-head);letter-spacing:.04em;color:var(--ae-ink)}
+.ae-chips .ae-chip-faction{border-color:var(--ae-accent);color:var(--ae-accent)}
+.ae-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
+.ae-tile{padding:12px 14px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-tile dt{font-size:13px;color:var(--ae-muted)}
+.ae-tile dd{margin:4px 0 0;font:600 26px/1.15 var(--ax-font-head);color:var(--ae-ink)}
+.ae-tile dd span{color:var(--ae-muted);font-size:20px}
+.ae-tile dd small{font:600 16px/1.3 var(--ax-font-head);color:var(--ae-ice)}
+.ae-plan-card{display:flex;flex-direction:column;gap:12px;border-color:color-mix(in srgb,var(--ae-gold) 45%,var(--ae-navy-line))}
+.ae-plan-card p{margin:0;color:var(--ae-muted)}
+.ae-plan-card .ae-eyebrow{color:var(--ae-gold)}
+.ae-plan-title{margin:0;font:400 24px/1.2 var(--ax-font-brand);color:var(--ae-ink)}
+.ae-plan-card .btn{margin-top:auto}
+
+/* Roster */
+.ae-roster-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:28px 0 12px}
+.ae-roster-head h2{margin:0;font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-muted)}
+.ae-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.ae-roster-slot{position:relative;min-height:112px;display:flex}
+.aetherium-page .ae-roster-open,.aetherium-page .ae-roster-add{width:100%;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:14px 16px;
+  text-transform:none;letter-spacing:0;font:500 14px/1.35 "Barlow",sans-serif;text-align:left}
+.aetherium-page .ae-roster-add{align-items:center;color:var(--ae-muted);border:1px dashed var(--ae-navy-line-strong)}
+.ae-roster-open strong{font:700 18px/1.2 var(--ax-font-head);color:var(--ae-ink)}
+.ae-roster-state{font:700 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ae-accent)}
+.ae-roster-slot.is-active .ae-roster-open{box-shadow:inset 0 0 0 1px var(--ae-accent)}
+.aetherium-page .ae-roster-remove{position:absolute;top:6px;right:8px;min-height:32px;padding:0 10px;font-size:11px;color:var(--ae-muted)}
+.ae-roster-note{margin:12px 0 0;color:var(--ae-muted);font-size:13px}
+
+/* Gear Ledger */
+.ae-ledger-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:18px;margin-bottom:var(--ae-gap);border-bottom:1px solid var(--ae-navy-line)}
+.ae-subline{margin:6px 0 0;font:500 18px/1.35 var(--ax-font-head);color:var(--ae-muted)}
+.ae-figures{display:flex;flex-wrap:wrap;gap:6px 22px;margin:10px 0 0;font-size:14px;color:var(--ae-muted)}
+.ae-figures b{color:var(--ae-ice);font-weight:700}
+.ae-ledger{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:24px;align-items:start}
+.ae-col{display:grid;gap:var(--ae-gap);min-width:0}
+.ae-section-title{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 12px;margin:0 0 12px;
+  font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-ink)}
+.ae-section-title small{font:600 12px/1.3 var(--ax-font-head);letter-spacing:.12em;color:var(--ae-accent)}
+.ae-gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.aetherium-page .ae-slot{width:100%;min-height:84px;justify-content:flex-start;gap:14px;padding:12px 14px;text-transform:none;letter-spacing:0;text-align:left;font:500 14px/1.35 "Barlow",sans-serif}
+.ae-slot.is-empty{display:grid;align-content:center;gap:2px;min-height:84px;box-sizing:border-box;padding:12px 14px;border:1px dashed var(--ae-navy-line-strong);color:var(--ae-muted)}
+.ae-slot-text{display:grid;gap:2px;min-width:0}
+.ae-slot-label{font:700 11px/1.2 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;color:var(--ae-muted)}
+.ae-slot strong{font:700 16px/1.25 var(--ax-font-head);color:var(--ae-ink);overflow-wrap:anywhere}
+.ae-slot-meta{color:var(--ae-muted);font-size:13px}
+.ae-icon{flex:none;width:52px;height:52px;object-fit:contain;background:var(--ae-navy);border:1px solid var(--ae-navy-line)}
+.ae-icon-empty{display:inline-block}
+.ae-stigma .ae-icon,.ae-stigma .ae-icon-empty{width:36px;height:36px}
+.ae-extra .ae-icon,.ae-extra .ae-icon-empty{width:40px;height:40px}
+.ae-accessories{margin:10px 0 0;color:var(--ae-muted);font-size:13px}
+.ae-item{min-height:120px}
+.ae-item-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.ae-item-head h3{margin:2px 0;font:700 20px/1.2 var(--ax-font-head);color:var(--ae-ink)}
+.ae-item-head p{margin:0}
+.ae-item-head .ae-icon{width:56px;height:56px}
+.ae-item-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.ae-item-facts div{padding:8px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.ae-item-facts dt{font-size:12px;color:var(--ae-muted)}
+.ae-item-facts dd{margin:2px 0 0;font:600 16px/1.3 var(--ax-font-head);color:var(--ae-ink)}
+.ae-item-stats{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.ae-item-stats caption{text-align:left;padding-bottom:6px;font:700 12px/1.3 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;color:var(--ae-muted)}
+.ae-item-stats th,.ae-item-stats td{padding:7px 0;border-bottom:1px solid var(--ae-navy-line);text-align:left;font-weight:500}
+.ae-item-stats td{text-align:right;font-family:var(--ax-font-head);font-weight:600}
+.ae-plus{color:var(--ae-ice)}
+.ae-stigmas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
+.ae-stigma{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.ae-stigma span{display:grid;min-width:0}
+.ae-stigma strong{font:700 14px/1.2 var(--ax-font-head);overflow-wrap:anywhere}
+.ae-stigma small{color:var(--ae-muted);font-size:12px}
+.ae-stigma.is-locked .ae-icon{filter:grayscale(1) brightness(.7)}
+.ae-boards{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.ae-board-row{display:flex;align-items:baseline;gap:10px;font-size:15px}
+.ae-board-name{font-weight:600}
+.ae-board-state{padding:2px 7px;font:700 10px/1.3 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--ae-navy-line-strong);color:var(--ae-muted)}
+.ae-board.is-open .ae-board-state{border-color:var(--ae-accent);color:var(--ae-accent)}
+.ae-board-count{margin-left:auto;font:600 14px/1 var(--ax-font-head);color:var(--ae-ink)}
+.ae-bar{height:6px;margin-top:6px;background:var(--ae-navy);border:1px solid var(--ae-navy-line)}
+.ae-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--ae-accent),var(--ae-accent-2))}
+.ae-board.is-locked{opacity:.6}
+.ae-board summary{display:block;cursor:pointer;list-style:none}
+.ae-board summary::-webkit-details-marker{display:none}
+.ae-board summary:focus-visible{outline:2px solid var(--ae-ice);outline-offset:3px}
+.ae-board .ae-bar{display:block}
+.ae-board-nodes{padding:10px 0 2px;font-size:13px}
+.ae-board-nodes p{margin:0 0 8px}
+.ae-node-effects{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.ae-node-effects li{display:flex;justify-content:space-between;gap:10px;padding:5px 8px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.ae-skeleton{display:grid;place-items:center;min-height:180px;color:var(--ae-muted)}
+.ae-loading{color:var(--ae-muted);font-size:14px;list-style:none}
+.ae-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.ae-stat{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);font-size:13px}
+.ae-stat dd{margin:0;font:700 14px/1.2 var(--ax-font-head)}
+.ae-note{margin:10px 0 0;color:var(--ae-muted);font-size:13px}
+.ae-extras{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.ae-extra{display:flex;gap:12px;align-items:center;padding:8px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.ae-extra span{display:grid}
+.ae-extra small{color:var(--ae-muted);font-size:12px}
+.ae-extra strong{font:700 15px/1.25 var(--ax-font-head)}
+
+.ae-footer{padding:20px var(--ae-gutter) 28px;border-top:1px solid var(--ae-navy-line);color:var(--ae-dim);font-size:13px;line-height:1.55}
+.ae-footer p{max-width:var(--ae-max);margin:0 auto 6px}
+
+/* Under 1200 the shell puts the header in the page flow and hides the ribbon (the menu drawer takes over). */
+@media (max-width:1199px){.ae-main{padding-top:20px}}
+@media (max-width:1099px){
+  .ae-summary,.ae-ledger{grid-template-columns:minmax(0,1fr)}
+  .ae-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:819px){
+  .ae-search-form{grid-template-columns:minmax(0,1fr)}
+  .ae-search-form button{width:100%}
+  .ae-summary-card{grid-template-columns:80px minmax(0,1fr);gap:14px}
+  .ae-summary-card .ae-name{font-size:22px}
+  .ae-panel{padding:18px 16px}
+  .ae-gear{grid-template-columns:minmax(0,1fr)}
+  .ae-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:479px){
+  .ae-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ae-tile dd{font-size:22px}
+  .ae-stigmas{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Overrides of the shell's own !important rules live in the shell's layer, loaded later (see workbench.css). */
+@layer astrix-brand{
+body.aetherium-page .ae-primary:not(#ax-p1):not(#ax-p2):not(#ax-p3):not(#ax-p4){
+  color:var(--ae-gold-ink)!important;clip-path:var(--ax-clip)!important;
+  background:linear-gradient(180deg,var(--ae-gold-hi) 0%,var(--ae-gold) 55%,var(--ae-gold-lo) 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,240,200,.8),inset 0 -1px 0 rgba(0,0,0,.35)!important;
+  --ax-stroke-hi:#fff3d2;--ax-stroke:var(--ae-gold-hi)}
+body.aetherium-page .ae-primary:disabled:not(#ax-p1):not(#ax-p2):not(#ax-p3):not(#ax-p4){
+  background:linear-gradient(180deg,var(--ae-navy-raised),var(--ae-navy-panel))!important;color:var(--ae-dim)!important;box-shadow:inset 0 0 0 1px var(--ae-navy-line-strong)!important}
+body.aetherium-page :is(.ae-slot,.ae-roster-open,.ae-roster-add,.ae-result):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){
+  clip-path:var(--ae-notch)!important;background:var(--ae-navy-raised)!important;box-shadow:var(--ae-bevel)!important;color:var(--ae-ink)!important}
+body.aetherium-page .ae-roster-add:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){background:transparent!important;color:var(--ae-muted)!important}
+body.aetherium-page .ae-slot[aria-pressed="true"]:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;
+  box-shadow:inset 3px 0 0 var(--ae-accent),inset 0 0 0 1px color-mix(in srgb,var(--ae-accent) 45%,transparent)!important}
+html body.aetherium-page[data-apx-button-system] :is(button,[role="tab"]):is([aria-pressed="true"],[aria-selected="true"]):not(#ax-never-2):not(#ax-never-3):not(#ax-w1){
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;
+  box-shadow:inset 3px 0 0 var(--ae-accent),inset 0 0 0 1px color-mix(in srgb,var(--ae-accent) 45%,transparent)!important}
+body.aetherium-page [data-forge-destination-ribbon]{background:rgba(10,17,32,.94)!important}
+/* The header is 78px tall here, so start the ribbon there and never slide its top: the content padding moves at once,
+   and a sliding ribbon would sit over the first panel for a moment while it catches up. */
+:root:has(body.aetherium-page){--ax-shell-top:78px}
+body.aetherium-page [data-forge-destination-ribbon]{transition:transform .28s var(--ax-ease)!important}
+body.aetherium-page header.apx-destination-header{background:rgba(10,17,32,.96)!important}
+body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]{background:linear-gradient(180deg,color-mix(in srgb,var(--ae-accent) 22%,transparent),transparent)!important}
+body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{box-shadow:0 0 10px var(--ax-stroke-glow)!important}
+@media (max-width:1199px){
+  html body.aetherium-page header.apx-destination-header .ax-menu-btn{margin-left:auto!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .aetherium-page *{animation:none!important;transition:none!important}
+}
+}

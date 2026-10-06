@@ -1,0 +1,10 @@
+{
+  "$comment": "Footer lines every AION 2 (The Aetherium) page carries, word for word. AION 2 pages must not carry another game's footer line. Checked by astrix-app/tools/validate-bungie-footer.mjs.",
+  "pagePrefixes": [
+    "hub/aetherium/"
+  ],
+  "lines": [
+    "The Aetherium by ASTRIX PARADOX is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by NCSOFT. AION 2 and related names, images and icons are trademarks of NCSOFT.",
+    "Character data is read from the public AION 2 armory. No login is needed and nothing is stored on our servers. Item and skill icons load from the NCSOFT CDN."
+  ]
+}

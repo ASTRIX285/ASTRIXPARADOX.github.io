@@ -9,11 +9,10 @@ workers_dev = true
 ENVIRONMENT = "production"
 
 # 10 minute response cache per normalised request.
-# Create it with: npx wrangler kv namespace create AION2_CACHE
-# then paste the id it prints below.
+# Namespace created by Miguel on 5 Oct 2026 (npx wrangler kv namespace create AION2_CACHE).
 [[kv_namespaces]]
 binding = "AION2_CACHE"
-id = "PASTE_AION2_CACHE_ID_HERE"
+id = "6d3c6cb3d4b84ea19306411e93453eb8"
 
 # 30 requests a minute per visitor IP (CF-Connecting-IP). The Worker also keeps
 # its own per-isolate 30 a minute guard, so it stays limited without this binding.

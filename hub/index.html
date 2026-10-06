@@ -87,9 +87,12 @@
     <div class="tools-shell">
       <div class="platform-grid" id="hubCards"></div>
       <script>
-      // The Hub cards: one card per tool. Edit this list only; the markup below is built from it.
+      // The Hub cards: one card per tool, in this order (The Aetherium first, top left). Edit this list only; the markup below is built from it.
       (function(){
         var HUB_TOOLS=[
+          {kind:'live',game:'AION 2',name:'The Aetherium',art:'/img/games/aion2-the-aetherium.jpg',artPos:'50% 45%',
+            copy:'Look up a Daeva on the EU servers by name and see class, level, combat power, gear, stigmas and Daevanion boards in one place. No login needed.',
+            action:{label:'Enter The Aetherium',href:'/hub/aetherium/'}},
           {kind:'live',game:'Destiny 2',name:'The Forge',art:'/img/games/D2_JB.jpg',
             copy:'Connect your Bungie account to review your Guardian, equipped gear, saved loadouts and build analysis in one connected workspace.',
             action:{label:'Enter The Forge',href:'../astrix-app/pages/home/'},more:{label:'About the Destiny 2 tools',href:'/tools/destiny-2/'}},
@@ -113,7 +116,7 @@
         document.getElementById('hubCards').innerHTML=HUB_TOOLS.map(card).join('');
       })();
       </script>
-      <noscript><p class="platform-noscript"><a href="../astrix-app/pages/home/">Enter The Forge</a> (Destiny 2). WorkBench (The Division) is coming soon.</p></noscript>
+      <noscript><p class="platform-noscript"><a href="../astrix-app/pages/home/">Enter The Forge</a> (Destiny 2). <a href="/hub/aetherium/">Enter The Aetherium</a> (AION 2). WorkBench (The Division) is coming soon.</p></noscript>
       </div>
     </div>
   </section>

@@ -80,7 +80,7 @@
 
   "/astrix-app/domains/player-identity/player-identity-service.mjs": "ffe9f66ede",
 
-  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "97239d3401",
+  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "12108b0a05",
 
   "/astrix-app/games/aion2/index.mjs": "4c6dfb3a1a",
 
@@ -97,6 +97,16 @@
   "/astrix-app/games/wow-forever/pipeline/build-forever-db.mjs": "ba21314ab8",
 
   "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8eb89bb6d3",
+
+  "/astrix-app/pages/aetherium/aetherium-config.mjs": "7775be2108",
+
+  "/astrix-app/pages/aetherium/aetherium-data.mjs": "abd5dbfcab",
+
+  "/astrix-app/pages/aetherium/aetherium-ui.mjs": "a5686bfb85",
+
+  "/astrix-app/pages/aetherium/daeva-card.mjs": "edacc1e6da",
+
+  "/astrix-app/pages/aetherium/gear-ledger.mjs": "10de910050",
 
   "/astrix-app/pages/build-fit/build-fit-url.mjs": "b69cb33f83",
 

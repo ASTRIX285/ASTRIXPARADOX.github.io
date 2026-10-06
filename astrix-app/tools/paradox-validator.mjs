@@ -11,8 +11,10 @@ const validators=[
   'validate-division.mjs',
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
+  'test-aetherium-pages.mjs', // The Aetherium Daeva Card and Gear Ledger: demo, live, roster, faction, Worker down, layout.
   'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.
   'test-hub-cards.mjs', // The Hub: full-bleed card art, text backdrop, spare card map image.
+  'test-aion2-adapter.mjs', // AION 2 armory adapter: ASTRIX285 fixtures to the character model.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',

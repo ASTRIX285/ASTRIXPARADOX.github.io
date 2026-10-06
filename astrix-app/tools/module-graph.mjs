@@ -10,7 +10,7 @@ export const ROOT=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 export const APP='astrix-app';
 const SKIP=new Set(['tools','node_modules','vendor','ASTRIX285.github.io']);
 // Page folders outside astrix-app/ whose pages load app modules (The Division WorkBench lives at /hub/workbench/<title>/).
-export const PAGE_DIRS=Object.freeze(['hub/workbench']);
+export const PAGE_DIRS=Object.freeze(['hub/aetherium','hub/workbench']);
 export const toSite=file=>'/'+relative(ROOT,file).split(sep).join('/');
 export const toFile=site=>resolve(ROOT,'.'+decodeURIComponent(site));
 

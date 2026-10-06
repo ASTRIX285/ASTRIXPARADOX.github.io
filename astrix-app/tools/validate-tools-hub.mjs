@@ -72,7 +72,7 @@ assert.ok(tools.includes('aria-controls="toolsMissionDialog"'),'Mission trigger 
 assert.ok(tools.includes('id="toolsMissionDialog" role="dialog" aria-modal="true"'),'Mission message must be exposed as a modal dialog');
 assert.ok(tools.includes('Gaming is better with<br><span>an intelligent partner.</span>'),'Mission popup must carry the approved campaign headline');
 assert.ok(tools.includes('The goal is not to play the game for you.'),'Mission popup must explain the AI partner boundary');
-// Cards come from one data list (HUB_TOOLS): The Forge, WorkBench (coming soon, disabled) and the future slot.
+// Cards come from one data list (HUB_TOOLS): The Forge, WorkBench (coming soon, disabled), The Aetherium and the future slot.
 const list=tools.slice(tools.indexOf('var HUB_TOOLS=['),tools.indexOf('];',tools.indexOf('var HUB_TOOLS=[')));
 assert.match(list,/name:'The Forge'[\s\S]*?action:\{label:'Enter The Forge',href:'\.\.\/astrix-app\/pages\/home\/'\}/,'The Forge card enters the Destiny 2 tool by its unchanged route');
 assert.match(list,/name:'WorkBench'[\s\S]*?status:'Coming soon'[\s\S]*?action:\{label:'Enter WorkBench'\}/,'WorkBench card is coming soon with no link');
@@ -84,7 +84,12 @@ assert.ok(list.includes("game:'Destiny 2'")&&list.includes("game:'The Division'"
 assert.equal((tools.match(/\.\.\/astrix-app\/pages\/home\//g)??[]).length,3,'The Forge card, its no-script link and the mission popup enter Guardian Home, the light landing page');
 assert.ok(tools.includes('class="btn-primary forge-entry-link"'),'Tools page must use a clear Enter Forge button');
 assert.doesNotMatch(tools,/guardian-alpha|ENTER (?:DESTINY )?ALPHA|Alpha · Invitation Only/,'Tools page must not expose retired Alpha state');
-assert.equal((list.match(/\{kind:'/g)??[]).length,3,'One card per tool: The Forge, WorkBench and the future slot');
+assert.ok(list.indexOf("name:'The Aetherium'")<list.indexOf("name:'The Forge'"),'The Aetherium card sits first, top left');
+assert.ok(read('ARTWORK_PROVENANCE.md').includes("`img/games/aion2-the-aetherium.jpg` is NCSOFT's artwork, not ours."),'The Aetherium card art is recorded as NCSOFT artwork');
+assert.equal((list.match(/\{kind:'/g)??[]).length,4,'One card per tool: The Forge, WorkBench, The Aetherium and the future slot');
+// The Aetherium (AION 2, 5 Oct 2026): live card into the Daeva Card. Art is NCSOFT's own share image, stored with Miguel's
+// approval and recorded in ARTWORK_PROVENANCE.md.
+assert.match(list,/game:'AION 2',name:'The Aetherium',art:'\/img\/games\/aion2-the-aetherium\.jpg'[\s\S]*?action:\{label:'Enter The Aetherium',href:'\/hub\/aetherium\/'\}/,'The Aetherium card enters the Daeva Card');
 assert.ok(tools.includes('class="platform-card platform-card-active'),'Tools use the active platform card');
 assert.ok(tools.includes('class="platform-card platform-card-coming'),'Future slot must use the reusable platform card');
 assert.ok(tools.includes('src="../img/logo.png"'),'Future tool card must use the official ASTRIX PARADOX logo');

@@ -14,6 +14,7 @@ export const ITEM_LEVEL_LABEL = '아이템레벨';
 export const SKILL_CATEGORIES = Object.freeze(['Active', 'Passive', 'Dp']);
 
 const pending = reason => ({ pending: true, reason });
+const icon = value => (typeof value === 'string' && value.startsWith('https://') ? value : null);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function requireShape(value, key, what) {
@@ -33,6 +34,8 @@ export function adaptProfile(info) {
     level: p.characterLevel,
     raceName: p.raceName,
     server: { id: p.serverId, name: p.serverName },
+    characterId: p.characterId,
+    portrait: icon(p.profileImage),
     title: p.titleName ?? null,
     combatPower: p.combatPower,
     itemLevel: Number.isFinite(itemLevelRow?.value)
@@ -61,6 +64,7 @@ export function adaptGear(equipment, slots, items = {}) {
       empty: false,
       itemId: item.id,
       name: item.name,
+      icon: icon(item.icon),
       grade: item.grade,
       enchant: item.enchantLevel,
       maxEnchant: sameItem && Number.isFinite(detail.maxEnchantLevel)
@@ -79,6 +83,48 @@ export function adaptGear(equipment, slots, items = {}) {
   return gear;
 }
 
+/** Primary and god stats from /api/character/info, without the item level row (that is profile.itemLevel). */
+export function adaptStats(info) {
+  requireShape(info, 'stat', 'Character info');
+  return (info.stat.statList ?? [])
+    .filter(row => row.name !== ITEM_LEVEL_LABEL)
+    .map(row => ({ type: row.type, name: row.name, value: row.value }));
+}
+
+/** One worn item from /api/character/equipment/item, for the item detail card. */
+export function adaptItemDetail(detail) {
+  requireShape(detail, 'id', 'Item detail');
+  const stat = row => ({ name: row.name, value: row.value, ...(row.extra && row.extra !== '0' ? { extra: row.extra } : {}) });
+  return {
+    id: detail.id,
+    name: detail.name,
+    icon: icon(detail.icon),
+    grade: detail.grade,
+    category: detail.categoryName ?? null,
+    level: detail.level ?? null,
+    enchant: detail.enchantLevel,
+    maxEnchant: Number.isFinite(detail.maxEnchantLevel) ? detail.maxEnchantLevel : pending('The armory sent no max enchant for this item.'),
+    manastoneSlots: Number.isFinite(detail.magicStoneSlotCount) ? detail.magicStoneSlotCount : pending('The armory sent no manastone slot count for this item.'),
+    soulBindRate: detail.soulBindRate ?? null,
+    mainStats: (detail.mainStats ?? []).map(stat),
+    subStats: (detail.subStats ?? []).map(stat),
+    sources: detail.sources ?? []
+  };
+}
+
+/** Character search rows from the armory search. Names arrive wrapped in highlight tags. */
+export function adaptSearch(search) {
+  requireShape(search, 'list', 'Character search');
+  return (search.list ?? []).map(row => ({
+    name: String(row.name).replace(/<\/?strong>/g, ''),
+    characterId: decodeURIComponent(row.characterId),
+    serverId: row.serverId,
+    serverName: row.serverName,
+    level: row.level,
+    portrait: row.profileImageUrl ? `https://profileimg.plaync.com${row.profileImageUrl}` : null
+  }));
+}
+
 /** All class skills from /api/character/equipment. Category Dp is a stigma. */
 export function adaptSkills(equipment) {
   requireShape(equipment, 'skill', 'Equipment');
@@ -89,6 +135,7 @@ export function adaptSkills(equipment) {
     return {
       id: skill.id,
       name: skill.name,
+      icon: icon(skill.icon),
       category: skill.category,
       needLevel: skill.needLevel,
       skillLevel: skill.skillLevel,
@@ -104,6 +151,7 @@ export function adaptDaevanion(info) {
   return (info.daevanion.boardList ?? []).map(board => ({
     id: board.id,
     name: board.name,
+    icon: icon(board.icon),
     open: board.open === 1,
     nodesTaken: board.openNodeCount,
     nodesTotal: board.totalNodeCount
@@ -132,10 +180,10 @@ export function adaptPetWing(equipment) {
   const petwing = equipment?.petwing ?? {};
   return {
     pet: petwing.pet
-      ? { id: petwing.pet.id, name: petwing.pet.name, level: petwing.pet.level }
+      ? { id: petwing.pet.id, name: petwing.pet.name, icon: icon(petwing.pet.icon), level: petwing.pet.level }
       : pending('The armory sent no equipped pet.'),
     wings: petwing.wing
-      ? { id: petwing.wing.id, name: petwing.wing.name, grade: petwing.wing.grade, enchant: petwing.wing.enchantLevel }
+      ? { id: petwing.wing.id, name: petwing.wing.name, icon: icon(petwing.wing.icon), grade: petwing.wing.grade, enchant: petwing.wing.enchantLevel }
       : pending('The armory sent no equipped wings.')
   };
 }
@@ -158,6 +206,7 @@ export function adaptCharacter(raw, { slots, region, capturedOn }) {
     profile: adaptProfile(raw.info),
     gear: adaptGear(raw.equipment, slots, raw.items ?? {}),
     accessorySlots: pending('The armory lists a slot only when an item is worn there. Accessory slot names and positions need an equipped accessory or an in-game capture.'),
+    stats: adaptStats(raw.info),
     skills: adaptSkills(raw.equipment),
     daevanion,
     ...adaptPetWing(raw.equipment),
