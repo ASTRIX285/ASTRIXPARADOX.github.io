@@ -58,6 +58,22 @@ const INSTRUMENT=()=>{
     if(state.shownAt!==null&&!entry.hadRecentInput&&entry.startTime-state.shownAt<1000)state.shift+=entry.value;
   }}).observe({type:'layout-shift',buffered:false});
 };
+// Reports needs its own Worker routes, which the Warlock fixture does not serve. Since the shared
+// recovery panel (#450), a Reports page with no data covers the tool tabs, so serve it honestly:
+// the real public activity catalogue, the fixture's own characters, and no clears.
+const reportsCatalogue=JSON.parse(await readFile(join(here,'astrix-app/tools/fixtures/reports-catalogue-current.json'),'utf8'));
+async function routeReports(context,origin){
+  const headers={'access-control-allow-origin':origin,'access-control-allow-credentials':'true'};
+  const json=(route,body)=>route.fulfill({status:200,contentType:'application/json',headers,body:JSON.stringify(body)});
+  const characters=Object.fromEntries(Object.values(fixture.profile.characters?.data||{}).map(row=>[row.characterId,{characterId:row.characterId,classType:row.classType}]));
+  await context.route('https://auth.astrixparadox.com/bungie/reports**',route=>{
+    const url=new URL(route.request().url());
+    if(url.pathname==='/bungie/reports/catalogue')return json(route,reportsCatalogue);
+    if(url.searchParams.get('kind')==='profile')return json(route,{ErrorCode:1,Response:{characters:{data:characters}}});
+    if(['aggregate','history'].includes(url.searchParams.get('kind')))return json(route,{ErrorCode:1,Response:{activities:[]}});
+    return route.fallback();
+  });
+}
 const failures=[],timings=[];
 let browser;
 try{
@@ -71,7 +87,7 @@ try{
       if(ONLY&&!ONLY.includes(name))continue;
       const context=await browser.newContext({viewport:{width,height},...(width<600?{isMobile:true,hasTouch:true,deviceScaleFactor:2}:{})});
       // Context routes reach prerendered documents too.
-      await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});
+      await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});await routeReports(context,origin);
       await context.addInitScript(INSTRUMENT);
       const page=await context.newPage(),errors=[];
       page.on('pageerror',error=>errors.push(String(error.stack||error.message).split(/\r?\n/).slice(0,2).join(' ').replace(/http:\/\/127\.0\.0\.1:\d+/g,'')));
@@ -123,7 +139,7 @@ try{
   // actions (retry kept) at once, with no loader animation and nothing left covered.
   if(!ONLY){
     const context=await browser.newContext({viewport:{width:1600,height:900}});
-    await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});
+    await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});await routeReports(context,origin);
     const page=await context.newPage();
     await page.goto(origin+'/astrix-app/pages/journey/',{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.ForgeLoader?.completed===true,null,{timeout:30000});
@@ -147,7 +163,7 @@ try{
   // step (its warm fetch of the destination page, held back here for 1.2 s) has finished.
   if(!ONLY){
     const context=await browser.newContext({viewport:{width:1600,height:900}});
-    await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});
+    await routeWarlockFixture({route:(pattern,handler)=>context.route(pattern,handler)},{origin,fixture,art});await routeReports(context,origin);
     let hold=false,releasedAt=null;
     await context.route(origin+'/astrix-app/pages/vault/',async route=>{
       // Only the warm step's fetch; the navigation itself is a document request.

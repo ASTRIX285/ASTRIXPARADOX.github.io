@@ -82,3 +82,4 @@ tools/destiny-2/index.html
 hub/aetherium/ascent/index.html
 hub/aetherium/gear/index.html
 hub/aetherium/index.html
+astrix-app/tools/test-seamless-transitions.mjs
