@@ -122,7 +122,7 @@
         "alternatives": [
           {
             "name": "Explosive Arrow",
-            "why": "ExpCarry boss and AoE sets, MetaBot stigma guide.",
+            "why": "Strong in boss fights and big pulls.",
             "refs": [
               "ec-ranger",
               "mb-stigma"
@@ -130,7 +130,7 @@
           },
           {
             "name": "Arrow Storm",
-            "why": "ExpCarry boss and AoE sets, MetaBot stigma guide.",
+            "why": "Strong in boss fights and big pulls.",
             "refs": [
               "ec-ranger",
               "mb-stigma"
@@ -141,13 +141,20 @@
         "refs": [
           "mb-ranger"
         ],
-        "note": "ExpCarry boss set: Bow of Blessing, Explosive Arrow, Griffon Arrow, Arrow Storm."
+        "note": "Boss fight set: Bow of Blessing, Explosive Arrow, Griffon Arrow, Arrow Storm."
       },
       "daevanion": {
         "priorities": [
           "Tempest Shot +1",
           "Drill Dart, Snipe and Deadshot +1",
           "Gale Arrow +1"
+        ],
+        "skillNodes": [
+          "Tempest Shot",
+          "Drill Dart",
+          "Snipe",
+          "Deadshot",
+          "Gale Arrow"
         ],
         "refs": [
           "mb-ranger"
@@ -166,7 +173,7 @@
       },
       "rotation": {
         "pending": true,
-        "reason": "No reliable Ranger rotation is published yet. ExpCarry advises keeping charged shots, movement and traps on manual keys and only macroing filler such as Snipe."
+        "reason": "No proven Ranger rotation yet. Keep charged shots, movement and traps on your own keys and only macro filler such as Snipe."
       },
       "levelNotes": [],
       "status": "sourced",

@@ -213,8 +213,8 @@
           20
         ]
       },
-      "text": "Every active skill has 5 Specialty perks: three open at skill Lv 8, one at 12 and one at 16. Three sources say you can equip one perk at skill Lv 8, a second at 12 and a third at 20.",
-      "confidence": "three sources, not yet checked in game",
+      "text": "Every active skill has 5 Specialty perks: three open at skill Lv 8, one at 12 and one at 16. You can equip one perk at skill Lv 8, a second at 12 and a third at 20.",
+      "confidence": "not yet checked in game",
       "provenance": [
         {
           "kind": "community-guide",
@@ -310,7 +310,7 @@
       "label": "How macros fire",
       "value": {
         "pending": true,
-        "reason": "Sources disagree. games.gg says skills fire in the listed order; mein-mmo says the macro checks from the bottom row up and fires the first skill that is ready. Needs an in-game check."
+        "reason": "Not confirmed yet: a macro either fires skills in the listed order, or checks from the bottom row up and fires the first one that is ready. Put two skills in one macro and see which fires first."
       },
       "text": "Holding the macro key runs it. Pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
       "provenance": [

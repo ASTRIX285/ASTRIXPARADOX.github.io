@@ -10,6 +10,8 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,pickBuild,rolesFor} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
+import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
+import {affordable,explainNode,nodeCost,planDaevanionBoard} from '../games/aion2/engine/daevanion-planner.mjs';
 
 const root=new URL('../',import.meta.url);
 const json=path=>JSON.parse(readFileSync(new URL(path,root),'utf8'));
@@ -184,6 +186,88 @@ check('every class and role builds a plan at every level band',()=>{
     assert.equal(plan.className,name);
     assert.ok(plan.sources.length>0,`${name} ${role.role} has sources`);
   }
+});
+
+const nezekan=adaptDaevanionBoard(json('tools/fixtures/aion2/eu/astrix285-daevanion-11.json'));
+const gladiatorNodes=builds.Gladiator.records[0].daevanion.skillNodes;
+
+check('Daevanion: Nezekan prices to 134 points, the board total',()=>{
+  const board=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  assert.equal(board.pointsTotal,134);
+  assert.equal(board.totalNodes,88);
+  assert.deepEqual(board.bounds,{top:3,bottom:13,left:3,right:13});
+  assert.equal(nodeCost({type:'SkillLevel',grade:'Legend'}),3);
+  assert.equal(nodeCost({type:'Stat',grade:'Unique'}),4);
+});
+
+check('Daevanion: every route step touches a node already owned',()=>{
+  const board=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  const start=nezekan.find(node=>node.type==='Start');
+  const owned=new Set([`${start.row}:${start.col}`]);
+  for(const step of board.route){
+    const touches=[[1,0],[-1,0],[0,1],[0,-1]].some(([dr,dc])=>owned.has(`${step.row+dr}:${step.col+dc}`));
+    assert.ok(touches,`step ${step.step} (${step.name}) is not connected`);
+    owned.add(`${step.row}:${step.col}`);
+  }
+});
+
+check('Daevanion: key skill nodes come first, in the build order, then the four corners',()=>{
+  const board=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  const targets=board.route.filter(step=>step.target).map(step=>step.effects[0]);
+  assert.deepEqual(targets.slice(0,4),['Overhead Slam +1','Rending Blow +1','Ruinous Blow +1','Crushing Wave +1']);
+  assert.equal(targets.slice(4).filter(text=>/\+1\.5%$/.test(text)).length,4);
+  assert.equal(board.route.at(-1).totalCost,board.route.reduce((sum,step)=>sum+step.cost,0));
+});
+
+check('Daevanion: nodes already taken are skipped and the route starts from them',()=>{
+  const fresh=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  const firstFour=new Set(fresh.route.slice(0,7).map(step=>step.nodeId));
+  const taken=nezekan.map(node=>firstFour.has(node.nodeId)?{...node,taken:true}:node);
+  const board=planDaevanionBoard({nodes:taken,skillOrder:gladiatorNodes});
+  assert.equal(board.takenCount,7);
+  assert.equal(board.pointsSpent,9,'six stat nodes and Overhead Slam');
+  assert.ok(board.route.every(step=>!firstFour.has(step.nodeId)));
+  assert.equal(board.route[0].step,1);
+  assert.equal(board.targets.skillsTaken,1);
+});
+
+check('Daevanion: a points budget splits the route into now and later',()=>{
+  const {route}=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  const split=affordable(route,10);
+  assert.equal(split.now.length,8);
+  assert.equal(split.shortBy,3);
+  assert.equal(affordable(route,0).now.length,0);
+  assert.equal(affordable(route,999).shortBy,null);
+  assert.equal(affordable(route,'').now.length,0);
+});
+
+check('Daevanion: every node explains itself in plain words',()=>{
+  const board=planDaevanionBoard({nodes:nezekan,skillOrder:gladiatorNodes});
+  const context={skillOrder:gladiatorNodes,cooldowns:new Map([['Ruinous Blow',45],['Overhead Slam',5]]),boardName:'Nezekan',boardFocus:'Combat Speed and Cooldown Reduction'};
+  for(const tile of board.tiles){const why=explainNode(tile,board.route,context);assert.ok(why.lines.length>0&&why.lines.every(line=>line.length>10),tile.name);}
+  const cdr=board.tiles.find(tile=>tile.kind==='unique'&&/Cooldown/.test(tile.name));
+  assert.match(explainNode(cdr,board.route,context).lines.join(' '),/On Ruinous Blow \(45 s\) that is about 0\.7 s back/);
+  const filler=board.tiles.find(tile=>tile.step===1);
+  assert.match(explainNode(filler,board.route,context).lines[0],/^Taken to reach Overhead Slam \+1/);
+  const route=board.route.filter(step=>step.from);
+  assert.equal(route.length,board.route.length,'every step links back to a node');
+});
+
+check('every build names the skills its Daevanion route aims for',()=>{
+  for(const name of AION2_CLASSES)for(const build of builds[name].records){
+    if(build.status==='pending'||build.daevanion?.pending)continue;
+    assert.ok(Array.isArray(build.daevanion.skillNodes)&&build.daevanion.skillNodes.length>0,`${build.id} skillNodes`);
+  }
+});
+
+check('players never see another site: no guide names in text a page shows',()=>{
+  const visible=value=>{
+    if(Array.isArray(value))return value.flatMap(visible);
+    if(value&&typeof value==='object')return Object.entries(value).filter(([key])=>!['provenance','refs','roleRefs','id'].includes(key)).flatMap(([,child])=>visible(child));
+    return typeof value==='string'?[value]:[];
+  };
+  const names=/MetaBot|ExpCarry|EZG|Destructoid|games\.gg|mein-mmo|gameplay\.tips|aion2hub|playnews/i;
+  for(const text of [...visible(progression.records),...visible(skills.records),...Object.values(builds).flatMap(file=>visible(file.records))])assert.doesNotMatch(text,names,text);
 });
 
 check('unknown class throws',()=>{

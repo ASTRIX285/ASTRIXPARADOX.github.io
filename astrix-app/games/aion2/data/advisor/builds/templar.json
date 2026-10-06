@@ -103,7 +103,7 @@
         "alternatives": [
           {
             "name": "Nezekan's Shield",
-            "why": "ExpCarry main PvE tank set and MetaBot stigma guide pick.",
+            "why": "Pure survival tank pick.",
             "refs": [
               "ec-templar",
               "mb-stigma"
@@ -111,14 +111,14 @@
           },
           {
             "name": "Shield of Protection",
-            "why": "ExpCarry main PvE tank set.",
+            "why": "Pure survival tank pick.",
             "refs": [
               "ec-templar"
             ]
           },
           {
             "name": "Second Skin",
-            "why": "ExpCarry main PvE tank set.",
+            "why": "Pure survival tank pick.",
             "refs": [
               "ec-templar"
             ]
@@ -129,13 +129,18 @@
           "mb-templar",
           "ec-templar"
         ],
-        "note": "Taunt is in every PvE list. For pure survival ExpCarry runs Shield of Protection, Taunt, Nezekan's Shield and Second Skin."
+        "note": "Taunt is in every PvE tank set. For pure survival, run Shield of Protection, Taunt, Nezekan's Shield and Second Skin."
       },
       "daevanion": {
         "priorities": [
           "Punishment +1 on Zikel",
           "Judgment +1 on Nezekan",
           "Vicious Strike +1 on Zikel"
+        ],
+        "skillNodes": [
+          "Punishment",
+          "Judgment",
+          "Vicious Strike"
         ],
         "refs": [
           "mb-templar"
@@ -168,7 +173,7 @@
         "refs": [
           "ec-templar"
         ],
-        "note": "ExpCarry gives the priorities, not a fixed order. Keep defensive skills on manual keys."
+        "note": "These are priorities, not a fixed order. Keep defensive skills on your own keys."
       },
       "levelNotes": [],
       "status": "sourced",
@@ -287,14 +292,14 @@
         "alternatives": [
           {
             "name": "Noble Armor",
-            "why": "ExpCarry solo and AoE set.",
+            "why": "Set for solo play and big pulls.",
             "refs": [
               "ec-templar"
             ]
           },
           {
             "name": "Executing Blade",
-            "why": "ExpCarry solo and AoE set.",
+            "why": "Set for solo play and big pulls.",
             "refs": [
               "ec-templar"
             ]
@@ -304,12 +309,16 @@
         "refs": [
           "ec-templar"
         ],
-        "note": "Slot order follows the ExpCarry list, not a sourced order."
+        "note": "The slot order is a suggestion."
       },
       "daevanion": {
         "priorities": [
           "Punishment +1 on Zikel",
           "Judgment +1 on Nezekan"
+        ],
+        "skillNodes": [
+          "Punishment",
+          "Judgment"
         ],
         "refs": [
           "mb-templar"

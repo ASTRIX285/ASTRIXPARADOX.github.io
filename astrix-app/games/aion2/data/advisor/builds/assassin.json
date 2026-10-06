@@ -111,7 +111,7 @@
         "alternatives": [
           {
             "name": "Aerial Bind",
-            "why": "MetaBot stigma guide pick.",
+            "why": "Popular alternative.",
             "refs": [
               "mb-stigma"
             ]
@@ -122,12 +122,16 @@
           "mb-assassin",
           "ezg-assassin"
         ],
-        "note": "Upgrade order from EZG: Triniel's Dagger to Lv 10, then Illusive Clone to Lv 20, then Swift Contract, then Savage Fang."
+        "note": "Upgrade order: Triniel's Dagger to Lv 10, then Illusive Clone to Lv 20, then Swift Contract, then Savage Fang."
       },
       "daevanion": {
         "priorities": [
           "Heart Gore +1 on Nezekan",
           "Insignia Explosion +1 on Zikel"
+        ],
+        "skillNodes": [
+          "Heart Gore",
+          "Insignia Explosion"
         ],
         "refs": [
           "mb-assassin"
@@ -135,7 +139,7 @@
       },
       "stats": {
         "pending": true,
-        "reason": "No reliable source ranks Assassin stats yet. Fight from behind: back attacks are central to the class."
+        "reason": "Assassin stat priorities are not confirmed yet. Fight from behind: back attacks are central to the class."
       },
       "rotation": {
         "steps": [

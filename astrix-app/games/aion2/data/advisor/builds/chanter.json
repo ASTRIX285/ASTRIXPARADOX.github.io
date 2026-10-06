@@ -109,14 +109,14 @@
         "alternatives": [
           {
             "name": "Obliterate",
-            "why": "ExpCarry boss support set.",
+            "why": "Strong in boss fights.",
             "refs": [
               "ec-chanter"
             ]
           },
           {
             "name": "Impeding Authority",
-            "why": "MetaBot stigma guide pick.",
+            "why": "Popular alternative.",
             "refs": [
               "mb-stigma"
             ]
@@ -127,13 +127,17 @@
           "mb-chanter",
           "ec-chanter"
         ],
-        "note": "ExpCarry boss set: Undefeated Mantra, Power of the Storm, Marchutan's Wrath, Obliterate."
+        "note": "Boss fight set: Undefeated Mantra, Power of the Storm, Marchutan's Wrath, Obliterate."
       },
       "daevanion": {
         "priorities": [
           "Nezekan and Zikel first",
           "Dark Crush +1",
           "Onslaught +1"
+        ],
+        "skillNodes": [
+          "Dark Crush",
+          "Onslaught"
         ],
         "refs": [
           "mb-chanter"
@@ -221,7 +225,7 @@
       "label": "Defensive support",
       "beginner": "medium",
       "status": "partial",
-      "summary": "A tankier Chanter that leans on shields and healing. Only the stigma set is sourced.",
+      "summary": "A tankier Chanter that leans on shields and healing. Only the stigma set is confirmed so far.",
       "coreSkills": [
         {
           "name": "Recuperation",
@@ -267,7 +271,7 @@
         "refs": [
           "ec-chanter"
         ],
-        "note": "ExpCarry defensive set. Slot order follows the list, not a sourced order."
+        "note": "Defensive set. The slot order is a suggestion."
       },
       "daevanion": {
         "pending": true,
@@ -376,12 +380,16 @@
         "refs": [
           "ec-chanter"
         ],
-        "note": "ExpCarry solo and AoE set."
+        "note": "Set for solo play and big pulls."
       },
       "daevanion": {
         "priorities": [
           "Dark Crush +1",
           "Onslaught +1"
+        ],
+        "skillNodes": [
+          "Dark Crush",
+          "Onslaught"
         ],
         "refs": [
           "mb-chanter"

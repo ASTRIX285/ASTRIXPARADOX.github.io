@@ -138,14 +138,14 @@
         "alternatives": [
           {
             "name": "Steel Barrier",
-            "why": "ExpCarry: swap in if you keep dying.",
+            "why": "Swap in if you keep dying.",
             "refs": [
               "ec-sorcerer"
             ]
           },
           {
             "name": "Arctic Armor",
-            "why": "ExpCarry: swap in if you keep dying.",
+            "why": "Swap in if you keep dying.",
             "refs": [
               "ec-sorcerer"
             ]
@@ -161,6 +161,11 @@
         "priorities": [
           "Reach the Specialty thresholds on your core skills first",
           "Nezekan nodes for Hellfire, Firestorm and Wish of Concentration"
+        ],
+        "skillNodes": [
+          "Hellfire",
+          "Firestorm",
+          "Wish of Concentration"
         ],
         "refs": [
           "ec-sorcerer"
@@ -179,7 +184,7 @@
       },
       "rotation": {
         "pending": true,
-        "reason": "No reliable Sorcerer rotation is published yet. Keep MP above 25 percent: Grace of Enhancement only adds PvE damage at 25 percent MP or more."
+        "reason": "No proven Sorcerer rotation yet. Keep MP above 25 percent: Grace of Enhancement only adds PvE damage at 25 percent MP or more."
       },
       "levelNotes": [],
       "roleRefs": [

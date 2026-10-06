@@ -94,7 +94,7 @@
         "alternatives": [
           {
             "name": "Cursed Cloud",
-            "why": "ExpCarry solo and AoE set, MetaBot stigma guide.",
+            "why": "Good for solo play and big pulls.",
             "refs": [
               "ec-spiritmaster",
               "mb-stigma"
@@ -112,6 +112,11 @@
           "Combustion +1",
           "Elemental Fusion +1",
           "Spirit Strike +1"
+        ],
+        "skillNodes": [
+          "Combustion",
+          "Elemental Fusion",
+          "Spirit Strike"
         ],
         "refs": [
           "mb-spiritmaster"
