@@ -225,6 +225,10 @@ html body.aetherium-page[data-apx-button-system] :is(button,[role="tab"]):is([ar
   background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;
   box-shadow:inset 3px 0 0 var(--ae-accent),inset 0 0 0 1px color-mix(in srgb,var(--ae-accent) 45%,transparent)!important}
 body.aetherium-page [data-forge-destination-ribbon]{background:rgba(10,17,32,.94)!important}
+/* The header is 78px tall here, so start the ribbon there and never slide its top: the content padding moves at once,
+   and a sliding ribbon would sit over the first panel for a moment while it catches up. */
+:root:has(body.aetherium-page){--ax-shell-top:78px}
+body.aetherium-page [data-forge-destination-ribbon]{transition:transform .28s var(--ax-ease)!important}
 body.aetherium-page header.apx-destination-header{background:rgba(10,17,32,.96)!important}
 body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]{background:linear-gradient(180deg,color-mix(in srgb,var(--ae-accent) 22%,transparent),transparent)!important}
 body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a[aria-current="page"]::after{box-shadow:0 0 10px var(--ax-stroke-glow)!important}
