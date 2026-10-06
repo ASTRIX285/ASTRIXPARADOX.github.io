@@ -1,0 +1,12 @@
+astrix-app/games/aion2/data/advisor/progression.json
+astrix-app/games/aion2/data/gladiator/stigmas.json
+astrix-app/games/aion2/docs/SCOPE.md
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aion2-adapter.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+hub/aetherium/ascent/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html

@@ -54,8 +54,8 @@ loaded it adds fixes from the armory first. Roles with no published build stay p
   on top. Macros are not in the armory data, so macro advice is recommendation-only.
 - Global facts the advisor uses (6 Oct 2026 research): level cap 45 on EU and NA; stigma slots at Lv 22,
   27, 32 and 37; Daevanion boards at 12, 20, 30, 40 and 45; Specialty perks at skill Lv 8, 12 and 16 with
-  slots at 8, 12 and 20 (three sources, to check in game). Guides disagree on macro order, so the page
-  asks the player to check it in game until Miguel confirms it.
+  slots at 8, 12 and 20 (three sources, to check in game). Macro order confirmed in game by Miguel
+  (6 Oct 2026, Macro window): skills fire in the listed order with a delay between each, 10 ms by default.
 - Roster: up to 8 characters per account, added by name and saved on the device.
 - The "equip the upgrades in your Cube" fix cannot be automatic (the Cube is not in the public data).
   It is replaced by "spend your open Nezekan nodes".

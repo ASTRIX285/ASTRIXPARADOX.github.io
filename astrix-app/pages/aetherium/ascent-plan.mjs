@@ -113,16 +113,29 @@ function renderSkills(plan) {
 function renderRotation(plan) {
   const r = plan.rotation;
   const order = plan.macroOrder;
-  const body = isPending(r) ? pendingNote(r) : `
-    <ol class="ae-macro">${r.steps.map(step => `<li class="${step.locked ? 'is-locked' : ''}">${esc(step.text)}${step.locked ? ` <small class="ae-tag is-locked">Lv ${esc(step.unlockLevel)}</small>` : ''}</li>`).join('')}</ol>
+  const delay = order && !isPending(order.value) ? order.value.delayMs : null;
+  if (isPending(r)) {
+    return `<section class="ae-panel" aria-labelledby="aeMacroTitle">
+      <h2 class="ae-section-title" id="aeMacroTitle">Macro</h2>${pendingNote(r)}
+      ${order ? `<p class="ae-note">${esc(order.text)}</p>` : ''}
+    </section>`;
+  }
+  // Laid out like the game's Macro window: numbered entries with the delay between each pair.
+  const usable = r.steps.filter(step => !step.locked);
+  const later = r.steps.filter(step => step.locked);
+  const entries = usable.map((step, index) => `${index ? `<li class="ae-macro-delay" aria-hidden="true"><span>Delay</span><b>${esc(delay ?? 10)}</b><span>ms</span></li>` : ''}
+      <li class="ae-macro-entry"><span class="ae-macro-num">${index + 1}</span><span class="ae-macro-skill">${esc(step.text)}</span></li>`).join('');
+  return `<section class="ae-panel" aria-labelledby="aeMacroTitle">
+    <h2 class="ae-section-title" id="aeMacroTitle">Macro <small>${usable.length} ${usable.length === 1 ? 'skill' : 'skills'} at Lv ${esc(plan.level)}</small></h2>
+    <div class="ae-macro-window">
+      <p class="ae-macro-title">Macro 1</p>
+      ${usable.length ? `<ol class="ae-macro">${entries}</ol>` : '<p class="ae-muted">None of the macro skills are unlocked yet.</p>'}
+    </div>
+    ${later.length ? `<p class="ae-muted">Add later: ${later.map(step => `${esc(step.text)} (Lv ${esc(step.unlockLevel)})`).join(', ')}.</p>` : ''}
     ${r.filler ? `<p><b>Filler:</b> ${esc(r.filler)}</p>` : ''}
     ${r.manual?.length ? `<p><b>Keep on your own keys:</b> ${r.manual.map(esc).join(', ')}</p>` : ''}
     ${r.note ? `<p class="ae-muted">${esc(r.note)}</p>` : ''}
-    `;
-  return `<section class="ae-panel" aria-labelledby="aeMacroTitle">
-    <h2 class="ae-section-title" id="aeMacroTitle">Macro and rotation <small>priority order</small></h2>
-    ${body}
-    ${order ? `<div class="ae-callout"><p><b>Check in game:</b> ${esc(isPending(order.value) ? order.value.reason : order.text)}</p><p class="ae-muted">${esc(order.text)}</p></div>` : ''}
+    ${order?.setup ? `<details class="ae-perks ae-macro-howto"><summary>How to set it up in game</summary><ol>${order.setup.map(line => `<li>${esc(line)}</li>`).join('')}</ol><p>${esc(order.text)}</p></details>` : ''}
   </section>`;
 }
 
@@ -176,6 +189,15 @@ function renderUpcoming(plan) {
 
 /* Daevanion planner: the real board from the armory, with a numbered route for this build. */
 const KIND_LABEL = { 'active-skill': 'Skill +1', 'passive-skill': 'Passive +1', unique: 'Corner', stat: 'Stat', start: 'Start' };
+
+/* The game's own node art, as the official armory site uses it (NCSOFT CDN, never re-hosted). */
+const NODE_ART = 'https://assets.playnccdn.com/static-aion2/characters/img/daevanion/';
+const NODE_GRADE = { 'active-skill': 'legend', 'passive-skill': 'rare', unique: 'unique', stat: 'common' };
+const START_ART = { Gladiator: 'gladiator', Templar: 'templar', Assassin: 'assassin', Ranger: 'ranger', Sorcerer: 'sorcerer', Spiritmaster: 'elementalist', Cleric: 'cleric', Chanter: 'chanter' };
+const nodeArt = (kind, taken) => kind === 'start'
+  ? `${NODE_ART}board_icon_start_${START_ART[state.className] ?? 'gladiator'}.png`
+  : `${NODE_ART}board_icon_${NODE_GRADE[kind] ?? 'common'}${taken ? '_open' : ''}.png`;
+const nodeImg = (kind, taken) => `<img class="ae-node-art" src="${esc(nodeArt(kind, taken))}" alt="" width="70" height="70" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
 const daevaKey = () => state.model ? `${state.model.profile.server.id}:${state.model.profile.characterId}` : null;
 
 function readPoints(boardId) {
@@ -259,7 +281,7 @@ function renderBoardPlan() {
     const status = tile.taken || tile.kind === 'start' ? 'taken' : tile.step ? statusOf(tile.step) : 'idle';
     const label = `${tile.name}. ${tile.effects.join(', ') || KIND_LABEL[tile.kind]}. ${tile.taken ? 'Taken' : tile.step ? `Step ${tile.step}` : 'Not on the route'}`;
     // Not a <button>: the shared button skin would turn every node into a gold action button.
-    return `<span class="ae-node" role="img" tabindex="0" data-kind="${esc(tile.kind)}" data-status="${status}"${tile.keySkill ? ' data-key="true"' : ''} data-node="${esc(tile.nodeId)}" data-rc="${tile.row}:${tile.col}" style="grid-row:${tile.row - top + 1};grid-column:${tile.col - left + 1}" aria-label="${esc(label)}"><i class="ae-node-glyph" aria-hidden="true"></i>${tile.step && !tile.taken ? `<span class="ae-node-step" aria-hidden="true">${tile.step}</span>` : ''}</span>`;
+    return `<span class="ae-node" role="img" tabindex="0" data-kind="${esc(tile.kind)}" data-status="${status}"${tile.keySkill ? ' data-key="true"' : ''} data-node="${esc(tile.nodeId)}" data-rc="${tile.row}:${tile.col}" style="grid-row:${tile.row - top + 1};grid-column:${tile.col - left + 1}" aria-label="${esc(label)}">${nodeImg(tile.kind, tile.taken)}${tile.step && !tile.taken ? `<span class="ae-node-step" aria-hidden="true">${tile.step}</span>` : ''}</span>`;
   }).join('');
   const stepItem = step => `<li data-status="${statusOf(step.step)}"${step.target ? ' data-target="true"' : ''} data-route-node="${esc(step.nodeId)}" tabindex="0">
       <span class="ae-pick-level">${step.step}</span>
@@ -279,8 +301,9 @@ function renderBoardPlan() {
           <div class="ae-board-grid" style="--rows:${bottom - top + 1};--cols:${right - left + 1}">${tiles}</div>
         </div>
         <ul class="ae-node-legend" aria-label="Key">
-          <li data-status="taken">Taken</li><li data-status="now">Take now</li><li data-status="later">Later</li>
-          <li data-kind="active-skill">Skill +1</li><li data-kind="passive-skill">Passive +1</li><li data-kind="unique">Core corner</li><li data-kind="stat">Stat</li>
+          <li data-status="now">Take now</li><li data-status="later">Later</li>
+          <li class="ae-legend-art">${nodeImg('stat', true)}Taken</li>
+          <li class="ae-legend-art">${nodeImg('active-skill', false)}Skill +1</li><li class="ae-legend-art">${nodeImg('passive-skill', false)}Passive +1</li><li class="ae-legend-art">${nodeImg('unique', false)}Core corner</li><li class="ae-legend-art">${nodeImg('stat', false)}Stat</li>
         </ul>
       </div>
       <div class="ae-route">
@@ -332,7 +355,7 @@ function selectNode(nodeId) {
   const status = tile.kind === 'start' || tile.taken ? 'Taken' : why.step ? (planner.split ? (nowSteps.has(why.step) ? 'Take now' : 'Later') : `Step ${why.step}`) : 'Not on the route';
   $('#aeNodePanel').innerHTML = `
     <div class="ae-node-panel-head">
-      <span class="ae-node ae-node-big" data-kind="${esc(tile.kind)}" data-status="${tile.taken || tile.kind === 'start' ? 'taken' : why.step ? 'route' : 'idle'}" aria-hidden="true"><i class="ae-node-glyph"></i></span>
+      <span class="ae-node ae-node-big" data-kind="${esc(tile.kind)}" data-status="${tile.taken || tile.kind === 'start' ? 'taken' : why.step ? 'route' : 'idle'}" aria-hidden="true">${nodeImg(tile.kind, tile.taken)}</span>
       <div><p class="ae-slot-label">${esc(KIND_LABEL[tile.kind] ?? 'Node')}${why.step ? ` · step ${why.step}` : ''}</p><h3>${esc(tile.effects[0] || why.title)}</h3><p class="ae-muted">${esc(why.title)}</p></div>
     </div>
     <dl class="ae-node-facts"><div><dt>Status</dt><dd>${esc(status)}</dd></div>${tile.kind === 'start' ? '' : `<div><dt>Cost</dt><dd>${why.cost} ${why.cost === 1 ? 'point' : 'points'}</dd></div>`}</dl>

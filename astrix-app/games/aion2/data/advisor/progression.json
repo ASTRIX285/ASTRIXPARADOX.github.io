@@ -309,10 +309,17 @@
       "id": "macro-order",
       "label": "How macros fire",
       "value": {
-        "pending": true,
-        "reason": "Not confirmed yet: a macro either fires skills in the listed order, or checks from the bottom row up and fires the first one that is ready. Put two skills in one macro and see which fires first."
+        "order": "listed",
+        "delayMs": 10
       },
-      "text": "Holding the macro key runs it. Pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
+      "text": "A macro runs its skills in the listed order, 1 then 2 and so on, with a short delay between each (10 ms by default; try about 50 ms on a laggy connection). Hold the key to run it; pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
+      "setup": [
+        "Open Skill, then Macro",
+        "Pick a macro slot (1, 2 or 3) and press Add Macro",
+        "Add the skills in the order shown here",
+        "Leave Delay at 10 ms",
+        "Put the macro on a key and hold it in fights"
+      ],
       "provenance": [
         {
           "kind": "community-guide",
@@ -335,6 +342,14 @@
           "region": "global",
           "reliability": "medium",
           "publishedOn": "2026-09-30"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-06",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Stigma > Macro window",
+          "note": "Entries are numbered 1, 2, and so on with a Delay (ms) box between each pair, 10 ms by default, and an Add Macro button; macro slots 1 to 3. Settles the order question: listed order."
         }
       ]
     }
