@@ -1,5 +1,5 @@
 {
-  "description": "Core skills for the Ascent Plan: unlock level, cooldown and Specialty perks, read from MetaBot skill pages built from the global client.",
+  "description": "Core skills for the Ascent Plan: unlock level, cooldown and Specialty perks, for the global (EU and NA) servers.",
   "records": [
     {
       "id": "gladiator-keen-strike",
@@ -565,19 +565,19 @@
       "name": "Punishing Strike",
       "unlockLevel": {
         "pending": true,
-        "reason": "MetaBot has no page for this skill. It looks like a chain skill reached through Pummel."
+        "reason": "Not confirmed yet. It looks like a chain skill reached through Pummel."
       },
       "cooldownSeconds": {
         "pending": true,
-        "reason": "MetaBot has no page for this skill."
+        "reason": "Not confirmed yet."
       },
       "summary": {
         "pending": true,
-        "reason": "MetaBot has no page for this skill."
+        "reason": "Not confirmed yet."
       },
       "specialties": {
         "pending": true,
-        "reason": "MetaBot has no page for this skill."
+        "reason": "Not confirmed yet."
       },
       "provenance": [
         {

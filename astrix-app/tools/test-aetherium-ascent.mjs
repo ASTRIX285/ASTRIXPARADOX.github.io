@@ -146,7 +146,7 @@ await check('level change re-plans and clamps to the cap',async()=>{
 
 await check('pending role is honest and offers the main role',async()=>{
   const {page,context}=await open(ascent('class=gladiator&role=tank&level=20'));
-  assert.match(await plain(page,'.ae-pending'),/^Not sourced yet\. No source gives an off-tank Gladiator build yet/);
+  assert.match(await plain(page,'.ae-pending'),/^Not confirmed yet\. No source gives an off-tank Gladiator build yet/);
   assert.equal(await page.locator('#aeNowTitle').count(),0,'No made-up steps for a pending role');
   assert.match(await page.textContent('#aeRole option[value="tank"]'),/no build yet/);
   await page.click('text=Show the Gladiator main role instead');
@@ -162,23 +162,64 @@ await check('unknown role falls back to the main role with a note',async()=>{
   await context.close();
 });
 
-await check('every citation points at a listed source',async()=>{
-  for(const query of ['class=gladiator&role=dps&level=22','class=templar&role=tank&level=37','class=spiritmaster&level=14']){
+await check('players stay on the site: no outbound links, no guide names on the page',async()=>{
+  for(const query of ['class=gladiator&role=dps&level=22','class=templar&role=tank&level=37','class=ranger&level=14',ref.toString()]){
     const {page,context}=await open(ascent(query));
-    const listed=await page.$$eval('.ae-sources li',items=>items.map(el=>el.id));
-    const cited=await page.$$eval('.ae-cite a',links=>[...new Set(links.map(a=>a.getAttribute('href').slice(1)))]);
-    assert.ok(cited.length>0,`${query} cites sources`);
-    for(const id of cited)assert.ok(listed.includes(id),`${query}: ${id} is cited but not listed`);
-    for(const id of listed)assert.ok(cited.includes(id),`${query}: ${id} is listed but never cited`);
-    const hrefs=await page.$$eval('.ae-sources a',links=>links.map(a=>[a.href,a.target,a.rel]));
-    for(const [href,target,rel] of hrefs){assert.match(href,/^https:\/\//);assert.equal(target,'_blank');assert.match(rel,/noopener/);}
+    const outbound=await page.$$eval('a[href]',links=>links.map(a=>a.href).filter(href=>!href.startsWith(location.origin)));
+    assert.deepEqual(outbound,[],`${query}: links that leave the site`);
+    const text=await page.textContent('body');
+    assert.doesNotMatch(text,/MetaBot|ExpCarry|EZG|Destructoid|games\.gg|mein-mmo|gameplay\.tips|aion2hub|playnews/i,`${query}: names another site`);
+    assert.equal(await page.locator('.ae-sources,.ae-cite').count(),0,`${query}: no source list or citation marks`);
     await context.close();
   }
 });
 
+await check('Daevanion planner: real board, numbered route, points budget remembered',async()=>{
+  const {page,context,calls}=await open(ascent(ref),{live:true});
+  await page.waitForSelector('.ae-board-grid');
+  assert.deepEqual(calls,['/aion2/character','/aion2/daevanion'],'One board call, for the open board only');
+  assert.equal(await page.getAttribute('[data-board-tab="11"]','aria-selected'),'true');
+  assert.equal(await page.locator('.ae-board-grid .ae-node').count(),89,'88 nodes plus Start');
+  assert.equal(await page.locator('.ae-node[data-kind="start"]').count(),1);
+  assert.equal(await page.locator('.ae-node[data-key="true"]').count(),4,'Overhead Slam, Rending Blow, Ruinous Blow, Crushing Wave');
+  assert.match(await plain(page,'#aeRouteSummary'),/Enter the points you have/);
+  const first=await page.$$eval('.ae-route-list li',items=>items.slice(0,7).map(li=>li.querySelector('strong').textContent));
+  assert.equal(first[6],'Overhead Slam +1','Overhead Slam is the first key node, step 7');
+  await page.fill('#aePoints','10');
+  await page.waitForFunction(()=>/You can take the next/.test(document.querySelector('#aeRouteSummary').textContent));
+  assert.match(await plain(page,'#aeRouteSummary'),/You can take the next 8 nodes now \(10 of your 10 points\)\. Step 9 needs 3 more points\./);
+  assert.equal(await page.locator('.ae-node[data-status="now"]').count(),8);
+  for(const width of [390,1920]){
+    await page.setViewportSize({width,height:900});
+    const fit=await page.evaluate(()=>{const grid=document.querySelector('.ae-board-grid').getBoundingClientRect();const panel=document.querySelector('#aePlanner').getBoundingClientRect();return grid.left>=panel.left-0.5&&grid.right<=panel.right+0.5;});
+    assert.ok(fit,`board fits its panel at ${width}`);
+  }
+  assert.equal(await page.locator('#aeFlow line').count(),40,'One flow link per route step');
+  assert.equal(await page.locator('#aeFlow line[data-status="now"]').count(),8);
+  assert.match(await plain(page,'#aeNodePanel'),/Attack Bonus \+3.*Take now.*Taken to reach Overhead Slam \+1/,'Panel opens on the next step');
+  await page.click('.ae-node[data-kind="unique"][data-rc="13:3"]');
+  assert.match(await plain(page,'#aeNodePanel'),/Cooldown Reduction \+1\.5%.*Later.*4 points.*core corner nodes.*On Ruinous Blow \(45 s\) that is about 0\.7 s back/);
+  await page.click('[data-route-node]:nth-child(7)');
+  assert.match(await plain(page,'#aeNodePanel'),/Overhead Slam \+1.*key skill 1 of 4/);
+  const tile=await page.$eval('.ae-node[data-kind="active-skill"]',el=>{const s=getComputedStyle(el);return [s.clipPath,s.backgroundImage.includes('gradient')];});
+  assert.equal(tile[0],'none','Nodes are tiles, not notched action buttons');
+  await page.reload();
+  await page.waitForSelector('.ae-board-grid');
+  assert.equal(await page.inputValue('#aePoints'),'10','Points remembered for this Daeva and board');
+  await context.close();
+});
+
+await check('Daevanion planner without a Daeva points to the Daeva Card',async()=>{
+  const {page,context}=await open(ascent('class=cleric&level=30'));
+  assert.match(await plain(page,'#aePlanner'),/Find your Daeva first/);
+  assert.equal(await page.getAttribute('#aePlanner a','href'),'/hub/aetherium/');
+  await context.close();
+});
+
 await check('with a Daeva link: armory fixes first, class and level locked, Elyos gold',async()=>{
   const {page,context,calls}=await open(ascent(ref),{live:true});
-  assert.deepEqual(calls,['/aion2/character']);
+  assert.equal(calls[0],'/aion2/character');
+  assert.ok(calls.every(path=>['/aion2/character','/aion2/daevanion'].includes(path)),`calls: ${calls}`);
   assert.equal(await page.getAttribute('body','data-faction'),'elyos');
   assert.equal(await page.isDisabled('#aeClass'),true);
   assert.equal(await page.isDisabled('#aeLevel'),true);
@@ -203,7 +244,8 @@ await check('active roster Daeva is used when the link names no class',async()=>
   const entry={name:'ASTRIX285',serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:12,raceName:'Elyos',demo:false};
   const storage={entries:[entry],active:`1308:${info.profile.characterId}`};
   const {page,context,calls}=await open(ascent(),{live:true,storage});
-  assert.deepEqual(calls,['/aion2/character']);
+  assert.equal(calls[0],'/aion2/character');
+  assert.ok(calls.every(path=>['/aion2/character','/aion2/daevanion'].includes(path)),`calls: ${calls}`);
   assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285/);
   await context.close();
   const manual=await open(ascent('class=sorcerer&level=20'),{live:true,storage});

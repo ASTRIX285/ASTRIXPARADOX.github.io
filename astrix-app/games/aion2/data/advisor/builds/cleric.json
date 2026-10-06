@@ -141,14 +141,14 @@
         "alternatives": [
           {
             "name": "Prayer of Amplification",
-            "why": "ExpCarry fourth pick.",
+            "why": "Common fourth pick.",
             "refs": [
               "ec-cleric"
             ]
           },
           {
             "name": "Yustiel's Power",
-            "why": "MetaBot stigma guide pick.",
+            "why": "Popular alternative.",
             "refs": [
               "mb-stigma"
             ]
@@ -167,6 +167,13 @@
           "Condemnation +1",
           "Judgment Thunder +1",
           "Healing Light and Radiant Recovery nodes"
+        ],
+        "skillNodes": [
+          "Light of Regeneration",
+          "Condemnation",
+          "Judgment Thunder",
+          "Healing Light",
+          "Radiant Recovery"
         ],
         "refs": [
           "mb-cleric",

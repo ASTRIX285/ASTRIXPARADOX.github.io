@@ -149,6 +149,8 @@ function planBoards(build, level, model, facts) {
   return {
     boards,
     priorities: isPending(build.daevanion) ? build.daevanion : build.daevanion.priorities,
+    // Skills whose +1 nodes the board planner routes to first, in order (falls back to the core skills).
+    skillNodes: (!isPending(build.daevanion) && build.daevanion.skillNodes) || (build.coreSkills ?? []).map(skill => skill.name),
     refs: isPending(build.daevanion) ? [] : build.daevanion.refs,
     general: facts['daevanion-priority'] ?? null
   };

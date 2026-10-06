@@ -16,14 +16,16 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261006-4">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261006-8">
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/progression.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/skills.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05",
 
-"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=67d1039b9d",
+"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8091806a2d",
+
+"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=d0547a39f8",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a",
 
@@ -33,12 +35,14 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85",
 
-"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=1257fb65b2"
+"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=a570270c75"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=12108b0a05" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=67d1039b9d" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8091806a2d" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=d0547a39f8" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a" data-head-hint>
 
@@ -48,8 +52,8 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=a5686bfb85" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=1257fb65b2" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=1257fb65b2"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=a570270c75" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=a570270c75"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
   <a class="ae-skip" href="#aeMain">Skip to the Ascent Plan</a>
@@ -93,7 +97,7 @@
       <div class="ae-ascent-intro">
         <p class="ae-eyebrow">Ascent Plan</p>
         <h1 id="aeAscentTitle">What to do next</h1>
-        <p class="ae-muted" id="aeAscentFor">Pick a class, the role you want to play and your level. Every pick shows where it comes from.</p>
+        <p class="ae-muted" id="aeAscentFor">Pick a class, the role you want to play and your level.</p>
       </div>
       <form class="ae-ascent-form" id="aeAscentForm">
         <label class="ae-field"><span>Class</span><select id="aeClass" name="class"></select></label>
@@ -110,7 +114,7 @@
   <footer class="ae-footer">
     <p>The Aetherium by ASTRIX PARADOX is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by NCSOFT. AION 2 and related names, images and icons are trademarks of NCSOFT.</p>
     <p>Character data is read from the public AION 2 armory. No login is needed and nothing is stored on our servers. Item and skill icons load from the NCSOFT CDN.</p>
-    <p>Build advice comes from the public guides listed under Sources, checked against each other. Early guides change often, so check a pick in game before you spend rare materials on it.</p>
+    <p>Build advice is checked against top players and our own testing, and updated as the game changes. Check a pick in game before you spend rare materials on it.</p>
   </footer>
 </body>
 </html>

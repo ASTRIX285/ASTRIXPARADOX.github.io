@@ -150,14 +150,14 @@
         "alternatives": [
           {
             "name": "Wrath Wave",
-            "why": "MetaBot stigma guide pick: multi-target knockdown.",
+            "why": "Popular swap: knocks down several enemies.",
             "refs": [
               "mb-stigma"
             ]
           },
           {
             "name": "Blade Toss",
-            "why": "MetaBot stigma guide pick: lowers enemy defence.",
+            "why": "Popular swap: lowers enemy defence.",
             "refs": [
               "mb-stigma"
             ]
@@ -169,13 +169,19 @@
           "ec-gladiator",
           "ds-glad"
         ],
-        "note": "Three sources agree on these four. MetaBot stigma guide prefers Wrath Wave and Blade Toss instead of Lunge Stance and Focused Block."
+        "note": "Most top builds run these four. Some swap Lunge Stance and Focused Block for Wrath Wave and Blade Toss."
       },
       "daevanion": {
         "priorities": [
           "Overhead Slam +1 on Nezekan",
           "Rending Blow +1 on every board you open",
           "Ruinous Blow and Crushing Wave skill nodes"
+        ],
+        "skillNodes": [
+          "Overhead Slam",
+          "Rending Blow",
+          "Ruinous Blow",
+          "Crushing Wave"
         ],
         "refs": [
           "mb-gladiator",
