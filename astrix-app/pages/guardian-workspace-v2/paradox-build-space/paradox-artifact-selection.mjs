@@ -1,4 +1,4 @@
-import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=fb01849b04';
+import {recommendArtifactLoadout,recommendArtifactPerks} from '../guardian-artifact-recommender.mjs?v=1bf5e794fd';
 import {createIntendedArtifactConfiguration,protectBuildState} from './paradox-build-state.mjs?v=813c0b7d03';
 
 const clone=value=>{

@@ -67,6 +67,7 @@
     [data-gw-recommendations] > .gw-rec:first-child button,
     [data-build-action="save"][data-build-id="equipped"],
     .paradox-loadout-dialog .is-primary, .beta-modal .beta-primary,
+    .apx-gate .apx-recovery-primary,
     [data-loadout-confirm-action],
     .guardian-loadout-menu-actions [data-loadout-menu-action="equip"],
     .guardian-loadout-menu-actions:not(:has([data-loadout-menu-action="equip"])) [data-loadout-menu-action="snapshot"],

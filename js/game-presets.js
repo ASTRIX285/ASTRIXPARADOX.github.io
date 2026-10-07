@@ -1,5 +1,5 @@
 // ============================================================
-// GAME PRESETS — ASTRIX PARADOX
+// GAME PRESETS: ASTRIX PARADOX
 //
 // HOW TO SWITCH WHAT'S "CURRENTLY PLAYING" ON THE HOME PAGE:
 // Scroll to the very bottom of this file and change ONE line:
@@ -22,8 +22,8 @@ window.GAME_PRESETS = {
     nameWhite: "Destiny",
     nameAccent: "2",
     paragraphs: [
-      "Bungie's sci-fi looter-shooter is where it all started for me. Raids, dungeons, Trials of Osiris — every season brings a new fight worth showing up for, and Destiny 2 is back at the center of the rotation.",
-      "Whether I am running flawless Trials cards, pushing Grandmaster Nightfalls, or diving into the newest raid on day one — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Bungie's sci-fi looter-shooter is where it all started for me. Raids, dungeons, Trials of Osiris, and every season brings a new fight worth showing up for, and Destiny 2 is back at the center of the rotation.",
+      "Whether I am running flawless Trials cards, pushing Grandmaster Nightfalls, or diving into the newest raid on day one: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -42,7 +42,7 @@ window.GAME_PRESETS = {
     nameAccent: "Desert",
     paragraphs: [
       "Pearl Abyss's brutal open-world action RPG is everything I live for. Savage combat, deep lore, a world that punishes the weak and rewards the relentless. I am all in, and I am bringing you with me.",
-      "Whether I am exploring every corner of the map, breaking down builds, or going live and taking on the hardest content the game throws at me — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Whether I am exploring every corner of the map, breaking down builds, or going live and taking on the hardest content the game throws at me: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -60,8 +60,8 @@ window.GAME_PRESETS = {
     nameWhite: "War",
     nameAccent: "frame",
     paragraphs: [
-      "Digital Extremes built something that still hits different years in — fluid space-ninja combat, a story that keeps escalating, and build variety that never runs dry. Warframe earns every hour I put into it.",
-      "Whether I am farming a new frame, pushing Steel Path, or chasing the latest cinematic quest — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Digital Extremes built something that still hits different years in: fluid space-ninja combat, a story that keeps escalating, and build variety that never runs dry. Warframe earns every hour I put into it.",
+      "Whether I am farming a new frame, pushing Steel Path, or chasing the latest cinematic quest: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -80,7 +80,7 @@ window.GAME_PRESETS = {
     nameAccent: "4",
     paragraphs: [
       "Gearbox's latest loot-shooter throws chaos, guns, and more guns at you non-stop, and I'm here for every second of it. Bigger world, deeper builds, and the same unhinged humor that hooked me years ago.",
-      "Whether I am chasing legendary drops, clearing vaults, or just causing mayhem with the crew — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Whether I am chasing legendary drops, clearing vaults, or just causing mayhem with the crew: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -98,8 +98,8 @@ window.GAME_PRESETS = {
     nameWhite: "Path of",
     nameAccent: "Exile",
     paragraphs: [
-      "Grinding Gear Games made the deepest ARPG on the market, and I mean that literally — the skill tree alone could swallow a weekend. Every league is a reason to theorycraft a new build and dive back in.",
-      "Whether I am mapping, chasing a specific unique, or pushing a build to its breaking point — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Grinding Gear Games made the deepest ARPG on the market, and I mean that literally: the skill tree alone could swallow a weekend. Every league is a reason to theorycraft a new build and dive back in.",
+      "Whether I am mapping, chasing a specific unique, or pushing a build to its breaking point: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -118,7 +118,7 @@ window.GAME_PRESETS = {
     nameAccent: "Wukong",
     paragraphs: [
       "Game Science took Chinese mythology and turned it into one of the most punishing, gorgeous action games I've played. Every boss is a lesson, and every win feels earned.",
-      "Whether I am learning a new boss pattern, exploring the next chapter, or just soaking in the art direction — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Whether I am learning a new boss pattern, exploring the next chapter, or just soaking in the art direction: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -136,8 +136,8 @@ window.GAME_PRESETS = {
     nameWhite: "Space",
     nameAccent: "Marine 2",
     paragraphs: [
-      "Saber Interactive nailed the fantasy of being an Astartes — a wall of Tyranids in front of you, a chainsword in your hand, and nowhere to retreat. Space Marine 2 is brutal, bombastic, and exactly what the 41st Millennium deserves.",
-      "Whether I am carving through hordes solo, running Operations with the squad, or chasing the next difficulty spike — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Saber Interactive nailed the fantasy of being an Astartes: a wall of Tyranids in front of you, a chainsword in your hand, and nowhere to retreat. Space Marine 2 is brutal, bombastic, and exactly what the 41st Millennium deserves.",
+      "Whether I am carving through hordes solo, running Operations with the squad, or chasing the next difficulty spike: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -156,7 +156,7 @@ window.GAME_PRESETS = {
     nameAccent: "War",
     paragraphs: [
       "Santa Monica Studio's saga is one of the best combat systems ever built wrapped around a story that actually earns its emotional beats. Every run gives me a reason to talk about it.",
-      "Whether I am pushing Give Me God of War difficulty, hunting collectibles, or replaying it for the story alone — this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
+      "Whether I am pushing Give Me God of War difficulty, hunting collectibles, or replaying it for the story alone: this is where you get the real experience. No fluff. Just gameplay, honest reactions, and community."
     ],
     reviewLink: "pages/reviews.html",
     reviewLabel: "Read the Review",
@@ -171,13 +171,13 @@ window.GAME_PRESETS = {
 };
 
 // ============================================================
-// ACTIVE GAME — this is the ONLY thing you touch to switch games.
+// ACTIVE GAME: this is the ONLY thing you touch to switch games.
 //
 // All your games are listed below, each on its own line, already
 // spelled correctly. To switch:
 //   1. Put // in front of the line that's currently active
 //   2. Remove the // from the line you want to switch to
-// Only ONE line should be active (no // in front) at a time —
+// Only ONE line should be active (no // in front) at a time.
 // whichever one is left "un-commented" wins.
 // ============================================================
 

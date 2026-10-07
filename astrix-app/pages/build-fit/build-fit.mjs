@@ -174,7 +174,7 @@ async function load(){
     const [loadout,snapshot,session]=await Promise.all([shares.load(page.selection.dim),manifest.ready(),sessionPromise]);
     reportPreparedPageStage('session','loadout');
     if(session?.authenticated===false){globalThis.ForgeLoader?.authRequired?.(authStartUrl(location.href));return;}
-    if(!session?.authenticated)throw new Error('Bungie is not responding. Reload to retry.');
+    if(!session?.authenticated){globalThis.ForgeLoader?.recover?.({code:session?.error||'bungie_unavailable'});return;}
     const payload=await payloadPromise,binding=sessionBinding(session);
     const adaptation=adaptDimLoadout(loadout,{snapshot,profile:payload.profile,binding,preferredCharacterId:page.selection.characterId,currentSeasonNumber:payload.currentSeasonNumber??null});
     page.inputs={loadout,snapshot,profile:payload.profile,binding,currentSeasonNumber:payload.currentSeasonNumber??null};

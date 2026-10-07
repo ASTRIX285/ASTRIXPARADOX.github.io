@@ -37,7 +37,7 @@ function modSlot(mod){
   return `
     <div
       class="beta-armour-mod-slot filled"
-      title="${esc(name)}${description ? ` — ${esc(description)}` : ""}"
+      title="${esc(name)}${description ? `: ${esc(description)}` : ""}"
       data-mod-hash="${esc(hash)}"
       aria-label="${esc(name)}"
     >
@@ -81,7 +81,7 @@ function renderExoticTraitInline(card,item){
     name,
     description,
     hash ? `Bungie hash: ${hash}` : ""
-  ].filter(Boolean).join(" — ");
+  ].filter(Boolean).join(": ");
 
   traitButton.setAttribute(
     "aria-label",

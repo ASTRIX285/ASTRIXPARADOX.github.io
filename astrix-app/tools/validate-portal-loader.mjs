@@ -4,14 +4,13 @@ import {readFile} from 'node:fs/promises';
 
 const ROOT=new URL('../../',import.meta.url);
 const read=path=>readFile(new URL(path,ROOT),'utf8');
+// Shooting Range and Mission Reports were retired to redirects on 4 Oct 2026 (Forge final pass).
 const pages={
   'Build library':'astrix-app/index.html',
   'Guardian Journey':'astrix-app/components/guardian-workspace/guardian-workspace.html',
   'Guardian Main':'astrix-app/pages/guardian-workspace-v2/index.html',
   'Build Space':'astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html',
-  'Shooting Range':'astrix-app/pages/guardian-workspace-v2/shooting-range-test/index.html',
   'Journey':'astrix-app/pages/journey/index.html',
-  'Mission Reports':'astrix-app/pages/mission-reports/index.html',
   'Vault':'astrix-app/pages/vault/index.html',
   'Forge Loader':'astrix-app/pages/forge-loader/index.html',
   'Loadout':'astrix-app/pages/loadout/index.html'
@@ -35,7 +34,7 @@ for(const [label,path] of Object.entries(pages)){
   assert.match(html,/astrix-portal-loader\.js/,`${label} must load the shared portal controller early`);
 }
 // Every destination must opt into the same prepared navigation asset generation.
-for(const label of ['Guardian Main','Build Space','Journey','Mission Reports','Vault','Forge Loader','Loadout']){
+for(const label of ['Guardian Main','Build Space','Journey','Vault','Forge Loader','Loadout']){
   // The generated import map lists module paths only; the classic script tags keep their keys.
   const html=(await read(pages[label])).replace(/<script type="importmap" data-module-versions>[\s\S]*?<\/script>/,'');
   for(const resource of ['astrix-portal-loader.css','astrix-portal-loader.js','astrix-destination-ribbon.js']){
@@ -74,7 +73,7 @@ assert.match(mainProgress,/const manifestReady=guardianManifest\.cached\(\)/,'Po
 assert.doesNotMatch(mainProgress,/await manifestReady|await sceneBackgroundReady/,'Portal completion must not block interaction on full manifest indexing or decorative imagery');
 assert.match(mainProgress,/Promise\.allSettled\(\[manifestReady,sceneBackgroundReady\]\)/,'Non-critical manifest and background work must continue after the page becomes usable');
 assert.match(mainProgress,/else setStage\('start'\)/,'Main portal must remain gated at the shared start stage until Bungie authentication completes');
-assert.match(mainProgress,/forge:guardian-error[\s\S]*?loader\?\.blocked\?\.\(message\)/,'A terminal live profile error must remain behind the portal with a retry action.');
+assert.match(mainProgress,/forge:guardian-error[\s\S]*?loader\?\.recover\?\.\(/,'A terminal live profile error must remain behind the shared recovery panel with a retry action.');
 assert.match(mainProgress,/currentSession=window\.FORGE_BUNGIE_SESSION[\s\S]*?guardianRenderComplete/,'Main portal must reconcile a session or render that completed before listener registration');
 assert.ok(mainHtml.indexOf('guardian-portal-progress.mjs')<mainHtml.indexOf('guardian-workspace-v2.mjs'),'Main progress listener must load before Guardian startup');
 assert.match(mainHtml,/astrix:guardian-fast-return:v1/,'Main must consume the Build-to-Guardian fast-return marker before the portal mounts');
@@ -117,7 +116,7 @@ async function loaderHarness({stalledBackground=false,isBuildSpace=true}={}){
   const documentEvents=new Map(),windowEvents=new Map(),frames=[];let headerPending=true,completed=0;
   const document={referrer:'https://astrixparadox.com/tools/',querySelector:selector=>selector==='.build-space'?(isBuildSpace?{}:null):selector.includes('is-pending')&&headerPending?{}:null,querySelectorAll:selector=>stalledBackground&&selector==='.scene.immersive'?[{}]:[],documentElement:{dataset:{}},baseURI:'https://sandbox.astrixparadox.com/',addEventListener:(name,fn)=>documentEvents.set(name,fn)};
   let blocked=0;
-  const window={ForgeLoader:{set(){},status(){},done(){completed++;},blocked(){blocked++;}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
+  const window={ForgeLoader:{set(){},status(){},done(){completed++;},blocked(){blocked++;},recover(){blocked++;return 'bungie';}},addEventListener:(name,fn)=>windowEvents.set(name,fn)};
   const source=mainProgress.replace(/^import .*;\n/gm,'').replace('const BACKGROUND_DECODE_TIMEOUT_MS=5*1000;','const BACKGROUND_DECODE_TIMEOUT_MS=1;');
   class HarnessImage{addEventListener(){}set src(value){this.currentSrc=value;}}
   const PREPARED_PAGE_STAGES={start:{percent:8,label:'Preparing verified Guardian data'},session:{percent:18,label:'Checking Bungie session'},request:{percent:42,label:'Loading prepared bulk manifest and Guardian data'},join:{percent:72,label:'Joining verified Guardian data to the prepared bulk manifest'},render:{percent:92,label:'Rendering verified page data'},ready:{percent:96,label:'Page ready'}};
@@ -138,7 +137,7 @@ console.log('BUILD_LOADER_EVENT_ORDER=PASS');
 // but authentication and missing/corrupt caches must still be recoverable.
 function warmPortalHarness({warm=true,identity='3:synthetic-a',age=0,path='/astrix-app/pages/loadout/',storageError=false,preparedEntry=false}={}){
   const classes=()=>{const names=new Set();return {add:name=>names.add(name),remove:name=>names.delete(name),contains:name=>names.has(name),toggle:(name,on)=>on?names.add(name):names.delete(name)};};
-  const node=()=>({classList:classes(),style:{setProperty(){}},hidden:true,textContent:'',addEventListener(){},removeEventListener(){},querySelector(){return node();}});
+  const node=()=>({classList:classes(),dataset:{},style:{setProperty(){}},hidden:true,textContent:'',addEventListener(){},removeEventListener(){},querySelector(){return node();}});
   let mounts=0,gate=null,markup='',assetReads=0;
   const document={referrer:'https://astrixparadox.com/tools/',documentElement:{classList:classes()},body:{classList:classes(),appendChild(value){gate=value;mounts++;}},querySelector:()=>gate,createElement(){return {set innerHTML(value){markup=value;},get firstElementChild(){return node();}};},addEventListener(){},get fonts(){assetReads++;return {ready:Promise.resolve()};}};
   const session={authenticated:true,csrfToken:'synthetic',capabilities:{destinyActions:{}},activeDestinyMembership:{membershipId:'synthetic-a',membershipType:3}};
@@ -169,12 +168,12 @@ function transitionHarness({headerPending=false}={}){
   const documentEvents=new Map();
   const events=new Map(),timers=new Map(),classes=new Set();let timerId=0,gate=null,finishImage;
   const classList={add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name),toggle:(name,on)=>on?classes.add(name):classes.delete(name)};
-  const item=()=>({classList:{add(){},remove(){},contains:()=>false,toggle(){}},style:{setProperty(){}},querySelector:()=>item(),addEventListener(){},removeEventListener(){},remove(){if(this===gate)gate=null;}});
+  const item=()=>({classList:{add(){},remove(){},contains:()=>false,toggle(){}},dataset:{},style:{setProperty(){}},querySelector:()=>item(),addEventListener(){},removeEventListener(){},remove(){if(this===gate)gate=null;}});
   const image={complete:false,closest:()=>null,getBoundingClientRect:()=>({width:50,height:50,top:10,left:10,right:60,bottom:60}),decode:()=>Promise.resolve(),addEventListener(name,fn){if(name==='load')finishImage=fn;},removeEventListener(){}};
   const document={referrer:'https://astrixparadox.com/tools/',documentElement:{classList,dataset:{}},body:{classList,appendChild:node=>{gate=node;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:selector==='[data-forge-hero-cards]'&&headerPending?{}:null,querySelectorAll:selector=>selector==='img'?[image]:[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return item();}}),addEventListener(name,fn){documentEvents.set(name,[...(documentEvents.get(name)||[]),fn]);}};
   const window={innerWidth:400,innerHeight:800,location:{origin:'https://astrixparadox.com',pathname:'/astrix-app/pages/loadout/'},addEventListener:(name,fn)=>events.set(name,fn)};
   runInNewContext(portalJs,{URL,window,document,sessionStorage:{getItem:()=>null,removeItem(){}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>fn(),Promise,Date});
-  let blockedCount=0;const realBlocked=window.ForgeLoader.blocked;window.ForgeLoader.blocked=message=>{blockedCount++;return realBlocked(message);};
+  let blockedCount=0;const realBlocked=window.ForgeLoader.blocked;window.ForgeLoader.blocked=message=>{blockedCount++;return realBlocked(message);};const realUnreachable=window.ForgeLoader.workerUnreachable;window.ForgeLoader.workerUnreachable=detail=>{blockedCount++;return realUnreachable(detail);};
   let finishTransition;
   const transition={finished:new Promise(resolve=>{finishTransition=resolve;})};
   return {document,classes,loader:window.ForgeLoader,emit:()=>events.get('pagereveal')({viewTransition:transition}),header:()=>{headerPending=false;(documentEvents.get('forge:hero-cards-render-complete')||[]).forEach(fn=>fn());},image:()=>finishImage(),finish:()=>finishTransition(),timeout:()=>[...timers.values()].find(row=>row.ms===4000).fn(),failure:()=>[...timers.values()].find(row=>row.ms===30000)?.fn(),blockedCalls:()=>blockedCount,gate:()=>gate};

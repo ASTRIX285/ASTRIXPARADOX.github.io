@@ -169,7 +169,7 @@
     clearTimeout(navigationFailureTimer);
     navigationFailureTimer=setTimeout(function(){
       if(navigationRendered||pendingDone)return;
-      window.ForgeLoader?.blocked?.('This page could not finish loading. Retry to continue.');
+      window.ForgeLoader?.workerUnreachable?.();
       document.documentElement.dataset.navigationState='recovery';
     },NAVIGATION_FAILURE_MS);
     var cleanup=function(){
@@ -184,7 +184,13 @@
   if(entryPortal)document.documentElement.classList.add('apx-booting');
   var LOGO = (window.APX_LOGO || '/img/logo.png');
   var SLOW_LOAD_NOTICE_MS=2800,ASSET_WAIT_MS=1800;
-  var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='';
+  var gate, prog, pct, status, authPanel, authButton, failurePanel, failureMessage, retryButton, continueButton, noticeTimer, pendingPct=0, pendingStatus='Opening portal', pendingDone=false, pendingAuthUrl='', pendingBlockedMessage='', pendingRecoveryKind='';
+  // One recovery panel for every tool page (4 Oct 2026): three states, three messages.
+  var RECOVERY_MESSAGES={
+    'signed-out':'Sign in with Bungie to load your Guardian.',
+    'bungie':"Bungie isn't responding right now.",
+    'worker':"Can't reach ASTRIX PARADOX right now."
+  };
   function markup(){
     return ''+
     '<div class="apx-gate '+(entryPortal?'breach-pending':'is-recovery')+'" role="status" aria-live="polite" aria-label="Loading">'+
@@ -205,16 +211,16 @@
           '</div>'+
         '</div>'+
         '<div class="apx-brand"><span class="apx-brand-kicker">AI GAMING INTELLIGENCE</span><span class="apx-brand-word"><span class="apx-brand-chrome">ASTRI</span><b>X</b></span><em>PARADOX</em></div>'+
-        '<div class="apx-auth-panel" hidden>'+
-          '<strong>BUNGIE SIGN-IN</strong>'+
-          '<span>Connect your Bungie account to load your live Guardian.</span>'+
-          '<button class="apx-auth-button" type="button">CONNECT BUNGIE</button>'+
+        '<div class="apx-auth-panel apx-recovery-panel" data-recovery="signed-out" hidden>'+
+          '<p class="apx-recovery-message">'+RECOVERY_MESSAGES['signed-out']+'</p>'+
+          '<div class="apx-recovery-actions"><button class="apx-auth-button apx-recovery-primary" type="button">Sign in with Bungie</button></div>'+
         '</div>'+
-        '<div class="apx-failure-panel" hidden>'+
-          '<strong>LIVE GUARDIAN DATA UNAVAILABLE</strong>'+
-          '<span></span>'+
-          '<button class="apx-auth-button apx-retry-button" type="button">RETRY LIVE DATA</button>'+
-          '<button class="apx-auth-button apx-continue-button" type="button">CONTINUE WITHOUT LIVE DATA</button>'+
+        '<div class="apx-failure-panel apx-recovery-panel" hidden>'+
+          '<p class="apx-recovery-message"></p>'+
+          '<div class="apx-recovery-actions">'+
+            '<button class="apx-auth-button apx-retry-button apx-recovery-primary" type="button">Retry</button>'+
+            '<button class="apx-auth-button apx-continue-button" type="button">Continue without live data</button>'+
+          '</div>'+
         '</div>'+
         // Loading copy is percentage-only. Status calls remain API-compatible.
       '</div>'+
@@ -225,7 +231,7 @@
     if(!gate)return;
     prog=gate.querySelector('.apx-prog');pct=gate.querySelector('.apx-pct');status=gate.querySelector('.apx-status');
     authPanel=gate.querySelector('.apx-auth-panel');authButton=authPanel&&authPanel.querySelector('.apx-auth-button');
-    failurePanel=gate.querySelector('.apx-failure-panel');failureMessage=failurePanel&&failurePanel.querySelector('span');retryButton=failurePanel&&failurePanel.querySelector('.apx-retry-button');continueButton=failurePanel&&failurePanel.querySelector('.apx-continue-button');
+    failurePanel=gate.querySelector('.apx-failure-panel');failureMessage=failurePanel&&failurePanel.querySelector('.apx-recovery-message');retryButton=failurePanel&&failurePanel.querySelector('.apx-retry-button');continueButton=failurePanel&&failurePanel.querySelector('.apx-continue-button');
   }
   function applyAuth(){
     if(!gate||!authPanel||!authButton)return;
@@ -239,9 +245,11 @@
     var blocked=Boolean(pendingBlockedMessage);
     gate.classList.toggle('is-live-blocked',blocked);
     failurePanel.hidden=!blocked;
-    if(failureMessage)failureMessage.textContent=pendingBlockedMessage;
+    failurePanel.dataset.recovery=blocked?pendingRecoveryKind:'';
+    if(failureMessage)failureMessage.textContent=blocked?RECOVERY_MESSAGES[pendingRecoveryKind]:'';
     if(retryButton)retryButton.onclick=blocked?function(){window.location.reload();}:null;
-    if(continueButton)continueButton.onclick=blocked?function(){pendingBlockedMessage='';pendingAuthUrl='';applyBlocked();applyAuth();done();}:null;
+    // Without live Bungie data the page can still show what it holds; when our own service is down there is nothing to continue with.
+    if(continueButton){continueButton.hidden=!blocked||pendingRecoveryKind!=='bungie';continueButton.onclick=blocked?function(){pendingBlockedMessage='';pendingAuthUrl='';pendingRecoveryKind='';applyBlocked();applyAuth();done();}:null;}
   }
   function apply(){
     if(prog)prog.style.setProperty('--p',pendingPct);
@@ -283,16 +291,36 @@
   }
   function authRequired(url){
     if(pendingDone)return;
-    if(!url){authResolved();blocked('Bungie is not responding. Retry');return;}
+    if(!url){authResolved();bungieDown();return;}
     interrupted=true;pendingAuthUrl=String(url||'');pendingBlockedMessage='';pendingDone=false;
     warmNavigation=false;uncover();mount();setStatus('Sign in to Bungie');applyAuth();revealNavigation(true);
   }
   function authResolved(){pendingAuthUrl='';applyAuth();}
-  function blocked(message){
+  // blocked(detail, kind): kind is 'bungie' (default) or 'worker'. The panel always shows that state's
+  // own message; a page's detail is kept on the gate for support only, never shown.
+  function blocked(detail,kind){
     if(pendingDone)return;
-    interrupted=true;pendingBlockedMessage=String(message||'Live Guardian data is unavailable.');pendingDone=false;
-    warmNavigation=false;uncover();mount();setStatus('Live Guardian data unavailable');applyBlocked();revealNavigation(true);
+    interrupted=true;pendingRecoveryKind=kind==='worker'?'worker':'bungie';
+    pendingBlockedMessage=String(detail||RECOVERY_MESSAGES[pendingRecoveryKind]);pendingDone=false;
+    warmNavigation=false;uncover();mount();setStatus(RECOVERY_MESSAGES[pendingRecoveryKind]);applyBlocked();revealNavigation(true);
+    if(gate)gate.dataset.recoveryDetail=pendingBlockedMessage;
   }
+  function bungieDown(detail){blocked(detail,'bungie');}
+  function workerUnreachable(detail){blocked(detail,'worker');}
+  // Which state a failure belongs to. No answer from our Worker (network error, timeout, a non-JSON
+  // or Cloudflare 52x reply) means ASTRIX PARADOX is unreachable; an answer that says Bungie or its
+  // data is unavailable means Bungie is down.
+  function recoveryKind(error){
+    if(!error)return 'bungie';
+    var code=String(error.code||error.error||'');
+    if(code==='worker_unreachable')return 'worker';
+    if(code==='bungie_unavailable')return 'bungie';
+    if(error.name==='TypeError'||error.name==='AbortError')return 'worker';
+    if(Number(error.status)>=520&&Number(error.status)<=530)return 'worker';
+    if(/failed to fetch|networkerror|load failed|timed out|timeout|could not be reached/i.test(String(error.message||error)))return 'worker';
+    return 'bungie';
+  }
+  function recover(error){var kind=recoveryKind(error);blocked(error&&error.message,kind);return kind;}
   function settleImage(image){
     if(image.complete)return image.decode?image.decode().catch(function(){}):Promise.resolve();
     var load=new Promise(function(resolve){
@@ -350,6 +378,6 @@
     bodyObserver.observe(document.documentElement,{childList:true});
     document.addEventListener('DOMContentLoaded',function(){bodyObserver.disconnect();mount();},{once:true});
   }
-  window.ForgeLoader={owner:'astrix-portal',get completed(){return pendingDone;},requireData:requireData,mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked};
+  window.ForgeLoader={owner:'astrix-portal',get completed(){return pendingDone;},requireData:requireData,mount:mount,set:set,status:setStatus,done:done,ready:ready,authRequired:authRequired,authResolved:authResolved,blocked:blocked,bungieDown:bungieDown,workerUnreachable:workerUnreachable,recover:recover,recoveryKind:recoveryKind,messages:RECOVERY_MESSAGES};
   if(window.APX_AUTO_READY===true){if(document.readyState==='complete')void ready();else window.addEventListener('load',function(){void ready();},{once:true});}
 })();

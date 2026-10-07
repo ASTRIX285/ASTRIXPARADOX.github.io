@@ -8,7 +8,7 @@ const REVIEWS_DATA = [
     "featured": true,
     "tags": ["Open World", "Action RPG", "Pearl Abyss", "2025"],
     "scoreStyle": "gold",
-    "intro": "Pearl Abyss promised a brutal, beautiful open world, and Crimson Desert delivers on almost every front. This is not just another action RPG — it is a statement from a studio that knows exactly what it is building.",
+    "intro": "Pearl Abyss promised a brutal, beautiful open world, and Crimson Desert delivers on almost every front. This is not just another action RPG: it is a statement from a studio that knows exactly what it is building.",
     "highs": [
       {
         "title": "Combat That Demands Respect",
@@ -29,7 +29,7 @@ const REVIEWS_DATA = [
         "desc": "The opening hours are relentless but the middle section of the story loses some momentum."
       }
     ],
-    "finalThoughts": "Crimson Desert is the game Pearl Abyss has been building toward for years. The combat is exceptional, the world is stunning, and Kliff is a protagonist worth following. One of the best action RPGs to release in years. If you have been on the fence — get in the Paradox.",
+    "finalThoughts": "Crimson Desert is the game Pearl Abyss has been building toward for years. The combat is exceptional, the world is stunning, and Kliff is a protagonist worth following. One of the best action RPGs to release in years. If you have been on the fence, get in the Paradox.",
     "trailerId": "ZdmoGYg8tB0",
     "studioLink": "https://crimsondesert.pearlabyss.com",
     "description": "Pearl Abyss delivers a brutal, beautiful open-world action RPG with exceptional combat and a world worth getting lost in.",
@@ -103,7 +103,7 @@ const REVIEWS_DATA = [
         "desc": "The game throws a lot at you quickly. Veterans will thrive but newcomers may feel buried."
       }
     ],
-    "finalThoughts": "Borderlands 4 delivers what veterans wanted — louder, faster, and more chaotic. The new movement and build variety breathe life into the series. For a Vault Hunter, that is more than enough.",
+    "finalThoughts": "Borderlands 4 delivers what veterans wanted: louder, faster, and more chaotic. The new movement and build variety breathe life into the series. For a Vault Hunter, that is more than enough.",
     "trailerId": "zlEZzjpEbko",
     "studioLink": "https://borderlands.com",
     "description": "Gearbox returns with over-the-top chaos, wild humor, and explosive new co-op mayhem across alien worlds.",
@@ -181,7 +181,7 @@ const REVIEWS_DATA = [
     "trailerId": "tfxxuVVGjPM",
     "studioLink": "https://www.pathofexile.com",
     "description": "A dark, complex ARPG featuring deep skill trees, brutal combat, and endless replayability.",
-    "image": "../img/games/poe.jpg",
+    "image": "../img/share/astrix-paradox-share-1200x630.jpg",
     "slug": "path-of-exile"
   }
 ];

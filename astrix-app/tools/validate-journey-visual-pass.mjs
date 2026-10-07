@@ -34,12 +34,12 @@ const globalHeroPages=[
   html,
   characterHtml,
   buildForgeHtml,
-  missionReportsHtml,
+  
   vaultHtml,
   forgeLoaderHtml,
   loadoutHtml
 ];
-const mapBackgroundPages=[characterHtml,buildForgeHtml,missionReportsHtml,vaultHtml,forgeLoaderHtml,loadoutHtml];
+const mapBackgroundPages=[characterHtml,buildForgeHtml,vaultHtml,forgeLoaderHtml,loadoutHtml];
 const cosmodromeMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/cosmodrome-director-map-4k.webp`);
 const cosmodromeDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/cosmodrome-director-map-6k.webp`);
 const placeholderMap=readFileSync(`${root}astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp`);
@@ -61,7 +61,8 @@ assert.doesNotMatch(journey,/guardianManifest\.hydratePayload\(payload\)/,'Journ
 assert.doesNotMatch(journey,/hasJourneyRecordComponents/,'Journey entry deliberately uses the shared renderable gate; missing records must not blank available characters');
 assert.match(journey,/const JOURNEY_BOOTSTRAP_PROFILE_WAIT_MS=12\*1000;[\s\S]*?const JOURNEY_BOOTSTRAP_UI_WAIT_MS=6\*1000;/,'Journey bootstrap must bound profile and noncritical UI waits');
 assert.doesNotMatch(journey,/JOURNEY_LOADER_READY_WAIT_MS|setTimeout\(\(\)=>\{globalThis\.ForgeLoader\.done/,'Journey must never dismiss its portal because an arbitrary final timer expired');
-assert.match(journey,/function showSignedOut\(\)\{[\s\S]*?ForgeLoader\.authResolved\(\);[\s\S]*?finishJourneyLoader\(signedOut\)/,'Disconnected Journey must reveal its own Bungie connection screen instead of trapping the portal at 12 percent');
+// Forge final pass (4 Oct 2026): signed out uses the shared recovery panel with the Bungie sign-in button.
+assert.match(journey,/function showSignedOut\(\)\{[\s\S]*?ForgeLoader\.authRequired\(authStartUrl\(\)\)/,'Disconnected Journey must show the shared sign-in panel instead of trapping the portal at 12 percent');
 assert.match(journey,/const profile=await readVerifiedProfile\(session\);[\s\S]*?if\(!profile\?\.profile\?\.characters\?\.data\)throw new Error[\s\S]*?const mapReady=showJourney\(\);/,'Journey must not reveal its dashboard until the prepared profile has passed the renderable data gate');
 assert.match(journey,/waitWithin\(heroCardsReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(mapReady,JOURNEY_BOOTSTRAP_UI_WAIT_MS\)[\s\S]*?waitWithin\(waitForJourneyAtmosphere\(\),JOURNEY_BOOTSTRAP_UI_WAIT_MS\)/,'Noncritical Hero, map and atmosphere tasks must not hold the Journey loader indefinitely');
 assert.doesNotMatch(html,/GUARDIAN JOURNEY · SUMMARY HUB|Your top-line Guardian record|VERIFIED DATA ONLY/,'Journey must not repeat its title in a standalone dashboard banner');
@@ -181,8 +182,9 @@ assert.ok(plainOrStamped(forgeLoaderHtml,'astrix-hero-cards.mjs'),'Forge Loader 
 // PR #231 (a6974b1) superseded fast-transfer-2; #241, #242, #243 and #268 refreshed its graph.
 assert.ok(plainOrStamped(characterHtml,'guardian-workspace-v2.mjs'),'Character must load the current resilient transfer module graph');
 assert.ok(plainOrStamped(buildForgeHtml,'paradox-build-space.mjs'),'Builder must load the partial-data-safe live module graph');
-assert.ok(plainOrStamped(missionReportsHtml,'mission-reports.mjs'),'Mission Reports must load the prepared page payload module graph');
-assert.ok(missionReportsHtml.includes('href="./mission-reports.css?v=20260908-icon-hover-1&amp;drilldown=20260927-1"'),'Mission Reports must load the cache-busted shared icon and hover correction');
+// Mission Reports was retired to a redirect to Reports on 4 Oct 2026 (Forge final pass).
+assert.match(missionReportsHtml,/http-equiv=\"refresh\" content=\"0;url=\.\.\/reports\/\"[\s\S]*?rel=\"canonical\"[\s\S]*?location\.replace\('\.\.\/reports\/'/,'Mission Reports must redirect to Reports');
+assert.match(missionReportsHtml,/<meta name=\"robots\" content=\"noindex/,'The retired Mission Reports page must not be indexed');
 assert.match(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?z-index:90!important;/,'Mission Reports must not override the global Guardian ribbon with document-flow positioning');
 assert.doesNotMatch(missionReportsCss,/\.mission-topbar\.topbar\{[\s\S]*?position:relative!important;[\s\S]*?top:auto!important;/,'Mission Reports must not reattach the Guardian ribbon to its report columns');
 assert.match(heroCss,/position:fixed!important;[\s\S]*?top:0!important;[\s\S]*?left:0!important;[\s\S]*?right:0!important;/,'Every hero-card topbar must remain fixed to the viewport top');
@@ -207,7 +209,6 @@ for(const [page,title,purpose] of [
   [characterHtml,'CHARACTER','INSPECT YOUR LIVE GUARDIAN LOADOUT'],
   [forgeLoaderHtml,'PREPARING THE FORGE','SELECT AND MAXIMISE ARMOUR'],
   [buildForgeHtml,'BUILDER','OPTIMISE, ANALYSE AND TEST YOUR GUARDIAN BUILD'],
-  [missionReportsHtml,'MISSION REPORTS','REVIEW GUARDIAN ACTIVITY'],
   [vaultHtml,'STORAGE',null],
   // Renamed to Armoury (Miguel, 30 Sep 2026).
   [loadoutHtml,'ARMOURY','YOUR SAVED GUARDIAN BUILDS']
@@ -219,7 +220,6 @@ assert.doesNotMatch(vaultHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Vault<\
 assert.match(vaultHtml,/<span class="apx-visually-hidden" id="vaultConnectionState"/,'Vault must preserve its connection-state hook after removing the duplicate heading');
 assert.doesNotMatch(loadoutHtml,/<div class="apx-page-heading">[\s\S]*?<h1>Loadout<\/h1>/,'Loadout must not repeat its page identity below the shared command header');
 assert.doesNotMatch(characterHtml,/class="top-icons"/,'Character must leave only the Bungie account control in the header action position');
-assert.doesNotMatch(missionReportsHtml,/mission-utility-actions/,'Mission Reports must leave only the Bungie account control in the header action position');
 assert.match(heroModule,/from ['"][^'"]*prepared-page-client\.mjs[^'"]*['"][\s\S]*?loadPreparedPagePayload\(session,page/,'Shared hero cards must use the confidential prepared page endpoint through the shared client');
 assert.match(heroModule,/function mostRecentCharacterId\(characters\)[\s\S]*?dateLastPlayed[\s\S]*?const selectedId=mostRecentCharacterId\(characters\)/,'Shared hero cards must automatically select Bungie’s newest dateLastPlayed Guardian');
 // Mobile shell (Miguel, 1 Oct 2026): the last selected Guardian, remembered per account, wins; newest played is the fallback.
@@ -239,8 +239,8 @@ assert.doesNotMatch(heroModule,/from ['"][^'"]*(?:guardian-bungie-profile|guardi
 for(const page of mapBackgroundPages){
   assert.ok(page.includes('astrix-paradox-background.css?v=20260830-global-map-background'),'Each approved page must load the shared ASTRIX PARADOX map background');
 }
-for(const page of [missionReportsHtml,vaultHtml,forgeLoaderHtml,loadoutHtml]){
-  assert.ok(page.includes('forge-paradox-map-background'),'Mission Reports, Vault, Forge Loader and Loadout must mount the shared map background layer');
+for(const page of [vaultHtml,forgeLoaderHtml,loadoutHtml]){
+  assert.ok(page.includes('forge-paradox-map-background'),'Vault, Forge Loader and Loadout must mount the shared map background layer');
 }
 assert.doesNotMatch(html,/astrix-paradox-background|forge-paradox-map-background/,'Journey must retain its existing destination background');
 assert.match(mapBackgroundCss,/astrix-paradox-map-placeholder-4k\.webp/,'Shared page backgrounds must use the approved 4K ASTRIX PARADOX map');

@@ -229,7 +229,7 @@ function effectSources(build, weapons) {
     if (!value) return;
     const description = displayDescription(value);
     const name = text(value?.name ?? value?.displayName ?? value?.setName);
-    const sourceText = [name, description].filter(Boolean).join(' — ');
+    const sourceText = [name, description].filter(Boolean).join(': ');
     if (sourceText) sources.push({ kind, name: name || kind, text: sourceText, weight });
   };
   add('selected Exotic', decision?.buildAnchor?.perk, 46);

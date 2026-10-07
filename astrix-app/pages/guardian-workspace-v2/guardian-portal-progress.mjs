@@ -84,8 +84,8 @@ document.addEventListener('forge:bungie-character-roster',()=>queueMicrotask(may
 document.addEventListener('forge:guardian-loadout-context',()=>{finishRevision++;profileSettled=false;});
 document.addEventListener('forge:guardian-error',event=>{
   finishRevision++;profileSettled=true;profileFailed=true;
-  const message=event.detail?.message||'Live Guardian data is unavailable. Retry the live request.';
-  loader?.blocked?.(message);
+  // One recovery panel (4 Oct 2026): the shared gate decides between "Bungie down" and "can't reach us".
+  loader?.recover?.(event.detail?.error||event.detail||null);
 });
 
 const currentSession=window.FORGE_BUNGIE_SESSION;

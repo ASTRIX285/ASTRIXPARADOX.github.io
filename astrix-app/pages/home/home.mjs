@@ -186,7 +186,7 @@ async function prepareJourney(session){
 async function init(){
   const session=await getBungieSession();
   if(session?.authenticated===false){signedOut();return;}
-  if(session?.authenticated!==true){globalThis.ForgeLoader?.blocked?.('Bungie is not responding. Retry in a moment.');return;}
+  if(session?.authenticated!==true){globalThis.ForgeLoader?.recover?.({code:session?.error||'bungie_unavailable'});return;}
   try{
     const result=await requestSummary();
     if(result.signedOut){signedOut();return;}

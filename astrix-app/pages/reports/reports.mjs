@@ -30,7 +30,7 @@ async function start({force=false,session:providedSession}={}){
     publishAge(snapshot);
     if(!subject)queueReportsPreparation(session,preparationQueue(session));
     window.ForgeLoader?.ready?.(root);
-  }catch{
+  }catch(error){
     if(current!==revision)return;
     // Bungie not responding: the last built overview with its age, never presented as live.
     const stored=session?.authenticated?await createReportsLoader({subject}).stored(session).catch(()=>null):null;
@@ -40,11 +40,12 @@ async function start({force=false,session:providedSession}={}){
       notice.textContent=`Bungie is not responding. Showing reports from ${ageWords(Date.now()-stored.fetchedAt)}. `;
       const retry=document.createElement('button');retry.type='button';retry.id='reportsRetry';retry.className='rp-tab';retry.textContent='Retry';retry.addEventListener('click',()=>void start({force:true}));
       notice.append(retry);root.prepend(notice);publishAge(stored);
+      window.ForgeLoader?.ready?.(root);
     }else{
-      root.innerHTML='<p role="status">Reports unavailable. <button type="button" id="reportsRetry">Retry</button></p>';
-      root.querySelector('#reportsRetry').addEventListener('click',()=>void start({force:true}));
+      // Nothing built yet: the one shared recovery panel (sign-in and retry kept).
+      const kind=window.ForgeLoader?.recover?.(error);
+      root.innerHTML=`<p role="status">${window.ForgeLoader?.messages?.[kind]||''}</p>`;
     }
-    window.ForgeLoader?.ready?.(root);
   }
 }
 // The refresh icon forces a full pull.

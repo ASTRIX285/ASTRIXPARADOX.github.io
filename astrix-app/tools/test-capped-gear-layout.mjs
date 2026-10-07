@@ -105,7 +105,9 @@ try{
   const heavy=document.querySelector('.character-inventory-workspace [data-equipment-group="heavy"]'),equipmentHeading=[...document.querySelectorAll('.character-inventory-workspace .vault-transfer-family')].find(e=>/EQUIPMENT/.test(e.textContent));
   const equipmentGap=heavy&&equipmentHeading?Math.round(box(equipmentHeading).y-box(heavy).bottom):null;
   const primary=document.querySelector('.character-inventory-workspace [data-equipment-group="primary"]'),helmet=document.querySelector('.character-inventory-workspace [data-equipment-group="helmet"]');
-  return {page:name,viewport:innerWidth,copyOverlaps,equipmentGap,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
+  // Builder renders at CSS zoom 0.75 from 1280px (Miguel, 28 Sep 2026; test-build-forge-zoom.mjs), so its rects are visual pixels.
+  const zoom=Number(document.documentElement.currentCSSZoom)||1;
+  return {page:name,viewport:innerWidth,zoom,copyOverlaps,equipmentGap,gear,strip:slots,header:box(header),ribbon:box(ribbon),cards,violations,columns:primary?(Math.abs(box(primary).x-box(helmet).x)>1?2:1):null,scrollWidth:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,catalogueToken:getComputedStyle(document.documentElement).getPropertyValue('--apx-icon-catalog').trim()};
  },name);}
  async function checkVaultColumns(width){
   const state=await page.evaluate(()=>{
@@ -208,7 +210,9 @@ try{
     order:right.map(node=>node.textContent.trim()),href:improve.getAttribute('href'),label:improve.getAttribute('aria-label'),
     padding:parseFloat(getComputedStyle(document.body).paddingBottom),primaryColour,improveColour:getComputedStyle(improve).backgroundColor,improveRing:{image:getComputedStyle(improve,'::after').backgroundImage,animation:getComputedStyle(improve,'::after').animationName,padding:getComputedStyle(improve,'::after').paddingTop},
     buttons:buttons.map(node=>({...box(node),font:getComputedStyle(node).fontFamily,fontSize:getComputedStyle(node).fontSize,whiteSpace:getComputedStyle(node).whiteSpace,scrollWidth:node.scrollWidth,clientWidth:node.clientWidth})),
-    rightBounds:box(bar.lastElementChild),fontSize:getComputedStyle(improve).fontSize
+    rightBounds:box(bar.lastElementChild),fontSize:getComputedStyle(improve).fontSize,
+    // Mobile shell (2 Oct 2026): on phone the fixed bottom bar is the inventory tab bar, and the action bar sits in the page flow.
+    compact:document.body.classList.contains('ax-inv-compact'),invBar:document.querySelector('.ax-inv-tabs')?box(document.querySelector('.ax-inv-tabs')):null
    };
   });
   if(width>=1920)assert.ok(Math.abs(state.inventory.bottom-state.rail.bottom)<=1,`Character ${width}: inventory bottom equals left rail bottom`);
@@ -223,7 +227,8 @@ try{
   assert.match(state.improveRing.image,/linear-gradient/,'Improve has the FULL-tier stroke');
   assert.equal(state.improveRing.animation,'apx-flow-pos','Improve has the flowing pulse');
   assert.equal(state.improveRing.padding,'3px','Improve stroke is 3px thick at the top-left');
-  assert.ok(Math.abs(state.padding-state.bounds.height)<=1,`Character ${width}: bottom padding equals bar height`);
+  if(state.compact)assert.ok(state.invBar&&Math.abs(state.padding-(state.invBar.height+12))<=1,`Character ${width}: bottom padding clears the fixed inventory tab bar (${state.padding} for ${state.invBar?.height})`);
+  else assert.ok(Math.abs(state.padding-state.bounds.height)<=1,`Character ${width}: bottom padding equals bar height`);
   assert.deepEqual(state.overlaps,[],`Character ${width}: no workspace content overlaps the bar`);
   assert.ok(state.bounds.left>=-1&&state.bounds.right<=width+1,`Character ${width}: bar fits viewport`);
   for(const button of state.buttons){
@@ -250,7 +255,7 @@ try{
    await page.screenshot({path:resolve(output,`${name}-${width}.png`)});captures.push({name,width,file:`${name}-${width}.png`});
    assert.ok(row.gear.length>=8,`${name} ${width}: fixture gear rendered`);
    if(name==='ForgeLoader')assert.deepEqual(row.gear.map(r=>r.width),before.gear.map(r=>r.width),'Forge Loader unchanged from main');
-   else for(const art of row.gear)assert.ok(Math.abs(art.width-(width===1363?44:66))<=(width===1363?1:.1),`${name} ${width}: art ${art.width}`);
+   else for(const art of row.gear)assert.ok(Math.abs(art.width-(width===1363?44:66)*row.zoom)<=(width===1363?1:.1),`${name} ${width}: art ${art.width} (expected the gear token at page zoom ${row.zoom})`);
    // Prompt 12b: Miguel's measured DIM pitch is tile + 6px on Character and Vault rows and the loadout strip.
    if(name==='Character'||name==='Vault'){const first=row.gear[0],next=row.gear.find(r=>Math.abs(r.y-first.y)<1&&r.x>first.x+1);assert.ok(next,`${name} ${width}: second tile in row`);assert.ok(Math.abs(next.x-first.x-(first.width+6))<=.1,`${name} ${width}: pitch ${next.x-first.x} for tile ${first.width}`);}
    // Prompt 21: slot size unchanged; pitch adds the separate 22px menu button and 4px internal gap.
@@ -258,7 +263,8 @@ try{
    assert.deepEqual(row.copyOverlaps,[],`${name} ${width}: header title and subtitle clear of hero cards and brand`);
    if(row.columns===2&&row.equipmentGap!==null)assert.ok(row.equipmentGap<=16,`Character ${width}: no empty row between Heavy and Equipment (${row.equipmentGap}px)`);
    assert.deepEqual(row.violations,[],`${name} ${width}: tile containment`);
-   assert.ok(row.scrollWidth<=width&&row.bodyScroll<=width,`${name} ${width}: no horizontal page scroll`);
+   // body.scrollWidth is in the body's own (zoomed) pixels; scale it back to the viewport before comparing.
+   assert.ok(row.scrollWidth<=width&&row.bodyScroll*row.zoom<=width+1,`${name} ${width}: no horizontal page scroll`);
    if(name==='Vault')await checkVaultColumns(width);
    if(name==='Loadout'){
     await checkLoadout(width);
@@ -294,7 +300,7 @@ try{
    }
    if(name==='BuildForge'){
     row.catalogue=await page.evaluate(()=>{const grid=document.querySelector('.manual-item-grid');grid.innerHTML=window.fixtureCatalogue;grid.closest('.manual-editor-overlay').hidden=false;return [...grid.querySelectorAll('.tile-art')].map(e=>e.getBoundingClientRect().width);});
-    assert.ok(row.catalogue.length);for(const size of row.catalogue)assert.equal(size,44,'Catalogue remains 44px');
+    assert.ok(row.catalogue.length);for(const size of row.catalogue)assert.ok(Math.abs(size-44*row.zoom)<=.05,`Catalogue remains 44px at page zoom ${row.zoom} (${size})`);
     await page.screenshot({path:resolve(output,`BuildForge-${width}-catalogue.png`)});captures.push({name:'Builder owned catalogue',width,file:`BuildForge-${width}-catalogue.png`});
    }
   }

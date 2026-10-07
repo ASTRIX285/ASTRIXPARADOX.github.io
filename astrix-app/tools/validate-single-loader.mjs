@@ -74,7 +74,7 @@ assert.throws(()=>assertOneLoader(simple+'<section data-page-loader></section>',
 function harness({auto=false,skip=false,referrer='https://astrixparadox.com/tools/',navigationType='navigate'}={}){
  let mounted=0,ready=0,reloads=0;const listeners=new Map(),elements=new Map();
  const classes=()=>{const set=new Set();return {add:x=>set.add(x),remove:x=>set.delete(x),contains:x=>set.has(x),toggle:(x,v)=>v?set.add(x):set.delete(x)};};
- const node=()=>({classList:classes(),style:{setProperty(){}},addEventListener(){},removeEventListener(){},remove(){},querySelector(selector){if(!elements.has(selector))elements.set(selector,node());return elements.get(selector);}});
+ const node=()=>({classList:classes(),dataset:{},style:{setProperty(){}},addEventListener(){},removeEventListener(){},remove(){},querySelector(selector){if(!elements.has(selector))elements.set(selector,node());return elements.get(selector);}});
  let gate;const document={referrer,readyState:'complete',documentElement:{classList:classes()},body:{classList:classes(),appendChild:n=>{gate=n;mounted++;}},fonts:{ready:Promise.resolve()},querySelector:selector=>selector==='.apx-gate'?gate:null,querySelectorAll:()=>[],createElement:()=>({set innerHTML(value){},get firstElementChild(){return node();}}),addEventListener(){},dispatchEvent:event=>{if(event.type==='forge:portal-ready')ready++;}};
  const window={performance:{getEntriesByType:()=>[{type:navigationType}]},APX_AUTO_READY:auto,APX_SKIP_PORTAL:skip,location:{origin:'https://astrixparadox.com',reload(){reloads++;},pathname:'/astrix-app/pages/journey/'},addEventListener:(name,fn)=>listeners.set(name,fn)};
  const context=vm.createContext({URL,window,document,CustomEvent:class{constructor(type){this.type=type;}},Promise,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn(),getComputedStyle:()=>({display:'block'}),sessionStorage:{getItem:()=>null}});
@@ -102,5 +102,5 @@ for(const options of [
 }
 assert.doesNotMatch(read(portal),/holdForBreach|hasWarmPage/);
 assert.match(read(portal),/module.createBreach/,'The one tool loader must use the approved entry skin module');
-assert.match(read(portal),/RETRY LIVE DATA/);assert.match(read(portal),/CONTINUE WITHOUT LIVE DATA/);
+assert.match(read(portal),/apx-retry-button apx-recovery-primary" type="button">Retry</);assert.match(read(portal),/>Continue without live data</);
 console.log(`SINGLE_LOADER=PASS tool-pages=${checked} public-pages-without-loader=${publicPages} duplicate-components-rejected lifecycle-once recovery-preserved`);

@@ -197,16 +197,29 @@ async function hydrateAccountVisual(control,session){
 
 let sessionRequest=null;
 
+// Three recovery states (4 Oct 2026). Signed out: the Worker answers 401 with the reauth code.
+// Bungie down: the Worker answers, but cannot reach Bungie. Worker unreachable: no usable answer
+// from our Worker at all (network error, timeout, a non-JSON reply or a Cloudflare 52x page).
+const WORKER_UNREACHABLE={authenticated:null,error:"worker_unreachable"};
+const BUNGIE_UNAVAILABLE={authenticated:null,error:"bungie_unavailable"};
+
 async function requestSession(){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),12000);
   try{
-    const response=await fetch(`${AUTH_ORIGIN}/session`,{
-      credentials:"include",
-      headers:{Accept:"application/json"},
-      signal:controller.signal
-    });
-    const session=await response.json();
+    let response;
+    try{
+      response=await fetch(`${AUTH_ORIGIN}/session`,{
+        credentials:"include",
+        headers:{Accept:"application/json"},
+        signal:controller.signal
+      });
+    }catch{
+      return {...WORKER_UNREACHABLE};
+    }
+    if(response.status>=520&&response.status<=530)return {...WORKER_UNREACHABLE};
+    let session;
+    try{session=await response.json();}catch{return {...WORKER_UNREACHABLE};}
     if(response.status===401&&session?.authenticated===false&&session?.error==="bungie_reauthentication_required"){
       const recoveryUrl=await requestAccessRecovery();
       if(recoveryUrl){
@@ -215,8 +228,8 @@ async function requestSession(){
       }
       return {authenticated:false,error:"bungie_reauthentication_required",status:401};
     }
-    if(!response.ok)throw new Error(session?.error||`session:${response.status}`);
-    return session?.authenticated===true?session:{authenticated:null,error:"bungie_unavailable"};
+    if(!response.ok)return {...BUNGIE_UNAVAILABLE,status:response.status};
+    return session?.authenticated===true?session:{...BUNGIE_UNAVAILABLE};
   }finally{
     clearTimeout(timer);
   }
@@ -232,7 +245,8 @@ function publishSession(session){
     globalThis.ForgeLoader?.authRequired?.(authStartUrl());
   }else{
     globalThis.ForgeLoader?.authResolved?.();
-    globalThis.ForgeLoader?.blocked?.("Bungie is not responding. Retry");
+    if(session?.error==="worker_unreachable")globalThis.ForgeLoader?.workerUnreachable?.();
+    else globalThis.ForgeLoader?.bungieDown?.();
   }
   globalThis.dispatchEvent(new CustomEvent("forge:bungie-session",{detail:session}));
 }
@@ -255,7 +269,7 @@ function getBungieSession({force=false}={}){
     })
     .catch(error=>{
       console.info("[Forge Bungie auth] session check unavailable",error);
-      const session={authenticated:null,error:"bungie_unavailable"};
+      const session={...WORKER_UNREACHABLE};
       publishSession(session);
       return session;
     });
@@ -277,7 +291,7 @@ async function refreshAuthState(control,force=false){
   control.visual.hidden=true;
   control.button.hidden=false;
   control.button.dataset.state=session?.authenticated===false?"disconnected":"unknown";
-  control.button.textContent=session?.authenticated===false?"CONNECT BUNGIE":"Bungie is not responding. Retry";
+  control.button.textContent=session?.authenticated===false?"Sign in with Bungie":"Retry";
 }
 
 // The profile normalizer also runs in a Worker; controls belong to documents.

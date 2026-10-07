@@ -96,7 +96,7 @@ function createRegionChestOverlay(key,label){
       row.className=`journey-region-chest ${chest.collected===true?'is-collected':chest.collected===false?'is-missing':'is-unknown'}`;
       const tick=document.createElement('span');
       tick.className='journey-region-chest-tick';
-      tick.textContent=chest.collected===true?'✓':chest.collected===false?'○':'–';
+      tick.textContent=chest.collected===true?'✓':chest.collected===false?'○':'?';
       tick.setAttribute('aria-hidden','true');
       const copy=document.createElement('span');
       copy.className='journey-region-chest-copy';
@@ -315,7 +315,7 @@ function createDestinationDataView(key,label,mapFigure){
         if(items.length>pageSize){
           const nav=document.createElement('nav');nav.setAttribute('aria-label','Destination record pages');
           for(const [text,next] of [['Previous',offset-pageSize],['Next',offset+pageSize]]){const button=document.createElement('button');button.type='button';button.textContent=text;button.disabled=next<0||next>=items.length;button.addEventListener('click',()=>{offset=next;paint();});nav.append(button);}
-          const count=document.createElement('span');count.textContent=` ${offset+1}–${Math.min(items.length,offset+pageSize)} of ${items.length}`;nav.append(count);list.append(nav);
+          const count=document.createElement('span');count.textContent=` ${offset+1} to ${Math.min(items.length,offset+pageSize)} of ${items.length}`;nav.append(count);list.append(nav);
         }
       };paint();
       return;

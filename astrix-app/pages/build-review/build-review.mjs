@@ -195,7 +195,8 @@ async function load(){
       globalThis.ForgeLoader?.authRequired?.(authStartUrl(location.href));
       return;
     }else{
-      throw new Error('Bungie is not responding. Reload to retry.');
+      globalThis.ForgeLoader?.recover?.({code:session?.error||'bungie_unavailable'});
+      return;
     }
   }catch(error){
     page.error=error?.message||'This DIM loadout could not be loaded.';

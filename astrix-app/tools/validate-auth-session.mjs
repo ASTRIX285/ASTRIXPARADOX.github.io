@@ -70,4 +70,4 @@ for(const authenticated of [undefined,null,true]){
 guarded.context.FORGE_BUNGIE_SESSION={authenticated:false};
 assert.match(vm.runInContext('authStartUrl()',guarded.context),/\/bungie\/start\?/);
 const portal=read('shared/astrix-portal-loader.js');
-assert.match(portal,/function authRequired\(url\)\{\s*if\(pendingDone\)return;\s*if\(!url\)\{authResolved\(\);blocked\('Bungie is not responding. Retry'\);return;\}/);
+assert.match(portal,/function authRequired\(url\)\{\s*if\(pendingDone\)return;\s*if\(!url\)\{authResolved\(\);bungieDown\(\);return;\}/);

@@ -508,7 +508,7 @@ async function checkTwitchLive() {
       }
 
       document.title =
-        `🔴 LIVE — ${data.game || 'Gaming'} | ASTRIX PARADOX`;
+        `🔴 LIVE | ${data.game || 'Gaming'} | ASTRIX PARADOX`;
 
       document.body.classList.add('is-live');
 

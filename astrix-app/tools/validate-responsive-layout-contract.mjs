@@ -26,7 +26,6 @@ const appPages=[
   ['Journey',await readFile(new URL('../journey/index.html',ROOT),'utf8')],
   ['Character',mainHtml],
   ['Builder',buildHtml],
-  ['Mission Reports',await readFile(new URL('../mission-reports/index.html',ROOT),'utf8')],
   ['Vault',await readFile(new URL('../vault/index.html',ROOT),'utf8')],
   ['Forge Loader',await readFile(new URL('../forge-loader/index.html',ROOT),'utf8')],
   ['Loadout',await readFile(new URL('../loadout/index.html',ROOT),'utf8')]

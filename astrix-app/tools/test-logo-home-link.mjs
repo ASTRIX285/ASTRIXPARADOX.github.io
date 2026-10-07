@@ -12,7 +12,8 @@ const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const publicPages=['','pages/reviews.html','pages/news.html','pages/clips.html','pages/games.html','pages/join.html','hub/','tools/destiny-2/','tools/destiny-2/dim-companion/','tools/destiny-2/dim-loadout-viewer/','astrix-app/pages/home/'];
-const toolPages=['journey','guardian-workspace-v2','forge-loader','guardian-workspace-v2/paradox-build-space','reports','vault','loadout','mission-reports','build-review'].map(page=>`astrix-app/pages/${page}/`);
+// Mission Reports was retired to a redirect to Reports on 4 Oct 2026; Reports is checked directly.
+const toolPages=['journey','guardian-workspace-v2','forge-loader','guardian-workspace-v2/paradox-build-space','reports','vault','loadout','build-review'].map(page=>`astrix-app/pages/${page}/`);
 const server=createServer(async(req,res)=>{
   const path=new URL(req.url,'http://localhost').pathname;
   const file=resolve(root,'.'+path+(path.endsWith('/')?'index.html':''));
