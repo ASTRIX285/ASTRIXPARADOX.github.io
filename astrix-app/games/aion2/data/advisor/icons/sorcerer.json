@@ -1,0 +1,230 @@
+{
+  "description": "Sorcerer skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "sorcerer-skill-icons",
+      "class": "Sorcerer",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Flame Arrow",
+          "icon": "ICON_SO_SKILL_020.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Ice Chain",
+          "icon": "ICON_SO_SKILL_009.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Firestorm",
+          "icon": "ICON_SO_SKILL_004.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Bittercold Wind",
+          "icon": "ICON_SO_SKILL_025.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Blaze",
+          "icon": "ICON_SO_SKILL_005.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Flame Scattershot",
+          "icon": "ICON_SO_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Frost",
+          "icon": "ICON_SO_SKILL_015.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Winter's Shackles",
+          "icon": "ICON_SO_SKILL_011.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Frost Burst",
+          "icon": "ICON_SO_SKILL_022.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Wish of Concentration",
+          "icon": "ICON_SO_SKILL_028.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Hellfire",
+          "icon": "ICON_SO_SKILL_006.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Fire Mark",
+          "icon": "ICON_SO_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Robe of Earth",
+          "icon": "ICON_SO_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Cold Snap",
+          "icon": "ICON_SO_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Robe of Flame",
+          "icon": "ICON_SO_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Absorb Essence",
+          "icon": "ICON_SO_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Grace of Resistance",
+          "icon": "ICON_SO_SKILL_038.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Robe of Cold",
+          "icon": "ICON_SO_SKILL_Passive_005.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Grace of Enhancement",
+          "icon": "ICON_SO_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Revitalization Contract",
+          "icon": "ICON_AS_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Vitality Evaporation",
+          "icon": "ICON_SO_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Divine Burst",
+          "icon": "ICON_SO_SKILL_036.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Steel Barrier",
+          "icon": "ICON_SO_SKILL_016.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Element Enhancement",
+          "icon": "ICON_SO_SKILL_040.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Curse: Tree",
+          "icon": "ICON_SO_SKILL_014.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Arctic Armor",
+          "icon": "ICON_SO_SKILL_021.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Soul Freeze",
+          "icon": "ICON_SO_SKILL_013.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Cold Storm",
+          "icon": "ICON_SO_SKILL_019.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Fire Wall",
+          "icon": "ICON_SO_SKILL_039.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Lumiel's Space",
+          "icon": "ICON_SO_SKILL_027.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Delayed Explosion",
+          "icon": "ICON_SO_SKILL_032.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Glacial Smite",
+          "icon": "ICON_SO_SKILL_012.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Bombardment",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Hibernation",
+          "icon": "ICON_SO_SKILL_041.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

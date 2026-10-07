@@ -1,0 +1,230 @@
+{
+  "description": "Cleric skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "cleric-skill-icons",
+      "class": "Cleric",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Earth's Retribution",
+          "icon": "ICON_CL_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Judgment Thunder",
+          "icon": "ICON_CL_SKILL_004.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Debilitating Mark",
+          "icon": "ICON_CL_SKILL_008.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Divine Aura",
+          "icon": "ICON_CL_SKILL_015.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Chain of Torment",
+          "icon": "ICON_CL_SKILL_007.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Lightning Strike Scattershot",
+          "icon": "ICON_CL_SKILL_037.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Light of Regeneration",
+          "icon": "ICON_CL_SKILL_009.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Condemnation",
+          "icon": "ICON_CL_SKILL_035.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Healing Light",
+          "icon": "ICON_CL_SKILL_010.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Radiant Recovery",
+          "icon": "ICON_CL_SKILL_012.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Bolt",
+          "icon": "ICON_CL_SKILL_006.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Warm Benediction",
+          "icon": "ICON_CL_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Empyrean Lords' Benediction",
+          "icon": "ICON_CL_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Empyrean Lord's Grace",
+          "icon": "ICON_CL_SKILL_Passive_012.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Healing Enhancement",
+          "icon": "ICON_CL_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Immortal Veil",
+          "icon": "ICON_CL_SKILL_Passive_011.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Heal Block",
+          "icon": "ICON_CL_SKILL_Passive_005.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Prayer of Concentration",
+          "icon": "ICON_CL_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Earth's Grace",
+          "icon": "ICON_CL_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Survival Willpower",
+          "icon": "ICON_GL_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Radiant Benediction",
+          "icon": "ICON_CL_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Power Burst",
+          "icon": "ICON_CL_SKILL_027.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Absolution",
+          "icon": "ICON_CL_SKILL_028.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Benevolence",
+          "icon": "ICON_CL_SKILL_047.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Prayer of Amplification",
+          "icon": "ICON_CL_SKILL_044.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Summon Resurrection",
+          "icon": "ICON_CL_SKILL_039.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Earth Punishment",
+          "icon": "ICON_CL_SKILL_040.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Salvation",
+          "icon": "ICON_CL_SKILL_026.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Root",
+          "icon": "ICON_CL_SKILL_019.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Light of Protection",
+          "icon": "ICON_CL_SKILL_041.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Yustiel's Power",
+          "icon": "ICON_CL_SKILL_042.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Voice of Doom",
+          "icon": "ICON_CL_SKILL_029.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Mark",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Noble Aura",
+          "icon": "ICON_CL_SKILL_046.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

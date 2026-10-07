@@ -233,6 +233,7 @@ export const ascentUrl = (ref, className = null) => ref
 const ADVISOR = '/astrix-app/games/aion2/data/advisor/';
 let advisorBase;
 const advisorBuilds = new Map();
+const advisorIcons = new Map();
 
 /**
  * Ascent Plan data: game-wide progression and the skill catalogue (shared, loaded once), plus the
@@ -250,13 +251,20 @@ function loadBuilds(className) {
   return advisorBuilds.get(slug);
 }
 
+/** The class's skill list with the game's icon for each skill and stigma (armory capture, all 8 classes). */
+function loadIcons(className) {
+  const slug = String(className).toLowerCase();
+  if (!advisorIcons.has(slug)) advisorIcons.set(slug, getJson(`${ADVISOR}icons/${slug}.json`).catch(() => { advisorIcons.delete(slug); return null; }));
+  return advisorIcons.get(slug);
+}
+
 /** Starts fetching a class's builds early (no await), so a later loadAdvisor finds them ready. */
 export function prefetchAdvisor(className) {
   loadAdvisorBase().catch(() => {});
-  if (className) loadBuilds(className).catch(() => {});
+  if (className) { loadBuilds(className).catch(() => {}); loadIcons(className); }
 }
 
 export async function loadAdvisor(className) {
-  const [[progression, skills], builds] = await Promise.all([loadAdvisorBase(), loadBuilds(className)]);
-  return { progression, skills, builds };
+  const [[progression, skills], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
+  return { progression, skills, builds, icons };
 }

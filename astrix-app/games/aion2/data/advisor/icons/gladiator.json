@@ -1,0 +1,230 @@
+{
+  "description": "Gladiator skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "gladiator-skill-icons",
+      "class": "Gladiator",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Keen Strike",
+          "icon": "ICON_GL_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Rending Blow",
+          "icon": "ICON_GL_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Leaping Slam",
+          "icon": "ICON_GL_SKILL_019.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Mocking Blade",
+          "icon": "ICON_GL_SKILL_028.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Overhead Slam",
+          "icon": "ICON_GL_SKILL_017.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Sword Aura Rampage",
+          "icon": "ICON_TE_SKILL_034.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Ankle Slice",
+          "icon": "ICON_GL_SKILL_020.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Crushing Wave",
+          "icon": "ICON_GL_SKILL_005.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Rush Strike",
+          "icon": "ICON_GL_SKILL_036.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Aerial Snare",
+          "icon": "ICON_GL_SKILL_015.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Ruinous Blow",
+          "icon": "ICON_GL_SKILL_010.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Survival Stance",
+          "icon": "ICON_GL_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Protection Armor",
+          "icon": "ICON_GL_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Blood Absorption",
+          "icon": "ICON_GL_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Identify Weakness",
+          "icon": "ICON_GL_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Attack Preparation",
+          "icon": "ICON_GL_SKILL_Passive_005.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Impact Hit",
+          "icon": "ICON_GL_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Destructive Impulse",
+          "icon": "ICON_GL_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Experienced Counterstrike",
+          "icon": "ICON_GL_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Survival Willpower",
+          "icon": "ICON_GL_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Murderous Burst",
+          "icon": "ICON_GL_SKILL_Passive_010.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Wrath Wave",
+          "icon": "ICON_GL_SKILL_007.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Lunge Stance",
+          "icon": "ICON_GL_SKILL_024.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Zikel's Blessing",
+          "icon": "ICON_GL_SKILL_040.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Focused Block",
+          "icon": "ICON_GL_SKILL_011.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Armor of Balance",
+          "icon": "ICON_GL_SKILL_013.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Blade Toss",
+          "icon": "ICON_GL_SKILL_008.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Tenaciousness",
+          "icon": "ICON_GL_SKILL_038.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Lifestealing Blade",
+          "icon": "ICON_GL_SKILL_034.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Rage Burst",
+          "icon": "ICON_GL_SKILL_039.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Wave Armor",
+          "icon": "ICON_GL_SKILL_041.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Forced Restraint",
+          "icon": "ICON_GL_SKILL_043.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Strike",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Fracturing Rush",
+          "icon": "ICON_GL_SKILL_045.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

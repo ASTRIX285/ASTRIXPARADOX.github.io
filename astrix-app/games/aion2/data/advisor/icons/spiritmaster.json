@@ -1,0 +1,230 @@
+{
+  "description": "Spiritmaster skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "spiritmaster-skill-icons",
+      "class": "Spiritmaster",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Cold Shock",
+          "icon": "ICON_EL_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Combustion",
+          "icon": "ICON_EL_SKILL_004.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Summon: Fire Spirit",
+          "icon": "ICON_EL_SKILL_010.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Summon: Water Spirit",
+          "icon": "ICON_EL_SKILL_011.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Jointstrike: Curse",
+          "icon": "ICON_EL_SKILL_014.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Rapid Scattershot",
+          "icon": "ICON_EL_SKILL_034.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Summon: Earth Spirit",
+          "icon": "ICON_EL_SKILL_013.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Dimensional Control",
+          "icon": "ICON_EL_SKILL_033.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Summon: Wind Spirit",
+          "icon": "ICON_EL_SKILL_012.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Soul's Cry",
+          "icon": "ICON_EL_SKILL_007.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Elemental Fusion",
+          "icon": "ICON_EL_SKILL_030.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Spirit Strike",
+          "icon": "ICON_EL_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Spirit Protection",
+          "icon": "ICON_EL_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Spirit's Descent",
+          "icon": "ICON_EL_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Corrode",
+          "icon": "ICON_EL_SKILL_Passive_012.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Spirit Revitalization",
+          "icon": "ICON_EL_SKILL_Passive_011.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Mental Focus",
+          "icon": "ICON_EL_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Consecutive Countercurrent",
+          "icon": "ICON_EL_SKILL_Passive_013.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Spirit Communion",
+          "icon": "ICON_EL_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Revitalization Contract",
+          "icon": "ICON_AS_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Element Unification",
+          "icon": "ICON_EL_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Jointstrike: Destructive Attack",
+          "icon": "ICON_EL_SKILL_024.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Enhance: Spirit's Benediction",
+          "icon": "ICON_EL_SKILL_019.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Flame Blessing",
+          "icon": "ICON_EL_SKILL_037.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Summon: Ancient Spirit",
+          "icon": "ICON_EL_SKILL_025.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Jointstrike: Corrode",
+          "icon": "ICON_EL_SKILL_015.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Kaisinel's Power",
+          "icon": "ICON_EL_SKILL_036.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Siphon",
+          "icon": "ICON_EL_SKILL_006.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Cry of Terror",
+          "icon": "ICON_EL_SKILL_008.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Cursed Cloud",
+          "icon": "ICON_EL_SKILL_022.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Seize Magic",
+          "icon": "ICON_EL_SKILL_023.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Magic Block",
+          "icon": "ICON_EL_SKILL_026.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Terror",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Command: Proxy",
+          "icon": "ICON_EL_SKILL_017.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

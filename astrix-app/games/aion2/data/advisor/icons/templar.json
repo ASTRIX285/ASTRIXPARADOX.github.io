@@ -1,0 +1,230 @@
+{
+  "description": "Templar skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "templar-skill-icons",
+      "class": "Templar",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Vicious Strike",
+          "icon": "ICON_TE_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Pummel",
+          "icon": "ICON_TE_SKILL_006.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Poach",
+          "icon": "ICON_TE_SKILL_013.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Shield Smite",
+          "icon": "ICON_TE_SKILL_010.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Judgment",
+          "icon": "ICON_TE_SKILL_004.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Flash Rampage",
+          "icon": "ICON_GL_SKILL_027.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Debilitating Smash",
+          "icon": "ICON_TE_SKILL_025.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Warding Strike",
+          "icon": "ICON_TE_SKILL_035.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Shield Rush",
+          "icon": "ICON_TE_SKILL_015.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Annihilate",
+          "icon": "ICON_TE_SKILL_028.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Punishment",
+          "icon": "ICON_TE_SKILL_009.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Enhance Health",
+          "icon": "ICON_TE_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Warding Shield",
+          "icon": "ICON_TE_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Punishing Benediction",
+          "icon": "ICON_TE_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Ironclad Defense",
+          "icon": "ICON_TE_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Guarding Seal",
+          "icon": "ICON_TE_SKILL_Passive_005.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Impact Hit",
+          "icon": "ICON_GL_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Insulting Roar",
+          "icon": "ICON_TE_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Fury",
+          "icon": "ICON_TE_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Survival Willpower",
+          "icon": "ICON_GL_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Block Pain",
+          "icon": "ICON_TE_SKILL_Passive_010.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Empyrean Lord's Punishment",
+          "icon": "ICON_TE_SKILL_029.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Nezekan's Shield",
+          "icon": "ICON_TE_SKILL_030.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Shield of Protection",
+          "icon": "ICON_TE_SKILL_011.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Taunt",
+          "icon": "ICON_TE_SKILL_012.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Armor of Balance",
+          "icon": "ICON_GL_SKILL_013.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Second Skin",
+          "icon": "ICON_TE_SKILL_018.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Doom Shield",
+          "icon": "ICON_TE_SKILL_007.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Noble Armor",
+          "icon": "ICON_TE_SKILL_022.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Executing Blade",
+          "icon": "ICON_TE_SKILL_041.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Comrade in Arms",
+          "icon": "ICON_TE_SKILL_024.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Grapple",
+          "icon": "ICON_TE_SKILL_021.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Fury",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Battlefield Banner",
+          "icon": "ICON_TE_SKILL_045.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

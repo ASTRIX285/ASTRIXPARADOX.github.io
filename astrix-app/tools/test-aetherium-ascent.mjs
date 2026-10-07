@@ -48,6 +48,7 @@ Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDI
 const lv22Equipment=structuredClone(equipment);
 lv22Equipment.equipment.equipmentList.push({...lv22Equipment.equipment.equipmentList[0],id:999000022,name:'Test Amulet',slotPos:22,slotPosName:'Amulet'});
 
+const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
 const browser=await chromium.launch();
 const realCalls=[];
 let failures=0;
@@ -82,7 +83,9 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta})});
   });
   // Icons and portraits come from the NCSOFT CDN; never fetched in tests.
-  await context.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+  // A 1x1 PNG stands in for every NCSOFT icon, so icon tiles keep their <img> as they do live.
+  await context.route(/playnccdn\.com/,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
+  await context.route(/plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
   // Never the real Worker or NCSOFT: a request to either is blocked and fails the run. Registered last, so it wins over the CDN stub above.
   await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{realCalls.push(route.request().url());return route.abort();});
   if(storage)await context.addInitScript(value=>{localStorage.setItem('aetherium.roster.v1',value);},JSON.stringify(storage));
@@ -190,28 +193,45 @@ await check('players stay on the site: no outbound links, no guide names on the 
   }
 });
 
-await check('Mastery: skill grid like the game, Specialty slots and perks for the picked skill',async()=>{
+await check('Mastery: icon grid like the game, names on hover, a card with the details on tap',async()=>{
   const {page,context}=await open(ascent(ref,'mastery'),{live:true});
   await page.waitForSelector('#aeMastery .ae-mskill');
   const order=await page.$$eval('#aeMastery .ae-mskill-grid:first-of-type .ae-mskill',items=>items.slice(0,3).map(el=>el.dataset.mastery));
   assert.deepEqual(order,['Keen Strike','Rending Blow','Overhead Slam']);
-  assert.match(await plain(page,'#aeMastery [data-mastery="Keen Strike"] .ae-mskill-lv'),/Lv\. 3/);
-  // NCSOFT is blocked in tests, so the icon fails and the tile falls back to the skill's name.
-  await page.waitForFunction(()=>!document.querySelector('#aeMastery [data-mastery="Keen Strike"] img'));
-  assert.ok((await page.locator('#aeMastery [data-mastery="Keen Strike"] .ae-mskill-name').boundingBox()).width>0,'Name shows when the icon cannot load');
-  assert.match(await plain(page,'.ae-mspend'),/Keen Strike Lv 3 to 8 opens Specialty slot 1/);
-  assert.equal(await page.getAttribute('[data-mastery="Keen Strike"]','data-equipped'),'true','Shows what is on the skill bar');
-  assert.match(await plain(page,'[data-mastery="Keen Strike"] .ae-mskill-bar'),/On bar/);
-  assert.equal(await page.locator('[data-mastery="Ruinous Blow"] .ae-mskill-bar').count(),0,'A locked skill is never shown as on the bar');
-  assert.match(await plain(page,'#aeMasteryDetail .ae-mbar'),/On your skill bar/);
-  assert.equal(await page.locator('.ae-mslots li').count(),3);
-  assert.match(await plain(page,'#aeMasteryDetail h3'),/Keen Strike Lv\. 3/);
-  await page.click('#aeMastery [data-mastery="Rending Blow"]');
-  assert.match(await plain(page,'#aeMasteryDetail h3'),/Rending Blow/);
-  assert.equal(await page.locator('#aeMastery .ae-mskill.is-selected').count(),1);
-  const box=await page.locator('#aeMastery [data-mastery="Rending Blow"]').boundingBox();
+  const tile='.ae-mskill-grid [data-mastery="Keen Strike"]';
+  assert.equal(await plain(page,`${tile} .ae-mskill-lv`),'3');
+  assert.equal(await page.getAttribute(tile,'data-tip'),'Keen Strike','Name on hover');
+  assert.match(await page.getAttribute(`${tile} img`,'src'),/ICON_GL_SKILL_002\.png$/,'The game icon');
+  assert.deepEqual(await page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>[el.dataset.mastery,el.querySelector('.ae-itile-badge').textContent])),[['Keen Strike','3→8'],['Rending Blow','3→8'],['Overhead Slam','2→8']]);
+  assert.equal(await page.getAttribute(tile,'data-equipped'),'true','Shows what is on the skill bar');
+  assert.equal(await page.locator('.ae-mskill-grid [data-mastery="Ruinous Blow"] .ae-mskill-bar').count(),0,'A locked skill is never shown as on the bar');
+  await page.hover(tile);
+  assert.equal(await plain(page,'#aeTip'),'Keen Strike');
+  await page.click(tile);
+  await page.waitForSelector('#aeInfo:not([hidden])');
+  assert.match(await plain(page,'#aeInfoTitle'),/Keen Strike Lv\. 3/);
+  assert.equal(await page.locator('#aeInfo .ae-card-slot').count(),3,'Three Specialty slots');
+  assert.equal(await page.locator('#aeInfo .ae-mperks li').count(),5,'All five perks');
+  assert.match(await plain(page,'#aeInfo .ae-card-status'),/On your skill bar/);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.isHidden('#aeInfo'),true,'Escape closes the card');
+  await page.click('.ae-mskill-grid [data-mastery="Rending Blow"]');
+  assert.match(await plain(page,'#aeInfoTitle'),/Rending Blow/);
+  await page.click('#aeInfo .ae-info-backdrop',{position:{x:5,y:5}});
+  assert.equal(await page.isHidden('#aeInfo'),true,'Tapping outside closes the card');
+  const box=await page.locator('.ae-mskill-grid [data-mastery="Rending Blow"]').boundingBox();
   assert.ok(Math.abs(box.width-box.height)<2,'Skill tiles are square, like the game');
   assert.equal(await style(page,'#aeMastery .ae-mskill','clip-path'),'none','No shared notched button skin on skill tiles');
+  await context.close();
+});
+
+await check('Mastery without a Daeva: every class skill as a game icon, key skills marked',async()=>{
+  const {page,context}=await open(ascent('class=cleric&role=healer&level=30','mastery'));
+  assert.equal(await page.locator('.ae-mskill-grid').first().locator('.ae-mskill').count(),12);
+  const srcs=await page.$$eval('.ae-mskill img',items=>items.map(el=>el.getAttribute('src')));
+  assert.equal(srcs.length,22,'An icon for every active and passive skill');
+  assert.ok(srcs.every(src=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_[A-Z]{2}_SKILL_/.test(src)),srcs.join());
+  assert.ok(await page.locator('.ae-mskill.is-key').count()>=3);
   await context.close();
 });
 
@@ -383,7 +403,10 @@ await check('guided screen: game window, tabs to every screen, guide lights up e
   assert.match(await plain(page,'.ae-guide'),/step 2 of 5.*Slot 2: equip Zikel's Blessing\./);
   assert.equal(await page.locator('.ae-guide-target').count(),1);
   assert.match(await page.getAttribute('[data-stigma="1"]','class'),/ae-guide-target/);
-  assert.match(await plain(page,'#aeStigmaDetail h3'),/Zikel's Blessing/,'The guide opens the slot it talks about');
+  assert.match(await page.getAttribute('[data-stigma="1"] img','src'),/ICON_GL_SKILL_040\.png$/,"Zikel's Blessing shows its game icon");
+  await page.click('[data-stigma="1"]');
+  assert.match(await plain(page,'#aeInfo'),/Zikel's Blessing.*Stigma · slot 2.*Slot open\. Equip it\./);
+  await page.keyboard.press('Escape');
   await page.click('[data-guide="next"]');
   assert.match(await plain(page,'.ae-guide'),/At Lv 32 slot 3 opens\. Put Rage Burst in it\./);
   await page.click('[data-guide="back"]');
@@ -399,7 +422,7 @@ await check('guided screen: game window, tabs to every screen, guide lights up e
 
 await check('stigma screen shows what is equipped now; macro screen shows how to bind it and the presets',async()=>{
   const stg=await open(ascent(ref,'stigma'),{live:true});
-  assert.match(await plain(stg.page,'#aeStigmaNow'),/Equipped now\s*No stigma equipped yet\./);
+  assert.match(await plain(stg.page,'#aeStigmaNow'),/Equipped now\s*None yet/);
   await stg.context.close();
   const mac=await open(ascent('class=gladiator&role=dps&level=30','macro'));
   assert.deepEqual(await mac.page.$$eval('#aeMacroBind .ae-crumbs li',items=>items.map(el=>el.textContent)),['Settings','Key Settings','General','Gameplay','Macro']);
