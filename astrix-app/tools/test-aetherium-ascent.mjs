@@ -185,6 +185,27 @@ await check('players stay on the site: no outbound links, no guide names on the 
   }
 });
 
+await check('Mastery: skill grid like the game, Specialty slots and perks for the picked skill',async()=>{
+  const {page,context}=await open(ascent(ref),{live:true});
+  await page.waitForSelector('#aeMastery .ae-mskill');
+  const order=await page.$$eval('#aeMastery .ae-mskill-grid:first-of-type .ae-mskill',items=>items.slice(0,3).map(el=>el.dataset.mastery));
+  assert.deepEqual(order,['Keen Strike','Rending Blow','Overhead Slam']);
+  assert.match(await plain(page,'#aeMastery [data-mastery="Keen Strike"] .ae-mskill-lv'),/Lv\. 3/);
+  // NCSOFT is blocked in tests, so the icon fails and the tile falls back to the skill's name.
+  await page.waitForFunction(()=>!document.querySelector('#aeMastery [data-mastery="Keen Strike"] img'));
+  assert.ok((await page.locator('#aeMastery [data-mastery="Keen Strike"] .ae-mskill-name').boundingBox()).width>0,'Name shows when the icon cannot load');
+  assert.match(await plain(page,'.ae-mspend'),/Keen Strike Lv 3 to 8 opens Specialty slot 1/);
+  assert.equal(await page.locator('.ae-mslots li').count(),3);
+  assert.match(await plain(page,'#aeMasteryDetail h3'),/Keen Strike Lv\. 3/);
+  await page.click('#aeMastery [data-mastery="Rending Blow"]');
+  assert.match(await plain(page,'#aeMasteryDetail h3'),/Rending Blow/);
+  assert.equal(await page.locator('#aeMastery .ae-mskill.is-selected').count(),1);
+  const box=await page.locator('#aeMastery [data-mastery="Rending Blow"]').boundingBox();
+  assert.ok(Math.abs(box.width-box.height)<2,'Skill tiles are square, like the game');
+  assert.equal(await style(page,'#aeMastery .ae-mskill','clip-path'),'none','No shared notched button skin on skill tiles');
+  await context.close();
+});
+
 await check('Daevanion planner: real board, numbered route, points budget remembered',async()=>{
   const {page,context,calls}=await open(ascent(ref),{live:true});
   await page.waitForSelector('.ae-board-grid');

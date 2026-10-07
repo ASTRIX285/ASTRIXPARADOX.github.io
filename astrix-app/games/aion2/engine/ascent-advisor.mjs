@@ -252,6 +252,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   const skills = planSkills(build, catalogue, lvl, model, facts);
   const stigmas = planStigmas(build, lvl, model, facts);
   const daevanion = planBoards(build, lvl, model, facts);
+  const mastery = planMastery(build, catalogue, lvl, model, facts);
   return {
     ...base,
     pending: null,
@@ -262,8 +263,70 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     stats: build.stats,
     rotation: planRotation(build.rotation, catalogue, lvl, stigmas),
     levelNotes: (build.levelNotes ?? []).filter(note => lvl <= note.to),
-    upcoming: upcoming(lvl, skills, stigmas, daevanion, facts)
+    upcoming: upcoming(lvl, skills, stigmas, daevanion, facts),
+    mastery
   };
+}
+
+/**
+ * The Mastery tab: every active and passive skill (from the armory when a Daeva is loaded, otherwise
+ * the build's key skills), each with its build priority, the Specialty picks for its three slots, all
+ * five perks, and where the next skill points should go.
+ */
+function planMastery(build, catalogue, level, model, facts) {
+  const slotLevels = specialtySlotLevels(facts);
+  const core = new Map((build.coreSkills ?? []).map(skill => [skill.name, skill]));
+  const picks = new Map((build.specialties ?? []).map(entry => [entry.skill, entry.picks]));
+  const goalOf = target => Number(/Lv\s*(\d+)/i.exec(target ?? '')?.[1]) || null;
+  const source = model
+    ? model.skills.filter(skill => skill.category !== 'Dp')
+    : [...core.values()].map(skill => ({ name: skill.name, category: 'Active', needLevel: catalogue.get(skill.name)?.unlockLevel ?? null, skillLevel: null, acquired: null, equipped: null, icon: null }));
+  const entries = source.map(skill => {
+    const info = catalogue.get(skill.name) ?? null;
+    const key = core.get(skill.name) ?? null;
+    const needLevel = Number.isInteger(skill.needLevel) ? skill.needLevel : null;
+    const skillLevel = skill.acquired ? skill.skillLevel : null;
+    const skillPicks = picks.get(skill.name) ?? [];
+    return {
+      name: skill.name,
+      icon: skill.icon ?? null,
+      category: skill.category === 'Passive' ? 'Passive' : 'Active',
+      needLevel,
+      unlocked: needLevel === null ? null : level >= needLevel,
+      acquired: skill.acquired,
+      equipped: skill.equipped,
+      skillLevel,
+      priority: key ? key.priority : null,
+      target: key?.target ?? null,
+      goal: goalOf(key?.target),
+      why: key?.why ?? null,
+      refs: key?.refs ?? [],
+      cooldownSeconds: info ? info.cooldownSeconds : null,
+      summary: info && !isPending(info.summary) ? info.summary : null,
+      perks: info && Array.isArray(info.specialties) ? info.specialties : [],
+      slots: slotLevels.map((slotLevel, index) => ({
+        slot: index + 1,
+        slotLevel,
+        open: skillLevel !== null && skillLevel >= slotLevel,
+        pick: skillPicks[index] ?? null
+      }))
+    };
+  });
+  const byPriority = (a, b) => (a.priority ?? 99) - (b.priority ?? 99) || (a.needLevel ?? 0) - (b.needLevel ?? 0);
+  const active = entries.filter(entry => entry.category === 'Active').sort(byPriority);
+  const passive = entries.filter(entry => entry.category === 'Passive').sort((a, b) => (a.needLevel ?? 0) - (b.needLevel ?? 0));
+  // Skill points: key skills you have, below their target, highest priority first. Each step aims for
+  // the next Specialty slot or the target, whichever comes first.
+  const spend = active
+    .filter(entry => entry.priority !== null && entry.unlocked !== false && entry.goal)
+    .map(entry => {
+      const from = entry.skillLevel ?? 1;
+      const nextSlot = slotLevels.find(slotLevel => slotLevel > from) ?? null;
+      const to = nextSlot ? Math.min(nextSlot, entry.goal) : entry.goal;
+      return { name: entry.name, from: entry.skillLevel, to, reason: nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : 'reaches the build target', priority: entry.priority };
+    })
+    .filter(step => step.from === null || step.from < step.to);
+  return { active, passive, spend, slotLevels, fromArmory: Boolean(model) };
 }
 
 /**

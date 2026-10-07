@@ -117,6 +117,31 @@ check('ASTRIX285: armory fixes first, then the build',()=>{
   assert.deepEqual(plan.now.map(item=>item.step),[1,2,3]);
 });
 
+check('Mastery: real skill levels, key skills first, points go to the next Specialty slot',()=>{
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
+  const m=plan.mastery;
+  assert.equal(m.fromArmory,true);
+  assert.deepEqual(m.active.slice(0,4).map(skill=>[skill.name,skill.priority,skill.skillLevel]),[['Keen Strike',1,3],['Rending Blow',2,3],['Overhead Slam',3,2],['Ruinous Blow',4,null]]);
+  assert.ok(m.passive.length>0,'Passive skills listed');
+  assert.ok(m.passive.every(skill=>skill.category==='Passive'));
+  assert.deepEqual(m.slotLevels,[8,12,20]);
+  assert.deepEqual(m.spend.map(step=>[step.name,step.from,step.to,step.reason]),[
+    ['Keen Strike',3,8,'opens Specialty slot 1'],['Rending Blow',3,8,'opens Specialty slot 1'],['Overhead Slam',2,8,'opens Specialty slot 1']]);
+  const keen=m.active[0];
+  assert.match(keen.icon??'',/^https:\/\//,'Game skill icon from the armory');
+  assert.equal(keen.slots.length,3);
+  assert.ok(keen.slots.every(slot=>slot.open===false),'Lv 3 has no slot open yet');
+});
+
+check('Mastery without a character: key skills from the guide, no invented levels',()=>{
+  const m=buildAscentPlan({className:'Cleric',role:'healer',level:30,data:data('Cleric')}).mastery;
+  assert.equal(m.fromArmory,false);
+  assert.ok(m.active.length>0);
+  assert.ok(m.active.every(skill=>skill.skillLevel===null&&skill.icon===null));
+  assert.ok(m.spend.length>0,'Still says where points go first');
+  assert.ok(m.spend.every(step=>step.from===null&&step.to===8),'No guessed current level, aim for the first slot');
+});
+
 check('ASTRIX285: skills show armory levels and the next Specialty slot',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
   const byName=Object.fromEntries(plan.skills.map(skill=>[skill.name,skill]));

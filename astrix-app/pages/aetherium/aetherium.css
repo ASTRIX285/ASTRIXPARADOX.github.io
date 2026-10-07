@@ -339,6 +339,40 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-route-list li[data-target="true"] strong{color:var(--ae-gold-hi)}
 .ae-route-list li span:last-child{display:grid;gap:2px;min-width:0}
 .ae-route-list small{color:var(--ae-muted);font-size:12px}
+/* Mastery, laid out like the game's Mastery tab: detail on the left, skill grid on the right. */
+.ae-mastery{margin:0 0 var(--ae-gap)}
+.ae-mspend{margin:0 0 16px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--ae-gold) 45%,var(--ae-navy-line));background:color-mix(in srgb,var(--ae-gold) 7%,transparent)}
+.ae-mspend ol{margin:6px 0 0;padding-left:22px;display:grid;gap:4px}
+.ae-mspend small{color:var(--ae-muted);margin-left:6px}
+.ae-mastery-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:start}
+.ae-mdetail{display:grid;gap:10px;align-content:start;padding:16px 18px;background:linear-gradient(180deg,#121b30,#0c1222);border:1px solid var(--ae-navy-line-strong)}
+.ae-mdetail-head{display:flex;gap:14px;align-items:center}
+.ae-mdetail-head img{border-radius:6px;border:1px solid var(--ae-navy-line-strong)}
+.ae-mdetail-head h3{margin:0;font:700 22px/1.2 var(--ax-font-head);color:var(--ae-ink)}
+.ae-mdetail-head h3 span{color:var(--ae-gold);font-size:18px}
+.ae-mdetail-head p{margin:2px 0 0}
+.ae-mdetail-summary{margin:0;font-size:14px;color:var(--ae-ink)}
+.ae-mslots{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.ae-mslots li{display:grid;gap:2px;padding:8px 12px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.ae-mslots li.is-open{border-color:color-mix(in srgb,var(--ae-gold) 55%,var(--ae-navy-line))}
+.ae-mslots li.is-locked{opacity:.8}
+.ae-mslots strong{font:700 15px/1.3 var(--ax-font-head);color:var(--ae-ink)}
+.ae-mslots small{color:var(--ae-muted);font-size:12px}
+.ae-mperks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:14px;color:var(--ae-muted)}
+.ae-mperks li{display:flex;gap:10px;align-items:baseline;padding:4px 8px}
+.ae-mperks li.is-pick{color:var(--ae-ink);background:color-mix(in srgb,var(--ae-gold) 10%,transparent);border-left:2px solid var(--ae-gold)}
+.ae-mskills{display:grid;gap:8px;align-content:start}
+.ae-mskills-title{margin:6px 0 0;padding:6px 10px;text-align:center;font:600 15px/1.2 var(--ax-font-head);color:var(--ae-ink);background:#1b2438;border:1px solid var(--ae-navy-line)}
+.ae-mskill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+body.aetherium-page .ae-mskill{position:relative;display:block;aspect-ratio:1;min-height:0;padding:0;overflow:hidden;clip-path:none!important;
+  background:#141b2b!important;border:1px solid #3a4560;border-radius:4px;box-shadow:none!important;cursor:pointer}
+.ae-mskill img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+.ae-mskill.is-locked img{filter:grayscale(1) brightness(.55)}
+.ae-mskill:focus-visible,.ae-mskill.is-selected{outline:2px solid var(--ae-gold);outline-offset:1px}
+.ae-mskill-name{display:grid;place-items:center;height:100%;padding:4px;font:600 11px/1.15 var(--ax-font-head);color:var(--ae-ink);text-align:center;overflow-wrap:anywhere;hyphens:auto}
+.ae-mskill-lv{position:absolute;right:3px;bottom:2px;font:700 11px/1 var(--ax-font-head);color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
+.ae-mskill-rank{position:absolute;left:3px;top:3px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:8px;display:grid;place-items:center;font:700 10px/1 var(--ax-font-head);background:var(--ae-gold);color:var(--ae-gold-ink)}
+@media (max-width:1099px){.ae-mastery-grid{grid-template-columns:minmax(0,1fr)}.ae-mskills{order:-1}}
 /* Game node art: the official sockets fill the tile; route state is a ring around them. */
 .ae-node:has(.ae-node-art){background:none;border:0;box-shadow:none;border-radius:18%}
 .ae-node-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
@@ -407,6 +441,11 @@ body.aetherium-page .ae-primary:disabled:not(#ax-p1):not(#ax-p2):not(#ax-p3):not
   background:linear-gradient(180deg,var(--ae-navy-raised),var(--ae-navy-panel))!important;color:var(--ae-dim)!important;box-shadow:inset 0 0 0 1px var(--ae-navy-line-strong)!important}
 body.aetherium-page :is(.ae-slot,.ae-roster-open,.ae-roster-add,.ae-result):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){
   clip-path:var(--ae-notch)!important;background:var(--ae-navy-raised)!important;box-shadow:var(--ae-bevel)!important;color:var(--ae-ink)!important}
+/* Mastery skill tiles are square game icons, not machined buttons. */
+body.aetherium-page .ae-mskill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
+  clip-path:none!important;border:1px solid #3a4560!important;border-radius:4px!important;background:#141b2b!important;box-shadow:none!important;padding:0!important;min-height:0!important;overflow:hidden!important}
+body.aetherium-page .ae-mskill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
+body.aetherium-page .ae-mskill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
 body.aetherium-page .ae-roster-add:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){background:transparent!important;color:var(--ae-muted)!important}
 body.aetherium-page .ae-slot[aria-pressed="true"]:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
   background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;

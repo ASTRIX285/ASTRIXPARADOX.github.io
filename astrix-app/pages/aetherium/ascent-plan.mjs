@@ -211,6 +211,78 @@ function writePoints(boardId, value) {
   } catch { /* storage blocked: the number lasts for this visit */ }
 }
 
+
+/* Mastery: laid out like the game's Mastery tab. Skill grid (Active, Passive) with levels and build
+   priority; the selected skill shows its three Specialty slots, the pick for each and all five perks. */
+const masteryState = { selected: null };
+
+function masteryTile(entry) {
+  const locked = entry.unlocked === false || entry.acquired === false;
+  return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.name === masteryState.selected ? ' is-selected' : ''}" data-mastery="${esc(entry.name)}" aria-label="${esc(entry.name)}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
+    <span class="ae-mskill-name">${esc(entry.name)}</span>
+    ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
+    ${entry.priority ? `<span class="ae-mskill-rank">${entry.priority}</span>` : ''}
+    <span class="ae-mskill-lv">${locked ? (entry.needLevel ? `Lv ${entry.needLevel}` : 'Locked') : entry.skillLevel !== null ? `Lv. ${entry.skillLevel}` : ''}</span>
+  </span>`;
+}
+
+function masteryDetail(mastery) {
+  const all = [...mastery.active, ...mastery.passive];
+  const entry = all.find(item => item.name === masteryState.selected) ?? mastery.active[0];
+  if (!entry) return '';
+  const slotLabel = slot => `Slot ${slot.slot} · skill Lv ${slot.slotLevel}`;
+  const pickedLevels = new Set(entry.slots.filter(slot => slot.pick).map(slot => `${slot.pick.skillLevel}|${slot.pick.pick}`));
+  const cd = typeof entry.cooldownSeconds === 'number' ? `${entry.cooldownSeconds} s` : entry.category === 'Active' ? 'No cooldown' : null;
+  return `<div class="ae-mdetail-head">
+      ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="64" height="64" referrerpolicy="no-referrer">` : ''}
+      <div><h3>${esc(entry.name)}${entry.skillLevel !== null ? ` <span>Lv. ${esc(entry.skillLevel)}</span>` : ''}</h3>
+      <p class="ae-muted">${esc(entry.category)}${entry.priority ? ` · build priority ${entry.priority}` : ' · not a key skill for this build'}${cd ? ` · ${esc(cd)}` : ''}</p></div>
+    </div>
+    ${entry.summary ? `<p class="ae-mdetail-summary">${esc(entry.summary)}</p>` : ''}
+    ${entry.why ? `<p class="ae-node-why"><b>Why:</b> ${esc(entry.why)}${entry.target ? ` Target: ${esc(entry.target)}.` : ''}</p>` : ''}
+    ${entry.category === 'Active' ? `
+      <p class="ae-slot-label">Specialty slots</p>
+      <ol class="ae-mslots">${entry.slots.map(slot => `<li class="${slot.open ? 'is-open' : 'is-locked'}">
+        <span class="ae-pick-level">${esc(slotLabel(slot))}</span>
+        <strong>${slot.pick ? esc(slot.pick.pick) : entry.priority ? 'Your choice' : 'Any'}</strong>
+        <small>${slot.open ? 'Open now' : entry.skillLevel !== null ? `Opens at skill Lv ${slot.slotLevel}` : `Opens at skill Lv ${slot.slotLevel}`}${slot.pick ? ` · perk from skill Lv ${slot.pick.skillLevel}` : ''}</small>
+      </li>`).join('')}</ol>
+      ${entry.perks.length ? `<p class="ae-slot-label">All 5 perks</p><ul class="ae-mperks">${entry.perks.map(perk => `<li${pickedLevels.has(`${perk.skillLevel}|${perk.text}`) || entry.slots.some(slot => slot.pick && slot.pick.skillLevel === perk.skillLevel && perk.text.toLowerCase().includes(slot.pick.pick.toLowerCase().split(' ')[0])) ? ' class="is-pick"' : ''}><span class="ae-pick-level">${esc(perk.skillLevel)}</span>${esc(perk.text)}</li>`).join('')}</ul>` : '<p class="ae-muted">This skill\'s perks are not in our data yet.</p>'}` : '<p class="ae-muted">Passive skills have no Specialty perks. Level them with spare points; Daevanion nodes add levels too.</p>'}`;
+}
+
+// A skill icon that fails to load drops away and leaves the skill's name on the tile.
+document.addEventListener('error', event => {
+  if (event.target instanceof HTMLImageElement && event.target.closest('.ae-mskill,.ae-mdetail-head')) event.target.remove();
+}, true);
+
+function selectMastery(skill) {
+  masteryState.selected = skill.dataset.mastery;
+  document.querySelectorAll('[data-mastery].is-selected').forEach(el => el.classList.remove('is-selected'));
+  skill.classList.add('is-selected');
+  $('#aeMasteryDetail').innerHTML = masteryDetail(state.plan.mastery);
+  // On a phone the detail sits under the grid, so bring it into view.
+  if (matchMedia('(max-width: 1099px)').matches) $('#aeMasteryDetail').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function renderMastery(plan) {
+  const m = plan.mastery;
+  if (!m) return '';
+  if (!masteryState.selected || ![...m.active, ...m.passive].some(item => item.name === masteryState.selected)) masteryState.selected = m.active[0]?.name ?? null;
+  return `<section class="ae-panel ae-mastery" id="aeMastery" aria-labelledby="aeMasteryTitle">
+    <h2 class="ae-section-title" id="aeMasteryTitle">Mastery <small>${m.fromArmory ? 'your skills' : `${esc(plan.className)} key skills`}</small></h2>
+    ${m.spend.length ? `<div class="ae-mspend"><p class="ae-slot-label">Spend your skill points</p><ol>${m.spend.map(step => `<li><b>${esc(step.name)}</b> ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`} <small>${esc(step.reason)}</small></li>`).join('')}</ol></div>` : ''}
+    <div class="ae-mastery-grid">
+      <div class="ae-mdetail" id="aeMasteryDetail" aria-live="polite">${masteryDetail(m)}</div>
+      <div class="ae-mskills">
+        <p class="ae-mskills-title">Active</p>
+        <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
+        ${m.passive.length ? `<p class="ae-mskills-title">Passive</p><div class="ae-mskill-grid">${m.passive.map(masteryTile).join('')}</div>` : ''}
+        ${m.fromArmory ? '' : '<p class="ae-muted">Find your Daeva to see every skill with its real icon and level.</p>'}
+      </div>
+    </div>
+  </section>`;
+}
+
 function renderPlannerShell(plan) {
   if (!state.model) {
     return `<section class="ae-panel ae-planner" id="aePlanner" aria-labelledby="aePlannerTitle">
@@ -395,6 +467,7 @@ function renderPlan() {
           <div class="ae-col">${renderBoards(plan)}${renderStats(plan)}${renderUpcoming(plan)}</div>
         </div>
       </div>
+      ${renderMastery(plan)}
       ${renderPlannerShell(plan)}
       `;
   }
@@ -444,12 +517,16 @@ function wireForm() {
   $('#aeLevel').addEventListener('change', levelChanged);
   $('#aeDaeva').addEventListener('click', event => { if (event.target.closest('[data-plan-by-hand]')) planByHand(); });
   $('#aePlan').addEventListener('click', event => {
+    const skill = event.target.closest('[data-mastery]');
+    if (skill) { selectMastery(skill); return; }
     const tab = event.target.closest('[data-board-tab]');
     if (tab) { showBoard(Number(tab.dataset.boardTab)).catch(fail); return; }
     const node = event.target.closest('[data-node],[data-route-node]');
     if (node) selectNode(node.dataset.node ?? node.dataset.routeNode);
   });
   $('#aePlan').addEventListener('keydown', event => {
+    const skill = event.target.closest?.('[data-mastery]');
+    if (skill && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectMastery(skill); return; }
     const node = event.target.closest?.('[data-node],[data-route-node]');
     if (node && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectNode(node.dataset.node ?? node.dataset.routeNode); }
   });
