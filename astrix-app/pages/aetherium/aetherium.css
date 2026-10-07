@@ -372,7 +372,7 @@ body.aetherium-page .ae-mskill{position:relative;display:block;aspect-ratio:1;mi
 .ae-mskill-name{display:grid;place-items:center;height:100%;padding:4px;font:600 11px/1.15 var(--ax-font-head);letter-spacing:0;color:var(--ae-ink);text-align:center;overflow-wrap:break-word;hyphens:auto}
 .ae-mskill-lv{position:absolute;right:3px;bottom:2px;font:700 11px/1 var(--ax-font-head);color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
 .ae-mskill-rank{position:absolute;left:3px;top:3px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:8px;display:grid;place-items:center;font:700 10px/1 var(--ax-font-head);background:var(--ae-gold);color:var(--ae-gold-ink)}
-@media (max-width:1099px){.ae-mastery-grid{grid-template-columns:minmax(0,1fr)}.ae-mskills{order:-1}}
+@media (max-width:1099px){.ae-mastery-grid{grid-template-columns:minmax(0,1fr)}}
 /* Ascent Plan menu and guided screens: the plan opens on cards like the game's menu; each card is its own
    page drawn like that game window, with a guide docked at the bottom that lights up what to do. */
 body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
@@ -521,7 +521,7 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 .ae-mskill-bar{left:auto;right:3px;top:3px;bottom:auto;width:16px;height:16px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:10px;line-height:1}
 .ae-mskill:has(.ae-mskill-bar) .ae-mskill-lv{top:auto;bottom:2px}
 .ae-legend-row{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ae-muted)}
-.ae-legend-row li{display:inline-flex;align-items:center;gap:6px}
+.ae-legend-row li{display:flex;align-items:center;gap:8px}
 .ae-legend-row .ae-mskill-rank,.ae-legend-row .ae-mskill-bar{position:static}
 .ae-icon-group{display:grid;gap:8px}
 body.aetherium-page .ae-itile.is-big:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important;width:72px;height:72px}
@@ -571,6 +571,23 @@ body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q
 .ae-card-slot small{font-size:11px;color:var(--ae-muted)}
 .ae-card-slot em{font-style:normal;font-size:12px;line-height:1.25;color:var(--ae-ink)}
 .ae-info .ae-mperks{font-size:13px}
+/* Locked skills and slots: grey icon, padlock and the character level that unlocks them, explained in the key. */
+.ae-lock{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 0;font:700 12px/1 var(--ax-font-head);color:#fff;background:rgba(0,0,0,.72)}
+.ae-lock svg{width:11px;height:11px;color:var(--ae-muted)}
+.ae-lock.is-key{position:static;display:inline-flex;white-space:nowrap;flex:0 0 auto;padding:3px 6px;border-radius:3px;background:#2a3142;font-size:11px}
+.ae-mskill-lv.is-key{position:static;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;box-sizing:border-box;background:#000;border:1px solid #3a4560;border-radius:3px;font:700 12px/1 var(--ax-font-head);color:#fff}
+.ae-mskill.is-locked img,.ae-stg-slot.is-locked img{filter:grayscale(1) brightness(.5)}
+.ae-legend-row{display:grid;gap:6px;font-size:13px}
+.ae-legend-row.is-centred{justify-content:center;justify-items:start}
+@media (min-width:900px){.ae-legend-row{display:flex}}
+.ae-guide-hide{position:absolute;right:4px;top:2px;width:32px;height:24px;display:grid;place-items:center;color:var(--ae-muted);cursor:pointer;font-size:14px}
+body.aetherium-page .ae-guide-hide:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:none!important;min-height:0!important;overflow:visible!important}
+body.aetherium-page .ae-guide-pill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent)!important;background:rgba(12,22,42,.97)!important;border-radius:20px!important;padding:0 14px!important;min-height:40px!important}
+.ae-guide-nav{margin-top:14px}
+.ae-guide-pill{display:none}
+.ae-guide.is-min{grid-template-columns:1fr;padding:0;background:none;border:0;box-shadow:none;justify-items:end;pointer-events:none}
+.ae-guide.is-min>*{display:none}
+.ae-guide.is-min .ae-guide-pill{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;pointer-events:auto;cursor:pointer;font:700 12px/1 var(--ax-font-head);letter-spacing:.12em;text-transform:uppercase;color:var(--ae-ice);background:rgba(12,22,42,.97);border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--ae-ice) 25%,transparent)}
 /* Game node art: the official sockets fill the tile; route state is a ring around them. */
 .ae-node:has(.ae-node-art){background:none;border:0;box-shadow:none;border-radius:18%}
 .ae-node-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
@@ -640,10 +657,10 @@ body.aetherium-page .ae-primary:disabled:not(#ax-p1):not(#ax-p2):not(#ax-p3):not
 body.aetherium-page :is(.ae-slot,.ae-roster-open,.ae-roster-add,.ae-result):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){
   clip-path:var(--ae-notch)!important;background:var(--ae-navy-raised)!important;box-shadow:var(--ae-bevel)!important;color:var(--ae-ink)!important}
 /* Mastery skill tiles and stigma slots are square game icons, not machined buttons. */
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
   clip-path:none!important;border:1px solid #3a4560!important;border-radius:4px!important;background:#141b2b!important;box-shadow:none!important;padding:0!important;min-height:0!important;overflow:hidden!important}
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
 body.aetherium-page .ae-stg-slot:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:transparent!important;overflow:visible!important}
 body.aetherium-page .ae-roster-add:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){background:transparent!important;color:var(--ae-muted)!important}
 body.aetherium-page .ae-slot[aria-pressed="true"]:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){

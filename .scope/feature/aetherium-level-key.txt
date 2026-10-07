@@ -1,0 +1,12 @@
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html
