@@ -117,22 +117,27 @@ function planStigmas(build, level, model, facts) {
   const slotLevels = facts['stigma-slots']?.value ?? [22, 27, 32, 37];
   const owned = model?.skills?.filter(skill => skill.category === 'Dp') ?? null;
   const acquired = owned ? owned.filter(skill => skill.acquired).map(skill => skill.name) : null;
+  const iconOf = name => owned?.find(skill => skill.name === name)?.icon ?? null;
   const slots = build.stigmas.slots.map((slot, index) => ({
     ...slot,
     slotLevel: slotLevels[index] ?? slot.slotLevel,
     open: level >= (slotLevels[index] ?? slot.slotLevel),
-    acquired: acquired ? acquired.includes(slot.name) : null
+    acquired: acquired ? acquired.includes(slot.name) : null,
+    equipped: owned ? Boolean(owned.find(skill => skill.name === slot.name)?.equipped) : null,
+    icon: iconOf(slot.name)
   }));
   return {
     unlockLevel: unlock,
     quest: facts['stigma-unlock']?.value?.quest ?? null,
     open: slots.filter(slot => slot.open).length,
     slots,
-    alternatives: build.stigmas.alternatives ?? [],
+    alternatives: (build.stigmas.alternatives ?? []).map(alt => ({ ...alt, icon: iconOf(alt.name) })),
     confidence: build.stigmas.confidence,
     note: build.stigmas.note ?? null,
     refs: build.stigmas.refs,
-    noneAcquired: acquired ? acquired.length === 0 : null
+    noneAcquired: acquired ? acquired.length === 0 : null,
+    // What the Daeva has equipped now (armory), so the page can say what to swap.
+    equippedNow: owned ? owned.filter(skill => skill.equipped).map(skill => ({ name: skill.name, icon: skill.icon ?? null })) : null
   };
 }
 
@@ -178,18 +183,18 @@ const enchantFix = slot => !slot.empty && slot.enchant === 0;
  */
 function nowList(level, build, skills, stigmas, boards, model) {
   const list = [];
-  const push = (rank, title, detail, refs = [], kind = 'build') => list.push({ rank, title, detail, refs, kind });
+  const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery') => list.push({ rank, title, detail, refs, kind, view });
 
   if (model) {
     const empty = model.gear.filter(slot => slot.empty);
-    if (empty.length) push(10, `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, [], 'armory');
+    if (empty.length) push(10, `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, [], 'armory', 'gear');
     const bare = model.gear.filter(enchantFix);
-    if (bare.length) push(30, `Enchant ${bare.length} worn ${bare.length === 1 ? 'item' : 'items'} above +0`, `Still at +0: ${bare.map(slot => slot.name).join(', ')}.`, [], 'armory');
+    if (bare.length) push(30, `Enchant ${bare.length} worn ${bare.length === 1 ? 'item' : 'items'} above +0`, `Still at +0: ${bare.map(slot => slot.name).join(', ')}.`, [], 'armory', 'gear');
     const openUnspent = boards.boards.filter(board => board.open && board.nodesTaken === 0);
-    if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory');
-    if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory');
+    if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion');
+    if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory', 'stigma');
     for (const skill of skills) {
-      if (skill.unlocked && skill.skillLevel !== null && skill.equipped === false) push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory');
+      if (skill.unlocked && skill.skillLevel !== null && skill.equipped === false) push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');
     }
   }
 
@@ -205,10 +210,10 @@ function nowList(level, build, skills, stigmas, boards, model) {
     const due = skill.picks.filter(pick => skill.skillLevel !== null && pick.skillLevel <= skill.skillLevel);
     if (due.length) push(45, `Pick ${skill.name} Specialty: ${due.map(pick => pick.pick).join(', ')}`, `Your ${skill.name} is Lv ${skill.skillLevel}, so ${due.length === 1 ? 'this perk is' : 'these perks are'} open.`, due.flatMap(pick => pick.refs));
   }
-  if (!stigmas.pending && stigmas.open) push(50, `Slot ${stigmas.slots.filter(slot => slot.open).map(slot => slot.name).join(', ')}`, `You have ${stigmas.open} stigma ${stigmas.open === 1 ? 'slot' : 'slots'} open at Lv ${level}.`, stigmas.refs);
+  if (!stigmas.pending && stigmas.open) push(50, `Slot ${stigmas.slots.filter(slot => slot.open).map(slot => slot.name).join(', ')}`, `You have ${stigmas.open} stigma ${stigmas.open === 1 ? 'slot' : 'slots'} open at Lv ${level}.`, stigmas.refs, 'build', 'stigma');
   if (!model) {
     const open = boards.boards.filter(board => board.open);
-    if (open.length && Array.isArray(boards.priorities)) push(55, `Daevanion: ${boards.priorities[0]}`, `Open boards at Lv ${level}: ${open.map(board => board.name).join(', ')}.`, boards.refs);
+    if (open.length && Array.isArray(boards.priorities)) push(55, `Daevanion: ${boards.priorities[0]}`, `Open boards at Lv ${level}: ${open.map(board => board.name).join(', ')}.`, boards.refs, 'build', 'daevanion');
   }
   return list.sort((a, b) => a.rank - b.rank).map(({ rank, ...item }, index) => ({ step: index + 1, ...item }));
 }
@@ -243,7 +248,9 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     sources: [...sourcesOf(build).values()],
     character: model ? { name: model.profile.name, level: model.profile.level, className: model.profile.class } : null,
     macroOrder: facts['macro-order'] ?? null,
-    specialtyRule: facts['specialty-perks'] ?? null
+    specialtyRule: facts['specialty-perks'] ?? null,
+    // The game's icon for each skill the armory lists (empty without a Daeva).
+    skillIcons: Object.fromEntries((model?.skills ?? []).filter(skill => skill.icon).map(skill => [skill.name, skill.icon]))
   };
   if (build.status === 'pending') {
     return { ...base, pending: build.build, now: [], skills: [], stigmas: { pending: build.build }, daevanion: planBoards({ daevanion: build.build }, lvl, model, facts), stats: build.build, rotation: build.build, upcoming: [] };

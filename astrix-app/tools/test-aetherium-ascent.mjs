@@ -96,7 +96,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
 const style=(page,selector,prop)=>page.$eval(selector,(el,p)=>getComputedStyle(el).getPropertyValue(p).trim(),prop);
 const GOLD='rgb(226, 181, 79)';
 const ref=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
-const ascent=(query='')=>`/hub/aetherium/ascent/${query?`?${query}`:''}`;
+const ascent=(query='',screen='')=>`/hub/aetherium/ascent/${screen?`${screen}/`:''}${query?`?${query}`:''}`;
+const SCREENS=['mastery','stigma','daevanion','macro','stats'];
 const plain=async(page,selector)=>(await page.textContent(selector)).replace(/\s+/g,' ').trim();
 
 await check('by hand: default Gladiator plan, no armory call, bookmarkable',async()=>{
@@ -110,8 +111,9 @@ await check('by hand: default Gladiator plan, no armory call, bookmarkable',asyn
   assert.match(await plain(page,'#aeNowTitle'),/at Lv 1/);
   assert.equal(await page.isVisible('#aeSource'),false,'No character source line by hand');
   assert.equal(await page.getAttribute('body','data-faction'),'astrix');
-  assert.equal(await page.locator('.ae-stigma-plan li').count(),4);
-  assert.equal(await page.locator('.ae-stigma-plan li.is-open').count(),0);
+  assert.deepEqual(await page.$$eval('.ae-menu-card',items=>items.map(el=>el.dataset.view)),[...SCREENS,'gear'],'A card per screen, like the game menu');
+  for(const screen of SCREENS)assert.equal(await page.getAttribute(`.ae-menu-card[data-view="${screen}"]`,'href'),`/hub/aetherium/ascent/${screen}/?class=gladiator&role=dps&level=1`,`${screen} card keeps the plan in its address`);
+  assert.match(await plain(page,'.ae-menu-card[data-view="stigma"] .ae-menu-status'),/Opens at Lv 22/);
   assert.deepEqual(errors,[]);
   await context.close();
 });
@@ -123,8 +125,7 @@ await check('class switch refills roles, main role first, and keeps the level',a
   assert.deepEqual(await page.$$eval('#aeRole option',items=>items.map(el=>el.value)),['support','healer','dps']);
   assert.equal(await page.inputValue('#aeRole'),'support');
   assert.match(page.url(),/class=chanter&role=support&level=30$/);
-  assert.match(await plain(page,'.ae-stigma-plan'),/Undefeated Mantra/);
-  assert.equal(await page.locator('.ae-stigma-plan li.is-open').count(),2,'Lv 30: two stigma slots');
+  assert.match(await plain(page,'.ae-menu-card[data-view="stigma"] .ae-menu-status'),/2 of 4 slots open/,'Lv 30: two stigma slots');
   await page.selectOption('#aeRole','healer');
   await page.waitForFunction(()=>location.search.includes('role=healer'));
   assert.match(await plain(page,'.ae-ascent-head'),/Defensive support/);
@@ -133,25 +134,29 @@ await check('class switch refills roles, main role first, and keeps the level',a
 
 await check('level change re-plans and clamps to the cap',async()=>{
   const {page,context}=await open(ascent('class=cleric&role=healer&level=5'));
-  assert.equal(await page.locator('.ae-board-plan li.is-open').count(),0);
+  assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Opens at Lv 12/);
   await page.fill('#aeLevel','99');
   await page.press('#aeLevel','Enter');
   await page.waitForFunction(()=>document.querySelector('#aeLevel').value==='45');
   assert.match(page.url(),/level=45$/);
-  assert.equal(await page.locator('.ae-board-plan li.is-open').count(),5,'All five boards open at 45');
-  assert.equal(await page.locator('.ae-stigma-plan li.is-open').count(),4);
+  assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/5 of 5 boards open/);
+  assert.match(await plain(page,'.ae-menu-card[data-view="stigma"] .ae-menu-status'),/4 of 4 slots open/);
+  assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/6 skills in Macro 1/);
+  await page.click('.ae-menu-card[data-view="macro"]');
+  await page.waitForFunction(()=>document.body.dataset.aeView==='macro'&&document.documentElement.dataset.aetheriumReady==='true');
+  assert.match(page.url(),/\/ascent\/macro\/\?class=cleric&role=healer&level=45$/,'The card opens its own page and keeps the level');
   assert.equal(await page.locator('.ae-macro-entry').count(),6,'All six Cleric macro skills usable at 45');
   assert.equal(await page.locator('.ae-macro-delay').count(),5,'A delay between each pair, like the game');
   await context.close();
 });
 
 await check('macro reads like the game: listed order, delay between, locked skills added later',async()=>{
-  const {page,context}=await open(ascent('class=gladiator&role=dps&level=5'));
+  const {page,context}=await open(ascent('class=gladiator&role=dps&level=5','macro'));
   assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Overhead Slam','Rending Blow']);
   assert.match(await plain(page,'.ae-macro-delay'),/Delay\s*10\s*ms/);
-  assert.match(await plain(page,'#aeMacroTitle ~ p'),/Add later: Ruinous Blow \(keep Prepare for Battle up\) \(Lv 14\), Rage Burst \(Lv 32\)/);
+  assert.deepEqual(await page.$$eval('#aeMacroLater li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Ruinous Blow (keep Prepare for Battle up) Lv 14','Rage Burst Lv 32']);
   assert.match(await plain(page,'.ae-macro-howto'),/runs its skills in the listed order/);
-  assert.doesNotMatch(await page.textContent('#aeMacroTitle ~ *'),/Check in game/);
+  assert.doesNotMatch(await page.textContent('.ae-gw-body'),/Check in game/);
   await context.close();
 });
 
@@ -174,8 +179,8 @@ await check('unknown role falls back to the main role with a note',async()=>{
 });
 
 await check('players stay on the site: no outbound links, no guide names on the page',async()=>{
-  for(const query of ['class=gladiator&role=dps&level=22','class=templar&role=tank&level=37','class=ranger&level=14',ref.toString()]){
-    const {page,context}=await open(ascent(query));
+  for(const [query,screen] of [['class=gladiator&role=dps&level=22',''],['class=templar&role=tank&level=37',''],['class=ranger&level=14',''],[ref.toString(),''],...SCREENS.map(screen=>['class=chanter&level=40',screen])]){
+    const {page,context}=await open(ascent(query,screen));
     const outbound=await page.$$eval('a[href]',links=>links.map(a=>a.href).filter(href=>!href.startsWith(location.origin)));
     assert.deepEqual(outbound,[],`${query}: links that leave the site`);
     const text=await page.textContent('body');
@@ -186,7 +191,7 @@ await check('players stay on the site: no outbound links, no guide names on the 
 });
 
 await check('Mastery: skill grid like the game, Specialty slots and perks for the picked skill',async()=>{
-  const {page,context}=await open(ascent(ref),{live:true});
+  const {page,context}=await open(ascent(ref,'mastery'),{live:true});
   await page.waitForSelector('#aeMastery .ae-mskill');
   const order=await page.$$eval('#aeMastery .ae-mskill-grid:first-of-type .ae-mskill',items=>items.slice(0,3).map(el=>el.dataset.mastery));
   assert.deepEqual(order,['Keen Strike','Rending Blow','Overhead Slam']);
@@ -195,6 +200,10 @@ await check('Mastery: skill grid like the game, Specialty slots and perks for th
   await page.waitForFunction(()=>!document.querySelector('#aeMastery [data-mastery="Keen Strike"] img'));
   assert.ok((await page.locator('#aeMastery [data-mastery="Keen Strike"] .ae-mskill-name').boundingBox()).width>0,'Name shows when the icon cannot load');
   assert.match(await plain(page,'.ae-mspend'),/Keen Strike Lv 3 to 8 opens Specialty slot 1/);
+  assert.equal(await page.getAttribute('[data-mastery="Keen Strike"]','data-equipped'),'true','Shows what is on the skill bar');
+  assert.match(await plain(page,'[data-mastery="Keen Strike"] .ae-mskill-bar'),/On bar/);
+  assert.equal(await page.locator('[data-mastery="Ruinous Blow"] .ae-mskill-bar').count(),0,'A locked skill is never shown as on the bar');
+  assert.match(await plain(page,'#aeMasteryDetail .ae-mbar'),/On your skill bar/);
   assert.equal(await page.locator('.ae-mslots li').count(),3);
   assert.match(await plain(page,'#aeMasteryDetail h3'),/Keen Strike Lv\. 3/);
   await page.click('#aeMastery [data-mastery="Rending Blow"]');
@@ -207,7 +216,7 @@ await check('Mastery: skill grid like the game, Specialty slots and perks for th
 });
 
 await check('Daevanion planner: real board, numbered route, points budget remembered',async()=>{
-  const {page,context,calls}=await open(ascent(ref),{live:true});
+  const {page,context,calls}=await open(ascent(ref,'daevanion'),{live:true});
   await page.waitForSelector('.ae-board-grid');
   assert.deepEqual(calls,['/aion2/character','/aion2/daevanion'],'One board call, for the open board only');
   assert.equal(await page.getAttribute('[data-board-tab="11"]','aria-selected'),'true');
@@ -249,9 +258,10 @@ await check('Daevanion planner: real board, numbered route, points budget rememb
 });
 
 await check('Daevanion planner without a Daeva points to the Daeva Card',async()=>{
-  const {page,context}=await open(ascent('class=cleric&level=30'));
-  assert.match(await plain(page,'#aePlanner'),/Find your Daeva first/);
-  assert.equal(await page.getAttribute('#aePlanner a','href'),'/hub/aetherium/');
+  const {page,context}=await open(ascent('class=cleric&level=30','daevanion'));
+  assert.equal(await page.locator('.ae-board-cards li.is-open').count(),3,'Lv 30: three boards open');
+  assert.match(await plain(page,'.ae-gw-body .ae-callout'),/Find your Daeva/);
+  assert.equal(await page.getAttribute('.ae-gw-body .ae-callout a','href'),'/hub/aetherium/');
   await context.close();
 });
 
@@ -265,10 +275,11 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await page.isDisabled('#aeRole'),false);
   assert.equal(await page.inputValue('#aeLevel'),'12');
   assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285, Gladiator Lv 12 on Meslamtaeda\./);
-  const steps=await page.$$eval('.ae-now-item strong',items=>items.map(el=>el.childNodes[0].textContent));
+  const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
   assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 7 worn items above +0','Level Overhead Slam (now Lv 2)']);
-  assert.equal(await page.locator('.ae-now-item[data-kind="armory"] .ae-tag').count(),2);
-  assert.match(await plain(page,'.ae-board-plan'),/Nezekan.*0 \/ 88 nodes/);
+  assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery'],'Each next move opens the screen that shows it');
+  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=/);
+  assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
   assert.match(page.url(),/serverId=1308&characterId=.*&role=dps$/);
   assert.equal(await style(page,'.ae-ascent-head .ae-eyebrow','color'),GOLD);
   await page.click('[data-plan-by-hand]');
@@ -315,6 +326,12 @@ await check('Daeva Card and Gear Ledger link to the Ascent Plan',async()=>{
 
 for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   await check(`looks at ${width}: no sideways scroll, clear of the header, fast`,async()=>{
+    for(const screen of SCREENS){
+      const {page,context}=await open(ascent('class=gladiator&role=dps&level=30',screen),{viewport:{width,height}});
+      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+      assert.ok(overflow<=0,`${screen} scrolls sideways by ${overflow}px`);
+      await context.close();
+    }
     for(const query of ['class=gladiator&role=dps&level=22',ref.toString()]){
       const started=Date.now();
       const {page,context}=await open(ascent(query),{viewport:{width,height}});
@@ -341,18 +358,70 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   });
 }
 
-await check('wide screens use the width: three plan columns at 1920, two at 1280',async()=>{
-  const lefts=async page=>page.$$eval('#aeNowTitle,#aeStigmaPlanTitle,#aeDaevTitle',items=>items.map(el=>Math.round(el.closest('.ae-panel').getBoundingClientRect().left)));
+await check('menu cards sit in one row on a wide screen, two columns on a phone',async()=>{
   const wide=await open(ascent(ref),{viewport:{width:1920,height:1000}});
-  const [now,stigma,daev]=await lefts(wide.page);
-  assert.ok(now<stigma&&stigma<daev,`three columns at 1920 (${now}, ${stigma}, ${daev})`);
-  const width=await wide.page.$eval('main',el=>el.getBoundingClientRect().width);
-  assert.ok(width>=1640,`content spans the screen at 1920 (${width}px)`);
+  const tops=await wide.page.$$eval('.ae-menu-card',items=>items.map(el=>Math.round(el.getBoundingClientRect().top)));
+  assert.equal(new Set(tops).size,1,`one row at 1920 (${tops})`);
   await wide.context.close();
-  const mid=await open(ascent(ref),{viewport:{width:1280,height:900}});
-  const [a,b,c]=await lefts(mid.page);
-  assert.ok(a<b&&b===c,`two columns at 1280 (${a}, ${b}, ${c})`);
-  await mid.context.close();
+  const phone=await open(ascent(ref),{viewport:{width:390,height:844}});
+  const lefts=await phone.page.$$eval('.ae-menu-card',items=>items.map(el=>Math.round(el.getBoundingClientRect().left)));
+  assert.equal(new Set(lefts).size,2,`two columns at 390 (${lefts})`);
+  await phone.context.close();
+});
+
+await check('guided screen: game window, tabs to every screen, guide lights up each step',async()=>{
+  const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=30','stigma'));
+  assert.equal(await page.isVisible('.ae-ascent-setup'),false,'The setup form stays on the menu');
+  assert.equal(await plain(page,'#aeScreenTitle'),'Stigma');
+  assert.deepEqual(await page.$$eval('.ae-gw-tabs a',items=>items.map(el=>[el.dataset.view,el.getAttribute('aria-current')])),SCREENS.map(screen=>[screen,screen==='stigma'?'page':null]));
+  assert.equal(await page.getAttribute('.ae-gw-back','href'),'/hub/aetherium/ascent/?class=gladiator&role=dps&level=30');
+  assert.equal(await page.locator('.ae-stg-slot').count(),4);
+  assert.equal(await page.locator('.ae-stg-slot.is-open').count(),2);
+  assert.match(await plain(page,'.ae-guide'),/step 1 of 5.*Slot 1: equip Lunge Stance\./);
+  assert.equal(await page.getAttribute('[data-stigma="0"]','class').then(c=>c.includes('ae-guide-target')),true,'Slot 1 lit up');
+  await page.click('[data-guide="next"]');
+  assert.match(await plain(page,'.ae-guide'),/step 2 of 5.*Slot 2: equip Zikel's Blessing\./);
+  assert.equal(await page.locator('.ae-guide-target').count(),1);
+  assert.match(await page.getAttribute('[data-stigma="1"]','class'),/ae-guide-target/);
+  assert.match(await plain(page,'#aeStigmaDetail h3'),/Zikel's Blessing/,'The guide opens the slot it talks about');
+  await page.click('[data-guide="next"]');
+  assert.match(await plain(page,'.ae-guide'),/At Lv 32 slot 3 opens\. Put Rage Burst in it\./);
+  await page.click('[data-guide="back"]');
+  assert.match(await plain(page,'.ae-guide'),/step 2 of 5/);
+  const box=await page.locator('.ae-guide').boundingBox();
+  assert.ok(box.y+box.height<=1000,'The guide stays on screen');
+  for(let i=0;i<3;i++)await page.click('[data-guide="next"]');
+  assert.match(await plain(page,'.ae-guide [data-guide="menu"]'),/Done/);
+  await Promise.all([page.waitForURL(/\/ascent\/\?class=gladiator&role=dps&level=30$/),page.click('[data-guide="menu"]')]);
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('stigma screen shows what is equipped now; macro screen shows how to bind it and the presets',async()=>{
+  const stg=await open(ascent(ref,'stigma'),{live:true});
+  assert.match(await plain(stg.page,'#aeStigmaNow'),/Equipped now\s*No stigma equipped yet\./);
+  await stg.context.close();
+  const mac=await open(ascent('class=gladiator&role=dps&level=30','macro'));
+  assert.deepEqual(await mac.page.$$eval('#aeMacroBind .ae-crumbs li',items=>items.map(el=>el.textContent)),['Settings','Key Settings','General','Gameplay','Macro']);
+  assert.match(await plain(mac.page,'#aeMacroBind'),/Side mouse button.*Hold it in fights\. Let go and the macro stops\./);
+  assert.equal(await mac.page.locator('#aeMacroPresets .ae-preset-row li').count(),3);
+  assert.match(await plain(mac.page,'#aeMacroPresets'),/Each of your 3 skill presets keeps its own macro/);
+  for(let i=0;i<8&&!/Now give the macro a key/.test(await plain(mac.page,'.ae-guide'));i++)await mac.page.click('[data-guide="next"]');
+  assert.match(await plain(mac.page,'.ae-guide'),/Now give the macro a key: Settings, Key Settings, General, Gameplay, Macro\./);
+  assert.match(await mac.page.getAttribute('#aeMacroBind','class'),/ae-guide-target/);
+  await mac.context.close();
+});
+
+await check('every screen opens with a guide and no errors',async()=>{
+  for(const screen of SCREENS){
+    const {page,context,errors}=await open(ascent(ref,screen),{live:true});
+    await page.waitForSelector('.ae-guide:not([hidden])');
+    assert.match(await plain(page,'.ae-guide-count'),/^Guide · step 1 of \d+$/,`${screen} guide`);
+    assert.equal(await page.locator('.ae-guide-target').count(),1,`${screen}: one thing lit up`);
+    assert.equal(await page.getAttribute('body','data-faction'),'elyos');
+    assert.deepEqual(errors,[],`${screen} errors`);
+    await context.close();
+  }
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));

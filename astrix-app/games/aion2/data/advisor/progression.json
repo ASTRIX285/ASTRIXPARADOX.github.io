@@ -318,7 +318,8 @@
         "Pick a macro slot (1, 2 or 3) and press Add Macro",
         "Add the skills in the order shown here",
         "Leave Delay at 10 ms",
-        "Put the macro on a key and hold it in fights"
+        "Bind the macro to a key or mouse button: Settings, Key Settings, General, Gameplay, then Macro",
+        "Hold that key in fights. Let go and the macro stops"
       ],
       "provenance": [
         {
@@ -350,8 +351,42 @@
           "gameVersion": "global launch (Oct 2026)",
           "where": "Skill > Stigma > Macro window",
           "note": "Entries are numbered 1, 2, and so on with a Delay (ms) box between each pair, 10 ms by default, and an Add Macro button; macro slots 1 to 3. Settles the order question: listed order."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "a2g-macro",
+          "title": "AION 2 macro guide",
+          "publisher": "aion2guide.org",
+          "url": "https://aion2guide.org/systems/aion-2-macro-guide/",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-macro",
+          "title": "AION 2 macros: setup, delay and presets",
+          "publisher": "gamerstogether.cz",
+          "url": "https://gamerstogether.cz/en/aion-2-macros/",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "bind": {
+        "path": [
+          "Settings",
+          "Key Settings",
+          "General",
+          "Gameplay",
+          "Macro"
+        ],
+        "defaultKey": null,
+        "mouse": true,
+        "hold": true,
+        "presets": 3,
+        "presetNote": "Each of your 3 skill presets keeps its own macro, so set it up again on every preset you use."
+      }
     }
   ]
 }
