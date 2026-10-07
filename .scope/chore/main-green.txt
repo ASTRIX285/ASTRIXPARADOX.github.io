@@ -1,0 +1,4 @@
+# Main green (6 Oct 2026): three stale tests updated to match the current pages.
+astrix-app/tools/test-hub-redirect.mjs
+astrix-app/tools/test-mobile-shell.mjs
+astrix-app/tools/validate-tools-hub.mjs

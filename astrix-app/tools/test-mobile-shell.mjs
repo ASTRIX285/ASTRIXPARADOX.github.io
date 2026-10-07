@@ -36,8 +36,11 @@ try{
       window.FORGE_BUNGIE_SESSION={authenticated:true,activeDestinyMembership:{membershipType:3,membershipId:'4611686018000000001'}};
       if(refresh==='registered')window.FORGE_REFRESH=()=>new Promise(done=>setTimeout(()=>{window.refreshed=(window.refreshed||0)+1;done();},300));
       if(refresh==='button'){const button=document.createElement('button');button.className='apx-data-refresh';button.textContent='Refresh';button.addEventListener('click',()=>{window.proxied=(window.proxied||0)+1;button.setAttribute('aria-busy','true');setTimeout(()=>button.setAttribute('aria-busy','false'),300);});document.querySelector('header').append(button);}
+      // Journey imports the Bungie auth module, which builds the header control. Scripts are stripped
+      // here, so load it directly (it used to arrive only as a side effect of the ribbon warming Reports).
+      await import('/astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs');
       const {renderGuardianCharacterCards}=await import('/astrix-app/pages/guardian-workspace-v2/guardian-character-cards.mjs');
-      // The card module's auth import publishes an offline session; restore the fixture account.
+      // The auth import publishes an offline session; restore the fixture account.
       await new Promise(done=>setTimeout(done,50));
       window.FORGE_BUNGIE_SESSION={authenticated:true,activeDestinyMembership:{membershipType:3,membershipId:'4611686018000000001'}};
       renderGuardianCharacterCards(['Hunter','Warlock','Titan'].map((characterClass,i)=>({characterId:String(i+1),characterClass,power:550,emblem:{background:''},stats:[]})),'2');
