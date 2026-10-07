@@ -1,0 +1,230 @@
+{
+  "description": "Ranger skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "ranger-skill-icons",
+      "class": "Ranger",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Snipe",
+          "icon": "ICON_RA_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Tempest Shot",
+          "icon": "ICON_RA_SKILL_034.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Snare Shot",
+          "icon": "ICON_RA_SKILL_013.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Marking Shot",
+          "icon": "ICON_RA_SKILL_031.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Drill Dart",
+          "icon": "ICON_RA_SKILL_005.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Arrow Scattershot",
+          "icon": "ICON_RA_SKILL_033.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Gale Arrow",
+          "icon": "ICON_RA_SKILL_011.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Explosion Trap",
+          "icon": "ICON_RA_SKILL_017.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Burst Arrow",
+          "icon": "ICON_RA_SKILL_008.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Suppressing Arrow",
+          "icon": "ICON_RA_SKILL_007.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Deadshot",
+          "icon": "ICON_RA_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Vigilant Eye",
+          "icon": "ICON_RA_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Concentrated Fire",
+          "icon": "ICON_RA_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Wind Vigor",
+          "icon": "ICON_RA_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Focused Eye",
+          "icon": "ICON_RA_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Hunter's Resolve",
+          "icon": "ICON_RA_SKILL_Passive_011.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Unyielding Resolve",
+          "icon": "ICON_RA_SKILL_Passive_012.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Rooting Eye",
+          "icon": "ICON_RA_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Melee Fire",
+          "icon": "ICON_RA_SKILL_Passive_013.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Revitalization Contract",
+          "icon": "ICON_AS_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Hunter's Soul",
+          "icon": "ICON_RA_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Arrow Storm",
+          "icon": "ICON_RA_SKILL_026.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Vaizel's Authority",
+          "icon": "ICON_RA_SKILL_022.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Bow of Blessing",
+          "icon": "ICON_RA_SKILL_030.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Ambush Kick",
+          "icon": "ICON_RA_SKILL_012.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Ensnaring Trap",
+          "icon": "ICON_RA_SKILL_018.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Illusory Arrow",
+          "icon": "ICON_RA_SKILL_015.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Stealth",
+          "icon": "ICON_RA_SKILL_019.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Sealing Arrow",
+          "icon": "ICON_RA_SKILL_016.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Mother Nature's Breath",
+          "icon": "ICON_RA_SKILL_035.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Griffon Arrow",
+          "icon": "ICON_RA_SKILL_006.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Explosive Arrow",
+          "icon": "ICON_RA_SKILL_023.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Smite",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Supporting Fire",
+          "icon": "ICON_RA_SKILL_038.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

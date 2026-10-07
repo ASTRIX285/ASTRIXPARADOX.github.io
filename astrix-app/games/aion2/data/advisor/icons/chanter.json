@@ -1,0 +1,230 @@
+{
+  "description": "Chanter skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "chanter-skill-icons",
+      "class": "Chanter",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Onslaught",
+          "icon": "ICON_CH_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Incandescent Blow",
+          "icon": "ICON_CH_SKILL_004.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Rushing Smash",
+          "icon": "ICON_CH_SKILL_009.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Impactful Crush",
+          "icon": "ICON_CH_SKILL_006.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Dark Crush",
+          "icon": "ICON_CH_SKILL_010.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Gust Rampage",
+          "icon": "ICON_CH_SKILL_030.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Heat Wave Blow",
+          "icon": "ICON_CH_SKILL_015.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Recuperation",
+          "icon": "ICON_CH_SKILL_013.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Tremor Crush",
+          "icon": "ICON_CH_SKILL_021.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Wave Blow",
+          "icon": "ICON_CH_SKILL_008.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Spinning Strike",
+          "icon": "ICON_CH_SKILL_029.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Blessing of Life",
+          "icon": "ICON_CH_SKILL_Passive_012.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Crossguard",
+          "icon": "ICON_CH_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Protection Circle",
+          "icon": "ICON_CH_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Inspiring Spell",
+          "icon": "ICON_CH_SKILL_Passive_011.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Attack Preparation",
+          "icon": "ICON_GL_SKILL_Passive_005.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Impact Hit",
+          "icon": "ICON_GL_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Raging Spell",
+          "icon": "ICON_CH_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Earth's Promise",
+          "icon": "ICON_CH_SKILL_Passive_010.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Survival Willpower",
+          "icon": "ICON_GL_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Wind's Promise",
+          "icon": "ICON_CH_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Obliterate",
+          "icon": "ICON_CH_SKILL_022.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Undefeated Mantra",
+          "icon": "ICON_CH_SKILL_019.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Focused Defense",
+          "icon": "ICON_CH_SKILL_014.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Sprint Mantra",
+          "icon": "ICON_CH_SKILL_016.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Fracturing Blow",
+          "icon": "ICON_CH_SKILL_043.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Marchutan's Wrath",
+          "icon": "ICON_CH_SKILL_033.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Impeding Authority",
+          "icon": "ICON_CH_SKILL_024.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Ensnaring Mark",
+          "icon": "ICON_CH_SKILL_023.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Healing Touch",
+          "icon": "ICON_CH_SKILL_017.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Power of the Storm",
+          "icon": "ICON_CH_SKILL_025.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Guardian Blessing",
+          "icon": "ICON_CH_SKILL_042.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Shock",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Barrier Spell",
+          "icon": "ICON_CH_SKILL_044.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

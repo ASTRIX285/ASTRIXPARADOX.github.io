@@ -111,13 +111,13 @@ function planSkills(build, catalogue, level, model, facts) {
 }
 
 /** Stigma slots open at this level, with the build's pick for each. */
-function planStigmas(build, level, model, facts) {
+function planStigmas(build, level, model, facts, gameIcons = new Map()) {
   if (isPending(build.stigmas)) return { pending: build.stigmas };
   const unlock = facts['stigma-unlock']?.value?.level ?? 22;
   const slotLevels = facts['stigma-slots']?.value ?? [22, 27, 32, 37];
   const owned = model?.skills?.filter(skill => skill.category === 'Dp') ?? null;
   const acquired = owned ? owned.filter(skill => skill.acquired).map(skill => skill.name) : null;
-  const iconOf = name => owned?.find(skill => skill.name === name)?.icon ?? null;
+  const iconOf = name => owned?.find(skill => skill.name === name)?.icon ?? gameIcons.get(name)?.icon ?? null;
   const slots = build.stigmas.slots.map((slot, index) => ({
     ...slot,
     slotLevel: slotLevels[index] ?? slot.slotLevel,
@@ -218,6 +218,13 @@ function nowList(level, build, skills, stigmas, boards, model) {
   return list.sort((a, b) => a.rank - b.rank).map(({ rank, ...item }, index) => ({ step: index + 1, ...item }));
 }
 
+/** name -> { name, icon (full URL), category, needLevel } from data/advisor/icons/<class>.json. */
+function iconIndex(icons, className) {
+  const record = (icons?.records ?? []).find(item => item.class === className);
+  if (!record) return new Map();
+  return new Map(record.skills.map(skill => [skill.name, { ...skill, icon: `${record.iconBase}${skill.icon}` }]));
+}
+
 /**
  * The full Ascent Plan.
  * @param {object} input
@@ -230,6 +237,7 @@ function nowList(level, build, skills, stigmas, boards, model) {
 export function buildAscentPlan({ className, role, level, data, model = null }) {
   if (!AION2_CLASSES.includes(className)) throw new TypeError(`Unknown AION 2 class: ${className}`);
   const facts = indexProgression(data.progression);
+  const gameIcons = iconIndex(data.icons, className);
   const lvl = clampLevel(model?.profile?.level ?? level ?? 1, data.progression);
   const roles = rolesFor(data.builds);
   const build = pickBuild(data.builds, role);
@@ -250,16 +258,16 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     macroOrder: facts['macro-order'] ?? null,
     specialtyRule: facts['specialty-perks'] ?? null,
     // The game's icon for each skill the armory lists (empty without a Daeva).
-    skillIcons: Object.fromEntries((model?.skills ?? []).filter(skill => skill.icon).map(skill => [skill.name, skill.icon]))
+    skillIcons: { ...Object.fromEntries([...gameIcons.values()].map(skill => [skill.name, skill.icon])), ...Object.fromEntries((model?.skills ?? []).filter(skill => skill.icon).map(skill => [skill.name, skill.icon])) }
   };
   if (build.status === 'pending') {
     return { ...base, pending: build.build, now: [], skills: [], stigmas: { pending: build.build }, daevanion: planBoards({ daevanion: build.build }, lvl, model, facts), stats: build.build, rotation: build.build, upcoming: [] };
   }
   const catalogue = skillIndex(data.skills, className);
   const skills = planSkills(build, catalogue, lvl, model, facts);
-  const stigmas = planStigmas(build, lvl, model, facts);
+  const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
   const daevanion = planBoards(build, lvl, model, facts);
-  const mastery = planMastery(build, catalogue, lvl, model, facts);
+  const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons);
   return {
     ...base,
     pending: null,
@@ -280,14 +288,17 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
  * the build's key skills), each with its build priority, the Specialty picks for its three slots, all
  * five perks, and where the next skill points should go.
  */
-function planMastery(build, catalogue, level, model, facts) {
+function planMastery(build, catalogue, level, model, facts, gameIcons = new Map()) {
   const slotLevels = specialtySlotLevels(facts);
   const core = new Map((build.coreSkills ?? []).map(skill => [skill.name, skill]));
   const picks = new Map((build.specialties ?? []).map(entry => [entry.skill, entry.picks]));
   const goalOf = target => Number(/Lv\s*(\d+)/i.exec(target ?? '')?.[1]) || null;
   const source = model
     ? model.skills.filter(skill => skill.category !== 'Dp')
-    : [...core.values()].map(skill => ({ name: skill.name, category: 'Active', needLevel: catalogue.get(skill.name)?.unlockLevel ?? null, skillLevel: null, acquired: null, equipped: null, icon: null }));
+    : gameIcons.size
+      // No Daeva: every class skill from the armory list, like the game's Mastery tab, levels unknown.
+      ? [...gameIcons.values()].filter(skill => skill.category !== 'Stigma').map(skill => ({ name: skill.name, category: skill.category, needLevel: skill.needLevel, skillLevel: null, acquired: null, equipped: null, icon: skill.icon }))
+      : [...core.values()].map(skill => ({ name: skill.name, category: 'Active', needLevel: catalogue.get(skill.name)?.unlockLevel ?? null, skillLevel: null, acquired: null, equipped: null, icon: null }));
   const entries = source.map(skill => {
     const info = catalogue.get(skill.name) ?? null;
     const key = core.get(skill.name) ?? null;

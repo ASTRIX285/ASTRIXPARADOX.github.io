@@ -1,0 +1,230 @@
+{
+  "description": "Assassin skills and stigmas with the game icon file, category and unlock level, read from the public EU armory skill list.",
+  "records": [
+    {
+      "id": "assassin-skill-icons",
+      "class": "Assassin",
+      "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "skills": [
+        {
+          "name": "Quick Slice",
+          "icon": "ICON_AS_SKILL_001.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Savage Roar",
+          "icon": "ICON_AS_SKILL_009.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Shadowstrike",
+          "icon": "ICON_AS_SKILL_007.png",
+          "category": "Active",
+          "needLevel": 1
+        },
+        {
+          "name": "Ambush",
+          "icon": "ICON_AS_SKILL_006.png",
+          "category": "Active",
+          "needLevel": 3
+        },
+        {
+          "name": "Heart Gore",
+          "icon": "ICON_AS_SKILL_035.png",
+          "category": "Active",
+          "needLevel": 4
+        },
+        {
+          "name": "Storm Rampage",
+          "icon": "ICON_AS_SKILL_034.png",
+          "category": "Active",
+          "needLevel": 5
+        },
+        {
+          "name": "Whirlwind Slice",
+          "icon": "ICON_AS_SKILL_019.png",
+          "category": "Active",
+          "needLevel": 7
+        },
+        {
+          "name": "Flash Slice",
+          "icon": "ICON_AS_SKILL_005.png",
+          "category": "Active",
+          "needLevel": 8
+        },
+        {
+          "name": "Infiltrate",
+          "icon": "ICON_AS_SKILL_036.png",
+          "category": "Active",
+          "needLevel": 10
+        },
+        {
+          "name": "Shadow Fall",
+          "icon": "ICON_AS_SKILL_020.png",
+          "category": "Active",
+          "needLevel": 12
+        },
+        {
+          "name": "Insignia Explosion",
+          "icon": "ICON_AS_SKILL_013.png",
+          "category": "Active",
+          "needLevel": 14
+        },
+        {
+          "name": "Defiance",
+          "icon": "ICON_CO_SKILL_002.png",
+          "category": "Active",
+          "needLevel": 16
+        },
+        {
+          "name": "Heightened Sixth Sense",
+          "icon": "ICON_AS_SKILL_Passive_001.png",
+          "category": "Passive",
+          "needLevel": 1
+        },
+        {
+          "name": "Exploit Weakness",
+          "icon": "ICON_AS_SKILL_Passive_002.png",
+          "category": "Passive",
+          "needLevel": 6
+        },
+        {
+          "name": "Apply Poison",
+          "icon": "ICON_AS_SKILL_Passive_003.png",
+          "category": "Passive",
+          "needLevel": 9
+        },
+        {
+          "name": "Rear Smite",
+          "icon": "ICON_AS_SKILL_Passive_004.png",
+          "category": "Passive",
+          "needLevel": 11
+        },
+        {
+          "name": "Assault Stance",
+          "icon": "ICON_AS_SKILL_Passive_006.png",
+          "category": "Passive",
+          "needLevel": 13
+        },
+        {
+          "name": "Impact Hit",
+          "icon": "ICON_AS_SKILL_Passive_011.png",
+          "category": "Passive",
+          "needLevel": 15
+        },
+        {
+          "name": "Ambush Stance",
+          "icon": "ICON_AS_SKILL_Passive_007.png",
+          "category": "Passive",
+          "needLevel": 17
+        },
+        {
+          "name": "Defense Break",
+          "icon": "ICON_AS_SKILL_Passive_008.png",
+          "category": "Passive",
+          "needLevel": 21
+        },
+        {
+          "name": "Revitalization Contract",
+          "icon": "ICON_AS_SKILL_Passive_009.png",
+          "category": "Passive",
+          "needLevel": 23
+        },
+        {
+          "name": "Determination",
+          "icon": "ICON_AS_SKILL_Passive_010.png",
+          "category": "Passive",
+          "needLevel": 25
+        },
+        {
+          "name": "Savage Fang",
+          "icon": "ICON_AS_SKILL_025.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Swift Contract",
+          "icon": "ICON_AS_SKILL_037.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Smoke Bomb",
+          "icon": "ICON_AS_SKILL_023.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Evasion Stance",
+          "icon": "ICON_AS_SKILL_024.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Spiral Slice",
+          "icon": "ICON_AS_SKILL_022.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Shadow Walk",
+          "icon": "ICON_AS_SKILL_016.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Throw Shadowblade",
+          "icon": "ICON_AS_SKILL_031.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Triniel's Dagger",
+          "icon": "ICON_AS_SKILL_028.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Aerial Bind",
+          "icon": "ICON_AS_SKILL_026.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Illusive Clone",
+          "icon": "ICON_AS_SKILL_029.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Evasion Contract",
+          "icon": "ICON_AS_SKILL_039.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Assault Ambush",
+          "icon": "ICON_CO_SKILL_003.png",
+          "category": "Stigma",
+          "needLevel": 22
+        },
+        {
+          "name": "Shadowstep",
+          "icon": "ICON_AS_SKILL_014.png",
+          "category": "Stigma",
+          "needLevel": 22
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-07"
+        }
+      ]
+    }
+  ]
+}

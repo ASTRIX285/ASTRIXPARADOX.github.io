@@ -18,7 +18,8 @@ const json=path=>JSON.parse(readFileSync(new URL(path,root),'utf8'));
 const progression=json('games/aion2/data/advisor/progression.json');
 const skills=json('games/aion2/data/advisor/skills.json');
 const builds=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/builds/${name.toLowerCase()}.json`)]));
-const data=name=>({progression,skills,builds:builds[name]});
+const icons=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/icons/${name.toLowerCase()}.json`)]));
+const data=name=>({progression,skills,builds:builds[name],icons:icons[name]});
 
 let failed=0;
 const check=(name,fn)=>{try {fn();console.log(`  ok   ${name}`);} catch(error){failed++;console.log(`  FAIL ${name}\n${error.stack}`);}};
@@ -133,6 +134,17 @@ check('Mastery: real skill levels, key skills first, points go to the next Speci
   assert.ok(keen.slots.every(slot=>slot.open===false),'Lv 3 has no slot open yet');
 });
 
+check('Every class has all 35 skills with icons, and every build pick has an icon',()=>{
+  for(const name of AION2_CLASSES){
+    const record=icons[name].records[0];
+    assert.equal(record.skills.length,35,name);
+    const plan=buildAscentPlan({className:name,level:45,data:data(name)});
+    if(plan.pending)continue;
+    for(const slot of plan.stigmas.slots??[])assert.ok(slot.icon,`${name} stigma ${slot.name}`);
+    for(const entry of plan.mastery.active.filter(item=>item.priority))assert.ok(entry.icon,`${name} key skill ${entry.name}`);
+  }
+});
+
 check('Each next move names the screen that shows it; stigmas carry the game icon',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
   assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery']);
@@ -141,15 +153,19 @@ check('Each next move names the screen that shows it; stigmas carry the game ico
   assert.match(plan.skillIcons['Keen Strike']??'',/^https:\/\//);
   const hand=buildAscentPlan({className:'Chanter',level:30,data:data('Chanter')});
   assert.ok(hand.now.every(item=>['mastery','stigma','daevanion','gear'].includes(item.view)));
-  assert.ok(hand.stigmas.slots.every(slot=>slot.icon===null),'No icon without a Daeva');
-  assert.deepEqual(hand.skillIcons,{});
+  assert.ok(hand.stigmas.slots.every(slot=>/ICON_CH_SKILL_\d+\.png$/.test(slot.icon??'')),'Stigma icons for every class, Daeva or not');
+  assert.equal(Object.keys(hand.skillIcons).length,35);
 });
 
 check('Mastery without a character: key skills from the guide, no invented levels',()=>{
   const m=buildAscentPlan({className:'Cleric',role:'healer',level:30,data:data('Cleric')}).mastery;
   assert.equal(m.fromArmory,false);
   assert.ok(m.active.length>0);
-  assert.ok(m.active.every(skill=>skill.skillLevel===null&&skill.icon===null));
+  assert.ok(m.active.every(skill=>skill.skillLevel===null),'No guessed levels');
+  assert.equal(m.active.length,12,'Every Cleric active, like the game');
+  assert.equal(m.passive.length,10);
+  assert.ok([...m.active,...m.passive].every(skill=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_/.test(skill.icon)),'Game icon on every skill without a Daeva');
+  assert.ok(m.active.filter(skill=>skill.priority).length>=3,'Key skills ranked');
   assert.ok(m.spend.length>0,'Still says where points go first');
   assert.ok(m.spend.every(step=>step.from===null&&step.to===8),'No guessed current level, aim for the first slot');
 });

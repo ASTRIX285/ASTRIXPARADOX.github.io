@@ -163,7 +163,7 @@ function renderMenu(plan) {
   const questCard = item => `<li><a class="ae-quest" href="${esc(viewHref(item.view))}" data-quest-view="${esc(item.view)}">
       <span class="ae-quest-art" data-fallback="${esc(item.view)}">${item.view === 'gear' ? ICON.gear : viewArt(item.view, plan)}</span>
       <span class="ae-quest-num">${item.step}</span>
-      <span class="ae-quest-text"><strong>${esc(item.title)}</strong><small>${esc(item.detail)}</small></span>
+      <span class="ae-quest-text"><strong>${esc(item.title)}</strong></span>
       <span class="ae-quest-go">Show me</span>
     </a></li>`;
   return `
@@ -176,14 +176,12 @@ function renderMenu(plan) {
         <span class="ae-menu-art" data-fallback="${view}">${viewArt(view, plan)}</span>
         <span class="ae-menu-name">${esc(info.title)}</span>
         <span class="ae-menu-status">${esc(viewStatus(view, plan))}</span>
-        <span class="ae-menu-blurb">${esc(info.blurb)}</span>
         ${todo(view) ? `<span class="ae-menu-badge" aria-label="${todo(view)} to do">${todo(view)}</span>` : ''}
       </a>`).join('')}
       <a class="ae-menu-card is-gear" href="${esc(viewHref('gear'))}" data-view="gear">
         <span class="ae-menu-art">${ICON.gear}</span>
         <span class="ae-menu-name">Gear</span>
         <span class="ae-menu-status">${plan.character ? 'Your worn items' : 'Find your Daeva'}</span>
-        <span class="ae-menu-blurb">What to upgrade first, slot by slot</span>
         ${todo('gear') ? `<span class="ae-menu-badge" aria-label="${todo('gear')} to do">${todo('gear')}</span>` : ''}
       </a>
     </nav>
@@ -210,39 +208,97 @@ function gameWindow(view, plan, body) {
 function renderStigmaScreen(plan) {
   const s = plan.stigmas;
   if (s.pending) return pendingNote(s.pending);
-  if (stigmaState.selected === null || !s.slots[stigmaState.selected]) stigmaState.selected = Math.max(0, s.slots.findIndex(slot => slot.open));
-  const slot = (item, index) => `<span class="ae-stg-slot ${item.open ? 'is-open' : 'is-locked'}${index === stigmaState.selected ? ' is-selected' : ''}" role="button" tabindex="0" data-stigma="${index}" aria-label="Slot ${index + 1}: ${esc(item.name)}${item.open ? '' : `, opens at Lv ${item.slotLevel}`}">
-      <span class="ae-stg-label">Slot ${index + 1}</span>
-      <span class="ae-stg-face"><span class="ae-stg-name">${esc(item.name)}</span>${art(item.icon)}${item.open ? '' : `<span class="ae-stg-lock">Lv ${esc(item.slotLevel)}</span>`}${item.equipped ? '<span class="ae-stg-on">Equipped</span>' : ''}</span>
+  const slot = (item, index) => `<span class="ae-stg-slot ${item.open ? 'is-open' : 'is-locked'}" role="button" tabindex="0" data-stigma="${index}" data-tip="${esc(item.name)}" aria-label="Slot ${index + 1}: ${esc(item.name)}${item.open ? '' : `, opens at Lv ${item.slotLevel}`}">
+      <span class="ae-stg-label">${index + 1}</span>
+      <span class="ae-stg-face"><span class="ae-stg-name">${esc(item.name)}</span>${art(item.icon)}${item.open ? '' : `<span class="ae-stg-lock">Lv ${esc(item.slotLevel)}</span>`}${item.equipped ? '<span class="ae-stg-on" aria-hidden="true">✓</span>' : ''}</span>
     </span>`;
+  const keep = name => s.slots.some(item => item.name === name);
   const now = s.equippedNow;
-  const nowRow = now === null ? '' : `<div class="ae-stg-now" id="aeStigmaNow"><p class="ae-mskills-title">Equipped now</p>${now.length
-    ? `<ul class="ae-chiplist">${now.map(item => `<li class="${s.slots.some(slotItem => slotItem.name === item.name) ? 'is-keep' : 'is-swap'}">${art(item.icon)}<span>${esc(item.name)} <b>${s.slots.some(slotItem => slotItem.name === item.name) ? 'Keep' : 'Swap out'}</b></span></li>`).join('')}</ul>`
-    : '<p class="ae-muted">No stigma equipped yet.</p>'}</div>`;
   return `<div class="ae-stg">
-    <p class="ae-stg-caption">Slot these</p>
     <div class="ae-stg-row">${s.slots.map(slot).join('')}</div>
-    ${nowRow}
-    <div class="ae-stg-detail" id="aeStigmaDetail">${stigmaDetail(plan)}</div>
-    ${s.alternatives.length ? `<div class="ae-stg-alts"><p class="ae-mskills-title">Swap options</p><div class="ae-stg-alt-row">${s.alternatives.map(alt => `<span class="ae-stg-alt" data-alt="${esc(alt.name)}"><span class="ae-stg-face"><span class="ae-stg-name">${esc(alt.name)}</span>${art(alt.icon)}</span><span><strong>${esc(alt.name)}</strong><small>${esc(alt.why)}</small></span></span>`).join('')}</div></div>` : ''}
+    <div class="ae-stg-lower">
+      ${now === null ? '' : `<div class="ae-icon-group" id="aeStigmaNow"><p class="ae-mskills-title">Equipped now</p>${now.length
+        ? `<div class="ae-icon-row">${now.map(item => iconTile(item.name, item.icon, { badge: keep(item.name) ? '✓' : '✕', tone: keep(item.name) ? 'keep' : 'swap', attr: `data-stigma-now="${esc(item.name)}"`, tip: `${item.name}: ${keep(item.name) ? 'keep' : 'swap out'}` })).join('')}</div>`
+        : '<p class="ae-empty">None yet</p>'}</div>`}
+      ${s.alternatives.length ? `<div class="ae-icon-group"><p class="ae-mskills-title">Swaps</p><div class="ae-icon-row">${s.alternatives.map(alt => iconTile(alt.name, alt.icon, { attr: `data-alt="${esc(alt.name)}"` })).join('')}</div></div>` : ''}
+    </div>
   </div>`;
 }
-const stigmaState = { selected: null };
-function stigmaDetail(plan) {
+function stigmaCard(plan, index) {
   const s = plan.stigmas;
-  const item = s.slots[stigmaState.selected];
-  if (!item) return '';
-  const status = item.equipped ? 'Equipped. Keep it.' : item.open ? (item.acquired === false ? 'Slot open. You still need this stigma.' : 'Slot open now. Equip it.') : `This slot opens at Lv ${item.slotLevel}.`;
-  return `<div class="ae-mdetail-head">${art(item.icon)}<div><h3>${esc(item.name)}</h3><p class="ae-muted">Slot ${stigmaState.selected + 1} · ${esc(status)}</p></div></div>
-    <p class="ae-muted">${esc(CONFIDENCE[s.confidence] ?? '')}</p>
-    ${plan.level < s.unlockLevel && s.quest ? `<p class="ae-node-why">Stigmas open at Lv ${esc(s.unlockLevel)} with the quest ${esc(s.quest)}.</p>` : ''}`;
+  const item = s.slots[index];
+  const status = item.equipped ? ['keep', 'Equipped. Keep it.'] : item.open ? (item.acquired === false ? ['need', 'Slot open. Get this stigma first.'] : ['go', 'Slot open. Equip it.']) : ['lock', `Slot opens at Lv ${item.slotLevel}.`];
+  return infoCardHtml({ icon: item.icon, title: item.name, sub: `Stigma · slot ${index + 1}`, status, lines: [
+    plan.level < s.unlockLevel && s.quest ? `Stigmas open at Lv ${s.unlockLevel} with the quest ${s.quest}.` : null,
+    CONFIDENCE[s.confidence] ?? null
+  ] });
+}
+function altCard(plan, name) {
+  const alt = plan.stigmas.alternatives.find(item => item.name === name);
+  return alt ? infoCardHtml({ icon: alt.icon, title: alt.name, sub: 'Stigma · swap option', lines: [alt.why] }) : '';
 }
 function selectStigma(el) {
-  stigmaState.selected = Number(el.dataset.stigma);
-  document.querySelectorAll('[data-stigma].is-selected').forEach(item => item.classList.remove('is-selected'));
-  el.classList.add('is-selected');
-  $('#aeStigmaDetail').innerHTML = stigmaDetail(state.plan);
+  openInfo(stigmaCard(state.plan, Number(el.dataset.stigma)), el);
 }
+
+/* Icon tiles and the info card: names show on hover (or long-press), details on click, like the game. */
+function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, big = false } = {}) {
+  return `<span class="ae-itile${big ? ' is-big' : ''}${tone ? ` is-${tone}` : ''}" role="button" tabindex="0" data-tip="${esc(tip ?? name)}" aria-label="${esc(tip ?? name)}" ${attr}>
+    <span class="ae-itile-name">${esc(name)}</span>${art(icon)}${badge ? `<span class="ae-itile-badge">${esc(badge)}</span>` : ''}
+  </span>`;
+}
+function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '' }) {
+  return `<div class="ae-card-head">
+      <span class="ae-card-icon">${art(icon) || ICON.stigma}</span>
+      <div><h3 id="aeInfoTitle">${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
+    </div>
+    ${status ? `<p class="ae-card-status is-${status[0]}">${esc(status[1])}</p>` : ''}
+    ${chips.length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : ''}
+    ${lines.filter(Boolean).map(line => `<p class="ae-card-line">${esc(line)}</p>`).join('')}
+    ${body}`;
+}
+let infoReturn = null;
+function openInfo(html, from) {
+  let box = $('#aeInfo');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'aeInfo';
+    box.className = 'ae-info';
+    box.innerHTML = '<div class="ae-info-backdrop" data-info-close></div><div class="ae-info-card" role="dialog" aria-modal="true" aria-labelledby="aeInfoTitle" tabindex="-1"><span class="ae-info-close" role="button" tabindex="0" data-info-close aria-label="Close">×</span><div id="aeInfoBody"></div></div>';
+    document.body.append(box);
+    box.addEventListener('click', event => { if (event.target.closest('[data-info-close]')) closeInfo(); });
+    document.addEventListener('keydown', event => {
+      if (box.hidden) return;
+      if (event.key === 'Escape' || ((event.key === 'Enter' || event.key === ' ') && event.target.closest?.('[data-info-close]'))) { event.preventDefault(); closeInfo(); }
+    });
+  }
+  $('#aeInfoBody').innerHTML = html;
+  box.hidden = false;
+  infoReturn = from ?? null;
+  box.querySelector('.ae-info-card').focus();
+}
+function closeInfo() {
+  const box = $('#aeInfo');
+  if (!box || box.hidden) return;
+  box.hidden = true;
+  infoReturn?.focus?.();
+}
+// One floating name label for every [data-tip] tile (mouse hover or keyboard focus).
+function showTip(el) {
+  let tip = $('#aeTip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'aeTip'; tip.className = 'ae-tip'; tip.setAttribute('role', 'tooltip'); document.body.append(tip); }
+  tip.textContent = el.dataset.tip;
+  tip.hidden = false;
+  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  tip.style.left = `${Math.max(6, Math.min(innerWidth - t.width - 6, r.left + r.width / 2 - t.width / 2))}px`;
+  tip.style.top = `${r.top - t.height - 8 < 4 ? r.bottom + 8 : r.top - t.height - 8}px`;
+}
+function hideTip() { const tip = $('#aeTip'); if (tip) tip.hidden = true; }
+document.addEventListener('pointerover', event => { const el = event.target.closest?.('[data-tip]'); if (el && event.pointerType === 'mouse') showTip(el); });
+document.addEventListener('pointerout', event => { if (event.target.closest?.('[data-tip]')) hideTip(); });
+document.addEventListener('focusin', event => { const el = event.target.closest?.('[data-tip]'); if (el) showTip(el); });
+document.addEventListener('focusout', hideTip);
+addEventListener('scroll', hideTip, { passive: true });
 
 function renderMacroScreen(plan) {
   const r = plan.rotation;
@@ -314,7 +370,7 @@ function guideSteps(view, plan) {
   if (plan.pending) return [{ text: 'This role has no confirmed build yet. Go back to the plan and pick the main role.', target: '.ae-gw-back' }];
   if (view === 'mastery') {
     const m = plan.mastery;
-    const pick = name => () => { const el = document.querySelector(`[data-mastery="${CSS.escape(name)}"]`); if (el) selectMastery(el, false); };
+    const pick = () => {};
     for (const entry of m.active.filter(item => item.priority && item.equipped === false && item.acquired)) add(`${entry.name} is a key skill but it is not on your skill bar. Drag it onto your bar in game.`, `[data-mastery="${CSS.escape(entry.name)}"]`, pick(entry.name));
     for (const step of m.spend.slice(0, 3)) add(`Put skill points into ${step.name}${step.from !== null ? `: Lv ${step.from} to ${step.to}` : ` up to Lv ${step.to}`}. That ${step.reason}.`, `[data-mastery="${CSS.escape(step.name)}"]`, pick(step.name));
     for (const skill of plan.skills) {
@@ -324,11 +380,11 @@ function guideSteps(view, plan) {
     if (!steps.length) {
       for (const entry of m.active.filter(item => item.priority).slice(0, 3)) add(`Key skill ${entry.priority}: ${entry.name}. ${entry.why ?? ''}`.trim(), `[data-mastery="${CSS.escape(entry.name)}"]`, pick(entry.name));
     }
-    add('Tap any skill to see its three Specialty slots and all five perks.', '.ae-mskills');
+    add('Tap any skill for its card: what it does, its Specialty slots and perks.', '.ae-mskills');
   } else if (view === 'stigma') {
     const s = plan.stigmas;
     if (s.pending) return [];
-    const pick = index => () => { const el = document.querySelector(`[data-stigma="${index}"]`); if (el) selectStigma(el); };
+    const pick = () => () => {};
     if (plan.level < s.unlockLevel) add(`Stigmas open at Lv ${s.unlockLevel}${s.quest ? ` with the quest ${s.quest}` : ''}. Slot 1 gets ${s.slots[0].name} first.`, '[data-stigma="0"]', pick(0));
     else if (s.noneAcquired) add(`You have no stigma yet. Finish ${s.quest ?? 'the stigma quest'} to get your first one.`, '[data-stigma="0"]', pick(0));
     const extra = (s.equippedNow ?? []).filter(item => !s.slots.some(slot => slot.name === item.name));
@@ -430,44 +486,60 @@ function writePoints(boardId, value) {
 }
 
 
-/* Mastery: laid out like the game's Mastery tab. Skill grid (Active, Passive) with levels and build
-   priority; the selected skill shows its three Specialty slots, the pick for each and all five perks. */
-const masteryState = { selected: null };
-
+/* Mastery: laid out like the game's Mastery tab. Icons only, names on hover; tap a skill for its
+   card: level, cooldown, what it does, why it matters, the three Specialty slots and all five perks. */
 function masteryTile(entry) {
   const locked = entry.unlocked === false || entry.acquired === false;
-  return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.name === masteryState.selected ? ' is-selected' : ''}" data-mastery="${esc(entry.name)}"${entry.equipped === true && !locked ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${entry.equipped === true && !locked ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
+  const onBar = entry.equipped === true && !locked;
+  const offBar = entry.equipped === false && entry.priority && !locked;
+  return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.priority ? ' is-key' : ''}" data-mastery="${esc(entry.name)}" data-tip="${esc(entry.name)}"${onBar ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${onBar ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
     <span class="ae-mskill-name">${esc(entry.name)}</span>
     ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
     ${entry.priority ? `<span class="ae-mskill-rank">${entry.priority}</span>` : ''}
-    ${entry.equipped === true && !locked ? '<span class="ae-mskill-bar" title="On your skill bar">On bar</span>' : entry.equipped === false && entry.priority && !locked ? '<span class="ae-mskill-bar is-off" title="Not on your skill bar">Not on bar</span>' : ''}
-    <span class="ae-mskill-lv">${locked ? (entry.needLevel ? `Lv ${entry.needLevel}` : 'Locked') : entry.skillLevel !== null ? `Lv. ${entry.skillLevel}` : ''}</span>
+    ${onBar ? '<span class="ae-mskill-bar" aria-hidden="true">●</span>' : offBar ? '<span class="ae-mskill-bar is-off" aria-hidden="true">!</span>' : ''}
+    <span class="ae-mskill-lv">${locked ? (entry.needLevel ? `Lv ${entry.needLevel}` : '') : entry.skillLevel !== null ? `${entry.skillLevel}` : ''}</span>
   </span>`;
 }
 
-function masteryDetail(mastery) {
-  const all = [...mastery.active, ...mastery.passive];
-  const entry = all.find(item => item.name === masteryState.selected) ?? mastery.active[0];
-  if (!entry) return '';
-  const slotLabel = slot => `Slot ${slot.slot} · skill Lv ${slot.slotLevel}`;
-  const pickedLevels = new Set(entry.slots.filter(slot => slot.pick).map(slot => `${slot.pick.skillLevel}|${slot.pick.pick}`));
-  const cd = typeof entry.cooldownSeconds === 'number' ? `${entry.cooldownSeconds} s` : entry.category === 'Active' ? 'No cooldown' : null;
-  return `<div class="ae-mdetail-head">
-      ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="64" height="64" referrerpolicy="no-referrer">` : ''}
-      <div><h3>${esc(entry.name)}${entry.skillLevel !== null ? ` <span>Lv. ${esc(entry.skillLevel)}</span>` : ''}</h3>
-      <p class="ae-muted">${esc(entry.category)}${entry.priority ? ` · build priority ${entry.priority}` : ' · not a key skill for this build'}${cd ? ` · ${esc(cd)}` : ''}</p>
-      ${entry.category === 'Active' && entry.acquired && entry.equipped !== null && entry.equipped !== undefined ? `<p class="ae-mbar ${entry.equipped ? 'is-on' : 'is-off'}">${entry.equipped ? 'On your skill bar' : entry.priority ? 'Not on your skill bar. Drag it onto your bar in game.' : 'Not on your skill bar'}</p>` : ''}</div>
+function masteryCard(entry) {
+  const pickOf = perk => entry.slots.some(slot => slot.pick && slot.pick.skillLevel === perk.skillLevel && perk.text.toLowerCase().includes(slot.pick.pick.toLowerCase().split(' ')[0]));
+  const cd = typeof entry.cooldownSeconds === 'number' ? `${entry.cooldownSeconds} s cooldown` : null;
+  const locked = entry.unlocked === false || entry.acquired === false;
+  const status = locked ? ['lock', `Unlocks at Lv ${entry.needLevel}`]
+    : entry.category === 'Active' && entry.acquired && entry.equipped === false && entry.priority ? ['need', 'Not on your skill bar. Drag it on.']
+    : entry.equipped === true ? ['keep', 'On your skill bar'] : null;
+  const specialty = entry.category !== 'Active' ? '' : `
+    <div class="ae-card-slots">${entry.slots.map(slot => `<span class="ae-card-slot ${slot.open ? 'is-open' : 'is-locked'}"><b>${slot.slot}</b><small>Lv ${slot.slotLevel}</small><em>${esc(slot.pick ? slot.pick.pick : 'Free pick')}</em></span>`).join('')}</div>
+    ${entry.perks.length ? `<ul class="ae-mperks">${entry.perks.map(perk => `<li${pickOf(perk) ? ' class="is-pick"' : ''}><span class="ae-pick-level">${esc(perk.skillLevel)}</span>${esc(perk.text)}</li>`).join('')}</ul>` : ''}`;
+  return infoCardHtml({
+    icon: entry.icon, title: entry.name, level: entry.skillLevel,
+    sub: `${entry.category}${entry.priority ? ` · key skill ${entry.priority}` : ''}`,
+    status,
+    chips: [cd, entry.target ? `Target: ${entry.target}` : null],
+    lines: [entry.summary, entry.why],
+    body: specialty
+  });
+}
+
+function selectMastery(skill) {
+  const m = state.plan.mastery;
+  const entry = [...m.active, ...m.passive].find(item => item.name === skill.dataset.mastery);
+  if (entry) openInfo(masteryCard(entry), skill);
+}
+
+function renderMastery(plan) {
+  const m = plan.mastery;
+  if (!m) return '';
+  const icons = Object.fromEntries([...m.active, ...m.passive].map(entry => [entry.name, entry.icon]));
+  return `<div class="ae-mastery" id="aeMastery">
+    ${m.spend.length ? `<div class="ae-icon-group ae-mspend" id="aeMasterySpend"><p class="ae-mskills-title">Level these next</p><div class="ae-icon-row">${m.spend.map(step => iconTile(step.name, icons[step.name], { big: true, badge: step.from !== null ? `${step.from}→${step.to}` : `→${step.to}`, attr: `data-mastery="${esc(step.name)}"`, tip: `${step.name}: ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`}` })).join('')}</div></div>` : ''}
+    <div class="ae-mskills">
+      <p class="ae-mskills-title">Active</p>
+      <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
+      ${m.passive.length ? `<p class="ae-mskills-title">Passive</p><div class="ae-mskill-grid">${m.passive.map(masteryTile).join('')}</div>` : ''}
+      <ul class="ae-legend-row" aria-label="Key"><li><span class="ae-mskill-rank">1</span>Key skill</li>${m.fromArmory ? '<li><span class="ae-mskill-bar">●</span>On your bar</li><li><span class="ae-mskill-bar is-off">!</span>Not on your bar</li>' : '<li><a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a> for your levels</li>'}</ul>
     </div>
-    ${entry.summary ? `<p class="ae-mdetail-summary">${esc(entry.summary)}</p>` : ''}
-    ${entry.why ? `<p class="ae-node-why"><b>Why:</b> ${esc(entry.why)}${entry.target ? ` Target: ${esc(entry.target)}.` : ''}</p>` : ''}
-    ${entry.category === 'Active' ? `
-      <p class="ae-slot-label">Specialty slots</p>
-      <ol class="ae-mslots">${entry.slots.map(slot => `<li class="${slot.open ? 'is-open' : 'is-locked'}">
-        <span class="ae-pick-level">${esc(slotLabel(slot))}</span>
-        <strong>${slot.pick ? esc(slot.pick.pick) : entry.priority ? 'Your choice' : 'Any'}</strong>
-        <small>${slot.open ? 'Open now' : entry.skillLevel !== null ? `Opens at skill Lv ${slot.slotLevel}` : `Opens at skill Lv ${slot.slotLevel}`}${slot.pick ? ` · perk from skill Lv ${slot.pick.skillLevel}` : ''}</small>
-      </li>`).join('')}</ol>
-      ${entry.perks.length ? `<p class="ae-slot-label">All 5 perks</p><ul class="ae-mperks">${entry.perks.map(perk => `<li${pickedLevels.has(`${perk.skillLevel}|${perk.text}`) || entry.slots.some(slot => slot.pick && slot.pick.skillLevel === perk.skillLevel && perk.text.toLowerCase().includes(slot.pick.pick.toLowerCase().split(' ')[0])) ? ' class="is-pick"' : ''}><span class="ae-pick-level">${esc(perk.skillLevel)}</span>${esc(perk.text)}</li>`).join('')}</ul>` : '<p class="ae-muted">This skill\'s perks are not in our data yet.</p>'}` : '<p class="ae-muted">Passive skills have no Specialty perks. Level them with spare points; Daevanion nodes add levels too.</p>'}`;
+  </div>`;
 }
 
 // A game icon that fails to load drops away: tiles fall back to the skill's name, menu cards to our own glyph.
@@ -478,34 +550,6 @@ document.addEventListener('error', event => {
   if (holder?.dataset.fallback && ICON[holder.dataset.fallback]) holder.innerHTML = ICON[holder.dataset.fallback];
   else if (!img.classList.contains('ae-node-art')) img.remove();
 }, true);
-
-function selectMastery(skill, scroll = true) {
-  masteryState.selected = skill.dataset.mastery;
-  document.querySelectorAll('[data-mastery].is-selected').forEach(el => el.classList.remove('is-selected'));
-  skill.classList.add('is-selected');
-  $('#aeMasteryDetail').innerHTML = masteryDetail(state.plan.mastery);
-  // On a phone the detail sits under the grid, so bring it into view.
-  if (scroll && matchMedia('(max-width: 1099px)').matches) $('#aeMasteryDetail').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-
-function renderMastery(plan) {
-  const m = plan.mastery;
-  if (!m) return '';
-  if (!masteryState.selected || ![...m.active, ...m.passive].some(item => item.name === masteryState.selected)) masteryState.selected = m.active[0]?.name ?? null;
-  return `<div class="ae-mastery" id="aeMastery">
-    ${m.spend.length ? `<div class="ae-mspend"><p class="ae-slot-label">Spend your skill points</p><ol>${m.spend.map(step => `<li><b>${esc(step.name)}</b> ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`} <small>${esc(step.reason)}</small></li>`).join('')}</ol></div>` : ''}
-    <div class="ae-mastery-grid">
-      <div class="ae-mdetail" id="aeMasteryDetail" aria-live="polite">${masteryDetail(m)}</div>
-      <div class="ae-mskills">
-        <p class="ae-mskills-title">Active</p>
-        <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
-        ${m.passive.length ? `<p class="ae-mskills-title">Passive</p><div class="ae-mskill-grid">${m.passive.map(masteryTile).join('')}</div>` : ''}
-        ${m.fromArmory ? '<p class="ae-muted ae-mlegend"><span class="ae-mskill-bar">On bar</span> is on your skill bar now. The armory does not say which key each skill sits on.</p>' : ''}
-        ${m.fromArmory ? '' : '<p class="ae-callout">Find your Daeva to see every skill with its real icon and level. <a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a></p>'}
-      </div>
-    </div>
-  </div>`;
-}
 
 function renderPlannerShell(plan) {
   if (!state.model) return renderBoardsByHand(plan);
@@ -737,6 +781,10 @@ function wireForm() {
     if (skill) { selectMastery(skill); return; }
     const stigma = event.target.closest('[data-stigma]');
     if (stigma) { selectStigma(stigma); return; }
+    const alt = event.target.closest('[data-alt]');
+    if (alt) { openInfo(altCard(state.plan, alt.dataset.alt), alt); return; }
+    const worn = event.target.closest('[data-stigma-now]');
+    if (worn) { const name = worn.dataset.stigmaNow; const keep = state.plan.stigmas.slots.some(item => item.name === name); openInfo(infoCardHtml({ icon: state.plan.skillIcons[name], title: name, sub: 'Stigma · equipped now', status: keep ? ['keep', 'In the build. Keep it.'] : ['need', 'Not in the build. Swap it out.'] }), worn); return; }
     const step = event.target.closest('[data-guide]');
     if (step) {
       if (step.dataset.guide === 'menu') location.assign(viewHref('menu'));
@@ -751,8 +799,8 @@ function wireForm() {
   $('#aePlan').addEventListener('keydown', event => {
     const skill = event.target.closest?.('[data-mastery]');
     if (skill && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectMastery(skill); return; }
-    const stigma = event.target.closest?.('[data-stigma]');
-    if (stigma && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectStigma(stigma); return; }
+    const tile = event.target.closest?.('[data-stigma],[data-alt],[data-stigma-now]');
+    if (tile && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); tile.click(); return; }
     const node = event.target.closest?.('[data-node],[data-route-node]');
     if (node && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectNode(node.dataset.node ?? node.dataset.routeNode); }
   });
