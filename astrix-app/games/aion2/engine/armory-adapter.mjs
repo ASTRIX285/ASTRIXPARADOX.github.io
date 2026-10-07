@@ -108,7 +108,16 @@ export function adaptItemDetail(detail) {
     soulBindRate: detail.soulBindRate ?? null,
     mainStats: (detail.mainStats ?? []).map(stat),
     subStats: (detail.subStats ?? []).map(stat),
-    sources: detail.sources ?? []
+    sources: detail.sources ?? [],
+    equipLevel: Number.isFinite(detail.equipLevel) ? detail.equipLevel : null,
+    classes: detail.classNames ?? [],
+    // Skill perks rolled on the item (a skill and its +level), and how many it can hold.
+    skillPerks: (detail.subSkills ?? []).map(perk => ({ name: perk.name, level: perk.level, icon: icon(perk.icon) })),
+    skillPerkSlots: Number.isFinite(detail.subSkillCountMax) ? detail.subSkillCountMax : 0,
+    bonusStatSlots: Number.isFinite(detail.subStatCount) ? detail.subStatCount : 0,
+    bonusStatsRandom: Boolean(detail.subStatRandom),
+    appearance: detail.costumes?.[0] ?? null,
+    description: typeof detail.desc === 'string' && detail.desc.trim() ? detail.desc.trim() : null
   };
 }
 

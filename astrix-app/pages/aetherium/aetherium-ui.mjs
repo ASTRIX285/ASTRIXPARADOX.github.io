@@ -90,3 +90,61 @@ export function wireDrawer() {
     else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0].focus(); }
   });
 }
+
+/* The info card (like the game's tooltip) and the hover name label, shared by every Aetherium page. */
+export function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '', grade = null }) {
+  return `<div class="ae-card-head"${grade ? ` data-grade="${esc(String(grade).toLowerCase())}"` : ''}>
+      <span class="ae-card-icon">${icon ? `<img src="${esc(icon)}" alt="" width="64" height="64" decoding="async" referrerpolicy="no-referrer">` : ''}</span>
+      <div><h3 id="aeInfoTitle">${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
+    </div>
+    ${status ? `<p class="ae-card-status is-${status[0]}">${esc(status[1])}</p>` : ''}
+    ${chips.length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : ''}
+    ${lines.filter(Boolean).map(line => `<p class="ae-card-line">${esc(line)}</p>`).join('')}
+    ${body}`;
+}
+let infoReturn = null;
+export function openInfo(html, from) {
+  let box = $('#aeInfo');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'aeInfo';
+    box.className = 'ae-info';
+    box.innerHTML = '<div class="ae-info-backdrop" data-info-close></div><div class="ae-info-card" role="dialog" aria-modal="true" aria-labelledby="aeInfoTitle" tabindex="-1"><span class="ae-info-close" role="button" tabindex="0" data-info-close aria-label="Close">×</span><div id="aeInfoBody"></div></div>';
+    document.body.append(box);
+    box.addEventListener('click', event => { if (event.target.closest('[data-info-close]')) closeInfo(); });
+    document.addEventListener('keydown', event => {
+      if (box.hidden) return;
+      if (event.key === 'Escape' || ((event.key === 'Enter' || event.key === ' ') && event.target.closest?.('[data-info-close]'))) { event.preventDefault(); closeInfo(); }
+    });
+  }
+  $('#aeInfoBody').innerHTML = html;
+  box.hidden = false;
+  infoReturn = from ?? null;
+  box.querySelector('.ae-info-card').focus();
+}
+export function closeInfo() {
+  const box = $('#aeInfo');
+  if (!box || box.hidden) return;
+  box.hidden = true;
+  infoReturn?.focus?.();
+}
+// One floating name label for every [data-tip] tile (mouse hover or keyboard focus).
+function showTip(el) {
+  let tip = $('#aeTip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'aeTip'; tip.className = 'ae-tip'; tip.setAttribute('role', 'tooltip'); document.body.append(tip); }
+  tip.textContent = el.dataset.tip;
+  tip.hidden = false;
+  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  tip.style.left = `${Math.max(6, Math.min(innerWidth - t.width - 6, r.left + r.width / 2 - t.width / 2))}px`;
+  tip.style.top = `${r.top - t.height - 8 < 4 ? r.bottom + 8 : r.top - t.height - 8}px`;
+}
+function hideTip() { const tip = $('#aeTip'); if (tip) tip.hidden = true; }
+document.addEventListener('pointerover', event => { const el = event.target.closest?.('[data-tip]'); if (el && event.pointerType === 'mouse') showTip(el); });
+document.addEventListener('pointerout', event => { if (event.target.closest?.('[data-tip]')) hideTip(); });
+document.addEventListener('focusin', event => { const el = event.target.closest?.('[data-tip]'); if (el) showTip(el); });
+document.addEventListener('focusout', hideTip);
+addEventListener('scroll', hideTip, { passive: true });
+// A card icon that fails to load drops away and leaves the empty frame.
+document.addEventListener('error', event => {
+  if (event.target instanceof HTMLImageElement && event.target.closest('#aeInfo .ae-card-icon,#aeInfo .ae-perk')) event.target.remove();
+}, true);
