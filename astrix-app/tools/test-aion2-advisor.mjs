@@ -145,6 +145,22 @@ check('Every class has all 35 skills with icons, and every build pick has an ico
   }
 });
 
+check('Skill bar: basic skill fixed on left click for every class, nothing placed twice',()=>{
+  for(const name of AION2_CLASSES){
+    const plan=buildAscentPlan({className:name,level:45,data:data(name)});
+    if(plan.pending)continue;
+    const bar=plan.skillBar;
+    assert.equal(bar.bars[0].LMB.name,icons[name].records[0].skills[0].name,`${name}: first class skill on left click`);
+    assert.equal(bar.bars[0].LMB.fixed,true);
+    const names=bar.bars.flatMap(row=>Object.values(row)).filter(Boolean).map(cell=>cell.name);
+    assert.equal(new Set(names).size,names.length,`${name}: no skill on two keys`);
+    assert.ok(Object.values(bar.bars[0]).every(cell=>!cell||cell.icon),`${name}: icons on bar 0`);
+  }
+  const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).skillBar.bars[0];
+  assert.equal(glad['3'].name,'Ruinous Blow');
+  assert.equal(glad['3'].locked,true,'Ruinous Blow locked at Lv 12 (unlocks at 14)');
+});
+
 check('Each next move names the screen that shows it; stigmas carry the game icon',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
   assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery']);

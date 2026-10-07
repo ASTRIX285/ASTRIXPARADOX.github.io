@@ -268,6 +268,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
   const daevanion = planBoards(build, lvl, model, facts);
   const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons);
+  const rotation = planRotation(build.rotation, catalogue, lvl, stigmas);
   return {
     ...base,
     pending: null,
@@ -276,11 +277,73 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     stigmas,
     daevanion,
     stats: build.stats,
-    rotation: planRotation(build.rotation, catalogue, lvl, stigmas),
+    rotation,
     levelNotes: (build.levelNotes ?? []).filter(note => lvl <= note.to),
     upcoming: upcoming(lvl, skills, stigmas, daevanion, facts),
-    mastery
+    mastery,
+    skillBar: planSkillBar({ build, rotation, stigmas, gameIcons, level: lvl, facts })
   };
+}
+
+/**
+ * Where each skill goes on the game's skill bar: 4 bars (0 is the one you fight on), keys 1 to 8,
+ * Q, E, left click and right click. Left click always holds the class's basic skill and cannot be
+ * moved (in-game capture). The rest follows the build: key skills on 1 to 4 in the order you level
+ * them, then the macro's skills, skills the build fires by hand on Q and E, stigmas on 5 to 8, and
+ * every other skill on bar 1.
+ */
+export const SKILL_BAR_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'LMB', 'RMB']);
+const manualNames = (rotation, nameIn) => (isPending(rotation) || !rotation ? [] : (rotation.manual ?? []).map(nameIn).filter(Boolean));
+function planSkillBar({ build, rotation, stigmas, gameIcons, level, facts }) {
+  const skills = [...gameIcons.values()];
+  if (!skills.length) return null;
+  const actives = skills.filter(skill => skill.category === 'Active');
+  const byName = new Map(skills.map(skill => [skill.name, skill]));
+  const names = [...byName.keys()].sort((a, b) => b.length - a.length);
+  const nameIn = text => names.find(name => String(text).startsWith(name)) ?? null;
+  const basic = actives[0];
+  const placed = new Set([basic.name]);
+  const cell = (key, name, role, rank = null) => {
+    const skill = byName.get(name);
+    placed.add(name);
+    const unlockLevel = role === 'stigma' ? (stigmas.slots.find(slot => slot.name === name)?.slotLevel ?? skill.needLevel) : skill.needLevel;
+    return { key, name, icon: skill.icon, role, rank, unlockLevel, locked: level < unlockLevel };
+  };
+  const bars = [0, 1, 2, 3].map(() => Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, null])));
+  bars[0].LMB = { ...cell('LMB', basic.name, 'fixed'), fixed: true };
+
+  const keySkills = (build.coreSkills ?? []).slice().sort((a, b) => a.priority - b.priority).map(skill => skill.name).filter(name => byName.has(name) && !placed.has(name));
+  const macro = isPending(rotation) || !rotation ? [] : rotation.steps.map(step => nameIn(step.text)).filter(Boolean);
+  const manual = isPending(rotation) || !rotation ? [] : (rotation.manual ?? []).map(nameIn).filter(Boolean);
+  const stigmaNames = stigmas.pending ? [] : stigmas.slots.map(slot => slot.name).filter(name => byName.has(name));
+
+  const queue = [];
+  for (const name of keySkills) queue.push([name, 'key', keySkills.indexOf(name) + 1]);
+  for (const name of macro) if (!keySkills.includes(name) && !stigmaNames.includes(name)) queue.push([name, 'macro', null]);
+  // Then the skills the build takes Daevanion nodes for, then any other active, in unlock order.
+  const nodeSkills = isPending(build.daevanion) ? [] : (build.daevanion?.skillNodes ?? []).filter(name => byName.has(name));
+  for (const name of nodeSkills) if (!queue.some(([item]) => item === name) && !stigmaNames.includes(name)) queue.push([name, 'build', null]);
+  for (const skill of actives) if (!queue.some(([item]) => item === skill.name) && !manualNames(rotation, nameIn).includes(skill.name)) queue.push([skill.name, 'spare', null]);
+  const free = key => !bars[0][key];
+  for (const key of ['1', '2', '3', '4', 'RMB']) {
+    const next = queue.find(([name]) => !placed.has(name));
+    if (next && free(key)) bars[0][key] = cell(key, next[0], next[1], next[2]);
+  }
+  for (const key of ['Q', 'E']) {
+    const name = manual.find(item => !placed.has(item) && !stigmaNames.includes(item));
+    if (name) { bars[0][key] = cell(key, name, 'manual'); continue; }
+    const next = queue.find(([item]) => !placed.has(item));
+    if (next) bars[0][key] = cell(key, next[0], next[1], next[2]);
+  }
+  ['5', '6', '7', '8'].forEach((key, index) => { if (stigmaNames[index] && !placed.has(stigmaNames[index])) bars[0][key] = cell(key, stigmaNames[index], 'stigma'); });
+  // Anything left from the build first, then every other active, on bar 1 in unlock order.
+  const rest = [...queue.map(([name]) => name), ...manual, ...actives.map(skill => skill.name)].filter((name, index, all) => all.indexOf(name) === index && !placed.has(name));
+  for (const key of ['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']) {
+    const name = rest.find(item => !placed.has(item));
+    if (!name) break;
+    bars[1][key] = cell(key, name, 'spare');
+  }
+  return { keys: SKILL_BAR_KEYS, bars, basic: basic.name, macroKey: facts['macro-order']?.value ? true : false };
 }
 
 /**
