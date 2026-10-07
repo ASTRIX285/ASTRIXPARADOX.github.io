@@ -133,6 +133,18 @@ check('Mastery: real skill levels, key skills first, points go to the next Speci
   assert.ok(keen.slots.every(slot=>slot.open===false),'Lv 3 has no slot open yet');
 });
 
+check('Each next move names the screen that shows it; stigmas carry the game icon',()=>{
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
+  assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery']);
+  assert.match(plan.stigmas.slots[0].icon??'',/^https:\/\//,'Lunge Stance icon from the armory');
+  assert.match(plan.stigmas.alternatives[0].icon??'',/^https:\/\//);
+  assert.match(plan.skillIcons['Keen Strike']??'',/^https:\/\//);
+  const hand=buildAscentPlan({className:'Chanter',level:30,data:data('Chanter')});
+  assert.ok(hand.now.every(item=>['mastery','stigma','daevanion','gear'].includes(item.view)));
+  assert.ok(hand.stigmas.slots.every(slot=>slot.icon===null),'No icon without a Daeva');
+  assert.deepEqual(hand.skillIcons,{});
+});
+
 check('Mastery without a character: key skills from the guide, no invented levels',()=>{
   const m=buildAscentPlan({className:'Cleric',role:'healer',level:30,data:data('Cleric')}).mastery;
   assert.equal(m.fromArmory,false);
