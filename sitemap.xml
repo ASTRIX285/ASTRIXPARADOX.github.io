@@ -41,10 +41,47 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- The Hub: every tool -->
   <url>
     <loc>https://astrixparadox.com/hub/</loc>
-    <lastmod>2026-09-28</lastmod>
+    <lastmod>2026-10-07</lastmod>
   </url>
+
+  <!-- The Aetherium (AION 2) -->
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/gear/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/mastery/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/stigma/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/daevanion/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/macro/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://astrixparadox.com/hub/aetherium/ascent/stats/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+
+  <!-- Destiny 2 tools -->
   <url>
     <loc>https://astrixparadox.com/tools/destiny-2/</loc>
     <lastmod>2026-09-28</lastmod>
