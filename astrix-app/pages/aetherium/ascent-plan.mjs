@@ -92,6 +92,7 @@ const ICON = {
   mastery: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38L30 18M30 18l4-10 6 6-10 4M14 30l4 4M8 40l4-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   stigma: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
   mouse: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="13" y="5" width="22" height="38" rx="11" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 5v13M13 18h22" stroke="currentColor" stroke-width="2.5"/><path d="M9 22v8" stroke="var(--ae-ice)" stroke-width="4" stroke-linecap="round"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
   daevanion: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 8h8v8H8zM20 8h8v8h-8zM32 8h8v8h-8zM20 20h8v8h-8zM8 32h8v8H8zM20 32h8v8h-8zM32 32h8v8h-8zM12 16v16M36 16v16M16 24h4M28 24h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>'
 };
 
@@ -208,14 +209,15 @@ function gameWindow(view, plan, body) {
 function renderStigmaScreen(plan) {
   const s = plan.stigmas;
   if (s.pending) return pendingNote(s.pending);
-  const slot = (item, index) => `<span class="ae-stg-slot ${item.open ? 'is-open' : 'is-locked'}" role="button" tabindex="0" data-stigma="${index}" data-tip="${esc(item.name)}" aria-label="Slot ${index + 1}: ${esc(item.name)}${item.open ? '' : `, opens at Lv ${item.slotLevel}`}">
+  const slot = (item, index) => `<span class="ae-stg-slot ${item.open ? 'is-open' : 'is-locked'}" role="button" tabindex="0" data-stigma="${index}" data-tip="${esc(item.open ? item.name : `${item.name} · slot opens at Lv ${item.slotLevel}`)}" aria-label="Slot ${index + 1}: ${esc(item.name)}${item.open ? '' : `, opens at Lv ${item.slotLevel}`}">
       <span class="ae-stg-label">${index + 1}</span>
-      <span class="ae-stg-face"><span class="ae-stg-name">${esc(item.name)}</span>${art(item.icon)}${item.open ? '' : `<span class="ae-stg-lock">Lv ${esc(item.slotLevel)}</span>`}${item.equipped ? '<span class="ae-stg-on" aria-hidden="true">✓</span>' : ''}</span>
+      <span class="ae-stg-face"><span class="ae-stg-name">${esc(item.name)}</span>${art(item.icon)}${item.open ? '' : `<span class="ae-lock">${ICON.lock}<b>Lv ${esc(item.slotLevel)}</b></span>`}${item.equipped ? '<span class="ae-stg-on" aria-hidden="true">✓</span>' : ''}</span>
     </span>`;
   const keep = name => s.slots.some(item => item.name === name);
   const now = s.equippedNow;
   return `<div class="ae-stg">
     <div class="ae-stg-row">${s.slots.map(slot).join('')}</div>
+    <ul class="ae-legend-row is-centred" aria-label="Key"><li><span class="ae-lock is-key">${ICON.lock}<b>Lv 27</b></span>Grey: the slot opens when your character reaches that level</li>${now === null ? '' : '<li><span class="ae-mskill-bar">✓</span>Equipped now</li>'}</ul>
     <div class="ae-stg-lower">
       ${now === null ? '' : `<div class="ae-icon-group" id="aeStigmaNow"><p class="ae-mskills-title">Equipped now</p>${now.length
         ? `<div class="ae-icon-row">${now.map(item => iconTile(item.name, item.icon, { badge: keep(item.name) ? '✓' : '✕', tone: keep(item.name) ? 'keep' : 'swap', attr: `data-stigma-now="${esc(item.name)}"`, tip: `${item.name}: ${keep(item.name) ? 'keep' : 'swap out'}` })).join('')}</div>`
@@ -449,11 +451,13 @@ function showGuideStep(index, scroll = true) {
   if (scroll && target) target.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   const last = guide.index === steps.length - 1;
   $('#aeGuide').innerHTML = `
+    <span class="ae-guide-pill" role="button" tabindex="0" data-guide="show">Guide · step ${guide.index + 1} of ${steps.length}</span>
     <span class="ae-guide-mark" aria-hidden="true"></span>
     <div class="ae-guide-copy">
       <p class="ae-guide-count">Guide · step ${guide.index + 1} of ${steps.length}</p>
       <p class="ae-guide-text">${esc(step.text)}</p>
     </div>
+    <span class="ae-guide-hide" role="button" tabindex="0" data-guide="hide" aria-label="Hide the guide">▾</span>
     <div class="ae-guide-nav">
       <button type="button" class="ae-guide-btn" data-guide="back"${guide.index === 0 ? ' disabled' : ''}>Back</button>
       <button type="button" class="ae-guide-btn is-next ae-primary" data-guide="${last ? 'menu' : 'next'}">${last ? 'Done' : 'Next'}</button>
@@ -492,12 +496,12 @@ function masteryTile(entry) {
   const locked = entry.unlocked === false || entry.acquired === false;
   const onBar = entry.equipped === true && !locked;
   const offBar = entry.equipped === false && entry.priority && !locked;
-  return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.priority ? ' is-key' : ''}" data-mastery="${esc(entry.name)}" data-tip="${esc(entry.name)}"${onBar ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${onBar ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
+  return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.priority ? ' is-key' : ''}" data-mastery="${esc(entry.name)}" data-tip="${esc(locked && entry.needLevel ? `${entry.name} · unlocks at Lv ${entry.needLevel}` : entry.skillLevel !== null ? `${entry.name} · skill Lv ${entry.skillLevel}` : entry.name)}"${onBar ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${locked && entry.needLevel ? `, unlocks at character level ${entry.needLevel}` : ''}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${onBar ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
     <span class="ae-mskill-name">${esc(entry.name)}</span>
     ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
     ${entry.priority ? `<span class="ae-mskill-rank">${entry.priority}</span>` : ''}
     ${onBar ? '<span class="ae-mskill-bar" aria-hidden="true">●</span>' : offBar ? '<span class="ae-mskill-bar is-off" aria-hidden="true">!</span>' : ''}
-    <span class="ae-mskill-lv">${locked ? (entry.needLevel ? `Lv ${entry.needLevel}` : '') : entry.skillLevel !== null ? `${entry.skillLevel}` : ''}</span>
+    ${locked && entry.needLevel ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(entry.needLevel)}</b></span>` : entry.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(entry.skillLevel)}</span>` : ''}
   </span>`;
 }
 
@@ -537,7 +541,11 @@ function renderMastery(plan) {
       <p class="ae-mskills-title">Active</p>
       <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
       ${m.passive.length ? `<p class="ae-mskills-title">Passive</p><div class="ae-mskill-grid">${m.passive.map(masteryTile).join('')}</div>` : ''}
-      <ul class="ae-legend-row" aria-label="Key"><li><span class="ae-mskill-rank">1</span>Key skill</li>${m.fromArmory ? '<li><span class="ae-mskill-bar">●</span>On your bar</li><li><span class="ae-mskill-bar is-off">!</span>Not on your bar</li>' : '<li><a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a> for your levels</li>'}</ul>
+      <ul class="ae-legend-row" aria-label="Key">
+        <li><span class="ae-mskill-rank">1</span>Key skill, level it in this order</li>
+        <li><span class="ae-lock is-key">${ICON.lock}<b>Lv 14</b></span>Grey: unlocks when your character reaches that level</li>
+        ${m.fromArmory ? '<li><span class="ae-mskill-lv is-key">3</span>Your skill level</li><li><span class="ae-mskill-bar">●</span>On your skill bar</li><li><span class="ae-mskill-bar is-off">!</span>Key skill not on your bar</li>' : '<li><a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a> to see your own skill levels</li>'}
+      </ul>
     </div>
   </div>`;
 }
@@ -788,6 +796,8 @@ function wireForm() {
     const step = event.target.closest('[data-guide]');
     if (step) {
       if (step.dataset.guide === 'menu') location.assign(viewHref('menu'));
+      else if (step.dataset.guide === 'hide') { $('#aeGuide').classList.add('is-min'); }
+      else if (step.dataset.guide === 'show') { $('#aeGuide').classList.remove('is-min'); }
       else showGuideStep(guide.index + (step.dataset.guide === 'next' ? 1 : -1));
       return;
     }
