@@ -524,8 +524,6 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 .ae-legend-row li{display:flex;align-items:center;gap:8px}
 .ae-legend-row .ae-mskill-rank,.ae-legend-row .ae-mskill-bar{position:static}
 .ae-icon-group{display:grid;gap:8px}
-body.aetherium-page .ae-itile.is-big:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important;width:72px;height:72px}
-body.aetherium-page .ae-mskill.is-key:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important}
 .ae-icon-row{display:flex;flex-wrap:wrap;gap:10px}
 .ae-itile{position:relative;display:block;width:56px;height:56px;overflow:hidden;cursor:pointer;background:#141b2b;border:1px solid #3a4560;border-radius:6px}
 .ae-itile.is-big{width:72px;height:72px;border-color:var(--ae-gold);box-shadow:0 0 14px color-mix(in srgb,var(--ae-gold) 30%,transparent)}
@@ -549,7 +547,6 @@ body.aetherium-page .ae-mskill.is-key:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#a
 .ae-info-card{position:relative;width:min(440px,100%);max-height:min(86vh,720px);overflow:auto;box-sizing:border-box;padding:18px 18px 16px;display:grid;gap:10px;
   background:linear-gradient(180deg,#18223a,#0c1222);border:1px solid color-mix(in srgb,var(--ae-gold) 60%,#3a4560);box-shadow:0 24px 60px rgba(0,0,0,.6);outline:none}
 .ae-info-close{position:absolute;right:6px;top:6px;width:40px;height:40px;display:grid;place-items:center;font-size:26px;line-height:1;color:var(--ae-muted);background:none;border:0;cursor:pointer}
-body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){clip-path:none!important;background:none!important;box-shadow:none!important;min-height:0!important}
 .ae-card-head{display:flex;gap:14px;align-items:center;padding-right:30px}
 .ae-card-icon{flex:0 0 64px;width:64px;height:64px;display:grid;place-items:center;overflow:hidden;color:var(--ae-gold);background:#0b1222;border:1px solid var(--ae-gold);border-radius:8px}
 .ae-card-icon img{width:100%;height:100%;object-fit:cover}.ae-card-icon svg{width:36px;height:36px}
@@ -581,13 +578,36 @@ body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q
 .ae-legend-row.is-centred{justify-content:center;justify-items:start}
 @media (min-width:900px){.ae-legend-row{display:flex}}
 .ae-guide-hide{position:absolute;right:4px;top:2px;width:32px;height:24px;display:grid;place-items:center;color:var(--ae-muted);cursor:pointer;font-size:14px}
-body.aetherium-page .ae-guide-hide:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:none!important;min-height:0!important;overflow:visible!important}
-body.aetherium-page .ae-guide-pill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent)!important;background:rgba(12,22,42,.97)!important;border-radius:20px!important;padding:0 14px!important;min-height:40px!important}
 .ae-guide-nav{margin-top:14px}
 .ae-guide-pill{display:none}
 .ae-guide.is-min{grid-template-columns:1fr;padding:0;background:none;border:0;box-shadow:none;justify-items:end;pointer-events:none}
 .ae-guide.is-min>*{display:none}
 .ae-guide.is-min .ae-guide-pill{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;pointer-events:auto;cursor:pointer;font:700 12px/1 var(--ax-font-head);letter-spacing:.12em;text-transform:uppercase;color:var(--ae-ice);background:rgba(12,22,42,.97);border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--ae-ice) 25%,transparent)}
+/* Item card (Gear Ledger): the game's tooltip layout. */
+.ae-item-sec{margin:0 0 6px;font:700 11px/1.2 var(--ax-font-head);letter-spacing:.14em;text-transform:uppercase;color:var(--ae-gold)}
+.ae-item-sec small{margin-left:6px;letter-spacing:0;text-transform:none;color:var(--ae-muted)}
+.ae-item-block{padding-top:8px;border-top:1px solid #2c3550}
+.ae-item-rows{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:14px}
+.ae-item-rows li{display:flex;justify-content:space-between;gap:12px}
+.ae-item-rows span{color:var(--ae-muted)}.ae-item-rows b{color:var(--ae-ink);font-weight:700}
+.ae-item-rows em{font-style:normal;color:var(--ae-gold)}
+.ae-item-rows.is-bonus b{color:var(--ae-ice)}
+.ae-item-enchant{display:flex;align-items:center;gap:10px}
+.ae-item-enchant .ae-item-sec{margin:0}
+.ae-item-enchant b{margin-left:auto;font:700 14px/1 var(--ax-font-head);color:var(--ae-ink)}
+.ae-pips{display:flex;flex-wrap:wrap;gap:3px}
+.ae-pips i{width:10px;height:10px;transform:rotate(45deg);border:1px solid #4a5674;background:#141b2b}
+.ae-pips i.is-on{background:var(--ae-gold);border-color:var(--ae-gold-hi);box-shadow:0 0 6px color-mix(in srgb,var(--ae-gold) 60%,transparent)}
+.ae-perk-list{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.ae-perk{display:flex;align-items:center;gap:10px;font-size:14px}
+.ae-perk img,.ae-perk-empty{flex:0 0 36px;width:36px;height:36px;border-radius:4px;border:1px solid #3a4560;box-sizing:border-box}
+.ae-perk-empty{border-style:dashed;background:#0b1222}
+.ae-perk b{margin-left:auto;color:var(--ae-gold)}
+.ae-perk.is-empty{color:var(--ae-dim)}
+.ae-sockets{display:flex;gap:8px}
+.ae-sockets i{width:22px;height:22px;border-radius:50%;border:2px solid #4a5674;background:radial-gradient(circle at 35% 35%,#26314a,#0b1222)}
+.ae-item-desc{font-size:13px;color:var(--ae-muted)}
+.ae-gear .ae-slot{cursor:pointer}
 /* Game node art: the official sockets fill the tile; route state is a ring around them. */
 .ae-node:has(.ae-node-art){background:none;border:0;box-shadow:none;border-radius:18%}
 .ae-node-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
@@ -662,6 +682,12 @@ body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-gui
 body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
 body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
 body.aetherium-page .ae-stg-slot:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:transparent!important;overflow:visible!important}
+body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8){clip-path:none!important;background:none!important;box-shadow:none!important;min-height:0!important;border:0!important;padding:0!important}
+body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8)::before,body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8)::after{content:none!important;display:none!important}
+body.aetherium-page .ae-guide-hide:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:none!important;min-height:0!important;overflow:visible!important}
+body.aetherium-page .ae-guide-pill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent)!important;background:rgba(12,22,42,.97)!important;border-radius:20px!important;padding:0 14px!important;min-height:40px!important}
+body.aetherium-page .ae-itile.is-big:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important;width:72px;height:72px}
+body.aetherium-page .ae-mskill.is-key:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important}
 body.aetherium-page .ae-roster-add:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){background:transparent!important;color:var(--ae-muted)!important}
 body.aetherium-page .ae-slot[aria-pressed="true"]:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
   background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;

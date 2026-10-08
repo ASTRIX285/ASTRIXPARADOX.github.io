@@ -47,6 +47,11 @@ Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDI
 const lv22Equipment=structuredClone(equipment);
 lv22Equipment.equipment.equipmentList.push({...lv22Equipment.equipment.equipmentList[0],id:999000022,name:'Test Amulet',slotPos:22,slotPosName:'Amulet'});
 
+const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
+// A Legend helm shaped like the live armory's (7 Oct 2026): one skill perk rolled of three, a description.
+const perkItem={...structuredClone(item),id:110300999,name:'Red Agate Helm',grade:'Legend',maxEnchantLevel:10,enchantLevel:0,magicStoneSlotCount:3,equipLevel:22,
+  subSkillCountMax:3,subStatCount:3,subStatRandom:true,costumes:['Skybright Oath (Helm)'],desc:'A helm for the brave.\nCan be upgraded.',
+  subSkills:[{id:11790000,level:1,icon:'https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png',name:'Survival Willpower'}]};
 const browser=await chromium.launch();
 const realCalls=[];
 let failures=0;
@@ -73,7 +78,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     const bodies={
       '/aion2/search':asmo?asmoSearch:search,
       '/aion2/character':lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment},
-      '/aion2/item':item,
+      '/aion2/item':url.searchParams.get('slotPos')==='1'?item:perkItem,
       '/aion2/daevanion':board
     };
     const body=bodies[url.pathname];
@@ -81,7 +86,9 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta})});
   });
   // Icons and portraits come from the NCSOFT CDN; never fetched in tests.
-  await context.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+  // A 1x1 PNG stands in for every NCSOFT icon, so icons keep their <img> as they do live.
+  await context.route(/playnccdn\.com/,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
+  await context.route(/plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
   // Never the real Worker or NCSOFT: a request to either is blocked and fails the run. Registered last, so it wins over the CDN stub above.
   await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{realCalls.push(route.request().url());return route.abort();});
   if(storage)await context.addInitScript(value=>{localStorage.setItem('aetherium.roster.v1',value);},JSON.stringify(storage));
@@ -148,15 +155,30 @@ await check('live Gear Ledger: one call for first paint, item and board on deman
   assert.ok(boards.slice(1).every(row=>row[1]==='Locked'),'Other boards locked from the data');
   assert.equal(await page.locator('.ae-stigma.is-locked').count(),13);
   assert.match(await page.textContent('#aeStigmaNote'),/13 stigmas · unlock at Lv 22/);
+  assert.equal(await page.locator('#aeItem').count(),0,'No side text panel: items open as a card');
   await page.click('[data-slot="0"]');
-  await page.waitForSelector('#aeItem h3');
-  assert.equal(await page.textContent('#aeItem h3'),'Twilight Greatsword');
-  assert.match(await page.textContent('#aeItem'),/Enchant\+2 of 5/);
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
+  assert.equal(await page.textContent('#aeInfoTitle'),'Twilight Greatsword');
+  assert.match(await page.textContent('#aeInfo .ae-card-head p'),/Main Hand · Greatsword · Rare/);
+  assert.equal(await page.locator('#aeInfo .ae-pips i').count(),5,'Enchant pips up to the max');
+  assert.equal(await page.locator('#aeInfo .ae-pips i.is-on').count(),2);
+  assert.match(await page.textContent('#aeInfo .ae-card-status'),/Enchant it: 3 more levels to \+5/);
+  assert.match(await page.textContent('#aeInfo .ae-item-rows'),/Attack48 \+2/);
+  assert.equal(await page.locator('#aeInfo .ae-sockets i').count(),2,'Manastone slots drawn as sockets');
   assert.match(await page.textContent('[data-slot="0"] .ae-slot-meta'),/\+2 of 5/,'Tile picks up max enchant from the detail');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.isHidden('#aeInfo'),true);
+  await page.click('[data-slot="1"]');
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-perk-list'));
+  assert.deepEqual(await page.$$eval('#aeInfo .ae-perk',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Survival Willpower+1','Empty perk slot','Empty perk slot'],'Skill perks: rolled and empty');
+  assert.match(await page.getAttribute('#aeInfo .ae-perk img','src'),/ICON_GL_SKILL_Passive_009\.png$/);
+  assert.match(await page.textContent('#aeInfo'),/Wear from Lv 22.*Look: Skybright Oath \(Helm\).*A helm for the brave\.Can be upgraded\./s);
+  await page.click('#aeInfo .ae-info-close');
+  assert.equal(await page.isHidden('#aeInfo'),true);
   await page.click('.ae-board details[data-board="11"] summary');
   await page.waitForFunction(()=>{const text=document.querySelector('[data-board="11"] [data-board-nodes]').textContent;return text&&!text.includes('Reading');});
   assert.match(await page.textContent('[data-board="11"] [data-board-nodes]'),/No nodes taken yet/);
-  assert.deepEqual(calls,['/aion2/character','/aion2/item','/aion2/daevanion']);
+  assert.deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item','/aion2/daevanion']);
   assert.deepEqual(errors,[]);
   await context.close();
 });

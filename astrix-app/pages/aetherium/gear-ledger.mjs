@@ -1,9 +1,10 @@
 /**
- * Gear Ledger (The Aetherium): the full setup of one Daeva. Gear with an item detail card,
+ * Gear Ledger (The Aetherium): the full setup of one Daeva. Tap a gear slot for its item card (like the
+ * game's tooltip: stats, enchant, skill perks, manastone slots, where it comes from),
  * stigmas, Daevanion boards (open or locked from the data), stats, pet and wings.
  */
 import { ArmoryUnavailable, loadBoard, loadCatalogue, loadCharacter, loadItemDetail, refFromUrl, roster } from './aetherium-data.mjs';
-import { $, esc, iconImg, isPending, markCharacterShown, markReady, number, setFaction, showNotice, showSource, slotLabel, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, iconImg, infoCardHtml, isPending, markCharacterShown, markReady, number, openInfo, setFaction, showNotice, showSource, slotLabel, wireDrawer } from './aetherium-ui.mjs';
 
 const PRIMARY_STATS = ['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS'];
 const state = { model: null, source: null, selected: null, boards: new Map(), listedSlots: new Set() };
@@ -26,7 +27,7 @@ function renderGear() {
   $('#aeGearCount').textContent = `${gear.filter(slot => !slot.empty).length} of ${gear.length} worn`;
   $('#aeGear').innerHTML = gear.map((slot, index) => slot.empty
     ? `<li><div class="ae-slot is-empty"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>Empty</strong></div></li>`
-    : `<li><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-pressed="false" aria-controls="aeItem">
+    : `<li><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-haspopup="dialog">
         ${iconImg(slot.icon, '', 52)}
         <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(slot.grade)} · ${esc(enchantText(slot))}</span></span>
       </button></li>`).join('');
@@ -40,12 +41,33 @@ function renderGear() {
       : 'Accessories: none worn. The armory only lists an accessory slot once something is worn in it.';
 }
 
-async function selectSlot(index) {
+/** The item card body: everything the armory gives for one worn item, laid out like the game's tooltip. */
+function itemCardBody(slot, d) {
+  const rows = list => list.map(row => `<li><span>${esc(row.name)}</span><b>${esc(row.value)}${row.extra ? ` <em>+${esc(row.extra)}</em>` : ''}</b></li>`).join('');
+  const max = isPending(d.maxEnchant) ? null : d.maxEnchant;
+  const stones = isPending(d.manastoneSlots) ? 0 : d.manastoneSlots;
+  const emptyPerks = Math.max(0, d.skillPerkSlots - d.skillPerks.length);
+  return `
+    ${max ? `<div class="ae-item-enchant" aria-label="Enchant +${esc(d.enchant)} of ${esc(max)}"><span class="ae-item-sec">Enchant</span><span class="ae-pips">${Array.from({ length: max }, (_, n) => `<i class="${n < d.enchant ? 'is-on' : ''}"></i>`).join('')}</span><b>+${esc(d.enchant)} / ${esc(max)}</b></div>` : ''}
+    ${d.mainStats.length ? `<div class="ae-item-block"><p class="ae-item-sec">Stats</p><ul class="ae-item-rows">${rows(d.mainStats)}</ul></div>` : ''}
+    ${d.subStats.length || d.bonusStatSlots ? `<div class="ae-item-block"><p class="ae-item-sec">Bonus stats${d.bonusStatsRandom ? ' <small>rolled</small>' : ''}</p>${d.subStats.length ? `<ul class="ae-item-rows is-bonus">${rows(d.subStats)}</ul>` : '<p class="ae-empty">None rolled yet</p>'}</div>` : ''}
+    ${d.skillPerkSlots || d.skillPerks.length ? `<div class="ae-item-block"><p class="ae-item-sec">Skill perks <small>${d.skillPerks.length} of ${d.skillPerkSlots}</small></p><ul class="ae-perk-list">
+      ${d.skillPerks.map(perk => `<li class="ae-perk">${perk.icon ? `<img src="${esc(perk.icon)}" alt="" width="36" height="36" referrerpolicy="no-referrer">` : '<span class="ae-perk-empty"></span>'}<span>${esc(perk.name)}</span><b>+${esc(perk.level)}</b></li>`).join('')}
+      ${Array.from({ length: emptyPerks }, () => '<li class="ae-perk is-empty"><span class="ae-perk-empty"></span><span>Empty perk slot</span></li>').join('')}
+    </ul></div>` : ''}
+    ${stones ? `<div class="ae-item-block"><p class="ae-item-sec">Manastone slots</p><span class="ae-sockets" aria-label="${stones} manastone slots">${Array.from({ length: stones }, () => '<i></i>').join('')}</span></div>` : ''}
+    ${d.sources.length || d.appearance ? `<ul class="ae-card-chips">${d.sources.map(source => `<li>From: ${esc(source)}</li>`).join('')}${d.appearance ? `<li>Look: ${esc(d.appearance)}</li>` : ''}</ul>` : ''}
+    ${d.description ? d.description.split('\n').map(line => `<p class="ae-card-line ae-item-desc">${esc(line)}</p>`).join('') : ''}`;
+}
+
+async function selectSlot(index, from) {
   const slot = state.model.gear[index];
   state.selected = index;
-  document.querySelectorAll('[data-slot]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.slot) === index)));
-  const el = $('#aeItem');
-  el.innerHTML = `<p class="ae-muted">Reading ${esc(slot.name)}.</p>`;
+  const head = detail => ({
+    icon: (detail ?? slot).icon, title: (detail ?? slot).name, grade: (detail ?? slot).grade,
+    sub: [slotLabel(slot.slot), detail?.category, (detail ?? slot).grade].filter(Boolean).join(' · ')
+  });
+  openInfo(infoCardHtml({ ...head(null), lines: [`Reading ${slot.name}.`] }), from);
   let result;
   try {
     result = await loadItemDetail(state.model, slot, state.source);
@@ -53,9 +75,9 @@ async function selectSlot(index) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
     result = { detail: null, reason: 'The armory is unavailable right now. Try this item again in a minute.' };
   }
-  if (state.selected !== index) return;
+  if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
-    el.innerHTML = `<div class="ae-item-head">${iconImg(slot.icon, '', 56)}<div><p class="ae-slot-label">${esc(slotLabel(slot.slot))}</p><h3>${esc(slot.name)}</h3><p class="ae-muted">${esc(slot.grade)} · ${esc(enchantText(slot))}</p></div></div><p class="ae-muted">${esc(result.reason)}</p>`;
+    openInfo(infoCardHtml({ ...head(null), chips: [`+${slot.enchant}`], lines: [result.reason] }), from);
     return;
   }
   const d = result.detail;
@@ -64,19 +86,13 @@ async function selectSlot(index) {
   if (!isPending(d.manastoneSlots)) slot.manastoneSlots = d.manastoneSlots;
   const meta = document.querySelector(`[data-slot="${index}"] .ae-slot-meta`);
   if (meta) meta.textContent = `${slot.grade} · ${enchantText(slot)}`;
-  const rows = list => list.map(row => `<tr><th scope="row">${esc(row.name)}</th><td>${esc(row.value)}${row.extra ? ` <span class="ae-plus">+${esc(row.extra)}</span>` : ''}</td></tr>`).join('');
-  el.innerHTML = `
-    <div class="ae-item-head" data-grade="${esc(String(d.grade).toLowerCase())}">${iconImg(d.icon, '', 56)}
-      <div><p class="ae-slot-label">${esc(slotLabel(slot.slot))}${d.category ? ` · ${esc(d.category)}` : ''}</p><h3>${esc(d.name)}</h3>
-      <p class="ae-muted">${esc(d.grade)}${d.level ? ` · Item level ${esc(d.level)}` : ''}</p></div></div>
-    <dl class="ae-item-facts">
-      <div><dt>Enchant</dt><dd>+${esc(d.enchant)}${isPending(d.maxEnchant) ? '' : ` of ${esc(d.maxEnchant)}`}</dd></div>
-      <div><dt>Manastone slots</dt><dd>${isPending(d.manastoneSlots) ? '-' : esc(d.manastoneSlots)}</dd></div>
-      ${d.soulBindRate ? `<div><dt>Soul binding</dt><dd>${esc(d.soulBindRate)}%</dd></div>` : ''}
-      ${d.sources.length ? `<div><dt>Comes from</dt><dd>${d.sources.map(esc).join(', ')}</dd></div>` : ''}
-    </dl>
-    ${d.mainStats.length ? `<table class="ae-item-stats"><caption>Main stats</caption><tbody>${rows(d.mainStats)}</tbody></table>` : ''}
-    ${d.subStats.length ? `<table class="ae-item-stats"><caption>Sub stats</caption><tbody>${rows(d.subStats)}</tbody></table>` : ''}`;
+  const max = isPending(d.maxEnchant) ? null : d.maxEnchant;
+  const status = max === null ? null : d.enchant >= max ? ['keep', 'Fully enchanted'] : ['go', `Enchant it: ${max - d.enchant} more ${max - d.enchant === 1 ? 'level' : 'levels'} to +${max}`];
+  openInfo(infoCardHtml({
+    ...head(d), status,
+    chips: [d.level ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null],
+    body: itemCardBody(slot, d)
+  }), from);
 }
 
 function renderSide() {
@@ -148,7 +164,6 @@ function render(model, source) {
   renderGear();
   renderSide();
   markCharacterShown();
-  $('#aeItem').innerHTML = '<p class="ae-muted">Pick a gear slot to see its stats, enchant and where it comes from.</p>';
 }
 
 async function start() {
@@ -159,7 +174,7 @@ async function start() {
   }, true);
   $('#aeGear').addEventListener('click', event => {
     const button = event.target.closest('[data-slot]');
-    if (button) selectSlot(Number(button.dataset.slot));
+    if (button) selectSlot(Number(button.dataset.slot), button).catch(error => console.error(error));
   });
   state.listedSlots = new Set((await loadCatalogue()).slots.map(slot => slot.slotPos));
   const active = roster.active();

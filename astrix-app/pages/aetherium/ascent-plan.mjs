@@ -11,7 +11,7 @@
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
 import { ArmoryUnavailable, ascentUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, roster } from './aetherium-data.mjs';
-import { $, esc, isPending, markCharacterShown, markReady, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
 
@@ -249,58 +249,7 @@ function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, 
     <span class="ae-itile-name">${esc(name)}</span>${art(icon)}${badge ? `<span class="ae-itile-badge">${esc(badge)}</span>` : ''}
   </span>`;
 }
-function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '' }) {
-  return `<div class="ae-card-head">
-      <span class="ae-card-icon">${art(icon) || ICON.stigma}</span>
-      <div><h3 id="aeInfoTitle">${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
-    </div>
-    ${status ? `<p class="ae-card-status is-${status[0]}">${esc(status[1])}</p>` : ''}
-    ${chips.length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : ''}
-    ${lines.filter(Boolean).map(line => `<p class="ae-card-line">${esc(line)}</p>`).join('')}
-    ${body}`;
-}
-let infoReturn = null;
-function openInfo(html, from) {
-  let box = $('#aeInfo');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'aeInfo';
-    box.className = 'ae-info';
-    box.innerHTML = '<div class="ae-info-backdrop" data-info-close></div><div class="ae-info-card" role="dialog" aria-modal="true" aria-labelledby="aeInfoTitle" tabindex="-1"><span class="ae-info-close" role="button" tabindex="0" data-info-close aria-label="Close">×</span><div id="aeInfoBody"></div></div>';
-    document.body.append(box);
-    box.addEventListener('click', event => { if (event.target.closest('[data-info-close]')) closeInfo(); });
-    document.addEventListener('keydown', event => {
-      if (box.hidden) return;
-      if (event.key === 'Escape' || ((event.key === 'Enter' || event.key === ' ') && event.target.closest?.('[data-info-close]'))) { event.preventDefault(); closeInfo(); }
-    });
-  }
-  $('#aeInfoBody').innerHTML = html;
-  box.hidden = false;
-  infoReturn = from ?? null;
-  box.querySelector('.ae-info-card').focus();
-}
-function closeInfo() {
-  const box = $('#aeInfo');
-  if (!box || box.hidden) return;
-  box.hidden = true;
-  infoReturn?.focus?.();
-}
-// One floating name label for every [data-tip] tile (mouse hover or keyboard focus).
-function showTip(el) {
-  let tip = $('#aeTip');
-  if (!tip) { tip = document.createElement('div'); tip.id = 'aeTip'; tip.className = 'ae-tip'; tip.setAttribute('role', 'tooltip'); document.body.append(tip); }
-  tip.textContent = el.dataset.tip;
-  tip.hidden = false;
-  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
-  tip.style.left = `${Math.max(6, Math.min(innerWidth - t.width - 6, r.left + r.width / 2 - t.width / 2))}px`;
-  tip.style.top = `${r.top - t.height - 8 < 4 ? r.bottom + 8 : r.top - t.height - 8}px`;
-}
-function hideTip() { const tip = $('#aeTip'); if (tip) tip.hidden = true; }
-document.addEventListener('pointerover', event => { const el = event.target.closest?.('[data-tip]'); if (el && event.pointerType === 'mouse') showTip(el); });
-document.addEventListener('pointerout', event => { if (event.target.closest?.('[data-tip]')) hideTip(); });
-document.addEventListener('focusin', event => { const el = event.target.closest?.('[data-tip]'); if (el) showTip(el); });
-document.addEventListener('focusout', hideTip);
-addEventListener('scroll', hideTip, { passive: true });
+
 
 function renderMacroScreen(plan) {
   const r = plan.rotation;
