@@ -156,11 +156,17 @@ export function formatDate(iso) {
 
 /* Roster: up to 8 Daevas, added by name, saved on this device. */
 const rosterKey = entry => `${entry.serverId}:${entry.characterId}`;
+const validEntry = entry => Boolean(entry && typeof entry.name === 'string' && entry.name.trim() && entry.characterId && Number.isFinite(Number(entry.serverId)));
 
 function readRoster() {
   try {
     const value = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY) ?? 'null');
-    if (value && Array.isArray(value.entries)) return { entries: value.entries.slice(0, AETHERIUM_ROSTER_SLOTS), active: value.active ?? null };
+    if (value && Array.isArray(value.entries)) {
+      // Drop entries saved without a name or id (an armory reply with an empty profile): they show as a blank card.
+      const entries = value.entries.filter(validEntry).slice(0, AETHERIUM_ROSTER_SLOTS);
+      const active = entries.some(item => rosterKey(item) === value.active) ? value.active : (entries[0] ? rosterKey(entries[0]) : null);
+      return { entries, active };
+    }
   } catch { /* storage blocked or corrupt: start empty */ }
   return { entries: [], active: null };
 }
@@ -187,6 +193,7 @@ export const roster = {
       raceName: model.profile.raceName,
       demo: source.kind === 'demo'
     };
+    if (!validEntry(entry)) return true; // Nothing to save: the armory sent no name. The card still shows what it has.
     const key = rosterKey(entry);
     const index = current.entries.findIndex(item => rosterKey(item) === key);
     if (index >= 0) current.entries[index] = entry;

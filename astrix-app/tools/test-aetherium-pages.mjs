@@ -198,6 +198,20 @@ await check('Lv 22 with no stigma acquired, extra worn slot: honest copy',async(
   await context.close();
 });
 
+await check('roster drops a blank saved Daeva and the strobe runs blue',async()=>{
+  const good={name:'ASTRIX285',serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:23,raceName:'Elyos',demo:false};
+  const blank={serverId:1308,characterId:'',className:undefined,level:undefined};
+  const {page,context}=await open('/hub/aetherium/',{storage:{entries:[good,blank],active:'1308:'}});
+  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1,'The blank entry is gone');
+  assert.equal(await page.inputValue('#aeNameInput'),'','The name box starts empty');
+  assert.equal(await page.getAttribute('#aeNameInput','placeholder'),'Type your in-game character name','A prompt, not a name');
+  assert.match(await page.textContent('#aeRosterCount'),/1 of 8 slots/);
+  assert.equal(await page.locator('.ae-roster-slot.is-active').count(),1,'The remaining Daeva becomes active');
+  const stroke=await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--ax-stroke').trim());
+  assert.equal(stroke,'#4fb6ff','Strobe colour is the bright blue');
+  await context.close();
+});
+
 await check('roster add and remove, faction colour switch',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true});
   assert.equal(await page.getAttribute('body','data-faction'),'elyos');

@@ -23,9 +23,11 @@ body.aetherium-page{
   --ax-black:var(--ae-navy);--ax-panel:var(--ae-navy-panel);--ax-raised:var(--ae-navy-raised);
   --ax-line:var(--ae-navy-line);--ax-line-strong:var(--ae-navy-line-strong);--ax-ink:var(--ae-ink);--ax-muted:var(--ae-muted);
   --ax-ember:var(--ae-accent);--ax-ember-hi:var(--ae-accent-hi);
-  --ax-stroke-hi:var(--ae-accent-hi);--ax-stroke:var(--ae-accent);
-  --ax-stroke-fade:color-mix(in srgb,var(--ae-accent) 45%,transparent);--ax-stroke-fade-tab:color-mix(in srgb,var(--ae-accent) 40%,transparent);
-  --ax-stroke-glow:color-mix(in srgb,var(--ae-accent-hi) 45%,transparent);
+  /* The strobe on tabs, tiles and buttons runs in a bright blue on every Aetherium page, whatever the faction. */
+  --ae-strobe:#4fb6ff;--ae-strobe-hi:#bfe6ff;
+  --ax-stroke-hi:var(--ae-strobe-hi);--ax-stroke:var(--ae-strobe);
+  --ax-stroke-fade:color-mix(in srgb,var(--ae-strobe) 45%,transparent);--ax-stroke-fade-tab:color-mix(in srgb,var(--ae-strobe) 40%,transparent);
+  --ax-stroke-glow:color-mix(in srgb,var(--ae-strobe-hi) 50%,transparent);
   margin:0;min-height:100vh;display:flex;flex-direction:column;color:var(--ae-ink);
   font:500 15px/1.5 "Barlow","Segoe UI",sans-serif;
   background:

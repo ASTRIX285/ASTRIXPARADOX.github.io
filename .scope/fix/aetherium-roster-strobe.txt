@@ -1,0 +1,13 @@
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium-data.mjs
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/tools/test-aetherium-pages.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html
