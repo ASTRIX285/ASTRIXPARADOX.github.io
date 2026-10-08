@@ -100,7 +100,7 @@ const style=(page,selector,prop)=>page.$eval(selector,(el,p)=>getComputedStyle(e
 const GOLD='rgb(226, 181, 79)';
 const ref=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
 const ascent=(query='',screen='')=>`/hub/aetherium/ascent/${screen?`${screen}/`:''}${query?`?${query}`:''}`;
-const SCREENS=['mastery','stigma','daevanion','macro','stats'];
+const SCREENS=['mastery','skill-bar','stigma','daevanion','macro','stats'];
 const plain=async(page,selector)=>(await page.textContent(selector)).replace(/\s+/g,' ').trim();
 
 await check('by hand: default Gladiator plan, no armory call, bookmarkable',async()=>{
@@ -235,6 +235,30 @@ await check('Mastery without a Daeva: every class skill as a game icon, key skil
   assert.equal(srcs.length,22,'An icon for every active and passive skill');
   assert.ok(srcs.every(src=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_[A-Z]{2}_SKILL_/.test(src)),srcs.join());
   assert.ok(await page.locator('.ae-mskill.is-key').count()>=3);
+  await context.close();
+});
+
+await check('Skill Bar: the game grid, Keen Strike fixed on left click, key skills on 1 to 4',async()=>{
+  const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=23','skill-bar'));
+  assert.equal(await page.locator('.ae-bar-row[data-bar-row]').count(),4,'Bars 3, 2, 1 and 0, like the game');
+  assert.deepEqual(await page.$$eval('.ae-bar-row[data-bar-row]',rows=>rows.map(row=>row.dataset.barRow)),['3','2','1','0'],'Bar 0 at the bottom');
+  assert.equal(await page.locator('.ae-bar-row[data-bar-row="0"] .ae-bar-cell').count(),12,'Keys 1 to 8, Q, E, left and right click');
+  const main=await page.$$eval('[data-bar-row="0"] [data-bar-skill]',cells=>Object.fromEntries(cells.map(el=>[el.dataset.barKey.split(':')[1],[el.dataset.barSkill,el.dataset.barRole]])));
+  assert.deepEqual(main.LMB,['Keen Strike','fixed'],'Left click is Keen Strike and fixed');
+  assert.deepEqual([main['1'],main['2'],main['3']],[['Rending Blow','key'],['Overhead Slam','key'],['Ruinous Blow','key']]);
+  assert.deepEqual([main.Q,main.E],[['Defiance','manual'],['Rush Strike','manual']],'Skills fired by hand on Q and E');
+  assert.deepEqual(['5','6','7','8'].map(key=>main[key]?.[0]),['Lunge Stance',"Zikel's Blessing",'Rage Burst','Focused Block']);
+  assert.equal(await page.locator('[data-bar-key="0:6"] .ae-lock').count(),1,"Zikel's Blessing slot locked until Lv 27");
+  assert.equal(await page.locator('[data-bar-key="0:LMB"] .ae-bar-pin').count(),1);
+  assert.match(await page.getAttribute('[data-bar-key="0:1"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
+  assert.match(await plain(page,'.ae-guide'),/Left click always fires Keen Strike/);
+  assert.match(await page.getAttribute('[data-bar-key="0:LMB"]','class'),/ae-guide-target/);
+  await page.click('[data-bar-key="0:2"]');
+  assert.match(await plain(page,'#aeInfoTitle'),/Overhead Slam/,'Tap a slot for the skill card');
+  await page.keyboard.press('Escape');
+  await page.click('[data-bar-key="0:5"]');
+  assert.match(await plain(page,'#aeInfo'),/Lunge Stance.*Stigma · slot 1/);
+  assert.deepEqual(errors,[]);
   await context.close();
 });
 

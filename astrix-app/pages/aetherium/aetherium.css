@@ -608,6 +608,38 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 .ae-sockets i{width:22px;height:22px;border-radius:50%;border:2px solid #4a5674;background:radial-gradient(circle at 35% 35%,#26314a,#0b1222)}
 .ae-item-desc{font-size:13px;color:var(--ae-muted)}
 .ae-gear .ae-slot{cursor:pointer}
+/* Skill Bar: the game's 4 bars (0 at the bottom), keys 1 to 8, Q, E and the two mouse buttons. */
+.ae-skillbar{display:grid;gap:14px}
+.ae-bar-scroll{overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.ae-bar-grid{display:grid;gap:6px;min-width:max-content;margin:0 auto;width:max-content}
+.ae-bar-row{display:flex;align-items:center;gap:14px}
+.ae-bar-group{display:flex;gap:5px}
+.ae-bar-num{width:22px;text-align:center;font:600 22px/1 var(--ax-font-head);color:var(--ae-muted)}
+.ae-bar-row.is-main .ae-bar-num{color:var(--ae-ink)}
+.ae-bar-cell{position:relative;display:block;width:56px;height:56px;box-sizing:border-box;border-radius:3px;overflow:hidden;cursor:pointer;background:#1b2b3c;border:1px solid #3d5a73}
+.ae-bar-cell.is-empty{cursor:default;background:radial-gradient(circle,#2a4256 0 2px,transparent 3px),#172433;border-color:#2b4155}
+.ae-bar-row.is-main .ae-bar-cell.is-empty{background:radial-gradient(circle,#3c5f78 0 2px,transparent 3px),#1d3142;border-color:#3d5a73}
+.ae-bar-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ae-bar-cell .ae-mskill-name{font-size:9px}
+.ae-bar-cell.is-fixed{border:2px solid var(--ae-ice)}
+.ae-bar-cell.is-key{border:2px solid var(--ae-gold)}
+.ae-bar-cell.is-macro,.ae-bar-cell.is-build{border:2px solid color-mix(in srgb,var(--ae-gold) 55%,#3d5a73)}
+.ae-bar-cell.is-manual{border:2px solid #4fd1a5}
+.ae-bar-cell.is-stigma{border:2px solid #b07cff}
+.ae-bar-cell.is-spare{border:1px solid #4a5674}
+.ae-bar-cell.is-locked img{filter:grayscale(1) brightness(.5)}
+.ae-bar-pin{position:absolute;right:2px;top:2px;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;background:var(--ae-ice);color:#06121f}
+.ae-bar-pin svg{width:10px;height:10px}
+.ae-bar-row.is-keys .ae-bar-group>*{width:56px}
+.ae-keycap{display:grid;place-items:center;height:26px;box-sizing:border-box;font:700 13px/1 "Barlow","Segoe UI",sans-serif;color:var(--ae-ink);background:#0b1222;border:1px solid #3a4560;border-bottom-width:3px;border-radius:4px}
+.ae-keycap.is-mouse svg{width:18px;height:18px;color:var(--ae-ink)}
+.ae-swatch{display:inline-block;width:14px;height:14px;border-radius:3px;border:2px solid;box-sizing:border-box}
+.ae-swatch.is-fixed{border-color:var(--ae-ice)}.ae-swatch.is-key{border-color:var(--ae-gold)}.ae-swatch.is-macro{border-color:color-mix(in srgb,var(--ae-gold) 55%,#3d5a73)}
+.ae-swatch.is-manual{border-color:#4fd1a5}.ae-swatch.is-stigma{border-color:#b07cff}.ae-swatch.is-spare{border-color:#4a5674;border-width:1px}
+.ae-bar-note{margin:0;font-size:13px}
+.ae-bar-swipe{display:none;margin:0;font-size:12px;color:var(--ae-muted);text-align:right}
+@media (max-width:820px){.ae-bar-swipe{display:block}}
+@media (max-width:640px){.ae-bar-cell,.ae-bar-row.is-keys .ae-bar-group>*{width:44px}.ae-bar-cell{height:44px}.ae-bar-row{gap:8px}.ae-bar-group{gap:3px}}
 /* Game node art: the official sockets fill the tile; route state is a ring around them. */
 .ae-node:has(.ae-node-art){background:none;border:0;box-shadow:none;border-radius:18%}
 .ae-node-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
@@ -677,10 +709,10 @@ body.aetherium-page .ae-primary:disabled:not(#ax-p1):not(#ax-p2):not(#ax-p3):not
 body.aetherium-page :is(.ae-slot,.ae-roster-open,.ae-roster-add,.ae-result):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){
   clip-path:var(--ae-notch)!important;background:var(--ae-navy-raised)!important;box-shadow:var(--ae-bevel)!important;color:var(--ae-ink)!important}
 /* Mastery skill tiles and stigma slots are square game icons, not machined buttons. */
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill,.ae-bar-cell):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
   clip-path:none!important;border:1px solid #3a4560!important;border-radius:4px!important;background:#141b2b!important;box-shadow:none!important;padding:0!important;min-height:0!important;overflow:hidden!important}
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
-body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill,.ae-bar-cell):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::before,
+body.aetherium-page :is(.ae-mskill,.ae-stg-slot,.ae-itile,.ae-guide-hide,.ae-guide-pill,.ae-bar-cell):not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6)::after{content:none!important;display:none!important}
 body.aetherium-page .ae-stg-slot:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:0!important;background:transparent!important;overflow:visible!important}
 body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8){clip-path:none!important;background:none!important;box-shadow:none!important;min-height:0!important;border:0!important;padding:0!important}
 body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8)::before,body.aetherium-page .ae-info-close:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):not(#ax-q8)::after{content:none!important;display:none!important}
@@ -688,6 +720,14 @@ body.aetherium-page .ae-guide-hide:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q
 body.aetherium-page .ae-guide-pill:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border:1px solid color-mix(in srgb,var(--ae-ice) 60%,transparent)!important;background:rgba(12,22,42,.97)!important;border-radius:20px!important;padding:0 14px!important;min-height:40px!important}
 body.aetherium-page .ae-itile.is-big:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important;width:72px;height:72px}
 body.aetherium-page .ae-mskill.is-key:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-color:var(--ae-gold)!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){border-radius:3px!important;background:#1b2b3c!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7).is-empty{background:radial-gradient(circle,#2a4256 0 2px,transparent 3px),#172433!important;border-color:#2b4155!important}
+body.aetherium-page .ae-bar-row.is-main .ae-bar-cell.is-empty:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){background:radial-gradient(circle,#3c5f78 0 2px,transparent 3px),#1d3142!important;border-color:#3d5a73!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7).is-fixed{border:2px solid var(--ae-ice)!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7).is-key{border:2px solid var(--ae-gold)!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7):is(.is-macro,.is-build){border:2px solid color-mix(in srgb,var(--ae-gold) 55%,#3d5a73)!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7).is-manual{border:2px solid #4fd1a5!important}
+body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7).is-stigma{border:2px solid #b07cff!important}
 body.aetherium-page .ae-roster-add:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5){background:transparent!important;color:var(--ae-muted)!important}
 body.aetherium-page .ae-slot[aria-pressed="true"]:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6){
   background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 26%,transparent),var(--ae-navy-raised) 75%)!important;

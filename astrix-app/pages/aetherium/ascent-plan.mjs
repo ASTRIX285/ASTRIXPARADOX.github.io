@@ -78,6 +78,7 @@ function setFormLock() {
    what to do there, one step at a time. Reasons stay short and show where they are needed. */
 const VIEWS = {
   mastery: { title: 'Mastery', window: 'Skill', blurb: 'Which skills to level and which Specialty perks to pick' },
+  'skill-bar': { title: 'Skill Bar', window: 'Skill Bar', blurb: 'Which key each skill goes on' },
   stigma: { title: 'Stigma', window: 'Stigma', blurb: 'The four stigmas to slot, and good swaps' },
   daevanion: { title: 'Daevanion', window: 'Daevanion', blurb: 'Your boards with the route to take, node by node' },
   macro: { title: 'Macro', window: 'Macro', blurb: 'The skill order to put in Macro 1' },
@@ -91,6 +92,7 @@ const ICON = {
   gear: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6.5 17-15 21C15.5 39 9 32 9 22V11z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 15v18M17 22h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
   mastery: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38L30 18M30 18l4-10 6 6-10 4M14 30l4 4M8 40l4-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   stigma: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  bar: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="14" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="15" y="14" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="26" y="14" width="9" height="9" rx="1.5" fill="currentColor"/><rect x="37" y="14" width="7" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="4" y="27" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="15" y="27" width="9" height="9" rx="1.5" fill="currentColor"/><rect x="26" y="27" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="37" y="27" width="7" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>',
   mouse: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="13" y="5" width="22" height="38" rx="11" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 5v13M13 18h22" stroke="currentColor" stroke-width="2.5"/><path d="M9 22v8" stroke="var(--ae-ice)" stroke-width="4" stroke-linecap="round"/></svg>',
   lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
   daevanion: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 8h8v8H8zM20 8h8v8h-8zM32 8h8v8h-8zM20 20h8v8h-8zM8 32h8v8H8zM20 32h8v8h-8zM32 32h8v8h-8zM12 16v16M36 16v16M16 24h4M28 24h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>'
@@ -124,6 +126,7 @@ function skillIcon(plan, text) {
   return name ? plan.skillIcons[name] : null;
 }
 function viewArt(view, plan) {
+  if (view === 'skill-bar') return ICON.bar;
   if (view === 'mastery') {
     const key = plan.mastery?.active.find(entry => entry.priority === 1);
     return key?.icon ? art(key.icon) : ICON.mastery;
@@ -148,6 +151,10 @@ function viewStatus(view, plan) {
     const open = plan.daevanion.boards.filter(board => board.open);
     const live = open.find(board => board.nodesTaken !== null);
     return live ? `${live.name}: ${live.nodesTaken} / ${live.nodesTotal} nodes` : open.length ? `${open.length} of ${plan.daevanion.boards.length} boards open` : `Opens at Lv ${plan.daevanion.boards[0]?.unlockLevel ?? 12}`;
+  }
+  if (view === 'skill-bar') {
+    const bar = plan.skillBar;
+    return bar ? `${bar.basic} stays on left click` : 'Not ready yet';
   }
   if (view === 'macro') {
     if (isPending(plan.rotation)) return 'Not confirmed yet';
@@ -293,6 +300,62 @@ function renderMacroScreen(plan) {
   </div>`;
 }
 
+/* Skill Bar: the game's 4 bars of keys, filled with where this build puts each skill. */
+const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click' };
+const ROLE_LABEL = { fixed: 'Fixed by the game', key: 'Key skill', macro: 'In your macro', build: 'Build skill', manual: 'Fire it by hand', stigma: 'Stigma', spare: 'Spare' };
+function keyCap(key) {
+  if (key === 'LMB' || key === 'RMB') {
+    const left = key === 'LMB';
+    return `<span class="ae-keycap is-mouse" title="${KEY_LABEL[key]}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="${left ? 'M12 2.9V10H5.9V9A6.1 6.1 0 0 1 12 2.9Z' : 'M12 2.9V10h6.1V9A6.1 6.1 0 0 0 12 2.9Z'}" fill="var(--ae-ice)"/><path d="M12 3v7M5.5 10h13" stroke="currentColor" stroke-width="1.4"/></svg></span>`;
+  }
+  return `<span class="ae-keycap">${esc(key)}</span>`;
+}
+function barCell(item, key, row) {
+  if (!item) return `<span class="ae-bar-cell is-empty" aria-hidden="true"></span>`;
+  const tip = `${KEY_LABEL[key] ?? key}: ${item.name}${item.locked ? ` · unlocks at Lv ${item.unlockLevel}` : ''}`;
+  return `<span class="ae-bar-cell is-${item.role}${item.locked ? ' is-locked' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="${item.role}" data-bar-key="${row}:${key}" data-tip="${esc(tip)}" aria-label="${esc(`Bar ${row}, ${tip}`)}">
+    <span class="ae-mskill-name">${esc(item.name)}</span>${art(item.icon)}
+    ${item.rank ? `<span class="ae-mskill-rank">${item.rank}</span>` : ''}
+    ${item.fixed ? `<span class="ae-bar-pin" aria-hidden="true">${ICON.lock}</span>` : ''}
+    ${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : ''}
+  </span>`;
+}
+function renderSkillBarScreen(plan) {
+  const bar = plan.skillBar;
+  if (!bar) return '<p class="ae-callout">The skill list for this class is not loaded yet.</p>';
+  const groups = [['1', '2', '3', '4'], ['5', '6', '7', '8'], ['Q', 'E'], ['LMB', 'RMB']];
+  const row = index => `<div class="ae-bar-row${index === 0 ? ' is-main' : ''}" data-bar-row="${index}">
+      ${groups.map(group => `<div class="ae-bar-group">${group.map(key => barCell(bar.bars[index][key], key, index)).join('')}</div>`).join('')}
+      <span class="ae-bar-num">${index}</span>
+    </div>`;
+  return `<div class="ae-skillbar">
+    <p class="ae-bar-swipe" aria-hidden="true">Swipe the bar to see Q, E and the mouse buttons ›</p>
+    <div class="ae-bar-scroll" id="aeSkillBar">
+      <div class="ae-bar-grid">
+        ${[3, 2, 1, 0].map(row).join('')}
+        <div class="ae-bar-row is-keys" aria-hidden="true">${groups.map(group => `<div class="ae-bar-group">${group.map(keyCap).join('')}</div>`).join('')}<span class="ae-bar-num"></span></div>
+      </div>
+    </div>
+    <ul class="ae-legend-row" aria-label="Key">
+      <li><span class="ae-swatch is-fixed"></span>Fixed: the game keeps ${esc(bar.basic)} on left click</li>
+      <li><span class="ae-swatch is-key"></span><span class="ae-mskill-rank">1</span>Key skill, in levelling order</li>
+      <li><span class="ae-swatch is-macro"></span>Build and macro skills</li>
+      <li><span class="ae-swatch is-manual"></span>Fire by hand</li>
+      <li><span class="ae-swatch is-stigma"></span>Stigma</li>
+      <li><span class="ae-swatch is-spare"></span>Spare, on bar 1</li>
+    </ul>
+    <p class="ae-muted ae-bar-note">Bar 0 is the one you fight on. Your macro does not need a slot: it has its own key (see Macro).</p>
+  </div>`;
+}
+function barSkillCard(name, role) {
+  const plan = state.plan;
+  const entry = [...plan.mastery.active, ...plan.mastery.passive].find(item => item.name === name);
+  const index = plan.stigmas.slots?.findIndex(slot => slot.name === name) ?? -1;
+  if (role === 'stigma' && index >= 0) return stigmaCard(plan, index);
+  if (entry) return masteryCard(entry);
+  return infoCardHtml({ icon: plan.skillIcons[name], title: name, sub: ROLE_LABEL[role] ?? 'Skill' });
+}
+
 function renderStatsScreen(plan) {
   const s = plan.stats;
   if (isPending(s)) return pendingNote(s);
@@ -346,6 +409,18 @@ function guideSteps(view, plan) {
     const next = s.slots.findIndex(slot => !slot.open);
     if (next >= 0 && plan.level >= s.unlockLevel) add(`At Lv ${s.slots[next].slotLevel} slot ${next + 1} opens. Put ${s.slots[next].name} in it.`, `[data-stigma="${next}"]`, pick(next));
     for (const alt of s.alternatives.slice(0, 2)) add(`Want a swap? ${alt.name}. ${alt.why}`, `[data-alt="${CSS.escape(alt.name)}"]`);
+  } else if (view === 'skill-bar') {
+    const bar = plan.skillBar;
+    if (!bar) return [];
+    const main = bar.bars[0];
+    add(`Left click always fires ${bar.basic}. The game keeps it there, so build around it.`, '[data-bar-key="0:LMB"]');
+    const keys = ['1', '2', '3', '4'].filter(key => main[key]);
+    if (keys.length) add(`Keys ${keys[0]} to ${keys.at(-1)}: ${keys.map(key => main[key].name).join(', ')}. Your key skills, in the order you level them.`, `[data-bar-row="0"] .ae-bar-group:nth-child(1)`);
+    if (main.RMB) add(`Right click: ${main.RMB.name}.`, '[data-bar-key="0:RMB"]');
+    const qe = ['Q', 'E'].filter(key => main[key]);
+    if (qe.length) add(`${qe.join(' and ')}: ${qe.map(key => main[key].name).join(' and ')}. ${qe.some(key => main[key].role === 'manual') ? 'Skills you fire by hand, when you need them.' : 'Close to your hand for quick use.'}`, `[data-bar-row="0"] .ae-bar-group:nth-child(3)`);
+    if (['5', '6', '7', '8'].some(key => main[key])) add('Keys 5 to 8: your stigmas. Each one goes on as its slot opens.', `[data-bar-row="0"] .ae-bar-group:nth-child(2)`);
+    if (Object.values(bar.bars[1]).some(Boolean)) add('Bar 1 holds everything else. Swap to it when you need one of those.', '[data-bar-row="1"]');
   } else if (view === 'macro') {
     if (isPending(plan.rotation)) return [];
     const usable = plan.rotation.steps.filter(step => !step.locked);
@@ -397,7 +472,7 @@ function showGuideStep(index, scroll = true) {
   step.onShow?.();
   const target = step.target ? document.querySelector(step.target) : null;
   target?.classList.add('ae-guide-target');
-  if (scroll && target) target.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  if (scroll && target) target.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   const last = guide.index === steps.length - 1;
   $('#aeGuide').innerHTML = `
     <span class="ae-guide-pill" role="button" tabindex="0" data-guide="show">Guide · step ${guide.index + 1} of ${steps.length}</span>
@@ -670,6 +745,7 @@ function renderPlan() {
       : VIEW === 'stigma' ? renderStigmaScreen(plan)
       : VIEW === 'daevanion' ? renderPlannerShell(plan)
       : VIEW === 'macro' ? renderMacroScreen(plan)
+      : VIEW === 'skill-bar' ? renderSkillBarScreen(plan)
       : renderStatsScreen(plan);
     $('#aePlan').innerHTML = `${fallback}${gameWindow(VIEW, plan, body)}`;
     if (VIEW === 'daevanion' && state.model && !plan.pending && document.querySelector('#aePlannerBody')) showBoard(planner.boardId).catch(fail);
@@ -738,6 +814,8 @@ function wireForm() {
     if (skill) { selectMastery(skill); return; }
     const stigma = event.target.closest('[data-stigma]');
     if (stigma) { selectStigma(stigma); return; }
+    const barSkill = event.target.closest('[data-bar-skill]');
+    if (barSkill) { openInfo(barSkillCard(barSkill.dataset.barSkill, barSkill.dataset.barRole), barSkill); return; }
     const alt = event.target.closest('[data-alt]');
     if (alt) { openInfo(altCard(state.plan, alt.dataset.alt), alt); return; }
     const worn = event.target.closest('[data-stigma-now]');
@@ -758,7 +836,7 @@ function wireForm() {
   $('#aePlan').addEventListener('keydown', event => {
     const skill = event.target.closest?.('[data-mastery]');
     if (skill && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectMastery(skill); return; }
-    const tile = event.target.closest?.('[data-stigma],[data-alt],[data-stigma-now]');
+    const tile = event.target.closest?.('[data-stigma],[data-alt],[data-stigma-now],[data-bar-skill]');
     if (tile && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); tile.click(); return; }
     const node = event.target.closest?.('[data-node],[data-route-node]');
     if (node && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectNode(node.dataset.node ?? node.dataset.routeNode); }
