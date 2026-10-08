@@ -11,7 +11,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,pickBuild,rolesFor} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
-import {affordable,explainNode,nodeCost,planDaevanionBoard} from '../games/aion2/engine/daevanion-planner.mjs';
+import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
 
 const root=new URL('../',import.meta.url);
 const json=path=>JSON.parse(readFileSync(new URL(path,root),'utf8'));
@@ -308,6 +308,32 @@ check('Daevanion: a points budget splits the route into now and later',()=>{
   assert.equal(affordable(route,0).now.length,0);
   assert.equal(affordable(route,999).shortBy,null);
   assert.equal(affordable(route,'').now.length,0);
+});
+
+check('Daevanion: summariseBoard adds up the taken nodes, keeps % as %, and lists what is left',()=>{
+  const take=(name,count)=>nezekan.filter(node=>node.name===name&&!node.taken).slice(0,count).map(node=>node.nodeId);
+  const takenIds=new Set([...take('Max MP',2),...take('Max HP',1),...take('Attack',3),...take('Combat Speed',2),...take('Skill Level Up - Rending Blow',1),...take('Skill Level Up - Blood Absorption',2)]);
+  const nodes=nezekan.map(node=>takenIds.has(node.nodeId)?{...node,taken:true}:node);
+  const sum=summariseBoard(nodes,{daevanion:{skillNodes:gladiatorNodes}});
+  assert.deepEqual(sum.skillEffects.map(row=>row.text),['Blood Absorption +2','Rending Blow +1']);
+  assert.deepEqual(sum.statEffects.map(row=>row.text),['Attack Bonus +9','Combat Speed +3%','HP +100','MP +100'],'two MP +50 nodes give MP +100; 1.5% twice is 3%');
+  assert.deepEqual(sum.statEffects.find(row=>row.name==='Combat Speed'),{name:'Combat Speed',unit:'%',total:3,text:'Combat Speed +3%'});
+  assert.equal(sum.takenCount,11);
+  assert.equal(sum.totalNodes,88);
+  assert.equal(sum.left.count,77);
+  assert.equal(sum.left.points,134-nodes.filter(node=>node.taken).reduce((total,node)=>total+nodeCost(node),0),'points left are the board total less what is taken');
+  assert.deepEqual(sum.left.keySkills.map(row=>row.text),['Overhead Slam +1','Ruinous Blow +1','Crushing Wave +1'],'key skill nodes not taken, in the build order');
+  assert.deepEqual(sum.left.corners.map(row=>row.text),['Cooldown Reduction +1.5%','Cooldown Reduction +1.5%']);
+  // Nothing taken: nothing added up, everything left. No plan: no key skill list.
+  const none=summariseBoard(nezekan,null);
+  assert.deepEqual([none.skillEffects,none.statEffects,none.left.keySkills],[[],[],[]]);
+  assert.equal(none.left.count,88);
+  assert.equal(none.left.points,134);
+  // Lines with no number are not added up; a minus stays a minus.
+  assert.equal(parseEffect('Cooldown Reduction'),null);
+  assert.deepEqual(parseEffect('Move Speed -2.5%'),{name:'Move Speed',value:-2.5,unit:'%'});
+  const odd=[{type:'Stat',grade:'Common',nodeId:1,row:1,col:1,name:'x',taken:true,effects:['Move Speed -2%']},{type:'Stat',grade:'Common',nodeId:2,row:1,col:2,name:'x',taken:true,effects:['Move Speed -3%']}];
+  assert.equal(summariseBoard(odd).statEffects[0].text,'Move Speed -5%');
 });
 
 check('Daevanion: every node explains itself in plain words',()=>{

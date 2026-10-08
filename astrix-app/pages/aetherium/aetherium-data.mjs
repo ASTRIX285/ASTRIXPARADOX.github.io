@@ -228,17 +228,38 @@ export function refFromUrl(search = location.search) {
   return /^\d+$/.test(serverId ?? '') && characterId ? { serverId: Number(serverId), characterId } : null;
 }
 
-export const gearUrl = ref => ref
-  ? `/hub/aetherium/gear/?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId })}`
-  : '/hub/aetherium/gear/';
+/* Page addresses. Every link to a Daeva page is built here, so a Daeva (?serverId=&characterId=) and the
+   class (lets the page start fetching its skill data while the armory answers) travel together. */
+function withQuery(path, ref, extra = {}) {
+  const params = new URLSearchParams();
+  if (ref) { params.set('serverId', ref.serverId); params.set('characterId', ref.characterId); }
+  for (const [key, value] of Object.entries(extra)) if (value !== null && value !== undefined && value !== '') params.set(key, value);
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
+}
+const classSlug = className => (className ? String(className).toLowerCase() : null);
 
-/** The Ascent Plan link for a Daeva. The class (when known) lets the page fetch its builds while the armory answers. */
-export const ascentUrl = (ref, className = null) => ref
-  ? `/hub/aetherium/ascent/?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId, ...(className ? { class: String(className).toLowerCase() } : {}) })}`
-  : '/hub/aetherium/ascent/';
+/** The character menu (Gear, Skills, Daevanion cards). */
+export const gearUrl = ref => withQuery('/hub/aetherium/gear/', ref);
+
+/** The Gear page: worn items, stats, pet, wings and title. */
+export const gearPageUrl = ref => withQuery('/hub/aetherium/gear/equipment/', ref);
+
+/** The Skills page. tab is 'mastery' (the default, left out of the address) or 'stigma'. */
+export const skillsUrl = (ref, className = null, tab = 'mastery') => withQuery('/hub/aetherium/skills/', ref, { class: classSlug(className), tab: tab === 'stigma' ? 'stigma' : null });
+
+/** The Daevanion page, opened on one board (?board=11). */
+export const daevanionPageUrl = (ref, className = null, boardId = null) => withQuery('/hub/aetherium/daevanion/', ref, { class: classSlug(className), board: boardId });
+
+/** The Ascent Plan link for a Daeva, or one of its screens (screen: 'daevanion', 'mastery' ...). The class (when known) lets the page fetch its builds while the armory answers. */
+export function ascentUrl(ref, className = null, { screen = null, board = null } = {}) {
+  const path = `/hub/aetherium/ascent/${screen ? `${screen}/` : ''}`;
+  return ref ? withQuery(path, ref, { class: classSlug(className), board }) : path;
+}
 
 const ADVISOR = '/astrix-app/games/aion2/data/advisor/';
 let advisorBase;
+let advisorProgression;
 const advisorBuilds = new Map();
 const advisorIcons = new Map();
 
@@ -247,9 +268,15 @@ const advisorIcons = new Map();
  * role builds for one class (loaded when that class is picked). Static files, no armory call.
  */
 export function loadAdvisorBase() {
-  advisorBase ??= Promise.all([getJson(`${ADVISOR}progression.json`), getJson(`${ADVISOR}skills.json`)])
+  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`)])
     .catch(error => { advisorBase = undefined; throw error; });
   return advisorBase;
+}
+
+/** Game-wide facts only (boards, unlock levels): a small file, so the menu and Daevanion pages skip the skill catalogue. */
+export function loadProgression() {
+  advisorProgression ??= getJson(`${ADVISOR}progression.json`).catch(error => { advisorProgression = undefined; throw error; });
+  return advisorProgression;
 }
 
 function loadBuilds(className) {
@@ -269,6 +296,18 @@ function loadIcons(className) {
 export function prefetchAdvisor(className) {
   loadAdvisorBase().catch(() => {});
   if (className) { loadBuilds(className).catch(() => {}); loadIcons(className); }
+}
+
+/** Starts fetching what the Daevanion page needs (no await), so it is ready when the board is. */
+export function prefetchDaevanionAdvice(className) {
+  loadProgression().catch(() => {});
+  if (className) loadBuilds(className).catch(() => {});
+}
+
+/** What the Daevanion page needs: the game-wide facts and the class's builds (for its key skill nodes). */
+export async function loadDaevanionAdvice(className) {
+  const [progression, builds] = await Promise.all([loadProgression(), loadBuilds(className)]);
+  return { progression, builds };
 }
 
 export async function loadAdvisor(className) {

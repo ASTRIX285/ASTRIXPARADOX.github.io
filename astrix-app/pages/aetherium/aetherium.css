@@ -90,6 +90,10 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
 .ae-tile{padding:12px 14px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
 .ae-tile dt{font-size:13px;color:var(--ae-muted)}
+.ae-tile{position:relative}
+.ae-tile.is-link a{color:inherit;text-decoration:none}
+.ae-tile.is-link a::after{content:"";position:absolute;inset:0}
+.ae-tile.is-link:hover,.ae-tile.is-link:focus-within{border-color:var(--ae-gold)}
 .ae-tile dd{margin:4px 0 0;font:600 26px/1.15 var(--ax-font-head);color:var(--ae-ink)}
 .ae-tile dd span{color:var(--ae-muted);font-size:20px}
 .ae-tile dd small{font:600 16px/1.3 var(--ax-font-head);color:var(--ae-ice)}
@@ -132,7 +136,6 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-slot-meta{color:var(--ae-muted);font-size:13px}
 .ae-icon{flex:none;width:52px;height:52px;object-fit:contain;background:var(--ae-navy);border:1px solid var(--ae-navy-line)}
 .ae-icon-empty{display:inline-block}
-.ae-stigma .ae-icon,.ae-stigma .ae-icon-empty{width:36px;height:36px}
 .ae-extra .ae-icon,.ae-extra .ae-icon-empty{width:40px;height:40px}
 .ae-accessories{margin:10px 0 0;color:var(--ae-muted);font-size:13px}
 .ae-item{min-height:120px}
@@ -149,29 +152,6 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-item-stats th,.ae-item-stats td{padding:7px 0;border-bottom:1px solid var(--ae-navy-line);text-align:left;font-weight:500}
 .ae-item-stats td{text-align:right;font-family:var(--ax-font-head);font-weight:600}
 .ae-plus{color:var(--ae-ice)}
-.ae-stigmas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
-.ae-stigma{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
-.ae-stigma span{display:grid;min-width:0}
-.ae-stigma strong{font:700 14px/1.2 var(--ax-font-head);overflow-wrap:anywhere}
-.ae-stigma small{color:var(--ae-muted);font-size:12px}
-.ae-stigma.is-locked .ae-icon{filter:grayscale(1) brightness(.7)}
-.ae-boards{display:grid;gap:12px;margin:0;padding:0;list-style:none}
-.ae-board-row{display:flex;align-items:baseline;gap:10px;font-size:15px}
-.ae-board-name{font-weight:600}
-.ae-board-state{padding:2px 7px;font:700 10px/1.3 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--ae-navy-line-strong);color:var(--ae-muted)}
-.ae-board.is-open .ae-board-state{border-color:var(--ae-accent);color:var(--ae-accent)}
-.ae-board-count{margin-left:auto;font:600 14px/1 var(--ax-font-head);color:var(--ae-ink)}
-.ae-bar{height:6px;margin-top:6px;background:var(--ae-navy);border:1px solid var(--ae-navy-line)}
-.ae-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--ae-accent),var(--ae-accent-2))}
-.ae-board.is-locked{opacity:.6}
-.ae-board summary{display:block;cursor:pointer;list-style:none}
-.ae-board summary::-webkit-details-marker{display:none}
-.ae-board summary:focus-visible{outline:2px solid var(--ae-ice);outline-offset:3px}
-.ae-board .ae-bar{display:block}
-.ae-board-nodes{padding:10px 0 2px;font-size:13px}
-.ae-board-nodes p{margin:0 0 8px}
-.ae-node-effects{display:grid;gap:4px;margin:0;padding:0;list-style:none}
-.ae-node-effects li{display:flex;justify-content:space-between;gap:10px;padding:5px 8px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
 .ae-skeleton{display:grid;place-items:center;min-height:180px;color:var(--ae-muted)}
 .ae-loading{color:var(--ae-muted);font-size:14px;list-style:none}
 .ae-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
@@ -657,17 +637,113 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 @media (max-width:1099px){.ae-planner-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:479px){.ae-board-grid{padding:8px;--tile:clamp(16px,5.4vw,24px)}.ae-node-step{top:-5px;right:-5px;min-width:15px;height:15px;font-size:9px}}
 
+/* Character pages: the menu, Gear, Skills and Daevanion. Game windows like the Ascent Plan screens. */
+.ae-menu.is-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ae-menu-card.is-skeleton{min-height:200px;opacity:.45;clip-path:var(--ae-notch)}
+.ae-gw-tabs.is-centred{justify-content:safe center;gap:6px;padding:8px 12px}
+.aetherium-page .ae-gw-tab{flex:0 0 auto;min-height:44px;padding:0 20px;font:700 14px/1 var(--ax-font-head);letter-spacing:.08em;text-transform:none;color:var(--ae-muted);background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line)}
+.aetherium-page .ae-gw-tab[aria-selected="true"]{color:var(--ae-ink);border-color:var(--ae-accent);box-shadow:inset 0 -2px 0 var(--ae-accent)}
+.aetherium-page .ae-gw-tab.is-locked{color:var(--ae-dim)}
+.ae-pad{display:inline-grid;place-items:center;width:12px;height:12px;margin-right:4px;vertical-align:-1px;color:var(--ae-muted)}
+.ae-pad svg{width:12px;height:12px}
+.ae-hover{position:fixed;z-index:950;width:min(340px,92vw);box-sizing:border-box;padding:14px 16px;display:grid;gap:8px;pointer-events:none;
+  background:linear-gradient(180deg,#18223a,#0c1222);border:1px solid color-mix(in srgb,var(--ae-gold) 60%,#3a4560);box-shadow:0 18px 40px rgba(0,0,0,.6)}
+.ae-hover[hidden]{display:none}
+.ae-hover .ae-card-head{padding-right:0}
+.ae-hover .ae-mperks,.ae-sdetail .ae-mperks{font-size:13px}
+.ae-card-facts{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:14px}
+.ae-card-facts li{display:flex;justify-content:space-between;gap:12px}
+.ae-card-facts span{color:var(--ae-muted)}.ae-card-facts b{color:var(--ae-ink)}
+.ae-card-slot.is-locked,.ae-mperks li.is-locked{opacity:.6}
+.ae-mperks li .ae-pad{margin:0 0 0 auto}
+
+/* Gear page: gear and stats on the left, pet, wings and title on the right, both columns ending level. */
+.ae-gear-page{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);align-items:stretch}
+.ae-gear-page>.ae-col{display:flex;flex-direction:column}
+.ae-gear-page .is-grow{flex:1 1 auto;display:flex;flex-direction:column}
+.ae-gear-page .is-grow>:last-child:not(.ae-extras){margin-top:auto}
+.ae-gear-page .ae-extras{flex:1;grid-auto-rows:1fr}
+.ae-gear-page .ae-extra{flex-direction:column;justify-content:center;gap:12px;padding:20px;text-align:center}
+.ae-gear-page .ae-extra span{justify-items:center;gap:3px}
+.ae-gear-page .ae-extra .ae-icon,.ae-gear-page .ae-extra .ae-icon-empty{width:88px;height:88px}
+.ae-gear-page .ae-extra strong{font-size:18px}
+@media (max-width:1099px){
+  .ae-gear-page{grid-template-columns:minmax(0,1fr)}
+  .ae-gear-page .ae-extras{grid-auto-rows:auto}
+  .ae-gear-page .ae-extra{flex-direction:row;justify-content:flex-start;padding:10px 12px;text-align:left}
+  .ae-gear-page .ae-extra span{justify-items:start}
+  .ae-gear-page .ae-extra .ae-icon,.ae-gear-page .ae-extra .ae-icon-empty{width:56px;height:56px}
+}
+
+/* Skills page: detail on the left, the 5-wide icon grid on the right, like the game's Skill window. */
+.ae-skills-window{max-width:1180px;margin-inline:auto}
+.ae-skills-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.ae-sdetail,.ae-sgrid-wrap{box-sizing:border-box;min-width:0;padding:16px 18px;background:linear-gradient(180deg,#121b30,#0c1222);border:1px solid var(--ae-navy-line-strong)}
+.ae-sdetail{display:grid;gap:12px;align-content:start}
+.ae-sdetail .ae-card-head{padding-right:0}
+.ae-sdetail .ae-card-head h3{font-size:22px}
+.ae-sgrid-wrap{display:grid;gap:10px;align-content:start}
+.ae-sgrid-wrap .ae-mskills-title{margin:0}
+.ae-sgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ae-sgrid .ae-mskill-lv{font-size:12px}
+@media (max-width:899px){
+  .ae-skills-layout{grid-template-columns:minmax(0,1fr)}
+  .ae-sgrid-wrap{order:-1}
+}
+
+/* Daevanion page: the board in the middle, Node and Board Effect on the right, like the game's Daevanion window. */
+.ae-dv{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:24px;align-items:stretch}
+.ae-dv-board{container-type:inline-size;min-width:0;display:grid;gap:12px;justify-items:center;align-content:start}
+.ae-dv-board .ae-board-stage{width:fit-content;max-width:100%}
+.ae-board-grid.is-fit{--tile:min(50px,calc((100cqw - 36px) / (var(--cols) * 1.22 - .22)))}
+.ae-board-stage.is-greyed{filter:grayscale(1) brightness(.6)}
+.ae-dv-banner{margin:0;padding:8px 14px;font:700 14px/1.3 var(--ax-font-head);text-align:center;color:var(--ae-ink);background:#1b2438;border:1px solid var(--ae-navy-line-strong)}
+.ae-dv-closed{display:grid;place-items:center;align-content:center;gap:10px;min-height:340px;width:100%;text-align:center}
+.ae-dv-closed h2{margin:0;font:700 24px/1.2 var(--ax-font-head);color:var(--ae-ink)}
+.ae-dv-closed p{margin:0;color:var(--ae-muted);max-width:36ch}
+.ae-dv-lock svg{width:56px;height:56px;color:var(--ae-muted)}
+.ae-dv-reading{margin:0;padding:40px 0}
+.ae-dv-panel{box-sizing:border-box;min-width:0;display:flex;flex-direction:column;gap:12px;padding:12px;background:linear-gradient(180deg,#121b30,#0c1222);border:1px solid var(--ae-navy-line-strong)}
+.ae-dv-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.aetherium-page .ae-dv-tabs .ae-gw-tab{padding:0 10px}
+.ae-dv-panel .ae-node-panel{flex:1;align-content:start;padding:4px 2px;background:none;border:0}
+.ae-dv-panel .ae-dv-plan{align-self:stretch}
+.ae-node-lines{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.ae-node-lines li,.ae-effect-list li,.ae-left-node{padding:6px 10px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);font-size:14px}
+.ae-node-note{margin:0;font-size:12px}
+.ae-effect{display:grid;gap:6px}
+.ae-effect-title{margin:10px 0 2px;font:700 12px/1.2 var(--ax-font-head);letter-spacing:.16em;text-transform:uppercase;color:var(--ae-gold)}
+.ae-effect-title:first-child{margin-top:0}
+.ae-effect-sub{margin:4px 0 0;font:700 12px/1.2 var(--ax-font-head);color:var(--ae-muted)}
+.ae-effect-list,.ae-left-list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.ae-left-node{display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+.ae-left-node small{color:var(--ae-muted)}
+.ae-left-node:hover,.ae-left-node:focus-visible{border-color:var(--ae-gold)}
+.ae-effect-total{margin:8px 0 0;padding:8px 10px;font-size:14px;color:var(--ae-ink);background:color-mix(in srgb,var(--ae-gold) 7%,transparent);border:1px solid color-mix(in srgb,var(--ae-gold) 40%,var(--ae-navy-line))}
+@media (max-width:1099px){.ae-dv{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.aetherium-page .ae-gw-tab{padding:0 12px}.ae-gw-tabs.is-centred{padding:8px 6px;gap:4px}}
+@media (max-width:520px){
+  .aetherium-page .ae-gw-tab{padding:0 6px;font-size:13px;letter-spacing:.02em}
+  .ae-gw-tabs.is-centred{gap:3px}
+  .ae-menu.is-three{gap:8px}
+  .ae-menu.is-three .ae-menu-card{padding:12px 6px 10px}
+  .ae-menu.is-three .ae-menu-art{width:56px;height:56px}
+  .ae-menu.is-three .ae-menu-name{font-size:15px}
+  .ae-menu.is-three .ae-menu-status{font-size:12px}
+  .ae-menu.is-three .ae-menu-badge{right:6px;top:6px}
+}
+@media (min-width:1500px){
+  .ae-menu.is-three .ae-menu-card{padding:30px 18px 24px}
+  .ae-menu.is-three .ae-menu-art{width:112px;height:112px}
+}
+
 /* Wide screens (Miguel, 6 Oct 2026: "a lot of wasted space"): the content grows to 1640px and every page
-   uses the extra width. Ascent Plan goes to three columns, Gear Ledger flows its side panels into two,
-   and the Daeva Card roster sits on one row. */
+   uses the extra width. Ascent Plan goes to three columns and the Daeva Card roster sits on one row. */
 @media (min-width:1500px){
   :root{--ae-max:1640px}
   .ae-ascent-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,2fr)}
   .ae-ascent-side{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
   .ae-ascent-setup{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
-  .ae-ledger{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
-  .ae-ledger>.ae-col:last-child{display:block;columns:2;column-gap:var(--ae-gap)}
-  .ae-ledger>.ae-col:last-child>*{break-inside:avoid;margin:0 0 var(--ae-gap)}
   .ae-summary{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}
   .ae-roster{grid-template-columns:repeat(8,minmax(0,1fr))}
   .ae-summary-card .ae-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -696,7 +772,6 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 @media (max-width:479px){
   .ae-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .ae-tile dd{font-size:22px}
-  .ae-stigmas{grid-template-columns:minmax(0,1fr)}
 }
 
 /* Overrides of the shell's own !important rules live in the shell's layer, loaded later (see workbench.css). */

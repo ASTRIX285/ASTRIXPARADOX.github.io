@@ -112,6 +112,8 @@ await check('by hand: default Gladiator plan, no armory call, bookmarkable',asyn
   assert.match(page.url(),/\/hub\/aetherium\/ascent\/\?class=gladiator&role=dps&level=1$/);
   assert.match(await plain(page,'.ae-ascent-head'),/Gladiator: Greatsword bruiser DPS/);
   assert.match(await plain(page,'#aeNowTitle'),/at Lv 1/);
+  assert.equal(await page.isVisible('#aeAscentFor'),true,'By hand the plan line stays');
+  assert.equal(await plain(page,'#aeAscentFor'),'Gladiator · DPS · Lv 1');
   assert.equal(await page.isVisible('#aeSource'),false,'No character source line by hand');
   assert.equal(await page.getAttribute('body','data-faction'),'astrix');
   assert.deepEqual(await page.$$eval('.ae-menu-card',items=>items.map(el=>el.dataset.view)),[...SCREENS,'gear'],'A card per screen, like the game menu');
@@ -312,6 +314,20 @@ await check('Daevanion planner without a Daeva points to the Daeva Card',async()
   await context.close();
 });
 
+await check('Daevanion screen reads ?board= and keeps it in its address; a board that is not open falls back to the first open one',async()=>{
+  const wanted=await open(ascent(`${ref}&board=11`,'daevanion'),{live:true});
+  await wanted.page.waitForSelector('.ae-board-grid');
+  assert.equal(await wanted.page.getAttribute('[data-board-tab="11"]','aria-selected'),'true');
+  assert.equal(new URL(wanted.page.url()).searchParams.get('board'),'11','The board stays in the address');
+  assert.match(await wanted.page.getAttribute('.ae-gw-tabs a[data-view="stats"]','href'),/^(?!.*board=)/,'Links to other screens do not carry the board');
+  await wanted.context.close();
+  const locked=await open(ascent(`${ref}&board=13`,'daevanion'),{live:true});
+  await locked.page.waitForSelector('.ae-board-grid');
+  assert.equal(await locked.page.getAttribute('[data-board-tab="11"]','aria-selected'),'true','Vaizel is not open: the first open board shows');
+  assert.equal(new URL(locked.page.url()).searchParams.get('board'),'11');
+  await locked.context.close();
+});
+
 await check('with a Daeva link: armory fixes first, class and level locked, Elyos gold',async()=>{
   const {page,context,calls}=await open(ascent(ref),{live:true});
   assert.equal(calls[0],'/aion2/character');
@@ -322,6 +338,8 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await page.isDisabled('#aeRole'),false);
   assert.equal(await page.inputValue('#aeLevel'),'12');
   assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285, Gladiator Lv 12 on Meslamtaeda\./);
+  assert.equal(await page.isHidden('#aeAscentFor'),true,'The name, class and level show once: the Planning for line says them');
+  assert.equal(await plain(page,'#aeNowTitle'),'Your next moves','No "for <name>" when a Daeva is linked');
   const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
   assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 7 worn items above +0','Level Overhead Slam (now Lv 2)']);
   assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery'],'Each next move opens the screen that shows it');

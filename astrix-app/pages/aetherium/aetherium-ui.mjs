@@ -92,10 +92,10 @@ export function wireDrawer() {
 }
 
 /* The info card (like the game's tooltip) and the hover name label, shared by every Aetherium page. */
-export function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '', grade = null }) {
+export function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '', grade = null, titleId = 'aeInfoTitle' }) {
   return `<div class="ae-card-head"${grade ? ` data-grade="${esc(String(grade).toLowerCase())}"` : ''}>
       <span class="ae-card-icon">${icon ? `<img src="${esc(icon)}" alt="" width="64" height="64" decoding="async" referrerpolicy="no-referrer">` : ''}</span>
-      <div><h3 id="aeInfoTitle">${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
+      <div><h3${titleId ? ` id="${titleId}"` : ''}>${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
     </div>
     ${status ? `<p class="ae-card-status is-${status[0]}">${esc(status[1])}</p>` : ''}
     ${chips.length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : ''}
@@ -144,7 +144,41 @@ document.addEventListener('pointerout', event => { if (event.target.closest?.('[
 document.addEventListener('focusin', event => { const el = event.target.closest?.('[data-tip]'); if (el) showTip(el); });
 document.addEventListener('focusout', hideTip);
 addEventListener('scroll', hideTip, { passive: true });
+/**
+ * A game-style hover card for icons that have a card of their own (skills, stigmas). Elements opt in with
+ * data-hover; htmlFor(element) returns the card body (infoCardHtml with titleId: null) or nothing.
+ * Shows on mouse hover and keyboard focus, never on touch: there a tap selects the icon instead.
+ */
+let hoverBox = null;
+export function wireHoverCards(root, htmlFor) {
+  const hide = () => { if (hoverBox) hoverBox.hidden = true; };
+  const show = el => {
+    const html = htmlFor(el);
+    if (!html) { hide(); return; }
+    if (!hoverBox) {
+      hoverBox = document.createElement('div');
+      hoverBox.id = 'aeHover';
+      hoverBox.className = 'ae-hover';
+      hoverBox.setAttribute('role', 'tooltip');
+      document.body.append(hoverBox);
+    }
+    hoverBox.innerHTML = html;
+    hoverBox.hidden = false;
+    const r = el.getBoundingClientRect(), b = hoverBox.getBoundingClientRect();
+    // Under the icon, or above it when there is no room below; failing both, kept inside the screen.
+    const below = r.bottom + 8, above = r.top - b.height - 8;
+    const top = below + b.height <= innerHeight - 6 ? below : above >= 6 ? above : below;
+    hoverBox.style.left = `${Math.max(6, Math.min(innerWidth - b.width - 6, r.left + r.width / 2 - b.width / 2))}px`;
+    hoverBox.style.top = `${Math.max(6, Math.min(innerHeight - b.height - 6, top))}px`;
+  };
+  root.addEventListener('pointerover', event => { const el = event.target.closest?.('[data-hover]'); if (el && event.pointerType === 'mouse') show(el); });
+  root.addEventListener('pointerout', event => { if (event.target.closest?.('[data-hover]')) hide(); });
+  // Keyboard focus only: a tap on a phone also focuses the icon, and there a tap just selects.
+  root.addEventListener('focusin', event => { const el = event.target.closest?.('[data-hover]'); if (el?.matches(':focus-visible')) show(el); });
+  root.addEventListener('focusout', hide);
+  addEventListener('scroll', hide, { passive: true });
+}
 // A card icon that fails to load drops away and leaves the empty frame.
 document.addEventListener('error', event => {
-  if (event.target instanceof HTMLImageElement && event.target.closest('#aeInfo .ae-card-icon,#aeInfo .ae-perk')) event.target.remove();
+  if (event.target instanceof HTMLImageElement && event.target.closest('#aeInfo .ae-card-icon,#aeInfo .ae-perk,#aeHover .ae-card-icon,#aeHover .ae-perk')) event.target.remove();
 }, true);
