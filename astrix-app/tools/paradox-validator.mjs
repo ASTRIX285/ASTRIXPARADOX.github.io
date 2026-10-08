@@ -58,6 +58,7 @@ const validators=[
   'test-home-browser.mjs',
   'test-asset-weight.mjs', // perf/asset-weight: no first-load image over 300 KB, no full manifest.
   'validate-tools-hub.mjs',
+  'validate-sitemap.mjs', // sitemap.xml and robots.txt match the public pages.
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
   'test-profile-size.mjs',

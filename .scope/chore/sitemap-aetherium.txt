@@ -1,0 +1,4 @@
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/validate-sitemap.mjs
+robots.txt
+sitemap.xml

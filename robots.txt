@@ -1,13 +1,25 @@
-# ASTRIX PARADOX — robots.txt
+# ASTRIX PARADOX robots.txt
 # astrixparadox.com
 
 User-agent: *
 Allow: /
 
-# Block workflow and config files from indexing
+# Workflow, admin and config files
 Disallow: /.github/
+Disallow: /.scope/
 Disallow: /admin/
 Disallow: /twitch-status.json
 
-# Sitemap location
+# Source folders that are not pages: Worker code, dev tools and test fixtures
+Disallow: /aetherium-worker/
+Disallow: /forge-auth-worker/
+Disallow: /forge-worker/
+Disallow: /forge-manifest-worker/
+Disallow: /astrix-app/tools/
+
+# Old nested copy of the site: keep it out of search so it never competes with the real pages
+Disallow: /ASTRIX285.github.io/
+
+# Pages need their scripts, styles and data files to render for search engines, so those stay open.
+
 Sitemap: https://astrixparadox.com/sitemap.xml
