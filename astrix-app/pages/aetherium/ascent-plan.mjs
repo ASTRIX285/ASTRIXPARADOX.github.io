@@ -10,7 +10,7 @@
  * and gets the plan from static data alone, with no call to the official site. Advice comes from
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
-import { ArmoryUnavailable, ascentUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster } from './aetherium-data.mjs';
 import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
@@ -82,7 +82,7 @@ function setFormLock() {
    what to do there, one step at a time. Reasons stay short and show where they are needed. */
 const VIEWS = {
   mastery: { title: 'Mastery', window: 'Skill', blurb: 'Which skills to level and which Specialty perks to pick' },
-  'skill-bar': { title: 'Skill Bar', window: 'Skill Bar', blurb: 'Which key each skill goes on' },
+  'skill-bar': { title: 'Skill Bar', window: 'Where to put your skills', blurb: 'Where each skill should go on your bars. This is the plan, not what is on them now.' },
   stigma: { title: 'Stigma', window: 'Stigma', blurb: 'The four stigmas to slot, and good swaps' },
   daevanion: { title: 'Daevanion', window: 'Daevanion', blurb: 'Your boards with the route to take, node by node' },
   macro: { title: 'Macro', window: 'Macro', blurb: 'The skill order to put in Macro 1' },
@@ -185,7 +185,7 @@ function renderMenu(plan) {
       <ol class="ae-quest-list">${quests.map(questCard).join('')}</ol>
     </section>` : ''}
     <nav class="ae-menu" aria-label="Plan screens">
-      ${Object.entries(VIEWS).map(([view, info]) => `<a class="ae-menu-card" href="${esc(viewHref(view))}" data-view="${view}">
+      ${Object.entries(VIEWS).map(([view, info]) => `<a class="ae-menu-card" href="${esc(viewHref(view))}" data-view="${view}" title="${esc(info.blurb)}">
         <span class="ae-menu-art" data-fallback="${view}">${viewArt(view, plan)}</span>
         <span class="ae-menu-name">${esc(info.title)}</span>
         <span class="ae-menu-status">${esc(viewStatus(view, plan))}</span>
@@ -349,7 +349,7 @@ function renderSkillBarScreen(plan) {
       <li><span class="ae-swatch is-stigma"></span>Stigma</li>
       <li><span class="ae-swatch is-spare"></span>Spare, on bar 1</li>
     </ul>
-    <p class="ae-muted ae-bar-note">Bar 0 is the one you fight on. Your macro does not need a slot: it has its own key (see Macro).</p>
+    <p class="ae-muted ae-bar-note">This is where the build puts each skill, not what is on your bars now. Bar 0 is the one you fight on. Your macro does not need a slot: it has its own key (see Macro).</p>
   </div>`;
 }
 function barSkillCard(name, role) {
@@ -609,7 +609,7 @@ async function showBoard(boardId) {
     try { result = await loadBoard(state.model, board, state.source); }
     catch (error) {
       if (!(error instanceof ArmoryUnavailable)) throw error;
-      result = { nodes: null, reason: 'The official AION 2 site is not answering right now. Pick the board again in a minute.' };
+      result = { nodes: null, reason: explain(error, 'The official AION 2 site is not answering right now. Pick the board again in a minute.') };
     }
     if (planner.boardId !== boardId) return;
     if (!result.nodes) { body.innerHTML = `<p class="ae-muted">${esc(result.reason)}</p>`; return; }
@@ -853,7 +853,7 @@ async function loadDaeva(ref) {
     return await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    showNotice('The official AION 2 site is not answering right now, so this plans by hand. Try your Daeva again in a minute.', 'warn');
+    showNotice(explain(error, 'The official AION 2 site is not answering right now, so this plans by hand. Try your Daeva again in a minute.'), 'warn');
     return null;
   }
 }

@@ -4,7 +4,7 @@
  * Stats on the left under the gear; pet, wings and title on the right, both columns ending level.
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, loadCatalogue, loadItemDetail } from './aetherium-data.mjs';
+import { ArmoryUnavailable, explain, loadCatalogue, loadItemDetail } from './aetherium-data.mjs';
 import { $, esc, iconImg, infoCardHtml, isPending, number, openInfo, slotLabel } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
 
@@ -64,7 +64,7 @@ async function selectSlot(index, from) {
     result = await loadItemDetail(state.model, slot, state.source);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    result = { detail: null, reason: 'The official AION 2 site is not answering right now. Try this item again in a minute.' };
+    result = { detail: null, reason: explain(error, 'The official AION 2 site is not answering right now. Try this item again in a minute.') };
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
@@ -100,6 +100,10 @@ function renderExtras() {
     isPending(model.wings) ? card('Wings', null, 'None equipped', null) : card('Wings', model.wings.icon, model.wings.name, `${model.wings.grade} · +${model.wings.enchant}`),
     card('Title', null, model.profile.title || 'No title', null)
   ].join('');
+  // Nothing to show (no pet, no wings, no title): the tall column would stay empty, so the page collapses it.
+  const bare = isPending(model.pet) && isPending(model.wings) && !model.profile.title;
+  document.querySelector('.ae-gear-page').classList.toggle('is-single', bare);
+  $('#aeExtrasCol').hidden = bare;
 }
 
 function render(model, source, ref) {
@@ -120,7 +124,7 @@ function render(model, source, ref) {
             <p class="ae-note">Attack, Defense and other combat stats are not in the public character data.</p>
           </section>
         </div>
-        <div class="ae-col">
+        <div class="ae-col" id="aeExtrasCol">
           <section class="ae-panel is-grow" aria-labelledby="aeExtraTitle">
             <h2 class="ae-section-title" id="aeExtraTitle">Pet, wings and title</h2>
             <ul class="ae-extras" id="aeExtras"></ul>
