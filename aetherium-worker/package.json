@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Read-only Cloudflare Worker proxy for the public AION 2 armory with KV cache, rate limit and CORS allowlist",
+  "description": "Read-only Cloudflare Worker proxy for the official AION 2 site with KV cache, rate limit and CORS allowlist",
   "main": "src/index.mjs",
   "scripts": {
     "dev": "wrangler dev",

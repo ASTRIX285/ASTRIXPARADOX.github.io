@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The Ascent Plan page (brief feature/aetherium-ascent-plan, 6 Oct 2026) on a local static server, the
-// armory Worker mocked (never NCSOFT, never the real Worker):
-//   - by hand: a new player picks class, role and level with no armory call; the address stays bookmarkable;
+// Worker mocked (never NCSOFT, never the real Worker):
+//   - by hand: a new player picks class, role and level with no call to the official site; the address stays bookmarkable;
 //   - class switch refills the roles (main role first), level clamps to 1 to 45, a pending role says so;
 //   - with a Daeva (link or active roster slot): armory fixes come first, class and level are locked to the
 //     character, faction colour applies, "plan another class by hand" unlocks the form;
@@ -105,7 +105,7 @@ const plain=async(page,selector)=>(await page.textContent(selector)).replace(/\s
 
 await check('by hand: default Gladiator plan, no armory call, bookmarkable',async()=>{
   const {page,context,calls,errors}=await open(ascent(),{live:true});
-  assert.deepEqual(calls,[],'A plan by hand never calls the armory');
+  assert.deepEqual(calls,[],'A plan by hand never calls the official site');
   assert.equal(await page.inputValue('#aeClass'),'Gladiator');
   assert.equal(await page.inputValue('#aeRole'),'dps');
   assert.equal(await page.inputValue('#aeLevel'),'1');
@@ -337,7 +337,7 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await page.isDisabled('#aeLevel'),true);
   assert.equal(await page.isDisabled('#aeRole'),false);
   assert.equal(await page.inputValue('#aeLevel'),'12');
-  assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285, Gladiator Lv 12 on Meslamtaeda\./);
+  assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285, Gladiator Lv 12 on Meslamtaeda, Europe\./);
   assert.equal(await page.isHidden('#aeAscentFor'),true,'The name, class and level show once: the Planning for line says them');
   assert.equal(await plain(page,'#aeNowTitle'),'Your next moves','No "for <name>" when a Daeva is linked');
   const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
@@ -346,6 +346,8 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
   assert.match(page.url(),/serverId=1308&characterId=.*&role=dps$/);
+  assert.match(page.url(),/[?&]region=eu&/,'The address carries the region');
+  for(const href of await page.$$eval('.ae-ascent-nav a, .ae-menu-card, .ae-quest',nodes=>nodes.map(n=>n.getAttribute('href')).filter(h=>h&&/serverId=/.test(h)))) assert.match(href,/[?&]region=eu(&|$)/,`Link keeps the region: ${href}`);
   assert.equal(await style(page,'.ae-ascent-head .ae-eyebrow','color'),GOLD);
   await page.click('[data-plan-by-hand]');
   await page.waitForFunction(()=>!document.querySelector('#aeClass').disabled);
@@ -371,7 +373,7 @@ await check('active roster Daeva is used when the link names no class',async()=>
 
 await check('Worker down: clear message and the plan by hand',async()=>{
   const {page,context}=await open(ascent(ref),{live:true,down:true});
-  assert.match(await page.textContent('#aeNotice'),/The armory is unavailable right now, so this plans by hand/);
+  assert.match(await page.textContent('#aeNotice'),/The official AION 2 site is not answering right now, so this plans by hand/);
   assert.equal(await page.isDisabled('#aeClass'),false);
   assert.match(await plain(page,'.ae-ascent-head'),/Gladiator/);
   await context.close();

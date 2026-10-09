@@ -151,6 +151,8 @@ function planBoards(build, level, model, facts) {
     const live = model?.daevanion?.find(item => item.id === board.id || item.name === board.name) ?? null;
     return {
       ...board,
+      // The character's own board id: Asmodian boards are 31 to 36, the facts list the Elyos ids.
+      id: live?.id ?? board.id,
       open: live ? Boolean(live.open) : level >= board.unlockLevel,
       nodesTaken: live ? live.nodesTaken : null,
       nodesTotal: live ? live.nodesTotal : null
@@ -183,7 +185,7 @@ function upcoming(level, skills, stigmas, boards, facts) {
 const enchantFix = slot => !slot.empty && slot.enchant === 0;
 
 /**
- * The ranked "do this now" list. Fixes from the armory come first (they are about this exact
+ * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
  * character), then the build steps that apply at this level.
  */
 function nowList(level, build, skills, stigmas, boards, model) {

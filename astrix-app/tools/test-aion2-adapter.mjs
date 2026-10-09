@@ -12,6 +12,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {adaptCharacter,adaptDaevanionBoard,adaptItemDetail,adaptSearch,ITEM_LEVEL_LABEL} from '../games/aion2/engine/armory-adapter.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
+import {deriveRegion,deriveServers,REGION_TABLE,BOARD_IDS} from './fixtures/aion2/derive-region-fixtures.mjs';
 import {validateGameModule} from '../platform/contracts/game-module.mjs';
 
 const root=new URL('../',import.meta.url);
@@ -121,6 +122,47 @@ assert.equal(module.resolveSkill('Templar',1).pending,true);
 assert.throws(()=>adaptCharacter({info:{},equipment:raw.equipment},{slots,region:'eu',capturedOn:'2026-10-05'}),/shape changed/);
 assert.throws(()=>adaptDaevanionBoard({}),/shape changed/);
 assert.throws(()=>adaptCharacter(raw,{slots,region:'eu',capturedOn:'today'}),/capturedOn/);
+
+// Race: the official data keys the faction on raceId (1 Elyos, 2 Asmodian) and spells the name "Asmodians".
+assert.equal(model.profile.raceId,1);
+{
+  const bareRace=structuredClone(raw);
+  delete bareRace.info.profile.raceId;
+  bareRace.info.profile.raceName='Asmodians';
+  assert.equal(adaptCharacter(bareRace,{slots,region:'eu',capturedOn:'2026-10-05'}).profile.raceName,'Asmodian','Name fallback accepts the plural');
+  bareRace.info.profile.raceName='Asmodian';
+  assert.equal(adaptCharacter(bareRace,{slots,region:'eu',capturedOn:'2026-10-05'}).profile.raceId,2,'Name fallback accepts the singular');
+}
+
+// One derived fixture per region (derived from the EU capture, not raw captures: see ENDPOINTS-regions.md).
+{
+  assert.deepEqual(REGION_TABLE.map(row=>row.code),['naw','nae','eu','la','as']);
+  const expectedCounts={naw:10,nae:16,eu:46,la:12,as:18};
+  for(const row of REGION_TABLE){
+    assert.equal(deriveServers(row.code).serverList.length,expectedCounts[row.code],`${row.code} server count`);
+    for(const race of ['elyos','asmodian']){
+      const d=deriveRegion(row.code,{race});
+      const m=adaptCharacter({info:d.info,equipment:d.equipment,items:{},boards:{[d.boardIds[0]]:d.daevanion}},{slots,region:row.code,capturedOn:'2026-10-09'});
+      assert.equal(m.source.region,row.code);
+      assert.equal(m.profile.class,row.cls);
+      assert.equal(m.profile.level,row.level);
+      assert.equal(m.profile.raceName,race==='asmodian'?'Asmodian':'Elyos');
+      assert.equal(m.profile.raceId,race==='asmodian'?2:1);
+      assert.equal(String(m.profile.server.id)[0],race==='asmodian'?'2':'1','Elyos 1xxx, Asmodian 2xxx');
+      assert.equal(String(m.profile.server.id)[1],String(row.digit),`${row.code} uses ${row.digit}x servers`);
+      assert.deepEqual(m.daevanion.map(board=>board.id),d.boardIds);
+      // Search rows keep the same shape in every region.
+      const rows=adaptSearch(d.search);
+      assert.equal(rows.length,1);
+      assert.equal(rows[0].serverId,d.serverId);
+    }
+  }
+  // Asmodian boards are 31 to 36 (no 35), Elyos 11 to 16 (no 15), and the board call reads the node list as is.
+  assert.deepEqual(BOARD_IDS.asmodian,[31,32,33,34,36]);
+  const asm=deriveRegion('eu',{race:'asmodian'});
+  const nodes=adaptDaevanionBoard(asm.daevanion);
+  assert.ok(nodes.length>0&&nodes.every(node=>node.boardId===31),'Asmodian board nodes carry the Asmodian board id');
+}
 
 // Schemas (ajv is a dev dependency: npm install --prefix astrix-app)
 const require=createRequire(import.meta.url);

@@ -5,12 +5,12 @@
  * its own page (hub/aetherium/ascent/<screen>/, body data-ae-view="<screen>") drawn like that game
  * window, with a step-by-step guide that lights up what to do.
  *
- * Two ways in. With a Daeva (from the link or the active roster slot) the plan reads the armory
+ * Two ways in. With a Daeva (from the link or the active roster slot) the plan reads the official site
  * and adds fixes for that exact character. Without one, a new player picks class, role and level
- * and gets the plan from static data alone, with no armory call. Advice comes from
+ * and gets the plan from static data alone, with no call to the official site. Advice comes from
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
-import { ArmoryUnavailable, ascentUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster } from './aetherium-data.mjs';
 import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
@@ -61,12 +61,12 @@ function renderDaevaLine() {
   if (!state.model) {
     const active = roster.active();
     el.hidden = !active;
-    if (active) el.innerHTML = `Planning by hand. <a href="${esc(ascentUrl({ serverId: active.serverId, characterId: active.characterId }, active.className))}" data-use-daeva>Use ${esc(active.name)} (${esc(active.className)} Lv ${esc(active.level)}) instead</a>`;
+    if (active) el.innerHTML = `Planning by hand. <a href="${esc(ascentUrl({ serverId: active.serverId, characterId: active.characterId, region: active.region }, active.className))}" data-use-daeva>Use ${esc(active.name)} (${esc(active.className)} Lv ${esc(active.level)}) instead</a>`;
     return;
   }
   const p = state.model.profile;
   el.hidden = false;
-  el.innerHTML = `Planning for <strong>${esc(p.name)}</strong>, ${esc(p.class)} Lv ${esc(p.level)} on ${esc(p.server.name)}. <button type="button" class="ae-linkish" data-plan-by-hand>Plan another class by hand</button>`;
+  el.innerHTML = `Planning for <strong>${esc(p.name)}</strong>, ${esc(p.class)} Lv ${esc(p.level)} on ${esc(p.server.name)}, ${esc(regionName(state.model.source.region))}. <button type="button" class="ae-linkish" data-plan-by-hand>Plan another class by hand</button>`;
 }
 
 function setFormLock() {
@@ -108,6 +108,7 @@ function planQuery() {
   if (state.ref && state.model) {
     params.set('serverId', state.ref.serverId);
     params.set('characterId', state.ref.characterId);
+    params.set('region', state.ref.region ?? 'eu');
     params.set('class', state.className.toLowerCase());
     if (state.role) params.set('role', state.role);
   } else {
@@ -493,7 +494,7 @@ function showGuideStep(index, scroll = true) {
 }
 
 
-/* Daevanion planner: the real board from the armory, with a numbered route for this build. */
+/* Daevanion planner: the real board from the official site, with a numbered route for this build. */
 const nodeArt = (kind, taken) => boardNodeArt(kind, taken, state.className);
 const nodeImg = (kind, taken) => boardNodeImg(kind, taken, state.className);
 const daevaKey = () => state.model ? `${state.model.profile.server.id}:${state.model.profile.characterId}` : null;
@@ -608,7 +609,7 @@ async function showBoard(boardId) {
     try { result = await loadBoard(state.model, board, state.source); }
     catch (error) {
       if (!(error instanceof ArmoryUnavailable)) throw error;
-      result = { nodes: null, reason: 'The armory is unavailable right now. Pick the board again in a minute.' };
+      result = { nodes: null, reason: 'The official AION 2 site is not answering right now. Pick the board again in a minute.' };
     }
     if (planner.boardId !== boardId) return;
     if (!result.nodes) { body.innerHTML = `<p class="ae-muted">${esc(result.reason)}</p>`; return; }
@@ -852,7 +853,7 @@ async function loadDaeva(ref) {
     return await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    showNotice('The armory is unavailable right now, so this plans by hand. Try your Daeva again in a minute.', 'warn');
+    showNotice('The official AION 2 site is not answering right now, so this plans by hand. Try your Daeva again in a minute.', 'warn');
     return null;
   }
 }
@@ -866,18 +867,18 @@ async function start() {
   const linked = refFromUrl();
   const active = roster.active();
   // A Daeva link wins; otherwise a manual class link; otherwise the active roster Daeva.
-  state.ref = linked ?? (fromUrl.className ? null : active ? { serverId: active.serverId, characterId: active.characterId } : null);
+  state.ref = linked ?? (fromUrl.className ? null : active ? { serverId: active.serverId, characterId: active.characterId, region: active.region } : null);
   state.role = fromUrl.role;
   const wantedBoard = Number(new URLSearchParams(location.search).get('board'));
   if (Number.isInteger(wantedBoard) && wantedBoard > 0) planner.boardId = wantedBoard;
-  // Fetch the plan data while the armory answers: the class comes from the link or the roster entry.
+  // Fetch the plan data while the site answers: the class comes from the link or the roster entry.
   const sameDaeva = active && state.ref && String(active.serverId) === String(state.ref.serverId) && active.characterId === state.ref.characterId;
   prefetchAdvisor(fromUrl.className ?? (sameDaeva ? active.className : null));
   if (state.ref) {
     const loaded = await loadDaeva(state.ref);
     if (loaded && AION2_CLASSES.includes(loaded.model.profile.class)) {
       Object.assign(state, { model: loaded.model, source: loaded.source, className: loaded.model.profile.class, level: loaded.model.profile.level });
-      setFaction(loaded.model.profile.raceName);
+      setFaction(loaded.model.profile.raceName, loaded.model.profile.raceId);
       showSource(loaded.source);
     } else state.ref = null;
   }

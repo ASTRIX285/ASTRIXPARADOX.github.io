@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The Aetherium character pages (brief design/aetherium-character-pages, 8 Oct 2026): the character menu and its
-// three game-style pages, on a local static server with the armory Worker mocked (never NCSOFT, never the real Worker):
+// three game-style pages, on a local static server with the Worker mocked (never NCSOFT, never the real Worker):
 //   - menu: header kept, three cards in the Ascent Plan menu style, each linking to its page with the Daeva;
 //   - Gear page: gear and stats left, pet, wings and title right, columns level; item cards still open;
 //   - Skills page: Mastery and Stigma tabs (?tab=stigma), 5-wide grids with levels, locked icons with a padlock,
@@ -16,6 +16,7 @@ import {createRequire} from 'node:module';
 import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {nodeCost} from '../games/aion2/engine/daevanion-planner.mjs';
+import {deriveRegion} from './fixtures/aion2/derive-region-fixtures.mjs';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 
@@ -38,6 +39,11 @@ const base=`http://127.0.0.1:${server.address().port}`;
 
 const info=await fixture('astrix285-info'),equipment=await fixture('astrix285-equipment'),board11=await fixture('astrix285-daevanion-11'),itemDetail=await fixture('astrix285-item-mainhand');
 const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
+
+// An Asmodian Daeva in Asia (derived from the Europe capture: see ENDPOINTS-regions.md). The official data spells
+// the race "Asmodians" and numbers the boards 31, 32, 33, 34, 36, not 11 to 16.
+const ASMO=deriveRegion('as',{race:'asmodian'});
+const ASMO_REF={serverId:String(ASMO.serverId),characterId:ASMO.characterId};
 
 // A Lv 23 Gladiator with a few Daevanion nodes taken (server 1311), so there is something to add up.
 const RICH={serverId:'1311',characterId:'cmljaGRhZXZh='};
@@ -93,6 +99,7 @@ const check=async(name,fn)=>{if(process.env.AE_ONLY&&!name.includes(process.env.
 async function open(path,{live=true,down=false,viewport={width:1600,height:1000}}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
+  const urls=[];
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
     const body=await response.text();
@@ -104,20 +111,26 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   await context.route(`${WORKER}/**`,async route=>{
     const url=new URL(route.request().url());
     calls.push(`${url.pathname}${url.searchParams.get('boardId')?`#${url.searchParams.get('boardId')}`:''}`);
+    urls.push(url);
     if(down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
     const rich=url.searchParams.get('serverId')==='1311';
+    const asmo=url.searchParams.get('serverId')===ASMO_REF.serverId;
     let body;
-    if(url.pathname==='/aion2/character')body=rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
+    if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
     else if(url.pathname==='/aion2/item')body=itemDetail;
     else if(url.pathname==='/aion2/daevanion'){
       const id=Number(url.searchParams.get('boardId'));
-      if(id===11)body=rich?takenBoard:board11;
+      if(asmo){
+        if(id===31)body=ASMO.daevanion;
+        else return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
+      }
+      else if(id===11)body=rich?takenBoard:board11;
       else if(id===12)body=otherBoard(12);   // open, nothing taken yet
-      else if(id===14)body=otherBoard(14);   // not open, yet the armory sends its grid: drawn greyed
+      else if(id===14)body=otherBoard(14);   // not open, yet the site sends its grid: drawn greyed
       else return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})}); // not open, no grid
     }
     if(!body)return route.fulfill({status:404,body:'{}'});
-    return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta})});
+    return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta:{...meta,region:url.searchParams.get('region')}})});
   });
   await context.route(/playnccdn\.com/,route=>process.env.AE_SHOTS?route.fulfill({status:200,contentType:'image/svg+xml',body:standIn(route.request().url())}):route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
   await context.route(/plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
@@ -128,7 +141,7 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
-  return {page,context,calls,errors};
+  return {page,context,calls,urls,errors};
 }
 const refQuery=(who=RICH,extra={})=>`?${new URLSearchParams({serverId:who.serverId,characterId:who.characterId,...extra})}`;
 const BASIC={serverId:'1308',characterId:info.profile.characterId};
@@ -145,7 +158,7 @@ await check('menu: header kept, three cards in the Ascent Plan style, each linki
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/${refQuery()}`);
   assert.deepEqual(calls.filter(call=>call!=='/aion2/character'),[],'First paint: only /aion2/character');
   const header=await plain(page,'#aeHeader');
-  assert.match(header,/RICHDAEVA/);assert.match(header,/Draped in Sky/);assert.match(header,/Gladiator Lv 23/);assert.match(header,/Elyos/);assert.match(header,/Kaisinel/);
+  assert.match(header,/RICHDAEVA/);assert.match(header,/Draped in Sky/);assert.match(header,/Gladiator Lv 23/);assert.match(header,/Elyos/);assert.match(header,/Kaisinel/);assert.match(header,/Europe/);
   assert.match(header,/Combat power 6,532/);assert.match(header,/Item level/);
   assert.equal(await page.getAttribute('#aeHeader a.btn','href'),'/hub/aetherium/','Back to Daeva Card');
   assert.deepEqual(await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.dataset.view)),['gear','skills','daevanion']);
@@ -157,7 +170,7 @@ await check('menu: header kept, three cards in the Ascent Plan style, each linki
   assert.match(await plain(page,'[data-view="skills"] .ae-menu-blurb'),/^Mastery and Stigma$/);
   assert.equal(await page.locator('#aeCards .ae-menu-badge').count(),3,'A count badge on each card');
   const hrefs=await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.getAttribute('href')));
-  const ref=`serverId=1311&characterId=${encodeURIComponent(RICH.characterId)}`;
+  const ref=`serverId=1311&characterId=${encodeURIComponent(RICH.characterId)}&region=eu`;
   assert.equal(hrefs[0],`/hub/aetherium/gear/equipment/?${ref}`);
   assert.equal(hrefs[1],`/hub/aetherium/skills/?${ref}&class=gladiator`);
   assert.equal(hrefs[2],`/hub/aetherium/daevanion/?${ref}&class=gladiator&board=11`,'The Daevanion card opens the first open board');
@@ -212,7 +225,7 @@ await check('Gear page: worn gear, stats, pet, wings and title; item cards still
   assert.match(await plain(page,'#aeExtras'),/Pet.*Wings.*Title.*Draped in Sky/);
   assert.equal(await page.locator('#aeStigmas, #aeBoards').count(),0,'Stigmas and boards live on their own pages');
   assert.equal(await page.locator('[aria-current="page"]').first().textContent(),'Gear Ledger');
-  assert.equal(await page.getAttribute('.ae-gw-back','href'),`/hub/aetherium/gear/${refQuery(BASIC)}`,'Back to the menu keeps the Daeva');
+  assert.equal(await page.getAttribute('.ae-gw-back','href'),`/hub/aetherium/gear/${refQuery(BASIC,{region:'eu'})}`,'Back to the menu keeps the Daeva');
   await page.click('[data-slot="0"]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
   assert.equal(await page.textContent('#aeInfoTitle'),'Twilight Greatsword');
@@ -493,7 +506,7 @@ await check('Daevanion page: a locked board with no grid says when it opens; one
   await shot(page,'daevanion-locked',1600);
   await page.click('[data-board="14"]');
   await page.waitForSelector('.ae-board-stage.is-greyed');
-  assert.equal(await page.locator('.ae-board-grid .ae-node').count(),89,'The armory sent this board\'s grid: drawn');
+  assert.equal(await page.locator('.ae-board-grid .ae-node').count(),89,'The official site sent this board\'s grid: drawn');
   assert.match(await page.$eval('.ae-board-stage',el=>getComputedStyle(el).filter),/grayscale/,'greyed');
   assert.match(await plain(page,'.ae-dv-banner'),/Opens at Lv 40/);
   assert.equal(await takenCount(page),0);
@@ -509,7 +522,7 @@ await check('Daevanion page: Plan my route opens the Ascent Plan Daevanion scree
   const {page,context}=await open(`/hub/aetherium/daevanion/${refQuery(RICH,{class:'gladiator',board:'12'})}`);
   await page.waitForSelector('.ae-board-grid .ae-node');
   const href=await page.getAttribute('#aeDvPlan','href');
-  assert.equal(href,`/hub/aetherium/ascent/daevanion/?serverId=1311&characterId=${encodeURIComponent(RICH.characterId)}&class=gladiator&board=12`);
+  assert.equal(href,`/hub/aetherium/ascent/daevanion/?serverId=1311&characterId=${encodeURIComponent(RICH.characterId)}&region=eu&class=gladiator&board=12`);
   await page.click('#aeDvPlan');
   await page.waitForFunction(()=>location.pathname==='/hub/aetherium/ascent/daevanion/');
   await page.waitForSelector('.ae-planner-tab');
@@ -552,6 +565,89 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000],[1920,1080]]){
   });
 }
 
+/* ---------- Regions and Asmodians ---------- */
+
+await check('Asmodian Daeva in Asia: violet, five Daevanion tabs with the character\'s own ids, a working board, region everywhere',async()=>{
+  const q=refQuery(ASMO_REF,{region:'as'});
+  const {page,context,calls,urls,errors}=await open(`/hub/aetherium/daevanion/${q}`);
+  await page.waitForSelector('.ae-board-grid .ae-node');
+  assert.equal(await page.getAttribute('body','data-faction'),'asmodian','Plural "Asmodians" and raceId 2');
+  assert.deepEqual(await page.$$eval('[data-board]',tabs=>tabs.map(tab=>tab.textContent.trim())),['Nezekan','Zikel','Vaizel','Triniel','Azphel'],'Five tabs, not ten');
+  assert.deepEqual(await page.$$eval('[data-board]',tabs=>tabs.map(tab=>Number(tab.dataset.board))),[31,32,33,34,36],'The character\'s own board ids');
+  assert.equal(await page.locator('[data-board]').count(),5);
+  assert.deepEqual(await page.$$eval('[data-board]',tabs=>tabs.map(tab=>tab.getAttribute('aria-selected'))),['true','false','false','false','false']);
+  assert.equal(new URL(page.url()).searchParams.get('board'),'31','The address carries the Asmodian board id');
+  assert.equal(await page.locator('.ae-board-grid .ae-node').count(),89,'The board is drawn, not empty');
+  const boardCall=urls.find(url=>url.pathname==='/aion2/daevanion');
+  assert.equal(boardCall.searchParams.get('boardId'),'31','The board call uses the character\'s own id');
+  assert.equal(boardCall.searchParams.get('region'),'as');
+  assert.deepEqual(calls,['/aion2/character','/aion2/daevanion#31']);
+  assert.match(await page.getAttribute('#aeDvPlan','href'),/\/ascent\/daevanion\/\?serverId=\d+&characterId=.*&region=as&class=ranger&board=31$/,'Plan my route keeps the id and the region');
+  assert.match(await plain(page,'.ae-gw-who'),/Ranger Lv 45/);
+  assert.deepEqual(errors,[]);
+  // The Ascent Plan route screen opens the same board by the same id.
+  await page.click('#aeDvPlan');
+  await page.waitForFunction(()=>location.pathname==='/hub/aetherium/ascent/daevanion/');
+  await page.waitForSelector('.ae-planner-tab');
+  assert.deepEqual(await page.$$eval('[data-board-tab]',tabs=>tabs.map(tab=>Number(tab.dataset.boardTab))),[31],'Only the open board, by its own id');
+  assert.equal(new URL(page.url()).searchParams.get('region'),'as');
+  await page.waitForSelector('.ae-planner .ae-node');
+  assert.equal(urls.filter(url=>url.pathname==='/aion2/daevanion').every(url=>url.searchParams.get('boardId')==='31'),true);
+  await context.close();
+});
+
+await check('Asmodian Daeva: opening a locked board by tab shows when it opens (id 32), no empty extra tabs',async()=>{
+  const {page,context}=await open(`/hub/aetherium/daevanion/${refQuery(ASMO_REF,{region:'as',board:'32'})}`);
+  await page.waitForSelector('[data-board]');
+  assert.equal(await page.locator('[data-board]').count(),5);
+  assert.equal(await page.getAttribute('[data-board="32"]','aria-selected'),'true','?board=32 selects the second Asmodian board');
+  await context.close();
+});
+
+await check('region travels on the menu, Gear, Skills and Daevanion pages and every link on them',async()=>{
+  for(const code of ['naw','nae','la','as']){
+    const q=refQuery(BASIC,{region:code});
+    for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
+      const {page,context,urls}=await open(`${path}${q}`);
+      if(path.endsWith('daevanion/'))await page.waitForSelector('.ae-board-grid .ae-node');
+      for(const url of urls) assert.equal(url.searchParams.get('region'),code,`${path} ${url.pathname} reads ${code}`);
+      const links=await page.$$eval('main a[href^="/hub/aetherium/"]',nodes=>nodes.map(n=>n.getAttribute('href')).filter(href=>/serverId=/.test(href)));
+      assert.ok(links.length>0,`${path} has Daeva links`);
+      for(const href of links) assert.match(href,new RegExp(`[?&]region=${code}(&|$)`),`${path} link keeps ${code}: ${href}`);
+      assert.match(await plain(page,'.ae-gw-who, #aeHeader .ae-subline'),/./);
+      await context.close();
+    }
+  }
+});
+
+await check('old links with no region read Europe on every character page',async()=>{
+  for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
+    const {page,context,urls}=await open(`${path}${refQuery(BASIC)}`);
+    for(const url of urls) assert.equal(url.searchParams.get('region'),'eu',`${path} ${url.pathname}`);
+    await context.close();
+  }
+  const {page,context,urls}=await open(`/hub/aetherium/gear/${refQuery(BASIC,{region:'kr'})}`);
+  for(const url of urls) assert.equal(url.searchParams.get('region'),'eu','A code we do not list is Europe, never sent on');
+  await context.close();
+});
+
+await check('no visible "armory" or "EU" text on any Aetherium page',async()=>{
+  const pages=['/hub/aetherium/','/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/',
+    '/hub/aetherium/ascent/','/hub/aetherium/ascent/mastery/','/hub/aetherium/ascent/stigma/','/hub/aetherium/ascent/skill-bar/',
+    '/hub/aetherium/ascent/daevanion/','/hub/aetherium/ascent/stats/','/hub/aetherium/ascent/macro/'];
+  for(const live of [false,true]){
+    for(const path of pages){
+      const query=live?refQuery(BASIC):'';
+      const {page,context}=await open(`${path}${query}`,{live});
+      const text=await page.evaluate(()=>[document.body.innerText,document.title,document.querySelector('meta[name=description]')?.content,
+        ...[...document.querySelectorAll('[placeholder],[aria-label],[title],[alt]')].map(n=>[n.placeholder,n.getAttribute('aria-label'),n.title,n.getAttribute('alt')].join(' '))].join('\n'));
+      assert.doesNotMatch(text,/armory/i,`${path} live=${live} shows "armory"`);
+      assert.doesNotMatch(text,/\bEU\b/,`${path} live=${live} shows "EU"`);
+      await context.close();
+    }
+  }
+});
+
 /* ---------- All the pages ---------- */
 
 await check('every character page: the example loads with no Worker call; links stay on the site; no dashes in the copy',async()=>{
@@ -573,8 +669,8 @@ await check('every character page: the example loads with no Worker call; links 
 await check('Worker down: every character page says so and shows the labelled example',async()=>{
   for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
     const {page,context,errors}=await open(`${path}${refQuery(BASIC)}`,{down:true});
-    assert.match(await plain(page,'#aeNotice'),/The armory is unavailable right now, so this shows the ASTRIX285 example/);
-    assert.match(await plain(page,'#aeSource'),/^Example data: ASTRIX285.*The armory is unavailable right now\.$/);
+    assert.match(await plain(page,'#aeNotice'),/The official AION 2 site is not answering right now, so this shows the ASTRIX285 example/);
+    assert.match(await plain(page,'#aeSource'),/^Example data: ASTRIX285.*The official AION 2 site is not answering right now\.$/);
     assert.deepEqual(errors,[]);
     await context.close();
   }

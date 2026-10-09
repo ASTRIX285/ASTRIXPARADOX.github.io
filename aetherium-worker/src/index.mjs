@@ -1,13 +1,14 @@
 /**
  * ASTRIX PARADOX - AETHERIUM ARMORY WORKER
- * Read-only edge proxy for the public AION 2 armory (NCSOFT). GET only.
+ * Read-only edge proxy for the public AION 2 character site (NCSOFT). GET only.
  * No secrets, no cookies, no login. Visitor headers are never forwarded upstream.
  * Every upstream URL is built from fixed constants and validated parameters, so
- * the Worker can only reach the whitelisted armory endpoints. No route lists or
+ * the Worker can only reach the whitelisted endpoints. No route lists or
  * walks characters: search always asks for page 1 only.
  */
 
 const CHARACTER_API = "https://aion2.plaync.com/api/character/";
+const SERVERS_API = "https://aion2.plaync.com/en-us/api/gameinfo/servers";
 const SEARCH_API = "https://api-search.plaync.com/aion2global/search/v2/character";
 const UPSTREAM_HOSTS = new Set(["aion2.plaync.com", "api-search.plaync.com"]);
 const UPSTREAM_HEADERS = Object.freeze({
@@ -15,14 +16,20 @@ const UPSTREAM_HEADERS = Object.freeze({
   Accept: "application/json"
 });
 
-// Region allowlist. NA is listed so it can be switched on later, but stays off.
+// Region allowlist: the five regions on the official search page, all on the same hosts.
+// Only these codes are ever sent upstream (an unknown code on the servers list silently
+// answers with the North America East list, so nothing else may pass).
+const REGION = Object.freeze({ enabled: true, lang: "en-US" });
 export const REGIONS = Object.freeze({
-  eu: Object.freeze({ enabled: true, lang: "en-US" }),
-  na: Object.freeze({ enabled: false, lang: "en-US" })
+  naw: REGION,
+  nae: REGION,
+  eu: REGION,
+  la: REGION,
+  as: REGION
 });
 
 export const CACHE_TTL_SECONDS = 600;
-export const RATE_LIMIT = Object.freeze({ limit: 30, windowMs: 60_000 });
+export const RATE_LIMIT = Object.freeze({ limit: 60, windowMs: 60_000 });
 export const UPSTREAM_TIMEOUT_MS = 8_000;
 const CACHE_VERSION = "v1";
 
@@ -46,7 +53,8 @@ const SHAPES = Object.freeze({
   info: ["profile"],
   equipment: ["equipment"],
   item: ["id"],
-  daevanion: ["nodeList"]
+  daevanion: ["nodeList"],
+  servers: ["serverList"]
 });
 
 class RequestError extends Error {
@@ -139,6 +147,16 @@ function readCharacter(params) {
 
 // Each route returns a normalised cache key plus the upstream calls it needs.
 const ROUTES = Object.freeze({
+  "/aion2/servers"(params) {
+    const { region, lang } = readRegion(params);
+    const url = `${SERVERS_API}?lang=${encodeURIComponent(lang)}&region=${encodeURIComponent(region)}`;
+    return {
+      key: ["servers", region],
+      region,
+      calls: [{ name: "servers", url, shape: SHAPES.servers }],
+      build: ([servers]) => servers
+    };
+  },
   "/aion2/search"(params) {
     const { region, lang } = readRegion(params);
     const name = readName(params);
@@ -200,6 +218,7 @@ export function isWhitelistedUpstream(url) {
   }
   if (parsed.protocol !== "https:" || !UPSTREAM_HOSTS.has(parsed.hostname) || parsed.port) return false;
   if (parsed.hostname === "api-search.plaync.com") return parsed.pathname === "/aion2global/search/v2/character";
+  if (parsed.pathname === "/en-us/api/gameinfo/servers") return true;
   return ["/api/character/info", "/api/character/equipment", "/api/character/equipment/item", "/api/character/daevanion/detail"]
     .includes(parsed.pathname);
 }
