@@ -54,7 +54,7 @@ async function nodesFor(board) {
   if (state.results.has(board.id)) return state.results.get(board.id);
   let result;
   try {
-    result = await loadBoard(state.model, board, state.source);
+    result = await loadBoard(state.model, board);
     if (result.nodes && !result.nodes.length) result = { nodes: null, reason: board.open ? 'The official AION 2 site sent no nodes for this board.' : 'closed' };
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable) && !(error instanceof TypeError)) throw error;

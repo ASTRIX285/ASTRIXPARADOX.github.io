@@ -38,6 +38,12 @@ await new Promise(done=>server.listen(0,'127.0.0.1',done));
 const base=`http://127.0.0.1:${server.address().port}`;
 
 const info=await fixture('astrix285-info'),equipment=await fixture('astrix285-equipment'),board11=await fixture('astrix285-daevanion-11'),itemDetail=await fixture('astrix285-item-mainhand');
+// The fixture is Miguel's own character. The mock Worker serves it under a test name: the gamer tag is never page data.
+const TEST_NAME='TESTDAEVA';
+info.profile.characterName=TEST_NAME;
+const GAMER_TAG=['ASTRIX','285'].join('');
+const ART_HOST='https://assets.playnccdn.com/';
+const NPC_ART={records:[{id:'intro-art',host:ART_HOST,keyArt:{pending:true,reason:'test'},npc:{url:`${ART_HOST}test/intro/npc.png`,alt:'Guide',shows:'test',foundOn:'test',capturedOn:'2026-10-09'},classes:[],provenance:[]}]};
 const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
 
 // An Asmodian Daeva in Asia (derived from the Europe capture: see ENDPOINTS-regions.md). The official data spells
@@ -96,14 +102,16 @@ const realCalls=[];
 let failures=0;
 const check=async(name,fn)=>{if(process.env.AE_ONLY&&!name.includes(process.env.AE_ONLY))return;try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
-async function open(path,{live=true,down=false,viewport={width:1600,height:1000}}={}){
+async function open(path,{live=true,down=false,viewport={width:1600,height:1000},art=null}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
   const urls=[];
+  const state={down};
+  if(art)await context.route(/\/astrix-app\/games\/aion2\/data\/intro-art\.json/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(art)}));
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
     const body=await response.text();
-    // The committed config points at the real Worker; every test swaps it for the mock (live) or null (demo).
+    // The committed config points at the real Worker; every test swaps it for the mock (live) or null (not connected).
     const swapped=body.replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,`export const AETHERIUM_WORKER_URL = ${live?`'${WORKER}'`:'null'};`);
     assert.notEqual(swapped,body,'Config Worker URL line found and swapped');
     await route.fulfill({response,body:swapped});
@@ -112,7 +120,7 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
     const url=new URL(route.request().url());
     calls.push(`${url.pathname}${url.searchParams.get('boardId')?`#${url.searchParams.get('boardId')}`:''}`);
     urls.push(url);
-    if(down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
+    if(state.down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
     const rich=url.searchParams.get('serverId')==='1311';
     const asmo=url.searchParams.get('serverId')===ASMO_REF.serverId;
     let body;
@@ -141,7 +149,18 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
-  return {page,context,calls,urls,errors};
+  return {page,context,calls,urls,errors,state};
+}
+// Everything a visitor can read on the page: the text, the title and description, and every visible attribute.
+const visibleText=page=>page.evaluate(()=>[document.body.innerText,document.title,document.querySelector('meta[name=description]')?.content,
+  ...[...document.querySelectorAll('[placeholder],[aria-label],[title],[alt]')].map(n=>[n.placeholder,n.getAttribute('aria-label'),n.title,n.getAttribute('alt')].join(' '))].join('\n'));
+/** No gamer tag, no example Daeva, none of the fixture character's own title, stats or portrait anywhere a visitor can see. */
+async function assertNoGamerTag(page,label){
+  const text=await visibleText(page);
+  assert.doesNotMatch(text,new RegExp(GAMER_TAG,'i'),`${label}: the gamer tag shows`);
+  assert.doesNotMatch(text,/Example data|example Daeva/i,`${label}: an example Daeva is mentioned`);
+  assert.doesNotMatch(text,/Draped in Sky|6,532/,`${label}: the fixture character's title or stats show`);
+  for(const src of await page.$$eval('main img',images=>images.map(img=>img.getAttribute('src'))))assert.doesNotMatch(src??'',/profileimg\.plaync\.com/,`${label}: a portrait shows (${src})`);
 }
 const refQuery=(who=RICH,extra={})=>`?${new URLSearchParams({serverId:who.serverId,characterId:who.characterId,...extra})}`;
 const BASIC={serverId:'1308',characterId:info.profile.characterId};
@@ -158,7 +177,7 @@ await check('menu: header kept, three cards in the Ascent Plan style, each linki
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/${refQuery()}`);
   assert.deepEqual(calls.filter(call=>call!=='/aion2/character'),[],'First paint: only /aion2/character');
   const header=await plain(page,'#aeHeader');
-  assert.match(header,/RICHDAEVA/);assert.match(header,/Draped in Sky/);assert.match(header,/Gladiator Lv 23/);assert.match(header,/Elyos/);assert.match(header,/Kaisinel/);assert.match(header,/Europe/);
+  assert.match(header,/RICHDAEVA/);assert.doesNotMatch(header,new RegExp(GAMER_TAG,'i'));assert.match(header,/Draped in Sky/);assert.match(header,/Gladiator Lv 23/);assert.match(header,/Elyos/);assert.match(header,/Kaisinel/);assert.match(header,/Europe/);
   assert.match(header,/Combat power 6,532/);assert.match(header,/Item level/);
   assert.equal(await page.getAttribute('#aeHeader a.btn','href'),'/hub/aetherium/','Back to Daeva Card');
   assert.deepEqual(await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.dataset.view)),['gear','skills','daevanion']);
@@ -180,11 +199,31 @@ await check('menu: header kept, three cards in the Ascent Plan style, each linki
 });
 
 await check('menu: a Daeva with no board open names the first board and its level',async()=>{
-  const {page,context}=await open('/hub/aetherium/gear/',{live:false});
-  // The labelled example (ASTRIX285, Lv 12) has Nezekan open with 0 of 88 nodes.
+  // The basic fixture Daeva (Lv 12) has Nezekan open with 0 of 88 nodes.
+  const {page,context}=await open(`/hub/aetherium/gear/${refQuery(BASIC)}`);
   assert.equal(await plain(page,'[data-view="daevanion"] .ae-menu-status'),'Nezekan: 0 / 88 nodes');
-  assert.equal(await page.getAttribute('[data-view="gear"]','href'),'/hub/aetherium/gear/equipment/','The example links carry no Daeva');
+  assert.match(await page.getAttribute('[data-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=/,'The links carry the Daeva');
   await context.close();
+});
+
+await check('menu with no Daeva: Find your Daeva first, a link to the search, the guide art after the words, no cards, no Worker call',async()=>{
+  for(const live of [true,false]){
+    const {page,context,calls,errors}=await open('/hub/aetherium/gear/',{live,art:NPC_ART});
+    assert.deepEqual(calls,[],`live=${live}: no Worker call`);
+    assert.equal(await plain(page,'#aeFindFirstTitle'),'Find your Daeva first');
+    assert.match(await plain(page,'#aeFindFirst'),/Type your in-game character name on the Daeva Card/);
+    assert.equal(await page.getAttribute('#aeFindFirst a.btn','href'),'/hub/aetherium/#aeSearch');
+    assert.equal(await page.locator('#aeCards .ae-menu-card').count(),0,'No cards without a Daeva');
+    assert.equal(await page.isHidden('#aeSource'),true);
+    assert.equal(await page.isHidden('#aeNotice'),true,'Nothing went wrong: no notice');
+    await page.waitForSelector('#aeFindFirst.has-art');
+    assert.equal(await page.getAttribute('#aeFindFirstArt img','src'),`${ART_HOST}test/intro/npc.png`,'The NPC guide from the art data');
+    assert.equal(await page.getAttribute('#aeFindFirstArt img','alt'),'Guide');
+    assert.equal(await page.getAttribute('#aeFindFirstArt img','referrerpolicy'),'no-referrer');
+    await assertNoGamerTag(page,`menu no Daeva live=${live}`);
+    assert.deepEqual(errors,[]);
+    await context.close();
+  }
 });
 
 await check('menu: same look as the Ascent Plan menu cards',async()=>{
@@ -374,11 +413,12 @@ await check('Skills page: ?tab=stigma opens Stigma; tabs keep the address; 13 st
   await context.close();
 });
 
-await check('Skills page at the labelled example (no Daeva): icons and levels from the example data',async()=>{
+await check('Skills page with no Daeva: Find your Daeva first, no skill window, no Worker call',async()=>{
   const {page,context,calls}=await open('/hub/aetherium/skills/',{live:false});
   assert.deepEqual(calls,[]);
-  assert.equal(await plain(page,'#aeSkillTitle'),'Keen Strike Lv. 3');
-  assert.equal(await page.locator('#aeSkillGrid .ae-mskill').count(),22);
+  assert.equal(await plain(page,'#aeFindFirstTitle'),'Find your Daeva first');
+  assert.equal(await page.locator('#aeSkillGrid, .ae-gw').count(),0,'No skill window and no example skills');
+  await assertNoGamerTag(page,'skills no Daeva');
   await context.close();
 });
 
@@ -680,12 +720,14 @@ await check('Skill Bar says where skills should go, not where they are',async()=
 
 /* ---------- All the pages ---------- */
 
-await check('every character page: the example loads with no Worker call; links stay on the site; no dashes in the copy',async()=>{
+await check('every character page with no Daeva: Find your Daeva first, no Worker call; links stay on the site; no dashes in the copy',async()=>{
   for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
     const {page,context,calls,errors}=await open(path,{live:false});
-    if(path.endsWith('daevanion/'))await page.waitForSelector('.ae-board-grid .ae-node');
-    assert.deepEqual(calls,[],`${path} example makes no Worker call`);
-    assert.match(await plain(page,'#aeSource'),/^Example data: a sample Daeva/);
+    assert.deepEqual(calls,[],`${path} makes no Worker call with no Daeva`);
+    assert.equal(await plain(page,'#aeFindFirstTitle'),'Find your Daeva first',path);
+    assert.equal(await page.isHidden('#aeSource'),true,`${path}: no data line`);
+    assert.equal(await page.locator('.ae-gw, .ae-board-grid, #aeCards .ae-menu-card').count(),0,`${path}: no character window`);
+    await assertNoGamerTag(page,`${path} no Daeva`);
     const outbound=await page.$$eval('main a[href]',links=>links.filter(link=>!link.getAttribute('href').startsWith('/')&&!link.getAttribute('href').startsWith('#')).map(link=>link.href));
     assert.deepEqual(outbound,[],`${path} has no outbound link`);
     const text=await page.evaluate(()=>document.querySelector('main').innerText);
@@ -696,13 +738,40 @@ await check('every character page: the example loads with no Worker call; links 
   }
 });
 
-await check('Worker down: every character page says so and shows the labelled example',async()=>{
+await check('Worker down: every character page says so, offers Try again, shows Find your Daeva first and never a stand-in; Try again reads the Daeva',async()=>{
   for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
-    const {page,context,errors}=await open(`${path}${refQuery(BASIC)}`,{down:true});
-    assert.match(await plain(page,'#aeNotice'),/The official AION 2 site is not answering right now, so this shows an example Daeva/);
-    assert.match(await plain(page,'#aeSource'),/^Example data: a sample Daeva.*The official AION 2 site is not answering right now\.$/);
+    const {page,context,errors,state,calls}=await open(`${path}${refQuery(BASIC)}`,{down:true});
+    assert.equal(await plain(page,'#aeNotice'),'The official AION 2 site is not answering right now. Try again in a minute.',path);
+    assert.equal(await page.isVisible('#aeRetry [data-retry]'),true,`${path}: Try again`);
+    assert.equal(await plain(page,'#aeFindFirstTitle'),'Find your Daeva first',path);
+    assert.equal(await page.isHidden('#aeSource'),true,`${path}: no data line`);
+    assert.equal(await page.locator('.ae-gw, .ae-board-grid, #aeCards .ae-menu-card').count(),0,`${path}: no character window`);
+    await assertNoGamerTag(page,`${path} Worker down`);
+    state.down=false;
+    await page.click('#aeRetry [data-retry]');
+    await page.waitForFunction(()=>document.querySelector('.ae-gw-who, #aeHeader .ae-subline'));
+    assert.match(await plain(page,'.ae-gw-who, #aeHeader .ae-subline'),/Gladiator Lv 12/,`${path}: Try again read the Daeva`);
+    assert.equal(await page.isHidden('#aeNotice'),true,`${path}: the notice clears`);
+    assert.equal(await page.locator('#aeFindFirst').count(),0,`${path}: the Find-first panel is gone`);
+    assert.equal(calls.filter(call=>call==='/aion2/character').length,2,`${path}: the same read, once more`);
     assert.deepEqual(errors,[]);
     await context.close();
+  }
+});
+
+await check('no gamer tag, example data or stand-in character on any character page in any state',async()=>{
+  for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
+    for(const [label,options,query] of [['no Daeva, not connected',{live:false},''],['no Daeva',{},''],['Worker down',{down:true},refQuery(BASIC)]]){
+      const {page,context}=await open(`${path}${query}`,options);
+      await assertNoGamerTag(page,`${path} (${label})`);
+      await context.close();
+    }
+    // A live Daeva page shows that Daeva only, under its own name.
+    const live=await open(`${path}${refQuery(BASIC)}`);
+    if(path.endsWith('daevanion/'))await live.page.waitForSelector('.ae-board-grid .ae-node');
+    assert.doesNotMatch(await visibleText(live.page),new RegExp(GAMER_TAG,'i'),`${path} live shows the gamer tag`);
+    assert.match(await plain(live.page,'.ae-gw-who, #aeHeader h1'),new RegExp(TEST_NAME));
+    await live.context.close();
   }
 });
 

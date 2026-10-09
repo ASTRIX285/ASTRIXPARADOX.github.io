@@ -37,12 +37,17 @@ const base=`http://127.0.0.1:${server.address().port}`;
 
 const info=await fixture('astrix285-info'),equipment=await fixture('astrix285-equipment'),search=await fixture('astrix285-search');
 const item=await fixture('astrix285-item-mainhand'),board=await fixture('astrix285-daevanion-11');
+// The fixture is Miguel's own character. The mock Worker serves it under a test name: the gamer tag is never page data.
+const TEST_NAME='TESTDAEVA';
+info.profile.characterName=TEST_NAME;
+search.list[0].name=`<strong>${TEST_NAME}</strong>`;
+const GAMER_TAG=['ASTRIX','285'].join('');
 // A second, Asmodian Daeva for the roster and faction checks (same shape, different identity).
 const asmoInfo=structuredClone(info);
 Object.assign(asmoInfo.profile,{characterName:'NOCTIS',characterId:'Zm9vYmFyMTIz=',raceId:2,raceName:'Asmodian',serverId:2301,serverName:'Israphel'});
 const asmoSearch={list:[{...search.list[0],name:'<strong>NOCTIS</strong>',characterId:'Zm9vYmFyMTIz%3D',race:2,serverId:2301,serverName:'Israphel'}],pagination:search.pagination};
 const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
-// A Lv 22 Daeva (as ASTRIX285 is on the live armory, 5 Oct 2026): stigmas still not acquired, an amulet worn in slot 22.
+// A Lv 22 Daeva (as the fixture character was on the live site, 5 Oct 2026): stigmas still not acquired, an amulet worn in slot 22.
 const lv22Info=structuredClone(info);
 Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDIy=',characterLevel:22,serverId:1309,serverName:'Hithanya'});
 const lv22Equipment=structuredClone(equipment);
@@ -60,7 +65,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
     let body=await response.text();
-    // The committed config points at the real Worker; every test swaps it for the mock (live) or null (demo).
+    // The committed config points at the real Worker; every test swaps it for the mock (live) or null (not connected).
     const swapped=body.replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,`export const AETHERIUM_WORKER_URL = ${live?`'${WORKER}'`:'null'};`);
     assert.notEqual(swapped,body,'Config Worker URL line found and swapped');
     body=swapped;
@@ -337,7 +342,8 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await page.isDisabled('#aeLevel'),true);
   assert.equal(await page.isDisabled('#aeRole'),false);
   assert.equal(await page.inputValue('#aeLevel'),'12');
-  assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285, Gladiator Lv 12 on Meslamtaeda, Europe\./);
+  assert.match(await plain(page,'#aeDaeva'),new RegExp(`Planning for ${TEST_NAME}, Gladiator Lv 12 on Meslamtaeda, Europe\\.`));
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),new RegExp(GAMER_TAG,'i'),'The gamer tag never shows');
   assert.equal(await page.isHidden('#aeAscentFor'),true,'The name, class and level show once: the Planning for line says them');
   assert.equal(await plain(page,'#aeNowTitle'),'Your next moves','No "for <name>" when a Daeva is linked');
   const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
@@ -358,30 +364,47 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
 });
 
 await check('active roster Daeva is used when the link names no class',async()=>{
-  const entry={name:'ASTRIX285',serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:12,raceName:'Elyos',demo:false};
+  const entry={name:TEST_NAME,serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:12,raceName:'Elyos',demo:false};
   const storage={entries:[entry],active:`1308:${info.profile.characterId}`};
   const {page,context,calls}=await open(ascent(),{live:true,storage});
   assert.equal(calls[0],'/aion2/character');
   assert.ok(calls.every(path=>['/aion2/character','/aion2/daevanion'].includes(path)),`calls: ${calls}`);
-  assert.match(await plain(page,'#aeDaeva'),/Planning for ASTRIX285/);
+  assert.match(await plain(page,'#aeDaeva'),new RegExp(`Planning for ${TEST_NAME}`));
   await context.close();
   const manual=await open(ascent('class=sorcerer&level=20'),{live:true,storage});
   assert.deepEqual(manual.calls,[],'A class link plans by hand even with an active Daeva');
-  assert.match(await plain(manual.page,'#aeDaeva'),/Planning by hand\. Use ASTRIX285 \(Gladiator Lv 12\) instead/);
+  assert.match(await plain(manual.page,'#aeDaeva'),new RegExp(`Planning by hand\\. Use ${TEST_NAME} \\(Gladiator Lv 12\\) instead`));
   await manual.context.close();
 });
 
-await check('Worker down: clear message and the plan by hand',async()=>{
+await check('Worker down: clear message, Try again, and the plan by hand; never a stand-in Daeva',async()=>{
   const {page,context}=await open(ascent(ref),{live:true,down:true});
   assert.match(await page.textContent('#aeNotice'),/The official AION 2 site is not answering right now, so this plans by hand/);
+  assert.equal(await page.isVisible('#aeRetry [data-retry]'),true,'A Try again button');
   assert.equal(await page.isDisabled('#aeClass'),false);
   assert.match(await plain(page,'.ae-ascent-head'),/Gladiator/);
+  assert.equal(await page.isHidden('#aeSource'),true,'No data line: nothing was read');
+  const text=await page.evaluate(()=>document.body.innerText);
+  assert.doesNotMatch(text,new RegExp(GAMER_TAG,'i'),'The gamer tag never shows');
+  assert.doesNotMatch(text,/Example data|example Daeva|Planning for/i,'No stand-in Daeva');
   await context.close();
+});
+
+await check('by hand with no Daeva: no gamer tag or example on the menu or any screen',async()=>{
+  for(const screen of ['',...SCREENS]){
+    const {page,context,calls}=await open(ascent('class=gladiator&level=1',screen),{live:false});
+    assert.deepEqual(calls,[]);
+    const text=await page.evaluate(()=>[document.body.innerText,document.title,...[...document.querySelectorAll('[alt],[title],[aria-label]')].map(n=>[n.getAttribute('alt'),n.title,n.getAttribute('aria-label')].join(' '))].join('\n'));
+    assert.doesNotMatch(text,new RegExp(GAMER_TAG,'i'),`${screen||'menu'} shows the gamer tag`);
+    assert.doesNotMatch(text,/Example data|example Daeva/i,`${screen||'menu'} mentions an example`);
+    await context.close();
+  }
 });
 
 await check('Daeva Card and Gear Ledger link to the Ascent Plan',async()=>{
   for(const path of ['/hub/aetherium/','/hub/aetherium/gear/','/hub/aetherium/ascent/']){
-    const {page,context}=await open(path);
+    // The Daeva Card's Ascent link sits on the character card, so it opens on a (mocked) live Daeva.
+    const {page,context}=await open(path==='/hub/aetherium/'?`${path}?${ref}`:path,{live:path==='/hub/aetherium/'});
     assert.equal(await page.locator('.apx-destination-ribbon a[href="/hub/aetherium/ascent/"]').count(),1,`${path} ribbon`);
     assert.equal(await page.locator('.ax-drawer-links a[href="/hub/aetherium/ascent/"]').count(),1,`${path} drawer`);
     if(path==='/hub/aetherium/'){

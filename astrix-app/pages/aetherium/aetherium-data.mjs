@@ -1,12 +1,14 @@
 /**
- * The Aetherium data layer. Reads the official AION 2 site through aetherium-worker (or the labelled
- * example Daeva while the Worker is not configured) and turns every response into the
- * character model through games/aion2 (armory-adapter.mjs). Pages never read the raw JSON.
+ * The Aetherium data layer. Reads the official AION 2 site through aetherium-worker and turns every
+ * response into the character model through games/aion2 (armory-adapter.mjs). Pages never read the raw JSON.
+ * There is no stand-in character: a read that fails throws ArmoryUnavailable and the page says so.
  */
 import { createAion2Module } from '/astrix-app/games/aion2/index.mjs';
 import { adaptDaevanionBoard, adaptItemDetail, adaptSearch } from '/astrix-app/games/aion2/engine/armory-adapter.mjs';
 import {
-  AETHERIUM_DEMO,
+  AETHERIUM_ART_HOST,
+  AETHERIUM_EU_SERVERS,
+  AETHERIUM_INTRO_ART,
   AETHERIUM_REGION,
   AETHERIUM_REGIONS,
   AETHERIUM_REGION_KEY,
@@ -36,16 +38,17 @@ export class ArmoryUnavailable extends Error {
 const reasonOfStatus = status => (status === 429 ? 'rate' : status === 502 || status === 503 || status === 504 ? 'site' : 'other');
 
 /** The words for a failed read. Only a real "site did not answer" blames the official site; siteText is that case's own sentence. */
-export function explain(error, siteText) {
+export function explain(error, siteText = SITE_NOT_ANSWERING) {
   if (error?.reason === 'rate') return 'Too many searches in a minute. Try again shortly.';
   if (error?.reason === 'other') return 'Something went wrong on our side. Try again in a minute.';
   return siteText;
 }
-
-/** The example label's reason for a failed read: 'unavailable' (the site), 'rate' or 'other'. */
-export const demoReasonOf = error => (error?.reason === 'rate' || error?.reason === 'other' ? error.reason : 'unavailable');
+/** The plain sentence for a read the official site did not answer. */
+export const SITE_NOT_ANSWERING = 'The official AION 2 site is not answering right now. Try again in a minute.';
 
 export const armoryLive = () => typeof AETHERIUM_WORKER_URL === 'string' && AETHERIUM_WORKER_URL.startsWith('https://');
+/** Thrown before any call when no Worker is configured: our side, never the official site. */
+const notConnected = () => new ArmoryUnavailable('Live character data is not connected.', 'other');
 
 async function getJson(url, { timeout = TIMEOUT_MS } = {}) {
   const controller = new AbortController();
@@ -60,8 +63,6 @@ async function getJson(url, { timeout = TIMEOUT_MS } = {}) {
     clearTimeout(timer);
   }
 }
-
-const fixture = name => getJson(`${AETHERIUM_DEMO.fixtures}${name}.json`);
 
 /* Regions. Only the five official codes are used anywhere; anything else is Europe. */
 export const regions = AETHERIUM_REGIONS;
@@ -85,13 +86,12 @@ function worker(path, params, region) {
 }
 
 const liveSource = meta => ({ kind: 'live', fetchedAt: meta?.fetchedAt ?? null, cache: meta?.cache ?? null });
-const demoSource = reason => ({ kind: 'demo', capturedOn: AETHERIUM_DEMO.capturedOn, reason });
 
 let catalogue;
 export function loadCatalogue() {
   catalogue ??= Promise.all([
     getJson('/astrix-app/games/aion2/data/gear-slots.json'),
-    fixture('servers')
+    getJson(AETHERIUM_EU_SERVERS)
   ]).then(([slots, servers]) => ({
     slots: slots.records,
     servers: servers.serverList,
@@ -100,16 +100,11 @@ export function loadCatalogue() {
   return catalogue;
 }
 
-const sameName = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
-
-/** Character search. Returns { rows, source }. In demo mode only the example Daeva is found. */
+/** Character search. Returns { rows, source }. Throws ArmoryUnavailable when the site or the Worker did not answer. */
 export async function searchCharacters(name, region = AETHERIUM_REGION) {
-  if (armoryLive()) {
-    const body = await worker('/aion2/search', { name }, region);
-    return { rows: adaptSearch(body), source: liveSource(body.meta) };
-  }
-  const rows = sameName(name, AETHERIUM_DEMO.name) ? adaptSearch(await fixture('astrix285-search')) : [];
-  return { rows, source: demoSource('not-connected') };
+  if (!armoryLive()) throw notConnected();
+  const body = await worker('/aion2/search', { name }, region);
+  return { rows: adaptSearch(body), source: liveSource(body.meta) };
 }
 
 /**
@@ -125,63 +120,67 @@ export async function loadServers(region = AETHERIUM_REGION) {
   } catch { return []; }
 }
 
-/** The demo equivalent of one /aion2/character call: info and equipment only. */
-async function demoRaw() {
-  const [info, equipment] = await Promise.all([fixture('astrix285-info'), fixture('astrix285-equipment')]);
-  return { info, equipment };
-}
-
 /**
- * The character model for one Daeva. Returns { model, source }.
- * ref = { serverId, characterId, region } or null for the demo character (Europe).
+ * The character model for one Daeva. Returns { model, source }. ref = { serverId, characterId, region }.
  * First paint needs only this: one /aion2/character call, in parallel with the small slot list.
  * Item detail and Daevanion boards load later, when the player opens them.
+ * A read that fails throws ArmoryUnavailable; there is no stand-in character.
  */
-export async function loadCharacter(ref, { demoReason = armoryLive() ? 'example' : 'not-connected' } = {}) {
-  if (ref && armoryLive()) {
-    const region = regionOf(ref.region);
-    const [{ module }, body] = await Promise.all([
-      loadCatalogue(),
-      worker('/aion2/character', { serverId: ref.serverId, characterId: ref.characterId }, region)
-    ]);
-    const capturedOn = (body.meta?.fetchedAt ?? new Date().toISOString()).slice(0, 10);
-    const model = module.normaliseCharacter(body, { region, capturedOn });
-    const source = liveSource(body.meta);
-    roster.refresh(model, source); // a live read keeps this Daeva's saved card up to date
-    return { model, source };
-  }
-  const [{ module }, raw] = await Promise.all([loadCatalogue(), demoRaw()]);
-  return {
-    model: module.normaliseCharacter(raw, { region: AETHERIUM_REGION, capturedOn: AETHERIUM_DEMO.capturedOn }),
-    source: demoSource(demoReason)
-  };
+export async function loadCharacter(ref) {
+  if (!ref) throw new TypeError('loadCharacter needs a Daeva: { serverId, characterId, region }');
+  if (!armoryLive()) throw notConnected();
+  const region = regionOf(ref.region);
+  const [{ module }, body] = await Promise.all([
+    loadCatalogue(),
+    worker('/aion2/character', { serverId: ref.serverId, characterId: ref.characterId }, region)
+  ]);
+  const capturedOn = (body.meta?.fetchedAt ?? new Date().toISOString()).slice(0, 10);
+  const model = module.normaliseCharacter(body, { region, capturedOn });
+  const source = liveSource(body.meta);
+  roster.refresh(model, source); // a live read keeps this Daeva's saved card up to date
+  return { model, source };
 }
 
 /** The item detail card for one worn item. Returns { detail, source } or { detail: null, reason }. */
-export async function loadItemDetail(model, slot, source) {
+export async function loadItemDetail(model, slot) {
   if (slot.empty) return { detail: null, reason: 'Nothing is worn in this slot.' };
-  if (source.kind === 'live') {
-    const body = await worker('/aion2/item', {
-      serverId: model.profile.server.id,
-      characterId: model.profile.characterId,
-      id: slot.itemId,
-      enchantLevel: slot.enchant,
-      slotPos: slot.slotPos
-    }, model.source.region);
-    return { detail: adaptItemDetail(body), source: liveSource(body.meta) };
-  }
-  if (slot.slotPos === 1) return { detail: adaptItemDetail(await fixture('astrix285-item-mainhand')), source };
-  return { detail: null, reason: 'The example holds item detail for the main hand only. Every slot opens once the live data is connected.' };
+  const body = await worker('/aion2/item', {
+    serverId: model.profile.server.id,
+    characterId: model.profile.characterId,
+    id: slot.itemId,
+    enchantLevel: slot.enchant,
+    slotPos: slot.slotPos
+  }, model.source.region);
+  return { detail: adaptItemDetail(body), source: liveSource(body.meta) };
 }
 
-/** The node grid of one Daevanion board, loaded when the player opens it. Returns { nodes } or { nodes: null, reason }. */
-export async function loadBoard(model, board, source) {
-  if (source.kind === 'live') {
-    const body = await worker('/aion2/daevanion', { serverId: model.profile.server.id, characterId: model.profile.characterId, boardId: board.id }, model.source.region);
-    return { nodes: adaptDaevanionBoard(body) };
-  }
-  if (board.id === 11) return { nodes: adaptDaevanionBoard(await fixture('astrix285-daevanion-11')) };
-  return { nodes: null, reason: 'The example holds the Nezekan board only. Every board opens once the live data is connected.' };
+/** The node grid of one Daevanion board, loaded when the player opens it. Returns { nodes }. */
+export async function loadBoard(model, board) {
+  const body = await worker('/aion2/daevanion', { serverId: model.profile.server.id, characterId: model.profile.characterId, boardId: board.id }, model.source.region);
+  return { nodes: adaptDaevanionBoard(body) };
+}
+
+/* The intro art: official class renders and the NPC guide, hotlinked from the NCSOFT CDN. The data file carries
+   each image's provenance (sources stay in the data, never on the page). An entry with no URL, or a URL on any
+   other host, is left out, so the page shows no art rather than the wrong art. Loaded after the page is usable. */
+const artUrlOk = url => typeof url === 'string' && url.startsWith(AETHERIUM_ART_HOST);
+/** A filled art entry ({ url, alt, ... } on the CDN) as { url, alt, width, height }; a pending or foreign one is null. */
+const artEntry = entry => (entry && !entry.pending && artUrlOk(entry.url)
+  ? { url: entry.url, alt: typeof entry.alt === 'string' ? entry.alt : '', width: entry.width ?? null, height: entry.height ?? null }
+  : null);
+let introArt;
+/** { classes: Map<slug, entry>, npc: entry | null, keyArt: entry | null }. Never throws: a missing file means no art. */
+export function loadIntroArt() {
+  introArt ??= getJson(AETHERIUM_INTRO_ART).then(data => {
+    const art = data?.records?.find(record => record.id === 'intro-art') ?? {};
+    const classes = new Map();
+    for (const item of Array.isArray(art.classes) ? art.classes : []) {
+      const entry = artEntry(item?.art);
+      if (entry && typeof item.class === 'string') classes.set(item.class.toLowerCase(), entry);
+    }
+    return { classes, npc: artEntry(art.npc), keyArt: artEntry(art.keyArt) };
+  }).catch(() => ({ classes: new Map(), npc: null, keyArt: null }));
+  return introArt;
 }
 
 /* The faction is keyed on the official race id (1 Elyos, 2 Asmodian). The name is only the fallback, and the
@@ -195,27 +194,11 @@ export function factionOf(raceName, raceId = null) {
 
 /** Character data age in plain words. Cached data is never shown as live. */
 export function sourceLabel(source) {
-  if (source.kind === 'demo') {
-    const why = {
-      unavailable: 'The official AION 2 site is not answering right now.',
-      rate: 'Too many searches in a minute. Try again shortly.',
-      other: 'Something went wrong on our side. Try again in a minute.',
-      example: 'Search for your own Daeva above.'
-    }[source.reason] ?? 'Live character data is not connected yet.';
-    return `Example data: a sample Daeva, read from the official AION 2 site on ${formatDate(source.capturedOn)}. ${why}`;
-  }
   const at = Date.parse(source.fetchedAt);
   if (!Number.isFinite(at)) return 'Read from the official AION 2 site.';
   const minutes = Math.max(0, Math.round((Date.now() - at) / 60000));
   const age = minutes < 1 ? 'just now' : minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
   return `Read from the official AION 2 site ${age}${source.cache === 'hit' ? ' (cached)' : ''}.`;
-}
-
-export function formatDate(iso) {
-  const date = new Date(`${iso}T12:00:00Z`);
-  return Number.isFinite(date.getTime())
-    ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
-    : iso;
 }
 
 /* Roster: up to 8 Daevas per server, added by name, saved on this device. The public data cannot tell which
@@ -225,11 +208,16 @@ const rosterIdOf = entry => `${regionOf(entry.region)}:${entry.serverId}`;
 const validEntry = entry => Boolean(entry && typeof entry.name === 'string' && entry.name.trim() && entry.characterId && Number.isFinite(Number(entry.serverId)));
 const emptyStore = () => ({ rosters: {}, active: null });
 
-/** Files entries into their server's roster (old entries have no region: Europe). Drops blank ones, caps each roster at the slot count. */
+/**
+ * Files entries into their server's roster (old entries have no region: Europe). Drops blank ones and the old example
+ * Daeva (saved with demo: true before the live Worker), caps each roster at the slot count. Real entries are untouched.
+ */
 function fileEntries(list, store) {
   for (const raw of list) {
     if (!validEntry(raw)) continue; // saved without a name or id (an empty reply): it would show as a blank card
-    const entry = { ...raw, region: regionOf(raw.region) };
+    if (raw.demo === true) continue; // the old example Daeva: never a real character on this device
+    const { demo, ...kept } = raw;
+    const entry = { ...kept, region: regionOf(raw.region) };
     const id = rosterIdOf(entry);
     const bucket = (store.rosters[id] ??= { region: entry.region, serverId: entry.serverId, serverName: entry.serverName, entries: [] });
     if (bucket.entries.length < AETHERIUM_ROSTER_SLOTS && !bucket.entries.some(item => rosterKey(item) === rosterKey(entry))) bucket.entries.push(entry);
@@ -250,9 +238,12 @@ function readStore() {
     const v2 = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY) ?? 'null');
     if (v2 && typeof v2.rosters === 'object' && v2.rosters) {
       const store = emptyStore();
-      fileEntries(Object.values(v2.rosters).flatMap(bucket => (Array.isArray(bucket?.entries) ? bucket.entries : [])), store);
-      store.active = v2.active ?? null;
-      return store;
+      const raw = Object.values(v2.rosters).flatMap(bucket => (Array.isArray(bucket?.entries) ? bucket.entries : []));
+      fileEntries(raw, store);
+      store.active = v2.active && findIn(store, v2.active.key) ? v2.active : null;
+      const kept = Object.values(store.rosters).reduce((count, bucket) => count + bucket.entries.length, 0);
+      // Something was dropped (the old example Daeva, a blank entry): the device keeps only what is shown.
+      return kept < raw.length ? writeStore(store) : store;
     }
     const v1 = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY_V1) ?? 'null');
     if (v1 && Array.isArray(v1.entries)) return writeStore(migrateV1(v1));
@@ -304,11 +295,10 @@ const entryFrom = (model, source) => ({
   region: model.source.region,
   title: model.profile.title ?? null,
   itemLevel: Number.isFinite(model.profile.itemLevel) ? model.profile.itemLevel : null,
-  seenAt: source.kind === 'live' && Number.isFinite(Date.parse(source.fetchedAt)) ? source.fetchedAt : null,
-  demo: source.kind === 'demo'
+  seenAt: source.kind === 'live' && Number.isFinite(Date.parse(source.fetchedAt)) ? source.fetchedAt : null
 });
 
-/** True when a read may overwrite a saved entry: live, and not older than what the entry already holds. Never from the example. */
+/** True when a read may overwrite a saved entry: live, and not older than what the entry already holds. */
 const mayRefresh = (saved, source) => source.kind === 'live'
   && Number.isFinite(Date.parse(source.fetchedAt))
   && (!saved.seenAt || Date.parse(source.fetchedAt) >= Date.parse(saved.seenAt));
@@ -342,14 +332,14 @@ export const roster = {
     writeStore(store);
     return true;
   },
-  /** A live read of a saved Daeva updates its card (level, class, race, title, item level). Never from the example or older data. */
+  /** A live read of a saved Daeva updates its card (level, class, race, title, item level). Never from older data. */
   refresh(model, source) {
     const store = readStore();
     const fresh = entryFrom(model, source);
     const found = findIn(store, rosterKey(fresh));
     if (!found || !mayRefresh(found.entry, source)) return false;
     const index = found.bucket.entries.indexOf(found.entry);
-    found.bucket.entries[index] = { ...found.entry, ...fresh, demo: false };
+    found.bucket.entries[index] = { ...found.entry, ...fresh };
     writeStore(store);
     return true;
   },

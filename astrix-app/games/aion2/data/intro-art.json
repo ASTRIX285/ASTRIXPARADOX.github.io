@@ -1,0 +1,40 @@
+{
+  "description": "The official art the Daeva Card intro and the Find-your-Daeva panels show: one render per class and the NPC guide, hotlinked from the NCSOFT CDN (assets.playnccdn.com), never re-hosted, cropped or edited. A filled art entry is { url, alt, shows, foundOn, capturedOn }: the image address, its alt text, what it shows, the official page it was found on and the date. A pending entry shows no art on the page. Sources stay in this file, never on a page. The class list is the official class list (armory capture).",
+  "records": [
+    {
+      "id": "intro-art",
+      "host": "https://assets.playnccdn.com/",
+      "terms": {
+        "pending": true,
+        "reason": "The NCSOFT fan content and AION 2 Creator Program terms could not be read from the build machine (its network policy refuses aion2.plaync.com and assets.playnccdn.com). Read them in a normal browser and record the link and the date here before any art entry below is filled in."
+      },
+      "keyArt": {
+        "pending": true,
+        "reason": "No official key art captured yet. Needs a normal browser on the official AION 2 site."
+      },
+      "npc": {
+        "pending": true,
+        "reason": "No official NPC render captured yet. Use an NPC the official site publishes and record its name; never guess one."
+      },
+      "classes": [
+        { "class": "gladiator", "name": "Gladiator", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "templar", "name": "Templar", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "assassin", "name": "Assassin", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "ranger", "name": "Ranger", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "sorcerer", "name": "Sorcerer", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "spiritmaster", "name": "Spiritmaster", "art": { "pending": true, "reason": "No official class render captured yet. The official data names this class Elementalist internally; the page label stays Spiritmaster." } },
+        { "class": "cleric", "name": "Cleric", "art": { "pending": true, "reason": "No official class render captured yet." } },
+        { "class": "chanter", "name": "Chanter", "art": { "pending": true, "reason": "No official class render captured yet." } }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/en-us/api/gameinfo/classes",
+          "capturedOn": "2026-10-05",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/classes.json"
+        }
+      ]
+    }
+  ]
+}
