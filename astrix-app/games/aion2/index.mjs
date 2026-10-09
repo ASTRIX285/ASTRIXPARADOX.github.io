@@ -13,7 +13,7 @@ import {
   adaptPetWing
 } from './engine/armory-adapter.mjs';
 
-export const AION2_REGIONS = Object.freeze(['eu']);
+export const AION2_REGIONS = Object.freeze(['naw', 'nae', 'eu', 'la', 'as']);
 
 export const AION2_CONCEPTS = Object.freeze({
   gear: 'equipment',

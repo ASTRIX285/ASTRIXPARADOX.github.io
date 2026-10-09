@@ -1,11 +1,11 @@
 /**
  * The Daevanion board drawing, shared by the Ascent Plan route screen and the Daevanion page.
- * A node is a tile in a grid (the armory sends each node's row and column); the game's own node art
+ * A node is a tile in a grid (the official site sends each node's row and column); the game's own node art
  * is drawn on it. What a tile means (taken, on the route, greyed) is set by the caller through `status`.
  */
 import { esc } from './aetherium-ui.mjs';
 
-/* The game's own node art, as the official armory site uses it (NCSOFT CDN, never re-hosted). */
+/* The game's own node art, as the official AION 2 site uses it (NCSOFT CDN, never re-hosted). */
 const NODE_ART = 'https://assets.playnccdn.com/static-aion2/characters/img/daevanion/';
 const NODE_GRADE = { 'active-skill': 'legend', 'passive-skill': 'rare', unique: 'unique', stat: 'common' };
 const START_ART = { Gladiator: 'gladiator', Templar: 'templar', Assassin: 'assassin', Ranger: 'ranger', Sorcerer: 'sorcerer', Spiritmaster: 'elementalist', Cleric: 'cleric', Chanter: 'chanter' };

@@ -9,17 +9,17 @@ export const number = value => (Number.isFinite(value) ? value.toLocaleString('e
 
 export const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 
-/** "MainHand" to "Main Hand": the armory's own slot name, spaced for reading. */
+/** "MainHand" to "Main Hand": the official slot name, spaced for reading. */
 export const slotLabel = name => String(name).replace(/([a-z])([A-Z])/g, '$1 $2');
 
-/** An NCSOFT CDN icon (never re-hosted), or an empty frame when the armory sent none. */
+/** An NCSOFT CDN icon (never re-hosted), or an empty frame when the site sent none. */
 export const iconImg = (src, alt = '', size = 48) => src
   ? `<img class="ae-icon" src="${esc(src)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
   : `<span class="ae-icon ae-icon-empty" aria-hidden="true"></span>`;
 
 /** Page accent from the active character's faction: Elyos, Asmodian, or ASTRIX before one loads. */
-export function setFaction(raceName) {
-  document.body.dataset.faction = raceName ? factionOf(raceName) : 'astrix';
+export function setFaction(raceName, raceId = null) {
+  document.body.dataset.faction = raceName || raceId ? factionOf(raceName, raceId) : 'astrix';
 }
 
 export function showSource(source) {

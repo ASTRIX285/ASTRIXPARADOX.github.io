@@ -51,6 +51,12 @@
             "Asmodian"
           ]
         },
+        "raceId": {
+          "enum": [
+            1,
+            2
+          ]
+        },
         "server": {
           "type": "object",
           "required": [
@@ -550,8 +556,13 @@
           "const": "armory"
         },
         "region": {
-          "type": "string",
-          "minLength": 1
+          "enum": [
+            "naw",
+            "nae",
+            "eu",
+            "la",
+            "as"
+          ]
         },
         "capturedOn": {
           "type": "string",

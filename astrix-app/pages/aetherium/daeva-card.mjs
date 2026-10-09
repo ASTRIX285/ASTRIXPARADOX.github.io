@@ -6,10 +6,16 @@ import {
   armoryLive,
   ascentUrl,
   daevanionPageUrl,
+  factionOf,
   gearUrl,
-  loadCatalogue,
+  lastRegion,
   loadCharacter,
+  loadServers,
   refFromUrl,
+  regionName,
+  regionOf,
+  regions,
+  rememberRegion,
   roster,
   searchCharacters
 } from './aetherium-data.mjs';
@@ -17,12 +23,21 @@ import { $, esc, markCharacterShown, markReady, number, setFaction, showNotice, 
 
 const state = { model: null, source: null, ref: null, busy: false };
 
+/* The region being searched. It starts from the link, else the region last used on this device, else Europe. */
+let currentRegion = 'eu';
+
+function renderRegions() {
+  $('#aeRegion').innerHTML = regions.map(item => `<option value="${esc(item.code)}">${esc(item.name)}</option>`).join('');
+  $('#aeRegion').value = currentRegion;
+}
+
 function renderServers(servers) {
   const select = $('#aeServer');
   const group = (raceId, label) => `<optgroup label="${label}">${servers
     .filter(server => server.raceId === raceId)
     .map(server => `<option value="${server.serverId}">${esc(server.serverName)}</option>`).join('')}</optgroup>`;
-  select.innerHTML = `<option value="">Any EU server</option>${group(1, 'Elyos')}${group(2, 'Asmodian')}`;
+  select.disabled = false;
+  select.innerHTML = `<option value="">Any server in ${esc(regionName(currentRegion))}</option>${group(1, 'Elyos')}${group(2, 'Asmodian')}`;
 }
 
 function renderSummary() {
@@ -33,7 +48,7 @@ function renderSummary() {
   const boardsOpen = model.daevanion.filter(board => board.open).length;
   const stigmas = model.skills.filter(skill => skill.category === 'Dp');
   const stigmaLevel = Math.min(...stigmas.map(skill => skill.needLevel));
-  // At or past the unlock level the armory can still report none acquired (stigmas also need a quest).
+  // At or past the unlock level the site can still report none acquired (stigmas also need a quest).
   const stigmaNote = p.level >= stigmaLevel ? 'None unlocked yet' : `Unlock at Lv ${stigmaLevel}`;
   const stigmasOpen = stigmas.filter(skill => skill.acquired).length;
   const eyebrow = [source.kind === 'demo' ? 'Example' : 'Your Daeva', p.title ? `Title: ${p.title}` : null].filter(Boolean).join(' · ');
@@ -45,7 +60,7 @@ function renderSummary() {
         <p class="ae-eyebrow">${esc(eyebrow)}</p>
         <h2 class="ae-name" id="aeName">${esc(p.name)}</h2>
         <ul class="ae-chips" aria-label="Character">
-          <li>${esc(p.class)}</li><li class="ae-chip-faction">${esc(p.raceName)}</li><li>${esc(p.server.name)}</li><li>Lv ${esc(p.level)}</li>
+          <li>${esc(p.class)}</li><li class="ae-chip-faction">${esc(p.raceName)}</li><li>${esc(p.server.name)}</li><li>${esc(regionName(model.source.region))}</li><li>Lv ${esc(p.level)}</li>
         </ul>
         <dl class="ae-tiles">
           <div class="ae-tile"><dt>Combat power</dt><dd>${number(p.combatPower)}</dd></div>
@@ -70,12 +85,12 @@ function renderRoster() {
   const cards = current.entries.map(entry => {
     const key = roster.key(entry);
     const active = key === current.active;
-    return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${entry.raceName === 'Asmodian' ? 'asmodian' : 'elyos'}">
+    return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
       <button type="button" class="ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
         ${active ? '<span class="ae-roster-state">Active</span>' : ''}
         <strong>${esc(entry.name)}</strong>
         <span>${esc(entry.className)} · Lv ${esc(entry.level)}</span>
-        <span class="ae-muted">${esc(entry.serverName)}${entry.demo ? ' · example' : ''}</span>
+        <span class="ae-muted">${esc(entry.serverName)} · ${esc(regionName(entry.region))}${entry.demo ? ' · example' : ''}</span>
       </button>
       <button type="button" class="ae-roster-remove" data-roster-remove="${esc(key)}" aria-label="Remove ${esc(entry.name)} from your Daevas">Remove</button>
     </li>`;
@@ -97,13 +112,13 @@ function renderResults(rows) {
   el.querySelectorAll('[data-result]').forEach(button => button.addEventListener('click', () => {
     const row = rows[Number(button.dataset.result)];
     el.hidden = true;
-    importCharacter({ serverId: row.serverId, characterId: row.characterId });
+    importCharacter({ serverId: row.serverId, characterId: row.characterId, region: currentRegion });
   }));
 }
 
 function show(model, source, ref) {
   Object.assign(state, { model, source, ref });
-  setFaction(model.profile.raceName);
+  setFaction(model.profile.raceName, model.profile.raceId);
   showSource(source);
   renderSummary();
   renderRoster();
@@ -124,10 +139,10 @@ async function importCharacter(ref) {
     else showNotice('');
     const shown = source.kind === 'live' ? ref : null;
     show(model, source, shown);
-    history.replaceState(null, '', shown ? `?${new URLSearchParams({ serverId: shown.serverId, characterId: shown.characterId })}` : location.pathname);
+    history.replaceState(null, '', shown ? `?${new URLSearchParams({ serverId: shown.serverId, characterId: shown.characterId, region: regionOf(shown.region) })}` : location.pathname);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The armory is unavailable right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
   } finally {
     setBusy(false);
   }
@@ -137,7 +152,7 @@ function setBusy(busy) {
   state.busy = busy;
   const button = $('#aeFind');
   button.disabled = busy;
-  button.textContent = busy ? 'Reading the armory' : 'Find character';
+  button.textContent = busy ? 'Reading your character' : 'Find character';
 }
 
 async function onSearch(event) {
@@ -148,11 +163,11 @@ async function onSearch(event) {
   setBusy(true);
   let found;
   try {
-    found = await searchCharacters(name);
+    found = await searchCharacters(name, currentRegion);
   } catch (error) {
     setBusy(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The armory is unavailable right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
     return;
   }
   setBusy(false);
@@ -161,13 +176,29 @@ async function onSearch(event) {
   if (!rows.length) {
     renderResults([]);
     showNotice(armoryLive()
-      ? `No Daeva named ${name} on ${serverId ? 'that server' : 'EU servers'}. Check the spelling.`
+      ? `No Daeva named ${name} on ${serverId ? 'that server' : regionName(currentRegion)}. Check the spelling.`
       : 'Live search is not connected yet. Search ASTRIX285 to open the example.', 'warn');
     return;
   }
   showNotice('');
-  if (rows.length === 1) { renderResults([]); await importCharacter({ serverId: rows[0].serverId, characterId: rows[0].characterId }); }
+  if (rows.length === 1) { renderResults([]); await importCharacter({ serverId: rows[0].serverId, characterId: rows[0].characterId, region: currentRegion }); }
   else renderResults(rows);
+}
+
+async function loadRegionServers() {
+  const region = currentRegion;
+  const select = $('#aeServer');
+  select.disabled = true;
+  select.innerHTML = `<option value="">Loading servers</option>`;
+  const servers = await loadServers(region);
+  if (region === currentRegion) renderServers(servers);
+}
+
+function onRegionChange() {
+  currentRegion = regionOf($('#aeRegion').value);
+  rememberRegion(currentRegion);
+  renderResults([]);
+  loadRegionServers();
 }
 
 function wireRoster() {
@@ -181,7 +212,7 @@ function wireRoster() {
       const entry = roster.read().entries.find(item => roster.key(item) === open.dataset.rosterOpen);
       if (!entry) return;
       roster.setActive(roster.key(entry));
-      importCharacter({ serverId: entry.serverId, characterId: entry.characterId });
+      importCharacter({ serverId: entry.serverId, characterId: entry.characterId, region: entry.region });
     }
   });
 }
@@ -191,17 +222,20 @@ async function start() {
   setFaction(null);
   $('#aeSearch').addEventListener('submit', onSearch);
   wireRoster();
-  const { servers } = await loadCatalogue();
-  renderServers(servers);
   const fromUrl = refFromUrl();
   const active = roster.active();
-  const ref = fromUrl ?? (active ? { serverId: active.serverId, characterId: active.characterId } : null);
+  const ref = fromUrl ?? (active ? { serverId: active.serverId, characterId: active.characterId, region: active.region } : null);
+  currentRegion = ref ? regionOf(ref.region) : lastRegion();
+  renderRegions();
+  $('#aeRegion').addEventListener('change', onRegionChange);
+  // The server list loads beside the character, never in front of it.
+  loadRegionServers();
   try {
     const { model, source } = await loadCharacter(ref);
     show(model, source, source.kind === 'live' ? ref : null);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The armory is unavailable right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
   }
   markReady();
 }

@@ -80,13 +80,13 @@
 
   "/astrix-app/domains/player-identity/player-identity-service.mjs": "ffe9f66ede",
 
-  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "f6138332d3",
+  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "fb4cd792dd",
 
-  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "f914585928",
+  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "284481204d",
 
   "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "ee7829cd12",
 
-  "/astrix-app/games/aion2/index.mjs": "4c6dfb3a1a",
+  "/astrix-app/games/aion2/index.mjs": "bc4e8c21cb",
 
   "/astrix-app/games/destiny-2/index.mjs": "a5dae81a23",
 
@@ -102,25 +102,25 @@
 
   "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8eb89bb6d3",
 
-  "/astrix-app/pages/aetherium/aetherium-config.mjs": "7775be2108",
+  "/astrix-app/pages/aetherium/aetherium-config.mjs": "5e56265107",
 
-  "/astrix-app/pages/aetherium/aetherium-data.mjs": "0325338d26",
+  "/astrix-app/pages/aetherium/aetherium-data.mjs": "f06437e6e6",
 
-  "/astrix-app/pages/aetherium/aetherium-ui.mjs": "5ae1983264",
+  "/astrix-app/pages/aetherium/aetherium-ui.mjs": "07bcd96c5e",
 
-  "/astrix-app/pages/aetherium/ascent-plan.mjs": "acb2a66ab2",
+  "/astrix-app/pages/aetherium/ascent-plan.mjs": "ecf2d097c1",
 
-  "/astrix-app/pages/aetherium/character-menu.mjs": "1114519f0b",
+  "/astrix-app/pages/aetherium/character-menu.mjs": "2cf1991709",
 
-  "/astrix-app/pages/aetherium/character-page.mjs": "183a2fffeb",
+  "/astrix-app/pages/aetherium/character-page.mjs": "8d4950e8ec",
 
-  "/astrix-app/pages/aetherium/daeva-card.mjs": "810d242479",
+  "/astrix-app/pages/aetherium/daeva-card.mjs": "146a1f90de",
 
-  "/astrix-app/pages/aetherium/daevanion-board.mjs": "644d65c25b",
+  "/astrix-app/pages/aetherium/daevanion-board.mjs": "38e92086ad",
 
-  "/astrix-app/pages/aetherium/daevanion-page.mjs": "43eab397f5",
+  "/astrix-app/pages/aetherium/daevanion-page.mjs": "e668cbacaa",
 
-  "/astrix-app/pages/aetherium/gear-ledger.mjs": "6a96de983d",
+  "/astrix-app/pages/aetherium/gear-ledger.mjs": "4dedda78d3",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "dd601aede8",
 

@@ -16,15 +16,16 @@ const state = { model: null, source: null, ref: null, className: 'Gladiator', bo
 
 const points = cost => `${cost} ${cost === 1 ? 'point' : 'points'}`;
 
-/** The five boards in game order, with what the armory says about each (open, nodes taken) and what the game facts say (unlock level, focus). */
+/** The five boards in game order, with what the character says about each (open, nodes taken) and what the game facts say (unlock level, focus). */
 function boardList(model, advice) {
   const facts = advice ? (indexProgression(advice.progression)['daevanion-boards']?.value ?? []) : [];
   const live = id => model.daevanion.find(board => board.id === id) ?? null;
   const rows = facts.map(fact => {
+    // Match by id or name: Asmodian boards carry their own ids (31 to 36), the facts list the Elyos ones. The link and the board call use the character's own id.
     const board = live(fact.id) ?? model.daevanion.find(item => item.name === fact.name) ?? null;
-    return { id: fact.id, name: fact.name, unlockLevel: fact.unlockLevel, focus: fact.focus, open: Boolean(board?.open), taken: board?.nodesTaken ?? 0, total: board?.nodesTotal ?? null };
+    return { id: board?.id ?? fact.id, name: fact.name, unlockLevel: fact.unlockLevel, focus: fact.focus, open: Boolean(board?.open), taken: board?.nodesTaken ?? 0, total: board?.nodesTotal ?? null };
   });
-  for (const board of model.daevanion) if (!rows.some(row => row.id === board.id)) rows.push({ id: board.id, name: board.name, unlockLevel: null, focus: null, open: board.open, taken: board.nodesTaken, total: board.nodesTotal });
+  for (const board of model.daevanion) if (!rows.some(row => row.id === board.id || row.name === board.name)) rows.push({ id: board.id, name: board.name, unlockLevel: null, focus: null, open: board.open, taken: board.nodesTaken, total: board.nodesTotal });
   return rows;
 }
 
@@ -46,7 +47,7 @@ function writeBoard() {
 }
 
 /**
- * The nodes of one board. Opening a board that is not open yet still tries the call: the armory may send the grid
+ * The nodes of one board. Opening a board that is not open yet still tries the call: the official site may send the grid
  * (drawn greyed) or nothing (then the page says when it opens). Results stay for the visit; a failed read of an open board does not.
  */
 async function nodesFor(board) {
@@ -54,10 +55,10 @@ async function nodesFor(board) {
   let result;
   try {
     result = await loadBoard(state.model, board, state.source);
-    if (result.nodes && !result.nodes.length) result = { nodes: null, reason: board.open ? 'The armory sent no nodes for this board.' : 'closed' };
+    if (result.nodes && !result.nodes.length) result = { nodes: null, reason: board.open ? 'The official AION 2 site sent no nodes for this board.' : 'closed' };
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable) && !(error instanceof TypeError)) throw error;
-    if (board.open) return { nodes: null, reason: 'The armory is unavailable right now. Pick this board again in a minute.' };
+    if (board.open) return { nodes: null, reason: 'The official AION 2 site is not answering right now. Pick this board again in a minute.' };
     result = { nodes: null, reason: 'closed' };
   }
   if (!board.open && !result.nodes) result = { nodes: null, reason: 'closed' };

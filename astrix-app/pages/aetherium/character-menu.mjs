@@ -3,7 +3,7 @@
  * same style as the Ascent Plan menu. Gear, Skills and Daevanion each open their own page for this Daeva.
  * First paint needs only /aion2/character; the small game-wide facts file is read only to name a board that is not open yet.
  */
-import { daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, skillsUrl } from './aetherium-data.mjs';
+import { daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, regionName, skillsUrl } from './aetherium-data.mjs';
 import { $, esc, isPending, number } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage } from './character-page.mjs';
 import { nodeArt } from './daevanion-board.mjs';
@@ -19,7 +19,7 @@ function renderHeader(model) {
   $('#aeHeader').innerHTML = `
     <div>
       <h1 class="ae-name">${esc(p.name)}</h1>
-      <p class="ae-subline">${[p.title, `${p.class} Lv ${p.level}`, p.raceName, p.server.name].filter(Boolean).map(esc).join(' · ')}</p>
+      <p class="ae-subline">${[p.title, `${p.class} Lv ${p.level}`, p.raceName, p.server.name, regionName(model.source.region)].filter(Boolean).map(esc).join(' · ')}</p>
       <p class="ae-figures"><span>Combat power <b>${number(p.combatPower)}</b></span><span>Item level <b>${isPending(p.itemLevel) ? '-' : number(p.itemLevel)}</b></span></p>
     </div>
     <a class="btn" href="/hub/aetherium/">Back to Daeva Card</a>`;

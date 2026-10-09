@@ -23,16 +23,16 @@ function renderGear() {
         <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(slot.grade)} · ${esc(enchantText(slot))}</span></span>
       </button></li>`).join('');
   const accessories = state.model.accessorySlots;
-  // Slots outside the slot list (cape, belt, accessories) only reach the armory once something is worn there.
+  // Slots outside the slot list (cape, belt, accessories) only reach the official site once something is worn there.
   const extra = gear.filter(slot => !state.listedSlots.has(slot.slotPos)).length;
   $('#aeAccessories').textContent = !isPending(accessories)
     ? `Accessories: ${accessories.filter(slot => !slot.empty).length} worn.`
     : extra
       ? 'Other slots, such as accessories, show here once something is worn in them.'
-      : 'Accessories: none worn. The armory only lists an accessory slot once something is worn in it.';
+      : 'Accessories: none worn. The official AION 2 site only lists an accessory slot once something is worn in it.';
 }
 
-/** The item card body: everything the armory gives for one worn item, laid out like the game's tooltip. */
+/** The item card body: everything the official site gives for one worn item, laid out like the game's tooltip. */
 function itemCardBody(slot, d) {
   const rows = list => list.map(row => `<li><span>${esc(row.name)}</span><b>${esc(row.value)}${row.extra ? ` <em>+${esc(row.extra)}</em>` : ''}</b></li>`).join('');
   const max = isPending(d.maxEnchant) ? null : d.maxEnchant;
@@ -64,7 +64,7 @@ async function selectSlot(index, from) {
     result = await loadItemDetail(state.model, slot, state.source);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    result = { detail: null, reason: 'The armory is unavailable right now. Try this item again in a minute.' };
+    result = { detail: null, reason: 'The official AION 2 site is not answering right now. Try this item again in a minute.' };
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
@@ -115,9 +115,9 @@ function render(model, source, ref) {
             <p class="ae-accessories" id="aeAccessories"></p>
           </section>
           <section class="ae-panel is-grow" aria-labelledby="aeStatTitle">
-            <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the armory</small></h2>
+            <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the official AION 2 site</small></h2>
             <dl class="ae-stats" id="aeStats"></dl>
-            <p class="ae-note">Attack, Defense and other combat stats are not in the public armory data.</p>
+            <p class="ae-note">Attack, Defense and other combat stats are not in the public character data.</p>
           </section>
         </div>
         <div class="ae-col">

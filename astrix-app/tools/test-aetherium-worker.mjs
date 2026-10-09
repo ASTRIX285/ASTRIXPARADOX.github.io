@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-// Aetherium armory Worker: whitelist, param validation, KV cache, rate limit, CORS and
-// upstream failure handling. Offline only: fetch is mocked with the #451 EU fixtures.
+// Aetherium Worker: whitelist, five regions, param validation, KV cache, rate limit, CORS and
+// upstream failure handling. Offline only: fetch is mocked with the #451 EU fixtures and the derived region fixtures.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {createWorker,isWhitelistedUpstream,normaliseCharacterId,REGIONS,CACHE_TTL_SECONDS} from '../../aetherium-worker/src/index.mjs';
+import {createWorker,isWhitelistedUpstream,normaliseCharacterId,REGIONS,RATE_LIMIT,CACHE_TTL_SECONDS} from '../../aetherium-worker/src/index.mjs';
+import {readFileSync as readText} from 'node:fs';
+import {REGION_TABLE,deriveServers} from './fixtures/aion2/derive-region-fixtures.mjs';
 
 const dir=fileURLToPath(new URL('./fixtures/aion2/eu/',import.meta.url));
 const load=name=>JSON.parse(readFileSync(`${dir}${name}.json`,'utf8'));
@@ -24,6 +26,7 @@ const SITE='https://astrixparadox.com';
 function upstreamBody(url){
   const u=new URL(url);
   if(u.hostname==='api-search.plaync.com') return fixtures.search;
+  if(u.pathname==='/en-us/api/gameinfo/servers') return deriveServers(u.searchParams.get('region'));
   return {'/api/character/info':fixtures.info,'/api/character/equipment':fixtures.equipment,
     '/api/character/equipment/item':fixtures.item,'/api/character/daevanion/detail':fixtures.daevanion}[u.pathname];
 }
@@ -135,7 +138,12 @@ const now=()=>clock;
   await expect('/aion2/search?name=ab%26size%3D1000',400,'invalid_name');
   await expect('/aion2/search?name=%3Cscript%3E',400,'invalid_name');
   await expect('/aion2/search?name=ASTRIX285&region=kr',400,'invalid_region');
-  await expect('/aion2/search?name=ASTRIX285&region=na',400,'region_disabled');
+  for(const bad of ['na','kr','tw','asia','sa','us','ru','']){
+    if(bad==='') continue;
+    await expect(`/aion2/search?name=ASTRIX285&region=${bad}`,400,'invalid_region');
+    await expect(`/aion2/servers?region=${bad}`,400,'invalid_region');
+    await expect(`/aion2/character?serverId=1308&characterId=${encodeURIComponent(ENCODED_ID)}&region=${bad}`,400,'invalid_region');
+  }
   await expect('/aion2/search?name=ASTRIX285&region=__proto__',400,'invalid_region');
   await expect(`/aion2/character?serverId=13a8&characterId=${encodeURIComponent(ENCODED_ID)}`,400,'invalid_serverId');
   await expect(`/aion2/character?characterId=${encodeURIComponent(ENCODED_ID)}`,400,'invalid_serverId');
@@ -150,8 +158,12 @@ const now=()=>clock;
   await expect(`/aion2/daevanion?${charQs}`,400,'invalid_boardId');
   assert.equal(fetch.calls.length,0,'No rejected request reaches upstream');
 
-  assert.equal(REGIONS.eu.enabled,true);
-  assert.equal(REGIONS.na.enabled,false,'NA present in config but off');
+  assert.deepEqual(Object.keys(REGIONS).sort(),['as','eu','la','nae','naw'],'Only the five official codes');
+  for(const code of Object.keys(REGIONS)) assert.equal(REGIONS[code].enabled,true,code);
+  assert.equal(Object.hasOwn(REGIONS,'na'),false);
+  assert.ok(isWhitelistedUpstream('https://aion2.plaync.com/en-us/api/gameinfo/servers?lang=en-US&region=eu'));
+  assert.equal(isWhitelistedUpstream('https://aion2.plaync.com/en-us/api/gameinfo/other'),false);
+  assert.equal(isWhitelistedUpstream('https://api-search.plaync.com/en-us/api/gameinfo/servers'),false);
   assert.ok(isWhitelistedUpstream('https://aion2.plaync.com/api/character/info?x=1'));
   assert.ok(isWhitelistedUpstream('https://api-search.plaync.com/aion2global/search/v2/character?keyword=a'));
   for(const bad of ['http://aion2.plaync.com/api/character/info','https://aion2.plaync.com/api/character/list',
@@ -195,12 +207,16 @@ const now=()=>clock;
   assert.equal(kv2.puts.length,0);
 }
 
-// 4. Rate limit: 30 a minute per CF-Connecting-IP, then 429, reset after the window.
+// 4. Rate limit: 60 a minute per CF-Connecting-IP (raised from 30 for five regions), then 429, reset after the window.
 {
   const fetch=mockFetch();
   const worker=createWorker({fetch,now});
   const env={AION2_CACHE:memoryKv()};
-  for(let i=0;i<30;i++){
+  assert.equal(RATE_LIMIT.limit,60,'60 a minute');
+  assert.equal(RATE_LIMIT.windowMs,60_000);
+  const toml=readText(new URL('../../aetherium-worker/wrangler.toml',import.meta.url),'utf8');
+  assert.match(toml,/simple = \{ limit = 60, period = 60 \}/,'wrangler.toml binding matches the Worker');
+  for(let i=0;i<RATE_LIMIT.limit;i++){
     const res=await worker.fetch(req('/aion2/search?name=ASTRIX285',{ip:'198.51.100.1'}),env);
     assert.equal(res.status,200,`request ${i+1} allowed`);
   }
@@ -312,6 +328,62 @@ const now=()=>clock;
   assert.equal(u.searchParams.get('page'),'1');
   assert.equal(u.searchParams.get('size'),'40');
   assert.equal(u.searchParams.getAll('page').length,1);
+}
+
+// 8. Five regions: each is accepted on every route, sends only its own code upstream, and caches on its own.
+{
+  assert.deepEqual(REGION_TABLE.map(row=>row.code).sort(),Object.keys(REGIONS).sort(),'Test table matches the allowlist');
+  const fetch=mockFetch();
+  const worker=createWorker({fetch,now});
+  const kv=memoryKv();
+  const env={AION2_CACHE:kv};
+  for(const {code,servers} of REGION_TABLE){
+    fetch.calls.length=0;
+    let res=await worker.fetch(req(`/aion2/search?name=ASTRIX285&region=${code}`),env);
+    assert.equal(res.status,200,`${code} search`);
+    assert.equal((await res.json()).meta.region,code);
+    assert.equal(new URL(fetch.calls[0].url).searchParams.get('region'),code);
+    assert.equal(new URL(fetch.calls[0].url).searchParams.get('localeInfo'),'en-US');
+
+    fetch.calls.length=0;
+    res=await worker.fetch(req(`/aion2/character?serverId=1308&characterId=${encodeURIComponent(ENCODED_ID)}&region=${code}`),env);
+    assert.equal(res.status,200,`${code} character`);
+    assert.equal(fetch.calls.length,2);
+    for(const call of fetch.calls){
+      const u=new URL(call.url);
+      assert.equal(u.hostname,'aion2.plaync.com','Same host in every region');
+      assert.equal(u.searchParams.get('region'),code);
+      assert.equal(u.searchParams.get('lang'),'en-US');
+    }
+
+    fetch.calls.length=0;
+    res=await worker.fetch(req(`/aion2/servers?region=${code}`),env);
+    assert.equal(res.status,200,`${code} servers`);
+    const body=await res.json();
+    assert.equal(body.serverList.length,servers,`${code} has ${servers} servers`);
+    assert.equal(body.meta.region,code);
+    assert.equal(fetch.calls.length,1);
+    assert.equal(fetch.calls[0].url,`https://aion2.plaync.com/en-us/api/gameinfo/servers?lang=en-US&region=${code}`);
+  }
+  // A cache key per region: the same character in two regions is two upstream reads and two entries.
+  const keys=new Set(kv.puts.map(put=>put.key));
+  assert.equal(keys.size,kv.puts.length,'No two regions share a cache entry');
+  assert.equal(kv.puts.length,REGION_TABLE.length*3);
+  const before=fetch.calls.length;
+  let res=await worker.fetch(req(`/aion2/servers?region=nae`),env);
+  assert.equal((await res.json()).meta.cache,'hit','Repeat read is a hit');
+  assert.equal(fetch.calls.length,before);
+  res=await worker.fetch(req(`/aion2/servers?region=naw`),env);
+  assert.equal((await res.json()).serverList.length,10,'NA West list is not the NA East list');
+  // No region means Europe, and an unknown one is refused before any upstream call.
+  fetch.calls.length=0;
+  res=await worker.fetch(req('/aion2/servers'),{});
+  assert.equal((await res.json()).meta.region,'eu');
+  assert.ok(fetch.calls[0].url.endsWith('region=eu'));
+  fetch.calls.length=0;
+  res=await worker.fetch(req('/aion2/servers?region=na'),{});
+  assert.equal(res.status,400);
+  assert.equal(fetch.calls.length,0,'An unknown code never reaches upstream (it would silently answer with the NA East list)');
 }
 
 console.log('aetherium worker tests pass');

@@ -23,6 +23,13 @@ function requireShape(value, key, what) {
   }
 }
 
+/** Race ids the official data uses: 1 Elyos, 2 Asmodian. The name ("Asmodians" in the data) is only the fallback. */
+const RACES = Object.freeze({ 1: 'Elyos', 2: 'Asmodian' });
+function raceOf(profile) {
+  if (Object.hasOwn(RACES, profile.raceId)) return RACES[profile.raceId];
+  return /^asmodian/i.test(String(profile.raceName ?? '')) ? 'Asmodian' : 'Elyos';
+}
+
 /** Profile block from /api/character/info. Item level comes from the untranslated stat row. */
 export function adaptProfile(info) {
   requireShape(info, 'profile', 'Character info');
@@ -32,7 +39,8 @@ export function adaptProfile(info) {
     name: p.characterName,
     class: p.className,
     level: p.characterLevel,
-    raceName: p.raceName,
+    raceName: raceOf(p),
+    raceId: Object.hasOwn(RACES, p.raceId) ? p.raceId : (raceOf(p) === 'Asmodian' ? 2 : 1),
     server: { id: p.serverId, name: p.serverName },
     characterId: p.characterId,
     portrait: icon(p.profileImage),

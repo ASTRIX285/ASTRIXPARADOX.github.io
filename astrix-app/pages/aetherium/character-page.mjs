@@ -1,6 +1,6 @@
 /**
  * The shared start-up of the character pages (menu, Gear, Skills, Daevanion): which Daeva, the
- * one /aion2/character call, the labelled example when the armory is down, the window bar.
+ * one /aion2/character call, the labelled example when the official site is down, the window bar.
  * First paint needs only that one call; each page loads anything else when it is asked for.
  */
 import { ArmoryUnavailable, gearUrl, loadCharacter, refFromUrl, roster } from './aetherium-data.mjs';
@@ -11,7 +11,7 @@ export const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5
 /** A padlock and the level that unlocks something, drawn over the bottom of an icon. */
 export const lockBadge = level => `<span class="ae-lock" aria-hidden="true">${LOCK_ICON}<b>Lv ${esc(level)}</b></span>`;
 
-/** The class named in the link (lets a page fetch its data while the armory answers), or the roster entry for this Daeva. */
+/** The class named in the link (lets a page fetch its data while the site answers), or the roster entry for this Daeva. */
 export function classHint(ref) {
   const named = new URLSearchParams(location.search).get('class');
   if (named) return named;
@@ -22,12 +22,12 @@ export function classHint(ref) {
 /** The Daeva this page is about: the link, else the active roster Daeva, else none (the example). */
 export function pageRef() {
   const active = roster.active();
-  return refFromUrl() ?? (active ? { serverId: active.serverId, characterId: active.characterId } : null);
+  return refFromUrl() ?? (active ? { serverId: active.serverId, characterId: active.characterId, region: active.region } : null);
 }
 
 /**
  * Runs a character page. render({ model, source, ref }) draws the page; ref is the Daeva to link onward
- * with (null for the labelled example). prefetch(classHint, ref) may start static fetches while the armory answers.
+ * with (null for the labelled example). prefetch(classHint, ref) may start static fetches while the site answers.
  */
 export async function startCharacterPage({ prefetch = null, render }) {
   wireDrawer();
@@ -39,11 +39,11 @@ export async function startCharacterPage({ prefetch = null, render }) {
     loaded = await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    showNotice('The armory is unavailable right now, so this shows the ASTRIX285 example. Try again in a minute.', 'warn');
+    showNotice('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.', 'warn');
     loaded = await loadCharacter(null, { demoReason: 'unavailable' });
   }
   const { model, source } = loaded;
-  setFaction(model.profile.raceName);
+  setFaction(model.profile.raceName, model.profile.raceId);
   showSource(source);
   await render({ model, source, ref: source.kind === 'live' ? ref : null });
   markCharacterShown();
