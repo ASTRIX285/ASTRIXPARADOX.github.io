@@ -14,6 +14,7 @@ import { ArmoryUnavailable, ascentUrl, gearUrl, loadAdvisor, loadBoard, loadChar
 import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
+import { KIND_LABEL, boardGridStyle, nodeArt as boardNodeArt, nodeImg as boardNodeImg, nodeTileHtml } from './daevanion-board.mjs';
 
 const state = { model: null, source: null, ref: null, className: 'Gladiator', role: null, level: 1, data: null, plan: null };
 const planner = { boardId: null, nodes: new Map(), selected: null, board: null, split: null, observer: null };
@@ -49,7 +50,10 @@ function readUrl() {
 
 /** Keeps the address bookmarkable: the Daeva link, or class, role and level for a manual plan. */
 function writeUrl() {
-  history.replaceState(null, '', `${location.pathname}?${planQuery()}`);
+  const params = new URLSearchParams(planQuery());
+  // The Daevanion screen keeps its board in the address, so a link opens that exact board.
+  if (VIEW === 'daevanion' && state.model && planner.boardId) params.set('board', planner.boardId);
+  history.replaceState(null, '', `${location.pathname}?${params}`);
 }
 
 function renderDaevaLine() {
@@ -114,7 +118,7 @@ function planQuery() {
   return params.toString();
 }
 function viewHref(view) {
-  if (view === 'gear') return state.model ? gearUrl(state.ref) : '/hub/aetherium/gear/';
+  if (view === 'gear') return gearUrl(state.model ? state.ref : null);
   return `/hub/aetherium/ascent/${view === 'menu' ? '' : `${view}/`}?${planQuery()}`;
 }
 
@@ -176,7 +180,7 @@ function renderMenu(plan) {
     </a></li>`;
   return `
     ${quests.length ? `<section class="ae-quests" aria-labelledby="aeNowTitle">
-      <h2 class="ae-section-title" id="aeNowTitle">Your next moves <small>${plan.character ? `for ${esc(plan.character.name)}` : `at Lv ${esc(plan.level)}`}</small></h2>
+      <h2 class="ae-section-title" id="aeNowTitle">Your next moves${plan.character ? '' : ` <small>at Lv ${esc(plan.level)}</small>`}</h2>
       <ol class="ae-quest-list">${quests.map(questCard).join('')}</ol>
     </section>` : ''}
     <nav class="ae-menu" aria-label="Plan screens">
@@ -490,16 +494,8 @@ function showGuideStep(index, scroll = true) {
 
 
 /* Daevanion planner: the real board from the armory, with a numbered route for this build. */
-const KIND_LABEL = { 'active-skill': 'Skill +1', 'passive-skill': 'Passive +1', unique: 'Corner', stat: 'Stat', start: 'Start' };
-
-/* The game's own node art, as the official armory site uses it (NCSOFT CDN, never re-hosted). */
-const NODE_ART = 'https://assets.playnccdn.com/static-aion2/characters/img/daevanion/';
-const NODE_GRADE = { 'active-skill': 'legend', 'passive-skill': 'rare', unique: 'unique', stat: 'common' };
-const START_ART = { Gladiator: 'gladiator', Templar: 'templar', Assassin: 'assassin', Ranger: 'ranger', Sorcerer: 'sorcerer', Spiritmaster: 'elementalist', Cleric: 'cleric', Chanter: 'chanter' };
-const nodeArt = (kind, taken) => kind === 'start'
-  ? `${NODE_ART}board_icon_start_${START_ART[state.className] ?? 'gladiator'}.png`
-  : `${NODE_ART}board_icon_${NODE_GRADE[kind] ?? 'common'}${taken ? '_open' : ''}.png`;
-const nodeImg = (kind, taken) => `<img class="ae-node-art" src="${esc(nodeArt(kind, taken))}" alt="" width="70" height="70" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+const nodeArt = (kind, taken) => boardNodeArt(kind, taken, state.className);
+const nodeImg = (kind, taken) => boardNodeImg(kind, taken, state.className);
 const daevaKey = () => state.model ? `${state.model.profile.server.id}:${state.model.profile.characterId}` : null;
 
 function readPoints(boardId) {
@@ -600,6 +596,7 @@ function renderPlannerShell(plan) {
 async function showBoard(boardId) {
   if (planner.boardId !== boardId) planner.selected = null;
   planner.boardId = boardId;
+  writeUrl();
   document.querySelectorAll('[data-board-tab]').forEach(tab => tab.setAttribute('aria-selected', String(Number(tab.dataset.boardTab) === boardId)));
   if ($('#aePoints')) $('#aePoints').value = readPoints(boardId);
   const body = $('#aePlannerBody');
@@ -639,12 +636,10 @@ function renderBoardPlan() {
   planner.split = split;
   const nowSteps = new Set((split?.now ?? []).map(step => step.step));
   const statusOf = step => split ? (nowSteps.has(step) ? 'now' : 'later') : 'route';
-  const { top, left, bottom, right } = board.bounds;
   const tiles = board.tiles.map(tile => {
     const status = tile.taken || tile.kind === 'start' ? 'taken' : tile.step ? statusOf(tile.step) : 'idle';
     const label = `${tile.name}. ${tile.effects.join(', ') || KIND_LABEL[tile.kind]}. ${tile.taken ? 'Taken' : tile.step ? `Step ${tile.step}` : 'Not on the route'}`;
-    // Not a <button>: the shared button skin would turn every node into a gold action button.
-    return `<span class="ae-node" role="img" tabindex="0" data-kind="${esc(tile.kind)}" data-status="${status}"${tile.keySkill ? ' data-key="true"' : ''} data-node="${esc(tile.nodeId)}" data-rc="${tile.row}:${tile.col}" style="grid-row:${tile.row - top + 1};grid-column:${tile.col - left + 1}" aria-label="${esc(label)}">${nodeImg(tile.kind, tile.taken)}${tile.step && !tile.taken ? `<span class="ae-node-step" aria-hidden="true">${tile.step}</span>` : ''}</span>`;
+    return nodeTileHtml(tile, board.bounds, { className: state.className, status, label, step: tile.step && !tile.taken ? tile.step : null });
   }).join('');
   const stepItem = step => `<li data-status="${statusOf(step.step)}"${step.target ? ' data-target="true"' : ''} data-route-node="${esc(step.nodeId)}" tabindex="0">
       <span class="ae-pick-level">${step.step}</span>
@@ -661,7 +656,7 @@ function renderBoardPlan() {
       <div class="ae-board-wrap">
         <div class="ae-board-stage" id="aeBoardStage">
           <svg class="ae-flow" id="aeFlow" aria-hidden="true"></svg>
-          <div class="ae-board-grid" style="--rows:${bottom - top + 1};--cols:${right - left + 1}">${tiles}</div>
+          <div class="ae-board-grid" style="${boardGridStyle(board.bounds)}">${tiles}</div>
         </div>
         <ul class="ae-node-legend" aria-label="Key">
           <li data-status="now">Take now</li><li data-status="later">Later</li>
@@ -735,7 +730,9 @@ function renderPlan() {
   $('#aeClass').value = plan.className;
   $('#aeLevel').value = plan.level;
   $('#aeLevel').max = plan.levelCap;
-  $('#aeAscentFor').textContent = `${plan.className} · ${plan.roleLabel} · Lv ${plan.level}${plan.character ? ` · ${plan.character.name}` : ''}`;
+  // With a Daeva linked the "Planning for ..." line already names it, its class and level: say it once.
+  $('#aeAscentFor').hidden = Boolean(plan.character);
+  $('#aeAscentFor').textContent = `${plan.className} · ${plan.roleLabel} · Lv ${plan.level}`;
   const fallback = plan.roleFallback ? `<p class="ae-callout">${esc(plan.className)} has no ${esc(ROLES[plan.roleRequested] ?? plan.roleRequested)} build, so this shows its main role.</p>` : '';
   writeUrl();
   if (VIEW !== 'menu') {
@@ -871,6 +868,8 @@ async function start() {
   // A Daeva link wins; otherwise a manual class link; otherwise the active roster Daeva.
   state.ref = linked ?? (fromUrl.className ? null : active ? { serverId: active.serverId, characterId: active.characterId } : null);
   state.role = fromUrl.role;
+  const wantedBoard = Number(new URLSearchParams(location.search).get('board'));
+  if (Number.isInteger(wantedBoard) && wantedBoard > 0) planner.boardId = wantedBoard;
   // Fetch the plan data while the armory answers: the class comes from the link or the roster entry.
   const sameDaeva = active && state.ref && String(active.serverId) === String(state.ref.serverId) && active.characterId === state.ref.characterId;
   prefetchAdvisor(fromUrl.className ?? (sameDaeva ? active.className : null));

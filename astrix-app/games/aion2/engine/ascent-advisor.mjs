@@ -141,6 +141,11 @@ function planStigmas(build, level, model, facts, gameIcons = new Map()) {
   };
 }
 
+/** The skills whose +1 Daevanion nodes a build takes first, in order (the core skills when the build names none). */
+export function daevanionSkillNodes(build) {
+  return (!isPending(build.daevanion) && build.daevanion.skillNodes) || (build.coreSkills ?? []).map(skill => skill.name);
+}
+
 function planBoards(build, level, model, facts) {
   const boards = (facts['daevanion-boards']?.value ?? []).map(board => {
     const live = model?.daevanion?.find(item => item.id === board.id || item.name === board.name) ?? null;
@@ -155,7 +160,7 @@ function planBoards(build, level, model, facts) {
     boards,
     priorities: isPending(build.daevanion) ? build.daevanion : build.daevanion.priorities,
     // Skills whose +1 nodes the board planner routes to first, in order (falls back to the core skills).
-    skillNodes: (!isPending(build.daevanion) && build.daevanion.skillNodes) || (build.coreSkills ?? []).map(skill => skill.name),
+    skillNodes: daevanionSkillNodes(build),
     refs: isPending(build.daevanion) ? [] : build.daevanion.refs,
     general: facts['daevanion-priority'] ?? null
   };

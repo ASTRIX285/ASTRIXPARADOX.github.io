@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1&amp;recovery=20261004-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Gear Ledger for AION 2: equipped gear with item detail, stigmas, Daevanion boards and stats for one character on the EU servers.">
+  <meta name="description" content="Gear Ledger for AION 2: one character on the EU servers, with its gear, skills and Daevanion boards on their own pages.">
   <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/gear/">
   <title>Gear Ledger | The Aetherium | AION 2 | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261008-5">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261008-6">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
@@ -26,11 +26,15 @@
 
 "/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=7775be2108",
 
-"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=8338f51c30",
+"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=0325338d26",
 
-"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=8112027bbf",
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=5ae1983264",
 
-"/astrix-app/pages/aetherium/gear-ledger.mjs":"/astrix-app/pages/aetherium/gear-ledger.mjs?v=903668d42f"
+"/astrix-app/pages/aetherium/character-menu.mjs":"/astrix-app/pages/aetherium/character-menu.mjs?v=1114519f0b",
+
+"/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=183a2fffeb",
+
+"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=644d65c25b"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=f6138332d3" data-head-hint>
@@ -39,15 +43,19 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=7775be2108" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=8338f51c30" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=0325338d26" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=8112027bbf" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=5ae1983264" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/gear-ledger.mjs?v=903668d42f" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/gear-ledger.mjs?v=903668d42f"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-menu.mjs?v=1114519f0b" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=183a2fffeb" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=644d65c25b" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/character-menu.mjs?v=1114519f0b"></script>
 </head>
-<body class="aetherium-page" data-faction="astrix" data-apx-button-system>
-  <a class="ae-skip" href="#aeMain">Skip to the Gear Ledger</a>
+<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="menu">
+  <a class="ae-skip" href="#aeMain">Skip to the character menu</a>
   <header class="apx-destination-header">
     <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>
     <div class="apx-destination-header-copy"><strong>THE AETHERIUM</strong><small>AION 2 · EU</small></div>
@@ -85,34 +93,9 @@
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <p class="ae-source" id="aeSource" hidden></p>
     <div class="ae-ledger-head" id="aeHeader"><p class="ae-muted">Reading the armory.</p></div>
-    <div class="ae-ledger" id="aeLedger">
-      <div class="ae-col">
-        <section class="ae-panel" aria-labelledby="aeGearTitle">
-          <h2 class="ae-section-title" id="aeGearTitle">Equipped gear <small id="aeGearCount"></small></h2>
-          <ul class="ae-gear" id="aeGear"><li class="ae-loading">Reading the armory.</li></ul>
-          <p class="ae-accessories" id="aeAccessories"></p>
-        </section>
-      </div>
-      <div class="ae-col">
-        <section class="ae-panel" aria-labelledby="aeStigmaTitle">
-          <h2 class="ae-section-title" id="aeStigmaTitle">Stigmas <small id="aeStigmaNote"></small></h2>
-          <ul class="ae-stigmas" id="aeStigmas"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeBoardTitle">
-          <h2 class="ae-section-title" id="aeBoardTitle">Daevanion boards <small>nodes taken</small></h2>
-          <ul class="ae-boards" id="aeBoards"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeStatTitle">
-          <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the armory</small></h2>
-          <dl class="ae-stats" id="aeStats"></dl>
-          <p class="ae-note">Attack, Defense and other combat stats are not in the public armory data.</p>
-        </section>
-        <section class="ae-panel" aria-labelledby="aeExtraTitle">
-          <h2 class="ae-section-title" id="aeExtraTitle">Pet, wings and title</h2>
-          <ul class="ae-extras" id="aeExtras"><li class="ae-loading">Reading the armory.</li></ul>
-        </section>
-      </div>
-    </div>
+    <nav class="ae-menu is-three" id="aeCards" aria-label="Character pages" aria-live="polite">
+      <span class="ae-menu-card is-skeleton" aria-hidden="true"></span><span class="ae-menu-card is-skeleton" aria-hidden="true"></span><span class="ae-menu-card is-skeleton" aria-hidden="true"></span>
+    </nav>
     <noscript><p class="ae-muted">The Gear Ledger needs JavaScript to read the armory.</p></noscript>
   </main>
 

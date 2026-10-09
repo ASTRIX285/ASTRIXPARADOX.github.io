@@ -143,6 +143,8 @@ export function planDaevanionBoard({ nodes, skillOrder = [] }) {
         name: node.name,
         effects: node.effects,
         kind: nodeKind(node),
+        type: node.type,
+        grade: node.grade ?? null,
         skill: nodeSkill(node),
         taken: Boolean(node.taken),
         step: stepOf.get(id) ?? null,
@@ -204,4 +206,51 @@ export function explainNode(tile, route, context = {}) {
     lines.push(`${effect}. Not on the route: it does not lead to a key skill or a corner. Take it with spare points later.`);
   }
   return { title: tile.name, lines, step: step?.step ?? null, cost: step?.cost ?? nodeCost({ type: tile.kind === 'start' ? 'Start' : 'Stat', grade: { 'active-skill': 'Legend', 'passive-skill': 'Rare', unique: 'Unique' }[tile.kind] ?? 'Common' }) };
+}
+
+/** "Combat Speed +1.5%" to { name, value, unit }. Null when the line has no number to add up. */
+export function parseEffect(text) {
+  const match = /^(.*?)\s*([+-]\d+(?:\.\d+)?)(%?)$/.exec(String(text ?? '').trim());
+  return match && match[1] ? { name: match[1], value: Number(match[2]), unit: match[3] } : null;
+}
+
+const sum = values => Math.round(values.reduce((total, value) => total + value, 0) * 1000) / 1000;
+const signed = (value, unit) => `${value < 0 ? '-' : '+'}${Math.abs(value)}${unit}`;
+
+/**
+ * What a character's taken nodes on one board add up to, and what is left. Pure.
+ * nodes: the board's nodes (adaptDaevanionBoard). plan: anything with plan.daevanion.skillNodes (the build's key skills).
+ * Skill nodes ("Rending Blow +1") raise a skill; every other node adds a stat. Units stay as the armory sends them (% stays %).
+ */
+export function summariseBoard(nodes, plan = null) {
+  const usable = (nodes ?? []).filter(node => node.type && node.type !== 'None' && node.type !== 'Start');
+  const taken = usable.filter(node => node.taken);
+  const totals = (list, keyOf) => {
+    const groups = new Map();
+    for (const node of list) for (const effect of node.effects ?? []) {
+      const parsed = parseEffect(effect);
+      if (!parsed) continue;
+      const key = keyOf(parsed);
+      const group = groups.get(key) ?? { name: parsed.name, unit: parsed.unit, values: [] };
+      group.values.push(parsed.value);
+      groups.set(key, group);
+    }
+    return [...groups.values()].map(group => ({ name: group.name, unit: group.unit, total: sum(group.values), text: `${group.name} ${signed(sum(group.values), group.unit)}` }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  };
+  const skillEffects = totals(taken.filter(node => node.type === 'SkillLevel'), parsed => parsed.name).map(({ name, total, text }) => ({ skill: name, total, text }));
+  const statEffects = totals(taken.filter(node => node.type !== 'SkillLevel'), parsed => `${parsed.name}|${parsed.unit}`);
+  const wanted = (plan?.daevanion?.skillNodes ?? []).map(name => String(name).toLowerCase());
+  const open = usable.filter(node => !node.taken);
+  const describe = node => ({ nodeId: node.nodeId, name: node.name, text: node.effects?.[0] || node.name, cost: nodeCost(node) });
+  const keySkills = open.filter(node => nodeSkill(node) && wanted.includes(nodeSkill(node).toLowerCase()))
+    .sort((a, b) => wanted.indexOf(nodeSkill(a).toLowerCase()) - wanted.indexOf(nodeSkill(b).toLowerCase())).map(describe);
+  const corners = open.filter(node => nodeKind(node) === 'unique').map(describe);
+  return {
+    takenCount: taken.length,
+    totalNodes: usable.length,
+    skillEffects,
+    statEffects,
+    left: { keySkills, corners, count: open.length, points: open.reduce((total, node) => total + nodeCost(node), 0) }
+  };
 }

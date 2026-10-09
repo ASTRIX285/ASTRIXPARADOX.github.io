@@ -5,6 +5,7 @@ import {
   ArmoryUnavailable,
   armoryLive,
   ascentUrl,
+  daevanionPageUrl,
   gearUrl,
   loadCatalogue,
   loadCharacter,
@@ -49,7 +50,7 @@ function renderSummary() {
         <dl class="ae-tiles">
           <div class="ae-tile"><dt>Combat power</dt><dd>${number(p.combatPower)}</dd></div>
           <div class="ae-tile"><dt>Item level</dt><dd>${isPending(p.itemLevel) ? '-' : number(p.itemLevel)}</dd></div>
-          <div class="ae-tile"><dt>Daevanion boards open</dt><dd>${boardsOpen} <span>/ ${model.daevanion.length}</span></dd></div>
+          <div class="ae-tile is-link"><dt><a href="${esc(daevanionPageUrl(state.ref, p.class, model.daevanion.find(board => board.open)?.id ?? null))}">Daevanion boards open</a></dt><dd>${boardsOpen} <span>/ ${model.daevanion.length}</span></dd></div>
           <div class="ae-tile"><dt>Stigmas</dt><dd>${stigmasOpen ? `${stigmasOpen} <span>/ ${stigmas.length}</span>` : `<small>${stigmaNote}</small>`}</dd></div>
         </dl>
       </div>

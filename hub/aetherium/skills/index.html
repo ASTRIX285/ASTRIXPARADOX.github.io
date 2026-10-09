@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="/astrix-app/shared/astrix-tool-shell.css?v=20260930-stroke-4&amp;shell=20261001-mobile-1&amp;mobile=20261002-1&amp;bf=20261002-1&amp;inv=20261002-1&amp;swr=20261002-1&amp;formation=20261003-1">
-  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1">
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1&amp;recovery=20261004-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="The AION 2 skill order to put in Macro 1 for your class, laid out like the game's Macro window.">
-  <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/ascent/macro/">
-  <title>Macro | Ascent Plan | The Aetherium | AION 2 | ASTRIX PARADOX</title>
+  <meta name="description" content="The skills of one AION 2 character on the EU servers, laid out like the game: Mastery with Specialty perks, and Stigma.">
+  <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/skills/">
+  <title>Skills | Gear Ledger | The Aetherium | AION 2 | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
@@ -17,15 +17,12 @@
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261008-6">
-  <link rel="preload" href="/astrix-app/games/aion2/data/advisor/progression.json" as="fetch" crossorigin>
-  <link rel="preload" href="/astrix-app/games/aion2/data/advisor/skills.json" as="fetch" crossorigin>
+  <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=f6138332d3",
 
 "/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=f914585928",
-
-"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=ee7829cd12",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a",
 
@@ -35,16 +32,14 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=5ae1983264",
 
-"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=acb2a66ab2",
+"/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=183a2fffeb",
 
-"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=644d65c25b"
+"/astrix-app/pages/aetherium/skills-page.mjs":"/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=f6138332d3" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=f914585928" data-head-hint>
-
-  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=ee7829cd12" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=4c6dfb3a1a" data-head-hint>
 
@@ -54,13 +49,13 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=5ae1983264" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=acb2a66ab2" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=183a2fffeb" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=644d65c25b" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=acb2a66ab2"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8"></script>
 </head>
-<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-view="macro">
-  <a class="ae-skip" href="#aeMain">Skip to Macro</a>
+<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="skills">
+  <a class="ae-skip" href="#aeMain">Skip to the skills</a>
   <header class="apx-destination-header">
     <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>
     <div class="apx-destination-header-copy"><strong>THE AETHERIUM</strong><small>AION 2 · EU</small></div>
@@ -72,8 +67,8 @@
     <nav class="apx-destination-ribbon" aria-label="The Aetherium">
       <ul>
         <li><a href="/hub/aetherium/">Daeva Card</a></li>
-        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
-        <li><a href="/hub/aetherium/ascent/" aria-current="page">Ascent Plan</a></li>
+        <li><a href="/hub/aetherium/gear/" aria-current="page">Gear Ledger</a></li>
+        <li><a href="/hub/aetherium/ascent/">Ascent Plan</a></li>
         <li><a href="/hub/">The Hub</a></li>
       </ul>
     </nav>
@@ -87,8 +82,8 @@
       </div>
       <ul class="ax-drawer-links">
         <li><a href="/hub/aetherium/">Daeva Card</a></li>
-        <li><a href="/hub/aetherium/gear/">Gear Ledger</a></li>
-        <li><a href="/hub/aetherium/ascent/" aria-current="page">Ascent Plan</a></li>
+        <li><a href="/hub/aetherium/gear/" aria-current="page">Gear Ledger</a></li>
+        <li><a href="/hub/aetherium/ascent/">Ascent Plan</a></li>
         <li><a href="/hub/">The Hub</a></li>
       </ul>
     </nav>
@@ -97,28 +92,13 @@
   <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <p class="ae-source" id="aeSource" hidden></p>
-    <section class="ae-panel ae-ascent-setup" aria-labelledby="aeAscentTitle">
-      <div class="ae-ascent-intro">
-        <p class="ae-eyebrow">Ascent Plan</p>
-        <h1 id="aeAscentTitle">What to do next</h1>
-        <p class="ae-muted" id="aeAscentFor">Pick a class, the role you want to play and your level.</p>
-      </div>
-      <form class="ae-ascent-form" id="aeAscentForm">
-        <label class="ae-field"><span>Class</span><select id="aeClass" name="class"></select></label>
-        <label class="ae-field"><span>Role</span><select id="aeRole" name="role"></select></label>
-        <label class="ae-field"><span>Level</span><input id="aeLevel" name="level" type="number" inputmode="numeric" min="1" max="45" step="1" value="1"></label>
-        <button class="btn ae-primary" type="submit">Show plan</button>
-      </form>
-      <p class="ae-ascent-daeva" id="aeDaeva" hidden></p>
-    </section>
-    <div id="aePlan" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Building your plan.</p></div></div>
-    <noscript><p class="ae-muted">The Ascent Plan needs JavaScript.</p></noscript>
+    <div id="aeStage" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Reading the armory.</p></div></div>
+    <noscript><p class="ae-muted">The Skills page needs JavaScript to read the armory.</p></noscript>
   </main>
 
   <footer class="ae-footer">
     <p>The Aetherium by ASTRIX PARADOX is an unofficial fan-made tool. It is not affiliated with, endorsed by or sponsored by NCSOFT. AION 2 and related names, images and icons are trademarks of NCSOFT.</p>
     <p>Character data is read from the public AION 2 armory. No login is needed and nothing is stored on our servers. Item and skill icons load from the NCSOFT CDN.</p>
-    <p>Build advice is checked against top players and our own testing, and updated as the game changes. Check a pick in game before you spend rare materials on it.</p>
   </footer>
 </body>
 </html>

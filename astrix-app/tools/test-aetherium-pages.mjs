@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// The Aetherium pages (brief feature/aetherium-daeva-card-gear-ledger, 5 Oct 2026): Daeva Card and Gear Ledger
+// The Aetherium pages (brief feature/aetherium-daeva-card-gear-ledger, 5 Oct 2026): Daeva Card and the Gear page
+// (the character menu, Skills and Daevanion pages are covered by test-aetherium-character.mjs)
 // on a local static server, the armory Worker mocked (never NCSOFT, never the real Worker):
 //   - demo mode (Worker not configured): ASTRIX285 example, labelled, no Worker request;
-//   - live mode: search to summary to Gear Ledger; first paint uses only /aion2/character; item detail and
-//     Daevanion boards load only when opened; boards show open or locked from the data;
+//   - live mode: search to summary to the character menu; the Gear page's first paint uses only /aion2/character and
+//     item detail loads only when opened;
 //   - roster add and remove, faction colour switch (Elyos gold, Asmodian violet, ASTRIX crimson before load);
 //   - Worker down: a clear "armory unavailable" message and the labelled demo;
 //   - looks: gold primary action, no horizontal scroll and no overlapping tiles at 390, 820 and 1600.
@@ -140,21 +141,18 @@ await check('live: search to summary uses search then one character call',async(
   assert.deepEqual(calls,['/aion2/search','/aion2/character']);
   assert.match(await page.textContent('#aeSource'),/^Read from the public EU armory just now\.$/);
   assert.match(page.url(),/serverId=1308&characterId=/,'Bookmarkable URL');
-  assert.match(await page.getAttribute('#aeGearLink','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=/);
+  assert.match(await page.getAttribute('#aeGearLink','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=/,'View full setup opens the character menu');
+  assert.match(await page.getAttribute('.ae-tile.is-link a','href'),/^\/hub\/aetherium\/daevanion\/\?serverId=1308&characterId=.*&class=gladiator&board=11$/,'The Daevanion tile opens the first open board');
   await context.close();
 });
 
-await check('live Gear Ledger: one call for first paint, item and board on demand',async()=>{
+await check('live Gear page: one call for first paint, item detail on demand',async()=>{
   const ref=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
-  const {page,context,calls,errors}=await open(`/hub/aetherium/gear/?${ref}`,{live:true});
+  const {page,context,calls,errors}=await open(`/hub/aetherium/gear/equipment/?${ref}`,{live:true});
   assert.deepEqual(calls,['/aion2/character'],'First paint: only /aion2/character');
   assert.equal(await page.locator('#aeGear [data-slot]').count(),8);
   assert.match(await page.textContent('#aeAccessories'),/none worn/);
-  const boards=await page.$$eval('.ae-board',items=>items.map(li=>[li.querySelector('.ae-board-name').textContent,li.querySelector('.ae-board-state').textContent,li.querySelector('.ae-board-count').textContent]));
-  assert.deepEqual(boards[0],['Nezekan','Open','0 / 88'],'Nezekan open from the data');
-  assert.ok(boards.slice(1).every(row=>row[1]==='Locked'),'Other boards locked from the data');
-  assert.equal(await page.locator('.ae-stigma.is-locked').count(),13);
-  assert.match(await page.textContent('#aeStigmaNote'),/13 stigmas · unlock at Lv 22/);
+  assert.equal(await page.locator('.ae-stigma, .ae-board').count(),0,'Stigmas and Daevanion boards have their own pages');
   assert.equal(await page.locator('#aeItem').count(),0,'No side text panel: items open as a card');
   await page.click('[data-slot="0"]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
@@ -175,10 +173,7 @@ await check('live Gear Ledger: one call for first paint, item and board on deman
   assert.match(await page.textContent('#aeInfo'),/Wear from Lv 22.*Look: Skybright Oath \(Helm\).*A helm for the brave\.Can be upgraded\./s);
   await page.click('#aeInfo .ae-info-close');
   assert.equal(await page.isHidden('#aeInfo'),true);
-  await page.click('.ae-board details[data-board="11"] summary');
-  await page.waitForFunction(()=>{const text=document.querySelector('[data-board="11"] [data-board-nodes]').textContent;return text&&!text.includes('Reading');});
-  assert.match(await page.textContent('[data-board="11"] [data-board-nodes]'),/No nodes taken yet/);
-  assert.deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item','/aion2/daevanion']);
+  assert.deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item']);
   assert.deepEqual(errors,[]);
   await context.close();
 });
@@ -188,9 +183,10 @@ await check('Lv 22 with no stigma acquired, extra worn slot: honest copy',async(
   const card=await open(`/hub/aetherium/?${ref}`,{live:true});
   assert.match(await card.page.textContent('.ae-tiles'),/StigmasNone unlocked yet/);
   await card.context.close();
-  const {page,context,errors}=await open(`/hub/aetherium/gear/?${ref}`,{live:true});
-  assert.match(await page.textContent('#aeStigmaNote'),/13 stigmas · none unlocked yet/);
-  assert.equal(await page.locator('.ae-stigma small',{hasText:'Not unlocked yet'}).count(),13);
+  const menu=await open(`/hub/aetherium/gear/?${ref}`,{live:true});
+  assert.match(await menu.page.textContent('[data-view="skills"] .ae-menu-status'),/0 of 13 stigmas/);
+  await menu.context.close();
+  const {page,context,errors}=await open(`/hub/aetherium/gear/equipment/?${ref}`,{live:true});
   assert.equal(await page.locator('#aeGear [data-slot]').count(),9,'The extra worn slot is shown');
   assert.match(await page.textContent('#aeGear'),/AmuletTest Amulet/);
   assert.match(await page.textContent('#aeAccessories'),/Other slots, such as accessories, show here once something is worn in them\./);
@@ -245,7 +241,7 @@ await check('ASTRIX crimson before a character loads',async()=>{
 
 await check('Worker down: clear message and labelled demo',async()=>{
   const ref=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
-  for(const path of [`/hub/aetherium/?${ref}`,`/hub/aetherium/gear/?${ref}`]){
+  for(const path of [`/hub/aetherium/?${ref}`,`/hub/aetherium/gear/?${ref}`,`/hub/aetherium/gear/equipment/?${ref}`]){
     const {page,context,errors}=await open(path,{live:true,down:true});
     assert.match(await page.textContent('#aeNotice'),/The armory is unavailable right now, so this shows the ASTRIX285 example/);
     assert.match(await page.textContent('#aeSource'),/^Example data: ASTRIX285.*The armory is unavailable right now\.$/);
@@ -256,7 +252,7 @@ await check('Worker down: clear message and labelled demo',async()=>{
 
 for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   await check(`looks at ${width}: no sideways scroll, gold action, tiles apart`,async()=>{
-    for(const path of ['/hub/aetherium/','/hub/aetherium/gear/']){
+    for(const path of ['/hub/aetherium/','/hub/aetherium/gear/equipment/']){
       const {page,context}=await open(path,{viewport:{width,height}});
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       assert.ok(overflow<=0,`${path} scrolls sideways by ${overflow}px`);
@@ -286,10 +282,10 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000]]){
   });
 }
 
-await check('wide screens: Gear Ledger side panels in two columns, roster on one row at 1920',async()=>{
-  const gear=await open('/hub/aetherium/gear/',{viewport:{width:1920,height:1000}});
-  const [stig,boards]=await gear.page.$$eval('#aeStigmaTitle,#aeBoardTitle',items=>items.map(el=>el.closest('.ae-panel').getBoundingClientRect()).map(r=>[Math.round(r.left),Math.round(r.top)]));
-  assert.ok(boards[0]>stig[0]&&Math.abs(boards[1]-stig[1])<4,`stigmas and boards side by side (${stig} / ${boards})`);
+await check('wide screens: Gear page columns side by side, roster on one row at 1920',async()=>{
+  const gear=await open('/hub/aetherium/gear/equipment/',{viewport:{width:1920,height:1000}});
+  const [left,right]=await gear.page.$$eval('.ae-gear-page>.ae-col',cols=>cols.map(col=>{const r=col.getBoundingClientRect();return [Math.round(r.left),Math.round(r.top),Math.round(r.bottom)];}));
+  assert.ok(right[0]>left[0]&&Math.abs(right[1]-left[1])<4&&Math.abs(right[2]-left[2])<4,`gear and stats beside pet, wings and title, ending level (${left} / ${right})`);
   await gear.context.close();
   const card=await open('/hub/aetherium/',{viewport:{width:1920,height:1000}});
   const tops=await card.page.$$eval('.ae-roster-slot',items=>[...new Set(items.map(el=>Math.round(el.getBoundingClientRect().top)))]);
