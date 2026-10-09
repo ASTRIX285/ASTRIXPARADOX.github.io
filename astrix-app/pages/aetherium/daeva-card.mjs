@@ -1,11 +1,13 @@
 /**
- * Daeva Card (The Aetherium): find a character, see the summary, keep up to 8 Daevas on this device.
+ * Daeva Card (The Aetherium): find a character, see the summary, keep up to 8 Daevas per server on this device.
  */
 import {
   ArmoryUnavailable,
   armoryLive,
   ascentUrl,
   daevanionPageUrl,
+  demoReasonOf,
+  explain,
   factionOf,
   gearUrl,
   lastRegion,
@@ -14,6 +16,7 @@ import {
   refFromUrl,
   regionName,
   regionOf,
+  regionShort,
   regions,
   rememberRegion,
   roster,
@@ -36,8 +39,11 @@ function renderServers(servers) {
   const group = (raceId, label) => `<optgroup label="${label}">${servers
     .filter(server => server.raceId === raceId)
     .map(server => `<option value="${server.serverId}">${esc(server.serverName)}</option>`).join('')}</optgroup>`;
+  const listed = raceId => servers.some(server => server.raceId === raceId);
   select.disabled = false;
-  select.innerHTML = `<option value="">Any server in ${esc(regionName(currentRegion))}</option>${group(1, 'Elyos')}${group(2, 'Asmodian')}`;
+  // A failed or empty list shows no empty Elyos and Asmodian headings: only "Any server" and a muted line.
+  select.innerHTML = `<option value="">Any server in ${esc(regionName(currentRegion))}</option>${listed(1) ? group(1, 'Elyos') : ''}${listed(2) ? group(2, 'Asmodian') : ''}`;
+  $('#aeServerNote').hidden = servers.some(server => server.raceId === 1 || server.raceId === 2);
 }
 
 function renderSummary() {
@@ -81,16 +87,19 @@ function renderSummary() {
 
 function renderRoster() {
   const current = roster.read();
-  $('#aeRosterCount').textContent = `${current.entries.length} of ${roster.slots} slots`;
+  // "<Server> · <short region> · <n> of 8", for the server whose roster is shown.
+  const count = `${current.entries.length} of ${roster.slots}`;
+  $('#aeRosterCount').textContent = current.rosterId ? `${current.serverName} · ${regionShort(current.region)} · ${count}` : count;
+  renderSwitcher(current);
   const cards = current.entries.map(entry => {
     const key = roster.key(entry);
     const active = key === current.active;
     return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
       <button type="button" class="ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
-        ${active ? '<span class="ae-roster-state">Active</span>' : ''}
-        <strong>${esc(entry.name)}</strong>
-        <span>${esc(entry.className)} · Lv ${esc(entry.level)}</span>
-        <span class="ae-muted">${esc(entry.serverName)} · ${esc(regionName(entry.region))}${entry.demo ? ' · example' : ''}</span>
+        <span class="ae-roster-state">${active ? 'Active' : ''}</span>
+        <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
+        <span class="ae-roster-line">${esc(entry.className)} · Lv ${esc(entry.level)}</span>
+        <span class="ae-roster-line ae-muted">${esc(entry.serverName)} · ${esc(regionShort(entry.region))}${entry.demo ? ' · example' : ''}</span>
       </button>
       <button type="button" class="ae-roster-remove" data-roster-remove="${esc(key)}" aria-label="Remove ${esc(entry.name)} from your Daevas">Remove</button>
     </li>`;
@@ -99,6 +108,15 @@ function renderRoster() {
     cards.push('<li class="ae-roster-slot is-empty"><button type="button" class="ae-roster-add" data-roster-add>+ Add a Daeva</button></li>');
   }
   $('#aeRoster').innerHTML = cards.join('');
+}
+
+/** The server switcher lists only servers that have saved Daevas, and hides when there is one. */
+function renderSwitcher(current) {
+  const box = $('#aeRosterSwitchBox');
+  box.hidden = current.servers.length < 2;
+  $('#aeRosterSwitch').innerHTML = current.servers
+    .map(item => `<option value="${esc(item.id)}">${esc(item.serverName)} · ${esc(regionShort(item.region))}</option>`).join('');
+  $('#aeRosterSwitch').value = current.rosterId ?? '';
 }
 
 function renderResults(rows) {
@@ -125,9 +143,9 @@ function show(model, source, ref) {
   markCharacterShown();
 }
 
-async function fallbackToDemo(message) {
+async function fallbackToDemo(message, demoReason = 'unavailable') {
   showNotice(message, 'warn');
-  const { model, source } = await loadCharacter(null, { demoReason: 'unavailable' });
+  const { model, source } = await loadCharacter(null, { demoReason });
   show(model, source, null);
 }
 
@@ -135,17 +153,28 @@ async function importCharacter(ref) {
   setBusy(true);
   try {
     const { model, source } = await loadCharacter(ref);
-    if (!roster.add(model, source)) showNotice(`All ${roster.slots} slots are full. Remove a Daeva to add ${model.profile.name}.`, 'warn');
+    if (!roster.add(model, source)) showNotice(`${model.profile.server.name} already has ${roster.slots} Daevas saved. Remove one to add ${model.profile.name}.`, 'warn');
     else showNotice('');
     const shown = source.kind === 'live' ? ref : null;
     show(model, source, shown);
     history.replaceState(null, '', shown ? `?${new URLSearchParams({ serverId: shown.serverId, characterId: shown.characterId, region: regionOf(shown.region) })}` : location.pathname);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await failedRead(error);
   } finally {
     setBusy(false);
   }
+}
+
+/** A read that failed. Only a real "the site did not answer" shows the example; a refusal or a rate limit says what happened and leaves the page as it is (unless there is nothing to show yet). */
+async function failedRead(error, nothingShown = false) {
+  const message = explain(error, 'The official AION 2 site is not answering right now, so this shows an example Daeva. Try again in a minute.');
+  if (error.reason === 'rate' || error.reason === 'other') {
+    if (nothingShown) await fallbackToDemo(message, demoReasonOf(error));
+    else showNotice(message, 'warn');
+    return;
+  }
+  await fallbackToDemo(message);
 }
 
 function setBusy(busy) {
@@ -167,7 +196,7 @@ async function onSearch(event) {
   } catch (error) {
     setBusy(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await failedRead(error);
     return;
   }
   setBusy(false);
@@ -177,7 +206,7 @@ async function onSearch(event) {
     renderResults([]);
     showNotice(armoryLive()
       ? `No Daeva named ${name} on ${serverId ? 'that server' : regionName(currentRegion)}. Check the spelling.`
-      : 'Live search is not connected yet. Search ASTRIX285 to open the example.', 'warn');
+      : 'Live search is not connected yet, so only the example Daeva can be opened.', 'warn');
     return;
   }
   showNotice('');
@@ -228,6 +257,12 @@ async function start() {
   currentRegion = ref ? regionOf(ref.region) : lastRegion();
   renderRegions();
   $('#aeRegion').addEventListener('change', onRegionChange);
+  $('#aeRosterSwitch').addEventListener('change', () => {
+    const entry = roster.switchTo($('#aeRosterSwitch').value);
+    if (!entry) return;
+    renderRoster();
+    importCharacter({ serverId: entry.serverId, characterId: entry.characterId, region: entry.region });
+  });
   // The server list loads beside the character, never in front of it.
   loadRegionServers();
   try {
@@ -235,7 +270,7 @@ async function start() {
     show(model, source, source.kind === 'live' ? ref : null);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await fallbackToDemo('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.');
+    await failedRead(error, true);
   }
   markReady();
 }

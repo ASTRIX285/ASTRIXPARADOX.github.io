@@ -1,6 +1,6 @@
 /**
  * The Aetherium data layer. Reads the official AION 2 site through aetherium-worker (or the labelled
- * ASTRIX285 demo while the Worker is not configured) and turns every response into the
+ * example Daeva while the Worker is not configured) and turns every response into the
  * character model through games/aion2 (armory-adapter.mjs). Pages never read the raw JSON.
  */
 import { createAion2Module } from '/astrix-app/games/aion2/index.mjs';
@@ -10,19 +10,40 @@ import {
   AETHERIUM_REGION,
   AETHERIUM_REGIONS,
   AETHERIUM_REGION_KEY,
+  AETHERIUM_REGION_SHORT,
   AETHERIUM_ROSTER_KEY,
+  AETHERIUM_ROSTER_KEY_V1,
   AETHERIUM_ROSTER_SLOTS,
   AETHERIUM_WORKER_URL
 } from './aetherium-config.mjs';
 
 const TIMEOUT_MS = 8000;
 
+/**
+ * A read that did not work. reason says why, so the page blames the right party:
+ *   'site'  the official site did not answer (Worker error armory_unavailable, a timeout, no network);
+ *   'rate'  the Worker said too many searches (429);
+ *   'other' the Worker refused the call or broke (400, 403, 404, 500 ...): our side.
+ */
 export class ArmoryUnavailable extends Error {
-  constructor(message = 'The official AION 2 site is not answering right now.') {
+  constructor(message = 'The official AION 2 site is not answering right now.', reason = 'site') {
     super(message);
     this.name = 'ArmoryUnavailable';
+    this.reason = reason;
   }
 }
+
+const reasonOfStatus = status => (status === 429 ? 'rate' : status === 502 || status === 503 || status === 504 ? 'site' : 'other');
+
+/** The words for a failed read. Only a real "site did not answer" blames the official site; siteText is that case's own sentence. */
+export function explain(error, siteText) {
+  if (error?.reason === 'rate') return 'Too many searches in a minute. Try again shortly.';
+  if (error?.reason === 'other') return 'Something went wrong on our side. Try again in a minute.';
+  return siteText;
+}
+
+/** The example label's reason for a failed read: 'unavailable' (the site), 'rate' or 'other'. */
+export const demoReasonOf = error => (error?.reason === 'rate' || error?.reason === 'other' ? error.reason : 'unavailable');
 
 export const armoryLive = () => typeof AETHERIUM_WORKER_URL === 'string' && AETHERIUM_WORKER_URL.startsWith('https://');
 
@@ -31,7 +52,7 @@ async function getJson(url, { timeout = TIMEOUT_MS } = {}) {
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
-    if (!response.ok) throw new ArmoryUnavailable(`The official AION 2 site answered ${response.status}.`);
+    if (!response.ok) throw new ArmoryUnavailable(`The official AION 2 site answered ${response.status}.`, reasonOfStatus(response.status));
     return await response.json();
   } catch (error) {
     throw error instanceof ArmoryUnavailable ? error : new ArmoryUnavailable(error?.message);
@@ -47,6 +68,8 @@ export const regions = AETHERIUM_REGIONS;
 export const isRegion = code => AETHERIUM_REGIONS.some(item => item.code === code);
 export const regionOf = code => (isRegion(code) ? code : AETHERIUM_REGION);
 export const regionName = code => AETHERIUM_REGIONS.find(item => item.code === regionOf(code)).name;
+/** The short label for roster cards and the roster heading (NA West, NA East, EU, SA, Asia). */
+export const regionShort = code => AETHERIUM_REGION_SHORT[regionOf(code)];
 
 /** The region last used on this device, else Europe. */
 export function lastRegion() {
@@ -79,7 +102,7 @@ export function loadCatalogue() {
 
 const sameName = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
 
-/** Character search. Returns { rows, source }. In demo mode only the ASTRIX285 example is found. */
+/** Character search. Returns { rows, source }. In demo mode only the example Daeva is found. */
 export async function searchCharacters(name, region = AETHERIUM_REGION) {
   if (armoryLive()) {
     const body = await worker('/aion2/search', { name }, region);
@@ -122,10 +145,10 @@ export async function loadCharacter(ref, { demoReason = armoryLive() ? 'example'
       worker('/aion2/character', { serverId: ref.serverId, characterId: ref.characterId }, region)
     ]);
     const capturedOn = (body.meta?.fetchedAt ?? new Date().toISOString()).slice(0, 10);
-    return {
-      model: module.normaliseCharacter(body, { region, capturedOn }),
-      source: liveSource(body.meta)
-    };
+    const model = module.normaliseCharacter(body, { region, capturedOn });
+    const source = liveSource(body.meta);
+    roster.refresh(model, source); // a live read keeps this Daeva's saved card up to date
+    return { model, source };
   }
   const [{ module }, raw] = await Promise.all([loadCatalogue(), demoRaw()]);
   return {
@@ -173,8 +196,13 @@ export function factionOf(raceName, raceId = null) {
 /** Character data age in plain words. Cached data is never shown as live. */
 export function sourceLabel(source) {
   if (source.kind === 'demo') {
-    const why = { unavailable: 'The official AION 2 site is not answering right now.', example: 'Search for your own Daeva above.' }[source.reason] ?? 'Live character data is not connected yet.';
-    return `Example data: ASTRIX285, read from the official AION 2 site on ${formatDate(source.capturedOn)}. ${why}`;
+    const why = {
+      unavailable: 'The official AION 2 site is not answering right now.',
+      rate: 'Too many searches in a minute. Try again shortly.',
+      other: 'Something went wrong on our side. Try again in a minute.',
+      example: 'Search for your own Daeva above.'
+    }[source.reason] ?? 'Live character data is not connected yet.';
+    return `Example data: a sample Daeva, read from the official AION 2 site on ${formatDate(source.capturedOn)}. ${why}`;
   }
   const at = Date.parse(source.fetchedAt);
   if (!Number.isFinite(at)) return 'Read from the official AION 2 site.';
@@ -190,71 +218,173 @@ export function formatDate(iso) {
     : iso;
 }
 
-/* Roster: up to 8 Daevas, added by name, saved on this device. */
+/* Roster: up to 8 Daevas per server, added by name, saved on this device. The public data cannot tell which
+   characters share an account, so a roster belongs to one server in one region (id "<region>:<serverId>"). */
 const rosterKey = entry => `${entry.serverId}:${entry.characterId}`; // server ids differ between regions, so the key needs no region
+const rosterIdOf = entry => `${regionOf(entry.region)}:${entry.serverId}`;
 const validEntry = entry => Boolean(entry && typeof entry.name === 'string' && entry.name.trim() && entry.characterId && Number.isFinite(Number(entry.serverId)));
+const emptyStore = () => ({ rosters: {}, active: null });
 
-function readRoster() {
+/** Files entries into their server's roster (old entries have no region: Europe). Drops blank ones, caps each roster at the slot count. */
+function fileEntries(list, store) {
+  for (const raw of list) {
+    if (!validEntry(raw)) continue; // saved without a name or id (an empty reply): it would show as a blank card
+    const entry = { ...raw, region: regionOf(raw.region) };
+    const id = rosterIdOf(entry);
+    const bucket = (store.rosters[id] ??= { region: entry.region, serverId: entry.serverId, serverName: entry.serverName, entries: [] });
+    if (bucket.entries.length < AETHERIUM_ROSTER_SLOTS && !bucket.entries.some(item => rosterKey(item) === rosterKey(entry))) bucket.entries.push(entry);
+  }
+  return store;
+}
+
+/** v1 (one list for the device) into v2 (a roster per server). Every entry moves, the active Daeva stays active. v1 is left untouched. */
+function migrateV1(value) {
+  const store = fileEntries(value.entries, emptyStore());
+  const mover = value.entries.find(entry => validEntry(entry) && rosterKey(entry) === value.active);
+  if (mover) store.active = { roster: rosterIdOf({ ...mover, region: regionOf(mover.region) }), key: rosterKey(mover) };
+  return store;
+}
+
+function readStore() {
   try {
-    const value = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY) ?? 'null');
-    if (value && Array.isArray(value.entries)) {
-      // Drop entries saved without a name or id (an empty reply): they show as a blank card. Old entries have no region: Europe.
-      const entries = value.entries.filter(validEntry).slice(0, AETHERIUM_ROSTER_SLOTS).map(item => ({ ...item, region: regionOf(item.region) }));
-      const active = entries.some(item => rosterKey(item) === value.active) ? value.active : (entries[0] ? rosterKey(entries[0]) : null);
-      return { entries, active };
+    const v2 = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY) ?? 'null');
+    if (v2 && typeof v2.rosters === 'object' && v2.rosters) {
+      const store = emptyStore();
+      fileEntries(Object.values(v2.rosters).flatMap(bucket => (Array.isArray(bucket?.entries) ? bucket.entries : [])), store);
+      store.active = v2.active ?? null;
+      return store;
     }
+    const v1 = JSON.parse(localStorage.getItem(AETHERIUM_ROSTER_KEY_V1) ?? 'null');
+    if (v1 && Array.isArray(v1.entries)) return writeStore(migrateV1(v1));
   } catch { /* storage blocked or corrupt: start empty */ }
-  return { entries: [], active: null };
+  return emptyStore();
 }
 
-function writeRoster(roster) {
-  try { localStorage.setItem(AETHERIUM_ROSTER_KEY, JSON.stringify(roster)); } catch { /* private mode: roster lives for this visit only */ }
-  return roster;
+function writeStore(store) {
+  try { localStorage.setItem(AETHERIUM_ROSTER_KEY, JSON.stringify(store)); } catch { /* private mode: roster lives for this visit only */ }
+  return store;
 }
+
+const findIn = (store, key) => {
+  for (const [id, bucket] of Object.entries(store.rosters)) {
+    const entry = bucket.entries.find(item => rosterKey(item) === key);
+    if (entry) return { id, bucket, entry };
+  }
+  return null;
+};
+
+/** The active Daeva's roster (else the first one), with the active key resolved. */
+function viewOf(store) {
+  const ids = Object.keys(store.rosters);
+  const found = store.active ? findIn(store, store.active.key) : null;
+  const id = found ? found.id : ids[0] ?? null;
+  const bucket = id ? store.rosters[id] : null;
+  const entries = bucket ? bucket.entries : [];
+  const active = found ? store.active.key : entries[0] ? rosterKey(entries[0]) : null;
+  return {
+    entries,
+    active,
+    rosterId: id,
+    region: bucket?.region ?? null,
+    serverId: bucket?.serverId ?? null,
+    serverName: bucket?.serverName ?? null,
+    servers: ids.map(key => ({ id: key, region: store.rosters[key].region, serverId: store.rosters[key].serverId, serverName: store.rosters[key].serverName, count: store.rosters[key].entries.length }))
+  };
+}
+
+const entryFrom = (model, source) => ({
+  name: model.profile.name,
+  serverId: model.profile.server.id,
+  serverName: model.profile.server.name,
+  characterId: model.profile.characterId,
+  className: model.profile.class,
+  level: model.profile.level,
+  raceName: model.profile.raceName,
+  raceId: model.profile.raceId ?? null,
+  region: model.source.region,
+  title: model.profile.title ?? null,
+  itemLevel: Number.isFinite(model.profile.itemLevel) ? model.profile.itemLevel : null,
+  seenAt: source.kind === 'live' && Number.isFinite(Date.parse(source.fetchedAt)) ? source.fetchedAt : null,
+  demo: source.kind === 'demo'
+});
+
+/** True when a read may overwrite a saved entry: live, and not older than what the entry already holds. Never from the example. */
+const mayRefresh = (saved, source) => source.kind === 'live'
+  && Number.isFinite(Date.parse(source.fetchedAt))
+  && (!saved.seenAt || Date.parse(source.fetchedAt) >= Date.parse(saved.seenAt));
 
 export const roster = {
   slots: AETHERIUM_ROSTER_SLOTS,
-  read: readRoster,
+  /** The roster of the active Daeva's server: { entries, active, rosterId, region, serverId, serverName, servers }. */
+  read: () => viewOf(readStore()),
   key: rosterKey,
-  /** Adds or refreshes a Daeva from its model and makes it active. Returns false when all slots are full. */
+  /**
+   * Adds a Daeva to its own server's roster, shows that roster and makes the Daeva active. A Daeva already saved is
+   * refreshed (live reads only). Returns false when that server's roster is full.
+   */
   add(model, source) {
-    const current = readRoster();
-    const entry = {
-      name: model.profile.name,
-      serverId: model.profile.server.id,
-      serverName: model.profile.server.name,
-      characterId: model.profile.characterId,
-      className: model.profile.class,
-      level: model.profile.level,
-      raceName: model.profile.raceName,
-      raceId: model.profile.raceId ?? null,
-      region: model.source.region,
-      demo: source.kind === 'demo'
-    };
-    if (!validEntry(entry)) return true; // Nothing to save: no name came back. The card still shows what it has.
-    const key = rosterKey(entry);
-    const index = current.entries.findIndex(item => rosterKey(item) === key);
-    if (index >= 0) current.entries[index] = entry;
-    else if (current.entries.length >= AETHERIUM_ROSTER_SLOTS) return false;
-    else current.entries.push(entry);
-    current.active = key;
-    writeRoster(current);
+    const store = readStore();
+    const fresh = entryFrom(model, source);
+    if (!validEntry(fresh)) return true; // Nothing to save: no name came back. The card still shows what it has.
+    const key = rosterKey(fresh);
+    const id = rosterIdOf(fresh);
+    const bucket = store.rosters[id];
+    const index = bucket ? bucket.entries.findIndex(item => rosterKey(item) === key) : -1;
+    if (index >= 0) {
+      const saved = bucket.entries[index];
+      if (mayRefresh(saved, source)) bucket.entries[index] = { ...saved, ...fresh };
+    } else if (bucket && bucket.entries.length >= AETHERIUM_ROSTER_SLOTS) {
+      return false;
+    } else {
+      (store.rosters[id] ??= { region: fresh.region, serverId: fresh.serverId, serverName: fresh.serverName, entries: [] }).entries.push(fresh);
+    }
+    store.active = { roster: id, key };
+    writeStore(store);
+    return true;
+  },
+  /** A live read of a saved Daeva updates its card (level, class, race, title, item level). Never from the example or older data. */
+  refresh(model, source) {
+    const store = readStore();
+    const fresh = entryFrom(model, source);
+    const found = findIn(store, rosterKey(fresh));
+    if (!found || !mayRefresh(found.entry, source)) return false;
+    const index = found.bucket.entries.indexOf(found.entry);
+    found.bucket.entries[index] = { ...found.entry, ...fresh, demo: false };
+    writeStore(store);
     return true;
   },
   remove(key) {
-    const current = readRoster();
-    current.entries = current.entries.filter(item => rosterKey(item) !== key);
-    if (current.active === key) current.active = current.entries[0] ? rosterKey(current.entries[0]) : null;
-    return writeRoster(current);
+    const store = readStore();
+    const found = findIn(store, key);
+    if (!found) return viewOf(store);
+    found.bucket.entries = found.bucket.entries.filter(item => rosterKey(item) !== key);
+    if (!found.bucket.entries.length) delete store.rosters[found.id];
+    if (store.active?.key === key) {
+      const next = (store.rosters[found.id] ?? Object.values(store.rosters)[0])?.entries[0] ?? null;
+      store.active = next ? { roster: rosterIdOf(next), key: rosterKey(next) } : null;
+    }
+    writeStore(store);
+    return viewOf(store);
   },
   setActive(key) {
-    const current = readRoster();
-    if (current.entries.some(item => rosterKey(item) === key)) current.active = key;
-    return writeRoster(current);
+    const store = readStore();
+    const found = findIn(store, key);
+    if (found) store.active = { roster: found.id, key };
+    writeStore(store);
+    return viewOf(store);
+  },
+  /** Shows another server's roster and makes its first Daeva active. Returns that Daeva, or null. */
+  switchTo(id) {
+    const store = readStore();
+    const first = store.rosters[id]?.entries[0] ?? null;
+    if (!first) return null;
+    store.active = { roster: id, key: rosterKey(first) };
+    writeStore(store);
+    return first;
   },
   active() {
-    const current = readRoster();
-    return current.entries.find(item => rosterKey(item) === current.active) ?? null;
+    const view = viewOf(readStore());
+    return view.entries.find(item => rosterKey(item) === view.active) ?? null;
   }
 };
 

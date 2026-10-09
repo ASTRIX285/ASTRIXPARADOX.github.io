@@ -648,6 +648,36 @@ await check('no visible "armory" or "EU" text on any Aetherium page',async()=>{
   }
 });
 
+/* ---------- Roster-and-polish checks ---------- */
+
+for(const [width,height] of [[390,844],[1280,900],[1600,1000],[1920,1080]]){
+  await check(`character windows at ${width}: Gear, Skills and Daevanion are the same width`,async()=>{
+    const widths={};
+    for(const path of ['/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
+      const {page,context}=await open(`${path}${refQuery(RICH,{class:'gladiator'})}`,{viewport:{width,height}});
+      if(path.endsWith('daevanion/'))await page.waitForSelector('.ae-board-grid .ae-node');
+      widths[path]=(await boxOf(page,'.ae-gw')).width;
+      assert.ok(await overflowOf(page)<=0,`${path} scrolls sideways at ${width}`);
+      await context.close();
+    }
+    const values=Object.values(widths);
+    assert.ok(values.every(value=>Math.abs(value-values[0])<=1),`Window widths differ at ${width}: ${JSON.stringify(widths)}`);
+  });
+}
+
+await check('Skill Bar says where skills should go, not where they are',async()=>{
+  const screen=await open('/hub/aetherium/ascent/skill-bar/?class=gladiator&role=dps&level=23',{live:false});
+  assert.equal(await plain(screen.page,'#aeScreenTitle'),'Where to put your skills');
+  assert.match(await plain(screen.page,'.ae-bar-note'),/This is where the build puts each skill, not what is on your bars now\./);
+  assert.equal(await screen.page.getAttribute('.ae-gw-tabs a[data-view="skill-bar"]','aria-current'),'page','The tab keeps its short name');
+  assert.equal(await plain(screen.page,'.ae-gw-tabs a[data-view="skill-bar"]'),'Skill Bar');
+  await screen.context.close();
+  const menu=await open('/hub/aetherium/ascent/?class=gladiator&role=dps&level=23',{live:false});
+  assert.equal(await menu.page.getAttribute('.ae-menu-card[data-view="skill-bar"]','title'),'Where each skill should go on your bars. This is the plan, not what is on them now.');
+  assert.doesNotMatch(await menu.page.getAttribute('.ae-menu-card[data-view="skill-bar"]','title'),/Which key each skill goes on/);
+  await menu.context.close();
+});
+
 /* ---------- All the pages ---------- */
 
 await check('every character page: the example loads with no Worker call; links stay on the site; no dashes in the copy',async()=>{
@@ -655,7 +685,7 @@ await check('every character page: the example loads with no Worker call; links 
     const {page,context,calls,errors}=await open(path,{live:false});
     if(path.endsWith('daevanion/'))await page.waitForSelector('.ae-board-grid .ae-node');
     assert.deepEqual(calls,[],`${path} example makes no Worker call`);
-    assert.match(await plain(page,'#aeSource'),/^Example data: ASTRIX285/);
+    assert.match(await plain(page,'#aeSource'),/^Example data: a sample Daeva/);
     const outbound=await page.$$eval('main a[href]',links=>links.filter(link=>!link.getAttribute('href').startsWith('/')&&!link.getAttribute('href').startsWith('#')).map(link=>link.href));
     assert.deepEqual(outbound,[],`${path} has no outbound link`);
     const text=await page.evaluate(()=>document.querySelector('main').innerText);
@@ -669,8 +699,8 @@ await check('every character page: the example loads with no Worker call; links 
 await check('Worker down: every character page says so and shows the labelled example',async()=>{
   for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
     const {page,context,errors}=await open(`${path}${refQuery(BASIC)}`,{down:true});
-    assert.match(await plain(page,'#aeNotice'),/The official AION 2 site is not answering right now, so this shows the ASTRIX285 example/);
-    assert.match(await plain(page,'#aeSource'),/^Example data: ASTRIX285.*The official AION 2 site is not answering right now\.$/);
+    assert.match(await plain(page,'#aeNotice'),/The official AION 2 site is not answering right now, so this shows an example Daeva/);
+    assert.match(await plain(page,'#aeSource'),/^Example data: a sample Daeva.*The official AION 2 site is not answering right now\.$/);
     assert.deepEqual(errors,[]);
     await context.close();
   }

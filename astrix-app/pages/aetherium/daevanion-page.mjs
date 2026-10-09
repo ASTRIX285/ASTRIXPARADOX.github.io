@@ -5,7 +5,7 @@
  * (what the taken nodes add up to, and what is left). It shows the character's board as it is: no route numbers.
  * First paint needs only /aion2/character; a board's nodes are read when its tab opens, one call per board, kept for the visit.
  */
-import { ArmoryUnavailable, ascentUrl, loadBoard, loadDaevanionAdvice, prefetchDaevanionAdvice } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, loadBoard, loadDaevanionAdvice, prefetchDaevanionAdvice } from './aetherium-data.mjs';
 import { $, esc } from './aetherium-ui.mjs';
 import { LOCK_ICON, failPage, startCharacterPage, windowBar } from './character-page.mjs';
 import { KIND_LABEL, boardGridStyle, nodeImg, nodeTileHtml } from './daevanion-board.mjs';
@@ -58,7 +58,7 @@ async function nodesFor(board) {
     if (result.nodes && !result.nodes.length) result = { nodes: null, reason: board.open ? 'The official AION 2 site sent no nodes for this board.' : 'closed' };
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable) && !(error instanceof TypeError)) throw error;
-    if (board.open) return { nodes: null, reason: 'The official AION 2 site is not answering right now. Pick this board again in a minute.' };
+    if (board.open) return { nodes: null, reason: explain(error, 'The official AION 2 site is not answering right now. Pick this board again in a minute.') };
     result = { nodes: null, reason: 'closed' };
   }
   if (!board.open && !result.nodes) result = { nodes: null, reason: 'closed' };

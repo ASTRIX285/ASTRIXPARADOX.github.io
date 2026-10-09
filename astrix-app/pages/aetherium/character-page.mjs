@@ -3,7 +3,7 @@
  * one /aion2/character call, the labelled example when the official site is down, the window bar.
  * First paint needs only that one call; each page loads anything else when it is asked for.
  */
-import { ArmoryUnavailable, gearUrl, loadCharacter, refFromUrl, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, demoReasonOf, explain, gearUrl, loadCharacter, refFromUrl, roster } from './aetherium-data.mjs';
 import { esc, markCharacterShown, markReady, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 
 export const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
@@ -39,8 +39,8 @@ export async function startCharacterPage({ prefetch = null, render }) {
     loaded = await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    showNotice('The official AION 2 site is not answering right now, so this shows the ASTRIX285 example. Try again in a minute.', 'warn');
-    loaded = await loadCharacter(null, { demoReason: 'unavailable' });
+    showNotice(explain(error, 'The official AION 2 site is not answering right now, so this shows an example Daeva. Try again in a minute.'), 'warn');
+    loaded = await loadCharacter(null, { demoReason: demoReasonOf(error) });
   }
   const { model, source } = loaded;
   setFaction(model.profile.raceName, model.profile.raceId);

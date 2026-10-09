@@ -15,6 +15,8 @@ export const AETHERIUM_REGIONS = Object.freeze([
   Object.freeze({ code: 'la', name: 'South America' }),
   Object.freeze({ code: 'as', name: 'Asia' })
 ]);
+/** Short labels for roster cards and the roster heading only. The full official names stay on the Daeva Card chip and the Region picker. */
+export const AETHERIUM_REGION_SHORT = Object.freeze({ naw: 'NA West', nae: 'NA East', eu: 'EU', la: 'SA', as: 'Asia' });
 /** The region a link without one opens in, and the region first-time visitors see. */
 export const AETHERIUM_REGION = 'eu';
 /** Where the last region used is kept on this device. */
@@ -27,5 +29,8 @@ export const AETHERIUM_DEMO = Object.freeze({
   fixtures: '/astrix-app/tools/fixtures/aion2/eu/'
 });
 
-export const AETHERIUM_ROSTER_KEY = 'aetherium.roster.v1';
+/** The roster is kept per server (the public data cannot tell which characters share an account). v1 was one list for the device. */
+export const AETHERIUM_ROSTER_KEY = 'aetherium.roster.v2';
+export const AETHERIUM_ROSTER_KEY_V1 = 'aetherium.roster.v1';
+/** Slots per server (AION 2 allows 8 characters on a server). */
 export const AETHERIUM_ROSTER_SLOTS = 8;
