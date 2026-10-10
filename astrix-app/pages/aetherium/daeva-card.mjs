@@ -23,6 +23,7 @@ import {
   searchCharacters
 } from './aetherium-data.mjs';
 import { $, esc, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
+import { classArt } from './daevanion-board.mjs';
 
 const state = { model: null, source: null, ref: null, busy: false };
 
@@ -94,8 +95,10 @@ function renderRoster() {
   const cards = current.entries.map(entry => {
     const key = roster.key(entry);
     const active = key === current.active;
+    const icon = classArt(entry.className);
     return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
       <button type="button" class="ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
+        ${icon ? `<img class="ae-roster-class" src="${esc(icon)}" alt="" width="40" height="40" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-roster-class" aria-hidden="true"></span>'}
         <span class="ae-roster-state">${active ? 'Active' : ''}</span>
         <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
         <span class="ae-roster-line">${esc(entry.className)} · Lv ${esc(entry.level)}</span>

@@ -1,0 +1,19 @@
+# design/aetherium-crisp-polish: a look and feel pass on the Aetherium pages (surfaces, light, type, spacing, menus, buttons, icons, loading states).
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/daeva-card.mjs
+astrix-app/pages/aetherium/daevanion-board.mjs
+astrix-app/tools/test-aetherium-character.mjs
+astrix-app/tools/test-aetherium-pages.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/daevanion/index.html
+hub/aetherium/gear/equipment/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html
+hub/aetherium/skills/index.html

@@ -16,6 +16,9 @@ export const nodeArt = (kind, taken, className) => kind === 'start'
   ? `${NODE_ART}board_icon_start_${START_ART[className] ?? 'gladiator'}.png`
   : `${NODE_ART}board_icon_${NODE_GRADE[kind] ?? 'common'}${taken ? '_open' : ''}.png`;
 
+/** The class icon (the board Start node art the game uses for that class), or null for a class we do not know. */
+export const classArt = className => (START_ART[className] ? `${NODE_ART}board_icon_start_${START_ART[className]}.png` : null);
+
 export const nodeImg = (kind, taken, className) => `<img class="ae-node-art" src="${esc(nodeArt(kind, taken, className))}" alt="" width="70" height="70" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
 
 /**
