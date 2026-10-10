@@ -179,7 +179,8 @@ function viewStatus(view, plan) {
  */
 function questHref(item) {
   const href = viewHref(item.view);
-  return item.view === 'daevanion' && item.board ? `${href}&board=${encodeURIComponent(item.board)}` : href;
+  if (item.view !== 'daevanion' || !item.board) return href;
+  return `${href}&board=${encodeURIComponent(item.board)}${item.node ? `&node=${encodeURIComponent(item.node)}` : ''}`;
 }
 
 function renderMenu(plan) {
@@ -404,6 +405,7 @@ function guideSteps(view, plan) {
     const m = plan.mastery;
     const pick = () => {};
     for (const entry of m.active.filter(item => item.priority && item.equipped === false && item.acquired)) add(`${entry.name} is a key skill but it is not on your skill bar. Drag it onto your bar in game.`, `[data-mastery="${CSS.escape(entry.name)}"]`, pick(entry.name));
+    for (const entry of m.atCap ?? []) add(`${entry.name} is at the Mastery cap (${entry.cap}), so no more skill points go into it. Its next +1: ${nextLevelText(entry.next)}.`, `[data-mastery-cap="${CSS.escape(entry.name)}"]`, pick(entry.name));
     for (const step of m.spend.slice(0, 3)) add(`Put skill points into ${step.name}${step.from !== null ? `: Lv ${step.from} to ${step.to}` : ` up to Lv ${step.to}`}. That ${step.reason}.`, `[data-mastery="${CSS.escape(step.name)}"]`, pick(step.name));
     for (const skill of plan.skills) {
       const due = skill.picks.filter(item => skill.skillLevel !== null && item.skillLevel <= skill.skillLevel);
@@ -541,6 +543,7 @@ function masteryCard(entry) {
   const pickOf = perk => entry.slots.some(slot => slot.pick && slot.pick.skillLevel === perk.skillLevel && perk.text.toLowerCase().includes(slot.pick.pick.toLowerCase().split(' ')[0]));
   const cd = typeof entry.cooldownSeconds === 'number' ? `${entry.cooldownSeconds} s cooldown` : null;
   const locked = entry.unlocked === false || entry.acquired === false;
+  const capped = (state.plan?.mastery?.atCap ?? []).find(item => item.name === entry.name) ?? null;
   const status = locked ? ['lock', `Unlocks at Lv ${entry.needLevel}`]
     : entry.category === 'Active' && entry.acquired && entry.equipped === false && entry.priority ? ['need', 'Not on your skill bar. Drag it on.']
     : entry.equipped === true ? ['keep', 'On your skill bar'] : null;
@@ -551,10 +554,45 @@ function masteryCard(entry) {
     icon: entry.icon, title: entry.name, level: entry.skillLevel,
     sub: `${entry.category}${entry.priority ? ` · key skill ${entry.priority}` : ''}`,
     status,
-    chips: [cd, entry.target ? `Target: ${entry.target}` : null],
-    lines: [entry.summary, entry.why],
+    chips: [cd, entry.targetText ?? entry.target ? `Target: ${entry.targetText ?? entry.target}` : null],
+    lines: [entry.summary, entry.why, capped ? `At the Mastery cap (${capped.cap}). Next +1: ${nextLevelText(capped.next)}.` : null],
     body: specialty
   });
+}
+
+/* A skill at the Mastery cap: where its next +1 comes from, in words (the card, the guide) and with the
+   board link (the Mastery screen). The engine names the node when the board has been read; until then the
+   page reads the open boards one by one (readCapBoards), and says so. */
+const capReads = { busy: false, failed: new Set() };
+function nextLevelText(next) {
+  if (next.kind === 'daevanion') return `the Daevanion node ${next.nodeName} on ${next.board.name}`;
+  if (next.kind === 'unread') return capReads.failed.has(next.board.id) ? `a Daevanion skill node, if ${next.board.name} still has it open` : `a Daevanion skill node (reading your ${next.board.name} board)`;
+  return next.text;
+}
+function nextLevelHtml(next) {
+  if (next.kind === 'daevanion') return `<a class="ae-linkish" href="${esc(viewHref('daevanion'))}&board=${encodeURIComponent(next.board.id)}&node=${encodeURIComponent(next.nodeId)}" data-cap-node="${esc(next.nodeId)}">${esc(next.nodeName)}</a> on ${esc(next.board.name)}`;
+  if (next.kind === 'unread' && capReads.failed.has(next.board.id)) return `a Daevanion skill node, if ${esc(next.board.name)} still has it open. <a class="ae-linkish" href="${esc(viewHref('daevanion'))}&board=${encodeURIComponent(next.board.id)}">Open ${esc(next.board.name)}</a>`;
+  return esc(nextLevelText(next));
+}
+/** Reads the first open board the cap list still needs, then draws the plan again. One board at a time. */
+async function readCapBoards() {
+  const model = state.model;
+  const unread = (state.plan?.mastery?.atCap ?? []).map(entry => entry.next).find(next => next.kind === 'unread');
+  if (!model || !unread || capReads.busy || capReads.failed.has(unread.board.id)) return;
+  const board = model.daevanion.find(item => item.id === unread.board.id);
+  if (!board) return;
+  capReads.busy = true;
+  try {
+    const nodes = planner.nodes.get(board.id) ?? (await loadBoard(model, board)).nodes;
+    board.nodes = nodes;
+    planner.nodes.set(board.id, nodes);
+  } catch (error) {
+    if (!(error instanceof ArmoryUnavailable)) throw error;
+    capReads.failed.add(board.id);
+  } finally {
+    capReads.busy = false;
+  }
+  if (state.model === model) renderPlan();
 }
 
 function selectMastery(skill) {
@@ -567,8 +605,10 @@ function renderMastery(plan) {
   const m = plan.mastery;
   if (!m) return '';
   const icons = Object.fromEntries([...m.active, ...m.passive].map(entry => [entry.name, entry.icon]));
+  const atCap = m.atCap ?? [];
   return `<div class="ae-mastery" id="aeMastery">
     ${m.spend.length ? `<div class="ae-icon-group ae-mspend" id="aeMasterySpend"><p class="ae-mskills-title">Level these next</p><div class="ae-icon-row">${m.spend.map(step => iconTile(step.name, icons[step.name], { big: true, badge: step.from !== null ? `${step.from}→${step.to}` : `→${step.to}`, attr: `data-mastery="${esc(step.name)}"`, tip: `${step.name}: ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`}` })).join('')}</div></div>` : ''}
+    ${atCap.length ? `<div class="ae-mspend ae-mcap" id="aeMasteryCap"><p class="ae-mskills-title">At the Mastery cap (${esc(m.cap)})</p><ul class="ae-mcap-list">${atCap.map(entry => `<li data-mastery-cap="${esc(entry.name)}">${iconTile(entry.name, icons[entry.name], { badge: String(entry.skillLevel), attr: `data-mastery="${esc(entry.name)}"`, tip: `${entry.name}: skill Lv ${entry.skillLevel}` })}<span><strong>${esc(entry.name)}</strong> is Lv ${esc(entry.skillLevel)}. Mastery stops at ${esc(entry.cap)}, so no more skill points go here.<br>Next +1: ${nextLevelHtml(entry.next)}</span></li>`).join('')}</ul></div>` : ''}
     <div class="ae-mskills">
       <p class="ae-mskills-title">Active</p>
       <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
@@ -737,6 +777,7 @@ function selectNode(nodeId) {
 function renderPlan() {
   const plan = buildAscentPlan({ className: state.className, role: state.role, level: state.level, data: state.data, model: state.model });
   state.plan = plan;
+  if (state.model && (VIEW === 'mastery' || VIEW === 'menu')) queueMicrotask(() => readCapBoards().catch(fail));
   state.role = plan.role;
   fillRoleSelect(plan.roles, plan.role);
   $('#aeClass').value = plan.className;
@@ -877,6 +918,8 @@ async function start() {
   state.role = fromUrl.role;
   const wantedBoard = Number(new URLSearchParams(location.search).get('board'));
   if (Number.isInteger(wantedBoard) && wantedBoard > 0) planner.boardId = wantedBoard;
+  const wantedNode = Number(new URLSearchParams(location.search).get('node'));
+  if (Number.isInteger(wantedNode) && wantedNode > 0) planner.selected = wantedNode;
   // Fetch the plan data while the site answers: the class comes from the link or the roster entry.
   const sameDaeva = active && state.ref && String(active.serverId) === String(state.ref.serverId) && active.characterId === state.ref.characterId;
   prefetchAdvisor(fromUrl.className ?? (sameDaeva ? active.className : null));

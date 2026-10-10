@@ -422,11 +422,12 @@ const advisorBuilds = new Map();
 const advisorIcons = new Map();
 
 /**
- * Ascent Plan data: game-wide progression and the skill catalogue (shared, loaded once), plus the
- * role builds for one class (loaded when that class is picked). Static files, no call to the official site.
+ * Ascent Plan data: game-wide progression, the confirmed mechanics (the Mastery cap) and the skill catalogue
+ * (shared, loaded once), plus the role builds for one class (loaded when that class is picked). Static files,
+ * no call to the official site.
  */
 export function loadAdvisorBase() {
-  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`)])
+  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`), getJson(`${ADVISOR}mechanics.json`)])
     .catch(error => { advisorBase = undefined; throw error; });
   return advisorBase;
 }
@@ -469,6 +470,6 @@ export async function loadDaevanionAdvice(className) {
 }
 
 export async function loadAdvisor(className) {
-  const [[progression, skills], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
-  return { progression, skills, builds, icons };
+  const [[progression, skills, mechanics], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
+  return { progression, skills, mechanics, builds, icons };
 }

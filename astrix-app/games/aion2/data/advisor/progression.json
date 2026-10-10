@@ -121,31 +121,36 @@
           "id": 11,
           "name": "Nezekan",
           "unlockLevel": 12,
-          "focus": "Combat Speed and Cooldown Reduction"
+          "focus": "Combat Speed and Cooldown Reduction",
+          "skillNodes": true
         },
         {
           "id": 12,
           "name": "Zikel",
           "unlockLevel": 20,
-          "focus": "Damage Boost and Damage Tolerance"
+          "focus": "Damage Boost and Damage Tolerance",
+          "skillNodes": true
         },
         {
           "id": 13,
           "name": "Vaizel",
           "unlockLevel": 30,
-          "focus": "Critical Damage Boost and Tolerance"
+          "focus": "Critical Damage Boost and Tolerance",
+          "skillNodes": true
         },
         {
           "id": 14,
           "name": "Triniel",
           "unlockLevel": 40,
-          "focus": "Multi-hit Chance and Resist"
+          "focus": "Multi-hit Chance and Resist",
+          "skillNodes": true
         },
         {
           "id": 16,
           "name": "Azphel",
           "unlockLevel": 45,
-          "focus": "PvP damage and status effects"
+          "focus": "PvP damage and status effects",
+          "skillNodes": false
         }
       ],
       "text": "Five boards, the same layout for every class. Each core skill has one +1 level node on each of the first four boards.",

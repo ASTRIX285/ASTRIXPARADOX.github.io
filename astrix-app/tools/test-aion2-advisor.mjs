@@ -8,7 +8,7 @@
 //   - Roles: pending builds stay pending, unknown roles fall back to the main role.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,needsEnchant,pickBuild,rolesFor} from '../games/aion2/engine/ascent-advisor.mjs';
+import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,masteryCap,needsEnchant,nextLevelSource,pickBuild,rolesFor,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
 import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
@@ -19,7 +19,8 @@ const progression=json('games/aion2/data/advisor/progression.json');
 const skills=json('games/aion2/data/advisor/skills.json');
 const builds=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/builds/${name.toLowerCase()}.json`)]));
 const icons=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/icons/${name.toLowerCase()}.json`)]));
-const data=name=>({progression,skills,builds:builds[name],icons:icons[name]});
+const mechanics=json('games/aion2/data/advisor/mechanics.json');
+const data=name=>({progression,skills,mechanics,builds:builds[name],icons:icons[name]});
 
 let failed=0;
 const check=(name,fn)=>{try {fn();console.log(`  ok   ${name}`);} catch(error){failed++;console.log(`  FAIL ${name}\n${error.stack}`);}};
@@ -418,6 +419,91 @@ check('the enchant move lists the +0 worn slots, the rule the Gear page flags wi
   assert.deepEqual(move.slots,expected);
   assert.ok(astrix.gear.filter(needsEnchant).every(slot=>!slot.empty&&slot.enchant===0));
   assert.ok(astrix.gear.filter(slot=>!needsEnchant(slot)).every(slot=>slot.empty||slot.enchant>0));
+});
+
+/* The Mastery cap (Miguel, in game, 10 Oct 2026): Mastery takes a skill to Lv 11 at most. The advisor never
+   suggests a Mastery step past it; a skill at the cap points at its next +1 source instead. */
+const withSkillLevels=(levels,boards=null)=>{
+  const live=structuredClone(astrix);
+  for(const skill of live.skills)if(skill.name in levels){skill.skillLevel=levels[skill.name];skill.acquired=true;}
+  if(boards)live.daevanion=live.daevanion.map(board=>({...board,...(boards(board)??{})}));
+  return live;
+};
+const nezekanNodes=adaptDaevanionBoard(fx('astrix285-daevanion-11'));
+check('the Mastery cap comes from mechanics.json, not the code',()=>{
+  assert.equal(masteryCap(mechanics),11);
+  const record=mechanics.records.find(item=>item.id==='mastery-cap');
+  assert.equal(record.status,'confirmed');
+  assert.ok(record.provenance.some(source=>source.kind==='in-game-capture'&&source.capturedOn==='2026-10-10'&&/Mastery/.test(source.where)));
+  assert.equal(masteryCap(null),null);
+  const nine={records:[{id:'mastery-cap',value:{cap:9,beyond:record.value.beyond}}]};
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:{...data('Gladiator'),mechanics:nine},model:withSkillLevels({'Keen Strike':9,'Rending Blow':8})});
+  assert.ok(plan.mastery.spend.every(step=>step.to<=9),'Steps stop at the cap the data gives');
+  assert.deepEqual(plan.mastery.atCap.map(entry=>entry.name),['Keen Strike']);
+  assert.equal(plan.masteryCap,9);
+});
+check('no Mastery step above the cap for any class, with or without a Daeva',()=>{
+  for(const name of AION2_CLASSES)for(const level of [1,12,22,30,45]){
+    const plan=buildAscentPlan({className:name,level,data:data(name)});
+    if(plan.pending)continue;
+    for(const step of plan.mastery.spend)assert.ok(step.to<=11&&(step.from===null||step.from<step.to),`${name} Lv ${level}: ${step.name} ${step.from} to ${step.to}`);
+    for(const entry of [...plan.mastery.active,...plan.skills])if(entry.targetText)assert.doesNotMatch(entry.targetText,/\bLv\s*(1[2-9]|[2-9]\d)\b/,`${name}: ${entry.name} target ${entry.targetText}`);
+    for(const move of plan.now)assert.doesNotMatch(`${move.title} ${move.detail}`,/Target: Lv\s*(1[2-9]|[2-9]\d)\b/,`${name} Lv ${level}: ${move.title}`);
+  }
+  const maxed=withSkillLevels({'Keen Strike':11,'Rending Blow':12,'Overhead Slam':11});
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:maxed});
+  assert.ok(plan.mastery.spend.every(step=>step.to<=11));
+  assert.ok(!plan.now.some(move=>/^Level (Keen Strike|Rending Blow|Overhead Slam)/.test(move.title)),'No "level it" move for a capped skill');
+});
+check('Keen Strike at 10 still gets a Mastery step to 11',()=>{
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':10})});
+  const step=plan.mastery.spend.find(item=>item.name==='Keen Strike');
+  assert.deepEqual(step,{name:'Keen Strike',from:10,to:11,reason:'reaches the Mastery cap',priority:1});
+  assert.equal(plan.mastery.atCap.length,0);
+  assert.ok(plan.now.some(item=>item.title.startsWith('Level ')),'A level move still comes');
+});
+check('a skill at 11 points at its Daevanion node on the first open board where it is not taken',()=>{
+  const read=withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:nezekanNodes}:null);
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:read});
+  const [keen]=plan.mastery.atCap;
+  assert.equal(keen.name,'Keen Strike');
+  assert.equal(keen.skillLevel,11);
+  assert.equal(keen.cap,11);
+  assert.deepEqual(keen.next,{kind:'daevanion',board:{id:11,name:'Nezekan'},nodeId:110131,nodeName:'Skill Level Up - Keen Strike',text:'Skill Level Up - Keen Strike on Nezekan'});
+  const move=plan.now.find(item=>item.title==='Take the Keen Strike +1 node on Nezekan');
+  assert.ok(move,'The move opens the board on the node');
+  assert.equal(move.view,'daevanion');
+  assert.equal(move.board,11);
+  assert.equal(move.node,110131);
+  assert.ok(!plan.now.some(item=>item.title.startsWith('Level Keen Strike')));
+  // The Mastery tab still shows the real level, 12 included.
+  const twelve=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':12},board=>board.id===11?{nodes:nezekanNodes}:null)});
+  assert.equal(twelve.mastery.active.find(entry=>entry.name==='Keen Strike').skillLevel,12);
+  assert.equal(twelve.mastery.atCap[0].skillLevel,12);
+  // Nezekan's node taken, Zikel open but not read yet: the page has to read Zikel next.
+  const taken=nezekanNodes.map(node=>node.nodeId===110131?{...node,taken:true}:node);
+  const unread=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:taken}:board.id===12?{open:true}:null)});
+  assert.deepEqual(unread.mastery.atCap[0].next,{kind:'unread',board:{id:12,name:'Zikel'},text:'a Daevanion skill node (Zikel not read yet)'});
+  assert.ok(!unread.now.some(item=>item.title.startsWith('Take the Keen Strike')),'No node move until the board is read');
+  // Every open board read and the node taken on each: gear or Arcana, as text, nothing invented.
+  const spent=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:taken}:null)});
+  assert.deepEqual(spent.mastery.atCap[0].next,{kind:'other',text:'gear stat lines or Arcana'});
+  assert.deepEqual(nextLevelSource('Keen Strike',[],[]),{kind:'pending',text:'not known yet'});
+});
+check('build targets above the cap are reworded, only where the data supports it',()=>{
+  const beyond=mechanics.records.find(item=>item.id==='mastery-cap').value.beyond;
+  assert.equal(targetAgainstCap('Lv 10 early',{cap:11,beyond}),'Lv 10 early');
+  assert.equal(targetAgainstCap('Keep levelled',{cap:11,beyond}),'Keep levelled');
+  assert.equal(targetAgainstCap('Lv 8 to 12',{cap:11,beyond,viaNodes:true,nodeBoards:4}),'Mastery 11, then +1 from Daevanion nodes');
+  assert.equal(targetAgainstCap('Lv 16, then 20',{cap:11,beyond,viaNodes:true,nodeBoards:4}),'Mastery 11, then +9 from Daevanion nodes, gear stat lines or Arcana');
+  assert.equal(targetAgainstCap('Lv 16',{cap:11,beyond,viaNodes:false,nodeBoards:4}),'Mastery 11, then +5 from Daevanion nodes, gear stat lines or Arcana');
+  assert.equal(targetAgainstCap('Lv 16',{cap:null}),'Lv 16','No cap known: the guide text stands');
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator')});
+  const byName=Object.fromEntries(plan.skills.map(skill=>[skill.name,skill.targetText]));
+  assert.equal(byName['Keen Strike'],'Lv 10 early');
+  assert.equal(byName['Rending Blow'],'Mastery 11, then +9 from Daevanion nodes, gear stat lines or Arcana');
+  assert.equal(plan.mastery.active.find(entry=>entry.name==='Rending Blow').targetText,byName['Rending Blow']);
+  assert.equal(progression.records.find(item=>item.id==='daevanion-boards').value.filter(board=>board.skillNodes===true).length,4,'Four boards carry skill nodes (daevanion-boards facts)');
 });
 
 check('unknown class throws',()=>{

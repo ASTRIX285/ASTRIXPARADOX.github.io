@@ -11,7 +11,7 @@ astrix-app/games/aion2/
   schema/                   character model, catalogue skill, gear slot and advisor build schemas
   data/gear-slots.json      gear slot positions and names, from the armory
   data/gladiator/           Gladiator skills and stigmas, from the armory
-  data/advisor/             Ascent Plan data: progression facts, core skills, role builds per class
+  data/advisor/             Ascent Plan data: progression facts, confirmed mechanics (mechanics.json: the Mastery cap), core skills, role builds per class
   docs/SCOPE.md             project scope
 ```
 

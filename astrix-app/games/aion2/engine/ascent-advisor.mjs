@@ -10,6 +10,8 @@
  * stays pending with a reason. Nothing is invented here: the engine only selects and orders.
  */
 
+import { nodeSkill } from './daevanion-planner.mjs';
+
 export const AION2_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
 
 export const ROLES = Object.freeze({
@@ -35,6 +37,66 @@ export function indexProgression(progression) {
 export function levelCap(progression) {
   const cap = indexProgression(progression)['level-cap']?.value;
   return Number.isInteger(cap) ? cap : 45;
+}
+
+/** Confirmed mechanics by id, from data/advisor/mechanics.json. */
+export function indexMechanics(mechanics) {
+  const records = mechanics?.records ?? mechanics ?? [];
+  return Object.fromEntries(records.map(record => [record.id, record]));
+}
+
+/**
+ * The highest level Mastery (Wisdom Stones) takes a skill to, from the mastery-cap rule in mechanics.json.
+ * Null when the file is not loaded: the plan then has no cap to hold to and says nothing about one.
+ */
+export function masteryCap(mechanics) {
+  const cap = indexMechanics(mechanics)['mastery-cap']?.value?.cap;
+  return Number.isInteger(cap) && cap > 0 ? cap : null;
+}
+
+/** Where levels above the Mastery cap come from, as the mastery-cap rule lists them ({ kind, label }). */
+export function levelSourcesBeyondCap(mechanics) {
+  const list = indexMechanics(mechanics)['mastery-cap']?.value?.beyond;
+  return Array.isArray(list) ? list.filter(item => item && typeof item.label === 'string') : [];
+}
+
+const joinOr = items => (items.length <= 1 ? items.join('') : `${items.slice(0, -1).join(', ')} or ${items.at(-1)}`);
+const shortLabel = label => label.replace(/ skill nodes$/, ' nodes');
+
+/**
+ * The guide's level target against the Mastery cap. A target at or under the cap stays as written.
+ * One above it is reworded: "Mastery 11, then +N from Daevanion nodes" when the build takes this
+ * skill's +1 nodes and the boards that carry them cover the extra levels (daevanion-boards facts);
+ * otherwise +N comes from the sources the mastery-cap rule names, with no claim about which.
+ */
+export function targetAgainstCap(target, { cap, viaNodes = false, nodeBoards = 0, beyond = [] } = {}) {
+  const text = typeof target === 'string' ? target : null;
+  if (text === null || cap === null) return text;
+  const levels = [...text.matchAll(/\d+/g)].map(match => Number(match[0]));
+  const top = levels.length ? Math.max(...levels) : null;
+  if (top === null || top <= cap) return text;
+  const extra = top - cap;
+  const daevanion = beyond.find(item => item.kind === 'daevanion')?.label ?? 'Daevanion skill nodes';
+  if (viaNodes && extra <= nodeBoards) return `Mastery ${cap}, then +${extra} from ${shortLabel(daevanion)}`;
+  const sources = beyond.map(item => shortLabel(item.label));
+  return sources.length ? `Mastery ${cap}, then +${extra} from ${joinOr(sources)}` : `Mastery ${cap}, then +${extra}`;
+}
+
+/**
+ * Where a skill at the Mastery cap gets its next +1: its Daevanion skill node on the first open board
+ * where that node is not taken (boards carry their nodes once read), else the other sources the
+ * mastery-cap rule names, as text. A board not read yet stops the search so the page can read it.
+ */
+export function nextLevelSource(skillName, boards, beyond = []) {
+  const wanted = String(skillName).toLowerCase();
+  const open = (boards ?? []).filter(board => board.open).sort((a, b) => (a.unlockLevel ?? 0) - (b.unlockLevel ?? 0));
+  for (const board of open) {
+    if (!Array.isArray(board.nodes)) return { kind: 'unread', board: { id: board.id, name: board.name }, text: `a Daevanion skill node (${board.name} not read yet)` };
+    const node = board.nodes.find(item => (nodeSkill(item) ?? '').toLowerCase() === wanted);
+    if (node && !node.taken) return { kind: 'daevanion', board: { id: board.id, name: board.name }, nodeId: node.nodeId, nodeName: node.name, text: `${node.name} on ${board.name}` };
+  }
+  const others = beyond.filter(item => item.kind !== 'daevanion').map(item => item.label);
+  return others.length ? { kind: 'other', text: joinOr(others) } : { kind: 'pending', text: 'not known yet' };
 }
 
 /** Clamps any input to a whole level the global servers allow. */
@@ -79,9 +141,10 @@ function specialtySlotLevels(facts) {
 }
 
 /** Core skills in priority order with unlock state, current level and the next Specialty step. */
-function planSkills(build, catalogue, level, model, facts) {
+function planSkills(build, catalogue, level, model, facts, capRule) {
   const slotLevels = specialtySlotLevels(facts);
   const picksBySkill = new Map((build.specialties ?? []).map(entry => [entry.skill, entry.picks]));
+  const nodeSkills = daevanionSkillNodes(build);
   return (build.coreSkills ?? []).map(core => {
     const info = catalogue.get(core.name) ?? null;
     const unlockLevel = info && !isPending(info.unlockLevel) ? info.unlockLevel : null;
@@ -94,6 +157,7 @@ function planSkills(build, catalogue, level, model, facts) {
       name: core.name,
       priority: core.priority,
       target: core.target,
+      targetText: targetAgainstCap(core.target, { ...capRule, viaNodes: nodeSkills.includes(core.name) }),
       why: core.why,
       refs: core.refs,
       unlockLevel,
@@ -155,7 +219,9 @@ function planBoards(build, level, model, facts) {
       id: live?.id ?? board.id,
       open: live ? Boolean(live.open) : level >= board.unlockLevel,
       nodesTaken: live ? live.nodesTaken : null,
-      nodesTotal: live ? live.nodesTotal : null
+      nodesTotal: live ? live.nodesTotal : null,
+      // The board's node grid once the page has read it (armory-adapter adaptCharacter boards), else null.
+      nodes: Array.isArray(live?.nodes) ? live.nodes : null
     };
   });
   return {
@@ -190,7 +256,7 @@ const enchantFix = needsEnchant;
  * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
  * character), then the build steps that apply at this level.
  */
-function nowList(level, build, skills, stigmas, boards, model) {
+function nowList(level, build, skills, stigmas, boards, model, mastery) {
   const list = [];
   const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery', extra = {}) => list.push({ rank, title, detail, refs, kind, view, ...extra });
 
@@ -210,10 +276,17 @@ function nowList(level, build, skills, stigmas, boards, model) {
   }
 
   const ready = skills.filter(skill => skill.unlocked !== false);
+  const cap = mastery?.cap ?? null;
   if (ready.length && model) {
-    const owned = ready.filter(skill => skill.skillLevel !== null).sort((a, b) => a.skillLevel - b.skillLevel || a.priority - b.priority);
-    const focus = owned.find(skill => skill.skillLevel < 8) ?? owned[0] ?? ready[0];
-    push(40, `Level ${focus.name}${focus.skillLevel !== null ? ` (now Lv ${focus.skillLevel})` : ''}`, `${focus.why} Target: ${focus.target}.${focus.skillLevel !== null && focus.skillLevel < 8 ? ' Skill Lv 8 opens its first Specialty perk.' : ''}`, focus.refs);
+    // A skill already at the Mastery cap never gets a "level it" move: Mastery cannot take it further.
+    const owned = ready.filter(skill => skill.skillLevel !== null && (cap === null || skill.skillLevel < cap)).sort((a, b) => a.skillLevel - b.skillLevel || a.priority - b.priority);
+    const focus = owned.find(skill => skill.skillLevel < 8) ?? owned[0] ?? ready.find(skill => skill.skillLevel === null) ?? null;
+    if (focus) push(40, `Level ${focus.name}${focus.skillLevel !== null ? ` (now Lv ${focus.skillLevel})` : ''}`, `${focus.why} Target: ${focus.targetText ?? focus.target}.${focus.skillLevel !== null && focus.skillLevel < 8 ? ' Skill Lv 8 opens its first Specialty perk.' : ''}`, focus.refs);
+    // A key skill at the cap: its next +1 is a Daevanion node, so the move opens that board on that node.
+    for (const entry of mastery?.atCap ?? []) {
+      if (entry.next.kind !== 'daevanion') continue;
+      push(42, `Take the ${entry.name} +1 node on ${entry.next.board.name}`, `${entry.name} is at the Mastery cap (${cap}). Its next level comes from the Daevanion node ${entry.next.nodeName}.`, entry.refs, 'build', 'daevanion', { board: entry.next.board.id, node: entry.next.nodeId });
+    }
   } else if (ready.length) {
     push(40, `Level your skills in this order: ${ready.map(skill => skill.name).join(', ')}`, 'Spend Wisdom Stones on the first one until it reaches skill Lv 8, which opens its first Specialty perk, then move down the list.', ready.flatMap(skill => skill.refs));
   }
@@ -248,6 +321,11 @@ function iconIndex(icons, className) {
 export function buildAscentPlan({ className, role, level, data, model = null }) {
   if (!AION2_CLASSES.includes(className)) throw new TypeError(`Unknown AION 2 class: ${className}`);
   const facts = indexProgression(data.progression);
+  const capRule = {
+    cap: masteryCap(data.mechanics),
+    beyond: levelSourcesBeyondCap(data.mechanics),
+    nodeBoards: (facts['daevanion-boards']?.value ?? []).filter(board => board.skillNodes === true).length
+  };
   const gameIcons = iconIndex(data.icons, className);
   const lvl = clampLevel(model?.profile?.level ?? level ?? 1, data.progression);
   const roles = rolesFor(data.builds);
@@ -268,6 +346,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     character: model ? { name: model.profile.name, level: model.profile.level, className: model.profile.class } : null,
     macroOrder: facts['macro-order'] ?? null,
     specialtyRule: facts['specialty-perks'] ?? null,
+    masteryCap: capRule.cap,
     // The game's icon for each skill the armory lists (empty without a Daeva).
     skillIcons: { ...Object.fromEntries([...gameIcons.values()].map(skill => [skill.name, skill.icon])), ...Object.fromEntries((model?.skills ?? []).filter(skill => skill.icon).map(skill => [skill.name, skill.icon])) }
   };
@@ -275,15 +354,15 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     return { ...base, pending: build.build, now: [], skills: [], stigmas: { pending: build.build }, daevanion: planBoards({ daevanion: build.build }, lvl, model, facts), stats: build.build, rotation: build.build, upcoming: [] };
   }
   const catalogue = skillIndex(data.skills, className);
-  const skills = planSkills(build, catalogue, lvl, model, facts);
+  const skills = planSkills(build, catalogue, lvl, model, facts, capRule);
   const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
   const daevanion = planBoards(build, lvl, model, facts);
-  const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons);
+  const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons, capRule, daevanion.boards);
   const rotation = planRotation(build.rotation, catalogue, lvl, stigmas);
   return {
     ...base,
     pending: null,
-    now: nowList(lvl, build, skills, stigmas, daevanion, model),
+    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery),
     skills,
     stigmas,
     daevanion,
@@ -362,11 +441,14 @@ function planSkillBar({ build, rotation, stigmas, gameIcons, level, facts }) {
  * the build's key skills), each with its build priority, the Specialty picks for its three slots, all
  * five perks, and where the next skill points should go.
  */
-function planMastery(build, catalogue, level, model, facts, gameIcons = new Map()) {
+function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(), capRule = { cap: null, beyond: [], nodeBoards: 0 }, boards = []) {
   const slotLevels = specialtySlotLevels(facts);
+  const cap = capRule.cap;
   const core = new Map((build.coreSkills ?? []).map(skill => [skill.name, skill]));
   const picks = new Map((build.specialties ?? []).map(entry => [entry.skill, entry.picks]));
-  const goalOf = target => Number(/Lv\s*(\d+)/i.exec(target ?? '')?.[1]) || null;
+  const nodeSkills = daevanionSkillNodes(build);
+  // A key skill with a level target is levelled with Mastery up to the cap (the guide's own number when no cap is known).
+  const goalOf = target => (/\d/.test(target ?? '') ? cap ?? (Number(/Lv\s*(\d+)/i.exec(target)?.[1]) || null) : null);
   const source = model
     ? model.skills.filter(skill => skill.category !== 'Dp')
     : gameIcons.size
@@ -390,6 +472,7 @@ function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(
       skillLevel,
       priority: key ? key.priority : null,
       target: key?.target ?? null,
+      targetText: key ? targetAgainstCap(key.target, { ...capRule, viaNodes: nodeSkills.includes(key.name) }) : null,
       goal: goalOf(key?.target),
       why: key?.why ?? null,
       refs: key?.refs ?? [],
@@ -409,16 +492,21 @@ function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(
   const passive = entries.filter(entry => entry.category === 'Passive').sort((a, b) => (a.needLevel ?? 0) - (b.needLevel ?? 0));
   // Skill points: key skills you have, below their target, highest priority first. Each step aims for
   // the next Specialty slot or the target, whichever comes first.
+  // Never a step past the Mastery cap: a skill there is listed under atCap with its next +1 source instead.
   const spend = active
-    .filter(entry => entry.priority !== null && entry.unlocked !== false && entry.goal)
+    .filter(entry => entry.priority !== null && entry.unlocked !== false && entry.goal && (cap === null || entry.skillLevel === null || entry.skillLevel < cap))
     .map(entry => {
       const from = entry.skillLevel ?? 1;
       const nextSlot = slotLevels.find(slotLevel => slotLevel > from) ?? null;
-      const to = nextSlot ? Math.min(nextSlot, entry.goal) : entry.goal;
-      return { name: entry.name, from: entry.skillLevel, to, reason: nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : 'reaches the build target', priority: entry.priority };
+      const to = Math.min(nextSlot ? Math.min(nextSlot, entry.goal) : entry.goal, cap ?? Infinity);
+      const reason = nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : cap !== null && to === cap ? 'reaches the Mastery cap' : 'reaches the build target';
+      return { name: entry.name, from: entry.skillLevel, to, reason, priority: entry.priority };
     })
     .filter(step => step.from === null || step.from < step.to);
-  return { active, passive, spend, slotLevels, fromArmory: Boolean(model) };
+  const atCap = cap === null ? [] : active
+    .filter(entry => entry.priority !== null && entry.skillLevel !== null && entry.skillLevel >= cap)
+    .map(entry => ({ name: entry.name, skillLevel: entry.skillLevel, cap, refs: entry.refs, next: nextLevelSource(entry.name, boards, capRule.beyond) }));
+  return { active, passive, spend, atCap, cap, slotLevels, fromArmory: Boolean(model) };
 }
 
 /**
