@@ -969,7 +969,8 @@ await check('loading: the search form at once and one skeleton in the card shape
   assert.equal(await page.locator('#aeSummary .ae-skeleton').count(),2,'Both are skeletons in their final shape');
   assert.ok(await page.$eval('#aeSummary .ae-skeleton',el=>el.classList.contains('ae-summary-card')),'the first in the card shape');
   assert.equal(await page.$$eval('#aeSummary .ae-skeleton',panels=>panels.filter(panel=>!panel.querySelector('.ae-sk')).length),0,'Never an empty panel');
-  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/^\s*Ascent Plan\s*$/m,'No empty Ascent Plan panel');
+  // The plan card's only words are for screen readers (visually hidden): nothing on screen reads as an empty Ascent Plan panel.
+  assert.equal(await page.$eval('#aeSummary .ae-plan-card.ae-skeleton .ae-sr',el=>`${el.textContent}|${getComputedStyle(el).position}`),'Ascent Plan|absolute','No empty Ascent Plan panel on screen');
   assert.equal(await plainText(page,'#aeReading'),'Reading your character');
   assert.equal(await style(page,'#aeReading','font-size'),'16px');
   const portrait=await rectOf(page,'#aeSummary .ae-sk-portrait'),body=await rectOf(page,'#aeSummary .ae-summary-body');
@@ -1179,7 +1180,8 @@ const CLASS_NAMES=['Gladiator','Templar','Assassin','Ranger','Sorcerer','Spiritm
 const ROSTER8=()=>JSON.stringify(storeV2(['Al','Bea','Cleo','Dax','Eri','Finn','Gus','Hal'].map((name,i)=>saved(name,1308,'Meslamtaeda','eu',{characterId:`${name.toLowerCase()}=`,className:CLASS_NAMES[i],level:10+i}))));
 
 await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or less in Barlow, sentence case, sizes in rem, tabular figures',async()=>{
-  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],['/hub/aetherium/gear/equipment/',{}]]){
+  // The Gear page opens on a Daeva: with none it shows Find your Daeva first (#473), which has no labels to check.
+  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
     const {page,context}=await open(path,{live:true,extra});
     const bad=await typeAudit(page);
     assert.deepEqual(bad,[],`${path}:\n${bad.join('\n')}`);

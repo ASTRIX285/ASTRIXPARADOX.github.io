@@ -95,8 +95,9 @@ function renderSummary() {
     <section class="ae-panel ae-first-move" id="aeFirstMove" aria-labelledby="aeFirstMoveTitle" aria-live="polite">
       <p class="ae-eyebrow" id="aeFirstMoveTitle">Your first move</p>
       <p class="ae-first-move-text" id="aeFirstMoveText">Working out your first move.</p>
-      <a class="btn ae-primary" id="aeFirstMoveGo" href="${esc(ascentUrl(state.ref, p.class))}" data-first-move hidden>Show me</a>
-    </section>`;
+      <a class="btn" id="aeFirstMoveGo" href="${esc(ascentUrl(state.ref, p.class))}" data-first-move hidden>Show me</a>
+    </section>
+    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>`;
   loadFirstMove().catch(() => {});
 }
 

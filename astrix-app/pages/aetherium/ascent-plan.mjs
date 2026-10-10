@@ -213,7 +213,8 @@ function renderMenu(plan) {
     ${plan.upcoming.length ? `<section class="ae-coming" aria-labelledby="aeNextTitle">
       <h2 class="ae-section-title" id="aeNextTitle">Coming up</h2>
       <ol class="ae-coming-list">${plan.upcoming.slice(0, 4).map(item => `<li data-kind="${esc(item.kind)}"><b>Lv ${esc(item.level)}</b>${esc(item.text)}</li>`).join('')}</ol>
-    </section>` : ''}`;
+    </section>` : ''}
+    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>`;
 }
 
 /** The frame every screen sits in: a game window with its title bar and the tabs to the other screens. */
@@ -227,6 +228,7 @@ function gameWindow(view, plan, body) {
     </div>
     <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
     <div class="ae-gw-body">${body}</div>
+    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>
   </div>`;
 }
 

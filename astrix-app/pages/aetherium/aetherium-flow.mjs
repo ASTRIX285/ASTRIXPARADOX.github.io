@@ -57,7 +57,7 @@ export function renderNext({ label, href, note = null } = {}) {
   if (!row) return;
   if (!href) { row.hidden = true; row.innerHTML = ''; return; }
   row.hidden = false;
-  row.innerHTML = `${note ? `<span class="ae-next-note">${esc(note)}</span>` : ''}<a class="btn ae-primary ae-next-btn" href="${esc(href)}" data-next>${esc(label)} <span aria-hidden="true">›</span></a>`;
+  row.innerHTML = `${note ? `<span class="ae-next-note">${esc(note)}</span>` : ''}<a class="btn ae-next-btn" href="${esc(href)}" data-next>${esc(label)} <span aria-hidden="true">›</span></a>`;
 }
 
 /** The Next row when there is no Daeva yet: the only way on is the search. */

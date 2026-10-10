@@ -1047,20 +1047,20 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-steps-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;flex:1 1 560px;min-width:0}
 .ae-steps-list li{min-width:0}
 .ae-step{position:relative;display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;align-items:center;min-height:44px;padding:6px 12px;box-sizing:border-box;
-  font:600 .875rem/1.3 var(--ax-font-head);color:var(--ae-muted);text-decoration:none;background:var(--ae-panel-alpha);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
-.ae-step-num{display:grid;place-items:center;width:28px;height:28px;grid-row:1/3;border-radius:50%;font:700 .875rem/1 var(--ax-font-head);color:var(--ae-ink);background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line-strong)}
+  font:600 .875rem/1.3 var(--ae-font-ui);color:var(--ae-muted);text-decoration:none;background:var(--ae-panel-alpha);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-step-num{display:grid;place-items:center;width:28px;height:28px;grid-row:1/3;border-radius:50%;font:700 .875rem/1 var(--ae-font-ui);color:var(--ae-ink);background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line-strong)}
 .ae-step-tick{width:16px;height:16px}
 .ae-step-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ae-step-note{grid-column:2;font:500 .875rem/1.2 "Barlow",sans-serif;color:var(--ae-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-a.ae-step:hover,a.ae-step:focus-visible{color:var(--ae-ink);border-color:var(--ae-accent-2)}
+.aetherium-page a.ae-step:hover,.aetherium-page a.ae-step:focus-visible{color:var(--ae-ink);border-color:var(--ae-accent-2)}
 .ae-step.is-current{color:var(--ae-ink);border-color:var(--ae-accent);background:linear-gradient(90deg,color-mix(in srgb,var(--ae-accent) 24%,transparent),var(--ae-panel-alpha) 70%);box-shadow:inset 3px 0 0 var(--ae-accent),var(--ae-bevel)}
 .ae-step.is-current .ae-step-num{background:var(--ae-accent);color:#fff;border-color:transparent}
 .ae-step.is-done{color:var(--ae-ink)}
 .ae-step.is-done .ae-step-num{background:var(--ae-gold);color:var(--ae-gold-ink);border-color:transparent}
 .ae-step.is-locked{opacity:.62}
-.aetherium-page button.ae-steps-help{display:inline-flex;align-items:center;min-height:44px;font:600 .875rem/1.3 var(--ax-font-head);color:var(--ae-ice);text-decoration:underline;text-underline-offset:3px}
+.aetherium-page button.ae-steps-help{display:inline-flex;align-items:center;min-height:44px;font:600 .875rem/1.3 var(--ae-font-ui);color:var(--ae-ice);text-decoration:underline;text-underline-offset:3px}
 @media (max-width:640px){.ae-steps-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-basis:100%}.ae-step{grid-template-columns:24px minmax(0,1fr);column-gap:8px;padding:6px 8px}
-  .ae-step-num{width:24px;height:24px;font-size:.8125rem}.ae-step-label,.ae-step-note{white-space:normal;overflow:visible;line-height:1.2}}
+  .ae-step-num{width:24px;height:24px;font-size:.875rem}.ae-step-label,.ae-step-note{white-space:normal;overflow:visible;line-height:1.2}}
 
 .ae-next{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 18px;margin:var(--ae-gap) 0 0;padding-top:var(--ae-gap);border-top:1px solid var(--ae-navy-line)}
 .ae-next[hidden]{display:none}
@@ -1070,20 +1070,21 @@ a.ae-step:hover,a.ae-step:focus-visible{color:var(--ae-ink);border-color:var(--a
 
 .ae-first-move{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 18px;border-color:color-mix(in srgb,var(--ae-gold) 55%,var(--ae-navy-line))}
 .ae-first-move .ae-eyebrow{margin:0;color:var(--ae-gold)}
-.ae-first-move-text{margin:0;min-width:0;font:600 1.125rem/1.35 var(--ax-font-head);color:var(--ae-ink)}
+.ae-first-move-text{margin:0;min-width:0;font:600 1.125rem/1.35 var(--ae-font-ui);color:var(--ae-ink)}
 .ae-first-move:not(.is-ready) .ae-first-move-text{font-weight:500;color:var(--ae-muted)}
 .ae-first-move .btn{justify-self:end}
 .ae-first-move .btn[hidden]{display:none}
 @media (max-width:819px){.ae-first-move{grid-template-columns:minmax(0,1fr)}.ae-first-move .btn{justify-self:stretch}}
 
-.ae-summary-card.is-skeleton{min-height:260px;place-items:start;color:inherit}
 .ae-summary-card.is-skeleton .ae-reading{grid-column:1/-1}
+/* The guide lives inside the content it points at (the summary grid, the plan menu, the game window), never between the content and the footer. */
+.ae-summary>.ae-guide{grid-column:1/-1}
 /* The skeleton shapes (.ae-sk, pills, tiles, shimmer) are the crisp polish rules above. */
 .ae-reading{margin:14px 0 0;font:500 1rem/1.4 "Barlow",sans-serif;color:var(--ae-muted)}
 
 .ae-gear li{position:relative;min-width:0}
 .ae-gear li.has-flag .ae-slot{padding-right:96px}
-.ae-flag{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;min-height:32px;padding:0 10px;font:700 .875rem/1 var(--ax-font-head);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-gold-ink);background:var(--ae-gold);text-decoration:none;clip-path:var(--ae-notch)}
+.ae-flag{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;min-height:32px;padding:0 10px;font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;text-transform:uppercase;color:var(--ae-gold-ink);background:var(--ae-gold);text-decoration:none;clip-path:var(--ae-notch)}
 .ae-flag:hover,.ae-flag:focus-visible{background:var(--ae-gold-hi)}
 
 .ae-menu-badge.is-words{height:26px;padding:0 10px;border-radius:13px;font-size:.875rem;white-space:nowrap}
@@ -1094,5 +1095,5 @@ a.ae-step:hover,a.ae-step:focus-visible{color:var(--ae-ink);border-color:var(--a
 @media (max-width:640px){.ae-gw-source{text-align:left}}
 
 .ae-guide-text{font-size:1rem}
-.ae-guide-count{font-size:.8125rem}
+.ae-guide-count{font-size:.875rem}
 @media (max-width:640px){.ae-guide-text{font-size:1rem}}
