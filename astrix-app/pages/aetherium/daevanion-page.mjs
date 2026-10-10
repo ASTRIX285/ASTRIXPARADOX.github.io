@@ -8,6 +8,7 @@
 import { ArmoryUnavailable, ascentUrl, explain, loadBoard, loadDaevanionAdvice, prefetchDaevanionAdvice } from './aetherium-data.mjs';
 import { $, esc } from './aetherium-ui.mjs';
 import { LOCK_ICON, failPage, startCharacterPage, windowBar } from './character-page.mjs';
+import { renderNext } from './aetherium-flow.mjs';
 import { KIND_LABEL, boardGridStyle, nodeImg, nodeTileHtml } from './daevanion-board.mjs';
 import { daevanionSkillNodes, indexProgression, pickBuild } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { nodeCost, planDaevanionBoard, summariseBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
@@ -176,6 +177,7 @@ async function showBoard(boardId) {
   document.querySelectorAll('[data-board]').forEach(tab => tab.setAttribute('aria-selected', String(Number(tab.dataset.board) === boardId)));
   $('#aeDvBoard').innerHTML = '<p class="ae-muted ae-dv-reading">Reading the board.</p>';
   $('#aeDvPlan').href = ascentUrl(state.ref, state.className, { screen: 'daevanion', board: boardId });
+  renderNext(nextFor(boardId));
   const result = await nodesFor(board);
   if (state.current !== boardId) return;
   drawBoard(board, result);
@@ -224,11 +226,15 @@ function render({ model, source, ref }, advice) {
   showBoard(state.current).catch(error => failPage('Daevanion page', error));
 }
 
+/** The page's Next: the Ascent Plan's Daevanion screen on the board that is open here, with the route drawn on it. */
+const nextFor = boardId => ({ label: 'Next: Plan my route', href: ascentUrl(state.ref, state.className, { screen: 'daevanion', board: boardId }), note: 'Step 3 of 3: this board on the Ascent Plan, with the nodes to take in order' });
+
 startCharacterPage({
   prefetch: className => prefetchDaevanionAdvice(className),
   async render(loaded) {
     // The game facts and the class's builds are small static files; a failed read leaves the boards without focus text and key skills.
     const advice = await loadDaevanionAdvice(loaded.model.profile.class).catch(() => null);
     await render(loaded, advice);
-  }
+  },
+  next: () => nextFor(state.current)
 }).catch(error => failPage('Daevanion page', error));

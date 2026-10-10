@@ -182,7 +182,9 @@ function upcoming(level, skills, stigmas, boards, facts) {
   return items.sort((a, b) => a.level - b.level || a.kind.localeCompare(b.kind));
 }
 
-const enchantFix = slot => !slot.empty && slot.enchant === 0;
+/** True for a worn item the plan wants enchanted: still at +0. The Gear page flags the same items. */
+export const needsEnchant = slot => !slot.empty && slot.enchant === 0;
+const enchantFix = needsEnchant;
 
 /**
  * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
@@ -190,15 +192,17 @@ const enchantFix = slot => !slot.empty && slot.enchant === 0;
  */
 function nowList(level, build, skills, stigmas, boards, model) {
   const list = [];
-  const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery') => list.push({ rank, title, detail, refs, kind, view });
+  const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery', extra = {}) => list.push({ rank, title, detail, refs, kind, view, ...extra });
 
   if (model) {
     const empty = model.gear.filter(slot => slot.empty);
-    if (empty.length) push(10, `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, [], 'armory', 'gear');
+    if (empty.length) push(10, `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, [], 'armory', 'gear', { slots: empty.map(slot => slot.slotPos) });
     const bare = model.gear.filter(enchantFix);
-    if (bare.length) push(30, `Enchant ${bare.length} worn ${bare.length === 1 ? 'item' : 'items'} above +0`, `Still at +0: ${bare.map(slot => slot.name).join(', ')}.`, [], 'armory', 'gear');
+    if (bare.length) push(30, `Enchant ${bare.length} worn ${bare.length === 1 ? 'item' : 'items'} above +0`, `Still at +0: ${bare.map(slot => slot.name).join(', ')}.`, [], 'armory', 'gear', { slots: bare.map(slot => slot.slotPos) });
+    // Only a board with nothing spent on it is offered. A board with any node taken (a finished one included) is never the move.
     const openUnspent = boards.boards.filter(board => board.open && board.nodesTaken === 0);
-    if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion');
+    // The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens the board it names.
+    if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion', { board: openUnspent[0].id, boards: openUnspent.map(board => ({ id: board.id, name: board.name })) });
     if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory', 'stigma');
     for (const skill of skills) {
       if (skill.unlocked && skill.skillLevel !== null && skill.equipped === false) push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');

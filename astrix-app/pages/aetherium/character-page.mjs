@@ -4,8 +4,9 @@
  * points at the search. A read that fails says why and offers Try again; nothing stands in for the character.
  * First paint needs only that one call; each page loads anything else when it is asked for.
  */
-import { ArmoryUnavailable, explain, gearUrl, loadCharacter, loadIntroArt, refFromUrl, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, gearUrl, loadCharacter, loadIntroArt, refFromUrl, roster } from './aetherium-data.mjs';
 import { $, esc, introArtImg, markCharacterShown, markReady, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
+import { renderFindFirstNext, renderNext, renderStepBar } from './aetherium-flow.mjs';
 
 export const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
 
@@ -47,6 +48,9 @@ export function showFindFirst() {
   stage.classList.add('is-find-first'); // the menu page's header box drops its rule and padding
   const cards = $('#aeCards');
   if (cards) { cards.innerHTML = ''; cards.hidden = true; }
+  // The step bar waits on steps 2 and 3, and the only way on is the search.
+  renderStepBar({ current: 'setup' });
+  renderFindFirstNext();
   loadIntroArt().then(art => {
     const holder = $('#aeFindFirstArt');
     if (!art.npc || !holder) return;
@@ -58,9 +62,10 @@ export function showFindFirst() {
 
 /**
  * Runs a character page. render({ model, source, ref }) draws the page; ref is the Daeva to link onward with.
- * prefetch(classHint, ref) may start static fetches while the site answers.
+ * prefetch(classHint, ref) may start static fetches while the site answers. next({ model, ref }) names the page's
+ * one Next button ({ label, href, note }); by default it is the Ascent Plan for this Daeva (step 3).
  */
-export async function startCharacterPage({ prefetch = null, render }) {
+export async function startCharacterPage({ prefetch = null, render, next = null }) {
   wireDrawer();
   setFaction(null);
   const ref = pageRef();
@@ -69,6 +74,8 @@ export async function startCharacterPage({ prefetch = null, render }) {
     markReady();
     return;
   }
+  // The step bar is up before the site answers: this page is step 2, the Daeva is found.
+  renderStepBar({ current: 'setup', ref, className: classHint(ref) });
   prefetch?.(classHint(ref), ref);
   const attempt = async () => {
     let loaded;
@@ -88,6 +95,8 @@ export async function startCharacterPage({ prefetch = null, render }) {
     setFaction(model.profile.raceName, model.profile.raceId);
     showSource(source);
     await render({ model, source, ref });
+    renderStepBar({ current: 'setup', ref, className: model.profile.class });
+    renderNext(next?.({ model, ref }) ?? { label: 'Next: Your next moves', href: ascentUrl(ref, model.profile.class), note: 'Step 3 of 3: the Ascent Plan' });
     markCharacterShown();
   };
   await attempt();
