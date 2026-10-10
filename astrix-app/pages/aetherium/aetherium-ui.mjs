@@ -9,8 +9,24 @@ export const number = value => (Number.isFinite(value) ? value.toLocaleString('e
 
 export const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 
-/** "MainHand" to "Main Hand": the official slot name, spaced for reading. */
-export const slotLabel = name => String(name).replace(/([a-z])([A-Z])/g, '$1 $2');
+/**
+ * A slot name in plain words: "MainHand" to "Main Hand", and the site's raw codes for slots it lists only when
+ * worn ("EARRING1", "RING2", "BRACELET1") to "Earring 1", "Ring 2", "Bracelet 1".
+ */
+export function slotLabel(name) {
+  const raw = String(name ?? '');
+  if (/^[A-Z0-9_ ]+$/.test(raw) && /[A-Z]{2}/.test(raw)) {
+    return raw.toLowerCase().replace(/_/g, ' ').replace(/([a-z])(\d+)$/, '$1 $2').replace(/\b[a-z]/g, c => c.toUpperCase());
+  }
+  return raw.replace(/([a-z])([A-Z])/g, '$1 $2');
+}
+
+/* Game order for the slots the site lists only when worn: necklace, earrings, rings, bracelets, belt, cape. Others keep the site's order after these. */
+const SLOT_ORDER = ['NECKLACE', 'AMULET', 'EARRING1', 'EARRING2', 'RING1', 'RING2', 'BRACELET1', 'BRACELET2', 'BELT', 'CAPE', 'CLOAK'];
+export function slotRank(name) {
+  const index = SLOT_ORDER.indexOf(String(name ?? '').toUpperCase().replace(/[\s_]/g, ''));
+  return index < 0 ? SLOT_ORDER.length : index;
+}
 
 /** An NCSOFT CDN icon (never re-hosted), or an empty frame when the site sent none. */
 export const iconImg = (src, alt = '', size = 48) => src

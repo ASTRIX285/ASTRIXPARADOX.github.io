@@ -16,6 +16,7 @@ import {createRequire} from 'node:module';
 import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {nodeCost} from '../games/aion2/engine/daevanion-planner.mjs';
+import {needsEnchant} from '../games/aion2/engine/ascent-advisor.mjs';
 import {deriveRegion} from './fixtures/aion2/derive-region-fixtures.mjs';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
@@ -84,6 +85,16 @@ for(const skill of richEquipment.skill.skillList){
 const learnedExpected=richEquipment.skill.skillList.filter(skill=>skill.category!=='Dp'&&skill.acquired===1).length;
 const otherBoard=id=>{const copy=structuredClone(board11);copy.nodeList.forEach(node=>{node.boardId=id;node.open=0;});return copy;};
 
+// The same Daeva wearing accessories (server 1312). The site lists those slots only when worn, as raw codes and in its
+// own order (EARRING2 before EARRING1): the Gear page must show plain names in game order. Two of them are past +0.
+const ACC={serverId:'1312',characterId:'YWNjZGFldmE='};
+const accInfo=structuredClone(richInfo);
+Object.assign(accInfo.profile,{characterName:'ACCDAEVA',characterId:ACC.characterId,serverId:1312,serverName:'Kaisinel'});
+const accEquipment=structuredClone(richEquipment);
+for(const [slotPos,slotPosName,name,enchantLevel] of [[12,'EARRING2','Second Earring',0],[11,'EARRING1','First Earring',3],[13,'RING1','First Ring',0],[15,'BRACELET1','First Bracelet',2]]){
+  accEquipment.equipment.equipmentList.push({...accEquipment.equipment.equipmentList[0],id:999000000+slotPos,name,slotPos,slotPosName,enchantLevel});
+}
+
 // Screenshots (AE_SHOTS) show stand-in art in game colours: this machine cannot reach the NCSOFT CDN.
 const hue=text=>[...text].reduce((total,char)=>(total*31+char.charCodeAt(0))%360,7);
 function standIn(url){
@@ -122,9 +133,10 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
     urls.push(url);
     if(state.down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
     const rich=url.searchParams.get('serverId')==='1311';
+    const acc=url.searchParams.get('serverId')===ACC.serverId;
     const asmo=url.searchParams.get('serverId')===ASMO_REF.serverId;
     let body;
-    if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
+    if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:acc?{info:accInfo,equipment:accEquipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
     else if(url.pathname==='/aion2/item')body=itemDetail;
     else if(url.pathname==='/aion2/daevanion'){
       const id=Number(url.searchParams.get('boardId'));
@@ -774,6 +786,117 @@ await check('no gamer tag, example data or stand-in character on any character p
     await live.context.close();
   }
 });
+
+/* ---------- First-visit flow (10 Oct 2026): the step bar, one Next per page, badges in words, Enchant flags, slot names ---------- */
+
+const stepsOf=page=>page.$$eval('#aeSteps .ae-step',items=>items.map(el=>({label:el.querySelector('.ae-step-label').textContent,current:el.getAttribute('aria-current'),done:el.classList.contains('is-done'),locked:el.classList.contains('is-locked'),href:el.getAttribute('href'),tick:Boolean(el.querySelector('.ae-step-tick')),note:el.querySelector('.ae-step-note')?.textContent??null})));
+
+await check('step bar on every character page: step 2 current, step 1 ticked, step 3 a link; one Next with the right target',async()=>{
+  const q=refQuery(RICH,{class:'gladiator'});
+  const want={
+    [`/hub/aetherium/gear/${refQuery()}`]:/^\/hub\/aetherium\/ascent\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator$/,
+    [`/hub/aetherium/gear/equipment/${refQuery()}`]:/^\/hub\/aetherium\/ascent\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator#aeNow$/,
+    [`/hub/aetherium/skills/${q}`]:/^\/hub\/aetherium\/ascent\/mastery\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator$/,
+    [`/hub/aetherium/daevanion/${q}`]:/^\/hub\/aetherium\/ascent\/daevanion\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator&board=11$/
+  };
+  for(const [path,target] of Object.entries(want)){
+    const {page,context,errors}=await open(path);
+    const steps=await stepsOf(page);
+    assert.deepEqual(steps.map(step=>step.label),['Find your Daeva','See your setup','Your next moves'],path);
+    assert.equal(steps[1].current,'step',`${path}: step 2 is current`);
+    assert.ok(steps[0].done&&steps[0].tick,`${path}: step 1 is done, with a tick`);
+    assert.ok(!steps.some(step=>step.locked),`${path}: nothing waits with a Daeva`);
+    assert.match(steps[0].href,/^\/hub\/aetherium\/\?serverId=1311&characterId=[^&]+&region=eu$/,`${path}: step 1 opens this Daeva's card`);
+    assert.match(steps[2].href,/^\/hub\/aetherium\/ascent\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator$/,`${path}: step 3 opens this Daeva's plan`);
+    assert.ok(await page.$eval('#aeSteps',el=>el===document.querySelector('main').firstElementChild),`${path}: the step bar is first under the ribbon`);
+    assert.equal(await page.locator('[data-next]').count(),1,`${path}: one Next`);
+    assert.match(await page.getAttribute('[data-next]','href'),target,`${path}: Next target`);
+    assert.match(await plain(page,'[data-next]'),/^Next: /,`${path}: Next says Next`);
+    assert.ok((await boxOf(page,'[data-next]')).height>=44,`${path}: Next at least 44px tall`);
+    assert.equal(await page.locator('[aria-current="page"]').first().textContent(),'Gear Ledger',`${path}: the ribbon still marks the page`);
+    assert.ok(parseFloat(await page.$eval('#aeSteps .ae-step-label',el=>getComputedStyle(el).fontSize))>=14,`${path}: step text at least 14px`);
+    assert.deepEqual(errors,[],path);
+    await context.close();
+  }
+});
+
+await check('Daevanion page: Next follows the board that is open',async()=>{
+  const {page,context}=await open(`/hub/aetherium/daevanion/${refQuery(RICH,{class:'gladiator'})}`);
+  await page.waitForSelector('.ae-board-grid .ae-node');
+  assert.match(await page.getAttribute('[data-next]','href'),/&board=11$/);
+  await page.click('[data-board="12"]');
+  await page.waitForFunction(()=>new URL(location.href).searchParams.get('board')==='12');
+  assert.match(await page.getAttribute('[data-next]','href'),/^\/hub\/aetherium\/ascent\/daevanion\/\?serverId=1311&characterId=[^&]+&region=eu&class=gladiator&board=12$/);
+  await context.close();
+});
+
+await check('no Daeva: steps 2 and 3 say Find your Daeva first, step 1 is the search, the one Next is the search',async()=>{
+  for(const path of ['/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/']){
+    const {page,context}=await open(path,{live:false});
+    const steps=await stepsOf(page);
+    assert.deepEqual(steps.filter(step=>step.locked).map(step=>[step.label,step.note]),[['See your setup','Find your Daeva first'],['Your next moves','Find your Daeva first']],path);
+    assert.equal(steps[1].current,'step',`${path}: step 2 is still the current step`);
+    assert.equal(await page.locator('#aeSteps a').count(),1,`${path}: only step 1 is a link`);
+    assert.equal(steps[0].href,'/hub/aetherium/#aeSearch');
+    assert.equal(await page.locator('[data-next]').count(),1,`${path}: one Next`);
+    assert.equal(await page.getAttribute('[data-next]','href'),'/hub/aetherium/#aeSearch');
+    assert.match(await plain(page,'[data-next]'),/^Find your Daeva/);
+    await context.close();
+  }
+});
+
+await check('menu badges say what they count, in words',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/${refQuery()}`);
+  const badges=await page.$$eval('#aeCards .ae-menu-badge',items=>items.map(el=>el.textContent.trim()));
+  assert.deepEqual(badges,[`${richEquipment.equipment.equipmentList.length} worn`,`${learnedExpected} skills`,'2 boards']);
+  assert.ok(parseFloat(await page.$eval('#aeCards .ae-menu-badge',el=>getComputedStyle(el).fontSize))>=14,'badge text at least 14px');
+  const badge=await boxOf(page,'#aeCards .ae-menu-badge'),card=await boxOf(page,'#aeCards .ae-menu-card');
+  assert.ok(badge.right<=card.right+0.5&&badge.top>=card.top-0.5,'the badge stays inside its card');
+  await context.close();
+});
+
+await check('Gear page: an Enchant flag on every item the plan wants enchanted, leading to the gear move; slot names in plain words and game order',async()=>{
+  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(ACC)}`);
+  assert.deepEqual(calls,['/aion2/character'],'The flags need no extra call');
+  const expected=accEquipment.equipment.equipmentList.filter(item=>item.enchantLevel===0).map(item=>String(item.slotPos)).sort();
+  assert.ok(expected.length>0&&expected.length<accEquipment.equipment.equipmentList.length,'Some items at +0, some past it');
+  const flags=await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.getAttribute('href'),el.textContent.trim()]));
+  assert.deepEqual(flags.map(flag=>flag[0]).sort(),expected,'One flag per +0 item, the advisor\'s own rule');
+  for(const [,href,text] of flags){
+    assert.equal(text,'Enchant');
+    assert.match(href,/^\/hub\/aetherium\/ascent\/\?serverId=1312&characterId=[^&]+&region=eu&class=gladiator#aeNow$/,'The flag leads to the gear moves on the Ascent Plan');
+  }
+  const unflagged=await page.$$eval('#aeGear > li',items=>items.filter(li=>!li.querySelector('[data-enchant-flag]')).map(li=>li.querySelector('.ae-slot-meta')?.textContent??''));
+  for(const meta of unflagged)assert.doesNotMatch(meta,/\+0( |$)/,`no flag means not +0: ${meta}`);
+  const labels=await page.$$eval('#aeGear .ae-slot-label',items=>items.map(el=>el.textContent));
+  assert.deepEqual(labels.slice(-4),['Earring 1','Earring 2','Ring 1','Bracelet 1'],'Plain words, game order');
+  assert.ok(!labels.some(label=>/[A-Z]{2}/.test(label)),`No raw codes: ${labels}`);
+  const first=await page.$eval('#aeGear li.has-flag',li=>{const a=li.getBoundingClientRect(),f=li.querySelector('[data-enchant-flag]').getBoundingClientRect(),n=li.querySelector('strong').getBoundingClientRect();return {inside:f.left>=a.left-0.5&&f.right<=a.right+0.5&&f.top>=a.top-0.5&&f.bottom<=a.bottom+0.5,clear:n.right<=f.left+0.5,size:getComputedStyle(li.querySelector('[data-enchant-flag]')).fontSize};});
+  assert.ok(first.inside,'the flag sits inside its tile');
+  assert.ok(first.clear,'the flag does not cover the item name');
+  assert.ok(parseFloat(first.size)>=14,'flag text at least 14px');
+  assert.equal(needsEnchant({empty:false,enchant:0}),true);
+  await Promise.all([page.waitForURL(/\/ascent\//),page.click('[data-enchant-flag]')]);
+  await page.waitForSelector('#aeNow');
+  assert.match(await plain(page,'#aeNow'),/Enchant \d+ worn items above \+0/,'The flag lands on the gear move');
+  await context.close();
+});
+
+for(const width of [390,820,1280,1600,1920]){
+  await check(`flow at ${width}: step bar and Next line up with the window on the Gear, Skills and Daevanion pages`,async()=>{
+    for(const path of [`/hub/aetherium/gear/equipment/${refQuery()}`,`/hub/aetherium/skills/${refQuery(RICH,{class:'gladiator'})}`,`/hub/aetherium/daevanion/${refQuery(RICH,{class:'gladiator'})}`]){
+      const {page,context}=await open(path,{viewport:{width,height:900}});
+      assert.ok(await overflowOf(page)<=0,`${path} scrolls sideways`);
+      const steps=await boxOf(page,'#aeSteps'),win=await boxOf(page,'.ae-gw'),next=await boxOf(page,'#aeNext');
+      near(steps.left,win.left,1,`${path} step bar starts with the window`);near(steps.right,win.right,1,`${path} step bar ends with the window`);
+      near(next.left,win.left,1,`${path} Next row starts with the window`);near(next.right,win.right,1,`${path} Next row ends with the window`);
+      assert.ok(next.top>=win.bottom-0.5,`${path} Next comes after the window`);
+      const items=await page.$$eval('#aeSteps .ae-step',els=>els.map(el=>el.getBoundingClientRect().toJSON()));
+      assert.ok(items.every(item=>item.height>=44),`${path} every step at least 44px tall`);
+      await context.close();
+    }
+  });
+}
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 

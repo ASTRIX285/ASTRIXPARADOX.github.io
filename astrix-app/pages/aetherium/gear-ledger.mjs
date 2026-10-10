@@ -4,24 +4,39 @@
  * Stats on the left under the gear; pet, wings and title on the right, both columns ending level.
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, explain, loadCatalogue, loadItemDetail } from './aetherium-data.mjs';
-import { $, esc, iconImg, infoCardHtml, isPending, number, openInfo, slotLabel } from './aetherium-ui.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, loadCatalogue, loadItemDetail } from './aetherium-data.mjs';
+import { $, esc, iconImg, infoCardHtml, isPending, number, openInfo, slotLabel, slotRank } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
+import { needsEnchant } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 
 const PRIMARY_STATS = ['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS'];
-const state = { model: null, source: null, selected: null, listedSlots: new Set() };
+const state = { model: null, source: null, ref: null, selected: null, listedSlots: new Set() };
 
 const enchantText = slot => `+${slot.enchant}${isPending(slot.maxEnchant) ? '' : ` of ${slot.maxEnchant}`}`;
+
+/** The Ascent Plan's gear moves (the "Enchant ... above +0" move among them), where an Enchant flag leads. */
+const movesHref = () => `${ascentUrl(state.ref, state.model.profile.class)}#aeNow`;
+
+/** The slot list in the game's order: the eight listed slots as the site sends them, then accessories (necklace, earrings, rings, bracelets, belt, cape). */
+function orderedGear(gear) {
+  const items = gear.map((slot, index) => ({ slot, index }));
+  const listed = items.filter(item => state.listedSlots.has(item.slot.slotPos));
+  const extra = items.filter(item => !state.listedSlots.has(item.slot.slotPos))
+    .sort((a, b) => slotRank(a.slot.slot) - slotRank(b.slot.slot) || a.slot.slotPos - b.slot.slotPos);
+  return [...listed, ...extra];
+}
 
 function renderGear() {
   const { gear } = state.model;
   $('#aeGearCount').textContent = `${gear.filter(slot => !slot.empty).length} of ${gear.length} worn`;
-  $('#aeGear').innerHTML = gear.map((slot, index) => slot.empty
+  // An item the Ascent Plan wants enchanted (still at +0, the same rule the advisor uses) carries an Enchant flag that leads to that move.
+  const flag = slot => (needsEnchant(slot) ? `<a class="ae-flag" href="${esc(movesHref())}" data-enchant-flag="${esc(slot.slotPos)}" aria-label="Enchant ${esc(slot.name)}: it is still at +0. See the move on the Ascent Plan.">Enchant</a>` : '');
+  $('#aeGear').innerHTML = orderedGear(gear).map(({ slot, index }) => slot.empty
     ? `<li><div class="ae-slot is-empty"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>Empty</strong></div></li>`
-    : `<li><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-haspopup="dialog">
+    : `<li${needsEnchant(slot) ? ' class="has-flag"' : ''}><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-haspopup="dialog">
         ${iconImg(slot.icon, '', 52)}
         <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(slot.grade)} · ${esc(enchantText(slot))}</span></span>
-      </button></li>`).join('');
+      </button>${flag(slot)}</li>`).join('');
   const accessories = state.model.accessorySlots;
   // Slots outside the slot list (cape, belt, accessories) only reach the official site once something is worn there.
   const extra = gear.filter(slot => !state.listedSlots.has(slot.slotPos)).length;
@@ -107,7 +122,7 @@ function renderExtras() {
 }
 
 function render(model, source, ref) {
-  Object.assign(state, { model, source, selected: null });
+  Object.assign(state, { model, source, ref, selected: null });
   $('#aeStage').innerHTML = `<div class="ae-gw ae-gear-window">
     ${windowBar({ title: 'Gear', model, ref })}
     <div class="ae-gw-body">
@@ -146,5 +161,6 @@ startCharacterPage({
   async render({ model, source, ref }) {
     state.listedSlots = new Set((await loadCatalogue()).slots.map(slot => slot.slotPos));
     render(model, source, ref);
-  }
+  },
+  next: ({ model, ref }) => ({ label: 'Next: Your next moves', href: `${ascentUrl(ref, model.profile.class)}#aeNow`, note: 'Step 3 of 3: the gear moves are on the Ascent Plan' })
 }).catch(error => failPage('Gear page', error));

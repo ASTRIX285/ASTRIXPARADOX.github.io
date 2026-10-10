@@ -78,7 +78,8 @@ const realCalls=[];
 let failures=0;
 const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
-async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,extra={},metaAt=null,servers='ok',noTitle=false,art=null}={}){
+// ready=false returns as soon as the page has loaded (to look at it while the site is still answering); slow holds the character call for 3.5 s.
+async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,extra={},metaAt=null,servers='ok',noTitle=false,art=null,ready=true,slow=false}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
   const urls=[];
@@ -114,6 +115,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     if(noTitle&&url.pathname==='/aion2/character')bodies['/aion2/character']={info:noTitleInfo,equipment:bareEquipment};
     const body=bodies[url.pathname];
     if(!body)return route.fulfill({status:404,body:'{}'});
+    if(slow&&url.pathname==='/aion2/character')await new Promise(done=>setTimeout(done,3500));
     return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta:{...meta,...(metaAt?{fetchedAt:new Date(metaAt).toISOString()}:{}),region:url.searchParams.get('region')}})});
   });
   // Icons and portraits come from the NCSOFT CDN; never fetched in tests.
@@ -128,7 +130,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
-  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
+  if(ready)await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
   return {page,context,calls,urls,errors,state};
 }
 // Everything a visitor can read on the page: the text, the title and description, and every visible attribute.
@@ -946,6 +948,163 @@ await check('wide screens: Gear page columns side by side, roster on one row at 
   const tops=await card.page.$$eval('.ae-roster-slot',items=>[...new Set(items.map(el=>Math.round(el.getBoundingClientRect().top)))]);
   assert.equal(tops.length,1,'8 roster slots on one row');
   await card.context.close();
+});
+
+/* ---------- First-visit flow (10 Oct 2026): loading, the first move, the step bar, one Next, the guide, home and The Hub ---------- */
+
+const daevaRef=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
+const plainText=(page,selector)=>page.$eval(selector,el=>el.textContent.replace(/\s+/g,' ').trim());
+const stepsOf=page=>page.$$eval('#aeSteps .ae-step',items=>items.map(el=>({label:el.querySelector('.ae-step-label').textContent,current:el.getAttribute('aria-current'),done:el.classList.contains('is-done'),locked:el.classList.contains('is-locked'),href:el.getAttribute('href'),tick:Boolean(el.querySelector('.ae-step-tick')),note:el.querySelector('.ae-step-note')?.textContent??null})));
+const rectOf=(page,selector)=>page.$eval(selector,el=>el.getBoundingClientRect().toJSON());
+
+await check('loading: the search form at once and one skeleton in the card shape, never two empty panels; after 3 s it says the read is still going',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/?${daevaRef}`,{live:true,slow:true,ready:false});
+  await page.waitForSelector('#aeSummary .ae-summary-card.is-skeleton',{state:'visible'});
+  assert.equal(await page.isVisible('#aeSearch'),true,'The search form shows while the site answers');
+  assert.equal(await page.locator('.ae-skeleton').count(),1,'One skeleton');
+  assert.equal(await page.locator('#aeSummary .ae-panel').count(),1,'Never two panels');
+  assert.ok(await page.$eval('#aeSummary .ae-skeleton',el=>el.classList.contains('ae-summary-card')),'in the card shape');
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/^\s*Ascent Plan\s*$/m,'No empty Ascent Plan panel');
+  assert.equal(await plainText(page,'#aeReading'),'Reading your character');
+  assert.equal(await style(page,'#aeReading','font-size'),'16px');
+  const portrait=await rectOf(page,'#aeSummary .ae-sk-portrait'),body=await rectOf(page,'#aeSummary .ae-summary-body');
+  assert.ok(portrait.width>=180&&body.left>=portrait.right,'portrait block on the left, words on the right, like the card');
+  await page.waitForFunction(()=>document.querySelector('#aeReading')?.textContent==='Still reading from the official AION 2 site',null,{timeout:6000});
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
+  assert.equal(await page.locator('.is-skeleton').count(),0,'The skeleton goes once the Daeva is on screen');
+  assert.equal(await page.textContent('#aeName'),TEST_NAME);
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('after a Daeva loads: the first move strip under the card shows the plan\'s top move, Show me opens it, Open Ascent Plan is gold, one Next to the plan',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/?${daevaRef}`,{live:true});
+  await page.waitForSelector('#aeFirstMove.is-ready');
+  const strip=await page.$eval('#aeFirstMove',el=>({text:el.querySelector('#aeFirstMoveText').textContent,href:el.querySelector('[data-first-move]').getAttribute('href'),label:el.querySelector('[data-first-move]').textContent.trim(),view:el.querySelector('[data-first-move]').dataset.moveView,board:el.querySelector('[data-first-move]').dataset.moveBoard}));
+  // The same Daeva's Ascent Plan: its top move is the strip's move.
+  const plan=await open(`/hub/aetherium/ascent/?${daevaRef}`,{live:true});
+  const top=await plan.page.$eval('.ae-quest',el=>({title:el.querySelector('strong').textContent,board:el.dataset.questBoard,view:el.dataset.questView}));
+  await plan.context.close();
+  assert.equal(strip.text,top.title,'The strip says the plan\'s top move');
+  assert.equal(strip.label,'Show me');
+  assert.equal(strip.view,top.view);
+  assert.equal(strip.board,top.board);
+  assert.match(strip.href,new RegExp(`^/hub/aetherium/ascent/daevanion/\\?serverId=1308&characterId=[^&]+&region=eu&class=gladiator&board=${top.board}$`),'Show me goes straight to the move');
+  const card=await rectOf(page,'#aeSummary .ae-summary-card'),box=await rectOf(page,'#aeFirstMove'),summary=await rectOf(page,'#aeSummary');
+  assert.ok(box.top>=card.bottom-0.5,'The strip sits under the card');
+  assert.ok(Math.abs(box.left-summary.left)<=1&&Math.abs(box.right-summary.right)<=1,'The strip spans the summary');
+  assert.match(await style(page,'#aeAscentLink','background-image'),/linear-gradient\(rgb\(244, 210, 124\)/,'Open Ascent Plan is the gold primary action');
+  assert.ok(parseFloat(await style(page,'#aeFirstMoveText','font-size'))>=16,'The move reads at 16px or more');
+  assert.equal(await page.locator('[data-next]').count(),1,'One Next on the page');
+  assert.match(await page.getAttribute('[data-next]','href'),/^\/hub\/aetherium\/ascent\/\?serverId=1308&characterId=[^&]+&region=eu&class=gladiator$/,'Next goes to the Ascent Plan');
+  assert.match(await plainText(page,'[data-next]'),/^Next: Your next moves/);
+  await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('[data-first-move]')]);
+  await page.waitForSelector('.ae-board-grid');
+  assert.equal(await page.getAttribute(`[data-board-tab="${top.board}"]`,'aria-selected'),'true','Show me opened the board the move names');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('step bar on the Daeva Card: step 1 current; with a Daeva it is ticked and steps 2 and 3 link on; without one they say Find your Daeva first',async()=>{
+  const none=await open('/hub/aetherium/',{live:true});
+  const bare=await stepsOf(none.page);
+  assert.deepEqual(bare.map(step=>step.label),['Find your Daeva','See your setup','Your next moves']);
+  assert.equal(bare[0].current,'step');
+  assert.deepEqual(bare.filter(step=>step.locked).map(step=>step.note),['Find your Daeva first','Find your Daeva first']);
+  assert.equal(await none.page.locator('#aeSteps a').count(),1);
+  assert.equal(await none.page.locator('#aeHowThisWorks').count(),0,'No guide to reopen before a Daeva');
+  assert.equal(await none.page.locator('[data-next]').count(),1,'One Next, even on the intro');
+  assert.equal(await none.page.getAttribute('[data-next]','href'),'#aeSearch');
+  assert.ok(await none.page.$eval('#aeSteps',el=>el===document.querySelector('main').firstElementChild),'The step bar is first under the ribbon');
+  await none.context.close();
+  const {page,context}=await open(`/hub/aetherium/?${daevaRef}`,{live:true});
+  const steps=await stepsOf(page);
+  assert.equal(steps[0].current,'step');
+  assert.ok(steps[0].done&&steps[0].tick,'Step 1 is ticked once a Daeva is found');
+  assert.ok(!steps.some(step=>step.locked));
+  assert.match(steps[1].href,/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=[^&]+&region=eu$/);
+  assert.match(steps[2].href,/^\/hub\/aetherium\/ascent\/\?serverId=1308&characterId=[^&]+&region=eu&class=gladiator$/);
+  assert.equal(await page.locator('#aeHowThisWorks').count(),1);
+  assert.ok(parseFloat(await style(page,'#aeSteps .ae-step-label','font-size'))>=14,'Step text at least 14px');
+  await context.close();
+});
+
+await check('first-visit guide: three steps after the first Daeva, Skip and Done close it, it shows once per device, How this works brings it back',async()=>{
+  const {page,context,errors}=await open('/hub/aetherium/',{live:true});
+  assert.equal(await page.isHidden('#aeGuide'),true,'No guide before a Daeva');
+  await page.fill('#aeNameInput',TEST_NAME);
+  await page.click('#aeFind');
+  await page.waitForSelector('#aeGuide:not([hidden])');
+  const text=()=>plainText(page,'#aeGuide');
+  assert.match(await text(),/step 1 of 3.*This is your Daeva\. Check it is the character you play/);
+  assert.match(await page.getAttribute('#aeSummary .ae-summary-card','class'),/ae-guide-target/,'The card is lit up');
+  assert.equal(await style(page,'.ae-guide-text','font-size'),'16px','Guide text is 16px');
+  assert.equal(await page.locator('#aeGuide [data-guide="skip"]').count(),1,'Skip is there');
+  await page.click('#aeGuide [data-guide="next"]');
+  assert.match(await text(),/step 2 of 3.*This is your first move/);
+  assert.match(await page.getAttribute('#aeFirstMove','class'),/ae-guide-target/);
+  await page.click('#aeGuide [data-guide="next"]');
+  assert.match(await text(),/step 3 of 3.*Your full plan is here/);
+  assert.match(await page.getAttribute('#aeAscentLink','class'),/ae-guide-target/);
+  assert.equal(await page.locator('#aeGuide [data-guide="skip"]').count(),0,'The last step has Done, not Skip');
+  await page.click('#aeGuide [data-guide="back"]');
+  assert.match(await text(),/step 2 of 3/);
+  await page.click('#aeGuide [data-guide="skip"]');
+  assert.equal(await page.isHidden('#aeGuide'),true,'Skip closes the guide');
+  assert.equal(await page.locator('.ae-guide-target').count(),0);
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('aetherium.guides.v1')).card),true,'Remembered on this device');
+  await page.reload();
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  await page.waitForSelector('#aeFirstMove');
+  await page.waitForTimeout(150);
+  assert.equal(await page.isHidden('#aeGuide'),true,'Shown once');
+  await page.click('#aeHowThisWorks');
+  assert.match(await text(),/step 1 of 3/,'How this works brings it back');
+  for(let i=0;i<2;i++)await page.click('#aeGuide [data-guide="next"]');
+  await page.click('#aeGuide [data-guide="done"]');
+  assert.equal(await page.isHidden('#aeGuide'),true,'Done closes it');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+for(const width of [390,820,1280,1600,1920]){
+  await check(`flow at ${width}: step bar, first move strip and Next line up with the card, no sideways scroll`,async()=>{
+    const {page,context}=await open(`/hub/aetherium/?${daevaRef}`,{live:true,viewport:{width,height:900}});
+    await page.waitForSelector('#aeFirstMove.is-ready');
+    assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth))<=0,'scrolls sideways');
+    const steps=await rectOf(page,'#aeSteps'),summary=await rectOf(page,'#aeSummary'),next=await rectOf(page,'#aeNext'),strip=await rectOf(page,'#aeFirstMove');
+    assert.ok(Math.abs(steps.left-summary.left)<=1&&Math.abs(steps.right-summary.right)<=1,`step bar on the grid (${steps.left}/${steps.right} vs ${summary.left}/${summary.right})`);
+    assert.ok(Math.abs(strip.left-summary.left)<=1&&Math.abs(strip.right-summary.right)<=1,'first move strip on the grid');
+    assert.ok(Math.abs(next.left-summary.left)<=1&&Math.abs(next.right-summary.right)<=1,'Next row on the grid');
+    const items=await page.$$eval('#aeSteps .ae-step',els=>els.map(el=>el.getBoundingClientRect().toJSON()));
+    assert.ok(items.every(item=>item.height>=44),'every step at least 44px tall');
+    for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++)assert.ok(items[i].right<=items[j].left+0.5||items[j].right<=items[i].left+0.5||items[i].bottom<=items[j].top+0.5||items[j].bottom<=items[i].top+0.5,`steps ${i} and ${j} overlap`);
+    assert.ok((await rectOf(page,'[data-first-move]')).height>=44,'Show me at least 44px tall');
+    if(process.env.AE_SHOTS&&(width===390||width===1600))await page.screenshot({path:resolve(process.env.AE_SHOTS,`first-move-${width}.png`),fullPage:true});
+    await context.close();
+  });
+}
+
+await check('home page and The Hub lead to The Aetherium, with the new words',async()=>{
+  const context=await browser.newContext();
+  // Public pages: nothing leaves the local server (fonts, streams, scripts on other hosts answer empty).
+  await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.fulfill({status:204,body:''}));
+  const page=await context.newPage();
+  await page.goto(`${base}/`);
+  assert.deepEqual(await page.$$eval('.hero-body a[href="/hub/aetherium/"]',links=>links.map(a=>a.textContent.trim())),['The Aetherium'],'The hero tool row names The Aetherium');
+  assert.match(await page.$eval('.hero-body',el=>el.textContent),/Destiny 2 build tools/,'The Destiny copy stays');
+  assert.match(await page.$eval('.hero-body',el=>el.textContent),/AION 2/);
+  assert.equal(await page.$eval('.hero-tags a[href="/hub/aetherium/"]',el=>el.textContent.trim()),'AION 2','AION 2 among the hero tags');
+  assert.ok((await page.$$('a[href="/hub/aetherium/"]')).length>=3,'Hero row, hero tags and the universes list all lead in');
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/[–—]/,'No dashes');
+  await page.goto(`${base}/hub/`);
+  const card=await page.$eval('#hubCards .platform-card',el=>({name:el.querySelector('h2').textContent,copy:el.querySelector('p').textContent,button:el.querySelector('.btn-primary').textContent.trim(),href:el.querySelector('.btn-primary').getAttribute('href')}));
+  assert.equal(card.name,'The Aetherium');
+  assert.equal(card.copy,'Search any AION 2 character in five regions. See their gear, skills and Daevanion boards, and what to do next for their level. No login needed.');
+  assert.equal(card.button,'Enter The Aetherium');
+  assert.equal(card.href,'/hub/aetherium/');
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/EU servers|Look up a Daeva/);
+  await context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
