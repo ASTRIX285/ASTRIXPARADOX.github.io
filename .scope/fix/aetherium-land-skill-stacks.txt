@@ -1,6 +1,4 @@
 # fix/aetherium-land-skill-stacks: land the skill stacks (#477) and official links (#478) on main, merged with the Mastery cap (#480).
-.scope/feature/aetherium-official-links.txt
-.scope/feature/aetherium-skill-stacks.txt
 CLAUDE.md
 DESIGN.md
 astrix-app/games/aion2/data/advisor/mechanics.json
