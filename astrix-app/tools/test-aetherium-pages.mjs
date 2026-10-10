@@ -9,7 +9,10 @@
 //   - roster add and remove, faction colour switch (Elyos gold, Asmodian violet, ASTRIX crimson before load);
 //   - Worker down, 429, 400: the right words, a Try again, never a stand-in character;
 //   - five regions: the Region picker, a server list per region, the region in the URL, the roster and every link;
-//   - looks: gold primary action, no horizontal scroll, no overlapping tiles and intro panels aligned at 390, 820 and 1600.
+//   - looks: gold primary action, no horizontal scroll, no overlapping tiles and intro panels aligned at 390, 820 and 1600;
+//   - crisp polish (10 Oct 2026): body 16px and nothing under 13px in rem, 200 percent zoom, tight sentence-case labels, token contrast,
+//     AX logo, strobe and notch, pills only on chips and counts, the ribbon, 1440 width and no empty band at 1600 and 1920,
+//     class icons on roster cards, skeleton shapes, reduced motion and transparency, the Destiny ribbon untouched.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -159,7 +162,7 @@ const storeV2=(entries,active=null)=>{
 const v2=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('aetherium.roster.v2')));
 const keyOf=entry=>`${entry.serverId}:${entry.characterId}`;
 const style=(page,selector,prop)=>page.$eval(selector,(el,p)=>getComputedStyle(el).getPropertyValue(p).trim(),prop);
-const GOLD='rgb(226, 181, 79)',VIOLET='rgb(154, 107, 255)';
+const GOLD='rgb(226, 181, 79)',VIOLET='rgb(154, 107, 255)',GOLD_HI='rgb(244, 210, 124)';
 
 await check('no Daeva: the intro shows (guide, three steps, search form, 8 class tiles to the plan by hand), no Worker call, no character',async()=>{
   for(const live of [true,false]){
@@ -961,9 +964,11 @@ await check('loading: the search form at once and one skeleton in the card shape
   const {page,context,errors}=await open(`/hub/aetherium/?${daevaRef}`,{live:true,slow:true,ready:false});
   await page.waitForSelector('#aeSummary .ae-summary-card.is-skeleton',{state:'visible'});
   assert.equal(await page.isVisible('#aeSearch'),true,'The search form shows while the site answers');
-  assert.equal(await page.locator('.ae-skeleton').count(),1,'One skeleton');
-  assert.equal(await page.locator('#aeSummary .ae-panel').count(),1,'Never two panels');
-  assert.ok(await page.$eval('#aeSummary .ae-skeleton',el=>el.classList.contains('ae-summary-card')),'in the card shape');
+  // Two shaped skeletons (the card and the plan card, the crisp polish's look), never an empty panel.
+  assert.equal(await page.locator('#aeSummary .ae-panel').count(),2,'The card and the plan card');
+  assert.equal(await page.locator('#aeSummary .ae-skeleton').count(),2,'Both are skeletons in their final shape');
+  assert.ok(await page.$eval('#aeSummary .ae-skeleton',el=>el.classList.contains('ae-summary-card')),'the first in the card shape');
+  assert.equal(await page.$$eval('#aeSummary .ae-skeleton',panels=>panels.filter(panel=>!panel.querySelector('.ae-sk')).length),0,'Never an empty panel');
   assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/^\s*Ascent Plan\s*$/m,'No empty Ascent Plan panel');
   assert.equal(await plainText(page,'#aeReading'),'Reading your character');
   assert.equal(await style(page,'#aeReading','font-size'),'16px');
@@ -1104,6 +1109,321 @@ await check('home page and The Hub lead to The Aetherium, with the new words',as
   assert.equal(card.button,'Enter The Aetherium');
   assert.equal(card.href,'/hub/aetherium/');
   assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/EU servers|Look up a Daeva/);
+  await context.close();
+});
+
+/* ---------- Crisp polish (design/aetherium-crisp-polish, 10 Oct 2026): type, tokens, surfaces, ribbon, width, states ---------- */
+
+// Tabs and the primary action may keep a little spacing (0.04em); every other label stays at 0.02em or less.
+const TABS='[data-forge-destination-ribbon] a,.ae-gw-tabs a,.ae-gw-tab,.ae-planner-tab,.ae-macro-tabs span';
+// Tiny badges and counts are the only text allowed at 13px; everything else is 14px or more, body text 16px.
+const TINY='.ae-menu-badge,.ae-node-step,.ae-quest-num,.ae-mskill-rank,.ae-mskill-lv,.ae-mskill-bar,.ae-lock,.ae-stg-on,.ae-stg-lock,.ae-itile-badge,.ae-itile-name,.ae-mskill-name,.ae-stg-name,.ae-section-title small,.ae-roster-count,.ae-cite,.ae-tag,.ae-pick-level,.ae-board-cards b,.ae-keycap,.ae-guide-pill';
+/** Every visible text node on the page: nothing under 13px (14px unless a badge, count or tab), tight spacing, Barlow for interface text, Michroma only on the title and the Daeva name. */
+const typeAudit=page=>page.evaluate(({TABS,TINY})=>{
+  const bad=[],seen=new Set();
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  for(let node=walker.nextNode();node;node=walker.nextNode()){
+    if(!node.nodeValue.trim())continue;
+    const el=node.parentElement;
+    if(!el||seen.has(el)||el.closest('.ae-sr,script,style,noscript,.ax-drawer,header.apx-destination-header'))continue;
+    seen.add(el);
+    const box=el.getBoundingClientRect();
+    if(!box.width||!box.height)continue;
+    const s=getComputedStyle(el);
+    if(s.visibility==='hidden'||s.display==='none')continue;
+    const size=parseFloat(s.fontSize);
+    const spacing=s.letterSpacing==='normal'?0:parseFloat(s.letterSpacing)/size;
+    const tab=Boolean(el.closest(TABS)),primary=Boolean(el.closest('.ae-primary')),brand=Boolean(el.closest('h1:not(.ae-gw-title),.ae-name')),tiny=Boolean(el.closest(TINY));
+    const where=`${el.tagName.toLowerCase()}${[...el.classList].map(c=>'.'+c).join('')} "${node.nodeValue.trim().slice(0,28)}"`;
+    if(size<13)bad.push(`${where}: ${size}px`);
+    else if(size<14&&!(tiny||tab||primary))bad.push(`${where}: ${size}px (only badges, counts and tabs may be 13px)`);
+    if(spacing>(tab||primary?0.041:0.021))bad.push(`${where}: letter spacing ${spacing.toFixed(3)}em`);
+    if(brand){if(!/Michroma/.test(s.fontFamily))bad.push(`${where}: title not in Michroma (${s.fontFamily})`);}
+    else if(!/^"?Barlow"?,/.test(s.fontFamily))bad.push(`${where}: not Barlow (${s.fontFamily})`);
+  }
+  return bad;
+},{TABS,TINY});
+/** Field labels and small heads: sentence case, 14px, weight 700, no uppercase transform. */
+const labelAudit=page=>page.$$eval('label.ae-field>span,.ae-eyebrow,.ae-section-title,#aeRosterTitle,.ae-roster-switch label,.ae-slot-label,.ae-tile dt',els=>els.filter(el=>el.getBoundingClientRect().height).map(el=>{
+  const s=getComputedStyle(el);const text=(el.firstChild?.nodeValue||el.textContent).trim();
+  return {text,transform:s.textTransform,size:parseFloat(s.fontSize),weight:s.fontWeight,caps:text.length>1&&!/[a-z]/.test(text)};}));
+/** Text that is cut off: an element that hides its overflow and whose words do not fit (an ellipsis on purpose is allowed). */
+const clippedText=page=>page.evaluate(()=>{
+  const out=[];
+  for(const el of document.querySelectorAll('main *')){
+    if(!el.childNodes.length||![...el.childNodes].some(n=>n.nodeType===3&&n.nodeValue.trim()))continue;
+    const s=getComputedStyle(el);
+    if(s.display==='none'||el.closest('.ae-sr,[hidden]'))continue;
+    const clipsX=/hidden|clip/.test(s.overflowX)&&s.textOverflow!=='ellipsis'&&!el.closest('.ae-mskill,.ae-itile,.ae-stg-face,.ae-bar-cell,.ae-quest-text small');
+    const clipsY=/hidden|clip/.test(s.overflowY)&&!el.closest('.ae-mskill,.ae-itile,.ae-stg-face,.ae-bar-cell,.ae-quest-text small');
+    if((clipsX&&el.scrollWidth>el.clientWidth+1)||(clipsY&&el.scrollHeight>el.clientHeight+1))out.push(`${el.tagName.toLowerCase()}${[...el.classList].map(c=>'.'+c).join('')} "${el.textContent.trim().slice(0,30)}"`);
+  }
+  return out;
+});
+/** WCAG contrast of the colour tokens against the panel (see-through, composited over the page) and the solid panel. */
+const contrastOf=page=>page.evaluate(()=>{
+  const root=getComputedStyle(document.documentElement);
+  const probe=document.createElement('span');document.body.append(probe);
+  const rgba=value=>{probe.style.color='';probe.style.color=value;const m=getComputedStyle(probe).color.match(/[\d.]+/g).map(Number);return {r:m[0],g:m[1],b:m[2],a:m[3]??1};};
+  const over=(top,under)=>({r:top.r*top.a+under.r*(1-top.a),g:top.g*top.a+under.g*(1-top.a),b:top.b*top.a+under.b*(1-top.a),a:1});
+  const lum=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4;};return .2126*f(c.r)+.7152*f(c.g)+.0722*f(c.b);};
+  const ratio=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return Math.round((x+.05)/(y+.05)*100)/100;};
+  const token=name=>root.getPropertyValue(name).trim();
+  const page=rgba(token('--ae-page')),panel=over(rgba(token('--ae-panel')),page),solid=rgba(token('--ae-panel-solid'));
+  const out={panelAlpha:rgba(token('--ae-panel')).a};
+  for(const [key,name] of Object.entries({text:'--ae-text',muted:'--ae-text-muted',dim:'--ae-text-dim',hairline:'--ae-hairline',hairlineStrong:'--ae-hairline-strong',gold:'--ae-gold'}))out[key]={panel:ratio(rgba(token(name)),panel),solid:ratio(rgba(token(name)),solid)};
+  probe.remove();return out;
+});
+const lookOf=(page,selector,pseudo=null)=>page.$eval(selector,(el,pseudo)=>{const s=getComputedStyle(el,pseudo);return {radius:s.borderTopLeftRadius,clip:s.clipPath,bg:s.backgroundColor,image:s.backgroundImage,color:s.color,shadow:s.boxShadow,transition:s.transitionDuration,border:s.borderTopWidth,height:el.getBoundingClientRect().height,animation:s.animationName,content:s.content,size:parseFloat(s.fontSize)};},pseudo);
+const CLASS_NAMES=['Gladiator','Templar','Assassin','Ranger','Sorcerer','Spiritmaster','Cleric','Chanter'];
+const ROSTER8=()=>JSON.stringify(storeV2(['Al','Bea','Cleo','Dax','Eri','Finn','Gus','Hal'].map((name,i)=>saved(name,1308,'Meslamtaeda','eu',{characterId:`${name.toLowerCase()}=`,className:CLASS_NAMES[i],level:10+i}))));
+
+await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or less in Barlow, sentence case, sizes in rem, tabular figures',async()=>{
+  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],['/hub/aetherium/gear/equipment/',{}]]){
+    const {page,context}=await open(path,{live:true,extra});
+    const bad=await typeAudit(page);
+    assert.deepEqual(bad,[],`${path}:\n${bad.join('\n')}`);
+    const labels=await labelAudit(page);
+    assert.ok(labels.length>=4,`${path} has labels to check`);
+    for(const label of labels){
+      assert.equal(label.transform,'none',`${path} "${label.text}" is not uppercased by CSS`);
+      assert.equal(label.caps,false,`${path} "${label.text}" is sentence case`);
+      assert.equal(label.size,14,`${path} "${label.text}" is ${label.size}px`);
+      assert.equal(label.weight,'700',`${path} "${label.text}" is bold`);
+    }
+    const body=await page.$eval('body',el=>{const s=getComputedStyle(el);return {size:parseFloat(s.fontSize),numbers:s.fontVariantNumeric,font:s.fontFamily};});
+    assert.equal(body.size,16,'Body text is 16px');
+    assert.equal(body.numbers,'tabular-nums','Numbers line up');
+    assert.match(body.font,/^"?Barlow"?,/,'One sans family on the body');
+    // Sizes are in rem: a bigger browser text setting scales every size with it.
+    const before=await page.$$eval('body,label.ae-field>span,.ae-tile dd,.ae-section-title,.ae-slot strong,.ae-roster-count',els=>els.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+    await page.evaluate(()=>{document.documentElement.style.fontSize='20px';});
+    const after=await page.$$eval('body,label.ae-field>span,.ae-tile dd,.ae-section-title,.ae-slot strong,.ae-roster-count',els=>els.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+    assert.deepEqual(after.map(v=>Math.round(v*100)/100),before.map(v=>Math.round(v*1.25*100)/100),'Every size follows the root font size');
+    await page.evaluate(()=>{document.documentElement.style.fontSize='';});
+    await context.close();
+  }
+  const card=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':ROSTER8()}});
+  const field=await card.page.$eval('label.ae-field>span',el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent}));
+  assert.deepEqual(field,{size:14,text:'Character name'});
+  assert.equal(await card.page.$eval('#aeRosterTitle',el=>el.textContent),'Your Daevas');
+  assert.match(await card.page.$eval('h1',el=>getComputedStyle(el).fontFamily),/Michroma/,'The page title keeps Michroma');
+  assert.match(await card.page.$eval('.ae-name',el=>getComputedStyle(el).fontFamily),/Michroma/,'The Daeva name keeps Michroma');
+  await card.context.close();
+});
+
+await check('crisp at 200 percent zoom: no clipped text and no sideways scroll on the Daeva Card and the Gear page',async()=>{
+  // 200 percent browser zoom on a 1600 window is an 800px viewport; the roster carries eight Daevas with long names.
+  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],['/hub/aetherium/gear/equipment/',{}]]){
+    const {page,context}=await open(path,{live:true,viewport:{width:800,height:500},extra});
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    assert.ok(overflow<=0,`${path} scrolls sideways by ${overflow}px at 200 percent`);
+    const clipped=await clippedText(page);
+    assert.deepEqual(clipped,[],`${path} clips text at 200 percent:\n${clipped.join('\n')}`);
+    await context.close();
+  }
+});
+
+await check('crisp tokens: muted text at least 4.5:1 and the hairline at least 1.6:1 against the panel; panels solid under reduced transparency',async()=>{
+  const {page,context}=await open('/hub/aetherium/');
+  const c=await contrastOf(page);
+  console.log(`      contrast on the panel: text ${c.text.panel}:1, muted ${c.muted.panel}:1, dim ${c.dim.panel}:1, hairline ${c.hairline.panel}:1, strong hairline ${c.hairlineStrong.panel}:1, gold ${c.gold.panel}:1 (solid panel: muted ${c.muted.solid}:1, hairline ${c.hairline.solid}:1)`);
+  assert.ok(c.panelAlpha<1,'The panel is see-through so the page glow shows');
+  assert.ok(c.muted.panel>=4.5&&c.muted.solid>=4.5,`muted text ${c.muted.panel}:1`);
+  assert.ok(c.dim.panel>=4.5&&c.dim.solid>=4.5,`dim notes ${c.dim.panel}:1`);
+  assert.ok(c.text.panel>=7,`body text ${c.text.panel}:1`);
+  assert.ok(c.hairline.panel>=1.6&&c.hairline.solid>=1.6,`hairline ${c.hairline.panel}:1`);
+  const glow=await page.$eval('body',el=>{const s=getComputedStyle(el);return {image:s.backgroundImage,attachment:s.backgroundAttachment};});
+  assert.equal((glow.image.match(/radial-gradient/g)||[]).length,2,'Two soft glows at the top of the page');
+  assert.doesNotMatch(glow.attachment,/fixed/,'No fixed background attachment');
+  assert.equal(await page.$$eval('.ae-panel,.ae-gw,[data-forge-destination-ribbon]',els=>els.map(el=>getComputedStyle(el).backdropFilter).filter(v=>v&&v!=='none').length),0,'No backdrop filter on large areas');
+  const panel=await lookOf(page,'.ae-panel');
+  assert.equal(panel.border,'1px','Hairline border on the panel');
+  assert.ok((panel.shadow.match(/rgba\(/g)||[]).length>=3,`Top highlight plus a two-layer shadow (${panel.shadow})`);
+  assert.match(panel.bg,/rgba\(.*0\.\d+\)$/,'The panel is see-through');
+  // Reduced transparency (Chromium emulation through CDP): the panel turns solid.
+  const cdp=await context.newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+  await page.waitForTimeout(50);
+  assert.doesNotMatch(await page.$eval('.ae-panel',el=>getComputedStyle(el).backgroundColor),/rgba\(.*0\.\d+\)$/,'Solid panels when transparency is reduced');
+  await context.close();
+});
+
+await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs, buttons and tiles; squared surfaces with pills only on chips and counts; gold gradient inside the notched primary action; outline on the rest',async()=>{
+  const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':ROSTER8()}});
+  const logo=await page.$eval('header.apx-destination-header .apx-destination-brand',el=>({href:el.getAttribute('href'),img:Boolean(el.querySelector('img')),shown:el.querySelector('img').getBoundingClientRect().width>0,wordmark:el.querySelector('.ax-wordmark')?.textContent.replace(/\s+/g,'')}));
+  assert.deepEqual(logo,{href:'/',img:true,shown:true,wordmark:'ASTRIXPARADOX'},'The AX logo beside the wordmark, linking home');
+  // The strobe stroke: the shell draws it as a pseudo-element with the pulse animation, in the Aetherium blue.
+  const ribbonStroke=await lookOf(page,'[data-forge-destination-ribbon] a[aria-current="page"]','::before');
+  assert.match(ribbonStroke.animation,/ax-stroke-pulse/,'Strobe on the tab');
+  assert.match(ribbonStroke.image,/linear-gradient/,'Strobe gradient on the tab');
+  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-open','.ae-roster-remove']){
+    const stroke=await lookOf(page,selector,'::after');
+    assert.match(stroke.animation,/ax-stroke-pulse/,`Strobe on ${selector}`);
+  }
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--ax-stroke').trim()),'#4fb6ff','The strobe runs in the Aetherium blue');
+  // Notched corners: buttons and tiles keep the AX clip; panels draw the notch at the corner so they keep their shadow.
+  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-remove']){
+    assert.match((await lookOf(page,selector)).clip,/^polygon\(/,`${selector} is notched`);
+  }
+  for(const selector of ['.ae-tile','.ae-roster-open']){
+    const look=await lookOf(page,selector);
+    assert.match(look.clip,/^polygon\(/,`${selector} is notched`);
+    assert.match(look.shadow,/inset 1px 1px 0px rgba\(255, 255, 255, 0\.07\), rgba\(0, 0, 0, 0\.45\) -1px -1px 0px inset|rgba\(255, 255, 255, 0\.07\) 1px 1px 0px 0px inset, rgba\(0, 0, 0, 0\.45\) -1px -1px 0px 0px inset/,`${selector} has the raised bevel (${look.shadow})`);
+  }
+  const notch=await lookOf(page,'.ae-panel','::before');
+  assert.equal(notch.content,'""','The panel has its notched corner');
+  assert.match(notch.image,/linear-gradient\(to (bottom left|left bottom)/,'drawn at the top-right corner');
+  // Squared surfaces: no radius on bars, buttons, inputs, tabs, tiles and panels. Pills only on chips and counts.
+  for(const selector of ['.ae-panel','#aeFind','#aeGearLink','#aeNameInput','#aeServer','.ae-roster-open','.ae-tile','#aeSource','[data-forge-destination-ribbon] a[aria-current="page"]','.ae-roster-remove','.ae-portrait','.ae-roster-class']){
+    assert.equal((await lookOf(page,selector)).radius,'0px',`${selector} is squared`);
+  }
+  for(const selector of ['.ae-chips li','#aeRosterCount']){
+    const look=await lookOf(page,selector);
+    assert.ok(parseFloat(look.radius)>=look.height/2,`${selector} is a pill (${look.radius} on ${look.height}px)`);
+    assert.equal(look.border,'1px',`${selector} has a hairline`);
+    assert.ok(look.size>=13,`${selector} text is ${look.size}px`);
+  }
+  const faction=await lookOf(page,'.ae-chip-faction');
+  assert.equal(faction.color,GOLD,'The faction chip keeps the faction colour');
+  const primary=await lookOf(page,'#aeFind');
+  assert.match(primary.image,/^linear-gradient\(rgb\(244, 210, 124\) 0%, rgb\(226, 181, 79\) 55%, rgb\(201, 154, 53\) 100%\)$/,'Gold top to bottom');
+  assert.equal(primary.color,'rgb(27, 20, 6)','Dark text on the gold');
+  assert.ok(primary.height>=44,'Primary action at least 44px tall');
+  assert.equal(await page.$$eval('main .ae-primary',els=>els.filter(el=>el.getBoundingClientRect().height).length),2,'One gold action per view: Find character and Open Ascent Plan');
+  for(const selector of ['#aeGearLink','.ae-roster-remove']){
+    const look=await lookOf(page,selector);
+    assert.equal(look.bg,'rgba(0, 0, 0, 0)',`${selector} has no fill`);
+    assert.equal(look.image,'none',`${selector} has no gradient`);
+    assert.match(look.shadow,/inset/,`${selector} has an outline ring`);
+    assert.equal(look.color,GOLD_HI,`${selector} text in the accent`);
+  }
+  // The active roster card: a soft accent tint with a 1px accent ring.
+  const active=await lookOf(page,'.ae-roster-slot.is-active .ae-roster-open');
+  assert.notEqual(active.bg,await page.$eval('.ae-roster-slot:not(.is-active) .ae-roster-open',el=>getComputedStyle(el).backgroundColor),'The active Daeva is tinted');
+  // Every hover and colour change animates over 150ms; every clickable thing has a focus ring.
+  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-open','.ae-tile','[data-forge-destination-ribbon] a','#aeNameInput']){
+    assert.match((await lookOf(page,selector)).transition,/0\.15s/,`${selector} animates over 150ms`);
+  }
+  await page.focus('[data-forge-destination-ribbon] a:not([aria-current])');
+  const ring=await page.$eval('[data-forge-destination-ribbon] a:not([aria-current])',el=>{const s=getComputedStyle(el);return {visible:el.matches(':focus-visible'),width:s.outlineWidth,style:s.outlineStyle};});
+  assert.deepEqual(ring,{visible:true,width:'2px',style:'solid'},'Keyboard focus ring on a tab');
+  await page.focus('#aeAscentLink');
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(250); // the ring animates in over 150ms
+  const button=await page.$eval('#aeGearLink',el=>({focused:el.matches(':focus-visible'),shadow:getComputedStyle(el).boxShadow}));
+  assert.equal(button.focused,true,'Tab reaches the button');
+  assert.match(button.shadow,/inset 0px 0px 0px 2px|0px 0px 0px 2px inset/,`Keyboard focus ring on a button (${button.shadow})`);
+  await context.close();
+});
+
+await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold box, no underline; Destiny pages keep the shared ribbon',async()=>{
+  const {page,context}=await open('/hub/aetherium/');
+  const bar=await page.$eval('[data-forge-destination-ribbon]',el=>{const s=getComputedStyle(el);return {border:s.borderBottomWidth,shadow:s.boxShadow,blur:s.backdropFilter};});
+  assert.equal(bar.border,'1px');assert.notEqual(bar.shadow,'none');assert.equal(bar.blur,'none');
+  const tabs=await page.$$eval('[data-forge-destination-ribbon] .apx-destination-ribbon a',links=>links.map(a=>{const s=getComputedStyle(a),after=getComputedStyle(a,'::after');
+    return {text:a.textContent,current:a.getAttribute('aria-current')==='page',color:s.color,bg:s.backgroundColor,radius:s.borderTopLeftRadius,spacing:Math.round(parseFloat(s.letterSpacing)/parseFloat(s.fontSize)*1000)/1000,underline:after.display!=='none'&&after.content!=='none',font:s.fontFamily,size:parseFloat(s.fontSize),height:a.getBoundingClientRect().height};}));
+  assert.deepEqual(tabs.map(t=>t.text),['Daeva Card','Gear Ledger','Ascent Plan','The Hub']);
+  assert.equal(tabs.filter(t=>t.current).length,1,'Exactly one active tab');
+  for(const tab of tabs){
+    assert.equal(tab.underline,false,`${tab.text}: no underline bar`);
+    assert.ok(tab.spacing<=0.041,`${tab.text}: spacing ${tab.spacing}em`);
+    assert.match(tab.font,/^"?Barlow"?,/,`${tab.text}: Barlow`);
+    assert.equal(tab.size,13,`${tab.text}: ${tab.size}px`);
+    assert.equal(tab.radius,'0px',`${tab.text}: squared`);
+    assert.ok(tab.height>=36,`${tab.text}: ${tab.height}px tall`);
+    if(tab.current){assert.equal(tab.color,GOLD,'Active tab in gold');assert.notEqual(tab.bg,'rgba(0, 0, 0, 0)','Active tab is a dark box');}
+    else assert.equal(tab.bg,'rgba(0, 0, 0, 0)',`${tab.text}: plain text`);
+  }
+  await context.close();
+  // Every rule in aetherium.css is scoped to the Aetherium, so a Destiny page could never pick it up (selector lists split on commas outside brackets).
+  const splitList=list=>{const out=[];let depth=0,start=0;for(let i=0;i<list.length;i++){const ch=list[i];if(ch==='(')depth++;else if(ch===')')depth--;else if(ch===','&&depth===0){out.push(list.slice(start,i).trim());start=i+1;}}out.push(list.slice(start).trim());return out.filter(Boolean);};
+  const css=await readFile(resolve(root,'astrix-app/pages/aetherium/aetherium.css'),'utf8');
+  const selectors=css.replace(/\/\*[\s\S]*?\*\//g,'').replace(/@(media|layer|supports)[^{]*\{/g,'').replace(/@keyframes[^{]*\{[\s\S]*?\}\s*\}/g,'').split('}').map(block=>block.slice(0,block.indexOf('{')).trim()).filter(Boolean).flatMap(splitList);
+  const stray=selectors.filter(s=>!/^(html\b|:root|\.ae-|#ae|\.aetherium-page|body\.aetherium-page|html body\.aetherium-page)/.test(s));
+  assert.deepEqual(stray,[],'Every selector starts with an Aetherium scope');
+  // A Destiny page with the shared ribbon: the shell's own look, untouched (wide uppercase tabs with the underline bar, no Aetherium stylesheet).
+  const destiny=await browser.newContext({viewport:{width:1600,height:1000}});
+  await destiny.route('**/*',route=>(/^http:\/\/127\.0\.0\.1/.test(route.request().url())?route.continue():route.abort()));
+  const forge=await destiny.newPage();
+  await forge.goto(`${base}/hub/workbench/td2/`,{waitUntil:'domcontentloaded'});
+  await forge.waitForSelector('[data-forge-destination-ribbon] a');
+  assert.equal(await forge.locator('link[href*="aetherium.css"]').count(),0,'No Aetherium stylesheet on a Destiny page');
+  const shared=await forge.$eval('[data-forge-destination-ribbon] .apx-destination-ribbon a',a=>{const s=getComputedStyle(a),after=getComputedStyle(a,'::after');return {spacing:Math.round(parseFloat(s.letterSpacing)/parseFloat(s.fontSize)*100)/100,upper:s.textTransform,radius:s.borderTopLeftRadius,underline:after.display,bar:getComputedStyle(a.closest('[data-forge-destination-ribbon]')).backgroundColor};});
+  assert.deepEqual(shared,{spacing:0.16,upper:'uppercase',radius:'0px',underline:'block',bar:'rgba(14, 12, 9, 0.94)'},'The shared ribbon is as the shell draws it');
+  await destiny.close();
+});
+
+for(const [width,height] of [[1600,1000],[1920,1080]]){
+  await check(`crisp width at ${width}: content 1440 wide with 24px gutters, roster one row of 8 cards with a class icon, no empty band`,async()=>{
+    const {page,context}=await open('/hub/aetherium/',{live:true,viewport:{width,height},extra:{'aetherium.roster.v2':ROSTER8()}});
+    const main=await page.$eval('main',el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left,width:r.width,padL:parseFloat(s.paddingLeft),padR:parseFloat(s.paddingRight)};});
+    assert.equal(main.width-main.padL-main.padR,1440,'Content is 1440 wide');
+    assert.equal(main.padL,24);
+    assert.ok(Math.abs(main.left+main.padL-(width-1440)/2)<=1,'Centred');
+    const cards=await page.$$eval('.ae-roster-slot.is-filled',items=>items.map(el=>{const r=el.getBoundingClientRect(),img=el.querySelector('img.ae-roster-class');return {top:Math.round(r.top),height:r.height,icon:img?{src:img.getAttribute('src'),w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height}:null};}));
+    assert.equal(cards.length,8);
+    assert.equal(new Set(cards.map(c=>c.top)).size,1,'One row of 8');
+    assert.equal(new Set(cards.map(c=>c.height)).size,1,'Equal heights');
+    for(const card of cards){
+      assert.ok(card.icon,'A class icon on each card');
+      assert.match(card.icon.src,/^https:\/\/assets\.playnccdn\.com\/.*board_icon_start_[a-z]+\.png$/,'The class art we already hotlink');
+      assert.equal(card.icon.w,40);assert.equal(card.icon.h,40);
+    }
+    assert.equal(new Set(cards.map(c=>c.icon.src)).size,8,'Each class has its own icon');
+    const panelsLeft=await page.$$eval('.ae-search, .ae-summary-card, #aeRoster',els=>[...new Set(els.map(el=>Math.round(el.getBoundingClientRect().left)))]);
+    assert.equal(panelsLeft.length,1,'Search, Daeva Card and roster share the left edge');
+    if(height===1080){
+      const band=await page.evaluate(()=>{const main=document.querySelector('main');const last=[...main.children].map(el=>el.getBoundingClientRect()).filter(r=>r.height>0).at(-1);return document.querySelector('footer').getBoundingClientRect().top-last.bottom;});
+      assert.ok(band>=0&&band<=56,`No empty band under the content (${Math.round(band)}px)`);
+    }
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    assert.ok(overflow<=0,'No sideways scroll');
+    if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`crisp-daeva-card-${width}.png`),fullPage:true});
+    await context.close();
+  });
+}
+
+await check('crisp loading: skeletons in the final shape (portrait, name bar, chips, four stat tiles) with a shimmer, none under reduced motion',async()=>{
+  for(const motion of ['no-preference','reduce']){
+    const context=await browser.newContext({viewport:{width:1600,height:1000},reducedMotion:motion});
+    const page=await context.newPage();
+    await page.route(/\.mjs/,route=>route.abort());
+    await page.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+    await page.goto(`${base}/hub/aetherium/`);
+    const shape=await page.evaluate(()=>{
+      const card=document.querySelector('#aeSummary .ae-summary-card.ae-skeleton');
+      const box=sel=>card.querySelector(sel).getBoundingClientRect();
+      const portrait=box('.ae-portrait.ae-sk');
+      return {portrait:Math.round(portrait.width/portrait.height*100)/100,name:box('.ae-sk-name').width>100,chips:[...card.querySelectorAll('.ae-sk-chip')].map(el=>getComputedStyle(el).borderRadius),tiles:[...new Set([...card.querySelectorAll('.ae-sk-tile')].map(el=>Math.round(el.getBoundingClientRect().top)))].length,tileCount:card.querySelectorAll('.ae-sk-tile').length,
+        plan:Boolean(document.querySelector('#aeSummary .ae-plan-card.ae-skeleton .ae-sk-btn')),words:document.querySelector('#aeSummary .ae-sr').textContent,shimmer:getComputedStyle(card.querySelector('.ae-sk'),'::after').animationName,visible:getComputedStyle(document.querySelector('#aeSummary .ae-sr')).position};
+    });
+    assert.ok(Math.abs(shape.portrait-5/6)<0.02,`Portrait shape 5:6 (${shape.portrait})`);
+    assert.ok(shape.name,'A name bar');
+    assert.equal(shape.chips.length,5,'Five chips');
+    assert.ok(shape.chips.every(r=>parseFloat(r)>=100),'Chips are pills');
+    assert.equal(shape.tileCount,4,'Four stat tiles');
+    assert.equal(shape.tiles,1,'Tiles on one row at 1600');
+    assert.equal(shape.plan,true,'The plan card has its button shape');
+    assert.equal(shape.words,'Reading your character.','The words are still there for screen readers');
+    assert.equal(shape.visible,'absolute','and visually hidden');
+    assert.equal(shape.shimmer,motion==='reduce'?'none':'ae-shimmer',`Shimmer with motion ${motion}`);
+    assert.equal(await page.$eval('#aeRoster .ae-loading',el=>el.classList.contains('ae-sk')&&el.getBoundingClientRect().height>=100),true,'The roster loading row is a card shape');
+    await context.close();
+  }
+});
+
+await check('crisp at 390: no sideways scroll, 16px gutter, type still tight, roster cards one height, nothing clipped',async()=>{
+  const {page,context}=await open('/hub/aetherium/',{live:true,viewport:{width:390,height:844},extra:{'aetherium.roster.v2':ROSTER8()}});
+  assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth))<=0,'No sideways scroll');
+  const bad=await typeAudit(page);
+  assert.deepEqual(bad,[],bad.join('\n'));
+  const clipped=await clippedText(page);
+  assert.deepEqual(clipped,[],clipped.join('\n'));
+  assert.equal(await page.$eval('main',el=>parseFloat(getComputedStyle(el).paddingLeft)),16,'16px gutter on a phone');
+  const heights=await page.$$eval('.ae-roster-slot.is-filled',items=>[...new Set(items.map(el=>el.getBoundingClientRect().height))]);
+  assert.equal(heights.length,1,'Roster cards one height');
+  if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,'crisp-daeva-card-390.png'),fullPage:true});
   await context.close();
 });
 

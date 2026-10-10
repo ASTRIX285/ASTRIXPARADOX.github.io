@@ -7,7 +7,9 @@
 //     hover card, click selects into the left panel;
 //   - Daevanion page: a tab per board (?board=), open and locked boards, Node and Board Effect panels with totals
 //     checked against a fixture with taken nodes (two MP +50 nodes give MP +100), one call per board;
-//   - first paint reads only /aion2/character, no sideways scroll, panels line up (bounding boxes) at 390, 820, 1600 and 1920.
+//   - first paint reads only /aion2/character, no sideways scroll, panels line up (bounding boxes) at 390, 820, 1600 and 1920;
+//   - crisp polish (10 Oct 2026): type sizes in rem, 200 percent zoom, the window's hairline, shadow and notch, one selected tab,
+//     notched bevelled cards and tiles with the strobe, pills on counts, 1440 width and no empty band, skeleton shapes.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -897,6 +899,218 @@ for(const width of [390,820,1280,1600,1920]){
     }
   });
 }
+
+/* ---------- Crisp polish (design/aetherium-crisp-polish, 10 Oct 2026): type, surfaces, window tabs, width, zoom, skeletons ---------- */
+
+const TABS='[data-forge-destination-ribbon] a,.ae-gw-tabs a,.ae-gw-tab,.ae-planner-tab,.ae-macro-tabs span';
+const TINY='.ae-menu-badge,.ae-node-step,.ae-quest-num,.ae-mskill-rank,.ae-mskill-lv,.ae-mskill-bar,.ae-lock,.ae-stg-on,.ae-stg-lock,.ae-itile-badge,.ae-itile-name,.ae-mskill-name,.ae-stg-name,.ae-section-title small,.ae-roster-count,.ae-cite,.ae-tag,.ae-pick-level,.ae-board-cards b,.ae-keycap,.ae-guide-pill';
+/** Every visible text node: nothing under 13px (14px unless a badge, count or tab), spacing at 0.02em or less, Barlow (Michroma only on the title and the Daeva name). */
+const typeAudit=page=>page.evaluate(({TABS,TINY})=>{
+  const bad=[],seen=new Set();
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  for(let node=walker.nextNode();node;node=walker.nextNode()){
+    if(!node.nodeValue.trim())continue;
+    const el=node.parentElement;
+    if(!el||seen.has(el)||el.closest('.ae-sr,script,style,noscript,.ax-drawer,header.apx-destination-header'))continue;
+    seen.add(el);
+    const box=el.getBoundingClientRect();
+    if(!box.width||!box.height)continue;
+    const s=getComputedStyle(el);
+    if(s.visibility==='hidden'||s.display==='none')continue;
+    const size=parseFloat(s.fontSize);
+    const spacing=s.letterSpacing==='normal'?0:parseFloat(s.letterSpacing)/size;
+    const tab=Boolean(el.closest(TABS)),primary=Boolean(el.closest('.ae-primary')),brand=Boolean(el.closest('h1:not(.ae-gw-title),.ae-name')),tiny=Boolean(el.closest(TINY));
+    const where=`${el.tagName.toLowerCase()}${[...el.classList].map(c=>'.'+c).join('')} "${node.nodeValue.trim().slice(0,28)}"`;
+    if(size<13)bad.push(`${where}: ${size}px`);
+    else if(size<14&&!(tiny||tab||primary))bad.push(`${where}: ${size}px (only badges, counts and tabs may be 13px)`);
+    if(spacing>(tab||primary?0.041:0.021))bad.push(`${where}: letter spacing ${spacing.toFixed(3)}em`);
+    if(brand){if(!/Michroma/.test(s.fontFamily))bad.push(`${where}: title not in Michroma (${s.fontFamily})`);}
+    else if(!/^"?Barlow"?,/.test(s.fontFamily))bad.push(`${where}: not Barlow (${s.fontFamily})`);
+  }
+  return bad;
+},{TABS,TINY});
+/** Text that is cut off: an element that hides its overflow and whose words do not fit (an ellipsis on purpose, and icon tiles whose name sits under the art, are allowed). */
+const clippedText=page=>page.evaluate(()=>{
+  const out=[];
+  for(const el of document.querySelectorAll('main *')){
+    if(![...el.childNodes].some(n=>n.nodeType===3&&n.nodeValue.trim()))continue;
+    const s=getComputedStyle(el);
+    if(s.display==='none'||el.closest('.ae-sr,[hidden],.ae-mskill,.ae-itile,.ae-stg-face,.ae-bar-cell,.ae-quest-text small,.ae-node'))continue;
+    const clipsX=/hidden|clip/.test(s.overflowX)&&s.textOverflow!=='ellipsis';
+    const clipsY=/hidden|clip/.test(s.overflowY);
+    if((clipsX&&el.scrollWidth>el.clientWidth+1)||(clipsY&&el.scrollHeight>el.clientHeight+1))out.push(`${el.tagName.toLowerCase()}${[...el.classList].map(c=>'.'+c).join('')} "${el.textContent.trim().slice(0,30)}"`);
+  }
+  return out;
+});
+const lookOf=(page,selector,pseudo=null)=>page.$eval(selector,(el,pseudo)=>{const s=getComputedStyle(el,pseudo);return {radius:s.borderTopLeftRadius,clip:s.clipPath,bg:s.backgroundColor,image:s.backgroundImage,color:s.color,shadow:s.boxShadow,transition:s.transitionDuration,border:s.borderTopWidth,borderColor:s.borderTopColor,height:el.getBoundingClientRect().height,width:el.getBoundingClientRect().width,animation:s.animationName,content:s.content,size:parseFloat(s.fontSize)};},pseudo);
+const GOLD='rgb(226, 181, 79)',GOLD_HI='rgb(244, 210, 124)';
+const CRISP_PAGES=[
+  ['menu',`/hub/aetherium/gear/${refQuery()}`],
+  ['gear',`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`],
+  ['skills-mastery',`/hub/aetherium/skills/${refQuery(RICH,{class:'gladiator'})}`],
+  ['skills-stigma',`/hub/aetherium/skills/${refQuery(RICH,{class:'gladiator',tab:'stigma'})}`],
+  ['daevanion',`/hub/aetherium/daevanion/${refQuery(RICH,{class:'gladiator'})}`],
+  ['ascent-menu',`/hub/aetherium/ascent/${refQuery(RICH,{class:'gladiator'})}`]
+];
+const settle=async(page,name)=>{if(name==='daevanion')await page.waitForSelector('.ae-board-grid .ae-node');if(name==='ascent-menu')await page.waitForSelector('.ae-menu-card');};
+
+await check('crisp type on every character page: body 16px, nothing under 13px, tight Barlow labels in sentence case, sizes in rem',async()=>{
+  for(const [name,path] of CRISP_PAGES){
+    const {page,context}=await open(path);
+    await settle(page,name);
+    const bad=await typeAudit(page);
+    assert.deepEqual(bad,[],`${name}:\n${bad.join('\n')}`);
+    assert.equal(await page.$eval('body',el=>parseFloat(getComputedStyle(el).fontSize)),16,`${name}: body text 16px`);
+    const labels=await page.$$eval('.ae-section-title,.ae-slot-label,.ae-item-sec,.ae-effect-title,.ae-eyebrow,label.ae-field>span',els=>els.filter(el=>el.getBoundingClientRect().height).map(el=>{const s=getComputedStyle(el);const text=(el.firstChild?.nodeValue||el.textContent).trim();return {text,transform:s.textTransform,size:parseFloat(s.fontSize),weight:s.fontWeight,caps:text.length>1&&!/[a-z]/.test(text)};}));
+    for(const label of labels){
+      assert.equal(label.transform,'none',`${name} "${label.text}" is not uppercased`);
+      assert.equal(label.caps,false,`${name} "${label.text}" is sentence case`);
+      assert.equal(label.size,14,`${name} "${label.text}" is ${label.size}px`);
+      assert.equal(label.weight,'700',`${name} "${label.text}" is bold`);
+    }
+    const before=await page.$$eval('body,.ae-gw-title,.ae-gw-tab,.ae-menu-name,.ae-section-title',els=>els.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+    await page.evaluate(()=>{document.documentElement.style.fontSize='20px';});
+    const after=await page.$$eval('body,.ae-gw-title,.ae-gw-tab,.ae-menu-name,.ae-section-title',els=>els.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+    assert.deepEqual(after.map(v=>Math.round(v*100)/100),before.map(v=>Math.round(v*1.25*100)/100),`${name}: every size follows the root font size`);
+    await context.close();
+  }
+});
+
+await check('crisp at 200 percent zoom: every character page without clipped text or sideways scroll',async()=>{
+  for(const [name,path] of CRISP_PAGES){
+    const {page,context}=await open(path,{viewport:{width:800,height:500}});
+    await settle(page,name);
+    const overflow=await overflowOf(page);
+    assert.ok(overflow<=0,`${name} scrolls sideways by ${overflow}px at 200 percent`);
+    const clipped=await clippedText(page);
+    assert.deepEqual(clipped,[],`${name} clips text at 200 percent:\n${clipped.join('\n')}`);
+    await context.close();
+  }
+});
+
+await check('crisp window: hairline, two-layer shadow and the notched corner; tabs in one strip with exactly one selected as a dark gold box; strobe on every tab and button',async()=>{
+  for(const [name,path] of CRISP_PAGES.filter(([key])=>/skills|daevanion/.test(key))){
+    const {page,context}=await open(path);
+    await settle(page,name);
+    const win=await lookOf(page,'.ae-gw');
+    assert.equal(win.border,'1px',`${name}: hairline on the window`);
+    assert.ok((win.shadow.match(/rgba\(/g)||[]).length>=3,`${name}: top highlight plus a two-layer shadow (${win.shadow})`);
+    assert.equal(win.radius,'0px',`${name}: squared window`);
+    const notch=await lookOf(page,'.ae-gw','::before');
+    assert.equal(notch.content,'""',`${name}: the window has its notched corner`);
+    const tabs=await page.$$eval('.ae-gw-tabs .ae-gw-tab',items=>items.map(el=>{const s=getComputedStyle(el),after=getComputedStyle(el,'::after');return {text:el.textContent.trim(),selected:el.getAttribute('aria-selected')==='true',color:s.color,bg:s.backgroundColor,radius:s.borderTopLeftRadius,height:el.getBoundingClientRect().height,strobe:after.animationName,size:parseFloat(s.fontSize),transition:s.transitionDuration};}));
+    assert.equal(tabs.filter(t=>t.selected).length,1,`${name}: exactly one selected tab`);
+    for(const tab of tabs){
+      assert.ok(tab.height>=44,`${name} tab "${tab.text}" is ${tab.height}px tall`);
+      assert.equal(tab.radius,'0px',`${name} tab "${tab.text}" is squared`);
+      assert.match(tab.strobe,/ax-stroke-pulse/,`${name} tab "${tab.text}" carries the strobe`);
+      assert.match(tab.transition,/0\.15s/,`${name} tab "${tab.text}" animates over 150ms`);
+      assert.equal(tab.size,13,`${name} tab "${tab.text}" is 13px`);
+      if(tab.selected){assert.equal(tab.color,GOLD,`${name}: selected tab in gold`);assert.notEqual(tab.bg,'rgba(0, 0, 0, 0)',`${name}: selected tab is a dark box`);}
+      else assert.equal(tab.bg,'rgba(0, 0, 0, 0)',`${name} tab "${tab.text}" is plain text`);
+    }
+    const strip=await page.$eval('.ae-gw-tabs',el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderBottomWidth}));
+    assert.notEqual(strip.bg,'rgba(0, 0, 0, 0)',`${name}: the tabs sit in one strip`);
+    assert.equal(strip.border,'1px');
+    await context.close();
+  }
+  // The Ascent Plan screens: the current screen tab is the gold box, the others plain.
+  const ascent=await open(`/hub/aetherium/ascent/mastery/${refQuery(RICH,{class:'gladiator'})}`);
+  await ascent.page.waitForSelector('.ae-gw-tabs a');
+  const links=await ascent.page.$$eval('.ae-gw-tabs a',items=>items.map(a=>({current:a.getAttribute('aria-current')==='page',color:getComputedStyle(a).color,bg:getComputedStyle(a).backgroundColor,height:a.getBoundingClientRect().height,radius:getComputedStyle(a).borderTopLeftRadius})));
+  assert.equal(links.filter(l=>l.current).length,1,'One current screen');
+  for(const link of links){assert.ok(link.height>=44);assert.equal(link.radius,'0px');if(link.current){assert.equal(link.color,GOLD);assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');}else assert.equal(link.bg,'rgba(0, 0, 0, 0)');}
+  await ascent.context.close();
+});
+
+await check('crisp menu cards and buttons: notched bevelled tiles, accent ring on hover over 150ms, pills on counts, outline buttons with the notch and the strobe',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/${refQuery()}`);
+  const card=await lookOf(page,'#aeCards .ae-menu-card');
+  assert.match(card.clip,/^polygon\(/,'Menu cards are notched');
+  assert.match(card.shadow,/inset/,'Menu cards keep the raised bevel');
+  assert.equal(card.radius,'0px');
+  assert.match(card.transition,/0\.15s/,'Hover animates over 150ms');
+  await page.hover('#aeCards .ae-menu-card');
+  await page.waitForTimeout(250);
+  assert.equal((await lookOf(page,'#aeCards .ae-menu-card')).borderColor,GOLD,'Hover lifts the border to the accent');
+  const badge=await lookOf(page,'#aeCards .ae-menu-badge');
+  assert.ok(parseFloat(badge.radius)>=badge.height/2,'Count badges are pills');
+  assert.ok(badge.size>=13,`Badge text is ${badge.size}px`);
+  for(const selector of ['#aeHeader a.btn']){
+    const look=await lookOf(page,selector);
+    assert.match(look.clip,/^polygon\(/,`${selector} is notched`);
+    assert.equal(look.bg,'rgba(0, 0, 0, 0)',`${selector} has no fill`);
+    assert.equal(look.image,'none',`${selector} has no gradient`);
+    assert.equal(look.color,GOLD_HI,`${selector} text in the accent`);
+    assert.ok(look.height>=44,`${selector} is ${look.height}px tall`);
+    assert.match((await lookOf(page,selector,'::after')).animation,/ax-stroke-pulse/,`${selector} carries the strobe`);
+  }
+  await context.close();
+  const gear=await open(`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`);
+  const count=await lookOf(gear.page,'#aeGearCount');
+  assert.ok(parseFloat(count.radius)>=count.height/2,'The worn count is a pill');
+  assert.equal(count.border,'1px','with a hairline');
+  const slot=await lookOf(gear.page,'#aeGear .ae-slot');
+  assert.match(slot.clip,/^polygon\(/,'Gear tiles are notched');
+  assert.match(slot.shadow,/inset/,'Gear tiles keep the bevel');
+  assert.match((await lookOf(gear.page,'#aeGear .ae-slot','::after')).animation,/ax-stroke-pulse/,'Gear tiles carry the strobe');
+  await gear.context.close();
+  const dv=await open(`/hub/aetherium/daevanion/${refQuery(RICH,{class:'gladiator'})}`);
+  await dv.page.waitForSelector('.ae-board-grid .ae-node');
+  await dv.page.click('[data-panel="effect"]');
+  const left=await lookOf(dv.page,'.ae-effect-total b');
+  assert.ok(parseFloat(left.radius)>=left.height/2,'The nodes-left count is a pill');
+  const plan=await lookOf(dv.page,'#aeDvPlan');
+  assert.match(plan.clip,/^polygon\(/,'Plan my route is notched');
+  assert.equal(plan.bg,'rgba(0, 0, 0, 0)','Plan my route is an outline button');
+  await dv.context.close();
+});
+
+for(const [width,height] of [[1600,1000],[1920,1080]]){
+  await check(`crisp width at ${width}: every character page fills 1440 with 24px gutters and no empty band under the content`,async()=>{
+    for(const [name,path] of CRISP_PAGES){
+      const {page,context}=await open(path,{viewport:{width,height}});
+      await settle(page,name);
+      const main=await page.$eval('main',el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left,width:r.width,padL:parseFloat(s.paddingLeft),padR:parseFloat(s.paddingRight)};});
+      assert.equal(main.width-main.padL-main.padR,1440,`${name}: content is 1440 wide`);
+      assert.equal(main.padL,24,`${name}: 24px gutter`);
+      if(await page.locator('.ae-gw').count())near((await boxOf(page,'.ae-gw')).width,1440,1,`${name}: the window fills the content width`);
+      const band=await page.evaluate(()=>{const main=document.querySelector('main');const last=[...main.children].map(el=>el.getBoundingClientRect()).filter(r=>r.height>0).at(-1);return document.querySelector('footer').getBoundingClientRect().top-last.bottom;});
+      assert.ok(band>=0&&band<=56,`${name}: no empty band under the content (${Math.round(band)}px)`);
+      assert.ok(await overflowOf(page)<=0,`${name} scrolls sideways`);
+      if(process.env.AE_SHOTS&&width===1600)await page.screenshot({path:resolve(process.env.AE_SHOTS,`crisp-${name}-${width}.png`),fullPage:true});
+      await context.close();
+    }
+  });
+}
+
+await check('crisp loading: window and menu skeletons in the final shape with a shimmer, none under reduced motion',async()=>{
+  for(const motion of ['no-preference','reduce']){
+    const context=await browser.newContext({viewport:{width:1600,height:1000},reducedMotion:motion});
+    await context.route(/\.mjs/,route=>route.abort());
+    await context.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+    const menu=await context.newPage();
+    await menu.goto(`${base}/hub/aetherium/gear/`);
+    const cards=await menu.$$eval('#aeCards .ae-menu-card.is-skeleton',items=>items.map(el=>({art:Boolean(el.querySelector('.ae-sk-art')),name:Boolean(el.querySelector('.ae-sk-name')),top:Math.round(el.getBoundingClientRect().top),clip:getComputedStyle(el).clipPath,shimmer:getComputedStyle(el.querySelector('.ae-sk'),'::after').animationName})));
+    assert.equal(cards.length,3,'Three card shapes');
+    assert.ok(cards.every(c=>c.art&&c.name),'Each with its art and name bar');
+    assert.equal(new Set(cards.map(c=>c.top)).size,1,'On one row');
+    assert.ok(cards.every(c=>/^polygon\(/.test(c.clip)),'Notched like the real cards');
+    assert.ok(cards.every(c=>c.shimmer===(motion==='reduce'?'none':'ae-shimmer')),`Shimmer with motion ${motion}`);
+    for(const path of ['/hub/aetherium/skills/','/hub/aetherium/daevanion/','/hub/aetherium/gear/equipment/']){
+      const page=await context.newPage();
+      await page.goto(`${base}${path}`);
+      const shape=await page.$eval('#aeStage .ae-sk-window',el=>({bar:el.querySelector('.ae-sk-bar').getBoundingClientRect().height,tiles:el.querySelectorAll('.ae-sk-row .ae-sk').length,row:new Set([...el.querySelectorAll('.ae-sk-row .ae-sk')].map(t=>Math.round(t.getBoundingClientRect().top))).size,words:el.nextElementSibling.textContent,shimmer:getComputedStyle(el.querySelector('.ae-sk'),'::after').animationName}));
+      assert.ok(shape.bar>=40,`${path}: a window bar shape`);
+      assert.equal(shape.tiles,4,`${path}: four tiles`);
+      assert.equal(shape.row,1,`${path}: on one row`);
+      assert.equal(shape.words,'Reading your character.');
+      assert.equal(shape.shimmer,motion==='reduce'?'none':'ae-shimmer');
+      await page.close();
+    }
+    await context.close();
+  }
+});
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-2">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/tools/fixtures/aion2/eu/servers.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
@@ -37,7 +37,9 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159",
 
-"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2"
+"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=e5abe5c8d7",
+
+"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd" data-head-hint>
@@ -56,8 +58,10 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=e5abe5c8d7" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=e5abe5c8d7"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
   <a class="ae-skip" href="#aeMain">Skip to the Daeva Card</a>
@@ -132,16 +136,10 @@
       <div class="ae-results" id="aeResults" hidden></div>
     </section>
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
-    <section class="ae-summary" id="aeSummary" aria-label="Character summary"><article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading">
-      <div class="ae-sk ae-sk-portrait" aria-hidden="true"></div>
-      <div class="ae-summary-body">
-        <p class="ae-eyebrow">Your Daeva</p>
-        <p class="ae-sk ae-sk-name" aria-hidden="true"></p>
-        <p class="ae-sk ae-sk-chips" aria-hidden="true"></p>
-        <div class="ae-sk-tiles" aria-hidden="true"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div>
-        <p class="ae-reading" id="aeReading" role="status">Reading your character</p>
-      </div>
-    </article></section>
+    <section class="ae-summary" id="aeSummary" aria-label="Character summary">
+      <article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading"><span class="ae-portrait ae-sk ae-sk-portrait" aria-hidden="true"></span><div class="ae-summary-body" aria-hidden="true"><span class="ae-sk ae-sk-eyebrow"></span><span class="ae-sk ae-sk-name"></span><span class="ae-sk-chips"><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span></span><span class="ae-tiles ae-sk-tiles"><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span></span></div><p class="ae-reading" id="aeReading" role="status">Reading your character</p><p class="ae-sr">Reading your character.</p></article>
+      <div class="ae-panel ae-plan-card ae-skeleton"><span class="ae-sk ae-sk-eyebrow" aria-hidden="true"></span><span class="ae-sk ae-sk-name" aria-hidden="true"></span><span class="ae-sk ae-sk-line" aria-hidden="true"></span><span class="ae-sk ae-sk-line is-short" aria-hidden="true"></span><span class="ae-sk ae-sk-btn" aria-hidden="true"></span><p class="ae-sr">Ascent Plan</p></div>
+    </section>
     <p class="ae-source" id="aeSource" hidden></p>
     <section class="ae-classes" id="aeClasses" aria-labelledby="aeClassesTitle">
       <div class="ae-classes-head"><h2 id="aeClassesTitle">Or pick a class</h2> <p class="ae-roster-count">Plan by hand, no Daeva needed</p></div>
@@ -160,7 +158,7 @@
     <section aria-labelledby="aeRosterTitle">
       <div class="ae-roster-head"><h2 id="aeRosterTitle">Your Daevas</h2> <p class="ae-roster-count" id="aeRosterCount">0 of 8</p></div>
       <div class="ae-roster-switch" id="aeRosterSwitchBox" hidden><label for="aeRosterSwitch">Show server</label> <select id="aeRosterSwitch" name="rosterServer"></select></div>
-      <ul class="ae-roster" id="aeRoster"><li class="ae-loading">Loading your Daevas.</li></ul>
+      <ul class="ae-roster" id="aeRoster"><li class="ae-loading ae-sk"><span class="ae-sr">Loading your Daevas.</span></li></ul>
       <p class="ae-roster-note">Up to 8 Daevas per server, added by name and saved on this device. The public data can't tell which characters share an account, so each server has its own list. The active Daeva sets the page colour by faction.</p>
     </section>
     <p class="ae-next" id="aeNext" hidden></p>

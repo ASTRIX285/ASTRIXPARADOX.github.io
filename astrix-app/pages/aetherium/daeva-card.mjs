@@ -30,6 +30,7 @@ import {
 import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { renderNext, renderStepBar } from './aetherium-flow.mjs';
+import { classArt } from './daevanion-board.mjs';
 import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 
 const state = { model: null, source: null, ref: null, busy: false, retry: null };
@@ -152,16 +153,8 @@ function firstVisitGuide() {
 }
 
 /* While the official site answers: the card's shape, never an empty panel. After 3 seconds it says the read is still going. */
-const SKELETON = `<article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading">
-      <div class="ae-sk ae-sk-portrait" aria-hidden="true"></div>
-      <div class="ae-summary-body">
-        <p class="ae-eyebrow">Your Daeva</p>
-        <p class="ae-sk ae-sk-name" aria-hidden="true"></p>
-        <p class="ae-sk ae-sk-chips" aria-hidden="true"></p>
-        <div class="ae-sk-tiles" aria-hidden="true"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div>
-        <p class="ae-reading" id="aeReading" role="status">Reading your character</p>
-      </div>
-    </article>`;
+const SKELETON = `<article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading"><span class="ae-portrait ae-sk ae-sk-portrait" aria-hidden="true"></span><div class="ae-summary-body" aria-hidden="true"><span class="ae-sk ae-sk-eyebrow"></span><span class="ae-sk ae-sk-name"></span><span class="ae-sk-chips"><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span><span class="ae-sk ae-sk-chip"></span></span><span class="ae-tiles ae-sk-tiles"><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span><span class="ae-tile ae-sk-tile"><span class="ae-sk"></span><span class="ae-sk"></span></span></span></div><p class="ae-reading" id="aeReading" role="status">Reading your character</p><p class="ae-sr">Reading your character.</p></article>
+<div class="ae-panel ae-plan-card ae-skeleton"><span class="ae-sk ae-sk-eyebrow" aria-hidden="true"></span><span class="ae-sk ae-sk-name" aria-hidden="true"></span><span class="ae-sk ae-sk-line" aria-hidden="true"></span><span class="ae-sk ae-sk-line is-short" aria-hidden="true"></span><span class="ae-sk ae-sk-btn" aria-hidden="true"></span><p class="ae-sr">Ascent Plan</p></div>`;
 let readingTimer = null;
 function showLoading(on) {
   clearTimeout(readingTimer);
@@ -182,8 +175,10 @@ function renderRoster() {
   const cards = current.entries.map(entry => {
     const key = roster.key(entry);
     const active = key === current.active;
+    const icon = classArt(entry.className);
     return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
       <button type="button" class="ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
+        ${icon ? `<img class="ae-roster-class" src="${esc(icon)}" alt="" width="40" height="40" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-roster-class" aria-hidden="true"></span>'}
         <span class="ae-roster-state">${active ? 'Active' : ''}</span>
         <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
         <span class="ae-roster-line">${esc(entry.className)} · Lv ${esc(entry.level)}</span>
@@ -228,7 +223,8 @@ let introArtWanted = false;
 function showIntro(on) {
   $('#aeIntro').hidden = !on;
   $('#aeClasses').hidden = !on;
-  if (on) { $('#aeSummary').hidden = true; $('#aeSource').hidden = true; }
+  // The intro shows nobody: the page's loading skeleton (a portrait and stat tile shapes) leaves the page until a read starts.
+  if (on) { $('#aeSummary').hidden = true; $('#aeSummary').innerHTML = ''; $('#aeSource').hidden = true; }
   if (on && !introArtWanted) { introArtWanted = true; loadIntroArt().then(renderIntroArt); }
 }
 
