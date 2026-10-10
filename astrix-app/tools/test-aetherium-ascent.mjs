@@ -225,8 +225,9 @@ await check('unknown role falls back to the main role with a note',async()=>{
 await check('players stay on the site: no outbound links, no guide names on the page',async()=>{
   for(const [query,screen] of [['class=gladiator&role=dps&level=22',''],['class=templar&role=tank&level=37',''],['class=ranger&level=14',''],[ref.toString(),''],...SCREENS.map(screen=>['class=chanter&level=40',screen])]){
     const {page,context}=await open(ascent(query,screen));
+    // Official NCSOFT pages are the one allowed outbound link (approved 10 Oct 2026): the footer's official site link. Nothing else leaves the site.
     const outbound=await page.$$eval('a[href]',links=>links.map(a=>a.href).filter(href=>!href.startsWith(location.origin)));
-    assert.deepEqual(outbound,[],`${query}: links that leave the site`);
+    assert.deepEqual(outbound,['https://aion2.plaync.com/en-us/index'],`${query}: only the official AION 2 site leaves the site`);
     const text=await page.textContent('body');
     assert.doesNotMatch(text,/MetaBot|ExpCarry|EZG|Destructoid|games\.gg|mein-mmo|gameplay\.tips|aion2hub|playnews/i,`${query}: names another site`);
     assert.equal(await page.locator('.ae-sources,.ae-cite').count(),0,`${query}: no source list or citation marks`);

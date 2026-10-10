@@ -255,6 +255,13 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 
 .ae-footer{padding:20px var(--ae-gutter) 28px;border-top:1px solid var(--ae-hairline);color:var(--ae-text-dim);font-size:.875rem;line-height:1.55}
 .ae-footer p{max-width:var(--ae-max);margin:0 auto 6px}
+/* Official NCSOFT links (approved by Miguel, 10 Oct 2026): small and quiet, part of the text, never a banner. 14px or more. */
+.ae-official{font-size:.875rem;line-height:1.55;color:var(--ae-text-muted)}
+.ae-official-link{color:var(--ae-ice);text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--ae-ice) 50%,transparent);transition:text-decoration-color 150ms ease}
+.ae-official-link:hover,.ae-official-link:focus-visible{text-decoration-color:var(--ae-ice)}
+.ae-official-link:focus-visible{outline:2px solid var(--ae-ice);outline-offset:2px}
+.ae-card-official{margin:12px 0 0}
+.ae-intro-official{margin:4px 0 0}
 
 /* Ascent Plan */
 .ae-ascent-setup{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px 28px;align-items:end;margin-bottom:var(--ae-gap)}

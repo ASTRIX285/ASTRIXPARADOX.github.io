@@ -35,6 +35,10 @@ import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/a
 
 const state = { model: null, source: null, ref: null, busy: false, retry: null };
 
+/* The official AION 2 character pages (NCSOFT). The address of one character's own page is not confirmed yet (it needs a look at the
+   official site), so the card links to the characters index. Official NCSOFT pages are the one outbound link the Aetherium allows. */
+const OFFICIAL_CHARACTERS = 'https://aion2.plaync.com/en-us/characters/index';
+
 /* The region being searched. It starts from the link, else the region last used on this device, else Europe. */
 let currentRegion = 'eu';
 
@@ -83,6 +87,7 @@ function renderSummary() {
           <div class="ae-tile is-link"><dt><a href="${esc(daevanionPageUrl(state.ref, p.class, model.daevanion.find(board => board.open)?.id ?? null))}">Daevanion boards open</a></dt><dd>${boardsOpen} <span>/ ${model.daevanion.length}</span></dd></div>
           <div class="ae-tile"><dt>Stigmas</dt><dd>${stigmasOpen ? `${stigmasOpen} <span>/ ${stigmas.length}</span>` : `<small>${stigmaNote}</small>`}</dd></div>
         </dl>
+        <p class="ae-official ae-card-official"><a class="ae-official-link" href="${esc(OFFICIAL_CHARACTERS)}" target="_blank" rel="noopener noreferrer" data-official-link="character">View on the official AION 2 site</a></p>
       </div>
     </article>
     <aside class="ae-panel ae-plan-card" aria-labelledby="aePlanTitle">
