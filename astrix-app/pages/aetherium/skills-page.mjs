@@ -39,7 +39,22 @@ function masteryBody(entry) {
     ? `<ul class="ae-mperks">${entry.perks.map(perk => `<li class="${pickOf(entry, perk) ? 'is-pick ' : ''}${perk.skillLevel > level ? 'is-locked' : ''}"><span class="ae-pick-level">Lv ${esc(perk.skillLevel)}</span><span>${esc(perk.text)}</span>${perk.skillLevel > level ? `<span class="ae-pad" aria-label="Locked">${LOCK_ICON}</span>` : ''}</li>`).join('')}</ul>`
     : '';
   const cooldown = typeof entry.cooldownSeconds === 'number' ? `<ul class="ae-card-facts"><li><span>Cooldown</span> <b>${esc(entry.cooldownSeconds)} s</b></li></ul>` : '';
-  return `<p class="ae-item-sec">Specialty</p>${slots}${perks ? `<p class="ae-item-sec">Specialty perks</p>${perks}` : ''}${cooldown}`;
+  return `<p class="ae-item-sec">Specialty</p>${slots}${perks ? `<p class="ae-item-sec">Specialty perks</p>${perks}` : ''}${cooldown}${chainHtml(entry.chains)}`;
+}
+
+/* A skill's chains on its card: lead-in skills, an arrow, the follow-up. Only from the data (Specialty perks and what was seen in game).
+   How a follow-up is pressed is a game rule that is not confirmed yet, so the card says so until mechanics.json flips it. */
+const CHAIN_ARROW = '<svg class="ae-chain-arrow" viewBox="0 0 24 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function chainHtml(chains) {
+  if (!chains?.length) return '';
+  const rule = state.plan.chains;
+  const icon = name => (state.plan.skillIcons[name] ? `<img src="${esc(state.plan.skillIcons[name])}" alt="" width="28" height="28" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '');
+  const skill = name => `<span class="ae-chain-skill">${icon(name)}${esc(name)}</span>`;
+  return `<div class="ae-chain-block" data-chain>
+    <p class="ae-item-sec">Chain</p>
+    ${chains.map(chain => `<p class="ae-chain">${chain.pending ? `<em class="ae-chain-pending">${esc(chain.pending.reason)}</em>` : chain.leadIns.map(skill).join('<span class="ae-chain-or">or</span>')}${CHAIN_ARROW}${skill(chain.followUp)}${chain.opensAt ? `<small>from skill Lv ${esc(chain.opensAt)}</small>` : ''}</p>`).join('')}
+    <p class="ae-chain-note">Follow-up: press it when it lights up.${rule?.confirmed ? '' : ` <span class="ae-tag is-unconfirmed" data-rule-tag="chain-follow-up">Not confirmed yet</span>${rule?.test ? ` <span class="ae-tag-test" data-rule-test="chain-follow-up">Check it in game: ${esc(rule.test)}</span>` : ''}`}</p>
+  </div>`;
 }
 
 function masteryCard(entry, titleId) {

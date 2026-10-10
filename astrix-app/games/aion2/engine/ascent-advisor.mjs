@@ -39,24 +39,21 @@ export function levelCap(progression) {
   return Number.isInteger(cap) ? cap : 45;
 }
 
-/** Confirmed mechanics by id, from data/advisor/mechanics.json. */
-export function indexMechanics(mechanics) {
-  const records = mechanics?.records ?? mechanics ?? [];
-  return Object.fromEntries(records.map(record => [record.id, record]));
-}
+/** Mechanics records by id, raw, from data/advisor/mechanics.json (indexMechanics below adds the confirmed flag and facts). */
+const recordsById = mechanics => Object.fromEntries((mechanics?.records ?? mechanics ?? []).map(record => [record.id, record]));
 
 /**
  * The highest level Mastery (Wisdom Stones) takes a skill to, from the mastery-cap rule in mechanics.json.
  * Null when the file is not loaded: the plan then has no cap to hold to and says nothing about one.
  */
 export function masteryCap(mechanics) {
-  const cap = indexMechanics(mechanics)['mastery-cap']?.value?.cap;
+  const cap = recordsById(mechanics)['mastery-cap']?.value?.cap;
   return Number.isInteger(cap) && cap > 0 ? cap : null;
 }
 
 /** Where levels above the Mastery cap come from, as the mastery-cap rule lists them ({ kind, label }). */
 export function levelSourcesBeyondCap(mechanics) {
-  const list = indexMechanics(mechanics)['mastery-cap']?.value?.beyond;
+  const list = recordsById(mechanics)['mastery-cap']?.value?.beyond;
   return Array.isArray(list) ? list.filter(item => item && typeof item.label === 'string') : [];
 }
 
@@ -256,7 +253,7 @@ const enchantFix = needsEnchant;
  * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
  * character), then the build steps that apply at this level.
  */
-function nowList(level, build, skills, stigmas, boards, model, mastery) {
+function nowList(level, build, skills, stigmas, boards, model, mastery = null, skillBar = null) {
   const list = [];
   const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery', extra = {}) => list.push({ rank, title, detail, refs, kind, view, ...extra });
 
@@ -270,8 +267,16 @@ function nowList(level, build, skills, stigmas, boards, model, mastery) {
     // The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens the board it names.
     if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion', { board: openUnspent[0].id, boards: openUnspent.map(board => ({ id: board.id, name: board.name })) });
     if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory', 'stigma');
+    // A skill the Daeva has but has not equipped, said by its place in the stacks ("Put Ruinous Blow under Rending Blow on key 1").
+    const placeOf = name => {
+      for (const stack of Object.values(skillBar?.stacks ?? {})) { const row = stack.skills.findIndex(item => item.name === name); if (row >= 0) return { key: stack.key, row, below: row ? stack.skills[row - 1].name : null }; }
+      return null;
+    };
     for (const skill of skills) {
-      if (skill.unlocked && skill.skillLevel !== null && skill.equipped === false) push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');
+      if (!(skill.unlocked && skill.skillLevel !== null && skill.equipped === false)) continue;
+      const place = placeOf(skill.name);
+      if (place) push(25, `Put ${skill.name}${place.below ? ` under ${place.below}` : ''} on key ${place.key}`, `You have it but it is not equipped. Row ${place.row} of key ${place.key} in the build's stack.`, skill.refs, 'armory', 'skill-bar', { key: place.key, row: place.row });
+      else push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');
     }
   }
 
@@ -354,15 +359,19 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     return { ...base, pending: build.build, now: [], skills: [], stigmas: { pending: build.build }, daevanion: planBoards({ daevanion: build.build }, lvl, model, facts), stats: build.build, rotation: build.build, upcoming: [] };
   }
   const catalogue = skillIndex(data.skills, className);
+  const mechanics = indexMechanics(data.mechanics, data.progression);
   const skills = planSkills(build, catalogue, lvl, model, facts, capRule);
   const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
   const daevanion = planBoards(build, lvl, model, facts);
   const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons, capRule, daevanion.boards);
   const rotation = planRotation(build.rotation, catalogue, lvl, stigmas);
+  const chains = planChains({ catalogue, className, mechanics });
+  const skillBar = planSkillStacks({ build, rotation, stigmas, gameIcons, catalogue, level: lvl, facts, mechanics, chains });
+  for (const entry of [...mastery.active, ...mastery.passive]) entry.chains = chainsOf(chains, entry.name);
   return {
     ...base,
     pending: null,
-    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery),
+    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery, skillBar),
     skills,
     stigmas,
     daevanion,
@@ -371,69 +380,210 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     levelNotes: (build.levelNotes ?? []).filter(note => lvl <= note.to),
     upcoming: upcoming(lvl, skills, stigmas, daevanion, facts),
     mastery,
-    skillBar: planSkillBar({ build, rotation, stigmas, gameIcons, level: lvl, facts })
+    skillBar,
+    chains,
+    macro: planMacro({ rotation, skillBar, mechanics }),
+    mechanics
   };
 }
 
 /**
- * Where each skill goes on the game's skill bar: 4 bars (0 is the one you fight on), keys 1 to 8,
- * Q, E, left click and right click. Left click always holds the class's basic skill and cannot be
- * moved (in-game capture). The rest follows the build: key skills on 1 to 4 in the order you level
- * them, then the macro's skills, skills the build fires by hand on Q and E, stigmas on 5 to 8, and
- * every other skill on bar 1.
+ * Where each skill goes on the game's skill bar: keys 1 to 8, Q, E, left click and right click, each
+ * key a stack of up to four rows (planSkillStacks). Left click always holds the class's basic skill and
+ * cannot be moved (in-game capture). The rest follows the build: the rotation stacked on the first keys,
+ * skills the build fires by hand on Q and E, stigmas outside the rotation on 5 to 8.
  */
 export const SKILL_BAR_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'LMB', 'RMB']);
-const manualNames = (rotation, nameIn) => (isPending(rotation) || !rotation ? [] : (rotation.manual ?? []).map(nameIn).filter(Boolean));
-function planSkillBar({ build, rotation, stigmas, gameIcons, level, facts }) {
+/** Rows on a key: 0 is nearest the key and fires first, 3 is the top. */
+export const STACK_ROWS = 4;
+
+/* Game mechanics (data/advisor/mechanics.json): one record per rule with a status. The pages show a "Not confirmed yet" tag,
+   with the rule's in-game test, wherever an unconfirmed rule is used; flipping the status in the data removes it everywhere. */
+export const RULE_IDS = Object.freeze(['skill-stack', 'chain-follow-up', 'macro-order', 'mastery-cap']);
+const UNKNOWN_RULE = Object.freeze({ status: 'unconfirmed', confirmed: false, text: '', test: null, facts: null });
+
+/** Rules by id, each with confirmed (boolean) and, for the macro rule, the facts it points at in progression.json. */
+export function indexMechanics(mechanics, progression) {
+  const facts = indexProgression(progression);
+  const out = {};
+  for (const rule of mechanics?.records ?? []) {
+    const from = typeof rule.factsFrom === 'string' && rule.factsFrom.startsWith('progression:') ? facts[rule.factsFrom.slice('progression:'.length)] ?? null : null;
+    out[rule.id] = { ...rule, confirmed: rule.status === 'confirmed', facts: from };
+  }
+  return out;
+}
+const ruleOf = (mechanics, id) => mechanics?.[id] ?? { ...UNKNOWN_RULE, id };
+
+/* Chain skills. Only from the data: a Specialty perk that "Adds X chain skill" (lead-in: that skill, follow-up: X, open from
+   the perk's skill level), a perk about a chain skill's trigger chance, and the follow-ups seen in game (mechanics.json),
+   whose lead-ins stay pending until they are captured. Nothing here says how a chain is pressed: that is the chain rule. */
+const CHAIN_ADDS = /^Adds (.+?) chain skill$/i;
+const CHAIN_TRIGGER = /^(.+?) chain skill trigger chance/i;
+export function planChains({ catalogue, className, mechanics }) {
+  const rule = ruleOf(mechanics, 'chain-follow-up');
+  const chains = [];
+  for (const [name, info] of catalogue) {
+    for (const perk of Array.isArray(info.specialties) ? info.specialties : []) {
+      const followUp = CHAIN_ADDS.exec(perk.text)?.[1] ?? CHAIN_TRIGGER.exec(perk.text)?.[1] ?? null;
+      if (followUp) chains.push({ leadIns: [name], followUp, opensAt: perk.skillLevel, from: 'specialty', pending: null });
+    }
+  }
+  for (const seen of rule.observed ?? []) {
+    if (seen.class !== className) continue;
+    chains.push({ leadIns: Array.isArray(seen.leadIns) ? seen.leadIns : [], followUp: seen.followUp, opensAt: null, from: 'tooltip', pending: isPending(seen.leadIns) ? seen.leadIns : null });
+  }
+  return { status: rule.status, confirmed: rule.confirmed, test: rule.test ?? null, unknown: rule.unknown ?? null, chains };
+}
+/** The chains a skill takes part in, as a lead-in or as the follow-up. */
+export const chainsOf = (chains, name) => (chains?.chains ?? []).filter(chain => chain.leadIns.includes(name) || chain.followUp === name);
+
+/**
+ * The skill bar as the game works it: every key holds a stack of up to four skills (rows 0 to 3). Pressing the key fires
+ * the lowest ready one. So cooldown skills go low and the no-cooldown filler goes on top, and a skill the build fires by
+ * hand (heals, defensives, buffs) or a charged skill gets a key of its own. The filling comes from the build only:
+ *   key 1 (and 2 when it overflows): the rotation, in the build's order, with the filler on top;
+ *   Q and E, then free keys: skills the build fires by hand, one per key;
+ *   5 to 8: stigmas outside the rotation, one per key, in slot order;
+ *   left click: the class's basic skill, fixed by the game;
+ *   free keys: key skills and Daevanion node skills the rotation does not use, then other actives in unlock order.
+ * Skills that get no key are listed with the reason. bars[row][key] is the same thing by row, for the page grid.
+ */
+const cooldownOf = info => (info && typeof info.cooldownSeconds === 'number' ? info.cooldownSeconds : null);
+function planSkillStacks({ build, rotation, stigmas, gameIcons, catalogue, level, facts, mechanics, chains = null }) {
   const skills = [...gameIcons.values()];
   if (!skills.length) return null;
+  const rule = ruleOf(mechanics, 'skill-stack');
   const actives = skills.filter(skill => skill.category === 'Active');
   const byName = new Map(skills.map(skill => [skill.name, skill]));
   const names = [...byName.keys()].sort((a, b) => b.length - a.length);
   const nameIn = text => names.find(name => String(text).startsWith(name)) ?? null;
+  const rot = isPending(rotation) || !rotation ? null : rotation;
+  const steps = rot ? rot.steps.map(step => ({ name: nameIn(step.text ?? step), text: step.text ?? step, charged: /charged/i.test(step.text ?? step) })).filter(step => step.name) : [];
+  const fillerName = rot?.filler ? nameIn(rot.filler) : null;
+  const manual = rot ? (rot.manual ?? []).map(nameIn).filter(Boolean) : [];
+  const stigmaSlots = stigmas.pending ? [] : stigmas.slots.filter(slot => byName.has(slot.name));
+  const stigmaNames = stigmaSlots.map(slot => slot.name);
+  const coreNames = (build.coreSkills ?? []).slice().sort((a, b) => a.priority - b.priority).map(skill => skill.name).filter(name => byName.has(name));
+  const corePriority = new Map(coreNames.map((name, index) => [name, index + 1]));
   const basic = actives[0];
-  const placed = new Set([basic.name]);
-  const cell = (key, name, role, rank = null) => {
+
+  const placed = new Set();
+  const entry = (name, role) => {
     const skill = byName.get(name);
+    const info = catalogue.get(name) ?? null;
+    const slot = stigmaSlots.find(item => item.name === name) ?? null;
+    const unlockLevel = slot ? slot.slotLevel : skill.needLevel;
+    const cooldown = cooldownOf(info);
+    const filler = name === fillerName;
     placed.add(name);
-    const unlockLevel = role === 'stigma' ? (stigmas.slots.find(slot => slot.name === name)?.slotLevel ?? skill.needLevel) : skill.needLevel;
-    return { key, name, icon: skill.icon, role, rank, unlockLevel, locked: level < unlockLevel };
+    return {
+      name, icon: skill.icon, role, rank: corePriority.get(name) ?? null, unlockLevel, locked: level < unlockLevel,
+      // A filler has no cooldown by the build's word; a captured 0 is the same thing. A pending cooldown is placed by role and said so.
+      cooldownSeconds: cooldown, noCooldown: filler || cooldown === 0, cooldownPending: !filler && cooldown === null, filler,
+      stigma: Boolean(slot), charged: steps.some(step => step.name === name && step.charged)
+    };
   };
-  const bars = [0, 1, 2, 3].map(() => Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, null])));
-  bars[0].LMB = { ...cell('LMB', basic.name, 'fixed'), fixed: true };
+  const stacks = Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, { key, skills: [], solo: false, reason: null }]));
+  const solo = (key, name, role, reason) => { stacks[key] = { key, skills: [entry(name, role)], solo: true, reason }; };
+  solo('LMB', basic.name, 'fixed', `The game keeps ${basic.name} on left click.`);
 
-  const keySkills = (build.coreSkills ?? []).slice().sort((a, b) => a.priority - b.priority).map(skill => skill.name).filter(name => byName.has(name) && !placed.has(name));
-  const macro = isPending(rotation) || !rotation ? [] : rotation.steps.map(step => nameIn(step.text)).filter(Boolean);
-  const manual = isPending(rotation) || !rotation ? [] : (rotation.manual ?? []).map(nameIn).filter(Boolean);
-  const stigmaNames = stigmas.pending ? [] : stigmas.slots.map(slot => slot.name).filter(name => byName.has(name));
-
-  const queue = [];
-  for (const name of keySkills) queue.push([name, 'key', keySkills.indexOf(name) + 1]);
-  for (const name of macro) if (!keySkills.includes(name) && !stigmaNames.includes(name)) queue.push([name, 'macro', null]);
-  // Then the skills the build takes Daevanion nodes for, then any other active, in unlock order.
+  // Key 1: the rotation as one stack, the filler on top. More than three cooldown skills spill onto key 2.
+  const rotationSkills = steps.filter(step => !step.charged && !manual.includes(step.name) && step.name !== basic.name && step.name !== fillerName).map(step => step.name).filter((name, index, all) => all.indexOf(name) === index);
+  const stackKeys = ['1', '2', '3', '4'];
+  let keyIndex = 0;
+  while (rotationSkills.length && keyIndex < stackKeys.length) {
+    const take = rotationSkills.splice(0, STACK_ROWS - 1).map(name => entry(name, 'macro'));
+    stacks[stackKeys[keyIndex]] = { key: stackKeys[keyIndex], skills: take, solo: false, reason: null };
+    keyIndex += 1;
+  }
+  if (fillerName && !placed.has(fillerName) && fillerName !== basic.name) {
+    const top = stacks['1'].skills.length ? stacks['1'] : null;
+    if (top) top.skills.push(entry(fillerName, 'macro')); else solo('1', fillerName, 'macro', 'The filler: no cooldown, so it never needs a stack.');
+  }
+  // Charged skills and skills the build fires by hand: a key of their own, Q and E first.
+  const soloQueue = [
+    ...steps.filter(step => step.charged && !placed.has(step.name)).map(step => [step.name, 'charged', 'A charged skill: hold the key, so it gets a key of its own (stack rule).']),
+    ...manual.filter(name => !placed.has(name)).map(name => [name, 'manual', 'The build fires it by hand when you need it, so it gets a key of its own (stack rule: heals, defensives, big buffs and charged skills stay out of stacks).'])
+  ];
+  const freeKeys = () => SKILL_BAR_KEYS.filter(key => !stacks[key].skills.length);
+  for (const key of ['Q', 'E']) { const next = soloQueue.shift(); if (next) solo(key, ...next); }
+  // Stigmas outside the rotation: keys 5 to 8 in slot order, one each.
+  const stigmaKeys = ['5', '6', '7', '8'];
+  for (const name of stigmaNames) {
+    if (placed.has(name)) continue;
+    const key = stigmaKeys.find(item => !stacks[item].skills.length) ?? freeKeys()[0];
+    if (!key) break;
+    solo(key, name, 'stigma', 'A stigma outside your rotation: its own key, so you choose when it fires.');
+  }
+  for (const next of soloQueue) { const key = freeKeys()[0]; if (!key) break; solo(key, ...next); }
+  // Key skills and Daevanion node skills the rotation does not use, then other actives in unlock order, one per free key.
   const nodeSkills = isPending(build.daevanion) ? [] : (build.daevanion?.skillNodes ?? []).filter(name => byName.has(name));
-  for (const name of nodeSkills) if (!queue.some(([item]) => item === name) && !stigmaNames.includes(name)) queue.push([name, 'build', null]);
-  for (const skill of actives) if (!queue.some(([item]) => item === skill.name) && !manualNames(rotation, nameIn).includes(skill.name)) queue.push([skill.name, 'spare', null]);
-  const free = key => !bars[0][key];
-  for (const key of ['1', '2', '3', '4', 'RMB']) {
-    const next = queue.find(([name]) => !placed.has(name));
-    if (next && free(key)) bars[0][key] = cell(key, next[0], next[1], next[2]);
+  const rest = [...coreNames, ...nodeSkills, ...actives.map(skill => skill.name)].filter((name, index, all) => all.indexOf(name) === index && !placed.has(name));
+  const notOnBar = [];
+  for (const name of rest) {
+    const key = freeKeys()[0];
+    if (key) { stacks[key] = { key, skills: [entry(name, corePriority.has(name) ? 'key' : nodeSkills.includes(name) ? 'build' : 'other')], solo: false, reason: null }; continue; }
+    const skill = byName.get(name);
+    notOnBar.push({ name, icon: skill.icon, unlockLevel: skill.needLevel, reason: 'No key left: the build does not use it. Swap it in if you like it.' });
   }
-  for (const key of ['Q', 'E']) {
-    const name = manual.find(item => !placed.has(item) && !stigmaNames.includes(item));
-    if (name) { bars[0][key] = cell(key, name, 'manual'); continue; }
-    const next = queue.find(([item]) => !placed.has(item));
-    if (next) bars[0][key] = cell(key, next[0], next[1], next[2]);
+  // A follow-up goes above its lead-in only once the chain rule is confirmed. Until then the page lists it under the stack.
+  if (chains?.confirmed) {
+    for (const chain of chains.chains) {
+      if (chain.pending || !byName.has(chain.followUp) || placed.has(chain.followUp)) continue;
+      const stack = Object.values(stacks).find(item => !item.solo && item.skills.length < STACK_ROWS && item.skills.some(skill => chain.leadIns.includes(skill.name)));
+      if (!stack) continue;
+      const at = stack.skills.findIndex(skill => chain.leadIns.includes(skill.name));
+      stack.skills.splice(at + 1, 0, entry(chain.followUp, 'chain'));
+    }
   }
-  ['5', '6', '7', '8'].forEach((key, index) => { if (stigmaNames[index] && !placed.has(stigmaNames[index])) bars[0][key] = cell(key, stigmaNames[index], 'stigma'); });
-  // Anything left from the build first, then every other active, on bar 1 in unlock order.
-  const rest = [...queue.map(([name]) => name), ...manual, ...actives.map(skill => skill.name)].filter((name, index, all) => all.indexOf(name) === index && !placed.has(name));
-  for (const key of ['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']) {
-    const name = rest.find(item => !placed.has(item));
-    if (!name) break;
-    bars[1][key] = cell(key, name, 'spare');
+  const bars = Array.from({ length: STACK_ROWS }, (_, row) => Object.fromEntries(SKILL_BAR_KEYS.map(key => {
+    const skill = stacks[key].skills[row] ?? null;
+    return [key, skill ? { ...skill, key, row, fixed: skill.role === 'fixed' } : null];
+  })));
+  bars[0].LMB.fixed = true;
+  const result = { keys: SKILL_BAR_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, notOnBar, rule: { status: rule.status, confirmed: rule.confirmed, text: rule.text, rules: rule.rules ?? [] }, macroKey: facts['macro-order']?.value ? true : false };
+  result.problems = stackProblems(result);
+  return result;
+}
+
+/** Stack rule check: a no-cooldown skill never sits below a cooldown skill, at most one filler per key, at most four rows. The data fails when this returns anything. */
+export function stackProblems(skillBar) {
+  const problems = [];
+  for (const stack of Object.values(skillBar?.stacks ?? {})) {
+    const list = stack.skills;
+    if (list.length > STACK_ROWS) problems.push(`key ${stack.key}: ${list.length} skills, the game holds ${STACK_ROWS}`);
+    if (list.filter(skill => skill.noCooldown).length > 1) problems.push(`key ${stack.key}: two no-cooldown skills, only the lowest would ever fire`);
+    list.forEach((skill, row) => {
+      if (!skill.noCooldown) return;
+      const above = list.slice(row + 1).find(item => (item.cooldownSeconds ?? 0) > 0 || item.cooldownPending);
+      if (above) problems.push(`key ${stack.key}: ${skill.name} (no cooldown) on row ${row} blocks ${above.name} above it`);
+    });
   }
-  return { keys: SKILL_BAR_KEYS, bars, basic: basic.name, macroKey: facts['macro-order']?.value ? true : false };
+  return problems;
+}
+
+/**
+ * Macro 1 from the stacks: the rotation's skills in the build's order, each with the key and row it sits on, so the
+ * screen can read "Key 1, rows 0 to 3" and the player can add the stacked key instead. How the game picks the next
+ * entry is the macro-order rule (unconfirmed: listed order, or a stack); the facts (slots, delay, hold, binding) come
+ * from progression.json through that rule.
+ */
+function planMacro({ rotation, skillBar, mechanics }) {
+  const rule = ruleOf(mechanics, 'macro-order');
+  const base = { status: rule.status, confirmed: rule.confirmed, text: rule.text ?? '', options: rule.options ?? [], notes: rule.notes ?? [], test: rule.test ?? null, facts: rule.facts ?? null };
+  if (!rotation || isPending(rotation) || !skillBar) return { ...base, pending: isPending(rotation) ? rotation : null, entries: [], keys: [] };
+  const where = name => {
+    for (const stack of Object.values(skillBar.stacks)) { const row = stack.skills.findIndex(skill => skill.name === name); if (row >= 0) return { key: stack.key, row, solo: stack.solo }; }
+    return null;
+  };
+  const names = Object.values(skillBar.stacks).flatMap(stack => stack.skills.map(skill => skill.name)).sort((a, b) => b.length - a.length);
+  const entries = rotation.steps.map(step => {
+    const name = names.find(item => String(step.text).startsWith(item)) ?? null;
+    const at = name ? where(name) : null;
+    return { ...step, name, key: at?.key ?? null, row: at?.row ?? null, soloKey: at?.solo ?? false, charged: /charged/i.test(step.text) };
+  });
+  const keys = entries.filter(item => item.key).map(item => item.key).filter((key, index, all) => all.indexOf(key) === index);
+  return { ...base, pending: null, entries, keys, filler: rotation.filler ?? null, manual: rotation.manual ?? [] };
 }
 
 /**

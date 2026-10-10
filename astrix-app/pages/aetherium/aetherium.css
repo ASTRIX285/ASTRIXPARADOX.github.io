@@ -255,6 +255,13 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 
 .ae-footer{padding:20px var(--ae-gutter) 28px;border-top:1px solid var(--ae-hairline);color:var(--ae-text-dim);font-size:.875rem;line-height:1.55}
 .ae-footer p{max-width:var(--ae-max);margin:0 auto 6px}
+/* Official NCSOFT links (approved by Miguel, 10 Oct 2026): small and quiet, part of the text, never a banner. 14px or more. */
+.ae-official{font-size:.875rem;line-height:1.55;color:var(--ae-text-muted)}
+.ae-official-link{color:var(--ae-ice);text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--ae-ice) 50%,transparent);transition:text-decoration-color 150ms ease}
+.ae-official-link:hover,.ae-official-link:focus-visible{text-decoration-color:var(--ae-ice)}
+.ae-official-link:focus-visible{outline:2px solid var(--ae-ice);outline-offset:2px}
+.ae-card-official{margin:12px 0 0}
+.ae-intro-official{margin:4px 0 0}
 
 /* Ascent Plan */
 .ae-ascent-setup{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px 28px;align-items:end;margin-bottom:var(--ae-gap)}
@@ -1019,7 +1026,7 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-classes-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:6px 14px;margin:0 0 12px}
 .ae-classes-head h2{margin:0;font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-muted)}
 .ae-class-art .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block}
-.ae-class-name{align-self:center;font:700 14px/1.2 var(--ax-font-head);letter-spacing:.04em}
+.ae-class-name{align-self:center;font:700 .875rem/1.2 var(--ax-font-head);letter-spacing:.04em}
 
 /* Find your Daeva first (Gear Ledger, Gear, Skills, Daevanion with no Daeva): the guide's art beside a short panel. */
 .ae-find-first{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center;margin:0}
@@ -1036,12 +1043,14 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 @media (max-width:819px){
   .ae-class-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
   .ae-class-tile{padding:10px 6px}
-  .ae-class-name{font-size:12px;letter-spacing:.02em;overflow-wrap:anywhere}
+  .ae-class-name{font-size:.8125rem;letter-spacing:.02em;overflow-wrap:normal;hyphens:manual}
   .ae-speech{padding:18px 16px}
   .ae-intro.has-npc .ae-intro-guide{grid-template-columns:96px minmax(0,1fr);gap:10px}
   .ae-find-first.has-art{grid-template-columns:110px minmax(0,1fr);gap:14px}
 }
-@media (max-width:479px){.ae-steps li{padding:8px 10px 8px 42px}.ae-steps li::before{left:10px;top:9px;width:22px;height:22px}}
+@media (max-width:479px){.ae-steps li{padding:8px 10px 8px 42px}.ae-steps li::before{left:10px;top:9px;width:22px;height:22px}
+  /* Four tiles a row stays (two rows of four); the name keeps 13px, drops its spacing and gets the full tile width, so Spiritmaster fits on one line and nothing breaks mid-word. */
+  .ae-class-tile{padding:10px 3px}.ae-class-name{letter-spacing:0;hyphens:auto}}
 .ae-roster-switch select{flex:0 1 auto;min-width:0;max-width:min(100%,360px)}
 .ae-roster-switch label{flex:0 0 auto}
 
@@ -1102,3 +1111,39 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-guide-text{font-size:1rem}
 .ae-guide-count{font-size:.875rem}
 @media (max-width:640px){.ae-guide-text{font-size:1rem}}
+
+/* Skill stacks (10 Oct 2026): every key a column of four rows, row 0 at the bottom; keycaps are buttons that open the stack
+   in words; cells of a stacked key share a tint; a question mark marks a cooldown not captured yet. Rule tags say
+   "Not confirmed yet" with the in-game test; chains draw lead-in, arrow, follow-up. Text 1rem and never under .875rem. */
+.ae-bar-cell.is-stacked{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ae-gold) 35%,transparent)}
+.ae-bar-cell.is-charged{border:2px solid var(--ae-manual)}
+.ae-bar-cell.is-other,.ae-bar-cell.is-chain{border:1px solid var(--ae-hairline-strong)}
+.ae-bar-cdq{position:absolute;right:2px;bottom:2px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;display:grid;place-items:center;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);color:var(--ae-gold-ink);background:var(--ae-gold)}
+.ae-bar-cdq.is-key{position:static}
+.ae-keycap[role="button"]{cursor:pointer;min-height:44px;transition:border-color 150ms ease,color 150ms ease}
+.ae-keycap[role="button"]:hover,.ae-keycap[role="button"]:focus-visible{color:var(--ae-gold);border-color:var(--ae-gold)}
+.ae-bar-row.is-keys{margin-top:4px}
+.ae-bar-rule{margin:0;font-size:1rem;line-height:1.5;color:var(--ae-text)}
+.ae-bar-pending{margin:0}
+.ae-followups small,.ae-chiplist small{display:block;color:var(--ae-text-muted);font-size:.875rem}
+.ae-stack-card{margin-top:14px;padding-top:12px;border-top:1px solid var(--ae-hairline)}
+.ae-stack-card .ae-card-head h3{font-size:1.125rem}
+.ae-card-line.is-stack{padding:10px 12px;background:var(--ae-well);border:1px solid var(--ae-hairline);color:var(--ae-text);font-weight:600;font-size:1rem;line-height:1.5}
+.ae-macro-where{margin-left:auto;padding-left:10px;font-size:.875rem;color:var(--ae-text-muted);white-space:nowrap}
+.ae-macro-from{margin:0;font-size:1rem;line-height:1.5}
+.ae-macro-rule{display:grid;gap:8px;padding:12px 14px;background:var(--ae-well);border:1px solid var(--ae-hairline)}
+.ae-macro-rule p{margin:0;font-size:1rem;line-height:1.5}
+.ae-macro-rule .ae-mskills-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ae-tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;vertical-align:middle}
+.ae-tag.is-unconfirmed{color:var(--ae-gold);background:color-mix(in srgb,var(--ae-gold) 12%,transparent);border:1px solid color-mix(in srgb,var(--ae-gold) 55%,transparent)}
+.ae-tag-test{display:inline;font-size:.875rem;color:var(--ae-text-muted)}
+.ae-macro-rule .ae-tag-test{display:block;margin:0}
+.ae-chain-block{display:grid;gap:6px;margin-top:12px}
+.ae-chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0;font-size:1rem}
+.ae-chain-skill{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ae-text)}
+.ae-chain-skill img{width:28px;height:28px;border-radius:4px;border:1px solid var(--ae-hairline-strong)}
+.ae-chain-arrow{width:24px;height:12px;color:var(--ae-gold);flex:0 0 auto}
+.ae-chain-or{font-size:.875rem;color:var(--ae-text-muted)}
+.ae-chain small{color:var(--ae-text-muted);font-size:.875rem}
+.ae-chain-pending{font-style:normal;color:var(--ae-text-muted)}
+.ae-chain-note{margin:0;font-size:.875rem;color:var(--ae-text-muted)}

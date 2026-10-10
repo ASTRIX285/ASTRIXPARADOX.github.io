@@ -1181,12 +1181,13 @@ const ROSTER8=()=>JSON.stringify(storeV2(['Al','Bea','Cleo','Dax','Eri','Finn','
 
 await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or less in Barlow, sentence case, sizes in rem, tabular figures',async()=>{
   // The Gear page opens on a Daeva: with none it shows Find your Daeva first (#473), which has no labels to check.
-  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
-    const {page,context}=await open(path,{live:true,extra});
+  // Every width the pages render (10 Oct 2026): a media query can shrink a size at one width only (the class tiles did at 819 and under).
+  for(const width of [390,820,1280,1600,1920])for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
+    const {page,context}=await open(path,{live:true,extra,viewport:{width,height:width<800?844:1000}});
     const bad=await typeAudit(page);
-    assert.deepEqual(bad,[],`${path}:\n${bad.join('\n')}`);
+    assert.deepEqual(bad,[],`${path} at ${width}:\n${bad.join('\n')}`);
     const labels=await labelAudit(page);
-    assert.ok(labels.length>=4,`${path} has labels to check`);
+    assert.ok(labels.length>=4,`${path} at ${width} has labels to check`);
     for(const label of labels){
       assert.equal(label.transform,'none',`${path} "${label.text}" is not uppercased by CSS`);
       assert.equal(label.caps,false,`${path} "${label.text}" is sentence case`);
@@ -1426,6 +1427,52 @@ await check('crisp at 390: no sideways scroll, 16px gutter, type still tight, ro
   const heights=await page.$$eval('.ae-roster-slot.is-filled',items=>[...new Set(items.map(el=>el.getBoundingClientRect().height))]);
   assert.equal(heights.length,1,'Roster cards one height');
   if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,'crisp-daeva-card-390.png'),fullPage:true});
+  await context.close();
+});
+
+/* ---------- Official NCSOFT links (feature/aetherium-official-links, 10 Oct 2026): the one allowed outbound link, on an allowlist ---------- */
+
+await check('every external link on every Aetherium page is an official NCSOFT AION 2 page, opens in a new tab with noopener noreferrer, and the footer carries the official site link',async()=>{
+  const live=`?${daevaRef}`;
+  const pages=['/hub/aetherium/','/hub/aetherium/gear/','/hub/aetherium/gear/equipment/','/hub/aetherium/skills/','/hub/aetherium/daevanion/',
+    '/hub/aetherium/ascent/','/hub/aetherium/ascent/mastery/','/hub/aetherium/ascent/skill-bar/','/hub/aetherium/ascent/stigma/','/hub/aetherium/ascent/daevanion/','/hub/aetherium/ascent/macro/','/hub/aetherium/ascent/stats/'];
+  for(const path of pages){
+    for(const withDaeva of [false,true]){
+      const {page,context}=await open(withDaeva?`${path}${live}${path.includes('ascent')||path.includes('skills')||path.includes('daevanion')?'&class=gladiator':''}`:path,{live:true});
+      if(path.includes('ascent/daevanion')&&withDaeva)await page.waitForSelector('.ae-board-grid');
+      const external=await page.$$eval('a[href]',links=>links.map(a=>({href:a.href,target:a.target,rel:a.rel,text:a.textContent.trim()})).filter(link=>/^https?:/.test(link.href)&&!link.href.startsWith(location.origin)));
+      for(const link of external){
+        const host=new URL(link.href).hostname;
+        assert.ok(host==='aion2.plaync.com'||host==='plaync.com'||host.endsWith('.plaync.com'),`${path}: ${link.href} is not an official NCSOFT page`);
+        assert.equal(link.target,'_blank',`${path}: ${link.href} opens in a new tab`);
+        assert.match(link.rel,/\bnoopener\b/);assert.match(link.rel,/\bnoreferrer\b/);
+      }
+      const footer=await page.$eval('footer .ae-official',el=>({text:el.textContent.replace(/\s+/g,' ').trim(),href:el.querySelector('a').getAttribute('href'),size:parseFloat(getComputedStyle(el.querySelector('a')).fontSize)}));
+      assert.equal(footer.text,'AION 2 is made by NCSOFT. Visit the official AION 2 site',path);
+      assert.equal(footer.href,'https://aion2.plaync.com/en-us/index');
+      assert.ok(footer.size>=14,`${path}: the link reads at ${footer.size}px`);
+      assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/[–—]/,`${path}: no dashes`);
+      await context.close();
+    }
+  }
+});
+
+await check('Daeva Card: Play AION 2 on the intro, View on the official AION 2 site on a loaded card, both official and quiet',async()=>{
+  const intro=await open('/hub/aetherium/',{live:true});
+  const play=await intro.page.$eval('#aeIntro [data-official-link="play"]',a=>({href:a.getAttribute('href'),text:a.textContent,target:a.target,rel:a.rel,size:parseFloat(getComputedStyle(a).fontSize),bg:getComputedStyle(a).backgroundImage}));
+  assert.deepEqual([play.href,play.text,play.target],['https://aion2.plaync.com/en-us/index','Play AION 2','_blank']);
+  assert.match(play.rel,/noopener noreferrer/);
+  assert.ok(play.size>=14);
+  assert.equal(play.bg,'none','A text link, not a button or banner');
+  assert.equal(await intro.page.locator('[data-official-link="character"]').count(),0,'No character link before a Daeva');
+  await intro.context.close();
+  const {page,context}=await open(`/hub/aetherium/?${daevaRef}`,{live:true});
+  const card=await page.$eval('#aeSummary [data-official-link="character"]',a=>({href:a.getAttribute('href'),text:a.textContent,target:a.target,rel:a.rel,size:parseFloat(getComputedStyle(a).fontSize)}));
+  // The address of one character's own official page is not confirmed yet, so the link goes to the official characters index.
+  assert.deepEqual([card.href,card.text,card.target],['https://aion2.plaync.com/en-us/characters/index','View on the official AION 2 site','_blank']);
+  assert.match(card.rel,/noopener noreferrer/);
+  assert.ok(card.size>=14);
+  assert.ok(await page.$eval('#aeSummary [data-official-link="character"]',a=>a.closest('.ae-summary-card')!==null),'On the card itself');
   await context.close();
 });
 
