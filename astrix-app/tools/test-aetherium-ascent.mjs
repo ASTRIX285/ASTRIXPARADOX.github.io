@@ -76,6 +76,16 @@ const spentInfo=structuredClone(vaizelInfo);
 Object.assign(spentInfo.profile,{characterName:'SPENTDAEVA',characterId:'c3BlbnRkYWV2YQ==',serverId:1314,serverName:'Siel'});
 spentInfo.daevanion.boardList.forEach(board=>{if(board.open===1)board.openNodeCount=Math.max(1,board.openNodeCount);});
 const spentRef=new URLSearchParams({serverId:'1314',characterId:spentInfo.profile.characterId});
+// The Mastery cap (Miguel, in game, 10 Oct 2026): a Daeva (server 1315) with Keen Strike at 12 (gear or a node past the cap),
+// Rending Blow at 11 and Overhead Slam at 10. Nezekan is open with nothing taken (the fixture board), so its skill nodes are free.
+const capInfo=structuredClone(info);
+Object.assign(capInfo.profile,{characterName:'CAPDAEVA',characterId:'Y2FwZGFldmE=',serverId:1315,serverName:'Siel'});
+const capEquipment=structuredClone(equipment);
+for(const skill of capEquipment.skill.skillList){
+  const level={'Keen Strike':12,'Rending Blow':11,'Overhead Slam':10}[skill.name];
+  if(level)Object.assign(skill,{skillLevel:level,acquired:1,equip:1});
+}
+const capRef=new URLSearchParams({serverId:'1315',characterId:capInfo.profile.characterId});
 
 const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
 const browser=await chromium.launch();
@@ -104,6 +114,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     const serverId=url.searchParams.get('serverId');
     const character=serverId==='1313'?{info:vaizelInfo,equipment}
       :serverId==='1314'?{info:spentInfo,equipment}
+      :serverId==='1315'?{info:capInfo,equipment:capEquipment}
       :serverId===String(ASMO_V.serverId)?{info:asmoVaizelInfo,equipment:ASMO_V.equipment}
       :lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment};
     const bodies={
@@ -272,6 +283,50 @@ await check('Mastery without a Daeva: every class skill as a game icon, key skil
   assert.ok(srcs.every(src=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_[A-Z]{2}_SKILL_/.test(src)),srcs.join());
   assert.ok(await page.locator('.ae-mskill.is-key').count()>=3);
   await context.close();
+});
+
+await check('Mastery cap: no step above 11, a capped skill links to its Daevanion node, the tile keeps the real level',async()=>{
+  const {page,context,calls,errors}=await open(ascent(capRef,'mastery'),{live:true});
+  await page.waitForSelector('#aeMasteryCap a[data-cap-node]');
+  assert.deepEqual(await page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>[el.dataset.mastery,el.querySelector('.ae-itile-badge').textContent])),[['Overhead Slam','10→11']],'Only the skill under the cap is levelled, and only to 11');
+  const badges=await page.$$eval('#aeMasterySpend .ae-itile-badge',items=>items.map(el=>el.textContent));
+  assert.ok(badges.every(badge=>Number(badge.split('→').pop())<=11),badges.join());
+  assert.equal(await plain(page,'#aeMasteryCap .ae-mskills-title'),'At the Mastery cap (11)');
+  const rows=await page.$$eval('#aeMasteryCap li',items=>items.map(el=>[el.dataset.masteryCap,el.textContent.replace(/\s+/g,' ').trim(),el.querySelector('a[data-cap-node]')?.getAttribute('href')??null]));
+  assert.deepEqual(rows.map(row=>row[0]),['Keen Strike','Rending Blow']);
+  assert.match(rows[0][1],/^Keen Strike ?12 ?Keen Strike is Lv 12\. Mastery stops at 11, so no more skill points go here\. ?Next \+1: Skill Level Up - Keen Strike on Nezekan$/);
+  assert.match(rows[0][2],/^\/hub\/aetherium\/ascent\/daevanion\/\?serverId=1315&characterId=[^&]+&region=eu&class=gladiator(&role=dps)?&board=11&node=110131$/,'The link opens Nezekan on the Keen Strike node');
+  assert.match(rows[1][2],/&board=11&node=110095$/,'Rending Blow: its own node');
+  assert.equal(calls.filter(path=>path==='/aion2/daevanion').length,1,'One board read, the first open one');
+  assert.equal(await plain(page,'.ae-mskill-grid [data-mastery="Keen Strike"] .ae-mskill-lv'),'12','The Skill window level is the real one');
+  assert.equal(await page.getAttribute('.ae-mskill-grid [data-mastery="Keen Strike"]','data-tip'),'Keen Strike · skill Lv 12');
+  await page.click('.ae-mskill-grid [data-mastery="Rending Blow"]');
+  await page.waitForSelector('#aeInfo:not([hidden])');
+  const card=await plain(page,'#aeInfoBody');
+  assert.match(card,/Target: Mastery 11, then \+9 from Daevanion nodes, gear stat lines or Arcana/,'The guide target is reworded against the cap');
+  assert.match(card,/At the Mastery cap \(11\)\. Next \+1: the Daevanion node Skill Level Up - Rending Blow on Nezekan\./);
+  assert.doesNotMatch(await plain(page,'#aeInfo .ae-card-chips'),/Lv 16|Lv 20/,'The target chip never names a level past the cap (Specialty slot levels in the body are fine)');
+  await page.keyboard.press('Escape');
+  await page.waitForSelector('#aeGuide:not([hidden])');
+  const guide=[];
+  for(let i=0;i<4;i++){guide.push(await plain(page,'.ae-guide-text'));if(await page.locator('#aeGuide [data-guide="next"]').count())await page.click('#aeGuide [data-guide="next"]');else break;}
+  assert.ok(guide.some(text=>/^Keen Strike is at the Mastery cap \(11\), so no more skill points go into it\. Its next \+1: the Daevanion node Skill Level Up - Keen Strike on Nezekan\.$/.test(text)),guide.join('\n'));
+  assert.ok(guide.every(text=>!/Keen Strike: Lv 12 to|Rending Blow: Lv 11 to/.test(text)),'The guide never levels a capped skill');
+  await Promise.all([page.waitForURL(/\/ascent\/daevanion\/.*board=11&node=110131/),page.click('#aeMasteryCap a[data-cap-node="110131"]')]);
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  await page.waitForSelector('.ae-node[data-node="110131"].is-selected');
+  assert.match(await plain(page,'#aeNodePanel h3'),/Keen Strike \+1/,'The board opens on the Keen Strike node');
+  assert.deepEqual(errors,[]);
+  await context.close();
+  // The menu: the move opens the board on the node, and nothing says to level a capped skill.
+  const menu=await open(ascent(capRef),{live:true});
+  await menu.page.waitForSelector('.ae-quest[href*="node=110131"]');
+  const quests=await menu.page.$$eval('.ae-quest',items=>items.map(el=>[el.querySelector('.ae-quest-text').textContent.trim(),el.getAttribute('href')]));
+  const node=quests.find(([title])=>title==='Take the Keen Strike +1 node on Nezekan');
+  assert.ok(node,quests.map(([title])=>title).join(' | '));
+  assert.match(node[1],/&board=11&node=110131$/);
+  assert.ok(quests.every(([title])=>!/^Level (Keen Strike|Rending Blow)/.test(title)));
+  await menu.context.close();
 });
 
 await check('Skill Bar: the game grid, Keen Strike fixed on left click, key skills on 1 to 4',async()=>{

@@ -414,6 +414,11 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-mspend{margin:0 0 16px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--ae-gold) 45%,var(--ae-hairline));background:color-mix(in srgb,var(--ae-gold) 7%,transparent)}
 .ae-mspend ol{margin:6px 0 0;padding-left:22px;display:grid;gap:4px}
 .ae-mspend small{color:var(--ae-text-muted);margin-left:6px}
+/* Skills at the Mastery cap: the tile, then where the next +1 comes from. */
+.ae-mcap-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.ae-mcap-list li{display:flex;gap:12px;align-items:center;min-width:0}
+.ae-mcap-list li>span{font-size:.9375rem;line-height:1.4;color:var(--ae-text)}
+.ae-mcap-list .ae-itile{flex:0 0 auto}
 .ae-mastery-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
 .ae-mdetail{display:grid;gap:10px;align-content:start;padding:16px 18px;background:var(--ae-well-gradient);border:1px solid var(--ae-hairline-strong);box-shadow:var(--ae-top-light),var(--ae-shadow-tight)}
 .ae-mdetail-head{display:flex;gap:14px;align-items:center}

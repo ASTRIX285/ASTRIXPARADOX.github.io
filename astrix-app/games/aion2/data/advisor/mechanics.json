@@ -1,0 +1,50 @@
+{
+  "description": "Confirmed game mechanics the Ascent Plan relies on. Each record is a rule checked in game, with the value the engine reads.",
+  "records": [
+    {
+      "id": "mastery-cap",
+      "label": "Mastery cap",
+      "status": "confirmed",
+      "value": {
+        "cap": 11,
+        "beyond": [
+          {
+            "kind": "daevanion",
+            "label": "Daevanion skill nodes",
+            "perNode": 1
+          },
+          {
+            "kind": "gear",
+            "label": "gear stat lines"
+          },
+          {
+            "kind": "arcana",
+            "label": "Arcana"
+          }
+        ]
+      },
+      "text": "Mastery takes a skill to Lv 11 at most. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Mastery window",
+          "note": "Mastery stops at skill Lv 11. Keen Strike read at Lv 10. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana, as the class research note (claude/aion2-class-research-6oct2026.md) lists them."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    }
+  ]
+}

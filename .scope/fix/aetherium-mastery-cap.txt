@@ -1,0 +1,23 @@
+# fix/aetherium-mastery-cap: the advisor never levels a skill past the Mastery cap (11, Miguel in game 10 Oct 2026); a capped skill points at its next +1 source.
+astrix-app/games/aion2/README.md
+astrix-app/games/aion2/data/advisor/mechanics.json
+astrix-app/games/aion2/data/advisor/progression.json
+astrix-app/games/aion2/engine/ascent-advisor.mjs
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium-data.mjs
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/daevanion/index.html
+hub/aetherium/gear/equipment/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html
+hub/aetherium/skills/index.html
