@@ -5,7 +5,7 @@
  * Everything comes from the character call plus the Ascent Plan's skill data (ascent-advisor.mjs); nothing is guessed,
  * and a value the data does not hold (casting time, range) is left out.
  */
-import { loadAdvisor, prefetchAdvisor } from './aetherium-data.mjs';
+import { ascentUrl, loadAdvisor, prefetchAdvisor } from './aetherium-data.mjs';
 import { $, esc, infoCardHtml, isPending, wireHoverCards } from './aetherium-ui.mjs';
 import { LOCK_ICON, failPage, lockBadge, startCharacterPage, windowBar } from './character-page.mjs';
 import { buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
@@ -190,5 +190,6 @@ startCharacterPage({
   prefetch: className => { if (className) prefetchAdvisor(className); },
   async render(loaded) {
     render(loaded, await loadAdvisor(loaded.model.profile.class));
-  }
+  },
+  next: ({ model, ref }) => ({ label: 'Next: Skills to level', href: ascentUrl(ref, model.profile.class, { screen: 'mastery' }), note: 'Step 3 of 3: the Mastery screen of the Ascent Plan' })
 }).catch(error => failPage('Skills page', error));

@@ -10,8 +10,10 @@
  * and gets the plan from static data alone, with no call to the official site. Advice comes from
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
-import { ArmoryUnavailable, ascentUrl, explain, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster, sourceLabel } from './aetherium-data.mjs';
 import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
+import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
+import { renderNext, renderStepBar } from './aetherium-flow.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
 import { KIND_LABEL, boardGridStyle, nodeArt as boardNodeArt, nodeImg as boardNodeImg, nodeTileHtml } from './daevanion-board.mjs';
@@ -170,17 +172,27 @@ function viewStatus(view, plan) {
   return '';
 }
 
+/**
+ * Where a next move's Show me goes: its screen, and for a Daevanion move the very board the move names (the
+ * character's own board id, carried on the move by the advisor). Without it the screen opened its first open board,
+ * so a move about Vaizel could open Nezekan.
+ */
+function questHref(item) {
+  const href = viewHref(item.view);
+  return item.view === 'daevanion' && item.board ? `${href}&board=${encodeURIComponent(item.board)}` : href;
+}
+
 function renderMenu(plan) {
   const quests = plan.now.slice(0, 4);
   const todo = view => plan.now.filter(item => item.view === view).length;
-  const questCard = item => `<li><a class="ae-quest" href="${esc(viewHref(item.view))}" data-quest-view="${esc(item.view)}">
+  const questCard = item => `<li><a class="ae-quest" href="${esc(questHref(item))}" data-quest-view="${esc(item.view)}"${item.board ? ` data-quest-board="${esc(item.board)}"` : ''}>
       <span class="ae-quest-art" data-fallback="${esc(item.view)}">${item.view === 'gear' ? ICON.gear : viewArt(item.view, plan)}</span>
       <span class="ae-quest-num">${item.step}</span>
       <span class="ae-quest-text"><strong>${esc(item.title)}</strong></span>
       <span class="ae-quest-go">Show me</span>
     </a></li>`;
   return `
-    ${quests.length ? `<section class="ae-quests" aria-labelledby="aeNowTitle">
+    ${quests.length ? `<section class="ae-quests" id="aeNow" aria-labelledby="aeNowTitle">
       <h2 class="ae-section-title" id="aeNowTitle">Your next moves${plan.character ? '' : ` <small>at Lv ${esc(plan.level)}</small>`}</h2>
       <ol class="ae-quest-list">${quests.map(questCard).join('')}</ol>
     </section>` : ''}
@@ -211,10 +223,10 @@ function gameWindow(view, plan, body) {
       <a class="ae-gw-back" href="${esc(viewHref('menu'))}"><span aria-hidden="true">‹</span> Plan</a>
       <h1 class="ae-gw-title" id="aeScreenTitle">${esc(VIEWS[view].window)}</h1>
       <p class="ae-gw-who">${esc(plan.className)} · ${esc(plan.roleLabel)} · Lv ${esc(plan.level)}${plan.character ? ` · ${esc(plan.character.name)}` : ''}</p>
+      ${state.source ? `<p class="ae-gw-source">${esc(sourceLabel(state.source))}</p>` : ''}
     </div>
     <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
     <div class="ae-gw-body">${body}</div>
-    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>
   </div>`;
 }
 
@@ -380,8 +392,7 @@ function renderBoardsByHand(plan) {
     <p class="ae-callout">Find your Daeva and this screen draws your own boards with the route on them. <a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a></p>`;
 }
 
-/* The guide: one short step at a time, the thing to look at lit up on the screen. */
-const guide = { steps: [], index: 0 };
+/* The guide: one short step at a time, the thing to look at lit up on the screen (aetherium-guide.mjs draws it). */
 
 function guideSteps(view, plan) {
   const steps = [];
@@ -459,38 +470,36 @@ function guideSteps(view, plan) {
   return steps;
 }
 
+/** A screen's guide: its steps in the shared guide, Done on the last step going back to the menu. */
 function startGuide(view, plan) {
-  guide.steps = guideSteps(view, plan);
-  guide.index = 0;
-  const el = $('#aeGuide');
-  if (!el) return;
-  el.hidden = !guide.steps.length;
-  if (guide.steps.length) showGuideStep(0, false);
+  mountGuide($('#aeGuide'), guideSteps(view, plan), { doneAction: 'menu', onDone: kind => { if (kind === 'menu') location.assign(viewHref('menu')); } });
 }
 
-function showGuideStep(index, scroll = true) {
-  const steps = guide.steps;
-  if (!steps.length) return;
-  guide.index = Math.max(0, Math.min(steps.length - 1, index));
-  const step = steps[guide.index];
-  document.querySelectorAll('.ae-guide-target').forEach(el => el.classList.remove('ae-guide-target'));
-  step.onShow?.();
-  const target = step.target ? document.querySelector(step.target) : null;
-  target?.classList.add('ae-guide-target');
-  if (scroll && target) target.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  const last = guide.index === steps.length - 1;
-  $('#aeGuide').innerHTML = `
-    <span class="ae-guide-pill" role="button" tabindex="0" data-guide="show">Guide · step ${guide.index + 1} of ${steps.length}</span>
-    <span class="ae-guide-mark" aria-hidden="true"></span>
-    <div class="ae-guide-copy">
-      <p class="ae-guide-count">Guide · step ${guide.index + 1} of ${steps.length}</p>
-      <p class="ae-guide-text">${esc(step.text)}</p>
-    </div>
-    <span class="ae-guide-hide" role="button" tabindex="0" data-guide="hide" aria-label="Hide the guide">▾</span>
-    <div class="ae-guide-nav">
-      <button type="button" class="ae-guide-btn" data-guide="back"${guide.index === 0 ? ' disabled' : ''}>Back</button>
-      <button type="button" class="ae-guide-btn is-next ae-primary" data-guide="${last ? 'menu' : 'next'}">${last ? 'Done' : 'Next'}</button>
-    </div>`;
+/* The menu's first-visit guide: one step, pointing at the next moves. Shown once per device; "How this works" brings it back. */
+const MENU_GUIDE = () => [{ text: 'Your next moves are below, in order. Do move 1 first in the game. Press Show me and it opens on a screen laid out like the game, with the thing to do lit up.', target: '#aeNow' }];
+function showMenuGuide() {
+  mountGuide($('#aeGuide'), MENU_GUIDE(), { skip: false, scroll: true, onDone: () => markGuideSeen('plan') });
+}
+function firstVisitGuide() {
+  if (VIEW !== 'menu' || !state.plan?.now?.length || guideSeen('plan')) return;
+  setTimeout(showMenuGuide, 0); // after the page has reported ready
+}
+
+/* The flow: this page is step 3. Its Next is the top move (menu) or the next screen; the last screen goes back to the moves. */
+const SCREEN_ORDER = Object.keys(VIEWS);
+function nextOf(plan) {
+  if (VIEW === 'menu') {
+    const first = plan.now[0];
+    if (first) return { label: 'Next: Show me move 1', href: questHref(first), note: first.title };
+    return { label: 'Next: Mastery', href: viewHref('mastery'), note: VIEWS.mastery.blurb };
+  }
+  const after = SCREEN_ORDER[SCREEN_ORDER.indexOf(VIEW) + 1];
+  if (after) return { label: `Next: ${VIEWS[after].title}`, href: viewHref(after), note: VIEWS[after].blurb };
+  return { label: 'Next: Back to your next moves', href: viewHref('menu'), note: 'That is every screen of the plan' };
+}
+function renderFlow(plan) {
+  renderStepBar({ current: 'moves', ref: state.model ? state.ref : null, className: state.className, help: VIEW === 'menu' && plan.now.length ? showMenuGuide : null });
+  renderNext(nextOf(plan));
 }
 
 
@@ -746,6 +755,7 @@ function renderPlan() {
       : VIEW === 'skill-bar' ? renderSkillBarScreen(plan)
       : renderStatsScreen(plan);
     $('#aePlan').innerHTML = `${fallback}${gameWindow(VIEW, plan, body)}`;
+    renderFlow(plan);
     if (VIEW === 'daevanion' && state.model && !plan.pending && document.querySelector('#aePlannerBody')) showBoard(planner.boardId).catch(fail);
     else startGuide(VIEW, plan);
     return;
@@ -764,6 +774,7 @@ function renderPlan() {
   $('#aePlan').innerHTML = plan.pending
     ? `${header}<section class="ae-panel">${pendingNote(plan.pending)}<p><a class="btn ae-primary" href="?class=${esc(plan.className.toLowerCase())}&level=${esc(plan.level)}">Show the ${esc(plan.className)} main role instead</a></p></section>`
     : `${header}${renderMenu(plan)}`;
+  renderFlow(plan);
 }
 
 async function selectClass(className) {
@@ -818,14 +829,6 @@ function wireForm() {
     if (alt) { openInfo(altCard(state.plan, alt.dataset.alt), alt); return; }
     const worn = event.target.closest('[data-stigma-now]');
     if (worn) { const name = worn.dataset.stigmaNow; const keep = state.plan.stigmas.slots.some(item => item.name === name); openInfo(infoCardHtml({ icon: state.plan.skillIcons[name], title: name, sub: 'Stigma · equipped now', status: keep ? ['keep', 'In the build. Keep it.'] : ['need', 'Not in the build. Swap it out.'] }), worn); return; }
-    const step = event.target.closest('[data-guide]');
-    if (step) {
-      if (step.dataset.guide === 'menu') location.assign(viewHref('menu'));
-      else if (step.dataset.guide === 'hide') { $('#aeGuide').classList.add('is-min'); }
-      else if (step.dataset.guide === 'show') { $('#aeGuide').classList.remove('is-min'); }
-      else showGuideStep(guide.index + (step.dataset.guide === 'next' ? 1 : -1));
-      return;
-    }
     const tab = event.target.closest('[data-board-tab]');
     if (tab) { showBoard(Number(tab.dataset.boardTab)).catch(fail); return; }
     const node = event.target.closest('[data-node],[data-route-node]');
@@ -894,6 +897,7 @@ async function start() {
   renderPlan();
   if (state.model) markCharacterShown();
   markReady();
+  firstVisitGuide();
 }
 
 function fail(error) {

@@ -16,13 +16,13 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261009-3">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-1">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd",
 
-"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=284481204d",
+"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8b7a875bd9",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
@@ -30,16 +30,18 @@
 
 "/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513",
 
-"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02",
+"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5",
 
-"/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=68badf3160",
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159",
 
-"/astrix-app/pages/aetherium/skills-page.mjs":"/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8"
+"/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=6245dbdebe",
+
+"/astrix-app/pages/aetherium/skills-page.mjs":"/astrix-app/pages/aetherium/skills-page.mjs?v=32d76e6a43"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=284481204d" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8b7a875bd9" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb" data-head-hint>
 
@@ -47,12 +49,14 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=68badf3160" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/skills-page.mjs?v=dd601aede8"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=6245dbdebe" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/skills-page.mjs?v=32d76e6a43" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/skills-page.mjs?v=32d76e6a43"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="skills">
   <a class="ae-skip" href="#aeMain">Skip to the skills</a>
@@ -90,9 +94,17 @@
   </div>
 
   <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
+    <nav class="ae-steps-bar" id="aeSteps" aria-label="Your path">
+      <ol class="ae-steps-list">
+        <li><a class="ae-step" href="/hub/aetherium/#aeSearch" data-step="find"><span class="ae-step-num" aria-hidden="true">1</span><span class="ae-step-label">Find your Daeva</span></a></li>
+        <li><span class="ae-step is-current is-locked" aria-disabled="true" aria-current="step" title="Find your Daeva first"><span class="ae-step-num" aria-hidden="true">2</span><span class="ae-step-label">See your setup</span><span class="ae-step-note">Find your Daeva first</span></span></li>
+        <li><span class="ae-step is-locked" aria-disabled="true" title="Find your Daeva first"><span class="ae-step-num" aria-hidden="true">3</span><span class="ae-step-label">Your next moves</span><span class="ae-step-note">Find your Daeva first</span></span></li>
+      </ol>
+    </nav>
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <p class="ae-source" id="aeSource" hidden></p>
     <div id="aeStage" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Reading your character.</p></div></div>
+    <p class="ae-next" id="aeNext" hidden></p>
     <noscript><p class="ae-muted">The Skills page needs JavaScript to read your character.</p></noscript>
   </main>
 

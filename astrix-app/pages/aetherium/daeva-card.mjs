@@ -10,11 +10,14 @@ import {
   daevanionPageUrl,
   explain,
   factionOf,
+  gearPageUrl,
   gearUrl,
   lastRegion,
+  loadAdvisor,
   loadCharacter,
   loadIntroArt,
   loadServers,
+  prefetchAdvisor,
   refFromUrl,
   regionName,
   regionOf,
@@ -25,6 +28,9 @@ import {
   searchCharacters
 } from './aetherium-data.mjs';
 import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
+import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
+import { renderNext, renderStepBar } from './aetherium-flow.mjs';
+import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 
 const state = { model: null, source: null, ref: null, busy: false, retry: null };
 
@@ -84,7 +90,87 @@ function renderSummary() {
       <p>The Ascent Plan for ${esc(p.name)}: what to fix now, which skills and Specialty perks to take, stigmas, Daevanion order and a macro, for ${esc(p.class)} at Lv ${esc(p.level)}.</p>
       <a class="btn ae-primary" id="aeAscentLink" href="${esc(ascentUrl(state.ref, p.class))}">Open Ascent Plan</a>
       <a class="btn" id="aeGearLink" href="${esc(gearUrl(state.ref))}">View full setup</a>
-    </aside>`;
+    </aside>
+    <section class="ae-panel ae-first-move" id="aeFirstMove" aria-labelledby="aeFirstMoveTitle" aria-live="polite">
+      <p class="ae-eyebrow" id="aeFirstMoveTitle">Your first move</p>
+      <p class="ae-first-move-text" id="aeFirstMoveText">Working out your first move.</p>
+      <a class="btn ae-primary" id="aeFirstMoveGo" href="${esc(ascentUrl(state.ref, p.class))}" data-first-move hidden>Show me</a>
+    </section>`;
+  loadFirstMove().catch(() => {});
+}
+
+/* The first move: the Ascent Plan's top move for this Daeva, in one line, with a Show me that opens it. The plan data
+   (small static files) loads once the card is on screen, so the card never waits for it. The move comes from the advisor only. */
+function moveHref(move, p) {
+  if (!move) return ascentUrl(state.ref, p.class);
+  if (move.view === 'gear') return gearPageUrl(state.ref);
+  return ascentUrl(state.ref, p.class, { screen: move.view, board: move.view === 'daevanion' ? move.board ?? null : null });
+}
+async function loadFirstMove() {
+  const { model, ref } = state;
+  const p = model.profile;
+  const text = $('#aeFirstMoveText');
+  const go = $('#aeFirstMoveGo');
+  const strip = $('#aeFirstMove');
+  if (!text || !go) return;
+  let plan = null;
+  if (AION2_CLASSES.includes(p.class)) {
+    try { plan = buildAscentPlan({ className: p.class, role: null, level: p.level, data: await loadAdvisor(p.class), model }); } catch { plan = null; }
+  }
+  if (state.model !== model || state.ref !== ref) return; // another Daeva took the card meanwhile
+  const move = plan?.now?.[0] ?? null;
+  text.textContent = move ? move.title : plan ? 'Nothing to fix right now. Your plan has what comes next.' : 'Your plan could not load here. Open the Ascent Plan to see it.';
+  go.href = moveHref(move, p);
+  go.textContent = move ? 'Show me' : 'Open Ascent Plan';
+  if (move) { go.dataset.moveView = move.view; if (move.board) go.dataset.moveBoard = move.board; }
+  go.hidden = false;
+  strip.classList.add('is-ready');
+  strip.dataset.move = move ? String(move.step) : 'none';
+}
+
+/* The flow on this page: step 1. With a Daeva on the card, steps 2 and 3 open, the Next goes to the Ascent Plan and
+   "How this works" reopens the first-visit guide. Without one, the only way on is the search. */
+function renderFlow() {
+  const p = state.model?.profile ?? null;
+  renderStepBar({ current: 'find', ref: p ? state.ref : null, className: p?.class ?? null, help: p ? showCardGuide : null });
+  if (p) renderNext({ label: 'Next: Your next moves', href: ascentUrl(state.ref, p.class), note: 'Step 3 of 3: the Ascent Plan for this Daeva' });
+  else renderNext({ label: 'Find your Daeva', href: '#aeSearch', note: 'Step 1 of 3: type your character name above' });
+}
+
+/* The first-visit guide: three steps, once per device, after the page is usable. Each step says what the thing on screen means for the game. */
+const CARD_GUIDE = () => [
+  { text: 'This is your Daeva. Check it is the character you play: the class, the level and the server.', target: '#aeSummary .ae-summary-card' },
+  { text: 'This is your first move: the one thing to do next time you are in the game. Show me opens it on a screen laid out like the game.', target: '#aeFirstMove' },
+  { text: 'Your full plan is here: the skills to level, the stigmas to slot, your Daevanion boards and a macro, in order.', target: '#aeAscentLink' }
+];
+function showCardGuide() {
+  mountGuide($('#aeGuide'), CARD_GUIDE(), { skip: true, scroll: true, onDone: () => markGuideSeen('card') });
+}
+function firstVisitGuide() {
+  if (guideSeen('card')) return;
+  setTimeout(showCardGuide, 0); // after the page has reported ready
+}
+
+/* While the official site answers: the card's shape, never an empty panel. After 3 seconds it says the read is still going. */
+const SKELETON = `<article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading">
+      <div class="ae-sk ae-sk-portrait" aria-hidden="true"></div>
+      <div class="ae-summary-body">
+        <p class="ae-eyebrow">Your Daeva</p>
+        <p class="ae-sk ae-sk-name" aria-hidden="true"></p>
+        <p class="ae-sk ae-sk-chips" aria-hidden="true"></p>
+        <div class="ae-sk-tiles" aria-hidden="true"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div>
+        <p class="ae-reading" id="aeReading" role="status">Reading your character</p>
+      </div>
+    </article>`;
+let readingTimer = null;
+function showLoading(on) {
+  clearTimeout(readingTimer);
+  if (state.model) return; // a Daeva already on screen stays while another read runs
+  const el = $('#aeSummary');
+  if (!on) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = SKELETON;
+  readingTimer = setTimeout(() => { const note = $('#aeReading'); if (note) note.textContent = 'Still reading from the official AION 2 site'; }, 3000);
 }
 
 function renderRoster() {
@@ -170,13 +256,16 @@ function renderIntroArt(art) {
 }
 
 function show(model, source, ref) {
+  clearTimeout(readingTimer);
   Object.assign(state, { model, source, ref });
   showIntro(false);
   setFaction(model.profile.raceName, model.profile.raceId);
   showSource(source);
   renderSummary();
   renderRoster();
+  renderFlow();
   markCharacterShown();
+  firstVisitGuide();
 }
 
 /** A read that failed: say why, offer Try again. A Daeva already on screen stays; with none, the intro shows. */
@@ -207,6 +296,7 @@ function setBusy(busy) {
   const button = $('#aeFind');
   button.disabled = busy;
   button.textContent = busy ? 'Reading your character' : 'Find character';
+  showLoading(busy);
 }
 
 async function onSearch(event) {
@@ -292,13 +382,19 @@ async function start() {
   if (!ref) {
     // A new visitor: the intro, with no call to the official site.
     showIntro(true);
+    renderFlow();
     markReady();
     return;
   }
+  // The card's shape shows at once while the site answers; the plan data for the first move starts loading beside it.
+  showLoading(true);
+  const sameDaeva = active && String(active.serverId) === String(ref.serverId) && active.characterId === ref.characterId;
+  prefetchAdvisor(sameDaeva ? active.className : null);
   try {
     const { model, source } = await loadCharacter(ref);
     show(model, source, ref);
   } catch (error) {
+    showLoading(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;
     failedRead(error, () => importCharacter(ref));
   }
