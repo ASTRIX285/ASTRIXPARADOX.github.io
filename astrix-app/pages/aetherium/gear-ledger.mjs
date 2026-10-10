@@ -61,7 +61,7 @@ async function selectSlot(index, from) {
   openInfo(infoCardHtml({ ...head(null), lines: [`Reading ${slot.name}.`] }), from);
   let result;
   try {
-    result = await loadItemDetail(state.model, slot, state.source);
+    result = await loadItemDetail(state.model, slot);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
     result = { detail: null, reason: explain(error, 'The official AION 2 site is not answering right now. Try this item again in a minute.') };

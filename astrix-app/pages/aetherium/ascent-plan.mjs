@@ -606,7 +606,7 @@ async function showBoard(boardId) {
     body.innerHTML = '<p class="ae-muted">Reading the board.</p>';
     const board = state.model.daevanion.find(item => item.id === boardId);
     let result;
-    try { result = await loadBoard(state.model, board, state.source); }
+    try { result = await loadBoard(state.model, board); }
     catch (error) {
       if (!(error instanceof ArmoryUnavailable)) throw error;
       result = { nodes: null, reason: explain(error, 'The official AION 2 site is not answering right now. Pick the board again in a minute.') };
@@ -853,7 +853,8 @@ async function loadDaeva(ref) {
     return await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    showNotice(explain(error, 'The official AION 2 site is not answering right now, so this plans by hand. Try your Daeva again in a minute.'), 'warn');
+    // The plan goes on by hand for the class the link or the roster names. Try again re-reads the same Daeva.
+    showNotice(explain(error, 'The official AION 2 site is not answering right now, so this plans by hand. Try your Daeva again in a minute.'), 'warn', { retry: () => location.reload() });
     return null;
   }
 }

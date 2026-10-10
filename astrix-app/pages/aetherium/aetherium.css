@@ -843,5 +843,70 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a[ar
 }
 .ae-gear-page>.ae-col[hidden]{display:none}
 .ae-roster-switch[hidden],.ae-server-note[hidden]{display:none}
+
+/* A failed read: the words in the notice, a Try again under them in the same box. */
+.ae-retry{display:flex;margin:calc(-1 * var(--ae-gap)) 0 var(--ae-gap);padding:0 14px 12px;border-left:3px solid var(--ae-accent-2);background:rgba(143,208,255,.06)}
+.ae-retry[data-tone="warn"]{border-left-color:var(--ae-gold);background:rgba(226,181,79,.1)}
+.ae-retry[data-tone="error"]{border-left-color:var(--ae-asmodian-2);background:rgba(209,58,82,.12)}
+.ae-retry[hidden]{display:none}
+.aetherium-page .ae-retry-btn{min-height:40px;padding:0 16px}
+
+/* The intro (Daeva Card with no Daeva): the official class art on one side, the NPC guide and its speech panel on
+   the other, in the game-window style. Art and speech panel share one height; without art the panel takes the row. */
+.ae-intro{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--ae-gap);align-items:stretch;margin:0 0 var(--ae-gap)}
+.ae-intro.has-art{grid-template-columns:minmax(260px,2fr) minmax(0,3fr)}
+.ae-intro[hidden],.ae-classes[hidden],.ae-intro-art[hidden],.ae-intro-npc[hidden],.ae-find-first-art[hidden],.ae-summary[hidden],.ae-menu[hidden]{display:none}
+.ae-intro-art{position:relative;min-height:300px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#1b2a4a,#0a1120 72%);border:1px solid #3a4560;box-shadow:0 18px 50px rgba(0,0,0,.5),var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-intro-art .ae-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%;display:block}
+.ae-intro-guide{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:stretch}
+.ae-intro.has-npc .ae-intro-guide{grid-template-columns:150px minmax(0,1fr)}
+.ae-intro-npc{display:grid;align-content:end;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,#1b2a4a,#0a1120 75%);border:1px solid #3a4560;box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-intro-npc .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block}
+.ae-speech{position:relative;display:flex;flex-direction:column;justify-content:center;gap:10px;box-sizing:border-box;padding:24px 28px;
+  background:linear-gradient(180deg,rgba(18,26,46,.97),rgba(9,14,27,.97));border:1px solid color-mix(in srgb,var(--ae-ice) 55%,#3a4560);
+  box-shadow:0 0 0 1px rgba(0,0,0,.4),0 0 24px color-mix(in srgb,var(--ae-ice) 18%,transparent),0 18px 50px rgba(0,0,0,.5),var(--ae-bevel)}
+.ae-intro.has-npc .ae-speech::before{content:"";position:absolute;left:-9px;top:50%;width:16px;height:16px;transform:translateY(-50%) rotate(45deg);background:#111a2e;border-left:1px solid color-mix(in srgb,var(--ae-ice) 55%,#3a4560);border-bottom:1px solid color-mix(in srgb,var(--ae-ice) 55%,#3a4560)}
+.ae-speech .ae-eyebrow{color:var(--ae-ice);margin:0}
+.ae-speech-title{margin:0;font:400 clamp(22px,2.6vw,32px)/1.15 var(--ax-font-brand);color:var(--ae-ink)}
+.ae-speech-lead{margin:0;color:var(--ae-muted);font-size:15px}
+.ae-steps{counter-reset:step;margin:6px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.ae-steps li{counter-increment:step;position:relative;display:grid;gap:2px;padding:10px 14px 10px 50px;background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-steps li::before{content:counter(step);position:absolute;left:14px;top:10px;width:24px;height:24px;display:grid;place-items:center;font:700 13px/1 var(--ax-font-head);color:var(--ae-gold-ink);background:var(--ae-gold)}
+.ae-steps strong{font:700 15px/1.3 var(--ax-font-head);color:var(--ae-ink)}
+.ae-steps span{color:var(--ae-muted);font-size:14px}
+.ae-classes{margin:var(--ae-gap) 0 0}
+.ae-class-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.ae-class-tile{display:grid;grid-template-rows:auto 1fr;align-items:center;gap:8px;box-sizing:border-box;height:100%;min-height:64px;padding:12px 10px;text-align:center;color:var(--ae-ink);text-decoration:none;
+  background:var(--ae-navy-raised);border:1px solid var(--ae-navy-line);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch);transition:border-color .15s,transform .15s}
+.ae-class-tile:hover,.ae-class-tile:focus-visible{border-color:var(--ae-gold);transform:translateY(-2px)}
+.ae-class-tile:focus-visible{outline:2px solid var(--ae-ice);outline-offset:2px}
+.ae-class-art{display:none;aspect-ratio:1;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#1b2a4a,#0a1120 72%);border:1px solid #3a4560;border-radius:6px}
+.ae-class-row.has-art .ae-class-art{display:block}
+.ae-classes-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:6px 14px;margin:0 0 12px}
+.ae-classes-head h2{margin:0;font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-muted)}
+.ae-class-art .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block}
+.ae-class-name{align-self:center;font:700 14px/1.2 var(--ax-font-head);letter-spacing:.04em}
+
+/* Find your Daeva first (Gear Ledger, Gear, Skills, Daevanion with no Daeva): the guide's art beside a short panel. */
+.ae-find-first{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center;margin:0}
+.ae-find-first.has-art{grid-template-columns:160px minmax(0,1fr)}
+.ae-find-first-body p{max-width:64ch}
+.ae-ledger-head.is-find-first{display:block;padding:0;margin:0;border:0}
+.ae-find-first-art{display:block;align-self:stretch;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,#1b2a4a,#0a1120 75%);border:1px solid #3a4560;box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
+.ae-find-first-art .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block}
+.ae-find-first-body{display:grid;gap:10px;justify-items:start}
+.ae-find-first-body h1{margin:0;font:400 clamp(24px,3vw,34px)/1.15 var(--ax-font-brand);color:var(--ae-ink)}
+.ae-find-first-body p{margin:0;color:var(--ae-muted)}
+.ae-find-first-body .ae-eyebrow{color:var(--ae-ice);margin:0}
+@media (max-width:1099px){.ae-intro.has-art{grid-template-columns:minmax(0,1fr)}.ae-intro-art{min-height:220px;max-height:320px}}
+@media (max-width:819px){
+  .ae-class-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .ae-class-tile{padding:10px 6px}
+  .ae-class-name{font-size:12px;letter-spacing:.02em;overflow-wrap:anywhere}
+  .ae-speech{padding:18px 16px}
+  .ae-intro.has-npc .ae-intro-guide{grid-template-columns:96px minmax(0,1fr);gap:10px}
+  .ae-find-first.has-art{grid-template-columns:110px minmax(0,1fr);gap:14px}
+}
+@media (max-width:479px){.ae-steps li{padding:8px 10px 8px 42px}.ae-steps li::before{left:10px;top:9px;width:22px;height:22px}}
 .ae-roster-switch select{flex:0 1 auto;min-width:0;max-width:min(100%,360px)}
 .ae-roster-switch label{flex:0 0 auto}

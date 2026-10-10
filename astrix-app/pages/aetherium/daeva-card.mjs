@@ -1,17 +1,19 @@
 /**
  * Daeva Card (The Aetherium): find a character, see the summary, keep up to 8 Daevas per server on this device.
+ * With no Daeva the page opens on the intro: official class art, the NPC guide with three steps, the search and
+ * the eight class tiles (a plan by hand for each). A failed read says why and offers Try again; nothing stands
+ * in for a character, and no page ever shows an example Daeva.
  */
 import {
   ArmoryUnavailable,
-  armoryLive,
   ascentUrl,
   daevanionPageUrl,
-  demoReasonOf,
   explain,
   factionOf,
   gearUrl,
   lastRegion,
   loadCharacter,
+  loadIntroArt,
   loadServers,
   refFromUrl,
   regionName,
@@ -22,9 +24,9 @@ import {
   roster,
   searchCharacters
 } from './aetherium-data.mjs';
-import { $, esc, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
+import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
 
-const state = { model: null, source: null, ref: null, busy: false };
+const state = { model: null, source: null, ref: null, busy: false, retry: null };
 
 /* The region being searched. It starts from the link, else the region last used on this device, else Europe. */
 let currentRegion = 'eu';
@@ -47,7 +49,7 @@ function renderServers(servers) {
 }
 
 function renderSummary() {
-  const { model, source } = state;
+  const { model } = state;
   const el = $('#aeSummary');
   if (!model) { el.hidden = true; return; }
   const p = model.profile;
@@ -57,7 +59,7 @@ function renderSummary() {
   // At or past the unlock level the site can still report none acquired (stigmas also need a quest).
   const stigmaNote = p.level >= stigmaLevel ? 'None unlocked yet' : `Unlock at Lv ${stigmaLevel}`;
   const stigmasOpen = stigmas.filter(skill => skill.acquired).length;
-  const eyebrow = [source.kind === 'demo' ? 'Example' : 'Your Daeva', p.title ? `Title: ${p.title}` : null].filter(Boolean).join(' · ');
+  const eyebrow = ['Your Daeva', p.title ? `Title: ${p.title}` : null].filter(Boolean).join(' · ');
   el.hidden = false;
   el.innerHTML = `
     <article class="ae-panel ae-summary-card" aria-labelledby="aeName">
@@ -99,7 +101,7 @@ function renderRoster() {
         <span class="ae-roster-state">${active ? 'Active' : ''}</span>
         <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
         <span class="ae-roster-line">${esc(entry.className)} · Lv ${esc(entry.level)}</span>
-        <span class="ae-roster-line ae-muted">${esc(entry.serverName)} · ${esc(regionShort(entry.region))}${entry.demo ? ' · example' : ''}</span>
+        <span class="ae-roster-line ae-muted">${esc(entry.serverName)} · ${esc(regionShort(entry.region))}</span>
       </button>
       <button type="button" class="ae-roster-remove" data-roster-remove="${esc(key)}" aria-label="Remove ${esc(entry.name)} from your Daevas">Remove</button>
     </li>`;
@@ -134,8 +136,42 @@ function renderResults(rows) {
   }));
 }
 
+/* The intro: shown while no Daeva is on screen. Its words and the search are in the page already; the official
+   art (class render, NPC guide, class tiles) is added once the art data is in, so it never holds up first paint. */
+let introArtWanted = false;
+function showIntro(on) {
+  $('#aeIntro').hidden = !on;
+  $('#aeClasses').hidden = !on;
+  if (on) { $('#aeSummary').hidden = true; $('#aeSource').hidden = true; }
+  if (on && !introArtWanted) { introArtWanted = true; loadIntroArt().then(renderIntroArt); }
+}
+
+function renderIntroArt(art) {
+  const intro = $('#aeIntro');
+  const hero = art.keyArt ?? [...art.classes.values()][0] ?? null;
+  if (hero) {
+    $('#aeIntroArt').innerHTML = introArtImg(hero, { width: 480, height: 600, lazy: false });
+    $('#aeIntroArt').hidden = false;
+    intro.classList.add('has-art');
+  }
+  if (art.npc) {
+    $('#aeIntroNpc').innerHTML = introArtImg(art.npc, { width: 160, height: 200, lazy: false });
+    $('#aeIntroNpc').hidden = false;
+    intro.classList.add('has-npc');
+  }
+  // With any class art in, every tile shows its art frame (a pending class keeps an empty frame, never a stand-in), so the row stays one height.
+  if (art.classes.size) $('#aeClasses .ae-class-row').classList.add('has-art');
+  for (const tile of document.querySelectorAll('#aeClasses [data-class]')) {
+    const entry = art.classes.get(tile.dataset.class);
+    if (!entry) continue;
+    tile.querySelector('.ae-class-art').innerHTML = introArtImg(entry, { width: 160, height: 160, className: 'ae-art ae-class-img' });
+    tile.classList.add('has-art');
+  }
+}
+
 function show(model, source, ref) {
   Object.assign(state, { model, source, ref });
+  showIntro(false);
   setFaction(model.profile.raceName, model.profile.raceId);
   showSource(source);
   renderSummary();
@@ -143,10 +179,11 @@ function show(model, source, ref) {
   markCharacterShown();
 }
 
-async function fallbackToDemo(message, demoReason = 'unavailable') {
-  showNotice(message, 'warn');
-  const { model, source } = await loadCharacter(null, { demoReason });
-  show(model, source, null);
+/** A read that failed: say why, offer Try again. A Daeva already on screen stays; with none, the intro shows. */
+function failedRead(error, retry) {
+  state.retry = retry;
+  showNotice(explain(error), 'warn', { retry: () => state.retry?.() });
+  if (!state.model) showIntro(true);
 }
 
 async function importCharacter(ref) {
@@ -155,26 +192,14 @@ async function importCharacter(ref) {
     const { model, source } = await loadCharacter(ref);
     if (!roster.add(model, source)) showNotice(`${model.profile.server.name} already has ${roster.slots} Daevas saved. Remove one to add ${model.profile.name}.`, 'warn');
     else showNotice('');
-    const shown = source.kind === 'live' ? ref : null;
-    show(model, source, shown);
-    history.replaceState(null, '', shown ? `?${new URLSearchParams({ serverId: shown.serverId, characterId: shown.characterId, region: regionOf(shown.region) })}` : location.pathname);
+    show(model, source, ref);
+    history.replaceState(null, '', `?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId, region: regionOf(ref.region) })}`);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await failedRead(error);
+    failedRead(error, () => importCharacter(ref));
   } finally {
     setBusy(false);
   }
-}
-
-/** A read that failed. Only a real "the site did not answer" shows the example; a refusal or a rate limit says what happened and leaves the page as it is (unless there is nothing to show yet). */
-async function failedRead(error, nothingShown = false) {
-  const message = explain(error, 'The official AION 2 site is not answering right now, so this shows an example Daeva. Try again in a minute.');
-  if (error.reason === 'rate' || error.reason === 'other') {
-    if (nothingShown) await fallbackToDemo(message, demoReasonOf(error));
-    else showNotice(message, 'warn');
-    return;
-  }
-  await fallbackToDemo(message);
 }
 
 function setBusy(busy) {
@@ -185,7 +210,7 @@ function setBusy(busy) {
 }
 
 async function onSearch(event) {
-  event.preventDefault();
+  event?.preventDefault?.();
   if (state.busy) return;
   const name = $('#aeNameInput').value.trim();
   if (!name) { showNotice('Type a character name first.', 'warn'); $('#aeNameInput').focus(); return; }
@@ -196,7 +221,7 @@ async function onSearch(event) {
   } catch (error) {
     setBusy(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await failedRead(error);
+    failedRead(error, () => onSearch());
     return;
   }
   setBusy(false);
@@ -204,9 +229,7 @@ async function onSearch(event) {
   const rows = serverId ? found.rows.filter(row => row.serverId === serverId) : found.rows;
   if (!rows.length) {
     renderResults([]);
-    showNotice(armoryLive()
-      ? `No Daeva named ${name} on ${serverId ? 'that server' : regionName(currentRegion)}. Check the spelling.`
-      : 'Live search is not connected yet, so only the example Daeva can be opened.', 'warn');
+    showNotice(`No Daeva named ${name} on ${serverId ? 'that server' : regionName(currentRegion)}. Check the spelling.`, 'warn');
     return;
   }
   showNotice('');
@@ -256,6 +279,7 @@ async function start() {
   const ref = fromUrl ?? (active ? { serverId: active.serverId, characterId: active.characterId, region: active.region } : null);
   currentRegion = ref ? regionOf(ref.region) : lastRegion();
   renderRegions();
+  renderRoster();
   $('#aeRegion').addEventListener('change', onRegionChange);
   $('#aeRosterSwitch').addEventListener('change', () => {
     const entry = roster.switchTo($('#aeRosterSwitch').value);
@@ -265,12 +289,18 @@ async function start() {
   });
   // The server list loads beside the character, never in front of it.
   loadRegionServers();
+  if (!ref) {
+    // A new visitor: the intro, with no call to the official site.
+    showIntro(true);
+    markReady();
+    return;
+  }
   try {
     const { model, source } = await loadCharacter(ref);
-    show(model, source, source.kind === 'live' ? ref : null);
+    show(model, source, ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    await failedRead(error, true);
+    failedRead(error, () => importCharacter(ref));
   }
   markReady();
 }

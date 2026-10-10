@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261009-2">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261009-3">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/tools/fixtures/aion2/eu/servers.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
@@ -25,27 +25,27 @@
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
-"/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=ddcaab9e0d",
+"/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=28610abc95",
 
-"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=8b0dc3749a",
+"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513",
 
-"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=07bcd96c5e",
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02",
 
-"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=e4304af7c4"
+"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=ddcaab9e0d" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=28610abc95" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=8b0dc3749a" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=07bcd96c5e" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=e4304af7c4" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=e4304af7c4"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
   <a class="ae-skip" href="#aeMain">Skip to the Daeva Card</a>
@@ -83,6 +83,22 @@
   </div>
 
   <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
+    <section class="ae-intro" id="aeIntro" aria-labelledby="aeIntroTitle">
+      <div class="ae-intro-art" id="aeIntroArt" hidden></div>
+      <div class="ae-intro-guide">
+        <div class="ae-intro-npc" id="aeIntroNpc" hidden></div>
+        <div class="ae-speech">
+          <p class="ae-eyebrow">Your guide</p>
+          <h2 class="ae-speech-title" id="aeIntroTitle">Welcome to The Aetherium, Daeva.</h2>
+          <p class="ae-speech-lead">Three steps and you will see your character, your gear and what to do next.</p>
+          <ol class="ae-steps">
+            <li><strong>Pick your region.</strong><span>The region picker is just below.</span></li>
+            <li><strong>Type your in-game character name.</strong><span>No login, nothing to install.</span></li>
+            <li><strong>See your Daeva.</strong><span>Gear, skills, Daevanion boards and an Ascent Plan for what to do next.</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
     <section class="ae-panel ae-search" aria-labelledby="aeSearchTitle">
       <p class="ae-eyebrow">Find your Daeva</p>
       <h1 id="aeSearchTitle">Type a character name. See your whole setup.</h1>
@@ -99,6 +115,20 @@
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <section class="ae-summary" id="aeSummary" aria-label="Character summary"><div class="ae-panel ae-skeleton"><p>Reading your character.</p></div><div class="ae-panel ae-skeleton"><p>Ascent Plan</p></div></section>
     <p class="ae-source" id="aeSource" hidden></p>
+    <section class="ae-classes" id="aeClasses" aria-labelledby="aeClassesTitle">
+      <div class="ae-classes-head"><h2 id="aeClassesTitle">Or pick a class</h2> <p class="ae-roster-count">Plan by hand, no Daeva needed</p></div>
+      <ul class="ae-class-row">
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=gladiator&amp;level=1" data-class="gladiator"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Gladiator</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=templar&amp;level=1" data-class="templar"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Templar</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=assassin&amp;level=1" data-class="assassin"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Assassin</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=ranger&amp;level=1" data-class="ranger"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Ranger</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=sorcerer&amp;level=1" data-class="sorcerer"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Sorcerer</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=spiritmaster&amp;level=1" data-class="spiritmaster"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Spiritmaster</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=cleric&amp;level=1" data-class="cleric"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Cleric</span></a></li>
+        <li><a class="ae-class-tile" href="/hub/aetherium/ascent/?class=chanter&amp;level=1" data-class="chanter"><span class="ae-class-art" aria-hidden="true"></span><span class="ae-class-name">Chanter</span></a></li>
+      </ul>
+      <p class="ae-roster-note">Each class opens the Ascent Plan by hand from Lv 1: skills, Specialty perks, stigmas, Daevanion order and a macro.</p>
+    </section>
     <section aria-labelledby="aeRosterTitle">
       <div class="ae-roster-head"><h2 id="aeRosterTitle">Your Daevas</h2> <p class="ae-roster-count" id="aeRosterCount">0 of 8</p></div>
       <div class="ae-roster-switch" id="aeRosterSwitchBox" hidden><label for="aeRosterSwitch">Show server</label> <select id="aeRosterSwitch" name="rosterServer"></select></div>

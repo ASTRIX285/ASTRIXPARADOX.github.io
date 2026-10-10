@@ -2,8 +2,8 @@
  * The Aetherium page config. One place for the Worker address and the regions.
  *
  * The aetherium-worker origin, no trailing slash (deployed by Miguel, 5 Oct 2026). If the Worker
- * answers with an error or can't be reached, the pages fall back to the ASTRIX285 fixtures as a
- * labelled demo. Set it to null to run the pages on the demo only.
+ * answers with an error or can't be reached, the pages say so and offer a retry. No page ever shows
+ * a stand-in character. With null the pages run with no live data at all (the search says so).
  */
 export const AETHERIUM_WORKER_URL = 'https://aetherium-worker.astrix285.workers.dev';
 
@@ -22,12 +22,13 @@ export const AETHERIUM_REGION = 'eu';
 /** Where the last region used is kept on this device. */
 export const AETHERIUM_REGION_KEY = 'aetherium.region.v1';
 
-/** The labelled demo: Miguel's own character, captured from the public Europe site (#451). */
-export const AETHERIUM_DEMO = Object.freeze({
-  capturedOn: '2026-10-05',
-  name: 'ASTRIX285',
-  fixtures: '/astrix-app/tools/fixtures/aion2/eu/'
-});
+/** The Europe server list, captured from the official site (an official API response, no character in it). Lets the Europe picker paint with no call. */
+export const AETHERIUM_EU_SERVERS = '/astrix-app/tools/fixtures/aion2/eu/servers.json';
+
+/** The official art the intro shows (class renders and the NPC guide), hotlinked from the NCSOFT CDN, with provenance. */
+export const AETHERIUM_INTRO_ART = '/astrix-app/games/aion2/data/intro-art.json';
+/** The only host intro art may come from. An entry on any other host is never shown. */
+export const AETHERIUM_ART_HOST = 'https://assets.playnccdn.com/';
 
 /** The roster is kept per server (the public data cannot tell which characters share an account). v1 was one list for the device. */
 export const AETHERIUM_ROSTER_KEY = 'aetherium.roster.v2';

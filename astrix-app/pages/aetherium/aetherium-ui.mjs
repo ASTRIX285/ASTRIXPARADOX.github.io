@@ -30,13 +30,34 @@ export function showSource(source) {
   el.textContent = sourceLabel(source);
 }
 
-export function showNotice(message, tone = 'info') {
+/**
+ * The page notice. With retry (a function) a "Try again" button sits under the words, in the same box;
+ * the button row is its own element so the notice text stays plain.
+ */
+export function showNotice(message, tone = 'info', { retry = null } = {}) {
   const el = $('#aeNotice');
   if (!el) return;
   el.hidden = !message;
   el.dataset.tone = tone;
   el.textContent = message ?? '';
+  let row = $('#aeRetry');
+  if (!row && retry) {
+    row = document.createElement('p');
+    row.id = 'aeRetry';
+    row.className = 'ae-retry';
+    row.innerHTML = '<button type="button" class="ae-retry-btn" data-retry>Try again</button>';
+    el.after(row);
+  }
+  if (!row) return;
+  row.hidden = !(message && retry);
+  row.dataset.tone = tone;
+  row.querySelector('[data-retry]').onclick = retry ? () => { showNotice(''); retry(); } : null;
 }
+
+/** One official intro image (NCSOFT CDN only, checked by the data layer). Lazy by default: the art never holds up the words. */
+export const introArtImg = (entry, { width = 320, height = 400, lazy = true, className = 'ae-art' } = {}) => entry
+  ? `<img class="${className}" src="${esc(entry.url)}" alt="${esc(entry.alt)}" width="${entry.width ?? width}" height="${entry.height ?? height}"${lazy ? ' loading="lazy"' : ''} decoding="async" referrerpolicy="no-referrer">`
+  : '';
 
 /** Marks the moment character data is on screen (the second load time the perf report reads). */
 export function markCharacterShown() {
