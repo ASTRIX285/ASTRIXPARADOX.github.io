@@ -129,6 +129,7 @@ Gold `#ffd36a`, deep gold `#c88a26`, crimson `#d3202f`, red `#790810`, deep red 
 - Every number, name and icon comes from Bungie data or the manifest. Missing data hides its element or shows an honest unavailable state. Never zero-fill, estimate or show sample data to a real player. Mocks are labelled SAMPLE DATA.
 - Authentic Bungie icons in every item, perk, mod and ability socket. The ASTRIX layer is a ring or state only, never a recolour.
 - Bungie attribution footer on every page. No implied affiliation.
+- No outbound links on tool pages. One exception, approved by Miguel on 10 Oct 2026: official game publisher pages only (for The Aetherium, NCSOFT's AION 2 site on aion2.plaync.com), as small quiet text links that open in a new tab with `rel="noopener noreferrer"`. Guides, shops and other sites stay off the pages.
 
 ## 11. Copy
 
