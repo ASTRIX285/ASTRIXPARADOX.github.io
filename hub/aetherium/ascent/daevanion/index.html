@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-2">
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/progression.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/skills.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
@@ -33,15 +33,15 @@
 
 "/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513",
 
-"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5",
+"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=f04d4f28c3",
 
-"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=9a55a922c9",
+"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=b86d35f119",
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159",
 
-"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=50c3070534",
+"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=cae0066479",
 
-"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=38e92086ad"
+"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd" data-head-hint>
@@ -56,16 +56,16 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=f04d4f28c3" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=9a55a922c9" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=b86d35f119" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=50c3070534" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=cae0066479" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=38e92086ad" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=50c3070534"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=cae0066479"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-view="daevanion">
   <a class="ae-skip" href="#aeMain">Skip to Daevanion</a>
@@ -126,9 +126,8 @@
       </form>
       <p class="ae-ascent-daeva" id="aeDaeva" hidden></p>
     </section>
-    <div id="aePlan" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Building your plan.</p></div></div>
+    <div id="aePlan" aria-live="polite"><div class="ae-panel ae-skeleton ae-sk-window" aria-hidden="true"><span class="ae-sk ae-sk-bar"></span><div class="ae-sk-body"><span class="ae-sk ae-sk-name"></span><div class="ae-sk-row"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div><span class="ae-sk ae-sk-line"></span><span class="ae-sk ae-sk-line is-short"></span></div></div><p class="ae-sr">Building your plan.</p></div>
     <p class="ae-next" id="aeNext" hidden></p>
-    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>
     <noscript><p class="ae-muted">The Ascent Plan needs JavaScript.</p></noscript>
   </main>
 

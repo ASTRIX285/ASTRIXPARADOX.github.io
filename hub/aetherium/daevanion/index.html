@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-2">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
@@ -32,13 +32,13 @@
 
 "/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513",
 
-"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5",
+"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=f04d4f28c3",
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159",
 
 "/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=6245dbdebe",
 
-"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=38e92086ad",
+"/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad",
 
 "/astrix-app/pages/aetherium/daevanion-page.mjs":"/astrix-app/pages/aetherium/daevanion-page.mjs?v=50ab9175e7"
 }}
@@ -55,13 +55,13 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=f04d4f28c3" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=6245dbdebe" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=38e92086ad" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-page.mjs?v=50ab9175e7" data-head-hint>
   <script type="module" src="/astrix-app/pages/aetherium/daevanion-page.mjs?v=50ab9175e7"></script>
@@ -111,7 +111,7 @@
     </nav>
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
     <p class="ae-source" id="aeSource" hidden></p>
-    <div id="aeStage" aria-live="polite"><div class="ae-panel ae-skeleton"><p>Reading your character.</p></div></div>
+    <div id="aeStage" aria-live="polite"><div class="ae-panel ae-skeleton ae-sk-window" aria-hidden="true"><span class="ae-sk ae-sk-bar"></span><div class="ae-sk-body"><span class="ae-sk ae-sk-name"></span><div class="ae-sk-row"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div><span class="ae-sk ae-sk-line"></span><span class="ae-sk ae-sk-line is-short"></span></div></div><p class="ae-sr">Reading your character.</p></div>
     <p class="ae-next" id="aeNext" hidden></p>
     <noscript><p class="ae-muted">The Daevanion page needs JavaScript to read your character.</p></noscript>
   </main>
