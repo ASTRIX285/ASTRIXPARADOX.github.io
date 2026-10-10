@@ -1097,3 +1097,39 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-guide-text{font-size:1rem}
 .ae-guide-count{font-size:.875rem}
 @media (max-width:640px){.ae-guide-text{font-size:1rem}}
+
+/* Skill stacks (10 Oct 2026): every key a column of four rows, row 0 at the bottom; keycaps are buttons that open the stack
+   in words; cells of a stacked key share a tint; a question mark marks a cooldown not captured yet. Rule tags say
+   "Not confirmed yet" with the in-game test; chains draw lead-in, arrow, follow-up. Text 1rem and never under .875rem. */
+.ae-bar-cell.is-stacked{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ae-gold) 35%,transparent)}
+.ae-bar-cell.is-charged{border:2px solid var(--ae-manual)}
+.ae-bar-cell.is-other,.ae-bar-cell.is-chain{border:1px solid var(--ae-hairline-strong)}
+.ae-bar-cdq{position:absolute;right:2px;bottom:2px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;display:grid;place-items:center;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);color:var(--ae-gold-ink);background:var(--ae-gold)}
+.ae-bar-cdq.is-key{position:static}
+.ae-keycap[role="button"]{cursor:pointer;min-height:44px;transition:border-color 150ms ease,color 150ms ease}
+.ae-keycap[role="button"]:hover,.ae-keycap[role="button"]:focus-visible{color:var(--ae-gold);border-color:var(--ae-gold)}
+.ae-bar-row.is-keys{margin-top:4px}
+.ae-bar-rule{margin:0;font-size:1rem;line-height:1.5;color:var(--ae-text)}
+.ae-bar-pending{margin:0}
+.ae-followups small,.ae-chiplist small{display:block;color:var(--ae-text-muted);font-size:.875rem}
+.ae-stack-card{margin-top:14px;padding-top:12px;border-top:1px solid var(--ae-hairline)}
+.ae-stack-card .ae-card-head h3{font-size:1.125rem}
+.ae-card-line.is-stack{padding:10px 12px;background:var(--ae-well);border:1px solid var(--ae-hairline);color:var(--ae-text);font-weight:600;font-size:1rem;line-height:1.5}
+.ae-macro-where{margin-left:auto;padding-left:10px;font-size:.875rem;color:var(--ae-text-muted);white-space:nowrap}
+.ae-macro-from{margin:0;font-size:1rem;line-height:1.5}
+.ae-macro-rule{display:grid;gap:8px;padding:12px 14px;background:var(--ae-well);border:1px solid var(--ae-hairline)}
+.ae-macro-rule p{margin:0;font-size:1rem;line-height:1.5}
+.ae-macro-rule .ae-mskills-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ae-tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;vertical-align:middle}
+.ae-tag.is-unconfirmed{color:var(--ae-gold);background:color-mix(in srgb,var(--ae-gold) 12%,transparent);border:1px solid color-mix(in srgb,var(--ae-gold) 55%,transparent)}
+.ae-tag-test{display:inline;font-size:.875rem;color:var(--ae-text-muted)}
+.ae-macro-rule .ae-tag-test{display:block;margin:0}
+.ae-chain-block{display:grid;gap:6px;margin-top:12px}
+.ae-chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0;font-size:1rem}
+.ae-chain-skill{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ae-text)}
+.ae-chain-skill img{width:28px;height:28px;border-radius:4px;border:1px solid var(--ae-hairline-strong)}
+.ae-chain-arrow{width:24px;height:12px;color:var(--ae-gold);flex:0 0 auto}
+.ae-chain-or{font-size:.875rem;color:var(--ae-text-muted)}
+.ae-chain small{color:var(--ae-text-muted);font-size:.875rem}
+.ae-chain-pending{font-style:normal;color:var(--ae-text-muted)}
+.ae-chain-note{margin:0;font-size:.875rem;color:var(--ae-text-muted)}
