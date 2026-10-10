@@ -3,7 +3,7 @@
  * same style as the Ascent Plan menu. Gear, Skills and Daevanion each open their own page for this Daeva.
  * First paint needs only /aion2/character; the small game-wide facts file is read only to name a board that is not open yet.
  */
-import { daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, regionName, skillsUrl } from './aetherium-data.mjs';
+import { ascentUrl, daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, regionName, skillsUrl } from './aetherium-data.mjs';
 import { $, esc, isPending, number } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage } from './character-page.mjs';
 import { nodeArt } from './daevanion-board.mjs';
@@ -29,13 +29,14 @@ const art = (src, glyph) => (src
   ? `<img src="${esc(src)}" alt="" width="84" height="84" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
   : GLYPH[glyph]);
 
+/* The badge says what it counts in words ("17 worn", "22 skills", "3 boards"), never a bare number. */
 function card({ view, href, name, status, blurb, count, noun, image }) {
   return `<a class="ae-menu-card" href="${esc(href)}" data-view="${view}">
       <span class="ae-menu-art" data-fallback="${view}">${art(image, view)}</span>
       <span class="ae-menu-name">${esc(name)}</span>
       <span class="ae-menu-status">${esc(status)}</span>
       <span class="ae-menu-blurb">${esc(blurb)}</span>
-      ${count ? `<span class="ae-menu-badge" aria-label="${count} ${esc(noun)}">${count}</span>` : ''}
+      ${count ? `<span class="ae-menu-badge is-words">${count} ${esc(noun)}</span>` : ''}
     </a>`;
 }
 
@@ -53,16 +54,16 @@ function renderCards(model, ref, progression) {
   $('#aeCards').innerHTML = [
     card({
       view: 'gear', href: gearPageUrl(ref), name: 'Gear', status: `${worn.length} of ${model.gear.length} worn`,
-      blurb: 'Worn items, stats, pet and wings', count: worn.length, noun: 'items worn', image: worn[0]?.icon ?? null
+      blurb: 'Worn items, stats, pet and wings', count: worn.length, noun: 'worn', image: worn[0]?.icon ?? null
     }),
     card({
       view: 'skills', href: skillsUrl(ref, model.profile.class), name: 'Skills',
       status: `${learned.length} ${learned.length === 1 ? 'skill' : 'skills'} · ${stigmas.filter(skill => skill.acquired).length} of ${stigmas.length} stigmas`,
-      blurb: 'Mastery and Stigma', count: learned.length, noun: 'skills learned', image: learned.find(skill => skill.category === 'Active')?.icon ?? null
+      blurb: 'Mastery and Stigma', count: learned.length, noun: learned.length === 1 ? 'skill' : 'skills', image: learned.find(skill => skill.category === 'Active')?.icon ?? null
     }),
     card({
       view: 'daevanion', href: daevanionPageUrl(ref, model.profile.class, first?.id ?? null), name: 'Daevanion', status: boardLine,
-      blurb: 'Boards and nodes', count: open.length, noun: 'boards open', image: nodeArt('unique', true, model.profile.class)
+      blurb: 'Boards and nodes', count: open.length, noun: open.length === 1 ? 'board' : 'boards', image: nodeArt('unique', true, model.profile.class)
     })
   ].join('');
 }
@@ -80,5 +81,6 @@ startCharacterPage({
     renderHeader(model);
     const progression = await loadProgression().catch(() => null);
     renderCards(model, ref, progression);
-  }
+  },
+  next: ({ model, ref }) => ({ label: 'Next: Your next moves', href: ascentUrl(ref, model.profile.class), note: 'Step 3 of 3: what to fix and what to do, in order' })
 }).catch(error => failPage('character menu', error));

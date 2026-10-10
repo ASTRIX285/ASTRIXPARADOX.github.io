@@ -8,7 +8,7 @@
 //   - Roles: pending builds stay pending, unknown roles fall back to the main role.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,pickBuild,rolesFor} from '../games/aion2/engine/ascent-advisor.mjs';
+import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,needsEnchant,pickBuild,rolesFor} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
 import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
@@ -373,6 +373,51 @@ check('macro order is settled by the in-game capture: listed order, 10 ms delay'
   assert.equal(wrath.cooldownSeconds,60);
   assert.equal(wrath.mpCost,200);
   assert.deepEqual(wrath.specialties.map(line=>line.unlockSkillLevel),[5,10,15,20]);
+});
+
+/* The first move must be right (first-visit flow, 10 Oct 2026): a Daevanion move names the board with nothing spent
+   on it and carries that board's own id, so Show me opens the board the move names. A board with any node taken,
+   a finished one included, is never the move. */
+const withBoards=(level,boards)=>{
+  const live=structuredClone(astrix);
+  live.profile.level=level;
+  live.daevanion=live.daevanion.map(board=>({...board,...boards(board)}));
+  return live;
+};
+check('a Daevanion move names the unspent board and carries its id: Vaizel at 0, Nezekan finished, Zikel part spent (Elyos ids)',()=>{
+  const live=withBoards(30,board=>({open:board.id<=13,nodesTaken:board.id===11?board.nodesTotal:board.id===12?9:0}));
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
+  const move=plan.now.find(item=>item.view==='daevanion');
+  assert.equal(move.title,'Spend points on the Vaizel Daevanion board');
+  assert.equal(move.board,13,'The move carries the Vaizel board id');
+  assert.deepEqual(move.boards,[{id:13,name:'Vaizel'}]);
+  assert.equal(plan.now.filter(item=>item.view==='daevanion').length,1,'One Daevanion move');
+  // Only the Daevanion moves: a stigma move may name Zikel's Blessing.
+  assert.doesNotMatch(plan.now.filter(item=>item.view==='daevanion').map(item=>item.title).join('\n'),/Nezekan|Zikel/,'Boards with nodes taken are never a move');
+});
+check('an Asmodian Daeva gets the Asmodian board id on the move (Vaizel is 33)',()=>{
+  const ids={11:31,12:32,13:33,14:34,16:36};
+  const live=withBoards(30,board=>({id:ids[board.id],open:board.id<=13,nodesTaken:board.id===13?0:board.nodesTotal}));
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
+  const move=plan.now.find(item=>item.view==='daevanion');
+  assert.match(move.title,/Vaizel/);
+  assert.equal(move.board,33);
+  assert.deepEqual(plan.daevanion.boards.map(board=>board.id),[31,32,33,34,36],'The plan lists the character\'s own ids');
+});
+check('no Daevanion move when every open board has nodes taken: a finished board is never offered',()=>{
+  const live=withBoards(30,board=>({open:board.id<=13,nodesTaken:board.id<=13?board.nodesTotal:0}));
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
+  assert.equal(plan.now.some(item=>item.view==='daevanion'),false);
+  assert.ok(plan.now.length>0,'Other moves still come');
+});
+check('the enchant move lists the +0 worn slots, the rule the Gear page flags with needsEnchant',()=>{
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
+  const move=plan.now.find(item=>/^Enchant \d+ worn items above \+0$/.test(item.title));
+  const expected=astrix.gear.filter(needsEnchant).map(slot=>slot.slotPos);
+  assert.ok(expected.length>0,'The fixture wears +0 items');
+  assert.deepEqual(move.slots,expected);
+  assert.ok(astrix.gear.filter(needsEnchant).every(slot=>!slot.empty&&slot.enchant===0));
+  assert.ok(astrix.gear.filter(slot=>!needsEnchant(slot)).every(slot=>slot.empty||slot.enchant>0));
 });
 
 check('unknown class throws',()=>{

@@ -16,12 +16,14 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261009-3">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261010-1">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/tools/fixtures/aion2/eu/servers.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd",
+
+"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8b7a875bd9",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
@@ -29,12 +31,18 @@
 
 "/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513",
 
-"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02",
+"/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5",
 
-"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3"
+"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=9a55a922c9",
+
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159",
+
+"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=fb4cd792dd" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=8b7a875bd9" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb" data-head-hint>
 
@@ -42,10 +50,14 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=1ce606c513" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=12f4f83c02" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=e727ffc3a5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=a65a34fde3"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=9a55a922c9" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=6c180c9159" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=d65ee39ff2"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
   <a class="ae-skip" href="#aeMain">Skip to the Daeva Card</a>
@@ -83,6 +95,13 @@
   </div>
 
   <main class="ae-main" id="aeMain" tabindex="-1" aria-busy="true">
+    <nav class="ae-steps-bar" id="aeSteps" aria-label="Your path">
+      <ol class="ae-steps-list">
+        <li><a class="ae-step is-current" href="/hub/aetherium/#aeSearch" data-step="find" aria-current="step"><span class="ae-step-num" aria-hidden="true">1</span><span class="ae-step-label">Find your Daeva</span></a></li>
+        <li><span class="ae-step is-locked" aria-disabled="true" title="Find your Daeva first"><span class="ae-step-num" aria-hidden="true">2</span><span class="ae-step-label">See your setup</span><span class="ae-step-note">Find your Daeva first</span></span></li>
+        <li><span class="ae-step is-locked" aria-disabled="true" title="Find your Daeva first"><span class="ae-step-num" aria-hidden="true">3</span><span class="ae-step-label">Your next moves</span><span class="ae-step-note">Find your Daeva first</span></span></li>
+      </ol>
+    </nav>
     <section class="ae-intro" id="aeIntro" aria-labelledby="aeIntroTitle">
       <div class="ae-intro-art" id="aeIntroArt" hidden></div>
       <div class="ae-intro-guide">
@@ -113,7 +132,16 @@
       <div class="ae-results" id="aeResults" hidden></div>
     </section>
     <p class="ae-notice" id="aeNotice" role="status" hidden></p>
-    <section class="ae-summary" id="aeSummary" aria-label="Character summary"><div class="ae-panel ae-skeleton"><p>Reading your character.</p></div><div class="ae-panel ae-skeleton"><p>Ascent Plan</p></div></section>
+    <section class="ae-summary" id="aeSummary" aria-label="Character summary"><article class="ae-panel ae-summary-card ae-skeleton is-skeleton" aria-busy="true" aria-labelledby="aeReading">
+      <div class="ae-sk ae-sk-portrait" aria-hidden="true"></div>
+      <div class="ae-summary-body">
+        <p class="ae-eyebrow">Your Daeva</p>
+        <p class="ae-sk ae-sk-name" aria-hidden="true"></p>
+        <p class="ae-sk ae-sk-chips" aria-hidden="true"></p>
+        <div class="ae-sk-tiles" aria-hidden="true"><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span><span class="ae-sk"></span></div>
+        <p class="ae-reading" id="aeReading" role="status">Reading your character</p>
+      </div>
+    </article></section>
     <p class="ae-source" id="aeSource" hidden></p>
     <section class="ae-classes" id="aeClasses" aria-labelledby="aeClassesTitle">
       <div class="ae-classes-head"><h2 id="aeClassesTitle">Or pick a class</h2> <p class="ae-roster-count">Plan by hand, no Daeva needed</p></div>
@@ -135,6 +163,8 @@
       <ul class="ae-roster" id="aeRoster"><li class="ae-loading">Loading your Daevas.</li></ul>
       <p class="ae-roster-note">Up to 8 Daevas per server, added by name and saved on this device. The public data can't tell which characters share an account, so each server has its own list. The active Daeva sets the page colour by faction.</p>
     </section>
+    <p class="ae-next" id="aeNext" hidden></p>
+    <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>
     <noscript><p class="ae-muted">The Daeva Card needs JavaScript to read your character.</p></noscript>
   </main>
 

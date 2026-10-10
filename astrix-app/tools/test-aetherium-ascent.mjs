@@ -20,6 +20,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${proce
 
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const WORKER='https://aion2-mock.invalid';
+const {deriveRegion}=await import('./fixtures/aion2/derive-region-fixtures.mjs');
 const fixtureDir=resolve(root,'astrix-app/tools/fixtures/aion2/eu');
 const fixture=async name=>JSON.parse(await readFile(resolve(fixtureDir,`${name}.json`),'utf8'));
 const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2'};
@@ -53,6 +54,29 @@ Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDI
 const lv22Equipment=structuredClone(equipment);
 lv22Equipment.equipment.equipmentList.push({...lv22Equipment.equipment.equipmentList[0],id:999000022,name:'Test Amulet',slotPos:22,slotPosName:'Amulet'});
 
+// The live shape of the Vaizel bug (10 Oct 2026): a Lv 30 Daeva (server 1313) with Nezekan finished, Zikel part spent
+// and Vaizel open with nothing on it. The move must name Vaizel and Show me must open Vaizel, never Nezekan.
+const spendBoards=list=>list.forEach(board=>{
+  if(board.name==='Nezekan')Object.assign(board,{open:1,openNodeCount:board.totalNodeCount});
+  if(board.name==='Zikel')Object.assign(board,{open:1,openNodeCount:9});
+  if(board.name==='Vaizel')Object.assign(board,{open:1,openNodeCount:0});
+});
+const vaizelInfo=structuredClone(info);
+Object.assign(vaizelInfo.profile,{characterName:'VAIZELDAEVA',characterId:'dmFpemVsZGFldmE=',characterLevel:30,serverId:1313,serverName:'Siel'});
+spendBoards(vaizelInfo.daevanion.boardList);
+const vaizelRef=new URLSearchParams({serverId:'1313',characterId:vaizelInfo.profile.characterId});
+// The same shape for an Asmodian Daeva in Asia: the boards are 31 to 36, so Vaizel is 33.
+const ASMO_V=deriveRegion('as',{race:'asmodian'});
+const asmoVaizelInfo=structuredClone(ASMO_V.info);
+Object.assign(asmoVaizelInfo.profile,{characterName:'ASMOVAIZEL',className:'Gladiator',characterLevel:30});
+spendBoards(asmoVaizelInfo.daevanion.boardList);
+const asmoVaizelRef=new URLSearchParams({serverId:String(ASMO_V.serverId),characterId:ASMO_V.characterId,region:'as'});
+// Every open board already has nodes taken (server 1314): no Daevanion move at all.
+const spentInfo=structuredClone(vaizelInfo);
+Object.assign(spentInfo.profile,{characterName:'SPENTDAEVA',characterId:'c3BlbnRkYWV2YQ==',serverId:1314,serverName:'Siel'});
+spentInfo.daevanion.boardList.forEach(board=>{if(board.open===1)board.openNodeCount=Math.max(1,board.openNodeCount);});
+const spentRef=new URLSearchParams({serverId:'1314',characterId:spentInfo.profile.characterId});
+
 const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
 const browser=await chromium.launch();
 const realCalls=[];
@@ -77,9 +101,14 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     if(down)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
     const asmo=url.searchParams.get('name')==='NOCTIS'||url.searchParams.get('serverId')==='2301';
     const lv22=url.searchParams.get('serverId')==='1309';
+    const serverId=url.searchParams.get('serverId');
+    const character=serverId==='1313'?{info:vaizelInfo,equipment}
+      :serverId==='1314'?{info:spentInfo,equipment}
+      :serverId===String(ASMO_V.serverId)?{info:asmoVaizelInfo,equipment:ASMO_V.equipment}
+      :lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment};
     const bodies={
       '/aion2/search':asmo?asmoSearch:search,
-      '/aion2/character':lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment},
+      '/aion2/character':character,
       '/aion2/item':item,
       '/aion2/daevanion':board
     };
@@ -522,6 +551,162 @@ await check('every screen opens with a guide and no errors',async()=>{
     await context.close();
   }
 });
+
+/* ---------- First-visit flow (10 Oct 2026): the first move must be right, the step bar, one Next, the title first, the menu guide ---------- */
+
+const stepsOf=page=>page.$$eval('#aeSteps .ae-step',items=>items.map(el=>({label:el.querySelector('.ae-step-label').textContent,current:el.getAttribute('aria-current'),done:el.classList.contains('is-done'),locked:el.classList.contains('is-locked'),href:el.getAttribute('href'),tick:Boolean(el.querySelector('.ae-step-tick')),note:el.querySelector('.ae-step-note')?.textContent??null})));
+const firstQuest=page=>page.$eval('.ae-quest',el=>({title:el.querySelector('strong').textContent,href:el.getAttribute('href'),view:el.dataset.questView,board:el.dataset.questBoard??null}));
+// The Daevanion move (at Lv 30 with no stigma yet, the stigma quest rightly ranks above it).
+const boardQuest=page=>page.$eval('.ae-quest[data-quest-view="daevanion"]',el=>({title:el.querySelector('strong').textContent,href:el.getAttribute('href'),view:el.dataset.questView,board:el.dataset.questBoard??null}));
+
+await check('Show me opens the board the move names: Vaizel open and unspent, Nezekan finished (Elyos ids)',async()=>{
+  const {page,context,errors}=await open(ascent(vaizelRef),{live:true});
+  const first=await boardQuest(page);
+  assert.equal(first.title,'Spend points on the Vaizel Daevanion board','The move names the board with nothing spent on it');
+  assert.equal(first.view,'daevanion');
+  assert.equal(first.board,'13','The move carries the character\'s own board id');
+  assert.match(first.href,/^\/hub\/aetherium\/ascent\/daevanion\/\?serverId=1313&characterId=[^&]+&region=eu&class=gladiator&role=dps&board=13$/,'Show me carries the board');
+  const titles=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
+  const boardMoves=titles.filter(title=>/Daevanion board/.test(title));
+  assert.ok(!boardMoves.some(title=>/Nezekan|Zikel/.test(title)),`A board with nodes taken is never a move: ${boardMoves}`);
+  assert.equal(boardMoves.length,1,'One Daevanion move');
+  await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('.ae-quest[data-quest-view="daevanion"]')]);
+  await page.waitForSelector('.ae-board-grid');
+  assert.equal(await page.getAttribute('[data-board-tab="13"]','aria-selected'),'true','Show me opened Vaizel, not Nezekan');
+  assert.equal(await page.getAttribute('[data-board-tab="11"]','aria-selected'),'false');
+  assert.equal(new URL(page.url()).searchParams.get('board'),'13');
+  assert.match(await plain(page,'#aeRouteSummary'),/Enter the points you have/,'Vaizel has a route to take');
+  assert.doesNotMatch(await plain(page,'.ae-route'),/Every key skill node and corner on this board is taken/);
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('Show me opens the board the move names for an Asmodian Daeva (Vaizel is board 33)',async()=>{
+  const {page,context,errors}=await open(ascent(asmoVaizelRef),{live:true});
+  assert.equal(await page.getAttribute('body','data-faction'),'asmodian');
+  const first=await boardQuest(page);
+  assert.equal(first.title,'Spend points on the Vaizel Daevanion board');
+  assert.equal(first.board,'33','The Asmodian id, matched by name');
+  assert.match(first.href,/&region=as&class=gladiator&role=dps&board=33$/);
+  await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('.ae-quest[data-quest-view="daevanion"]')]);
+  await page.waitForSelector('.ae-board-grid');
+  assert.deepEqual(await page.$$eval('[data-board-tab]',tabs=>tabs.map(tab=>[Number(tab.dataset.boardTab),tab.getAttribute('aria-selected')])),[[31,'false'],[32,'false'],[33,'true']],'Vaizel (33) is open on the screen');
+  assert.equal(new URL(page.url()).searchParams.get('board'),'33');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('no Daevanion move when every open board has nodes taken: the Nezekan menu card still shows the board',async()=>{
+  const {page,context}=await open(ascent(spentRef),{live:true});
+  assert.equal(await page.locator('.ae-quest[data-quest-view="daevanion"]').count(),0,'A finished or started board is never a move');
+  assert.ok(await page.locator('.ae-quest').count()>0,'Other moves still come');
+  assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 88 \/ 88 nodes/);
+  await context.close();
+});
+
+await check('step bar on the Ascent Plan: step 3 current, 1 and 2 ticked with a Daeva; by hand steps 2 and 3 wait for a Daeva',async()=>{
+  const live=await open(ascent(ref),{live:true});
+  const steps=await stepsOf(live.page);
+  assert.deepEqual(steps.map(step=>step.label),['Find your Daeva','See your setup','Your next moves']);
+  assert.equal(steps[2].current,'step');
+  assert.ok(steps[0].done&&steps[0].tick&&steps[1].done&&steps[1].tick,'Steps 1 and 2 are done, with ticks');
+  assert.ok(!steps.some(step=>step.locked));
+  assert.match(steps[0].href,/^\/hub\/aetherium\/\?serverId=1308&characterId=[^&]+&region=eu$/,'Step 1 opens this Daeva\'s card');
+  assert.match(steps[1].href,/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=[^&]+&region=eu$/,'Step 2 opens this Daeva\'s setup');
+  assert.equal(await live.page.locator('#aeHowThisWorks').count(),1,'How this works sits by the step bar');
+  assert.ok(await live.page.$eval('#aeSteps',el=>el===document.querySelector('main').firstElementChild),'The step bar is first under the ribbon');
+  assert.ok(parseFloat(await style(live.page,'#aeSteps .ae-step-label','font-size'))>=14,'Step text at least 14px');
+  await live.context.close();
+  const hand=await open(ascent('class=gladiator&role=dps&level=30'));
+  const handSteps=await stepsOf(hand.page);
+  assert.deepEqual(handSteps.filter(step=>step.locked).map(step=>[step.label,step.note]),[['See your setup','Find your Daeva first'],['Your next moves','Find your Daeva first']]);
+  assert.equal(handSteps[2].current,'step','Step 3 is still the current step');
+  assert.equal(handSteps[0].href,'/hub/aetherium/#aeSearch');
+  assert.equal(await hand.page.locator('#aeSteps a').count(),1,'Only step 1 is a link without a Daeva');
+  await hand.context.close();
+});
+
+await check('every Ascent Plan page has one Next: the menu to move 1, each screen to the next screen, the last back to the moves',async()=>{
+  const menu=await open(ascent(ref),{live:true});
+  assert.equal(await menu.page.locator('[data-next]').count(),1,'One Next on the menu');
+  assert.equal(await menu.page.getAttribute('[data-next]','href'),(await firstQuest(menu.page)).href,'The menu\'s Next is move 1');
+  assert.match(await plain(menu.page,'#aeNext'),/Spend points on the Nezekan Daevanion board.*Next: Show me move 1/);
+  const nextBox=await menu.page.$eval('#aeNext',el=>el.getBoundingClientRect().toJSON()),planBox=await menu.page.$eval('#aePlan',el=>el.getBoundingClientRect().toJSON());
+  assert.ok(nextBox.top>=planBox.bottom-0.5,'Next ends the page');
+  assert.ok((await menu.page.$eval('[data-next]',el=>el.getBoundingClientRect().height))>=44,'Next at least 44px tall');
+  await menu.context.close();
+  const order=[...SCREENS,'menu'];
+  for(let i=0;i<SCREENS.length;i++){
+    const {page,context}=await open(ascent('class=gladiator&role=dps&level=30',SCREENS[i]));
+    assert.equal(await page.locator('[data-next]').count(),1,`${SCREENS[i]}: one Next`);
+    const after=order[i+1];
+    assert.equal(await page.getAttribute('[data-next]','href'),after==='menu'?'/hub/aetherium/ascent/?class=gladiator&role=dps&level=30':`/hub/aetherium/ascent/${after}/?class=gladiator&role=dps&level=30`,`${SCREENS[i]} leads to ${after}`);
+    assert.match(await plain(page,'[data-next]'),/^Next: /);
+    await context.close();
+  }
+});
+
+const AGE_LINE=/^Read from the official AION 2 site (just now|\d+ minutes? ago)\.$/;
+await check('title first: the data age sits under the title, small; on a screen it sits in the window bar',async()=>{
+  const {page,context}=await open(ascent(ref),{live:true});
+  assert.equal(await page.isVisible('#aeSource'),true);
+  const title=await page.$eval('#aeAscentTitle',el=>el.getBoundingClientRect().toJSON()),source=await page.$eval('#aeSource',el=>el.getBoundingClientRect().toJSON());
+  assert.ok(source.top>=title.bottom-0.5,`The data line is under the title (${source.top} vs ${title.bottom})`);
+  assert.ok(await page.$eval('#aeSource',el=>el.closest('.ae-ascent-intro')!==null),'Inside the intro, after the title');
+  assert.equal(await page.evaluate(()=>[...document.querySelector('main').children].find(el=>el.getBoundingClientRect().height>0).id),'aeSteps','The step bar comes first, never the data line');
+  assert.equal(await style(page,'#aeSource','font-size'),'14px','Small, never under 14px');
+  // Any age: a slow machine can take the read past the minute ("just now" or "N minute(s) ago"), never cached as live.
+  assert.match(await page.textContent('#aeSource'),AGE_LINE);
+  await context.close();
+  const screen=await open(ascent(ref,'mastery'),{live:true});
+  assert.match(await plain(screen.page,'.ae-gw-bar .ae-gw-source'),AGE_LINE,'A screen shows the data age in its window bar');
+  await screen.context.close();
+});
+
+await check('first visit to the Ascent Plan: one guide step pointing at Your next moves, shown once, How this works brings it back',async()=>{
+  const {page,context,errors}=await open(ascent(ref),{live:true});
+  await page.waitForSelector('#aeGuide:not([hidden])');
+  assert.match(await plain(page,'.ae-guide-count'),/^Guide · step 1 of 1$/);
+  assert.match(await plain(page,'.ae-guide-text'),/^Your next moves are below, in order\. Do move 1 first in the game\./);
+  assert.match(await page.getAttribute('#aeNow','class'),/ae-guide-target/,'Your next moves is lit up');
+  assert.equal(await style(page,'.ae-guide-text','font-size'),'16px','Guide text is 16px');
+  assert.equal(await page.locator('#aeGuide [data-guide="done"]').count(),1);
+  await page.click('#aeGuide [data-guide="done"]');
+  assert.equal(await page.isHidden('#aeGuide'),true,'Done closes it');
+  assert.equal(await page.locator('.ae-guide-target').count(),0);
+  await page.reload();
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  await page.waitForSelector('#aeNow');
+  await page.waitForTimeout(150);
+  assert.equal(await page.isHidden('#aeGuide'),true,'Shown once per device');
+  await page.click('#aeHowThisWorks');
+  assert.equal(await page.isVisible('#aeGuide'),true,'How this works brings it back');
+  assert.match(await page.getAttribute('#aeNow','class'),/ae-guide-target/);
+  assert.deepEqual(errors,[]);
+  await context.close();
+  const hand=await open(ascent('class=gladiator&role=dps&level=30'));
+  await hand.page.waitForSelector('#aeGuide:not([hidden])');
+  assert.doesNotMatch(await plain(hand.page,'.ae-guide-text'),/Daeva/,'By hand the step says nothing about a Daeva');
+  await hand.context.close();
+});
+
+for(const width of [390,820,1280,1600,1920]){
+  await check(`flow at ${width}: step bar, Next and the guide line up with the plan, no sideways scroll`,async()=>{
+    const {page,context}=await open(ascent(ref),{viewport:{width,height:900},live:true});
+    await page.waitForSelector('#aeGuide:not([hidden])');
+    assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth))<=0,'scrolls sideways');
+    const box=selector=>page.$eval(selector,el=>el.getBoundingClientRect().toJSON());
+    const steps=await box('#aeSteps'),plan=await box('#aePlan'),next=await box('#aeNext');
+    assert.ok(Math.abs(steps.left-plan.left)<=1&&Math.abs(steps.right-plan.right)<=1,`step bar on the grid (${steps.left}/${steps.right} vs ${plan.left}/${plan.right})`);
+    assert.ok(Math.abs(next.left-plan.left)<=1&&Math.abs(next.right-plan.right)<=1,'Next row on the grid');
+    const items=await page.$$eval('#aeSteps .ae-step',els=>els.map(el=>el.getBoundingClientRect().toJSON()));
+    assert.ok(items.every(item=>item.height>=44),'every step at least 44px tall');
+    for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++)assert.ok(items[i].right<=items[j].left+0.5||items[j].right<=items[i].left+0.5||items[i].bottom<=items[j].top+0.5||items[j].bottom<=items[i].top+0.5,`steps ${i} and ${j} overlap`);
+    const guide=await page.locator('#aeGuide').boundingBox();
+    assert.ok(guide.y+guide.height<=900+0.5,'the guide stays on screen');
+    await context.close();
+  });
+}
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
