@@ -21,6 +21,7 @@ Read this file at the start of every session. It survives chat compaction. The c
 - Never commit, merge, reset or force-push `main`. Never run `gh pr merge`. Leave auto-merge off.
 - Every change, review fixes included, is committed and pushed to the PR branch before you report. Nothing stays on disk only.
 - Keep each PR inside its `.scope/<branch>.txt`. If the work needs a file outside that scope, stop and report it.
+- A stacked PR (built on another open PR) puts `base: <parent branch>` as the first line of its scope file, so the scope guard checks it against that branch and not against `main`. Remove that line when the PR is rebased onto `main`. The guard prints `SCOPE_BASE=<branch>` before its result; in CI it falls back to `GITHUB_BASE_REF`, else `main`.
 - When a PR conflicts after another merges, rebase it, keep both sides' changes, and report the new head SHA.
 
 ## Unattended runs
@@ -96,7 +97,7 @@ Report ONLY:
 - Pushed head commit SHA (must match GitHub)
 - Files changed
 - Cache keys / versions bumped
-- Validator and test exit codes
+- Validator and test exit codes, with the real result lines: `SCOPE_BASE=`, `SCOPE_GUARD=`, `PARADOX_VALIDATOR=` and the exit code, copied from the run
 - Known failures that already fail on `main`
 - "Decisions I made" (if any)
 No code in chat.

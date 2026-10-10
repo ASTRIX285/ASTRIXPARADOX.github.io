@@ -1,0 +1,4 @@
+# chore/scope-guard-stack-base: validate-scope-guard checks a stacked PR against its own base ("base: <branch>" first line, else GITHUB_BASE_REF, else main) and prints SCOPE_BASE= before its result.
+CLAUDE.md
+astrix-app/tools/test-scope-guard.mjs
+astrix-app/tools/validate-scope-guard.mjs
