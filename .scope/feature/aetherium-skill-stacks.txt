@@ -1,3 +1,4 @@
+base: design/aetherium-crisp-polish
 # feature/aetherium-skill-stacks: the Skill Bar as the game's key stacks (rows 0 to 3), chains from the data, the macro from the stacks, game rules with a status in mechanics.json and Not confirmed yet tags. Stacked on #474 (design/aetherium-crisp-polish), which sits on #476.
 astrix-app/games/aion2/data/advisor/mechanics.json
 astrix-app/games/aion2/engine/ascent-advisor.mjs
