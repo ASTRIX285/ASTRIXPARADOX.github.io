@@ -1,5 +1,5 @@
 {
-  "description": "AION 2 game mechanics the Ascent Plan rests on, one record per rule with a status. confirmed: seen in game or settled by Miguel. unconfirmed: guides say it, nobody has tested it yet; every page that rests on it shows a Not confirmed yet tag and the in-game test below. Flip a status here and every screen follows. Sources stay in this file, never on a page. The macro facts themselves (slots, delay, hold, interrupt, key binding) live in progression.json under macro-order; the macro-order rule here points at them so there is one place to edit.",
+  "description": "AION 2 game mechanics the Ascent Plan rests on, one record per rule with a status. confirmed: seen in game or settled by Miguel. unconfirmed: guides say it, nobody has tested it yet; every page that rests on it shows a Not confirmed yet tag and the in-game test below. Flip a status here and every screen follows. Every rule carries a provenance block (platform/contracts/provenance.schema.json), never shown on a page; guideViews says which order each macro guide describes. The macro facts themselves (slots, delay, hold, interrupt, key binding) live in progression.json under macro-order; the macro-order rule here points at them so there is one place to edit.",
   "records": [
     {
       "id": "skill-stack",
@@ -14,7 +14,7 @@
       "rows": 4,
       "test": null,
       "confirmedOn": "2026-10-10",
-      "sources": [
+      "provenance": [
         {
           "kind": "in-game-capture",
           "capturedBy": "Miguel (ASTRIX285)",
@@ -31,8 +31,7 @@
           "url": "https://aion2guide.org/systems/aion-2-macro-guide/",
           "retrievedOn": "2026-10-07",
           "region": "not-stated",
-          "reliability": "medium",
-          "note": "Describes the same bottom-first priority on a key."
+          "reliability": "medium"
         }
       ]
     },
@@ -47,11 +46,14 @@
         {
           "class": "Gladiator",
           "followUp": "Ankle Slice",
-          "leadIns": { "pending": true, "reason": "The tooltip names two lead-in skills. They are not captured yet." },
+          "leadIns": {
+            "pending": true,
+            "reason": "The tooltip names two lead-in skills. They are not captured yet."
+          },
           "source": "tooltip"
         }
       ],
-      "sources": [
+      "provenance": [
         {
           "kind": "in-game-capture",
           "capturedBy": "Miguel (ASTRIX285)",
@@ -68,8 +70,7 @@
           "url": "https://metabot.gg/en/aion-2/skills/keen-strike",
           "retrievedOn": "2026-10-06",
           "region": "global",
-          "reliability": "high",
-          "note": "Specialty perks that add a chain skill (Reckless Strike and the others) come from the skill catalogue, skills.json."
+          "reliability": "high"
         }
       ]
     },
@@ -79,8 +80,14 @@
       "status": "unconfirmed",
       "text": "Guides disagree on how a macro picks its next skill.",
       "options": [
-        { "id": "listed", "text": "The macro runs its entries in the listed order, 1 then 2 and so on." },
-        { "id": "stack", "text": "The macro works like a stack: it fires the first ready entry from the bottom and skips entries on cooldown." }
+        {
+          "id": "listed",
+          "text": "The macro runs its entries in the listed order, 1 then 2 and so on."
+        },
+        {
+          "id": "stack",
+          "text": "The macro works like a stack: it fires the first ready entry from the bottom and skips entries on cooldown."
+        }
       ],
       "notes": [
         "Adding a stacked key to a macro runs that key's stack.",
@@ -88,7 +95,7 @@
       ],
       "test": "Make a macro with A then B, and get A on cooldown. Does B fire, and when A is ready again does the macro go back to A first?",
       "factsFrom": "progression:macro-order",
-      "sources": [
+      "provenance": [
         {
           "kind": "community-guide",
           "ref": "gg-macro",
@@ -97,8 +104,7 @@
           "url": "https://games.gg/aion-2/guides/aion-2-how-to-add-skills-items-and-macros/",
           "retrievedOn": "2026-10-06",
           "region": "not-stated",
-          "reliability": "medium",
-          "says": "listed"
+          "reliability": "medium"
         },
         {
           "kind": "community-guide",
@@ -108,8 +114,7 @@
           "url": "https://mein-mmo.de/en/aion-2-macro-this-trick-instantly-increases-your-damage-while-you-only-hold-down-2-keys,1590032/",
           "retrievedOn": "2026-10-06",
           "region": "global",
-          "reliability": "medium",
-          "says": "stack"
+          "reliability": "medium"
         },
         {
           "kind": "community-guide",
@@ -119,8 +124,7 @@
           "url": "https://gamerstogether.cz/en/aion-2-macros/",
           "retrievedOn": "2026-10-07",
           "region": "not-stated",
-          "reliability": "medium",
-          "says": "listed"
+          "reliability": "medium"
         },
         {
           "kind": "in-game-capture",
@@ -130,7 +134,12 @@
           "where": "Skill > Stigma > Macro window",
           "note": "Entries are numbered with a delay between each pair. That shows the window, not which entry fires when one is on cooldown; the test above settles it."
         }
-      ]
+      ],
+      "guideViews": {
+        "gg-macro": "listed",
+        "mm-macro": "stack",
+        "gt-macro": "listed"
+      }
     }
   ]
 }

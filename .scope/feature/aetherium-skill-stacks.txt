@@ -20,3 +20,4 @@ hub/aetherium/gear/equipment/index.html
 hub/aetherium/gear/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html
+astrix-app/tools/test-aetherium-pages.mjs

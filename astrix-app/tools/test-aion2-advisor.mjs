@@ -515,7 +515,7 @@ check('mechanics: the stack rule confirmed, chains and macro order unconfirmed w
   assert.equal(plan.macro.facts.value.delayMs,10);
   for(const rule of mechanics.records){
     assert.ok(['confirmed','unconfirmed'].includes(rule.status),`${rule.id} has a status`);
-    assert.ok(rule.sources.length>0,`${rule.id} cites sources`);
+    assert.ok(Array.isArray(rule.provenance)&&rule.provenance.length>0,`${rule.id} carries provenance`);
     if(rule.status==='unconfirmed')assert.ok(rule.test,`${rule.id} names its in-game test`);
   }
 });
