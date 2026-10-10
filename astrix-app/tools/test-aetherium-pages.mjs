@@ -1181,12 +1181,13 @@ const ROSTER8=()=>JSON.stringify(storeV2(['Al','Bea','Cleo','Dax','Eri','Finn','
 
 await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or less in Barlow, sentence case, sizes in rem, tabular figures',async()=>{
   // The Gear page opens on a Daeva: with none it shows Find your Daeva first (#473), which has no labels to check.
-  for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
-    const {page,context}=await open(path,{live:true,extra});
+  // Every width the pages render (10 Oct 2026): a media query can shrink a size at one width only (the class tiles did at 819 and under).
+  for(const width of [390,820,1280,1600,1920])for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
+    const {page,context}=await open(path,{live:true,extra,viewport:{width,height:width<800?844:1000}});
     const bad=await typeAudit(page);
-    assert.deepEqual(bad,[],`${path}:\n${bad.join('\n')}`);
+    assert.deepEqual(bad,[],`${path} at ${width}:\n${bad.join('\n')}`);
     const labels=await labelAudit(page);
-    assert.ok(labels.length>=4,`${path} has labels to check`);
+    assert.ok(labels.length>=4,`${path} at ${width} has labels to check`);
     for(const label of labels){
       assert.equal(label.transform,'none',`${path} "${label.text}" is not uppercased by CSS`);
       assert.equal(label.caps,false,`${path} "${label.text}" is sentence case`);

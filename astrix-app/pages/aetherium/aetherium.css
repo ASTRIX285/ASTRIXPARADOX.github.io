@@ -1014,7 +1014,7 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-classes-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:6px 14px;margin:0 0 12px}
 .ae-classes-head h2{margin:0;font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-muted)}
 .ae-class-art .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block}
-.ae-class-name{align-self:center;font:700 14px/1.2 var(--ax-font-head);letter-spacing:.04em}
+.ae-class-name{align-self:center;font:700 .875rem/1.2 var(--ax-font-head);letter-spacing:.04em}
 
 /* Find your Daeva first (Gear Ledger, Gear, Skills, Daevanion with no Daeva): the guide's art beside a short panel. */
 .ae-find-first{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center;margin:0}
@@ -1031,12 +1031,14 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 @media (max-width:819px){
   .ae-class-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
   .ae-class-tile{padding:10px 6px}
-  .ae-class-name{font-size:12px;letter-spacing:.02em;overflow-wrap:anywhere}
+  .ae-class-name{font-size:.8125rem;letter-spacing:.02em;overflow-wrap:normal;hyphens:manual}
   .ae-speech{padding:18px 16px}
   .ae-intro.has-npc .ae-intro-guide{grid-template-columns:96px minmax(0,1fr);gap:10px}
   .ae-find-first.has-art{grid-template-columns:110px minmax(0,1fr);gap:14px}
 }
-@media (max-width:479px){.ae-steps li{padding:8px 10px 8px 42px}.ae-steps li::before{left:10px;top:9px;width:22px;height:22px}}
+@media (max-width:479px){.ae-steps li{padding:8px 10px 8px 42px}.ae-steps li::before{left:10px;top:9px;width:22px;height:22px}
+  /* Four tiles a row stays (two rows of four); the name keeps 13px, drops its spacing and gets the full tile width, so Spiritmaster fits on one line and nothing breaks mid-word. */
+  .ae-class-tile{padding:10px 3px}.ae-class-name{letter-spacing:0;hyphens:auto}}
 .ae-roster-switch select{flex:0 1 auto;min-width:0;max-width:min(100%,360px)}
 .ae-roster-switch label{flex:0 0 auto}
 
