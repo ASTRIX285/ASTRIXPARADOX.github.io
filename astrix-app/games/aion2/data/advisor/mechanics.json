@@ -1,0 +1,145 @@
+{
+  "description": "AION 2 game mechanics the Ascent Plan rests on, one record per rule with a status. confirmed: seen in game or settled by Miguel. unconfirmed: guides say it, nobody has tested it yet; every page that rests on it shows a Not confirmed yet tag and the in-game test below. Flip a status here and every screen follows. Every rule carries a provenance block (platform/contracts/provenance.schema.json), never shown on a page; guideViews says which order each macro guide describes. The macro facts themselves (slots, delay, hold, interrupt, key binding) live in progression.json under macro-order; the macro-order rule here points at them so there is one place to edit.",
+  "records": [
+    {
+      "id": "skill-stack",
+      "label": "Skill stacks",
+      "status": "confirmed",
+      "text": "Each key holds up to four skills stacked in rows 0 to 3, row 0 nearest the key. Pressing the key checks row 0 first: if that skill is ready it fires, otherwise the game moves up to row 1, 2 and 3 and fires the first one that is ready.",
+      "rules": [
+        "Cooldown skills at the bottom, no-cooldown filler at the top.",
+        "A no-cooldown skill below a cooldown skill blocks it: it is always ready, so the key never reaches the skill above.",
+        "Heals, defensives, big buffs and charged skills go on their own keys, so you choose when they fire."
+      ],
+      "rows": 4,
+      "test": null,
+      "confirmedOn": "2026-10-10",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Screenshot of his own bar: four rows on a key, row 0 at the bottom, the key fires the lowest ready skill."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "a2g-macro",
+          "title": "AION 2 macro guide",
+          "publisher": "aion2guide.org",
+          "url": "https://aion2guide.org/systems/aion-2-macro-guide/",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "chain-follow-up",
+      "label": "Chain skills",
+      "status": "unconfirmed",
+      "text": "Using some skills opens a follow-up skill for a short window. The skill tooltip lists the skills that lead into a follow-up.",
+      "unknown": "How the follow-up is pressed and how long the window lasts are not confirmed.",
+      "test": "Use a lead-in skill, then press the follow-up's key at once. Does it fire, and how long is it available?",
+      "observed": [
+        {
+          "class": "Gladiator",
+          "followUp": "Ankle Slice",
+          "leadIns": {
+            "pending": true,
+            "reason": "The tooltip names two lead-in skills. They are not captured yet."
+          },
+          "source": "tooltip"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill tooltip, Ankle Slice",
+          "note": "The tooltip shows two skills that lead into Ankle Slice."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-skill-keen-strike",
+          "title": "Keen Strike skill page",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills/keen-strike",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "macro-order",
+      "label": "How a macro fires",
+      "status": "unconfirmed",
+      "text": "Guides disagree on how a macro picks its next skill.",
+      "options": [
+        {
+          "id": "listed",
+          "text": "The macro runs its entries in the listed order, 1 then 2 and so on."
+        },
+        {
+          "id": "stack",
+          "text": "The macro works like a stack: it fires the first ready entry from the bottom and skips entries on cooldown."
+        }
+      ],
+      "notes": [
+        "Adding a stacked key to a macro runs that key's stack.",
+        "Holding left click with the macro key makes it cycle faster (guides, not tested)."
+      ],
+      "test": "Make a macro with A then B, and get A on cooldown. Does B fire, and when A is ready again does the macro go back to A first?",
+      "factsFrom": "progression:macro-order",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gg-macro",
+          "title": "How to add skills, items and macros",
+          "publisher": "games.gg",
+          "url": "https://games.gg/aion-2/guides/aion-2-how-to-add-skills-items-and-macros/",
+          "retrievedOn": "2026-10-06",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mm-macro",
+          "title": "Macro trick for more damage",
+          "publisher": "mein-mmo",
+          "url": "https://mein-mmo.de/en/aion-2-macro-this-trick-instantly-increases-your-damage-while-you-only-hold-down-2-keys,1590032/",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-macro",
+          "title": "AION 2 macros: setup, delay and presets",
+          "publisher": "gamerstogether.cz",
+          "url": "https://gamerstogether.cz/en/aion-2-macros/",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-06",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Stigma > Macro window",
+          "note": "Entries are numbered with a delay between each pair. That shows the window, not which entry fires when one is on cooldown; the test above settles it."
+        }
+      ],
+      "guideViews": {
+        "gg-macro": "listed",
+        "mm-macro": "stack",
+        "gt-macro": "listed"
+      }
+    }
+  ]
+}
