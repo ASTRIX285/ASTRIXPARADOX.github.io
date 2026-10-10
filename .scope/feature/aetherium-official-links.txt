@@ -1,3 +1,4 @@
+base: feature/aetherium-skill-stacks
 # feature/aetherium-official-links: official NCSOFT AION 2 links on The Aetherium (footer, intro, Daeva Card), the allowlist test and the DESIGN.md exception. Stacked on #477.
 DESIGN.md
 astrix-app/pages/aetherium/aetherium.css
