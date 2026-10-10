@@ -96,11 +96,39 @@ try {
   pass(cwd,{GITHUB_HEAD_REF:'chore/nested/task',GITHUB_REF:'refs/pull/123/merge'});
   git(cwd,'update-ref','refs/remotes/origin/main','HEAD');pass(cwd,{GITHUB_REF:'refs/heads/main'});
 
+  // Stacked PRs (10 Oct 2026): "base: <branch>" on the first line of the scope file checks the branch against that
+  // branch, so only its own changes count. Without the line it is compared against main as before.
+  function stacked(){
+    const parent=fixture('chore/parent');scope(parent,'parent.txt\n','chore/parent');put(parent,'parent.txt');
+    git(parent,'add','.');git(parent,'commit','-m','parent');git(parent,'update-ref','refs/remotes/origin/chore/parent','HEAD');
+    git(parent,'switch','-c','chore/child');return parent;
+  }
+  cwd=stacked();put(cwd,'child.txt');scope(cwd,'base: chore/parent\nchild.txt\n','chore/child');pass(cwd); // Own files only.
+  git(cwd,'add','.');git(cwd,'commit','-m','child');pass(cwd);
+  assert.equal(validateScope(cwd,env).base,'chore/parent');checks++;
+  put(cwd,'undeclared.txt');fail(cwd,/Scope violation/);rmSync(join(cwd,'undeclared.txt')); // Undeclared still fails.
+  scope(cwd,'child.txt\n','chore/child');fail(cwd,/Another branch/); // No base line: against main, where the parent's scope file is in the diff.
+  scope(cwd,'base: chore/missing\nchild.txt\n','chore/child');fail(cwd,/Scope base branch not found: chore\/missing/);
+  scope(cwd,'base: chore/child\nchild.txt\n','chore/child');fail(cwd,/cannot be the branch itself/);
+  scope(cwd,'child.txt\nbase: chore/parent\n','chore/child');fail(cwd,/first line/);
+  scope(cwd,'base: ../escape\nchild.txt\n','chore/child');fail(cwd,/Malformed scope base/);
+  scope(cwd,'base: chore/parent\nchild.txt\nparent.txt\n','chore/child');pass(cwd); // A base file may be listed; the base line is not an entry.
+  cwd=stacked();put(cwd,'child.txt');scope(cwd,'child.txt\n','chore/child');fail(cwd,/Another branch/);
+  pass(cwd,{GITHUB_BASE_REF:'chore/parent'}); // CI names the base when the scope file does not.
+  scope(cwd,'base: chore/parent\nchild.txt\n','chore/child');pass(cwd,{GITHUB_BASE_REF:'main'}); // The scope file wins over CI.
+  cwd=fixture();scope(cwd);pass(cwd,{GITHUB_BASE_REF:'main'});assert.equal(validateScope(cwd,{GITHUB_BASE_REF:'main'}).base,'main');checks++;
+
   // Exercise the actual command-line entry and exit codes in an isolated repo.
   cwd=fixture();scope(cwd,'astrix-app/tools/validate-scope-guard.mjs\n');
   put(cwd,'astrix-app/tools/validate-scope-guard.mjs',readFileSync(fileURLToPath(new URL('./validate-scope-guard.mjs',import.meta.url))));
   const cli=()=>spawnSync(process.execPath,['astrix-app/tools/validate-scope-guard.mjs'],{cwd,env:{PATH:process.env.PATH},encoding:'utf8'});
-  let result=cli();assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/SCOPE_GUARD=PASS/);checks++;
-  put(cwd,'outside.txt');result=cli();assert.equal(result.status,1);assert.match(result.stderr,/SCOPE_GUARD=FAIL/);checks++;
+  let result=cli();assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/SCOPE_BASE=main\s+SCOPE_GUARD=PASS/,'The base is printed before the result');checks++;
+  put(cwd,'outside.txt');result=cli();assert.equal(result.status,1);assert.match(result.stdout,/SCOPE_BASE=main/);assert.match(result.stderr,/SCOPE_GUARD=FAIL/);checks++;
+  // A stacked branch on the command line prints its base.
+  cwd=stacked();scope(cwd,'base: chore/parent\nastrix-app/tools/validate-scope-guard.mjs\n','chore/child');
+  put(cwd,'astrix-app/tools/validate-scope-guard.mjs',readFileSync(fileURLToPath(new URL('./validate-scope-guard.mjs',import.meta.url))));
+  result=cli();assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/SCOPE_BASE=chore\/parent\s+SCOPE_GUARD=PASS/);checks++;
+  scope(cwd,'base: chore/missing\nastrix-app/tools/validate-scope-guard.mjs\n','chore/child');
+  result=cli();assert.equal(result.status,1);assert.match(result.stdout,/SCOPE_BASE=chore\/missing/);assert.match(result.stderr,/Scope base branch not found: chore\/missing/);checks++;
   console.log(`SCOPE_GUARD_TESTS=PASS checks=${checks}`);
 } finally {rmSync(temp,{recursive:true,force:true});}

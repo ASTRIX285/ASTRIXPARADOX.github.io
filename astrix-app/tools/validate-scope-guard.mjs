@@ -390,6 +390,8 @@ function git(cwd,args){
   return execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']});
 }
 
+const BRANCH_PATTERN=/^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)*$/;
+
 export function branchName(cwd,env=process.env){
   let branch=env.GITHUB_HEAD_REF;
   if(!branch && env.GITHUB_EVENT_PATH && /^pull_request/.test(env.GITHUB_EVENT_NAME||'')){
@@ -399,9 +401,48 @@ export function branchName(cwd,env=process.env){
   if(!branch) branch=git(cwd,['branch','--show-current']).trim();
   if(!branch && env.GITHUB_REF?.startsWith('refs/heads/')) branch=env.GITHUB_REF.slice('refs/heads/'.length);
   assert.ok(branch,'Cannot resolve branch in detached checkout; supply GITHUB_HEAD_REF (PR) or GITHUB_REF (push)');
-  assert.match(branch,/^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)*$/,'Malformed branch name');
+  assert.match(branch,BRANCH_PATTERN,'Malformed branch name');
   git(cwd,['check-ref-format','--branch',branch]);
   return branch;
+}
+
+// Stacked PRs (10 Oct 2026). A branch built on another PR is checked against that branch, not main, so only its own
+// changes count. The base comes, in this order, from a first line "base: <branch>" in the branch's scope file, from
+// GITHUB_BASE_REF in CI, else main. The command line prints SCOPE_BASE=<branch> before the result, never silently.
+const BASE_LINE=/^base:\s*(\S+)\s*$/;
+
+/** The base branch name and where it came from: { base, from } with from 'scope file', 'GITHUB_BASE_REF' or 'default'. */
+export function scopeBaseName(cwd,branch,env=process.env){
+  const scopePath=`.scope/${branch}.txt`;
+  let base=null,from='default';
+  if(regularFile(cwd,scopePath,{missing:true})){
+    const lines=readFileSync(resolve(cwd,scopePath),'utf8').split(/\r?\n/);
+    const match=BASE_LINE.exec(lines[0]??'');
+    if(match){base=match[1];from='scope file';}
+    assert.ok(!lines.slice(1).some(line=>BASE_LINE.test(line)),'base: must be the first line of the scope file');
+  }
+  if(!base&&env.GITHUB_BASE_REF){base=env.GITHUB_BASE_REF;from='GITHUB_BASE_REF';}
+  if(!base)base='main';
+  assert.match(base,BRANCH_PATTERN,`Malformed scope base branch: ${base}`);
+  git(cwd,['check-ref-format','--branch',base]);
+  // main checks itself against origin/main as before; a declared base must be another branch.
+  if(from!=='default')assert.notEqual(base,branch,'Scope base cannot be the branch itself');
+  return {base,from};
+}
+
+function hasRemoteRef(cwd,base){
+  try {git(cwd,['rev-parse','--verify','--quiet',`refs/remotes/origin/${base}`]);return true;}
+  catch {return false;}
+}
+
+/** The base's remote-tracking ref, fetched when it is not present locally. Fails plainly when the branch does not exist. */
+export function scopeBaseRef(cwd,base){
+  if(!hasRemoteRef(cwd,base)){
+    try {git(cwd,['fetch','--quiet','origin',`${base}:refs/remotes/origin/${base}`]);}
+    catch {throw new Error(`Scope base branch not found: ${base} (no origin/${base} locally and it could not be fetched from origin)`);}
+    assert.ok(hasRemoteRef(cwd,base),`Scope base branch not found: ${base}`);
+  }
+  return `origin/${base}`;
 }
 
 export function exactPath(path){
@@ -431,20 +472,25 @@ export function readScope(cwd,branch,baseFiles){
   const content=readFileSync(resolve(cwd,scopePath),'utf8');
   assert.ok(!content.includes('\uFFFD'),'Scope file must be valid UTF-8');
   const entries=new Set();
-  for(const line of content.split(/\r?\n/)){
-    if(line===''||line.startsWith('#'))continue;
+  content.split(/\r?\n/).forEach((line,index)=>{
+    // "base: <branch>" names the stack base. Only the first line may carry it, so a base can never hide among the entries.
+    if(BASE_LINE.test(line)){assert.equal(index,0,'base: must be the first line of the scope file');return;}
+    if(line===''||line.startsWith('#'))return;
     const path=exactPath(line);
     assert.ok(!entries.has(path),`Duplicate scope entry: ${path}`);
     assert.ok(regularFile(cwd,path,{missing:true})||baseFiles.has(path),`Missing scope entry: ${path}`);
     entries.add(path);
-  }
+  });
   return {scopePath,entries};
 }
 
 export function validateScope(cwd=root,env=process.env){
   const branch=branchName(cwd,env);
+  const {base}=scopeBaseName(cwd,branch,env);
+  const baseRef=scopeBaseRef(cwd,base);
+  // Committed changes since the base, plus working tree, staged and untracked files: all of them count.
   const paths=new Set([
-    ...git(cwd,['diff','--no-renames','--name-only','-z','origin/main...HEAD']).split('\0'),
+    ...git(cwd,['diff','--no-renames','--name-only','-z',`${baseRef}...HEAD`]).split('\0'),
     ...git(cwd,['diff','--no-renames','--name-only','-z']).split('\0'),
     ...git(cwd,['diff','--no-renames','--name-only','-z','--cached']).split('\0'),
     ...git(cwd,['ls-files','--others','--exclude-standard','-z']).split('\0'),
@@ -454,17 +500,22 @@ export function validateScope(cwd=root,env=process.env){
   for(const path of paths){
     if(path==='.scope'||path.startsWith('.scope/'))assert.equal(path,scopePath,`Another branch's scope file changed: ${path}`);
   }
-  const baseFiles=new Set(git(cwd,['ls-tree','-r','--name-only','-z','origin/main']).split('\0').filter(Boolean));
+  const baseFiles=new Set(git(cwd,['ls-tree','-r','--name-only','-z',baseRef]).split('\0').filter(Boolean));
   let entries=new Set();
-  // A clean main checkout needs no task file. Every task with changes needs one,
+  // A clean checkout of the base needs no task file. Every task with changes needs one,
   // even if its code paths happen to be covered by the inherited baseline.
   if(paths.size||regularFile(cwd,scopePath,{missing:true}))entries=readScope(cwd,branch,baseFiles).entries;
   const outside=[...paths].filter(path=>path!==scopePath&&!baselineAllows(path)&&!entries.has(path));
   assert.deepEqual(outside,[],`Scope violation:\n${outside.join('\n')}`);
-  return {branch,scopePath,changed:paths.size};
+  return {branch,base,scopePath,changed:paths.size};
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  try {validateScope();console.log('SCOPE_GUARD=PASS');}
-  catch(error){console.error(`SCOPE_GUARD=FAIL: ${error.message}`);process.exitCode=1;}
+  try {
+    // The base is printed first, so a run against the wrong branch is never silent.
+    const {base}=scopeBaseName(root,branchName(root));
+    console.log(`SCOPE_BASE=${base}`);
+    validateScope();
+    console.log('SCOPE_GUARD=PASS');
+  } catch(error){console.error(`SCOPE_GUARD=FAIL: ${error.message}`);process.exitCode=1;}
 }
