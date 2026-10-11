@@ -1312,7 +1312,6 @@ body.aetherium-page #aeStatsPanel .ae-stat-open:focus-visible:not(#ax-s1):not(#a
 #aeStatsPanel .ae-stat-effect{grid-column:2}
 #aeDeity .ae-stat-icon{width:28px;height:28px}
 .ae-card-icon .ae-stat-icon{width:40px;height:40px}
-.ae-chain-stat{white-space:nowrap}
 .ae-chain-stat .ae-stat-icon{width:20px;height:20px;margin-right:.25rem;vertical-align:-5px}
 .ae-gear-look{margin:1rem 0}
 .ae-look-rows{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
