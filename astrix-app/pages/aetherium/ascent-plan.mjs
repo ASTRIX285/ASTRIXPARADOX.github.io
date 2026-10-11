@@ -11,10 +11,10 @@
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
 import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster, sourceLabel } from './aetherium-data.mjs';
-import { $, esc, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, gradeTile, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { renderNext, renderStepBar } from './aetherium-flow.mjs';
-import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel, levelOrder } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel, gradeInfo, levelOrder } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
 import { KIND_LABEL, boardGridStyle, nodeArt as boardNodeArt, nodeImg as boardNodeImg, nodeTileHtml } from './daevanion-board.mjs';
 
@@ -181,18 +181,24 @@ function viewStatus(view, plan) {
  * so a move about Vaizel could open Nezekan.
  */
 function questHref(item) {
-  // A gear move opens the Gear page with the items it names ringed (#enchant, #empty), not the plain list.
+  // A gear move opens the Gear page with only the items it names ringed (#enchant-1, #replace-epic, #empty), not the plain list.
   if (item.view === 'gear' && state.model) return `${gearPageUrl(state.ref)}${item.ring ? `#${item.ring}` : ''}`;
   const href = viewHref(item.view);
   if (item.view !== 'daevanion' || !item.board) return href;
   return `${href}&board=${encodeURIComponent(item.board)}${item.node ? `&node=${encodeURIComponent(item.node)}` : ''}`;
 }
 
+/** A gear move's art: the first item it names on its grade tile, like the game's, else the gear glyph. */
+function gearArt(item) {
+  const slot = state.model && item.slots?.length ? state.model.gear.find(entry => entry.slotPos === item.slots[0] && !entry.empty) : null;
+  return slot ? gradeTile({ icon: slot.icon, grade: gradeInfo(slot.grade, state.data?.grades).id, enchant: slot.enchant, size: 56 }) : ICON.gear;
+}
+
 function renderMenu(plan) {
   const quests = plan.now.slice(0, 4);
   const todo = view => plan.now.filter(item => item.view === view).length;
   const questCard = item => `<li><a class="ae-quest" href="${esc(questHref(item))}" data-quest-view="${esc(item.view)}"${item.board ? ` data-quest-board="${esc(item.board)}"` : ''}>
-      <span class="ae-quest-art" data-fallback="${esc(item.view)}">${item.view === 'gear' ? ICON.gear : viewArt(item.view, plan)}</span>
+      <span class="ae-quest-art" data-fallback="${esc(item.view)}">${item.view === 'gear' ? gearArt(item) : viewArt(item.view, plan)}</span>
       <span class="ae-quest-num">${item.step}</span>
       <span class="ae-quest-text"><strong>${esc(item.title)}</strong></span>
       <span class="ae-quest-go">Show me</span>

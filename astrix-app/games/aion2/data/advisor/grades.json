@@ -1,0 +1,856 @@
+{
+  "description": "AION 2 item grades, one record per grade: the code the official data sends (grade), the name the game client shows (name: the data sends it as gradeName in the item detail), the order from lowest to highest, the tile colour in the game and the enchant cap. Each value has a status and provenance. confirmed: seen in the live data or in game. unconfirmed: guides say it, not seen on global gear yet. An item's own maxEnchantLevel (item detail) always beats the cap here; the cap is the fallback, shown as about until the detail is read. Pages never show the internal code Legend: it is the game's Epic. The colours are the game's grade colours, mirrored as tokens in aetherium.css.",
+  "records": [
+    {
+      "id": "common",
+      "code": "Common",
+      "label": "White",
+      "name": {
+        "value": "Common",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment",
+            "capturedOn": "2026-10-05",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+          }
+        ]
+      },
+      "order": {
+        "value": 1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#e8ecf2",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "cap": {
+        "value": 5,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-05",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "rare",
+      "code": "Rare",
+      "label": "Green",
+      "name": {
+        "value": "Rare",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          }
+        ]
+      },
+      "order": {
+        "value": 2,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#5fd37e",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-11",
+            "gameVersion": "global launch (Oct 2026)",
+            "where": "Equipment window, item tiles",
+            "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+          }
+        ]
+      },
+      "cap": {
+        "value": 5,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-11",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Equipment window, item tiles",
+          "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "epic",
+      "code": "Legend",
+      "label": "Blue",
+      "name": {
+        "value": "Epic",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          }
+        ]
+      },
+      "order": {
+        "value": 3,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#58a8ff",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-11",
+            "gameVersion": "global launch (Oct 2026)",
+            "where": "Equipment window, item tiles",
+            "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+          }
+        ]
+      },
+      "cap": {
+        "value": 10,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-11",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Equipment window, item tiles",
+          "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "unique",
+      "code": "Unique",
+      "label": "Gold",
+      "name": {
+        "value": "Unique",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          }
+        ]
+      },
+      "order": {
+        "value": 4,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#e2b54f",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-11",
+            "gameVersion": "global launch (Oct 2026)",
+            "where": "Equipment window, item tiles",
+            "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+          }
+        ]
+      },
+      "cap": {
+        "value": 15,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/equipment/item",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "ath-enhancement",
+            "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+            "publisher": "AllThingsHow",
+            "url": "https://allthings.how/?p=244900",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-07",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-enhancement",
+            "title": "AION 2 Enhancement Calculator",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/enhancement",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-11",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Equipment window, item tiles",
+          "note": "Miguel's screenshot of his Lv 45 gear, as he reports it: weapon and guard tiles gold (Unique), armour tiles blue (Epic), belt tile green (Rare)."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "heroic",
+      "code": "Epic",
+      "label": "Orange",
+      "name": {
+        "value": "Heroic",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gt-enhancement",
+            "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+            "publisher": "gameplay.tips",
+            "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-01",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "order": {
+        "value": 5,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gt-enhancement",
+            "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+            "publisher": "gameplay.tips",
+            "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-01",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#ff9a4a",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gt-enhancement",
+            "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+            "publisher": "gameplay.tips",
+            "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-01",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "cap": {
+        "value": 20,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gt-enhancement",
+            "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+            "publisher": "gameplay.tips",
+            "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+            "retrievedOn": "2026-10-11",
+            "publishedOn": "2026-10-01",
+            "region": "not-stated",
+            "reliability": "medium"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gt-enhancement",
+          "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-01",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gw-enhancement",
+          "title": "AION2 Gear Enhancement simulator",
+          "publisher": "GameWith",
+          "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "mythic",
+      "code": {
+        "pending": true,
+        "reason": "The internal code is not seen on global gear yet."
+      },
+      "label": "Red",
+      "name": {
+        "value": "Mythic",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "order": {
+        "value": 6,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#ff6b6b",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "cap": {
+        "pending": true,
+        "reason": "Not on global gear yet."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gw-enhancement",
+          "title": "AION2 Gear Enhancement simulator",
+          "publisher": "GameWith",
+          "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "special",
+      "code": {
+        "pending": true,
+        "reason": "The internal code is not seen on global gear yet."
+      },
+      "label": "Teal",
+      "name": {
+        "value": "Special",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "order": {
+        "value": 7,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "colour": {
+        "value": "#45d6c6",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "gw-enhancement",
+            "title": "AION2 Gear Enhancement simulator",
+            "publisher": "GameWith",
+            "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+            "retrievedOn": "2026-10-11",
+            "region": "korea",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "cap": {
+        "pending": true,
+        "reason": "Special items enhance in their own way."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gw-enhancement",
+          "title": "AION2 Gear Enhancement simulator",
+          "publisher": "GameWith",
+          "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "slot-caps",
+      "label": "Enchant caps by slot",
+      "text": "Amulets and belts go to +10 at every grade and enhance with their own scrolls (Amulet Enhance Scroll, Belt Enhance Scroll).",
+      "slots": {
+        "Amulet": {
+          "value": 10,
+          "status": "confirmed",
+          "provenance": [
+            {
+              "kind": "armory",
+              "region": "eu",
+              "endpoint": "/api/character/equipment/item",
+              "capturedOn": "2026-10-11",
+              "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-enhancement",
+              "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/?p=244900",
+              "retrievedOn": "2026-10-11",
+              "publishedOn": "2026-10-07",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        "Belt": {
+          "value": 10,
+          "status": "confirmed",
+          "provenance": [
+            {
+              "kind": "armory",
+              "region": "eu",
+              "endpoint": "/api/character/equipment/item",
+              "capturedOn": "2026-10-11",
+              "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-enhancement",
+              "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/?p=244900",
+              "retrievedOn": "2026-10-11",
+              "publishedOn": "2026-10-07",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}

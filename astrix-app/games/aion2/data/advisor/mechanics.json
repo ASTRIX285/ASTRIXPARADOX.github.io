@@ -1,5 +1,5 @@
 {
-  "description": "AION 2 game mechanics the Ascent Plan rests on, one record per rule with a status. confirmed: seen in game or settled by Miguel. unconfirmed: guides say it, nobody has tested it yet; every page that rests on it shows a Not confirmed yet tag and the in-game test below. Flip a status here and every screen follows. Every rule carries a provenance block (platform/contracts/provenance.schema.json), never shown on a page; guideViews says which order each macro guide describes. The macro facts themselves (slots, delay, hold, interrupt, key binding) live in progression.json under macro-order; the macro-order rule here points at them so there is one place to edit. A confirmed rule with a value the engine reads (mastery-cap: the Mastery cap and where levels past it come from) keeps that value under value.",
+  "description": "AION 2 game mechanics the Ascent Plan rests on, one record per rule with a status. confirmed: seen in game or settled by Miguel. unconfirmed: guides say it, nobody has tested it yet; every page that rests on it shows a Not confirmed yet tag and the in-game test below. Flip a status here and every screen follows. Every rule carries a provenance block (platform/contracts/provenance.schema.json), never shown on a page; guideViews says which order each macro guide describes. The macro facts themselves (slots, delay, hold, interrupt, key binding) live in progression.json under macro-order; the macro-order rule here points at them so there is one place to edit. A confirmed rule with a value the engine reads (mastery-cap: the Mastery cap and where levels past it come from) keeps that value under value. enchant-rates is confirmed by four guides that agree, one of them read from the global client data; the official item data confirms the caps it rests on (grades.json). The enchant rules (enchant-rates, enchant-pity, enchant-carry, enhance-stones) feed the Gear page's item card and the gear moves; the grade caps they rest on live in grades.json.",
   "records": [
     {
       "id": "skill-stack",
@@ -183,6 +183,212 @@
           "region": "korea",
           "reliability": "medium",
           "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "enchant-rates",
+      "label": "Enchant success",
+      "status": "confirmed",
+      "confirmedOn": "2026-10-11",
+      "value": {
+        "safeTo": 10,
+        "rates": {
+          "11": 65,
+          "12": 50,
+          "13": 35,
+          "14": 25,
+          "15": 20
+        },
+        "keepsLevel": true
+      },
+      "text": "Every enchant step up to +10 succeeds. Past +10 the chance is 65% for +11, 50% for +12, 35% for +13, 25% for +14 and 20% for +15. A failure costs the attempt (its stones and Kina), never a level, and never breaks the item.",
+      "test": "Open the Enchant window on an item at +10 and read the success chance it shows for +11.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gw-enhancement",
+          "title": "AION2 Gear Enhancement simulator",
+          "publisher": "GameWith",
+          "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "hub-gear-forge",
+          "title": "AION 2 Gear Forge",
+          "publisher": "AION2 Hub",
+          "url": "https://aion2hub.com/tools/gear-forge",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "enchant-pity",
+      "label": "Enchant failure bonus",
+      "status": "unconfirmed",
+      "value": {
+        "perFailure": 5
+      },
+      "text": "Each failed try above +10 adds 5 points to the chance of the next try at that step. A success resets it.",
+      "test": "Fail an enchant above +10, then check whether the chance shown for the same step went up by 5.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gw-enhancement",
+          "title": "AION2 Gear Enhancement simulator",
+          "publisher": "GameWith",
+          "url": "https://gamewith.ai/aion2/en/enhancement-simulator",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "hub-gear-forge",
+          "title": "AION 2 Gear Forge",
+          "publisher": "AION2 Hub",
+          "url": "https://aion2hub.com/tools/gear-forge",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "enchant-carry",
+      "label": "Enchant level carries over",
+      "status": "confirmed",
+      "parts": [
+        {
+          "id": "crafted-steps",
+          "status": "confirmed",
+          "text": "Transfer crafting a crafted item into the next step keeps its enchant level."
+        },
+        {
+          "id": "gear-transfer",
+          "status": "unconfirmed",
+          "text": "Moving a Unique item's enchant level onto another Unique item keeps the level.",
+          "test": "Before a Unique to Unique transfer, check the preview for the enchant level on the new item."
+        }
+      ],
+      "text": "A crafted upgrade step keeps the item's enchant level. A Unique to Unique gear transfer may keep it too, not confirmed yet.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-succession",
+          "title": "Succession crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/succession-crafting",
+          "retrievedOn": "2026-10-11",
+          "region": "korea",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "enhance-stones",
+      "label": "Enhance Stones",
+      "status": "unconfirmed",
+      "value": {
+        "name": "Enhance Stone",
+        "from": [
+          "Dungeon clears, such as Daeva Bio-Research Base and Nightmare Altar",
+          "Some monsters and bosses",
+          "Achievements",
+          "Quests",
+          "Expedition dungeons",
+          "Attendance and the battle pass",
+          "Faction rifts"
+        ]
+      },
+      "text": "Enchanting weapons, armour and most accessories uses Enhance Stones and Kina. Amulets and belts use their own scrolls instead.",
+      "test": "In game, open an Enhance Stone's item card and check where it says it comes from.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-wing-enhancement",
+          "title": "AION 2 Wing Enhancement Guide: Cost to +10 and Best Wings",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/wing-enhancement-guide",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-08",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ath-enhancement",
+          "title": "AION 2 Enhancement: Success Chance and Cost of Every Step to +15 by Grade",
+          "publisher": "AllThingsHow",
+          "url": "https://allthings.how/?p=244900",
+          "retrievedOn": "2026-10-11",
+          "publishedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-enhancement",
+          "title": "AION 2 Enhancement Calculator",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/enhancement",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
         }
       ]
     }

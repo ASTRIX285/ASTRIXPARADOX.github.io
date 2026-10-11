@@ -3,12 +3,14 @@
 //   - The advisor data covers all 8 classes, each with a main role, and every field it shows cites a
 //     source that is listed on the record (no orphan refs, no invented sources).
 //   - Every core skill is in the skill catalogue; Gladiator skills and stigmas match the armory catalogue.
-//   - ASTRIX285 (Lv 12 Gladiator, #451 fixtures) gets the armory fixes: unspent Nezekan, +0 gear, Overhead Slam.
+//   - ASTRIX285 (Lv 12 Gladiator, #451 fixtures) gets the armory fixes: unspent Nezekan, gear to enchant, Overhead Slam.
+//   - Grade rule (fix/aetherium-gear-enchant-context, 11 Oct 2026): Unique to +10 then +15 on weapon and guard, Epic and
+//     late Common or Rare replaced, amulet and belt to +10, nothing at the cap; a Lv 45 fixture gives the exact moves.
 //   - Level-aware: stigma slots 22/27/32/37, boards 12/20/30/40/45, locked skills and macro steps, cap 45.
 //   - Roles: pending builds stay pending, unknown roles fall back to the main role.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,fillerProblems,levelOrder,masteryCap,needsEnchant,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
+import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
 import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
@@ -20,7 +22,8 @@ const skills=json('games/aion2/data/advisor/skills.json');
 const builds=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/builds/${name.toLowerCase()}.json`)]));
 const icons=Object.fromEntries(AION2_CLASSES.map(name=>[name,json(`games/aion2/data/advisor/icons/${name.toLowerCase()}.json`)]));
 const mechanics=json('games/aion2/data/advisor/mechanics.json');
-const data=name=>({progression,skills,mechanics,builds:builds[name],icons:icons[name]});
+const grades=json('games/aion2/data/advisor/grades.json');
+const data=name=>({progression,skills,mechanics,grades,builds:builds[name],icons:icons[name]});
 
 let failed=0;
 const check=(name,fn)=>{try {fn();console.log(`  ok   ${name}`);} catch(error){failed++;console.log(`  FAIL ${name}\n${error.stack}`);}};
@@ -112,7 +115,8 @@ check('ASTRIX285: armory fixes first, then the build',()=>{
   assert.equal(plan.character.name,'ASTRIX285');
   assert.deepEqual(plan.now.map(item=>item.title),[
     'Spend points on the Nezekan Daevanion board',
-    'Enchant 7 worn items above +0',
+    // Grade rule (11 Oct 2026): at Lv 12 the Common and Rare pieces go to their +5 cap, one move for all eight.
+    'Enchant 8 Rare and Common pieces to +5',
     // One level order (walkthrough fix, 11 Oct 2026): the level move is the Mastery list's first step, Keen Strike, not the lowest skill.
     'Level Keen Strike (now Lv 3)'
   ]);
@@ -414,14 +418,128 @@ check('no Daevanion move when every open board has nodes taken: a finished board
   assert.equal(plan.now.some(item=>item.view==='daevanion'),false);
   assert.ok(plan.now.length>0,'Other moves still come');
 });
-check('the enchant move lists the +0 worn slots, the rule the Gear page flags with needsEnchant',()=>{
+// Grade rule (11 Oct 2026): was "the +0 worn slots" (needsEnchant). The move now lists the slots the grade rule enchants.
+check('the enchant move lists the worn slots the grade rule says to enchant, the rule the Gear page flags with',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
-  const move=plan.now.find(item=>/^Enchant \d+ worn items above \+0$/.test(item.title));
-  const expected=astrix.gear.filter(needsEnchant).map(slot=>slot.slotPos);
-  assert.ok(expected.length>0,'The fixture wears +0 items');
+  const move=plan.now.find(item=>/^Enchant \d+ .+ pieces to \+5$/.test(item.title));
+  const expected=astrix.gear.filter(slot=>enchantAdvice(slot,{level:12,grades,progression})?.action==='enchant').map(slot=>slot.slotPos);
+  assert.ok(expected.length>0,'The fixture wears items to enchant');
   assert.deepEqual(move.slots,expected);
-  assert.ok(astrix.gear.filter(needsEnchant).every(slot=>!slot.empty&&slot.enchant===0));
-  assert.ok(astrix.gear.filter(slot=>!needsEnchant(slot)).every(slot=>slot.empty||slot.enchant>0));
+  assert.equal(move.ring,move.move,'Show me rings the move by its own id');
+  assert.ok(astrix.gear.filter(slot=>!slot.empty).every(slot=>enchantAdvice(slot,{level:12,grades,progression}).action==='enchant'),'At Lv 12 every Common and Rare item below +5 is enchanted');
+  assert.ok(astrix.gear.filter(slot=>!slot.empty).every(slot=>slot.enchant<5),'The fixture items are all below their +5 cap');
+});
+
+/* The grade rule (brief fix/aetherium-gear-enchant-context, 11 Oct 2026). Grades come from grades.json (the data's
+   "Legend" is the game's Epic); caps from the item's own maxEnchantLevel, else the grade's cap. */
+const item=(over={})=>({empty:false,slot:'Helmet',slotPos:3,name:'Test Helm',grade:'Unique',enchant:0,maxEnchant:{pending:true,reason:'test'},...over});
+const advise=(over,level=45)=>enchantAdvice(item(over),{level,grades,progression});
+const pickAdvice=advice=>[advice.action,advice.from,advice.to,advice.costly,advice.flag];
+check('grade names: the data\'s Legend is the game\'s Epic, internal Epic is Heroic; gradeName wins; Legend is never a name',()=>{
+  assert.equal(gradeInfo('Legend',grades).name,'Epic');
+  assert.equal(gradeInfo('Legend',grades).id,'epic');
+  assert.equal(gradeInfo('Epic',grades).name,'Heroic');
+  assert.equal(gradeInfo('Unique',grades).name,'Unique');
+  assert.equal(gradeInfo('Rare',grades,'Rare').name,'Rare');
+  assert.equal(gradeInfo('Legend',null).name,'Epic','Even with no grade data, Legend is shown as Epic');
+  for(const record of grades.records.filter(entry=>entry.id!=='slot-caps'))assert.notEqual(record.name.value,'Legend');
+  assert.deepEqual(grades.records.filter(entry=>entry.order).sort((a,b)=>a.order.value-b.order.value).map(entry=>entry.name.value),['Common','Rare','Epic','Unique','Heroic','Mythic','Special']);
+});
+check('grades.json: every value has a status and provenance, colours and caps as researched',()=>{
+  const by=Object.fromEntries(grades.records.map(entry=>[entry.id,entry]));
+  for(const record of grades.records.filter(entry=>entry.id!=='slot-caps')){
+    for(const key of ['name','order','colour'])assert.ok(['confirmed','unconfirmed'].includes(record[key].status)&&record[key].provenance.length,`${record.id}.${key}`);
+    assert.ok(record.cap.pending||(['confirmed','unconfirmed'].includes(record.cap.status)&&record.cap.provenance.length),`${record.id}.cap`);
+    assert.ok(record.provenance.length,`${record.id} provenance`);
+  }
+  assert.deepEqual(['common','rare','epic','unique'].map(id=>by[id].cap.value),[5,5,10,15]);
+  assert.equal(by.mythic.name.status,'unconfirmed');
+  assert.equal(by.special.name.status,'unconfirmed');
+  assert.deepEqual(Object.fromEntries(Object.entries(by['slot-caps'].slots).map(([name,cap])=>[name,cap.value])),{Amulet:10,Belt:10});
+  assert.equal(by.unique.colour.value,'#e2b54f');
+  assert.equal(by.epic.colour.value,'#58a8ff');
+  assert.equal(by.rare.colour.value,'#5fd37e');
+});
+check('Unique: enchant to +10 first (every step succeeds), then +15 only on the weapon and guard, marked costly',()=>{
+  assert.deepEqual(pickAdvice(advise({enchant:3,slot:'MainHand',slotPos:1})),['enchant',3,10,false,'ENCHANT +3 to +10']);
+  assert.deepEqual(pickAdvice(advise({enchant:3})),['enchant',3,10,false,'ENCHANT +3 to +10']);
+  assert.deepEqual(pickAdvice(advise({enchant:11,slot:'SubHand',slotPos:2})),['enchant',11,15,true,'ENCHANT +11 to +15']);
+  assert.deepEqual(pickAdvice(advise({enchant:10,slot:'MainHand',slotPos:1})),['enchant',10,15,true,'ENCHANT +10 to +15']);
+  assert.deepEqual(pickAdvice(advise({enchant:10})),['done',10,10,false,null],'Unique armour stops at +10, no flag');
+  assert.equal(advise({enchant:3}).cap,15);
+  assert.equal(advise({enchant:3}).about,true,'No item detail yet: the cap is the grade table\'s, said as about');
+  assert.equal(advise({enchant:3,maxEnchant:15}).about,false,'The item\'s own max enchant wins');
+});
+check('Epic never above +5: always Replace with a Unique piece',()=>{
+  for(const enchant of [0,3,5])assert.deepEqual(pickAdvice(advise({grade:'Legend',enchant,maxEnchant:10})),['replace',enchant,null,false,'REPLACE']);
+  assert.match(advise({grade:'Legend'}).why,/do not enchant it past \+5/);
+  assert.equal(advise({grade:'Legend'}).grade.name,'Epic');
+});
+check('Common and Rare: enchant to +5 early, Replace from Lv 20 (no progression cut-off yet)',()=>{
+  assert.equal(advise({grade:'Rare',enchant:0},19).action,'enchant');
+  assert.equal(advise({grade:'Rare',enchant:0},19).to,5);
+  assert.equal(advise({grade:'Common',enchant:2},12).to,5);
+  for(const grade of ['Common','Rare'])assert.equal(advise({grade,enchant:0},20).action,'replace',grade);
+  assert.equal(advise({grade:'Rare',enchant:5,maxEnchant:5},12).action,'full');
+});
+check('amulets and belts follow their own +10 cap at every grade',()=>{
+  for(const slot of ['Amulet','Belt'])for(const grade of ['Rare','Legend','Unique']){
+    const advice=advise({slot,slotPos:22,grade,enchant:6});
+    assert.deepEqual([advice.action,advice.to,advice.cap],['enchant',10,10],`${slot} ${grade}`);
+  }
+  assert.equal(advise({slot:'Amulet',slotPos:22,grade:'Rare',enchant:10}).action,'full');
+});
+check('at the cap: Fully enchanted, FULL, no move',()=>{
+  const advice=advise({enchant:15,maxEnchant:15,slot:'MainHand',slotPos:1});
+  assert.deepEqual([advice.action,advice.flag],['full','FULL']);
+  const model={gear:[item({enchant:15,maxEnchant:15,slot:'MainHand',slotPos:1})]};
+  assert.deepEqual(gearMoves(model,{level:45,grades,progression}),[]);
+});
+check('every class and slot: the grade rule runs for all 8 classes, wings and pet never get advice',()=>{
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  for(const className of AION2_CLASSES){
+    const model=structuredClone(lv45);
+    model.profile.class=className;
+    const plan=buildAscentPlan({className,role:null,data:data(className),model});
+    assert.ok(plan.now.some(move=>move.move==='enchant-1'),`${className}: the weapon move`);
+    for(const slot of model.gear.filter(entry=>!entry.empty))assert.ok(enchantAdvice(slot,{level:45,grades,progression}).action,`${className} ${slot.slot}`);
+  }
+  assert.ok(!lv45.gear.some(slot=>/wing|pet/i.test(slot.slot)),'Wings and pet are not gear slots');
+});
+check('a Lv 45 Daeva (Unique weapon +3, Unique guard +11, Epic Pilgrim set, Rare amulet +9): the exact gear moves, in order',()=>{
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  const moves=gearMoves(lv45,{level:45,grades,progression});
+  assert.deepEqual(moves.map(move=>move.title),[
+    'Enchant Spiritforged Greatsword +3 to +10',
+    'Enchant Noble Belt +6 to +10',
+    'Enchant Revelation Amulet +9 to +10',
+    'Replace 11 Epic pieces with Unique gear',
+    'Replace 2 Rare pieces with Unique gear',
+    'Enchant Wisdom Guard +11 to +15'
+  ]);
+  assert.match(moves[0].detail,/^Every step succeeds\./);
+  assert.match(moves[2].detail,/^One step to its \+10 cap/);
+  assert.match(moves.at(-1).detail,/Big Kina and Enhance Stone cost/);
+  assert.match(moves.at(-1).detail,/after the weapon/);
+  assert.deepEqual(moves[3].slots.sort((a,b)=>a-b),[3,4,5,6,7,8,10,11,12,13,19]);
+  assert.ok(lv45.gear.filter(slot=>slot.name.startsWith('Pilgrim')).every(slot=>enchantAdvice(slot,{level:45,grades,progression}).flag==='REPLACE'),'Pilgrim pieces are flagged Replace, not Enchant');
+  assert.ok(!moves.some(move=>/Enchant \d+ (worn )?items/.test(move.title)),'Never one vague Enchant N items line');
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:lv45});
+  const gear=plan.now.filter(move=>move.view==='gear').map(move=>move.title);
+  assert.deepEqual(gear,moves.map(move=>move.title),'The plan carries the same moves in the same order');
+  assert.ok(plan.now.findIndex(move=>move.move==='enchant-1')<plan.now.findIndex(move=>move.move==='enchant-2'),'Guard after the weapon');
+});
+check('enchant rules in mechanics.json: rates, pity, carry and stones, each with a status and provenance',()=>{
+  const rules=indexMechanics(mechanics,progression);
+  assert.deepEqual(rules['enchant-rates'].value.rates,{11:65,12:50,13:35,14:25,15:20});
+  assert.equal(rules['enchant-rates'].value.safeTo,10);
+  assert.equal(rules['enchant-rates'].value.keepsLevel,true);
+  assert.equal(rules['enchant-rates'].status,'confirmed');
+  assert.equal(rules['enchant-pity'].status,'unconfirmed');
+  assert.equal(rules['enchant-pity'].value.perFailure,5);
+  assert.deepEqual(rules['enchant-carry'].parts.map(part=>[part.id,part.status]),[['crafted-steps','confirmed'],['gear-transfer','unconfirmed']]);
+  assert.equal(rules['enhance-stones'].status,'unconfirmed');
+  assert.deepEqual(enchantSteps(9,12,rules['enchant-rates']).map(step=>step.rate),[100,65,50]);
 });
 
 /* The Mastery cap (Miguel, in game, 10 Oct 2026): Mastery takes a skill to Lv 11 at most. The advisor never

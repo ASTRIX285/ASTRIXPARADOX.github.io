@@ -33,6 +33,15 @@ export const iconImg = (src, alt = '', size = 48) => src
   ? `<img class="ae-icon" src="${esc(src)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
   : `<span class="ae-icon ae-icon-empty" aria-hidden="true"></span>`;
 
+/**
+ * An item icon on its grade tile, like the game's: the grade colour behind the icon with a soft inner glow, and the
+ * enchant level on the corner (+3) once it is above +0. grade is the grade id from grades.json (unique, epic ...);
+ * an unknown grade gets the plain well. The colour lives in aetherium.css (--ae-grade-*), never inline.
+ */
+export const gradeTile = ({ icon, grade = null, enchant = null, size = 80, alt = '', className = '' }) => `<span class="ae-gtile${className ? ` ${className}` : ''}"${grade ? ` data-grade="${esc(grade)}"` : ''}>${icon
+  ? `<img src="${esc(icon)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+  : '<span class="ae-icon-empty" aria-hidden="true"></span>'}${Number.isFinite(enchant) && enchant > 0 ? `<b class="ae-gtile-plus" aria-hidden="true">+${esc(enchant)}</b>` : ''}</span>`;
+
 /** Page accent from the active character's faction: Elyos, Asmodian, or ASTRIX before one loads. */
 export function setFaction(raceName, raceId = null) {
   document.body.dataset.faction = raceName || raceId ? factionOf(raceName, raceId) : 'astrix';

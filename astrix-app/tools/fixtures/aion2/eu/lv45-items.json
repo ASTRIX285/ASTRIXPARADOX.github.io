@@ -1,0 +1,1200 @@
+{
+  "1": {
+    "id": 110130047,
+    "name": "Spiritforged Greatsword",
+    "grade": "Unique",
+    "gradeName": "Unique",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WP_GS_0078_T05.png",
+    "level": 45,
+    "levelValue": 3,
+    "enchantLevel": 3,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 15,
+    "raceName": "All",
+    "classNames": [
+      "Gladiator"
+    ],
+    "categoryName": "Greatsword",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 4,
+    "godStoneSlotCount": 1,
+    "costumes": [
+      "Golden Vow (Greatsword)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "minValue": "195",
+        "value": "263",
+        "extra": "15",
+        "exceed": false
+      },
+      {
+        "id": "WeaponAccuracy",
+        "name": "Accuracy",
+        "value": "100",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "Critical",
+        "name": "Critical Hit",
+        "value": "150",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "Block",
+        "name": "Block",
+        "value": "150",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "STR",
+        "name": "Might",
+        "minValue": "15",
+        "value": "15"
+      },
+      {
+        "id": "Critical",
+        "name": "Critical Hit",
+        "minValue": "16",
+        "value": "16"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "57",
+        "value": "57"
+      },
+      {
+        "id": "Block",
+        "name": "Block",
+        "minValue": "23",
+        "value": "23"
+      }
+    ],
+    "magicStoneStat": [
+      {
+        "id": "HPMax",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_001.png",
+        "value": "+60",
+        "name": "HP",
+        "grade": "Rare",
+        "slotPos": 0
+      },
+      {
+        "id": "Accuracy",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_001.png",
+        "value": "+5",
+        "name": "Accuracy Bonus",
+        "grade": "Common",
+        "slotPos": 1
+      },
+      {
+        "id": "HPMax",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_001.png",
+        "value": "+30",
+        "name": "HP",
+        "grade": "Common",
+        "slotPos": 2
+      },
+      {
+        "id": "ArmorDefense",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_001.png",
+        "value": "+30",
+        "name": "Defense",
+        "grade": "Rare",
+        "slotPos": 3
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "2": {
+    "id": 115030002,
+    "name": "Wisdom Guard",
+    "grade": "Unique",
+    "gradeName": "Unique",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Weapon_Guarder_L_022.png",
+    "level": 36,
+    "levelValue": 11,
+    "enchantLevel": 11,
+    "storable": true,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 15,
+    "raceName": "All",
+    "categoryName": "Guard",
+    "type": "Equip",
+    "equipLevel": 30,
+    "magicStoneSlotCount": 4,
+    "godStoneSlotCount": 1,
+    "subStatCount": 4,
+    "subSkillCountMax": 4,
+    "subStatRandom": true,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "73",
+        "extra": "44",
+        "exceed": false
+      },
+      {
+        "id": "WeaponAccuracy",
+        "name": "Accuracy",
+        "value": "50",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "Critical",
+        "name": "Critical Hit",
+        "value": "50",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "94.3",
+    "subStats": [
+      {
+        "id": "Block",
+        "name": "Block",
+        "value": "37"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "value": "112"
+      },
+      {
+        "id": "BackAttackDamage",
+        "name": "Back Attack",
+        "value": "59"
+      }
+    ],
+    "subSkills": [
+      {
+        "id": 11200000,
+        "level": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_020.png",
+        "name": "Ankle Slice"
+      }
+    ],
+    "magicStoneStat": [
+      {
+        "id": "Accuracy",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_003.png",
+        "value": "+7",
+        "name": "Accuracy Bonus",
+        "grade": "Rare",
+        "slotPos": 0
+      },
+      {
+        "id": "ArmorDefense",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_003.png",
+        "value": "+50",
+        "name": "Defense",
+        "grade": "Legend",
+        "slotPos": 1
+      },
+      {
+        "id": "HPMax",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_003.png",
+        "value": "+50",
+        "name": "HP",
+        "grade": "Rare",
+        "slotPos": 2
+      },
+      {
+        "id": "CriticalResist",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_003.png",
+        "value": "+10",
+        "name": "Critical Hit Resist",
+        "grade": "Legend",
+        "slotPos": 3
+      }
+    ],
+    "sources": [
+      "Looted from monsters"
+    ],
+    "favorite": false
+  },
+  "3": {
+    "id": 210340031,
+    "name": "Pilgrim Helm",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Helmet.png",
+    "level": 41,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Helm",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Helm)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "225",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "103",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "34",
+        "value": "34"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "22",
+        "value": "22"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "8",
+        "value": "8"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "4": {
+    "id": 210440031,
+    "name": "Pilgrim Pauldrons",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Shoulder.png",
+    "level": 41,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Pauldrons",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Pauldrons)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "225",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "103",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "34",
+        "value": "34"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "22",
+        "value": "22"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "8",
+        "value": "8"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "5": {
+    "id": 210140031,
+    "name": "Pilgrim Breastplate",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Torso.png",
+    "level": 38,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Top",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Breastplate)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "277",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "152",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "50",
+        "value": "50"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "31",
+        "value": "31"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "10",
+        "value": "10"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "6": {
+    "id": 210240031,
+    "name": "Pilgrim Greaves",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Pants.png",
+    "level": 38,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Legs",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Greaves)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "231",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "114",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "42",
+        "value": "42"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "26",
+        "value": "26"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "9",
+        "value": "9"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "7": {
+    "id": 210540031,
+    "name": "Pilgrim Gloves",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Gloves.png",
+    "level": 39,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Gloves",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Gloves)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "190",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "78",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "30",
+        "value": "30"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "19",
+        "value": "19"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "7",
+        "value": "7"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "8": {
+    "id": 210640029,
+    "name": "Anguish Boots",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0032_T05_Boots.png",
+    "level": 40,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": true,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Shoes",
+    "type": "Equip",
+    "equipLevel": 37,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Hallowed Promise (Boots)"
+    ],
+    "subStatCount": 3,
+    "subSkillCountMax": 3,
+    "subStatRandom": true,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "195",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "80",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "49.5",
+    "subStats": [
+      {
+        "id": "PerfectResist",
+        "name": "Perfect Resist",
+        "value": "2%"
+      },
+      {
+        "id": "FrontAttackDefense",
+        "name": "Front Defense",
+        "value": "132"
+      }
+    ],
+    "subSkills": [
+      {
+        "id": 11740000,
+        "level": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_004.png",
+        "name": "Identify Weakness"
+      }
+    ],
+    "sources": [
+      "Reward Chest",
+      "Expedition",
+      "Sanctuary"
+    ],
+    "favorite": false
+  },
+  "10": {
+    "id": 310140024,
+    "name": "Silent Necklace",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_NL_0020.png",
+    "level": 38,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": true,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Necklace",
+    "type": "Accessory",
+    "equipLevel": 35,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Violet Bead (Necklace)"
+    ],
+    "subStatCount": 3,
+    "subSkillCountMax": 3,
+    "subStatRandom": true,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "58",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "138",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "78.7",
+    "subStats": [
+      {
+        "id": "Block",
+        "name": "Block",
+        "value": "22"
+      }
+    ],
+    "subSkills": [
+      {
+        "id": 11710000,
+        "level": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_001.png",
+        "name": "Survival Stance"
+      },
+      {
+        "id": 11760000,
+        "level": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_006.png",
+        "name": "Impact Hit"
+      }
+    ],
+    "sources": [
+      "Reward Chest",
+      "Expedition",
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "11": {
+    "id": 310240024,
+    "name": "Judicator Earrings",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_ER_0020.png",
+    "level": 38,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": true,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Earrings",
+    "type": "Accessory",
+    "equipLevel": 35,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Violet Bead (Earrings)"
+    ],
+    "subStatCount": 3,
+    "subSkillCountMax": 3,
+    "subStatRandom": true,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "48",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "115",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "45",
+    "subStats": [
+      {
+        "id": "Block",
+        "name": "Block",
+        "value": "16"
+      },
+      {
+        "id": "CriticalResist",
+        "name": "Critical Hit Resist",
+        "value": "31"
+      }
+    ],
+    "subSkills": [
+      {
+        "id": 11720000,
+        "level": 1,
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_002.png",
+        "name": "Protection Armor"
+      }
+    ],
+    "sources": [
+      "Reward Chest",
+      "Expedition",
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "12": {
+    "id": 310240030,
+    "name": "Drifter Earrings",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_ER_0017.png",
+    "level": 33,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Earrings",
+    "type": "Accessory",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Eternal Promise (Earrings)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "42",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "100",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "WeaponAccuracy",
+        "name": "Accuracy",
+        "minValue": "12",
+        "value": "12"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "23",
+        "value": "23"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "8",
+        "value": "8"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "13": {
+    "id": 310340025,
+    "name": "Anguish Ring",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Ring_0037.png",
+    "level": 40,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": true,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Ring",
+    "type": "Accessory",
+    "equipLevel": 37,
+    "magicStoneSlotCount": 3,
+    "subStatCount": 3,
+    "subSkillCountMax": 3,
+    "subStatRandom": true,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "41",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "97",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "34.1",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "140"
+      },
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "12"
+      },
+      {
+        "id": "AGI",
+        "name": "Precision",
+        "value": "11"
+      }
+    ],
+    "sources": [
+      "Reward Chest",
+      "Expedition",
+      "Sanctuary"
+    ],
+    "favorite": false
+  },
+  "14": {
+    "id": 310350028,
+    "name": "Facade Ring",
+    "grade": "Rare",
+    "gradeName": "Rare",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Ring_0011.png",
+    "level": 19,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 5,
+    "raceName": "All",
+    "categoryName": "Ring",
+    "type": "Accessory",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 2,
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "19",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "45",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "WeaponAccuracy",
+        "name": "Accuracy",
+        "minValue": "8",
+        "value": "8"
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "minValue": "26",
+        "value": "26"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "15": {
+    "id": 310450011,
+    "name": "Facade Bracelet",
+    "grade": "Rare",
+    "gradeName": "Rare",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_ACC_Bracelet_0011.png",
+    "level": 19,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 5,
+    "raceName": "All",
+    "categoryName": "Bracelet",
+    "type": "Accessory",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 2,
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "value": "24",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "57",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "WeaponFixingDamage",
+        "name": "Attack",
+        "minValue": "6",
+        "value": "6"
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "minValue": "29",
+        "value": "29"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "17": {
+    "id": 215250001,
+    "name": "Noble Belt",
+    "desc": "A belt available only those with noble intentions.\nCan be enhanced with Belt Enhance Scroll acquired in Strongholds.\nCan be upgraded via Substance Morph after enhancing it 10 times.",
+    "grade": "Rare",
+    "gradeName": "Rare",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Acc_Belt_C_018.png",
+    "level": 13,
+    "levelValue": 6,
+    "enchantLevel": 6,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": false,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Belt",
+    "type": "Equip",
+    "equipLevel": 1,
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "100",
+        "extra": "300",
+        "exceed": false
+      },
+      {
+        "id": "HpPotionRate",
+        "name": "HP Potion Recovery increase",
+        "value": "10%",
+        "extra": "0%",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "19": {
+    "id": 210740031,
+    "name": "Pilgrim Cloak",
+    "grade": "Legend",
+    "gradeName": "Epic",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_GM_0019_T04_Cape.png",
+    "level": 40,
+    "levelValue": 0,
+    "enchantLevel": 0,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": true,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Cloak",
+    "type": "Equip",
+    "equipLevel": 1,
+    "magicStoneSlotCount": 3,
+    "costumes": [
+      "Iron Heart (Cloak)"
+    ],
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "value": "195",
+        "extra": "0",
+        "exceed": false
+      },
+      {
+        "id": "HPMax",
+        "name": "HP",
+        "value": "80",
+        "extra": "0",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "subStats": [
+      {
+        "id": "ArmorDefense",
+        "name": "Defense",
+        "minValue": "22",
+        "value": "22"
+      },
+      {
+        "id": "MPMax",
+        "name": "MP",
+        "minValue": "15",
+        "value": "15"
+      },
+      {
+        "id": "MPRegen",
+        "name": "Natural MP Regen",
+        "minValue": "6",
+        "value": "6"
+      }
+    ],
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  },
+  "22": {
+    "id": 311050001,
+    "name": "Revelation Amulet",
+    "desc": "An amulet granted only to those who have received the revelation.\nCan be enhanced with Amulet Enhance Scroll acquired through Monolith Resonance.\nCan be upgraded via Substance Morph after enhancing it 10 times.",
+    "grade": "Rare",
+    "gradeName": "Rare",
+    "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Craft_Conversion_Crystal_L_lv3_01.png",
+    "level": 13,
+    "levelValue": 9,
+    "enchantLevel": 9,
+    "storable": false,
+    "tradable": false,
+    "tradablePersonal": false,
+    "enchantable": true,
+    "decomposable": false,
+    "maxEnchantLevel": 10,
+    "raceName": "All",
+    "categoryName": "Amulet",
+    "type": "Accessory",
+    "equipLevel": 1,
+    "subStatCount": 0,
+    "subSkillCountMax": 0,
+    "subStatRandom": false,
+    "mainStats": [
+      {
+        "id": "DefensePierce",
+        "name": "Penetration",
+        "value": "100",
+        "extra": "270",
+        "exceed": false
+      },
+      {
+        "id": "AmplifyWeaponDamage",
+        "name": "Weapon Damage Boost",
+        "value": "5%",
+        "extra": "0%",
+        "exceed": false
+      }
+    ],
+    "soulBindRate": "100",
+    "sources": [
+      "Quest"
+    ],
+    "favorite": false
+  }
+}

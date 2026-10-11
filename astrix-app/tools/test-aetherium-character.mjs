@@ -18,7 +18,7 @@ import {createRequire} from 'node:module';
 import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {nodeCost} from '../games/aion2/engine/daevanion-planner.mjs';
-import {needsEnchant} from '../games/aion2/engine/ascent-advisor.mjs';
+import {enchantAdvice} from '../games/aion2/engine/ascent-advisor.mjs';
 import {deriveRegion} from './fixtures/aion2/derive-region-fixtures.mjs';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
@@ -92,6 +92,13 @@ const otherBoard=id=>{const copy=structuredClone(board11);copy.nodeList.forEach(
 // The same Daeva wearing accessories (server 1312). The site lists those slots only when worn, as raw codes and in its
 // own order (EARRING2 before EARRING1): the Gear page must show plain names in game order. Two of them are past +0.
 const ACC={serverId:'1312',characterId:'YWNjZGFldmE='};
+// A Lv 45 Daeva in Unique, Epic and Rare gear (captured 11 Oct 2026, renamed: no gamer tag, id or portrait).
+const LV45={serverId:'1308',characterId:'bHY0NXRlc3RkYWV2YQ=='};
+const lv45Info=await fixture('lv45-info'),lv45Equipment=await fixture('lv45-equipment'),lv45Items=await fixture('lv45-items');
+const grades=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/grades.json'),'utf8'));
+const progression=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/progression.json'),'utf8'));
+/** The grade rule's advice for a worn item as the equipment list sends it (no item detail read yet). */
+const adviceFor=(item,level)=>enchantAdvice({empty:false,slot:item.slotPosName,slotPos:item.slotPos,name:item.name,grade:item.grade,enchant:item.enchantLevel,maxEnchant:{pending:true,reason:'test'}},{level,grades,progression});
 const accInfo=structuredClone(richInfo);
 Object.assign(accInfo.profile,{characterName:'ACCDAEVA',characterId:ACC.characterId,serverId:1312,serverName:'Kaisinel'});
 const accEquipment=structuredClone(richEquipment);
@@ -139,8 +146,11 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
     const rich=url.searchParams.get('serverId')==='1311';
     const acc=url.searchParams.get('serverId')===ACC.serverId;
     const asmo=url.searchParams.get('serverId')===ASMO_REF.serverId;
+    const lv45=url.searchParams.get('characterId')===LV45.characterId;
     let body;
-    if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:acc?{info:accInfo,equipment:accEquipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
+    if(lv45&&url.pathname==='/aion2/character')body={info:lv45Info,equipment:lv45Equipment};
+    else if(lv45&&url.pathname==='/aion2/item')body=lv45Items[url.searchParams.get('slotPos')];
+    else if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:acc?{info:accInfo,equipment:accEquipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
     else if(url.pathname==='/aion2/item')body=itemDetail;
     else if(url.pathname==='/aion2/daevanion'){
       const id=Number(url.searchParams.get('boardId'));
@@ -872,30 +882,104 @@ await check('menu badges say what they count, in words',async()=>{
   await context.close();
 });
 
-await check('Gear page: an Enchant flag on every item the plan wants enchanted, leading to the gear move; slot names in plain words and game order',async()=>{
+// Brief fix/aetherium-gear-enchant-context (11 Oct 2026) replaced this check's rule: it was "an Enchant flag on every +0 item,
+// leading to the gear move on the Ascent Plan" (a loop back to this page). Now the flag comes from the grade rule and opens the
+// item card in place. Kept: one flag per item the rule names, no extra call, plain slot names, flag inside its tile, 14px or more.
+await check('Gear page: a flag from the grade rule on every item it names, opening the item card in place; slot names in plain words and game order',async()=>{
   const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(ACC)}`);
   assert.deepEqual(calls,['/aion2/character'],'The flags need no extra call');
-  const expected=accEquipment.equipment.equipmentList.filter(item=>item.enchantLevel===0).map(item=>String(item.slotPos)).sort();
-  assert.ok(expected.length>0&&expected.length<accEquipment.equipment.equipmentList.length,'Some items at +0, some past it');
-  const flags=await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.getAttribute('href'),el.textContent.trim()]));
-  assert.deepEqual(flags.map(flag=>flag[0]).sort(),expected,'One flag per +0 item, the advisor\'s own rule');
-  for(const [,href,text] of flags){
-    assert.equal(text,'Enchant');
-    assert.match(href,/^\/hub\/aetherium\/ascent\/\?serverId=1312&characterId=[^&]+&region=eu&class=gladiator#aeNow$/,'The flag leads to the gear moves on the Ascent Plan');
-  }
-  const unflagged=await page.$$eval('#aeGear > li',items=>items.filter(li=>!li.querySelector('[data-enchant-flag]')).map(li=>li.querySelector('.ae-slot-meta')?.textContent??''));
-  for(const meta of unflagged)assert.doesNotMatch(meta,/\+0( |$)/,`no flag means not +0: ${meta}`);
+  const level=accInfo.profile.characterLevel;
+  const expected=accEquipment.equipment.equipmentList.map(item=>[String(item.slotPos),adviceFor(item,level)]).filter(([,advice])=>advice?.flag).sort(([a],[b])=>a.localeCompare(b));
+  assert.ok(expected.length>0,'The rule flags items');
+  const flags=await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.tagName,el.getAttribute('href'),el.textContent.trim()]).sort(([a],[b])=>a.localeCompare(b)));
+  assert.deepEqual(flags.map(flag=>[flag[0],flag[3]]),expected.map(([slotPos,advice])=>[slotPos,advice.flag]),'One flag per item the rule names, its text the rule\'s');
+  for(const [,tag,href] of flags){assert.equal(tag,'BUTTON');assert.equal(href,null,'A flag never links to another page');}
   const labels=await page.$$eval('#aeGear .ae-slot-label',items=>items.map(el=>el.textContent));
   assert.deepEqual(labels.slice(-4),['Earring 1','Earring 2','Ring 1','Bracelet 1'],'Plain words, game order');
   assert.ok(!labels.some(label=>/[A-Z]{2}/.test(label)),`No raw codes: ${labels}`);
-  const first=await page.$eval('#aeGear li.has-flag',li=>{const a=li.getBoundingClientRect(),f=li.querySelector('[data-enchant-flag]').getBoundingClientRect(),n=li.querySelector('strong').getBoundingClientRect();return {inside:f.left>=a.left-0.5&&f.right<=a.right+0.5&&f.top>=a.top-0.5&&f.bottom<=a.bottom+0.5,clear:n.right<=f.left+0.5,size:getComputedStyle(li.querySelector('[data-enchant-flag]')).fontSize};});
+  const first=await page.$eval('#aeGear li.has-flag',li=>{const a=li.getBoundingClientRect(),f=li.querySelector('[data-enchant-flag]').getBoundingClientRect(),n=li.querySelector('strong').getBoundingClientRect();return {inside:f.left>=a.left-0.5&&f.right<=a.right+0.5&&f.top>=a.top-0.5&&f.bottom<=a.bottom+0.5,clear:n.right<=f.left+0.5||n.bottom<=f.top+0.5,size:getComputedStyle(li.querySelector('[data-enchant-flag]')).fontSize,height:f.height};});
   assert.ok(first.inside,'the flag sits inside its tile');
   assert.ok(first.clear,'the flag does not cover the item name');
   assert.ok(parseFloat(first.size)>=14,'flag text at least 14px');
-  assert.equal(needsEnchant({empty:false,enchant:0}),true);
-  await Promise.all([page.waitForURL(/\/ascent\//),page.click('[data-enchant-flag]')]);
-  await page.waitForSelector('#aeNow');
-  assert.match(await plain(page,'#aeNow'),/Enchant \d+ worn items above \+0/,'The flag lands on the gear move');
+  assert.ok(first.height>=43.5,'flag is a 44px target');
+  const before=page.url();
+  await page.click('#aeGear li.has-flag [data-enchant-flag]');
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
+  assert.equal(page.url(),before,'Tapping a flag never navigates');
+  await context.close();
+});
+
+/* Grade tiles and enchant context (brief fix/aetherium-gear-enchant-context, 11 Oct 2026), on a renamed Lv 45 Daeva. */
+await check('Gear page grades: icons 80px at desktop and 64px on a phone, the enchant level on the corner, two columns then one under 600px',async()=>{
+  for(const [width,height,size,columns] of [[1600,1000,80,2],[390,844,64,1]]){
+    const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width,height}});
+    const tiles=await page.$$eval('#aeGear .ae-gtile',items=>items.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.width),Math.round(r.height)];}));
+    assert.equal(tiles.length,17);
+    for(const [w,h] of tiles)assert.deepEqual([w,h],[size,size],`${width}: ${size}px tiles`);
+    const plus=await page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile',el=>{const t=el.getBoundingClientRect(),b=el.querySelector('.ae-gtile-plus').getBoundingClientRect();return {text:el.querySelector('.ae-gtile-plus').textContent,corner:b.right>=t.right-8&&b.bottom>=t.bottom-8};});
+    assert.deepEqual(plus,{text:'+3',corner:true},'The weapon shows +3 on its corner');
+    assert.equal(await page.$eval('#aeGear [data-slot-pos="2"] .ae-gtile-plus',el=>el.textContent),'+11');
+    assert.equal(await page.$eval('#aeGear',el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}: no sideways scroll`);
+    await context.close();
+  }
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width:800,height:900}});
+  await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'No sideways scroll at 200 percent text');
+  await context.close();
+});
+
+await check('Gear page grades: the grade colour behind every tile (computed), grade names in that colour at 4.5:1, Epic never Legend',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  const want={common:'rgb(232, 236, 242)',rare:'rgb(95, 211, 126)',epic:'rgb(88, 168, 255)',unique:'rgb(226, 181, 79)',heroic:'rgb(255, 154, 74)',mythic:'rgb(255, 107, 107)',special:'rgb(69, 214, 198)'};
+  const seen=await page.$$eval('#aeGear .ae-gtile',items=>items.map(el=>[el.dataset.grade,getComputedStyle(el).borderTopColor,getComputedStyle(el).backgroundColor]));
+  assert.deepEqual([...new Set(seen.map(([grade])=>grade))].sort(),['epic','rare','unique']);
+  for(const [grade,border,fill] of seen){assert.equal(border,want[grade],`${grade} edge`);assert.notEqual(fill,'rgba(0, 0, 0, 0)',`${grade} fill`);}
+  // Every grade in grades.json, even those not on this Daeva, paints its own colour.
+  const all=await page.evaluate(ids=>ids.map(id=>{const el=document.createElement('span');el.className='ae-gtile';el.dataset.grade=id;document.querySelector('#aeGear').append(el);const s=getComputedStyle(el);const out=[id,s.borderTopColor,s.backgroundColor];el.remove();return out;}),Object.keys(want));
+  for(const [grade,border,fill] of all){assert.equal(border,want[grade],grade);assert.notEqual(fill,'rgba(0, 0, 0, 0)',grade);}
+  const lum=rgb=>{const [r,g,b]=rgb.match(/\d+/g).map(Number).map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;});return 0.2126*r+0.7152*g+0.0722*b;};
+  for(const [grade,colour] of Object.entries(want)){const ratio=(lum(colour)+0.05)/(lum('rgb(22, 30, 51)')+0.05);assert.ok(ratio>=4.5,`${grade} text ${ratio.toFixed(2)}:1`);}
+  const names=await page.$$eval('#aeGear .ae-grade-name',items=>items.map(el=>[el.textContent,el.dataset.grade,getComputedStyle(el).color]));
+  assert.ok(names.some(([name])=>name==='Epic'),'Epic shows');
+  for(const [,grade,colour] of names)assert.equal(colour,want[grade],`${grade} name in its colour`);
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/Legend/,'No Legend anywhere on the page');
+  await context.close();
+});
+
+await check('Gear page flags: ENCHANT +3 to +10 on the weapon, ENCHANT +11 to +15 on the guard, REPLACE on the Epic pieces, ENCHANT +9 to +10 on the amulet',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  const flags=Object.fromEntries(await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.textContent.trim()])));
+  assert.equal(flags['1'],'ENCHANT +3 to +10');
+  assert.equal(flags['2'],'ENCHANT +11 to +15');
+  assert.equal(flags['22'],'ENCHANT +9 to +10');
+  for(const item of lv45Equipment.equipment.equipmentList.filter(entry=>entry.grade==='Legend'))assert.equal(flags[String(item.slotPos)],'REPLACE',item.name);
+  assert.ok(await page.$eval('[data-enchant-flag="2"]',el=>el.classList.contains('is-costly')),'The guard past +10 is marked costly');
+  const look=await page.$$eval('[data-enchant-flag="1"],[data-enchant-flag="5"]',items=>items.map(el=>getComputedStyle(el).backgroundColor));
+  assert.notEqual(look[0],look[1],'Enchant and Replace flags look different');
+  await context.close();
+});
+
+await check('Gear page item card: tapping a flag opens it in place with grade and cap, now and target, why, the odds, failure, cost and stones',async()=>{
+  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  const before=page.url();
+  await page.click('[data-enchant-flag="2"]');
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
+  assert.equal(page.url(),before,'No navigation');
+  const card=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
+  for(const part of [/Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/weapon and guard only, the weapon first/,/\+12: 50% chance/,/\+15: 20% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in your Enchant window\./,/Not confirmed yet/,/Daeva Bio-Research Base/])assert.match(card,part);
+  assert.ok(calls.includes('/aion2/item'),'The detail call gives the real cap');
+  await page.keyboard.press('Escape');
+  await page.click('[data-enchant-flag="1"]');
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
+  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/\+4 to \+10: every step succeeds/);
+  await page.keyboard.press('Escape');
+  await page.click('[data-enchant-flag="5"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
+  const replace=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
+  assert.match(replace,/Replace it with a Unique piece/);
+  assert.match(replace,/Grade Epic/);
+  assert.doesNotMatch(replace,/Legend/);
   await context.close();
 });
 
