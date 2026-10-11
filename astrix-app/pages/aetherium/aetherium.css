@@ -1276,7 +1276,7 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 #aeStatsPanel .ae-stat dd{margin:0;font:700 1.375rem/1.1 var(--ae-font-ui);color:var(--ae-text);font-variant-numeric:tabular-nums}
 .ae-stat-effect{flex-basis:100%;font-size:.875rem;line-height:1.35;color:var(--ae-text-dim)}
 .ae-stat-effect.is-official{color:var(--ae-text-muted)}
-.ae-stat-tag{display:inline-flex;align-items:center;min-height:1.375rem;padding:0 .5rem;border-radius:var(--ae-pill);font:700 .8125rem/1 var(--ae-font-ui);font-style:normal;letter-spacing:.02em;border:1px solid}
+.ae-stat-tag{display:inline-flex;align-items:center;min-height:1.375rem;padding:0 .5rem;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);font-style:normal;letter-spacing:.02em;border:1px solid}
 .ae-stat-tag.is-high{color:var(--ae-gold);border-color:color-mix(in srgb,var(--ae-gold) 60%,transparent);background:color-mix(in srgb,var(--ae-gold) 12%,transparent)}
 .ae-stat-tag.is-useful{color:var(--ae-ice);border-color:color-mix(in srgb,var(--ae-ice) 50%,transparent);background:color-mix(in srgb,var(--ae-ice) 8%,transparent)}
 .ae-stat-tag.is-low{color:var(--ae-text-muted);border-color:var(--ae-hairline-strong);background:transparent}
