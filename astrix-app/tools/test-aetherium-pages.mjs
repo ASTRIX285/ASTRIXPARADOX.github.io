@@ -1276,6 +1276,8 @@ await check('crisp tokens: muted text at least 4.5:1 and the hairline at least 1
 
 await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs, buttons and tiles; squared surfaces with pills only on chips and counts; gold gradient inside the notched primary action; outline on the rest',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':ROSTER8()}});
+  // Find character turns from gold to an outline once the Daeva is on the card; its colour change animates over 150ms.
+  await page.waitForTimeout(250);
   const logo=await page.$eval('header.apx-destination-header .apx-destination-brand',el=>({href:el.getAttribute('href'),img:Boolean(el.querySelector('img')),shown:el.querySelector('img').getBoundingClientRect().width>0,wordmark:el.querySelector('.ax-wordmark')?.textContent.replace(/\s+/g,'')}));
   assert.deepEqual(logo,{href:'/',img:true,shown:true,wordmark:'ASTRIXPARADOX'},'The AX logo beside the wordmark, linking home');
   // The strobe stroke: the shell draws it as a pseudo-element with the pulse animation, in the Aetherium blue.
