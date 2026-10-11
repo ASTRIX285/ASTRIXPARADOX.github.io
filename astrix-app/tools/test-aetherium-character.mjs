@@ -1031,7 +1031,12 @@ await check('Stat icons: every one of the 16 tiles uses its own symbol, 40px mai
   }
   assert.ok(icons.some(icon=>icon.tag==='high'),'The fixture has a High stat to check');
   // The symbol really draws: the sprite loaded and the shadow tree has painted geometry.
-  assert.ok(await page.$eval('[data-stat="might"] .ae-stat-icon',async svg=>{const r=await fetch(svg.querySelector('use').getAttribute('href').split('#')[0]);return r.ok&&/svg/.test(r.headers.get('content-type'));}),'The sprite is served');
+  const parsed=await page.$eval('[data-stat="might"] .ae-stat-icon',async svg=>{const r=await fetch(svg.querySelector('use').getAttribute('href').split('#')[0]);
+    const doc=new DOMParser().parseFromString(await r.text(),'image/svg+xml');
+    return {ok:r.ok,type:r.headers.get('content-type'),error:Boolean(doc.querySelector('parsererror')),ids:[...doc.querySelectorAll('symbol')].map(s=>s.id),drawn:[...doc.querySelectorAll('symbol')].every(s=>s.querySelector('path,circle,ellipse'))};});
+  assert.ok(parsed.ok&&/svg/.test(parsed.type),'The sprite is served as SVG');
+  assert.equal(parsed.error,false,'The sprite parses in the browser (a broken file draws nothing)');
+  assert.deepEqual(parsed.ids,STAT_IDS.map(id=>`ae-stat-${id}`));assert.ok(parsed.drawn,'Every symbol has geometry');
   const sprites=requested.filter(url=>/\/icons\/stats\.svg/.test(url));
   assert.ok(sprites.length>=1&&new Set(sprites).size===1,`One sprite URL: ${sprites}`);
   assert.deepEqual(requested.filter(url=>/plaync|ncsoft/i.test(new URL(url).host)&&/[\/_-]stats?(?:[_.\/-]|$)|stat_?icon|arcana|abilit/i.test(new URL(url).pathname)),[],'No NCSOFT stat icon');

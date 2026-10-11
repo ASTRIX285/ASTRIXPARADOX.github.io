@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg">
   <!-- The Aetherium stat icons: original ASTRIX PARADOX art, one symbol per stat (6 main, 10 deity).
        No fill or colour here: the page sets stroke (currentColor) and its width in aetherium.css.
-       Precision's centre dot hides at 24px or less through --ae-stat-dot. -->
+       Precision's centre dot hides at 24px or less (the page's ae-stat-dot property). -->
   <symbol id="ae-stat-might" viewBox="0 0 40 40"><path d="M12 18v-6a2.5 2.5 0 0 1 5 0v5M17 16v-6a2.5 2.5 0 0 1 5 0v6M22 16v-4a2.5 2.5 0 0 1 5 0v8c0 7-4 11-9 11h-1c-4 0-7-3-7-7v-4a2.5 2.5 0 0 1 5 0"/></symbol>
   <symbol id="ae-stat-dexterity" viewBox="0 0 40 40"><path d="M31 7C19 9 11 18 9 33M31 7c-2 11-10 18-20 20M15 22l-4-4M19 18l-3-5M23 14l-1-5M18 26h-5M22 22l-6 1"/></symbol>
   <symbol id="ae-stat-precision" viewBox="0 0 40 40"><path d="M4 20c4-7 9-10 16-10s12 3 16 10c-4 7-9 10-16 10S8 27 4 20z"/><circle cx="20" cy="20" r="5"/><circle class="ae-stat-dot" cx="20" cy="20" r="1.5" style="display:var(--ae-stat-dot,inline)"/></symbol>

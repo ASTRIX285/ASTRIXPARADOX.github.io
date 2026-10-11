@@ -1171,6 +1171,7 @@ await check('Stats screen: every chain stat has its own 20px icon, gold when Hig
   const sprites=requested.filter(url=>/\/icons\/stats\.svg/.test(url));
   assert.ok(sprites.length>=1&&new Set(sprites).size===1,`One sprite URL: ${sprites}`);
   assert.deepEqual(requested.filter(url=>/plaync|ncsoft/i.test(new URL(url).host)&&/[\/_-]stats?(?:[_.\/-]|$)|stat_?icon|arcana|abilit/i.test(new URL(url).pathname)),[],'No NCSOFT stat icon');
+  assert.equal(await page.evaluate(async url=>Boolean(new DOMParser().parseFromString(await (await fetch(url)).text(),'image/svg+xml').querySelector('parsererror')),sprites[0]),false,'The sprite parses in the browser');
   await context.close();
 });
 
