@@ -23,32 +23,53 @@
         {
           "name": "Judgment",
           "priority": 2,
-          "target": "Lv 20 (Lv 16 perks matter most)",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more (its skill level 16 perks matter most): Mastery stops at 11 and the build names no other source",
           "why": "Main damage hit. Top players put Daevanion points into it on Nezekan.",
           "refs": [
             "ec-templar",
             "mb-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20 (Lv 16 perks matter most)\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Pummel",
           "priority": 3,
-          "target": "Lv 20",
+          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Core shield attack.",
           "refs": [
             "ec-templar",
             "mb-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Punishment",
           "priority": 4,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. 20 m charged hit that grants Executor: more accuracy and PvE damage.",
           "refs": [
             "ec-templar",
             "mb-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Warding Strike",
@@ -224,29 +245,50 @@
         {
           "name": "Judgment",
           "priority": 1,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Main damage hit.",
           "refs": [
             "ec-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Punishment",
           "priority": 2,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Big charged hit with the Executor buff.",
           "refs": [
             "ec-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Pummel",
           "priority": 3,
-          "target": "Lv 20",
+          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Core shield attack.",
           "refs": [
             "ec-templar"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         }
       ],
       "specialties": [

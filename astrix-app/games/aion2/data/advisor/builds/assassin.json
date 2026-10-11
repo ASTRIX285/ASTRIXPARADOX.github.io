@@ -24,22 +24,36 @@
         {
           "name": "Heart Gore",
           "priority": 2,
-          "target": "Lv 16 for the cooldown reset",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The cooldown reset needs skill level 16: Mastery stops at 11 and the build names no other source",
           "why": "Main hit, triggers on crits.",
           "refs": [
             "mb-assassin",
             "ezg-assassin"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 16 for the cooldown reset\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Insignia Explosion",
           "priority": 3,
-          "target": "Lv 16",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. Spends 1 to 5 Insignia stacks and stuns.",
           "refs": [
             "mb-assassin",
             "ezg-assassin"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 16\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Shadowstrike",

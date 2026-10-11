@@ -170,7 +170,8 @@ await check('no Daeva: the intro shows (guide, three steps, search form, 8 class
     assert.deepEqual(calls,[],`live=${live}: no Worker call before a Daeva is picked`);
     assert.equal(await page.isVisible('#aeIntro'),true,'The intro shows');
     assert.match(await page.textContent('#aeIntroTitle'),/Welcome to The Aetherium, Daeva\./);
-    assert.deepEqual(await page.$$eval('.ae-steps li strong',items=>items.map(el=>el.textContent)),['Pick your region.','Type your in-game character name.','See your Daeva.'],'Three steps, in order');
+    // Walkthrough fix (11 Oct 2026): the welcome card follows the form: name, then region (and server, optional).
+    assert.deepEqual(await page.$$eval('.ae-steps li strong',items=>items.map(el=>el.textContent)),['Type your in-game character name.','Pick your region.','See your Daeva.'],'Three steps, in the form\'s order');
     assert.equal(await page.isVisible('#aeSearch'),true,'The search form is there');
     assert.deepEqual(await page.$$eval('label.ae-field > span',nodes=>nodes.map(n=>n.textContent)),['Character name','Region','Server']);
     assert.equal(await page.getAttribute('#aeNameInput','placeholder'),'Type your in-game character name');
@@ -276,7 +277,9 @@ await check('live: search to summary uses search then one character call',async(
   assert.deepEqual(calls,['/aion2/search','/aion2/character']);
   assert.match(await page.textContent('#aeSource'),/^Read from the official AION 2 site just now\.$/);
   assert.match(page.url(),/serverId=1308&characterId=.*&region=eu$/,'Bookmarkable URL carries the region');
-  assert.match(await page.getAttribute('#aeGearLink','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=.*&region=eu$/,'View full setup opens the character menu');
+  // Walkthrough fix (11 Oct 2026): View full setup is gone (it is step 2); the Next opens the character menu.
+  assert.equal(await page.locator('#aeGearLink').count(),0,'No View full setup button');
+  assert.match(await page.getAttribute('[data-next]','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=.*&region=eu$/,'Next: See your setup opens the character menu');
   assert.match(await page.getAttribute('.ae-tile.is-link a','href'),/^\/hub\/aetherium\/daevanion\/\?serverId=1308&characterId=.*&region=eu&class=gladiator&board=11$/,'The Daevanion tile opens the first open board');
   assert.equal(await page.isHidden('#aeIntro'),true,'The intro goes once a Daeva is on screen');
   assert.equal(await page.isHidden('#aeClasses'),true);
@@ -294,6 +297,23 @@ await check('a saved roster Daeva skips the intro and opens its own card',async(
   assert.equal(await page.isVisible('#aeSummary'),true);
   assert.equal(await page.textContent('#aeName'),TEST_NAME);
   assert.match(await page.textContent('#aeSource'),/^Read from the official AION 2 site just now\.$/);
+  await context.close();
+});
+
+// Walkthrough fix (11 Oct 2026): "Since your last visit" shows only when this device already held the Daeva at a lower level.
+await check('Daeva Card: Since your last visit names the earlier level only when storage holds one, at 1600 and 390',async()=>{
+  for(const width of [1600,390]){
+    const earlier=saved(TEST_NAME,1308,'Meslamtaeda','eu',{characterId:info.profile.characterId,level:9});
+    const {page,context}=await open('/hub/aetherium/',{live:true,viewport:{width,height:width<500?844:1000},extra:{'aetherium.roster.v2':JSON.stringify(storeV2([earlier]))}});
+    assert.equal(await page.textContent('#aeSince'),'Since your last visit: Lv 9 to Lv 12.');
+    const box=await page.$eval('#aeSince',el=>{const r=el.getBoundingClientRect();return {w:r.width,right:r.right,size:parseFloat(getComputedStyle(el).fontSize)};});
+    assert.ok(box.w>0&&box.right<=width&&box.size>=16,'It reads at 16px inside the screen');
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)<=0,'No sideways scroll');
+    await context.close();
+  }
+  const same=saved(TEST_NAME,1308,'Meslamtaeda','eu',{characterId:info.profile.characterId,level:12});
+  const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([same]))}});
+  assert.equal(await page.locator('#aeSince').count(),0,'Same level: no line');
   await context.close();
 });
 
@@ -460,13 +480,13 @@ await check('region travels: search, URL, roster card and every link',async()=>{
   const savedEntry=Object.values(saved.rosters)[0].entries[0];
   assert.equal(savedEntry.region,'as');
   assert.equal(savedEntry.raceId,1);
-  for(const selector of ['#aeAscentLink','#aeGearLink','.ae-tile.is-link a']){
+  for(const selector of ['#aeAscentLink','[data-next]','.ae-tile.is-link a']){
     for(const link of await page.$$eval(selector,nodes=>nodes.map(n=>n.getAttribute('href')))){
       assert.match(link,/[?&]region=as(&|$)/,`${selector} keeps the region: ${link}`);
     }
   }
   // Following the link keeps Asia all the way to the Worker.
-  const link=await page.getAttribute('#aeGearLink','href');
+  const link=await page.getAttribute('[data-next]','href');
   await context.close();
   const next=await open(link,{live:true});
   assert.equal(next.urls.find(url=>url.pathname==='/aion2/character').searchParams.get('region'),'as');
@@ -999,11 +1019,13 @@ await check('after a Daeva loads: the first move strip under the card shows the 
   const card=await rectOf(page,'#aeSummary .ae-summary-card'),box=await rectOf(page,'#aeFirstMove'),summary=await rectOf(page,'#aeSummary');
   assert.ok(box.top>=card.bottom-0.5,'The strip sits under the card');
   assert.ok(Math.abs(box.left-summary.left)<=1&&Math.abs(box.right-summary.right)<=1,'The strip spans the summary');
-  assert.match(await style(page,'#aeAscentLink','background-image'),/linear-gradient\(rgb\(244, 210, 124\)/,'Open Ascent Plan is the gold primary action');
+  // Walkthrough fix (11 Oct 2026): one gold action per screen, the bottom Next; Open Ascent Plan is a secondary outline.
+  assert.equal(await style(page,'#aeAscentLink','background-image'),'none','Open Ascent Plan is secondary');
+  assert.match(await style(page,'[data-next]','background-image'),/linear-gradient\(rgb\(244, 210, 124\)/,'The Next is the gold primary action');
   assert.ok(parseFloat(await style(page,'#aeFirstMoveText','font-size'))>=16,'The move reads at 16px or more');
   assert.equal(await page.locator('[data-next]').count(),1,'One Next on the page');
-  assert.match(await page.getAttribute('[data-next]','href'),/^\/hub\/aetherium\/ascent\/\?serverId=1308&characterId=[^&]+&region=eu&class=gladiator$/,'Next goes to the Ascent Plan');
-  assert.match(await plainText(page,'[data-next]'),/^Next: Your next moves/);
+  assert.match(await page.getAttribute('[data-next]','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=[^&]+&region=eu$/,'Next goes to step 2, See your setup');
+  assert.match(await plainText(page,'[data-next]'),/^Next: See your setup/);
   await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('[data-first-move]')]);
   await page.waitForSelector('.ae-board-grid');
   assert.equal(await page.getAttribute(`[data-board-tab="${top.board}"]`,'aria-selected'),'true','Show me opened the board the move names');
@@ -1042,19 +1064,19 @@ await check('first-visit guide: three steps after the first Daeva, Skip and Done
   await page.click('#aeFind');
   await page.waitForSelector('#aeGuide:not([hidden])');
   const text=()=>plainText(page,'#aeGuide');
-  assert.match(await text(),/step 1 of 3.*This is your Daeva\. Check it is the character you play/);
+  assert.match(await text(),/Tip 1 of 3.*This is your Daeva\. Check it is the character you play/);
   assert.match(await page.getAttribute('#aeSummary .ae-summary-card','class'),/ae-guide-target/,'The card is lit up');
   assert.equal(await style(page,'.ae-guide-text','font-size'),'16px','Guide text is 16px');
   assert.equal(await page.locator('#aeGuide [data-guide="skip"]').count(),1,'Skip is there');
   await page.click('#aeGuide [data-guide="next"]');
-  assert.match(await text(),/step 2 of 3.*This is your first move/);
+  assert.match(await text(),/Tip 2 of 3.*This is your first move/);
   assert.match(await page.getAttribute('#aeFirstMove','class'),/ae-guide-target/);
   await page.click('#aeGuide [data-guide="next"]');
-  assert.match(await text(),/step 3 of 3.*Your full plan is here/);
-  assert.match(await page.getAttribute('#aeAscentLink','class'),/ae-guide-target/);
+  assert.match(await text(),/Tip 3 of 3.*Next, see your setup/);
+  assert.match(await page.getAttribute('#aeNext','class'),/ae-guide-target/,'The Next is lit up');
   assert.equal(await page.locator('#aeGuide [data-guide="skip"]').count(),0,'The last step has Done, not Skip');
   await page.click('#aeGuide [data-guide="back"]');
-  assert.match(await text(),/step 2 of 3/);
+  assert.match(await text(),/Tip 2 of 3/);
   await page.click('#aeGuide [data-guide="skip"]');
   assert.equal(await page.isHidden('#aeGuide'),true,'Skip closes the guide');
   assert.equal(await page.locator('.ae-guide-target').count(),0);
@@ -1065,7 +1087,7 @@ await check('first-visit guide: three steps after the first Daeva, Skip and Done
   await page.waitForTimeout(150);
   assert.equal(await page.isHidden('#aeGuide'),true,'Shown once');
   await page.click('#aeHowThisWorks');
-  assert.match(await text(),/step 1 of 3/,'How this works brings it back');
+  assert.match(await text(),/Tip 1 of 3/,'How this works brings it back');
   for(let i=0;i<2;i++)await page.click('#aeGuide [data-guide="next"]');
   await page.click('#aeGuide [data-guide="done"]');
   assert.equal(await page.isHidden('#aeGuide'),true,'Done closes it');
@@ -1254,19 +1276,21 @@ await check('crisp tokens: muted text at least 4.5:1 and the hairline at least 1
 
 await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs, buttons and tiles; squared surfaces with pills only on chips and counts; gold gradient inside the notched primary action; outline on the rest',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':ROSTER8()}});
+  // Find character turns from gold to an outline once the Daeva is on the card; its colour change animates over 150ms.
+  await page.waitForTimeout(250);
   const logo=await page.$eval('header.apx-destination-header .apx-destination-brand',el=>({href:el.getAttribute('href'),img:Boolean(el.querySelector('img')),shown:el.querySelector('img').getBoundingClientRect().width>0,wordmark:el.querySelector('.ax-wordmark')?.textContent.replace(/\s+/g,'')}));
   assert.deepEqual(logo,{href:'/',img:true,shown:true,wordmark:'ASTRIXPARADOX'},'The AX logo beside the wordmark, linking home');
   // The strobe stroke: the shell draws it as a pseudo-element with the pulse animation, in the Aetherium blue.
   const ribbonStroke=await lookOf(page,'[data-forge-destination-ribbon] a[aria-current="page"]','::before');
   assert.match(ribbonStroke.animation,/ax-stroke-pulse/,'Strobe on the tab');
   assert.match(ribbonStroke.image,/linear-gradient/,'Strobe gradient on the tab');
-  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-open','.ae-roster-remove']){
+  for(const selector of ['#aeFind','#aeAscentLink','.ae-roster-open','.ae-roster-remove']){
     const stroke=await lookOf(page,selector,'::after');
     assert.match(stroke.animation,/ax-stroke-pulse/,`Strobe on ${selector}`);
   }
   assert.equal(await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--ax-stroke').trim()),'#4fb6ff','The strobe runs in the Aetherium blue');
   // Notched corners: buttons and tiles keep the AX clip; panels draw the notch at the corner so they keep their shadow.
-  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-remove']){
+  for(const selector of ['#aeFind','#aeAscentLink','[data-next]','.ae-roster-remove']){
     assert.match((await lookOf(page,selector)).clip,/^polygon\(/,`${selector} is notched`);
   }
   for(const selector of ['.ae-tile','.ae-roster-open']){
@@ -1278,7 +1302,7 @@ await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs,
   assert.equal(notch.content,'""','The panel has its notched corner');
   assert.match(notch.image,/linear-gradient\(to (bottom left|left bottom)/,'drawn at the top-right corner');
   // Squared surfaces: no radius on bars, buttons, inputs, tabs, tiles and panels. Pills only on chips and counts.
-  for(const selector of ['.ae-panel','#aeFind','#aeGearLink','#aeNameInput','#aeServer','.ae-roster-open','.ae-tile','#aeSource','[data-forge-destination-ribbon] a[aria-current="page"]','.ae-roster-remove','.ae-portrait','.ae-roster-class']){
+  for(const selector of ['.ae-panel','#aeFind','#aeAscentLink','#aeNameInput','#aeServer','.ae-roster-open','.ae-tile','#aeSource','[data-forge-destination-ribbon] a[aria-current="page"]','.ae-roster-remove','.ae-portrait','.ae-roster-class']){
     assert.equal((await lookOf(page,selector)).radius,'0px',`${selector} is squared`);
   }
   for(const selector of ['.ae-chips li','#aeRosterCount']){
@@ -1289,12 +1313,13 @@ await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs,
   }
   const faction=await lookOf(page,'.ae-chip-faction');
   assert.equal(faction.color,GOLD,'The faction chip keeps the faction colour');
-  const primary=await lookOf(page,'#aeFind');
+  // Walkthrough fix (11 Oct 2026): with a Daeva on the card the one gold action is the bottom Next (step 2); Find character and Open Ascent Plan are outlines.
+  const primary=await lookOf(page,'[data-next]');
   assert.match(primary.image,/^linear-gradient\(rgb\(244, 210, 124\) 0%, rgb\(226, 181, 79\) 55%, rgb\(201, 154, 53\) 100%\)$/,'Gold top to bottom');
   assert.equal(primary.color,'rgb(27, 20, 6)','Dark text on the gold');
   assert.ok(primary.height>=44,'Primary action at least 44px tall');
-  assert.equal(await page.$$eval('main .ae-primary',els=>els.filter(el=>el.getBoundingClientRect().height).length),2,'One gold action per view: Find character and Open Ascent Plan');
-  for(const selector of ['#aeGearLink','.ae-roster-remove']){
+  assert.equal(await page.$$eval('main .ae-primary',els=>els.filter(el=>el.getBoundingClientRect().height).length),1,'One gold action per view: the Next');
+  for(const selector of ['#aeFind','#aeAscentLink','.ae-roster-remove']){
     const look=await lookOf(page,selector);
     assert.equal(look.bg,'rgba(0, 0, 0, 0)',`${selector} has no fill`);
     assert.equal(look.image,'none',`${selector} has no gradient`);
@@ -1305,16 +1330,16 @@ await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs,
   const active=await lookOf(page,'.ae-roster-slot.is-active .ae-roster-open');
   assert.notEqual(active.bg,await page.$eval('.ae-roster-slot:not(.is-active) .ae-roster-open',el=>getComputedStyle(el).backgroundColor),'The active Daeva is tinted');
   // Every hover and colour change animates over 150ms; every clickable thing has a focus ring.
-  for(const selector of ['#aeFind','#aeGearLink','.ae-roster-open','.ae-tile','[data-forge-destination-ribbon] a','#aeNameInput']){
+  for(const selector of ['#aeFind','#aeAscentLink','.ae-roster-open','.ae-tile','[data-forge-destination-ribbon] a','#aeNameInput']){
     assert.match((await lookOf(page,selector)).transition,/0\.15s/,`${selector} animates over 150ms`);
   }
   await page.focus('[data-forge-destination-ribbon] a:not([aria-current])');
   const ring=await page.$eval('[data-forge-destination-ribbon] a:not([aria-current])',el=>{const s=getComputedStyle(el);return {visible:el.matches(':focus-visible'),width:s.outlineWidth,style:s.outlineStyle};});
   assert.deepEqual(ring,{visible:true,width:'2px',style:'solid'},'Keyboard focus ring on a tab');
-  await page.focus('#aeAscentLink');
+  await page.focus('[data-official-link="character"]');
   await page.keyboard.press('Tab');
   await page.waitForTimeout(250); // the ring animates in over 150ms
-  const button=await page.$eval('#aeGearLink',el=>({focused:el.matches(':focus-visible'),shadow:getComputedStyle(el).boxShadow}));
+  const button=await page.$eval('#aeAscentLink',el=>({focused:el.matches(':focus-visible'),shadow:getComputedStyle(el).boxShadow}));
   assert.equal(button.focused,true,'Tab reaches the button');
   assert.match(button.shadow,/inset 0px 0px 0px 2px|0px 0px 0px 2px inset/,`Keyboard focus ring on a button (${button.shadow})`);
   await context.close();

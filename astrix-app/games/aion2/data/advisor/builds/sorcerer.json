@@ -14,61 +14,103 @@
         {
           "name": "Flame Arrow",
           "priority": 1,
-          "target": "Lv 8 to 16",
+          "target": "Lv 8, then Mastery 11. The guide's skill level 16 needs more: Mastery stops at 11 and the build names no other source",
           "why": "MP filler.",
           "refs": [
             "ec-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 16\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Firestorm",
           "priority": 2,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Each fireball cuts the Hellfire cooldown from skill Lv 12.",
           "refs": [
             "ec-sorcerer",
             "mb-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Blaze",
           "priority": 3,
-          "target": "Lv 20",
+          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Core damage skill.",
           "refs": [
             "ec-sorcerer",
             "mb-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Hellfire",
           "priority": 4,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. Big AoE nuke.",
           "refs": [
             "ec-sorcerer",
             "mb-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Wish of Concentration",
           "priority": 5,
-          "target": "Lv 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 12. Attack buff.",
           "refs": [
             "ec-sorcerer",
             "mb-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Bittercold Wind",
           "priority": 6,
-          "target": "Lv 20",
+          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Frost damage skill used by nearly every top player.",
           "refs": [
             "ec-sorcerer",
             "mb-sorcerer"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         }
       ],
       "specialties": [

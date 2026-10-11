@@ -58,6 +58,8 @@ const ASMO_REF={serverId:String(ASMO.serverId),characterId:ASMO.characterId};
 const RICH={serverId:'1311',characterId:'cmljaGRhZXZh='};
 const richInfo=structuredClone(info);
 Object.assign(richInfo.profile,{characterName:'RICHDAEVA',characterId:RICH.characterId,characterLevel:23,serverId:1311,serverName:'Kaisinel'});
+// Real base stats for the rich Daeva (made-up test values, never shown as a real character): non-zero values show as they are.
+richInfo.stat.statList.filter(row=>['STR','DEX','INT','CON','AGI','WIS'].includes(row.type)).forEach((row,index)=>{row.value=[41,0,12,37,25,18][index];});
 const takenBoard=structuredClone(board11);
 const nodesNamed=(list,name,count)=>list.nodeList.filter(node=>node.name===name&&node.open===0).sort((a,b)=>a.nodeId-b.nodeId).slice(0,count);
 const TAKEN=[
@@ -268,13 +270,26 @@ for(const [width,height] of [[390,844],[820,1180],[1600,1000],[1920,1080]]){
 
 /* ---------- Gear page ---------- */
 
+await check('Gear page: real base stats show as they are, a 0 among them included',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(RICH)}`);
+  assert.equal(await page.locator('#aeStats .ae-stat').count(),6,'Six primary stats');
+  assert.deepEqual(await page.$$eval('#aeStats .ae-stat dd',items=>items.map(el=>el.textContent)),['41','0','12','37','25','18']);
+  assert.equal(await page.isVisible('#aeStatsNone'),false,'No honest line when the site shows real values');
+  await context.close();
+});
+
 await check('Gear page: worn gear, stats, pet, wings and title; item cards still open',async()=>{
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`);
   assert.deepEqual(calls,['/aion2/character'],'First paint: only /aion2/character');
   assert.equal(await page.textContent('#aeScreenTitle'),'Gear');
   assert.equal(await page.locator('#aeGear [data-slot]').count(),8);
   assert.match(await page.textContent('#aeGearCount'),/8 of 8 worn/);
-  assert.equal(await page.locator('#aeStats .ae-stat').count(),6,'Six primary stats');
+  // Walkthrough fix (11 Oct 2026): the fixture's six base stats are all 0, which means the official site is not showing them.
+  // The page says that once instead of six zeros (the six-stat case is checked below with real values).
+  assert.equal(await page.locator('#aeStats .ae-stat').count(),0,'No row of six zeros');
+  assert.equal(await page.isVisible('#aeStats'),false);
+  assert.equal(await plain(page,'#aeStatsNone'),'Not shown by the official AION 2 site');
+  assert.match(await plain(page,'#aeCombatNote'),/Accuracy and other combat stats are not in the public character data\. Check them on your in-game character screen\./);
   assert.match(await plain(page,'#aeExtras'),/Pet.*Wings.*Title.*Draped in Sky/);
   assert.equal(await page.locator('#aeStigmas, #aeBoards').count(),0,'Stigmas and boards live on their own pages');
   assert.equal(await page.locator('[aria-current="page"]').first().textContent(),'Gear Ledger');

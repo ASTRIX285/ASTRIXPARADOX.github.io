@@ -1,5 +1,5 @@
 /**
- * The guide (The Aetherium): one short step at a time, the thing to look at lit up on the page. One component
+ * The guide (The Aetherium): one short tip at a time, the thing to look at lit up on the page. One component
  * for every page: the Ascent Plan screens, the Daeva Card's first visit and the Ascent Plan menu.
  *
  * mountGuide(el, steps, options) draws the guide into el (an <aside class="ae-guide">) and handles its buttons.
@@ -27,7 +27,8 @@ function showStep(el, index, scroll = true) {
   target?.classList.add('ae-guide-target');
   if (scroll && target) target.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   const last = guide.index === guide.steps.length - 1;
-  const count = `Guide · step ${guide.index + 1} of ${guide.steps.length}`;
+  // The step bar is the only "step" on a page: the guide counts tips.
+  const count = `Tip ${guide.index + 1} of ${guide.steps.length}`;
   el.innerHTML = `
     <span class="ae-guide-pill" role="button" tabindex="0" data-guide="show">${esc(count)}</span>
     <span class="ae-guide-mark" aria-hidden="true"></span>

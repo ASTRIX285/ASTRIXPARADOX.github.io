@@ -34,12 +34,19 @@
         {
           "name": "Incandescent Blow",
           "priority": 3,
-          "target": "Lv 8 to 12",
+          "target": "Lv 8, then Mastery 11. The guide's skill level 12 needs more: Mastery stops at 11 and the build names no other source",
           "why": "No-cooldown damage skill.",
           "refs": [
             "mb-chanter",
             "ec-chanter"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 12\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Spinning Strike",
