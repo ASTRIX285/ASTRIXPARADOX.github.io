@@ -312,11 +312,13 @@ await check('Gear page: worn gear, stats, pet, wings and title; item cards still
   assert.equal(await page.textContent('#aeScreenTitle'),'Gear');
   assert.equal(await page.locator('#aeGear [data-slot]').count(),8);
   assert.match(await page.textContent('#aeGearCount'),/8 of 8 worn/);
-  // Walkthrough fix (11 Oct 2026): the fixture's six base stats are all 0, which means the official site is not showing them.
-  // The page says that once instead of six zeros (the six-stat case is checked below with real values).
-  assert.equal(await page.locator('#aeStats .ae-stat').count(),0,'No row of six zeros');
-  assert.equal(await page.isVisible('#aeStats'),false);
-  assert.equal(await plain(page,'#aeStatsNone'),'Not shown by the official AION 2 site');
+  // Walkthrough fix (11 Oct 2026) said all-zero stats meant the site was not showing them, so the page hid the row.
+  // Stats explained (feature/aetherium-stats-explained, 11 Oct 2026) changed that: a low Daeva really has 0 points (the live
+  // data sends null effect lines for them), so the 16 tiles show with a near-zero note that says where points come from.
+  assert.equal(await page.locator('#aeStats .ae-stat').count(),6,'Six main stats, 0 shown as 0');
+  assert.equal(await page.locator('#aeDeity .ae-stat').count(),10,'Ten deity stats');
+  assert.equal(await page.isVisible('#aeStatsLow'),true,'The near-zero note says where points come from');
+  assert.equal(await page.isVisible('#aeStatsNone'),false,'The site does send the stats');
   assert.match(await plain(page,'#aeCombatNote'),/Accuracy and other combat stats are not in the public character data\. Check them on your in-game character screen\./);
   assert.match(await plain(page,'#aeExtras'),/Pet.*Wings.*Title.*Draped in Sky/);
   assert.equal(await page.locator('#aeStigmas, #aeBoards').count(),0,'Stigmas and boards live on their own pages');
@@ -923,6 +925,69 @@ await check('Gear grid: 20 tiles in two rows of 10 at 1600, 5 per row at 1024 an
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width:800,height:900}});
   await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
   assert.ok(await overflowOf(page)<=1,'No sideways scroll at 200 percent text');
+  await context.close();
+});
+
+/* Stats explained (feature/aetherium-stats-explained, 11 Oct 2026): 16 stat tiles with the official lines and class tags. */
+await check('Gear page stats: 6 main and 10 deity tiles with the official effect lines, High, Useful and Low tags for the class',async()=>{
+  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  assert.deepEqual(calls,['/aion2/character'],'No extra Worker call for stats');
+  assert.equal(await page.locator('#aeStats .ae-stat').count(),6);
+  assert.equal(await page.locator('#aeDeity .ae-stat').count(),10);
+  const tiles=await page.$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>[el.dataset.stat,el.querySelector('dd').textContent,el.querySelector('.ae-stat-effect').textContent,el.dataset.tag]));
+  const by=Object.fromEntries(tiles.map(([id,points,line,tag])=>[id,{points,line,tag}]));
+  assert.deepEqual(by.might,{points:'15',line:'Attack increase +1.5%',tag:'useful'},'The official line, not ours');
+  assert.deepEqual(by.precision,{points:'11',line:'Accuracy increase +1.1%, Critical Hit increase +1.1%',tag:'high'});
+  assert.deepEqual(by.time,{points:'37',line:'Combat Speed +3.7%, Double Resist +3.7%',tag:'useful'});
+  assert.equal(by.constitution.tag,'low');
+  assert.equal(by.intelligence.line,'Each point: Status Effect Chance +0.1%','No official line at 0 points: what one point gives');
+  const tagLook=await page.$eval('#aeStatsPanel .ae-stat-tag',items=>Object.fromEntries(items.map(el=>[el.dataset.statTag,getComputedStyle(el).color])));
+  assert.equal(tagLook.high,'rgb(226, 181, 79)','High in gold');
+  assert.equal(tagLook.useful,'rgb(143, 208, 255)','Useful in ice');
+  assert.notEqual(tagLook.low,tagLook.high);
+  assert.equal(await page.isVisible('#aeStatsLow'),false,'No near-zero note for the Lv 45 Daeva');
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/아이템|ItemLevel/,'No Korean label or ItemLevel row');
+  await context.close();
+});
+
+await check('Gear page stats: tapping a tile opens its card in place with what it does, the class reason, sources and gear lines; Escape returns focus',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  const before=page.url();
+  await page.click('[data-stat-open="constitution"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) [data-stat-reason]');
+  assert.equal(page.url(),before,'No navigation');
+  const card=await page.$eval('#aeInfoBody',el=>el.innerText.replace(/\s+/g,' '));
+  for(const part of [/Constitution/,/Low for Gladiator/,/What it does/,/HP: Your health pool\./,/Constitution: low for Gladiator\. It only raises HP, which your build does not chase\. Templars want it\./,/Where points come from/,/Not confirmed yet/,/Sub stat lines on armour/,/Soul Binding rerolls/,/Look for Constitution lines on armour\./])assert.match(card,part);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.statOpen),'constitution','Focus returns to the tile');
+  await page.click('[data-stat-open="time"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) [data-stat-reason]');
+  const time=await page.$eval('#aeInfoBody',el=>el.innerText.replace(/\s+/g,' '));
+  assert.match(time,/Your points give Combat Speed \+3\.7% Double Resist \+3\.7%/);
+  assert.match(time,/Arcana/);
+  assert.match(time,/Daevanion: Nezekan nodes \(Combat Speed\)/,'Board named by the board data');
+  await context.close();
+});
+
+await check('Gear page stats: the near-zero note shows for a low Daeva; no sideways scroll at 390 and at 200 percent text',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`,{viewport:{width:390,height:844}});
+  assert.equal(await page.isVisible('#aeStatsLow'),true);
+  assert.equal(await plain(page,'#aeStatsLow'),'These come from sub stat lines on Unique and crafted gear, and from Arcana for the deity stats. Low numbers are normal until then.');
+  assert.equal(await page.locator('#aeStatsPanel .ae-stat').count(),16);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'390: no sideways scroll');
+  for(const box of await page.$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>el.getBoundingClientRect().height)))assert.ok(box>=43.5,'44px targets');
+  await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+  await page.setViewportSize({width:800,height:900});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'200 percent: no sideways scroll');
+  await context.close();
+});
+
+await check('Gear page item card: sub stat lines tagged High, Useful or Low for the class',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await page.click('[data-enchant-flag="1"]');
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-rows.is-bonus'));
+  const lines=await page.$eval('#aeInfo .ae-item-rows.is-bonus li',items=>items.map(el=>[el.querySelector('span').firstChild.textContent.trim(),el.dataset.lineTag]));
+  assert.deepEqual(lines,[['Might','useful'],['Critical Hit','low'],['MP','low'],['Block','low']]);
   await context.close();
 });
 

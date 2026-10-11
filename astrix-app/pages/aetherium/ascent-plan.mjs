@@ -506,11 +506,31 @@ function keyPanel(key) {
     ${cards || '<p class="ae-empty">Nothing on this key.</p>'}`;
 }
 
+/* The stat chain under one combat stat: the main and deity stats that feed it, with the Daeva's own points when live
+   ("Accuracy ← Precision 11, Freedom 26"). A stat order line that names no combat stat a point stat feeds says so. */
+function statChainHtml(entry, live) {
+  const links = entry?.links ?? [];
+  const fed = links.filter(link => link.from.length);
+  if (!fed.length) return `<span class="ae-chain is-none">${links.length ? 'From gear lines and Daevanion, not from stat points' : 'No stat points feed this'}</span>`;
+  return fed.map(link => `<span class="ae-chain" data-chain="${esc(link.name)}"><b>${esc(link.name)}</b> <span aria-hidden="true">←</span><span class="ae-visually-hidden"> comes from</span> ${link.from.map(from => `<span class="ae-chain-stat is-${esc(from.kind)}">${esc(from.name)}${live && from.points !== null ? ` <b>${esc(from.points)}</b>` : ''}</span>`).join(', ')}</span>`).join('');
+}
+
+/* What to look for on each kind of gear: the lines this build wants in its order, the rest greyed as skip. */
+function gearRowsHtml(rows) {
+  return `<section class="ae-gear-look" id="aeGearLook" aria-labelledby="aeGearLookTitle">
+      <h3 class="ae-stats-group" id="aeGearLookTitle">What to look for on your gear <span class="ae-tag is-unconfirmed">Not confirmed yet</span> <span class="ae-tag-test">Check: the sub stat lines your gear rolls in game.</span></h3>
+      <ul class="ae-look-rows">${rows.map(row => `<li data-gear-row="${esc(row.id)}"><strong>${esc(row.label)}</strong>
+        <span>${row.want.length ? row.want.map(stat => `<span class="ae-look-want${stat.tag ? ` is-${esc(stat.tag)}` : ''}">${esc(stat.name)}</span>`).join(' ') : '<span class="ae-look-none">Nothing your build chases</span>'}${row.skip.length ? `<span class="ae-look-skip">Skip: ${esc(row.skip.map(stat => stat.name).join(', '))}</span>` : ''}</span></li>`).join('')}</ul>
+    </section>`;
+}
+
 function renderStatsScreen(plan) {
   const s = plan.stats;
-  if (isPending(s)) return pendingNote(s);
-  return `<ol class="ae-stat-ranks">${s.order.map((stat, index) => `<li data-stat-rank="${index + 1}"><span class="ae-stat-rank">${index + 1}</span><strong>${esc(stat)}</strong></li>`).join('')}</ol>
+  const sp = plan.statPlan;
+  if (isPending(s)) return `${pendingNote(s)}${sp ? `<p class="ae-muted" id="aeNoStatOrder">No stat order for this class yet. What each stat does is on the Gear page.</p>${gearRowsHtml(sp.gear)}` : ''}`;
+  return `<ol class="ae-stat-ranks">${s.order.map((stat, index) => `<li data-stat-rank="${index + 1}"><span class="ae-stat-rank">${index + 1}</span><span class="ae-stat-rank-text"><strong>${esc(stat)}</strong>${sp?.chains ? statChainHtml(sp.chains[index], sp.live) : ''}</span></li>`).join('')}</ol>
     <p class="ae-muted">Look for these, in this order, on gear, manastones and accessories.</p>
+    ${sp ? gearRowsHtml(sp.gear) : ''}
     <p class="ae-callout" id="aeStatsWhere">The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.</p>
     ${plan.character ? '' : `<p><a class="btn" id="aeGearLink" href="${esc(viewHref('gear'))}">Find your Daeva to see your gear</a></p>`}`;
 }

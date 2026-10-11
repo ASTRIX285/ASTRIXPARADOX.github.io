@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {AION2_CLASSES,ROLES,buildAscentPlan,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
+import {classesWanting,combatNamesIn,indexStats,mostlyLow,rankPointStats,statOrder,statReason,subStatTag} from '../games/aion2/engine/stat-advisor.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
 import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
 
@@ -937,6 +938,97 @@ check('Macro 1 lists keys in build order with each stack; locked skills are neve
 
 check('unknown class throws',()=>{
   assert.throws(()=>buildAscentPlan({className:'Brawler',data:data('Gladiator')}),/Unknown AION 2 class/);
+});
+
+/* Stats explained (feature/aetherium-stats-explained, 11 Oct 2026): stats.json and the class priority chain. A point stat
+   matters as much as the highest combat stat it feeds in the class build's own stats.order; nothing is guessed. */
+const statsData=json('games/aion2/data/advisor/stats.json');
+const mainBuilds=Object.fromEntries(AION2_CLASSES.map(name=>[name,builds[name].records.find(build=>build.main)]));
+const statIndex=indexStats(statsData);
+check('stats.json: 6 main and 10 deity stats at 0.1% per point, the effects the official lines show, every value with status and provenance',()=>{
+  assert.deepEqual(statIndex.main.map(stat=>[stat.name,stat.effects.value]),[['Might',['Attack']],['Dexterity',['Evasion','Block','Critical Hit Resist']],['Intelligence',['Status Effect Chance']],['Constitution',['HP']],['Precision',['Accuracy','Critical Hit']],['Willpower',['Status Effect Resist']]]);
+  assert.deepEqual(statIndex.deity.map(stat=>[stat.lord,stat.effects.value]),[['Nezekan',['Defense','Perfect Chance']],['Vaizel',['Accuracy','Evasion']],['Kaisinel',['Cooldown','Endurance Penetration']],['Yustiel',['HP','Regeneration']],['Siel',['Combat Speed','Double Resist']],['Zikel',['Attack','Perfect Resist']],['Triniel',['Critical Hit','Regeneration Penetration']],['Lumiel',['MP Cost','Double Chance']],['Marchutan',['MP','Endurance']],['Israphel',['Move Speed','Block']]]);
+  for(const stat of statIndex.point){
+    assert.equal(stat.perPoint.value,0.1);
+    for(const key of ['effects','perPoint','from'])assert.ok(['confirmed','unconfirmed'].includes(stat[key].status)&&stat[key].provenance.length,`${stat.id}.${key}`);
+    assert.equal(stat.effects.status,'confirmed');
+    assert.equal(stat.from.status,'unconfirmed','Where points come from stays unconfirmed until checked');
+  }
+  // The live Lv 45 lines match the record: Might 15 gives Attack +1.5%, Time 37 gives Combat Speed and Double Resist +3.7%.
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  for(const row of lv45.stats.filter(entry=>entry.value>0)){
+    const stat=statIndex.byType.get(row.type);
+    assert.equal(row.effects.length,stat.effects.value.length,row.name);
+    row.effects.forEach((line,n)=>{assert.ok(line.startsWith(stat.effects.value[n]),`${row.name}: ${line}`);assert.match(line,new RegExp(`${(row.value*0.1).toFixed(1).replace(/\.0$/,'')}%$`));});
+  }
+  const caps=Object.fromEntries(statIndex.combat.filter(stat=>stat.cap).map(stat=>[stat.name,[stat.cap.value,stat.cap.status]]));
+  assert.deepEqual(caps,{Evasion:[30,'unconfirmed'],'Critical Hit':[50,'unconfirmed'],Cooldown:[60,'unconfirmed'],'MP Cost':[60,'unconfirmed'],'Move Speed':[150,'unconfirmed']});
+  for(const name of ['Accuracy','Double Chance','Perfect Chance','Combat Speed','Endurance','Regeneration','Status Effect Chance','Status Effect Resist'])assert.ok(statIndex.combatByName.get(name).meaning.value,name);
+});
+check('the priority chain runs for every class from its own stats.order; a class without one gets no ranking',()=>{
+  for(const name of AION2_CLASSES){
+    const build=mainBuilds[name];
+    const order=statOrder(build,statsData);
+    const rank=rankPointStats(build,statsData);
+    if(!Array.isArray(build.stats?.order)){assert.equal(order,null,name);assert.equal(rank,null,`${name}: no ranking without a stat order`);continue;}
+    assert.equal(order.length,build.stats.order.length,name);
+    assert.equal(Object.keys(rank).length,16,name);
+    // A stat is high only when it feeds one of the first two entries, through a combat stat that entry's own text names.
+    for(const [id,entry] of Object.entries(rank)){
+      const stat=statIndex.byId.get(id);
+      const named=order.filter(line=>line.combat.some(combat=>stat.effects.value.includes(combat)));
+      assert.equal(entry.tag,!named.length?'low':named[0].rank<2?'high':'useful',`${name} ${id}`);
+      for(const line of named)assert.ok(line.combat.every(combat=>new RegExp(combat,'i').test(line.text)),`${name}: "${line.text}" names ${line.combat}`);
+    }
+  }
+  assert.equal(rankPointStats(mainBuilds.Assassin,statsData),null,'Assassin: stat order pending, no ranking');
+});
+check('Gladiator: Precision high, Constitution low, with the reason text; other classes named only from their own data',()=>{
+  const rank=rankPointStats(mainBuilds.Gladiator,statsData);
+  assert.equal(rank.precision.tag,'high');
+  assert.equal(rank.freedom.tag,'high');
+  assert.equal(rank.wisdom.tag,'high');
+  assert.equal(rank.time.tag,'useful');
+  assert.equal(rank.might.tag,'useful','Front Attack Damage Boost is not Attack: Might comes from the sixth entry, Attack');
+  assert.equal(rank.constitution.tag,'low');
+  const others=classesWanting('constitution',mainBuilds,statsData,'Gladiator');
+  assert.deepEqual(others,['Templar'],'Only the Templar build ranks Constitution high (HP second on its list)');
+  for(const name of others)assert.equal(rankPointStats(mainBuilds[name],statsData).constitution.tag,'high');
+  assert.equal(statReason(statIndex.byId.get('precision'),rank.precision,'Gladiator'),'Precision: high for Gladiator. It raises Accuracy, your first stat to reach.');
+  assert.equal(statReason(statIndex.byId.get('constitution'),rank.constitution,'Gladiator',others),'Constitution: low for Gladiator. It only raises HP, which your build does not chase. Templars want it.');
+  assert.ok(!classesWanting('constitution',mainBuilds,statsData).includes('Assassin'),'A class with no stat order never wants anything');
+});
+check('Ascent Plan stat plan: chains with the Daeva\'s own points, gear rows with skips; by hand has no live numbers',()=>{
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:{...data('Gladiator'),stats:statsData},model:lv45});
+  const accuracy=plan.statPlan.chains[0].links.find(link=>link.name==='Accuracy');
+  assert.deepEqual(accuracy.from.map(from=>[from.name,from.points]),[['Precision',11],['Freedom [Vaizel]',26]]);
+  assert.deepEqual(plan.statPlan.chains[3].links.map(link=>[link.name,link.from.length]),[['Weapon Damage Boost',0]],'Fed by no stat points');
+  const rows=Object.fromEntries(plan.statPlan.gear.map(row=>[row.label,[row.want.map(stat=>stat.name),row.skip.map(stat=>stat.name)]]));
+  assert.deepEqual(rows.Weapon,[['Precision','Might'],[]]);
+  assert.deepEqual(rows.Armour,[[],['Dexterity','Constitution','Willpower']]);
+  assert.deepEqual(rows.Accessories,[['Precision','Might'],['Intelligence']]);
+  assert.deepEqual(rows['Arcana and Abyssal Bracelet'][0],['Freedom [Vaizel]','Wisdom [Lumiel]','Time [Siel]','Destruction [Zikel]']);
+  const byHand=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),stats:statsData}});
+  assert.ok(byHand.statPlan.chains.every(entry=>entry.links.every(link=>link.from.every(from=>from.points===null))),'No live numbers by hand');
+  assert.equal(byHand.statPlan.live,false);
+  const tank=buildAscentPlan({className:'Templar',role:'tank',level:45,data:{...data('Templar'),stats:statsData}});
+  assert.equal(tank.statPlan.rank.constitution.tag,'high','A tank whose order has HP gets Constitution high');
+  assert.equal(tank.statPlan.rank.justice.tag,'high','and Justice for Defense');
+});
+check('sub stat lines on an item are tagged for the class; near-zero main stats are spotted',()=>{
+  const rank=rankPointStats(mainBuilds.Gladiator,statsData);
+  assert.equal(subStatTag({name:'Might'},rank,mainBuilds.Gladiator,statsData),'useful');
+  assert.equal(subStatTag({name:'Precision'},rank,mainBuilds.Gladiator,statsData),'high');
+  assert.equal(subStatTag({name:'Block'},rank,mainBuilds.Gladiator,statsData),'low');
+  assert.equal(subStatTag({name:'MP'},rank,mainBuilds.Gladiator,statsData),'low');
+  assert.equal(subStatTag({name:'Might'},null,mainBuilds.Assassin,statsData),null,'No tag without a stat order');
+  const low=module.normaliseCharacter({info:fx('astrix285-info'),equipment:fx('astrix285-equipment')},{region:'eu',capturedOn:'2026-10-05'});
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  assert.equal(mostlyLow(low.stats,statsData),true);
+  assert.equal(mostlyLow(lv45.stats,statsData),false);
+  assert.deepEqual(combatNamesIn('Front Attack Damage Boost',statsData),['Front Attack Damage Boost']);
+  assert.deepEqual(combatNamesIn('Critical Hit Resist and MP Cost',statsData),['Critical Hit Resist','MP Cost']);
 });
 
 if(failed){console.log(`AION2_ADVISOR=FAIL ${failed}`);process.exitCode=1;}

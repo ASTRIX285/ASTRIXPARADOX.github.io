@@ -7,18 +7,20 @@
  * Item details load in the background after first paint (at most 3 at a time, kept for the session).
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, preloadItemDetails } from './aetherium-data.mjs';
-import { $, esc, gradeTile, infoCardHtml, isPending, number, openInfo, slotLabel } from './aetherium-ui.mjs';
+import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails } from './aetherium-data.mjs';
+import { $, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel } from './aetherium-ui.mjs';
+import { renderStatsPanel } from './stats-panel.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
-import { enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics, indexProgression } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { rankPointStats, subStatTag } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 
-const PRIMARY_STATS = ['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS'];
 /* The game's equipment window: row 1 weapons and armour, row 2 accessories and the two runes. Arcana have their own row. */
 const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GLOVES', 'BOOTS', 'CAPE', 'BELT',
   'NECKLACE', 'EARRING1', 'EARRING2', 'RING1', 'RING2', 'BRACELET1', 'BRACELET2', 'AMULET', 'RUNE1', 'RUNE2'];
 const ARCANA = ['ARCANA1', 'ARCANA2', 'ARCANA3', 'ARCANA4', 'ARCANA5'];
 const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
-const state = { model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set() };
+const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
+const state = { model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null };
 
 const adviceOf = slot => enchantAdvice(slot, { level: state.model.profile.level, grades: state.grades, progression: state.progression });
 const gradeOf = slot => gradeInfo(slot.grade, state.grades, slot.gradeName ?? null);
@@ -154,6 +156,15 @@ function adviceHtml(slot, rules) {
     </section>`;
 }
 
+/** Bonus stat lines, each tagged High, Useful or Low for this Daeva's class (stats.json and the class's stat order). */
+function subRows(list) {
+  const rank = state.stats && state.build ? rankPointStats(state.build, state.stats) : null;
+  return list.map(row => {
+    const tag = subStatTag(row, rank, state.build, state.stats);
+    return `<li${tag ? ` data-line-tag="${tag}"` : ''}><span>${esc(row.name)}${tag ? ` <i class="ae-stat-tag is-${tag}">${TAG_WORD[tag]}</i>` : ''}</span><b>${esc(row.value)}${row.extra ? ` <em>+${esc(row.extra)}</em>` : ''}</b></li>`;
+  }).join('');
+}
+
 /** The item card body: everything the official site gives for one worn item, laid out like the game's tooltip. */
 function itemCardBody(slot, d) {
   const rows = list => list.map(row => `<li><span>${esc(row.name)}</span><b>${esc(row.value)}${row.extra ? ` <em>+${esc(row.extra)}</em>` : ''}</b></li>`).join('');
@@ -163,7 +174,7 @@ function itemCardBody(slot, d) {
   return `
     ${max ? `<div class="ae-item-enchant" aria-label="Enchant +${esc(d.enchant)} of ${esc(max)}"><span class="ae-item-sec">Enchant</span><span class="ae-pips">${Array.from({ length: max }, (_, n) => `<i class="${n < d.enchant ? 'is-on' : ''}"></i>`).join('')}</span><b>+${esc(d.enchant)} / ${esc(max)}</b></div>` : ''}
     ${d.mainStats.length ? `<div class="ae-item-block"><p class="ae-item-sec">Stats</p><ul class="ae-item-rows">${rows(d.mainStats)}</ul></div>` : ''}
-    ${d.subStats.length || d.bonusStatSlots ? `<div class="ae-item-block"><p class="ae-item-sec">Bonus stats${d.bonusStatsRandom ? ' <small>rolled</small>' : ''}</p>${d.subStats.length ? `<ul class="ae-item-rows is-bonus">${rows(d.subStats)}</ul>` : '<p class="ae-empty">None rolled yet</p>'}</div>` : ''}
+    ${d.subStats.length || d.bonusStatSlots ? `<div class="ae-item-block"><p class="ae-item-sec">Bonus stats${d.bonusStatsRandom ? ' <small>rolled</small>' : ''}</p>${d.subStats.length ? `<ul class="ae-item-rows is-bonus">${subRows(d.subStats)}</ul>` : '<p class="ae-empty">None rolled yet</p>'}</div>` : ''}
     ${d.skillPerkSlots || d.skillPerks.length ? `<div class="ae-item-block"><p class="ae-item-sec">Skill perks <small>${d.skillPerks.length} of ${d.skillPerkSlots}</small></p><ul class="ae-perk-list">
       ${d.skillPerks.map(perk => `<li class="ae-perk">${perk.icon ? `<img src="${esc(perk.icon)}" alt="" width="36" height="36" referrerpolicy="no-referrer">` : '<span class="ae-perk-empty"></span>'}<span>${esc(perk.name)}</span><b>+${esc(perk.level)}</b></li>`).join('')}
       ${Array.from({ length: emptyPerks }, () => '<li class="ae-perk is-empty"><span class="ae-perk-empty"></span><span>Empty perk slot</span></li>').join('')}
@@ -255,14 +266,12 @@ function wireTips(root) {
   addEventListener('scroll', hideTip, { passive: true });
 }
 
-/* Base stats as the official site sends them. When every one is 0 the site is not showing them, so the page says that
-   once instead of six zeros. Real values show as they are. */
+/* The 6 main and 10 deity stats with the official effect lines and the class tags (stats-panel.mjs). A 0 is shown as 0:
+   low numbers are normal before Unique gear, and the line at the top says where points come from. */
 function renderStats() {
-  const primary = state.model.stats.filter(row => PRIMARY_STATS.includes(row.type));
-  const none = !primary.length || primary.every(row => row.value === 0);
-  $('#aeStats').hidden = none;
-  $('#aeStats').innerHTML = none ? '' : primary.map(row => `<div class="ae-stat"><dt>${esc(row.name)}</dt><dd>${number(row.value)}</dd></div>`).join('');
-  $('#aeStatsNone').hidden = !none;
+  if (!state.stats) { $('#aeStatsPanel').hidden = true; $('#aeStatsNone').hidden = false; return; }
+  const boards = indexProgression(state.progression)['daevanion-boards']?.value ?? [];
+  renderStatsPanel({ model: state.model, stats: state.stats, build: state.build, boards });
 }
 
 /* Show me from a gear move (#enchant-1, #replace-epic, #empty): only the items that move names are ringed, the first is
@@ -353,7 +362,14 @@ function render(model, source, ref) {
           </section>
           <section class="ae-panel is-grow" aria-labelledby="aeStatTitle">
             <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the official AION 2 site</small></h2>
-            <dl class="ae-stats" id="aeStats"></dl>
+            <p class="ae-stats-low" id="aeStatsLow" hidden>These come from sub stat lines on Unique and crafted gear, and from Arcana for the deity stats. Low numbers are normal until then.</p>
+            <p class="ae-stats-low" id="aeStatsOrder" hidden>No stat order for this class yet, so the tiles show what each stat does without a tag.</p>
+            <div id="aeStatsPanel">
+              <h3 class="ae-stats-group">Main stats</h3>
+              <dl class="ae-stats" id="aeStats"></dl>
+              <h3 class="ae-stats-group">Deity stats</h3>
+              <dl class="ae-stats is-deity" id="aeDeity"></dl>
+            </div>
             <p class="ae-empty ae-stats-none" id="aeStatsNone" hidden>Not shown by the official AION 2 site</p>
             <p class="ae-note" id="aeCombatNote">Attack, Defense, Accuracy and other combat stats are not in the public character data. Check them on your in-game character screen.</p>
           </section>
@@ -399,9 +415,11 @@ function render(model, source, ref) {
 
 startCharacterPage({
   // The grade record and the game facts are small static files: they load while the official site answers.
-  prefetch: () => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); },
+  prefetch: className => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); loadStats().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
   async render({ model, source, ref }) {
-    const [catalogue, grades, progression] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null)]);
+    const [catalogue, grades, progression, stats, builds] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null)]);
+    state.stats = stats;
+    state.build = builds?.records?.find(build => build.main) ?? null;
     state.slotNames = new Map(catalogue.slots.map(slot => [keyOf(slot.slotPosName), slot.slotPosName]));
     state.grades = grades ? indexGrades(grades) : null;
     state.progression = progression;

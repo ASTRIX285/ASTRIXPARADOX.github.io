@@ -1106,6 +1106,38 @@ for(const width of [1600,390]){
   });
 }
 
+/* Stats explained (feature/aetherium-stats-explained, 11 Oct 2026): each combat stat shows the point stats that feed it, with
+   the Daeva's own points, then what to look for on each kind of gear. By hand the same screen with no live numbers. */
+await check('Stats screen: chains with live points, gear rows with skips, no live numbers by hand, no sideways scroll',async()=>{
+  const {page,context}=await open(ascent(`${ref45}&class=gladiator`,'stats'),{live:true});
+  const ranks=await page.$$eval('[data-stat-rank]',items=>items.map(el=>el.querySelector('strong').textContent));
+  assert.equal(ranks[0],'Accuracy (enough for your content)','The class order is kept');
+  assert.equal(await plain(page,'[data-stat-rank="1"] [data-chain="Accuracy"]'),'Accuracy ← comes from Precision 11, Freedom [Vaizel] 26');
+  assert.equal(await plain(page,'[data-stat-rank="2"] [data-chain="Double Chance"]'),'Double Chance ← comes from Wisdom [Lumiel] 1');
+  assert.match(await plain(page,'[data-stat-rank="4"]'),/From gear lines and Daevanion, not from stat points/);
+  const rows=await page.$$eval('[data-gear-row]',items=>items.map(el=>[el.querySelector('strong').textContent,[...el.querySelectorAll('.ae-look-want')].map(want=>want.textContent),el.querySelector('.ae-look-skip')?.textContent??'']));
+  assert.deepEqual(rows.map(row=>row[0]),['Weapon','Armour','Accessories','Arcana and Abyssal Bracelet']);
+  assert.deepEqual(rows[0][1],['Precision','Might']);
+  assert.equal(rows[1][2],'Skip: Dexterity, Constitution, Willpower');
+  assert.equal(rows[2][2],'Skip: Intelligence');
+  assert.match(await plain(page,'#aeGearLook'),/Not confirmed yet/);
+  assert.equal(await plain(page,'#aeStatsWhere'),'The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.');
+  await context.close();
+  const hand=await open(ascent('class=gladiator&role=dps&level=45','stats'));
+  assert.equal(await plain(hand.page,'[data-stat-rank="1"] [data-chain="Accuracy"]'),'Accuracy ← comes from Precision, Freedom [Vaizel]','By hand: no live numbers');
+  await hand.context.close();
+  const phone=await open(ascent(`${ref45}&class=gladiator`,'stats'),{live:true,viewport:{width:390,height:844}});
+  assert.equal(await phone.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'390: no sideways scroll');
+  await phone.page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+  await phone.page.setViewportSize({width:800,height:900});
+  assert.equal(await phone.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'200 percent: no sideways scroll');
+  await phone.context.close();
+  const assassin=await open(ascent('class=assassin&level=45','stats'));
+  assert.match(await plain(assassin.page,'#aeNoStatOrder'),/No stat order for this class yet/);
+  assert.equal(await assassin.page.locator('.ae-look-skip').count(),0,'No ranking, so nothing is skipped');
+  await assassin.context.close();
+});
+
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
 await browser.close();
