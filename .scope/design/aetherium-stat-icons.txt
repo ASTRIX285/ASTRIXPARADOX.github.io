@@ -1,0 +1,24 @@
+# design/aetherium-stat-icons: our own 16 stat icons in one SVG sprite, named by stats.json, on every stat tile, stat card and Stats screen chain. Never NCSOFT's stat icons.
+astrix-app/games/aion2/data/advisor/stats.json
+astrix-app/games/aion2/engine/stat-advisor.mjs
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium-config.mjs
+astrix-app/pages/aetherium/aetherium-ui.mjs
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/pages/aetherium/icons/stats.svg
+astrix-app/pages/aetherium/stats-panel.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aetherium-character.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/daevanion/index.html
+hub/aetherium/gear/equipment/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/index.html
+hub/aetherium/skills/index.html

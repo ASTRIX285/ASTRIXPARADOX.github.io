@@ -1300,6 +1300,20 @@ body.aetherium-page #aeStatsPanel .ae-stat-open:focus-visible:not(#ax-s1):not(#a
 .ae-chain-stat.is-deity{color:var(--ae-gold)}
 .ae-chain-stat b{color:var(--ae-text);font-variant-numeric:tabular-nums}
 .ae-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* Stat icons (design/aetherium-stat-icons, 11 Oct 2026): our own art, one sprite (icons/stats.svg), never NCSOFT's.
+   Pale blue line art; gold with a soft radial halo when the stat is High for the class. 40px on main tiles, 28px on
+   deity tiles and the stat card well, 20px in the Stats screen chains, where the stroke is heavier and Precision drops its dot. */
+.ae-stat-icon{flex:0 0 auto;width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--ae-ice);border-radius:50%;overflow:visible}
+.ae-stat-icon.is-small{width:20px;height:20px;stroke-width:2.4;--ae-stat-dot:none}
+.ae-stat-icon.is-high{color:var(--ae-gold);background:radial-gradient(closest-side,color-mix(in srgb,var(--ae-gold) 30%,transparent),color-mix(in srgb,var(--ae-gold) 10%,transparent) 60%,transparent)}
+#aeStatsPanel .ae-stat dt{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:.25rem .625rem}
+#aeStatsPanel .ae-stat dt>.ae-stat-icon{grid-row:1 / span 2;align-self:start}
+#aeStatsPanel .ae-stat-head{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem;min-width:0}
+#aeStatsPanel .ae-stat-effect{grid-column:2}
+#aeDeity .ae-stat-icon{width:28px;height:28px}
+.ae-card-icon .ae-stat-icon{width:40px;height:40px}
+.ae-chain-stat{white-space:nowrap}
+.ae-chain-stat .ae-stat-icon{width:20px;height:20px;margin-right:.25rem;vertical-align:-5px}
 .ae-gear-look{margin:1rem 0}
 .ae-look-rows{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
 .ae-look-rows li{display:grid;grid-template-columns:minmax(8rem,12rem) minmax(0,1fr);gap:.5rem 1rem;align-items:baseline;padding:.625rem .75rem;background:var(--ae-raised);border:1px solid var(--ae-hairline)}

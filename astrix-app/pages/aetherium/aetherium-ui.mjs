@@ -1,5 +1,6 @@
 /** Shared page helpers for The Aetherium: escaping, faction theme, notices, menu drawer, readiness. */
 import { factionOf, sourceLabel } from './aetherium-data.mjs';
+import { AETHERIUM_STAT_ICONS } from './aetherium-config.mjs';
 
 export const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -8,6 +9,15 @@ export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':
 export const number = value => (Number.isFinite(value) ? value.toLocaleString('en-GB') : '-');
 
 export const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
+
+/**
+ * A stat's own icon (its icon field in stats.json) from the one stat sprite. Decorative: the text beside it names the stat.
+ * size is the drawn size in px; 24 or less draws the heavier small stroke. high: the stat is High for the class (gold).
+ */
+export function statIcon(icon, { size = 40, high = false } = {}) {
+  if (!icon) return '';
+  return `<svg class="ae-stat-icon${size <= 24 ? ' is-small' : ''}${high ? ' is-high' : ''}" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true" focusable="false" data-stat-icon="${esc(icon)}"><use href="${AETHERIUM_STAT_ICONS}#${esc(icon)}"/></svg>`;
+}
 
 /**
  * A slot name in plain words: "MainHand" to "Main Hand", and the site's raw codes for slots it lists only when
@@ -138,9 +148,9 @@ export function wireDrawer() {
 }
 
 /* The info card (like the game's tooltip) and the hover name label, shared by every Aetherium page. */
-export function infoCardHtml({ icon, title, sub, level = null, status = null, chips = [], lines = [], body = '', grade = null, titleId = 'aeInfoTitle' }) {
+export function infoCardHtml({ icon, iconHtml = '', title, sub, level = null, status = null, chips = [], lines = [], body = '', grade = null, titleId = 'aeInfoTitle' }) {
   return `<div class="ae-card-head"${grade ? ` data-grade="${esc(String(grade).toLowerCase())}"` : ''}>
-      <span class="ae-card-icon">${icon ? `<img src="${esc(icon)}" alt="" width="64" height="64" decoding="async" referrerpolicy="no-referrer">` : ''}</span>
+      <span class="ae-card-icon">${iconHtml || (icon ? `<img src="${esc(icon)}" alt="" width="64" height="64" decoding="async" referrerpolicy="no-referrer">` : '')}</span>
       <div><h3${titleId ? ` id="${titleId}"` : ''}>${esc(title)}${level !== null ? ` <span>Lv. ${esc(level)}</span>` : ''}</h3><p>${esc(sub)}</p></div>
     </div>
     ${status ? `<p class="ae-card-status is-${status[0]}">${esc(status[1])}</p>` : ''}

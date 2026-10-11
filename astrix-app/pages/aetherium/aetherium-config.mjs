@@ -25,6 +25,9 @@ export const AETHERIUM_REGION_KEY = 'aetherium.region.v1';
 /** The Europe server list, captured from the official site (an official API response, no character in it). Lets the Europe picker paint with no call. */
 export const AETHERIUM_EU_SERVERS = '/astrix-app/tools/fixtures/aion2/eu/servers.json';
 
+/** The stat icon sprite: our own art, one symbol per stat (ae-stat-<id>), named by each stat's icon field in stats.json. Never NCSOFT's stat icons. */
+export const AETHERIUM_STAT_ICONS = '/astrix-app/pages/aetherium/icons/stats.svg?v=20261011-1';
+
 /** The official art the intro shows (class renders and the NPC guide), hotlinked from the NCSOFT CDN, with provenance. */
 export const AETHERIUM_INTRO_ART = '/astrix-app/games/aion2/data/intro-art.json';
 /** The only host intro art may come from. An entry on any other host is never shown. */

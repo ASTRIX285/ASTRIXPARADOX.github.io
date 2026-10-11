@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- The Aetherium stat icons: original ASTRIX PARADOX art, one symbol per stat (6 main, 10 deity).
+       No fill or colour here: the page sets stroke (currentColor) and its width in aetherium.css.
+       Precision's centre dot hides at 24px or less through --ae-stat-dot. -->
+  <symbol id="ae-stat-might" viewBox="0 0 40 40"><path d="M12 18v-6a2.5 2.5 0 0 1 5 0v5M17 16v-6a2.5 2.5 0 0 1 5 0v6M22 16v-4a2.5 2.5 0 0 1 5 0v8c0 7-4 11-9 11h-1c-4 0-7-3-7-7v-4a2.5 2.5 0 0 1 5 0"/></symbol>
+  <symbol id="ae-stat-dexterity" viewBox="0 0 40 40"><path d="M31 7C19 9 11 18 9 33M31 7c-2 11-10 18-20 20M15 22l-4-4M19 18l-3-5M23 14l-1-5M18 26h-5M22 22l-6 1"/></symbol>
+  <symbol id="ae-stat-precision" viewBox="0 0 40 40"><path d="M4 20c4-7 9-10 16-10s12 3 16 10c-4 7-9 10-16 10S8 27 4 20z"/><circle cx="20" cy="20" r="5"/><circle class="ae-stat-dot" cx="20" cy="20" r="1.5" style="display:var(--ae-stat-dot,inline)"/></symbol>
+  <symbol id="ae-stat-willpower" viewBox="0 0 40 40"><path d="M20 4c2 6 9 9 9 18a9 9 0 0 1-18 0c0-5 3-7 4-11 2 3 2 5 4 6 1-4 0-8 1-13z"/></symbol>
+  <symbol id="ae-stat-intelligence" viewBox="0 0 40 40"><path d="M20 12c-4-3-9-3-14-2v20c5-1 10-1 14 2 4-3 9-3 14-2V10c-5-1-10-1-14 2zM20 12v20"/></symbol>
+  <symbol id="ae-stat-constitution" viewBox="0 0 40 40"><path d="M20 33S6 24 6 15a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 9-14 18-14 18z"/></symbol>
+  <symbol id="ae-stat-justice" viewBox="0 0 40 40"><path d="M20 6v28M12 34h16M8 12h24M8 12l-5 10h10zM32 12l-5 10h10z"/></symbol>
+  <symbol id="ae-stat-freedom" viewBox="0 0 40 40"><path d="M6 28c6-2 10-8 12-18 4 8 10 12 16 12-6 4-14 6-28 6zM12 24c2-3 4-6 5-10"/></symbol>
+  <symbol id="ae-stat-illusion" viewBox="0 0 40 40"><path d="M26 6a14 14 0 1 0 8 22A12 12 0 0 1 26 6z"/></symbol>
+  <symbol id="ae-stat-life" viewBox="0 0 40 40"><path d="M8 32C8 18 16 8 32 8c0 16-10 24-24 24zM8 32l12-12"/></symbol>
+  <symbol id="ae-stat-time" viewBox="0 0 40 40"><path d="M11 5h18M11 35h18M13 5c0 8 7 10 7 15s-7 7-7 15M27 5c0 8-7 10-7 15s7 7 7 15"/></symbol>
+  <symbol id="ae-stat-destruction" viewBox="0 0 40 40"><path d="M20 4l3 10 10-4-6 9 9 4-10 2 3 10-9-6-9 6 3-10-10-2 9-4-6-9 10 4z"/></symbol>
+  <symbol id="ae-stat-death" viewBox="0 0 40 40"><path d="M10 34V18a10 10 0 0 1 20 0v16M15 24l4 4M19 24l-4 4M25 24l-4 4M21 24l4 4"/></symbol>
+  <symbol id="ae-stat-wisdom" viewBox="0 0 40 40"><path d="M14 30h12M16 34h8M20 6a9 9 0 0 0-5 16c1 1 2 3 2 5h6c0-2 1-4 2-5a9 9 0 0 0-5-16z"/></symbol>
+  <symbol id="ae-stat-destiny" viewBox="0 0 40 40"><circle cx="20" cy="20" r="14"/><path d="M20 8l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/></symbol>
+  <symbol id="ae-stat-space" viewBox="0 0 40 40"><circle cx="20" cy="20" r="7"/><ellipse cx="20" cy="20" rx="17" ry="6" transform="rotate(-20 20 20)"/></symbol>
+</svg>

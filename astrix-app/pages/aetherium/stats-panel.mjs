@@ -3,9 +3,10 @@
  * the official effect line (the game's own words from the character data) and a High, Useful or Low tag for the class.
  * Tap a tile for what it does, why it matters for this class, where points come from and what to look for on gear.
  * The explanations come from data/advisor/stats.json; the official line always wins for the player's own numbers.
+ * Each tile and card carries the stat's own icon (stats.json icon, our sprite): 40px on main tiles, 28px on deity tiles.
  */
 import { loadMainBuilds } from './aetherium-data.mjs';
-import { $, esc, infoCardHtml, number, openInfo } from './aetherium-ui.mjs';
+import { $, esc, infoCardHtml, number, openInfo, statIcon } from './aetherium-ui.mjs';
 import { AION2_CLASSES } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { boardSources, classesWanting, indexStats, mostlyLow, rankPointStats, statReason } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 
@@ -27,7 +28,7 @@ function tileHtml(stat) {
   const rank = panel.rank?.[stat.id] ?? null;
   const tag = rank ? `<span class="ae-stat-tag is-${rank.tag}" data-stat-tag="${rank.tag}">${TAG_WORD[rank.tag]}</span>` : '';
   return `<div class="ae-stat" data-stat="${esc(stat.id)}"${rank ? ` data-tag="${rank.tag}"` : ''}>
-      <dt><button type="button" class="ae-stat-open" data-stat-open="${esc(stat.id)}" aria-haspopup="dialog">${esc(stat.name)}</button>${tag}
+      <dt>${statIcon(stat.icon, { size: stat.kind === 'main' ? 40 : 28, high: rank?.tag === 'high' })}<span class="ae-stat-head"><button type="button" class="ae-stat-open" data-stat-open="${esc(stat.id)}" aria-haspopup="dialog">${esc(stat.name)}</button>${tag}</span>
         <span class="ae-stat-effect${row.effects.length ? ' is-official' : ''}">${esc(effectLine(stat))}</span></dt>
       <dd>${number(row.value)}</dd>
     </div>`;
@@ -70,6 +71,7 @@ async function openStat(id, from) {
     : `Look for ${stat.name} on Arcana and the Abyssal Bracelet.`;
   const lines = row.effects.length ? row.effects : [];
   openInfo(infoCardHtml({
+    iconHtml: statIcon(stat.icon, { size: 40, high: rank?.tag === 'high' }),
     title: stat.name,
     sub: `${stat.kind === 'main' ? 'Main stat' : 'Deity stat'} · ${number(row.value)} ${row.value === 1 ? 'point' : 'points'}`,
     status: rank ? [rank.tag === 'low' ? 'lock' : rank.tag === 'high' ? 'go' : 'keep', `${TAG_WORD[rank.tag]} for ${panel.className}`] : null,

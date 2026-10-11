@@ -11,7 +11,7 @@
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
 import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster, sourceLabel } from './aetherium-data.mjs';
-import { $, esc, gradeTile, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, gradeTile, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, statIcon, wireDrawer } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { renderNext, renderStepBar } from './aetherium-flow.mjs';
 import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel, gradeInfo, levelOrder } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
@@ -507,12 +507,13 @@ function keyPanel(key) {
 }
 
 /* The stat chain under one combat stat: the main and deity stats that feed it, with the Daeva's own points when live
-   ("Accuracy ← Precision 11, Freedom 26"). A stat order line that names no combat stat a point stat feeds says so. */
-function statChainHtml(entry, live) {
+   ("Accuracy ← Precision 11, Freedom 26"), each with its own 20px icon, gold when High for the class. A stat order line
+   that names no combat stat a point stat feeds says so. */
+function statChainHtml(entry, live, rank) {
   const links = entry?.links ?? [];
   const fed = links.filter(link => link.from.length);
   if (!fed.length) return `<span class="ae-chain is-none">${links.length ? 'From gear lines and Daevanion, not from stat points' : 'No stat points feed this'}</span>`;
-  return fed.map(link => `<span class="ae-chain" data-chain="${esc(link.name)}"><b>${esc(link.name)}</b> <span aria-hidden="true">←</span><span class="ae-visually-hidden"> comes from</span> ${link.from.map(from => `<span class="ae-chain-stat is-${esc(from.kind)}">${esc(from.name)}${live && from.points !== null ? ` <b>${esc(from.points)}</b>` : ''}</span>`).join(', ')}</span>`).join('');
+  return fed.map(link => `<span class="ae-chain" data-chain="${esc(link.name)}"><b>${esc(link.name)}</b> <span aria-hidden="true">←</span><span class="ae-visually-hidden"> comes from</span> ${link.from.map(from => `<span class="ae-chain-stat is-${esc(from.kind)}">${statIcon(from.icon, { size: 20, high: rank?.[from.id]?.tag === 'high' })}${esc(from.name)}${live && from.points !== null ? ` <b>${esc(from.points)}</b>` : ''}</span>`).join(', ')}</span>`).join('');
 }
 
 /* What to look for on each kind of gear: the lines this build wants in its order, the rest greyed as skip. */
@@ -528,7 +529,7 @@ function renderStatsScreen(plan) {
   const s = plan.stats;
   const sp = plan.statPlan;
   if (isPending(s)) return `${pendingNote(s)}${sp ? `<p class="ae-muted" id="aeNoStatOrder">No stat order for this class yet. What each stat does is on the Gear page.</p>${gearRowsHtml(sp.gear)}` : ''}`;
-  return `<ol class="ae-stat-ranks">${s.order.map((stat, index) => `<li data-stat-rank="${index + 1}"><span class="ae-stat-rank">${index + 1}</span><span class="ae-stat-rank-text"><strong>${esc(stat)}</strong>${sp?.chains ? statChainHtml(sp.chains[index], sp.live) : ''}</span></li>`).join('')}</ol>
+  return `<ol class="ae-stat-ranks">${s.order.map((stat, index) => `<li data-stat-rank="${index + 1}"><span class="ae-stat-rank">${index + 1}</span><span class="ae-stat-rank-text"><strong>${esc(stat)}</strong>${sp?.chains ? statChainHtml(sp.chains[index], sp.live, sp.rank) : ''}</span></li>`).join('')}</ol>
     <p class="ae-muted">Look for these, in this order, on gear, manastones and accessories.</p>
     ${sp ? gearRowsHtml(sp.gear) : ''}
     <p class="ae-callout" id="aeStatsWhere">The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.</p>
