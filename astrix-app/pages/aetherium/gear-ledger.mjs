@@ -1,98 +1,124 @@
 /**
- * Gear page (The Aetherium, hub/aetherium/gear/equipment/): what one Daeva wears. Each item sits on its grade tile like
- * the game's (grade colour, enchant level on the corner) with a flag from the grade rule: ENCHANT +3 to +10, REPLACE or
- * FULL. Tap a tile or its flag for the item card (like the game's tooltip, plus why, how far, how safe and what it costs).
- * Stats on the left under the gear; pet, wings and title on the right, both columns ending level.
+ * Gear page (The Aetherium, hub/aetherium/gear/equipment/): what one Daeva wears, laid out like the game's equipment
+ * window. An icon grid of 20 slots in two rows of 10 (weapons and armour, then accessories and runes), each item on its
+ * grade tile with the enchant level and the item level on its corners. Hover or focus shows the name; a click or tap opens
+ * the item card with what to do first. An item the grade rule says to enchant has a pulsing gold edge, one to replace a
+ * quieter edge and a chevron, a fully enchanted one a check. Pet, wings, title and Arcana sit beside the grid as small tiles.
+ * Item details load in the background after first paint (at most 3 at a time, kept for the session).
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression } from './aetherium-data.mjs';
-import { $, esc, gradeTile, iconImg, infoCardHtml, isPending, number, openInfo, slotLabel, slotRank } from './aetherium-ui.mjs';
+import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, preloadItemDetails } from './aetherium-data.mjs';
+import { $, esc, gradeTile, infoCardHtml, isPending, number, openInfo, slotLabel } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
 import { enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 
 const PRIMARY_STATS = ['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS'];
-const state = { model: null, source: null, ref: null, selected: null, listedSlots: new Set(), grades: null, progression: null, ring: null };
+/* The game's equipment window: row 1 weapons and armour, row 2 accessories and the two runes. Arcana have their own row. */
+const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GLOVES', 'BOOTS', 'CAPE', 'BELT',
+  'NECKLACE', 'EARRING1', 'EARRING2', 'RING1', 'RING2', 'BRACELET1', 'BRACELET2', 'AMULET', 'RUNE1', 'RUNE2'];
+const ARCANA = ['ARCANA1', 'ARCANA2', 'ARCANA3', 'ARCANA4', 'ARCANA5'];
+const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
+const state = { model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set() };
 
 const adviceOf = slot => enchantAdvice(slot, { level: state.model.profile.level, grades: state.grades, progression: state.progression });
 const gradeOf = slot => gradeInfo(slot.grade, state.grades, slot.gradeName ?? null);
-const enchantText = slot => {
+const capText = slot => {
   const { cap, about } = adviceOf(slot) ?? {};
   return `+${slot.enchant}${Number.isFinite(cap) ? ` of ${about ? 'about ' : ''}${cap}` : ''}`;
 };
+/** What the tile's marker says, in words (the accessible name never relies on colour alone). */
+const MARK_WORDS = { enchant: 'needs enchanting', replace: 'replace with a Unique piece', full: 'fully enchanted' };
+const markOf = slot => (Object.hasOwn(MARK_WORDS, adviceOf(slot)?.action ?? '') ? adviceOf(slot).action : null);
 
-/** The slot list in the game's order: the eight listed slots as the site sends them, then accessories (necklace, earrings, rings, bracelets, belt, cape). */
-function orderedGear(gear) {
-  const items = gear.map((slot, index) => ({ slot, index }));
-  const listed = items.filter(item => state.listedSlots.has(item.slot.slotPos));
-  const extra = items.filter(item => !state.listedSlots.has(item.slot.slotPos))
-    .sort((a, b) => slotRank(a.slot.slot) - slotRank(b.slot.slot) || a.slot.slotPos - b.slot.slotPos);
-  return [...listed, ...extra];
+const CHEVRON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/* The title has no icon in the data: a laurel badge drawn here, never game art. */
+const LAUREL = '<svg class="ae-title-badge" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40c-7-2-13-8-14-17M24 40c7-2 13-8 14-17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 30c-3 0-5-2-5-4 3 0 5 1 5 4zM10 23c-3-1-4-3-4-5 3 1 4 3 4 5zM11 16c-2-1-3-4-2-6 2 1 3 3 2 6zM36 30c3 0 5-2 5-4-3 0-5 1-5 4zM38 23c3-1 4-3 4-5-3 1-4 3-4 5zM37 16c2-1 3-4 2-6-2 1-3 3-2 6z" fill="currentColor"/><path d="M24 12l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="currentColor"/></svg>';
+
+/** The tile's accessible name: the item, its grade, +N of the cap and the marker in words, then item level and slot. */
+function tileName(slot) {
+  const mark = markOf(slot);
+  return [slot.name, gradeOf(slot).name, capText(slot), mark ? MARK_WORDS[mark] : null, Number.isFinite(slot.itemLevel) ? `item level ${slot.itemLevel}` : null, slotLabel(slot.slot)].filter(Boolean).join(', ');
+}
+/** The slot, name, grade and cap as page text, visually hidden (the button's name comes from tileName). */
+function tileWords(slot) {
+  return `<span class="ae-sr" aria-hidden="true"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(gradeOf(slot).name)} · ${esc(capText(slot))}</span></span>`;
 }
 
-/** The flag on a tile, from the grade rule. It opens the item card in place, never another page. */
-function flagHtml(slot, index) {
-  const advice = adviceOf(slot);
-  if (!advice?.flag) return '';
-  const say = advice.action === 'enchant' ? `Enchant ${slot.name} from +${advice.from} to +${advice.to}` : advice.action === 'replace' ? `Replace ${slot.name}` : `${slot.name} is fully enchanted`;
-  return `<button type="button" class="ae-flag is-${esc(advice.action)}${advice.costly ? ' is-costly' : ''}" data-enchant-flag="${esc(slot.slotPos)}" data-flag-slot="${index}" aria-haspopup="dialog" aria-label="${esc(say)}. Open the item card for why.">${esc(advice.flag)}</button>`;
-}
-
-function slotMeta(slot) {
+/** One worn tile: the icon on its grade, +N bottom corner, item level top corner when known, the marker. */
+function tileHtml(slot, index) {
   const grade = gradeOf(slot);
-  return `<span class="ae-grade-name"${grade.id ? ` data-grade="${esc(grade.id)}"` : ''}>${esc(grade.name)}</span> · ${esc(enchantText(slot))}`;
+  const mark = markOf(slot);
+  const level = Number.isFinite(slot.itemLevel) ? `<b class="ae-gtile-lv" aria-hidden="true">${esc(slot.itemLevel)}</b>` : '';
+  const sign = mark === 'replace' ? `<span class="ae-gmark" aria-hidden="true">${CHEVRON}</span>` : mark === 'full' ? `<span class="ae-gmark" aria-hidden="true">${CHECK}</span>` : '';
+  return `<button type="button" class="ae-slot ae-gbtn" data-slot="${index}" data-grade="${esc(grade.id ?? '')}" aria-haspopup="dialog" aria-label="${esc(tileName(slot))}" data-gtip="${index}">
+      ${gradeTile({ icon: slot.icon, grade: grade.id, enchant: slot.enchant, size: 88, extra: `${level}${sign}` })}${tileWords(slot)}
+    </button>`;
 }
+const cellOf = (key, worn) => {
+  if (!worn) return `<li class="ae-gcell is-empty" data-slot-key="${esc(key)}"><span class="ae-gempty" role="img" aria-label="${esc(slotLabel(state.slotNames.get(key) ?? key))}: empty"></span></li>`;
+  const { slot, index } = worn;
+  const mark = markOf(slot);
+  return `<li class="ae-gcell" data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}" data-slot-key="${esc(key)}"${mark ? ` data-advice="${mark}"` : ''}>${tileHtml(slot, index)}</li>`;
+};
 
 function renderGear() {
   const { gear } = state.model;
   $('#aeGearCount').textContent = `${gear.filter(slot => !slot.empty).length} of ${gear.length} worn`;
-  $('#aeGear').innerHTML = orderedGear(gear).map(({ slot, index }) => {
-    if (slot.empty) return `<li data-gear-index="${index}"><div class="ae-slot is-empty"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>Empty</strong></div></li>`;
-    const advice = adviceOf(slot);
-    const flag = flagHtml(slot, index);
-    return `<li data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}"${advice?.action ? ` data-advice="${esc(advice.action)}"` : ''}${flag ? ' class="has-flag"' : ''}><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(gradeOf(slot).id ?? '')}" aria-haspopup="dialog">
-        ${gradeTile({ icon: slot.icon, grade: gradeOf(slot).id, enchant: slot.enchant, size: 80 })}
-        <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${slotMeta(slot)}</span></span>
-      </button>${flag}</li>`;
-  }).join('');
+  const worn = new Map(gear.map((slot, index) => [keyOf(slot.slot), { slot, index }]).filter(([, entry]) => !entry.slot.empty));
+  // A worn slot the grid does not name yet (a new slot type) is kept at the end of the grid, never dropped.
+  const extra = [...worn.keys()].filter(key => !GRID.includes(key) && !ARCANA.includes(key));
+  $('#aeGear').innerHTML = [...GRID, ...extra].map(key => cellOf(key, worn.get(key))).join('');
+  const arcana = ARCANA.filter(key => worn.has(key));
+  $('#aeArcanaBlock').hidden = !arcana.length;
+  $('#aeArcana').innerHTML = arcana.length ? ARCANA.map(key => cellOf(key, worn.get(key))).join('') : '';
   const accessories = state.model.accessorySlots;
-  // Slots outside the slot list (cape, belt, accessories) only reach the official site once something is worn there.
-  const extra = gear.filter(slot => !state.listedSlots.has(slot.slotPos)).length;
+  // Slots outside the always-listed eight (cape, belt, accessories) only reach the official site once something is worn there.
+  const listed = new Set(gear.filter(slot => slot.empty || [1, 2, 3, 4, 5, 6, 7, 8].includes(slot.slotPos)).map(slot => slot.slotPos));
+  const others = gear.filter(slot => !listed.has(slot.slotPos)).length;
   $('#aeAccessories').textContent = !isPending(accessories)
     ? `Accessories: ${accessories.filter(slot => !slot.empty).length} worn.`
-    : extra
+    : others
       ? 'Other slots, such as accessories, show here once something is worn in them.'
       : 'Accessories: none worn. The official AION 2 site only lists an accessory slot once something is worn in it.';
-  state.ring?.forEach(slotPos => document.querySelector(`#aeGear [data-slot-pos="${CSS.escape(String(slotPos))}"]`)?.classList.add('is-ringed'));
+  state.ring?.forEach(slotPos => document.querySelector(`#aeGearPanel [data-slot-pos="${CSS.escape(String(slotPos))}"]`)?.classList.add('is-ringed'));
 }
 
-/** Refreshes one tile after the item detail lands (its real cap): the meta line and the flag follow the rule again. */
+/** Redraws one tile after its item detail lands: the real cap, the item level and the marker follow. */
 function refreshTile(index) {
   const slot = state.model.gear[index];
-  const li = document.querySelector(`#aeGear [data-gear-index="${index}"]`);
+  const li = document.querySelector(`#aeGearPanel [data-gear-index="${index}"]`);
   if (!li || slot.empty) return;
-  li.querySelector('.ae-slot-meta').innerHTML = slotMeta(slot);
-  li.querySelector('.ae-flag')?.remove();
-  const flag = flagHtml(slot, index);
-  if (flag) li.insertAdjacentHTML('beforeend', flag);
-  li.classList.toggle('has-flag', Boolean(flag));
-  const action = adviceOf(slot)?.action;
-  if (action) li.dataset.advice = action; else delete li.dataset.advice;
+  li.innerHTML = tileHtml(slot, index);
+  const mark = markOf(slot);
+  if (mark) li.dataset.advice = mark; else delete li.dataset.advice;
+}
+
+/** Keeps what an item detail adds on the slot itself (the tile and the rule read it there). */
+function applyDetail(slot, detail) {
+  // Only the detail of the very item worn here (the same id) may change the tile.
+  if (!detail || (detail.id !== undefined && slot.itemId !== undefined && detail.id !== slot.itemId)) return;
+  if (!isPending(detail.maxEnchant)) slot.maxEnchant = detail.maxEnchant;
+  if (!isPending(detail.manastoneSlots)) slot.manastoneSlots = detail.manastoneSlots;
+  if (detail.gradeName) slot.gradeName = detail.gradeName;
+  // The detail's level is the item level the game's tooltip shows (ENDPOINTS.md, 11 Oct 2026). levelValue is the enchant level.
+  if (Number.isFinite(detail.level)) slot.itemLevel = detail.level;
 }
 
 const NOT_CONFIRMED = test => `<span class="ae-tag is-unconfirmed">Not confirmed yet</span>${test ? ` <span class="ae-tag-test">Check: ${esc(test)}</span>` : ''}`;
 
 /**
- * The advice block of the item card: grade and cap, now and target, why, the chance of each next step, that a failure
- * never drops a level or breaks the item, the cost and where Enhance Stones come from. Every rule shows its status.
+ * What to do, first in the item card: the grade rule's move, why, grade and cap, now and target, the chance of each next
+ * step, that a failure never drops a level or breaks the item, the cost and where Enhance Stones come from.
  */
 function adviceHtml(slot, rules) {
   const advice = adviceOf(slot);
   if (!advice) return '';
   const grade = advice.grade;
   const rows = [];
-  const capText = Number.isFinite(advice.cap) ? `${advice.about ? 'about ' : ''}+${advice.cap}` : 'not known yet';
+  const cap = Number.isFinite(advice.cap) ? `${advice.about ? 'about ' : ''}+${advice.cap}` : 'not known yet';
   rows.push(`<li><span>Grade</span><b class="ae-grade-name"${grade.id ? ` data-grade="${esc(grade.id)}"` : ''}>${esc(grade.name)}</b></li>`);
-  rows.push(`<li><span>Enchant cap</span><b>${esc(capText)}</b></li>`);
+  rows.push(`<li><span>Enchant cap</span><b>${esc(cap)}</b></li>`);
   rows.push(`<li><span>Now</span><b>+${esc(advice.from)}</b></li>`);
   if (advice.action === 'enchant') rows.push(`<li><span>Target</span><b>+${esc(advice.to)}</b></li>`);
   const head = { enchant: `Enchant it to +${advice.to}`, replace: 'Replace it with a Unique piece', full: 'Fully enchanted', done: `+${advice.from} is enough here` }[advice.action] ?? 'No advice yet';
@@ -119,7 +145,8 @@ function adviceHtml(slot, rules) {
   const from = advice.action === 'enchant' && !ownScroll && Array.isArray(stones?.value?.from)
     ? `<div class="ae-item-block"><p class="ae-item-sec">Where ${esc(stones.value.name)}s come from ${stones.confirmed ? '' : NOT_CONFIRMED(stones.test)}</p><ul class="ae-odds-list">${stones.value.from.map(place => `<li>${esc(place)}</li>`).join('')}</ul></div>`
     : '';
-  return `<section class="ae-advice is-${esc(advice.action ?? 'none')}" id="aeAdvice" aria-label="Enchant advice">
+  return `<section class="ae-advice is-${esc(advice.action ?? 'none')}" id="aeAdvice" aria-labelledby="aeAdviceTitle">
+      <p class="ae-item-sec" id="aeAdviceTitle">What to do</p>
       <p class="ae-advice-head">${esc(head)}</p>
       <p class="ae-card-line ae-advice-why">${esc(advice.why)}</p>
       <ul class="ae-advice-facts">${rows.join('')}</ul>
@@ -146,7 +173,7 @@ function itemCardBody(slot, d) {
     ${d.description ? d.description.split('\n').map(line => `<p class="ae-card-line ae-item-desc">${esc(line)}</p>`).join('') : ''}`;
 }
 
-/** The card's status line, from the same rule as the flag. */
+/** The card's status line, from the same rule as the marker. */
 function statusOf(advice) {
   if (!advice) return null;
   if (advice.action === 'enchant') return ['go', `Enchant it: ${advice.to - advice.from} more ${advice.to - advice.from === 1 ? 'level' : 'levels'} to +${advice.to}`];
@@ -155,21 +182,21 @@ function statusOf(advice) {
   if (advice.action === 'done') return ['keep', `+${advice.from} reached`];
   return null;
 }
+const chipsHtml = chips => (chips.filter(Boolean).length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : '');
 
 let rulesPromise = null;
 const loadRules = () => (rulesPromise ??= loadMechanics().then(mechanics => indexMechanics(mechanics, null)).catch(() => { rulesPromise = null; return {}; }));
 
-async function selectSlot(index, from, { advice: toAdvice = false } = {}) {
+async function selectSlot(index, from) {
   const slot = state.model.gear[index];
   state.selected = index;
+  hideTip();
   const head = detail => ({
     icon: (detail ?? slot).icon, title: (detail ?? slot).name, grade: gradeOf(slot).id,
     sub: [slotLabel(slot.slot), detail?.category, gradeOf(slot).name].filter(Boolean).join(' · ')
   });
   const rules = await loadRules();
-  const focusAdvice = () => { if (toAdvice) $('#aeAdvice')?.scrollIntoView({ block: 'nearest' }); };
   openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), body: `${adviceHtml(slot, rules)}<p class="ae-card-line">Reading ${esc(slot.name)}.</p>` }), from);
-  focusAdvice();
   let result;
   try {
     result = await loadItemDetail(state.model, slot);
@@ -179,22 +206,53 @@ async function selectSlot(index, from, { advice: toAdvice = false } = {}) {
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
-    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), chips: [`+${slot.enchant}`], lines: [result.reason], body: adviceHtml(slot, rules) }), from);
-    focusAdvice();
+    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${adviceHtml(slot, rules)}${chipsHtml([`+${slot.enchant}`])}` }), from);
     return;
   }
   const d = result.detail;
-  // The detail call is the only source of max enchant, manastone slots and the client's grade name: keep them on the tile too.
-  if (!isPending(d.maxEnchant)) slot.maxEnchant = d.maxEnchant;
-  if (!isPending(d.manastoneSlots)) slot.manastoneSlots = d.manastoneSlots;
-  if (d.gradeName) slot.gradeName = d.gradeName;
+  applyDetail(slot, d);
   refreshTile(index);
   openInfo(infoCardHtml({
     ...head(d), status: statusOf(adviceOf(slot)),
-    chips: [d.level ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null],
-    body: `${adviceHtml(slot, rules)}${itemCardBody(slot, d)}`
-  }), from);
-  focusAdvice();
+    body: `${adviceHtml(slot, rules)}${chipsHtml([Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
+  }), document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
+}
+
+/* The hover name: the item name in its grade colour, the grade, the slot and +N of the cap. Mouse hover or keyboard focus
+   only; a tap opens the card instead. */
+function tipFor(el) {
+  const extra = el.dataset.extraTip;
+  if (extra) return { name: extra, grade: el.dataset.grade || null, line: el.dataset.extraLine ?? '' };
+  const slot = state.model.gear[Number(el.dataset.gtip)];
+  if (!slot || slot.empty) return null;
+  const grade = gradeOf(slot);
+  return { name: slot.name, grade: grade.id, line: [grade.name, slotLabel(slot.slot), capText(slot), Number.isFinite(slot.itemLevel) ? `Item level ${slot.itemLevel}` : null].filter(Boolean).join(' · ') };
+}
+function showTip(el) {
+  const tip = tipFor(el);
+  if (!tip) return;
+  let box = $('#aeGearTip');
+  if (!box) { box = document.createElement('div'); box.id = 'aeGearTip'; box.className = 'ae-gtip'; box.setAttribute('role', 'tooltip'); document.body.append(box); }
+  box.innerHTML = `<strong class="ae-grade-name"${tip.grade ? ` data-grade="${esc(tip.grade)}"` : ''}>${esc(tip.name)}</strong>${tip.line ? `<span>${esc(tip.line)}</span>` : ''}`;
+  box.hidden = false;
+  const r = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+  box.style.left = `${Math.max(6, Math.min(innerWidth - b.width - 6, r.left + r.width / 2 - b.width / 2))}px`;
+  box.style.top = `${r.top - b.height - 8 < 4 ? r.bottom + 8 : r.top - b.height - 8}px`;
+  // A tile the background loader left for later reads its detail now, so its card opens at once.
+  const index = Number(el.dataset.gtip);
+  const slot = state.model.gear[index];
+  if (slot && state.later.has(slot)) {
+    state.later.delete(slot);
+    loadItemDetail(state.model, slot).then(result => { applyDetail(slot, result.detail); refreshTile(index); }).catch(() => state.later.add(slot));
+  }
+}
+function hideTip() { const box = $('#aeGearTip'); if (box) box.hidden = true; }
+function wireTips(root) {
+  root.addEventListener('pointerover', event => { const el = event.target.closest?.('[data-gtip],[data-extra-tip]'); if (el && event.pointerType === 'mouse') showTip(el); });
+  root.addEventListener('pointerout', event => { if (event.target.closest?.('[data-gtip],[data-extra-tip]')) hideTip(); });
+  root.addEventListener('focusin', event => { const el = event.target.closest?.('[data-gtip],[data-extra-tip]'); if (el?.matches(':focus-visible')) showTip(el); });
+  root.addEventListener('focusout', hideTip);
+  addEventListener('scroll', hideTip, { passive: true });
 }
 
 /* Base stats as the official site sends them. When every one is 0 the site is not showing them, so the page says that
@@ -228,27 +286,53 @@ function showRing() {
   note.hidden = !ring;
   if (!ring) return;
   note.textContent = ring.say;
-  const nodes = [...document.querySelectorAll('#aeGear li.is-ringed')];
+  const nodes = [...document.querySelectorAll('#aeGearPanel li.is-ringed')];
   nodes[0]?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
-/** Pet, wings and title as three big cards that share the column's height equally. */
+/** Pet, wings and title as three tiles the size of the gear tiles. Hover names them; a click opens a small card. */
 function renderExtras() {
   const { model } = state;
-  const card = (label, icon, name, meta) => `<li class="ae-extra">${iconImg(icon, '', 88)}<span><small>${label}</small><strong>${esc(name)}</strong>${meta ? `<small>${esc(meta)}</small>` : ''}</span></li>`;
+  const wingsGrade = isPending(model.wings) ? null : gradeInfo(model.wings.grade, state.grades);
+  const titleGrade = model.profile.titleGrade ? gradeInfo(model.profile.titleGrade, state.grades) : null;
+  const tile = (kind, label, name, inner, grade, line) => `<li class="ae-gcell ae-xcell" data-extra="${kind}">
+      <button type="button" class="ae-slot ae-gbtn" data-extra-tip="${esc(name)}" data-extra-line="${esc(line)}" data-grade="${esc(grade?.id ?? '')}" aria-haspopup="dialog">
+        <span class="ae-gtile"${grade?.id ? ` data-grade="${esc(grade.id)}"` : ''}>${inner}</span><span class="ae-sr"><small>${esc(label)}</small>: <strong>${esc(name)}</strong>${line ? `, ${esc(line)}` : ''}</span>
+      </button><span class="ae-extra-label" aria-hidden="true">${esc(label)}</span></li>`;
+  const img = icon => (icon ? `<img src="${esc(icon)}" alt="" width="88" height="88" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-icon-empty" aria-hidden="true"></span>');
   $('#aeExtras').innerHTML = [
-    isPending(model.pet) ? card('Pet', null, 'None equipped', null) : card('Pet', model.pet.icon, model.pet.name, `Lv ${model.pet.level}`),
-    isPending(model.wings) ? card('Wings', null, 'None equipped', null) : card('Wings', model.wings.icon, model.wings.name, `${gradeInfo(model.wings.grade, state.grades).name} · +${model.wings.enchant}`),
-    card('Title', null, model.profile.title || 'No title', null)
+    isPending(model.pet) ? tile('pet', 'Pet', 'None equipped', img(null), null, '') : tile('pet', 'Pet', model.pet.name, img(model.pet.icon), null, `Lv ${model.pet.level}`),
+    isPending(model.wings) ? tile('wings', 'Wings', 'None equipped', img(null), null, '') : tile('wings', 'Wings', model.wings.name, img(model.wings.icon), wingsGrade, `${wingsGrade.name} · +${model.wings.enchant}`),
+    tile('title', 'Title', model.profile.title || 'No title', LAUREL, titleGrade, titleGrade ? titleGrade.name : '')
   ].join('');
-  // Nothing to show (no pet, no wings, no title): the tall column would stay empty, so the page collapses it.
-  const bare = isPending(model.pet) && isPending(model.wings) && !model.profile.title;
+  // Nothing to show (no pet, no wings, no title, no Arcana): the side column would stay empty, so the page collapses it.
+  const bare = isPending(model.pet) && isPending(model.wings) && !model.profile.title && $('#aeArcanaBlock').hidden;
   document.querySelector('.ae-gear-page').classList.toggle('is-single', bare);
   $('#aeExtrasCol').hidden = bare;
 }
 
+/** The small card for the pet, the wings or the title: only what the data has. */
+function openExtra(kind, from) {
+  const { model } = state;
+  hideTip();
+  if (kind === 'pet') {
+    openInfo(infoCardHtml(isPending(model.pet) ? { icon: null, title: 'No pet', sub: 'Pet', lines: ['No pet is equipped.'] } : { icon: model.pet.icon, title: model.pet.name, sub: 'Pet', lines: [`Pet level ${model.pet.level}.`] }), from);
+  } else if (kind === 'wings') {
+    if (isPending(model.wings)) { openInfo(infoCardHtml({ icon: null, title: 'No wings', sub: 'Wings', lines: ['No wings are equipped.'] }), from); return; }
+    const grade = gradeInfo(model.wings.grade, state.grades);
+    openInfo(infoCardHtml({ icon: model.wings.icon, title: model.wings.name, grade: grade.id, sub: `Wings · ${grade.name}`, chips: [`+${model.wings.enchant}`], lines: ['The official data does not say how far wings enchant, so the page gives no enchant advice for them.'] }), from);
+  } else {
+    const effects = model.profile.titleEffects ?? [];
+    const grade = model.profile.titleGrade ? gradeInfo(model.profile.titleGrade, state.grades) : null;
+    openInfo(infoCardHtml({ icon: null, title: model.profile.title || 'No title', grade: grade?.id ?? null, sub: ['Title', grade?.name].filter(Boolean).join(' · '),
+      lines: model.profile.title ? (effects.length ? effects : ['The official data sends no effect for this title.']) : ['No title is worn.'] }), from);
+    const icon = $('#aeInfo .ae-card-icon');
+    if (icon) icon.innerHTML = LAUREL;
+  }
+}
+
 function render(model, source, ref) {
-  Object.assign(state, { model, source, ref, selected: null });
+  Object.assign(state, { model, source, ref, selected: null, later: new Set() });
   const ring = ringOf(location.hash);
   state.ring = ring ? new Set(ring.slots) : null;
   // Came from Show me on a gear move: the back link returns to where it was pressed (the Ascent Plan's moves, or the
@@ -258,12 +342,13 @@ function render(model, source, ref) {
   $('#aeStage').innerHTML = `<div class="ae-gw ae-gear-window">
     ${windowBar({ title: 'Gear', model, ref, back })}
     <div class="ae-gw-body">
-      <div class="ae-ledger ae-gear-page">
+      <div class="ae-ledger ae-gear-page" id="aeGearPanel">
         <div class="ae-col">
           <section class="ae-panel" aria-labelledby="aeGearTitle">
             <h2 class="ae-section-title" id="aeGearTitle">Equipped gear <small id="aeGearCount"></small></h2>
             <p class="ae-ring-note" id="aeGearRingNote" role="status" hidden></p>
-            <ul class="ae-gear" id="aeGear"></ul>
+            <p class="ae-gear-legend" id="aeGearLegend"><span class="ae-legend-swatch" aria-hidden="true"></span>Gold pulse: enchant it. Tap any item for what to do.</p>
+            <ul class="ae-ggrid" id="aeGear" aria-label="Equipped gear, in the game's order"></ul>
             <p class="ae-accessories" id="aeAccessories"></p>
           </section>
           <section class="ae-panel is-grow" aria-labelledby="aeStatTitle">
@@ -276,7 +361,11 @@ function render(model, source, ref) {
         <div class="ae-col" id="aeExtrasCol">
           <section class="ae-panel is-grow" aria-labelledby="aeExtraTitle">
             <h2 class="ae-section-title" id="aeExtraTitle">Pet, wings and title</h2>
-            <ul class="ae-extras" id="aeExtras"></ul>
+            <ul class="ae-ggrid is-row" id="aeExtras"></ul>
+            <div class="ae-arcana-block" id="aeArcanaBlock" hidden>
+              <h3 class="ae-section-title" id="aeArcanaTitle">Arcana</h3>
+              <ul class="ae-ggrid is-row" id="aeArcana" aria-labelledby="aeArcanaTitle"></ul>
+            </div>
           </section>
         </div>
       </div>
@@ -286,12 +375,26 @@ function render(model, source, ref) {
   renderStats();
   renderExtras();
   showRing();
-  $('#aeGear').addEventListener('click', event => {
-    const flag = event.target.closest('[data-flag-slot]');
-    if (flag) { selectSlot(Number(flag.dataset.flagSlot), flag, { advice: true }).catch(error => console.error(error)); return; }
+  const panel = $('#aeGearPanel');
+  wireTips(panel);
+  panel.addEventListener('click', event => {
+    const extra = event.target.closest('[data-extra] button');
+    if (extra) { openExtra(extra.closest('[data-extra]').dataset.extra, extra); return; }
     const button = event.target.closest('[data-slot]');
     if (button) selectSlot(Number(button.dataset.slot), button).catch(error => console.error(error));
   });
+  // Item details load after first paint, in the background, in the grid's order: tiles fill in as each one lands.
+  const order = [...GRID, ...ARCANA];
+  const worn = model.gear.map((slot, index) => ({ slot, index })).filter(({ slot }) => !slot.empty)
+    .sort((a, b) => (order.indexOf(keyOf(a.slot.slot)) + 1 || 99) - (order.indexOf(keyOf(b.slot.slot)) + 1 || 99));
+  const indexOf = new Map(worn.map(({ slot, index }) => [slot, index]));
+  setTimeout(() => {
+    preloadItemDetails(model, worn.map(({ slot }) => slot), {
+      onDetail: (slot, result) => { if (state.model !== model) return; applyDetail(slot, result.detail); refreshTile(indexOf.get(slot)); }
+    }).then(later => { later.forEach(slot => state.later.add(slot)); })
+      .catch(() => {})
+      .finally(() => { if (state.model === model) document.documentElement.dataset.aeGearDetails = 'done'; });
+  }, 0);
 }
 
 startCharacterPage({
@@ -299,7 +402,7 @@ startCharacterPage({
   prefetch: () => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); },
   async render({ model, source, ref }) {
     const [catalogue, grades, progression] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null)]);
-    state.listedSlots = new Set(catalogue.slots.map(slot => slot.slotPos));
+    state.slotNames = new Map(catalogue.slots.map(slot => [keyOf(slot.slotPosName), slot.slotPosName]));
     state.grades = grades ? indexGrades(grades) : null;
     state.progression = progression;
     render(model, source, ref);

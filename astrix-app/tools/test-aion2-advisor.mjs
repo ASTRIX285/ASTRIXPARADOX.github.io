@@ -495,6 +495,15 @@ check('at the cap: Fully enchanted, FULL, no move',()=>{
   const model={gear:[item({enchant:15,maxEnchant:15,slot:'MainHand',slotPos:1})]};
   assert.deepEqual(gearMoves(model,{level:45,grades,progression}),[]);
 });
+check('runes and Arcana get no grade advice (their own enhance rules), and never an empty-slot move when unworn',()=>{
+  for(const slot of ['Rune1','Rune2','Arcana1','Arcana5']){
+    const advice=advise({slot,slotPos:23,grade:'Rare',enchant:0,maxEnchant:3});
+    assert.deepEqual([advice.action,advice.flag],[null,null],slot);
+  }
+  const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+  assert.equal(lv45.gear.filter(slot=>slot.empty).length,0,'Unworn accessories, runes and Arcana are not empty slots');
+  assert.ok(!gearMoves(lv45,{level:45,grades,progression}).some(move=>move.id==='empty'));
+});
 check('every class and slot: the grade rule runs for all 8 classes, wings and pet never get advice',()=>{
   const lv45=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
   for(const className of AION2_CLASSES){

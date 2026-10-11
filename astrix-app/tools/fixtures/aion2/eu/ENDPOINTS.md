@@ -85,3 +85,35 @@ otherwise. They never show `Legend`.
 
 The amulet and belt details also say in their text that they enhance with their own scrolls (Amulet Enhance Scroll,
 Belt Enhance Scroll). No item detail sends an enchant cost in Kina or stones.
+
+## Item level and the full slot list (checked 11 Oct 2026)
+
+Read through the live Worker for field shapes only; nothing from these reads is saved.
+
+- **Item level.** The equipment list sends none. In the item detail, `level` is the item level and `levelValue` is the
+  enchant level (it always equals `enchantLevel`). Checked on every grade worn:
+
+  | Grade | Item | `level` | `levelValue` | `enchantLevel` |
+  | --- | --- | --- | --- | --- |
+  | Unique | Spiritforged Greatsword | 45 | 3 | 3 |
+  | Unique | Wisdom Guard | 36 | 11 | 11 |
+  | Epic (`Legend`) | Pilgrim Helm | 41 | 0 | 0 |
+  | Rare | Noble Belt | 13 | 6 | 6 |
+  | Common | a Lv 11 Daeva's worn armour | 9 | 0 | 0 |
+  | Common | the same Daeva's weapon at +1 | 1 | 1 | 1 |
+
+  `equipLevel` is the level needed to wear it, a third value. The Gear page shows `level` on the tile's top corner, and only
+  once the detail has been read. To confirm in game: open the tooltip of an item and compare its item level.
+- **Common in the detail.** `gradeName` is `Common` and `maxEnchantLevel` is 5.
+- **Every worn slot the data uses**, read from several Lv 45 Daevas:
+
+  | Range | Slots |
+  | --- | --- |
+  | 1 to 8 | the eight main slots, the only ones listed even when empty |
+  | 10 to 17 | Necklace, Earring1, Earring2, Ring1, Ring2, Bracelet1, Bracelet2, Belt |
+  | 19, 22 | Cape, Amulet |
+  | 23, 24 | Rune1, Rune2: item detail grade `Special`, category Rune, cap 10 |
+  | 41 to 45 | Arcana1 to Arcana5: category such as Chalice, grade such as `Rare`, cap 3 |
+
+  That is 25 worn slots. 9, 18, 20 and 21 were not seen. `data/gear-slots.json` lists all 25 and marks the 17 outside
+  the main eight `listed: false`, so an unworn accessory, rune or Arcana is never an empty slot to fill.

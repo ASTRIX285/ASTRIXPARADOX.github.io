@@ -96,6 +96,220 @@
         "capturedOn": "2026-10-05",
         "fixture": "astrix-app/tools/fixtures/aion2/eu/astrix285-equipment.json"
       }
+    },
+    {
+      "id": "necklace",
+      "slotPos": 10,
+      "slotPosName": "Necklace",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "earring-1",
+      "slotPos": 11,
+      "slotPosName": "Earring1",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "earring-2",
+      "slotPos": 12,
+      "slotPosName": "Earring2",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "ring-1",
+      "slotPos": 13,
+      "slotPosName": "Ring1",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "ring-2",
+      "slotPos": 14,
+      "slotPosName": "Ring2",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "bracelet-1",
+      "slotPos": 15,
+      "slotPosName": "Bracelet1",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "bracelet-2",
+      "slotPos": 16,
+      "slotPosName": "Bracelet2",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "belt",
+      "slotPos": 17,
+      "slotPosName": "Belt",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "cape",
+      "slotPos": 19,
+      "slotPosName": "Cape",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "amulet",
+      "slotPos": 22,
+      "slotPosName": "Amulet",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11",
+        "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+      }
+    },
+    {
+      "id": "rune-1",
+      "slotPos": 23,
+      "slotPosName": "Rune1",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "rune-2",
+      "slotPos": 24,
+      "slotPosName": "Rune2",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "arcana-1",
+      "slotPos": 41,
+      "slotPosName": "Arcana1",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "arcana-2",
+      "slotPos": 42,
+      "slotPosName": "Arcana2",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "arcana-3",
+      "slotPos": 43,
+      "slotPosName": "Arcana3",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "arcana-4",
+      "slotPos": 44,
+      "slotPosName": "Arcana4",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
+    },
+    {
+      "id": "arcana-5",
+      "slotPos": 45,
+      "slotPosName": "Arcana5",
+      "listed": false,
+      "provenance": {
+        "kind": "armory",
+        "region": "eu",
+        "endpoint": "/api/character/equipment",
+        "capturedOn": "2026-10-11"
+      }
     }
-  ]
+  ],
+  "description": "The worn slots the official character data uses. listed false: the site sends that slot only when something is worn in it (accessories, belt, cape, runes, Arcana), so an unworn one is never an empty slot to fill. Slot names and positions read through the live Worker on 11 Oct 2026 from several Lv 45 Daevas."
 }

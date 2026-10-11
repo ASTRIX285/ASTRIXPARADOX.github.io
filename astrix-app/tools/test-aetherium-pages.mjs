@@ -348,7 +348,9 @@ await check('old demo roster entries are dropped on read; real entries are kept 
 await check('live Gear page: one call for first paint, item detail on demand',async()=>{
   const ref=new URLSearchParams({serverId:'1308',characterId:info.profile.characterId});
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/equipment/?${ref}`,{live:true});
-  assert.deepEqual(calls,['/aion2/character'],'First paint: only /aion2/character');
+  // Gear grid (11 Oct 2026): was deepEqual(calls,['/aion2/character']). Item details now follow first paint in the background.
+  assert.equal(calls[0],'/aion2/character','First paint: the character call first');
+  assert.deepEqual(calls.filter(call=>call!=='/aion2/item'),['/aion2/character'],'First paint: no other call but item details');
   assert.equal(await page.locator('#aeGear [data-slot]').count(),8);
   assert.match(await page.textContent('#aeAccessories'),/none worn/);
   assert.equal(await page.locator('.ae-stigma, .ae-board').count(),0,'Stigmas and Daevanion boards have their own pages');
@@ -372,7 +374,10 @@ await check('live Gear page: one call for first paint, item detail on demand',as
   assert.match(await page.textContent('#aeInfo'),/Wear from Lv 22.*Look: Skybright Oath \(Helm\).*A helm for the brave\.Can be upgraded\./s);
   await page.click('#aeInfo .ae-info-close');
   assert.equal(await page.isHidden('#aeInfo'),true);
-  assert.deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item']);
+  // Gear grid (11 Oct 2026): was deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item']). Each worn item is now read
+  // once in the background and kept for the session, so opening two cards reads nothing again.
+  await page.waitForFunction(()=>document.documentElement.dataset.aeGearDetails==='done');
+  assert.deepEqual(calls,['/aion2/character',...Array(8).fill('/aion2/item')],'One read per worn item, none again on click');
   assert.deepEqual(errors,[]);
   await context.close();
 });

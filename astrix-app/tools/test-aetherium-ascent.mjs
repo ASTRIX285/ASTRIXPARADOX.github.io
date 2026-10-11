@@ -1019,7 +1019,8 @@ await check('Show me on the enchant move opens the Gear page with the items it n
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
   await page.waitForSelector('#aeGear li.is-ringed');
   assert.equal(await page.locator('#aeGear li.is-ringed').count(),8,'The eight items the move names');
-  assert.equal(await page.locator('#aeGear li.is-ringed .ae-flag').count(),8,'each with its Enchant flag');
+  // Gear grid (11 Oct 2026): was '.ae-flag' (the ENCHANT button, now removed). Each ringed tile carries the gold Enchant marker.
+  assert.equal(await page.locator('#aeGear li.is-ringed[data-advice="enchant"]').count(),8,'each with its Enchant marker');
   assert.equal(await plain(page,'#aeGearRingNote'),title,'The line at the top says what the move says');
   assert.equal(await page.$eval('#aeGear li.is-ringed',el=>getComputedStyle(el).outlineStyle),'solid','The ring is drawn');
   await page.waitForTimeout(600);
@@ -1060,7 +1061,8 @@ await check('Show me on a Lv 45 gear move rings only the items it names, and the
   // Tapping a flag after Show me opens the card in place: no way round to the plan and back again.
   const {page,context}=await open(`/hub/aetherium/gear/equipment/?${ref45}#replace-epic`,{live:true});
   const before=page.url();
-  await page.click('[data-enchant-flag="5"]');
+  // Gear grid (11 Oct 2026): was the REPLACE flag button; now the tile itself.
+  await page.click('#aeGear [data-slot-pos="5"] button');
   await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
   assert.equal(page.url(),before,'No loop');
   await context.close();

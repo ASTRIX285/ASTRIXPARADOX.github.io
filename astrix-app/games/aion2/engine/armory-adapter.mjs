@@ -30,6 +30,11 @@ function raceOf(profile) {
   return /^asmodian/i.test(String(profile.raceName ?? '')) ? 'Asmodian' : 'Elyos';
 }
 
+function titleEffects(info, titleId) {
+  const title = (info.title?.titleList ?? []).find(entry => entry.id === titleId);
+  return title ? [...(title.equipStatList ?? []), ...(title.statList ?? [])].map(line => line?.desc).filter(desc => typeof desc === 'string' && desc !== '') : [];
+}
+
 /** Profile block from /api/character/info. Item level comes from the untranslated stat row. */
 export function adaptProfile(info) {
   requireShape(info, 'profile', 'Character info');
@@ -45,6 +50,9 @@ export function adaptProfile(info) {
     characterId: p.characterId,
     portrait: icon(p.profileImage),
     title: p.titleName ?? null,
+    titleGrade: p.titleGrade ?? null,
+    // The worn title's effects, when the owned-title list carries it (its equip and owned lines, as the site words them).
+    titleEffects: titleEffects(info, p.titleId),
     combatPower: p.combatPower,
     itemLevel: Number.isFinite(itemLevelRow?.value)
       ? itemLevelRow.value
@@ -54,14 +62,17 @@ export function adaptProfile(info) {
 
 /**
  * Gear from /api/character/equipment, one entry per known slot.
- * @param slots   Gear slot records (data/gear-slots.json): { slotPos, slotPosName }.
+ * @param slots   Gear slot records (data/gear-slots.json): { slotPos, slotPosName, listed }. A slot with listed false
+ *                (accessories, runes, Arcana) is only in the gear when worn: the site never sends it empty.
  * @param items   Optional map of slotPos to the /api/character/equipment/item response.
  *                maxEnchant and manastoneSlots come only from that detail call.
  */
 export function adaptGear(equipment, slots, items = {}) {
   requireShape(equipment, 'equipment', 'Equipment');
   const worn = new Map((equipment.equipment.equipmentList ?? []).map(item => [item.slotPos, item]));
-  const known = new Set(slots.map(slot => slot.slotPos));
+  const listed = slots.filter(slot => slot.listed !== false);
+  const known = new Set(listed.map(slot => slot.slotPos));
+  const names = new Map(slots.map(slot => [slot.slotPos, slot.slotPosName]));
   const entry = (slotPos, slotPosName, item) => {
     if (!item) return { slot: slotPosName, slotPos, empty: true };
     const detail = items[slotPos];
@@ -83,10 +94,10 @@ export function adaptGear(equipment, slots, items = {}) {
         : pending('Manastone slot count comes from the item detail call, which has not been read for this slot.')
     };
   };
-  const gear = slots.map(slot => entry(slot.slotPos, slot.slotPosName, worn.get(slot.slotPos)));
+  const gear = listed.map(slot => entry(slot.slotPos, slot.slotPosName, worn.get(slot.slotPos)));
   // A worn item in a slot the catalogue does not list yet (for example an accessory) is kept, never dropped.
   for (const [slotPos, item] of worn) {
-    if (!known.has(slotPos)) gear.push(entry(slotPos, item.slotPosName, item));
+    if (!known.has(slotPos)) gear.push(entry(slotPos, item.slotPosName ?? names.get(slotPos), item));
   }
   return gear;
 }

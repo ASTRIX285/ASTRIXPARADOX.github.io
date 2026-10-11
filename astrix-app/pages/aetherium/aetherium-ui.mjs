@@ -18,7 +18,7 @@ export function slotLabel(name) {
   if (/^[A-Z0-9_ ]+$/.test(raw) && /[A-Z]{2}/.test(raw)) {
     return raw.toLowerCase().replace(/_/g, ' ').replace(/([a-z])(\d+)$/, '$1 $2').replace(/\b[a-z]/g, c => c.toUpperCase());
   }
-  return raw.replace(/([a-z])([A-Z])/g, '$1 $2');
+  return raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([a-z])(\d+)$/, '$1 $2');
 }
 
 /* Game order for the slots the site lists only when worn: necklace, earrings, rings, bracelets, belt, cape. Others keep the site's order after these. */
@@ -38,9 +38,9 @@ export const iconImg = (src, alt = '', size = 48) => src
  * enchant level on the corner (+3) once it is above +0. grade is the grade id from grades.json (unique, epic ...);
  * an unknown grade gets the plain well. The colour lives in aetherium.css (--ae-grade-*), never inline.
  */
-export const gradeTile = ({ icon, grade = null, enchant = null, size = 80, alt = '', className = '' }) => `<span class="ae-gtile${className ? ` ${className}` : ''}"${grade ? ` data-grade="${esc(grade)}"` : ''}>${icon
+export const gradeTile = ({ icon, grade = null, enchant = null, size = 80, alt = '', className = '', extra = '' }) => `<span class="ae-gtile${className ? ` ${className}` : ''}"${grade ? ` data-grade="${esc(grade)}"` : ''}>${icon
   ? `<img src="${esc(icon)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-  : '<span class="ae-icon-empty" aria-hidden="true"></span>'}${Number.isFinite(enchant) && enchant > 0 ? `<b class="ae-gtile-plus" aria-hidden="true">+${esc(enchant)}</b>` : ''}</span>`;
+  : '<span class="ae-icon-empty" aria-hidden="true"></span>'}${Number.isFinite(enchant) && enchant > 0 ? `<b class="ae-gtile-plus" aria-hidden="true">+${esc(enchant)}</b>` : ''}${extra}</span>`;
 
 /** Page accent from the active character's faction: Elyos, Asmodian, or ASTRIX before one loads. */
 export function setFaction(raceName, raceId = null) {
