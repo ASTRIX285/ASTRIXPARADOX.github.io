@@ -24,34 +24,55 @@
         {
           "name": "Rending Blow",
           "priority": 2,
-          "target": "Lv 10 early, then 16 and 20",
+          "target": "Lv 10 early, then Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 and 20 need more: Mastery stops at 11 and the build names no other source",
           "why": "Main MP spender and filler. Top players put Daevanion points into it on every board.",
           "refs": [
             "ds-glad",
             "ec-gladiator",
             "mb-gladiator"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 10 early, then 16 and 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Overhead Slam",
           "priority": 3,
-          "target": "Lv 20 first once you have it",
+          "target": "Mastery 11, then +4 from Daevanion nodes once you have it. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Hardest regular hit. At skill Lv 16 its cooldown can be removed.",
           "refs": [
             "ec-gladiator",
             "ds-glad",
             "mb-gladiator"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20 first once you have it\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Ruinous Blow",
           "priority": 4,
-          "target": "Lv 16, then 20",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 and 20 need more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. Grants Prepare for Battle: more PvE damage and crit for 20 s.",
           "refs": [
             "ec-gladiator",
             "mb-gladiator"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 16, then 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         }
       ],
       "specialties": [

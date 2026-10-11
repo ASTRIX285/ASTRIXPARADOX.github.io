@@ -86,6 +86,13 @@ for(const skill of capEquipment.skill.skillList){
   if(level)Object.assign(skill,{skillLevel:level,acquired:1,equip:1});
 }
 const capRef=new URLSearchParams({serverId:'1315',characterId:capInfo.profile.characterId});
+// The Lv 41 walk (11 Oct 2026, server 1316): four stigmas open, three build stigmas equipped and Wrath Wave (a listed swap) in Rage Burst's place.
+const lv41Info=structuredClone(info);
+Object.assign(lv41Info.profile,{characterName:'LEVELFORTY',characterId:'bGV2ZWw0MQ==',characterLevel:41,serverId:1316,serverName:'Siel'});
+const lv41Equipment=structuredClone(equipment);
+const lv41On=new Set(['Lunge Stance',"Zikel's Blessing",'Wrath Wave','Focused Block']);
+for(const skill of lv41Equipment.skill.skillList)if(skill.category==='Dp')Object.assign(skill,{acquired:1,equip:lv41On.has(skill.name)?1:0});
+const lv41Ref=new URLSearchParams({serverId:'1316',characterId:lv41Info.profile.characterId});
 
 const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
 const browser=await chromium.launch();
@@ -94,7 +101,7 @@ let failures=0;
 const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
 // mechanics: a stand-in mechanics.json (a rule flipped to confirmed), so a test can show the tags follow the data.
-async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,mechanics=null}={}){
+async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,mechanics=null,visited=null}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
   if(mechanics)await context.route(/\/astrix-app\/games\/aion2\/data\/advisor\/mechanics\.json/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(mechanics)}));
@@ -117,6 +124,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     const character=serverId==='1313'?{info:vaizelInfo,equipment}
       :serverId==='1314'?{info:spentInfo,equipment}
       :serverId==='1315'?{info:capInfo,equipment:capEquipment}
+      :serverId==='1316'?{info:lv41Info,equipment:lv41Equipment}
       :serverId===String(ASMO_V.serverId)?{info:asmoVaizelInfo,equipment:ASMO_V.equipment}
       :lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment};
     const bodies={
@@ -136,6 +144,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   // Never the real Worker or NCSOFT: a request to either is blocked and fails the run. Registered last, so it wins over the CDN stub above.
   await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{realCalls.push(route.request().url());return route.abort();});
   if(storage)await context.addInitScript(value=>{localStorage.setItem('aetherium.roster.v1',value);},JSON.stringify(storage));
+  // Steps this Daeva has opened on this device (the step bar ticks a step only once it has been opened).
+  if(visited)await context.addInitScript(([key,steps])=>{if(!localStorage.getItem('aetherium.steps.v1'))localStorage.setItem('aetherium.steps.v1',JSON.stringify({[key]:Object.fromEntries(steps.map(step=>[step,true]))}));},[`1308:${info.profile.characterId}`,visited]);
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
@@ -193,20 +203,23 @@ await check('level change re-plans and clamps to the cap',async()=>{
   assert.match(page.url(),/level=45$/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/5 of 5 boards open/);
   assert.match(await plain(page,'.ae-menu-card[data-view="stigma"] .ae-menu-status'),/4 of 4 slots open/);
-  assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/6 skills in Macro 1/);
+  // Walkthrough fix (11 Oct 2026): Macro 1 lists keys, not loose skills: Earth Punishment (key 7), the key 1 stack and Bolt (Q).
+  assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/3 keys in Macro 1/);
   await page.click('.ae-menu-card[data-view="macro"]');
   await page.waitForFunction(()=>document.body.dataset.aeView==='macro'&&document.documentElement.dataset.aetheriumReady==='true');
   assert.match(page.url(),/\/ascent\/macro\/\?class=cleric&role=healer&level=45$/,'The card opens its own page and keeps the level');
-  assert.equal(await page.locator('.ae-macro-entry').count(),6,'All six Cleric macro skills usable at 45');
-  assert.equal(await page.locator('.ae-macro-delay').count(),5,'A delay between each pair, like the game');
+  assert.equal(await page.locator('.ae-macro-entry').count(),3,'All three Cleric macro keys usable at 45');
+  assert.equal(await page.locator('.ae-macro-delay').count(),2,'A delay between each pair, like the game');
   await context.close();
 });
 
 await check('macro reads like the game: listed order, delay between, locked skills added later',async()=>{
   const {page,context}=await open(ascent('class=gladiator&role=dps&level=5','macro'));
-  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Overhead Slam','Rending Blow']);
-  assert.match(await plain(page,'.ae-macro-delay'),/Delay\s*10\s*ms/);
-  assert.deepEqual(await page.$$eval('#aeMacroLater li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Ruinous Blow (keep Prepare for Battle up) Lv 14','Rage Burst Lv 32']);
+  // Walkthrough fix (11 Oct 2026): one entry per key with its stack; locked rows stay greyed, and a key with nothing open is Add later.
+  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)']);
+  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-stack li',items=>items.map(el=>[el.textContent.replace(/\s+/g,' ').trim(),el.classList.contains('is-locked')])),[['Ruinous Blow from Lv 14',true],['Overhead Slam row 1',false],['Rending Blow row 2',false]]);
+  assert.deepEqual(await page.$$eval('#aeMacroLater li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Key 7 (Rage Burst) Lv 32','Defiance, on its own key Lv 16','Rush Strike, on its own key Lv 10']);
+  assert.equal(await page.locator('#aeMacroManual').count(),0,'Nothing locked under Keep on your own keys');
   // Skill stacks (10 Oct 2026): how a macro picks its next skill is not confirmed, so the screen shows both orders and the in-game test, never one as fact.
   assert.match(await plain(page,'#aeMacroRule'),/Guides disagree\. Either the macro runs its entries in the listed order, 1 then 2 and so on, or the macro works like a stack: it fires the first ready entry from the bottom and skips entries on cooldown\./);
   assert.equal(await page.locator('#aeMacroRule [data-rule-tag="macro-order"]').count(),1,'Not confirmed yet');
@@ -309,7 +322,7 @@ await check('Mastery cap: no step above 11, a capped skill links to its Daevanio
   await page.click('.ae-mskill-grid [data-mastery="Rending Blow"]');
   await page.waitForSelector('#aeInfo:not([hidden])');
   const card=await plain(page,'#aeInfoBody');
-  assert.match(card,/Target: Mastery 11, then \+9 from Daevanion nodes, gear stat lines or Arcana/,'The guide target is reworded against the cap');
+  assert.match(card,/Target: Lv 10 early, then Mastery 11, then \+4 from Daevanion nodes\. The guide's skill level 16 and 20 need more: Mastery stops at 11 and the build names no other source/,'The guide target is reworded against the cap (in the build since the walkthrough fix)');
   assert.match(card,/At the Mastery cap \(11\)\. Next \+1: the Daevanion node Skill Level Up - Rending Blow on Nezekan\./);
   assert.doesNotMatch(await plain(page,'#aeInfo .ae-card-chips'),/Lv 16|Lv 20/,'The target chip never names a level past the cap (Specialty slot levels in the body are fine)');
   await page.keyboard.press('Escape');
@@ -342,20 +355,20 @@ await check('Skill Bar: the game grid, Keen Strike fixed on left click, key skil
   assert.equal(await page.locator('.ae-bar-row[data-bar-row="0"] .ae-bar-cell').count(),12,'Keys 1 to 8, Q, E, left and right click');
   const main=await page.$$eval('[data-bar-row="0"] [data-bar-skill]',cells=>Object.fromEntries(cells.map(el=>[el.dataset.barKey.split(':')[1],[el.dataset.barSkill,el.dataset.barRole]])));
   assert.deepEqual(main.LMB,['Keen Strike','fixed'],'Left click is Keen Strike and fixed');
-  // Skill stacks (10 Oct 2026): key 1 is the rotation as a stack (row 0 fires first), key 2 the rest; Rage Burst sits in the stack, not on a stigma key.
-  assert.deepEqual([main['1'],main['2']],[['Ruinous Blow','macro'],['Rending Blow','macro']],'Row 0 of keys 1 and 2: the rotation, in build order');
+  // Walkthrough fix (11 Oct 2026): key 1 is the rotation as a stack ending with the filler; no stigma in a stack, so 5 to 8 are the four stigmas.
+  assert.deepEqual([main['1'],main['2']],[['Ruinous Blow','macro'],['Crushing Wave','build']],'Row 0 of key 1: the rotation; key 2 a node skill the rotation does not use');
   const key1=await page.$$eval('[data-bar-key$=":1"][data-bar-skill]',cells=>cells.map(el=>[el.dataset.barKey.split(':')[0],el.dataset.barSkill]));
-  assert.deepEqual(key1,[['2','Overhead Slam'],['1','Rage Burst'],['0','Ruinous Blow']],'Key 1 stacked rows 2, 1, 0 top to bottom');
+  assert.deepEqual(key1,[['2','Rending Blow'],['1','Overhead Slam'],['0','Ruinous Blow']],'Key 1 stacked rows 2, 1, 0 top to bottom, the filler on top');
   assert.deepEqual([main.Q,main.E],[['Defiance','manual'],['Rush Strike','manual']],'Skills fired by hand on Q and E');
-  assert.deepEqual(['5','6','7'].map(key=>main[key]?.[0]),['Lunge Stance',"Zikel's Blessing",'Focused Block'],'Stigmas outside the rotation, one per key');
+  assert.deepEqual(['5','6','7','8'].map(key=>main[key]?.[0]),['Lunge Stance',"Zikel's Blessing",'Rage Burst','Focused Block'],'The four stigmas on 5 to 8, one per key');
   assert.equal(await page.locator('[data-bar-key="0:6"] .ae-lock').count(),1,"Zikel's Blessing slot locked until Lv 27");
   assert.equal(await page.locator('[data-bar-key="0:LMB"] .ae-bar-pin').count(),1);
-  assert.match(await page.getAttribute('[data-bar-key="0:2"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
+  assert.match(await page.getAttribute('[data-bar-key="2:1"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
   assert.match(await plain(page,'.ae-guide'),/Left click always fires Keen Strike/);
   assert.match(await page.getAttribute('[data-bar-key="0:LMB"]','class'),/ae-guide-target/);
-  await page.click('[data-bar-key="2:1"]');
+  await page.click('[data-bar-key="1:1"]');
   assert.match(await plain(page,'#aeInfoTitle'),/Overhead Slam/,'Tap a cell for the skill card');
-  assert.match(await plain(page,'#aeInfo .ae-card-line.is-stack'),/^Press 1: Ruinous Blow fires when ready, otherwise Rage Burst, then Overhead Slam\.$/,'and the key\'s stack in words');
+  assert.match(await plain(page,'#aeInfo .ae-card-line.is-stack'),/^Press 1: Ruinous Blow fires when ready, otherwise Overhead Slam, then Rending Blow\.$/,'and the key\'s stack in words');
   await page.keyboard.press('Escape');
   await page.click('[data-bar-key="0:5"]');
   assert.match(await plain(page,'#aeInfo'),/Lunge Stance.*Stigma · slot 1/);
@@ -441,13 +454,15 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await page.isHidden('#aeAscentFor'),true,'The name, class and level show once: the Planning for line says them');
   assert.equal(await plain(page,'#aeNowTitle'),'Your next moves','No "for <name>" when a Daeva is linked');
   const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
-  assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 7 worn items above +0','Level Overhead Slam (now Lv 2)']);
+  // Walkthrough fix (11 Oct 2026): one level order, so the level move is Keen Strike, the Mastery list's first skill.
+  assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 7 worn items above +0','Level Keen Strike (now Lv 3)']);
   assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery'],'Each next move opens the screen that shows it');
-  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/\?serverId=1308&characterId=/);
+  // Walkthrough fix (11 Oct 2026): Show me on the enchant move opens the Gear page with the +0 items ringed.
+  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#enchant$/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
   assert.match(page.url(),/serverId=1308&characterId=.*&role=dps$/);
   assert.match(page.url(),/[?&]region=eu&/,'The address carries the region');
-  for(const href of await page.$$eval('.ae-ascent-nav a, .ae-menu-card, .ae-quest',nodes=>nodes.map(n=>n.getAttribute('href')).filter(h=>h&&/serverId=/.test(h)))) assert.match(href,/[?&]region=eu(&|$)/,`Link keeps the region: ${href}`);
+  for(const href of await page.$$eval('.ae-ascent-nav a, .ae-menu-card, .ae-quest',nodes=>nodes.map(n=>n.getAttribute('href')).filter(h=>h&&/serverId=/.test(h)))) assert.match(href,/[?&]region=eu(&|#|$)/,`Link keeps the region: ${href}`); // a Show me hash (#enchant) may follow the query
   assert.equal(await style(page,'.ae-ascent-head .ae-eyebrow','color'),GOLD);
   await page.click('[data-plan-by-hand]');
   await page.waitForFunction(()=>!document.querySelector('#aeClass').disabled);
@@ -567,10 +582,10 @@ await check('guided screen: game window, tabs to every screen, guide lights up e
   assert.equal(await page.isVisible('.ae-guide-text'),false,'The guide folds away');
   await page.click('[data-guide="show"]');
   assert.equal(await page.isVisible('.ae-guide-text'),true,'and comes back');
-  assert.match(await plain(page,'.ae-guide'),/step 1 of 5.*Slot 1: equip Lunge Stance\./);
+  assert.match(await plain(page,'.ae-guide'),/Tip 1 of 5.*Slot 1: equip Lunge Stance\./);
   assert.equal(await page.getAttribute('[data-stigma="0"]','class').then(c=>c.includes('ae-guide-target')),true,'Slot 1 lit up');
   await page.click('[data-guide="next"]');
-  assert.match(await plain(page,'.ae-guide'),/step 2 of 5.*Slot 2: equip Zikel's Blessing\./);
+  assert.match(await plain(page,'.ae-guide'),/Tip 2 of 5.*Slot 2: equip Zikel's Blessing\./);
   assert.equal(await page.locator('.ae-guide-target').count(),1);
   assert.match(await page.getAttribute('[data-stigma="1"]','class'),/ae-guide-target/);
   assert.match(await page.getAttribute('[data-stigma="1"] img','src'),/ICON_GL_SKILL_040\.png$/,"Zikel's Blessing shows its game icon");
@@ -580,7 +595,7 @@ await check('guided screen: game window, tabs to every screen, guide lights up e
   await page.click('[data-guide="next"]');
   assert.match(await plain(page,'.ae-guide'),/At Lv 32 slot 3 opens\. Put Rage Burst in it\./);
   await page.click('[data-guide="back"]');
-  assert.match(await plain(page,'.ae-guide'),/step 2 of 5/);
+  assert.match(await plain(page,'.ae-guide'),/Tip 2 of 5/);
   const box=await page.locator('.ae-guide').boundingBox();
   assert.ok(box.y+box.height<=1000,'The guide stays on screen');
   for(let i=0;i<3;i++)await page.click('[data-guide="next"]');
@@ -609,7 +624,8 @@ await check('every screen opens with a guide and no errors',async()=>{
   for(const screen of SCREENS){
     const {page,context,errors}=await open(ascent(ref,screen),{live:true});
     await page.waitForSelector('.ae-guide:not([hidden])');
-    assert.match(await plain(page,'.ae-guide-count'),/^Guide · step 1 of \d+$/,`${screen} guide`);
+    // Walkthrough fix (11 Oct 2026): the step bar is the only "step"; the guide counts tips.
+    assert.match(await plain(page,'.ae-guide-count'),/^Tip 1 of \d+$/,`${screen} guide`);
     assert.equal(await page.locator('.ae-guide-target').count(),1,`${screen}: one thing lit up`);
     assert.equal(await page.getAttribute('body','data-faction'),'elyos');
     assert.deepEqual(errors,[],`${screen} errors`);
@@ -669,8 +685,9 @@ await check('no Daevanion move when every open board has nodes taken: the Nezeka
   await context.close();
 });
 
-await check('step bar on the Ascent Plan: step 3 current, 1 and 2 ticked with a Daeva; by hand steps 2 and 3 wait for a Daeva',async()=>{
-  const live=await open(ascent(ref),{live:true});
+await check('step bar on the Ascent Plan: step 3 current, 1 and 2 ticked with a Daeva once opened; by hand steps 2 and 3 wait for a Daeva',async()=>{
+  // Walkthrough fix (11 Oct 2026): a step shows done only once it has been opened, so this Daeva's setup step is stored as opened first.
+  const live=await open(ascent(ref),{live:true,visited:['find','setup']});
   const steps=await stepsOf(live.page);
   assert.deepEqual(steps.map(step=>step.label),['Find your Daeva','See your setup','Your next moves']);
   assert.equal(steps[2].current,'step');
@@ -731,7 +748,7 @@ await check('title first: the data age sits under the title, small; on a screen 
 await check('first visit to the Ascent Plan: one guide step pointing at Your next moves, shown once, How this works brings it back',async()=>{
   const {page,context,errors}=await open(ascent(ref),{live:true});
   await page.waitForSelector('#aeGuide:not([hidden])');
-  assert.match(await plain(page,'.ae-guide-count'),/^Guide · step 1 of 1$/);
+  assert.match(await plain(page,'.ae-guide-count'),/^Tip 1 of 1$/);
   assert.match(await plain(page,'.ae-guide-text'),/^Your next moves are below, in order\. Do move 1 first in the game\./);
   assert.match(await page.getAttribute('#aeNow','class'),/ae-guide-target/,'Your next moves is lit up');
   assert.equal(await style(page,'.ae-guide-text','font-size'),'16px','Guide text is 16px');
@@ -795,7 +812,9 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   assert.match(await plain(page,'.ae-bar-note'),/only says whether a skill is equipped, never which key or row it is on/);
   assert.ok(parseFloat(await style(page,'#aeStackRule','font-size'))>=16);
   assert.equal(await page.locator('.ae-bar-cell.is-cd-pending').count()>0,true,'Pending cooldowns are marked');
-  assert.match(await plain(page,'.ae-bar-pending'),/Cooldown not captured yet for .*Rending Blow/);
+  // Walkthrough fix (11 Oct 2026): Rending Blow is the build's filler now, so it is not in the pending list; Rage Burst (a stigma, cooldown not captured) is.
+  assert.match(await plain(page,'.ae-bar-pending'),/Cooldown not captured yet for .*Rage Burst/);
+  assert.doesNotMatch(await plain(page,'.ae-bar-pending'),/Rending Blow/);
   assert.deepEqual(await page.$$eval('#aeNotOnBar li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Ankle Slice No key left: the build does not use it. Swap it in if you like it.','Aerial Snare No key left: the build does not use it. Swap it in if you like it.']);
   assert.deepEqual(errors,[]);
   await context.close();
@@ -812,10 +831,10 @@ await check('key panel: tap a key and the stack reads in plain words with each s
   const {page,context}=await open(ascent(GLAD30,'skill-bar'));
   await page.click('[data-bar-keycap="1"]');
   assert.equal(await plain(page,'#aeInfoTitle'),'Key 1');
-  assert.equal(await plain(page,'#aeInfo [data-key-say]'),'Press 1: Ruinous Blow fires when ready, otherwise Rage Burst, then Overhead Slam.');
+  assert.equal(await plain(page,'#aeInfo [data-key-say]'),'Press 1: Ruinous Blow fires when ready, otherwise Overhead Slam, then Rending Blow.');
   assert.deepEqual(await page.$$eval('#aeInfo .ae-stack-card',items=>items.map(el=>el.dataset.stackRow)),['0','1','2'],'A card per row, lowest first');
   assert.match(await plain(page,'#aeInfo .ae-stack-card[data-stack-row="0"]'),/Row 0, fires first · 45 s cooldown.*Ruinous Blow/);
-  assert.match(await plain(page,'#aeInfo .ae-stack-card[data-stack-row="1"]'),/cooldown not captured yet.*Rage Burst/);
+  assert.match(await plain(page,'#aeInfo .ae-stack-card[data-stack-row="2"]'),/no cooldown.*Rending Blow/);
   assert.ok(parseFloat(await style(page,'#aeInfo [data-key-say]','font-size'))>=16);
   await page.keyboard.press('Escape');
   await page.click('[data-bar-keycap="Q"]');
@@ -834,7 +853,8 @@ await check('chains come from the data and show on the skill card: lead-in, arro
   const {page,context}=await open(ascent(GLAD30,'mastery'));
   await page.click('[data-mastery="Keen Strike"]');
   assert.equal(await page.locator('#aeInfo [data-chain]').count(),1);
-  assert.match(await plain(page,'#aeInfo [data-chain]'),/Chain Keen Strike\s*Reckless Strike\s*from skill Lv 16 Follow-up: press it when it lights up\. Not confirmed yet Check it in game: Use a lead-in skill, then press the follow-up's key at once/);
+  // Walkthrough fix (11 Oct 2026): a follow-up above the cap says the build names no way to reach it (no Keen Strike node).
+  assert.match(await plain(page,'#aeInfo [data-chain]'),/Chain Keen Strike\s*Reckless Strike\s*from skill Lv 16\. Mastery stops at 11 and the build names no other source\. Follow-up: press it when it lights up\. Not confirmed yet Check it in game: Use a lead-in skill, then press the follow-up's key at once/);
   assert.equal(await page.locator('#aeInfo [data-chain] .ae-chain-arrow').count(),1,'An arrow between lead-in and follow-up');
   await page.keyboard.press('Escape');
   await page.click('[data-mastery="Rending Blow"]');
@@ -843,7 +863,7 @@ await check('chains come from the data and show on the skill card: lead-in, arro
   await context.close();
   const bar=await open(ascent(GLAD30,'skill-bar'));
   const followUps=await bar.page.$$eval('#aeFollowUps li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim()));
-  assert.deepEqual(followUps,['Reckless Strike follow-up to Keen Strike from skill Lv 16','Upward Strike follow-up to Overhead Slam from skill Lv 8','Wrath Burst follow-up to Defiance from skill Lv 8','Ankle Slice The tooltip names two lead-in skills. They are not captured yet.']);
+  assert.deepEqual(followUps,['Reckless Strike follow-up to Keen Strike from skill Lv 16. Mastery stops at 11 and the build names no other source.','Upward Strike follow-up to Overhead Slam from skill Lv 8','Wrath Burst follow-up to Defiance from skill Lv 8','Ankle Slice The tooltip names two lead-in skills. They are not captured yet.']);
   assert.equal(await bar.page.locator('#aeFollowUps [data-rule-tag="chain-follow-up"]').count(),1);
   assert.match(await plain(bar.page,'#aeFollowUps [data-rule-test="chain-follow-up"]'),/^Check it in game: Use a lead-in skill, then press the follow-up's key at once\. Does it fire, and how long is it available\?$/);
   assert.equal(await bar.page.locator('.ae-bar-cell[data-bar-skill="Reckless Strike"]').count(),0,'Unconfirmed: the follow-up is not placed in a stack');
@@ -853,9 +873,12 @@ await check('chains come from the data and show on the skill card: lead-in, arro
 await check('macro built from the stacks: each entry says its key and row, the from-stacks line, the rule with both orders and its test',async()=>{
   // Lv 45, so every rotation skill is open (Rage Burst's slot opens at 32).
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=45','macro'));
-  assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>[el.querySelector('.ae-macro-skill').textContent,el.dataset.macroKey,el.querySelector('.ae-macro-where')?.textContent])),[
-    ['Ruinous Blow (keep Prepare for Battle up)','1','key 1, row 0'],['Rage Burst','1','key 1, row 1'],['Overhead Slam','1','key 1, row 2'],['Rending Blow','2','key 2, row 0']]);
-  assert.match(await plain(page,'#aeMacroFrom'),/^Built from your stacks: key 1, key 2, in the order the build uses them\. Adding a stacked key to the macro runs that key's stack \(guides say; not tested\)\.$/);
+  // Walkthrough fix (11 Oct 2026): Macro 1 lists keys in build order, each key once with its stack under it, so a stacked key
+  // never doubles up with its own skills. The not-tested tag on "a stacked key runs its stack" stays, with the one-by-one fallback.
+  assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>[el.querySelector('.ae-macro-skill').textContent,el.dataset.macroKey,[...el.querySelectorAll('.ae-macro-stack li')].map(li=>li.textContent.replace(/\s+/g,' ').trim())])),[
+    ['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)','1',['Ruinous Blow row 0','Overhead Slam row 1','Rending Blow row 2']],['Key 7 (Rage Burst)','7',[]]]);
+  assert.match(await plain(page,'#aeMacroFrom'),/^Each entry is a key from your Skill Bar, in the order the build uses them\. Adding a stacked key to the macro runs that key's stack \(guides say; not tested\)\.$/);
+  assert.equal(await plain(page,'#aeMacroFallback'),'If your test shows a key only fires row 0, add the skills one by one in this order: Ruinous Blow, Rage Burst, Overhead Slam, Rending Blow.');
   assert.equal(await page.locator('[data-rule-tag="macro-order"]').count(),1);
   assert.match(await plain(page,'[data-rule-test="macro-order"]'),/^Check it in game: Make a macro with A then B, and get A on cooldown\. Does B fire, and when A is ready again does the macro go back to A first\?$/);
   assert.ok(parseFloat(await style(page,'#aeMacroRule p','font-size'))>=16);
@@ -898,6 +921,137 @@ for(const [width,height] of [[390,844],[1600,1000]]){
       assert.deepEqual(small,[],`${screen}: nothing under 13px`);
       if(screen==='skill-bar'){const cell=await box(page,'[data-bar-key="0:1"]');assert.ok(cell.width>=44&&cell.height>=44,'cells are touch targets');}
       if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`stacks-${screen}-${width}.png`),fullPage:true});
+      await context.close();
+    }
+  });
+}
+
+/* ---------- Walkthrough fix (fix/aetherium-walkthrough-logic, 11 Oct 2026): Lv 12 and Lv 41 Gladiator walks ---------- */
+const goldCount=page=>page.$$eval('main .ae-primary',els=>els.filter(el=>{const r=el.getBoundingClientRect();return r.height>0&&/linear-gradient/.test(getComputedStyle(el).backgroundImage);}).length);
+const noSideScroll=page=>page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+const rectIn=(page,selector)=>page.$eval(selector,el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height,display:getComputedStyle(el).display,size:parseFloat(getComputedStyle(el).fontSize)};});
+
+await check('Lv 12 walk: key 1 is Ruinous Blow, Overhead Slam, Rending Blow; keys 5 to 8 the stigmas; what key 1 fires now; one gold action',async()=>{
+  const {page,context,errors}=await open(ascent(ref,'skill-bar'),{live:true});
+  const col=key=>page.$$eval(`[data-bar-key$=":${key}"][data-bar-skill]`,cells=>cells.map(el=>[Number(el.dataset.barKey.split(':')[0]),el.dataset.barSkill]).sort((a,b)=>a[0]-b[0]).map(item=>item[1]));
+  assert.deepEqual(await col('1'),['Ruinous Blow','Overhead Slam','Rending Blow'],'Row 0, 1, 2 of key 1');
+  for(const [key,name] of [['5','Lunge Stance'],['6',"Zikel's Blessing"],['7','Rage Burst'],['8','Focused Block']])assert.deepEqual(await col(key),[name],`Key ${key}: ${name}, alone`);
+  assert.match(await page.getAttribute('[data-bar-key="0:1"]','data-tip'),/Ruinous Blow .*from Lv 14/,'Locked skill greyed with from Lv 14');
+  assert.match(await plain(page,'#aeFiresNow'),/What fires now at Lv 12 Key 1 Overhead Slam, then Rending Blow Ruinous Blow from Lv 14/);
+  await page.click('[data-bar-keycap="1"]');
+  assert.equal(await plain(page,'#aeInfo [data-key-now]'),'Until Lv 14, key 1 fires Overhead Slam, then Rending Blow.');
+  await page.keyboard.press('Escape');
+  let guide='';
+  for(let i=0;i<8&&!/key 1 fires Overhead Slam/.test(guide);i++){guide=await plain(page,'.ae-guide-text');if(!/key 1 fires/.test(guide))await page.click('#aeGuide [data-guide="next"]');}
+  assert.match(guide,/Rending Blow \(the filler\) on top, so the key always does something\. Until Lv 14, key 1 fires Overhead Slam, then Rending Blow\./,'The guide says what key 1 fires now');
+  assert.doesNotMatch(await plain(page,'.ae-guide-count'),/step/i,'The guide counts tips, never steps');
+  assert.equal(await goldCount(page),1,'One gold action: the Next');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('Lv 12 walk: one level order across the next moves, Mastery and its guide; macro lists keys; Defiance is Add later',async()=>{
+  const menu=await open(ascent(ref),{live:true});
+  const level=(await menu.page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent))).find(text=>/^Level /.test(text));
+  assert.equal(level,'Level Keen Strike (now Lv 3)');
+  assert.equal(await goldCount(menu.page),1,'Menu: one gold action');
+  await menu.context.close();
+  const mastery=await open(ascent(ref,'mastery'),{live:true});
+  const order=await mastery.page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>el.dataset.mastery));
+  assert.deepEqual(order,['Keen Strike','Rending Blow','Overhead Slam']);
+  assert.match(await plain(mastery.page,'.ae-guide-text'),/^Put skill points into Keen Strike: Lv 3 to 8\./,'The Mastery guide starts with the same skill');
+  await mastery.context.close();
+  const macro=await open(ascent(ref,'macro'),{live:true});
+  assert.deepEqual(await macro.page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['1'],'Macro 1 lists key 1 once');
+  assert.match(await plain(macro.page,'#aeMacroLater'),/Defiance, on its own key Lv 16/);
+  assert.doesNotMatch(await plain(macro.page,'#aeMacroManual'),/Defiance/,'Defiance is never under Keep on your own keys at Lv 12');
+  await macro.context.close();
+});
+
+await check('Lv 41 walk: Wrath Wave equipped is a popular swap for Rage Burst, said once and not offered again',async()=>{
+  const {page,context,errors}=await open(ascent(lv41Ref,'stigma'),{live:true});
+  assert.equal(await plain(page,'[data-stigma-line="Wrath Wave"]'),'Slot 3: Wrath Wave is a popular swap for Rage Burst. Keep it or switch to Rage Burst.');
+  const text=await page.evaluate(()=>document.body.innerText);
+  assert.doesNotMatch(text,/Swap it for the stigmas below|Want a swap\? Wrath Wave/,'The screen never tells the player to swap Wrath Wave out, then offers it');
+  assert.deepEqual(await page.$$eval('[data-alt]',items=>items.map(el=>el.dataset.alt)),['Blade Toss'],'Swaps: only the one not equipped');
+  assert.equal(await page.getAttribute('[data-stigma-now="Wrath Wave"]','data-verdict'),'swap');
+  const guide=[];
+  for(let i=0;i<8;i++){guide.push(await plain(page,'.ae-guide-text'));if(!await page.locator('#aeGuide [data-guide="next"]').count())break;await page.click('#aeGuide [data-guide="next"]');}
+  assert.equal(guide.filter(line=>/Wrath Wave/.test(line)).length,1,'The guide says it once');
+  assert.ok(!guide.some(line=>/Slot 3: equip Rage Burst/.test(line)),'and does not also tell the player to equip Rage Burst in that slot');
+  assert.equal(await goldCount(page),1);
+  assert.deepEqual(errors,[]);
+  await context.close();
+  const bar=await open(ascent(lv41Ref,'skill-bar'),{live:true});
+  assert.equal(await bar.page.locator('#aeFiresNow [data-fires-later]').count(),0,'At Lv 41 every key fires: nothing waits');
+  await bar.context.close();
+});
+
+await check('a step shows done only after a visit, per Daeva on this device; the Next is named as the step bar names it',async()=>{
+  const plan=await open(ascent(ref),{live:true});
+  let steps=await stepsOf(plan.page);
+  assert.equal(steps[1].done,false,'See your setup is not done before it has been opened');
+  assert.equal(await plan.page.$eval('#aeSteps [data-step="setup"]',el=>el.classList.contains('is-next')),true,'It shows as the next step');
+  await plan.page.goto(`${base}/hub/aetherium/gear/?${ref}`);
+  await plan.page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  assert.match(await plain(plan.page,'[data-next]'),/^Next: Your next moves/,'The setup page goes on to step 3, named as the step bar names it');
+  await plan.page.goto(`${base}${ascent(ref)}`);
+  await plan.page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  steps=await stepsOf(plan.page);
+  assert.equal(steps[1].done,true,'Done once opened');
+  const stored=JSON.parse(await plan.page.evaluate(()=>localStorage.getItem('aetherium.steps.v1')));
+  assert.equal(stored[`1308:${info.profile.characterId}`].setup,true,'Kept per Daeva');
+  await plan.context.close();
+});
+
+await check('Show me on the enchant move opens the Gear page with the +0 items ringed and in view',async()=>{
+  const {page,context}=await open(ascent(ref),{live:true});
+  const href=await page.getAttribute('.ae-quest[data-quest-view="gear"]','href');
+  await page.goto(`${base}${href}`);
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  await page.waitForSelector('#aeGear li.is-ringed');
+  assert.equal(await page.locator('#aeGear li.is-ringed').count(),7,'The seven +0 items the move names');
+  assert.equal(await page.locator('#aeGear li.is-ringed .ae-flag').count(),7,'each with its Enchant flag');
+  assert.equal(await plain(page,'#aeGearRingNote'),'Ringed: the 7 worn items still at +0. Enchant them in game.');
+  assert.equal(await page.$eval('#aeGear li.is-ringed',el=>getComputedStyle(el).outlineStyle),'solid','The ring is drawn');
+  await page.waitForTimeout(600);
+  assert.ok(await page.$eval('#aeGear li.is-ringed',el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'The first ringed item is in view');
+  await context.close();
+});
+
+await check('Stats: no dead end, the combat stats are named as not in the public data, no gold Check your gear',async()=>{
+  const {page,context}=await open(ascent(ref,'stats'),{live:true});
+  assert.equal(await plain(page,'#aeStatsWhere'),'The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.');
+  assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/Check your gear/);
+  assert.equal(await goldCount(page),1);
+  await context.close();
+});
+
+for(const width of [1600,390]){
+  await check(`new sections at ${width}: why line, plan at a glance, What fires now, macro stacks, stigma lines, no sideways scroll`,async()=>{
+    const viewport={width,height:width<500?844:1000};
+    const menu=await open(ascent(ref),{live:true,viewport});
+    assert.ok(await noSideScroll(menu.page)<=0,'menu: no sideways scroll');
+    const glance=await rectIn(menu.page,'#aeGlanceTitle');
+    assert.ok(glance.height>0&&glance.right<=width,'Your plan at a glance shows');
+    assert.match(await plain(menu.page,'.ae-menu-card[data-view="skill-bar"] .ae-menu-status'),/^Key 1 is your rotation$/);
+    await menu.context.close();
+    for(const [screen,selector,who] of [['skill-bar','#aeFiresNow',ref],['macro','.ae-macro-stack',ref],['stigma','[data-stigma-line]',lv41Ref],['mastery','#aeWhy',ref]]){
+      const {page,context}=await open(ascent(who,screen),{live:true,viewport});
+      assert.ok(await noSideScroll(page)<=0,`${screen} at ${width}: no sideways scroll`);
+      const box=await rectIn(page,selector);
+      const main=await rectIn(page,'.ae-gw-body');
+      assert.ok(box.height>0&&box.width>0,`${screen}: ${selector} renders`);
+      assert.ok(box.left>=main.left-1&&box.right<=main.right+1,`${screen}: ${selector} sits inside the window (${box.left}-${box.right} in ${main.left}-${main.right})`);
+      assert.ok(box.size>=13,`${screen}: ${selector} text at least 13px`);
+      const why=await rectIn(page,'#aeWhy');
+      assert.ok(why.height>0&&why.size>=16,`${screen}: the why line reads at 16px`);
+      if(screen==='skill-bar'){
+        const bar=await rectIn(page,'#aeSkillBar');
+        if(width>=1280)assert.ok(box.left>=bar.right-1,'Wide: What fires now sits beside the bar');
+        else assert.ok(await page.$eval('#aeFiresNow',el=>el.getBoundingClientRect().top)>=await page.$eval('#aeSkillBar',el=>el.getBoundingClientRect().bottom)-1,'Phone: What fires now sits under the bar');
+      }
+      assert.equal(await goldCount(page),1,`${screen}: one gold action`);
       await context.close();
     }
   });

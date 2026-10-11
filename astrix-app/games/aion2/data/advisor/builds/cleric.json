@@ -33,21 +33,35 @@
         {
           "name": "Condemnation",
           "priority": 3,
-          "target": "Lv 20+",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 and up need more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 8. Your main damage skill.",
           "refs": [
             "ec-cleric"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20+\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Healing Light",
           "priority": 4,
-          "target": "Lv 16+",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 and up need more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 10. Heals you and the lowest-health ally at 40 m.",
           "refs": [
             "ec-cleric",
             "mb-builds"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 16+\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Radiant Recovery",

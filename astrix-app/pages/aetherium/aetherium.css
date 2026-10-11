@@ -147,7 +147,7 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 .ae-plan-card p{margin:0;color:var(--ae-text-muted)}
 .ae-plan-card .ae-eyebrow{color:var(--ae-gold)}
 .ae-plan-title{margin:0;font:700 1.375rem/1.2 var(--ae-font-ui);letter-spacing:0;color:var(--ae-text)}
-.ae-plan-card .btn.ae-primary{margin-top:auto}
+.ae-plan-card .btn{margin-top:auto}
 
 /* Skeletons: the final layout's shape with a soft shimmer, still under prefers-reduced-motion. */
 .ae-sk{position:relative;display:block;overflow:hidden;background:var(--ae-raised);box-shadow:inset 0 0 0 1px var(--ae-hairline)}
@@ -1147,3 +1147,44 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-chain small{color:var(--ae-text-muted);font-size:.875rem}
 .ae-chain-pending{font-style:normal;color:var(--ae-text-muted)}
 .ae-chain-note{margin:0;font-size:.875rem;color:var(--ae-text-muted)}
+
+/* Walkthrough fix (fix/aetherium-walkthrough-logic, 11 Oct 2026): one clear path. Each page says where you are (step bar,
+   title), what this tells you (the content, with a one-line why under the screen title) and what to do next (one gold Next). */
+.ae-step.is-next{color:var(--ae-ink);border-color:color-mix(in srgb,var(--ae-strobe) 55%,var(--ae-navy-line))}
+.ae-step.is-next .ae-step-num{border-color:var(--ae-strobe);color:var(--ae-strobe-hi)}
+.ae-gw-why{margin:0;padding:0.625rem 1.5rem;font-size:1rem;line-height:1.5;color:var(--ae-text-muted);border-bottom:1px solid var(--ae-hairline);background:rgba(0,0,0,.18)}
+@media (max-width:640px){.ae-gw-why{padding:0.625rem 1rem}}
+.ae-glance-title{margin:0 0 0.75rem}
+.ae-since{margin:0;padding:0.5rem 0.75rem;font-size:1rem;color:var(--ae-text);background:var(--ae-well);border:1px solid var(--ae-hairline)}
+/* Skill Bar: the bar and "What fires now" side by side on a wide screen, stacked on a phone. */
+.ae-bar-top{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;align-items:start}
+.ae-bar-main{min-width:0;display:grid;gap:0.5rem}
+@media (min-width:1280px){.ae-bar-top{grid-template-columns:minmax(0,1fr) minmax(16rem,20rem)}}
+.ae-fires-now{display:grid;gap:0.5rem;padding:0.75rem 0.875rem;background:var(--ae-well);border:1px solid var(--ae-hairline-strong);clip-path:var(--ae-notch)}
+.ae-fires-now .ae-mskills-title{margin:0}
+.ae-fires-list{margin:0;padding:0;list-style:none;display:grid;gap:0.375rem}
+.ae-fires-list li{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:0.5rem;align-items:baseline;font-size:1rem;line-height:1.4}
+.ae-fires-list b{font-weight:700;color:var(--ae-ice)}
+.ae-fires-list small{display:block;font-size:0.875rem;color:var(--ae-text-muted)}
+.ae-fires-later{margin:0;font-size:0.875rem;line-height:1.45;color:var(--ae-text-muted)}
+.ae-card-line.is-now{color:var(--ae-ice);font-weight:600}
+/* Stigma: one line per equipped stigma that is not a build pick. */
+.ae-stg-verdict{margin:0.5rem 0 0;max-width:36rem;font-size:1rem;line-height:1.45;color:var(--ae-text)}
+.ae-itile.is-alt .ae-itile-badge{color:var(--ae-gold)}
+/* Macro: one entry per key, its stack listed under it, locked rows greyed with their level. */
+.ae-macro-entry{flex-wrap:wrap}
+.ae-macro-of{font-weight:500;color:var(--ae-text-muted)}
+.ae-macro-stack{flex-basis:100%;display:grid;gap:0.25rem;margin:0.25rem 0 0 2.25rem;padding:0;list-style:none}
+.ae-macro-stack li{display:flex;align-items:center;gap:0.5rem;font-size:0.9375rem;color:var(--ae-text)}
+.ae-macro-stack li img{width:1.75rem;height:1.75rem;border-radius:4px;border:1px solid var(--ae-hairline-strong)}
+.ae-macro-stack li small{margin-left:auto;font-size:0.875rem;color:var(--ae-text-muted)}
+.ae-macro-stack li.is-locked{opacity:.6}
+.ae-macro-fallback{margin:0;font-size:1rem;line-height:1.5;color:var(--ae-text-muted)}
+/* Mastery: how a slot above the cap is reached, or that the build names no way. */
+.ae-card-slot .ae-reach{font-size:0.8125rem;line-height:1.3;color:var(--ae-ice)}
+.ae-card-slot .ae-reach.is-no{color:var(--ae-text-muted)}
+/* Gear: Show me rings the items a move names. */
+.ae-ring-note{margin:0 0 0.625rem;padding:0.5rem 0.75rem;font-size:1rem;color:var(--ae-text);background:color-mix(in srgb,var(--ae-strobe) 10%,transparent);border:1px solid color-mix(in srgb,var(--ae-strobe) 55%,var(--ae-hairline))}
+.ae-gear li.is-ringed{outline:2px solid var(--ae-strobe);outline-offset:2px}
+.ae-stats-none{padding:0.5rem 0;font-size:1rem}
+.ae-stats[hidden],.ae-ring-note[hidden],.ae-stats-none[hidden]{display:none}

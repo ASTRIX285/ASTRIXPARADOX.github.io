@@ -11,7 +11,6 @@ import {
   explain,
   factionOf,
   gearPageUrl,
-  gearUrl,
   lastRegion,
   loadAdvisor,
   loadCharacter,
@@ -29,11 +28,11 @@ import {
 } from './aetherium-data.mjs';
 import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
-import { renderNext, renderStepBar } from './aetherium-flow.mjs';
+import { nextStep, renderNext, renderStepBar } from './aetherium-flow.mjs';
 import { classArt } from './daevanion-board.mjs';
 import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 
-const state = { model: null, source: null, ref: null, busy: false, retry: null };
+const state = { model: null, source: null, ref: null, busy: false, retry: null, before: null };
 
 /* The official AION 2 character pages (NCSOFT). The address of one character's own page is not confirmed yet (it needs a look at the
    official site), so the card links to the characters index. Official NCSOFT pages are the one outbound link the Aetherium allows. */
@@ -94,8 +93,8 @@ function renderSummary() {
       <p class="ae-eyebrow">Ascent Plan</p>
       <h2 class="ae-plan-title" id="aePlanTitle">What to do next</h2>
       <p>The Ascent Plan for ${esc(p.name)}: what to fix now, which skills and Specialty perks to take, stigmas, Daevanion order and a macro, for ${esc(p.class)} at Lv ${esc(p.level)}.</p>
-      <a class="btn ae-primary" id="aeAscentLink" href="${esc(ascentUrl(state.ref, p.class))}">Open Ascent Plan</a>
-      <a class="btn" id="aeGearLink" href="${esc(gearUrl(state.ref))}">View full setup</a>
+      ${sinceLine(p)}
+      <a class="btn" id="aeAscentLink" href="${esc(ascentUrl(state.ref, p.class))}">Open Ascent Plan</a>
     </aside>
     <section class="ae-panel ae-first-move" id="aeFirstMove" aria-labelledby="aeFirstMoveTitle" aria-live="polite">
       <p class="ae-eyebrow" id="aeFirstMoveTitle">Your first move</p>
@@ -106,11 +105,24 @@ function renderSummary() {
   loadFirstMove().catch(() => {});
 }
 
+/* Since your last visit: only when this device already held this Daeva at a lower level (the roster keeps the level it last saw). */
+function sinceLine(p) {
+  const before = state.before;
+  if (!Number.isFinite(before) || !Number.isFinite(p.level) || before >= p.level) return '';
+  return `<p class="ae-since" id="aeSince">Since your last visit: Lv ${esc(before)} to Lv ${esc(p.level)}.</p>`;
+}
+/** The level this device last saved for a Daeva, read before a live read refreshes it. */
+function savedLevel(ref) {
+  const entry = ref ? roster.read().entries.find(item => String(item.serverId) === String(ref.serverId) && item.characterId === ref.characterId) : null;
+  return Number.isFinite(entry?.level) ? entry.level : null;
+}
+
 /* The first move: the Ascent Plan's top move for this Daeva, in one line, with a Show me that opens it. The plan data
    (small static files) loads once the card is on screen, so the card never waits for it. The move comes from the advisor only. */
 function moveHref(move, p) {
   if (!move) return ascentUrl(state.ref, p.class);
-  if (move.view === 'gear') return gearPageUrl(state.ref);
+  // A gear move opens the Gear page with the items it names ringed (#enchant, #empty).
+  if (move.view === 'gear') return `${gearPageUrl(state.ref)}${move.ring ? `#${move.ring}` : ''}`;
   return ascentUrl(state.ref, p.class, { screen: move.view, board: move.view === 'daevanion' ? move.board ?? null : null });
 }
 async function loadFirstMove() {
@@ -135,20 +147,25 @@ async function loadFirstMove() {
   strip.dataset.move = move ? String(move.step) : 'none';
 }
 
-/* The flow on this page: step 1. With a Daeva on the card, steps 2 and 3 open, the Next goes to the Ascent Plan and
-   "How this works" reopens the first-visit guide. Without one, the only way on is the search. */
+/* The flow on this page: step 1. With a Daeva on the card, steps 2 and 3 open, the Next goes to step 2 (See your setup)
+   as the one gold action, and "How this works" reopens the first-visit guide. Without one, the search is the gold action
+   and the Next only points at it. */
 function renderFlow() {
   const p = state.model?.profile ?? null;
   renderStepBar({ current: 'find', ref: p ? state.ref : null, className: p?.class ?? null, help: p ? showCardGuide : null });
-  if (p) renderNext({ label: 'Next: Your next moves', href: ascentUrl(state.ref, p.class), note: 'Step 3 of 3: the Ascent Plan for this Daeva' });
-  else renderNext({ label: 'Find your Daeva', href: '#aeSearch', note: 'Step 1 of 3: type your character name above' });
+  // One gold action: the search with no Daeva, the Next with one.
+  $('#aeFind')?.classList.toggle('ae-primary', !p);
+  if (p) {
+    const next = nextStep('find', state.ref, p.class);
+    renderNext({ label: next.label, href: next.href, note: 'Step 2 of 3: your gear, skills and Daevanion boards' });
+  } else renderNext({ label: 'Find your Daeva', href: '#aeSearch', note: 'Step 1 of 3: type your character name above', primary: false });
 }
 
 /* The first-visit guide: three steps, once per device, after the page is usable. Each step says what the thing on screen means for the game. */
 const CARD_GUIDE = () => [
   { text: 'This is your Daeva. Check it is the character you play: the class, the level and the server.', target: '#aeSummary .ae-summary-card' },
   { text: 'This is your first move: the one thing to do next time you are in the game. Show me opens it on a screen laid out like the game.', target: '#aeFirstMove' },
-  { text: 'Your full plan is here: the skills to level, the stigmas to slot, your Daevanion boards and a macro, in order.', target: '#aeAscentLink' }
+  { text: 'Next, see your setup: your gear, skills and Daevanion boards. Then your next moves, in order.', target: '#aeNext' }
 ];
 function showCardGuide() {
   mountGuide($('#aeGuide'), CARD_GUIDE(), { skip: true, scroll: true, onDone: () => markGuideSeen('card') });
@@ -257,9 +274,9 @@ function renderIntroArt(art) {
   }
 }
 
-function show(model, source, ref) {
+function show(model, source, ref, before = null) {
   clearTimeout(readingTimer);
-  Object.assign(state, { model, source, ref });
+  Object.assign(state, { model, source, ref, before });
   showIntro(false);
   setFaction(model.profile.raceName, model.profile.raceId);
   showSource(source);
@@ -279,11 +296,12 @@ function failedRead(error, retry) {
 
 async function importCharacter(ref) {
   setBusy(true);
+  const before = savedLevel(ref);
   try {
     const { model, source } = await loadCharacter(ref);
     if (!roster.add(model, source)) showNotice(`${model.profile.server.name} already has ${roster.slots} Daevas saved. Remove one to add ${model.profile.name}.`, 'warn');
     else showNotice('');
-    show(model, source, ref);
+    show(model, source, ref, before);
     history.replaceState(null, '', `?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId, region: regionOf(ref.region) })}`);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
@@ -392,9 +410,10 @@ async function start() {
   showLoading(true);
   const sameDaeva = active && String(active.serverId) === String(ref.serverId) && active.characterId === ref.characterId;
   prefetchAdvisor(sameDaeva ? active.className : null);
+  const before = savedLevel(ref);
   try {
     const { model, source } = await loadCharacter(ref);
-    show(model, source, ref);
+    show(model, source, ref, before);
   } catch (error) {
     showLoading(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;

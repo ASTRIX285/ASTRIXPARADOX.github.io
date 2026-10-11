@@ -32,8 +32,8 @@ function renderGear() {
   // An item the Ascent Plan wants enchanted (still at +0, the same rule the advisor uses) carries an Enchant flag that leads to that move.
   const flag = slot => (needsEnchant(slot) ? `<a class="ae-flag" href="${esc(movesHref())}" data-enchant-flag="${esc(slot.slotPos)}" aria-label="Enchant ${esc(slot.name)}: it is still at +0. See the move on the Ascent Plan.">Enchant</a>` : '');
   $('#aeGear').innerHTML = orderedGear(gear).map(({ slot, index }) => slot.empty
-    ? `<li><div class="ae-slot is-empty"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>Empty</strong></div></li>`
-    : `<li${needsEnchant(slot) ? ' class="has-flag"' : ''}><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-haspopup="dialog">
+    ? `<li data-gear-index="${index}"><div class="ae-slot is-empty"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>Empty</strong></div></li>`
+    : `<li data-gear-index="${index}"${needsEnchant(slot) ? ' class="has-flag"' : ''}><button type="button" class="ae-slot" data-slot="${index}" data-grade="${esc(String(slot.grade).toLowerCase())}" aria-haspopup="dialog">
         ${iconImg(slot.icon, '', 52)}
         <span class="ae-slot-text"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(slot.grade)} · ${esc(enchantText(slot))}</span></span>
       </button>${flag(slot)}</li>`).join('');
@@ -101,9 +101,32 @@ async function selectSlot(index, from) {
   }), from);
 }
 
+/* Base stats as the official site sends them. When every one is 0 the site is not showing them, so the page says that
+   once instead of six zeros. Real values show as they are. */
 function renderStats() {
   const primary = state.model.stats.filter(row => PRIMARY_STATS.includes(row.type));
-  $('#aeStats').innerHTML = primary.map(row => `<div class="ae-stat"><dt>${esc(row.name)}</dt><dd>${number(row.value)}</dd></div>`).join('');
+  const none = !primary.length || primary.every(row => row.value === 0);
+  $('#aeStats').hidden = none;
+  $('#aeStats').innerHTML = none ? '' : primary.map(row => `<div class="ae-stat"><dt>${esc(row.name)}</dt><dd>${number(row.value)}</dd></div>`).join('');
+  $('#aeStatsNone').hidden = !none;
+}
+
+/* Show me from a gear move (#enchant, #empty): the items the move names are ringed and the first is scrolled into view,
+   with one line that says what the ring means. The rule is the advisor's own (needsEnchant, an empty slot). */
+const RINGS = {
+  enchant: { pick: slot => needsEnchant(slot), say: count => `Ringed: the ${count} worn ${count === 1 ? 'item' : 'items'} still at +0. Enchant ${count === 1 ? 'it' : 'them'} in game.` },
+  empty: { pick: slot => slot.empty, say: count => `Ringed: the ${count} empty ${count === 1 ? 'slot' : 'slots'}. Any item beats an empty slot.` }
+};
+function ringFromHash() {
+  const ring = RINGS[location.hash.replace(/^#/, '')] ?? null;
+  const items = ring ? orderedGear(state.model.gear).filter(({ slot }) => ring.pick(slot)) : [];
+  const note = $('#aeGearRingNote');
+  note.hidden = !items.length;
+  if (!items.length) return;
+  note.textContent = ring.say(items.length);
+  const nodes = items.map(({ index }) => document.querySelector(`#aeGear [data-gear-index="${index}"]`)).filter(Boolean);
+  nodes.forEach(node => node.classList.add('is-ringed'));
+  nodes[0]?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
 /** Pet, wings and title as three big cards that share the column's height equally. */
@@ -130,13 +153,15 @@ function render(model, source, ref) {
         <div class="ae-col">
           <section class="ae-panel" aria-labelledby="aeGearTitle">
             <h2 class="ae-section-title" id="aeGearTitle">Equipped gear <small id="aeGearCount"></small></h2>
+            <p class="ae-ring-note" id="aeGearRingNote" role="status" hidden></p>
             <ul class="ae-gear" id="aeGear"></ul>
             <p class="ae-accessories" id="aeAccessories"></p>
           </section>
           <section class="ae-panel is-grow" aria-labelledby="aeStatTitle">
             <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the official AION 2 site</small></h2>
             <dl class="ae-stats" id="aeStats"></dl>
-            <p class="ae-note">Attack, Defense and other combat stats are not in the public character data.</p>
+            <p class="ae-empty ae-stats-none" id="aeStatsNone" hidden>Not shown by the official AION 2 site</p>
+            <p class="ae-note" id="aeCombatNote">Attack, Defense, Accuracy and other combat stats are not in the public character data. Check them on your in-game character screen.</p>
           </section>
         </div>
         <div class="ae-col" id="aeExtrasCol">
@@ -151,6 +176,7 @@ function render(model, source, ref) {
   renderGear();
   renderStats();
   renderExtras();
+  ringFromHash();
   $('#aeGear').addEventListener('click', event => {
     const button = event.target.closest('[data-slot]');
     if (button) selectSlot(Number(button.dataset.slot), button).catch(error => console.error(error));

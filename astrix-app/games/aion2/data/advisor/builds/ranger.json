@@ -34,12 +34,19 @@
         {
           "name": "Gale Arrow",
           "priority": 3,
-          "target": "Lv 16 for the cooldown cut",
+          "target": "Mastery 11, then +4 from Daevanion nodes. The cooldown cut needs skill level 16: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 7. Self buff for combat speed and damage.",
           "refs": [
             "mb-ranger",
             "mb-builds"
-          ]
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 16 for the cooldown cut\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
         },
         {
           "name": "Drill Dart",
