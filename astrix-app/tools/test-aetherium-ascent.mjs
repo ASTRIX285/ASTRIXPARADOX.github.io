@@ -53,6 +53,9 @@ const lv22Info=structuredClone(info);
 Object.assign(lv22Info.profile,{characterName:'LEVELED',characterId:'bGV2ZWxlZDIy=',characterLevel:22,serverId:1309,serverName:'Hithanya'});
 const lv22Equipment=structuredClone(equipment);
 lv22Equipment.equipment.equipmentList.push({...lv22Equipment.equipment.equipmentList[0],id:999000022,name:'Test Amulet',slotPos:22,slotPosName:'Amulet'});
+// A Lv 45 Daeva in Unique, Epic and Rare gear (captured 11 Oct 2026, renamed: no gamer tag, id or portrait), served on server 1317.
+const lv45Info=await fixture('lv45-info'),lv45Equipment=await fixture('lv45-equipment'),lv45Items=await fixture('lv45-items');
+Object.assign(lv45Info.profile,{serverId:1317});
 
 // The live shape of the Vaizel bug (10 Oct 2026): a Lv 30 Daeva (server 1313) with Nezekan finished, Zikel part spent
 // and Vaizel open with nothing on it. The move must name Vaizel and Show me must open Vaizel, never Nezekan.
@@ -125,12 +128,13 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
       :serverId==='1314'?{info:spentInfo,equipment}
       :serverId==='1315'?{info:capInfo,equipment:capEquipment}
       :serverId==='1316'?{info:lv41Info,equipment:lv41Equipment}
+      :serverId==='1317'?{info:lv45Info,equipment:lv45Equipment}
       :serverId===String(ASMO_V.serverId)?{info:asmoVaizelInfo,equipment:ASMO_V.equipment}
       :lv22?{info:lv22Info,equipment:lv22Equipment}:{info:asmo?asmoInfo:info,equipment};
     const bodies={
       '/aion2/search':asmo?asmoSearch:search,
       '/aion2/character':character,
-      '/aion2/item':item,
+      '/aion2/item':serverId==='1317'?lv45Items[url.searchParams.get('slotPos')]:item,
       '/aion2/daevanion':board
     };
     const body=bodies[url.pathname];
@@ -455,10 +459,11 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   assert.equal(await plain(page,'#aeNowTitle'),'Your next moves','No "for <name>" when a Daeva is linked');
   const steps=await page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent));
   // Walkthrough fix (11 Oct 2026): one level order, so the level move is Keen Strike, the Mastery list's first skill.
-  assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 7 worn items above +0','Level Keen Strike (now Lv 3)']);
+  // Grade rule (11 Oct 2026): was 'Enchant 7 worn items above +0'. At Lv 12 the Common and Rare pieces go to their +5 cap.
+  assert.deepEqual(steps,['Spend points on the Nezekan Daevanion board','Enchant 8 Rare and Common pieces to +5','Level Keen Strike (now Lv 3)']);
   assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery'],'Each next move opens the screen that shows it');
-  // Walkthrough fix (11 Oct 2026): Show me on the enchant move opens the Gear page with the +0 items ringed.
-  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#enchant$/);
+  // Walkthrough fix (11 Oct 2026): Show me on the enchant move opens the Gear page with the items it names ringed (the move's own id since the grade rule).
+  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#enchant-early$/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
   assert.match(page.url(),/serverId=1308&characterId=.*&role=dps$/);
   assert.match(page.url(),/[?&]region=eu&/,'The address carries the region');
@@ -1004,18 +1009,60 @@ await check('a step shows done only after a visit, per Daeva on this device; the
   await plan.context.close();
 });
 
-await check('Show me on the enchant move opens the Gear page with the +0 items ringed and in view',async()=>{
+// Grade rule (11 Oct 2026): was "the seven +0 items ringed" with the note "Ringed: the 7 worn items still at +0. Enchant them
+// in game." The move now names the eight Common and Rare pieces below their +5 cap, and the note says what the move says.
+await check('Show me on the enchant move opens the Gear page with the items it names ringed and in view',async()=>{
   const {page,context}=await open(ascent(ref),{live:true});
+  const title=await plain(page,'.ae-quest[data-quest-view="gear"] .ae-quest-text');
   const href=await page.getAttribute('.ae-quest[data-quest-view="gear"]','href');
   await page.goto(`${base}${href}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
   await page.waitForSelector('#aeGear li.is-ringed');
-  assert.equal(await page.locator('#aeGear li.is-ringed').count(),7,'The seven +0 items the move names');
-  assert.equal(await page.locator('#aeGear li.is-ringed .ae-flag').count(),7,'each with its Enchant flag');
-  assert.equal(await plain(page,'#aeGearRingNote'),'Ringed: the 7 worn items still at +0. Enchant them in game.');
+  assert.equal(await page.locator('#aeGear li.is-ringed').count(),8,'The eight items the move names');
+  assert.equal(await page.locator('#aeGear li.is-ringed .ae-flag').count(),8,'each with its Enchant flag');
+  assert.equal(await plain(page,'#aeGearRingNote'),title,'The line at the top says what the move says');
   assert.equal(await page.$eval('#aeGear li.is-ringed',el=>getComputedStyle(el).outlineStyle),'solid','The ring is drawn');
   await page.waitForTimeout(600);
   assert.ok(await page.$eval('#aeGear li.is-ringed',el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'The first ringed item is in view');
+  await context.close();
+});
+
+/* fix/aetherium-gear-enchant-context (11 Oct 2026): gear moves are specific and in order, Show me rings only what a move names,
+   and the Gear page's back link returns to the plan, never a loop. A renamed Lv 45 Daeva (Unique weapon +3, guard +11, Epic set). */
+const ref45=new URLSearchParams({serverId:'1317',characterId:lv45Info.profile.characterId});
+await check('Lv 45 gear moves: weapon to +10, belt and amulet to +10, replace the Epic pieces, then the guard to +15 marked costly',async()=>{
+  const {page,context}=await open(ascent(ref45),{live:true});
+  const quests=await page.$$eval('.ae-quest',items=>items.map(el=>[el.dataset.questView,el.querySelector('.ae-quest-text').textContent.trim(),el.getAttribute('href')]));
+  const gear=quests.filter(([view])=>view==='gear');
+  assert.ok(gear.length>=1);
+  assert.equal(gear[0][1],'Enchant Spiritforged Greatsword +3 to +10');
+  assert.match(gear[0][2],/#enchant-1$/);
+  assert.doesNotMatch(quests.map(quest=>quest[1]).join('|'),/Enchant \d+ (worn )?items/,'Never one vague line');
+  // The gear move shows the item it names on its grade tile.
+  assert.equal(await page.$eval('.ae-quest[data-quest-view="gear"] .ae-gtile',el=>el.dataset.grade),'unique');
+  await context.close();
+});
+
+await check('Show me on a Lv 45 gear move rings only the items it names, and the back link returns to the Ascent Plan',async()=>{
+  for(const [hash,count,say] of [['#enchant-1',1,'Enchant Spiritforged Greatsword +3 to +10'],['#replace-epic',11,'Replace 11 Epic pieces with Unique gear'],['#enchant-2',1,'Enchant Wisdom Guard +11 to +15']]){
+    const {page,context}=await open(`/hub/aetherium/gear/equipment/?${ref45}${hash}`,{live:true});
+    await page.waitForSelector('#aeGear li.is-ringed');
+    assert.equal(await page.locator('#aeGear li.is-ringed').count(),count,hash);
+    assert.equal(await plain(page,'#aeGearRingNote'),say);
+    const back=await page.getAttribute('.ae-gw-back','href');
+    assert.match(back,/^\/hub\/aetherium\/ascent\/\?serverId=1317&characterId=[^#]+#aeNow$/,'Back goes to the plan');
+    assert.match(await plain(page,'.ae-gw-back'),/Plan/);
+    await Promise.all([page.waitForURL(/\/ascent\//),page.click('.ae-gw-back')]);
+    await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+    assert.ok(await page.locator('.ae-quest').count(),'Back on the moves');
+    await context.close();
+  }
+  // Tapping a flag after Show me opens the card in place: no way round to the plan and back again.
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/?${ref45}#replace-epic`,{live:true});
+  const before=page.url();
+  await page.click('[data-enchant-flag="5"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
+  assert.equal(page.url(),before,'No loop');
   await context.close();
 });
 

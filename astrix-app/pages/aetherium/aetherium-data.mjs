@@ -397,6 +397,9 @@ function withQuery(path, ref, extra = {}) {
 }
 const classSlug = className => (className ? String(className).toLowerCase() : null);
 
+/** The Daeva Card for a Daeva. */
+export const cardUrl = ref => withQuery('/hub/aetherium/', ref);
+
 /** The character menu (Gear, Skills, Daevanion cards). */
 export const gearUrl = ref => withQuery('/hub/aetherium/gear/', ref);
 
@@ -418,18 +421,32 @@ export function ascentUrl(ref, className = null, { screen = null, board = null }
 const ADVISOR = '/astrix-app/games/aion2/data/advisor/';
 let advisorBase;
 let advisorProgression;
+let advisorGrades;
+let advisorMechanics;
 const advisorBuilds = new Map();
 const advisorIcons = new Map();
 
 /**
- * Ascent Plan data: game-wide progression, the confirmed mechanics (the Mastery cap) and the skill catalogue
- * (shared, loaded once), plus the role builds for one class (loaded when that class is picked). Static files,
+ * Ascent Plan data: game-wide progression, the confirmed mechanics (the Mastery cap), the item grades and the skill
+ * catalogue (shared, loaded once), plus the role builds for one class (loaded when that class is picked). Static files,
  * no call to the official site.
  */
 export function loadAdvisorBase() {
-  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`), getJson(`${ADVISOR}mechanics.json`)])
+  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`), loadMechanics(), loadGrades()])
     .catch(error => { advisorBase = undefined; throw error; });
   return advisorBase;
+}
+
+/** Item grades (data/advisor/grades.json): the game's names, colours and enchant caps. A small file, loaded once. */
+export function loadGrades() {
+  advisorGrades ??= getJson(`${ADVISOR}grades.json`).catch(error => { advisorGrades = undefined; throw error; });
+  return advisorGrades;
+}
+
+/** The game mechanics (data/advisor/mechanics.json), shared by the Ascent Plan and the Gear page's item card. */
+export function loadMechanics() {
+  advisorMechanics ??= getJson(`${ADVISOR}mechanics.json`).catch(error => { advisorMechanics = undefined; throw error; });
+  return advisorMechanics;
 }
 
 /** Game-wide facts only (boards, unlock levels): a small file, so the menu and Daevanion pages skip the skill catalogue. */
@@ -470,6 +487,6 @@ export async function loadDaevanionAdvice(className) {
 }
 
 export async function loadAdvisor(className) {
-  const [[progression, skills, mechanics], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
-  return { progression, skills, mechanics, builds, icons };
+  const [[progression, skills, mechanics, grades], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
+  return { progression, skills, mechanics, grades, builds, icons };
 }

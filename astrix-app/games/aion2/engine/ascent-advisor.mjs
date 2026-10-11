@@ -290,23 +290,179 @@ export function levelOrder(plan) {
   return Array.isArray(plan?.mastery?.spend) ? plan.mastery.spend : [];
 }
 
-/** True for a worn item the plan wants enchanted: still at +0. The Gear page flags the same items. */
-export const needsEnchant = slot => !slot.empty && slot.enchant === 0;
-const enchantFix = needsEnchant;
+/* Item grades and enchant advice. The grade record (data/advisor/grades.json) gives the game's name, order, colour and
+   cap for the code the official data sends (its "Legend" is the game's Epic). The item's own maxEnchantLevel always
+   beats the grade's cap; the cap is only the fallback, said as "about" until the item detail is read. The Gear page,
+   the item card and the plan's gear moves all read enchantAdvice, so a tile's flag and the move that names it agree. */
+
+/** The level from which Common and Rare gear is replaced, not enchanted: the progression fact when there is one, else Lv 20. */
+export const EARLY_GEAR_LEVEL = 20;
+/** Every enchant step up to this level succeeds (mechanics.json enchant-rates). */
+export const SAFE_ENCHANT = 10;
+/** Slots that go past +10 only on these (the rest stop at +10: past it every step can fail and the cost climbs). */
+const WEAPON_AND_GUARD = new Set(['MAINHAND', 'SUBHAND']);
+/** Slots with their own cap at every grade (grades.json slot-caps). */
+const OWN_CAP_SLOTS = new Set(['AMULET', 'BELT']);
+const slotKey = slot => String(slot?.slot ?? '').toUpperCase().replace(/[\s_]/g, '');
+
+/** Grades by the code the data sends, plus the slot caps. */
+export function indexGrades(grades) {
+  const records = grades?.records ?? [];
+  const byCode = new Map();
+  for (const record of records) {
+    if (typeof record.code === 'string') byCode.set(record.code, record);
+  }
+  const caps = records.find(record => record.id === 'slot-caps')?.slots ?? {};
+  return { byCode, slotCaps: Object.fromEntries(Object.entries(caps).map(([name, cap]) => [name.toUpperCase(), cap.value])) };
+}
+const gradeIndexOf = grades => (grades?.byCode instanceof Map ? grades : indexGrades(grades));
+
+/**
+ * One grade in the game's words: { id, name, order, colour, cap, known }. gradeName (the item detail's client name)
+ * wins over the record's name. A code no record knows is never shown raw if it is "Legend".
+ */
+export function gradeInfo(code, grades, gradeName = null) {
+  const record = gradeIndexOf(grades).byCode.get(code) ?? null;
+  const fallback = code === 'Legend' ? 'Epic' : (typeof code === 'string' && code ? code : 'Unknown');
+  return {
+    id: record?.id ?? null,
+    name: (typeof gradeName === 'string' && gradeName) ? gradeName : record?.name.value ?? fallback,
+    order: Number.isFinite(record?.order?.value) ? record.order.value : null,
+    colour: record?.colour?.value ?? null,
+    cap: Number.isFinite(record?.cap?.value) ? record.cap.value : null,
+    known: Boolean(record)
+  };
+}
+
+/** The enchant cap of one worn item: { cap, about } (about: from the grade table, the item detail not read yet). */
+export function enchantCap(slot, grades) {
+  if (Number.isFinite(slot.maxEnchant)) return { cap: slot.maxEnchant, about: false };
+  const index = gradeIndexOf(grades);
+  const own = index.slotCaps[slotKey(slot)];
+  if (Number.isFinite(own)) return { cap: own, about: true };
+  const cap = gradeInfo(slot.grade, index).cap;
+  return { cap, about: true };
+}
+
+function earlyGearLevel(progression) {
+  const fact = indexProgression(progression)['gear-replace-level'];
+  return Number.isFinite(fact?.value) ? fact.value : EARLY_GEAR_LEVEL;
+}
+
+/**
+ * What to do with one worn item, by its grade. Returns null for an empty slot, else
+ * { action, from, to, cap, about, costly, why, flag, grade }:
+ *   enchant  to the target (to): Unique to +10 first, then +15 only on the weapon and guard (costly);
+ *            amulets and belts to their own cap; Common and Rare only before the early-gear level;
+ *   replace  Epic (never past +5), and Common and Rare from the early-gear level;
+ *   full     at the cap; done: a Unique item at +10 that is not the weapon or guard (no flag);
+ *   null     a grade the data does not know yet (no advice, never a guess).
+ */
+export function enchantAdvice(slot, { level = 1, grades = null, progression = null } = {}) {
+  if (!slot || slot.empty) return null;
+  const index = gradeIndexOf(grades);
+  const grade = gradeInfo(slot.grade, index, slot.gradeName ?? null);
+  const { cap, about } = enchantCap(slot, index);
+  const from = Number.isFinite(slot.enchant) ? slot.enchant : 0;
+  const base = { from, to: null, cap, about, costly: false, grade };
+  const capText = `${about ? 'about ' : ''}+${cap}`;
+  if (!Number.isFinite(cap) || grade.order === null) {
+    return { ...base, action: null, flag: null, why: `The ${grade.name} grade is not confirmed for enchant advice yet.` };
+  }
+  const full = { ...base, action: 'full', to: cap, flag: 'FULL', why: `Fully enchanted: +${from} is its cap.` };
+  const enchantTo = (to, why, costly = false) => ({ ...base, action: 'enchant', to, costly, flag: `ENCHANT +${from} to +${to}`, why });
+  if (OWN_CAP_SLOTS.has(slotKey(slot))) {
+    return from >= cap ? full : enchantTo(cap, `${slotLabelOf(slot)}s go to ${capText} at every grade. They use their own enhance scroll.`);
+  }
+  if (grade.id === 'epic') {
+    return { ...base, action: 'replace', flag: 'REPLACE', why: `Epic gear stops at ${capText}. Replace it with a Unique piece, and do not enchant it past +5: the stones stay with it when you swap.` };
+  }
+  if (grade.id === 'common' || grade.id === 'rare') {
+    if (level >= earlyGearLevel(progression)) {
+      return { ...base, action: 'replace', flag: 'REPLACE', why: `${grade.name} gear is for the early levels. Replace it with a Unique piece: enchanting it now spends stones on an item you will drop.` };
+    }
+    return from >= cap ? full : enchantTo(cap, `Cheap while you level: every step to ${capText} succeeds.`);
+  }
+  if (grade.order >= (index.byCode.get('Unique')?.order?.value ?? Infinity)) {
+    if (from >= cap) return full;
+    const safe = Math.min(SAFE_ENCHANT, cap);
+    if (from < safe) return enchantTo(safe, `${grade.name} gear is worth enchanting. Every step to +${safe} succeeds.`);
+    if (WEAPON_AND_GUARD.has(slotKey(slot))) {
+      return enchantTo(cap, `Past +${SAFE_ENCHANT} each step can fail and costs a lot of Kina and Enhance Stones. Worth it on the weapon and guard only, the weapon first.`, true);
+    }
+    return { ...base, action: 'done', to: safe, flag: null, why: `+${from} reached. Past +${SAFE_ENCHANT} only pays on the weapon and guard.` };
+  }
+  return { ...base, action: null, flag: null, why: `The ${grade.name} grade is not confirmed for enchant advice yet.` };
+}
+const slotLabelOf = slot => String(slot.slot ?? '').toLowerCase().replace(/^./, c => c.toUpperCase());
+
+/** The chance of each enchant step from one level to another, from mechanics.json enchant-rates: [{ to, rate }]. */
+export function enchantSteps(from, to, rule) {
+  const safeTo = rule?.value?.safeTo ?? SAFE_ENCHANT;
+  const rates = rule?.value?.rates ?? {};
+  const steps = [];
+  for (let level = from + 1; level <= to; level += 1) steps.push({ to: level, rate: level <= safeTo ? 100 : (Number.isFinite(rates[level]) ? rates[level] : null) });
+  return steps;
+}
+
+/**
+ * The plan's gear moves, specific and in order: one per Unique item to enchant (the weapon first), amulets and belts
+ * to their cap, Epic pieces to replace, Common and Rare to replace, then the costly steps past +10 (weapon, then guard).
+ * Each move names its slots (slotPos) and an id, which is also the Gear page's ring (#enchant-1, #replace-epic).
+ */
+export function gearMoves(model, { level = 1, grades = null, progression = null } = {}) {
+  if (!model) return [];
+  const moves = [];
+  const add = (rank, id, title, detail, slots) => moves.push({ rank, id, title, detail, slots: slots.map(slot => slot.slotPos), ring: id });
+  const empty = model.gear.filter(slot => slot.empty);
+  if (empty.length) add(10, 'empty', `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, empty);
+  if (!grades) return moves;
+  const advised = model.gear.filter(slot => !slot.empty).map(slot => ({ slot, advice: enchantAdvice(slot, { level, grades, progression }) }));
+  const of = test => advised.filter(({ advice }) => advice && test(advice));
+  const weaponFirst = (a, b) => (slotKey(a.slot) === 'MAINHAND' ? -1 : slotKey(b.slot) === 'MAINHAND' ? 1 : a.slot.slotPos - b.slot.slotPos);
+  const one = ({ slot, advice }, rank, detail) => add(rank, `enchant-${slot.slotPos}`, `Enchant ${slot.name} +${advice.from} to +${advice.to}`, detail, [slot]);
+  const plain = of(advice => advice.action === 'enchant' && !advice.costly);
+  // Unique (and higher) to +10: the weapon and guard each get their own move, the rest one move when there are several.
+  const uniqueSafe = plain.filter(({ slot, advice }) => advice.grade.id !== 'common' && advice.grade.id !== 'rare' && !OWN_CAP_SLOTS.has(slotKey(slot))).sort(weaponFirst);
+  const keySlots = uniqueSafe.filter(({ slot }) => WEAPON_AND_GUARD.has(slotKey(slot)));
+  const otherSafe = uniqueSafe.filter(({ slot }) => !WEAPON_AND_GUARD.has(slotKey(slot)));
+  keySlots.forEach((entry, n) => one(entry, 30 + n / 10, `Every step succeeds. ${entry.advice.grade.name} gear goes on to +${entry.advice.cap} later.`));
+  if (otherSafe.length === 1) one(otherSafe[0], 30.5, 'Every step succeeds.');
+  else if (otherSafe.length) add(30.5, 'enchant-unique', `Enchant ${otherSafe.length} ${otherSafe[0].advice.grade.name} pieces to +${SAFE_ENCHANT}`, `Every step succeeds. ${otherSafe.map(({ slot }) => slot.name).join(', ')}.`, otherSafe.map(({ slot }) => slot));
+  // Amulets and belts to their own cap.
+  plain.filter(({ slot }) => OWN_CAP_SLOTS.has(slotKey(slot))).forEach((entry, n) => one(entry, 31 + n / 10, `${entry.advice.to - entry.advice.from === 1 ? 'One step' : `${entry.advice.to - entry.advice.from} steps`} to its +${entry.advice.cap} cap. It uses its own enhance scroll.`));
+  // Common and Rare while levelling: one move.
+  const early = plain.filter(({ slot, advice }) => !OWN_CAP_SLOTS.has(slotKey(slot)) && (advice.grade.id === 'common' || advice.grade.id === 'rare'));
+  if (early.length === 1) one(early[0], 31.5, 'Cheap while you level. Every step succeeds.');
+  else if (early.length) add(31.5, 'enchant-early', `Enchant ${early.length} ${namesOf(early)} pieces to +${early[0].advice.cap}`, `Cheap while you level. Every step succeeds. ${early.map(({ slot }) => slot.name).join(', ')}.`, early.map(({ slot }) => slot));
+  // Replace: Epic pieces, then Common and Rare.
+  const replace = of(advice => advice.action === 'replace');
+  const epic = replace.filter(({ advice }) => advice.grade.id === 'epic');
+  const low = replace.filter(({ advice }) => advice.grade.id !== 'epic');
+  const replaceMove = (rank, id, list) => add(rank, id,
+    list.length === 1 ? `Replace ${list[0].slot.name} with a Unique piece` : `Replace ${list.length} ${namesOf(list)} pieces with Unique gear`,
+    `${list[0].advice.grade.id === 'epic' ? 'Epic gear stops at +10. Do not enchant it past +5.' : 'Do not enchant them: the stones stay with the old item.'} Replace with a Unique piece. ${list.map(({ slot }) => slot.name).join(', ')}.`,
+    list.map(({ slot }) => slot));
+  if (epic.length) replaceMove(32, 'replace-epic', epic);
+  if (low.length) replaceMove(33, 'replace-early', low);
+  // The costly steps past +10: the weapon, then the guard.
+  of(advice => advice.action === 'enchant' && advice.costly).sort(weaponFirst).forEach((entry, n) => one(entry, 34 + n / 10,
+    `Big Kina and Enhance Stone cost. Each step past +${SAFE_ENCHANT} can fail; a failure costs the attempt, never a level.${slotKey(entry.slot) === 'MAINHAND' ? '' : ' Do it after the weapon.'}`));
+  return moves;
+}
+const namesOf = list => [...new Set(list.map(({ advice }) => advice.grade.name))].join(' and ');
 
 /**
  * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
  * character), then the build steps that apply at this level.
  */
-function nowList(level, build, skills, stigmas, boards, model, mastery = null, skillBar = null) {
+function nowList(level, build, skills, stigmas, boards, model, mastery = null, skillBar = null, { grades = null, progression = null } = {}) {
   const list = [];
   const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery', extra = {}) => list.push({ rank, title, detail, refs, kind, view, ...extra });
 
   if (model) {
-    const empty = model.gear.filter(slot => slot.empty);
-    if (empty.length) push(10, `Fill ${empty.length} empty gear ${empty.length === 1 ? 'slot' : 'slots'}`, `Nothing is worn in: ${empty.map(slot => slot.slot.replace(/([a-z])([A-Z])/g, '$1 $2')).join(', ')}. Any item beats an empty slot.`, [], 'armory', 'gear', { slots: empty.map(slot => slot.slotPos), ring: 'empty' });
-    const bare = model.gear.filter(enchantFix);
-    if (bare.length) push(30, `Enchant ${bare.length} worn ${bare.length === 1 ? 'item' : 'items'} above +0`, `Still at +0: ${bare.map(slot => slot.name).join(', ')}.`, [], 'armory', 'gear', { slots: bare.map(slot => slot.slotPos), ring: 'enchant' });
+    // The gear moves come from the grade rule (gearMoves), the same one the Gear page flags tiles with.
+    for (const move of gearMoves(model, { level, grades, progression })) push(move.rank, move.title, move.detail, [], 'armory', 'gear', { slots: move.slots, ring: move.ring, move: move.id });
     // Only a board with nothing spent on it is offered. A board with any node taken (a finished one included) is never the move.
     const openUnspent = boards.boards.filter(board => board.open && board.nodesTaken === 0);
     // The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens the board it names.
@@ -422,7 +578,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   return {
     ...base,
     pending: null,
-    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery, skillBar),
+    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery, skillBar, { grades: data.grades ?? null, progression: data.progression }),
     skills,
     stigmas,
     daevanion,
@@ -450,7 +606,7 @@ export const STACK_ROWS = 4;
 
 /* Game mechanics (data/advisor/mechanics.json): one record per rule with a status. The pages show a "Not confirmed yet" tag,
    with the rule's in-game test, wherever an unconfirmed rule is used; flipping the status in the data removes it everywhere. */
-export const RULE_IDS = Object.freeze(['skill-stack', 'chain-follow-up', 'macro-order', 'mastery-cap']);
+export const RULE_IDS = Object.freeze(['skill-stack', 'chain-follow-up', 'macro-order', 'mastery-cap', 'enchant-rates', 'enchant-pity', 'enchant-carry', 'enhance-stones']);
 const UNKNOWN_RULE = Object.freeze({ status: 'unconfirmed', confirmed: false, text: '', test: null, facts: null });
 
 /** Rules by id, each with confirmed (boolean) and, for the macro rule, the facts it points at in progression.json. */

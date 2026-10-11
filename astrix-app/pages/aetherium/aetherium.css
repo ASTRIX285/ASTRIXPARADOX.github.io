@@ -24,6 +24,8 @@
   --ae-node-skill:#3f8fe0;--ae-node-passive:#2e9a62;--ae-node-corner:#e2742b;--ae-node-stat:#4a5470;
   --ae-bar:#1b2b3c;--ae-bar-line:#3d5a73;--ae-bar-dim:#172433;--ae-bar-dim-line:#2b4155;--ae-bar-main:#1d3142;--ae-bar-dot:#2a4256;--ae-bar-main-dot:#3c5f78;
   --ae-manual:#4fd1a5;--ae-stigma:#b07cff;--ae-warn:#ff7b8e;
+  /* Item grade colours, the game's own (data/advisor/grades.json holds them with their status). On the dark panels they read at 4.5:1 or more. */
+  --ae-grade-common:#e8ecf2;--ae-grade-rare:#5fd37e;--ae-grade-epic:#58a8ff;--ae-grade-unique:#e2b54f;--ae-grade-heroic:#ff9a4a;--ae-grade-mythic:#ff6b6b;--ae-grade-special:#45d6c6;
   /* Shape and light. Squared AX corners with the notch on panels, buttons and tiles; pills are the only round shapes. */
   --ae-pill:999px;--ae-notch:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
   --ae-top-light:inset 0 1px 0 rgba(255,255,255,.06);
@@ -875,7 +877,6 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
   .ae-summary-card{grid-template-columns:80px minmax(0,1fr);gap:14px}
   .ae-summary-card .ae-name{font-size:1.375rem}
   .ae-panel{padding:16px}
-  .ae-gear{grid-template-columns:minmax(0,1fr)}
   .ae-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:479px){
@@ -1097,9 +1098,6 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-reading{margin:14px 0 0;font:500 1rem/1.4 "Barlow",sans-serif;color:var(--ae-muted)}
 
 .ae-gear li{position:relative;min-width:0}
-.ae-gear li.has-flag .ae-slot{padding-right:96px}
-.ae-flag{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;min-height:32px;padding:0 10px;font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;text-transform:uppercase;color:var(--ae-gold-ink);background:var(--ae-gold);text-decoration:none;clip-path:var(--ae-notch)}
-.ae-flag:hover,.ae-flag:focus-visible{background:var(--ae-gold-hi)}
 
 .ae-menu-badge.is-words{height:26px;padding:0 10px;border-radius:13px;font-size:.875rem;white-space:nowrap}
 
@@ -1188,3 +1186,64 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-gear li.is-ringed{outline:2px solid var(--ae-strobe);outline-offset:2px}
 .ae-stats-none{padding:0.5rem 0;font-size:1rem}
 .ae-stats[hidden],.ae-ring-note[hidden],.ae-stats-none[hidden]{display:none}
+
+/* Item grade tiles (fix/aetherium-gear-enchant-context): the icon on its grade colour with a soft inner glow, like the
+   game's tiles, and the enchant level on the corner. 80px at desktop, 64px on a phone. The colour is the grade's token. */
+.ae-gtile{--ae-g:var(--ae-hairline-strong);position:relative;flex:none;display:grid;place-items:center;box-sizing:border-box;width:5rem;height:5rem;
+  border:1px solid var(--ae-g);border-radius:6px;background-color:color-mix(in srgb,var(--ae-g) 26%,var(--ae-well));
+  background-image:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--ae-g) 42%,transparent),transparent 72%);
+  box-shadow:inset 0 0 0.875rem color-mix(in srgb,var(--ae-g) 45%,transparent),inset 0 1px 0 rgba(255,255,255,.12)}
+.ae-gtile img{width:100%;height:100%;object-fit:contain}
+.ae-gtile .ae-icon-empty{width:100%;height:100%}
+.ae-gtile-plus{position:absolute;right:3px;bottom:2px;padding:0 4px;font:800 .875rem/1.25 var(--ae-font-ui);color:var(--ae-text);background:color-mix(in srgb,var(--ae-page) 78%,transparent);border-radius:3px}
+.ae-gtile[data-grade="common"],.ae-grade-name[data-grade="common"],.ae-card-head[data-grade="common"]{--ae-g:var(--ae-grade-common)}
+.ae-gtile[data-grade="rare"],.ae-grade-name[data-grade="rare"],.ae-card-head[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}
+.ae-gtile[data-grade="epic"],.ae-grade-name[data-grade="epic"],.ae-card-head[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
+.ae-gtile[data-grade="unique"],.ae-grade-name[data-grade="unique"],.ae-card-head[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-gtile[data-grade="heroic"],.ae-grade-name[data-grade="heroic"],.ae-card-head[data-grade="heroic"]{--ae-g:var(--ae-grade-heroic)}
+.ae-gtile[data-grade="mythic"],.ae-grade-name[data-grade="mythic"],.ae-card-head[data-grade="mythic"]{--ae-g:var(--ae-grade-mythic)}
+.ae-gtile[data-grade="special"],.ae-grade-name[data-grade="special"],.ae-card-head[data-grade="special"]{--ae-g:var(--ae-grade-special)}
+.ae-grade-name[data-grade]{color:var(--ae-g);font-weight:700}
+/* The item card's icon takes the same grade tile. */
+.ae-card-head[data-grade] .ae-card-icon{border-color:var(--ae-g);background-color:color-mix(in srgb,var(--ae-g) 26%,var(--ae-well));
+  background-image:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--ae-g) 42%,transparent),transparent 72%);box-shadow:inset 0 0 0.75rem color-mix(in srgb,var(--ae-g) 45%,transparent)}
+.ae-card-head[data-grade] .ae-card-icon img{object-fit:contain}
+
+/* Gear tiles: two columns at desktop, one under 600px. The flag sits under the item's words, inside the tile. */
+.aetherium-page .ae-gear .ae-slot{align-items:center;min-height:6.5rem;font-size:1rem}
+.ae-gear .ae-slot-meta,.ae-gear .ae-grade-name,.ae-gtile-plus{letter-spacing:.02em}
+.ae-gear .ae-slot-meta{font-size:.875rem}
+.ae-gear li.has-flag .ae-slot{align-items:flex-start;padding-bottom:3.5rem}
+/* Flag colours in the brand layer, after its button rules: a layered !important beats an unlayered one. */
+body.aetherium-page .ae-gear .ae-flag:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){
+  position:absolute;left:calc(14px + 5rem + 14px);bottom:.75rem;display:inline-flex;align-items:center;min-height:2.75rem;max-width:calc(100% - 5rem - 42px);
+  padding:0 .75rem;font:800 .875rem/1.15 var(--ae-font-ui);letter-spacing:.02em;text-transform:none;white-space:nowrap;cursor:pointer}
+@layer astrix-brand{
+body.aetherium-page .ae-gear .ae-flag:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){
+  color:var(--ae-gold-ink)!important;background:var(--ae-gold)!important;clip-path:var(--ae-notch)!important;box-shadow:var(--ae-bevel)!important;border:0!important}
+body.aetherium-page .ae-gear .ae-flag:hover:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){background:var(--ae-gold-hi)!important}
+body.aetherium-page .ae-gear .ae-flag.is-costly:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){color:var(--ae-gold)!important;background:color-mix(in srgb,var(--ae-gold) 12%,var(--ae-well))!important;box-shadow:inset 0 0 0 1px var(--ae-gold)!important}
+body.aetherium-page .ae-gear .ae-flag.is-replace:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){color:var(--ae-ice)!important;background:color-mix(in srgb,var(--ae-ice) 10%,var(--ae-well))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ae-ice) 70%,transparent)!important}
+body.aetherium-page .ae-gear .ae-flag.is-full:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){color:var(--ae-text-muted)!important;background:var(--ae-well)!important;box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)!important}
+body.aetherium-page .ae-gear .ae-flag:focus-visible:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){outline:2px solid var(--ae-strobe);outline-offset:2px}
+}
+@media (max-width:599px){
+  .ae-gear{grid-template-columns:minmax(0,1fr)}
+  .ae-gtile{width:4rem;height:4rem}
+  body.aetherium-page .ae-gear .ae-flag:not(#ax-f1):not(#ax-f2):not(#ax-f3):not(#ax-f4):not(#ax-f5){left:calc(14px + 4rem + 14px);max-width:calc(100% - 4rem - 42px)}
+}
+
+
+/* The item card's enchant advice: what to do, why, how far, how safe and what it costs. */
+.ae-advice{display:grid;gap:.5rem;margin:.75rem 0;padding:.75rem;background:var(--ae-well);border:1px solid var(--ae-hairline);border-left:3px solid var(--ae-gold)}
+.ae-advice.is-replace{border-left-color:var(--ae-ice)}
+.ae-advice.is-full,.ae-advice.is-done,.ae-advice.is-none{border-left-color:var(--ae-hairline-strong)}
+.ae-advice-head{margin:0;font:700 1.0625rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-advice .ae-card-line{margin:0}
+.ae-advice .ae-item-block{margin:0}
+.ae-odds-list{margin:0;padding:0 0 0 1.1rem;display:grid;gap:2px;font-size:.875rem;color:var(--ae-text)}
+.ae-advice .ae-tag{margin-left:4px}
+.ae-advice-facts{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:.875rem}
+.ae-advice-facts li{display:flex;justify-content:space-between;gap:12px}
+.ae-advice-facts span{color:var(--ae-text-muted)}.ae-advice-facts b{color:var(--ae-text);font-weight:700}
+.ae-quest-art .ae-gtile{width:100%;height:100%;border:0;border-radius:0}

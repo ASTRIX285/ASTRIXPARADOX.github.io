@@ -110,11 +110,14 @@ export function failPage(name, error) {
   console.error(error);
 }
 
-/** The game-window title bar of a character page: back to the menu, the window title, who it is. */
-export function windowBar({ title, model, ref }) {
+/**
+ * The game-window title bar of a character page: back to where the player came from (the character menu, or the
+ * screen a page passes as back: { href, label }), the window title, who it is.
+ */
+export function windowBar({ title, model, ref, back = null }) {
   const p = model.profile;
   return `<div class="ae-gw-bar">
-      <a class="ae-gw-back" href="${esc(gearUrl(ref))}"><span aria-hidden="true">‹</span> Character</a>
+      <a class="ae-gw-back" href="${esc(back?.href ?? gearUrl(ref))}"><span aria-hidden="true">‹</span> ${esc(back?.label ?? 'Character')}</a>
       <h1 class="ae-gw-title" id="aeScreenTitle">${esc(title)}</h1>
       <p class="ae-gw-who">${esc(p.name)} · ${esc(p.class)} Lv ${esc(p.level)}</p>
     </div>`;

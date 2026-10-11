@@ -121,8 +121,8 @@ function savedLevel(ref) {
    (small static files) loads once the card is on screen, so the card never waits for it. The move comes from the advisor only. */
 function moveHref(move, p) {
   if (!move) return ascentUrl(state.ref, p.class);
-  // A gear move opens the Gear page with the items it names ringed (#enchant, #empty).
-  if (move.view === 'gear') return `${gearPageUrl(state.ref)}${move.ring ? `#${move.ring}` : ''}`;
+  // A gear move opens the Gear page with only the items it names ringed (#enchant-1:card); :card sends its back link here.
+  if (move.view === 'gear') return `${gearPageUrl(state.ref)}${move.ring ? `#${move.ring}:card` : ''}`;
   return ascentUrl(state.ref, p.class, { screen: move.view, board: move.view === 'daevanion' ? move.board ?? null : null });
 }
 async function loadFirstMove() {
