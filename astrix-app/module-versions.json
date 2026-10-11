@@ -80,11 +80,13 @@
 
   "/astrix-app/domains/player-identity/player-identity-service.mjs": "ffe9f66ede",
 
-  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "c4f9fa214b",
+  "/astrix-app/games/aion2/engine/armory-adapter.mjs": "04dcd80059",
 
-  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "04be048767",
+  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "aefc174227",
 
   "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "ee7829cd12",
+
+  "/astrix-app/games/aion2/engine/stat-advisor.mjs": "06ad2e1795",
 
   "/astrix-app/games/aion2/index.mjs": "bc4e8c21cb",
 
@@ -104,7 +106,7 @@
 
   "/astrix-app/pages/aetherium/aetherium-config.mjs": "28610abc95",
 
-  "/astrix-app/pages/aetherium/aetherium-data.mjs": "4511955fbb",
+  "/astrix-app/pages/aetherium/aetherium-data.mjs": "60eb452c11",
 
   "/astrix-app/pages/aetherium/aetherium-flow.mjs": "d212e4f454",
 
@@ -112,7 +114,7 @@
 
   "/astrix-app/pages/aetherium/aetherium-ui.mjs": "5ac4979deb",
 
-  "/astrix-app/pages/aetherium/ascent-plan.mjs": "0809f8a895",
+  "/astrix-app/pages/aetherium/ascent-plan.mjs": "bc82fef903",
 
   "/astrix-app/pages/aetherium/character-menu.mjs": "92350effff",
 
@@ -124,9 +126,11 @@
 
   "/astrix-app/pages/aetherium/daevanion-page.mjs": "50ab9175e7",
 
-  "/astrix-app/pages/aetherium/gear-ledger.mjs": "b0700bf9da",
+  "/astrix-app/pages/aetherium/gear-ledger.mjs": "7442cb934b",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "052005311b",
+
+  "/astrix-app/pages/aetherium/stats-panel.mjs": "817538968a",
 
   "/astrix-app/pages/build-fit/build-fit-url.mjs": "b69cb33f83",
 

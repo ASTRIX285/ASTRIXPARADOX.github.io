@@ -590,7 +590,9 @@
         "required": [
           "type",
           "name",
-          "value"
+          "value",
+          "kind",
+          "effects"
         ],
         "additionalProperties": false,
         "properties": {
@@ -603,6 +605,22 @@
           },
           "value": {
             "type": "number"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "main",
+              "deity"
+            ],
+            "description": "main: the six main stats; deity: the ten deity stats."
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The official statSecondList: what these points give, in the game's words."
           }
         }
       }

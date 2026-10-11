@@ -471,6 +471,7 @@ let advisorBase;
 let advisorProgression;
 let advisorGrades;
 let advisorMechanics;
+let advisorStats;
 const advisorBuilds = new Map();
 const advisorIcons = new Map();
 
@@ -480,7 +481,7 @@ const advisorIcons = new Map();
  * no call to the official site.
  */
 export function loadAdvisorBase() {
-  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`), loadMechanics(), loadGrades()])
+  advisorBase ??= Promise.all([loadProgression(), getJson(`${ADVISOR}skills.json`), loadMechanics(), loadGrades(), loadStats()])
     .catch(error => { advisorBase = undefined; throw error; });
   return advisorBase;
 }
@@ -489,6 +490,12 @@ export function loadAdvisorBase() {
 export function loadGrades() {
   advisorGrades ??= getJson(`${ADVISOR}grades.json`).catch(error => { advisorGrades = undefined; throw error; });
   return advisorGrades;
+}
+
+/** The stats record (data/advisor/stats.json): what each stat does, where points come from. A small file, loaded once. */
+export function loadStats() {
+  advisorStats ??= getJson(`${ADVISOR}stats.json`).catch(error => { advisorStats = undefined; throw error; });
+  return advisorStats;
 }
 
 /** The game mechanics (data/advisor/mechanics.json), shared by the Ascent Plan and the Gear page's item card. */
@@ -503,7 +510,8 @@ export function loadProgression() {
   return advisorProgression;
 }
 
-function loadBuilds(className) {
+/** One class's builds (static, cached). */
+export function loadBuilds(className) {
   const slug = String(className).toLowerCase();
   if (!advisorBuilds.has(slug)) advisorBuilds.set(slug, getJson(`${ADVISOR}builds/${slug}.json`).catch(error => { advisorBuilds.delete(slug); throw error; }));
   return advisorBuilds.get(slug);
@@ -534,7 +542,13 @@ export async function loadDaevanionAdvice(className) {
   return { progression, builds };
 }
 
+/** Every class's main build, { Gladiator: build, ... }: says which classes rank a stat high. Loaded when a stat card first opens. */
+export async function loadMainBuilds(classes) {
+  const files = await Promise.all(classes.map(name => loadBuilds(name).catch(() => null)));
+  return Object.fromEntries(classes.map((name, n) => [name, files[n]?.records?.find(build => build.main) ?? null]).filter(([, build]) => build));
+}
+
 export async function loadAdvisor(className) {
-  const [[progression, skills, mechanics, grades], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
-  return { progression, skills, mechanics, grades, builds, icons };
+  const [[progression, skills, mechanics, grades, stats], builds, icons] = await Promise.all([loadAdvisorBase(), loadBuilds(className), loadIcons(className)]);
+  return { progression, skills, mechanics, grades, stats, builds, icons };
 }

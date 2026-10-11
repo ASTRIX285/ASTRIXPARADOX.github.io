@@ -98,6 +98,24 @@ assert.ok(nezekan.icon.startsWith('https://assets.playnccdn.com/'));
 assert.ok(model.stats.some(row=>row.name==='Might'),'Primary stats listed');
 assert.ok(!model.stats.some(row=>row.name===ITEM_LEVEL_LABEL),'Item level row is not a stat');
 
+// Stats explained (feature/aetherium-stats-explained, 11 Oct 2026): the 6 main and 10 deity stats are kept with the
+// game's own effect lines (statSecondList), the ItemLevel row is dropped. Lv 45 fixture, renamed.
+{
+  const lv45=adaptCharacter({info:fixture('lv45-info'),equipment:fixture('lv45-equipment')},{slots,region:'eu',capturedOn:'2026-10-11'});
+  assert.equal(lv45.stats.length,16,'6 main and 10 deity stats');
+  assert.deepEqual(lv45.stats.filter(row=>row.kind==='main').map(row=>row.type),['STR','DEX','INT','CON','AGI','WIS']);
+  assert.deepEqual(lv45.stats.filter(row=>row.kind==='deity').map(row=>row.type),['Justice','Freedom','Illusion','Life','Time','Destruction','Death','Wisdom','Destiny','Space']);
+  assert.ok(!lv45.stats.some(row=>row.type==='ItemLevel'),'No ItemLevel row');
+  assert.equal(lv45.profile.itemLevel,795,'Item level stays on the profile');
+  const by=type=>lv45.stats.find(row=>row.type===type);
+  assert.deepEqual(by('STR').effects,['Attack increase +1.5%']);
+  assert.deepEqual(by('AGI').effects,['Accuracy increase +1.1%','Critical Hit increase +1.1%']);
+  assert.deepEqual(by('Time').effects,['Combat Speed +3.7%','Double Resist +3.7%']);
+  assert.equal(by('Time').name,'Time [Siel]');
+  assert.deepEqual(by('INT').effects,[],'0 points: the site sends null, kept as an empty list');
+  assert.ok(model.stats.every(row=>Array.isArray(row.effects)&&['main','deity'].includes(row.kind)),'Every stat row has its kind and effect list');
+}
+
 // Item detail card and search rows
 const detail=adaptItemDetail(raw.items[1]);
 assert.equal(detail.name,'Twilight Greatsword');

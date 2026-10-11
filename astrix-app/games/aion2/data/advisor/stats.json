@@ -1,0 +1,3155 @@
+{
+  "description": "AION 2 stats, one record per stat. main and deity are the 16 point stats the official character data sends (stat.statList, with statSecondList: the game's own words for what the points give). Each gives 0.1% per point to each of its effects, confirmed against the live statSecondList. combat are the stats a player sees in game, with a plain meaning and the global client's cap where there is one (unconfirmed until checked in game). source and rule say where points come from (unconfirmed until Miguel checks). The pages always show the official statSecondList for the player's own character; this record only explains it. A class's priority comes from its build's stats.order (builds/<class>.json), linked to these stats by the combat stat names the order text uses; nothing is guessed. Each value has a status and provenance; sources are never shown on a page.",
+  "test": "In game, open the character stat window, hover a main stat and a deity stat, and check the effect lines and caps against this record.",
+  "records": [
+    {
+      "id": "might",
+      "kind": "main",
+      "type": "STR",
+      "name": "Might",
+      "effects": {
+        "value": [
+          "Attack"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "weapon",
+          "accessory"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "dexterity",
+      "kind": "main",
+      "type": "DEX",
+      "name": "Dexterity",
+      "effects": {
+        "value": [
+          "Evasion",
+          "Block",
+          "Critical Hit Resist"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "armour"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "intelligence",
+      "kind": "main",
+      "type": "INT",
+      "name": "Intelligence",
+      "effects": {
+        "value": [
+          "Status Effect Chance"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "accessory"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "constitution",
+      "kind": "main",
+      "type": "CON",
+      "name": "Constitution",
+      "effects": {
+        "value": [
+          "HP"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "armour"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "precision",
+      "kind": "main",
+      "type": "AGI",
+      "name": "Precision",
+      "effects": {
+        "value": [
+          "Accuracy",
+          "Critical Hit"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "weapon",
+          "accessory"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "willpower",
+      "kind": "main",
+      "type": "WIS",
+      "name": "Willpower",
+      "effects": {
+        "value": [
+          "Status Effect Resist"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "armour"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "justice",
+      "kind": "deity",
+      "type": "Justice",
+      "name": "Justice [Nezekan]",
+      "lord": "Nezekan",
+      "effects": {
+        "value": [
+          "Defense",
+          "Perfect Chance"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "freedom",
+      "kind": "deity",
+      "type": "Freedom",
+      "name": "Freedom [Vaizel]",
+      "lord": "Vaizel",
+      "effects": {
+        "value": [
+          "Accuracy",
+          "Evasion"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "illusion",
+      "kind": "deity",
+      "type": "Illusion",
+      "name": "Illusion [Kaisinel]",
+      "lord": "Kaisinel",
+      "effects": {
+        "value": [
+          "Cooldown",
+          "Endurance Penetration"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "kind": "deity",
+      "type": "Life",
+      "name": "Life [Yustiel]",
+      "lord": "Yustiel",
+      "effects": {
+        "value": [
+          "HP",
+          "Regeneration"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "time",
+      "kind": "deity",
+      "type": "Time",
+      "name": "Time [Siel]",
+      "lord": "Siel",
+      "effects": {
+        "value": [
+          "Combat Speed",
+          "Double Resist"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "destruction",
+      "kind": "deity",
+      "type": "Destruction",
+      "name": "Destruction [Zikel]",
+      "lord": "Zikel",
+      "effects": {
+        "value": [
+          "Attack",
+          "Perfect Resist"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "death",
+      "kind": "deity",
+      "type": "Death",
+      "name": "Death [Triniel]",
+      "lord": "Triniel",
+      "effects": {
+        "value": [
+          "Critical Hit",
+          "Regeneration Penetration"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "wisdom",
+      "kind": "deity",
+      "type": "Wisdom",
+      "name": "Wisdom [Lumiel]",
+      "lord": "Lumiel",
+      "effects": {
+        "value": [
+          "MP Cost",
+          "Double Chance"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "destiny",
+      "kind": "deity",
+      "type": "Destiny",
+      "name": "Destiny [Marchutan]",
+      "lord": "Marchutan",
+      "effects": {
+        "value": [
+          "MP",
+          "Endurance"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "kind": "deity",
+      "type": "Space",
+      "name": "Space [Israphel]",
+      "lord": "Israphel",
+      "effects": {
+        "value": [
+          "Move Speed",
+          "Block"
+        ],
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "perPoint": {
+        "value": 0.1,
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11",
+            "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+          },
+          {
+            "kind": "armory",
+            "region": "eu",
+            "endpoint": "/api/character/info",
+            "capturedOn": "2026-10-11"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "from": {
+        "value": [
+          "arcana",
+          "abyssal-bracelet",
+          "monolith"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-info.json"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/info",
+          "capturedOn": "2026-10-11"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "attack",
+      "kind": "combat",
+      "name": "Attack",
+      "meaning": {
+        "value": "Raises the damage of every hit.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "defense",
+      "kind": "combat",
+      "name": "Defense",
+      "meaning": {
+        "value": "Lowers the damage you take from each hit.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "hp",
+      "kind": "combat",
+      "name": "HP",
+      "meaning": {
+        "value": "Your health pool.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "mp",
+      "kind": "combat",
+      "name": "MP",
+      "meaning": {
+        "value": "The pool your skills spend.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "accuracy",
+      "kind": "combat",
+      "name": "Accuracy",
+      "meaning": {
+        "value": "Stops your hits from missing.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "evasion",
+      "kind": "combat",
+      "name": "Evasion",
+      "meaning": {
+        "value": "A chance to dodge a hit completely.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "cap": {
+        "value": 30,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "tgw-stats",
+            "title": "Character stats",
+            "publisher": "The Games Wiki",
+            "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+            "retrievedOn": "2026-10-11",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "block",
+      "kind": "combat",
+      "name": "Block",
+      "meaning": {
+        "value": "A chance to block a hit and take less damage.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "critical-hit",
+      "kind": "combat",
+      "name": "Critical Hit",
+      "meaning": {
+        "value": "A chance for a hit to crit for more damage.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "cap": {
+        "value": 50,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "tgw-stats",
+            "title": "Character stats",
+            "publisher": "The Games Wiki",
+            "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+            "retrievedOn": "2026-10-11",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "critical-hit-resist",
+      "kind": "combat",
+      "name": "Critical Hit Resist",
+      "meaning": {
+        "value": "Lowers the chance of enemies critting you.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "double-chance",
+      "kind": "combat",
+      "name": "Double Chance",
+      "meaning": {
+        "value": "A chance for a hit to deal double damage.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "double-resist",
+      "kind": "combat",
+      "name": "Double Resist",
+      "meaning": {
+        "value": "Lowers the chance of enemies landing double damage on you.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "perfect-chance",
+      "kind": "combat",
+      "name": "Perfect Chance",
+      "meaning": {
+        "value": "A chance for a hit to land at your weapon's max attack.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "perfect-resist",
+      "kind": "combat",
+      "name": "Perfect Resist",
+      "meaning": {
+        "value": "Lowers the chance of enemies landing a Perfect hit on you.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "combat-speed",
+      "kind": "combat",
+      "name": "Combat Speed",
+      "meaning": {
+        "value": "How fast you attack and cast.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "cooldown",
+      "kind": "combat",
+      "name": "Cooldown",
+      "meaning": {
+        "value": "Shortens skill cooldowns.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "cap": {
+        "value": 60,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "tgw-stats",
+            "title": "Character stats",
+            "publisher": "The Games Wiki",
+            "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+            "retrievedOn": "2026-10-11",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "mp-cost",
+      "kind": "combat",
+      "name": "MP Cost",
+      "meaning": {
+        "value": "Lowers the MP your skills cost.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "cap": {
+        "value": 60,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "tgw-stats",
+            "title": "Character stats",
+            "publisher": "The Games Wiki",
+            "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+            "retrievedOn": "2026-10-11",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "endurance",
+      "kind": "combat",
+      "name": "Endurance",
+      "meaning": {
+        "value": "A chance to halve the damage of a hit.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "endurance-penetration",
+      "kind": "combat",
+      "name": "Endurance Penetration",
+      "meaning": {
+        "value": "Lowers the chance of enemies halving your hits.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "regeneration",
+      "kind": "combat",
+      "name": "Regeneration",
+      "meaning": {
+        "value": "Turns part of a hit into HP.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "regeneration-penetration",
+      "kind": "combat",
+      "name": "Regeneration Penetration",
+      "meaning": {
+        "value": "Lowers the HP enemies get back from Regeneration.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "status-effect-chance",
+      "kind": "combat",
+      "name": "Status Effect Chance",
+      "meaning": {
+        "value": "A better chance for your stuns, roots and slows to land.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "status-effect-resist",
+      "kind": "combat",
+      "name": "Status Effect Resist",
+      "meaning": {
+        "value": "A better chance to shrug off stuns, roots and slows.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "move-speed",
+      "kind": "combat",
+      "name": "Move Speed",
+      "meaning": {
+        "value": "How fast you run.",
+        "status": "confirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "cap": {
+        "value": 150,
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          },
+          {
+            "kind": "community-guide",
+            "ref": "tgw-stats",
+            "title": "Character stats",
+            "publisher": "The Games Wiki",
+            "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+            "retrievedOn": "2026-10-11",
+            "region": "not-stated",
+            "reliability": "medium"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-11",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "damage-boost",
+      "kind": "combat",
+      "name": "Damage Boost",
+      "meaning": {
+        "value": "More damage dealt.",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "weapon-damage-boost",
+      "kind": "combat",
+      "name": "Weapon Damage Boost",
+      "meaning": {
+        "value": "More damage from weapon hits.",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "front-attack-damage-boost",
+      "kind": "combat",
+      "name": "Front Attack Damage Boost",
+      "meaning": {
+        "value": "More damage when you hit an enemy from the front.",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "critical-damage-boost",
+      "kind": "combat",
+      "name": "Critical Damage Boost",
+      "meaning": {
+        "value": "More damage on a critical hit.",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "damage-tolerance",
+      "kind": "combat",
+      "name": "Damage Tolerance",
+      "meaning": {
+        "value": "Less damage taken.",
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "weapon",
+      "kind": "source",
+      "label": "Weapon",
+      "stats": {
+        "value": [
+          "might",
+          "precision"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "armour",
+      "kind": "source",
+      "label": "Armour",
+      "stats": {
+        "value": [
+          "dexterity",
+          "constitution",
+          "willpower"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "accessory",
+      "kind": "source",
+      "label": "Accessories",
+      "stats": {
+        "value": [
+          "might",
+          "intelligence",
+          "precision"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "arcana",
+      "kind": "source",
+      "label": "Arcana",
+      "text": "Its main effect gives deity stat points.",
+      "stats": {
+        "value": [
+          "deity"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "abyssal-bracelet",
+      "kind": "source",
+      "label": "Abyssal Bracelet",
+      "text": "A random line can give deity stat points.",
+      "stats": {
+        "value": [
+          "deity"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "monolith",
+      "kind": "source",
+      "label": "Monolith level rewards",
+      "text": "Monolith levels give deity stat points.",
+      "stats": {
+        "value": [
+          "deity"
+        ],
+        "status": "unconfirmed",
+        "provenance": [
+          {
+            "kind": "community-guide",
+            "ref": "mb-stats",
+            "title": "AION 2 Stats Explained",
+            "publisher": "MetaBot",
+            "url": "https://metabot.gg/en/aion-2/stats",
+            "retrievedOn": "2026-10-11",
+            "region": "global",
+            "reliability": "high"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stats",
+          "title": "AION 2 Stats Explained",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/stats",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "soul-binding",
+      "kind": "rule",
+      "label": "Soul Binding",
+      "text": "Soul Binding rerolls the sub stat lines on gear: Reset rerolls every line, Sync rerolls one.",
+      "status": "confirmed",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "crafted-line",
+      "kind": "rule",
+      "label": "Crafted gear",
+      "text": "Crafted gear has one more sub stat line than gear that drops.",
+      "status": "confirmed",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}

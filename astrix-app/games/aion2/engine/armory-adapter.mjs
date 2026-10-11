@@ -102,12 +102,25 @@ export function adaptGear(equipment, slots, items = {}) {
   return gear;
 }
 
-/** Primary and god stats from /api/character/info, without the item level row (that is profile.itemLevel). */
+/** The six main stats by the data's type code. The other point stats in the list are the ten deity stats. */
+export const MAIN_STAT_TYPES = Object.freeze(['STR', 'DEX', 'INT', 'CON', 'AGI', 'WIS']);
+
+/**
+ * The 6 main and 10 deity stats from /api/character/info, without the item level row (that is profile.itemLevel).
+ * effects is the game's own statSecondList: what this character's points give ('Attack increase +1.5%'). The site
+ * sends null for a stat at 0 points, which comes out as an empty list.
+ */
 export function adaptStats(info) {
   requireShape(info, 'stat', 'Character info');
   return (info.stat.statList ?? [])
-    .filter(row => row.name !== ITEM_LEVEL_LABEL)
-    .map(row => ({ type: row.type, name: row.name, value: row.value }));
+    .filter(row => row.name !== ITEM_LEVEL_LABEL && row.type !== 'ItemLevel')
+    .map(row => ({
+      type: row.type,
+      name: row.name,
+      value: row.value,
+      kind: MAIN_STAT_TYPES.includes(row.type) ? 'main' : 'deity',
+      effects: Array.isArray(row.statSecondList) ? row.statSecondList.filter(line => typeof line === 'string' && line.trim()) : []
+    }));
 }
 
 /** One worn item from /api/character/equipment/item, for the item detail card. */

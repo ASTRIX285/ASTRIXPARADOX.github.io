@@ -1265,3 +1265,48 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
   .ae-ggrid.is-row{grid-template-columns:repeat(5,minmax(0,5.5rem))}
 }
 @media (max-width:479px){.ae-ggrid,.ae-ggrid.is-row{gap:.25rem}.ae-gear-page .ae-panel{padding:12px}}
+/* Stats explained (feature/aetherium-stats-explained): 6 main and 10 deity stat tiles, each with the points, the official
+   effect line and a High, Useful or Low tag for the class. The whole tile opens the stat card. */
+.ae-stats-group{margin:.75rem 0 .5rem;font:700 .875rem/1.3 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted)}
+#aeStatsPanel .ae-stats{grid-template-columns:repeat(auto-fill,minmax(min(100%,13.5rem),1fr));gap:.5rem}
+#aeStatsPanel .ae-stat{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.25rem .75rem;min-height:2.75rem;padding:.625rem .75rem;
+  font-size:1rem;background:var(--ae-raised);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel);transition:border-color var(--ae-ease)}
+#aeStatsPanel .ae-stat:hover,#aeStatsPanel .ae-stat:focus-within{border-color:color-mix(in srgb,var(--ae-accent) 60%,var(--ae-hairline))}
+#aeStatsPanel .ae-stat dt{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem;min-width:0}
+#aeStatsPanel .ae-stat dd{margin:0;font:700 1.375rem/1.1 var(--ae-font-ui);color:var(--ae-text);font-variant-numeric:tabular-nums}
+.ae-stat-effect{flex-basis:100%;font-size:.875rem;line-height:1.35;color:var(--ae-text-dim)}
+.ae-stat-effect.is-official{color:var(--ae-text-muted)}
+.ae-stat-tag{display:inline-flex;align-items:center;min-height:1.375rem;padding:0 .5rem;border-radius:var(--ae-pill);font:700 .875rem/1 var(--ae-font-ui);font-style:normal;letter-spacing:.02em;border:1px solid}
+.ae-stat-tag.is-high{color:var(--ae-gold);border-color:color-mix(in srgb,var(--ae-gold) 60%,transparent);background:color-mix(in srgb,var(--ae-gold) 12%,transparent)}
+.ae-stat-tag.is-useful{color:var(--ae-ice);border-color:color-mix(in srgb,var(--ae-ice) 50%,transparent);background:color-mix(in srgb,var(--ae-ice) 8%,transparent)}
+.ae-stat-tag.is-low{color:var(--ae-text-muted);border-color:var(--ae-hairline-strong);background:transparent}
+#aeStatsPanel .ae-stat[data-tag="low"] dd{color:var(--ae-text-muted)}
+.ae-stats-low{margin:0 0 .5rem;padding:.5rem .75rem;font-size:1rem;color:var(--ae-text);background:color-mix(in srgb,var(--ae-ice) 6%,transparent);border-left:3px solid var(--ae-ice)}
+.ae-item-rows .ae-stat-tag{margin-left:.375rem;min-height:1.25rem}
+/* The stat name is a button whose hit area is the whole tile. Its look is set in the brand layer, after the button rules. */
+.ae-stat-open{position:static;padding:0;font:700 1rem/1.25 var(--ae-font-ui);text-align:left;cursor:pointer}
+.ae-stat-open::before{content:"";position:absolute;inset:0}
+@layer astrix-brand{
+body.aetherium-page #aeStatsPanel .ae-stat-open:not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):not(#ax-s5){
+  display:inline!important;min-height:0!important;padding:0!important;color:var(--ae-text)!important;background:none!important;box-shadow:none!important;clip-path:none!important;border:0!important;text-transform:none!important;letter-spacing:0!important}
+body.aetherium-page #aeStatsPanel .ae-stat-open:focus-visible:not(#ax-s1):not(#ax-s2):not(#ax-s3):not(#ax-s4):not(#ax-s5){outline:2px solid var(--ae-strobe);outline-offset:2px}
+}
+/* Ascent Plan Stats screen: the point stats that feed each combat stat, and what to look for on each kind of gear. */
+.ae-stat-rank-text{display:grid;gap:.25rem;min-width:0}
+.ae-chain{display:block;font-size:.875rem;line-height:1.4;color:var(--ae-text-muted)}
+.ae-chain>b{color:var(--ae-text)}
+.ae-chain.is-none{color:var(--ae-text-dim)}
+.ae-chain-stat{color:var(--ae-ice)}
+.ae-chain-stat.is-deity{color:var(--ae-gold)}
+.ae-chain-stat b{color:var(--ae-text);font-variant-numeric:tabular-nums}
+.ae-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ae-gear-look{margin:1rem 0}
+.ae-look-rows{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
+.ae-look-rows li{display:grid;grid-template-columns:minmax(8rem,12rem) minmax(0,1fr);gap:.5rem 1rem;align-items:baseline;padding:.625rem .75rem;background:var(--ae-raised);border:1px solid var(--ae-hairline)}
+.ae-look-rows strong{font:700 1rem/1.3 var(--ae-font-ui)}
+.ae-look-want{display:inline-block;margin:0 .375rem .25rem 0;padding:0 .5rem;border-radius:var(--ae-pill);font:700 .875rem/1.6 var(--ae-font-ui);border:1px solid var(--ae-hairline-strong);color:var(--ae-text)}
+.ae-look-want.is-high{color:var(--ae-gold);border-color:color-mix(in srgb,var(--ae-gold) 60%,transparent)}
+.ae-look-want.is-useful{color:var(--ae-ice);border-color:color-mix(in srgb,var(--ae-ice) 50%,transparent)}
+.ae-look-skip,.ae-look-none{font-size:.875rem;color:var(--ae-text-dim)}
+.ae-look-skip{display:block;margin-top:.25rem}
+@media (max-width:599px){.ae-look-rows li{grid-template-columns:minmax(0,1fr)}}

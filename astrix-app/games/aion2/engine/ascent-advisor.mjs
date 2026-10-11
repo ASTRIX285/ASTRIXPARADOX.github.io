@@ -11,6 +11,7 @@
  */
 
 import { nodeSkill } from './daevanion-planner.mjs';
+import { gearRows, rankPointStats, statChains } from './stat-advisor.mjs';
 
 export const AION2_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
 
@@ -588,6 +589,9 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     stigmas,
     daevanion,
     stats: build.stats,
+    // Stats explained (stats.json): the build's stat order linked to the point stats that feed it, with the Daeva's own
+    // points when one is loaded, and what to look for on each kind of gear. null without the stats record.
+    statPlan: data.stats ? { rank: rankPointStats(build, data.stats), chains: statChains(build, data.stats, model?.stats ?? null), gear: gearRows(rankPointStats(build, data.stats), data.stats), live: Boolean(model) } : null,
     rotation,
     levelNotes: (build.levelNotes ?? []).filter(note => lvl <= note.to),
     upcoming: upcoming(lvl, skills, stigmas, daevanion, facts),

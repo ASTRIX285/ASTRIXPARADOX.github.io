@@ -117,3 +117,18 @@ Read through the live Worker for field shapes only; nothing from these reads is 
 
   That is 25 worn slots. 9, 18, 20 and 21 were not seen. `data/gear-slots.json` lists all 25 and marks the 17 outside
   the main eight `listed: false`, so an unworn accessory, rune or Arcana is never an empty slot to fill.
+## Stats (checked 11 Oct 2026)
+
+`info.stat.statList` has 17 rows on both Daevas read through the live Worker: a Lv 45 Gladiator (the renamed
+`lv45-info.json`) and a Lv 10 Sorcerer (shape only, nothing saved).
+
+| Rows | `type` | Notes |
+| --- | --- | --- |
+| 6 main stats | `STR`, `DEX`, `INT`, `CON`, `AGI`, `WIS` (Might, Dexterity, Intelligence, Constitution, Precision, Willpower) | |
+| 10 deity stats | `Justice`, `Freedom`, `Illusion`, `Life`, `Time`, `Destruction`, `Death`, `Wisdom`, `Destiny`, `Space` | names carry the lord: `Time [Siel]` |
+| Item level | `ItemLevel`, name in Korean (`아이템레벨`) | the profile's item level; not a stat |
+
+Each stat row with points carries `statSecondList`: the game's own words for what those points give, for example
+Might 15 gives `Attack increase +1.5%`, Time [Siel] 37 gives `Combat Speed +3.7%` and `Double Resist +3.7%`. Every effect is
+0.1% per point. A stat at 0 sends `statSecondList: null` (every row on the Lv 10 Daeva). The adapter keeps all 16 stats with
+these lines as `effects` and drops the ItemLevel row.
