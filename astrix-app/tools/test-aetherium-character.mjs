@@ -930,18 +930,29 @@ await check('Gear grid: 20 tiles in two rows of 10 at 1600, 5 per row at 1024 an
 
 /* Stats explained (feature/aetherium-stats-explained, 11 Oct 2026): 16 stat tiles with the official lines and class tags. */
 await check('Gear page stats: 6 main and 10 deity tiles with the official effect lines, High, Useful and Low tags for the class',async()=>{
-  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
-  assert.deepEqual(calls,['/aion2/character'],'No extra Worker call for stats');
+  const {page,context,calls,urls}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  // Strict: the only Worker calls are the character, then one item detail per worn item (the gear grid's background load).
+  // The stats add none: their record and the class builds are static files.
+  await settled(page);
+  const worn=lv45Equipment.equipment.equipmentList.map(item=>String(item.slotPos)).sort();
+  assert.equal(calls[0],'/aion2/character','First paint reads only the character');
+  assert.ok(calls.slice(1).every(call=>call==='/aion2/item'),`Only item details after it: ${calls}`);
+  assert.deepEqual(urls.filter(url=>url.pathname==='/aion2/item').map(url=>url.searchParams.get('slotPos')).sort(),worn,'One detail per worn item, none twice');
+  const before=calls.length;
+  await page.click('[data-stat-open="precision"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) [data-stat-reason]');
+  assert.equal(calls.length,before,'Opening a stat card adds no Worker call');
+  await page.keyboard.press('Escape');
   assert.equal(await page.locator('#aeStats .ae-stat').count(),6);
   assert.equal(await page.locator('#aeDeity .ae-stat').count(),10);
-  const tiles=await page.$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>[el.dataset.stat,el.querySelector('dd').textContent,el.querySelector('.ae-stat-effect').textContent,el.dataset.tag]));
+  const tiles=await page.$$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>[el.dataset.stat,el.querySelector('dd').textContent,el.querySelector('.ae-stat-effect').textContent,el.dataset.tag]));
   const by=Object.fromEntries(tiles.map(([id,points,line,tag])=>[id,{points,line,tag}]));
   assert.deepEqual(by.might,{points:'15',line:'Attack increase +1.5%',tag:'useful'},'The official line, not ours');
   assert.deepEqual(by.precision,{points:'11',line:'Accuracy increase +1.1%, Critical Hit increase +1.1%',tag:'high'});
   assert.deepEqual(by.time,{points:'37',line:'Combat Speed +3.7%, Double Resist +3.7%',tag:'useful'});
   assert.equal(by.constitution.tag,'low');
   assert.equal(by.intelligence.line,'Each point: Status Effect Chance +0.1%','No official line at 0 points: what one point gives');
-  const tagLook=await page.$eval('#aeStatsPanel .ae-stat-tag',items=>Object.fromEntries(items.map(el=>[el.dataset.statTag,getComputedStyle(el).color])));
+  const tagLook=await page.$$eval('#aeStatsPanel .ae-stat-tag',items=>Object.fromEntries(items.map(el=>[el.dataset.statTag,getComputedStyle(el).color])));
   assert.equal(tagLook.high,'rgb(226, 181, 79)','High in gold');
   assert.equal(tagLook.useful,'rgb(143, 208, 255)','Useful in ice');
   assert.notEqual(tagLook.low,tagLook.high);
@@ -975,7 +986,7 @@ await check('Gear page stats: the near-zero note shows for a low Daeva; no sidew
   assert.equal(await plain(page,'#aeStatsLow'),'These come from sub stat lines on Unique and crafted gear, and from Arcana for the deity stats. Low numbers are normal until then.');
   assert.equal(await page.locator('#aeStatsPanel .ae-stat').count(),16);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'390: no sideways scroll');
-  for(const box of await page.$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>el.getBoundingClientRect().height)))assert.ok(box>=43.5,'44px targets');
+  for(const box of await page.$$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>el.getBoundingClientRect().height)))assert.ok(box>=43.5,'44px targets');
   await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
   await page.setViewportSize({width:800,height:900});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'200 percent: no sideways scroll');
@@ -984,9 +995,10 @@ await check('Gear page stats: the near-zero note shows for a low Daeva; no sidew
 
 await check('Gear page item card: sub stat lines tagged High, Useful or Low for the class',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
-  await page.click('[data-enchant-flag="1"]');
+  // The gear grid (#486) has no flag buttons: the main hand tile opens the item card.
+  await page.click('#aeGearPanel [data-slot-pos="1"] [data-slot]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-rows.is-bonus'));
-  const lines=await page.$eval('#aeInfo .ae-item-rows.is-bonus li',items=>items.map(el=>[el.querySelector('span').firstChild.textContent.trim(),el.dataset.lineTag]));
+  const lines=await page.$$eval('#aeInfo .ae-item-rows.is-bonus li',items=>items.map(el=>[el.querySelector('span').firstChild.textContent.trim(),el.dataset.lineTag]));
   assert.deepEqual(lines,[['Might','useful'],['Critical Hit','low'],['MP','low'],['Block','low']]);
   await context.close();
 });
