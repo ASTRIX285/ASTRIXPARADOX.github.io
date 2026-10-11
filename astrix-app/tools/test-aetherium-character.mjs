@@ -94,7 +94,13 @@ const otherBoard=id=>{const copy=structuredClone(board11);copy.nodeList.forEach(
 const ACC={serverId:'1312',characterId:'YWNjZGFldmE='};
 // A Lv 45 Daeva in Unique, Epic and Rare gear (captured 11 Oct 2026, renamed: no gamer tag, id or portrait).
 const LV45={serverId:'1308',characterId:'bHY0NXRlc3RkYWV2YQ=='};
+// The same Daeva with its amulet at the +10 cap (a Full marker) and the bracelet's item detail failing (no item level).
+const FULL45={serverId:'1308',characterId:'ZnVsbGRhZXZhNDU='};
 const lv45Info=await fixture('lv45-info'),lv45Equipment=await fixture('lv45-equipment'),lv45Items=await fixture('lv45-items');
+const full45Equipment=structuredClone(lv45Equipment),full45Items=structuredClone(lv45Items);
+full45Equipment.equipment.equipmentList.find(item=>item.slotPos===22).enchantLevel=10;
+Object.assign(full45Items['22'],{enchantLevel:10,levelValue:10});
+delete full45Items['15'];
 const grades=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/grades.json'),'utf8'));
 const progression=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/progression.json'),'utf8'));
 /** The grade rule's advice for a worn item as the equipment list sends it (no item detail read yet). */
@@ -128,7 +134,7 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   const context=await browser.newContext({viewport});
   const calls=[];
   const urls=[];
-  const state={down};
+  const state={down,inflight:0,maxInflight:0};
   if(art)await context.route(/\/astrix-app\/games\/aion2\/data\/intro-art\.json/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(art)}));
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
@@ -147,9 +153,19 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
     const acc=url.searchParams.get('serverId')===ACC.serverId;
     const asmo=url.searchParams.get('serverId')===ASMO_REF.serverId;
     const lv45=url.searchParams.get('characterId')===LV45.characterId;
+    const full45=url.searchParams.get('characterId')===FULL45.characterId;
+    // Item details are held 150ms so the test can see how many run at once.
+    if(url.pathname==='/aion2/item'&&(lv45||full45)){
+      state.inflight++;state.maxInflight=Math.max(state.maxInflight,state.inflight);
+      await new Promise(done=>setTimeout(done,150));
+      state.inflight--;
+      const detail=(full45?full45Items:lv45Items)[url.searchParams.get('slotPos')];
+      if(!detail)return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
+      return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...detail,meta:{...meta,region:url.searchParams.get('region')}})});
+    }
     let body;
     if(lv45&&url.pathname==='/aion2/character')body={info:lv45Info,equipment:lv45Equipment};
-    else if(lv45&&url.pathname==='/aion2/item')body=lv45Items[url.searchParams.get('slotPos')];
+    else if(full45&&url.pathname==='/aion2/character')body={info:{...lv45Info,profile:{...lv45Info.profile,characterId:FULL45.characterId}},equipment:full45Equipment};
     else if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:acc?{info:accInfo,equipment:accEquipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
     else if(url.pathname==='/aion2/item')body=itemDetail;
     else if(url.pathname==='/aion2/daevanion'){
@@ -290,7 +306,9 @@ await check('Gear page: real base stats show as they are, a 0 among them include
 
 await check('Gear page: worn gear, stats, pet, wings and title; item cards still open',async()=>{
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`);
-  assert.deepEqual(calls,['/aion2/character'],'First paint: only /aion2/character');
+  // Gear grid (11 Oct 2026): was deepEqual(calls,['/aion2/character']). Item details now follow first paint in the background.
+  assert.equal(calls[0],'/aion2/character','First paint: the character call first');
+  assert.deepEqual(calls.filter(call=>call!=='/aion2/item'),['/aion2/character'],'First paint: no other call but item details');
   assert.equal(await page.textContent('#aeScreenTitle'),'Gear');
   assert.equal(await page.locator('#aeGear [data-slot]').count(),8);
   assert.match(await page.textContent('#aeGearCount'),/8 of 8 worn/);
@@ -882,104 +900,187 @@ await check('menu badges say what they count, in words',async()=>{
   await context.close();
 });
 
-// Brief fix/aetherium-gear-enchant-context (11 Oct 2026) replaced this check's rule: it was "an Enchant flag on every +0 item,
-// leading to the gear move on the Ascent Plan" (a loop back to this page). Now the flag comes from the grade rule and opens the
-// item card in place. Kept: one flag per item the rule names, no extra call, plain slot names, flag inside its tile, 14px or more.
-await check('Gear page: a flag from the grade rule on every item it names, opening the item card in place; slot names in plain words and game order',async()=>{
-  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(ACC)}`);
-  assert.deepEqual(calls,['/aion2/character'],'The flags need no extra call');
-  const level=accInfo.profile.characterLevel;
-  const expected=accEquipment.equipment.equipmentList.map(item=>[String(item.slotPos),adviceFor(item,level)]).filter(([,advice])=>advice?.flag).sort(([a],[b])=>a.localeCompare(b));
-  assert.ok(expected.length>0,'The rule flags items');
-  const flags=await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.tagName,el.getAttribute('href'),el.textContent.trim()]).sort(([a],[b])=>a.localeCompare(b)));
-  assert.deepEqual(flags.map(flag=>[flag[0],flag[3]]),expected.map(([slotPos,advice])=>[slotPos,advice.flag]),'One flag per item the rule names, its text the rule\'s');
-  for(const [,tag,href] of flags){assert.equal(tag,'BUTTON');assert.equal(href,null,'A flag never links to another page');}
-  const labels=await page.$$eval('#aeGear .ae-slot-label',items=>items.map(el=>el.textContent));
-  assert.deepEqual(labels.slice(-4),['Earring 1','Earring 2','Ring 1','Bracelet 1'],'Plain words, game order');
-  assert.ok(!labels.some(label=>/[A-Z]{2}/.test(label)),`No raw codes: ${labels}`);
-  const first=await page.$eval('#aeGear li.has-flag',li=>{const a=li.getBoundingClientRect(),f=li.querySelector('[data-enchant-flag]').getBoundingClientRect(),n=li.querySelector('strong').getBoundingClientRect();return {inside:f.left>=a.left-0.5&&f.right<=a.right+0.5&&f.top>=a.top-0.5&&f.bottom<=a.bottom+0.5,clear:n.right<=f.left+0.5||n.bottom<=f.top+0.5,size:getComputedStyle(li.querySelector('[data-enchant-flag]')).fontSize,height:f.height};});
-  assert.ok(first.inside,'the flag sits inside its tile');
-  assert.ok(first.clear,'the flag does not cover the item name');
-  assert.ok(parseFloat(first.size)>=14,'flag text at least 14px');
-  assert.ok(first.height>=43.5,'flag is a 44px target');
-  const before=page.url();
-  await page.click('#aeGear li.has-flag [data-enchant-flag]');
-  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
-  assert.equal(page.url(),before,'Tapping a flag never navigates');
-  await context.close();
-});
+/* The gear grid (brief design/aetherium-gear-grid, 11 Oct 2026). It replaced the #484 checks on the ENCHANT, REPLACE and FULL
+   flag buttons (the brief removes the buttons): their rule is kept, now as tile markers. A renamed Lv 45 Daeva in Unique,
+   Epic and Rare gear. Item details load in the background after first paint; the mock holds each for 150ms to count how
+   many run at once. A second copy (FULL45) has the amulet at its +10 cap and the bracelet's detail failing. */
+const settled=async page=>page.waitForFunction(()=>document.documentElement.dataset.aeGearDetails==='done',null,{timeout:15000});
+const boxes=(page,selector)=>page.$$eval(selector,items=>items.map(el=>{const r=el.getBoundingClientRect();return {left:Math.round(r.left),top:Math.round(r.top),width:Math.round(r.width),height:Math.round(r.height)};}));
+const rowsOf=list=>[...new Set(list.map(box=>box.top))].map(top=>list.filter(box=>box.top===top).length);
 
-/* Grade tiles and enchant context (brief fix/aetherium-gear-enchant-context, 11 Oct 2026), on a renamed Lv 45 Daeva. */
-await check('Gear page grades: icons 80px at desktop and 64px on a phone, the enchant level on the corner, two columns then one under 600px',async()=>{
-  for(const [width,height,size,columns] of [[1600,1000,80,2],[390,844,64,1]]){
+await check('Gear grid: 20 tiles in two rows of 10 at 1600, 5 per row at 1024 and 390, about 88px, no sideways scroll',async()=>{
+  for(const [width,height,perRow,min,max] of [[1600,1000,10,84,90],[1024,900,5,60,90],[390,844,5,52,66]]){
     const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width,height}});
-    const tiles=await page.$$eval('#aeGear .ae-gtile',items=>items.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.width),Math.round(r.height)];}));
-    assert.equal(tiles.length,17);
-    for(const [w,h] of tiles)assert.deepEqual([w,h],[size,size],`${width}: ${size}px tiles`);
-    const plus=await page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile',el=>{const t=el.getBoundingClientRect(),b=el.querySelector('.ae-gtile-plus').getBoundingClientRect();return {text:el.querySelector('.ae-gtile-plus').textContent,corner:b.right>=t.right-8&&b.bottom>=t.bottom-8};});
-    assert.deepEqual(plus,{text:'+3',corner:true},'The weapon shows +3 on its corner');
-    assert.equal(await page.$eval('#aeGear [data-slot-pos="2"] .ae-gtile-plus',el=>el.textContent),'+11');
-    assert.equal(await page.$eval('#aeGear',el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
-    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}: no sideways scroll`);
+    const cells=await boxes(page,'#aeGear > li');
+    assert.equal(cells.length,20,`${width}: 20 slots`);
+    assert.deepEqual(rowsOf(cells),Array(20/perRow).fill(perRow),`${width}: ${perRow} per row`);
+    for(const cell of cells){assert.ok(cell.width>=min&&cell.width<=max,`${width}: tile ${cell.width}px`);near(cell.width,cell.height,1,'square tiles');}
+    const keys=await page.$$eval('#aeGear > li',items=>items.map(el=>el.dataset.slotKey));
+    assert.deepEqual(keys,['MAINHAND','SUBHAND','HELMET','SHOULDER','TORSO','PANTS','GLOVES','BOOTS','CAPE','BELT','NECKLACE','EARRING1','EARRING2','RING1','RING2','BRACELET1','BRACELET2','AMULET','RUNE1','RUNE2'],'The game\'s order');
+    assert.ok(await overflowOf(page)<=0,`${width}: no sideways scroll`);
     await context.close();
   }
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width:800,height:900}});
   await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
-  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'No sideways scroll at 200 percent text');
+  assert.ok(await overflowOf(page)<=1,'No sideways scroll at 200 percent text');
   await context.close();
 });
 
-await check('Gear page grades: the grade colour behind every tile (computed), grade names in that colour at 4.5:1, Epic never Legend',async()=>{
+await check('Gear grid: grade colour behind every worn tile (computed), empty slots dim with their name, Epic never Legend',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await settled(page);
   const want={common:'rgb(232, 236, 242)',rare:'rgb(95, 211, 126)',epic:'rgb(88, 168, 255)',unique:'rgb(226, 181, 79)',heroic:'rgb(255, 154, 74)',mythic:'rgb(255, 107, 107)',special:'rgb(69, 214, 198)'};
   const seen=await page.$$eval('#aeGear .ae-gtile',items=>items.map(el=>[el.dataset.grade,getComputedStyle(el).borderTopColor,getComputedStyle(el).backgroundColor]));
+  assert.equal(seen.length,17);
   assert.deepEqual([...new Set(seen.map(([grade])=>grade))].sort(),['epic','rare','unique']);
   for(const [grade,border,fill] of seen){assert.equal(border,want[grade],`${grade} edge`);assert.notEqual(fill,'rgba(0, 0, 0, 0)',`${grade} fill`);}
-  // Every grade in grades.json, even those not on this Daeva, paints its own colour.
-  const all=await page.evaluate(ids=>ids.map(id=>{const el=document.createElement('span');el.className='ae-gtile';el.dataset.grade=id;document.querySelector('#aeGear').append(el);const s=getComputedStyle(el);const out=[id,s.borderTopColor,s.backgroundColor];el.remove();return out;}),Object.keys(want));
-  for(const [grade,border,fill] of all){assert.equal(border,want[grade],grade);assert.notEqual(fill,'rgba(0, 0, 0, 0)',grade);}
-  const lum=rgb=>{const [r,g,b]=rgb.match(/\d+/g).map(Number).map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;});return 0.2126*r+0.7152*g+0.0722*b;};
-  for(const [grade,colour] of Object.entries(want)){const ratio=(lum(colour)+0.05)/(lum('rgb(22, 30, 51)')+0.05);assert.ok(ratio>=4.5,`${grade} text ${ratio.toFixed(2)}:1`);}
-  const names=await page.$$eval('#aeGear .ae-grade-name',items=>items.map(el=>[el.textContent,el.dataset.grade,getComputedStyle(el).color]));
-  assert.ok(names.some(([name])=>name==='Epic'),'Epic shows');
-  for(const [,grade,colour] of names)assert.equal(colour,want[grade],`${grade} name in its colour`);
+  const empty=await page.$$eval('#aeGear .ae-gempty',items=>items.map(el=>[el.getAttribute('aria-label'),getComputedStyle(el).borderTopStyle,Number(getComputedStyle(el).opacity)]));
+  assert.deepEqual(empty.map(([label])=>label),['Bracelet 2: empty','Rune 1: empty','Rune 2: empty']);
+  for(const [,style,opacity] of empty){assert.equal(style,'dashed');assert.ok(opacity<1,'dim');}
   assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/Legend/,'No Legend anywhere on the page');
   await context.close();
 });
 
-await check('Gear page flags: ENCHANT +3 to +10 on the weapon, ENCHANT +11 to +15 on the guard, REPLACE on the Epic pieces, ENCHANT +9 to +10 on the amulet',async()=>{
+await check('Gear grid corners: +N bottom right and the item level top left when the detail has it, both 14px at 4.5:1; no level when it has not',async()=>{
+  const {page,context,state}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await settled(page);
+  const corner=await page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile',el=>{const t=el.getBoundingClientRect(),p=el.querySelector('.ae-gtile-plus'),l=el.querySelector('.ae-gtile-lv');const pb=p.getBoundingClientRect(),lb=l.getBoundingClientRect();return {plus:p.textContent,level:l.textContent,plusCorner:pb.right>=t.right-8&&pb.bottom>=t.bottom-8,levelCorner:lb.left<=t.left+8&&lb.top<=t.top+8,size:[parseFloat(getComputedStyle(p).fontSize),parseFloat(getComputedStyle(l).fontSize)],colour:getComputedStyle(l).color,bg:getComputedStyle(l).backgroundColor};});
+  assert.deepEqual([corner.plus,corner.level,corner.plusCorner,corner.levelCorner],['+3','45',true,true]);
+  for(const size of corner.size)assert.ok(size>=13,`corner text ${size}px`);
+  assert.equal(await page.$eval('#aeGear [data-slot-pos="2"] .ae-gtile-lv',el=>el.textContent),'36','The guard is item level 36');
+  assert.equal(await page.locator('#aeGear [data-slot-pos="3"] .ae-gtile-plus').count(),0,'+0 shows no enchant corner');
+  assert.ok(state.maxInflight<=3,`At most 3 detail calls at once (saw ${state.maxInflight})`);
+  await context.close();
+  // The same Daeva with the bracelet's detail failing: that tile keeps no item level, never a guess.
+  const failing=await open(`/hub/aetherium/gear/equipment/${refQuery(FULL45)}`);
+  await settled(failing.page);
+  assert.equal(await failing.page.locator('#aeGear [data-slot-pos="15"] .ae-gtile-lv').count(),0,'No detail, no item level: the corner stays empty');
+  assert.equal(await failing.page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile-lv',el=>el.textContent),'45');
+  await failing.context.close();
+});
+
+await check('Gear grid markers: a 2s gold pulse only on Enchant items, solid under reduced motion; Replace and Full markers; names carry them',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
-  const flags=Object.fromEntries(await page.$$eval('[data-enchant-flag]',items=>items.map(el=>[el.dataset.enchantFlag,el.textContent.trim()])));
-  assert.equal(flags['1'],'ENCHANT +3 to +10');
-  assert.equal(flags['2'],'ENCHANT +11 to +15');
-  assert.equal(flags['22'],'ENCHANT +9 to +10');
-  for(const item of lv45Equipment.equipment.equipmentList.filter(entry=>entry.grade==='Legend'))assert.equal(flags[String(item.slotPos)],'REPLACE',item.name);
-  assert.ok(await page.$eval('[data-enchant-flag="2"]',el=>el.classList.contains('is-costly')),'The guard past +10 is marked costly');
-  const look=await page.$$eval('[data-enchant-flag="1"],[data-enchant-flag="5"]',items=>items.map(el=>getComputedStyle(el).backgroundColor));
-  assert.notEqual(look[0],look[1],'Enchant and Replace flags look different');
+  await settled(page);
+  const looks=await page.$$eval('#aeGear > li[data-slot-pos]',items=>items.map(el=>{const s=getComputedStyle(el.querySelector('.ae-gtile'),'::before');return {pos:el.dataset.slotPos,advice:el.dataset.advice??null,content:s.content,animation:s.animationName,duration:s.animationDuration,width:s.borderTopWidth,colour:s.borderTopColor,mark:el.querySelector('.ae-gmark')?.innerHTML??'',name:el.querySelector('button').getAttribute('aria-label')};}));
+  const by=Object.fromEntries(looks.map(look=>[look.pos,look]));
+  for(const pos of ['1','2','17','22']){
+    const look=by[pos];
+    assert.equal(look.advice,'enchant',pos);
+    assert.equal(look.animation,'ae-enchant-pulse',`${pos} pulses`);
+    assert.equal(look.duration,'2s');
+    assert.ok(['1px','1.5px'].includes(look.width),`edge ${look.width} (1.5px snaps to 1px at 1x)`);
+    assert.equal(look.colour,'rgb(226, 181, 79)','gold edge');
+    assert.match(look.name,/needs enchanting/,'The marker is in the name');
+  }
+  const declared=await page.evaluate(()=>[...document.styleSheets].flatMap(sheet=>{try{return [...sheet.cssRules];}catch{return [];}}).filter(rule=>rule.selectorText?.includes('[data-advice="enchant"] .ae-gtile::before')).map(rule=>rule.style.borderWidth||rule.style.borderTopWidth).filter(Boolean));
+  assert.ok(declared.includes('1.5px'),`The edge is declared 1.5px (${declared})`);
+  assert.match(by['1'].name,/^Spiritforged Greatsword, Unique, \+3 of 15, needs enchanting, item level 45, Main Hand$/);
+  for(const look of looks.filter(entry=>entry.advice!=='enchant')){assert.notEqual(look.animation,'ae-enchant-pulse',`${look.pos} never pulses`);}
+  for(const pos of ['3','4','5','6','7','8','10','11','12','13','19','14','15']){
+    assert.equal(by[pos].advice,'replace',pos);
+    assert.match(by[pos].mark,/<svg/,'a chevron');
+    assert.match(by[pos].name,/replace with a Unique piece/);
+    assert.equal(by[pos].animation,'none','steady');
+  }
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const still=await page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile',el=>{const s=getComputedStyle(el,'::before');return [s.animationName,s.borderTopColor,s.opacity];});
+  assert.deepEqual(still,['none','rgb(226, 181, 79)','1'],'Reduced motion: a solid gold edge');
+  assert.equal(await plain(page,'#aeGearLegend'),'Gold pulse: enchant it. Tap any item for what to do.');
+  assert.equal(await page.locator('#aeGearPanel [data-enchant-flag], #aeGearPanel .ae-flag').count(),0,'No ENCHANT buttons');
+  await context.close();
+  const full=await open(`/hub/aetherium/gear/equipment/${refQuery(FULL45)}`);
+  await settled(full.page);
+  const amulet=await full.page.$eval('#aeGear [data-slot-pos="22"]',el=>({advice:el.dataset.advice,mark:el.querySelector('.ae-gmark')?.innerHTML??'',edge:getComputedStyle(el.querySelector('.ae-gtile'),'::before').content,name:el.querySelector('button').getAttribute('aria-label')}));
+  assert.equal(amulet.advice,'full');
+  assert.match(amulet.mark,/<svg/,'a check');
+  assert.equal(amulet.edge,'none','no edge');
+  assert.match(amulet.name,/fully enchanted/);
+  await full.context.close();
+});
+
+await check('Gear grid hover: a name tooltip with the name in its grade colour, the grade, the slot and +N of the cap',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await settled(page);
+  await page.hover('#aeGear [data-slot-pos="5"] button');
+  await page.waitForSelector('#aeGearTip:not([hidden])');
+  const tip=await page.$eval('#aeGearTip',el=>({text:el.innerText.replace(/\s+/g,' '),colour:getComputedStyle(el.querySelector('strong')).color}));
+  assert.match(tip.text,/^Pilgrim Breastplate Epic · Torso · \+0 of 10 · Item level 38$/);
+  assert.equal(tip.colour,'rgb(88, 168, 255)','Name in the Epic colour');
+  await page.mouse.move(5,5);
+  assert.equal(await page.isHidden('#aeGearTip'),true);
   await context.close();
 });
 
-await check('Gear page item card: tapping a flag opens it in place with grade and cap, now and target, why, the odds, failure, cost and stones',async()=>{
-  const {page,context,calls}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+await check('Gear grid click: the item card opens in place with What to do first; Escape closes it and focus returns to the tile',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await settled(page);
   const before=page.url();
-  await page.click('[data-enchant-flag="2"]');
+  await page.click('#aeGear [data-slot-pos="2"] button');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
   assert.equal(page.url(),before,'No navigation');
+  const order=await page.$eval('#aeInfoBody',el=>[...el.querySelectorAll('#aeAdvice,.ae-item-enchant,.ae-item-block:not(#aeAdvice .ae-item-block)')].map(node=>node.id||node.className));
+  assert.equal(order[0],'aeAdvice','What to do comes first');
   const card=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
-  for(const part of [/Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/weapon and guard only, the weapon first/,/\+12: 50% chance/,/\+15: 20% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in your Enchant window\./,/Not confirmed yet/,/Daeva Bio-Research Base/])assert.match(card,part);
-  assert.ok(calls.includes('/aion2/item'),'The detail call gives the real cap');
+  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in your Enchant window\./,/Not confirmed yet/])assert.match(card,part);
+  assert.match(await page.textContent('#aeInfo'),/Item level 36/);
   await page.keyboard.press('Escape');
-  await page.click('[data-enchant-flag="1"]');
-  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
-  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/\+4 to \+10: every step succeeds/);
-  await page.keyboard.press('Escape');
-  await page.click('[data-enchant-flag="5"]');
+  assert.equal(await page.isHidden('#aeInfo'),true);
+  assert.equal(await page.evaluate(()=>document.activeElement?.closest('li')?.dataset.slotPos),'2','Focus back on the tile');
+  await page.click('#aeGear [data-slot-pos="5"] button');
   await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
-  const replace=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
-  assert.match(replace,/Replace it with a Unique piece/);
-  assert.match(replace,/Grade Epic/);
-  assert.doesNotMatch(replace,/Legend/);
+  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/What to do Replace it with a Unique piece/);
+  await page.click('#aeInfo .ae-info-backdrop',{position:{x:5,y:5}});
+  assert.equal(await page.isHidden('#aeInfo'),true,'A tap outside closes it');
+  await context.close();
+});
+
+await check('Pet, wings and title: three tiles the size of the gear tiles beside the grid, hover names, click cards',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await settled(page);
+  const tiles=await boxes(page,'#aeExtras button');
+  const gear=await boxes(page,'#aeGear > li[data-slot-pos="1"] button');
+  assert.equal(tiles.length,3);
+  for(const tile of tiles){near(tile.width,gear[0].width,1,'same size as a gear tile');}
+  assert.equal(new Set(tiles.map(tile=>tile.top)).size,1,'one row');
+  const grid=await page.$eval('#aeGear',el=>el.getBoundingClientRect().right);
+  assert.ok(tiles[0].left>grid,'beside the grid at desktop');
+  assert.deepEqual(await page.$$eval('#aeExtras .ae-extra-label',items=>items.map(el=>el.textContent)),['Pet','Wings','Title']);
+  await page.hover('#aeExtras [data-extra="pet"] button');
+  await page.waitForSelector('#aeGearTip:not([hidden])');
+  assert.match(await plain(page,'#aeGearTip'),/^Karnif Lv 3$/);
+  await page.click('#aeExtras [data-extra="wings"] button');
+  await page.waitForSelector('#aeInfo:not([hidden])');
+  assert.match(await plain(page,'#aeInfo'),/Superior Daeva Wings.*Wings · Epic.*\+0/);
+  await page.keyboard.press('Escape');
+  await page.click('#aeExtras [data-extra="title"] button');
+  await page.waitForSelector('#aeInfo:not([hidden])');
+  assert.match(await plain(page,'#aeInfo'),/I'll Finish This/);
+  assert.equal(await page.locator('#aeInfo .ae-card-icon svg.ae-title-badge').count(),1,'The title badge, drawn, not game art');
+  assert.equal(await page.locator('#aeExtras [data-extra="title"] svg.ae-title-badge').count(),1);
+  assert.equal(await page.locator('#aeExtras [data-extra="wings"] [data-advice]').count(),0,'No enchant marker on wings: the data does not say they enchant');
+  await context.close();
+  const phone=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width:1024,height:900}});
+  const under=await phone.page.$eval('#aeExtras',el=>el.getBoundingClientRect().top),gridBottom=await phone.page.$eval('#aeGear',el=>el.getBoundingClientRect().bottom);
+  assert.ok(under>gridBottom,'under the grid below 1100px');
+  await phone.context.close();
+});
+
+await check('Gear grid loading: first paint needs only the character call; details at most 3 at a time, kept for the session; calls per visit',async()=>{
+  const {page,context,calls,state}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  assert.equal(calls[0],'/aion2/character','The character call comes first');
+  await settled(page);
+  const items=calls.filter(call=>call==='/aion2/item').length;
+  assert.equal(items,17,'One detail per worn item');
+  assert.ok(state.maxInflight<=3&&state.maxInflight>=2,`At most 3 at once (saw ${state.maxInflight})`);
+  console.log(`      Gear page visit, Lv 45: ${calls.length} Worker calls (1 character + ${items} item details)`);
+  assert.ok(calls.length<=20,'Inside the 20 calls a visit may make');
+  const kept=calls.length;
+  await page.reload();
+  await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
+  await settled(page);
+  assert.equal(calls.filter(call=>call==='/aion2/item').length,17,'A second visit in the same session reads no item again');
+  assert.equal(calls.length,kept+1,'only the character call');
   await context.close();
 });
 

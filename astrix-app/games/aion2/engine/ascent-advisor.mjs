@@ -303,6 +303,8 @@ export const SAFE_ENCHANT = 10;
 const WEAPON_AND_GUARD = new Set(['MAINHAND', 'SUBHAND']);
 /** Slots with their own cap at every grade (grades.json slot-caps). */
 const OWN_CAP_SLOTS = new Set(['AMULET', 'BELT']);
+/** Slots the grade rule does not cover: runes enhance their own way (a failure can drop a level) and Arcana have their own small cap. */
+const OWN_RULE_SLOTS = /^(RUNE|ARCANA)\d*$/;
 const slotKey = slot => String(slot?.slot ?? '').toUpperCase().replace(/[\s_]/g, '');
 
 /** Grades by the code the data sends, plus the slot caps. */
@@ -366,6 +368,9 @@ export function enchantAdvice(slot, { level = 1, grades = null, progression = nu
   const from = Number.isFinite(slot.enchant) ? slot.enchant : 0;
   const base = { from, to: null, cap, about, costly: false, grade };
   const capText = `${about ? 'about ' : ''}+${cap}`;
+  if (OWN_RULE_SLOTS.test(slotKey(slot))) {
+    return { ...base, action: null, flag: null, why: 'Runes and Arcana enhance their own way. Enchant advice for them is not confirmed yet.' };
+  }
   if (!Number.isFinite(cap) || grade.order === null) {
     return { ...base, action: null, flag: null, why: `The ${grade.name} grade is not confirmed for enchant advice yet.` };
   }

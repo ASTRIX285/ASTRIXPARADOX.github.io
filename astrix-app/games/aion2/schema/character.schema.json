@@ -80,6 +80,19 @@
             "null"
           ]
         },
+        "titleGrade": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "titleEffects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
         "combatPower": {
           "type": "integer",
           "minimum": 0

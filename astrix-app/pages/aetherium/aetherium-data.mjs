@@ -141,9 +141,26 @@ export async function loadCharacter(ref) {
   return { model, source };
 }
 
+/* Item details are kept for the browser session (sessionStorage), keyed by Daeva, item, enchant level and slot, so moving
+   between pages never reads the same item twice. The same item at a new enchant level is a new key. Storage can be off
+   (private mode, blocked site data): then every read simply goes to the Worker. */
+const ITEM_CACHE_KEY = 'aetherium.items.v1';
+const itemCacheKey = (model, slot) => [model.source.region, model.profile.server.id, model.profile.characterId, slot.itemId, slot.enchant, slot.slotPos].join('|');
+function readItemCache() {
+  try { return JSON.parse(sessionStorage.getItem(ITEM_CACHE_KEY) ?? '{}') ?? {}; } catch { return {}; }
+}
+function writeItemCache(key, body) {
+  try { sessionStorage.setItem(ITEM_CACHE_KEY, JSON.stringify({ ...readItemCache(), [key]: body })); } catch { /* storage off or full: the next visit reads it again */ }
+}
+/** True when this item's detail is already kept for the session (no Worker call needed). */
+export const itemDetailKept = (model, slot) => !slot.empty && Object.hasOwn(readItemCache(), itemCacheKey(model, slot));
+
 /** The item detail card for one worn item. Returns { detail, source } or { detail: null, reason }. */
 export async function loadItemDetail(model, slot) {
   if (slot.empty) return { detail: null, reason: 'Nothing is worn in this slot.' };
+  const key = itemCacheKey(model, slot);
+  const kept = readItemCache()[key];
+  if (kept) return { detail: adaptItemDetail(kept), source: liveSource(kept.meta) };
   const body = await worker('/aion2/item', {
     serverId: model.profile.server.id,
     characterId: model.profile.characterId,
@@ -151,7 +168,38 @@ export async function loadItemDetail(model, slot) {
     enchantLevel: slot.enchant,
     slotPos: slot.slotPos
   }, model.source.region);
+  writeItemCache(key, body);
   return { detail: adaptItemDetail(body), source: liveSource(body.meta) };
+}
+
+/** At most this many item detail calls run at once. */
+export const ITEM_DETAIL_CONCURRENCY = 3;
+/** Item detail calls one Gear page visit makes in the background; with the character call that is 20. The rest load on hover or tap. */
+export const ITEM_DETAIL_BUDGET = 19;
+
+/**
+ * Loads worn items' details in the background, at most ITEM_DETAIL_CONCURRENCY at a time and at most budget Worker calls
+ * (details already kept for the session cost none). onDetail(slot, result) runs as each lands; a failed read is skipped.
+ * Returns the slots left for later (over the budget).
+ */
+export async function preloadItemDetails(model, slots, { onDetail, budget = ITEM_DETAIL_BUDGET } = {}) {
+  const worn = slots.filter(slot => !slot.empty);
+  const queue = [];
+  const later = [];
+  let calls = 0;
+  for (const slot of worn) {
+    if (itemDetailKept(model, slot)) queue.push(slot);
+    else if (calls < budget) { calls += 1; queue.push(slot); }
+    else later.push(slot);
+  }
+  const run = async () => {
+    while (queue.length) {
+      const slot = queue.shift();
+      try { onDetail?.(slot, await loadItemDetail(model, slot)); } catch { /* the tile keeps what the character call gave it */ }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(ITEM_DETAIL_CONCURRENCY, queue.length) }, run));
+  return later;
 }
 
 /** The node grid of one Daevanion board, loaded when the player opens it. Returns { nodes }. */
