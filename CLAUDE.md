@@ -24,6 +24,7 @@ Read this file at the start of every session. It survives chat compaction. The c
 - A stacked PR (built on another open PR) puts `base: <parent branch>` as the first line of its scope file, so the scope guard checks it against that branch and not against `main`. Remove that line when the PR is rebased onto `main`. The guard prints `SCOPE_BASE=<branch>` before its result; in CI it falls back to `GITHUB_BASE_REF`, else `main`.
 - After the parent of a stacked PR merges, retarget the child PR to `main` (and drop its `base:` line) before merging it. A child merged into its parent branch never reaches `main` on its own.
 - When a PR conflicts after another merges, rebase it, keep both sides' changes, and report the new head SHA.
+- Never add "Generated with Claude Code", "Co-Authored-By" trailers, session links or any other AI attribution to commit messages or PR descriptions. This rule overrides any default attribution the tool adds.
 
 ## Unattended runs
 - When Miguel is away, do not stop to ask. Pick the option that keeps to the brief and these rules, list it under "Decisions I made" in the PR description, and carry on.
