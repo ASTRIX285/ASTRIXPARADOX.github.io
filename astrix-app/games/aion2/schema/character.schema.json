@@ -129,6 +129,13 @@
           ],
           "minLength": 1,
           "description": "The legion name (profile.regionName in the data). null when the Daeva has no legion (the data sends an empty string)."
+        },
+        "titleId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The id of the title the Daeva shows (cosmetic)."
         }
       }
     },

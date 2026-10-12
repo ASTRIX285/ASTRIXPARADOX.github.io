@@ -10,7 +10,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
-import {adaptCharacter,adaptDaevanionBoard,adaptItemDetail,adaptSearch,ITEM_LEVEL_LABEL} from '../games/aion2/engine/armory-adapter.mjs';
+import {adaptAppearance,adaptCharacter,adaptDaevanionBoard,adaptGear,adaptItemDetail,adaptProfile,adaptSearch,adaptTitles,arcanaSlots,daevanionPercent,ITEM_LEVEL_LABEL} from '../games/aion2/engine/armory-adapter.mjs';
+import {effectTag,indexStats,rankPointStats} from '../games/aion2/engine/stat-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {deriveRegion,deriveServers,REGION_TABLE,BOARD_IDS} from './fixtures/aion2/derive-region-fixtures.mjs';
 import {validateGameModule} from '../platform/contracts/game-module.mjs';
@@ -182,6 +183,84 @@ assert.equal(model.profile.raceId,1);
   assert.ok(nodes.length>0&&nodes.every(node=>node.boardId===31),'Asmodian board nodes carry the Asmodian board id');
 }
 
+// More character info (12 Oct 2026): the Lv 45 /aion2/character capture (lv45-character.json, renamed: TESTDAEVA, TESTLEGION).
+const lv45Raw=fixture('lv45-character');
+const lv45=adaptCharacter({info:lv45Raw.info,equipment:lv45Raw.equipment},{slots,region:'eu',capturedOn:'2026-10-12'});
+{
+  // Legion: profile.regionName, an empty string with no legion (the 5 Oct capture), absent or blank too.
+  assert.equal(lv45.profile.legion,'TESTLEGION');
+  assert.equal(model.profile.legion,null,'No legion on the 5 Oct capture (regionName "")');
+  for(const value of [undefined,null,'','   ',42]){
+    const info=structuredClone(lv45Raw.info);
+    if(value===undefined)delete info.profile.regionName;else info.profile.regionName=value;
+    assert.equal(adaptProfile(info).legion,null,`regionName ${JSON.stringify(value)}: no legion`);
+  }
+  // The title shown (cosmetic) keeps its id, name and grade.
+  assert.deepEqual([lv45.profile.title,lv45.profile.titleId,lv45.profile.titleGrade],["I'll Finish This",12010016,'Rare']);
+  // Titles: one entry per category in the game's order, owned of total, the title set there with both effect lists.
+  const t=lv45.titles;
+  assert.deepEqual([t.owned,t.total],[59,297]);
+  assert.deepEqual(t.categories.map(c=>[c.id,c.code,c.owned,c.total,c.percent]),[['attack','Attack',19,103,18],['defense','Defense',15,95,16],['other','Etc',25,99,25]]);
+  assert.deepEqual(t.categories[0].worn,{id:11020034,name:'Failed Entrepreneur',grade:'Legend',effect:['PvE Attack +25','Attack Bonus +20'],alsoGives:['Accuracy Bonus +10']});
+  assert.deepEqual(t.categories[2].worn.effect,['HP +750','HP Potion Recovery +300']);
+  assert.deepEqual(t.categories[1].worn.alsoGives,['Front Defense +30']);
+  // The 5 Oct capture: owned counts but no title set in any category (id and name null).
+  assert.ok(model.titles.categories.length===3&&model.titles.categories.every(c=>c.worn===null),'No title set: worn is null, never a blank title');
+  // No title block, a missing category, null lists.
+  assert.equal(adaptTitles({}).pending,true,'No title block: pending');
+  assert.equal(adaptTitles({title:{titleList:null}}).pending,true);
+  const partial=structuredClone(lv45Raw.info.title);
+  partial.titleList=partial.titleList.filter(entry=>entry.equipCategory!=='Defense');
+  partial.titleList[0].equipStatList=null;partial.titleList[0].statList=[{desc:''},{desc:null},{desc:' HP +5 '}];
+  const pt=adaptTitles({title:partial});
+  assert.deepEqual(pt.categories.map(c=>c.id),['attack','other'],'A missing category is left out, never 0, the rest in the game order');
+  const first=pt.categories.find(c=>c.code===partial.titleList[0].equipCategory);
+  assert.deepEqual([first.worn.effect,first.worn.alsoGives],[[],['HP +5']],'Null and blank lines dropped');
+  delete partial.ownedCount;
+  assert.equal(adaptTitles({title:partial}).owned,null,'No overall count: null, never 0');
+  // Arcana: always the five slots, empty here (none worn in any capture); a worn one is its gear entry.
+  assert.deepEqual(lv45.arcana.map(a=>[a.slot,a.slotPos,a.empty]),[['Arcana1',41,true],['Arcana2',42,true],['Arcana3',43,true],['Arcana4',44,true],['Arcana5',45,true]]);
+  const withArcana=structuredClone(lv45Raw.equipment);
+  withArcana.equipment.equipmentList.push({enchantLevel:2,exceedLevel:0,grade:'Rare',icon:'https://assets.playnccdn.com/static-aion2-gamedata/resources/test.png',id:900000043,name:'Test Arcana',slotPos:43,slotPosName:'Arcana3'});
+  const gearA=adaptGear(withArcana,slots);
+  const arc=arcanaSlots(gearA,slots);
+  assert.equal(arc.length,5);
+  assert.deepEqual([arc[2].empty,arc[2].name,arc[2].grade,arc[2].enchant],[false,'Test Arcana','Rare',2]);
+  assert.ok([0,1,3,4].every(n=>arc[n].empty),'The other four stay empty');
+  // Exceed level: sent on every worn item (0 here), 0 when the data leaves it out, the number when above 0.
+  assert.ok(lv45.gear.filter(g=>!g.empty).every(g=>g.exceed===0),'Exceed 0 on every worn item in the capture');
+  const ex=structuredClone(lv45Raw.equipment);
+  ex.equipment.equipmentList[0].exceedLevel=2;delete ex.equipment.equipmentList[1].exceedLevel;ex.equipment.equipmentList[2].exceedLevel=null;
+  const exGear=adaptGear(ex,slots);
+  assert.deepEqual([exGear.find(g=>g.slotPos===1).exceed,exGear.find(g=>g.slotPos===2).exceed,exGear.find(g=>g.slotPos===5).exceed],[2,0,0]);
+  // Appearance: the skins and the wing skin as sent; nothing when the data has none.
+  assert.deepEqual(lv45.appearance.skins.map(skin=>[skin.slot,skin.name,skin.grade]),[['Cape','Skybright Oath (Cloak)','Legend'],['Greatsword','Endsong (Greatsword)','Legend'],['Torso','Light of Genesis (Breastplate)','Common'],['Shoulder','Steel Endurance (Pauldrons)','Legend'],['Helmet','Steel Endurance (Helm)','Legend']]);
+  assert.deepEqual(lv45.appearance.wingSkin,{id:30200703,name:'Superior Daeva Wings',icon:'https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_WingB_007C.png',grade:'Legend'});
+  assert.deepEqual(adaptAppearance({equipment:{equipmentList:[]},petwing:{}}),{skins:[],wingSkin:null},'No skins, no wing skin');
+  assert.deepEqual(adaptAppearance({}),{skins:[],wingSkin:null});
+  // Daevanion: the board percent as sent, null when missing; the overall percent by nodes over every board.
+  assert.deepEqual(lv45.daevanion.map(b=>[b.name,b.nodesTaken,b.nodesTotal,b.percent]),[['Nezekan',45,88,51],['Zikel',42,88,48],['Vaizel',21,88,24],['Triniel',0,116,0],['Azphel',0,152,0]]);
+  assert.equal(daevanionPercent(lv45.daevanion),20,'108 of 532 nodes');
+  assert.equal(daevanionPercent([]),null);
+  const noPct=structuredClone(lv45Raw.info);delete noPct.daevanion.boardList[0].openPercent;
+  assert.equal(adaptCharacter({info:noPct,equipment:lv45Raw.equipment},{slots,region:'eu',capturedOn:'2026-10-12'}).daevanion[0].percent,null);
+  // Ranking: rankingList is null in every capture, so the model has no ranking at all.
+  assert.equal(lv45Raw.info.ranking.rankingList,null);
+  assert.ok(!('ranking' in lv45),'No ranking field: no data');
+  // Stigmas: the equipped ones and their levels come straight from the skill data.
+  assert.deepEqual(lv45.skills.filter(s=>s.category==='Dp'&&s.equipped).map(s=>[s.name,s.skillLevel]),[['Wrath Wave',1],["Zikel's Blessing",3],['Rage Burst',8],['Wave Armor',1],['Fracturing Rush',1]]);
+  // Title effect tags for a Gladiator: only a line naming a stat the record knows exactly gets one.
+  const stats=json('games/aion2/data/advisor/stats.json');
+  const build=json('games/aion2/data/advisor/builds/gladiator.json').records.find(b=>b.main);
+  const rank=rankPointStats(build,indexStats(stats));
+  const tags=Object.fromEntries(['Attack Bonus +20','Accuracy Bonus +10','HP +750','Evasion Bonus +32','PvE Attack +25','Critical Damage Defense +315','Front Defense +30','HP Potion Recovery +300','Move Speed +1.6%'].map(line=>[line,effectTag(line,rank,build,stats)]));
+  assert.deepEqual(tags,{'Attack Bonus +20':'useful','Accuracy Bonus +10':'high','HP +750':'low','Evasion Bonus +32':'low','PvE Attack +25':null,'Critical Damage Defense +315':null,'Front Defense +30':null,'HP Potion Recovery +300':null,'Move Speed +1.6%':'low'});
+  assert.equal(effectTag('Attack Bonus +20',null,build,stats),null,'No stat order: no tag');
+  // The fixture is renamed: no gamer tag, real id, portrait or real legion name.
+  const text=JSON.stringify(lv45Raw);
+  for(const bad of [['ASTRIX','285'].join(''),['AX','PARADOX'].join(''),'B-3zbauf5','profileimg.plaync.com'])assert.ok(!text.includes(bad),`fixture has no ${bad}`);
+}
+
 // Schemas (ajv is a dev dependency: npm install --prefix astrix-app)
 const require=createRequire(import.meta.url);
 let Ajv2020,addFormats;
@@ -199,6 +278,7 @@ if(Ajv2020){
   };
   check('character',model,'ASTRIX285 model');
   check('character',bareModel,'Model with an empty slot');
+  check('character',lv45,'Lv 45 model with titles, legion, Arcana and appearance');
   slots.forEach(record=>check('gear-slot',record,`slot ${record.id}`));
   [...skills,...stigmas].forEach(record=>check('catalogue-skill',record,`skill ${record.name}`));
 }

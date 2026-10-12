@@ -76,6 +76,24 @@ const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 const perkItem={...structuredClone(item),id:110300999,name:'Red Agate Helm',grade:'Legend',maxEnchantLevel:10,enchantLevel:0,magicStoneSlotCount:3,equipLevel:22,
   subSkillCountMax:3,subStatCount:3,subStatRandom:true,costumes:['Skybright Oath (Helm)'],desc:'A helm for the brave.\nCan be upgraded.',
   subSkills:[{id:11790000,level:1,icon:'https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png',name:'Survival Willpower'}]};
+/* More character info (12 Oct 2026): the Lv 45 /aion2/character capture (lv45-character.json, renamed: TESTDAEVA, legion
+   TESTLEGION), a second Daeva in Asia made from it (another class, server and stats, an Arcana and an exceed level), and
+   a Daeva with no skins. All served by character id through EXTRA. */
+const EXTRA=new Map();
+const lv45Body=await fixture('lv45-character');
+const L45={serverId:'1308',characterId:lv45Body.info.profile.characterId,region:'eu'};
+EXTRA.set(L45.characterId,{info:lv45Body.info,equipment:lv45Body.equipment});
+const second=structuredClone(lv45Body);
+Object.assign(second.info.profile,{characterName:'SECONDDAEVA',characterId:'c2Vjb25kZGFldmE=',className:'Sorcerer',serverId:2501,serverName:'AS Asmodian 1',raceId:2,raceName:'Asmodians',regionName:'',combatPower:39000});
+second.info.stat.statList.find(row=>row.type==='INT').value=30;
+second.equipment.equipment.equipmentList[0]={...second.equipment.equipment.equipmentList[0],enchantLevel:12,exceedLevel:2};
+second.equipment.equipment.equipmentList.push({enchantLevel:2,exceedLevel:0,grade:'Rare',icon:'https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Test_Arcana.png',id:900000041,name:'Test Chalice',slotPos:41,slotPosName:'Arcana1'});
+second.equipment.equipment.skinList=[];
+delete second.equipment.petwing.wingSkin;
+const S45={serverId:'2501',characterId:second.info.profile.characterId,region:'as'};
+EXTRA.set(S45.characterId,{info:second.info,equipment:second.equipment});
+const refOf=who=>new URLSearchParams({serverId:who.serverId,characterId:who.characterId,region:who.region}).toString();
+
 const browser=await chromium.launch();
 const realCalls=[];
 let failures=0;
@@ -116,7 +134,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
       bodies['/aion2/servers']=servers==='empty'?{serverList:[]}:deriveServers(url.searchParams.get('region'));
     }
     if(noTitle&&url.pathname==='/aion2/character')bodies['/aion2/character']={info:noTitleInfo,equipment:bareEquipment};
-    const body=bodies[url.pathname];
+    // A Daeva the more-info checks (12 Oct 2026) serve by character id: the Lv 45 capture and its variants.
+    const body=(url.pathname==='/aion2/character'&&EXTRA.get(url.searchParams.get('characterId')))||bodies[url.pathname];
     if(!body)return route.fulfill({status:404,body:'{}'});
     if(slow&&url.pathname==='/aion2/character')await new Promise(done=>setTimeout(done,3500));
     return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta:{...meta,...(metaAt?{fetchedAt:new Date(metaAt).toISOString()}:{}),region:url.searchParams.get('region')}})});
@@ -1504,6 +1523,189 @@ await check('Daeva Card: Play AION 2 on the intro, View on the official AION 2 s
   assert.ok(card.size>=14);
   assert.ok(await page.$eval('#aeSummary [data-official-link="character"]',a=>a.closest('.ae-summary-card')!==null),'On the card itself');
   await context.close();
+});
+
+
+/* ---------- More character info (12 Oct 2026) ---------- */
+const grey=page=>page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--ae-grade-epic').trim());
+const seen=(page,selector)=>page.$eval(selector,el=>el.innerText.replace(/\s+/g,' ').trim());
+const overflowX=page=>page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+
+await check('Daeva Card: the legion line only with data, and the slim row (title effects set, Daevanion overall)',async()=>{
+  const {page,context,calls,errors}=await open(`/hub/aetherium/?${refOf(L45)}`,{live:true});
+  assert.deepEqual(calls,['/aion2/character'],'First paint is still one character call');
+  assert.equal(await plainText(page,'#aeLegion'),'Legion TESTLEGION');
+  assert.equal(await plainText(page,'#aeFacts [data-fact="titles"]'),'Title effects 3 of 3 set');
+  assert.equal(await plainText(page,'#aeFacts [data-fact="daevanion"]'),'Daevanion 20% overall');
+  assert.match(await page.getAttribute('#aeFacts [data-fact="titles"] a','href'),/^\/hub\/aetherium\/gear\/titles\/\?serverId=1308/);
+  const tiles=await boxOf(page,'#aeSummary .ae-tiles'),facts=await boxOf(page,'#aeFacts');
+  assert.ok(Math.abs(tiles.left-facts.left)<1&&Math.abs(tiles.right-facts.right)<1,'The row lines up with the stat tiles');
+  assert.ok(await page.$$eval('#aeFacts a',els=>els.every(el=>el.getBoundingClientRect().height>=44)),'44px targets');
+  const text=await page.evaluate(()=>document.body.innerText);
+  assert.doesNotMatch(text,/59|297/,'No overall title total: it does not match the game yet');
+  assert.doesNotMatch(text,/Ranking/i,'No ranking: the data has none');
+  assert.deepEqual(errors,[]);
+  await context.close();
+  const none=await open(`/hub/aetherium/?${daevaRef}`,{live:true});
+  assert.equal(await none.page.locator('#aeLegion').count(),0,'No legion in the data: no line, never a placeholder');
+  await none.context.close();
+});
+
+await check('Titles page: title shown at the top, three equipped effects with per-category counts, confirmed labels, class tags, Epic colour, never Legend',async()=>{
+  for(const width of [390,1600]){
+    const {page,context,calls,errors}=await open(`/hub/aetherium/gear/titles/?${refOf(L45)}`,{live:true,viewport:{width,height:900}});
+    assert.deepEqual(calls,['/aion2/character']);
+    assert.equal(await plainText(page,'#aeTitleShownTitle'),'Title shown');
+    assert.equal(await plainText(page,'[data-title-shown]'),"I'll Finish This");
+    assert.equal(await page.getAttribute('[data-title-shown]','data-grade'),'rare');
+    assert.equal(await plainText(page,'#aeEffectsTitle'),'Equipped effects');
+    assert.deepEqual(await page.$$eval('[data-title-category]',els=>els.map(el=>el.dataset.titleCategory)),['attack','defense','other']);
+    assert.deepEqual(await page.$$eval('[data-title-category] .ae-section-title',els=>els.map(el=>el.textContent.trim())),['Offensive','Defensive','Other']);
+    assert.deepEqual(await page.$$eval('[data-title-count]',els=>els.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['19 of 103 owned','15 of 95 owned','25 of 99 owned']);
+    assert.equal(await page.locator('#aeTitlesTotal').count(),0,'No overall total');
+    const text=await page.evaluate(()=>document.body.innerText);
+    assert.doesNotMatch(text,/\b59\b|\b297\b/,'The overall count never shows');
+    assert.doesNotMatch(text,/Legend/,'Never the word Legend');
+    assert.doesNotMatch(text,/Also gives|not confirmed/i,'The old labels and the unconfirmed line are gone');
+    assert.deepEqual(await page.$$eval('[data-title-category="attack"] .ae-item-sec',els=>els.map(el=>el.textContent.trim())),['Equip effect','Always on once owned']);
+    assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-rule-status]',els=>els.map(el=>el.dataset.ruleStatus)),['confirmed','confirmed']);
+    assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-title-list="effect"] li',els=>els.map(el=>[el.querySelector('span').textContent,el.dataset.lineTag??null])),[['PvE Attack +25',null],['Attack Bonus +20','useful']]);
+    assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-title-list="owned"] li',els=>els.map(el=>[el.querySelector('span').textContent,el.dataset.lineTag??null])),[['Accuracy Bonus +10','high']]);
+    assert.equal(await plainText(page,'[data-title-category="attack"] .ae-tworn-name'),'Failed Entrepreneur');
+    assert.equal(await page.getAttribute('[data-title-category="attack"] .ae-tworn-name','data-grade'),'epic');
+    const colour=await page.$eval('[data-title-category="attack"] .ae-tworn-name',el=>getComputedStyle(el).color);
+    const epic=await page.evaluate(hex=>{const el=document.createElement('i');el.style.color=hex;document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;},await grey(page));
+    assert.equal(colour,epic,'The Epic title name is in the Epic grade colour (blue)');
+    assert.equal(await plainText(page,'[data-title-category="attack"] .ae-tworn-grade'),'Epic');
+    const cats=await page.$$eval('[data-title-category]',els=>els.map(el=>{const r=el.getBoundingClientRect();return {top:Math.round(r.top),left:r.left,width:r.width};}));
+    if(width>=900)assert.ok(cats.every(c=>c.top===cats[0].top),'Three categories side by side on wide screens');
+    else assert.ok(cats[1].top>cats[0].top&&Math.abs(cats[1].left-cats[0].left)<1,'One column on a phone');
+    assert.ok(await overflowX(page)<=0,`no sideways scroll at ${width}`);
+    if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`titles-${width}.png`),fullPage:true});
+    assert.deepEqual(errors,[]);
+    await context.close();
+  }
+});
+
+await check('Gear page: five Arcana slots filled or empty with a card each, exceed only above 0, Appearance only with skins',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/gear/equipment/?${refOf(L45)}`,{live:true});
+  assert.equal(await page.locator('#aeArcana > li').count(),5,'Always the five Arcana slots');
+  assert.equal(await page.locator('#aeArcana [data-arcana-empty]').count(),5,'None worn in the capture: five empty slots');
+  assert.equal(await plainText(page,'#aeArcanaCount'),'0 of 5 worn');
+  assert.equal(await page.isVisible('#aeArcanaNone'),true);
+  await page.click('#aeArcana [data-arcana-empty="1"]');
+  assert.equal(await plainText(page,'#aeInfoTitle'),'No Arcana yet');
+  assert.match(await plainText(page,'#aeInfo [data-arcana-line]'),/^Arcana are the main source of deity stats\. Not confirmed yet$/,'The one line, tagged unconfirmed as in stats.json');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#aeGear .ae-gtile-ex').count(),0,'Exceed 0 everywhere: no exceed mark');
+  assert.equal(await page.isVisible('#aeAppearance'),true,'Skins in the data: the Appearance panel shows');
+  assert.deepEqual(await page.$$eval('#aeLooks .ae-extra-label',els=>els.map(el=>el.textContent)),['Cape','Greatsword','Torso','Shoulder','Helmet','Wings']);
+  await page.click('#aeLooks [data-look-open="1"]');
+  assert.equal(await plainText(page,'#aeInfoTitle'),'Endsong (Greatsword)');
+  assert.doesNotMatch(await plainText(page,'#aeInfo'),/Legend/);
+  await page.keyboard.press('Escape');
+  const arcana=await page.$$eval('#aeArcana > li',els=>els.map(el=>{const r=el.getBoundingClientRect();return {top:Math.round(r.top),w:Math.round(r.width)};}));
+  assert.ok(arcana.every(a=>a.top===arcana[0].top&&a.w===arcana[0].w),'One row of five, one size');
+  const gearCell=await boxOf(page,'#aeGear > li');
+  assert.ok(Math.abs(gearCell.width-arcana[0].w)<1.5,'Arcana tiles the size of the gear tiles');
+  if(process.env.AE_SHOTS)for(const width of [1600,390]){await page.setViewportSize({width,height:900});await page.screenshot({path:resolve(process.env.AE_SHOTS,`gear-arcana-${width}.png`),fullPage:true});}
+  assert.deepEqual(errors,[]);
+  await context.close();
+  const two=await open(`/hub/aetherium/gear/equipment/?${refOf(S45)}`,{live:true});
+  assert.equal(await two.page.locator('#aeArcana [data-arcana-empty]').count(),4,'One Arcana worn, four empty');
+  assert.equal(await two.page.getAttribute('#aeArcana > li:first-child','data-slot-pos'),'41');
+  assert.equal(await plainText(two.page,'#aeArcanaCount'),'1 of 5 worn');
+  assert.equal(await two.page.isHidden('#aeArcanaNone'),true);
+  await two.page.click('#aeArcana [data-arcana-empty="2"]');
+  assert.equal(await plainText(two.page,'#aeInfoTitle'),'Empty Arcana slot');
+  await two.page.keyboard.press('Escape');
+  await two.page.click('#aeArcana > li:first-child button');
+  await two.page.waitForSelector('#aeInfo [data-arcana-line]');
+  assert.match(await plainText(two.page,'#aeInfo [data-arcana-line]'),/^Arcana are the main source of deity stats\./);
+  await two.page.keyboard.press('Escape');
+  assert.equal(await plainText(two.page,'#aeGear [data-slot-pos="1"] .ae-gtile-ex'),'E2','Exceed 2 next to +12');
+  assert.match(await two.page.getAttribute('#aeGear [data-slot-pos="1"] button','aria-label'),/\+12 of [^,]+, Exceed 2/);
+  const ex=await two.page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile-ex',el=>({size:parseFloat(getComputedStyle(el).fontSize)}));
+  assert.ok(ex.size>=13,'Exceed mark at least 13px');
+  assert.equal(await two.page.isHidden('#aeAppearance'),true,'No skins: the Appearance panel collapses');
+  await two.context.close();
+});
+
+const COMPARE_PAIR=`?a=${encodeURIComponent(`eu:${L45.serverId}:${L45.characterId}`)}&b=${encodeURIComponent(`as:${S45.serverId}:${S45.characterId}`)}`;
+const pairStore=()=>JSON.stringify(storeV2([
+  saved('TESTDAEVA',1308,'Meslamtaeda','eu',{characterId:L45.characterId,level:45}),
+  saved('SECONDDAEVA',2501,'AS Asmodian 1','as',{characterId:S45.characterId,className:'Sorcerer',level:45})
+]));
+await check('Compare: two Daevas from different regions side by side, two calls in parallel, every section, higher marked on both sides',async()=>{
+  for(const width of [390,820,1600,1920]){
+    const {page,context,calls,urls,errors}=await open(`/hub/aetherium/compare/${COMPARE_PAIR}`,{live:true,viewport:{width,height:900},extra:{'aetherium.roster.v2':pairStore()}});
+    assert.deepEqual(calls,['/aion2/character','/aion2/character'],'Two character calls, no item calls');
+    assert.deepEqual(urls.map(url=>url.searchParams.get('region')).sort(),['as','eu']);
+    assert.ok(await overflowX(page)<=0,`no sideways scroll at ${width}`);
+    assert.deepEqual(await page.$$eval('[data-compare-section]',els=>els.map(el=>el.dataset.compareSection)),['overview','main-stats','deity-stats','daevanion','titles','arcana','gear']);
+    const heads=await page.$$eval('#aeCmpHeads .ae-cmp-who',els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:Math.round(r.top),name:el.querySelector('.ae-cmp-name').textContent};}));
+    assert.deepEqual(heads.map(h=>h.name),['TESTDAEVA','SECONDDAEVA'],'First Daeva left, second right');
+    assert.ok(heads[0].top===heads[1].top&&heads[0].right<=heads[1].left,'The two headers side by side');
+    assert.equal(await page.locator('#aeCmpHeads a').count(),0,'Names are plain text, not links');
+    assert.match(await plainText(page,'#aeCmpHeads [data-compare-legion]'),/^Legion TESTLEGION$/);
+    assert.equal(await page.locator('#aeCmpHeads [data-compare-legion]').count(),1,'Only the Daeva with a legion shows one');
+    // Every row: left value, the label in the middle, right value, on one line.
+    const rows=await page.$$eval('.ae-cmp-row',els=>els.map(el=>{const [a,label,b]=[...el.children].map(c=>c.getBoundingClientRect());return {ok:a.right<=label.left+0.5&&label.right<=b.left+0.5&&Math.abs((a.top+a.height/2)-(b.top+b.height/2))<2};}));
+    assert.ok(rows.length>40&&rows.every(r=>r.ok),'Each row reads left value, label, right value');
+    assert.equal(await page.locator('.ae-cmp-cell.is-a').count(),await page.locator('.ae-cmp-cell.is-b').count());
+    // Higher marked on both sides: combat power on the left, Intelligence on the right.
+    assert.deepEqual(await page.$$eval('[data-compare-row="combat-power"] .ae-cmp-cell',els=>els.map(el=>el.classList.contains('is-higher'))),[true,false]);
+    assert.deepEqual(await page.$$eval('[data-compare-row="stat-INT"] .ae-cmp-cell',els=>els.map(el=>el.classList.contains('is-higher'))),[false,true]);
+    assert.deepEqual(await page.$$eval('[data-compare-row="item-level"] .ae-cmp-cell',els=>els.map(el=>el.classList.contains('is-higher'))),[false,false],'A tie marks neither');
+    const accent=await page.$eval('[data-compare-row="combat-power"] .is-higher b',el=>getComputedStyle(el).color);
+    const plainColour=await page.$eval('[data-compare-row="combat-power"] .ae-cmp-cell:not(.is-higher) b',el=>getComputedStyle(el).color);
+    assert.notEqual(accent,plainColour,'The higher number is in colour');
+    assert.equal(await page.locator('[data-compare-section="main-stats"] .ae-cmp-row').count(),6);
+    assert.equal(await page.locator('[data-compare-section="deity-stats"] .ae-cmp-row').count(),10);
+    assert.ok(await page.locator('[data-compare-section="main-stats"] .ae-stat-icon').count()===6,'Stat icons from the sprite');
+    assert.match(await seen(page,'[data-compare-row="board-Nezekan"]'),/^51% Nezekan 51%$/);
+    assert.match(await seen(page,'[data-compare-row="titles-attack"]'),/^19 of 103 Offensive 19 of 103$/);
+    // Gear: only the icon on its grade tile and one short line (grade, enchant, item level). No item names.
+    const gear=await page.$$eval('[data-compare-section="gear"] .ae-cmp-cell',els=>els.map(el=>({tile:el.querySelectorAll('.ae-gtile').length,img:el.querySelectorAll('img').length,line:el.querySelector('.ae-cmp-item-line')?.textContent.trim()??null,text:el.innerText.trim()})));
+    assert.ok(gear.length>=34&&gear.every(g=>g.tile===1&&g.img===1&&g.line===g.text.replace(/\s+/g,' ')),'Each gear cell: one tile and one line');
+    assert.ok(gear.every(g=>/^(Common|Rare|Epic|Unique|Heroic|Mythic|Special)( \+\d+( E\d+)?( · iLv \d+)?)$/.test(g.line)),`Gear lines are grade, enchant and item level only: ${gear.map(g=>g.line).join(' | ')}`);
+    const text=await page.evaluate(()=>document.querySelector('#aeCompare').innerText);
+    assert.doesNotMatch(text,/Spiritforged Greatsword|Pilgrim Helm|Legend/,'No item names, never Legend');
+    assert.match(await seen(page,'[data-compare-row="gear-MAINHAND"] .is-b'),/^Unique \+12 E2$/);
+    // Arcana: an empty slot is a dim empty frame, a worn one its tile.
+    assert.equal(await page.locator('[data-compare-row="arcana-1"] .is-a .ae-gempty').count(),1,'Empty slot: an empty frame');
+    assert.equal(await page.locator('[data-compare-row="arcana-1"] .is-b .ae-gtile').count(),1);
+    assert.match(await seen(page,'[data-compare-row="arcana-1"] .is-b .ae-cmp-item-line'),/^Rare \+2$/);
+    // Copy link is the standard outline button, not crimson; the note is one line above the first section.
+    const copy=await page.$eval('#aeCmpCopy',el=>({h:el.getBoundingClientRect().height,color:getComputedStyle(el).color}));
+    assert.ok(copy.h>=44,'44px target');
+    const crimson=await page.evaluate(()=>{const el=document.createElement('i');el.style.color='var(--ae-astrix-hi)';document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;});
+    assert.notEqual(copy.color,crimson,'Copy link is not red');
+    assert.equal(await plainText(page,'#aeCmpNote'),'The higher number is in colour.');
+    const note=await boxOf(page,'#aeCmpNote'),first=await boxOf(page,'[data-compare-section="overview"]');
+    assert.ok(note.bottom<=first.top,'The note sits above the first section');
+    if(process.env.AE_SHOTS&&(width===390||width===1600))await page.screenshot({path:resolve(process.env.AE_SHOTS,`compare-${width}.png`),fullPage:true});
+    assert.deepEqual(errors,[]);
+    await context.close();
+  }
+});
+
+await check('Compare: a shared link opens the same pair on a device with no saved Daevas; the roster link opens the saved two',async()=>{
+  const {page,context,urls}=await open(`/hub/aetherium/compare/${COMPARE_PAIR}`,{live:true});
+  assert.deepEqual(urls.map(url=>[url.searchParams.get('region'),url.searchParams.get('serverId'),url.searchParams.get('characterId')]).sort(),[['as','2501',S45.characterId],['eu','1308',L45.characterId]]);
+  assert.deepEqual(await page.$$eval('#aeCmpHeads .ae-cmp-name',els=>els.map(el=>el.textContent)),['TESTDAEVA','SECONDDAEVA']);
+  assert.equal(await page.$eval('#aeCmp-a',el=>el.value),`eu:1308:${L45.characterId}`);
+  assert.equal(await page.$eval('#aeCmp-b',el=>el.value),`as:2501:${S45.characterId}`);
+  assert.equal(new URL(page.url()).search,COMPARE_PAIR,'The address keeps the pair');
+  await context.close();
+  const card=await open(`/hub/aetherium/?${refOf(L45)}`,{live:true,extra:{'aetherium.roster.v2':pairStore()}});
+  assert.equal(await card.page.isVisible('#aeCompareLink'),true,'Two saved Daevas: the roster offers Compare');
+  const href=await card.page.getAttribute('#aeCompareLink','href');
+  assert.equal(href,`/hub/aetherium/compare/${COMPARE_PAIR}`);
+  await card.context.close();
+  const one=await open(`/hub/aetherium/?${refOf(L45)}`,{live:true});
+  assert.equal(await one.page.isHidden('#aeCompareLink'),true,'One saved Daeva: no Compare link');
+  await one.context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));

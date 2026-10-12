@@ -17,6 +17,9 @@ const state = { model: null, source: null, ref: null, className: 'Gladiator', bo
 
 const points = cost => `${cost} ${cost === 1 ? 'point' : 'points'}`;
 
+/** A board's percent complete: nodes taken of nodes total, else the data's own percent; null with neither. */
+const percentOf = board => (!board ? null : Number.isFinite(board.nodesTaken) && board.nodesTotal > 0 ? Math.round((board.nodesTaken / board.nodesTotal) * 100) : Number.isFinite(board.percent) ? board.percent : null);
+
 /** The five boards in game order, with what the character says about each (open, nodes taken) and what the game facts say (unlock level, focus). */
 function boardList(model, advice) {
   const facts = advice ? (indexProgression(advice.progression)['daevanion-boards']?.value ?? []) : [];
@@ -24,9 +27,9 @@ function boardList(model, advice) {
   const rows = facts.map(fact => {
     // Match by id or name: Asmodian boards carry their own ids (31 to 36), the facts list the Elyos ones. The link and the board call use the character's own id.
     const board = live(fact.id) ?? model.daevanion.find(item => item.name === fact.name) ?? null;
-    return { id: board?.id ?? fact.id, name: fact.name, unlockLevel: fact.unlockLevel, focus: fact.focus, open: Boolean(board?.open), taken: board?.nodesTaken ?? 0, total: board?.nodesTotal ?? null };
+    return { id: board?.id ?? fact.id, name: fact.name, unlockLevel: fact.unlockLevel, focus: fact.focus, open: Boolean(board?.open), taken: board?.nodesTaken ?? 0, total: board?.nodesTotal ?? null, percent: percentOf(board) };
   });
-  for (const board of model.daevanion) if (!rows.some(row => row.id === board.id || row.name === board.name)) rows.push({ id: board.id, name: board.name, unlockLevel: null, focus: null, open: board.open, taken: board.nodesTaken, total: board.nodesTotal });
+  for (const board of model.daevanion) if (!rows.some(row => row.id === board.id || row.name === board.name)) rows.push({ id: board.id, name: board.name, unlockLevel: null, focus: null, open: board.open, taken: board.nodesTaken, total: board.nodesTotal, percent: percentOf(board) });
   return rows;
 }
 
@@ -195,7 +198,7 @@ function render({ model, source, ref }, advice) {
   document.title = 'Daevanion | Gear Ledger | The Aetherium | AION 2 | ASTRIX PARADOX';
   $('#aeStage').innerHTML = `<div class="ae-gw ae-dv-window" data-view="daevanion">
     ${windowBar({ title: 'Daevanion', model, ref })}
-    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Daevanion boards">${state.boards.map(board => `<button type="button" role="tab" class="ae-gw-tab${board.open ? '' : ' is-locked'}" data-board="${esc(board.id)}" aria-selected="${board.id === state.current}">${board.open ? '' : `<span class="ae-pad">${LOCK_ICON}</span>`}${esc(board.name)}</button>`).join('')}</div>
+    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Daevanion boards">${state.boards.map(board => `<button type="button" role="tab" class="ae-gw-tab${board.open ? '' : ' is-locked'}" data-board="${esc(board.id)}" aria-selected="${board.id === state.current}">${board.open ? '' : `<span class="ae-pad">${LOCK_ICON}</span>`}${esc(board.name)}${board.open && board.percent !== null ? `<span class="ae-tab-pct" data-board-percent="${esc(board.percent)}"></span>` : ''}</button>`).join('')}</div>
     <div class="ae-gw-body">
       <div class="ae-dv">
         <section class="ae-dv-board" id="aeDvBoard" aria-live="polite"></section>

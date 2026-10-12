@@ -96,6 +96,9 @@ const ACC={serverId:'1312',characterId:'YWNjZGFldmE='};
 const LV45={serverId:'1308',characterId:'bHY0NXRlc3RkYWV2YQ=='};
 // The same Daeva with its amulet at the +10 cap (a Full marker) and the bracelet's item detail failing (no item level).
 const FULL45={serverId:'1308',characterId:'ZnVsbGRhZXZhNDU='};
+// The 12 Oct 2026 capture (lv45-character.json: renamed TESTDAEVA, legion TESTLEGION), the whole /aion2/character body.
+const char45=await fixture('lv45-character');
+const NEW45={serverId:'1308',characterId:char45.info.profile.characterId};
 const lv45Info=await fixture('lv45-info'),lv45Equipment=await fixture('lv45-equipment'),lv45Items=await fixture('lv45-items');
 const full45Equipment=structuredClone(lv45Equipment),full45Items=structuredClone(lv45Items);
 full45Equipment.equipment.equipmentList.find(item=>item.slotPos===22).enchantLevel=10;
@@ -170,7 +173,8 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
       return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...detail,meta:{...meta,region:url.searchParams.get('region')}})});
     }
     let body;
-    if(lv45&&url.pathname==='/aion2/character')body={info:lv45Info,equipment:lv45Equipment};
+    if(url.pathname==='/aion2/character'&&url.searchParams.get('characterId')===NEW45.characterId)body={info:char45.info,equipment:char45.equipment};
+    else if(lv45&&url.pathname==='/aion2/character')body={info:lv45Info,equipment:lv45Equipment};
     else if(full45&&url.pathname==='/aion2/character')body={info:{...lv45Info,profile:{...lv45Info.profile,characterId:FULL45.characterId}},equipment:full45Equipment};
     else if(url.pathname==='/aion2/character')body=asmo?{info:ASMO.info,equipment:ASMO.equipment}:acc?{info:accInfo,equipment:accEquipment}:rich?{info:richInfo,equipment:richEquipment}:{info,equipment};
     else if(url.pathname==='/aion2/item')body=itemDetail;
@@ -1466,6 +1470,54 @@ await check('crisp loading: window and menu skeletons in the final shape with a 
     }
     await context.close();
   }
+});
+
+
+/* ---------- More character info (12 Oct 2026) ---------- */
+await check('Daevanion: each open board tab shows its percent complete (nodes taken of nodes total)',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/daevanion/${refQuery(NEW45,{class:'gladiator',board:'11'})}`);
+  // The percent is drawn beside the name (CSS content from data-board-percent), so the tab's own text stays the board name.
+  const tabs=await page.$$eval('[data-board]',els=>els.map(el=>{const pct=el.querySelector('.ae-tab-pct');return [el.textContent.trim(),pct?getComputedStyle(pct,'::before').content:null];}));
+  assert.deepEqual(tabs,[['Nezekan','"51%"'],['Zikel','"48%"'],['Vaizel','"24%"'],['Triniel','"0%"'],['Azphel','"0%"']]);
+  const size=await page.$eval('.ae-tab-pct',el=>parseFloat(getComputedStyle(el,'::before').fontSize));
+  assert.ok(size>=13,'Percent at least 13px');
+  for(const width of [390,1600]){
+    await page.setViewportSize({width,height:900});
+    const fit=await page.$eval('.ae-gw-tabs',el=>el.scrollWidth-el.clientWidth);
+    assert.ok(fit<=0,`all five tabs fit at ${width} with their percent`);
+  }
+  assert.deepEqual(errors,[]);
+  await context.close();
+  // A Daeva with only Nezekan open (the 5 Oct capture): a locked board shows no percent.
+  const basic=await open(`/hub/aetherium/daevanion/${refQuery(BASIC,{class:'gladiator',board:'11'})}`);
+  const locked=await basic.page.$$eval('[data-board].is-locked',els=>els.map(el=>el.querySelector('.ae-tab-pct')));
+  assert.ok(locked.length>0&&locked.every(item=>item===null),'Locked boards: no percent');
+  await basic.context.close();
+});
+
+await check('Stigma screen: the equipped stigmas with their levels from the skill data, beside the build four',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/ascent/stigma/${refQuery(NEW45,{class:'gladiator'})}`);
+  await page.waitForSelector('#aeStigmaNow [data-stigma-now]');
+  const now=await page.$$eval('#aeStigmaNow [data-stigma-now]',els=>els.map(el=>[el.dataset.stigmaNow,el.dataset.stigmaLevel??null,el.querySelector('.ae-itile-lv')?.textContent??null]));
+  assert.deepEqual(now,[['Wrath Wave','1','Lv 1'],["Zikel's Blessing",'3','Lv 3'],['Rage Burst','8','Lv 8'],['Wave Armor','1','Lv 1'],['Fracturing Rush','1','Lv 1']]);
+  assert.equal(await page.locator('.ae-stg-row [data-stigma]').count(),4,'The build four stay as they are');
+  assert.match(await page.getAttribute('[data-stigma-now="Rage Burst"]','aria-label'),/^Rage Burst, Lv 8: /);
+  await page.click('[data-stigma-now="Rage Burst"]');
+  assert.match(await page.$eval('#aeInfoTitle',el=>el.textContent),/Rage Burst\s+Lv\. 8/);
+  const lv=await page.$eval('.ae-itile-lv',el=>parseFloat(getComputedStyle(el).fontSize));
+  assert.ok(lv>=13,'Level at least 13px');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('menu: the legion line under the name only when the data has one',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/${refQuery(NEW45)}`);
+  assert.equal(await page.$eval('#aeLegion',el=>el.textContent.replace(/\s+/g,' ').trim()),'Legion TESTLEGION');
+  assert.equal(await page.$eval('[data-view="titles"] .ae-menu-status',el=>el.textContent.trim()),'3 of 3 effects set');
+  await context.close();
+  const none=await open(`/hub/aetherium/gear/${refQuery(BASIC)}`);
+  assert.equal(await none.page.locator('#aeLegion').count(),0);
+  await none.context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));

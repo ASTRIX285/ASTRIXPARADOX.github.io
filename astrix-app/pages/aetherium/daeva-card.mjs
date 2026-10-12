@@ -110,14 +110,15 @@ function renderSummary() {
   loadFirstMove().catch(() => {});
 }
 
-/* The slim row under the stat tiles: titles owned of total and Daevanion progress over every board, each only when the
+/* The slim row under the stat tiles: title effects set and Daevanion progress over every board, each only when the
    data has it, each a link to its page. The official data sends no ranking for any Daeva captured so far, so there is none. */
 function factsRow(model) {
   const titles = isPending(model.titles) ? null : model.titles;
   const percent = daevanionPercent(model.daevanion);
   const facts = [];
-  if (titles && Number.isFinite(titles.owned) && Number.isFinite(titles.total)) {
-    facts.push(`<li data-fact="titles"><a href="${esc(titlesUrl(state.ref))}">Titles <b>${number(titles.owned)}</b> <span>of ${number(titles.total)}</span></a></li>`);
+  // Titles as the effects set of the three categories: the data's overall owned count does not match the game's yet.
+  if (titles && titles.categories.length) {
+    facts.push(`<li data-fact="titles"><a href="${esc(titlesUrl(state.ref))}">Title effects <b>${titles.categories.filter(category => category.worn).length}</b> <span>of ${titles.categories.length} set</span></a></li>`);
   }
   if (percent !== null) {
     facts.push(`<li data-fact="daevanion"><a href="${esc(daevanionPageUrl(state.ref, model.profile.class, model.daevanion.find(board => board.open)?.id ?? null))}">Daevanion <b>${percent}%</b> <span>overall</span></a></li>`);
