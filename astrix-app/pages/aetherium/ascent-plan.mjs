@@ -168,7 +168,7 @@ function viewStatus(view, plan) {
   }
   if (view === 'macro') {
     if (!plan.macro || plan.macro.pending) return 'Not confirmed yet';
-    const usable = plan.macro.slots.filter(slot => slot.usable).length;
+    const usable = plan.macro.used;
     return usable ? `${usable} ${usable === 1 ? 'key' : 'keys'} in Macro 1` : 'Nothing to add yet';
   }
   if (view === 'stats') return isPending(plan.stats) ? 'Not confirmed yet' : `First: ${plan.stats.order[0]}`;
@@ -323,14 +323,19 @@ function renderMacroScreen(plan) {
   if (!m || m.pending) return `${pendingNote(m?.pending ?? plan.rotation)}${order?.setup ? `<p class="ae-note">Open Skill, then Macro, to see the window in game.</p>` : ''}`;
   // Laid out like the game's Macro window: one numbered entry per key, in the build's order, the key's stack shown under
   // it, so a stacked key goes in once and never doubles up with its own skills. Locked rows stay, greyed with their level.
-  const usable = m.slots.filter(slot => slot.usable);
+  // Every slot the macro holds is drawn (the limit from progression.json); the ones left are dim free slots.
+  const usable = m.filled;
+  const max = m.maxEntries ?? usable.length;
   const stackRow = skill => `<li class="${skill.locked ? 'is-locked' : ''}" data-macro-row="${skill.row}">${art(plan.skillIcons[skill.name])}<span>${esc(skill.name)}</span> <small>${skill.locked ? `from Lv ${esc(skill.unlockLevel)}` : `row ${esc(skill.row)}`}</small></li>`;
   const entries = usable.map((slot, index) => `${index ? `<li class="ae-macro-delay" aria-hidden="true"><span>Delay</span><b>${esc(delay ?? 10)}</b><span>ms</span></li>` : ''}
-      <li class="ae-macro-entry" data-macro-entry="${index + 1}" data-macro-key="${esc(slot.key)}"><span class="ae-macro-num">${index + 1}</span><span class="ae-macro-skill">${esc(keyName(slot.key))} <span class="ae-macro-of">(${esc(slot.skills.map(skill => skill.name).join(', '))})</span></span>
-        ${slot.stacked ? `<ol class="ae-macro-stack" aria-label="${esc(keyName(slot.key))} stack, row 0 first">${slot.skills.map(stackRow).join('')}</ol>` : ''}</li>`).join('');
+      <li class="ae-macro-entry" data-macro-entry="${index + 1}" data-macro-slot="${index + 1}" data-macro-key="${esc(slot.key)}" data-macro-from="${esc(slot.from)}"><span class="ae-macro-num">${index + 1}</span><span class="ae-macro-skill">${esc(keyName(slot.key))} <span class="ae-macro-of">(${esc(slot.skills.map(skill => skill.name).join(', '))})</span></span>
+        ${slot.stacked ? `<ol class="ae-macro-stack" aria-label="${esc(keyName(slot.key))} stack, row 0 first">${slot.skills.map(stackRow).join('')}</ol>` : ''}</li>`).join('')
+    + Array.from({ length: Math.max(0, max - usable.length) }, (_, index) => `<li class="ae-macro-free" data-macro-slot="${usable.length + index + 1}" data-macro-free><span class="ae-macro-num">${usable.length + index + 1}</span><span class="ae-macro-skill">Free slot</span></li>`).join('');
+  const count = m.maxEntries ? `<p class="ae-macro-count" id="aeMacroCount">A macro holds up to ${esc(m.maxEntries)} entries. This one uses ${esc(m.used)}.</p>` : '';
   const stacked = usable.some(slot => slot.stacked);
   const fromKeys = usable.length
     ? `<p class="ae-macro-from" id="aeMacroFrom">Each entry is a key from your Skill Bar, in the order the build uses them.${stacked ? ` Adding a stacked key to the macro runs that key's stack (guides say; not tested).` : ''}</p>
+      ${m.added.length ? `<p class="ae-macro-added" id="aeMacroAdded">Then the other damage keys, longest cooldown first: ${esc(m.added.map(slot => keyName(slot.key)).join(', '))}.</p>` : ''}
       ${stacked && m.fallback.length ? `<p class="ae-macro-fallback" id="aeMacroFallback">If your test shows a key only fires row 0, add the skills one by one in this order: ${esc(m.fallback.join(', '))}.</p>` : ''}`
     : '';
   const options = m.options.map(option => option.text.replace(/\.$/, ''));
@@ -347,11 +352,15 @@ function renderMacroScreen(plan) {
     ...manualLater.map(item => `<li data-later-manual="${esc(item.name)}">${art(skillIcon(plan, item.text))}<span>${esc(item.text)}, on its own key <b>Lv ${esc(item.unlockLevel)}</b></span></li>`)
   ];
   const chip = text => `<li>${art(skillIcon(plan, text))}<span>${esc(text)}</span></li>`;
+  // Could add: keys the data gives no role yet, follow-ups while the chain rule is unconfirmed, keys past the limit. Never added on a guess.
+  const could = m.couldAdd.map(item => `<li data-could-add="${esc(item.key ?? item.names[0])}" data-could-kind="${esc(item.kind)}">${art(plan.skillIcons[item.names[0]])}<span>${esc(item.key ? `${keyName(item.key)} (${item.names.join(', ')})` : item.names.join(', '))} <small>${esc(item.reason)}</small></span></li>`);
   return `<div class="ae-macro-screen">
     <div class="ae-macro-main">
     <div class="ae-macro-window" id="aeMacroWindow">
       <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
-      ${usable.length ? `<ol class="ae-macro">${entries}</ol>` : '<p class="ae-muted">None of the macro skills are unlocked yet.</p>'}
+      ${count}
+      ${usable.length ? '' : '<p class="ae-muted">None of the macro skills are unlocked yet.</p>'}
+      ${max ? `<ol class="ae-macro">${entries}</ol>` : ''}
     </div>
       ${fromKeys}
       ${rule}
@@ -375,6 +384,7 @@ function renderMacroScreen(plan) {
       ${laterItems.length ? `<div id="aeMacroLater"><p class="ae-mskills-title">Add later</p><ul class="ae-chiplist">${laterItems.join('')}</ul></div>` : ''}
       ${manualOpen.length ? `<div id="aeMacroManual"><p class="ae-mskills-title">Keep on your own keys</p><ul class="ae-chiplist">${manualOpen.map(item => chip(item.text)).join('')}</ul></div>` : ''}
       ${m.filler ? `<div id="aeMacroFiller"><p class="ae-mskills-title">Filler</p><ul class="ae-chiplist">${chip(m.filler)}</ul></div>` : ''}
+      ${could.length ? `<div id="aeMacroCould"><p class="ae-mskills-title">Could add, check it first</p><ul class="ae-chiplist ae-could">${could.join('')}</ul></div>` : ''}
       ${order?.setup ? `<details class="ae-perks ae-macro-howto"><summary>How to set it up in game</summary><ol>${order.setup.map(line => `<li>${esc(line)}</li>`).join('')}</ol><p>Hold the key to run it; pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys. How it picks the next skill: see above.</p></details>` : ''}
     </div>
   </div>`;
@@ -605,8 +615,8 @@ function guideSteps(view, plan) {
   } else if (view === 'macro') {
     const m = plan.macro;
     if (!m || m.pending) return [];
-    const usable = m.slots.filter(slot => slot.usable);
-    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add your keys in this order${usable.length ? `: ${usable.map(slot => keyName(slot.key).replace(/^Key /, 'key ')).join(', then ')}` : ''}.`, '#aeMacroWindow');
+    const usable = m.filled;
+    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add your keys in this order${usable.length ? `: ${usable.map(slot => keyName(slot.key).replace(/^Key /, 'key ')).join(', ')}` : ''}.${m.maxEntries ? ` A macro holds up to ${m.maxEntries} entries. This one uses ${m.used}.` : ''}`, '#aeMacroWindow');
     if (usable[0]) add(`Number 1 is ${keyName(usable[0].key)} (${usable[0].skills.map(skill => skill.name).join(', ')}). It goes first.`, '[data-macro-entry="1"]');
     if (usable.some(slot => slot.stacked) && m.fallback.length) add(`A stacked key in a macro running its whole stack is not tested yet. If yours only fires row 0, add the skills one by one: ${m.fallback.join(', ')}.`, '#aeMacroFallback');
     const manualOpen = m.manual.filter(item => !item.locked);
@@ -617,6 +627,7 @@ function guideSteps(view, plan) {
     const bind = m.facts?.bind ?? plan.macroOrder?.bind;
     if (bind) add(`Now give the macro a key: ${bind.path.join(', ')}. A side mouse button works well. Hold it in fights.`, '#aeMacroBind');
     if (bind?.presets) add(bind.presetNote, '#aeMacroPresets');
+    if (m.couldAdd.length) add('Could add: our data does not say enough yet to add these for you. Check them in game first.', '#aeMacroCould');
   } else if (view === 'stats') {
     if (isPending(plan.stats)) return [];
     plan.stats.order.slice(0, 3).forEach((stat, index) => add(`${index === 0 ? 'First' : index === 1 ? 'Then' : 'After that'}: ${stat}.`, `[data-stat-rank="${index + 1}"]`));

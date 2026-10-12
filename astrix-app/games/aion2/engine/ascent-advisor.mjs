@@ -598,7 +598,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     mastery,
     skillBar,
     chains,
-    macro: planMacro({ rotation, skillBar, mechanics, level: lvl }),
+    macro: planMacro({ rotation, skillBar, mechanics, level: lvl, catalogue, chains }),
     mechanics
   };
 }
@@ -847,17 +847,31 @@ export function stigmaKeyProblems(skillBar) {
   return problems;
 }
 
+/** The most entries one macro holds: macro-order maxEntries in progression.json (confirmed in game). null when the data has none. */
+export function macroMaxEntries(facts) {
+  const limit = facts?.maxEntries?.value;
+  return Number.isInteger(limit) && limit > 0 ? limit : null;
+}
+/** Roles a key's skills may have to be added to the macro after the rotation. Everything else stays on its own key. */
+export const MACRO_ADD_ROLES = Object.freeze(['damage']);
+/** A skill's role from the catalogue (skills.json), or null when the data does not say. */
+export const skillRole = (catalogue, name) => catalogue?.get(name)?.role?.value ?? null;
+
 /**
  * Macro 1 from the keys: the keys the rotation uses, in the build's order, each with its stack, so a stacked key goes
  * into the macro once and never doubles up with its own skills. How the game picks the next entry is the macro-order
  * rule (unconfirmed: listed order, or a stack); a stacked key running its whole stack is a guide note, not tested. The
- * fallback is the rotation's skills one by one, for when a test shows a key fires only row 0. Facts (slots, delay,
- * hold, binding) come from progression.json through that rule.
+ * fallback is the filled entries' skills one by one, for when a test shows a key fires only row 0. Facts (slots, delay,
+ * hold, binding, the entry limit) come from progression.json through that rule.
+ * After the rotation, the macro fills up to its limit with other bar keys whose skills the catalogue marks as damage,
+ * longest cooldown first. A key with any other role stays off; a key with no role is listed under couldAdd, as are
+ * follow-ups while the chain rule is unconfirmed. Locked keys go under later with their level.
  */
-function planMacro({ rotation, skillBar, mechanics, level }) {
+function planMacro({ rotation, skillBar, mechanics, level, catalogue = new Map(), chains = null }) {
   const rule = ruleOf(mechanics, 'macro-order');
-  const base = { status: rule.status, confirmed: rule.confirmed, text: rule.text ?? '', options: rule.options ?? [], notes: rule.notes ?? [], test: rule.test ?? null, facts: rule.facts ?? null };
-  if (!rotation || isPending(rotation) || !skillBar) return { ...base, pending: isPending(rotation) ? rotation : null, entries: [], keys: [], slots: [], later: [], fallback: [], manual: [], filler: null };
+  const maxEntries = macroMaxEntries(rule.facts);
+  const base = { status: rule.status, confirmed: rule.confirmed, text: rule.text ?? '', options: rule.options ?? [], notes: rule.notes ?? [], test: rule.test ?? null, facts: rule.facts ?? null, maxEntries };
+  if (!rotation || isPending(rotation) || !skillBar) return { ...base, pending: isPending(rotation) ? rotation : null, entries: [], keys: [], slots: [], filled: [], used: 0, added: [], couldAdd: [], later: [], fallback: [], manual: [], filler: null };
   const where = name => {
     for (const stack of Object.values(skillBar.stacks)) { const row = stack.skills.findIndex(skill => skill.name === name); if (row >= 0) return { key: stack.key, row, solo: stack.solo || stack.skills.length === 1 }; }
     return null;
@@ -870,14 +884,59 @@ function planMacro({ rotation, skillBar, mechanics, level }) {
   });
   const keys = entries.filter(item => item.key).map(item => item.key).filter((key, index, all) => all.indexOf(key) === index);
   // One macro entry per key: the whole stack, each row with its lock. A key fires now when any of its skills is open.
-  const slots = keys.map(key => {
+  const slotOf = (key, from) => {
     const stack = skillBar.stacks[key];
     const skills = stack.skills.map((skill, row) => ({ name: skill.name, row, locked: skill.locked, unlockLevel: skill.unlockLevel }));
     const open = skills.filter(skill => !skill.locked);
-    return { key, stacked: skills.length > 1, skills, usable: open.length > 0, firesNow: open.map(skill => skill.name), unlockLevel: open.length ? null : Math.min(...skills.map(skill => skill.unlockLevel)) };
-  });
-  // The fallback: the rotation's open skills one by one, in the build's order, each once.
-  const fallback = entries.filter(item => item.name && !item.locked).map(item => item.name).filter((name, index, all) => all.indexOf(name) === index);
+    const cooldowns = stack.skills.map(skill => skill.cooldownSeconds).filter(value => typeof value === 'number');
+    return { key, from, stacked: skills.length > 1, skills, usable: open.length > 0, firesNow: open.map(skill => skill.name), unlockLevel: open.length ? null : Math.min(...skills.map(skill => skill.unlockLevel)), cooldownSeconds: cooldowns.length ? Math.max(...cooldowns) : null };
+  };
+  const slots = keys.map(key => slotOf(key, 'rotation'));
+  const room = maxEntries ?? slots.length;
+  const couldAdd = [];
+  const full = item => couldAdd.push({ ...item, reason: `No free slot left: a macro holds ${room} entries.` });
+  const filled = [];
+  for (const slot of slots.filter(item => item.usable)) { if (filled.length < room) filled.push(slot); else full({ key: slot.key, names: slot.firesNow, kind: 'full' }); }
+  // Other bar keys: never left click (the basic skill), never a charged skill or one the build fires by hand, and only when
+  // the catalogue marks every skill on the key as damage. No role in the data: listed to check, never added.
+  // A skill the build names anywhere in its manual list (an opener, "Taunt") stays a hand-fired skill, never a candidate.
+  const byHand = name => (rotation.manual ?? []).some(text => String(text).includes(name));
+  const candidates = [];
+  for (const stack of Object.values(skillBar.stacks)) {
+    if (!stack.skills.length || keys.includes(stack.key)) continue;
+    if (stack.skills.some(skill => skill.role === 'fixed' || skill.role === 'manual' || skill.role === 'charged' || skill.charged || byHand(skill.name))) continue;
+    const roles = stack.skills.map(skill => skillRole(catalogue, skill.name));
+    if (roles.some(role => role && !MACRO_ADD_ROLES.includes(role))) continue;
+    if (roles.some(role => !role)) {
+      couldAdd.push({ key: stack.key, names: stack.skills.map(skill => skill.name), kind: 'no-role', reason: 'No role in our data yet', unlockLevel: Math.min(...stack.skills.map(skill => skill.unlockLevel)) });
+      continue;
+    }
+    candidates.push(slotOf(stack.key, 'damage'));
+  }
+  // The big hits first: longest cooldown first, a pending cooldown last, ties in bar order.
+  const byCooldown = (a, b) => (b.cooldownSeconds ?? -1) - (a.cooldownSeconds ?? -1);
+  candidates.sort(byCooldown);
+  const rotationLater = slots.filter(slot => !slot.usable);
+  const added = [];
+  const addedLater = [];
+  for (const slot of candidates) {
+    if (slot.usable && filled.length + rotationLater.length + addedLater.length < room) { filled.push(slot); added.push(slot); }
+    else if (!slot.usable && filled.length + rotationLater.length + addedLater.length < room) addedLater.push(slot);
+    else full({ key: slot.key, names: slot.skills.map(skill => skill.name), kind: 'full' });
+  }
+  // Follow-ups of skills in the macro: added only once the chain rule is confirmed (then the stacks already hold them).
+  const inMacro = filled.flatMap(slot => slot.skills.map(skill => skill.name));
+  if (chains && !chains.confirmed) {
+    for (const chain of chains.chains ?? []) {
+      if (chain.pending || inMacro.includes(chain.followUp) || couldAdd.some(item => item.names.includes(chain.followUp))) continue;
+      const lead = chain.leadIns.find(name => inMacro.includes(name));
+      if (!lead) continue;
+      couldAdd.push({ key: null, names: [chain.followUp], kind: 'follow-up', leadIn: lead, opensAt: chain.opensAt ?? null, reason: `A follow-up to ${lead}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}. How a follow-up fires is not confirmed yet.` });
+    }
+  }
+  // The fallback: the rotation's open skills one by one, in the build's order, then each added key's skills, each once, up to the limit.
+  const rotationFallback = entries.filter(item => item.name && !item.locked).map(item => item.name);
+  const fallback = [...rotationFallback, ...added.flatMap(slot => slot.firesNow)].filter((name, index, all) => all.indexOf(name) === index).slice(0, room);
   // Skills the build fires by hand: kept on their own keys once open, under Add later until then.
   const manual = (rotation.manual ?? []).map(text => {
     const name = barNames.find(item => String(text).startsWith(item)) ?? null;
@@ -886,7 +945,8 @@ function planMacro({ rotation, skillBar, mechanics, level }) {
   });
   return {
     ...base, pending: null, entries, keys, slots,
-    later: slots.filter(slot => !slot.usable),
+    filled, used: filled.length, added, couldAdd,
+    later: [...rotationLater, ...addedLater],
     fallback,
     filler: rotation.filler ?? null,
     manual,

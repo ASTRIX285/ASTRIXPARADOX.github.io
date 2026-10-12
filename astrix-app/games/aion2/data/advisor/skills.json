@@ -1,5 +1,5 @@
 {
-  "description": "Core skills for the Ascent Plan: unlock level, cooldown and Specialty perks, for the global (EU and NA) servers.",
+  "description": "Core skills for the Ascent Plan: unlock level, cooldown, role and Specialty perks, for the global (EU and NA) servers. A role (value, from, quote) is set only where the skill summary or the class build says it in those words; the quote is the exact text it rests on. No role means the data does not say.",
   "records": [
     {
       "id": "gladiator-keen-strike",
@@ -11,6 +11,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies, raises Enmity and restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "Your MP builder"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -56,6 +61,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies, raises Enmity and deals light stagger damage.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "Main MP spender and filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -98,6 +108,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Heavy hit on a knocked down target; can proc on targets with Incapacitated Immunity.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Hardest regular hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -182,6 +197,11 @@
       "unlockLevel": 10,
       "cooldownSeconds": 20,
       "summary": "Gap closer to a target within 10m with a chance to knock down.",
+      "role": {
+        "value": "movement",
+        "from": "summary",
+        "quote": "Gap closer"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -224,6 +244,11 @@
       "unlockLevel": 8,
       "cooldownSeconds": 20,
       "summary": "AoE strike hitting up to 4 enemies around the caster.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "AoE strike hitting up to 4 enemies"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -266,6 +291,11 @@
       "unlockLevel": 16,
       "cooldownSeconds": 60,
       "summary": "Clears hard crowd control and grants Tenacity (status immunity) for 5s.",
+      "role": {
+        "value": "defensive",
+        "from": "summary",
+        "quote": "Clears hard crowd control and grants Tenacity"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -308,6 +338,11 @@
       "unlockLevel": 3,
       "cooldownSeconds": 20,
       "summary": "Single target hit that knocks down for 3s; different motion versus Incapacitated Immunity.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Single target hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -350,6 +385,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Strong single target hit within 4m that raises Enmity.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Main damage hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -392,6 +432,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 30,
       "summary": "Chargeable AoE around a target; grants Executor buff (accuracy and damage boost) for 20s.",
+      "role": {
+        "value": "charged",
+        "from": "summary",
+        "quote": "Chargeable"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -437,6 +482,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies, raises Enmity and deals light stagger damage.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Core shield attack"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -479,6 +529,11 @@
       "unlockLevel": 8,
       "cooldownSeconds": 30,
       "summary": "AoE hit that heals the caster, grants Warding damage tolerance and triggers Judgment.",
+      "role": {
+        "value": "defensive",
+        "from": "build",
+        "quote": "Self heal and damage tolerance buff"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -524,6 +579,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies, raises Enmity and restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "Your MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -602,6 +662,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies and restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -644,6 +709,11 @@
       "unlockLevel": 1,
       "cooldownSeconds": 20,
       "summary": "Teleports behind a target within 20m, strikes, turns them around and stuns 3s.",
+      "role": {
+        "value": "movement",
+        "from": "build",
+        "quote": "Teleport behind the target"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -686,6 +756,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 10,
       "summary": "Detonates Insignia stacks for AoE damage around a target with a stun.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "AoE damage around a target"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -728,6 +803,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Unlocks after a Critical Hit; AoE strike on up to 4 enemies that restores MP.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Main hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -773,6 +853,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies and engraves 1 Insignia for 10s.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Hits up to 4 nearby enemies"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -815,6 +900,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 20,
       "summary": "Chargeable Wind shot on one target; 35% more damage while Precision is active.",
+      "role": {
+        "value": "charged",
+        "from": "summary",
+        "quote": "Chargeable"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -860,6 +950,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Basic Wind shot on one target within 20m that restores MP; usable while moving.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -905,6 +1000,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Wind damage to up to 4 enemies around a target within 20m.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "No-cooldown damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -947,6 +1047,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Fire AoE around a target that applies Bleed and cuts healing received.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Core damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -989,6 +1094,11 @@
       "unlockLevel": 7,
       "cooldownSeconds": 20,
       "summary": "Wind AoE around a target; grants Gale buff for combat speed and damage.",
+      "role": {
+        "value": "buff",
+        "from": "build",
+        "quote": "Self buff for combat speed and damage"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1073,6 +1183,11 @@
       "unlockLevel": 1,
       "cooldownSeconds": 5,
       "summary": "Fire damage to a single target within 20m.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Fire damage to a single target"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1115,6 +1230,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Fire hit on a target with Fire Mark that restores MP.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Core damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1157,6 +1277,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 45,
       "summary": "Chargeable Fire AoE on up to 4 enemies around a target.",
+      "role": {
+        "value": "charged",
+        "from": "summary",
+        "quote": "Chargeable"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1202,6 +1327,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Basic Fire attack on one target within 20m that restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1244,6 +1374,11 @@
       "unlockLevel": 3,
       "cooldownSeconds": 15,
       "summary": "Places a 2s Water zone at a target that damages and may Root enemies.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Frost damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1286,6 +1421,11 @@
       "unlockLevel": 12,
       "cooldownSeconds": 60,
       "summary": "Self buff: +10% Attack and +100 Accuracy for 30s.",
+      "role": {
+        "value": "buff",
+        "from": "summary",
+        "quote": "Self buff"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1328,6 +1468,11 @@
       "unlockLevel": 8,
       "cooldownSeconds": 45,
       "summary": "Water AoE around a target that Slows enemies for 3s.",
+      "role": {
+        "value": "crowd-control",
+        "from": "summary",
+        "quote": "Slows enemies"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1373,6 +1518,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Basic Water attack on one target within 20m that restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1418,6 +1568,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Fire AoE on up to 4 enemies around a target within 20m.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Core damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1592,6 +1747,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Briefly enabled when a spirit uses its skill; AoE that Slows and restores MP.",
+      "role": {
+        "value": "crowd-control",
+        "from": "summary",
+        "quote": "AoE that Slows"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1634,6 +1794,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 10,
       "summary": "AoE around a target that applies Curse damage over time and reduces their damage to you.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Curse damage over time"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1679,6 +1844,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Basic Earth attack on one target within 20m that restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1724,6 +1894,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Wind AoE on up to 4 enemies around a target within 20m.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Wind AoE on up to 4 enemies"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1766,6 +1941,11 @@
       "unlockLevel": 7,
       "cooldownSeconds": 30,
       "summary": "Party heal over time every 2s for 30s within 40m.",
+      "role": {
+        "value": "heal",
+        "from": "build",
+        "quote": "Party heal over time"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1808,6 +1988,11 @@
       "unlockLevel": 10,
       "cooldownSeconds": 6,
       "summary": "Heals the caster and the lowest HP party member within 40m.",
+      "role": {
+        "value": "heal",
+        "from": "build",
+        "quote": "Heals you and the lowest-health ally"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1850,6 +2035,11 @@
       "unlockLevel": 12,
       "cooldownSeconds": 12,
       "summary": "Party heal within 40m that also removes 1 debuff.",
+      "role": {
+        "value": "heal",
+        "from": "build",
+        "quote": "Party heal that also cleanses"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1892,6 +2082,11 @@
       "unlockLevel": 8,
       "cooldownSeconds": 3,
       "summary": "Earth AoE on a target afflicted with Chain of Torment and nearby enemies.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Your main damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1934,6 +2129,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 45,
       "summary": "Chargeable Wind AoE on up to 4 enemies around a target.",
+      "role": {
+        "value": "charged",
+        "from": "summary",
+        "quote": "Chargeable"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -1976,6 +2176,11 @@
       "unlockLevel": 3,
       "cooldownSeconds": 30,
       "summary": "Places a stationary aura for 5s that repeatedly deals Earth damage to a target.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "deals Earth damage"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2021,6 +2226,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies and restores MP.",
+      "role": {
+        "value": "filler",
+        "from": "build",
+        "quote": "MP filler"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2063,6 +2273,11 @@
       "unlockLevel": 4,
       "cooldownSeconds": 5,
       "summary": "Strong single target hit within 20m.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "Main hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2108,6 +2323,11 @@
         "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
       },
       "summary": "Hits up to 4 nearby enemies with light stagger damage.",
+      "role": {
+        "value": "damage",
+        "from": "build",
+        "quote": "No-cooldown damage skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2150,6 +2370,11 @@
       "unlockLevel": 14,
       "cooldownSeconds": 30,
       "summary": "Big AoE hit that stacks Critical Damage Boost and briefly enables Dark Crush.",
+      "role": {
+        "value": "buff",
+        "from": "build",
+        "quote": "The core buff skill"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2192,6 +2417,11 @@
       "unlockLevel": 8,
       "cooldownSeconds": 15,
       "summary": "Party heal within 40m that removes a debuff and adds a short heal over time.",
+      "role": {
+        "value": "heal",
+        "from": "summary",
+        "quote": "Party heal"
+      },
       "specialties": [
         {
           "skillLevel": 8,
@@ -2234,6 +2464,11 @@
       "unlockLevel": 3,
       "cooldownSeconds": 15,
       "summary": "Single target hit with 60% Stun chance (100% on NPCs); briefly enables Dark Crush.",
+      "role": {
+        "value": "damage",
+        "from": "summary",
+        "quote": "Single target hit"
+      },
       "specialties": [
         {
           "skillLevel": 8,
