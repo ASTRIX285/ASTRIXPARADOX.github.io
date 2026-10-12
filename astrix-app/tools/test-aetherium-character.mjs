@@ -221,26 +221,30 @@ const shot=async(page,name,width)=>{if(process.env.AE_SHOTS&&(width===390||width
 
 /* ---------- Character menu ---------- */
 
-await check('menu: header kept, three cards in the Ascent Plan style, each linking to its page with the Daeva',async()=>{
+// Titles card (12 Oct 2026): the menu holds four cards (Gear, Skills, Daevanion, Titles); these checks expected three.
+await check('menu: header kept, four cards in the Ascent Plan style, each linking to its page with the Daeva',async()=>{
   const {page,context,calls,errors}=await open(`/hub/aetherium/gear/${refQuery()}`);
   assert.deepEqual(calls.filter(call=>call!=='/aion2/character'),[],'First paint: only /aion2/character');
   const header=await plain(page,'#aeHeader');
   assert.match(header,/RICHDAEVA/);assert.doesNotMatch(header,new RegExp(GAMER_TAG,'i'));assert.match(header,/Draped in Sky/);assert.match(header,/Gladiator Lv 23/);assert.match(header,/Elyos/);assert.match(header,/Kaisinel/);assert.match(header,/Europe/);
   assert.match(header,/Combat power 6,532/);assert.match(header,/Item level/);
   assert.equal(await page.getAttribute('#aeHeader a.btn','href'),'/hub/aetherium/','Back to Daeva Card');
-  assert.deepEqual(await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.dataset.view)),['gear','skills','daevanion']);
-  assert.deepEqual(await page.$$eval('#aeCards .ae-menu-name',items=>items.map(el=>el.textContent)),['Gear','Skills','Daevanion']);
+  // was ['gear','skills','daevanion'] and ['Gear','Skills','Daevanion']
+  assert.deepEqual(await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.dataset.view)),['gear','skills','daevanion','titles']);
+  assert.deepEqual(await page.$$eval('#aeCards .ae-menu-name',items=>items.map(el=>el.textContent)),['Gear','Skills','Daevanion','Titles']);
   const lines=await page.$$eval('#aeCards .ae-menu-status',items=>items.map(el=>el.textContent.trim()));
   assert.match(lines[0],/^\d+ of \d+ worn$/);
   assert.equal(lines[1],`${learnedExpected} skills · 3 of 13 stigmas`);
   assert.equal(lines[2],`Nezekan: ${TAKEN.length} / 88 nodes`);
+  assert.equal(lines[3],'0 of 3 effects set','Titles: the category effects set, never the overall total');
   assert.match(await plain(page,'[data-view="skills"] .ae-menu-blurb'),/^Mastery and Stigma$/);
-  assert.equal(await page.locator('#aeCards .ae-menu-badge').count(),3,'A count badge on each card');
+  assert.equal(await page.locator('#aeCards .ae-menu-badge').count(),4,'A count badge on each card'); // was 3
   const hrefs=await page.$$eval('#aeCards .ae-menu-card',cards=>cards.map(card=>card.getAttribute('href')));
   const ref=`serverId=1311&characterId=${encodeURIComponent(RICH.characterId)}&region=eu`;
   assert.equal(hrefs[0],`/hub/aetherium/gear/equipment/?${ref}`);
   assert.equal(hrefs[1],`/hub/aetherium/skills/?${ref}&class=gladiator`);
   assert.equal(hrefs[2],`/hub/aetherium/daevanion/?${ref}&class=gladiator&board=11`,'The Daevanion card opens the first open board');
+  assert.equal(hrefs[3],`/hub/aetherium/gear/titles/?${ref}`);
   assert.equal(await page.locator('[aria-current="page"]').first().textContent(),'Gear Ledger');
   assert.deepEqual(errors,[]);
   await context.close();
@@ -286,13 +290,20 @@ await check('menu: same look as the Ascent Plan menu cards',async()=>{
 });
 
 for(const [width,height] of [[390,844],[820,1180],[1600,1000],[1920,1080]]){
-  await check(`menu at ${width}: no sideways scroll, three equal cards on one row`,async()=>{
+  // Titles card (12 Oct 2026): was three equal cards on one row at every width. Now four equal cards on one row at 820 and
+  // up, and at 390 a clean two by two wrap (two rows of two equal cards).
+  await check(`menu at ${width}: no sideways scroll, four equal cards${width<640?' in two rows of two':' on one row'}`,async()=>{
     const {page,context}=await open(`/hub/aetherium/gear/${refQuery()}`,{viewport:{width,height}});
     assert.ok(await overflowOf(page)<=0,'scrolls sideways');
     const cards=await page.$$eval('#aeCards .ae-menu-card',items=>items.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,width:r.width,height:r.height};}));
-    assert.equal(cards.length,3);
-    assert.ok(cards.every(card=>Math.abs(card.top-cards[0].top)<1&&Math.abs(card.width-cards[0].width)<1&&Math.abs(card.height-cards[0].height)<1),'cards share a row, a width and a height');
-    assert.ok(cards[0].right<=cards[1].left+0.5&&cards[1].right<=cards[2].left+0.5,'cards do not overlap');
+    assert.equal(cards.length,4);
+    assert.ok(cards.every(card=>Math.abs(card.width-cards[0].width)<1&&Math.abs(card.height-cards[0].height)<1),'cards share a width and a height');
+    const rows=width<640?[[cards[0],cards[1]],[cards[2],cards[3]]]:[cards];
+    for(const line of rows){
+      assert.ok(line.every(card=>Math.abs(card.top-line[0].top)<1),'cards in a row share a top');
+      for(let n=1;n<line.length;n++)assert.ok(line[n-1].right<=line[n].left+0.5,'cards do not overlap');
+    }
+    if(rows.length>1)assert.ok(rows[1][0].top>=rows[0][0].top+rows[0][0].height-0.5,'the second row sits under the first');
     const head=await boxOf(page,'#aeHeader'),nav=await boxOf(page,'#aeCards');
     near(nav.left,head.left,1,'cards start where the header starts');near(nav.right,head.right,1,'cards end where the header ends');
     await shot(page,'menu',width);
@@ -901,7 +912,8 @@ await check('no Daeva: steps 2 and 3 say Find your Daeva first, step 1 is the se
 await check('menu badges say what they count, in words',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/${refQuery()}`);
   const badges=await page.$$eval('#aeCards .ae-menu-badge',items=>items.map(el=>el.textContent.trim()));
-  assert.deepEqual(badges,[`${richEquipment.equipment.equipmentList.length} worn`,`${learnedExpected} skills`,'2 boards']);
+  // was [worn, skills, '2 boards']: the Titles card (12 Oct 2026) adds its own badge.
+  assert.deepEqual(badges,[`${richEquipment.equipment.equipmentList.length} worn`,`${learnedExpected} skills`,'2 boards','0 set']);
   assert.ok(parseFloat(await page.$eval('#aeCards .ae-menu-badge',el=>getComputedStyle(el).fontSize))>=14,'badge text at least 14px');
   const badge=await boxOf(page,'#aeCards .ae-menu-badge'),card=await boxOf(page,'#aeCards .ae-menu-card');
   assert.ok(badge.right<=card.right+0.5&&badge.top>=card.top-0.5,'the badge stays inside its card');
@@ -1436,7 +1448,7 @@ await check('crisp loading: window and menu skeletons in the final shape with a 
     const menu=await context.newPage();
     await menu.goto(`${base}/hub/aetherium/gear/`);
     const cards=await menu.$$eval('#aeCards .ae-menu-card.is-skeleton',items=>items.map(el=>({art:Boolean(el.querySelector('.ae-sk-art')),name:Boolean(el.querySelector('.ae-sk-name')),top:Math.round(el.getBoundingClientRect().top),clip:getComputedStyle(el).clipPath,shimmer:getComputedStyle(el.querySelector('.ae-sk'),'::after').animationName})));
-    assert.equal(cards.length,3,'Three card shapes');
+    assert.equal(cards.length,4,'Four card shapes, as the menu draws'); // was 3: the Titles card (12 Oct 2026) makes four
     assert.ok(cards.every(c=>c.art&&c.name),'Each with its art and name bar');
     assert.equal(new Set(cards.map(c=>c.top)).size,1,'On one row');
     assert.ok(cards.every(c=>/^polygon\(/.test(c.clip)),'Notched like the real cards');

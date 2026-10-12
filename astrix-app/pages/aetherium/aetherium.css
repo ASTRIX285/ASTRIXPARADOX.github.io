@@ -1329,3 +1329,7 @@ body.aetherium-page #aeStatsPanel .ae-stat-open:focus-visible:not(#ax-s1):not(#a
 .ae-look-skip,.ae-look-none{font-size:.875rem;color:var(--ae-text-dim)}
 .ae-look-skip{display:block;margin-top:.25rem}
 @media (max-width:599px){.ae-look-rows li{grid-template-columns:minmax(0,1fr)}}
+
+/* The character menu with four cards (Gear, Skills, Daevanion, Titles): one row of four from 641px, two by two below. */
+.ae-menu.is-three.is-four{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:640px){.ae-menu.is-three.is-four{grid-template-columns:repeat(2,minmax(0,1fr))}}
