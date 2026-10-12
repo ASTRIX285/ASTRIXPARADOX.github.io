@@ -1,0 +1,2 @@
+# chore/aion2-crafting-materials: AION 2 vendors, crafting materials, levelling routes and trading research for The Aetherium (12 Oct 2026). Docs only, no page changes.
+astrix-app/games/aion2/docs/CRAFTING-MATERIALS.md
