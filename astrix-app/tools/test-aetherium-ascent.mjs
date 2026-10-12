@@ -223,9 +223,10 @@ await check('level change re-plans and clamps to the cap',async()=>{
 await check('macro reads like the game: listed order, delay between, locked skills added later',async()=>{
   const {page,context}=await open(ascent('class=gladiator&role=dps&level=5','macro'));
   // Walkthrough fix (11 Oct 2026): one entry per key with its stack; locked rows stay greyed, and a key with nothing open is Add later.
-  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)']);
+  // Macro eight (12 Oct 2026): after the key 1 stack, Mocking Blade (key 4, open at Lv 3) fills the next slot; Crushing Wave (key 2, Lv 8) is Add later.
+  assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent)),['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)','Key 4 (Mocking Blade)']);
   assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-stack li',items=>items.map(el=>[el.textContent.replace(/\s+/g,' ').trim(),el.classList.contains('is-locked')])),[['Ruinous Blow from Lv 14',true],['Overhead Slam row 1',false],['Rending Blow row 2',false]]);
-  assert.deepEqual(await page.$$eval('#aeMacroLater li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Key 7 (Rage Burst) Lv 32','Defiance, on its own key Lv 16','Rush Strike, on its own key Lv 10']);
+  assert.deepEqual(await page.$$eval('#aeMacroLater li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Key 7 (Rage Burst) Lv 32','Key 2 (Crushing Wave) Lv 8','Defiance, on its own key Lv 16','Rush Strike, on its own key Lv 10']);
   assert.equal(await page.locator('#aeMacroManual').count(),0,'Nothing locked under Keep on your own keys');
   // Skill stacks (10 Oct 2026): how a macro picks its next skill is not confirmed, so the screen shows both orders and the in-game test, never one as fact.
   assert.match(await plain(page,'#aeMacroRule'),/Guides disagree\. Either the macro runs its entries in the listed order, 1 then 2 and so on, or the macro works like a stack: it fires the first ready entry from the bottom and skips entries on cooldown\./);
@@ -884,9 +885,11 @@ await check('macro built from the stacks: each entry says its key and row, the f
   // Walkthrough fix (11 Oct 2026): Macro 1 lists keys in build order, each key once with its stack under it, so a stacked key
   // never doubles up with its own skills. The not-tested tag on "a stacked key runs its stack" stays, with the one-by-one fallback.
   assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>[el.querySelector('.ae-macro-skill').textContent,el.dataset.macroKey,[...el.querySelectorAll('.ae-macro-stack li')].map(li=>li.textContent.replace(/\s+/g,' ').trim())])),[
-    ['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)','1',['Ruinous Blow row 0','Overhead Slam row 1','Rending Blow row 2']],['Key 7 (Rage Burst)','7',[]]]);
+    ['Key 1 (Ruinous Blow, Overhead Slam, Rending Blow)','1',['Ruinous Blow row 0','Overhead Slam row 1','Rending Blow row 2']],['Key 7 (Rage Burst)','7',[]],
+    // Macro eight (12 Oct 2026): then the damage keys, longest cooldown first.
+    ['Key 2 (Crushing Wave)','2',[]],['Key 4 (Mocking Blade)','4',[]]]);
   assert.match(await plain(page,'#aeMacroFrom'),/^Each entry is a key from your Skill Bar, in the order the build uses them\. Adding a stacked key to the macro runs that key's stack \(guides say; not tested\)\.$/);
-  assert.equal(await plain(page,'#aeMacroFallback'),'If your test shows a key only fires row 0, add the skills one by one in this order: Ruinous Blow, Rage Burst, Overhead Slam, Rending Blow.');
+  assert.equal(await plain(page,'#aeMacroFallback'),'If your test shows a key only fires row 0, add the skills one by one in this order: Ruinous Blow, Rage Burst, Overhead Slam, Rending Blow, Crushing Wave, Mocking Blade.');
   assert.equal(await page.locator('[data-rule-tag="macro-order"]').count(),1);
   assert.match(await plain(page,'[data-rule-test="macro-order"]'),/^Check it in game: Make a macro with A then B, and get A on cooldown\. Does B fire, and when A is ready again does the macro go back to A first\?$/);
   assert.ok(parseFloat(await style(page,'#aeMacroRule p','font-size'))>=16);
@@ -958,6 +961,74 @@ await check('Lv 12 walk: key 1 is Ruinous Blow, Overhead Slam, Rending Blow; key
   await context.close();
 });
 
+/* Macro eight (fix/aetherium-macro-eight, 12 Oct 2026): a macro holds up to 8 entries (Miguel, in game). The screen draws all 8,
+   the free ones dim and marked, says how many are used, and the tip, the fallback and the entries agree. */
+for(const width of [1600,390]){
+  await check(`macro eight at ${width}: 8 slots, free slots marked, the uses N line, tip and fallback match the entries`,async()=>{
+    const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=45','macro'),{viewport:{width,height:1000}});
+    assert.equal(await page.locator('.ae-macro [data-macro-slot]').count(),8,'All 8 slots drawn');
+    assert.deepEqual(await page.$$eval('.ae-macro [data-macro-slot]',items=>items.map(el=>el.dataset.macroSlot)),['1','2','3','4','5','6','7','8']);
+    assert.equal(await page.locator('.ae-macro-entry').count(),4);
+    assert.equal(await page.locator('.ae-macro-free').count(),4);
+    assert.deepEqual(await page.$$eval('.ae-macro-free',items=>items.map(el=>[el.querySelector('.ae-macro-num').textContent,el.querySelector('.ae-macro-skill').textContent])),[['5','Free slot'],['6','Free slot'],['7','Free slot'],['8','Free slot']]);
+    assert.equal(await page.locator('.ae-macro-delay').count(),3,'A delay between each pair of filled entries only');
+    assert.equal(await plain(page,'#aeMacroCount'),'A macro holds up to 8 entries. This one uses 4.');
+    assert.ok(parseFloat(await style(page,'#aeMacroCount','font-size'))>=16,'The count line is body size');
+    // Looks: a free slot is dimmer than a filled one, dashed, at least 44px tall, and still readable.
+    const look=await page.evaluate(()=>{
+      const free=document.querySelector('.ae-macro-free'),used=document.querySelector('.ae-macro-entry');
+      const lum=c=>{const [r,g,b]=c.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4;});return .2126*r+.7152*g+.0722*b;};
+      const text=getComputedStyle(free.querySelector('.ae-macro-skill')).color,usedText=getComputedStyle(used.querySelector('.ae-macro-skill')).color;
+      const well=getComputedStyle(document.documentElement).getPropertyValue('--ae-well').trim();
+      const probe=document.createElement('span');probe.style.color=well;document.body.append(probe);const bg=getComputedStyle(probe).color;probe.remove();
+      const ratio=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((m,n)=>n-m);return (x+.05)/(y+.05);};
+      return {style:getComputedStyle(free).borderTopStyle,height:free.getBoundingClientRect().height,usedHeight:used.getBoundingClientRect().height,dimmer:lum(text)<lum(usedText),contrast:ratio(text,bg),font:parseFloat(getComputedStyle(free.querySelector('.ae-macro-skill')).fontSize),right:free.getBoundingClientRect().right,width:document.documentElement.clientWidth};
+    });
+    assert.equal(look.style,'dashed');
+    assert.ok(look.height>=44&&look.usedHeight>=44,`44px slots (${look.height}, ${look.usedHeight})`);
+    assert.ok(look.dimmer,'Free slot text is dimmer than a filled entry');
+    assert.ok(look.contrast>=4.5,`Free slot text contrast ${look.contrast.toFixed(2)}`);
+    assert.ok(look.font>=13,'Nothing under 13px');
+    assert.ok(look.right<=look.width,'No sideways overflow');
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'No sideways scroll');
+    // The tip follows the entries, in order.
+    const keys=await page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey));
+    assert.deepEqual(keys,['1','7','2','4']);
+    const tip=await plain(page,'.ae-guide');
+    assert.match(tip,/Add your keys in this order: key 1, key 7, key 2, key 4\. A macro holds up to 8 entries\. This one uses 4\./);
+    // The fallback is every filled entry's skills one by one, the entries' skills in the same keys.
+    const fallback=(await plain(page,'#aeMacroFallback')).replace(/^.*in this order: /,'').replace(/\.$/,'').split(', ');
+    const entrySkills=await page.$$eval('.ae-macro-entry',items=>items.flatMap(el=>(/\((.*)\)/.exec(el.querySelector('.ae-macro-skill').textContent)?.[1]??'').split(', ')));
+    assert.deepEqual([...fallback].sort(),[...entrySkills].sort(),'Fallback holds the same skills as the entries');
+    assert.deepEqual(fallback.slice(-2),['Crushing Wave','Mocking Blade'],'The added keys come after the rotation');
+    // Kept: the Not confirmed yet tags, the binding steps, the presets note and Could add with its reason.
+    assert.equal(await page.locator('#aeMacroRule [data-rule-tag="macro-order"]').count(),1);
+    assert.match(await plain(page,'#aeMacroFrom'),/\(guides say; not tested\)/);
+    assert.equal(await page.locator('#aeMacroBind .ae-crumbs li').count(),5);
+    assert.match(await plain(page,'#aeMacroPresets'),/Each of your 3 skill presets keeps its own macro/);
+    assert.match(await plain(page,'#aeMacroManual'),/Defiance.*Rush Strike/);
+    assert.match(await plain(page,'#aeMacroAdded'),/^Then the other damage keys, longest cooldown first: Key 2, Key 4\.$/);
+    assert.match(await plain(page,'#aeMacroCould'),/^Could add, check it first/);
+    assert.match(await plain(page,'#aeMacroCould [data-could-add="3"]'),/Key 3 \(Leaping Slam\) No role in our data yet/);
+    assert.match(await plain(page,'#aeMacroCould [data-could-add="Upward Strike"]'),/How a follow-up fires is not confirmed yet/);
+    for(const name of ['Defiance','Rush Strike','Keen Strike'])assert.doesNotMatch(await plain(page,'.ae-macro'),new RegExp(name),`${name} is never an entry`);
+    assert.doesNotMatch(await page.textContent('.ae-gw-body'),/[–—]/,'No dashes');
+    if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`macro-eight-lv45-${width}.png`),fullPage:true});
+    assert.deepEqual(errors,[]);
+    await context.close();
+  });
+  await check(`macro eight at ${width}, Lv 12: three entries, five free slots, Rage Burst Add later`,async()=>{
+    const {page,context}=await open(ascent('class=gladiator&role=dps&level=12','macro'),{viewport:{width,height:1000}});
+    assert.equal(await page.locator('.ae-macro [data-macro-slot]').count(),8);
+    assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['1','2','4']);
+    assert.equal(await page.locator('.ae-macro-free').count(),5);
+    assert.equal(await plain(page,'#aeMacroCount'),'A macro holds up to 8 entries. This one uses 3.');
+    assert.match(await plain(page,'.ae-guide'),/Add your keys in this order: key 1, key 2, key 4\./);
+    assert.match(await plain(page,'#aeMacroLater'),/Key 7 \(Rage Burst\) Lv 32/);
+    if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`macro-eight-lv12-${width}.png`),fullPage:true});
+    await context.close();
+  });
+}
 await check('Lv 12 walk: one level order across the next moves, Mastery and its guide; macro lists keys; Defiance is Add later',async()=>{
   const menu=await open(ascent(ref),{live:true});
   const level=(await menu.page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent))).find(text=>/^Level /.test(text));
@@ -970,7 +1041,8 @@ await check('Lv 12 walk: one level order across the next moves, Mastery and its 
   assert.match(await plain(mastery.page,'.ae-guide-text'),/^Put skill points into Keen Strike: Lv 3 to 8\./,'The Mastery guide starts with the same skill');
   await mastery.context.close();
   const macro=await open(ascent(ref,'macro'),{live:true});
-  assert.deepEqual(await macro.page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['1'],'Macro 1 lists key 1 once');
+  // Macro eight (12 Oct 2026): key 1 once, then Crushing Wave and Mocking Blade (both open at Lv 12, 20 s each, bar order).
+  assert.deepEqual(await macro.page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['1','2','4'],'Macro 1 lists key 1 once');
   assert.match(await plain(macro.page,'#aeMacroLater'),/Defiance, on its own key Lv 16/);
   assert.doesNotMatch(await plain(macro.page,'#aeMacroManual'),/Defiance/,'Defiance is never under Keep on your own keys at Lv 12');
   await macro.context.close();

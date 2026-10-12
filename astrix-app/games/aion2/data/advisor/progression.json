@@ -317,6 +317,21 @@
         "order": "listed",
         "delayMs": 10
       },
+      "maxEntries": {
+        "value": 8,
+        "status": "confirmed",
+        "text": "A macro holds up to 8 entries.",
+        "provenance": [
+          {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-11",
+            "gameVersion": "global launch (Oct 2026)",
+            "where": "Skill > Macro window",
+            "note": "Confirmed in game: one macro holds up to 8 entries."
+          }
+        ]
+      },
       "text": "A macro runs its skills in the listed order, 1 then 2 and so on, with a short delay between each (10 ms by default; try about 50 ms on a laggy connection). Hold the key to run it; pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
       "setup": [
         "Open Skill, then Macro",

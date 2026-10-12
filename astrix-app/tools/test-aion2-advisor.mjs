@@ -921,7 +921,9 @@ check('no Specialty pick, slot or follow-up above 11 reads as reachable without 
 check('Macro 1 lists keys in build order with each stack; locked skills are never under Keep on your own keys',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:41,data:data('Gladiator')});
   assert.deepEqual(plan.macro.slots.map(slot=>[slot.key,slot.skills.map(skill=>skill.name)]),[['1',['Ruinous Blow','Overhead Slam','Rending Blow']],['7',['Rage Burst']]]);
-  assert.deepEqual(plan.macro.fallback,['Ruinous Blow','Rage Burst','Overhead Slam','Rending Blow'],'Fallback: one by one, in the build order, each once');
+  // Macro eight (fix/aetherium-macro-eight): the fallback now runs through every filled entry. The rotation part keeps the build order, each once.
+  assert.deepEqual(plan.macro.fallback.slice(0,4),['Ruinous Blow','Rage Burst','Overhead Slam','Rending Blow'],'Fallback: one by one, in the build order, each once');
+  assert.deepEqual(plan.macro.fallback,['Ruinous Blow','Rage Burst','Overhead Slam','Rending Blow','Crushing Wave','Mocking Blade'],'then the added damage keys, in their order');
   const low=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).macro;
   assert.deepEqual(low.slots.map(slot=>[slot.key,slot.usable,slot.firesNow]),[['1',true,['Overhead Slam','Rending Blow']],['7',false,[]]]);
   assert.deepEqual(low.later.map(slot=>[slot.key,slot.unlockLevel]),[['7',32]]);
@@ -934,6 +936,115 @@ check('Macro 1 lists keys in build order with each stack; locked skills are neve
     assert.equal(new Set(named).size,named.length,`${name} ${role} Lv ${level}: no skill twice in the macro`);
     for(const item of p.macro.manual)if(item.name)assert.equal(item.locked,level<item.unlockLevel,`${name}: ${item.name} lock follows the level`);
   }
+});
+
+/* Macro eight (fix/aetherium-macro-eight, 12 Oct 2026): a macro holds up to 8 entries (Miguel, in game, 11 Oct 2026). Macro 1
+   starts with the rotation's keys, then fills with other bar keys the catalogue marks as damage, longest cooldown first.
+   Nothing is added on a guess: no role means "Could add", locked means "Add later". The limit is read from progression.json. */
+const macroRecord=progression.records.find(item=>item.id==='macro-order');
+check('macro limit: maxEntries 8 in progression.json, confirmed, from Miguel in game on 11 Oct 2026',()=>{
+  assert.equal(macroRecord.maxEntries.value,8);
+  assert.equal(macroRecord.maxEntries.status,'confirmed');
+  assert.ok(macroRecord.maxEntries.provenance.some(source=>source.kind==='in-game-capture'&&/^Miguel/.test(source.capturedBy)&&source.capturedOn==='2026-10-11'));
+  assert.equal(buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro.maxEntries,8);
+});
+check('macro limit is read from the data, never hard-coded: change it and the macro follows',()=>{
+  const three=structuredClone(progression);
+  three.records.find(item=>item.id==='macro-order').maxEntries.value=3;
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),progression:three}});
+  assert.equal(plan.macro.maxEntries,3);
+  assert.deepEqual(plan.macro.filled.map(slot=>slot.key),['1','7','2'],'Cut at the limit');
+  assert.ok(plan.macro.couldAdd.some(item=>item.kind==='full'&&item.key==='4'&&/a macro holds 3 entries/.test(item.reason)),'What did not fit says so');
+  const none=structuredClone(progression);
+  delete none.records.find(item=>item.id==='macro-order').maxEntries;
+  const bare=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),progression:none}}).macro;
+  assert.equal(bare.maxEntries,null);
+  assert.deepEqual(bare.filled.map(slot=>slot.key),['1','7'],'With no limit in the data, nothing is added past the rotation');
+});
+check('macro never holds more than 8 entries, at any level, for any class',()=>{
+  for(const {name,role,level,plan} of everyPlan([1,5,12,22,30,41,45])){
+    assert.ok(plan.macro.used<=8,`${name} ${role} Lv ${level}: ${plan.macro.used} entries`);
+    assert.equal(plan.macro.used,plan.macro.filled.length);
+    assert.ok(plan.macro.fallback.length<=8,`${name} ${role} Lv ${level}: fallback within the limit`);
+    const keys=plan.macro.filled.map(slot=>slot.key);
+    assert.equal(new Set(keys).size,keys.length,`${name}: each key once`);
+  }
+});
+check('Lv 45 Gladiator: the rotation first (key 1 stack, key 7 Rage Burst), then damage keys by cooldown, longest first',()=>{
+  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
+  assert.deepEqual(m.filled.map(slot=>[slot.key,slot.from,slot.firesNow]),[
+    ['1','rotation',['Ruinous Blow','Overhead Slam','Rending Blow']],['7','rotation',['Rage Burst']],
+    ['2','damage',['Crushing Wave']],['4','damage',['Mocking Blade']]]);
+  assert.equal(m.used,4);
+  const cds=m.added.map(slot=>slot.cooldownSeconds);
+  assert.deepEqual(cds,[...cds].sort((a,b)=>b-a),'Longest cooldown first');
+  for(const slot of m.added)for(const skill of slot.skills)assert.equal(skills.records.find(item=>item.class==='Gladiator'&&item.name===skill.name).role.value,'damage',`${skill.name} is damage in the data`);
+});
+check('damage keys sort by cooldown from the data: a longer cooldown moves a key up',()=>{
+  const longer=structuredClone(skills);
+  longer.records.find(item=>item.name==='Mocking Blade').cooldownSeconds=40;
+  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),skills:longer}}).macro;
+  assert.deepEqual(m.added.map(slot=>slot.key),['4','2']);
+});
+check('Defiance, Rush Strike and Keen Strike are never macro entries; nor any movement, defensive, heal, buff or charged skill',()=>{
+  for(const {name,role,level,plan} of everyPlan([1,12,22,41,45])){
+    const named=plan.macro.added.flatMap(slot=>slot.skills.map(skill=>skill.name));
+    const catalogue=skills.records.filter(item=>item.class===name);
+    for(const skill of named)assert.equal(catalogue.find(item=>item.name===skill)?.role?.value,'damage',`${name} ${role} Lv ${level}: ${skill} added only as damage`);
+    assert.ok(!plan.macro.added.some(slot=>slot.key==='LMB'),`${name}: the left click basic is never added`);
+    for(const item of plan.macro.manual)if(item.name)assert.ok(!named.includes(item.name),`${name}: ${item.name} is fired by hand, never added`);
+    const manualText=plan.macro.manual.map(item=>item.text).join(' | ');
+    for(const item of plan.macro.couldAdd)for(const skill of item.names)assert.ok(!manualText.includes(skill),`${name}: ${skill} is in the build's manual list, so never under Could add`);
+    if(name!=='Gladiator')continue;
+    const all=plan.macro.filled.flatMap(slot=>slot.skills.map(skill=>skill.name));
+    for(const skill of ['Defiance','Rush Strike','Keen Strike'])assert.ok(!all.includes(skill),`Gladiator Lv ${level}: ${skill} is never an entry`);
+  }
+});
+check('locked damage keys go under Add later with their level; never an entry',()=>{
+  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:5,data:data('Gladiator')}).macro;
+  assert.deepEqual(m.filled.map(slot=>slot.key),['1','4'],'Mocking Blade (Lv 3) is open, Crushing Wave (Lv 8) is not');
+  assert.deepEqual(m.later.map(slot=>[slot.key,slot.unlockLevel]),[['7',32],['2',8]]);
+  for(const {plan} of everyPlan([1,5,12,22,41,45]))for(const slot of plan.macro.filled)assert.ok(slot.usable,'Only open keys are entries');
+});
+check('a key with no role in the data goes to Could add with the reason, never into the macro',()=>{
+  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
+  const noRole=m.couldAdd.filter(item=>item.kind==='no-role');
+  assert.deepEqual(noRole.map(item=>[item.key,item.names]).filter(([key])=>['3','RMB'].includes(key)),[['3',['Leaping Slam']],['RMB',['Sword Aura Rampage']]]);
+  for(const item of noRole)assert.equal(item.reason,'No role in our data yet');
+  // Give Leaping Slam a role in the data and it is added, by cooldown.
+  const tagged=structuredClone(skills);
+  tagged.records.push({id:'gladiator-leaping-slam',class:'Gladiator',name:'Leaping Slam',unlockLevel:1,cooldownSeconds:30,summary:'test',role:{value:'damage',from:'summary',quote:'test'}});
+  const more=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),skills:tagged}}).macro;
+  assert.deepEqual(more.added.map(slot=>slot.key),['3','2','4']);
+  assert.ok(!more.couldAdd.some(item=>item.key==='3'));
+});
+check('follow-ups are Could add while the chain rule is unconfirmed',()=>{
+  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
+  const up=m.couldAdd.find(item=>item.kind==='follow-up');
+  assert.deepEqual(up.names,['Upward Strike']);
+  assert.match(up.reason,/A follow-up to Overhead Slam from skill Lv 8\. How a follow-up fires is not confirmed yet\./);
+});
+check('every role in the catalogue rests on the exact words of its summary or its class build',()=>{
+  const ALLOWED=['damage','filler','buff','movement','defensive','heal','charged','crowd-control'];
+  for(const record of skills.records){
+    if(!record.role)continue;
+    assert.ok(ALLOWED.includes(record.role.value),`${record.name}: ${record.role.value}`);
+    if(record.role.from==='summary')assert.ok(String(record.summary).includes(record.role.quote),`${record.name}: quote is in the summary`);
+    else{
+      assert.equal(record.role.from,'build');
+      assert.ok(builds[record.class].records.some(build=>(build.coreSkills??[]).some(core=>core.name===record.name&&core.why.includes(record.role.quote))),`${record.name}: quote is in the ${record.class} build`);
+    }
+  }
+});
+check('every class reports how many entries its data supports',()=>{
+  const counts={};
+  for(const name of AION2_CLASSES){
+    const plan=buildAscentPlan({className:name,level:45,data:data(name)});
+    counts[name]=plan.macro.pending?'pending':plan.macro.used;
+    if(!plan.macro.pending)assert.ok(plan.macro.used>=1&&plan.macro.used<=8,name);
+  }
+  console.log(`       entries at Lv 45: ${Object.entries(counts).map(([name,count])=>`${name} ${count}`).join(', ')}`);
+  assert.equal(counts.Gladiator,4);
 });
 
 check('unknown class throws',()=>{
