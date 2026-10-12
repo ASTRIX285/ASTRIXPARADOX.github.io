@@ -49,6 +49,9 @@ export function adaptProfile(info) {
     server: { id: p.serverId, name: p.serverName },
     characterId: p.characterId,
     portrait: icon(p.profileImage),
+    // The legion, as the official character page shows it beside the server. The data names it regionName and sends
+    // an empty string for a Daeva with no legion (ENDPOINTS.md, 12 Oct 2026); that comes out as null.
+    legion: typeof p.regionName === 'string' && p.regionName.trim() ? p.regionName.trim() : null,
     title: p.titleName ?? null,
     titleGrade: p.titleGrade ?? null,
     // The worn title's effects, when the owned-title list carries it (its equip and owned lines, as the site words them).
@@ -86,6 +89,8 @@ export function adaptGear(equipment, slots, items = {}) {
       icon: icon(item.icon),
       grade: item.grade,
       enchant: item.enchantLevel,
+      // Exceed level (the official page's step past the enchant cap). Sent on every worn item, 0 when none.
+      exceed: Number.isFinite(item.exceedLevel) ? item.exceedLevel : 0,
       maxEnchant: sameItem && Number.isFinite(detail.maxEnchantLevel)
         ? detail.maxEnchantLevel
         : pending('Max enchant comes from the item detail call, which has not been read for this slot.'),
@@ -195,8 +200,17 @@ export function adaptDaevanion(info) {
     icon: icon(board.icon),
     open: board.open === 1,
     nodesTaken: board.openNodeCount,
-    nodesTotal: board.totalNodeCount
+    nodesTotal: board.totalNodeCount,
+    // The official page's percent complete for the board; null when the data sends none.
+    percent: Number.isFinite(board.openPercent) ? board.openPercent : null
   }));
+}
+
+/** Daevanion progress over every board in the data, by nodes taken, as a whole percent. null with no nodes. */
+export function daevanionPercent(boards) {
+  const total = (boards ?? []).reduce((sum, board) => sum + (Number.isFinite(board.nodesTotal) ? board.nodesTotal : 0), 0);
+  const taken = (boards ?? []).reduce((sum, board) => sum + (Number.isFinite(board.nodesTaken) ? board.nodesTaken : 0), 0);
+  return total > 0 ? Math.round((taken / total) * 100) : null;
 }
 
 /** Node grid of one board from /api/character/daevanion/detail. Empty grid cells and blank effect lines (the Start node) are skipped. */
@@ -215,6 +229,69 @@ export function adaptDaevanionBoard(detail) {
       taken: node.open === 1,
       effects: (node.effectList ?? []).map(effect => effect.desc).filter(desc => typeof desc === 'string' && desc !== '')
     }));
+}
+
+/** The title categories in the official page's order. equipCategory is the data's own code. */
+export const TITLE_CATEGORIES = Object.freeze([
+  { id: 'attack', code: 'Attack' },
+  { id: 'defense', code: 'Defense' },
+  { id: 'other', code: 'Etc' }
+]);
+const descs = list => (Array.isArray(list) ? list.map(line => line?.desc).filter(desc => typeof desc === 'string' && desc.trim()).map(desc => desc.trim()) : []);
+
+/**
+ * Titles from /api/character/info (info.title). One entry per category: owned of total, and the title worn in that
+ * category with its two effect lists as the data sends them (equipStatList as effect, statList as alsoGives).
+ * A category the data does not send is left out, never shown as 0. Pending when the data has no title block.
+ */
+export function adaptTitles(info) {
+  const block = info?.title;
+  if (!block || !Array.isArray(block.titleList)) return pending('The official data sent no title list for this character.');
+  const categories = TITLE_CATEGORIES.map(category => {
+    const entry = block.titleList.find(item => item?.equipCategory === category.code);
+    if (!entry) return null;
+    return {
+      id: category.id,
+      code: category.code,
+      owned: Number.isFinite(entry.ownedCount) ? entry.ownedCount : null,
+      total: Number.isFinite(entry.totalCount) ? entry.totalCount : null,
+      percent: Number.isFinite(entry.ownedPercent) ? entry.ownedPercent : null,
+      worn: Number.isFinite(entry.id) && typeof entry.name === 'string' && entry.name.trim()
+        ? { id: entry.id, name: entry.name.trim(), grade: entry.grade ?? null, effect: descs(entry.equipStatList), alsoGives: descs(entry.statList) }
+        : null
+    };
+  }).filter(Boolean);
+  return {
+    owned: Number.isFinite(block.ownedCount) ? block.ownedCount : null,
+    total: Number.isFinite(block.totalCount) ? block.totalCount : null,
+    categories
+  };
+}
+
+/** The five Arcana slots (Arcana1 to Arcana5 in the slot list), each the gear entry when worn, else empty. */
+export function arcanaSlots(gear, slots) {
+  return slots.filter(slot => /^Arcana\d$/.test(slot.slotPosName)).map(slot => gear.find(entry => entry.slotPos === slot.slotPos && !entry.empty)
+    ?? { slot: slot.slotPosName, slotPos: slot.slotPos, empty: true });
+}
+
+/**
+ * Appearance from /api/character/equipment: gear skins (equipment.skinList) and the wing skin (petwing.wingSkin).
+ * Only what the data sends; an empty list and no wing skin means nothing to show.
+ */
+export function adaptAppearance(equipment) {
+  const skins = (equipment?.equipment?.skinList ?? []).filter(skin => skin && typeof skin.name === 'string').map(skin => ({
+    slot: skin.slotPosName ?? null,
+    slotPos: skin.slotPos ?? null,
+    itemId: skin.id,
+    name: skin.name,
+    icon: icon(skin.icon),
+    grade: skin.grade ?? null
+  }));
+  const wing = equipment?.petwing?.wingSkin;
+  return {
+    skins,
+    wingSkin: wing && typeof wing.name === 'string' ? { id: wing.id, name: wing.name, icon: icon(wing.icon), grade: wing.grade ?? null } : null
+  };
 }
 
 export function adaptPetWing(equipment) {
@@ -243,13 +320,17 @@ export function adaptCharacter(raw, { slots, region, capturedOn }) {
     const detail = raw.boards?.[board.id];
     if (detail) board.nodes = adaptDaevanionBoard(detail);
   }
+  const gear = adaptGear(raw.equipment, slots, raw.items ?? {});
   return {
     profile: adaptProfile(raw.info),
-    gear: adaptGear(raw.equipment, slots, raw.items ?? {}),
+    gear,
+    arcana: arcanaSlots(gear, slots),
     accessorySlots: pending('The armory lists a slot only when an item is worn there. Accessory slot names and positions need an equipped accessory or an in-game capture.'),
     stats: adaptStats(raw.info),
     skills: adaptSkills(raw.equipment),
     daevanion,
+    titles: adaptTitles(raw.info),
+    appearance: adaptAppearance(raw.equipment),
     ...adaptPetWing(raw.equipment),
     source: { kind: 'armory', region, capturedOn }
   };

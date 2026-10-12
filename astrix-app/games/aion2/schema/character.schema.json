@@ -13,7 +13,10 @@
     "daevanion",
     "pet",
     "wings",
-    "source"
+    "source",
+    "arcana",
+    "titles",
+    "appearance"
   ],
   "additionalProperties": false,
   "properties": {
@@ -118,6 +121,14 @@
             "null"
           ],
           "pattern": "^https://"
+        },
+        "legion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "description": "The legion name (profile.regionName in the data). null when the Daeva has no legion (the data sends an empty string)."
         }
       }
     },
@@ -215,6 +226,11 @@
                   "null"
                 ],
                 "pattern": "^https://"
+              },
+              "exceed": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "exceedLevel from the equipment list; 0 when none."
               }
             }
           }
@@ -473,6 +489,15 @@
               "null"
             ],
             "pattern": "^https://"
+          },
+          "percent": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "description": "openPercent: the official page's percent complete for the board."
           }
         }
       }
@@ -622,6 +647,344 @@
             },
             "description": "The official statSecondList: what these points give, in the game's words."
           }
+        }
+      }
+    },
+    "arcana": {
+      "description": "The five Arcana slots (Arcana1 to Arcana5), each a worn gear entry or empty.",
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "slot",
+              "slotPos",
+              "empty"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "minLength": 1
+              },
+              "slotPos": {
+                "type": "integer"
+              },
+              "empty": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "slot",
+              "slotPos",
+              "empty",
+              "itemId",
+              "name",
+              "grade",
+              "enchant",
+              "maxEnchant",
+              "manastoneSlots",
+              "icon"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "minLength": 1
+              },
+              "slotPos": {
+                "type": "integer"
+              },
+              "empty": {
+                "const": false
+              },
+              "itemId": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "grade": {
+                "type": "string",
+                "minLength": 1
+              },
+              "enchant": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxEnchant": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ]
+              },
+              "manastoneSlots": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ]
+              },
+              "icon": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^https://"
+              },
+              "exceed": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "exceedLevel from the equipment list; 0 when none."
+              }
+            }
+          }
+        ]
+      }
+    },
+    "titles": {
+      "description": "Titles (info.title): owned of total, and per category (Attack, Defense, Etc) owned of total and the title worn there with its two effect lists. Pending when the data has no title block.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "owned",
+            "total",
+            "categories"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "owned": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "total": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "code",
+                  "owned",
+                  "total",
+                  "percent",
+                  "worn"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "enum": [
+                      "attack",
+                      "defense",
+                      "other"
+                    ]
+                  },
+                  "code": {
+                    "enum": [
+                      "Attack",
+                      "Defense",
+                      "Etc"
+                    ]
+                  },
+                  "owned": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "total": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "percent": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "worn": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "name",
+                          "grade",
+                          "effect",
+                          "alsoGives"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "grade": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "effect": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "alsoGives": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$ref": "../../../platform/contracts/pending.schema.json"
+        }
+      ]
+    },
+    "appearance": {
+      "description": "Gear skins (equipment.skinList) and the wing skin (petwing.wingSkin), only what the data sends.",
+      "type": "object",
+      "required": [
+        "skins",
+        "wingSkin"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "skins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "slot",
+              "slotPos",
+              "itemId",
+              "name",
+              "icon",
+              "grade"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "slotPos": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "itemId": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "icon": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^https://"
+              },
+              "grade": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "wingSkin": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "icon",
+                "grade"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^https://"
+                },
+                "grade": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
         }
       }
     }

@@ -8,6 +8,9 @@ export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':
 
 export const number = value => (Number.isFinite(value) ? value.toLocaleString('en-GB') : '-');
 
+/** The page's words for the official title categories (equipCategory Attack, Defense, Etc). */
+export const TITLE_CATEGORY_NAMES = Object.freeze({ attack: 'Offensive', defense: 'Defensive', other: 'Other' });
+
 export const isPending = value => Boolean(value && typeof value === 'object' && value.pending === true);
 
 /**
