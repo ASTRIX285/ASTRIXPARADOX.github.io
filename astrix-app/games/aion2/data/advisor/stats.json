@@ -1,5 +1,5 @@
 {
-  "description": "AION 2 stats, one record per stat. main and deity are the 16 point stats the official character data sends (stat.statList, with statSecondList: the game's own words for what the points give). Each gives 0.1% per point to each of its effects, confirmed against the live statSecondList. combat are the stats a player sees in game, with a plain meaning and the global client's cap where there is one (unconfirmed until checked in game). source and rule say where points come from (unconfirmed until Miguel checks). The pages always show the official statSecondList for the player's own character; this record only explains it. A class's priority comes from its build's stats.order (builds/<class>.json), linked to these stats by the combat stat names the order text uses; nothing is guessed. Each value has a status and provenance; sources are never shown on a page.",
+  "description": "AION 2 stats, one record per stat. main and deity are the 16 point stats the official character data sends (stat.statList, with statSecondList: the game's own words for what the points give). Each gives 0.1% per point to each of its effects, confirmed against the live statSecondList. combat are the stats a player sees in game, with a plain meaning and the global client's cap where there is one (unconfirmed until checked in game). source and rule say where points come from (unconfirmed until Miguel checks). The pages always show the official statSecondList for the player's own character; this record only explains it. A class's priority comes from its build's stats.order (builds/<class>.json), linked to these stats by the combat stat names the order text uses; nothing is guessed. Each value has a status and provenance; sources are never shown on a page. icon names each point stat's symbol in the page's own stat sprite (pages/aetherium/icons/stats.svg, original art).",
   "test": "In game, open the character stat window, hover a main stat and a deity stat, and check the effect lines and caps against this record.",
   "records": [
     {
@@ -7,6 +7,7 @@
       "kind": "main",
       "type": "STR",
       "name": "Might",
+      "icon": "ae-stat-might",
       "effects": {
         "value": [
           "Attack"
@@ -117,6 +118,7 @@
       "kind": "main",
       "type": "DEX",
       "name": "Dexterity",
+      "icon": "ae-stat-dexterity",
       "effects": {
         "value": [
           "Evasion",
@@ -228,6 +230,7 @@
       "kind": "main",
       "type": "INT",
       "name": "Intelligence",
+      "icon": "ae-stat-intelligence",
       "effects": {
         "value": [
           "Status Effect Chance"
@@ -337,6 +340,7 @@
       "kind": "main",
       "type": "CON",
       "name": "Constitution",
+      "icon": "ae-stat-constitution",
       "effects": {
         "value": [
           "HP"
@@ -446,6 +450,7 @@
       "kind": "main",
       "type": "AGI",
       "name": "Precision",
+      "icon": "ae-stat-precision",
       "effects": {
         "value": [
           "Accuracy",
@@ -557,6 +562,7 @@
       "kind": "main",
       "type": "WIS",
       "name": "Willpower",
+      "icon": "ae-stat-willpower",
       "effects": {
         "value": [
           "Status Effect Resist"
@@ -667,6 +673,7 @@
       "type": "Justice",
       "name": "Justice [Nezekan]",
       "lord": "Nezekan",
+      "icon": "ae-stat-justice",
       "effects": {
         "value": [
           "Defense",
@@ -780,6 +787,7 @@
       "type": "Freedom",
       "name": "Freedom [Vaizel]",
       "lord": "Vaizel",
+      "icon": "ae-stat-freedom",
       "effects": {
         "value": [
           "Accuracy",
@@ -893,6 +901,7 @@
       "type": "Illusion",
       "name": "Illusion [Kaisinel]",
       "lord": "Kaisinel",
+      "icon": "ae-stat-illusion",
       "effects": {
         "value": [
           "Cooldown",
@@ -1006,6 +1015,7 @@
       "type": "Life",
       "name": "Life [Yustiel]",
       "lord": "Yustiel",
+      "icon": "ae-stat-life",
       "effects": {
         "value": [
           "HP",
@@ -1119,6 +1129,7 @@
       "type": "Time",
       "name": "Time [Siel]",
       "lord": "Siel",
+      "icon": "ae-stat-time",
       "effects": {
         "value": [
           "Combat Speed",
@@ -1232,6 +1243,7 @@
       "type": "Destruction",
       "name": "Destruction [Zikel]",
       "lord": "Zikel",
+      "icon": "ae-stat-destruction",
       "effects": {
         "value": [
           "Attack",
@@ -1345,6 +1357,7 @@
       "type": "Death",
       "name": "Death [Triniel]",
       "lord": "Triniel",
+      "icon": "ae-stat-death",
       "effects": {
         "value": [
           "Critical Hit",
@@ -1458,6 +1471,7 @@
       "type": "Wisdom",
       "name": "Wisdom [Lumiel]",
       "lord": "Lumiel",
+      "icon": "ae-stat-wisdom",
       "effects": {
         "value": [
           "MP Cost",
@@ -1571,6 +1585,7 @@
       "type": "Destiny",
       "name": "Destiny [Marchutan]",
       "lord": "Marchutan",
+      "icon": "ae-stat-destiny",
       "effects": {
         "value": [
           "MP",
@@ -1684,6 +1699,7 @@
       "type": "Space",
       "name": "Space [Israphel]",
       "lord": "Israphel",
+      "icon": "ae-stat-space",
       "effects": {
         "value": [
           "Move Speed",

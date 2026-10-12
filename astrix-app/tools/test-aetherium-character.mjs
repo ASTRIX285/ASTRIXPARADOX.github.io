@@ -27,7 +27,7 @@ const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const WORKER='https://aion2-mock.invalid';
 const fixtureDir=resolve(root,'astrix-app/tools/fixtures/aion2/eu');
 const fixture=async name=>JSON.parse(await readFile(resolve(fixtureDir,`${name}.json`),'utf8'));
-const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2'};
+const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2','.svg':'image/svg+xml'};
 
 const server=createServer(async(req,res)=>{
   const path=decodeURIComponent(new URL(req.url,'http://x').pathname);
@@ -125,6 +125,9 @@ function standIn(url){
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`);
 }
 const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
+const statRecords=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/stats.json'),'utf8')).records.filter(record=>record.kind==='main'||record.kind==='deity');
+const MAIN_IDS=['might','dexterity','intelligence','constitution','precision','willpower'];
+const STAT_IDS=['might','dexterity','precision','willpower','intelligence','constitution','justice','freedom','illusion','life','time','destruction','death','wisdom','destiny','space'];
 const browser=await chromium.launch();
 const realCalls=[];
 let failures=0;
@@ -135,6 +138,9 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   const calls=[];
   const urls=[];
   const state={down,inflight:0,maxInflight:0};
+  // Every URL the page asks for, so a check can see which hosts were asked (stat icons: our sprite only, never NCSOFT).
+  const requested=[];
+  context.on('request',request=>requested.push(request.url()));
   if(art)await context.route(/\/astrix-app\/games\/aion2\/data\/intro-art\.json/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(art)}));
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
@@ -191,7 +197,7 @@ async function open(path,{live=true,down=false,viewport={width:1600,height:1000}
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
-  return {page,context,calls,urls,errors,state};
+  return {page,context,calls,urls,errors,state,requested};
 }
 // Everything a visitor can read on the page: the text, the title and description, and every visible attribute.
 const visibleText=page=>page.evaluate(()=>[document.body.innerText,document.title,document.querySelector('meta[name=description]')?.content,
@@ -987,6 +993,67 @@ await check('Gear page stats: the near-zero note shows for a low Daeva; no sidew
   assert.equal(await page.locator('#aeStatsPanel .ae-stat').count(),16);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'390: no sideways scroll');
   for(const box of await page.$$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>el.getBoundingClientRect().height)))assert.ok(box>=43.5,'44px targets');
+  await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+  await page.setViewportSize({width:800,height:900});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'200 percent: no sideways scroll');
+  await context.close();
+});
+
+/* Stat icons (design/aetherium-stat-icons, 11 Oct 2026): our own 16 icons in one sprite, named by stats.json, on every tile
+   and stat card. Pale blue, gold for High. Never an NCSOFT stat icon. */
+await check('Stat icons: the sprite has the 16 symbols, 40 by 40, stroke only, no fill or colour',async()=>{
+  const sprite=await readFile(resolve(root,'astrix-app/pages/aetherium/icons/stats.svg'),'utf8');
+  const symbols=[...sprite.matchAll(/<symbol\b([^>]*)>/g)].map(match=>({id:/\bid="([^"]+)"/.exec(match[1])?.[1],viewBox:/\bviewBox="([^"]+)"/.exec(match[1])?.[1]}));
+  assert.deepEqual(symbols.map(symbol=>symbol.id),STAT_IDS.map(id=>`ae-stat-${id}`),'16 symbols, one per stat, ae-stat-<name>');
+  assert.ok(symbols.every(symbol=>symbol.viewBox==='0 0 40 40'),'Each 0 0 40 40');
+  assert.doesNotMatch(sprite,/\b(fill|stroke|color|stroke-width)=|#[0-9a-f]{3,6}\b|rgb\(|<image|href=/i,'No fills, colours, widths or outside art in the file');
+  for(const record of statRecords)assert.equal(record.icon,`ae-stat-${record.id}`,`stats.json names ${record.id}'s icon`);
+});
+
+await check('Stat icons: every one of the 16 tiles uses its own symbol, 40px main and 28px deity, pale blue, High in gold with a halo; one sprite request, none to NCSOFT',async()=>{
+  const {page,context,requested}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  const icons=await page.$$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>{
+    const svg=el.querySelector('svg.ae-stat-icon'),use=svg?.querySelector('use'),box=svg?.getBoundingClientRect(),c=svg&&getComputedStyle(svg);
+    return {id:el.dataset.stat,tag:el.dataset.tag??null,href:use?.getAttribute('href')??null,hidden:svg?.getAttribute('aria-hidden'),w:box?.width,h:box?.height,
+      stroke:c?.stroke,fill:c?.fill,width:c?.strokeWidth,halo:c?.backgroundImage,label:el.querySelector('.ae-stat-open').textContent};
+  }));
+  assert.equal(icons.length,16,'16 tiles');
+  assert.deepEqual(icons.map(icon=>icon.id).sort(),[...STAT_IDS].sort());
+  for(const icon of icons){
+    assert.match(icon.href??'',new RegExp(`^/astrix-app/pages/aetherium/icons/stats\\.svg\\?v=[^#]+#ae-stat-${icon.id}$`),`${icon.id}: <use> points at its own symbol`);
+    assert.equal(icon.hidden,'true',`${icon.id}: the icon is aria-hidden`);
+    assert.ok(icon.label.trim().length>0,`${icon.id}: the tile's text names the stat`);
+    const size=MAIN_IDS.includes(icon.id)?40:28;
+    assert.equal(Math.round(icon.w),size,`${icon.id}: ${size}px`);assert.equal(Math.round(icon.h),size);
+    assert.equal(icon.fill,'none');assert.equal(icon.width,'1.8px',`${icon.id}: 1.8 stroke above 24px`);
+    if(icon.tag==='high'){assert.equal(icon.stroke,'rgb(226, 181, 79)',`${icon.id}: High in gold`);assert.match(icon.halo,/radial-gradient/,`${icon.id}: soft halo`);}
+    else {assert.equal(icon.stroke,'rgb(143, 208, 255)',`${icon.id}: pale blue`);assert.equal(icon.halo,'none');}
+  }
+  assert.ok(icons.some(icon=>icon.tag==='high'),'The fixture has a High stat to check');
+  // The symbol really draws: the sprite loaded and the shadow tree has painted geometry.
+  const parsed=await page.$eval('[data-stat="might"] .ae-stat-icon',async svg=>{const r=await fetch(svg.querySelector('use').getAttribute('href').split('#')[0]);
+    const doc=new DOMParser().parseFromString(await r.text(),'image/svg+xml');
+    return {ok:r.ok,type:r.headers.get('content-type'),error:Boolean(doc.querySelector('parsererror')),ids:[...doc.querySelectorAll('symbol')].map(s=>s.id),drawn:[...doc.querySelectorAll('symbol')].every(s=>s.querySelector('path,circle,ellipse'))};});
+  assert.ok(parsed.ok&&/svg/.test(parsed.type),'The sprite is served as SVG');
+  assert.equal(parsed.error,false,'The sprite parses in the browser (a broken file draws nothing)');
+  assert.deepEqual(parsed.ids,STAT_IDS.map(id=>`ae-stat-${id}`));assert.ok(parsed.drawn,'Every symbol has geometry');
+  const sprites=requested.filter(url=>/\/icons\/stats\.svg/.test(url));
+  assert.ok(sprites.length>=1&&new Set(sprites).size===1,`One sprite URL: ${sprites}`);
+  assert.deepEqual(requested.filter(url=>/plaync|ncsoft/i.test(new URL(url).host)&&/[\/_-]stats?(?:[_.\/-]|$)|stat_?icon|arcana|abilit/i.test(new URL(url).pathname)),[],'No NCSOFT stat icon');
+  // The stat card shows the same icon, 40px, in its well.
+  await page.click('[data-stat-open="precision"]');
+  await page.waitForSelector('#aeInfo:not([hidden]) [data-stat-reason]');
+  const card=await page.$eval('#aeInfo .ae-card-icon .ae-stat-icon',svg=>({href:svg.querySelector('use').getAttribute('href'),w:svg.getBoundingClientRect().width,stroke:getComputedStyle(svg).stroke,hidden:svg.getAttribute('aria-hidden')}));
+  assert.match(card.href,/#ae-stat-precision$/);assert.equal(Math.round(card.w),40);assert.equal(card.hidden,'true');
+  assert.equal(card.stroke,icons.find(icon=>icon.id==='precision').stroke,'Card icon matches the tile');
+  assert.equal(await page.locator('#aeInfo .ae-card-icon img').count(),0,'No outside image for a stat');
+  await context.close();
+});
+
+await check('Stat icons: 390 and 200 percent zoom keep the icons beside the text with no sideways scroll',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`,{viewport:{width:390,height:844}});
+  const rows=await page.$$eval('#aeStatsPanel .ae-stat',items=>items.map(el=>{const i=el.querySelector('.ae-stat-icon').getBoundingClientRect(),t=el.querySelector('.ae-stat-open').getBoundingClientRect(),b=el.getBoundingClientRect();return {left:i.right<=t.left+0.5,inside:i.left>=b.left&&i.right<=b.right};}));
+  assert.ok(rows.every(row=>row.left&&row.inside),'Icon sits left of the name, inside the tile');
   await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
   await page.setViewportSize({width:800,height:900});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'200 percent: no sideways scroll');

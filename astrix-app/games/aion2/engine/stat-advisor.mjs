@@ -112,7 +112,7 @@ export function statChains(build, stats, liveStats = null) {
       name,
       meaning: index.combatByName.get(name)?.meaning.value ?? null,
       from: index.point.filter(stat => stat.effects.value.includes(name))
-        .map(stat => ({ id: stat.id, name: stat.name, kind: stat.kind, points: points.has(stat.type) ? points.get(stat.type) : null }))
+        .map(stat => ({ id: stat.id, name: stat.name, kind: stat.kind, icon: stat.icon ?? null, points: points.has(stat.type) ? points.get(stat.type) : null }))
     }))
   }));
 }

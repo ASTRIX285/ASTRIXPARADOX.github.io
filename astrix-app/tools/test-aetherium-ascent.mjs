@@ -23,7 +23,7 @@ const WORKER='https://aion2-mock.invalid';
 const {deriveRegion}=await import('./fixtures/aion2/derive-region-fixtures.mjs');
 const fixtureDir=resolve(root,'astrix-app/tools/fixtures/aion2/eu');
 const fixture=async name=>JSON.parse(await readFile(resolve(fixtureDir,`${name}.json`),'utf8'));
-const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2'};
+const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2','.svg':'image/svg+xml'};
 
 const server=createServer(async(req,res)=>{
   const path=decodeURIComponent(new URL(req.url,'http://x').pathname);
@@ -107,6 +107,9 @@ const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(
 async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,mechanics=null,visited=null}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
+  // Every URL the page asks for, so a check can see which hosts were asked (stat icons: our sprite only, never NCSOFT).
+  const requested=[];
+  context.on('request',request=>requested.push(request.url()));
   if(mechanics)await context.route(/\/astrix-app\/games\/aion2\/data\/advisor\/mechanics\.json/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(mechanics)}));
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();
@@ -155,7 +158,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
-  return {page,context,calls,errors};
+  return {page,context,calls,errors,requested};
 }
 const style=(page,selector,prop)=>page.$eval(selector,(el,p)=>getComputedStyle(el).getPropertyValue(p).trim(),prop);
 const GOLD='rgb(226, 181, 79)';
@@ -1136,6 +1139,40 @@ await check('Stats screen: chains with live points, gear rows with skips, no liv
   assert.match(await plain(assassin.page,'#aeNoStatOrder'),/No stat order for this class yet/);
   assert.equal(await assassin.page.locator('.ae-look-skip').count(),0,'No ranking, so nothing is skipped');
   await assassin.context.close();
+});
+
+/* Stat icons (design/aetherium-stat-icons, 11 Oct 2026): each stat in a chain carries its own 20px icon from our sprite,
+   named by stats.json, with the heavier small stroke and no Precision dot; gold when High for the class. Never NCSOFT's. */
+await check('Stats screen: every chain stat has its own 20px icon, gold when High; the sprite has the 16 symbols; no NCSOFT stat icon',async()=>{
+  const stats=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/stats.json'),'utf8'));
+  const points=stats.records.filter(record=>record.kind==='main'||record.kind==='deity');
+  const STAT_IDS=['might','dexterity','precision','willpower','intelligence','constitution','justice','freedom','illusion','life','time','destruction','death','wisdom','destiny','space'];
+  assert.deepEqual(points.map(record=>record.icon).sort(),STAT_IDS.map(id=>`ae-stat-${id}`).sort(),'stats.json names all 16 icons');
+  const sprite=await readFile(resolve(root,'astrix-app/pages/aetherium/icons/stats.svg'),'utf8');
+  assert.deepEqual([...sprite.matchAll(/<symbol id="([^"]+)" viewBox="0 0 40 40">/g)].map(match=>match[1]),STAT_IDS.map(id=>`ae-stat-${id}`),'16 symbols with the ids, 40 by 40');
+  assert.doesNotMatch(sprite,/\b(fill|stroke|color)=|#[0-9a-f]{3,6}\b|rgb\(/i,'No fills or colours in the file');
+  const byName=new Map(points.map(record=>[record.name,record]));
+  const {page,context,requested}=await open(ascent(`${ref45}&class=gladiator`,'stats'),{live:true});
+  const chained=await page.$$eval('.ae-chain-stat',items=>items.map(el=>{const svg=el.querySelector('svg.ae-stat-icon'),c=svg&&getComputedStyle(svg),box=svg?.getBoundingClientRect();
+    return {name:el.firstChild?.nextSibling?.textContent?.trim()??el.textContent,text:el.textContent.replace(/\s+/g,' ').trim(),href:svg?.querySelector('use')?.getAttribute('href')??null,hidden:svg?.getAttribute('aria-hidden'),w:box?.width,stroke:c?.stroke,width:c?.strokeWidth,dot:c?.getPropertyValue('--ae-stat-dot').trim(),high:svg?.classList.contains('is-high')};}));
+  assert.ok(chained.length>=3,'Chains to check');
+  const rank={precision:'high'};
+  for(const stat of chained){
+    const record=[...byName.values()].find(r=>stat.text.startsWith(r.name));
+    assert.ok(record,`${stat.text}: a known stat`);
+    assert.match(stat.href??'',new RegExp(`^/astrix-app/pages/aetherium/icons/stats\\.svg\\?v=[^#]+#${record.icon}$`),`${record.name}: <use> points at its own symbol`);
+    assert.equal(stat.hidden,'true');assert.equal(Math.round(stat.w),20,`${record.name}: 20px`);
+    assert.equal(stat.width,'2.4px',`${record.name}: heavier stroke at 24px or less`);assert.equal(stat.dot,'none','Precision drops its dot when small');
+    assert.equal(stat.stroke,stat.high?GOLD:'rgb(143, 208, 255)',`${record.name}: gold when High, else pale blue`);
+    if(rank[record.id])assert.equal(stat.high,true,`${record.name}: High for Gladiator`);
+  }
+  assert.ok(chained.some(stat=>stat.high),'A High stat in gold by computed style');
+  assert.equal(await plain(page,'[data-stat-rank="1"] [data-chain="Accuracy"]'),'Accuracy ← comes from Precision 11, Freedom [Vaizel] 26','The icons add no text');
+  const sprites=requested.filter(url=>/\/icons\/stats\.svg/.test(url));
+  assert.ok(sprites.length>=1&&new Set(sprites).size===1,`One sprite URL: ${sprites}`);
+  assert.deepEqual(requested.filter(url=>/plaync|ncsoft/i.test(new URL(url).host)&&/[\/_-]stats?(?:[_.\/-]|$)|stat_?icon|arcana|abilit/i.test(new URL(url).pathname)),[],'No NCSOFT stat icon');
+  assert.equal(await page.evaluate(async url=>Boolean(new DOMParser().parseFromString(await (await fetch(url)).text(),'image/svg+xml').querySelector('parsererror')),sprites[0]),false,'The sprite parses in the browser');
+  await context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
