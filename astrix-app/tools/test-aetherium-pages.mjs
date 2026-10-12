@@ -1561,13 +1561,13 @@ await check('Titles page: title shown at the top, three equipped effects with pe
     assert.equal(await plainText(page,'#aeEffectsTitle'),'Equipped effects');
     assert.deepEqual(await page.$$eval('[data-title-category]',els=>els.map(el=>el.dataset.titleCategory)),['attack','defense','other']);
     assert.deepEqual(await page.$$eval('[data-title-category] .ae-section-title',els=>els.map(el=>el.textContent.trim())),['Offensive','Defensive','Other']);
-    assert.deepEqual(await page.$$eval('[data-title-count]',els=>els.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['19 of 103 owned','15 of 95 owned','25 of 99 owned']);
+    assert.deepEqual(await page.$$eval('[data-title-count]',els=>els.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['19 of 103 collected','15 of 95 collected','25 of 99 collected']);
     assert.equal(await page.locator('#aeTitlesTotal').count(),0,'No overall total');
     const text=await page.evaluate(()=>document.body.innerText);
     assert.doesNotMatch(text,/\b59\b|\b297\b/,'The overall count never shows');
     assert.doesNotMatch(text,/Legend/,'Never the word Legend');
     assert.doesNotMatch(text,/Also gives|not confirmed/i,'The old labels and the unconfirmed line are gone');
-    assert.deepEqual(await page.$$eval('[data-title-category="attack"] .ae-item-sec',els=>els.map(el=>el.textContent.trim())),['Equip effect','Always on once owned']);
+    assert.deepEqual(await page.$$eval('[data-title-category="attack"] .ae-item-sec',els=>els.map(el=>el.textContent.trim())),['Equip effect','Always on once collected']);
     assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-rule-status]',els=>els.map(el=>el.dataset.ruleStatus)),['confirmed','confirmed']);
     assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-title-list="effect"] li',els=>els.map(el=>[el.querySelector('span').textContent,el.dataset.lineTag??null])),[['PvE Attack +25',null],['Attack Bonus +20','useful']]);
     assert.deepEqual(await page.$$eval('[data-title-category="attack"] [data-title-list="owned"] li',els=>els.map(el=>[el.querySelector('span').textContent,el.dataset.lineTag??null])),[['Accuracy Bonus +10','high']]);

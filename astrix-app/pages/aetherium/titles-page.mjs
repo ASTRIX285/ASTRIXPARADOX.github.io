@@ -49,9 +49,9 @@ function categoryHtml(category, ctx) {
   return `<section class="ae-panel ae-tcat" data-title-category="${esc(category.id)}" aria-labelledby="aeTcat-${esc(category.id)}">
       <div class="ae-tcat-head">
         <h2 class="ae-section-title" id="aeTcat-${esc(category.id)}">${esc(name)}</h2>
-        ${counted ? `<p class="ae-tcat-count" data-title-count><b>${number(category.owned)}</b> of ${number(category.total)} owned</p>` : ''}
+        ${counted ? `<p class="ae-tcat-count" data-title-count><b>${number(category.owned)}</b> of ${number(category.total)} collected</p>` : ''}
       </div>
-      ${percent !== null ? `<div class="ae-tbar" role="img" aria-label="${esc(name)}: ${percent}% owned"><span style="inline-size:${Math.max(0, Math.min(100, percent))}%"></span></div>` : ''}
+      ${percent !== null ? `<div class="ae-tbar" role="img" aria-label="${esc(name)}: ${percent}% collected"><span style="inline-size:${Math.max(0, Math.min(100, percent))}%"></span></div>` : ''}
       ${worn ? `<div class="ae-tworn" data-title-worn="${esc(worn.id)}">
           <span class="ae-gtile ae-tworn-badge"${grade?.id ? ` data-grade="${esc(grade.id)}"` : ''} aria-hidden="true">${LAUREL}</span>
           <div class="ae-tworn-body">
@@ -61,7 +61,7 @@ function categoryHtml(category, ctx) {
           </div>
         </div>
         ${worn.effect.length ? `<div class="ae-item-block" data-title-list="effect" data-rule-status="${ctx.ruleStatus('equip-effect')}"><p class="ae-item-sec">Equip effect${ctx.ruleTag('equip-effect')}</p><ul class="ae-teffects">${effectRows(worn.effect, ctx)}</ul></div>` : ''}
-        ${worn.alsoGives.length ? `<div class="ae-item-block" data-title-list="owned" data-rule-status="${ctx.ruleStatus('owned-effect')}"><p class="ae-item-sec">Always on once owned${ctx.ruleTag('owned-effect')}</p><ul class="ae-teffects is-owned">${effectRows(worn.alsoGives, ctx)}</ul></div>` : ''}
+        ${worn.alsoGives.length ? `<div class="ae-item-block" data-title-list="owned" data-rule-status="${ctx.ruleStatus('owned-effect')}"><p class="ae-item-sec">Always on once collected${ctx.ruleTag('owned-effect')}</p><ul class="ae-teffects is-owned">${effectRows(worn.alsoGives, ctx)}</ul></div>` : ''}
         ${advice ? `<p class="ae-card-line ae-tadvice" data-title-advice>${esc(advice)}</p>` : ''}`
     : '<p class="ae-empty" data-title-none>No title set as this effect</p>'}
     </section>`;
@@ -91,7 +91,7 @@ function render(model, ref, ctx) {
       ${none ? '<p class="ae-empty" id="aeTitlesNone">The official AION 2 site sends no titles for this Daeva.</p>' : `
       <h2 class="ae-section-title ae-titles-head" id="aeEffectsTitle">Equipped effects</h2>
       <div class="ae-titles-intro">
-        <p class="ae-note">Set one title as the effect in each category. Its equip effect works only while it is set. Its always on line works from the moment you own the title.</p>
+        <p class="ae-note">Set one title as the effect in each category. Its equip effect works only while it is set. Its always on line works from the moment you collect the title.</p>
         <p class="ae-note" id="aeTitlesTags">${ctx.rank ? `High, Useful and Low say how much a line helps a ${esc(ctx.className)}, from the class's stat order. A line with no tag names a stat the plan does not rank.` : `No stat order for ${esc(ctx.className)} yet, so the lines show without a tag.`}</p>
       </div>
       <div class="ae-tcats" id="aeTitleCats" aria-labelledby="aeEffectsTitle">${titles.categories.map(category => categoryHtml(category, ctx)).join('')}</div>`}
