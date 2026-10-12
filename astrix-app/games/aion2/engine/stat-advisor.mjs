@@ -164,3 +164,18 @@ export function mostlyLow(liveStats, stats) {
   const index = indexOf(stats);
   return index.main.every(stat => ((liveStats ?? []).find(row => row.type === stat.type)?.value ?? 0) < LOW_MAIN);
 }
+
+/**
+ * A title effect line from the official data ("Attack Bonus +20", "HP +750"), tagged for this build the way a sub stat
+ * line is. Only a line that names exactly one stat the record knows gets a tag: the words before the number, with a
+ * trailing "Bonus" or "increase" dropped, must be that stat's name. "PvE Attack" or "Critical Damage Defense" name
+ * something the record does not have, so they get none (null), never a guess.
+ */
+export function effectTag(desc, rank, build, stats) {
+  if (!rank) return null;
+  const index = indexOf(stats);
+  const name = String(desc ?? '').replace(/\s*[+-]\s*[\d.,]+\s*%?\s*$/, '').replace(/\s+(Bonus|increase)$/i, '').trim();
+  if (!name) return null;
+  const known = index.combatByName.has(name) || index.point.some(stat => stat.name === name);
+  return known ? subStatTag({ name }, rank, build, index) : null;
+}

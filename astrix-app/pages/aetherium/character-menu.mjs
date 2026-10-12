@@ -1,9 +1,10 @@
 /**
- * Character menu (The Aetherium, hub/aetherium/gear/): one Daeva's name and numbers, then three cards in the
- * same style as the Ascent Plan menu. Gear, Skills and Daevanion each open their own page for this Daeva.
+ * Character menu (The Aetherium, hub/aetherium/gear/): one Daeva's name and numbers, then four cards in the
+ * same style as the Ascent Plan menu. Gear, Skills, Daevanion and Titles each open their own page for this Daeva
+ * (Titles only when the official data sends a title list).
  * First paint needs only /aion2/character; the small game-wide facts file is read only to name a board that is not open yet.
  */
-import { ascentUrl, daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, regionName, skillsUrl } from './aetherium-data.mjs';
+import { ascentUrl, daevanionPageUrl, gearPageUrl, loadProgression, prefetchDaevanionAdvice, regionName, skillsUrl, titlesUrl } from './aetherium-data.mjs';
 import { $, esc, isPending, number } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage } from './character-page.mjs';
 import { nodeArt } from './daevanion-board.mjs';
@@ -11,6 +12,7 @@ import { nodeArt } from './daevanion-board.mjs';
 const GLYPH = {
   gear: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6.5 17-15 21C15.5 39 9 32 9 22V11z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 15v18M17 22h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
   skills: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38L30 18M30 18l4-10 6 6-10 4M14 30l4 4M8 40l4-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  titles: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40c-7-2-13-8-14-17M24 40c7-2 13-8 14-17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M24 12l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="currentColor"/></svg>',
   daevanion: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 8h8v8H8zM20 8h8v8h-8zM32 8h8v8h-8zM20 20h8v8h-8zM8 32h8v8H8zM20 32h8v8h-8zM32 32h8v8h-8zM12 16v16M36 16v16M16 24h4M28 24h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>'
 };
 
@@ -20,6 +22,7 @@ function renderHeader(model) {
     <div>
       <h1 class="ae-name">${esc(p.name)}</h1>
       <p class="ae-subline">${[p.title, `${p.class} Lv ${p.level}`, p.raceName, p.server.name, regionName(model.source.region)].filter(Boolean).map(esc).join(' · ')}</p>
+      ${p.legion ? `<p class="ae-legion" id="aeLegion"><span>Legion</span> ${esc(p.legion)}</p>` : ''}
       <p class="ae-figures"><span>Combat power <b>${number(p.combatPower)}</b></span><span>Item level <b>${isPending(p.itemLevel) ? '-' : number(p.itemLevel)}</b></span></p>
     </div>
     <a class="btn" href="/hub/aetherium/">Back to Daeva Card</a>`;
@@ -40,7 +43,7 @@ function card({ view, href, name, status, blurb, count, noun, image }) {
     </a>`;
 }
 
-/** The three cards for one Daeva, counted from the character call alone. */
+/** The cards for one Daeva, counted from the character call alone. */
 function renderCards(model, ref, progression) {
   const worn = model.gear.filter(slot => !slot.empty);
   const learned = model.skills.filter(skill => skill.category !== 'Dp' && skill.acquired);
@@ -64,8 +67,20 @@ function renderCards(model, ref, progression) {
     card({
       view: 'daevanion', href: daevanionPageUrl(ref, model.profile.class, first?.id ?? null), name: 'Daevanion', status: boardLine,
       blurb: 'Boards and nodes', count: open.length, noun: open.length === 1 ? 'board' : 'boards', image: nodeArt('unique', true, model.profile.class)
-    })
-  ].join('');
+    }),
+    titlesCard(model, ref)
+  ].filter(Boolean).join('');
+  $('#aeCards').classList.toggle('is-four', $('#aeCards').children.length === 4);
+}
+
+/** The Titles card: owned of total from the data. No title list in the data, no card. */
+function titlesCard(model, ref) {
+  const titles = model.titles;
+  if (isPending(titles) || !Number.isFinite(titles.owned) || !Number.isFinite(titles.total)) return '';
+  return card({
+    view: 'titles', href: titlesUrl(ref), name: 'Titles', status: `${number(titles.owned)} of ${number(titles.total)} owned`,
+    blurb: 'Offensive, Defensive and Other', count: titles.owned, noun: 'owned', image: null
+  });
 }
 
 // A game icon that fails to load drops away and leaves our own glyph.

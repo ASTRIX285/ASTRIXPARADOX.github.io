@@ -356,6 +356,8 @@ export const roster = {
   /** The roster of the active Daeva's server: { entries, active, rosterId, region, serverId, serverName, servers }. */
   read: () => viewOf(readStore()),
   key: rosterKey,
+  /** Every saved Daeva on this device, on every server and in every region, for the Compare pickers. */
+  all: () => Object.values(readStore().rosters).flatMap(bucket => bucket.entries),
   /**
    * Adds a Daeva to its own server's roster, shows that roster and makes the Daeva active. A Daeva already saved is
    * refreshed (live reads only). Returns false when that server's roster is full.
@@ -453,6 +455,25 @@ export const gearUrl = ref => withQuery('/hub/aetherium/gear/', ref);
 
 /** The Gear page: worn items, stats, pet, wings and title. */
 export const gearPageUrl = ref => withQuery('/hub/aetherium/gear/equipment/', ref);
+
+/** The Titles page: the three title categories, owned of total, and what each worn title gives. */
+export const titlesUrl = ref => withQuery('/hub/aetherium/gear/titles/', ref);
+
+/** A Daeva in a Compare link: "<region>:<serverId>:<characterId>". */
+export const compareKey = ref => `${regionOf(ref.region)}:${ref.serverId}:${ref.characterId}`;
+/** A Compare key back into a Daeva, or null when it is not one. The character id is everything after the second colon. */
+export function compareRef(key) {
+  const match = /^([a-z]{2,3}):(\d+):(.+)$/.exec(String(key ?? ''));
+  return match && isRegion(match[1]) ? { region: match[1], serverId: Number(match[2]), characterId: match[3] } : null;
+}
+/** The Compare page, for two Daevas (either may be left out). */
+export function compareUrl(a = null, b = null) {
+  const params = new URLSearchParams();
+  if (a) params.set('a', compareKey(a));
+  if (b) params.set('b', compareKey(b));
+  const query = params.toString();
+  return `/hub/aetherium/compare/${query ? `?${query}` : ''}`;
+}
 
 /** The Skills page. tab is 'mastery' (the default, left out of the address) or 'stigma'. */
 export const skillsUrl = (ref, className = null, tab = 'mastery') => withQuery('/hub/aetherium/skills/', ref, { class: classSlug(className), tab: tab === 'stigma' ? 'stigma' : null });

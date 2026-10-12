@@ -7,6 +7,7 @@
 import {
   ArmoryUnavailable,
   ascentUrl,
+  compareUrl,
   daevanionPageUrl,
   explain,
   factionOf,
@@ -24,13 +25,15 @@ import {
   regions,
   rememberRegion,
   roster,
-  searchCharacters
+  searchCharacters,
+  titlesUrl
 } from './aetherium-data.mjs';
 import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction, showNotice, showSource, wireDrawer, isPending } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { nextStep, renderNext, renderStepBar } from './aetherium-flow.mjs';
 import { classArt } from './daevanion-board.mjs';
 import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { daevanionPercent } from '/astrix-app/games/aion2/engine/armory-adapter.mjs';
 
 const state = { model: null, source: null, ref: null, busy: false, retry: null, before: null };
 
@@ -77,6 +80,7 @@ function renderSummary() {
       <div class="ae-summary-body">
         <p class="ae-eyebrow">${esc(eyebrow)}</p>
         <h2 class="ae-name" id="aeName">${esc(p.name)}</h2>
+        ${p.legion ? `<p class="ae-legion" id="aeLegion"><span>Legion</span> ${esc(p.legion)}</p>` : ''}
         <ul class="ae-chips" aria-label="Character">
           <li>${esc(p.class)}</li><li class="ae-chip-faction">${esc(p.raceName)}</li><li>${esc(p.server.name)}</li><li>${esc(regionName(model.source.region))}</li><li>Lv ${esc(p.level)}</li>
         </ul>
@@ -86,6 +90,7 @@ function renderSummary() {
           <div class="ae-tile is-link"><dt><a href="${esc(daevanionPageUrl(state.ref, p.class, model.daevanion.find(board => board.open)?.id ?? null))}">Daevanion boards open</a></dt><dd>${boardsOpen} <span>/ ${model.daevanion.length}</span></dd></div>
           <div class="ae-tile"><dt>Stigmas</dt><dd>${stigmasOpen ? `${stigmasOpen} <span>/ ${stigmas.length}</span>` : `<small>${stigmaNote}</small>`}</dd></div>
         </dl>
+        ${factsRow(model)}
         <p class="ae-official ae-card-official"><a class="ae-official-link" href="${esc(OFFICIAL_CHARACTERS)}" target="_blank" rel="noopener noreferrer" data-official-link="character">View on the official AION 2 site</a></p>
       </div>
     </article>
@@ -103,6 +108,21 @@ function renderSummary() {
     </section>
     <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>`;
   loadFirstMove().catch(() => {});
+}
+
+/* The slim row under the stat tiles: titles owned of total and Daevanion progress over every board, each only when the
+   data has it, each a link to its page. The official data sends no ranking for any Daeva captured so far, so there is none. */
+function factsRow(model) {
+  const titles = isPending(model.titles) ? null : model.titles;
+  const percent = daevanionPercent(model.daevanion);
+  const facts = [];
+  if (titles && Number.isFinite(titles.owned) && Number.isFinite(titles.total)) {
+    facts.push(`<li data-fact="titles"><a href="${esc(titlesUrl(state.ref))}">Titles <b>${number(titles.owned)}</b> <span>of ${number(titles.total)}</span></a></li>`);
+  }
+  if (percent !== null) {
+    facts.push(`<li data-fact="daevanion"><a href="${esc(daevanionPageUrl(state.ref, model.profile.class, model.daevanion.find(board => board.open)?.id ?? null))}">Daevanion <b>${percent}%</b> <span>overall</span></a></li>`);
+  }
+  return facts.length ? `<ul class="ae-facts" id="aeFacts" aria-label="Progress">${facts.join('')}</ul>` : '';
 }
 
 /* Since your last visit: only when this device already held this Daeva at a lower level (the roster keeps the level it last saw). */
@@ -195,6 +215,7 @@ function renderRoster() {
   const count = `${current.entries.length} of ${roster.slots}`;
   $('#aeRosterCount').textContent = current.rosterId ? `${current.serverName} · ${regionShort(current.region)} · ${count}` : count;
   renderSwitcher(current);
+  renderCompareLink(current);
   const cards = current.entries.map(entry => {
     const key = roster.key(entry);
     const active = key === current.active;
@@ -214,6 +235,18 @@ function renderRoster() {
     cards.push('<li class="ae-roster-slot is-empty"><button type="button" class="ae-roster-add" data-roster-add>+ Add a Daeva</button></li>');
   }
   $('#aeRoster').innerHTML = cards.join('');
+}
+
+/** Compare: shown once two Daevas are saved on this device (any server or region). It opens on the active one and the next. */
+function renderCompareLink(current) {
+  const link = $('#aeCompareLink');
+  if (!link) return;
+  const all = roster.all();
+  link.hidden = all.length < 2;
+  if (all.length < 2) return;
+  const first = all.find(entry => roster.key(entry) === current.active) ?? all[0];
+  const second = all.find(entry => entry !== first);
+  link.href = compareUrl(first, second);
 }
 
 /** The server switcher lists only servers that have saved Daevas, and hides when there is one. */
