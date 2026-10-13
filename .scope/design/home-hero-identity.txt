@@ -11,3 +11,9 @@ img/home/crimsondesert.webp
 img/home/spacemarine2.webp
 img/home/godofwar.webp
 img/home/division2.webp
+pages/games.html
+css/universes.css
+img/home/battlefield.webp
+img/home/wukong.webp
+img/home/warhammer40k.webp
+astrix-app/tools/test-universes-b.mjs

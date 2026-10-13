@@ -69,7 +69,8 @@ try{
    assert.equal(r.edges.length,4,`${label}: four slab edges`);
    assert.match(r.titleFont,/acumin-pro-extra-condensed/,`${label}: header in Acumin Extra Condensed`);
    assert.ok(r.heroBox.height>=400&&r.heroBox.height<=600,`${label}: header ${r.heroBox.height}px`);
-   assert.equal(r.chapters.length,9,`${label}: nine universes`);
+   assert.equal(r.chapters.length,10,`${label}: ten universes`);
+   assert.equal(r.chapters.find(c=>c.game==='division2')?.status,'In rotation',`${label}: The Division 2 is in`);
    assert.equal(r.chapters[0].game,'aion2',`${label}: AION 2 leads`);
    assert.ok(r.chapters[0].lead,`${label}: lead chapter marked`);
    assert.equal(r.chapters[0].status,'Playing now');

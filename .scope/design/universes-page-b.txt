@@ -1,7 +1,0 @@
-base: design/home-hero-identity
-pages/games.html
-css/universes.css
-img/home/battlefield.webp
-img/home/wukong.webp
-img/home/warhammer40k.webp
-astrix-app/tools/test-universes-b.mjs
