@@ -20,7 +20,7 @@ const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GL
 const ARCANA = ['ARCANA1', 'ARCANA2', 'ARCANA3', 'ARCANA4', 'ARCANA5'];
 const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
 const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
-const state = { model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null };
+const state = { looks: [], model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null };
 
 const adviceOf = slot => enchantAdvice(slot, { level: state.model.profile.level, grades: state.grades, progression: state.progression });
 const gradeOf = slot => gradeInfo(slot.grade, state.grades, slot.gradeName ?? null);
@@ -37,14 +37,17 @@ const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3
 /* The title has no icon in the data: a laurel badge drawn here, never game art. */
 const LAUREL = '<svg class="ae-title-badge" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40c-7-2-13-8-14-17M24 40c7-2 13-8 14-17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 30c-3 0-5-2-5-4 3 0 5 1 5 4zM10 23c-3-1-4-3-4-5 3 1 4 3 4 5zM11 16c-2-1-3-4-2-6 2 1 3 3 2 6zM36 30c3 0 5-2 5-4-3 0-5 1-5 4zM38 23c3-1 4-3 4-5-3 1-4 3-4 5zM37 16c2-1 3-4 2-6-2 1-3 3-2 6z" fill="currentColor"/><path d="M24 12l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="currentColor"/></svg>';
 
+/** Exceed level beside the enchant: only above 0 (the data sends 0 for none). */
+const exceedText = slot => (Number.isFinite(slot.exceed) && slot.exceed > 0 ? `Exceed ${slot.exceed}` : null);
+
 /** The tile's accessible name: the item, its grade, +N of the cap and the marker in words, then item level and slot. */
 function tileName(slot) {
   const mark = markOf(slot);
-  return [slot.name, gradeOf(slot).name, capText(slot), mark ? MARK_WORDS[mark] : null, Number.isFinite(slot.itemLevel) ? `item level ${slot.itemLevel}` : null, slotLabel(slot.slot)].filter(Boolean).join(', ');
+  return [slot.name, gradeOf(slot).name, capText(slot), exceedText(slot), mark ? MARK_WORDS[mark] : null, Number.isFinite(slot.itemLevel) ? `item level ${slot.itemLevel}` : null, slotLabel(slot.slot)].filter(Boolean).join(', ');
 }
 /** The slot, name, grade and cap as page text, visually hidden (the button's name comes from tileName). */
 function tileWords(slot) {
-  return `<span class="ae-sr" aria-hidden="true"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc(gradeOf(slot).name)} · ${esc(capText(slot))}</span></span>`;
+  return `<span class="ae-sr" aria-hidden="true"><span class="ae-slot-label">${esc(slotLabel(slot.slot))}</span><strong>${esc(slot.name)}</strong><span class="ae-slot-meta">${esc([gradeOf(slot).name, capText(slot), exceedText(slot)].filter(Boolean).join(' · '))}</span></span>`;
 }
 
 /** One worn tile: the icon on its grade, +N bottom corner, item level top corner when known, the marker. */
@@ -52,9 +55,10 @@ function tileHtml(slot, index) {
   const grade = gradeOf(slot);
   const mark = markOf(slot);
   const level = Number.isFinite(slot.itemLevel) ? `<b class="ae-gtile-lv" aria-hidden="true">${esc(slot.itemLevel)}</b>` : '';
+  const exceed = exceedText(slot) ? `<b class="ae-gtile-ex" aria-hidden="true">E${esc(slot.exceed)}</b>` : '';
   const sign = mark === 'replace' ? `<span class="ae-gmark" aria-hidden="true">${CHEVRON}</span>` : mark === 'full' ? `<span class="ae-gmark" aria-hidden="true">${CHECK}</span>` : '';
   return `<button type="button" class="ae-slot ae-gbtn" data-slot="${index}" data-grade="${esc(grade.id ?? '')}" aria-haspopup="dialog" aria-label="${esc(tileName(slot))}" data-gtip="${index}">
-      ${gradeTile({ icon: slot.icon, grade: grade.id, enchant: slot.enchant, size: 88, extra: `${level}${sign}` })}${tileWords(slot)}
+      ${gradeTile({ icon: slot.icon, grade: grade.id, enchant: slot.enchant, size: 88, extra: `${level}${exceed}${sign}` })}${tileWords(slot)}
     </button>`;
 }
 const cellOf = (key, worn) => {
@@ -71,9 +75,13 @@ function renderGear() {
   // A worn slot the grid does not name yet (a new slot type) is kept at the end of the grid, never dropped.
   const extra = [...worn.keys()].filter(key => !GRID.includes(key) && !ARCANA.includes(key));
   $('#aeGear').innerHTML = [...GRID, ...extra].map(key => cellOf(key, worn.get(key))).join('');
-  const arcana = ARCANA.filter(key => worn.has(key));
-  $('#aeArcanaBlock').hidden = !arcana.length;
-  $('#aeArcana').innerHTML = arcana.length ? ARCANA.map(key => cellOf(key, worn.get(key))).join('') : '';
+  // The five Arcana slots always show, worn or empty, in the data's order (Arcana1 to Arcana5). Each one opens a card.
+  const anyArcana = state.model.arcana.some(slot => !slot.empty);
+  $('#aeArcanaCount').textContent = `${state.model.arcana.filter(slot => !slot.empty).length} of ${state.model.arcana.length} worn`;
+  $('#aeArcana').innerHTML = state.model.arcana.map((slot, n) => (slot.empty
+    ? `<li class="ae-gcell is-empty" data-slot-key="${esc(keyOf(slot.slot))}" data-arcana-slot="${n + 1}"><button type="button" class="ae-slot ae-gbtn ae-arcana-empty" data-arcana-empty="${n + 1}" aria-haspopup="dialog" aria-label="${esc(slotLabel(slot.slot))}: empty" data-extra-tip="${esc(slotLabel(slot.slot))}" data-extra-line="Empty"><span class="ae-gempty" aria-hidden="true"></span></button></li>`
+    : cellOf(keyOf(slot.slot), worn.get(keyOf(slot.slot))).replace('<li class="ae-gcell"', `<li class="ae-gcell" data-arcana-slot="${n + 1}"`))).join('');
+  $('#aeArcanaNone').hidden = anyArcana;
   const accessories = state.model.accessorySlots;
   // Slots outside the always-listed eight (cape, belt, accessories) only reach the official site once something is worn there.
   const listed = new Set(gear.filter(slot => slot.empty || [1, 2, 3, 4, 5, 6, 7, 8].includes(slot.slotPos)).map(slot => slot.slotPos));
@@ -105,6 +113,26 @@ function applyDetail(slot, detail) {
   if (detail.gradeName) slot.gradeName = detail.gradeName;
   // The detail's level is the item level the game's tooltip shows (ENDPOINTS.md, 11 Oct 2026). levelValue is the enchant level.
   if (Number.isFinite(detail.level)) slot.itemLevel = detail.level;
+}
+
+/** The stats record's Arcana source line (stats.json source arcana), with its status. */
+function arcanaSource() {
+  const record = state.stats?.records?.find(item => item.id === 'arcana' && item.kind === 'source') ?? null;
+  return { confirmed: record?.stats?.status === 'confirmed' };
+}
+const isArcana = slot => /^arcana\d$/i.test(String(slot?.slot ?? ''));
+/** The plain Arcana line on an Arcana card, tagged with its status from stats.json. */
+function arcanaNote(slot) {
+  if (!isArcana(slot)) return '';
+  const source = arcanaSource();
+  return `<p class="ae-card-line" data-arcana-line>Arcana are the main source of deity stats.${source.confirmed ? '' : ` ${NOT_CONFIRMED(null)}`}</p>`;
+}
+/** An empty Arcana slot: "No Arcana yet" when none is worn, else this slot is empty. Nothing else is claimed. */
+function openArcanaEmpty(n, from) {
+  hideTip();
+  const none = !state.model.arcana.some(slot => !slot.empty);
+  const slot = state.model.arcana[n - 1];
+  openInfo(infoCardHtml({ icon: null, title: none ? 'No Arcana yet' : 'Empty Arcana slot', sub: slotLabel(slot.slot), body: arcanaNote(slot) }), from);
 }
 
 const NOT_CONFIRMED = test => `<span class="ae-tag is-unconfirmed">Not confirmed yet</span>${test ? ` <span class="ae-tag-test">Check: ${esc(test)}</span>` : ''}`;
@@ -207,7 +235,7 @@ async function selectSlot(index, from) {
     sub: [slotLabel(slot.slot), detail?.category, gradeOf(slot).name].filter(Boolean).join(' · ')
   });
   const rules = await loadRules();
-  openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), body: `${adviceHtml(slot, rules)}<p class="ae-card-line">Reading ${esc(slot.name)}.</p>` }), from);
+  openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}<p class="ae-card-line">Reading ${esc(slot.name)}.</p>` }), from);
   let result;
   try {
     result = await loadItemDetail(state.model, slot);
@@ -217,7 +245,7 @@ async function selectSlot(index, from) {
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
-    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${adviceHtml(slot, rules)}${chipsHtml([`+${slot.enchant}`])}` }), from);
+    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${chipsHtml([`+${slot.enchant}`, exceedText(slot)])}` }), from);
     return;
   }
   const d = result.detail;
@@ -225,7 +253,7 @@ async function selectSlot(index, from) {
   refreshTile(index);
   openInfo(infoCardHtml({
     ...head(d), status: statusOf(adviceOf(slot)),
-    body: `${adviceHtml(slot, rules)}${chipsHtml([Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
+    body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${chipsHtml([exceedText(slot), Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
   }), document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
 }
 
@@ -237,7 +265,7 @@ function tipFor(el) {
   const slot = state.model.gear[Number(el.dataset.gtip)];
   if (!slot || slot.empty) return null;
   const grade = gradeOf(slot);
-  return { name: slot.name, grade: grade.id, line: [grade.name, slotLabel(slot.slot), capText(slot), Number.isFinite(slot.itemLevel) ? `Item level ${slot.itemLevel}` : null].filter(Boolean).join(' · ') };
+  return { name: slot.name, grade: grade.id, line: [grade.name, slotLabel(slot.slot), capText(slot), exceedText(slot), Number.isFinite(slot.itemLevel) ? `Item level ${slot.itemLevel}` : null].filter(Boolean).join(' · ') };
 }
 function showTip(el) {
   const tip = tipFor(el);
@@ -314,10 +342,32 @@ function renderExtras() {
     isPending(model.wings) ? tile('wings', 'Wings', 'None equipped', img(null), null, '') : tile('wings', 'Wings', model.wings.name, img(model.wings.icon), wingsGrade, `${wingsGrade.name} · +${model.wings.enchant}`),
     tile('title', 'Title', model.profile.title || 'No title', LAUREL, titleGrade, titleGrade ? titleGrade.name : '')
   ].join('');
-  // Nothing to show (no pet, no wings, no title, no Arcana): the side column would stay empty, so the page collapses it.
-  const bare = isPending(model.pet) && isPending(model.wings) && !model.profile.title && $('#aeArcanaBlock').hidden;
+  renderAppearance();
+  // Nothing to show (no pet, no wings, no title): the side column would stay empty, so the page collapses it.
+  const bare = isPending(model.pet) && isPending(model.wings) && !model.profile.title;
   document.querySelector('.ae-gear-page').classList.toggle('is-single', bare);
   $('#aeExtrasCol').hidden = bare;
+}
+
+/* Appearance: gear skins and the wing skin from the data, as small tiles (name on hover, card on tap). Only when there are any. */
+function renderAppearance() {
+  const { skins, wingSkin } = state.model.appearance ?? { skins: [], wingSkin: null };
+  const items = [...skins.map(skin => ({ ...skin, kind: slotLabel(skin.slot ?? '') || 'Skin' })), ...(wingSkin ? [{ ...wingSkin, kind: 'Wings' }] : [])];
+  $('#aeAppearance').hidden = !items.length;
+  state.looks = items;
+  $('#aeLooks').innerHTML = items.map((item, n) => {
+    const grade = item.grade ? gradeInfo(item.grade, state.grades) : null;
+    return `<li class="ae-gcell ae-xcell" data-look="${n}">
+        <button type="button" class="ae-slot ae-gbtn" data-look-open="${n}" data-extra-tip="${esc(item.name)}" data-extra-line="${esc(item.kind)}" data-grade="${esc(grade?.id ?? '')}" aria-haspopup="dialog" aria-label="${esc(`${item.kind}: ${item.name}`)}">
+          ${gradeTile({ icon: item.icon, grade: grade?.id ?? null, size: 88 })}</button><span class="ae-extra-label" aria-hidden="true">${esc(item.kind)}</span></li>`;
+  }).join('');
+}
+function openLook(n, from) {
+  const item = state.looks?.[n];
+  if (!item) return;
+  hideTip();
+  const grade = item.grade ? gradeInfo(item.grade, state.grades) : null;
+  openInfo(infoCardHtml({ icon: item.icon, title: item.name, grade: grade?.id ?? null, sub: ['Appearance', item.kind, grade?.name].filter(Boolean).join(' · '), lines: ['A look only: it changes how the item appears, not its stats.'] }), from);
 }
 
 /** The small card for the pet, the wings or the title: only what the data has. */
@@ -359,6 +409,15 @@ function render(model, source, ref) {
             <p class="ae-gear-legend" id="aeGearLegend"><span class="ae-legend-swatch" aria-hidden="true"></span>Gold pulse: enchant it. Tap any item for what to do.</p>
             <ul class="ae-ggrid" id="aeGear" aria-label="Equipped gear, in the game's order"></ul>
             <p class="ae-accessories" id="aeAccessories"></p>
+            <div class="ae-arcana-block" id="aeArcanaBlock">
+              <h3 class="ae-section-title" id="aeArcanaTitle">Arcana <small id="aeArcanaCount"></small></h3>
+              <ul class="ae-ggrid is-arcana" id="aeArcana" aria-labelledby="aeArcanaTitle"></ul>
+              <p class="ae-note" id="aeArcanaNone" hidden>No Arcana yet. Arcana are the main source of deity stats.</p>
+            </div>
+          </section>
+          <section class="ae-panel" id="aeAppearance" aria-labelledby="aeAppearanceTitle" hidden>
+            <h2 class="ae-section-title" id="aeAppearanceTitle">Appearance</h2>
+            <ul class="ae-ggrid is-row" id="aeLooks" aria-labelledby="aeAppearanceTitle"></ul>
           </section>
           <section class="ae-panel is-grow" aria-labelledby="aeStatTitle">
             <h2 class="ae-section-title" id="aeStatTitle">Stats <small>from the official AION 2 site</small></h2>
@@ -378,10 +437,6 @@ function render(model, source, ref) {
           <section class="ae-panel is-grow" aria-labelledby="aeExtraTitle">
             <h2 class="ae-section-title" id="aeExtraTitle">Pet, wings and title</h2>
             <ul class="ae-ggrid is-row" id="aeExtras"></ul>
-            <div class="ae-arcana-block" id="aeArcanaBlock" hidden>
-              <h3 class="ae-section-title" id="aeArcanaTitle">Arcana</h3>
-              <ul class="ae-ggrid is-row" id="aeArcana" aria-labelledby="aeArcanaTitle"></ul>
-            </div>
           </section>
         </div>
       </div>
@@ -394,6 +449,10 @@ function render(model, source, ref) {
   const panel = $('#aeGearPanel');
   wireTips(panel);
   panel.addEventListener('click', event => {
+    const look = event.target.closest('[data-look-open]');
+    if (look) { openLook(Number(look.dataset.lookOpen), look); return; }
+    const emptyArcana = event.target.closest('[data-arcana-empty]');
+    if (emptyArcana) { openArcanaEmpty(Number(emptyArcana.dataset.arcanaEmpty), emptyArcana); return; }
     const extra = event.target.closest('[data-extra] button');
     if (extra) { openExtra(extra.closest('[data-extra]').dataset.extra, extra); return; }
     const button = event.target.closest('[data-slot]');

@@ -1329,3 +1329,96 @@ body.aetherium-page #aeStatsPanel .ae-stat-open:focus-visible:not(#ax-s1):not(#a
 .ae-look-skip,.ae-look-none{font-size:.875rem;color:var(--ae-text-dim)}
 .ae-look-skip{display:block;margin-top:.25rem}
 @media (max-width:599px){.ae-look-rows li{grid-template-columns:minmax(0,1fr)}}
+
+/* The character menu with four cards (Gear, Skills, Daevanion, Titles): one row of four from 641px, two by two below. */
+.ae-menu.is-three.is-four{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:640px){.ae-menu.is-three.is-four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Daeva Card and menu: the legion line under the name, and the slim progress row under the stat tiles. */
+.ae-legion{margin:.375rem 0 0;font:600 1rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-legion span{margin-right:.375rem;font:700 .875rem/1.3 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted)}
+.ae-facts{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 0;padding:0;list-style:none}
+.ae-facts li{flex:1 1 12rem;min-width:0}
+.ae-facts a{display:flex;align-items:baseline;flex-wrap:wrap;gap:.25rem .5rem;min-height:2.75rem;box-sizing:border-box;padding:.625rem .875rem;background:var(--ae-raised);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel);
+  font:700 .875rem/1.3 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted);text-decoration:none}
+.ae-facts a:hover,.ae-facts a:focus-visible{border-color:var(--ae-accent)}
+.ae-facts b{font:600 1.125rem/1.2 var(--ae-font-ui);color:var(--ae-text)}
+.ae-facts span{font-weight:600}
+.ae-roster-head .ae-compare-link{margin-left:auto}
+.ae-roster-head .ae-compare-link[hidden]{display:none}
+
+/* Titles page: the title shown at the top, then the three equipped effects side by side (one column under 900px). */
+.ae-tshown{display:flex;align-items:center;gap:1rem;margin:0 0 var(--ae-gap)}
+.ae-titles-head{margin:0 0 .5rem}
+.ae-titles-intro{margin:0 0 var(--ae-gap)}
+.ae-titles-intro .ae-note{margin:.25rem 0 0}
+.ae-tcats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--ae-gap)}
+@media (max-width:899px){.ae-tcats{grid-template-columns:minmax(0,1fr)}}
+.ae-tcat{display:flex;flex-direction:column;gap:.75rem}
+.ae-tcat-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.25rem .75rem}
+.ae-tcat-head .ae-section-title{margin:0}
+.ae-tcat-count{margin:0;font:600 .875rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-tcat-count b{font-size:1.125rem;color:var(--ae-text)}
+.ae-tbar{height:.5rem;background:var(--ae-well);border:1px solid var(--ae-hairline);overflow:hidden}
+.ae-tbar span{display:block;height:100%;background:linear-gradient(90deg,var(--ae-accent),var(--ae-accent-hi))}
+.ae-tworn{display:flex;align-items:center;gap:.875rem}
+.ae-tworn-badge{width:4rem;height:4rem;color:var(--ae-g)}
+.ae-tworn-badge .ae-title-badge{width:2.5rem;height:2.5rem}
+.ae-tworn-body{min-width:0}
+.ae-tworn-body .ae-eyebrow{margin:0 0 .125rem}
+.ae-tworn-body .ae-section-title{margin:0 0 .25rem}
+.ae-tworn-name{margin:0;font:700 1.125rem/1.25 var(--ae-font-ui);color:var(--ae-g,var(--ae-text));overflow-wrap:break-word}
+.ae-tworn-grade{margin:.125rem 0 0;font-size:.875rem;color:var(--ae-text-muted)}
+.ae-teffects{display:grid;gap:.375rem;margin:0;padding:0;list-style:none}
+.ae-teffects li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.25rem .5rem;font:600 1rem/1.35 var(--ae-font-ui);color:var(--ae-text)}
+.ae-tadvice{margin:0;color:var(--ae-text-muted)}
+
+/* Gear page: exceed level on the tile's bottom left, the five Arcana in one row, the Appearance panel. */
+.ae-gtile-ex{position:absolute;left:3px;bottom:2px;padding:0 4px;font:800 .875rem/1.25 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-gold);background:color-mix(in srgb,var(--ae-page) 78%,transparent);border-radius:3px}
+.ae-arcana-block{margin-top:1.25rem}
+.ae-ggrid.is-arcana{grid-template-columns:repeat(5,minmax(0,5.5rem))}
+.ae-arcana-empty .ae-gempty{opacity:1}
+#aeAppearance .ae-ggrid.is-row{grid-template-columns:repeat(auto-fill,minmax(4.5rem,5.5rem))}
+
+/* Daevanion: a board tab's percent complete. Stigma screen: an equipped stigma's level on its top corner. */
+.ae-tab-pct::before{content:attr(data-board-percent) "%";margin-left:.375rem;font-weight:600;color:var(--ae-text-muted)}
+@media (max-width:640px){.ae-gw-tab:has(.ae-tab-pct){flex-direction:column;line-height:1.15}.ae-tab-pct::before{margin-left:0}}
+.ae-gw-tab[aria-selected="true"] .ae-tab-pct::before{color:inherit}
+.ae-itile-lv{position:absolute;right:0;top:0;padding:1px 4px;font:700 .8125rem/1.1 var(--ae-font-ui);letter-spacing:.02em;background:rgba(0,0,0,.75);color:var(--ae-text)}
+
+/* Compare: the first Daeva always left, the second always right, at every width. Each row is left value, label, right value. */
+.ae-cmp-pickers,.ae-cmp-heads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:0 0 var(--ae-gap)}
+.ae-cmp-pick select{min-width:0}
+.ae-cmp-who{display:grid;justify-items:center;gap:.25rem;min-width:0;padding:1rem .75rem;text-align:center;background:var(--ae-raised);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel)}
+.ae-cmp-portrait{display:grid;place-items:center;width:6.25rem;aspect-ratio:5/6;overflow:hidden;background:var(--ae-well);border:1px solid var(--ae-hairline);color:var(--ae-text-muted);font-size:.875rem}
+.ae-cmp-portrait img{width:100%;height:100%;object-fit:cover}
+.ae-cmp-name{margin:.25rem 0 0;font:700 1.125rem/1.2 var(--ae-font-ui);color:var(--ae-text);overflow-wrap:anywhere}
+.ae-cmp-line{margin:0;font-size:.875rem;line-height:1.35;color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-cmp-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;margin:0 0 var(--ae-gap)}
+.ae-cmp-tools .ae-note{margin:0;flex:1 1 14rem}
+.ae-cmp-copied{font-size:.875rem;color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-cmp{display:grid;gap:var(--ae-gap)}
+.ae-cmp-section{padding:1rem}
+.ae-cmp-section .ae-section-title{justify-content:center}
+.ae-cmp-rows{display:grid}
+.ae-cmp-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto) minmax(0,1fr);align-items:center;gap:.5rem;min-height:2.75rem;padding:.25rem 0;border-top:1px solid var(--ae-hairline)}
+.ae-cmp-row:first-child{border-top:0}
+.ae-cmp-label{display:flex;align-items:center;justify-content:center;gap:.375rem;max-width:11rem;text-align:center;font:700 .875rem/1.25 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted)}
+.ae-cmp-cell{min-width:0;font:600 1rem/1.3 var(--ae-font-ui);color:var(--ae-text);overflow-wrap:anywhere}
+.ae-cmp-cell.is-a{text-align:right;justify-self:end}
+.ae-cmp-cell.is-b{text-align:left;justify-self:start}
+.ae-cmp-cell b{font-weight:700}
+.ae-cmp-cell.is-higher,.ae-cmp-cell.is-higher b{color:var(--ae-accent-hi)}
+.ae-cmp-of{color:var(--ae-text-muted);font-weight:600}
+.ae-cmp-none{color:var(--ae-text-muted)}
+.ae-cmp-item{display:inline-grid;justify-items:center;gap:.25rem;vertical-align:middle}
+.ae-cmp-cell.is-a .ae-cmp-item{justify-items:end}
+.ae-cmp-cell.is-b .ae-cmp-item{justify-items:start}
+.ae-cmp-item .ae-gtile{width:3rem;height:3rem}
+.ae-cmp-item .ae-gempty{width:3rem;height:3rem;opacity:.5}
+.ae-cmp-item-line{font:600 .875rem/1.25 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-cmp-cell.is-higher .ae-cmp-item-line{color:var(--ae-accent-hi)}
+@media (max-width:520px){.ae-cmp-section{padding:.75rem .5rem}.ae-cmp-row{gap:.375rem}.ae-cmp-label{max-width:6.5rem}.ae-cmp-cell{font-size:.9375rem}}
+/* Compare shows two Daevas of any faction: its accent (buttons, the higher number) is the neutral ice tone, never crimson. */
+.ae-compare-window{--ae-accent:var(--ae-ice);--ae-accent-hi:var(--ae-ice)}
+@media (min-width:1100px){.ae-cmp{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.ae-cmp-section[data-compare-section="gear"],.ae-cmp-section[data-compare-section="arcana"]{grid-row:span 2}}

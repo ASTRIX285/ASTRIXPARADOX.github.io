@@ -54,6 +54,8 @@ export function adaptProfile(info) {
     legion: typeof p.regionName === 'string' && p.regionName.trim() ? p.regionName.trim() : null,
     title: p.titleName ?? null,
     titleGrade: p.titleGrade ?? null,
+    // The title the Daeva shows (the game's Equipped Title): cosmetic, separate from the three equipped effects in titles.
+    titleId: Number.isFinite(p.titleId) ? p.titleId : null,
     // The worn title's effects, when the owned-title list carries it (its equip and owned lines, as the site words them).
     titleEffects: titleEffects(info, p.titleId),
     combatPower: p.combatPower,

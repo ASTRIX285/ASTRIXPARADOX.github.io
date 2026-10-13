@@ -233,7 +233,8 @@ function judgeEquipped(equipped, slots, alternatives) {
   const alts = new Set(alternatives.map(alt => alt.name));
   const free = slots.map((slot, index) => ({ slot, index })).filter(item => item.slot.open && item.slot.equipped === false);
   return equipped.map(skill => {
-    const base = { name: skill.name, icon: skill.icon ?? null };
+    // The stigma's level from the skill data, shown beside it as the official page does. It plays no part in the verdict.
+    const base = { name: skill.name, icon: skill.icon ?? null, level: Number.isFinite(skill.skillLevel) ? skill.skillLevel : null };
     if (inBuild.has(skill.name)) return { ...base, verdict: 'keep', slot: slots.findIndex(slot => slot.name === skill.name) + 1, for: null };
     const place = free.shift() ?? null;
     return { ...base, verdict: alts.has(skill.name) ? 'swap' : 'out', slot: place ? place.index + 1 : null, for: place ? place.slot.name : null, why: alternatives.find(alt => alt.name === skill.name)?.why ?? null };

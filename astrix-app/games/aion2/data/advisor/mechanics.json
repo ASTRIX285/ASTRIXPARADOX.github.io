@@ -391,6 +391,35 @@
           "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
         }
       ]
+    },
+    {
+      "id": "title-effects",
+      "label": "Title effects",
+      "status": "confirmed",
+      "confirmedOn": "2026-10-12",
+      "text": "Each title has two kinds of effect. The top lines (equipStatList in the official data) work only while the title is set as an equipped effect, one per category. The bottom line (statList) is always on once the title is owned. The title the Daeva shows (profile.titleName) is cosmetic.",
+      "parts": [
+        {
+          "id": "equip-effect",
+          "status": "confirmed",
+          "text": "Equip effect: works only while the title is set as the equipped effect for its category."
+        },
+        {
+          "id": "owned-effect",
+          "status": "confirmed",
+          "text": "Always on once owned."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-12",
+          "gameVersion": "not recorded",
+          "where": "Title window",
+          "note": "Titles not set as an effect show their top lines greyed and their bottom line lit."
+        }
+      ]
     }
   ]
 }

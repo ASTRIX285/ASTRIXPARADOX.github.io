@@ -260,7 +260,7 @@ function renderStigmaScreen(plan) {
     <ul class="ae-legend-row is-centred" aria-label="Key"><li><span class="ae-lock is-key">${ICON.lock}<b>Lv 27</b></span>Grey: the slot opens when your character reaches that level</li>${now === null ? '' : '<li><span class="ae-mskill-bar">✓</span>Equipped now</li>'}</ul>
     <div class="ae-stg-lower">
       ${now === null ? '' : `<div class="ae-icon-group" id="aeStigmaNow"><p class="ae-mskills-title">Equipped now</p>${now.length
-        ? `<div class="ae-icon-row">${now.map(item => iconTile(item.name, item.icon, { badge: BADGE[item.verdict][0], tone: BADGE[item.verdict][1], attr: `data-stigma-now="${esc(item.name)}" data-verdict="${item.verdict}"`, tip: `${item.name}: ${item.verdict === 'keep' ? 'keep' : item.verdict === 'swap' ? 'a popular swap' : 'swap out'}` })).join('')}</div>
+        ? `<div class="ae-icon-row">${now.map(item => iconTile(item.name, item.icon, { badge: BADGE[item.verdict][0], tone: BADGE[item.verdict][1], level: item.level ?? null, attr: `data-stigma-now="${esc(item.name)}" data-verdict="${item.verdict}"${Number.isFinite(item.level) ? ` data-stigma-level="${esc(item.level)}"` : ''}`, tip: `${item.name}${Number.isFinite(item.level) ? `, Lv ${item.level}` : ''}: ${item.verdict === 'keep' ? 'keep' : item.verdict === 'swap' ? 'a popular swap' : 'swap out'}` })).join('')}</div>
           ${now.filter(item => item.verdict !== 'keep').map(item => `<p class="ae-stg-verdict" data-stigma-line="${esc(item.name)}">${esc(equippedLine(item))}</p>`).join('')}`
         : '<p class="ae-empty">None yet</p>'}</div>`}
       ${s.alternatives.length ? `<div class="ae-icon-group"><p class="ae-mskills-title">Swaps</p><div class="ae-icon-row">${s.alternatives.map(alt => iconTile(alt.name, alt.icon, { attr: `data-alt="${esc(alt.name)}"` })).join('')}</div></div>` : ''}
@@ -308,9 +308,9 @@ function chainHtml(plan, chains) {
 }
 
 /* Icon tiles and the info card: names show on hover (or long-press), details on click, like the game. */
-function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, big = false } = {}) {
+function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, big = false, level = null } = {}) {
   return `<span class="ae-itile${big ? ' is-big' : ''}${tone ? ` is-${tone}` : ''}" role="button" tabindex="0" data-tip="${esc(tip ?? name)}" aria-label="${esc(tip ?? name)}" ${attr}>
-    <span class="ae-itile-name">${esc(name)}</span>${art(icon)}${badge ? `<span class="ae-itile-badge">${esc(badge)}</span>` : ''}
+    <span class="ae-itile-name">${esc(name)}</span>${art(icon)}${badge ? `<span class="ae-itile-badge">${esc(badge)}</span>` : ''}${level !== null ? `<b class="ae-itile-lv" aria-hidden="true">Lv ${esc(level)}</b>` : ''}
   </span>`;
 }
 
@@ -1053,7 +1053,7 @@ function wireForm() {
       const item = (state.plan.stigmas.equippedNow ?? []).find(entry => entry.name === worn.dataset.stigmaNow);
       if (!item) return;
       const status = item.verdict === 'keep' ? ['keep', 'In the build. Keep it.'] : item.verdict === 'swap' ? ['keep', 'A popular swap in this build.'] : ['need', 'Not in the build. Swap it out.'];
-      openInfo(infoCardHtml({ icon: state.plan.skillIcons[item.name] ?? item.icon, title: item.name, sub: 'Stigma · equipped now', status, lines: [item.verdict === 'keep' ? null : equippedLine(item), item.why] }), worn);
+      openInfo(infoCardHtml({ icon: state.plan.skillIcons[item.name] ?? item.icon, title: item.name, level: Number.isFinite(item.level) ? item.level : null, sub: 'Stigma · equipped now', status, lines: [item.verdict === 'keep' ? null : equippedLine(item), item.why] }), worn);
       return;
     }
     const tab = event.target.closest('[data-board-tab]');

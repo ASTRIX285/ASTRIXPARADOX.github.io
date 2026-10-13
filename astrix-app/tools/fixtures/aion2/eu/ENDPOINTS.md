@@ -132,3 +132,33 @@ Each stat row with points carries `statSecondList`: the game's own words for wha
 Might 15 gives `Attack increase +1.5%`, Time [Siel] 37 gives `Combat Speed +3.7%` and `Double Resist +3.7%`. Every effect is
 0.1% per point. A stat at 0 sends `statSecondList: null` (every row on the Lv 10 Daeva). The adapter keeps all 16 stats with
 these lines as `effects` and drops the ItemLevel row.
+
+## More character info (captured 12 Oct 2026, Lv 45)
+
+`lv45-character.json` is one `/aion2/character` response (info, equipment and meta together) for a Lv 45 Elyos
+Gladiator on Meslamtaeda, EU. Miguel opened the Worker link in Chrome and saved it with Ctrl+S; this cloud session could
+not reach the Worker. It is renamed: TESTDAEVA, a test character id, no portrait, legion TESTLEGION.
+
+| Field | What it holds | Where |
+| --- | --- | --- |
+| Legion | `profile.regionName`: the legion name; an empty string with no legion (5 Oct and 11 Oct captures) | `info.profile` |
+| Title shown | `titleName`, `titleId`, `titleGrade`: the one name the Daeva shows, cosmetic | `info.profile` |
+| Equipped effects | `title.titleList`: one entry per `equipCategory` (`Attack`, `Defense`, `Etc`), the title set there, its `equipStatList` and `statList`, and `ownedCount` / `totalCount` / `ownedPercent` for that category | `info.title` |
+| Title counts | `title.ownedCount` 59, `title.totalCount` 297 overall | `info.title` |
+| Exceed level | `exceedLevel` on every worn item, `0` on all of them here | `equipment.equipment.equipmentList[]` |
+| Gear skins | `skinList`: five skins with slot, name, grade and icon | `equipment.equipment` |
+| Wing skin | `wingSkin` (the same wings here) | `equipment.petwing` |
+| Board percent | `openPercent` per board (Nezekan 51, Zikel 48, Vaizel 24) | `info.daevanion.boardList[]` |
+| Ranking | `rankingList: null` | `info.ranking` |
+| Arcana | none worn: no slot 41 to 45 in the list | `equipment.equipment.equipmentList[]` |
+
+Title effects (confirmed in game by Miguel, 12 Oct 2026): `equipStatList` works only while the title is set as the
+equipped effect for its category; `statList` is always on once the title is owned. In the game's Title window a title not
+set as an effect shows its top lines greyed and its bottom line lit. Recorded in `data/advisor/mechanics.json`
+(`title-effects`).
+
+Counts do not agree yet: the game's Title window shows "Total Collection Status 16/95" while this capture says 59 of 297
+overall and 25 of 99, 19 of 103, 15 of 95 per category. Pages show the per-category owned of total only, never an overall
+total, until one category is checked in game.
+
+Not built, no data: ranking (null in every capture). Arcana slots show empty until a capture has one worn.

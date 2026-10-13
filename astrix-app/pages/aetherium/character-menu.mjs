@@ -73,13 +73,17 @@ function renderCards(model, ref, progression) {
   $('#aeCards').classList.toggle('is-four', $('#aeCards').children.length === 4);
 }
 
-/** The Titles card: owned of total from the data. No title list in the data, no card. */
+/**
+ * The Titles card: how many of the category effects have a title set. No title list in the data, no card. It gives no
+ * overall owned total: the data's overall count does not match the game's Total Collection Status yet (12 Oct 2026).
+ */
 function titlesCard(model, ref) {
   const titles = model.titles;
-  if (isPending(titles) || !Number.isFinite(titles.owned) || !Number.isFinite(titles.total)) return '';
+  if (isPending(titles) || !titles.categories.length) return '';
+  const set = titles.categories.filter(category => category.worn).length;
   return card({
-    view: 'titles', href: titlesUrl(ref), name: 'Titles', status: `${number(titles.owned)} of ${number(titles.total)} owned`,
-    blurb: 'Offensive, Defensive and Other', count: titles.owned, noun: 'owned', image: null
+    view: 'titles', href: titlesUrl(ref), name: 'Titles', status: `${set} of ${titles.categories.length} effects set`,
+    blurb: 'Title shown and equipped effects', count: String(set), noun: 'set', image: null
   });
 }
 
