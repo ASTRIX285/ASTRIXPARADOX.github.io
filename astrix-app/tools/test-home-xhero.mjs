@@ -116,6 +116,8 @@ try{
    assert.ok(r.slices.slice(1).every(s=>s.status!=='Playing now'),`${label}: only the lead game says Playing now`);
    if(width>1024)assert.ok(r.slices[0].box.width>r.slices[1].box.width*4,`${label}: open slice ${r.slices[0].box.width} vs ${r.slices[1].box.width}`);
    else assert.ok(r.slices[0].box.height>r.slices[1].box.height*4,`${label}: open row ${r.slices[0].box.height} vs ${r.slices[1].box.height}`);
+   const d2=r.slices.find(s=>s.game==='division2');
+   assert.ok(d2&&d2.status==='In rotation',`${label}: The Division 2 is in The Universes`);
    // Lead tool: The Aetherium first with the red button.
    assert.equal(r.tools[0].game,'aion2',`${label}: The Aetherium leads The Tools`);
    assert.deepEqual(r.tools.map(t=>t.primary),[true,false],`${label}: only the lead tool's button is red`);

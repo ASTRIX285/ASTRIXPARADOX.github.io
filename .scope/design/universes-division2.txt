@@ -1,0 +1,10 @@
+astrix-app/tools/test-home-xhero.mjs
+astrix-app/tools/test-universes-b.mjs
+css/universes.css
+img/home/battlefield.webp
+img/home/division2.webp
+img/home/warhammer40k.webp
+img/home/wukong.webp
+index.html
+js/game-presets.js
+pages/games.html
