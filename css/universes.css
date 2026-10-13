@@ -1,0 +1,104 @@
+/* ASTRIX PARADOX Universes page, in the concept B "The X" look (follows the home page, PR #494).
+   A short X header over the ASTRIX PARADOX map, then one full-width chapter per game, studio-site
+   style. The lead game follows window.ACTIVE_GAME in js/game-presets.js.
+
+   Cascade: layout rules are unlayered so the site's reset cannot beat them; the few rules that
+   compete with the astrix-brand layer's !important rules are repeated inside it at the end. */
+
+:root{
+  --ax-home-display:"acumin-pro-extra-condensed","Barlow Semi Condensed","Segoe UI",sans-serif;
+  --ax-home-label:"acumin-pro-wide","Barlow Semi Condensed","Segoe UI",sans-serif;
+}
+
+/* ---------- Header ---------- */
+#axUniHero{position:relative;isolation:isolate;overflow:hidden;min-height:520px;display:flex;align-items:center;justify-content:center;background:var(--ax-black)}
+#axUniHero .ax-uh-map{position:absolute;inset:0;z-index:-4;background:var(--forge-paradox-map-art) center/cover no-repeat}
+#axUniHero .ax-uh-pool{position:absolute;inset:0;z-index:-3;pointer-events:none;
+  background:radial-gradient(ellipse 760px 260px at 50% 56%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,.7) 75%,rgba(14,12,9,0) 100%)}
+#axUniHero .ax-uh-scene{position:absolute;inset:0;z-index:-2;width:100%;height:100%}
+#axUniHero .slab-top{stop-color:var(--ax-raised)}
+#axUniHero .slab-bottom{stop-color:var(--ax-black)}
+#axUniHero .ax-uh-edge{fill:none;stroke:var(--ax-ember-hi);stroke-width:1.5;opacity:.14;
+  filter:drop-shadow(0 0 4px rgba(230,57,31,.8));animation:ax-uni-strobe 5.2s linear infinite}
+#axUniHero .ax-uh-streak{fill:none;stroke:var(--ax-stroke-hi-primary);stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:80 920;filter:drop-shadow(0 0 4px rgba(230,57,31,.95));animation:ax-uni-run 3.4s linear infinite}
+#axUniHero .ax-uh-d1{animation-delay:-2.6s}
+#axUniHero .ax-uh-d2{animation-delay:-1.3s}
+#axUniHero .ax-uh-d3{animation-delay:-3.9s}
+#axUniHero .ax-uh-inner{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:calc(68px + 40px) 16px 56px}
+#axUniHero h1.ax-uh-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(56px,8vw,120px);line-height:.9;
+  letter-spacing:.005em;text-transform:uppercase;color:#f4f4f2;text-shadow:none}
+#axUniHero h1.ax-uh-title .accent{color:var(--ax-ember-hi);text-shadow:0 0 18px rgba(230,57,31,.5)}
+#axUniHero p.ax-uh-line{margin:0;max-width:46ch;font:400 clamp(17px,1.4vw,20px)/1.55 var(--ax-font-body);color:#dcdcda}
+#axUniHero .ax-uh-inner{animation:ax-uni-rise .45s cubic-bezier(.23,1,.32,1) both}
+
+/* ---------- Chapters: one full-width band per game ---------- */
+#axUniList{display:flex;flex-direction:column;gap:8px;padding:8px 0 0}
+#axUniList .ax-ch{position:relative;height:clamp(420px,36vw,520px);overflow:hidden;background:var(--ax-panel)}
+#axUniList .ax-ch-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.23,1,.32,1)}
+#axUniList .ax-ch::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.6) 38%,rgba(14,12,9,0) 70%)}
+#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(270deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.6) 38%,rgba(14,12,9,0) 70%)}
+#axUniList .ax-ch-body{position:absolute;z-index:2;left:clamp(16px,6vw,96px);bottom:clamp(32px,4vw,64px);display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:min(640px,88%)}
+#axUniList .ax-ch:nth-child(even) .ax-ch-body{left:auto;right:clamp(16px,6vw,96px);align-items:flex-end;text-align:right}
+#axUniList p.ax-ch-status{margin:0;font:400 13px/1 var(--ax-home-label);letter-spacing:.22em;text-transform:uppercase;color:var(--ax-muted);text-shadow:0 1px 8px rgba(14,12,9,.9)}
+#axUniList p.ax-ch-status:empty{display:none}
+#axUniList p.ax-ch-status.is-live{color:var(--ax-ember-hi)}
+#axUniList h2.ax-ch-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(48px,5.4vw,84px);line-height:.92;
+  letter-spacing:.005em;text-transform:uppercase;color:#ffffff;text-wrap:balance}
+#axUniList p.ax-ch-line{margin:0;max-width:44ch;font:400 18px/1.5 var(--ax-font-body);color:#c9c9c8}
+#axUniList .ax-ch-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+#axUniList .ax-ch:nth-child(even) .ax-ch-cta{justify-content:flex-end}
+/* The lead game wears the strobe stroke: left and bottom edges, brightest bottom-left, with a pulse. */
+#axUniList .ax-ch.is-lead::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/100% 1.5px no-repeat,
+    linear-gradient(0deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/1.5px 100% no-repeat;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow));animation:ax-uni-pulse 2.8s ease-in-out infinite}
+@media (hover:hover) and (pointer:fine){
+  #axUniList .ax-ch:hover .ax-ch-art{transform:scale(1.03)}
+}
+
+/* ---------- Trailer modal ---------- */
+.trailer-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,12,9,.94);align-items:center;justify-content:center}
+.trailer-modal.open{display:flex}
+.trailer-modal-inner{position:relative;width:min(90vw,1000px)}
+.trailer-modal-close{position:absolute;top:-52px;right:0;min-height:44px;padding:0 18px;cursor:pointer}
+.trailer-frame{position:relative;padding-top:56.25%;background:var(--ax-black)}
+.trailer-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.trailer-modal-label{margin-top:14px;text-align:center;font:400 13px/1 var(--ax-home-label);letter-spacing:.2em;text-transform:uppercase;color:var(--ax-muted)}
+
+/* ---------- Phone ---------- */
+@media (max-width:768px){
+  #axUniHero{min-height:420px}
+  #axUniHero .ax-uh-pool{background:radial-gradient(ellipse 260px 200px at 50% 58%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,0) 100%),
+    linear-gradient(180deg,rgba(14,12,9,0) 40%,rgb(14,12,9) 48%,rgb(14,12,9) 58%,rgba(14,12,9,0) 66%)}
+  #axUniList .ax-ch{height:460px}
+  #axUniList .ax-ch::after,#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(0deg,rgba(14,12,9,.97) 0%,rgba(14,12,9,.7) 45%,rgba(14,12,9,.1) 100%)}
+  #axUniList .ax-ch-body,#axUniList .ax-ch:nth-child(even) .ax-ch-body{left:16px;right:16px;bottom:24px;align-items:flex-start;text-align:left}
+  #axUniList .ax-ch:nth-child(even) .ax-ch-cta{justify-content:flex-start}
+  #axUniList p.ax-ch-line{font-size:16px}
+  #axUniList .ax-ch-cta{flex-direction:column;align-self:stretch}
+  #axUniList .ax-ch-cta>*{justify-content:center}
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  #axUniHero .ax-uh-inner{animation:none}
+  #axUniHero .ax-uh-edge{animation:none;opacity:.6}
+  #axUniHero .ax-uh-streak{display:none}
+  #axUniList .ax-ch.is-lead::before{animation:none}
+  #axUniList .ax-ch-art{transition:none}
+}
+
+@layer astrix-brand{
+  body.ax-brand.ax-map>section#axUniHero{background:var(--ax-black)!important;padding:0!important;margin:0!important;border:0!important}
+  body.ax-brand.ax-map>section#axUniList{background:transparent!important;padding:8px 0 0!important}
+  body.ax-brand #axUniHero h1.ax-uh-title,body.ax-brand #axUniList h2.ax-ch-title{font-family:var(--ax-home-display)!important;letter-spacing:.005em!important}
+  body.ax-brand #axUniList :is(.btn-primary,.btn-secondary):active,
+  body.ax-brand .trailer-modal-close:active{transform:scale(.97)!important}
+}
+
+@keyframes ax-uni-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ax-uni-strobe{0%,100%{opacity:.14}3%{opacity:.95}5%{opacity:.2}8%{opacity:.95}12%{opacity:.14}}
+@keyframes ax-uni-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
+@keyframes ax-uni-pulse{0%,100%{opacity:.55}50%{opacity:1}}
