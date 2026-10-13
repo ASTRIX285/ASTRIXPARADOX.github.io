@@ -34,7 +34,7 @@
 
 /* ---------- Chapters: one full-width band per game ---------- */
 #axUniList{display:flex;flex-direction:column;gap:8px;padding:8px 0 0}
-#axUniList .ax-ch{position:relative;height:clamp(420px,36vw,520px);overflow:hidden;background:var(--ax-panel)}
+#axUniList .ax-ch{position:relative;height:clamp(420px,40vw,720px);overflow:hidden;background:var(--ax-panel)}
 #axUniList .ax-ch-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.23,1,.32,1)}
 #axUniList .ax-ch::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(90deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.6) 38%,rgba(14,12,9,0) 70%)}
@@ -54,6 +54,11 @@
   background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/100% 1.5px no-repeat,
     linear-gradient(0deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/1.5px 100% no-repeat;
   filter:drop-shadow(0 0 2px var(--ax-stroke-glow));animation:ax-uni-pulse 2.8s ease-in-out infinite}
+/* Art whose composition does not survive a very wide crop: show the whole image on the far side
+   and fade it into the dark, so the text, the baked logo and the character each keep their space. */
+#axUniList .ax-ch--inset .ax-ch-art{left:auto;right:0;width:min(100%,calc(var(--ax-ch-h,720px) * 16 / 9));
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%);mask-image:linear-gradient(90deg,transparent 0%,#000 28%)}
+#axUniList .ax-ch--inset{--ax-ch-h:clamp(420px,40vw,720px)}
 @media (hover:hover) and (pointer:fine){
   #axUniList .ax-ch:hover .ax-ch-art{transform:scale(1.03)}
 }
@@ -73,6 +78,7 @@
   #axUniHero .ax-uh-pool{background:radial-gradient(ellipse 260px 200px at 50% 58%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,0) 100%),
     linear-gradient(180deg,rgba(14,12,9,0) 40%,rgb(14,12,9) 48%,rgb(14,12,9) 58%,rgba(14,12,9,0) 66%)}
   #axUniList .ax-ch{height:460px}
+  #axUniList .ax-ch--inset .ax-ch-art{width:100%;-webkit-mask-image:none;mask-image:none}
   #axUniList .ax-ch::after,#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(0deg,rgba(14,12,9,.97) 0%,rgba(14,12,9,.7) 45%,rgba(14,12,9,.1) 100%)}
   #axUniList .ax-ch-body,#axUniList .ax-ch:nth-child(even) .ax-ch-body{left:16px;right:16px;bottom:24px;align-items:flex-start;text-align:left}
   #axUniList .ax-ch:nth-child(even) .ax-ch-cta{justify-content:flex-start}
