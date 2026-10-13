@@ -1124,11 +1124,13 @@ await check('home page and The Hub lead to The Aetherium, with the new words',as
   await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.fulfill({status:204,body:''}));
   const page=await context.newPage();
   await page.goto(`${base}/`);
-  assert.deepEqual(await page.$$eval('.hero-body a[href="/hub/aetherium/"]',links=>links.map(a=>a.textContent.trim())),['The Aetherium'],'The hero tool row names The Aetherium');
-  assert.match(await page.$eval('.hero-body',el=>el.textContent),/Destiny 2 build tools/,'The Destiny copy stays');
-  assert.match(await page.$eval('.hero-body',el=>el.textContent),/AION 2/);
-  assert.equal(await page.$eval('.hero-tags a[href="/hub/aetherium/"]',el=>el.textContent.trim()),'AION 2','AION 2 among the hero tags');
-  assert.ok((await page.$$('a[href="/hub/aetherium/"]')).length>=3,'Hero row, hero tags and the universes list all lead in');
+  // Home page concept B (design/home-hero-identity): AION 2 leads The Universes and The Aetherium leads The Tools.
+  assert.equal(await page.$eval('#axUniRow .ax-slice',el=>el.dataset.game),'aion2','AION 2 leads The Universes');
+  assert.equal(await page.$eval('#axUniRow .ax-slice a[href="/hub/aetherium/"]',el=>el.textContent.trim()),'Enter The Aetherium','The AION 2 slice leads in');
+  assert.equal(await page.$eval('#axToolsSplit .ax-tool',el=>el.getAttribute('href')),'/hub/aetherium/','The Aetherium leads The Tools');
+  assert.match(await page.$eval('#axToolsSplit .ax-tool .ax-tool-name',el=>el.textContent),/THE AETHERIUM/);
+  assert.match(await page.$eval('#axTools',el=>el.textContent),/Destiny 2 build tools/,'The Destiny copy stays');
+  assert.ok((await page.$$('a[href="/hub/aetherium/"]')).length>=2,'The universes slice and the tools panel both lead in');
   assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/[–—]/,'No dashes');
   await page.goto(`${base}/hub/`);
   const card=await page.$eval('#hubCards .platform-card',el=>({name:el.querySelector('h2').textContent,copy:el.querySelector('p').textContent,button:el.querySelector('.btn-primary').textContent.trim(),href:el.querySelector('.btn-primary').getAttribute('href')}));

@@ -1,0 +1,12 @@
+index.html
+css/home-xhero.css
+astrix-app/tools/test-aetherium-pages.mjs
+astrix-app/tools/test-home-xhero.mjs
+js/game-presets.js
+img/home/aion2.webp
+img/home/destiny2.webp
+img/home/warframe.webp
+img/home/borderlands4.webp
+img/home/crimsondesert.webp
+img/home/spacemarine2.webp
+img/home/godofwar.webp
