@@ -56,6 +56,25 @@ window.GAME_PRESETS = {
     studio: "BUNGIE"
   },
 
+  division2: {
+    heroName: "The Division 2",
+    eyebrow: "Active Universe",
+    nameWhite: "The Division",
+    nameAccent: "2",
+    paragraphs: [
+      "Ubisoft and Massive Entertainment's The Division 2 is in the rotation, and WorkBench is the tool coming for it.",
+      "A companion workspace for your agent, gear and builds, built around The Division's own systems."
+    ],
+    reviewLink: "pages/games.html",
+    reviewLabel: "See the universe",
+    watchLink: "https://twitch.tv/astrix285x",
+    watchLabel: "Watch Live",
+    image: "img/games/the-division-2-rescue-team-ksvwkrsdg1v5pg4w_edited.jpg",
+    imageAlt: "The Division 2",
+    badgeTitle: "THE DIVISION 2",
+    studio: "MASSIVE ENTERTAINMENT"
+  },
+
   crimsondesert: {
     heroName: "Crimson Desert",
     eyebrow: "Active Universe",
@@ -203,6 +222,7 @@ window.GAME_PRESETS = {
 // ============================================================
 
 window.ACTIVE_GAME = "aion2";
+// window.ACTIVE_GAME = "division2";
 // window.ACTIVE_GAME = "crimsondesert";
 // window.ACTIVE_GAME = "destiny2";
 // window.ACTIVE_GAME = "warframe";
