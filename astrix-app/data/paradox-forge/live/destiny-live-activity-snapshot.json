@@ -30,14 +30,14 @@
       "description": "Help your clan earn rewards by completing activities as a group.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_640c1c6f00fe2d7bb0cd6030c294d655.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 3000,
       "activities": [],
       "live": {
         "milestoneHash": 4253138191,
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 3000
       }
     },
@@ -47,8 +47,8 @@
       "description": "Step across the threshold of the infinite.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_0e7324ac0c8ef8f2253e0951004238af.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 7777,
       "activities": [
         {
@@ -100,8 +100,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 7777
       }
     },
@@ -111,8 +111,8 @@
       "description": "Free the Light.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_329a6f8ba06cf48f5831b92c7777b16b.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 7995,
       "activities": [
         {
@@ -144,7 +144,7 @@
             2006149364,
             4038464106,
             2626834038,
-            3196075844,
+            426976067,
             3810297122
           ],
           "modifiers": [
@@ -227,10 +227,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
               "hash": 3810297122,
@@ -329,9 +329,7 @@
         "activities": [
           {
             "activityHash": 1541433876,
-            "challengeObjectiveHashes": [
-              2243638599
-            ],
+            "challengeObjectiveHashes": [],
             "modifierHashes": [
               1783825372,
               3958417570,
@@ -353,9 +351,7 @@
           },
           {
             "activityHash": 4129614942,
-            "challengeObjectiveHashes": [
-              2243638599
-            ],
+            "challengeObjectiveHashes": [],
             "modifierHashes": [
               1783825372,
               3958417570,
@@ -370,7 +366,7 @@
               2006149364,
               4038464106,
               2626834038,
-              3196075844,
+              426976067,
               3810297122
             ],
             "phaseHashes": [
@@ -382,8 +378,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 7995
       }
     },
@@ -393,8 +389,8 @@
       "description": "He waits in the dark below.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_2c5b645accc12584f882c472deb30017.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 7998,
       "activities": [
         {
@@ -490,8 +486,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 7998
       }
     },
@@ -501,135 +497,10 @@
       "description": "Beneath Venus, evil stirs…",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_44a010ae763cd975d56c632ff72c48a1.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 8000,
       "activities": [
-        {
-          "activityHash": 3022541210,
-          "name": "Vault of Glass: Master",
-          "description": "Beneath Venus, evil stirs…",
-          "icon": "/common/destiny2_content/icons/bd7a1fc995f87be96698263bc16698e7.png",
-          "activityModeHashes": [
-            2043403989,
-            1164760493
-          ],
-          "activityModeTypes": [
-            4,
-            7
-          ],
-          "isPvP": false,
-          "recommendedLight": null,
-          "modifierHashes": [
-            4075903438,
-            3135466059,
-            274420331,
-            2814846409,
-            3212721586,
-            1572570117,
-            1783825372,
-            2833087500,
-            2650740350,
-            4087563963,
-            1990363418,
-            197794292,
-            95459596,
-            3196075844,
-            3810297122
-          ],
-          "modifiers": [
-            {
-              "hash": 4075903438,
-              "name": "Boosts Gained",
-              "description": "Initial Exotic drop rate boosts: {var:3027371367}",
-              "icon": "/common/destiny2_content/icons/e8b3345969eca43c46bfc13c0964f267.png"
-            },
-            {
-              "hash": 3135466059,
-              "name": "Wait For It…",
-              "description": "A challenge awaits…",
-              "icon": "/common/destiny2_content/icons/75155c6d06a82303493cca1f29b622b2.png"
-            },
-            {
-              "hash": 274420331,
-              "name": "The Only Oracle For You",
-              "description": "A challenge awaits…",
-              "icon": "/common/destiny2_content/icons/75155c6d06a82303493cca1f29b622b2.png"
-            },
-            {
-              "hash": 2814846409,
-              "name": "Out of Its Way",
-              "description": "A challenge awaits…",
-              "icon": "/common/destiny2_content/icons/75155c6d06a82303493cca1f29b622b2.png"
-            },
-            {
-              "hash": 3212721586,
-              "name": "Strangers in Time",
-              "description": "A challenge awaits…",
-              "icon": "/common/destiny2_content/icons/75155c6d06a82303493cca1f29b622b2.png"
-            },
-            {
-              "hash": 1572570117,
-              "name": "Ensemble's Refrain",
-              "description": "A challenge awaits…",
-              "icon": "/common/destiny2_content/icons/75155c6d06a82303493cca1f29b622b2.png"
-            },
-            {
-              "hash": 1783825372,
-              "name": "",
-              "description": "",
-              "icon": ""
-            },
-            {
-              "hash": 2833087500,
-              "name": "Shielded Foes",
-              "description": "You will face combatants with [Arc] Arc and [Void] Void shields.\n\nActivity modifiers may add more shield types.",
-              "icon": "/common/destiny2_content/icons/156f53c80f4c3e5024eb4c21aeb233e2.png"
-            },
-            {
-              "hash": 2650740350,
-              "name": "Shielded Foes",
-              "description": "[Arc] Arc and [Void] Void Shields",
-              "icon": "/common/destiny2_content/icons/156f53c80f4c3e5024eb4c21aeb233e2.png"
-            },
-            {
-              "hash": 4087563963,
-              "name": "Master Modifiers",
-              "description": "Extra Champions\nExtra Shields",
-              "icon": "/common/destiny2_content/icons/e6507058cbddfc8b72dde057674e792a.png"
-            },
-            {
-              "hash": 1990363418,
-              "name": "Champion Foes",
-              "description": "You will face [Shield-Piercing] Barrier and [Disruption] Overload Champions.\n\nVisit the Character or Mod Customization screen to view your active anti-Champion perks.",
-              "icon": "/common/destiny2_content/icons/b7963b805843bcdaf21afaed5d11d387.png"
-            },
-            {
-              "hash": 197794292,
-              "name": "Champion Foes",
-              "description": "You will face [Shield-Piercing] Barrier and [Disruption] Overload Champions.",
-              "icon": "/common/destiny2_content/icons/b7963b805843bcdaf21afaed5d11d387.png"
-            },
-            {
-              "hash": 95459596,
-              "name": "Overcharged Rocket Launcher",
-              "description": "{var:1027206613}% bonus to Rocket Launcher damage.",
-              "icon": "/common/destiny2_content/icons/dd28546b6d1b7824bcba8ab563f128b6.png"
-            },
-            {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
-            },
-            {
-              "hash": 3810297122,
-              "name": "Strand Surge",
-              "description": "{var:2189146210}% bonus to outgoing Strand damage.",
-              "icon": "/common/destiny2_content/icons/e8ab8ba72b54125d2750e943ba6c824d.png"
-            }
-          ]
-        },
         {
           "activityHash": 3881495763,
           "name": "Vault of Glass: Standard",
@@ -705,9 +576,7 @@
         "activities": [
           {
             "activityHash": 3881495763,
-            "challengeObjectiveHashes": [
-              3180884403
-            ],
+            "challengeObjectiveHashes": [],
             "modifierHashes": [
               1783825372,
               3135466059,
@@ -724,40 +593,10 @@
               3793779770,
               3793779769
             ]
-          },
-          {
-            "activityHash": 3022541210,
-            "challengeObjectiveHashes": [
-              3180884403
-            ],
-            "modifierHashes": [
-              4075903438,
-              3135466059,
-              274420331,
-              2814846409,
-              3212721586,
-              1572570117,
-              1783825372,
-              2833087500,
-              2650740350,
-              4087563963,
-              1990363418,
-              197794292,
-              95459596,
-              3196075844,
-              3810297122
-            ],
-            "phaseHashes": [
-              1327839050,
-              1327839048,
-              1327839049,
-              3793779770,
-              3793779769
-            ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 8000
       }
     },
@@ -767,8 +606,8 @@
       "description": "Long live the King…",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_58109af839b023d7bf44c7b734818e47.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 8001,
       "activities": [
         {
@@ -865,8 +704,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 8001
       }
     },
@@ -876,8 +715,8 @@
       "description": "A sinister threat has taken root.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_d3dc8747ee63f991c6a56ac7908047ba.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 8001,
       "activities": [
         {
@@ -965,8 +804,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 8001
       }
     },
@@ -976,8 +815,8 @@
       "description": "The disciple beckons…",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_bc5d4a8377955b809dbbe0fb71645e6e.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 8002,
       "activities": [
         {
@@ -1008,7 +847,7 @@
             3307318061,
             40182179,
             2626834038,
-            3196075844,
+            426976067,
             3810297122
           ],
           "modifiers": [
@@ -1085,10 +924,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
               "hash": 3810297122,
@@ -1166,7 +1005,9 @@
         "activities": [
           {
             "activityHash": 1441982566,
-            "challengeObjectiveHashes": [],
+            "challengeObjectiveHashes": [
+              1863972407
+            ],
             "modifierHashes": [
               1783825372,
               2672226122,
@@ -1184,7 +1025,9 @@
           },
           {
             "activityHash": 3889634515,
-            "challengeObjectiveHashes": [],
+            "challengeObjectiveHashes": [
+              1863972407
+            ],
             "modifierHashes": [
               1834872958,
               2672226122,
@@ -1198,7 +1041,7 @@
               3307318061,
               40182179,
               2626834038,
-              3196075844,
+              426976067,
               3810297122
             ],
             "phaseHashes": [
@@ -1209,8 +1052,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 8002
       }
     },
@@ -1220,8 +1063,8 @@
       "description": "\"The opportunity of a lifetime.\"",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_56d1f52f0cb40248a990408d7ac84bd3.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 9200,
       "activities": [
         {
@@ -1299,7 +1142,9 @@
         "activities": [
           {
             "activityHash": 2122313384,
-            "challengeObjectiveHashes": [],
+            "challengeObjectiveHashes": [
+              897950155
+            ],
             "modifierHashes": [
               1783825372,
               2834033523,
@@ -1318,8 +1163,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 9200
       }
     },
@@ -1329,8 +1174,8 @@
       "description": "The chains of legacy must be broken.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_427561ad3d02d80a76a9cce7802c1323.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 9300,
       "activities": [
         {
@@ -1418,8 +1263,8 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 9300
       }
     },
@@ -1429,8 +1274,8 @@
       "description": "Defeat the Sanctified Mind.",
       "icon": "/common/destiny2_content/icons/DestinyMilestoneDefinition_eb9f4e265e29cb5e50559b6bf814a9c9.png",
       "isInGameMilestone": false,
-      "startDate": "2026-10-06T17:00:00Z",
-      "endDate": "2026-10-13T17:00:00Z",
+      "startDate": "2026-10-13T17:00:00Z",
+      "endDate": "2026-10-20T17:00:00Z",
       "order": 9300,
       "activities": [
         {
@@ -1510,11 +1355,11 @@
             ]
           }
         ],
-        "startDate": "2026-10-06T17:00:00Z",
-        "endDate": "2026-10-13T17:00:00Z",
+        "startDate": "2026-10-13T17:00:00Z",
+        "endDate": "2026-10-20T17:00:00Z",
         "order": 9300
       }
     }
   ],
-  "generatedAt": "2026-10-06T21:43:22Z"
+  "generatedAt": "2026-10-13T21:53:28Z"
 }
