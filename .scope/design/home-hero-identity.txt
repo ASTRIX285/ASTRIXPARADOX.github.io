@@ -10,3 +10,4 @@ img/home/borderlands4.webp
 img/home/crimsondesert.webp
 img/home/spacemarine2.webp
 img/home/godofwar.webp
+img/home/division2.webp
