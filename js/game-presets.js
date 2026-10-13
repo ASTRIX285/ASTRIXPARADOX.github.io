@@ -2,9 +2,11 @@
 // GAME PRESETS: ASTRIX PARADOX
 //
 // HOW TO SWITCH WHAT'S "CURRENTLY PLAYING" ON THE HOME PAGE:
+// (this one line sets the lead game in The Universes and the lead
+// tool in The Tools, so whatever you are playing comes first)
 // Scroll to the very bottom of this file and change ONE line:
 //
-//     window.ACTIVE_GAME = "destiny2";
+//     // window.ACTIVE_GAME = "destiny2";
 //
 // ...to any key defined below (e.g. "crimsondesert", "warframe").
 // Commit the file. Nothing else needs to change.
@@ -15,6 +17,25 @@
 // ============================================================
 
 window.GAME_PRESETS = {
+
+  aion2: {
+    heroName: "AION 2",
+    eyebrow: "Active Universe",
+    nameWhite: "AION",
+    nameAccent: "2",
+    paragraphs: [
+      "NCSOFT's AION 2 is the game I am playing right now, and The Aetherium is the tool I built for it.",
+      "Search any AION 2 character in five regions. See their gear, skills and Daevanion boards, and what to do next for their level."
+    ],
+    reviewLink: "/hub/aetherium/",
+    reviewLabel: "Enter The Aetherium",
+    watchLink: "https://twitch.tv/astrix285x",
+    watchLabel: "Watch Live",
+    image: "img/games/aion2-the-aetherium.jpg",
+    imageAlt: "AION 2",
+    badgeTitle: "AION 2",
+    studio: "NCSOFT"
+  },
 
   destiny2: {
     heroName: "Destiny 2",
@@ -124,7 +145,7 @@ window.GAME_PRESETS = {
     reviewLabel: "Read the Review",
     watchLink: "https://twitch.tv/astrix285x",
     watchLabel: "Watch Live",
-    image: "img/games/blackmythwukong.jpg",
+    image: "img/games/black-myth-wukong.png",
     imageAlt: "Black Myth: Wukong",
     badgeTitle: "BLACK MYTH: WUKONG",
     studio: "GAME SCIENCE"
@@ -162,7 +183,7 @@ window.GAME_PRESETS = {
     reviewLabel: "Read the Review",
     watchLink: "https://twitch.tv/astrix285x",
     watchLabel: "Watch Live",
-    image: "img/games/godofwar.jpg",
+    image: "img/games/god-of-war.jpg",
     imageAlt: "God of War",
     badgeTitle: "GOD OF WAR",
     studio: "SANTA MONICA STUDIO"
@@ -181,8 +202,9 @@ window.GAME_PRESETS = {
 // whichever one is left "un-commented" wins.
 // ============================================================
 
+window.ACTIVE_GAME = "aion2";
 // window.ACTIVE_GAME = "crimsondesert";
-window.ACTIVE_GAME = "destiny2";
+// window.ACTIVE_GAME = "destiny2";
 // window.ACTIVE_GAME = "warframe";
 // window.ACTIVE_GAME = "borderlands4";
 // window.ACTIVE_GAME = "pathofexile";
