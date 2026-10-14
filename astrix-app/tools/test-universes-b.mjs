@@ -20,6 +20,8 @@ assert.doesNotMatch(html+css,/[–—]/,'No dashes');
 assert.doesNotMatch(html,/The Forge|guardian-alpha|tools-section/,'Universes stays separate from the Tools catalogue');
 assert.ok(html.includes('Gaming <span class="accent">Universes</span>'),'Universes keeps its own purpose');
 assert.doesNotMatch(html,/class="reveal|game-card|section-eyebrow|onclick=/,'No template cards, eyebrows, scroll reveals or inline handlers');
+for(const m of html.matchAll(/<img class="ax-ch-art"[^>]*>/g))assert.match(m[0],/style="object-position: 50% \d+%"/,'Every chapter image has its own crop so baked logos stay whole');
+assert.match(html,/data-game="crimsondesert">[\s\S]*?Reviewed 9\.0\/10/,'Crimson Desert shows its review score');
 
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'};
 const server=createServer(async(req,res)=>{
@@ -77,6 +79,7 @@ try{
    assert.ok(r.chapters.slice(1).every(c=>!c.lead&&c.status!=='Playing now'),`${label}: only the lead game says Playing now`);
    assert.match(r.chapters[0].firstCta,/btn-primary/,`${label}: the lead game's action is red`);
    assert.ok(r.chapters.slice(1).every(c=>!/btn-primary/.test(c.firstCta)),`${label}: every other action stays secondary`);
+   if(width>=1600)assert.ok(r.chapters.every(c=>c.box.height>=600&&c.box.height<=720),`${label}: bands tall enough to show the art (${r.chapters.map(c=>Math.round(c.box.height))})`);
    for(const c of r.chapters){
     assert.ok(c.box.width>=width-1,`${label}: ${c.game} runs full width`);
     assert.ok(c.body.left>=c.box.left+15&&c.body.right<=c.box.right-15&&c.body.top>=c.box.top&&c.body.bottom<=c.box.bottom,`${label}: ${c.game} text sits inside its chapter`);
