@@ -95,16 +95,30 @@
     .trailer-modal-inner { position:relative; width:90vw; max-width:1000px; }
     .trailer-modal-close {
       position:absolute; top:-40px; right:0;
-      font-family:'bahnschrift-semicondensed',monospace; font-size:11px; letter-spacing:2px;
+      font-family:'bahnschrift-semicondensed',monospace; font-size:.8125rem; letter-spacing:2px;
       color:var(--grey); background:none; border:none; cursor:pointer; text-transform:uppercase;
     }
     .trailer-modal-close:hover { color:var(--white); }
     .trailer-frame { position:relative; padding-top:56.25%; background:#000; }
     .trailer-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
     .trailer-modal-label {
-      font-family:'bahnschrift-semicondensed',monospace; font-size:11px; letter-spacing:2px;
+      font-family:'bahnschrift-semicondensed',monospace; font-size:.8125rem; letter-spacing:2px;
       color:var(--grey); text-align:center; margin-top:14px; text-transform:uppercase;
     }
+
+    /* Readable at 100% zoom (Miguel, 13 Oct 2026): body text 17 to 18px, labels 13px, sizes in rem. */
+    .review-title { font-family: "acumin-pro-extra-condensed","Barlow Semi Condensed",sans-serif; font-size: 2rem; line-height: 1; letter-spacing: .01em; text-transform: uppercase; margin-bottom: 12px; }
+    .review-tag { font-size: .8125rem; letter-spacing: .14em; color: var(--grey); padding: 5px 12px; }
+    .review-intro { font-size: 1.125rem; line-height: 1.7; color: #c9c9c8; max-width: 68ch; }
+    .review-section-title, .featured-banner { font-size: .8125rem; letter-spacing: .2em; }
+    .review-section-text { font-size: 1.0625rem; line-height: 1.7; color: #c9c9c8; }
+    .review-section-text strong { font-size: 1.0625rem; }
+    .review-score { width: 76px; height: 76px; font-size: 1.5rem; }
+    .review-header-body { padding: 36px 40px; }
+    .review-body { padding: 0 40px 36px; gap: 40px; }
+    .review-final { padding: 0 40px 28px; }
+    .review-final .review-section-text { max-width: 80ch; }
+    .review-actions { padding: 0 40px 40px; }
     @media (max-width: 768px) {
       .reviews-hero { padding: calc(var(--nav-height) + 40px) 20px 40px; }
       .review-card-header { grid-template-columns: 1fr; }
@@ -113,8 +127,14 @@
       .review-body { grid-template-columns: 1fr; padding: 0 20px 20px; }
       .review-final { padding: 0 20px 16px; }
       .review-actions { padding: 0 20px 20px; }
-      .review-title { font-size: 16px; }
-      .review-score { width: 52px; height: 52px; font-size: 15px; }
+      .review-title { font-size: 1.625rem; }
+      .review-score { width: 60px; height: 60px; font-size: 1.25rem; }
+      .review-intro { font-size: 1.0625rem; }
+      .review-section-text, .review-section-text strong { font-size: 1rem; }
+      .review-header-body { padding: 24px 16px; }
+      .review-body { padding: 0 16px 24px; gap: 24px; }
+      .review-final { padding: 0 16px 20px; }
+      .review-actions { padding: 0 16px 24px; }
     }
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
@@ -183,6 +203,7 @@
 </div>
 
 <script src="../js/main.js?v=20261005-source-quality-1"></script>
+<script src="../js/game-presets.js"></script>
 <script src="../js/reviews-data.js"></script>
 <script>
 function buildHighLows(items, type) {
@@ -192,12 +213,14 @@ function buildHighLows(items, type) {
 }
 
 function buildReviewCard(review, index) {
-  var delayClass = index === 0 ? '' : index === 1 ? ' reveal-delay-1' : ' reveal-delay-2';
-  var featuredBanner = review.featured ? '<div class="featured-banner">★ Currently Playing</div>' : '';
-  var borderStyle = review.featured ? 'style="border-color:rgba(139,0,0,0.5);"' : '';
+  // Playing now follows the one line in js/game-presets.js (window.ACTIVE_GAME), not a flag in the review data.
+  var active = window.GAME_PRESETS && window.GAME_PRESETS[window.ACTIVE_GAME];
+  var playing = !!active && active.heroName === review.title;
+  var featuredBanner = playing ? '<div class="featured-banner">Playing now</div>' : '';
+  var borderStyle = playing ? 'style="border-color:rgba(139,0,0,0.5);"' : '';
   var tags = review.tags.map(function(t) { return '<span class="review-tag">' + t + '</span>'; }).join('');
 
-  return '<div class="review-card reveal' + delayClass + '" ' + borderStyle + '>' +
+  return '<div class="review-card" ' + borderStyle + '>' +
     '<div class="review-card-header">' +
       '<div class="review-img"><img src="' + review.image + '" alt="' + review.title + '"></div>' +
       '<div class="review-header-body">' +
@@ -227,8 +250,8 @@ function buildReviewCard(review, index) {
       '<p class="review-section-text">' + review.finalThoughts + '</p>' +
     '</div>' +
     '<div class="review-actions">' +
-      '<button class="btn-primary" style="padding:10px 24px;font-size:11px;" onclick="openTrailer(\'' + review.trailerId + '\',\'' + review.title + ': Official Trailer\')">▶ Watch Trailer</button>' +
-      '<a href="' + review.studioLink + '" target="_blank" class="btn-secondary" style="padding:10px 24px;font-size:11px;">Visit Game ↗</a>' +
+      '<button class="btn-primary" onclick="openTrailer(\'' + review.trailerId + '\',\'' + review.title + ': Official Trailer\')">▶ Watch Trailer</button>' +
+      '<a href="' + review.studioLink + '" target="_blank" class="btn-secondary">Visit Game ↗</a>' +
     '</div>' +
   '</div>';
 }
@@ -239,8 +262,6 @@ REVIEWS_DATA.forEach(function(review, index) {
   container.innerHTML += buildReviewCard(review, index);
 });
 
-// Re-run scroll reveal on dynamically added cards
-if (typeof setupReveal === 'function') setupReveal();
 
 function openTrailer(id, title) {
   document.getElementById('trailerFrame').src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
