@@ -75,7 +75,8 @@ Read this file at the start of every session. It survives chat compaction. The c
 - Load only what the page needs. No full manifest or data files for features not on screen.
 
 ## Tool entry and navigation rule
-- Show the portal loader only on a fresh navigation from the public entry, The Hub (/hub/, formerly /tools/). Never show its ring or breach skin on internal tool transfers, reloads, history traversal or direct links.
+- Show the portal loader only on a fresh navigation from the public entry, The Hub (/hub/, formerly /tools/). Never show its ring, its wordmark or its loading bar on internal tool transfers, reloads, history traversal or direct links.
+- Internal tool transfers show the transfer cover instead (Miguel, 14 Oct 2026): the ASTRIX X slabs over the map art with the strobe on their lit edges, and the stage label in the notched tab on the bottom edge. It lives in `astrix-portal-loader.css` (`html.apx-transfer`). Reduced motion and a failed transfer get the same X, still.
 - Retain the outgoing page until the selected destination has fully rendered and reported readiness. Never show a half-built page. Reveal immediately when ready; 3 to 4 seconds is the maximum target, never an artificial delay.
 - A failed transfer exposes recovery actions without a loader animation. Preserve authentication and retry controls.
 
