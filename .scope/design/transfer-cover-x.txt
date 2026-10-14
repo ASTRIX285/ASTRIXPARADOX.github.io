@@ -1,0 +1,17 @@
+CLAUDE.md
+DESIGN.md
+astrix-app/components/guardian-workspace/guardian-workspace.html
+astrix-app/index.html
+astrix-app/pages/build-fit/index.html
+astrix-app/pages/build-review/index.html
+astrix-app/pages/forge-loader/index.html
+astrix-app/pages/forge-loader/results/index.html
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/home/index.html
+astrix-app/pages/journey/index.html
+astrix-app/pages/loadout/index.html
+astrix-app/pages/reports/index.html
+astrix-app/pages/vault/index.html
+astrix-app/shared/astrix-portal-loader.css
+astrix-app/tools/test-transfer-cover.mjs
