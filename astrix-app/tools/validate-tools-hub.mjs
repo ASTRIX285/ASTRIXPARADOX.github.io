@@ -59,15 +59,18 @@ assert.ok(tools.includes('href="tools.css?v=20260830-mission-popup&amp;hub=20261
 assert.ok(tools.includes('<title>The Hub | ASTRIX PARADOX</title>')&&tools.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'The Hub title and canonical');
 const redirect=read('tools/index.html');
 assert.ok(redirect.includes("location.replace('/hub/'+location.search+location.hash)")&&redirect.includes('content="0; url=/hub/"')&&redirect.includes('<link rel="canonical" href="https://astrixparadox.com/hub/">'),'/tools/ redirects to /hub/ keeping the query and hash');
-assert.ok(tools.includes('Tools for the games we play'),'Tools page must explain the multi-game purpose');
+// The Hub header is the shared concept B X header (css/page-xheader.css, Oct 2026): one headline, the purpose copy and both actions.
+const hubHero=tools.slice(tools.indexOf('<section class="ax-ph" id="axPageHero"'),tools.indexOf('</section>',tools.indexOf('id="axPageHero"')));
+assert.ok(hubHero.includes('Better tools.<br><span class="accent">Built for each game.</span>'),'The Hub header names what the tools are for');
+assert.ok(tools.includes('href="../css/page-xheader.css?v='),'The Hub loads the shared X header styles');
 assert.doesNotMatch(tools,/astrix-desktop-density\.css/,'Public Tools page must remain at native scale on large monitors');
-assert.equal((tools.match(/<section class="tools-hero">/g)??[]).length,1,'Tools introduction must use one hero section');
+assert.equal((tools.match(/id="axPageHero"/g)??[]).length,1,'Tools introduction must use one hero section');
+assert.doesNotMatch(tools,/class="tools-hero"|section-eyebrow">Tools for the games|Useful information\./,'The old two-column header stays retired');
 assert.doesNotMatch(tools,/<section class="tools-principles"/,'Tools purpose must not be split into a second section');
-assert.ok(tools.indexOf('Better tools.')<tools.indexOf('Useful information.'),'Tools purpose must be presented inside the combined introduction');
-assert.ok(tools.includes('ASTRIX PARADOX builds focused companion tools'),'Tools introduction must use the approved concise purpose copy');
-assert.ok(tools.includes('class="tools-intro-summary"'),'Tools introduction must use one concise summary block');
+assert.ok(hubHero.includes('ASTRIX PARADOX builds focused companion tools'),'Tools introduction must use the approved concise purpose copy');
 assert.doesNotMatch(tools,/principle-grid|<article class="principle /,'Separate principle cards must remain removed');
-assert.ok(tools.indexOf('class="tools-actions"')>tools.indexOf('class="tools-intro-summary"'),'Tools actions must follow the complete introduction');
+assert.ok(hubHero.indexOf('class="ax-ph-actions"')>hubHero.indexOf('ASTRIX PARADOX builds focused companion tools'),'Tools actions must follow the complete introduction');
+assert.ok(hubHero.includes('class="btn-primary tools-mission-trigger"')&&hubHero.includes('href="../pages/games.html">Browse universes</a>'),'Both header actions sit in the header');
 assert.ok(tools.includes('class="btn-primary tools-mission-trigger"'),'Primary Tools action must open the ASTRIX PARADOX mission');
 assert.ok(tools.includes('aria-controls="toolsMissionDialog"'),'Mission trigger must identify its dialog');
 assert.ok(tools.includes('id="toolsMissionDialog" role="dialog" aria-modal="true"'),'Mission message must be exposed as a modal dialog');
