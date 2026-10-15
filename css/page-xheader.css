@@ -38,7 +38,8 @@
   padding:calc(68px + 44px) 16px 60px}
 #axPageHero h1.ax-ph-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(52px,7.4vw,112px);line-height:.92;
   letter-spacing:.005em;text-transform:uppercase;color:#f4f4f2;text-shadow:none;text-wrap:balance}
-#axPageHero h1.ax-ph-title .accent{color:var(--ax-ember-hi);text-shadow:0 0 18px rgba(230,57,31,.5)}
+/* inline-block so a second line that wraps on a phone is balanced on its own, never a one-word orphan */
+#axPageHero h1.ax-ph-title .accent{display:inline-block;color:var(--ax-ember-hi);text-shadow:0 0 18px rgba(230,57,31,.5)}
 #axPageHero p.ax-ph-line{margin:0;max-width:52ch;font:400 clamp(17px,1.4vw,20px)/1.55 var(--ax-font-body);color:#dcdcda}
 #axPageHero .ax-ph-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:6px}
 
