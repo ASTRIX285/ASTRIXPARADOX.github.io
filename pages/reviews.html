@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="../css/style.css?v=20261005-stream-fit-1">
+  <link rel="stylesheet" href="../css/page-xheader.css?v=20261015-xheader-1">
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
@@ -21,15 +22,6 @@
   <link rel="icon" href="../img/favicon/favicon.ico">
 
   <style>
-    .reviews-hero {
-      padding: calc(var(--nav-height) + 60px) 40px 60px;
-      background: var(--dark-2); border-bottom: 1px solid rgba(139,0,0,0.2);
-      position: relative; overflow: hidden;
-    }
-    .reviews-hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 0% 50%, rgba(139,0,0,0.15) 0%, transparent 60%);
-    }
     .review-card {
       background: var(--dark-2); border: 1px solid rgba(139,0,0,0.2);
       margin-bottom: 2px; overflow: hidden;
@@ -120,7 +112,6 @@
     .review-final .review-section-text { max-width: 80ch; }
     .review-actions { padding: 0 40px 40px; }
     @media (max-width: 768px) {
-      .reviews-hero { padding: calc(var(--nav-height) + 40px) 20px 40px; }
       .review-card-header { grid-template-columns: 1fr; }
       .review-img { min-height: 180px; }
       .review-header-body { padding: 20px; }
@@ -164,17 +155,44 @@
   </div>
 </nav>
 
-<div class="reviews-hero">
-  <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
-    <div class="section-eyebrow" style="animation:fadeUp 0.8s ease 0.2s both;">Game Reviews</div>
-    <h1 class="section-title" style="animation:fadeUp 0.8s ease 0.4s both;">Honest Takes.<br><span class="accent">No Fluff.</span></h1>
-    <p style="color:var(--grey);max-width:500px;margin-top:16px;animation:fadeUp 0.8s ease 0.6s both;">
-      Real reviews from someone who actually plays. No sponsored content, no corporate spin. Just gameplay, honest reactions, and community.
-    </p>
+<section class="ax-ph" id="axPageHero" aria-labelledby="axPageTitle">
+  <div class="ax-ph-map" aria-hidden="true"></div>
+  <div class="ax-ph-pool" aria-hidden="true"></div>
+  <svg class="ax-ph-scene ax-ph-scene--wide" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="axPhSlabWide" x1="0" y1="0" x2="0" y2="1"><stop class="slab-top" offset="0"/><stop class="slab-bottom" offset="1"/></linearGradient></defs>
+    <polygon points="-80,740 90,740 520,310 350,310" fill="url(#axPhSlabWide)" opacity=".8"/>
+    <polygon points="1360,740 1190,740 760,310 930,310" fill="url(#axPhSlabWide)" opacity=".8"/>
+    <polygon points="-80,-20 90,-20 700,590 530,590" fill="url(#axPhSlabWide)"/>
+    <polygon points="1360,-20 1190,-20 580,590 750,590" fill="url(#axPhSlabWide)"/>
+    <line class="ax-ph-edge ax-ph-d0" x1="90" y1="-20" x2="700" y2="590"/>
+    <line class="ax-ph-streak ax-ph-d0" pathLength="1000" x1="700" y1="590" x2="90" y2="-20"/>
+    <line class="ax-ph-edge ax-ph-d1" x1="1190" y1="-20" x2="580" y2="590"/>
+    <line class="ax-ph-streak ax-ph-d1" pathLength="1000" x1="580" y1="590" x2="1190" y2="-20"/>
+    <line class="ax-ph-edge ax-ph-d2" x1="90" y1="740" x2="520" y2="310"/>
+    <line class="ax-ph-streak ax-ph-d2" pathLength="1000" x1="90" y1="740" x2="520" y2="310"/>
+    <line class="ax-ph-edge ax-ph-d3" x1="1190" y1="740" x2="760" y2="310"/>
+    <line class="ax-ph-streak ax-ph-d3" pathLength="1000" x1="1190" y1="740" x2="760" y2="310"/>
+  </svg>
+  <svg class="ax-ph-scene ax-ph-scene--tall" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="axPhSlabTall" x1="0" y1="0" x2="0" y2="1"><stop class="slab-top" offset="0"/><stop class="slab-bottom" offset="1"/></linearGradient></defs>
+    <polygon points="-60,860 20,860 205,600 125,600" fill="url(#axPhSlabTall)" opacity=".8"/>
+    <polygon points="450,860 370,860 185,600 265,600" fill="url(#axPhSlabTall)" opacity=".8"/>
+    <polygon points="-70,-10 10,-10 250,660 170,660" fill="url(#axPhSlabTall)"/>
+    <polygon points="460,-10 380,-10 140,660 220,660" fill="url(#axPhSlabTall)"/>
+    <line class="ax-ph-edge ax-ph-d0" x1="10" y1="-10" x2="250" y2="660"/>
+    <line class="ax-ph-streak ax-ph-d0" pathLength="1000" x1="250" y1="660" x2="10" y2="-10"/>
+    <line class="ax-ph-edge ax-ph-d1" x1="380" y1="-10" x2="140" y2="660"/>
+    <line class="ax-ph-streak ax-ph-d1" pathLength="1000" x1="140" y1="660" x2="380" y2="-10"/>
+    <line class="ax-ph-edge ax-ph-d2" x1="20" y1="860" x2="205" y2="600"/>
+    <line class="ax-ph-streak ax-ph-d2" pathLength="1000" x1="20" y1="860" x2="205" y2="600"/>
+    <line class="ax-ph-edge ax-ph-d3" x1="370" y1="860" x2="185" y2="600"/>
+    <line class="ax-ph-streak ax-ph-d3" pathLength="1000" x1="370" y1="860" x2="185" y2="600"/>
+  </svg>
+  <div class="ax-ph-inner">
+    <h1 class="ax-ph-title" id="axPageTitle">Honest takes. <span class="accent">No fluff.</span></h1>
+    <p class="ax-ph-line">Real reviews from someone who actually plays. No sponsored content, no corporate spin. Just gameplay, honest reactions, and community.</p>
   </div>
-</div>
-
-<div class="gold-line"></div>
+</section>
 
 <section class="section" style="background:var(--dark);">
   <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:3px;" id="reviewsContainer">
