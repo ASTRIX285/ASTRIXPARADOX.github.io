@@ -3,6 +3,7 @@
    ASTRIX PARADOX map art with the strobe on their lit edges, one headline and one line.
    Markup: <section class="ax-ph" id="axPageHero"> with .ax-ph-map, .ax-ph-pool, two .ax-ph-scene
    SVGs (wide and tall) and .ax-ph-inner. The page that uses it links this file after style.css.
+   The words have no entrance animation: these pages are visited often and the text must be there at once.
 
    Cascade: layout rules are unlayered so the site's reset cannot beat them; the few rules that
    compete with the astrix-brand layer's !important rules are repeated inside it at the end. */
@@ -34,7 +35,7 @@
 #axPageHero .ax-ph-d3{animation-delay:-3.9s}
 
 #axPageHero .ax-ph-inner{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;max-width:900px;
-  padding:calc(68px + 44px) 16px 60px;animation:ax-ph-rise .45s cubic-bezier(.23,1,.32,1) both}
+  padding:calc(68px + 44px) 16px 60px}
 #axPageHero h1.ax-ph-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(52px,7.4vw,112px);line-height:.92;
   letter-spacing:.005em;text-transform:uppercase;color:#f4f4f2;text-shadow:none;text-wrap:balance}
 #axPageHero h1.ax-ph-title .accent{color:var(--ax-ember-hi);text-shadow:0 0 18px rgba(230,57,31,.5)}
@@ -53,7 +54,6 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-  #axPageHero .ax-ph-inner{animation:none}
   #axPageHero .ax-ph-edge{animation:none;opacity:.6}
   #axPageHero .ax-ph-streak{display:none}
 }
@@ -64,6 +64,5 @@
   body.ax-brand #axPageHero :is(.btn-primary,.btn-secondary):active{transform:scale(.97)!important}
 }
 
-@keyframes ax-ph-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes ax-ph-strobe{0%,100%{opacity:.14}3%{opacity:.95}5%{opacity:.2}8%{opacity:.95}12%{opacity:.14}}
 @keyframes ax-ph-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
