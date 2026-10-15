@@ -34,7 +34,7 @@
 #axPageHero .ax-ph-d2{animation-delay:-1.3s}
 #axPageHero .ax-ph-d3{animation-delay:-3.9s}
 
-#axPageHero .ax-ph-inner{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;max-width:900px;
+#axPageHero .ax-ph-inner{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;max-width:1200px;
   padding:calc(68px + 44px) 16px 60px}
 #axPageHero h1.ax-ph-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(52px,7.4vw,112px);line-height:.92;
   letter-spacing:.005em;text-transform:uppercase;color:#f4f4f2;text-shadow:none;text-wrap:balance}
@@ -59,7 +59,7 @@
 }
 
 @layer astrix-brand{
-  body.ax-brand.ax-map>section#axPageHero{background:var(--ax-black)!important;padding:0!important;margin:0!important;border:0!important}
+  body.ax-brand.ax-map section#axPageHero{background:var(--ax-black)!important;padding:0!important;margin:0!important;border:0!important}
   body.ax-brand #axPageHero h1.ax-ph-title{font-family:var(--ax-home-display)!important;letter-spacing:.005em!important}
   body.ax-brand #axPageHero :is(.btn-primary,.btn-secondary):active{transform:scale(.97)!important}
 }
