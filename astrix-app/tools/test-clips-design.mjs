@@ -40,7 +40,7 @@ const fetchEmpty=(file,extra=[])=>execFileSync(python,['-B','-c',[
   `sys.argv=["build_clips.py","--page",${JSON.stringify(file)}]`,
   'clips.main()'
 ].join('\n')],{cwd:root,stdio:'pipe'});
-const clipIds=html=>[...html.matchAll(/openClip\('([^']+)'/g)].map(match=>match[1]);
+const clipIds=html=>[...html.matchAll(/data-clip="([^"]+)"/g)].map(match=>match[1]);
 const clipCount=html=>Number(html.match(/<!-- CLIPS-COUNT:START -->(\d+)<!-- CLIPS-COUNT:END -->/)?.[1]);
 const rewrite=file=>execFileSync(python,[script,'--reuse-cards','--page',file],{stdio:'pipe'});
 
@@ -87,7 +87,7 @@ try{
   fetchEmpty(added,[{game:'test-new-game',label:'Test New Game',id:'PLtest'}]);
   const withNew=readFileSync(added,'utf8');
   assert.deepEqual(gameChips(withNew),['all',...playlists,'test-new-game'],'A new playlist gets its own chip');
-  assert.match(withNew,/<button class="ax-chip filter-btn game-btn" data-game="test-new-game" onclick="filterClips\(this,'game'\)">Test New Game<\/button>/,'The new chip uses the chip classes on the page');
+  assert.match(withNew,/<button class="ax-chip filter-btn game-btn" data-game="test-new-game" aria-pressed="false">Test New Game<\/button>/,'The new chip uses the chip classes on the page');
   assert.deepEqual(clipIds(withNew),ids,'Adding a playlist keeps every existing clip');
   checkDesign(withNew,'after adding a playlist');
 
@@ -99,4 +99,4 @@ try{
   assert.equal(readFileSync(bare,'utf8'),unmarked,'Nothing is written when the markers are missing');
 }finally{rmSync(dir,{recursive:true,force:true});}
 
-console.log(`CLIPS_DESIGN=PASS logo "/", body.ax-map and ax-stroke, brand and map stylesheets kept; shared chips on Clips and News; ${ids.length} clips identical after a rewrite; rerun byte-identical; empty playlists keep their clips; a new playlist gets its own chip; missing markers stop the builder`);
+console.log(`CLIPS_DESIGN=PASS no inline handlers or reveals, clean pictures; logo "/", body.ax-map and ax-stroke, brand and map stylesheets kept; shared chips on Clips and News; ${ids.length} clips identical after a rewrite; rerun byte-identical; empty playlists keep their clips; a new playlist gets its own chip; missing markers stop the builder`);

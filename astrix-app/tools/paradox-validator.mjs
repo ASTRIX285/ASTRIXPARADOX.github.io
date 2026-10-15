@@ -23,6 +23,8 @@ const validators=[
   'validate-ribbon-buttons.mjs',
   'test-game-footers.mjs',
   'validate-bungie-footer.mjs',
+  'test-clips-design.mjs', // Clips: builder keeps the page design, no inline handlers or reveals.
+  'test-clips-cards.mjs', // Clips cards: visible at rest, clean picture, readable sizes, player, filters, thumbnail fallbacks.
   'test-reports-data.mjs',
   'test-reports-drilldown.mjs',
   'test-reports-three-stage.mjs',
