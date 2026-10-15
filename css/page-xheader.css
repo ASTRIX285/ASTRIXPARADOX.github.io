@@ -1,0 +1,68 @@
+/* ASTRIX PARADOX public page header, concept B "The X" (Oct 2026).
+   The short X header used by Reviews, News, Clips, Join Us and The Hub: the approved slabs over the
+   ASTRIX PARADOX map art with the strobe on their lit edges, one headline and one line.
+   Markup: <section class="ax-ph" id="axPageHero"> with .ax-ph-map, .ax-ph-pool, two .ax-ph-scene
+   SVGs (wide and tall) and .ax-ph-inner. The page that uses it links this file after style.css.
+   The words have no entrance animation: these pages are visited often and the text must be there at once.
+
+   Cascade: layout rules are unlayered so the site's reset cannot beat them; the few rules that
+   compete with the astrix-brand layer's !important rules are repeated inside it at the end. */
+
+:root{
+  --ax-home-display:"acumin-pro-extra-condensed","Barlow Semi Condensed","Segoe UI",sans-serif;
+  --ax-home-label:"acumin-pro-wide","Barlow Semi Condensed","Segoe UI",sans-serif;
+}
+
+#axPageHero{position:relative;isolation:isolate;overflow:hidden;min-height:480px;display:flex;align-items:center;justify-content:center;background:var(--ax-black)}
+#axPageHero .ax-ph-map{position:absolute;inset:0;z-index:-4;background:var(--forge-paradox-map-art) center/cover no-repeat}
+/* The map art has the name baked into its centre; the slabs would cut it in half, so a dark pool hides it. */
+#axPageHero .ax-ph-pool{position:absolute;inset:0;z-index:-3;pointer-events:none;
+  background:radial-gradient(ellipse 820px 280px at 50% 54%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,.7) 75%,rgba(14,12,9,0) 100%)}
+/* In a short header the slab edges run behind the headline, so a soft scrim over the slabs keeps the
+   words clean while the strobe still reads through it and stays bright on the arms. */
+#axPageHero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 640px 240px at 50% 50%,rgba(14,12,9,.72) 0%,rgba(14,12,9,.6) 50%,rgba(14,12,9,0) 100%)}
+#axPageHero .ax-ph-scene{position:absolute;inset:0;z-index:-2;width:100%;height:100%}
+#axPageHero .ax-ph-scene--tall{display:none}
+#axPageHero .slab-top{stop-color:var(--ax-raised)}
+#axPageHero .slab-bottom{stop-color:var(--ax-black)}
+#axPageHero .ax-ph-edge{fill:none;stroke:var(--ax-ember-hi);stroke-width:1.5;opacity:.14;
+  filter:drop-shadow(0 0 4px rgba(230,57,31,.8));animation:ax-ph-strobe 5.2s linear infinite}
+#axPageHero .ax-ph-streak{fill:none;stroke:var(--ax-stroke-hi-primary);stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:80 920;filter:drop-shadow(0 0 4px rgba(230,57,31,.95));animation:ax-ph-run 3.4s linear infinite}
+#axPageHero .ax-ph-d1{animation-delay:-2.6s}
+#axPageHero .ax-ph-d2{animation-delay:-1.3s}
+#axPageHero .ax-ph-d3{animation-delay:-3.9s}
+
+#axPageHero .ax-ph-inner{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;max-width:900px;
+  padding:calc(68px + 44px) 16px 60px}
+#axPageHero h1.ax-ph-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(52px,7.4vw,112px);line-height:.92;
+  letter-spacing:.005em;text-transform:uppercase;color:#f4f4f2;text-shadow:none;text-wrap:balance}
+#axPageHero h1.ax-ph-title .accent{color:var(--ax-ember-hi);text-shadow:0 0 18px rgba(230,57,31,.5)}
+#axPageHero p.ax-ph-line{margin:0;max-width:52ch;font:400 clamp(17px,1.4vw,20px)/1.55 var(--ax-font-body);color:#dcdcda}
+#axPageHero .ax-ph-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:6px}
+
+@media (max-width:768px){
+  #axPageHero{min-height:420px}
+  #axPageHero .ax-ph-scene--wide{display:none}
+  #axPageHero .ax-ph-scene--tall{display:block}
+  #axPageHero .ax-ph-pool{background:radial-gradient(ellipse 260px 200px at 50% 56%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,0) 100%),
+    linear-gradient(180deg,rgba(14,12,9,0) 30%,rgb(14,12,9) 40%,rgb(14,12,9) 66%,rgba(14,12,9,0) 76%)}
+  #axPageHero::before{background:radial-gradient(ellipse 230px 200px at 50% 50%,rgba(14,12,9,.7) 0%,rgba(14,12,9,.55) 50%,rgba(14,12,9,0) 100%)}
+  #axPageHero .ax-ph-actions{flex-direction:column;align-self:stretch;max-width:320px;width:100%;margin-inline:auto}
+  #axPageHero .ax-ph-actions>*{justify-content:center}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #axPageHero .ax-ph-edge{animation:none;opacity:.6}
+  #axPageHero .ax-ph-streak{display:none}
+}
+
+@layer astrix-brand{
+  body.ax-brand.ax-map>section#axPageHero{background:var(--ax-black)!important;padding:0!important;margin:0!important;border:0!important}
+  body.ax-brand #axPageHero h1.ax-ph-title{font-family:var(--ax-home-display)!important;letter-spacing:.005em!important}
+  body.ax-brand #axPageHero :is(.btn-primary,.btn-secondary):active{transform:scale(.97)!important}
+}
+
+@keyframes ax-ph-strobe{0%,100%{opacity:.14}3%{opacity:.95}5%{opacity:.2}8%{opacity:.95}12%{opacity:.14}}
+@keyframes ax-ph-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
