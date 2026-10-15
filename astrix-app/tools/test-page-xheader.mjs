@@ -52,7 +52,8 @@ try{
      const hero=document.getElementById('axPageHero');const cs=(e,p)=>getComputedStyle(e,p);
      const scene=[...hero.querySelectorAll('.ax-ph-scene')].find(s=>cs(s).display!=='none');
      const b=hero.getBoundingClientRect(),inner=hero.querySelector('h1').getBoundingClientRect(),nav=document.querySelector('nav').getBoundingClientRect();
-     return {first:hero.previousElementSibling?.tagName==='NAV',
+     const lead=hero.previousElementSibling||(hero.parentElement.tagName==='MAIN'?hero.parentElement.previousElementSibling:null);
+     return {first:lead?.tagName==='NAV',
       map:cs(hero.querySelector('.ax-ph-map')).backgroundImage,bg:cs(hero).backgroundColor,
       viewBox:scene.getAttribute('viewBox'),edges:[...scene.querySelectorAll('.ax-ph-edge')].map(e=>cs(e).animationName),
       streaks:[...scene.querySelectorAll('.ax-ph-streak')].map(e=>cs(e).display),
