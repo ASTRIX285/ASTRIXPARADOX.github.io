@@ -475,7 +475,7 @@ function nowList(level, build, skills, stigmas, boards, model, mastery = null, s
     // The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens the board it names.
     if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion', { board: openUnspent[0].id, boards: openUnspent.map(board => ({ id: board.id, name: board.name })) });
     if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory', 'stigma');
-    // A skill the Daeva has but has not equipped, said by its place in the stacks ("Put Overhead Slam above Ruinous Blow on key 1": row 1 sits above row 0).
+    // A skill the Daeva has but has not equipped, said by its place on the bar ("Put Overhead Slam above Rage Burst on stack A": row 1 sits above row 0).
     const placeOf = name => {
       for (const stack of Object.values(skillBar?.stacks ?? {})) { const row = stack.skills.findIndex(item => item.name === name); if (row >= 0) return { key: stack.key, row, below: row ? stack.skills[row - 1].name : null }; }
       return null;
@@ -483,7 +483,7 @@ function nowList(level, build, skills, stigmas, boards, model, mastery = null, s
     for (const skill of skills) {
       if (!(skill.unlocked && skill.skillLevel !== null && skill.equipped === false)) continue;
       const place = placeOf(skill.name);
-      if (place) push(25, `Put ${skill.name}${place.below ? ` above ${place.below}` : ''} on key ${place.key}`, `You have it but it is not equipped. Row ${place.row} of key ${place.key} in the build's stack.`, skill.refs, 'armory', 'skill-bar', { key: place.key, row: place.row });
+      if (place) push(25, `Put ${skill.name}${place.below ? ` above ${place.below}` : ''} on ${keyPhrase(place.key)}`, place.below ? `You have it but it is not equipped. Row ${place.row} of ${keyPhrase(place.key)} in the build's bar.` : `You have it but it is not equipped. It goes on ${keyPhrase(place.key)}.`, skill.refs, 'armory', 'skill-bar', { key: place.key, row: place.row });
       else push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');
     }
   }
@@ -580,7 +580,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   const chains = planChains({ catalogue, className, mechanics });
   // A follow-up that opens above the Mastery cap says how the build gets there, or that it names no way (Reckless Strike: no Keen Strike node).
   for (const chain of chains.chains) chain.reach = chain.opensAt && chain.leadIns[0] ? reachSkillLevel(chain.leadIns[0], chain.opensAt, { ...capRule, nodeSkills: daevanionSkillNodes(build) }) : null;
-  const skillBar = planSkillStacks({ build, rotation, stigmas, gameIcons, catalogue, level: lvl, facts, mechanics, chains });
+  const skillBar = planSkillStacks({ build, stigmas, gameIcons, catalogue, level: lvl, facts, mechanics, model, chains });
   for (const entry of [...mastery.active, ...mastery.passive]) entry.chains = chainsOf(chains, entry.name);
   return {
     ...base,
@@ -599,20 +599,26 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     mastery,
     skillBar,
     chains,
-    macro: planMacro({ rotation, skillBar, mechanics, level: lvl, catalogue, chains }),
+    macro: planMacro({ build, skillBar, mechanics, facts, level: lvl }),
     mechanics
   };
 }
 
 /**
- * Where each skill goes on the game's skill bar: keys 1 to 8, Q, E, left click and right click, each
- * key a stack of up to four rows (planSkillStacks). Left click always holds the class's basic skill and
- * cannot be moved (in-game capture). The rest follows the build: the rotation stacked on the first keys,
- * skills the build fires by hand on Q and E, stigmas outside the rotation on 5 to 8.
+ * Where each skill goes on the game's skill bar, from the build's macro block (builds/<class>.json, macro). The right-hand
+ * block is stack A, the main attack, stack B (Miguel, in game, 16 Oct 2026): the two stacks either side of the main attack
+ * are the macro's only entries. The main attack sits on left click, where the game keeps the class's basic skill. The
+ * left-hand block holds every own-key skill on a key of its own, left to right in the order a player uses them: opener
+ * and burst buffs (opener order), charged skills, stagger and situational skills, defensives and heals, movement last.
+ * Each key is a stack of up to four rows (planSkillStacks); only stack A and stack B hold more than one skill.
  */
-export const SKILL_BAR_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'LMB', 'RMB']);
+export const LEFT_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']);
+export const RIGHT_KEYS = Object.freeze(['A', 'LMB', 'B']);
+export const SKILL_BAR_KEYS = Object.freeze([...LEFT_KEYS, ...RIGHT_KEYS]);
 /** Rows on a key: 0 is nearest the key and fires first, 3 is the top. */
 export const STACK_ROWS = 4;
+/** The macro block's two stacks and the keys they sit on. */
+export const MACRO_STACKS = Object.freeze([['stackA', 'A'], ['stackB', 'B']]);
 
 /* Game mechanics (data/advisor/mechanics.json): one record per rule with a status. The pages show a "Not confirmed yet" tag,
    with the rule's in-game test, wherever an unconfirmed rule is used; flipping the status in the data removes it everywhere. */
@@ -654,23 +660,7 @@ export function planChains({ catalogue, className, mechanics }) {
 /** The chains a skill takes part in, as a lead-in or as the follow-up. */
 export const chainsOf = (chains, name) => (chains?.chains ?? []).filter(chain => chain.leadIns.includes(name) || chain.followUp === name);
 
-/**
- * The skill bar as the game works it: every key holds a stack of up to four skills (rows 0 to 3). Pressing the key fires
- * the lowest ready one. So cooldown skills go low and a no-cooldown filler goes on the top filled row, and a skill the
- * build fires by hand (heals, defensives, buffs), a charged skill or a stigma gets a key of its own. From the build only:
- *   left click: the class's basic skill, fixed by the game;
- *   5 to 8: the build's stigmas, one per key, in slot order (a stigma is never in a stack);
- *   key 1 (then 2 to 4 when it overflows): the rotation's cooldown skills in the build's order, a filler on top;
- *   Q and E, then free keys: charged skills and skills the build fires by hand, one per key;
- *   free keys: key skills and Daevanion node skills the rotation does not use, then other actives in unlock order.
- * A filler is a skill with a captured 0 s cooldown, or one the build calls its filler (the rotation's filler line, or a
- * key skill whose reason says filler), so a pending cooldown counts only on the build's word. A class whose only filler
- * is its basic skill (fixed on left click) has no filler for its stacks: those stacks say so, with the reason.
- * Skills that get no key are listed with the reason. bars[row][key] is the same thing by row, for the page grid.
- */
 const cooldownOf = info => (info && typeof info.cooldownSeconds === 'number' ? info.cooldownSeconds : null);
-const STIGMA_KEYS = Object.freeze(['5', '6', '7', '8']);
-const STACK_KEYS = Object.freeze(['1', '2', '3', '4']);
 
 /** The skills a build calls its filler, in the build's order: the rotation's filler line, key skills whose reason says filler, then a captured 0 s cooldown. */
 export function buildFillers(build, names, catalogue = new Map()) {
@@ -684,132 +674,179 @@ export function buildFillers(build, names, catalogue = new Map()) {
   return out.filter((name, index) => names.includes(name) && out.indexOf(name) === index);
 }
 
-function planSkillStacks({ build, rotation, stigmas, gameIcons, catalogue, level, facts, mechanics, chains = null }) {
+/** Own-key reasons in the order the left-hand block runs, left to right (the opener goes before all of them). */
+export const OWN_KEY_ORDER = Object.freeze(['buff', 'toggle', 'charged', 'stagger', 'other', 'defensive', 'heal', 'dash', 'movement']);
+/** Why a skill is on its own key, by reason, when the build gives no line of its own (macro-rules, own-keys). */
+export const OWN_KEY_WHY = Object.freeze({
+  buff: 'Own key: a burst buff. Press it when you choose, not on trash.',
+  toggle: 'Own key: a toggle. A macro would switch it off on the next pass.',
+  charged: 'Own key: charged. A macro only fires stage 1.',
+  stagger: 'Own key: use it in a stagger window.',
+  other: 'Own key: most players keep it off the macro.',
+  defensive: 'Own key: a defensive. You need it at a chosen moment.',
+  heal: 'Own key: a heal. You choose when it fires.',
+  dash: 'Own key: a dash. It pulls you out of position.',
+  movement: 'Own key: it moves you. Keep it for when you mean to move.'
+});
+const macroUseOf = info => (info?.macroUse && typeof info.macroUse === 'object' ? info.macroUse : null);
+const conditionOf = info => (Array.isArray(info?.triggers) ? info.triggers.find(item => item.type === 'condition' && item.skillLevel === null) ?? null : null);
+
+/**
+ * A skill's triggers (skills.json), each with whether the Daeva's skill level reaches it: reached true or false with a
+ * Daeva, null without one. A trigger that needs a skill level the Daeva has not reached, or cannot be checked, is dim and
+ * says "From skill Lv N".
+ */
+export function skillTriggers(info, skillLevel) {
+  return (Array.isArray(info?.triggers) ? info.triggers : []).map(item => {
+    const reached = item.skillLevel === null ? true : Number.isInteger(skillLevel) ? skillLevel >= item.skillLevel : null;
+    return { ...item, reached, dim: reached !== true, from: item.skillLevel === null ? null : `From skill Lv ${item.skillLevel}` };
+  });
+}
+
+function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, mechanics, model = null, chains = null }) {
   const skills = [...gameIcons.values()];
   if (!skills.length) return null;
   const rule = ruleOf(mechanics, 'skill-stack');
+  const block = build.macro && typeof build.macro === 'object' ? build.macro : null;
   const actives = skills.filter(skill => skill.category === 'Active');
   const byName = new Map(skills.map(skill => [skill.name, skill]));
-  const names = [...byName.keys()].sort((a, b) => b.length - a.length);
-  const nameIn = text => names.find(name => String(text).startsWith(name)) ?? null;
-  const rot = isPending(rotation) || !rotation ? null : rotation;
-  const steps = rot ? rot.steps.map(step => ({ name: nameIn(step.text ?? step), text: step.text ?? step, charged: /charged/i.test(step.text ?? step) })).filter(step => step.name) : [];
-  const manual = rot ? (rot.manual ?? []).map(nameIn).filter(Boolean) : [];
-  const stigmaSlots = stigmas.pending ? [] : stigmas.slots.filter(slot => byName.has(slot.name));
-  const stigmaNames = stigmaSlots.map(slot => slot.name);
-  const coreNames = (build.coreSkills ?? []).slice().sort((a, b) => a.priority - b.priority).map(skill => skill.name).filter(name => byName.has(name));
-  const corePriority = new Map(coreNames.map((name, index) => [name, index + 1]));
   const basic = actives[0];
+  const corePriority = new Map((build.coreSkills ?? []).slice().sort((a, b) => a.priority - b.priority).map((skill, index) => [skill.name, index + 1]));
+  const slotted = stigmas.pending ? [] : stigmas.slots;
+  const owned = name => model?.skills?.find(skill => skill.name === name) ?? null;
   const fillers = buildFillers(build, [...byName.keys()], catalogue);
-  // Fillers a stack can use: not the basic skill (left click keeps it), not a stigma, not one fired by hand. Rotation fillers first.
-  const stackFillers = fillers
-    .filter(name => name !== basic.name && !stigmaNames.includes(name) && !manual.includes(name))
-    .sort((a, b) => (steps.findIndex(step => step.name === a) + 1 || 99) - (steps.findIndex(step => step.name === b) + 1 || 99));
 
-  const placed = new Set();
-  const entry = (name, role) => {
+  const cell = (name, place) => {
     const skill = byName.get(name);
     const info = catalogue.get(name) ?? null;
-    const slot = stigmaSlots.find(item => item.name === name) ?? null;
+    const isStigma = skill.category === 'Stigma';
+    const slot = slotted.find(item => item.name === name) ?? null;
+    const mine = owned(name);
+    // A stigma outside the build's four slots needs a swap first, unless the Daeva already has it equipped.
+    const needsSlot = isStigma && !slot && !(mine?.equipped);
     const unlockLevel = slot ? slot.slotLevel : skill.needLevel;
     const cooldown = cooldownOf(info);
-    const filler = fillers.includes(name);
-    placed.add(name);
+    const skillLevel = mine?.acquired && Number.isInteger(mine.skillLevel) ? mine.skillLevel : null;
+    const condition = conditionOf(info);
+    const noCooldown = Boolean(place.row?.noCooldown) || fillers.includes(name) || cooldown === 0;
     return {
-      name, icon: skill.icon, role, rank: corePriority.get(name) ?? null, unlockLevel, locked: level < unlockLevel,
-      // A filler has no cooldown by the build's word; a captured 0 is the same thing. A pending cooldown is placed by role and said so.
-      cooldownSeconds: cooldown, noCooldown: filler || cooldown === 0, cooldownPending: !filler && cooldown === null, filler,
-      stigma: Boolean(slot), charged: steps.some(step => step.name === name && step.charged)
+      name, icon: skill.icon, key: place.key, row: place.index, role: place.role, reason: place.reason ?? null,
+      why: place.why ?? null, rank: corePriority.get(name) ?? null, stigma: isStigma, needsSlot, unlockLevel, locked: level < unlockLevel,
+      // From the Daeva's skill data: never learned, or at level 0, means it costs animation time in a macro for nothing.
+      learned: mine ? Boolean(mine.acquired) && mine.skillLevel !== 0 : null,
+      skillLevel, cooldownSeconds: cooldown, noCooldown, cooldownPending: !noCooldown && cooldown === null,
+      filler: fillers.includes(name), conditional: Boolean(condition), condition: condition?.text ?? null,
+      triggers: skillTriggers(info, skillLevel), macroUse: macroUseOf(info), charged: macroUseOf(info)?.reason === 'charged',
+      fixed: place.role === 'main' && name === basic.name
     };
   };
-  const stacks = Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, { key, skills: [], solo: false, reason: null, fillerMissing: null }]));
-  const solo = (key, name, role, reason) => { stacks[key] = { key, skills: [entry(name, role)], solo: true, reason, fillerMissing: null }; };
-  solo('LMB', basic.name, 'fixed', `The game keeps ${basic.name} on left click.`);
+  const stacks = Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, { key, side: LEFT_KEYS.includes(key) ? 'left' : 'right', skills: [], solo: false, reason: null, label: null, fillerMissing: null, pending: null }]));
+  const placed = new Set();
+  const put = (key, entries, extra = {}) => { stacks[key] = { ...stacks[key], skills: entries, ...extra }; entries.forEach(item => placed.add(item.name)); };
 
-  // Stigmas first, on 5 to 8 in slot order, so nothing else takes their keys and no stack ever holds one.
-  stigmaNames.slice(0, STIGMA_KEYS.length).forEach((name, index) => solo(STIGMA_KEYS[index], name, 'stigma', 'A stigma: its own key, so you choose when it fires.'));
-
-  // The rotation's cooldown skills, in the build's order, stacked on 1 to 4 with a filler on the top filled row.
-  const cooldownSkills = steps
-    .filter(step => !step.charged && !manual.includes(step.name) && step.name !== basic.name && !stigmaNames.includes(step.name) && !fillers.includes(step.name))
-    .map(step => step.name).filter((name, index, all) => all.indexOf(name) === index);
-  const fillerQueue = [...stackFillers];
-  const noFillerReason = () => (stackFillers.length
-    ? "The build names one filler and it tops an earlier key, so nothing tops this stack. When every skill here is on cooldown, the key does nothing."
-    : fillers.includes(basic.name)
-      ? `The build's filler, ${basic.name}, stays on left click and the build names no other, so nothing tops this stack. When every skill here is on cooldown, the key does nothing.`
-      : "The build names no no-cooldown skill to top this stack. When every skill here is on cooldown, the key does nothing.");
-  let keyIndex = 0;
-  while (cooldownSkills.length && keyIndex < STACK_KEYS.length) {
-    const key = STACK_KEYS[keyIndex];
-    const filler = fillerQueue.shift() ?? null;
-    const take = cooldownSkills.splice(0, STACK_ROWS - 1).map(name => entry(name, 'macro'));
-    if (filler) take.push(entry(filler, 'macro'));
-    stacks[key] = { key, skills: take, solo: false, reason: null, fillerMissing: take.length > 1 && !filler ? noFillerReason() : null };
-    keyIndex += 1;
-  }
-  // A filler no stack used still goes on the bar, on its own key: it never needs a stack.
-  const freeKeys = () => SKILL_BAR_KEYS.filter(key => !stacks[key].skills.length);
-  for (const name of fillerQueue) {
-    if (placed.has(name)) continue;
-    const key = STACK_KEYS.find(item => !stacks[item].skills.length) ?? freeKeys()[0];
-    if (key) solo(key, name, 'macro', 'The filler: no cooldown, so it never needs a stack.');
-  }
-  // Charged skills and skills the build fires by hand: a key of their own, Q and E first.
-  const soloQueue = [
-    ...steps.filter(step => step.charged && !placed.has(step.name)).map(step => [step.name, 'charged', 'A charged skill: hold the key, so it gets a key of its own (stack rule).']),
-    ...manual.filter(name => !placed.has(name)).map(name => [name, 'manual', 'The build fires it by hand when you need it, so it gets a key of its own (stack rule: heals, defensives, big buffs and charged skills stay out of stacks).'])
-  ];
-  for (const key of ['Q', 'E']) { const next = soloQueue.shift(); if (next) solo(key, ...next); }
-  for (const next of soloQueue) { const key = freeKeys()[0]; if (!key) break; solo(key, ...next); }
-  // Key skills and Daevanion node skills the rotation does not use, then other actives in unlock order, one per free key.
-  const nodeSkills = isPending(build.daevanion) ? [] : (build.daevanion?.skillNodes ?? []).filter(name => byName.has(name));
-  const rest = [...coreNames, ...nodeSkills, ...actives.map(skill => skill.name)].filter((name, index, all) => all.indexOf(name) === index && !placed.has(name) && !stigmaNames.includes(name));
   const notOnBar = [];
-  for (const name of rest) {
-    const key = freeKeys()[0];
-    if (key) { stacks[key] = { key, skills: [entry(name, corePriority.has(name) ? 'key' : nodeSkills.includes(name) ? 'build' : 'other')], solo: false, reason: null, fillerMissing: null }; continue; }
-    const skill = byName.get(name);
-    notOnBar.push({ name, icon: skill.icon, unlockLevel: skill.needLevel, reason: 'No key left: the build does not use it. Swap it in if you like it.' });
+  if (block) {
+    // The right-hand block: stack A, the main attack on left click, stack B, each row as the block lists it.
+    for (const [id, key] of MACRO_STACKS) {
+      const stack = block[id];
+      if (!stack?.rows?.length) { stacks[key].pending = block[`${id}Pending`] ?? { pending: true, reason: 'No line is sourced for this stack yet.' }; continue; }
+      const rows = stack.rows.filter(row => byName.has(row.name)).slice(0, STACK_ROWS).map((row, index) => cell(row.name, { key, index, role: id, why: row.why, row }));
+      const top = rows.at(-1);
+      put(key, rows, {
+        label: stack.label ?? null,
+        // A stack that does not end on a no-cooldown skill: the macro skips it when every row is on cooldown (macro-order facts).
+        fillerMissing: rows.length > 1 && !(top.noCooldown && !top.conditional) ? 'No filler on top: when every skill here is on cooldown, the macro skips this entry and your held main attack fills the gap.' : null
+      });
+    }
+    const main = block.mainAttack?.name && byName.has(block.mainAttack.name) ? block.mainAttack : { name: basic.name, why: null };
+    put('LMB', [cell(main.name, { key: 'LMB', index: 0, role: 'main', why: main.why })], { solo: true, reason: `The game keeps ${basic.name} on left click. Hold it with the macro key.` });
+    // The left-hand block: the opener first, in its order, then every other own key grouped by reason.
+    const own = (block.ownKeys ?? []).filter(item => byName.has(item.name) && !placed.has(item.name));
+    const opener = block.opener ?? [];
+    const rank = item => (opener.includes(item.name) ? opener.indexOf(item.name) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
+    const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => rank(a) - rank(b) || a.index - b.index);
+    const keys = [...LEFT_KEYS];
+    for (const item of ordered) {
+      const key = keys.shift();
+      const why = item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
+      if (!key) { notOnBar.push({ name: item.name, icon: byName.get(item.name).icon, unlockLevel: byName.get(item.name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
+      put(key, [cell(item.name, { key, index: 0, role: opener.includes(item.name) ? 'opener' : 'own', reason: item.reason, why })], { solo: true, reason: why, opener: opener.includes(item.name) ? opener.indexOf(item.name) + 1 : null });
+    }
+    for (const extra of block.extras ?? []) if (byName.has(extra.name) && !placed.has(extra.name)) notOnBar.push({ name: extra.name, icon: byName.get(extra.name).icon, unlockLevel: byName.get(extra.name).needLevel, reason: extra.why, extra: true });
+  } else {
+    put('LMB', [cell(basic.name, { key: 'LMB', index: 0, role: 'main', why: null })], { solo: true, reason: `The game keeps ${basic.name} on left click.` });
   }
-  // A follow-up goes above its lead-in only once the chain rule is confirmed, and always under the stack's filler.
+  // Other actives the build does not place: listed with the reason, never guessed onto a key.
+  for (const skill of actives) if (!placed.has(skill.name) && !notOnBar.some(item => item.name === skill.name)) notOnBar.push({ name: skill.name, icon: skill.icon, unlockLevel: skill.needLevel, reason: 'Not in this build\'s bar. Swap it in if you like it.' });
+
+  // A follow-up goes above its lead-in only once the chain rule is confirmed, only where the stack has a free row, under its filler.
   if (chains?.confirmed) {
     for (const chain of chains.chains) {
       if (chain.pending || !byName.has(chain.followUp) || placed.has(chain.followUp)) continue;
-      const stack = Object.values(stacks).find(item => !item.solo && item.skills.length < STACK_ROWS && item.skills.some(skill => chain.leadIns.includes(skill.name)));
+      const stack = MACRO_STACKS.map(([, key]) => stacks[key]).find(item => item.skills.length && item.skills.length < STACK_ROWS && item.skills.some(skill => chain.leadIns.includes(skill.name)));
       if (!stack) continue;
       const at = stack.skills.findIndex(skill => chain.leadIns.includes(skill.name));
-      stack.skills.splice(at + 1, 0, entry(chain.followUp, 'chain'));
+      stack.skills.splice(at + 1, 0, cell(chain.followUp, { key: stack.key, index: at + 1, role: 'chain', why: `A follow-up to ${stack.skills[at].name}: it sits right above it.` }));
+      stack.skills.forEach((skill, row) => { skill.row = row; });
+      placed.add(chain.followUp);
     }
   }
-  // What each key fires at this level: the open skills in row order, and the level the next locked one opens.
+  // What each key fires at this level: the open rows in order, and the level the next locked one opens.
   for (const stack of Object.values(stacks)) {
-    const locked = stack.skills.filter(skill => skill.locked);
-    stack.firesNow = stack.skills.filter(skill => !skill.locked).map(skill => skill.name);
-    stack.nextUnlock = locked.length ? Math.min(...locked.map(skill => skill.unlockLevel)) : null;
+    const waiting = stack.skills.filter(skill => skill.locked);
+    stack.firesNow = stack.skills.filter(skill => !skill.locked && !skill.needsSlot && skill.learned !== false).map(skill => skill.name);
+    stack.nextUnlock = waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null;
   }
   const bars = Array.from({ length: STACK_ROWS }, (_, row) => Object.fromEntries(SKILL_BAR_KEYS.map(key => {
     const skill = stacks[key].skills[row] ?? null;
-    return [key, skill ? { ...skill, key, row, fixed: skill.role === 'fixed' } : null];
+    return [key, skill ? { ...skill, key, row } : null];
   })));
-  bars[0].LMB.fixed = true;
+  const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
   const result = {
-    keys: SKILL_BAR_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, notOnBar, stigmas: stigmaNames, fillers, stackFillers,
+    keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
+    notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null,
+    opener: (block?.opener ?? []).filter(name => placed.has(name)),
     rule: { status: rule.status, confirmed: rule.confirmed, text: rule.text, rules: rule.rules ?? [] }, macroKey: facts['macro-order']?.value ? true : false
   };
-  result.problems = [...stackProblems(result), ...fillerProblems(result), ...stigmaKeyProblems(result)];
+  result.copySteps = copySteps(result);
+  result.problems = [...stackProblems(result), ...fillerProblems(result), ...stigmaKeyProblems(result), ...placementProblems(result)];
   return result;
 }
 
-/** Stack rule check: a no-cooldown skill never sits below a cooldown skill, at most one filler per key, at most four rows. The data fails when this returns anything. */
+const keyWords = key => (key === 'A' ? 'Stack A' : key === 'B' ? 'Stack B' : key === 'LMB' ? 'Left click' : key === 'RMB' ? 'Right click' : `Key ${key}`);
+/** Where a skill sits, in words: "stack A", "left click", "key 3". */
+export const keyPhrase = key => keyWords(key).replace(/^(Stack|Key)/, word => word.toLowerCase()).replace(/^Left click|^Right click/, words => words.toLowerCase());
+
+/**
+ * "Copy this bar": key by key, row by row, in the order to drag them in game (left-hand block left to right, then stack A
+ * and stack B; left click is set by the game), ending with the macro step.
+ */
+function copySteps(bar) {
+  const steps = [];
+  for (const key of [...LEFT_KEYS, 'A', 'B']) {
+    const stack = bar.stacks[key];
+    if (!stack.skills.length) continue;
+    steps.push({ key, label: keyWords(key), rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })) });
+  }
+  const entries = ['A', 'B'].filter(key => bar.stacks[key].skills.length);
+  if (entries.length) steps.push({ key: null, label: 'Macro 1', macro: true, text: entries.length === 2 ? 'Then add stack A and stack B to Macro 1.' : 'Then add stack A to Macro 1.' });
+  return steps;
+}
+
+/**
+ * Stack rule check: at most four rows, at most one always-ready skill per key, and an always-ready skill never below a
+ * cooldown skill (it would block it). A skill that only fires on a condition (a stagger, a window, a mark) is not always
+ * ready, so it never blocks. The data fails when this returns anything.
+ */
 export function stackProblems(skillBar) {
   const problems = [];
   for (const stack of Object.values(skillBar?.stacks ?? {})) {
     const list = stack.skills;
+    const always = skill => skill.noCooldown && !skill.conditional;
     if (list.length > STACK_ROWS) problems.push(`key ${stack.key}: ${list.length} skills, the game holds ${STACK_ROWS}`);
-    if (list.filter(skill => skill.noCooldown).length > 1) problems.push(`key ${stack.key}: two no-cooldown skills, only the lowest would ever fire`);
+    if (list.filter(always).length > 1) problems.push(`key ${stack.key}: two no-cooldown skills, only the lowest would ever fire`);
     list.forEach((skill, row) => {
-      if (!skill.noCooldown) return;
+      if (!always(skill)) return;
       const above = list.slice(row + 1).find(item => (item.cooldownSeconds ?? 0) > 0 || item.cooldownPending);
       if (above) problems.push(`key ${stack.key}: ${skill.name} (no cooldown) on row ${row} blocks ${above.name} above it`);
     });
@@ -818,32 +855,41 @@ export function stackProblems(skillBar) {
 }
 
 /**
- * Filler rule check: a key that holds two or more skills has a no-cooldown skill on its top filled row, so the key always
- * does something. A stack the build has no filler for passes only when it carries the reason (fillerMissing).
+ * Filler rule check: a key that holds two or more skills has an always-ready skill on its top filled row, so the key always
+ * does something, or carries the reason it has none (fillerMissing).
  */
 export function fillerProblems(skillBar) {
   const problems = [];
   for (const stack of Object.values(skillBar?.stacks ?? {})) {
     const list = stack.skills;
     if (list.length < 2) continue;
-    if (!list.at(-1).noCooldown && !stack.fillerMissing) problems.push(`key ${stack.key}: ${list.at(-1).name} on the top row has a cooldown and the stack names no reason`);
-    if (stack.fillerMissing && (skillBar.stackFillers ?? []).some(name => !Object.values(skillBar.stacks).some(other => other.skills.some(skill => skill.name === name)))) problems.push(`key ${stack.key}: no filler on top, but the build's filler is not on the bar`);
+    const top = list.at(-1);
+    if (!(top.noCooldown && !top.conditional) && !stack.fillerMissing) problems.push(`key ${stack.key}: ${top.name} on the top row is not always ready and the stack names no reason`);
   }
   return problems;
 }
 
-/** Stigma rule check: a stigma is never in a stack, and with four stigmas, keys 5 to 8 hold them in slot order. */
+/** Stigma rule check: a stigma sits in a stack only on stack A or B (the macro block puts it there); every other key holds one skill. */
 export function stigmaKeyProblems(skillBar) {
   const problems = [];
   for (const stack of Object.values(skillBar?.stacks ?? {})) {
-    if (stack.skills.length > 1 && stack.skills.some(skill => skill.stigma)) problems.push(`key ${stack.key}: a stigma in a stack (${stack.skills.filter(skill => skill.stigma).map(skill => skill.name).join(', ')})`);
+    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key)) problems.push(`key ${stack.key}: ${stack.skills.length} skills, only stack A and stack B are stacks`);
+    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key) && stack.skills.some(skill => skill.stigma)) problems.push(`key ${stack.key}: a stigma in a stack (${stack.skills.filter(skill => skill.stigma).map(skill => skill.name).join(', ')})`);
   }
-  const names = skillBar?.stigmas ?? [];
-  if (names.length === STIGMA_KEYS.length) {
-    STIGMA_KEYS.forEach((key, index) => {
-      const held = skillBar.stacks[key]?.skills.map(skill => skill.name) ?? [];
-      if (held.length !== 1 || held[0] !== names[index]) problems.push(`key ${key}: holds ${held.join(', ') || 'nothing'}, the build's stigma ${index + 1} is ${names[index]}`);
-    });
+  return problems;
+}
+
+/** Placement check: no skill in two places, nothing marked own-key in a stack, the main attack never in a stack. */
+export function placementProblems(skillBar) {
+  const problems = [];
+  const seen = new Map();
+  for (const stack of Object.values(skillBar?.stacks ?? {})) {
+    for (const skill of stack.skills) {
+      if (seen.has(skill.name)) problems.push(`${skill.name} is on ${seen.get(skill.name)} and ${stack.key}`);
+      seen.set(skill.name, stack.key);
+      if (['A', 'B'].includes(stack.key) && skill.macroUse?.value === 'own-key') problems.push(`${skill.name} is marked own-key (${skill.macroUse.reason}) but sits in stack ${stack.key}`);
+      if (['A', 'B'].includes(stack.key) && skill.name === skillBar.mainAttack) problems.push(`${skill.name} is the main attack but sits in stack ${stack.key}`);
+    }
   }
   return problems;
 }
@@ -853,105 +899,60 @@ export function macroMaxEntries(facts) {
   const limit = facts?.maxEntries?.value;
   return Number.isInteger(limit) && limit > 0 ? limit : null;
 }
-/** Roles a key's skills may have to be added to the macro after the rotation. Everything else stays on its own key. */
-export const MACRO_ADD_ROLES = Object.freeze(['damage']);
 /** A skill's role from the catalogue (skills.json), or null when the data does not say. */
 export const skillRole = (catalogue, name) => catalogue?.get(name)?.role?.value ?? null;
+/** Why a row of a stack is not in the macro right now, or null when it is. */
+function outOfMacro(skill, level) {
+  if (skill.locked) return `From Lv ${skill.unlockLevel}`;
+  if (skill.needsSlot) return 'Needs a stigma slot';
+  if (skill.learned === false) return 'Not learned yet';
+  if (skill.macroUse?.value === 'own-key') return 'Own key';
+  return null;
+}
 
 /**
- * Macro 1 from the keys: the keys the rotation uses, in the build's order, each with its stack, so a stacked key goes
- * into the macro once and never doubles up with its own skills. How the game picks the next entry is the macro-order
- * rule (unconfirmed: listed order, or a stack); a stacked key running its whole stack is a guide note, not tested. The
- * fallback is the filled entries' skills one by one, for when a test shows a key fires only row 0. Facts (slots, delay,
- * hold, binding, the entry limit) come from progression.json through that rule.
- * After the rotation, the macro fills up to its limit with other bar keys whose skills the catalogue marks as damage,
- * longest cooldown first. A key with any other role stays off; a key with no role is listed under couldAdd, as are
- * follow-ups while the chain rule is unconfirmed. Locked keys go under later with their level.
+ * Macro 1 from the macro block: entry 1 is stack A, entry 2 is stack B, 10 ms delay each, never more. Each entry fires
+ * its stack's first ready row, so a row that is locked, needs a stigma slot, or is not learned (level 0 still costs
+ * animation time) is out of the macro until it is ready, and says when. The main attack is held with the macro key and is
+ * never an entry. Own keys come grouped by reason, the opener in order. Facts and rules come from progression.json.
  */
-function planMacro({ rotation, skillBar, mechanics, level, catalogue = new Map(), chains = null }) {
+function planMacro({ build, skillBar, mechanics, facts, level }) {
   const rule = ruleOf(mechanics, 'macro-order');
   const maxEntries = macroMaxEntries(rule.facts);
-  const base = { status: rule.status, confirmed: rule.confirmed, text: rule.text ?? '', options: rule.options ?? [], notes: rule.notes ?? [], test: rule.test ?? null, facts: rule.facts ?? null, maxEntries };
-  if (!rotation || isPending(rotation) || !skillBar) return { ...base, pending: isPending(rotation) ? rotation : null, entries: [], keys: [], slots: [], filled: [], used: 0, added: [], couldAdd: [], later: [], fallback: [], manual: [], filler: null };
-  const where = name => {
-    for (const stack of Object.values(skillBar.stacks)) { const row = stack.skills.findIndex(skill => skill.name === name); if (row >= 0) return { key: stack.key, row, solo: stack.solo || stack.skills.length === 1 }; }
-    return null;
-  };
-  const barNames = Object.values(skillBar.stacks).flatMap(stack => stack.skills.map(skill => skill.name)).sort((a, b) => b.length - a.length);
-  const entries = rotation.steps.map(step => {
-    const name = barNames.find(item => String(step.text).startsWith(item)) ?? null;
-    const at = name ? where(name) : null;
-    return { ...step, name, key: at?.key ?? null, row: at?.row ?? null, soloKey: at?.solo ?? false, charged: /charged/i.test(step.text) };
+  const rules = facts['macro-rules'] ?? null;
+  const delayRule = rules?.rules?.find(item => item.id === 'delay') ?? null;
+  const delayMs = Number.isInteger(delayRule?.value?.delayMs) ? delayRule.value.delayMs : rule.facts?.value?.delayMs ?? 10;
+  const base = { status: rule.status, confirmed: rule.confirmed, text: rule.text ?? '', options: rule.options ?? [], notes: rule.notes ?? [], test: rule.test ?? null, facts: rule.facts ?? null, maxEntries, rules, delayMs, level };
+  const empty = { entries: [], keys: [], used: 0, ownKeys: [], opener: [], later: [], extras: [], mainAttack: null, levelNotes: [] };
+  if (!skillBar || !skillBar.fromBlock) return { ...base, ...empty, pending: { pending: true, reason: 'No macro line is sourced for this build yet.' } };
+  const block = build.macro;
+  const entries = MACRO_STACKS.map(([, key]) => skillBar.stacks[key]).filter(stack => stack.skills.length).slice(0, 2).map((stack, index) => {
+    const skills = stack.skills.map(skill => ({ name: skill.name, row: skill.row, icon: skill.icon, why: skill.why, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel, condition: skill.condition, triggers: skill.triggers, out: outOfMacro(skill, level), inMacro: outOfMacro(skill, level) === null }));
+    const live = skills.filter(skill => skill.inMacro);
+    const waiting = skills.filter(skill => skill.locked);
+    return { entry: index + 1, key: stack.key, label: stack.label, delayMs, skills, firesNow: live.map(skill => skill.name), usable: live.length > 0, unlockLevel: live.length ? null : waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null, fillerMissing: stack.fillerMissing };
   });
-  const keys = entries.filter(item => item.key).map(item => item.key).filter((key, index, all) => all.indexOf(key) === index);
-  // One macro entry per key: the whole stack, each row with its lock. A key fires now when any of its skills is open.
-  const slotOf = (key, from) => {
-    const stack = skillBar.stacks[key];
-    const skills = stack.skills.map((skill, row) => ({ name: skill.name, row, locked: skill.locked, unlockLevel: skill.unlockLevel }));
-    const open = skills.filter(skill => !skill.locked);
-    const cooldowns = stack.skills.map(skill => skill.cooldownSeconds).filter(value => typeof value === 'number');
-    return { key, from, stacked: skills.length > 1, skills, usable: open.length > 0, firesNow: open.map(skill => skill.name), unlockLevel: open.length ? null : Math.min(...skills.map(skill => skill.unlockLevel)), cooldownSeconds: cooldowns.length ? Math.max(...cooldowns) : null };
-  };
-  const slots = keys.map(key => slotOf(key, 'rotation'));
-  const room = maxEntries ?? slots.length;
-  const couldAdd = [];
-  const full = item => couldAdd.push({ ...item, reason: `No free slot left: a macro holds ${room} entries.` });
-  const filled = [];
-  for (const slot of slots.filter(item => item.usable)) { if (filled.length < room) filled.push(slot); else full({ key: slot.key, names: slot.firesNow, kind: 'full' }); }
-  // Other bar keys: never left click (the basic skill), never a charged skill or one the build fires by hand, and only when
-  // the catalogue marks every skill on the key as damage. No role in the data: listed to check, never added.
-  // A skill the build names anywhere in its manual list (an opener, "Taunt") stays a hand-fired skill, never a candidate.
-  const byHand = name => (rotation.manual ?? []).some(text => String(text).includes(name));
-  const candidates = [];
-  for (const stack of Object.values(skillBar.stacks)) {
-    if (!stack.skills.length || keys.includes(stack.key)) continue;
-    if (stack.skills.some(skill => skill.role === 'fixed' || skill.role === 'manual' || skill.role === 'charged' || skill.charged || byHand(skill.name))) continue;
-    const roles = stack.skills.map(skill => skillRole(catalogue, skill.name));
-    if (roles.some(role => role && !MACRO_ADD_ROLES.includes(role))) continue;
-    if (roles.some(role => !role)) {
-      couldAdd.push({ key: stack.key, names: stack.skills.map(skill => skill.name), kind: 'no-role', reason: 'No role in our data yet', unlockLevel: Math.min(...stack.skills.map(skill => skill.unlockLevel)) });
-      continue;
-    }
-    candidates.push(slotOf(stack.key, 'damage'));
+  const ownCells = LEFT_KEYS.map(key => skillBar.stacks[key].skills[0]).filter(Boolean);
+  const groups = [];
+  for (const skill of ownCells) {
+    const id = skill.reason ?? 'other';
+    let group = groups.find(item => item.reason === id);
+    if (!group) { group = { reason: id, skills: [] }; groups.push(group); }
+    group.skills.push({ name: skill.name, icon: skill.icon, key: skill.key, why: skill.why, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel });
   }
-  // The big hits first: longest cooldown first, a pending cooldown last, ties in bar order.
-  const byCooldown = (a, b) => (b.cooldownSeconds ?? -1) - (a.cooldownSeconds ?? -1);
-  candidates.sort(byCooldown);
-  const rotationLater = slots.filter(slot => !slot.usable);
-  const added = [];
-  const addedLater = [];
-  for (const slot of candidates) {
-    if (slot.usable && filled.length + rotationLater.length + addedLater.length < room) { filled.push(slot); added.push(slot); }
-    else if (!slot.usable && filled.length + rotationLater.length + addedLater.length < room) addedLater.push(slot);
-    else full({ key: slot.key, names: slot.skills.map(skill => skill.name), kind: 'full' });
-  }
-  // Follow-ups of skills in the macro: added only once the chain rule is confirmed (then the stacks already hold them).
-  const inMacro = filled.flatMap(slot => slot.skills.map(skill => skill.name));
-  if (chains && !chains.confirmed) {
-    for (const chain of chains.chains ?? []) {
-      if (chain.pending || inMacro.includes(chain.followUp) || couldAdd.some(item => item.names.includes(chain.followUp))) continue;
-      const lead = chain.leadIns.find(name => inMacro.includes(name));
-      if (!lead) continue;
-      couldAdd.push({ key: null, names: [chain.followUp], kind: 'follow-up', leadIn: lead, opensAt: chain.opensAt ?? null, reason: `A follow-up to ${lead}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}. How a follow-up fires is not confirmed yet.` });
-    }
-  }
-  // The fallback: the rotation's open skills one by one, in the build's order, then each added key's skills, each once, up to the limit.
-  const rotationFallback = entries.filter(item => item.name && !item.locked).map(item => item.name);
-  const fallback = [...rotationFallback, ...added.flatMap(slot => slot.firesNow)].filter((name, index, all) => all.indexOf(name) === index).slice(0, room);
-  // Skills the build fires by hand: kept on their own keys once open, under Add later until then.
-  const manual = (rotation.manual ?? []).map(text => {
-    const name = barNames.find(item => String(text).startsWith(item)) ?? null;
-    const cell = name ? Object.values(skillBar.stacks).flatMap(stack => stack.skills).find(skill => skill.name === name) : null;
-    return { text, name, locked: Boolean(cell?.locked), unlockLevel: cell?.unlockLevel ?? null };
-  });
+  groups.sort((a, b) => OWN_KEY_ORDER.indexOf(a.reason) - OWN_KEY_ORDER.indexOf(b.reason));
+  const main = skillBar.stacks.LMB.skills[0];
   return {
-    ...base, pending: null, entries, keys, slots,
-    filled, used: filled.length, added, couldAdd,
-    later: [...rotationLater, ...addedLater],
-    fallback,
-    filler: rotation.filler ?? null,
-    manual,
-    level
+    ...base, ...empty, pending: null,
+    status: rule.status, blockStatus: block.status ?? null,
+    entries, keys: entries.map(entry => entry.key), used: entries.filter(entry => entry.usable).length,
+    mainAttack: main ? { name: main.name, icon: main.icon, why: main.why, triggers: main.triggers } : null,
+    opener: skillBar.opener.map(name => ownCells.find(skill => skill.name === name)).filter(Boolean).map(skill => ({ name: skill.name, icon: skill.icon, key: skill.key, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })),
+    ownKeys: groups,
+    // What joins the macro later, soonest first: rows locked at this level, with the level.
+    later: entries.flatMap(entry => entry.skills.filter(skill => skill.locked).map(skill => ({ name: skill.name, key: entry.key, row: skill.row, unlockLevel: skill.unlockLevel }))).sort((a, b) => a.unlockLevel - b.unlockLevel),
+    extras: skillBar.notOnBar.filter(item => item.extra),
+    levelNotes: block.levelNotes ?? []
   };
 }
 

@@ -84,10 +84,10 @@ function setFormLock() {
    what to do there, one step at a time. Reasons stay short and show where they are needed. */
 const VIEWS = {
   mastery: { title: 'Mastery', window: 'Skill', blurb: 'Which skills to level and which Specialty perks to pick', why: 'Wisdom Stones level your skills. Put them into the skills your build uses most, in this order.' },
-  'skill-bar': { title: 'Skill Bar', window: 'Where to put your skills', blurb: 'Where each skill should go on your bars. This is the plan, not what is on them now.', why: 'Each key fires the lowest ready skill in its stack, so the order on a key decides what you cast.' },
+  'skill-bar': { title: 'Skill Bar', window: 'Where to put your skills', blurb: 'Where each skill should go on your bars. This is the plan, not what is on them now.', why: 'Each key fires the lowest ready skill in its stack. Two stacks either side of your main attack make your macro; everything else gets its own key.' },
   stigma: { title: 'Stigma', window: 'Stigma', blurb: 'The four stigmas to slot, and good swaps', why: 'Stigmas are extra skills with their own keys. Four slots open as you level.' },
   daevanion: { title: 'Daevanion', window: 'Daevanion', blurb: 'Your boards with the route to take, node by node', why: 'Daevanion nodes add skill levels and stats. Each node has to touch one you already have.' },
-  macro: { title: 'Macro', window: 'Macro', blurb: 'The key order to put in Macro 1', why: 'A macro puts your rotation on one key that you hold in fights.' },
+  macro: { title: 'Macro', window: 'Macro', blurb: 'Stack A and stack B in Macro 1', why: 'Two entries, one for each stack either side of your main attack. Hold the macro key and your main attack together.' },
   stats: { title: 'Stats', window: 'Stats', blurb: 'What to look for on gear and manastones', why: "The build's stat priority: when you choose between two items, favour the stat higher on this list." }
 };
 const VIEW = Object.hasOwn(VIEWS, document.body.dataset.aeView ?? '') ? document.body.dataset.aeView : 'menu';
@@ -163,13 +163,13 @@ function viewStatus(view, plan) {
   }
   if (view === 'skill-bar') {
     const bar = plan.skillBar;
-    if (!bar) return 'Not ready yet';
-    return bar.stacks['1'].skills.length > 1 ? 'Key 1 is your rotation' : `${bar.basic} stays on left click`;
+    if (!bar || !bar.fromBlock) return 'Not ready yet';
+    return `Stack A, ${bar.mainAttack}, stack B`;
   }
   if (view === 'macro') {
     if (!plan.macro || plan.macro.pending) return 'Not confirmed yet';
-    const usable = plan.macro.used;
-    return usable ? `${usable} ${usable === 1 ? 'key' : 'keys'} in Macro 1` : 'Nothing to add yet';
+    const count = plan.macro.entries.length;
+    return plan.macro.used ? `${count === 2 ? 'Stack A and stack B' : 'Stack A'} in Macro 1` : 'Nothing to add yet';
   }
   if (view === 'stats') return isPending(plan.stats) ? 'Not confirmed yet' : `First: ${plan.stats.order[0]}`;
   return '';
@@ -315,205 +315,235 @@ function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, 
 }
 
 
-function renderMacroScreen(plan) {
-  const m = plan.macro;
-  // The macro facts (slots, delay, hold, binding) come from progression.json through the macro-order rule in mechanics.json.
-  const order = m?.facts ?? plan.macroOrder;
-  const delay = order && !isPending(order.value) ? order.value.delayMs : null;
-  if (!m || m.pending) return `${pendingNote(m?.pending ?? plan.rotation)}${order?.setup ? `<p class="ae-note">Open Skill, then Macro, to see the window in game.</p>` : ''}`;
-  // Laid out like the game's Macro window: one numbered entry per key, in the build's order, the key's stack shown under
-  // it, so a stacked key goes in once and never doubles up with its own skills. Locked rows stay, greyed with their level.
-  // Every slot the macro holds is drawn (the limit from progression.json); the ones left are dim free slots.
-  const usable = m.filled;
-  const max = m.maxEntries ?? usable.length;
-  const stackRow = skill => `<li class="${skill.locked ? 'is-locked' : ''}" data-macro-row="${skill.row}">${art(plan.skillIcons[skill.name])}<span>${esc(skill.name)}</span> <small>${skill.locked ? `from Lv ${esc(skill.unlockLevel)}` : `row ${esc(skill.row)}`}</small></li>`;
-  const entries = usable.map((slot, index) => `${index ? `<li class="ae-macro-delay" aria-hidden="true"><span>Delay</span><b>${esc(delay ?? 10)}</b><span>ms</span></li>` : ''}
-      <li class="ae-macro-entry" data-macro-entry="${index + 1}" data-macro-slot="${index + 1}" data-macro-key="${esc(slot.key)}" data-macro-from="${esc(slot.from)}"><span class="ae-macro-num">${index + 1}</span><span class="ae-macro-skill">${esc(keyName(slot.key))} <span class="ae-macro-of">(${esc(slot.skills.map(skill => skill.name).join(', '))})</span></span>
-        ${slot.stacked ? `<ol class="ae-macro-stack" aria-label="${esc(keyName(slot.key))} stack, row 0 first">${slot.skills.map(stackRow).join('')}</ol>` : ''}</li>`).join('')
-    + Array.from({ length: Math.max(0, max - usable.length) }, (_, index) => `<li class="ae-macro-free" data-macro-slot="${usable.length + index + 1}" data-macro-free><span class="ae-macro-num">${usable.length + index + 1}</span><span class="ae-macro-skill">Free slot</span></li>`).join('');
-  const count = m.maxEntries ? `<p class="ae-macro-count" id="aeMacroCount">A macro holds up to ${esc(m.maxEntries)} entries. This one uses ${esc(m.used)}.</p>` : '';
-  const stacked = usable.some(slot => slot.stacked);
-  const fromKeys = usable.length
-    ? `<p class="ae-macro-from" id="aeMacroFrom">Each entry is a key from your Skill Bar, in the order the build uses them.${stacked ? ` Adding a stacked key to the macro runs that key's stack (guides say; not tested).` : ''}</p>
-      ${m.added.length ? `<p class="ae-macro-added" id="aeMacroAdded">Then the other damage keys, longest cooldown first: ${esc(m.added.map(slot => keyName(slot.key)).join(', '))}.</p>` : ''}
-      ${stacked && m.fallback.length ? `<p class="ae-macro-fallback" id="aeMacroFallback">If your test shows a key only fires row 0, add the skills one by one in this order: ${esc(m.fallback.join(', '))}.</p>` : ''}`
-    : '';
-  const options = m.options.map(option => option.text.replace(/\.$/, ''));
-  const rule = `<div class="ae-macro-rule" id="aeMacroRule">
-      <p class="ae-mskills-title">How it picks the next skill ${ruleTag(m, 'macro-order', { test: false })}</p>
-      <p>${m.confirmed ? esc(m.text) : `Guides disagree. Either ${esc(options[0] ? options[0].charAt(0).toLowerCase() + options[0].slice(1) : 'it runs the entries in the listed order')}, or ${esc(options[1] ? options[1].charAt(0).toLowerCase() + options[1].slice(1) : 'it fires the first ready entry from the bottom like a stack')}.`}</p>
-      ${m.confirmed || !m.test ? '' : `<p class="ae-tag-test" data-rule-test="macro-order">Check it in game: ${esc(m.test)}</p>`}
-    </div>`;
-  // Add later: keys with nothing open yet, and skills the build fires by hand that are still locked. Never under Keep on your own keys.
-  const manualOpen = m.manual.filter(item => !item.locked);
-  const manualLater = m.manual.filter(item => item.locked);
-  const laterItems = [
-    ...m.later.map(slot => `<li data-later-key="${esc(slot.key)}">${art(plan.skillIcons[slot.skills[0].name])}<span>${esc(keyName(slot.key))} (${esc(slot.skills.map(skill => skill.name).join(', '))}) <b>Lv ${esc(slot.unlockLevel)}</b></span></li>`),
-    ...manualLater.map(item => `<li data-later-manual="${esc(item.name)}">${art(skillIcon(plan, item.text))}<span>${esc(item.text)}, on its own key <b>Lv ${esc(item.unlockLevel)}</b></span></li>`)
-  ];
-  const chip = text => `<li>${art(skillIcon(plan, text))}<span>${esc(text)}</span></li>`;
-  // Could add: keys the data gives no role yet, follow-ups while the chain rule is unconfirmed, keys past the limit. Never added on a guess.
-  const could = m.couldAdd.map(item => `<li data-could-add="${esc(item.key ?? item.names[0])}" data-could-kind="${esc(item.kind)}">${art(plan.skillIcons[item.names[0]])}<span>${esc(item.key ? `${keyName(item.key)} (${item.names.join(', ')})` : item.names.join(', '))} <small>${esc(item.reason)}</small></span></li>`);
-  return `<div class="ae-macro-screen">
-    <div class="ae-macro-main">
-    <div class="ae-macro-window" id="aeMacroWindow">
-      <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
-      ${count}
-      ${usable.length ? '' : '<p class="ae-muted">None of the macro skills are unlocked yet.</p>'}
-      ${max ? `<ol class="ae-macro">${entries}</ol>` : ''}
-    </div>
-      ${fromKeys}
-      ${rule}
-      ${order?.bind ? `<div class="ae-macro-bind" id="aeMacroBind">
-        <p class="ae-mskills-title">Put it on a key</p>
-        <ol class="ae-crumbs">${order.bind.path.map(step => `<li>${esc(step)}</li>`).join('')}</ol>
-        <div class="ae-bind-keys">
-          <span class="ae-bind-key">${ICON.mouse}<span>Side mouse button</span></span>
-          <span class="ae-bind-or">or</span>
-          <span class="ae-bind-key"><b>F</b><span>Any free key</span></span>
-        </div>
-        <p class="ae-muted">${order.bind.defaultKey ? `Default key: ${esc(order.bind.defaultKey)}. ` : 'There is no key set at the start, so bind one. '}${order.bind.hold ? 'Hold it in fights. Let go and the macro stops.' : ''}</p>
-      </div>` : ''}
-      ${order?.bind?.presets ? `<div class="ae-macro-presets" id="aeMacroPresets">
-        <p class="ae-mskills-title">Your ${esc(order.bind.presets)} presets</p>
-        <ol class="ae-preset-row">${Array.from({ length: order.bind.presets }, (_, index) => `<li class="${index === 0 ? 'is-on' : ''}"><b>Preset ${index + 1}</b><small>${index === 0 ? `${esc(plan.roleLabel)} build` : 'Spare'}</small></li>`).join('')}</ol>
-        <p class="ae-muted">${esc(order.bind.presetNote)}</p>
-      </div>` : ''}
-    </div>
-    <div class="ae-macro-side">
-      ${laterItems.length ? `<div id="aeMacroLater"><p class="ae-mskills-title">Add later</p><ul class="ae-chiplist">${laterItems.join('')}</ul></div>` : ''}
-      ${manualOpen.length ? `<div id="aeMacroManual"><p class="ae-mskills-title">Keep on your own keys</p><ul class="ae-chiplist">${manualOpen.map(item => chip(item.text)).join('')}</ul></div>` : ''}
-      ${m.filler ? `<div id="aeMacroFiller"><p class="ae-mskills-title">Filler</p><ul class="ae-chiplist">${chip(m.filler)}</ul></div>` : ''}
-      ${could.length ? `<div id="aeMacroCould"><p class="ae-mskills-title">Could add, check it first</p><ul class="ae-chiplist ae-could">${could.join('')}</ul></div>` : ''}
-      ${order?.setup ? `<details class="ae-perks ae-macro-howto"><summary>How to set it up in game</summary><ol>${order.setup.map(line => `<li>${esc(line)}</li>`).join('')}</ol><p>Hold the key to run it; pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys. How it picks the next skill: see above.</p></details>` : ''}
-    </div>
-  </div>`;
+/* The macro facts and rules (progression.json: macro-order facts, macro-rules) as the page shows them. A fact or rule that is
+   not confirmed carries the "Not confirmed yet" tag; one players disagree on says so. Sources stay in the data. */
+const factOf = (plan, id) => plan.macro?.facts?.facts?.find(item => item.id === id) ?? plan.macroOrder?.facts?.find(item => item.id === id) ?? null;
+const macroRule = (plan, id) => plan.macro?.rules?.rules?.find(item => item.id === id) ?? null;
+function statusTag(item, id) {
+  if (!item || item.status === 'confirmed') return '';
+  if (item.status === 'disputed') return `<span class="ae-tag is-unconfirmed" data-status-tag="${esc(id)}">Players disagree</span>`;
+  return `<span class="ae-tag is-unconfirmed" data-status-tag="${esc(id)}">Not confirmed yet</span>`;
 }
 
-/* Skill Bar, as the game works it: every key is a stack of up to four skills (rows 0 to 3, row 0 nearest the key).
-   Press the key and the lowest ready skill fires. The screen draws the keys as columns, row 0 at the bottom, and fills
-   them from the build (skillBar.stacks). Tap a cell for that skill's card, tap a key for the whole stack in words. */
-const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click' };
+/* Skill Bar, as the game draws it: every key a column of four rows, row 0 at the bottom nearest the key label. The
+   right-hand block is stack A, the main attack, stack B; the left-hand block holds every own-key skill, one per key, in
+   the order a player uses them. Tap a skill for where it goes and why; tap a key for the whole stack in words. */
+const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click', A: 'Stack A', B: 'Stack B' };
 const keyName = key => KEY_LABEL[key] ?? `Key ${key}`;
-const ROLE_LABEL = { fixed: 'Fixed by the game', key: 'Key skill', macro: 'In your rotation', build: 'Daevanion node skill', manual: 'Fired by hand', charged: 'Charged skill', stigma: 'Stigma', chain: 'Follow-up', other: 'Other skill' };
+const OWN_LABEL = { buff: 'Buff', toggle: 'Toggle', charged: 'Charged', stagger: 'Stagger', other: 'Situational', defensive: 'Defensive', heal: 'Heal', dash: 'Dash', movement: 'Movement' };
 const cooldownWords = item => (item.noCooldown ? 'no cooldown' : item.cooldownPending ? 'cooldown not captured yet' : `${item.cooldownSeconds} s cooldown`);
-/** The stack of one key in plain words: "Press 3: Overhead Slam fires when ready, otherwise Rending Blow." */
+/** The stack of one key in plain words: "Stack A: Rage Burst fires when ready, otherwise Overhead Slam, then ..." */
 function stackSentence(stack) {
   const names = stack.skills.map(skill => skill.name);
   const key = keyName(stack.key);
   if (!names.length) return `${key}: nothing on it. A free key.`;
-  if (names.length === 1) return `Press ${key.replace(/^Key /, '')}: ${names[0]}.${stack.reason ? ` ${stack.reason}` : ''}`;
-  return `Press ${key.replace(/^Key /, '')}: ${names[0]} fires when ready, otherwise ${names.slice(1).join(', then ')}.`;
+  if (names.length === 1) return `${key}: ${names[0]}.${stack.reason ? ` ${stack.reason}` : ''}`;
+  return `${key}: ${names[0]} fires when ready, otherwise ${names.slice(1).join(', then ')}.`;
 }
 /**
- * What a key fires at the player's level now: "Until Lv 14, key 1 fires Overhead Slam, then Rending Blow." Locked skills
+ * What a key fires at the player's level now: "Until Lv 32, stack A fires Overhead Slam, then Mocking Blade." Locked skills
  * stay on the plan, greyed with their level; this line says what the key really does today. Null when nothing is locked.
  */
 function firesNowSentence(stack) {
   if (!stack.skills.length || stack.nextUnlock === null) return null;
-  const key = keyName(stack.key).replace(/^Key /, 'key ');
+  const key = keyName(stack.key).replace(/^(Key|Stack)/, word => word.toLowerCase());
   if (!stack.firesNow.length) return `Until Lv ${stack.nextUnlock}, ${key} fires nothing yet.`;
   return `Until Lv ${stack.nextUnlock}, ${key} fires ${stack.firesNow.join(', then ')}.`;
 }
-/** The "What fires now" panel: every key that does something at this level, in bar order, with what joins it later. */
-function firesNowPanel(plan) {
-  const bar = plan.skillBar;
-  const order = ['1', '2', '3', '4', 'Q', 'E', '5', '6', '7', '8', 'LMB', 'RMB'];
-  const rows = order.map(key => bar.stacks[key]).filter(stack => stack.skills.length);
-  const live = rows.filter(stack => stack.firesNow.length);
-  const later = rows.filter(stack => !stack.firesNow.length);
-  const lockedOn = stack => stack.skills.filter(skill => skill.locked).map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
-  return `<section class="ae-fires-now" id="aeFiresNow" aria-labelledby="aeFiresNowTitle">
-      <h2 class="ae-mskills-title" id="aeFiresNowTitle">What fires now at Lv ${esc(plan.level)}</h2>
-      <ol class="ae-fires-list">${live.map(stack => `<li data-fires-key="${esc(stack.key)}"><b>${esc(keyName(stack.key))}</b> <span>${esc(stack.firesNow.join(', then '))}${stack.nextUnlock !== null ? ` <small>${esc(lockedOn(stack))}</small>` : ''}</span></li>`).join('')}</ol>
-      ${later.length ? `<p class="ae-fires-later" data-fires-later>Later: ${later.map(stack => `${esc(keyName(stack.key))}, ${esc(lockedOn(stack))}`).join('. ')}.</p>` : ''}
-    </section>`;
+/** Where a skill goes and why, one line: "Stack A row 0: Longest cooldown ..." or "Own key: charged ...". */
+function placeLine(item) {
+  if (item.role === 'stackA' || item.role === 'stackB' || item.role === 'chain') return `${keyName(item.key)} row ${item.row}: ${item.why ?? (item.noCooldown ? 'Filler: always ready, so it sits last.' : 'In the stack by cooldown.')}`;
+  if (item.role === 'main') return `Main attack, between the stacks. ${item.why ?? 'Hold it with the macro key.'}`;
+  return item.why ?? 'Own key.';
 }
+const MOUSE_SVG = left => `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="${left ? 'M12 2.9V10H5.9V9A6.1 6.1 0 0 1 12 2.9Z' : 'M12 2.9V10h6.1V9A6.1 6.1 0 0 0 12 2.9Z'}" fill="var(--ae-ice)"/><path d="M12 3v7M5.5 10h13" stroke="currentColor" stroke-width="1.4"/></svg>`;
 function keyCap(key, stack) {
-  const label = `${keyName(key)}: ${stackSentence(stack)}`;
-  if (key === 'LMB' || key === 'RMB') {
-    const left = key === 'LMB';
-    return `<span class="ae-keycap is-mouse" role="button" tabindex="0" data-bar-keycap="${key}" data-tip="${esc(KEY_LABEL[key])}" aria-label="${esc(label)}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="${left ? 'M12 2.9V10H5.9V9A6.1 6.1 0 0 1 12 2.9Z' : 'M12 2.9V10h6.1V9A6.1 6.1 0 0 0 12 2.9Z'}" fill="var(--ae-ice)"/><path d="M12 3v7M5.5 10h13" stroke="currentColor" stroke-width="1.4"/></svg></span>`;
-  }
-  return `<span class="ae-keycap" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key)}</span>`;
+  const label = `${keyName(key)}. ${stackSentence(stack)}`;
+  if (key === 'LMB' || key === 'RMB') return `<span class="ae-keycap is-mouse" role="button" tabindex="0" data-bar-keycap="${key}" data-tip="${esc(KEY_LABEL[key])}" aria-label="${esc(label)}">${MOUSE_SVG(key === 'LMB')}</span>`;
+  return `<span class="ae-keycap${key === 'A' || key === 'B' ? ' is-stack' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key === 'A' || key === 'B' ? keyName(key) : key)}</span>`;
 }
 function barCell(item, key, row, stack) {
   if (!item) return `<span class="ae-bar-cell is-empty" aria-hidden="true"></span>`;
-  const tip = `${keyName(key)}, row ${row}: ${item.name} · ${cooldownWords(item)}${item.locked ? ` · from Lv ${item.unlockLevel}` : ''}`;
-  return `<span class="ae-bar-cell is-${item.role}${item.locked ? ' is-locked' : ''}${stack.skills.length > 1 ? ' is-stacked' : ''}${item.cooldownPending ? ' is-cd-pending' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="${item.role}" data-bar-key="${row}:${key}" data-tip="${esc(tip)}" aria-label="${esc(tip)}">
+  const state = item.locked ? ` From Lv ${item.unlockLevel}.` : item.needsSlot ? ' Needs a stigma slot.' : item.learned === false ? ' Not learned yet.' : '';
+  const tip = `${keyName(key)}, row ${row}: ${item.name}.${state}`;
+  const dim = item.locked || item.needsSlot || item.learned === false;
+  return `<span class="ae-bar-cell is-${esc(item.role)}${dim ? ' is-locked' : ''}${stack.skills.length > 1 ? ' is-stacked' : ''}${item.cooldownPending ? ' is-cd-pending' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="${esc(item.role)}" data-bar-key="${row}:${esc(key)}" data-tip="${esc(tip)}" aria-label="${esc(tip)}">
     <span class="ae-mskill-name">${esc(item.name)}</span>${art(item.icon)}
-    ${item.rank ? `<span class="ae-mskill-rank">${item.rank}</span>` : ''}
     ${item.fixed ? `<span class="ae-bar-pin" aria-hidden="true">${ICON.lock}</span>` : ''}
+    ${stack.opener ? `<span class="ae-bar-order" aria-hidden="true">${esc(stack.opener)}</span>` : ''}
     ${item.cooldownPending && !item.fixed ? '<span class="ae-bar-cdq" aria-hidden="true">?</span>' : ''}
-    ${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : ''}
+    ${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : item.needsSlot ? '<span class="ae-lock is-slot" aria-hidden="true"><b>Slot</b></span>' : item.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(item.skillLevel)}</span>` : ''}
   </span>`;
+}
+/** One key as the game draws it: rows 3 to 0 top to bottom, the key label underneath. */
+function barColumn(bar, key) {
+  const stack = bar.stacks[key];
+  return `<div class="ae-bar-col${key === 'LMB' ? ' is-main' : ''}" data-bar-col="${esc(key)}">
+    ${[3, 2, 1, 0].map(row => `<span class="ae-bar-slot" data-bar-row="${row}">${barCell(bar.bars[row][key], key, row, stack)}</span>`).join('')}
+    ${keyCap(key, stack)}
+  </div>`;
+}
+/** The right-hand block: stack A, the main attack, stack B, each stack with its label. The Macro screen draws only this. */
+function rightBlock(bar, { id = 'aeRightBlock' } = {}) {
+  const head = key => key === 'LMB' ? '<span class="ae-block-head is-main">Main attack</span>' : `<span class="ae-block-head">${esc(keyName(key))}${bar.stacks[key].label ? `<small>${esc(bar.stacks[key].label)}</small>` : ''}</span>`;
+  return `<div class="ae-bar-block is-right" id="${id}" aria-label="Right-hand block: stack A, main attack, stack B">
+    ${bar.right.map(key => `<div class="ae-block-col" data-block-col="${esc(key)}">${head(key)}${barColumn(bar, key)}</div>`).join('')}
+  </div>`;
+}
+/** The "What fires now" panel: what stack A and stack B fire at this level, and what joins them later. */
+function firesNowPanel(plan) {
+  const bar = plan.skillBar;
+  const rows = ['A', 'B'].map(key => bar.stacks[key]).filter(stack => stack.skills.length);
+  const later = stack => stack.skills.filter(skill => skill.locked).map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
+  return `<section class="ae-fires-now" id="aeFiresNow" aria-labelledby="aeFiresNowTitle">
+      <h2 class="ae-mskills-title" id="aeFiresNowTitle">What fires now at Lv ${esc(plan.level)}</h2>
+      <ol class="ae-fires-list">${rows.map(stack => `<li data-fires-key="${esc(stack.key)}"><b>${esc(keyName(stack.key))}</b> <span>${stack.firesNow.length ? esc(stack.firesNow.join(', then ')) : 'Nothing yet'}${later(stack) ? ` <small>${esc(later(stack))}</small>` : ''}</span></li>`).join('')}</ol>
+    </section>`;
+}
+/** "Copy this bar": key by key, row by row, in the order to drag them in game, ending with the macro step. */
+function copyList(bar) {
+  const row = item => `<li class="${item.locked || item.needsSlot ? 'is-later' : ''}"><span>Row ${esc(item.row)}</span> ${esc(item.name)}${item.locked ? ` <small>from Lv ${esc(item.unlockLevel)}</small>` : item.needsSlot ? ' <small>needs a stigma slot</small>' : ''}</li>`;
+  return `<details class="ae-copy" id="aeCopyBar" open>
+    <summary class="ae-mskills-title">Copy this bar</summary>
+    <ol class="ae-copy-steps">${bar.copySteps.map(step => step.macro
+      ? `<li class="is-macro" data-copy-step="macro">${esc(step.text)}</li>`
+      : `<li data-copy-step="${esc(step.key)}"><b>${esc(step.label)}</b>${step.rows.length === 1 ? ` ${esc(step.rows[0].name)}${step.rows[0].locked ? ` <small>from Lv ${esc(step.rows[0].unlockLevel)}</small>` : step.rows[0].needsSlot ? ' <small>needs a stigma slot</small>' : ''}` : `<ol class="ae-copy-rows">${step.rows.map(row).join('')}</ol>`}</li>`).join('')}</ol>
+    <p class="ae-muted">Left click keeps ${esc(bar.mainAttack)}: the game sets it.</p>
+  </details>`;
 }
 function renderSkillBarScreen(plan) {
   const bar = plan.skillBar;
   if (!bar) return '<p class="ae-callout">The skill list for this class is not loaded yet.</p>';
-  const groups = [['1', '2', '3', '4'], ['5', '6', '7', '8'], ['Q', 'E'], ['LMB', 'RMB']];
-  const row = index => `<div class="ae-bar-row${index === 0 ? ' is-main' : ''}" data-bar-row="${index}">
-      ${groups.map(group => `<div class="ae-bar-group">${group.map(key => barCell(bar.bars[index][key], key, index, bar.stacks[key])).join('')}</div>`).join('')}
-      <span class="ae-bar-num" aria-hidden="true">${index}</span>
-    </div>`;
+  if (!bar.fromBlock) return `<p class="ae-callout">No bar layout is sourced for this build yet.</p>`;
   const chains = plan.chains?.chains ?? [];
-  const pendingCooldowns = Object.values(bar.stacks).flatMap(stack => stack.skills).filter(skill => skill.cooldownPending && skill.role !== 'fixed');
   const chip = (name, icon, note) => `<li>${art(icon)}<span>${esc(name)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
+  const used = bar.left.filter(key => bar.stacks[key].skills.length);
+  const leftKeys = bar.left.slice(0, Math.max(8, used.length));
+  const pendingCooldowns = Object.values(bar.stacks).flatMap(stack => stack.skills).filter(skill => skill.cooldownPending && !skill.fixed);
   return `<div class="ae-skillbar">
     <div class="ae-bar-top">
-    <div class="ae-bar-main">
-    <p class="ae-bar-swipe" aria-hidden="true">Swipe the bar to see Q, E and the mouse buttons ›</p>
-    <div class="ae-bar-scroll" id="aeSkillBar">
-      <div class="ae-bar-grid">
-        ${[3, 2, 1, 0].map(row).join('')}
-        <div class="ae-bar-row is-keys">${groups.map(group => `<div class="ae-bar-group">${group.map(key => keyCap(key, bar.stacks[key])).join('')}</div>`).join('')}<span class="ae-bar-num" aria-hidden="true"></span></div>
+      <div class="ae-bar-main">
+        <p class="ae-bar-swipe" aria-hidden="true">Swipe the keys to see them all ›</p>
+        <div class="ae-bar-scroll" id="aeSkillBar">
+          <div class="ae-bar-blocks">
+            <div class="ae-bar-block is-left" id="aeLeftBlock" aria-label="Left-hand block: one skill per key">${leftKeys.map(key => barColumn(bar, key)).join('')}</div>
+            ${rightBlock(bar)}
+          </div>
+        </div>
       </div>
+      ${firesNowPanel(plan)}
     </div>
-    </div>
-    ${firesNowPanel(plan)}
-    </div>
-    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first, then 1, 2 and 3. Cooldown skills sit low, the no-cooldown filler on top. Tap a key to read its stack. ${ruleTag(bar.rule, 'skill-stack')}</p>
-    <ul class="ae-legend-row" aria-label="Key">
-      <li><span class="ae-swatch is-fixed"></span>Fixed: the game keeps ${esc(bar.basic)} on left click</li>
-      <li><span class="ae-swatch is-macro"></span>Your rotation, stacked on key 1${bar.stacks['2'].skills.length > 1 && bar.stacks['2'].skills[0].role === 'macro' ? ' and 2' : ''}, a filler on top</li>
-      <li><span class="ae-lock is-key">${ICON.lock}<b>Lv 14</b></span>Grey: from that level. Until then the key fires the open skills</li>
-      <li><span class="ae-swatch is-key"></span><span class="ae-mskill-rank">1</span>Key skill, in levelling order</li>
-      <li><span class="ae-swatch is-manual"></span>Fired by hand or charged: its own key</li>
-      <li><span class="ae-swatch is-stigma"></span>Stigma, its own key</li>
-      <li><span class="ae-bar-cdq is-key">?</span>Cooldown not captured yet: placed by its role in the build</li>
-    </ul>
-    <p class="ae-muted ae-bar-note">This is where the build puts each skill, not what is on your bars now. The official AION 2 site only says whether a skill is equipped, never which key or row it is on. Your macro does not need a slot: it has its own key (see Macro).</p>
+    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. Stack A and stack B sit either side of your main attack and go into your macro. Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''}</p>
+    ${copyList(bar)}
     ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills ${ruleTag(plan.chains, 'chain-follow-up', { test: false })}</p>
       <ul class="ae-chiplist ae-followups">${chains.map(chain => chip(chain.followUp, plan.skillIcons[chain.followUp], chain.pending ? chain.pending.reason : `follow-up to ${chain.leadIns.join(' or ')}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}${chain.reach ? `. ${chain.reach.note}.` : ''}`)).join('')}</ul>
       <p class="ae-muted">Press a follow-up when it lights up.${plan.chains.confirmed ? '' : ` It goes above its lead-in in the stack once the chain rule is confirmed.${plan.chains.test ? ` <span class="ae-tag-test" data-rule-test="chain-follow-up">Check it in game: ${esc(plan.chains.test)}</span>` : ''}`}</p></div>` : ''}
     ${bar.notOnBar.length ? `<div class="ae-icon-group" id="aeNotOnBar"><p class="ae-mskills-title">Not on your bar</p><ul class="ae-chiplist">${bar.notOnBar.map(skill => chip(skill.name, skill.icon, skill.reason)).join('')}</ul></div>` : ''}
-    ${pendingCooldowns.length ? `<p class="ae-muted ae-bar-pending">Cooldown not captured yet for ${pendingCooldowns.map(skill => skill.name).join(', ')}: placed by role in the build. Check each tooltip in game.</p>` : ''}
+    ${pendingCooldowns.length ? `<p class="ae-muted ae-bar-pending">Cooldown not captured yet for ${esc(pendingCooldowns.map(skill => skill.name).join(', '))}. Check each tooltip in game.</p>` : ''}
+    <p class="ae-muted ae-bar-note">This is where the build puts each skill, not what is on your bars now. The official AION 2 site only says whether a skill is equipped, never which key or row it is on.</p>
   </div>`;
 }
-/** A cell's card: the skill's own card, with where it sits in the stack and what the key does. */
+/** A skill's triggers on its card: each with its condition or effect, a skill-level one dim until the Daeva reaches it. */
+function triggersHtml(item) {
+  const list = item.triggers ?? [];
+  if (!list.length) return '';
+  const LABEL = { condition: 'Needs', opens: 'Gives', cdCut: 'Cooldown' };
+  return `<ul class="ae-triggers" data-triggers>${list.map(trigger => `<li class="${trigger.dim ? 'is-dim' : ''}" data-trigger-level="${esc(trigger.skillLevel ?? '')}"><b>${esc(LABEL[trigger.type] ?? 'Note')}</b> ${esc(trigger.text)}${trigger.from ? ` <small>${esc(trigger.from)}</small>` : ''}</li>`).join('')}</ul>
+    ${list.some(trigger => trigger.status !== 'confirmed') ? '<p class="ae-card-line"><span class="ae-tag is-unconfirmed">Not confirmed yet</span></p>' : ''}`;
+}
+/** A cell's card: the skill's own card, then where it goes and why, its condition and triggers. */
 function barSkillCard(name, role, key = null) {
   const plan = state.plan;
   const stack = key ? plan.skillBar.stacks[key] : null;
-  const place = stack ? `<p class="ae-card-line is-stack">${esc(stackSentence(stack))}</p>` : '';
-  const entry = [...plan.mastery.active, ...plan.mastery.passive].find(item => item.name === name);
+  const item = stack?.skills.find(skill => skill.name === name) ?? null;
+  const place = item ? `<p class="ae-card-line is-stack" data-place-line>${esc(placeLine(item))}</p>${item.condition ? `<p class="ae-card-line" data-condition>${esc(item.condition)}</p>` : ''}${item.needsSlot ? '<p class="ae-card-line" data-needs-slot>A stigma swap: it needs one of your four stigma slots before it fires.</p>' : ''}${triggersHtml(item)}` : '';
+  const entry = [...plan.mastery.active, ...plan.mastery.passive].find(skill => skill.name === name);
   const index = plan.stigmas.slots?.findIndex(slot => slot.name === name) ?? -1;
-  if (role === 'stigma' && index >= 0) return `${stigmaCard(plan, index)}${place}`;
+  if (index >= 0) return `${stigmaCard(plan, index)}${place}`;
   if (entry) return `${masteryCard(entry)}${place}`;
-  return `${infoCardHtml({ icon: plan.skillIcons[name], title: name, sub: ROLE_LABEL[role] ?? 'Skill' })}${place}`;
+  return `${infoCardHtml({ icon: plan.skillIcons[name], title: name, sub: item?.stigma ? 'Stigma' : 'Skill' })}${place}`;
 }
-/** A key's panel: the stack in plain words, then each skill's card, lowest row first. */
+/** A key's panel: the stack in plain words, then each skill with its row and why, lowest row first. */
 function keyPanel(key) {
   const plan = state.plan;
   const stack = plan.skillBar.stacks[key];
   const cards = stack.skills.map((skill, row) => `<section class="ae-stack-card" data-stack-row="${row}">
-      <p class="ae-slot-label">Row ${row}${row === 0 ? ', fires first' : ''} · ${esc(cooldownWords(skill))}</p>
-      ${barSkillCard(skill.name, skill.role).replace(/ id="aeInfoTitle"/, '')}
+      <p class="ae-slot-label">Row ${row}${row === 0 ? ', fires first' : ''}: ${esc(cooldownWords(skill))}</p>
+      ${barSkillCard(skill.name, skill.role, key).replace(/ id="aeInfoTitle"/, '')}
     </section>`).join('');
   return `<div class="ae-card-head"><div><h3 id="aeInfoTitle">${esc(keyName(key))}</h3><p>${stack.skills.length === 1 ? 'One skill on this key' : `${stack.skills.length} skills stacked, rows 0 to ${stack.skills.length - 1}`}</p></div></div>
     <p class="ae-card-line is-stack" data-key-say>${esc(stackSentence(stack))}</p>
     ${firesNowSentence(stack) ? `<p class="ae-card-line is-now" data-key-now>${esc(firesNowSentence(stack))}</p>` : ''}
     ${stack.fillerMissing ? `<p class="ae-card-line" data-key-nofiller>${esc(stack.fillerMissing)}</p>` : ''}
     ${cards || '<p class="ae-empty">Nothing on this key.</p>'}`;
+}
+
+/* Macro, as the game's Macro window: entry 1 stack A, entry 2 stack B, 10 ms delay each, copied straight across. Above it
+   the right-hand block of the bar, the same picture the Skill Bar screen draws, so the two never disagree. */
+function renderMacroScreen(plan) {
+  const m = plan.macro;
+  const order = m?.facts ?? plan.macroOrder;
+  if (!m || m.pending) return `${pendingNote(m?.pending ?? plan.rotation)}${order?.setup ? `<p class="ae-note">Open Skill, then Macro, to see the window in game.</p>` : ''}`;
+  const bar = plan.skillBar;
+  const delay = m.delayMs;
+  const entries = m.entries.map(entry => `<li class="ae-macro-entry" data-macro-entry="${entry.entry}" data-macro-key="${esc(entry.key)}">
+      <span class="ae-macro-num">${entry.entry}</span>
+      <span class="ae-macro-skill"><b>${esc(keyName(entry.key))}</b>${entry.label ? ` <span class="ae-macro-of">${esc(entry.label)}</span>` : ''}${entry.usable ? '' : ` <small>From Lv ${esc(entry.unlockLevel)}</small>`}</span>
+      <span class="ae-macro-rows" aria-label="${esc(`${keyName(entry.key)}, row 0 first: ${entry.skills.map(skill => skill.name).join(', ')}`)}">${entry.skills.map(skill => `<span class="ae-macro-row${skill.inMacro ? '' : ' is-out'}" data-macro-row="${skill.row}" data-tip="${esc(`${skill.name}${skill.out ? `. ${skill.out}` : ''}`)}">${art(plan.skillIcons[skill.name])}</span>`).join('')}</span>
+    </li>
+    <li class="ae-macro-delay" aria-label="Delay ${esc(delay)} ms"><span>Delay</span><b>${esc(delay)}</b><span>ms</span></li>`).join('');
+  const hold = macroRule(plan, 'hold-basic');
+  const skip = factOf(plan, 'skip-on-cooldown');
+  const later = m.later.length ? `<p class="ae-macro-later" id="aeMacroLater">Joins later: ${m.later.map(item => `<span data-later="${esc(item.name)}">${esc(item.name)} <b>Lv ${esc(item.unlockLevel)}</b></span>`).join(', ')}.</p>` : '';
+  const opener = m.opener.length ? `<section class="ae-macro-opener" id="aeMacroOpener" aria-labelledby="aeOpenerTitle">
+      <h2 class="ae-mskills-title" id="aeOpenerTitle">Open with</h2>
+      <ol class="ae-opener-strip">${m.opener.map((item, index) => `<li class="${item.locked || item.needsSlot ? 'is-locked' : ''}" data-opener="${index + 1}"><span class="ae-opener-num">${index + 1}</span><span class="ae-bar-cell is-opener${item.locked || item.needsSlot ? ' is-locked' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="opener" data-bar-key="0:${esc(item.key)}" aria-label="${esc(`${index + 1}: ${item.name}, ${keyName(item.key)}`)}" data-tip="${esc(item.name)}">${art(item.icon)}${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : ''}</span><small>${esc(item.name)}</small></li>`).join('')}<li class="is-then"><span>Then hold the macro</span></li></ol>
+    </section>` : '';
+  const groups = m.ownKeys.length ? `<section class="ae-own-keys" id="aeOwnKeys" aria-labelledby="aeOwnTitle">
+      <h2 class="ae-mskills-title" id="aeOwnTitle">Keep on their own keys ${statusTag(macroRule(plan, 'own-keys'), 'own-keys')}</h2>
+      <div class="ae-own-groups">${m.ownKeys.map(group => `<div class="ae-own-group" data-own-group="${esc(group.reason)}"><p>${esc(OWN_LABEL[group.reason] ?? 'Own key')}</p><div class="ae-icon-row">${group.skills.map(skill => `<span class="ae-bar-cell is-own${skill.locked || skill.needsSlot ? ' is-locked' : ''}" role="button" tabindex="0" data-bar-skill="${esc(skill.name)}" data-bar-role="own" data-bar-key="0:${esc(skill.key)}" data-tip="${esc(`${skill.name}: ${skill.why}`)}" aria-label="${esc(`${skill.name}. ${skill.why}`)}">${art(skill.icon)}</span>`).join('')}</div></div>`).join('')}</div>
+    </section>` : '';
+  const delayRule = macroRule(plan, 'delay');
+  const queue = factOf(plan, 'skill-queue');
+  const mouse = factOf(plan, 'mouse-bind-aion1');
+  const test = macroRule(plan, 'test-dummy');
+  return `<div class="ae-macro-screen">
+    <div class="ae-macro-main">
+      ${rightBlock(bar, { id: 'aeMacroBlock' })}
+      <div class="ae-macro-window" id="aeMacroWindow">
+        <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
+        <ol class="ae-macro">${entries}</ol>
+        <p class="ae-macro-count" id="aeMacroCount">Two entries, one for each stack either side of your main attack.</p>
+      </div>
+      <p class="ae-macro-skip" id="aeMacroRule">Each entry fires its stack's first ready skill. ${skip ? `${esc(skip.text.split('. ')[0])}. ${statusTag(skip, 'skip-on-cooldown')}` : ''}</p>
+      ${later}
+      <section class="ae-macro-hold" id="aeMacroHold" aria-labelledby="aeHoldTitle">
+        <h2 class="ae-mskills-title" id="aeHoldTitle">How to run it ${statusTag(hold, 'hold-basic')}</h2>
+        <div class="ae-hold-keys" aria-hidden="true"><span class="ae-hold-key"><b>Macro</b><small>your macro key</small></span><span class="ae-hold-plus">+</span><span class="ae-hold-key is-mouse">${MOUSE_SVG(true)}<small>${esc(m.mainAttack?.name ?? bar.mainAttack)}</small></span></div>
+        <p>Hold both. Your basic attack fills the gaps, gives MP and cuts each animation short.</p>
+      </section>
+    </div>
+    <div class="ae-macro-side">
+      ${opener}
+      ${groups}
+      <section class="ae-macro-settings" id="aeMacroSettings" aria-labelledby="aeSettingsTitle">
+        <h2 class="ae-mskills-title" id="aeSettingsTitle">Settings</h2>
+        <dl class="ae-settings">
+          <div data-setting="delay"><dt>Delay</dt><dd>${esc(delay)} ms. ${delayRule?.value?.slowMs ? `${esc(delayRule.value.slowMs.join(' to '))} ms if skills fail to fire or your ping is ${esc(delayRule.value.pingMs)} ms or more.` : ''} ${statusTag(delayRule, 'delay')}</dd></div>
+          ${order?.bind ? `<div data-setting="bind" id="aeMacroBind"><dt>Key</dt><dd><ol class="ae-crumbs">${order.bind.path.map(step => `<li>${esc(step)}</li>`).join('')}</ol>${order.bind.defaultKey ? '' : 'No key is set at the start, so bind one.'}${mouse ? ` ${esc(mouse.text)} ${statusTag(mouse, 'mouse-bind-aion1')}` : ''}</dd></div>` : ''}
+          ${queue ? `<div data-setting="skill-queue"><dt>Skill Queue</dt><dd>Players disagree. Test both. ${statusTag(queue, 'skill-queue')}</dd></div>` : ''}
+          ${order?.bind?.presets ? `<div data-setting="presets" id="aeMacroPresets"><dt>Presets</dt><dd>${esc(order.bind.presetNote)}</dd></div>` : ''}
+        </dl>
+      </section>
+      ${test ? `<section class="ae-macro-test" id="aeMacroTest" aria-labelledby="aeTestTitle">
+        <h2 class="ae-mskills-title" id="aeTestTitle">Test it on the training dummy ${statusTag(test, 'test-dummy')}</h2>
+        <ol class="ae-test-steps">${(test.steps ?? []).map(step => `<li>${esc(step)}</li>`).join('')}</ol>
+        <p class="ae-muted">Open Combat Analysis with Ctrl+X.${test.check ? ` <span class="ae-tag-test" data-fact-test="test-dummy">Check it in game: ${esc(test.check)}</span>` : ''}</p>
+      </section>` : ''}
+      ${m.extras.length ? `<div class="ae-icon-group" id="aeMacroExtras"><p class="ae-mskills-title">Some players add</p><ul class="ae-chiplist">${m.extras.map(item => `<li>${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.reason)}</small></span></li>`).join('')}</ul></div>` : ''}
+      ${m.levelNotes.length ? `<ul class="ae-macro-notes" id="aeMacroNotes">${m.levelNotes.map(note => `<li>${esc(note.text)}</li>`).join('')}</ul>` : ''}
+    </div>
+  </div>`;
 }
 
 /* The stat chain under one combat stat: the main and deity stats that feed it, with the Daeva's own points when live
@@ -595,39 +625,34 @@ function guideSteps(view, plan) {
     for (const alt of s.alternatives.slice(0, 2)) add(`Want a swap? ${alt.name}. ${alt.why}`, `[data-alt="${CSS.escape(alt.name)}"]`);
   } else if (view === 'skill-bar') {
     const bar = plan.skillBar;
-    if (!bar) return [];
+    if (!bar || !bar.fromBlock) return [];
     const stacks = bar.stacks;
-    add(`Left click always fires ${bar.basic}. The game keeps it there, so build around it.`, '[data-bar-key="0:LMB"]');
-    add('Every key is a stack, rows 0 to 3, row 0 nearest the key. Press the key and the lowest ready skill fires.', '#aeStackRule');
-    for (const key of ['1', '2', '3', '4']) {
+    add(`Your right-hand block: stack A, your main attack (${bar.mainAttack}) on left click, then stack B. These two stacks are your macro.`, '#aeRightBlock');
+    for (const key of ['A', 'B']) {
       const stack = stacks[key];
+      if (!stack.skills.length) continue;
       const now = firesNowSentence(stack);
-      // The "always does something" line only where a filler really tops the stack; otherwise the reason the build has none.
-      if (stack.skills.length > 1) add(`${stackSentence(stack)} ${stack.fillerMissing ? stack.fillerMissing : `Cooldown skills sit low, ${stack.skills.at(-1).name} (the filler) on top, so the key always does something.`}${now ? ` ${now}` : ''}`, `[data-bar-keycap="${key}"]`);
-      else if (stack.skills.length === 1 && key === '1') add(`${stackSentence(stack)}${now ? ` ${now}` : ''}`, `[data-bar-keycap="${key}"]`);
+      add(`${stackSentence(stack)}${now ? ` ${now}` : ''}`, `[data-bar-keycap="${key}"]`);
     }
-    if (bar.stacks['1'].nextUnlock !== null) add(`This is what your keys fire at Lv ${plan.level}. Greyed skills join as you level.`, '#aeFiresNow');
-    const own = ['Q', 'E'].filter(key => stacks[key].solo && stacks[key].skills.length);
-    if (own.length) add(`${own.map(key => `${key}: ${stacks[key].skills[0].name}`).join('. ')}. On their own keys: ${stacks[own[0]].reason}`, `[data-bar-row="0"] .ae-bar-group:nth-child(3)`);
-    if (['5', '6', '7', '8'].some(key => stacks[key].skills.length)) add('Keys 5 to 8: your stigmas, one each. Each one goes on as its slot opens.', `[data-bar-row="0"] .ae-bar-group:nth-child(2)`);
+    if (['A', 'B'].some(key => stacks[key].nextUnlock !== null)) add(`This is what your stacks fire at Lv ${plan.level}. Greyed skills join as you level.`, '#aeFiresNow');
+    const own = bar.left.map(key => stacks[key].skills[0]).filter(Boolean);
+    if (own.length) add(`The left-hand block: one skill per key, in the order you use them${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it stays off the macro.`, '#aeLeftBlock');
+    add('Copy it across key by key, then add stack A and stack B to Macro 1.', '#aeCopyBar');
     if (plan.chains?.chains?.length) add('Follow-up skills light up after their lead-in. Press them then.', '#aeFollowUps');
     if (bar.notOnBar.length) add('Skills that get no key are listed here, with the reason.', '#aeNotOnBar');
   } else if (view === 'macro') {
     const m = plan.macro;
     if (!m || m.pending) return [];
-    const usable = m.filled;
-    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add your keys in this order${usable.length ? `: ${usable.map(slot => keyName(slot.key).replace(/^Key /, 'key ')).join(', ')}` : ''}.${m.maxEntries ? ` A macro holds up to ${m.maxEntries} entries. This one uses ${m.used}.` : ''}`, '#aeMacroWindow');
-    if (usable[0]) add(`Number 1 is ${keyName(usable[0].key)} (${usable[0].skills.map(skill => skill.name).join(', ')}). It goes first.`, '[data-macro-entry="1"]');
-    if (usable.some(slot => slot.stacked) && m.fallback.length) add(`A stacked key in a macro running its whole stack is not tested yet. If yours only fires row 0, add the skills one by one: ${m.fallback.join(', ')}.`, '#aeMacroFallback');
-    const manualOpen = m.manual.filter(item => !item.locked);
-    if (manualOpen.length) add(`Keep ${manualOpen.map(item => item.text).join(' and ')} on their own keys. Use them when you need them.`, '#aeMacroManual');
-    if (m.filler) add(`When MP runs low: ${m.filler}.`, '#aeMacroFiller');
-    if (m.later.length || m.manual.some(item => item.locked)) add('Add these when you unlock them.', '#aeMacroLater');
-    if (!m.confirmed) add(`How the macro picks its next skill is not confirmed yet. ${m.test ?? ''}`.trim(), '#aeMacroRule');
+    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add ${m.entries.length === 2 ? 'stack A, then stack B' : 'stack A'}, ${m.delayMs} ms delay each.`, '#aeMacroWindow');
+    if (m.entries[0]) add(`Entry 1 is stack A: ${m.entries[0].skills.map(skill => skill.name).join(', ')}. It fires the first one that is ready.`, '[data-macro-entry="1"]');
+    if (m.later.length) add('These join the stacks as you level. They sit in place already.', '#aeMacroLater');
+    add(`Hold the macro key and your main attack, ${m.mainAttack?.name ?? plan.skillBar.mainAttack}, together.`, '#aeMacroHold');
+    if (m.opener.length) add(`Before the macro: ${m.opener.map(item => item.name).join(', then ')}.`, '#aeMacroOpener');
+    if (m.ownKeys.length) add('Keep these off the macro, on their own keys. Tap one to see why.', '#aeOwnKeys');
     const bind = m.facts?.bind ?? plan.macroOrder?.bind;
-    if (bind) add(`Now give the macro a key: ${bind.path.join(', ')}. A side mouse button works well. Hold it in fights.`, '#aeMacroBind');
+    if (bind) add(`Give the macro a key: ${bind.path.join(', ')}. Hold it in fights.`, '#aeMacroBind');
     if (bind?.presets) add(bind.presetNote, '#aeMacroPresets');
-    if (m.couldAdd.length) add('Could add: our data does not say enough yet to add these for you. Check them in game first.', '#aeMacroCould');
+    if (m.rules?.rules?.some(rule => rule.id === 'test-dummy')) add('Then test it on the training dummy and keep the setup with the higher number.', '#aeMacroTest');
   } else if (view === 'stats') {
     if (isPending(plan.stats)) return [];
     plan.stats.order.slice(0, 3).forEach((stat, index) => add(`${index === 0 ? 'First' : index === 1 ? 'Then' : 'After that'}: ${stat}.`, `[data-stat-rank="${index + 1}"]`));

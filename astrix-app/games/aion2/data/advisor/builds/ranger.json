@@ -226,8 +226,144 @@
           "region": "global",
           "reliability": "high",
           "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "dg-macros",
+          "title": "Macros guide",
+          "publisher": "Daeva Guides",
+          "url": "https://daevaguides.com/en/guides/macros",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros",
+          "dg-macros",
+          "tgw-ranger-skills"
+        ],
+        "stackA": {
+          "label": "Set up",
+          "rows": [
+            {
+              "name": "Snare Shot",
+              "why": "Slows the target so stack B's next pass lands on a slowed target."
+            },
+            {
+              "name": "Gale Arrow",
+              "why": "More PvE damage and speed for 10 s."
+            },
+            {
+              "name": "Drill Dart",
+              "why": "Short cooldown bleed, MP back on a critical hit."
+            },
+            {
+              "name": "Tempest Shot",
+              "why": "Filler: always ready, so it sits last.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Snipe",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackB": {
+          "label": "Pay off",
+          "rows": [
+            {
+              "name": "Explosive Arrow",
+              "why": "Longest cooldown, hits harder on the slowed target."
+            },
+            {
+              "name": "Burst Arrow",
+              "why": "Only on a slowed or rooted target."
+            },
+            {
+              "name": "Griffon Arrow",
+              "why": "Fire damage over time."
+            },
+            {
+              "name": "Arrow Scattershot",
+              "why": "Only on a staggered target, so it sits on top where it never blocks.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "opener": [
+          "Vaizel's Authority",
+          "Bow of Blessing",
+          "Supporting Fire"
+        ],
+        "ownKeys": [
+          {
+            "name": "Vaizel's Authority",
+            "reason": "buff",
+            "why": "Burst buff: press the three burst buffs together."
+          },
+          {
+            "name": "Bow of Blessing",
+            "reason": "buff",
+            "why": "Burst buff: press the three burst buffs together."
+          },
+          {
+            "name": "Supporting Fire",
+            "reason": "buff",
+            "why": "Burst buff: press the three burst buffs together."
+          },
+          {
+            "name": "Deadshot",
+            "reason": "charged",
+            "why": "Charged: fire it full after Marking Shot's Precision. A macro only fires stage 1."
+          },
+          {
+            "name": "Arrow Storm",
+            "reason": "stagger"
+          },
+          {
+            "name": "Explosion Trap",
+            "reason": "other"
+          },
+          {
+            "name": "Mother Nature's Breath",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Marking Shot",
+            "reason": "movement",
+            "why": "Moves you: keep it for when you mean to move. It grants Precision for Deadshot."
+          }
+        ],
+        "levelNotes": []
+      }
     }
   ]
 }

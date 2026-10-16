@@ -88,13 +88,16 @@ check('specialty picks sit at a level where that perk exists',()=>{
 check('Gladiator skill unlock levels and stigma names match the armory catalogue',()=>{
   const armorySkills=new Map(json('games/aion2/data/gladiator/skills.json').records.map(record=>[record.name,record.needLevel]));
   const armoryStigmas=new Set(json('games/aion2/data/gladiator/stigmas.json').records.map(record=>record.name));
-  for(const record of skills.records.filter(item=>item.class==='Gladiator'))assert.equal(record.unlockLevel,armorySkills.get(record.name),record.name);
+  // Macro builder (16 Oct 2026): stigma records added for their macro use are checked against the stigma catalogue; every skill record against the skill catalogue.
+  for(const record of skills.records.filter(item=>item.class==='Gladiator')){
+    if(record.kind==='stigma'){assert.ok(armoryStigmas.has(record.name),record.name);assert.equal(record.unlockLevel,22,record.name);}
+    else assert.equal(record.unlockLevel,armorySkills.get(record.name),record.name);
+  }
   for(const build of builds.Gladiator.records.filter(item=>item.stigmas&&!item.stigmas.pending)){
     for(const slot of build.stigmas.slots)assert.ok(armoryStigmas.has(slot.name),slot.name);
     for(const alt of build.stigmas.alternatives)assert.ok(armoryStigmas.has(alt.name),alt.name);
   }
 });
-
 check('no em or en dashes in advisor data',()=>{
   for(const text of [JSON.stringify(progression),JSON.stringify(skills),...Object.values(builds).map(value=>JSON.stringify(value))])assert.doesNotMatch(text,/[\u2013\u2014]/);
 });
@@ -163,13 +166,15 @@ check('Skill bar: basic skill fixed on left click for every class, nothing place
     assert.equal(new Set(names).size,names.length,`${name}: no skill on two keys`);
     assert.ok(Object.values(bar.bars[0]).every(cell=>!cell||cell.icon),`${name}: icons on bar 0`);
   }
-  // Skill stacks (10 Oct 2026): the rotation is one stack on key 1, so Ruinous Blow sits on row 0 of key 1 (it used to be its own key 3).
+  // Macro builder (16 Oct 2026): Ruinous Blow is a dash, so it leaves the stack for its own key (it was row 0 of key 1). Still locked at Lv 12.
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).skillBar;
-  assert.equal(glad.stacks['1'].skills[0].name,'Ruinous Blow','Row 0 of key 1: the first rotation skill fires first');
-  assert.equal(glad.bars[0]['1'].name,'Ruinous Blow');
-  assert.equal(glad.bars[0]['1'].locked,true,'Ruinous Blow locked at Lv 12 (unlocks at 14)');
+  const key=glad.left.find(item=>glad.stacks[item].skills[0]?.name==='Ruinous Blow');
+  assert.ok(key,'Ruinous Blow has a key of its own');
+  assert.equal(glad.stacks[key].skills.length,1);
+  assert.equal(glad.stacks[key].skills[0].reason,'dash');
+  assert.equal(glad.stacks[key].skills[0].locked,true,'Ruinous Blow locked at Lv 12 (unlocks at 14)');
+  assert.equal(glad.bars[0].A.name,'Rage Burst','Row 0 of stack A fires first');
 });
-
 check('Each next move names the screen that shows it; stigmas carry the game icon',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
   assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery']);
@@ -652,9 +657,11 @@ check('stacks for all 8 classes: at most four rows, no no-cooldown skill below a
       assert.deepEqual(stackProblems(bar),[],`${name} Lv ${level}: the check agrees`);
       for(const stack of stacksOf(plan)){
         assert.ok(stack.skills.length<=4,`${name}: key ${stack.key} holds ${stack.skills.length}`);
-        const filler=stack.skills.findIndex(skill=>skill.noCooldown);
+        // A skill that is always ready sits on top; one that fires only on a condition (stagger, a window) never blocks, so it may sit below it.
+        const filler=stack.skills.findIndex(skill=>skill.noCooldown&&!skill.conditional);
         if(filler>=0)assert.equal(filler,stack.skills.length-1,`${name}: the no-cooldown skill on key ${stack.key} is on top`);
         if(stack.solo)assert.ok(stack.skills.length===1&&stack.reason,`${name}: a single-skill key says why`);
+        if(stack.skills.length>1)assert.ok(['A','B'].includes(stack.key),`${name}: only stack A and stack B are stacks`);
       }
       assert.deepEqual(bar.stacks.LMB.skills.map(skill=>skill.name),[bar.basic],`${name}: left click holds the basic skill alone`);
       assert.equal(bar.bars[0].LMB.fixed,true);
@@ -665,30 +672,33 @@ check('stacks for all 8 classes: at most four rows, no no-cooldown skill below a
     }
   }
 });
-
-check('Gladiator stacks: the rotation on key 1 in build order with the filler rule, by-hand skills on their own keys, stigmas outside the rotation on 5 to 8',()=>{
+check('Gladiator bar: stack A, Keen Strike, stack B as the research record; own keys left to right in the order a player uses them',()=>{
   const bar=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).skillBar;
-  // Walkthrough fix (11 Oct 2026): a stigma is never in a stack and every stacked key ends with a filler, so Rage Burst moves to key 7
-  // and Rending Blow (the build's filler) tops key 1. Key 2 takes the next key skill the rotation does not use.
-  assert.deepEqual(bar.stacks['1'].skills.map(skill=>skill.name),['Ruinous Blow','Overhead Slam','Rending Blow'],'Key 1: the rotation, row 0 first, the filler on top');
-  assert.deepEqual(bar.stacks['2'].skills.map(skill=>skill.name),['Crushing Wave'],'Key 2: a Daevanion node skill the rotation does not use');
+  assert.deepEqual(bar.right,['A','LMB','B'],'The right-hand block: stack A, the main attack, stack B');
+  assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),['Rage Burst','Overhead Slam','Mocking Blade','Ankle Slice']);
+  assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),['Blade Toss','Crushing Wave','Sword Aura Rampage','Rending Blow']);
+  assert.equal(bar.stacks.LMB.skills[0].name,'Keen Strike');
   assert.equal(bar.stacks.LMB.skills[0].noCooldown,true,'Keen Strike, the filler, is the basic on left click');
-  assert.deepEqual([bar.stacks.Q,bar.stacks.E].map(stack=>[stack.skills[0].name,stack.solo,stack.skills[0].role]),[['Defiance',true,'manual'],['Rush Strike',true,'manual']]);
-  assert.match(bar.stacks.Q.reason,/fires it by hand/);
-  assert.deepEqual(['5','6','7','8'].map(key=>bar.stacks[key].skills.map(skill=>skill.name)),[['Lunge Stance'],["Zikel's Blessing"],['Rage Burst'],['Focused Block']],'The four stigmas on 5 to 8, one each, in slot order');
-  assert.deepEqual(bar.notOnBar.map(skill=>skill.name),['Ankle Slice','Aerial Snare']);
+  const left=bar.left.map(key=>bar.stacks[key].skills[0]).filter(Boolean);
+  assert.deepEqual(left.map(skill=>skill.name),["Zikel's Blessing",'Lunge Stance','Ruinous Blow','Focused Block','Defiance','Leaping Slam','Rush Strike'],'Opener in order, then defensives, movement last');
+  assert.deepEqual(left.map(skill=>skill.key),['1','2','3','4','5','6','7']);
+  assert.ok(left.every(skill=>skill.why),'Each own key says why');
+  assert.match(bar.stacks['3'].skills[0].why,/Dash/);
+  // Blade Toss is a swap stigma, not one of the build's four: it shows in place and needs a slot.
+  assert.equal(bar.stacks.B.skills[0].needsSlot,true);
+  assert.deepEqual(bar.stacks.B.firesNow,['Crushing Wave','Sword Aura Rampage','Rending Blow']);
+  assert.deepEqual(bar.notOnBar.map(skill=>skill.name),['Aerial Snare']);
 });
-
 check('pending cooldowns are marked and placed by role, never guessed',()=>{
   const bar=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).skillBar;
   // Rending Blow's cooldown is not captured; the build calls it its filler, so it counts as no cooldown on the build's word.
-  const rending=bar.stacks['1'].skills[2];
+  const rending=bar.stacks.B.skills[3];
   assert.equal(rending.name,'Rending Blow');
   assert.equal(rending.cooldownSeconds,null,'Rending Blow: cooldown not captured, never guessed');
   assert.equal(rending.filler,true);assert.equal(rending.noCooldown,true);assert.equal(rending.cooldownPending,false);
-  assert.equal(bar.stacks['1'].skills[1].cooldownPending,false);assert.equal(bar.stacks['1'].skills[1].cooldownSeconds,5,'Overhead Slam 5 s');
-  const ruinous=bar.stacks['1'].skills[0];
-  assert.equal(ruinous.cooldownPending,false);assert.equal(ruinous.cooldownSeconds,45);
+  assert.equal(bar.stacks.A.skills[1].cooldownPending,false);assert.equal(bar.stacks.A.skills[1].cooldownSeconds,5,'Overhead Slam 5 s');
+  const rage=bar.stacks.A.skills[0];
+  assert.equal(rage.cooldownPending,false);assert.equal(rage.cooldownSeconds,45,'Rage Burst 45 s, from the research record');
   for(const name of AION2_CLASSES){
     const plan=buildAscentPlan({className:name,level:45,data:data(name)});
     if(plan.pending)continue;
@@ -700,7 +710,6 @@ check('pending cooldowns are marked and placed by role, never guessed',()=>{
     }
   }
 });
-
 check('the stack check fails a filler under a cooldown skill, a second filler, or a fifth row',()=>{
   const cd=(name,s)=>({name,cooldownSeconds:s,noCooldown:false,cooldownPending:false});
   const filler=name=>({name,cooldownSeconds:null,noCooldown:true,cooldownPending:false});
@@ -708,8 +717,10 @@ check('the stack check fails a filler under a cooldown skill, a second filler, o
   assert.equal(stackProblems({stacks:{'1':{key:'1',skills:[cd('B',10),filler('A')]}}}).length,0,'filler on top is right');
   assert.equal(stackProblems({stacks:{'1':{key:'1',skills:[cd('B',10),filler('A'),filler('C')]}}}).length,1,'two fillers: only the lower one would ever fire');
   assert.equal(stackProblems({stacks:{'1':{key:'1',skills:[cd('A',1),cd('B',2),cd('C',3),cd('D',4),cd('E',5)]}}}).length,1,'five rows');
+  // Macro builder (16 Oct 2026): a no-cooldown skill that only fires on a condition (a stagger, a window) is not always ready, so it never blocks.
+  assert.equal(stackProblems({stacks:{A:{key:'A',skills:[cd('B',10),{...filler('S'),conditional:true},filler('F')]}}}).length,0,'stagger-only below the filler');
+  assert.equal(stackProblems({stacks:{A:{key:'A',skills:[{...filler('S'),conditional:true},cd('B',10)]}}}).length,0,'stagger-only below a cooldown skill');
 });
-
 check('chains come only from the data: Specialty perks that add a chain skill, and the Ankle Slice tooltip with its lead-ins pending',()=>{
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).chains;
   assert.equal(glad.status,'unconfirmed');assert.equal(glad.confirmed,false);assert.match(glad.test,/Use a lead-in skill/);
@@ -740,44 +751,47 @@ check('mechanics: the stack rule confirmed, chains and macro order unconfirmed w
   }
 });
 
-check('the macro is built from the stacks: rotation order, each entry with its key and row',()=>{
+check('Macro 1 is the macro block: entry 1 stack A, entry 2 stack B, 10 ms each, each row with its place',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')});
-  // Rage Burst is a stigma on its own key (7) since the walkthrough fix; key 1 holds the rest of the rotation with Rending Blow on top.
-  assert.deepEqual(plan.macro.keys,['1','7']);
-  assert.deepEqual(plan.macro.entries.map(step=>[step.name,step.key,step.row,step.locked]),[['Ruinous Blow','1',0,false],['Rage Burst','7',0,false],['Overhead Slam','1',1,false],['Rending Blow','1',2,false]]);
+  assert.deepEqual(plan.macro.keys,['A','B']);
+  assert.deepEqual(plan.macro.entries.map(entry=>[entry.entry,entry.key,entry.delayMs]),[[1,'A',10],[2,'B',10]]);
+  assert.deepEqual(plan.macro.entries[0].skills.map(skill=>[skill.name,skill.row,skill.inMacro]),[['Rage Burst',0,true],['Overhead Slam',1,true],['Mocking Blade',2,true],['Ankle Slice',3,true]]);
+  assert.equal(plan.macro.entries[1].skills[0].out,'Needs a stigma slot','Blade Toss waits for a stigma slot');
   const low=buildAscentPlan({className:'Gladiator',role:'dps',level:5,data:data('Gladiator')}).macro.entries;
-  assert.deepEqual(low.filter(step=>!step.locked).map(step=>step.name),['Overhead Slam','Rending Blow']);
+  assert.deepEqual(low.map(entry=>entry.firesNow),[['Overhead Slam','Mocking Blade'],['Sword Aura Rampage','Rending Blow']]);
   const cleric=buildAscentPlan({className:'Cleric',role:'healer',level:45,data:data('Cleric')}).macro;
-  assert.equal(cleric.entries.find(step=>/Bolt/.test(step.text)).charged,true,'A charged skill is marked');
-  assert.equal(cleric.entries.find(step=>/Bolt/.test(step.text)).soloKey,true,'and sits on its own key');
+  const named=cleric.entries.flatMap(entry=>entry.skills.map(skill=>skill.name));
+  assert.ok(!named.includes('Bolt'),'A charged skill is never an entry');
+  assert.ok(cleric.ownKeys.find(group=>group.reason==='charged').skills.some(skill=>skill.name==='Bolt'),'and sits on its own key, grouped as charged');
 });
-
 check('flipping a rule to confirmed in the data removes the pending state and places a known follow-up above its lead-in',()=>{
   const flipped=structuredClone(mechanics);
   flipped.records.find(rule=>rule.id==='chain-follow-up').status='confirmed';
   flipped.records.find(rule=>rule.id==='macro-order').status='confirmed';
   const iconsPlus=structuredClone(icons.Gladiator);
   iconsPlus.records[0].skills.push({name:'Upward Strike',icon:'ICON_GL_SKILL_099.png',category:'Active',needLevel:4});
-  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),mechanics:flipped,icons:iconsPlus}});
+  // Stack A is full (four rows) in the record, so give it a free row: the follow-up needs one.
+  const roomy=structuredClone(builds.Gladiator);
+  roomy.records[0].macro.stackA.rows=roomy.records[0].macro.stackA.rows.filter(row=>row.name!=='Ankle Slice');
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),mechanics:flipped,icons:iconsPlus,builds:roomy}});
   assert.equal(plan.chains.confirmed,true);assert.equal(plan.macro.confirmed,true);
-  const key1=plan.skillBar.stacks['1'].skills.map(skill=>skill.name);
-  assert.deepEqual(key1,['Ruinous Blow','Overhead Slam','Upward Strike','Rending Blow'],'The follow-up sits right above its lead-in once the rule is confirmed, under the filler');
+  assert.deepEqual(plan.skillBar.stacks.A.skills.map(skill=>skill.name),['Rage Burst','Overhead Slam','Upward Strike','Mocking Blade'],'The follow-up sits right above its lead-in once the rule is confirmed');
   assert.deepEqual(plan.skillBar.problems,[]);
-  const before=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),icons:iconsPlus}}).skillBar;
+  const full=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),mechanics:flipped,icons:iconsPlus}}).skillBar;
+  assert.ok(!full.stacks.A.skills.some(skill=>skill.name==='Upward Strike'),'A full stack has no room: never a fifth row');
+  const before=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),icons:iconsPlus,builds:roomy}}).skillBar;
   assert.ok(!Object.values(before.stacks).some(stack=>stack.skills.some(skill=>skill.name==='Upward Strike')),'Unconfirmed: the follow-up is not placed in a stack');
 });
-
-check('a next move says the key and the row from the stacks: Put Overhead Slam above Ruinous Blow on key 1',()=>{
+check('a next move says the key and the row from the stacks: Put Overhead Slam above Rage Burst on stack A',()=>{
   const live=structuredClone(astrix);
   const slam=live.skills.find(skill=>skill.name==='Overhead Slam');
   Object.assign(slam,{acquired:true,skillLevel:2,equipped:false});
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
   const move=plan.now.find(item=>/^Put Overhead Slam/.test(item.title));
-  // Row 1 sits above row 0 on the bar, so the move says above (it said "under Rage Burst" while Rage Burst was in the stack).
-  assert.equal(move.title,'Put Overhead Slam above Ruinous Blow on key 1');
-  assert.equal(move.view,'skill-bar');assert.equal(move.key,'1');assert.equal(move.row,1);
+  // Macro builder (16 Oct 2026): Rage Burst is row 0 of stack A and Overhead Slam row 1 (it was above Ruinous Blow on key 1).
+  assert.equal(move.title,'Put Overhead Slam above Rage Burst on stack A');
+  assert.equal(move.view,'skill-bar');assert.equal(move.key,'A');assert.equal(move.row,1);
 });
-
 /* Walkthrough fix (fix/aetherium-walkthrough-logic, 11 Oct 2026): a Lv 12 and a Lv 41 Gladiator walk found screens that
    argued with each other and with mechanics.json. These hold the fixes for all 8 classes, from their build and catalogue data. */
 const everyPlan=(levels=[1,12,22,41,45])=>AION2_CLASSES.flatMap(name=>rolesFor(builds[name]).flatMap(role=>levels.map(level=>({name,role:role.role,level,plan:buildAscentPlan({className:name,role:role.role,level,data:data(name)})})))).filter(item=>!item.plan.pending);
@@ -788,55 +802,59 @@ check('every stacked key ends with a filler on its top row, or says why the buil
     for(const stack of stacksOf(plan).filter(item=>item.skills.length>1)){
       const top=stack.skills.at(-1);
       if(stack.fillerMissing){
-        assert.ok(bar.stackFillers.every(filler=>stacksOf(plan).some(other=>other!==stack&&other.skills.at(-1).name===filler)),`${name}: key ${stack.key} has no filler only when every usable filler tops another key`);
-        assert.match(stack.fillerMissing,/the key does nothing/,`${name}: key ${stack.key} says why`);
+        assert.ok(!(top.noCooldown&&!top.conditional),`${name}: key ${stack.key} says it has no filler only when its top row is not always ready`);
+        assert.match(stack.fillerMissing,/the macro skips this entry/,`${name}: key ${stack.key} says why`);
       } else {
         assert.equal(top.noCooldown,true,`${name} ${role} Lv ${level}: key ${stack.key} tops with ${top.name}, a no-cooldown skill`);
         const info=skills.records.find(record=>record.class===name&&record.name===top.name);
-        assert.ok(info?.cooldownSeconds===0||bar.fillers.includes(top.name),`${name}: ${top.name} is a filler by the catalogue (0 s) or the build's word`);
+        const row=builds[name].records.find(build=>build.role===role).macro[stack.key==='A'?'stackA':'stackB'].rows.find(item=>item.name===top.name);
+        assert.ok(info?.cooldownSeconds===0||bar.fillers.includes(top.name)||row?.noCooldown===true,`${name}: ${top.name} is a filler by the catalogue (0 s), the build's word or the research record`);
       }
     }
   }
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:41,data:data('Gladiator')}).skillBar;
-  assert.deepEqual(glad.fillers,['Keen Strike','Rending Blow'],'Gladiator fillers: the rotation filler line, then the key skill called "Main MP spender and filler"');
-  assert.deepEqual(glad.stackFillers,['Rending Blow'],'Keen Strike stays on left click, so Rending Blow tops the stack');
-  assert.equal(glad.stacks['1'].fillerMissing,null);
-  // Derived, never hard-coded: take Rending Blow's filler word away and key 1 has no filler to end on, and says why.
+  // Macro builder: Sword Aura Rampage joins the list, its 0 s cooldown now in the catalogue (research record).
+  assert.deepEqual(glad.fillers,['Keen Strike','Rending Blow','Sword Aura Rampage'],'Gladiator fillers: the rotation filler line, the key skill called "Main MP spender and filler", then a 0 s cooldown');
+  assert.deepEqual(glad.stackFillers,['Rending Blow'],'Keen Strike stays on left click, so Rending Blow tops stack B');
+  assert.equal(glad.stacks.B.fillerMissing,null);
+  assert.match(glad.stacks.A.fillerMissing,/macro skips this entry/,'Stack A ends on Ankle Slice, a cooldown skill, and says so');
+  // Derived, never hard-coded: take Rending Blow's filler word and the record's no-cooldown away and stack B has no filler to end on, and says why.
   const noFiller=structuredClone(builds.Gladiator);
   noFiller.records[0].coreSkills.find(core=>core.name==='Rending Blow').why='Main MP spender.';
+  delete noFiller.records[0].macro.stackB.rows.find(row=>row.name==='Rending Blow').noCooldown;
   const bare=buildAscentPlan({className:'Gladiator',role:'dps',level:41,data:{...data('Gladiator'),builds:noFiller}}).skillBar;
-  assert.deepEqual(bare.stacks['1'].skills.map(skill=>skill.name),['Ruinous Blow','Overhead Slam','Rending Blow']);
-  assert.match(bare.stacks['1'].fillerMissing,/Keen Strike, stays on left click/);
+  assert.deepEqual(bare.stacks.B.skills.map(skill=>skill.name),['Blade Toss','Crushing Wave','Sword Aura Rampage','Rending Blow']);
+  assert.match(bare.stacks.B.fillerMissing,/macro skips this entry/);
   assert.deepEqual(bare.problems,[],'A stack with its reason passes');
   // The check fails a stack that ends on a cooldown skill with no reason.
   const cd=(name,s)=>({name,cooldownSeconds:s,noCooldown:false,cooldownPending:false});
   assert.equal(fillerProblems({stacks:{'1':{key:'1',skills:[cd('A',10),cd('B',5)],fillerMissing:null}}}).length,1);
   assert.equal(fillerProblems({stacks:{'1':{key:'1',skills:[cd('A',10),{...cd('F',null),noCooldown:true}],fillerMissing:null}}}).length,0);
 });
-
-check('no stigma in any stack; keys 5 to 8 hold the four build stigmas in slot order (all 8 classes)',()=>{
+check('stigmas sit where the macro block puts them: in stack A or B, or on a key of their own (all 8 classes)',()=>{
   for(const {name,role,level,plan} of everyPlan()){
     const bar=plan.skillBar;
     assert.deepEqual(stigmaKeyProblems(bar),[],`${name} ${role} Lv ${level}`);
-    for(const stack of stacksOf(plan))if(stack.skills.length>1)assert.ok(stack.skills.every(skill=>!skill.stigma),`${name}: key ${stack.key} holds no stigma`);
-    const slots=plan.stigmas.slots??[];
-    if(slots.length===4)assert.deepEqual(['5','6','7','8'].map(key=>bar.stacks[key].skills.map(skill=>skill.name)),slots.map(slot=>[slot.name]),`${name} ${role}: 5 to 8 are the stigmas`);
+    for(const stack of stacksOf(plan))if(stack.skills.length>1)assert.ok(['A','B'].includes(stack.key),`${name}: key ${stack.key} is not a stack`);
+    // A stigma outside the build's four slots needs one: it shows in place, never in what fires now.
+    for(const skill of stacksOf(plan).flatMap(stack=>stack.skills).filter(item=>item.stigma)){
+      assert.equal(skill.needsSlot,!(plan.stigmas.slots??[]).some(slot=>slot.name===skill.name),`${name}: ${skill.name} slot`);
+      if(skill.needsSlot)assert.ok(!bar.stacks[skill.key].firesNow.includes(skill.name));
+    }
   }
-  const bad={stigmas:['A','B','C','D'],stacks:{'1':{key:'1',skills:[{name:'X'},{name:'A',stigma:true}]},'5':{key:'5',skills:[{name:'Y'}]},'6':{key:'6',skills:[{name:'B'}]},'7':{key:'7',skills:[{name:'C'}]},'8':{key:'8',skills:[{name:'D'}]}}};
-  assert.equal(stigmaKeyProblems(bad).length,2,'A stigma in a stack and a wrong key 5 both fail');
+  const bad={stigmas:['A','B','C','D'],stacks:{'1':{key:'1',skills:[{name:'X'},{name:'A',stigma:true}]},'5':{key:'5',skills:[{name:'Y'}]}}};
+  assert.equal(stigmaKeyProblems(bad).length,2,'A stack on a left key, and a stigma in it, both fail');
 });
-
-check('Gladiator Lv 12 and Lv 41: key 1 is Ruinous Blow, Overhead Slam, Rending Blow; Lv 12 says what key 1 fires now',()=>{
+check('Gladiator Lv 12 and Lv 41: stack A is Rage Burst, Overhead Slam, Mocking Blade, Ankle Slice; Lv 12 says what it fires now',()=>{
   for(const level of [12,41]){
     const bar=buildAscentPlan({className:'Gladiator',role:'dps',level,data:data('Gladiator')}).skillBar;
-    assert.deepEqual(bar.stacks['1'].skills.map(skill=>[skill.name,skill.locked]),[['Ruinous Blow',level<14],['Overhead Slam',false],['Rending Blow',false]]);
-    assert.deepEqual(bar.stacks['1'].firesNow,level<14?['Overhead Slam','Rending Blow']:['Ruinous Blow','Overhead Slam','Rending Blow']);
-    assert.equal(bar.stacks['1'].nextUnlock,level<14?14:null,'Until Lv 14 key 1 fires Overhead Slam, then Rending Blow');
-    assert.equal(bar.stacks['7'].skills[0].name,'Rage Burst');
-    assert.equal(bar.stacks['7'].nextUnlock,level<32?32:null);
+    assert.deepEqual(bar.stacks.A.skills.map(skill=>[skill.name,skill.locked]),[['Rage Burst',level<32],['Overhead Slam',false],['Mocking Blade',false],['Ankle Slice',false]]);
+    assert.deepEqual(bar.stacks.A.firesNow,level<32?['Overhead Slam','Mocking Blade','Ankle Slice']:['Rage Burst','Overhead Slam','Mocking Blade','Ankle Slice']);
+    assert.equal(bar.stacks.A.nextUnlock,level<32?32:null,'Until Lv 32 stack A fires Overhead Slam first');
+    const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills[0]?.name==='Ruinous Blow');
+    assert.equal(ruinous.nextUnlock,level<14?14:null);
   }
 });
-
 check('stigma screen data: an equipped build swap is a swap once, never "swap it out", and is not offered again',()=>{
   const live=structuredClone(astrix);
   live.profile.level=41;
@@ -918,26 +936,22 @@ check('no Specialty pick, slot or follow-up above 11 reads as reachable without 
   assert.equal(reachSkillLevel('X',11,{cap:11}),null);
 });
 
-check('Macro 1 lists keys in build order with each stack; locked skills are never under Keep on your own keys',()=>{
-  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:41,data:data('Gladiator')});
-  assert.deepEqual(plan.macro.slots.map(slot=>[slot.key,slot.skills.map(skill=>skill.name)]),[['1',['Ruinous Blow','Overhead Slam','Rending Blow']],['7',['Rage Burst']]]);
-  // Macro eight (fix/aetherium-macro-eight): the fallback now runs through every filled entry. The rotation part keeps the build order, each once.
-  assert.deepEqual(plan.macro.fallback.slice(0,4),['Ruinous Blow','Rage Burst','Overhead Slam','Rending Blow'],'Fallback: one by one, in the build order, each once');
-  assert.deepEqual(plan.macro.fallback,['Ruinous Blow','Rage Burst','Overhead Slam','Rending Blow','Crushing Wave','Mocking Blade'],'then the added damage keys, in their order');
-  const low=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).macro;
-  assert.deepEqual(low.slots.map(slot=>[slot.key,slot.usable,slot.firesNow]),[['1',true,['Overhead Slam','Rending Blow']],['7',false,[]]]);
-  assert.deepEqual(low.later.map(slot=>[slot.key,slot.unlockLevel]),[['7',32]]);
-  assert.deepEqual(low.manual.map(item=>[item.name,item.locked,item.unlockLevel]),[['Defiance',true,16],['Rush Strike',false,10]],'Defiance is Add later at Lv 12');
+check('Macro 1: what joins later comes with its level; the opener is in order; no skill twice (all 8 classes)',()=>{
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')});
+  assert.deepEqual(plan.macro.later.map(item=>[item.name,item.key,item.unlockLevel]),[['Blade Toss','B',22],['Rage Burst','A',32]]);
+  assert.deepEqual(plan.macro.opener.map(item=>[item.name,item.locked,item.unlockLevel]),[["Zikel's Blessing",true,27],['Lunge Stance',true,22],['Ruinous Blow',true,14]]);
+  assert.deepEqual(plan.macro.ownKeys.map(group=>group.reason),['buff','defensive','dash']);
   for(const {name,role,level,plan:p} of everyPlan()){
-    if(!p.macro.slots.length)continue;
-    const keys=p.macro.slots.map(slot=>slot.key);
+    if(p.macro.pending)continue;
+    const keys=p.macro.entries.map(entry=>entry.key);
     assert.equal(new Set(keys).size,keys.length,`${name}: each key once`);
-    const named=p.macro.slots.flatMap(slot=>slot.skills.map(skill=>skill.name));
+    const named=p.macro.entries.flatMap(entry=>entry.skills.map(skill=>skill.name));
     assert.equal(new Set(named).size,named.length,`${name} ${role} Lv ${level}: no skill twice in the macro`);
-    for(const item of p.macro.manual)if(item.name)assert.equal(item.locked,level<item.unlockLevel,`${name}: ${item.name} lock follows the level`);
+    const own=p.macro.ownKeys.flatMap(group=>group.skills.map(skill=>skill.name));
+    for(const skill of named)assert.ok(!own.includes(skill),`${name}: ${skill} is in the macro and on its own key`);
+    for(const item of p.macro.later)assert.ok(item.unlockLevel>level,`${name}: ${item.name} joins later`);
   }
 });
-
 /* Macro eight (fix/aetherium-macro-eight, 12 Oct 2026): a macro holds up to 8 entries (Miguel, in game, 11 Oct 2026). Macro 1
    starts with the rotation's keys, then fills with other bar keys the catalogue marks as damage, longest cooldown first.
    Nothing is added on a guess: no role means "Could add", locked means "Add later". The limit is read from progression.json. */
@@ -946,83 +960,110 @@ check('macro limit: maxEntries 8 in progression.json, confirmed, from Miguel in 
   assert.equal(macroRecord.maxEntries.value,8);
   assert.equal(macroRecord.maxEntries.status,'confirmed');
   assert.ok(macroRecord.maxEntries.provenance.some(source=>source.kind==='in-game-capture'&&/^Miguel/.test(source.capturedBy)&&source.capturedOn==='2026-10-11'));
+  assert.match(macroRecord.maxEntries.note,/20 steps/,'Two guides say 20, pending a recheck');
+  assert.equal(macroRecord.maxEntries.recheck.pending,true);
   assert.equal(buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro.maxEntries,8);
 });
-check('macro limit is read from the data, never hard-coded: change it and the macro follows',()=>{
-  const three=structuredClone(progression);
-  three.records.find(item=>item.id==='macro-order').maxEntries.value=3;
-  const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),progression:three}});
-  assert.equal(plan.macro.maxEntries,3);
-  assert.deepEqual(plan.macro.filled.map(slot=>slot.key),['1','7','2'],'Cut at the limit');
-  assert.ok(plan.macro.couldAdd.some(item=>item.kind==='full'&&item.key==='4'&&/a macro holds 3 entries/.test(item.reason)),'What did not fit says so');
+check('the macro never fills to its limit: two entries whatever the limit says (the #491 fill-up is gone)',()=>{
+  for(const value of [3,8,20]){
+    const changed=structuredClone(progression);
+    changed.records.find(item=>item.id==='macro-order').maxEntries.value=value;
+    const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),progression:changed}});
+    assert.equal(plan.macro.maxEntries,value,'The limit is read from the data');
+    assert.deepEqual(plan.macro.keys,['A','B'],`Limit ${value}: still stack A and stack B, nothing added`);
+  }
   const none=structuredClone(progression);
   delete none.records.find(item=>item.id==='macro-order').maxEntries;
   const bare=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),progression:none}}).macro;
   assert.equal(bare.maxEntries,null);
-  assert.deepEqual(bare.filled.map(slot=>slot.key),['1','7'],'With no limit in the data, nothing is added past the rotation');
+  assert.deepEqual(bare.keys,['A','B']);
 });
-check('macro never holds more than 8 entries, at any level, for any class',()=>{
+check('macro never holds more than 2 entries, stack A then stack B, at any level, for any class',()=>{
   for(const {name,role,level,plan} of everyPlan([1,5,12,22,30,41,45])){
-    assert.ok(plan.macro.used<=8,`${name} ${role} Lv ${level}: ${plan.macro.used} entries`);
-    assert.equal(plan.macro.used,plan.macro.filled.length);
-    assert.ok(plan.macro.fallback.length<=8,`${name} ${role} Lv ${level}: fallback within the limit`);
-    const keys=plan.macro.filled.map(slot=>slot.key);
-    assert.equal(new Set(keys).size,keys.length,`${name}: each key once`);
+    assert.ok(plan.macro.entries.length<=2,`${name} ${role} Lv ${level}: ${plan.macro.entries.length} entries`);
+    assert.deepEqual(plan.macro.keys,['A','B'].slice(0,plan.macro.entries.length),`${name}: stack A first, then stack B`);
+    assert.equal(plan.macro.used,plan.macro.entries.filter(entry=>entry.usable).length);
+    assert.ok(plan.macro.entries.every(entry=>entry.delayMs===10),`${name}: 10 ms each`);
   }
 });
-check('Lv 45 Gladiator: the rotation first (key 1 stack, key 7 Rage Burst), then damage keys by cooldown, longest first',()=>{
-  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
-  assert.deepEqual(m.filled.map(slot=>[slot.key,slot.from,slot.firesNow]),[
-    ['1','rotation',['Ruinous Blow','Overhead Slam','Rending Blow']],['7','rotation',['Rage Burst']],
-    ['2','damage',['Crushing Wave']],['4','damage',['Mocking Blade']]]);
-  assert.equal(m.used,4);
-  const cds=m.added.map(slot=>slot.cooldownSeconds);
-  assert.deepEqual(cds,[...cds].sort((a,b)=>b-a),'Longest cooldown first');
-  for(const slot of m.added)for(const skill of slot.skills)assert.equal(skills.records.find(item=>item.class==='Gladiator'&&item.name===skill.name).role.value,'damage',`${skill.name} is damage in the data`);
+const SECTION_6={
+  Gladiator:{A:['Rage Burst','Overhead Slam','Mocking Blade','Ankle Slice'],main:'Keen Strike',B:['Blade Toss','Crushing Wave','Sword Aura Rampage','Rending Blow'],opener:["Zikel's Blessing",'Lunge Stance','Ruinous Blow'],own:['Ruinous Blow','Lunge Stance',"Zikel's Blessing",'Focused Block','Defiance','Leaping Slam','Rush Strike']},
+  Assassin:{A:['Savage Fang','Ambush','Storm Rampage','Savage Roar'],main:'Quick Slice',B:['Insignia Explosion',"Triniel's Dagger",'Heart Gore'],opener:['Illusive Clone','Swift Contract'],own:['Illusive Clone','Swift Contract','Shadowstrike','Flash Slice','Infiltrate','Shadow Fall','Defiance','Evasion Stance']},
+  Ranger:{A:['Snare Shot','Gale Arrow','Drill Dart','Tempest Shot'],main:'Snipe',B:['Explosive Arrow','Burst Arrow','Griffon Arrow','Arrow Scattershot'],opener:["Vaizel's Authority",'Bow of Blessing','Supporting Fire'],own:['Deadshot','Marking Shot',"Vaizel's Authority",'Bow of Blessing','Supporting Fire','Arrow Storm','Explosion Trap','Defiance',"Mother Nature's Breath"]},
+  Sorcerer:{A:['Element Enhancement','Delayed Explosion','Fire Wall','Blaze'],main:'Flame Arrow',B:["Winter's Shackles",'Cold Storm','Bittercold Wind','Firestorm'],opener:[],own:['Hellfire','Wish of Concentration','Frost','Frost Burst','Flame Scattershot','Ice Chain','Defiance','Steel Barrier','Arctic Armor','Hibernation']},
+  Spiritmaster:{A:['Jointstrike: Curse','Summon: Earth Spirit','Summon: Water Spirit','Summon: Fire Spirit'],main:'Cold Shock',B:['Jointstrike: Corrode','Dimensional Control','Elemental Fusion','Combustion'],opener:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit'],own:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit','Jointstrike: Destructive Attack','Rapid Scattershot',"Soul's Cry",'Defiance']}
+};
+check('every DPS class matches section 6 of the research record: rows, main attack, own keys, opener',()=>{
+  for(const [name,want] of Object.entries(SECTION_6)){
+    const plan=buildAscentPlan({className:name,role:'dps',level:45,data:data(name)});
+    const bar=plan.skillBar;
+    assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),want.A,`${name} stack A`);
+    assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),want.B,`${name} stack B`);
+    assert.equal(bar.stacks.LMB.skills[0].name,want.main,`${name} main attack`);
+    assert.deepEqual(bar.opener,want.opener,`${name} opener`);
+    assert.deepEqual(plan.macro.opener.map(item=>item.name),want.opener);
+    const own=bar.left.map(key=>bar.stacks[key].skills[0]?.name).filter(Boolean);
+    assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
+    assert.equal(plan.macro.blockStatus,'reported','Section 6 is REPORTED');
+  }
 });
-check('damage keys sort by cooldown from the data: a longer cooldown moves a key up',()=>{
-  const longer=structuredClone(skills);
-  longer.records.find(item=>item.name==='Mocking Blade').cooldownSeconds=40;
-  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),skills:longer}}).macro;
-  assert.deepEqual(m.added.map(slot=>slot.key),['4','2']);
+check('Templar: stack A has Doom Shield in row 0, stack B Debilitating Smash in row 0, Vicious Strike between them',()=>{
+  const plan=buildAscentPlan({className:'Templar',level:45,data:data('Templar')});
+  assert.equal(plan.skillBar.stacks.A.skills[0].name,'Doom Shield');
+  assert.equal(plan.skillBar.stacks.B.skills[0].name,'Debilitating Smash');
+  assert.equal(plan.skillBar.stacks.LMB.skills[0].name,'Vicious Strike');
+  assert.equal(builds.Templar.records.find(build=>build.main).macro.layoutProvenance.capturedBy,'Miguel','The layout is Miguel\'s in-game Templar setup');
 });
-check('Defiance, Rush Strike and Keen Strike are never macro entries; nor any movement, defensive, heal, buff or charged skill',()=>{
+check('no basic attack, filler key, charged skill, toggle or dash in any macro step (all 8 classes)',()=>{
   for(const {name,role,level,plan} of everyPlan([1,12,22,41,45])){
-    const named=plan.macro.added.flatMap(slot=>slot.skills.map(skill=>skill.name));
-    const catalogue=skills.records.filter(item=>item.class===name);
-    for(const skill of named)assert.equal(catalogue.find(item=>item.name===skill)?.role?.value,'damage',`${name} ${role} Lv ${level}: ${skill} added only as damage`);
-    assert.ok(!plan.macro.added.some(slot=>slot.key==='LMB'),`${name}: the left click basic is never added`);
-    for(const item of plan.macro.manual)if(item.name)assert.ok(!named.includes(item.name),`${name}: ${item.name} is fired by hand, never added`);
-    const manualText=plan.macro.manual.map(item=>item.text).join(' | ');
-    for(const item of plan.macro.couldAdd)for(const skill of item.names)assert.ok(!manualText.includes(skill),`${name}: ${skill} is in the build's manual list, so never under Could add`);
-    if(name!=='Gladiator')continue;
-    const all=plan.macro.filled.flatMap(slot=>slot.skills.map(skill=>skill.name));
-    for(const skill of ['Defiance','Rush Strike','Keen Strike'])assert.ok(!all.includes(skill),`Gladiator Lv ${level}: ${skill} is never an entry`);
+    if(plan.macro.pending)continue;
+    const named=plan.macro.entries.flatMap(entry=>entry.skills.map(skill=>skill.name));
+    assert.ok(!named.includes(plan.skillBar.basic),`${name}: the basic attack is never a step`);
+    assert.ok(!plan.macro.keys.includes('LMB'),`${name}: the left click key is never an entry`);
+    for(const skill of named){
+      const use=skills.records.find(item=>item.class===name&&item.name===skill)?.macroUse;
+      assert.equal(use?.value,'line',`${name} ${role} Lv ${level}: ${skill} is marked for the line`);
+    }
+    for(const group of plan.macro.ownKeys)if(['charged','toggle','dash','movement'].includes(group.reason))for(const skill of group.skills)assert.ok(!named.includes(skill.name),`${name}: ${skill.name} (${group.reason}) stays off`);
+  }
+  const off={Gladiator:['Defiance','Rush Strike','Keen Strike','Ruinous Blow'],Templar:['Punishment','Vicious Strike'],Cleric:['Bolt'],Chanter:['Undefeated Mantra']};
+  for(const [name,list] of Object.entries(off))for(const {plan} of everyPlan([12,45]).filter(item=>item.name===name)){
+    const named=plan.macro.entries.flatMap(entry=>entry.skills.map(skill=>skill.name));
+    for(const skill of list)assert.ok(!named.includes(skill),`${name}: ${skill} is never an entry`);
   }
 });
-check('locked damage keys go under Add later with their level; never an entry',()=>{
-  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:5,data:data('Gladiator')}).macro;
-  assert.deepEqual(m.filled.map(slot=>slot.key),['1','4'],'Mocking Blade (Lv 3) is open, Crushing Wave (Lv 8) is not');
-  assert.deepEqual(m.later.map(slot=>[slot.key,slot.unlockLevel]),[['7',32],['2',8]]);
-  for(const {plan} of everyPlan([1,5,12,22,41,45]))for(const slot of plan.macro.filled)assert.ok(slot.usable,'Only open keys are entries');
+check('locked rows stay out of the macro with their level: Lv 12 fires only unlocked skills (all 8 classes)',()=>{
+  for(const {name,level,plan} of everyPlan([1,5,12,22,41,45])){
+    for(const entry of plan.macro.entries){
+      for(const skill of entry.skills.filter(item=>item.inMacro))assert.ok(skill.unlockLevel<=level,`${name} Lv ${level}: ${skill.name} is open`);
+      for(const skill of entry.skills.filter(item=>item.locked))assert.equal(skill.out,`From Lv ${skill.unlockLevel}`);
+    }
+  }
+  for(const {name,plan} of everyPlan([12]))for(const entry of plan.macro.entries)assert.ok(entry.firesNow.every(skill=>plan.skillBar.stacks[entry.key].skills.find(item=>item.name===skill).unlockLevel<=12),`${name}: Lv 12 shows only unlocked skills`);
 });
-check('a key with no role in the data goes to Could add with the reason, never into the macro',()=>{
-  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
-  const noRole=m.couldAdd.filter(item=>item.kind==='no-role');
-  assert.deepEqual(noRole.map(item=>[item.key,item.names]).filter(([key])=>['3','RMB'].includes(key)),[['3',['Leaping Slam']],['RMB',['Sword Aura Rampage']]]);
-  for(const item of noRole)assert.equal(item.reason,'No role in our data yet');
-  // Give Leaping Slam a role in the data and it is added, by cooldown.
-  const tagged=structuredClone(skills);
-  tagged.records.push({id:'gladiator-leaping-slam',class:'Gladiator',name:'Leaping Slam',unlockLevel:1,cooldownSeconds:30,summary:'test',role:{value:'damage',from:'summary',quote:'test'}});
-  const more=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:{...data('Gladiator'),skills:tagged}}).macro;
-  assert.deepEqual(more.added.map(slot=>slot.key),['3','2','4']);
-  assert.ok(!more.couldAdd.some(item=>item.key==='3'));
+check('a skill the Daeva has not learned, or has at level 0, stays out of the macro',()=>{
+  const live=structuredClone(astrix);
+  live.profile.level=45;
+  const slam=live.skills.find(skill=>skill.name==='Overhead Slam');
+  Object.assign(slam,{acquired:true,skillLevel:0});
+  const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
+  const row=plan.macro.entries[0].skills.find(skill=>skill.name==='Overhead Slam');
+  assert.equal(row.inMacro,false);assert.equal(row.out,'Not learned yet');
+  assert.ok(!plan.macro.entries[0].firesNow.includes('Overhead Slam'));
 });
-check('follow-ups are Could add while the chain rule is unconfirmed',()=>{
-  const m=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).macro;
-  const up=m.couldAdd.find(item=>item.kind==='follow-up');
-  assert.deepEqual(up.names,['Upward Strike']);
-  assert.match(up.reason,/A follow-up to Overhead Slam from skill Lv 8\. How a follow-up fires is not confirmed yet\./);
+check('a Lv 16 trigger is dimmed for a Daeva below skill Lv 16, and lights up at 16',()=>{
+  const at=skillLevel=>{
+    const live=structuredClone(astrix);
+    live.profile.level=45;
+    Object.assign(live.skills.find(skill=>skill.name==='Overhead Slam'),{acquired:true,skillLevel,equipped:true});
+    return buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live}).skillBar.stacks.A.skills[1].triggers.find(item=>item.skillLevel===16);
+  };
+  assert.deepEqual([at(11).reached,at(11).dim,at(11).from],[false,true,'From skill Lv 16']);
+  assert.deepEqual([at(16).reached,at(16).dim],[true,false]);
+  const hand=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).skillBar.stacks.A.skills[1].triggers.find(item=>item.skillLevel===16);
+  assert.deepEqual([hand.reached,hand.dim],[null,true],'Without a Daeva the level is not known, so it stays dim');
+  const cond=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).skillBar.stacks.B.skills[2];
+  assert.equal(cond.condition,'Only on a staggered target.','A conditional row says its condition');
 });
 check('every role in the catalogue rests on the exact words of its summary or its class build',()=>{
   const ALLOWED=['damage','filler','buff','movement','defensive','heal','charged','crowd-control'];
@@ -1041,12 +1082,33 @@ check('every class reports how many entries its data supports',()=>{
   for(const name of AION2_CLASSES){
     const plan=buildAscentPlan({className:name,level:45,data:data(name)});
     counts[name]=plan.macro.pending?'pending':plan.macro.used;
-    if(!plan.macro.pending)assert.ok(plan.macro.used>=1&&plan.macro.used<=8,name);
+    if(!plan.macro.pending)assert.ok(plan.macro.used>=1&&plan.macro.used<=2,name);
   }
   console.log(`       entries at Lv 45: ${Object.entries(counts).map(([name,count])=>`${name} ${count}`).join(', ')}`);
-  assert.equal(counts.Gladiator,4);
+  assert.equal(counts.Gladiator,2);
+  assert.equal(counts.Chanter,1,'Chanter: one line sourced, stack B pending');
+  assert.ok(counts.Ranger>=1&&counts.Sorcerer>=1,'Ranger and Sorcerer have a line though their rotation is pending');
 });
-
+check('macro data: facts, the eight rules and every skill\'s macro use carry a status and provenance',()=>{
+  const ids=macroRecord.facts.map(fact=>fact.id);
+  for(const id of ['skip-on-cooldown','order-not-guaranteed','reads-key-slot','charged-stage-one','toggles-switch-off','level-zero-costs-time','skill-queue'])assert.ok(ids.includes(id),id);
+  for(const fact of macroRecord.facts){assert.ok(['reported','disputed','confirmed'].includes(fact.status),fact.id);assert.ok(fact.provenance.length>0,fact.id);}
+  assert.equal(macroRecord.facts.find(fact=>fact.id==='skill-queue').status,'disputed');
+  const rules=progression.records.find(item=>item.id==='macro-rules');
+  assert.equal(rules.rules.length,8);
+  assert.equal(rules.layout.status,'confirmed');
+  for(const rule of rules.rules){assert.ok(['reported','confirmed'].includes(rule.status),rule.id);assert.ok(rule.provenance.length>0,rule.id);}
+  const REASONS=['charged','toggle','dash','buff','defensive','heal','stagger','movement','other','main-attack'];
+  for(const record of skills.records){
+    if(record.macroUse){assert.ok(['line','own-key'].includes(record.macroUse.value),record.name);if(record.macroUse.value==='own-key')assert.ok(REASONS.includes(record.macroUse.reason),record.name);}
+    for(const trigger of record.triggers??[]){assert.ok(['condition','opens','cdCut'].includes(trigger.type),record.name);assert.ok(trigger.skillLevel===null||Number.isInteger(trigger.skillLevel));assert.ok(trigger.status);}
+  }
+  for(const name of AION2_CLASSES)for(const build of builds[name].records.filter(item=>item.macro)){
+    const rows=['stackA','stackB'].flatMap(id=>build.macro[id]?.rows??[]);
+    for(const row of rows)assert.equal(skills.records.find(item=>item.class===name&&item.name===row.name)?.macroUse?.value,'line',`${build.id}: ${row.name}`);
+    for(const own of build.macro.ownKeys)assert.equal(skills.records.find(item=>item.class===name&&item.name===own.name)?.macroUse?.value,'own-key',`${build.id}: ${own.name}`);
+  }
+});
 check('unknown class throws',()=>{
   assert.throws(()=>buildAscentPlan({className:'Brawler',data:data('Gladiator')}),/Unknown AION 2 class/);
 });

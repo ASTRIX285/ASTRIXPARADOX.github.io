@@ -281,8 +281,89 @@
           "region": "global",
           "reliability": "high",
           "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Thunder",
+          "rows": [
+            {
+              "name": "Judgment Thunder",
+              "why": "Most players run this alone as their line."
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Earth's Retribution",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackB": {
+          "label": "Torment",
+          "rows": [
+            {
+              "name": "Chain of Torment",
+              "why": "Opens Condemnation, so it fires first."
+            },
+            {
+              "name": "Condemnation",
+              "why": "Only on a target with Chain of Torment."
+            }
+          ]
+        },
+        "opener": [],
+        "extras": [
+          {
+            "name": "Divine Aura",
+            "why": "Some players add it to stack B. Test it on the dummy."
+          },
+          {
+            "name": "Debilitating Mark",
+            "why": "Some players add it to stack B. Test it on the dummy."
+          }
+        ],
+        "ownKeys": [
+          {
+            "name": "Bolt",
+            "reason": "charged"
+          },
+          {
+            "name": "Healing Light",
+            "reason": "heal"
+          },
+          {
+            "name": "Light of Regeneration",
+            "reason": "heal"
+          },
+          {
+            "name": "Radiant Recovery",
+            "reason": "heal"
+          },
+          {
+            "name": "Light of Protection",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          }
+        ],
+        "levelNotes": []
+      }
     }
   ]
 }
