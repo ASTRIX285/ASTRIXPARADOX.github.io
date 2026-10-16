@@ -26,6 +26,7 @@ const validators=[
   'test-clips-design.mjs', // Clips: builder keeps the page design, no inline handlers or reveals.
   'test-clips-cards.mjs', // Clips cards: visible at rest, clean picture, readable sizes, player, filters, thumbnail fallbacks.
   'test-forge-tint.mjs', // The Forge: faint steel-blue background and edges, Ember actions, public pages neutral.
+  'test-capsule-buttons.mjs', // Buttons: reactor capsule with the dial on headline actions; locked stream buttons unchanged.
   'test-reports-data.mjs',
   'test-reports-drilldown.mjs',
   'test-reports-three-stage.mjs',
