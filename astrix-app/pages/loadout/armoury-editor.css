@@ -5,13 +5,13 @@
 :root{
   --ae-tile:56px;
   --ae-gap:10px;
-  --ae-panel:rgba(21,19,15,.92);
+  --ae-panel:rgba(19,19,21,.92);
   --ae-selected-ring:var(--ax-ember-hi);
-  --ae-locked:rgba(14,12,9,.7);
+  --ae-locked:rgba(11,11,12,.7);
   --ae-error-wash:rgba(115,32,34,.25);
-  --ae-badge:rgba(14,12,9,.85);
+  --ae-badge:rgba(11,11,12,.85);
   --ae-shadow:rgba(0,0,0,.6);
-  --ae-backdrop:rgba(14,12,9,.72);
+  --ae-backdrop:rgba(11,11,12,.72);
 }
 
 .paradox-loadout-dialog.is-armoury-editor{width:min(1320px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);padding:0;overflow:hidden;background:var(--ax-black);border:1px solid var(--ax-line-strong);color:var(--ax-ink)}

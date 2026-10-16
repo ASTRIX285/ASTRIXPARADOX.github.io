@@ -24,7 +24,7 @@ function buildScene(){
   const svg=svgNode('svg',{viewBox:'0 0 1280 720',preserveAspectRatio:'xMidYMid slice','aria-hidden':'true',focusable:'false'});
   const defs=svgNode('defs');
   const slab=svgNode('linearGradient',{id:'apxXSlab',x1:0,y1:0,x2:0,y2:1});
-  slab.append(svgNode('stop',{offset:0,'stop-color':'#211e19'}),svgNode('stop',{offset:1,'stop-color':'#0e0c09'}));
+  slab.append(svgNode('stop',{offset:0,'stop-color':'#1f1f22'}),svgNode('stop',{offset:1,'stop-color':'#0b0b0c'}));
   const grid=svgNode('pattern',{id:'apxXGrid',width:48,height:48,patternUnits:'userSpaceOnUse'});
   grid.append(svgNode('path',{d:'M48 0H0V48',fill:'none',stroke:'#ffffff','stroke-opacity':.05,'stroke-width':1}));
   const fade=svgNode('radialGradient',{id:'apxXFade',cx:.5,cy:.5,r:.5});

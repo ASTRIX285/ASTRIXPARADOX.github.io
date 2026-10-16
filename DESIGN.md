@@ -23,16 +23,19 @@ The site is dark only (`color-scheme: dark`). There is no light theme.
 
 | Name | Hex | Role |
 |---|---|---|
-| Canvas Charcoal | `#161616` | Page ground |
-| Panel Charcoal | `#222222` | Panels and cards |
-| Raised Charcoal | `#2b2b2b` | Raised controls, secondary buttons |
-| Primary Text | `#ededed` | Body and headings |
-| Secondary Text | `#b8b8b8` | Supporting copy |
-| Action Crimson | `#b22222` | The one primary action per page, active tab |
-| Focus Sky | `#82c9ff` | Keyboard focus ring only |
+| Forge Black | `#0b0b0c` | Page ground |
+| Panel | `#131315` | Panels and cards |
+| Raised | `#1d1d20` | Raised controls, secondary buttons |
+| Primary Text | `#ededeb` | Body and headings |
+| Secondary Text | `#b9b9b8` | Supporting copy |
+| Ember | `#ba1f12` | The one primary action per page, active tab |
+| Ember-hi | `#e6391f` | Strobe and glow on the action colour |
+| Steel | `#8a8a89` | Quiet labels and icons |
 | Success Teal | `#62d6ad` | Confirmed success state only |
-| Border | `#414141` | Hairlines and card edges |
-| Strong Border | `#616161` | Secondary button edges |
+| Border | `#2c2c30` | Hairlines and card edges |
+| Strong Border | `#46464c` | Secondary button edges |
+
+Neutral blacks only (Miguel, 16 Oct 2026). No brown, warm or sepia tints anywhere in the chrome, and no sepia filters on backgrounds. The ASTRIX PARADOX map art is black with steel linework and the red nebula.
 
 ### Item cards (`paradox-item-cards.css`)
 

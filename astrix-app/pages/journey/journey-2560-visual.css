@@ -958,7 +958,7 @@ button.journey-map-marker.has-no-icon:not(:focus-visible):not(.is-selected){outl
 
   .journey-page .apx-section,
   .journey-page .apx-scaffold-card{
-    background:linear-gradient(145deg,rgba(18,14,14,.86),rgba(12,12,12,.78));
+    background:linear-gradient(145deg,rgba(16,16,18,.86),rgba(12,12,12,.78));
     backdrop-filter:blur(7px);
   }
 

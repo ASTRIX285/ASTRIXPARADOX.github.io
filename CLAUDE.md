@@ -51,7 +51,7 @@ Read this file at the start of every session. It survives chat compaction. The c
 ## Brand and design (source: DESIGN.md)
 - Brand is "ASTRIX PARADOX" (all caps). "ASTRIX285" is Miguel's personal handle. Never rename either.
 - The AX logo (designed by Miguel's son) never changes. It sits beside the ASTRIX wordmark in every header and in the menu drawer, on desktop and phone. Every logo links to "/".
-- Palette: Forge Black #0e0c09, Panel #15130f, Raised #1f1c16, Ember #ba1f12, Ember-hi #e6391f, Deep #732022, Steel #8a8a89, hairlines #2e2a22 / #4a4538. Fonts: Michroma, Barlow, Barlow Semi Condensed. Use tokens, never hardcoded hex. No navy.
+- Palette (neutral blacks, Miguel 16 Oct 2026): Forge Black #0b0b0c, Panel #131315, Raised #1d1d20, Ember #ba1f12, Ember-hi #e6391f, Deep #732022, Steel #8a8a89, hairlines #2c2c30 / #46464c. Fonts: Michroma, Barlow, Barlow Semi Condensed. Use tokens, never hardcoded hex. No navy and no brown: every dark is a neutral black or grey, never a warm or sepia tint. The map art is black with steel linework and the red nebula.
 - Strobe stroke: 1.5px on the left and bottom edges, brightest at the bottom-left, fading out at the bottom-right corner, with a pulse. Standard on every tab and button and on the selected item, tools and public pages.
 - Tiles: raised bevel (light top and left inner edge, dark bottom and right inner edge, soft drop shadow) with the notched top-right corner, unless a brief says flat.
 - Diamond shapes stay diamonds: Super formation and subclass picker. Never put a square button frame around a diamond.

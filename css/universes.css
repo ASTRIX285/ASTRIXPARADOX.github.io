@@ -14,7 +14,7 @@
 #axUniHero{position:relative;isolation:isolate;overflow:hidden;min-height:520px;display:flex;align-items:center;justify-content:center;background:var(--ax-black)}
 #axUniHero .ax-uh-map{position:absolute;inset:0;z-index:-4;background:var(--forge-paradox-map-art) center/cover no-repeat}
 #axUniHero .ax-uh-pool{position:absolute;inset:0;z-index:-3;pointer-events:none;
-  background:radial-gradient(ellipse 760px 260px at 50% 56%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,.7) 75%,rgba(14,12,9,0) 100%)}
+  background:radial-gradient(ellipse 760px 260px at 50% 56%,rgb(11,11,12) 0%,rgb(11,11,12) 50%,rgba(11,11,12,.7) 75%,rgba(11,11,12,0) 100%)}
 #axUniHero .ax-uh-scene{position:absolute;inset:0;z-index:-2;width:100%;height:100%}
 #axUniHero .slab-top{stop-color:var(--ax-raised)}
 #axUniHero .slab-bottom{stop-color:var(--ax-black)}
@@ -37,11 +37,11 @@
 #axUniList .ax-ch{position:relative;height:clamp(420px,40vw,720px);overflow:hidden;background:var(--ax-panel)}
 #axUniList .ax-ch-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.23,1,.32,1)}
 #axUniList .ax-ch::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(90deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.6) 38%,rgba(14,12,9,0) 70%)}
-#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(270deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.6) 38%,rgba(14,12,9,0) 70%)}
+  background:linear-gradient(90deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.6) 38%,rgba(11,11,12,0) 70%)}
+#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(270deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.6) 38%,rgba(11,11,12,0) 70%)}
 #axUniList .ax-ch-body{position:absolute;z-index:2;left:clamp(16px,6vw,96px);bottom:clamp(32px,4vw,64px);display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:min(640px,88%)}
 #axUniList .ax-ch:nth-child(even) .ax-ch-body{left:auto;right:clamp(16px,6vw,96px);align-items:flex-end;text-align:right}
-#axUniList p.ax-ch-status{margin:0;font:400 13px/1 var(--ax-home-label);letter-spacing:.22em;text-transform:uppercase;color:var(--ax-muted);text-shadow:0 1px 8px rgba(14,12,9,.9)}
+#axUniList p.ax-ch-status{margin:0;font:400 13px/1 var(--ax-home-label);letter-spacing:.22em;text-transform:uppercase;color:var(--ax-muted);text-shadow:0 1px 8px rgba(11,11,12,.9)}
 #axUniList p.ax-ch-status:empty{display:none}
 #axUniList p.ax-ch-status.is-live{color:var(--ax-ember-hi)}
 #axUniList h2.ax-ch-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(48px,5.4vw,84px);line-height:.92;
@@ -64,7 +64,7 @@
 }
 
 /* ---------- Trailer modal ---------- */
-.trailer-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,12,9,.94);align-items:center;justify-content:center}
+.trailer-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,11,12,.94);align-items:center;justify-content:center}
 .trailer-modal.open{display:flex}
 .trailer-modal-inner{position:relative;width:min(90vw,1000px)}
 .trailer-modal-close{position:absolute;top:-52px;right:0;min-height:44px;padding:0 18px;cursor:pointer}
@@ -75,11 +75,11 @@
 /* ---------- Phone ---------- */
 @media (max-width:768px){
   #axUniHero{min-height:420px}
-  #axUniHero .ax-uh-pool{background:radial-gradient(ellipse 260px 200px at 50% 58%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,0) 100%),
-    linear-gradient(180deg,rgba(14,12,9,0) 40%,rgb(14,12,9) 48%,rgb(14,12,9) 58%,rgba(14,12,9,0) 66%)}
+  #axUniHero .ax-uh-pool{background:radial-gradient(ellipse 260px 200px at 50% 58%,rgb(11,11,12) 0%,rgb(11,11,12) 50%,rgba(11,11,12,0) 100%),
+    linear-gradient(180deg,rgba(11,11,12,0) 40%,rgb(11,11,12) 48%,rgb(11,11,12) 58%,rgba(11,11,12,0) 66%)}
   #axUniList .ax-ch{height:460px}
   #axUniList .ax-ch--inset .ax-ch-art{width:100%;-webkit-mask-image:none;mask-image:none}
-  #axUniList .ax-ch::after,#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(0deg,rgba(14,12,9,.97) 0%,rgba(14,12,9,.7) 45%,rgba(14,12,9,.1) 100%)}
+  #axUniList .ax-ch::after,#axUniList .ax-ch:nth-child(even)::after{background:linear-gradient(0deg,rgba(11,11,12,.97) 0%,rgba(11,11,12,.7) 45%,rgba(11,11,12,.1) 100%)}
   #axUniList .ax-ch-body,#axUniList .ax-ch:nth-child(even) .ax-ch-body{left:16px;right:16px;bottom:24px;align-items:flex-start;text-align:left}
   #axUniList .ax-ch:nth-child(even) .ax-ch-cta{justify-content:flex-start}
   #axUniList p.ax-ch-line{font-size:16px}

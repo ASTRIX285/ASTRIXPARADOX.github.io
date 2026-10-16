@@ -1404,7 +1404,7 @@ await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold
   await forge.waitForSelector('[data-forge-destination-ribbon] a');
   assert.equal(await forge.locator('link[href*="aetherium.css"]').count(),0,'No Aetherium stylesheet on a Destiny page');
   const shared=await forge.$eval('[data-forge-destination-ribbon] .apx-destination-ribbon a',a=>{const s=getComputedStyle(a),after=getComputedStyle(a,'::after');return {spacing:Math.round(parseFloat(s.letterSpacing)/parseFloat(s.fontSize)*100)/100,upper:s.textTransform,radius:s.borderTopLeftRadius,underline:after.display,bar:getComputedStyle(a.closest('[data-forge-destination-ribbon]')).backgroundColor};});
-  assert.deepEqual(shared,{spacing:0.16,upper:'uppercase',radius:'0px',underline:'block',bar:'rgba(14, 12, 9, 0.94)'},'The shared ribbon is as the shell draws it');
+  assert.deepEqual(shared,{spacing:0.16,upper:'uppercase',radius:'0px',underline:'block',bar:'rgba(11, 11, 12, 0.94)'},'The shared ribbon is as the shell draws it');
   await destiny.close();
 });
 
