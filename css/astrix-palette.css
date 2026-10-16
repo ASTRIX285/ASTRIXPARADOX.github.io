@@ -145,3 +145,21 @@ body[data-apx-button-system] :is(a.restore-btn, a.btn, .restore-btn, .improve-ct
 @media (prefers-reduced-motion: reduce) {
   body[data-apx-button-system] :is(button, [role="button"]) { transition: none !important; }
 }
+
+/* The Forge (Destiny 2, Bungie), Miguel 16 Oct 2026. Background only: a faint steel-blue cast in the
+   map glow and on panel edges and hairlines, taken from Bungie's blue but darker and greyer so it is a
+   variation, never their colour. Buttons, tabs, strobes and the selected state stay Ember. Forge pages
+   carry data-dev="bungie" on <html>; the map stays the ASTRIX PARADOX art underneath. */
+html[data-dev="bungie"]:root{
+  --apx-dev-tint:52,110,140;
+  --forge-paradox-map-art:
+    radial-gradient(1200px 760px at 86% 8%,rgba(var(--apx-dev-tint),.34),transparent 64%),
+    radial-gradient(1000px 640px at 8% 96%,rgba(var(--apx-dev-tint),.2),transparent 62%),
+    image-set(
+      url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp?v=20261016-neutral-1") 1x,
+      url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp?v=20261016-neutral-1") 1.5x
+    );
+  --ax-map-glow:rgba(52,110,140,.2);
+  --ax-line:#293037;--ax-line-strong:#3a424b;--ax-hairline:#2d333a;--ax-chip-line:#434c55;
+  --apx-colour-border:#2d333a;--apx-colour-border-strong:#434c55;
+}
