@@ -32,44 +32,50 @@
     .game-section{margin-bottom:48px}
     .game-section.hidden{display:none}
     .game-section-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-top:8px}
-    .game-section-label{font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
-    .game-section-line{flex:1;height:1px;background:linear-gradient(to right,rgba(201,168,76,0.4),transparent)}
-    .game-section-header .game-section-line:first-child{background:linear-gradient(to left,rgba(201,168,76,0.4),transparent)}
+    body .game-section-header .game-section-label{font:600 15px/1 var(--ax-font-body);letter-spacing:.2em;color:var(--white);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+    .game-section-line{flex:1;height:1px;background:linear-gradient(to right,var(--ax-line-hi,#4a4538),transparent)}
+    .game-section-header .game-section-line:first-child{background:linear-gradient(to left,var(--ax-line-hi,#4a4538),transparent)}
     #clipsGrid{display:block}
     .game-section{margin-bottom:60px}
-    .clips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px}
-    .clip-card{background:var(--dark-2);border:1px solid rgba(139,0,0,0.15);overflow:hidden;transition:border-color 0.3s;position:relative}
-    .clip-card:hover{border-color:rgba(139,0,0,0.4)}
+    /* Cards: the picture stays clean (only the play mark and the running time on it), the
+       words sit underneath at a readable size. Visible at rest: no scroll reveal. */
+    .clips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+    .clip-card{display:flex;flex-direction:column;background:var(--ax-panel);border:1px solid var(--ax-line,#2e2a22);overflow:hidden;position:relative;transition:border-color .2s ease}
     .clip-card.hidden{display:none}
-    .clip-thumb{aspect-ratio:16/9;position:relative;background:#000;cursor:pointer;overflow:hidden}
-    .clip-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s}
-    .clip-card:hover .clip-thumb img{transform:scale(1.04)}
-    .clip-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);display:flex;align-items:center;justify-content:center}
-    .clip-play-btn{width:56px;height:56px;border-radius:50%;background:rgba(139,0,0,0.9);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;transition:transform 0.2s,background 0.2s}
-    .clip-card:hover .clip-play-btn{transform:scale(1.12);background:var(--crimson-mid)}
-    .clip-play-btn svg{margin-left:4px}
-    .clip-game-badge{position:absolute;top:10px;left:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--white);background:var(--crimson);padding:3px 10px;text-transform:uppercase}
-    .clip-type-badge{position:absolute;top:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--dark);background:var(--gold);padding:3px 10px;text-transform:uppercase}
-    .clip-duration{position:absolute;bottom:10px;right:10px;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;color:var(--white);background:rgba(0,0,0,0.8);padding:2px 8px;letter-spacing:1px}
-    .clip-body{padding:16px 20px}
-    .clip-title{font-family:"bahnschrift-semicondensed",monospace;font-size:12px;font-weight:600;color:var(--white);line-height:1.4;margin-bottom:8px;letter-spacing:0.5px}
-    .clip-meta{display:flex;justify-content:space-between;align-items:center}
-    .clip-date{font-size:11px;color:var(--grey);letter-spacing:1px}
-    .clip-links{display:flex;gap:10px}
-    .clip-link{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-decoration:none;transition:color 0.2s}
-    .clip-link:hover{color:var(--gold-light)}
-    .clip-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center}
+    .clip-thumb{display:block;width:100%;aspect-ratio:16/9;position:relative;margin:0;padding:0;border:0;background:var(--ax-black);cursor:pointer;overflow:hidden}
+    .clip-thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .4s cubic-bezier(.23,1,.32,1)}
+    .clip-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(14,12,9,.55) 0%,rgba(14,12,9,0) 45%);pointer-events:none}
+    .clip-play{position:absolute;left:50%;top:50%;z-index:1;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:var(--ax-ember);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.23,1,.32,1),background-color .2s ease}
+    .clip-play svg{margin-left:4px;fill:#fff}
+    .clip-duration{position:absolute;right:10px;bottom:10px;z-index:1;font:600 13px/1 var(--ax-font-body);letter-spacing:.04em;color:#fff;background:rgba(14,12,9,.85);padding:5px 8px}
+    .clip-thumb:active .clip-play{transform:scale(.94)}
+    .clip-thumb:focus-visible{outline:2px solid var(--ax-ember-hi);outline-offset:-2px}
+    .clip-body{display:flex;flex-direction:column;gap:12px;flex:1;padding:16px 18px 18px}
+    .clip-title{margin:0;font:600 17px/1.35 var(--ax-font-body);color:var(--white);text-wrap:pretty}
+    .clip-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:auto}
+    .clip-type{font:600 12px/1 var(--ax-font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--ax-ember-hi);border:1px solid var(--ax-line-hi,#4a4538);padding:5px 8px}
+    .clip-date{font:400 14px/1 var(--ax-font-body);color:#c9c9c8}
+    .clip-link{margin-left:auto;font:600 13px/1 var(--ax-font-body);letter-spacing:.08em;text-transform:uppercase;color:#dcdcda;text-decoration:none;padding:10px 0}
+    .clip-link:hover,.clip-link:focus-visible{color:var(--ax-ember-hi)}
+    @media (hover:hover) and (pointer:fine){
+      .clip-card:hover{border-color:var(--ax-ember)}
+      .clip-card:hover .clip-thumb img{transform:scale(1.03)}
+      .clip-card:hover .clip-play{background:var(--ax-ember-hi)}
+    }
+    .clip-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,12,9,.95);align-items:center;justify-content:center}
     .clip-modal.open{display:flex}
     .clip-modal-inner{position:relative;width:92vw;max-width:1100px}
-    .clip-modal-close{position:absolute;top:-44px;right:0;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);background:none;border:none;cursor:pointer;text-transform:uppercase}
-    .clip-modal-close:hover{color:var(--white)}
+    .clip-modal-close{position:absolute;top:-56px;right:0;min-height:44px;padding:0 16px;font:600 14px/1 var(--ax-font-body);letter-spacing:.1em;color:#dcdcda;background:none;border:1px solid var(--ax-line-hi,#4a4538);cursor:pointer;text-transform:uppercase}
+    .clip-modal-close:hover,.clip-modal-close:focus-visible{color:#fff;border-color:var(--ax-ember-hi)}
+    .clip-modal-close:active{transform:scale(.97)}
     .clip-modal-frame{position:relative;padding-top:56.25%;background:#000}
     .clip-modal-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-    .clip-modal-label{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);text-align:center;margin-top:16px;text-transform:uppercase}
-    .clip-modal-source{font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:6px}
-    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font-family:"bahnschrift-semicondensed",monospace;font-size:11px;letter-spacing:2px;color:var(--grey);border-bottom:1px solid rgba(139,0,0,0.1);margin-bottom:24px;flex-wrap:wrap}
+    .clip-modal-label{font:600 17px/1.4 var(--ax-font-body);color:#fff;text-align:center;margin-top:16px}
+    .clip-modal-source{font:400 14px/1.4 var(--ax-font-body);letter-spacing:.08em;color:#c9c9c8;text-align:center;margin-top:6px;text-transform:uppercase}
+    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font:400 14px/1.4 var(--ax-font-body);letter-spacing:.08em;color:#c9c9c8;border-bottom:1px solid var(--ax-line,#2e2a22);margin-bottom:24px;flex-wrap:wrap;text-transform:uppercase}
     .clips-stats span{color:var(--white)}
-    @media(max-width:768px){.clips-grid{grid-template-columns:1fr}.filter-wrap{padding:0 20px}.filter-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px 0}.filter-label{min-width:0;padding:0;margin:0;border-right:0}.filter-pills{padding:0}}
+    @media (prefers-reduced-motion:reduce){.clip-thumb img,.clip-play{transition:none}.clip-card:hover .clip-thumb img{transform:none}}
+    @media(max-width:768px){.clips-grid{grid-template-columns:1fr;gap:16px}.filter-wrap{padding:0 20px}.filter-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px 0}.filter-label{min-width:0;padding:0;margin:0;border-right:0}.filter-pills{padding:0}}
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
   <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
@@ -144,27 +150,27 @@
       <span class="filter-label ax-chip-label">Game</span>
       <div class="filter-pills ax-chip-row">
         <!-- CLIPS-GAMES:START -->
-        <button class="ax-chip filter-btn game-btn active" data-game="all" onclick="filterClips(this,'game')">All</button>
-        <button class="ax-chip filter-btn game-btn" data-game="crimson-desert" onclick="filterClips(this,'game')">Crimson Desert</button>
-        <button class="ax-chip filter-btn game-btn" data-game="black-myth-wukong" onclick="filterClips(this,'game')">Black Myth: Wukong</button>
-        <button class="ax-chip filter-btn game-btn" data-game="god-of-war" onclick="filterClips(this,'game')">God of War</button>
-        <button class="ax-chip filter-btn game-btn" data-game="destiny" onclick="filterClips(this,'game')">Destiny</button>
+        <button class="ax-chip filter-btn game-btn active" data-game="all" aria-pressed="true">All</button>
+        <button class="ax-chip filter-btn game-btn" data-game="crimson-desert" aria-pressed="false">Crimson Desert</button>
+        <button class="ax-chip filter-btn game-btn" data-game="black-myth-wukong" aria-pressed="false">Black Myth: Wukong</button>
+        <button class="ax-chip filter-btn game-btn" data-game="god-of-war" aria-pressed="false">God of War</button>
+        <button class="ax-chip filter-btn game-btn" data-game="destiny" aria-pressed="false">Destiny</button>
         <!-- CLIPS-GAMES:END -->
       </div>
     </div>
     <div class="filter-row">
       <span class="filter-label ax-chip-label">Type</span>
       <div class="filter-pills ax-chip-row">
-        <button class="ax-chip filter-btn type-btn active" data-type="all" onclick="filterClips(this,'type')">All</button>
-        <button class="ax-chip filter-btn type-btn" data-type="highlight" onclick="filterClips(this,'type')">Highlight</button>
-        <button class="ax-chip filter-btn type-btn" data-type="boss" onclick="filterClips(this,'type')">Boss</button>
-        <button class="ax-chip filter-btn type-btn" data-type="guide" onclick="filterClips(this,'type')">Guide</button>
-        <button class="ax-chip filter-btn type-btn" data-type="build" onclick="filterClips(this,'type')">Build</button>
-        <button class="ax-chip filter-btn type-btn" data-type="pve" onclick="filterClips(this,'type')">PvE</button>
-        <button class="ax-chip filter-btn type-btn" data-type="puzzle" onclick="filterClips(this,'type')">Puzzle</button>
-        <button class="ax-chip filter-btn type-btn" data-type="challenge" onclick="filterClips(this,'type')">Challenge</button>
-        <button class="ax-chip filter-btn type-btn" data-type="missions" onclick="filterClips(this,'type')">Missions</button>
-        <button class="ax-chip filter-btn type-btn" data-type="funny" onclick="filterClips(this,'type')">Funny</button>
+        <button class="ax-chip filter-btn type-btn active" data-type="all" aria-pressed="true">All</button>
+        <button class="ax-chip filter-btn type-btn" data-type="highlight" aria-pressed="false">Highlight</button>
+        <button class="ax-chip filter-btn type-btn" data-type="boss" aria-pressed="false">Boss</button>
+        <button class="ax-chip filter-btn type-btn" data-type="guide" aria-pressed="false">Guide</button>
+        <button class="ax-chip filter-btn type-btn" data-type="build" aria-pressed="false">Build</button>
+        <button class="ax-chip filter-btn type-btn" data-type="pve" aria-pressed="false">PvE</button>
+        <button class="ax-chip filter-btn type-btn" data-type="puzzle" aria-pressed="false">Puzzle</button>
+        <button class="ax-chip filter-btn type-btn" data-type="challenge" aria-pressed="false">Challenge</button>
+        <button class="ax-chip filter-btn type-btn" data-type="missions" aria-pressed="false">Missions</button>
+        <button class="ax-chip filter-btn type-btn" data-type="funny" aria-pressed="false">Funny</button>
       </div>
     </div>
   </div>
@@ -173,7 +179,7 @@
 <section class="section" style="background:var(--dark);padding-top:32px;">
   <div style="max-width:1100px;margin:0 auto;">
     <div class="clips-stats">
-      SHOWING <span id="clipCount"><!-- CLIPS-COUNT:START -->61<!-- CLIPS-COUNT:END --></span> CLIPS
+      SHOWING <span id="clipCount"><!-- CLIPS-COUNT:START -->58<!-- CLIPS-COUNT:END --></span> CLIPS
       &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@ASTRIXPARADOX" target="_blank" style="color:var(--gold);font-family:'bahnschrift-semicondensed',monospace;font-size:11px;letter-spacing:2px;">SUBSCRIBE ON YOUTUBE &#8599;</a>
     </div>
     <div id="clipsGrid">
@@ -186,212 +192,162 @@
         </div>
         <div class="clips-grid">
 
-      <div class="clip-card reveal" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('MDAZYcBoMvo','Crimson Desert | |Guide| Crimson Desert -  Golden Apple Spawn Near Full Harvest Farm','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/MDAZYcBoMvo/maxresdefault.jpg" alt="|Guide| Crimson Desert -  Golden Apple Spawn Near Full Harvest Farm" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">5:21</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="MDAZYcBoMvo" data-label="Golden Apple Spawn Near Full Harvest Farm" data-source="Crimson Desert | Guide" aria-label="Play Golden Apple Spawn Near Full Harvest Farm">
+          <img src="https://img.youtube.com/vi/MDAZYcBoMvo/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/MDAZYcBoMvo/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">5:21</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert -  Golden Apple Spawn Near Full Harvest Farm</div>
+          <p class="clip-title">Golden Apple Spawn Near Full Harvest Farm</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Jun 06, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=MDAZYcBoMvo" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=MDAZYcBoMvo" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('eBXbektTxw0','Crimson Desert | |Guide| Crimson Desert - How To Disable The Fleet of Archives Power Core','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/eBXbektTxw0/maxresdefault.jpg" alt="|Guide| Crimson Desert - How To Disable The Fleet of Archives Power Core" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">2:06</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="eBXbektTxw0" data-label="How To Disable The Fleet of Archives Power Core" data-source="Crimson Desert | Guide" aria-label="Play How To Disable The Fleet of Archives Power Core">
+          <img src="https://img.youtube.com/vi/eBXbektTxw0/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/eBXbektTxw0/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:06</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - How To Disable The Fleet of Archives Power Core</div>
+          <p class="clip-title">How To Disable The Fleet of Archives Power Core</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Jun 05, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=eBXbektTxw0" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=eBXbektTxw0" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('4kM6LJAd33w','Crimson Desert | |Guide| Crimson Desert - Fast Abyss Cell Farming Made Easy','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/4kM6LJAd33w/maxresdefault.jpg" alt="|Guide| Crimson Desert - Fast Abyss Cell Farming Made Easy" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">3:28</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="4kM6LJAd33w" data-label="Fast Abyss Cell Farming Made Easy" data-source="Crimson Desert | Guide" aria-label="Play Fast Abyss Cell Farming Made Easy">
+          <img src="https://img.youtube.com/vi/4kM6LJAd33w/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/4kM6LJAd33w/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:28</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - Fast Abyss Cell Farming Made Easy</div>
+          <p class="clip-title">Fast Abyss Cell Farming Made Easy</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Jun 05, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=4kM6LJAd33w" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=4kM6LJAd33w" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="crimson-desert" data-type="challenge">
-        <div class="clip-thumb" onclick="openClip('l_xRpfrArUU','Crimson Desert | |Challenge| Crimson Desert  - Red River Ancient Ruins','Crimson Desert · Challenge')">
-          <img src="https://img.youtube.com/vi/l_xRpfrArUU/maxresdefault.jpg" alt="|Challenge| Crimson Desert  - Red River Ancient Ruins" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Challenge</div>
-          <div class="clip-duration">1:48</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="challenge">
+        <button class="clip-thumb" type="button" data-clip="l_xRpfrArUU" data-label="Red River Ancient Ruins" data-source="Crimson Desert | Challenge" aria-label="Play Red River Ancient Ruins">
+          <img src="https://img.youtube.com/vi/l_xRpfrArUU/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/l_xRpfrArUU/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:48</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Challenge| Crimson Desert  - Red River Ancient Ruins</div>
+          <p class="clip-title">Red River Ancient Ruins</p>
           <div class="clip-meta">
+            <span class="clip-type">Challenge</span>
             <span class="clip-date">May 30, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=l_xRpfrArUU" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=l_xRpfrArUU" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="crimson-desert" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('w5gwx0WqSdg','Crimson Desert | |Highlight| Crimson Desert - Greymane Marrow\'s Request','Crimson Desert · Highlight')">
-          <img src="https://img.youtube.com/vi/w5gwx0WqSdg/maxresdefault.jpg" alt="|Highlight| Crimson Desert - Greymane Marrow's Request" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">2:31</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="w5gwx0WqSdg" data-label="Greymane Marrow&#x27;s Request" data-source="Crimson Desert | Highlight" aria-label="Play Greymane Marrow&#x27;s Request">
+          <img src="https://img.youtube.com/vi/w5gwx0WqSdg/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/w5gwx0WqSdg/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:31</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Highlight| Crimson Desert - Greymane Marrow's Request</div>
+          <p class="clip-title">Greymane Marrow's Request</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 29, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=w5gwx0WqSdg" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=w5gwx0WqSdg" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('G7VDv-BXN1w','Crimson Desert | |Guide| Crimson Desert - How To Get The Legendary Baby Wyvern Pet','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/G7VDv-BXN1w/maxresdefault.jpg" alt="|Guide| Crimson Desert - How To Get The Legendary Baby Wyvern Pet" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">4:57</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="G7VDv-BXN1w" data-label="How To Get The Legendary Baby Wyvern Pet" data-source="Crimson Desert | Guide" aria-label="Play How To Get The Legendary Baby Wyvern Pet">
+          <img src="https://img.youtube.com/vi/G7VDv-BXN1w/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/G7VDv-BXN1w/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:57</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - How To Get The Legendary Baby Wyvern Pet</div>
+          <p class="clip-title">How To Get The Legendary Baby Wyvern Pet</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">May 22, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=G7VDv-BXN1w" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=G7VDv-BXN1w" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('OqNmvv8QSsA','Crimson Desert | |Guide| Crimson Desert - How To Get The Ring Of Lightning','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/OqNmvv8QSsA/maxresdefault.jpg" alt="|Guide| Crimson Desert - How To Get The Ring Of Lightning" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">2:52</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="OqNmvv8QSsA" data-label="How To Get The Ring Of Lightning" data-source="Crimson Desert | Guide" aria-label="Play How To Get The Ring Of Lightning">
+          <img src="https://img.youtube.com/vi/OqNmvv8QSsA/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/OqNmvv8QSsA/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:52</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - How To Get The Ring Of Lightning</div>
+          <p class="clip-title">How To Get The Ring Of Lightning</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Apr 27, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=OqNmvv8QSsA" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=OqNmvv8QSsA" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('o9V8_S8kmx8','Crimson Desert | |Guide| Crimson Desert - How To Free The Wyvern Dragon','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/o9V8_S8kmx8/maxresdefault.jpg" alt="|Guide| Crimson Desert - How To Free The Wyvern Dragon" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">4:15</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="o9V8_S8kmx8" data-label="How To Free The Wyvern Dragon" data-source="Crimson Desert | Guide" aria-label="Play How To Free The Wyvern Dragon">
+          <img src="https://img.youtube.com/vi/o9V8_S8kmx8/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/o9V8_S8kmx8/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:15</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - How To Free The Wyvern Dragon</div>
+          <p class="clip-title">How To Free The Wyvern Dragon</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Apr 26, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=o9V8_S8kmx8" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=o9V8_S8kmx8" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="crimson-desert" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('jPf89vU9tXI','Crimson Desert | |Guide| Crimson Desert - How To Expand Howling Hill Camp','Crimson Desert · Guide')">
-          <img src="https://img.youtube.com/vi/jPf89vU9tXI/maxresdefault.jpg" alt="|Guide| Crimson Desert - How To Expand Howling Hill Camp" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">0:42</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="jPf89vU9tXI" data-label="How To Expand Howling Hill Camp" data-source="Crimson Desert | Guide" aria-label="Play How To Expand Howling Hill Camp">
+          <img src="https://img.youtube.com/vi/jPf89vU9tXI/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/jPf89vU9tXI/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">0:42</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Guide| Crimson Desert - How To Expand Howling Hill Camp</div>
+          <p class="clip-title">How To Expand Howling Hill Camp</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Apr 05, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=jPf89vU9tXI" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=jPf89vU9tXI" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="crimson-desert" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('hl6E_F7boRk','Crimson Desert | |Boss| Crimson Desert - Easy Tenebrum Boss Strategy','Crimson Desert · Boss')">
-          <img src="https://img.youtube.com/vi/hl6E_F7boRk/maxresdefault.jpg" alt="|Boss| Crimson Desert - Easy Tenebrum Boss Strategy" onerror="this.src='../img/games/crimsondesert.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Crimson Desert</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">5:29</div>
-        </div>
+      <div class="clip-card" data-game="crimson-desert" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="hl6E_F7boRk" data-label="Easy Tenebrum Boss Strategy" data-source="Crimson Desert | Boss" aria-label="Play Easy Tenebrum Boss Strategy">
+          <img src="https://img.youtube.com/vi/hl6E_F7boRk/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/hl6E_F7boRk/hqdefault.jpg|../img/games/crimsondesert.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">5:29</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| Crimson Desert - Easy Tenebrum Boss Strategy</div>
+          <p class="clip-title">Easy Tenebrum Boss Strategy</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Apr 04, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=hl6E_F7boRk" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=hl6E_F7boRk" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
@@ -406,191 +362,146 @@
         </div>
         <div class="clips-grid">
 
-      <div class="clip-card reveal" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('UC4wnVRUYRo','Black Myth: Wukong | |Boss| - Black Myth: Wukong -  Toad King','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/UC4wnVRUYRo/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -  Toad King" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">2:49</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="UC4wnVRUYRo" data-label="Toad King" data-source="Black Myth: Wukong | Boss" aria-label="Play Toad King">
+          <img src="https://img.youtube.com/vi/UC4wnVRUYRo/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/UC4wnVRUYRo/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:49</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -  Toad King</div>
+          <p class="clip-title">Toad King</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 12, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=UC4wnVRUYRo" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=UC4wnVRUYRo" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('W7OpehHtp6A','Black Myth: Wukong | |Boss| - Black Myth: Wukong -  The First Prince','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/W7OpehHtp6A/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -  The First Prince" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">3:05</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="W7OpehHtp6A" data-label="The First Prince" data-source="Black Myth: Wukong | Boss" aria-label="Play The First Prince">
+          <img src="https://img.youtube.com/vi/W7OpehHtp6A/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/W7OpehHtp6A/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:05</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -  The First Prince</div>
+          <p class="clip-title">The First Prince</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 12, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=W7OpehHtp6A" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=W7OpehHtp6A" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('Kfc4MuWSXC8','Black Myth: Wukong | |Boss| - Black Myth: Wukong  - King and Second Prince of Flowing Sands fight','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/Kfc4MuWSXC8/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong  - King and Second Prince of Flowing Sands fight" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">4:45</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="Kfc4MuWSXC8" data-label="King and Second Prince of Flowing Sands fight" data-source="Black Myth: Wukong | Boss" aria-label="Play King and Second Prince of Flowing Sands fight">
+          <img src="https://img.youtube.com/vi/Kfc4MuWSXC8/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Kfc4MuWSXC8/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:45</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong  - King and Second Prince of Flowing Sands fight</div>
+          <p class="clip-title">King and Second Prince of Flowing Sands fight</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 12, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Kfc4MuWSXC8" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Kfc4MuWSXC8" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('_bYctgCbhtM','Black Myth: Wukong | |Boss| - Black Myth: Wukong -   Earth Wolf encounter','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/_bYctgCbhtM/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -   Earth Wolf encounter" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">2:16</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="_bYctgCbhtM" data-label="Earth Wolf encounter" data-source="Black Myth: Wukong | Boss" aria-label="Play Earth Wolf encounter">
+          <img src="https://img.youtube.com/vi/_bYctgCbhtM/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/_bYctgCbhtM/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:16</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -   Earth Wolf encounter</div>
+          <p class="clip-title">Earth Wolf encounter</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 12, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=_bYctgCbhtM" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=_bYctgCbhtM" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('Go7boKNgP18','Black Myth: Wukong | |Boss| -  Black Myth: Wukong - Black Bear Guai','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/Go7boKNgP18/maxresdefault.jpg" alt="|Boss| -  Black Myth: Wukong - Black Bear Guai" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">6:51</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="Go7boKNgP18" data-label="Black Bear Guai" data-source="Black Myth: Wukong | Boss" aria-label="Play Black Bear Guai">
+          <img src="https://img.youtube.com/vi/Go7boKNgP18/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Go7boKNgP18/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:51</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| -  Black Myth: Wukong - Black Bear Guai</div>
+          <p class="clip-title">Black Bear Guai</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 12, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Go7boKNgP18" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Go7boKNgP18" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('kl1sRvTrKAY','Black Myth: Wukong | |Boss| - Black Myth: Wukong -   Black Wind King','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/kl1sRvTrKAY/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -   Black Wind King" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">4:00</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="kl1sRvTrKAY" data-label="Black Wind King" data-source="Black Myth: Wukong | Boss" aria-label="Play Black Wind King">
+          <img src="https://img.youtube.com/vi/kl1sRvTrKAY/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/kl1sRvTrKAY/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:00</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -   Black Wind King</div>
+          <p class="clip-title">Black Wind King</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 11, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=kl1sRvTrKAY" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=kl1sRvTrKAY" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('yNzB6Fp4CeM','Black Myth: Wukong | |Boss| - Black Myth: Wukong -   Whiteclad Noble','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/yNzB6Fp4CeM/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -   Whiteclad Noble" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">6:28</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="yNzB6Fp4CeM" data-label="Whiteclad Noble" data-source="Black Myth: Wukong | Boss" aria-label="Play Whiteclad Noble">
+          <img src="https://img.youtube.com/vi/yNzB6Fp4CeM/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/yNzB6Fp4CeM/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:28</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -   Whiteclad Noble</div>
+          <p class="clip-title">Whiteclad Noble</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 11, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=yNzB6Fp4CeM" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=yNzB6Fp4CeM" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('ZGvWs7EI0BM','Black Myth: Wukong | |Boss| - Black Myth: Wukong -  Yaoguai Chief Guangmou','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/ZGvWs7EI0BM/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -  Yaoguai Chief Guangmou" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">1:31</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="ZGvWs7EI0BM" data-label="Yaoguai Chief Guangmou" data-source="Black Myth: Wukong | Boss" aria-label="Play Yaoguai Chief Guangmou">
+          <img src="https://img.youtube.com/vi/ZGvWs7EI0BM/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/ZGvWs7EI0BM/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:31</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -  Yaoguai Chief Guangmou</div>
+          <p class="clip-title">Yaoguai Chief Guangmou</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 04, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=ZGvWs7EI0BM" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=ZGvWs7EI0BM" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="black-myth-wukong" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('XlpeTHc9fuk','Black Myth: Wukong | |Boss| - Black Myth: Wukong -  Yaoguai King Lingxuzi','Black Myth: Wukong · Boss')">
-          <img src="https://img.youtube.com/vi/XlpeTHc9fuk/maxresdefault.jpg" alt="|Boss| - Black Myth: Wukong -  Yaoguai King Lingxuzi" onerror="this.src='../img/games/black-myth-wukong.png'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Black Myth: Wukong</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">2:53</div>
-        </div>
+      <div class="clip-card" data-game="black-myth-wukong" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="XlpeTHc9fuk" data-label="Yaoguai King Lingxuzi" data-source="Black Myth: Wukong | Boss" aria-label="Play Yaoguai King Lingxuzi">
+          <img src="https://img.youtube.com/vi/XlpeTHc9fuk/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/XlpeTHc9fuk/hqdefault.jpg|../img/games/black-myth-wukong.png" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:53</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| - Black Myth: Wukong -  Yaoguai King Lingxuzi</div>
+          <p class="clip-title">Yaoguai King Lingxuzi</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Sep 04, 2024</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=XlpeTHc9fuk" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=XlpeTHc9fuk" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
@@ -605,170 +516,130 @@
         </div>
         <div class="clips-grid">
 
-      <div class="clip-card reveal" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('Y8jtbfgtBVo','God of War | |Boss| God of War - How To Defeat Hildr Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/Y8jtbfgtBVo/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Hildr Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">3:05</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="Y8jtbfgtBVo" data-label="How To Defeat Hildr Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Hildr Valkyrie">
+          <img src="https://img.youtube.com/vi/Y8jtbfgtBVo/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Y8jtbfgtBVo/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:05</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Hildr Valkyrie</div>
+          <p class="clip-title">How To Defeat Hildr Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 07, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Y8jtbfgtBVo" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Y8jtbfgtBVo" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('AsGGDE8_z4I','God of War | |Boss| God of War - How To Defeat Rota Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/AsGGDE8_z4I/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Rota Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">4:55</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="AsGGDE8_z4I" data-label="How To Defeat Rota Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Rota Valkyrie">
+          <img src="https://img.youtube.com/vi/AsGGDE8_z4I/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/AsGGDE8_z4I/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:55</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Rota Valkyrie</div>
+          <p class="clip-title">How To Defeat Rota Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 04, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=AsGGDE8_z4I" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=AsGGDE8_z4I" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('HSOm4PovypA','God of War | |Boss| God of War - How To Defeat Olrun Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/HSOm4PovypA/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Olrun Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">4:41</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="HSOm4PovypA" data-label="How To Defeat Olrun Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Olrun Valkyrie">
+          <img src="https://img.youtube.com/vi/HSOm4PovypA/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/HSOm4PovypA/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:41</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Olrun Valkyrie</div>
+          <p class="clip-title">How To Defeat Olrun Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 03, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=HSOm4PovypA" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=HSOm4PovypA" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('ngvzWO3QiW8','God of War | |Boss| God of War - How To Defeat Eir Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/ngvzWO3QiW8/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Eir Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">5:14</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="ngvzWO3QiW8" data-label="How To Defeat Eir Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Eir Valkyrie">
+          <img src="https://img.youtube.com/vi/ngvzWO3QiW8/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/ngvzWO3QiW8/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">5:14</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Eir Valkyrie</div>
+          <p class="clip-title">How To Defeat Eir Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 02, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=ngvzWO3QiW8" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=ngvzWO3QiW8" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('4U9THhAnX6Y','God of War | |Boss| God of War - How To Defeat Gunnr Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/4U9THhAnX6Y/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Gunnr Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">5:22</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="4U9THhAnX6Y" data-label="How To Defeat Gunnr Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Gunnr Valkyrie">
+          <img src="https://img.youtube.com/vi/4U9THhAnX6Y/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/4U9THhAnX6Y/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">5:22</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Gunnr Valkyrie</div>
+          <p class="clip-title">How To Defeat Gunnr Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 01, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=4U9THhAnX6Y" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=4U9THhAnX6Y" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('DWsDYfgjeXw','God of War | |Boss| God of War - How To Defeat Geirdriful Valkyrie','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/DWsDYfgjeXw/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Geirdriful Valkyrie" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">3:42</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="DWsDYfgjeXw" data-label="How To Defeat Geirdriful Valkyrie" data-source="God of War | Boss" aria-label="Play How To Defeat Geirdriful Valkyrie">
+          <img src="https://img.youtube.com/vi/DWsDYfgjeXw/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/DWsDYfgjeXw/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:42</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Geirdriful Valkyrie</div>
+          <p class="clip-title">How To Defeat Geirdriful Valkyrie</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">May 01, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=DWsDYfgjeXw" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=DWsDYfgjeXw" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('9xABLI0qDt0','God of War | |Boss| God of War - How To Defeat Svartaljofurr In Alfheim','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/9xABLI0qDt0/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Svartaljofurr In Alfheim" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">2:51</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="9xABLI0qDt0" data-label="How To Defeat Svartaljofurr In Alfheim" data-source="God of War | Boss" aria-label="Play How To Defeat Svartaljofurr In Alfheim">
+          <img src="https://img.youtube.com/vi/9xABLI0qDt0/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/9xABLI0qDt0/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">2:51</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Svartaljofurr In Alfheim</div>
+          <p class="clip-title">How To Defeat Svartaljofurr In Alfheim</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Apr 27, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=9xABLI0qDt0" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=9xABLI0qDt0" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="god-of-war" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('N5bLP3noSS4','God of War | |Boss| God of War - How To Defeat Hraezlyr Dragon','God of War · Boss')">
-          <img src="https://img.youtube.com/vi/N5bLP3noSS4/maxresdefault.jpg" alt="|Boss| God of War - How To Defeat Hraezlyr Dragon" onerror="this.src='../img/games/god-of-war.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">God of War</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">6:41</div>
-        </div>
+      <div class="clip-card" data-game="god-of-war" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="N5bLP3noSS4" data-label="How To Defeat Hraezlyr Dragon" data-source="God of War | Boss" aria-label="Play How To Defeat Hraezlyr Dragon">
+          <img src="https://img.youtube.com/vi/N5bLP3noSS4/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/N5bLP3noSS4/hqdefault.jpg|../img/games/god-of-war.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:41</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">|Boss| God of War - How To Defeat Hraezlyr Dragon</div>
+          <p class="clip-title">How To Defeat Hraezlyr Dragon</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Apr 27, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=N5bLP3noSS4" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=N5bLP3noSS4" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
@@ -783,716 +654,498 @@
         </div>
         <div class="clips-grid">
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('3FIiRbCbOy4','Destiny | Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/3FIiRbCbOy4/maxresdefault.jpg" alt="Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">0:42</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="3FIiRbCbOy4" data-label="Destiny 2 - Squad Wipe with Annihilation Kills - Showdown" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Squad Wipe with Annihilation Kills - Showdown">
+          <img src="https://img.youtube.com/vi/3FIiRbCbOy4/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/3FIiRbCbOy4/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">0:42</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown</div>
+          <p class="clip-title">Destiny 2 - Squad Wipe with Annihilation Kills - Showdown</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=3FIiRbCbOy4" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=3FIiRbCbOy4" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('AMAwqMyQxng','Destiny | Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/AMAwqMyQxng/maxresdefault.jpg" alt="Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">13:07</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="AMAwqMyQxng" data-label="Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two">
+          <img src="https://img.youtube.com/vi/AMAwqMyQxng/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/AMAwqMyQxng/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">13:07</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two</div>
+          <p class="clip-title">Destiny 1 - WOTM HM - Aksis Archon Prime Phase Two</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=AMAwqMyQxng" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=AMAwqMyQxng" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('BrwlXKFKT3c','Destiny | Destiny 1 - King\'s Fall Raid - GOLGOROTH','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/BrwlXKFKT3c/maxresdefault.jpg" alt="Destiny 1 - King's Fall Raid - GOLGOROTH" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">11:03</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="BrwlXKFKT3c" data-label="Destiny 1 - King&#x27;s Fall Raid - GOLGOROTH" data-source="Destiny | PvE" aria-label="Play Destiny 1 - King&#x27;s Fall Raid - GOLGOROTH">
+          <img src="https://img.youtube.com/vi/BrwlXKFKT3c/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/BrwlXKFKT3c/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">11:03</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - King's Fall Raid - GOLGOROTH</div>
+          <p class="clip-title">Destiny 1 - King's Fall Raid - GOLGOROTH</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=BrwlXKFKT3c" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=BrwlXKFKT3c" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('I37pY6U_lQE','Destiny | Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/I37pY6U_lQE/maxresdefault.jpg" alt="Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:19</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="I37pY6U_lQE" data-label="Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni">
+          <img src="https://img.youtube.com/vi/I37pY6U_lQE/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/I37pY6U_lQE/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:19</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni</div>
+          <p class="clip-title">Destiny 1 - WOTM HM - Part 3 - Siege Engine / Death Zamboni</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=I37pY6U_lQE" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=I37pY6U_lQE" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('IsNSbcEZBOw','Destiny | Destiny 1 - King\'s Fall - Totems Hard Mode','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/IsNSbcEZBOw/maxresdefault.jpg" alt="Destiny 1 - King's Fall - Totems Hard Mode" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:51</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="IsNSbcEZBOw" data-label="Destiny 1 - King&#x27;s Fall - Totems Hard Mode" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - King&#x27;s Fall - Totems Hard Mode">
+          <img src="https://img.youtube.com/vi/IsNSbcEZBOw/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/IsNSbcEZBOw/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:51</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - King's Fall - Totems Hard Mode</div>
+          <p class="clip-title">Destiny 1 - King's Fall - Totems Hard Mode</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=IsNSbcEZBOw" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=IsNSbcEZBOw" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('NYpLbCYxkso','Destiny | Destiny 1 - WOTM HM - Aksis Archon Prime Phase One','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/NYpLbCYxkso/maxresdefault.jpg" alt="Destiny 1 - WOTM HM - Aksis Archon Prime Phase One" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:05</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="NYpLbCYxkso" data-label="Destiny 1 - WOTM HM - Aksis Archon Prime Phase One" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - WOTM HM - Aksis Archon Prime Phase One">
+          <img src="https://img.youtube.com/vi/NYpLbCYxkso/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/NYpLbCYxkso/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:05</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - WOTM HM - Aksis Archon Prime Phase One</div>
+          <p class="clip-title">Destiny 1 - WOTM HM - Aksis Archon Prime Phase One</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=NYpLbCYxkso" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=NYpLbCYxkso" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="challenge">
-        <div class="clip-thumb" onclick="openClip('QzYNU-FpM1I','Destiny | Destiny 1 - KIng\'s Fall - Oryx Challenge Mode','Destiny · Challenge')">
-          <img src="https://img.youtube.com/vi/QzYNU-FpM1I/maxresdefault.jpg" alt="Destiny 1 - KIng's Fall - Oryx Challenge Mode" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Challenge</div>
-          <div class="clip-duration">13:05</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="challenge">
+        <button class="clip-thumb" type="button" data-clip="QzYNU-FpM1I" data-label="Destiny 1 - KIng&#x27;s Fall - Oryx Challenge Mode" data-source="Destiny | Challenge" aria-label="Play Destiny 1 - KIng&#x27;s Fall - Oryx Challenge Mode">
+          <img src="https://img.youtube.com/vi/QzYNU-FpM1I/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/QzYNU-FpM1I/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">13:05</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - KIng's Fall - Oryx Challenge Mode</div>
+          <p class="clip-title">Destiny 1 - KIng's Fall - Oryx Challenge Mode</p>
           <div class="clip-meta">
+            <span class="clip-type">Challenge</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=QzYNU-FpM1I" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=QzYNU-FpM1I" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('UH42SysUftE','Destiny | Private video','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/UH42SysUftE/maxresdefault.jpg" alt="Private video" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">0:00</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="Ysk9cPQ3vPo" data-label="Destiny 1 - The Shadow Thief - Queens Reward Bounty" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - The Shadow Thief - Queens Reward Bounty">
+          <img src="https://img.youtube.com/vi/Ysk9cPQ3vPo/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Ysk9cPQ3vPo/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:19</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Private video</div>
+          <p class="clip-title">Destiny 1 - The Shadow Thief - Queens Reward Bounty</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=UH42SysUftE" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Ysk9cPQ3vPo" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('Ysk9cPQ3vPo','Destiny | Destiny 1  - The Shadow Thief - Queens Reward Bounty','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/Ysk9cPQ3vPo/maxresdefault.jpg" alt="Destiny 1  - The Shadow Thief - Queens Reward Bounty" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">4:19</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="Z0y05pyonJM" data-label="Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2">
+          <img src="https://img.youtube.com/vi/Z0y05pyonJM/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Z0y05pyonJM/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">9:39</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1  - The Shadow Thief - Queens Reward Bounty</div>
+          <p class="clip-title">Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Ysk9cPQ3vPo" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Z0y05pyonJM" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('Z0y05pyonJM','Destiny | Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/Z0y05pyonJM/maxresdefault.jpg" alt="Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">9:39</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="jBk7_7PbUZI" data-label="Destniy 1 - Old Russia - Devil&#x27;s Lair" data-source="Destiny | Highlight" aria-label="Play Destniy 1 - Old Russia - Devil&#x27;s Lair">
+          <img src="https://img.youtube.com/vi/jBk7_7PbUZI/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/jBk7_7PbUZI/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:07</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - WOTM HM - Vosik the Archpriest - Part 2</div>
+          <p class="clip-title">Destniy 1 - Old Russia - Devil's Lair</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Z0y05pyonJM" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=jBk7_7PbUZI" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('jBk7_7PbUZI','Destiny | Destniy 1 -  Old Russia - Devil\'s Lair','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/jBk7_7PbUZI/maxresdefault.jpg" alt="Destniy 1 -  Old Russia - Devil's Lair" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">3:07</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="k7wzxljUvCg" data-label="Destiny 1 - The Taken King - King&#x27;s Fall Raid Hard Mode Part 1" data-source="Destiny | PvE" aria-label="Play Destiny 1 - The Taken King - King&#x27;s Fall Raid Hard Mode Part 1">
+          <img src="https://img.youtube.com/vi/k7wzxljUvCg/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/k7wzxljUvCg/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">9:19</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destniy 1 -  Old Russia - Devil's Lair</div>
+          <p class="clip-title">Destiny 1 - The Taken King - King's Fall Raid Hard Mode Part 1</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=jBk7_7PbUZI" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=k7wzxljUvCg" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('k7wzxljUvCg','Destiny | Destiny 1 - The Taken King - King\'s Fall Raid Hard Mode Part 1','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/k7wzxljUvCg/maxresdefault.jpg" alt="Destiny 1 - The Taken King - King's Fall Raid Hard Mode Part 1" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">9:19</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="pRH4pb6_WxY" data-label="Destiny 1 - Bounty and Strikes Grind" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - Bounty and Strikes Grind">
+          <img src="https://img.youtube.com/vi/pRH4pb6_WxY/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/pRH4pb6_WxY/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:12:50</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - The Taken King - King's Fall Raid Hard Mode Part 1</div>
+          <p class="clip-title">Destiny 1 - Bounty and Strikes Grind</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=k7wzxljUvCg" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=pRH4pb6_WxY" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('oRf0BOiXSZs','Destiny | Private video','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/oRf0BOiXSZs/maxresdefault.jpg" alt="Private video" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">0:00</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="puzzle">
+        <button class="clip-thumb" type="button" data-clip="quq-_XVgc8M" data-label="Destiny 1 - King&#x27;s Fall - Tomb Ship Puzzle" data-source="Destiny | Puzzle" aria-label="Play Destiny 1 - King&#x27;s Fall - Tomb Ship Puzzle">
+          <img src="https://img.youtube.com/vi/quq-_XVgc8M/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/quq-_XVgc8M/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:45</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Private video</div>
+          <p class="clip-title">Destiny 1 - King's Fall - Tomb Ship Puzzle</p>
           <div class="clip-meta">
+            <span class="clip-type">Puzzle</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=oRf0BOiXSZs" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=quq-_XVgc8M" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('pRH4pb6_WxY','Destiny | Destiny 1 - Bounty and Strikes Grind','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/pRH4pb6_WxY/maxresdefault.jpg" alt="Destiny 1 - Bounty and Strikes Grind" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">1:12:50</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="w-Ejwieeon0" data-label="Destiny 1 - Fun with new Update (Part 1)" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - Fun with new Update (Part 1)">
+          <img src="https://img.youtube.com/vi/w-Ejwieeon0/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/w-Ejwieeon0/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">14:59</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - Bounty and Strikes Grind</div>
+          <p class="clip-title">Destiny 1 - Fun with new Update (Part 1)</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=pRH4pb6_WxY" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=w-Ejwieeon0" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="puzzle">
-        <div class="clip-thumb" onclick="openClip('quq-_XVgc8M','Destiny | Destiny 1 - King\'s Fall - Tomb Ship Puzzle','Destiny · Puzzle')">
-          <img src="https://img.youtube.com/vi/quq-_XVgc8M/maxresdefault.jpg" alt="Destiny 1 - King's Fall - Tomb Ship Puzzle" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Puzzle</div>
-          <div class="clip-duration">4:45</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="wJgrvvkg-yw" data-label="Destiny 1 - Outbreak Prime gameplay" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - Outbreak Prime gameplay">
+          <img src="https://img.youtube.com/vi/wJgrvvkg-yw/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/wJgrvvkg-yw/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">9:19</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - King's Fall - Tomb Ship Puzzle</div>
+          <p class="clip-title">Destiny 1 - Outbreak Prime gameplay</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=quq-_XVgc8M" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=wJgrvvkg-yw" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('uKXBweTNxPI','Destiny | Private video','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/uKXBweTNxPI/maxresdefault.jpg" alt="Private video" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">0:00</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="xW72CzC0Y_U" data-label="Destiny 1 - Wrath of the Machine raid - First Exotic Chest Location" data-source="Destiny | PvE" aria-label="Play Destiny 1 - Wrath of the Machine raid - First Exotic Chest Location">
+          <img src="https://img.youtube.com/vi/xW72CzC0Y_U/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/xW72CzC0Y_U/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:57</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Private video</div>
+          <p class="clip-title">Destiny 1 - Wrath of the Machine raid - First Exotic Chest Location</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=uKXBweTNxPI" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=xW72CzC0Y_U" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('w-Ejwieeon0','Destiny | Destiny 1 - Fun  with new Update (Part 1)','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/w-Ejwieeon0/maxresdefault.jpg" alt="Destiny 1 - Fun  with new Update (Part 1)" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">14:59</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="LZxKPhABjVg" data-label="Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113" data-source="Destiny | Highlight" aria-label="Play Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113">
+          <img src="https://img.youtube.com/vi/LZxKPhABjVg/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/LZxKPhABjVg/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:21</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - Fun  with new Update (Part 1)</div>
+          <p class="clip-title">Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=w-Ejwieeon0" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=LZxKPhABjVg" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('wJgrvvkg-yw','Destiny | Destiny 1 - Outbreak Prime gameplay','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/wJgrvvkg-yw/maxresdefault.jpg" alt="Destiny 1 - Outbreak Prime gameplay" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">9:19</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="8KgiG5k0Wv0" data-label="Destiny 2 - Deep Stone Crypt Security - First Encounter" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Deep Stone Crypt Security - First Encounter">
+          <img src="https://img.youtube.com/vi/8KgiG5k0Wv0/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/8KgiG5k0Wv0/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:20</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 1 - Outbreak Prime gameplay</div>
+          <p class="clip-title">Destiny 2 - Deep Stone Crypt Security - First Encounter</p>
           <div class="clip-meta">
-            <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=wJgrvvkg-yw" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="clip-card reveal" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('xW72CzC0Y_U','Destiny | Destiny 1  - Wrath of the Machine raid - First Exotic Chest Location','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/xW72CzC0Y_U/maxresdefault.jpg" alt="Destiny 1  - Wrath of the Machine raid - First Exotic Chest Location" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">4:57</div>
-        </div>
-        <div class="clip-body">
-          <div class="clip-title">Destiny 1  - Wrath of the Machine raid - First Exotic Chest Location</div>
-          <div class="clip-meta">
-            <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=xW72CzC0Y_U" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('LZxKPhABjVg','Destiny | Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/LZxKPhABjVg/maxresdefault.jpg" alt="Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:21</div>
-        </div>
-        <div class="clip-body">
-          <div class="clip-title">Destiny 1 - WOTM HM - Vosik First Encounter- Enter The Wall Foundry 113</div>
-          <div class="clip-meta">
-            <span class="clip-date">May 31, 2026</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=LZxKPhABjVg" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('8KgiG5k0Wv0','Destiny | Destiny 2 - Deep Stone Crypt Security - First Encounter','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/8KgiG5k0Wv0/maxresdefault.jpg" alt="Destiny 2 - Deep Stone Crypt Security - First Encounter" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:20</div>
-        </div>
-        <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Deep Stone Crypt Security - First Encounter</div>
-          <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">Nov 22, 2020</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=8KgiG5k0Wv0" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=8KgiG5k0Wv0" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('3FIiRbCbOy4','Destiny | Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/3FIiRbCbOy4/maxresdefault.jpg" alt="Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">0:42</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="3FIiRbCbOy4" data-label="Destiny 2 - Squad Wipe with Annihilation Kills - Showdown" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Squad Wipe with Annihilation Kills - Showdown">
+          <img src="https://img.youtube.com/vi/3FIiRbCbOy4/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/3FIiRbCbOy4/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">0:42</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny  2 - Squad Wipe with Annihilation Kills -  Showdown</div>
+          <p class="clip-title">Destiny 2 - Squad Wipe with Annihilation Kills - Showdown</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">May 10, 2020</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=3FIiRbCbOy4" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=3FIiRbCbOy4" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('Q61kHieEUAU','Destiny | Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre','Destiny · Guide')">
-          <img src="https://img.youtube.com/vi/Q61kHieEUAU/maxresdefault.jpg" alt="Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">4:47</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="Q61kHieEUAU" data-label="Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre" data-source="Destiny | Guide" aria-label="Play Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre">
+          <img src="https://img.youtube.com/vi/Q61kHieEUAU/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/Q61kHieEUAU/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">4:47</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre</div>
+          <p class="clip-title">Destiny 2 - How to Kill Morgeth the Spirekeeper Ogre</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Nov 04, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=Q61kHieEUAU" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=Q61kHieEUAU" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('5dQOjdPaHhg','Destiny | Destiny 2 -  How to defeat  Shuro Chi -  Last Wish Raid','Destiny · Guide')">
-          <img src="https://img.youtube.com/vi/5dQOjdPaHhg/maxresdefault.jpg" alt="Destiny 2 -  How to defeat  Shuro Chi -  Last Wish Raid" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">9:23</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="5dQOjdPaHhg" data-label="Destiny 2 - How to defeat Shuro Chi - Last Wish Raid" data-source="Destiny | Guide" aria-label="Play Destiny 2 - How to defeat Shuro Chi - Last Wish Raid">
+          <img src="https://img.youtube.com/vi/5dQOjdPaHhg/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/5dQOjdPaHhg/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">9:23</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 -  How to defeat  Shuro Chi -  Last Wish Raid</div>
+          <p class="clip-title">Destiny 2 - How to defeat Shuro Chi - Last Wish Raid</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Oct 14, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=5dQOjdPaHhg" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=5dQOjdPaHhg" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('ZhIdKQrVF94','Destiny | Destiny 2 - Calus one Phase - Sleeper Destruction Rampage','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/ZhIdKQrVF94/maxresdefault.jpg" alt="Destiny 2 - Calus one Phase - Sleeper Destruction Rampage" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">6:39</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="ZhIdKQrVF94" data-label="Destiny 2 - Calus one Phase - Sleeper Destruction Rampage" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Calus one Phase - Sleeper Destruction Rampage">
+          <img src="https://img.youtube.com/vi/ZhIdKQrVF94/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/ZhIdKQrVF94/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:39</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Calus one Phase - Sleeper Destruction Rampage</div>
+          <p class="clip-title">Destiny 2 - Calus one Phase - Sleeper Destruction Rampage</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">Jun 23, 2018</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=ZhIdKQrVF94" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=ZhIdKQrVF94" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('c9MyauXAvvg','Destiny | Destiny 2 - Curse of Osiris - The Gatway','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/c9MyauXAvvg/maxresdefault.jpg" alt="Destiny 2 - Curse of Osiris - The Gatway" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">20:42</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="c9MyauXAvvg" data-label="Destiny 2 - Curse of Osiris - The Gatway" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Curse of Osiris - The Gatway">
+          <img src="https://img.youtube.com/vi/c9MyauXAvvg/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/c9MyauXAvvg/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">20:42</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Curse of Osiris - The Gatway</div>
+          <p class="clip-title">Destiny 2 - Curse of Osiris - The Gatway</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">Dec 06, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=c9MyauXAvvg" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=c9MyauXAvvg" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('oQWeFAmhcJQ','Destiny | Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry','Destiny · Guide')">
-          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" alt="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">1:24</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="oQWeFAmhcJQ" data-label="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" data-source="Destiny | Guide" aria-label="Play Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry">
+          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/oQWeFAmhcJQ/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:24</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</div>
+          <p class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Nov 29, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('oQWeFAmhcJQ','Destiny | Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry','Destiny · Guide')">
-          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" alt="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">1:24</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="oQWeFAmhcJQ" data-label="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" data-source="Destiny | Guide" aria-label="Play Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry">
+          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/oQWeFAmhcJQ/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:24</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</div>
+          <p class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Nov 29, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="guide">
-        <div class="clip-thumb" onclick="openClip('oQWeFAmhcJQ','Destiny | Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry','Destiny · Guide')">
-          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" alt="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Guide</div>
-          <div class="clip-duration">1:24</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="guide">
+        <button class="clip-thumb" type="button" data-clip="oQWeFAmhcJQ" data-label="Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry" data-source="Destiny | Guide" aria-label="Play Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry">
+          <img src="https://img.youtube.com/vi/oQWeFAmhcJQ/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/oQWeFAmhcJQ/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">1:24</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</div>
+          <p class="clip-title">Destiny 2 - How to use [MOD] on Primary Kinetic Weaponry</p>
           <div class="clip-meta">
+            <span class="clip-type">Guide</span>
             <span class="clip-date">Nov 29, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=oQWeFAmhcJQ" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('8UsTZ4Pwtv4','Destiny | Destiny 2 - Leviathan raid - The Pleasure Gardens','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/8UsTZ4Pwtv4/maxresdefault.jpg" alt="Destiny 2 - Leviathan raid - The Pleasure Gardens" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">6:11</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="8UsTZ4Pwtv4" data-label="Destiny 2 - Leviathan raid - The Pleasure Gardens" data-source="Destiny | PvE" aria-label="Play Destiny 2 - Leviathan raid - The Pleasure Gardens">
+          <img src="https://img.youtube.com/vi/8UsTZ4Pwtv4/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/8UsTZ4Pwtv4/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:11</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Leviathan raid - The Pleasure Gardens</div>
+          <p class="clip-title">Destiny 2 - Leviathan raid - The Pleasure Gardens</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">Oct 25, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=8UsTZ4Pwtv4" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=8UsTZ4Pwtv4" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('BUybY7ASJOE','Destiny | Destiny 2 - Leviathan raid - The Royal Baths','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/BUybY7ASJOE/maxresdefault.jpg" alt="Destiny 2 - Leviathan raid - The Royal Baths" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">6:01</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="BUybY7ASJOE" data-label="Destiny 2 - Leviathan raid - The Royal Baths" data-source="Destiny | PvE" aria-label="Play Destiny 2 - Leviathan raid - The Royal Baths">
+          <img src="https://img.youtube.com/vi/BUybY7ASJOE/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/BUybY7ASJOE/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">6:01</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Leviathan raid - The Royal Baths</div>
+          <p class="clip-title">Destiny 2 - Leviathan raid - The Royal Baths</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">Oct 25, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=BUybY7ASJOE" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=BUybY7ASJOE" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-1" data-game="destiny" data-type="boss">
-        <div class="clip-thumb" onclick="openClip('NnnI7tgfkRc','Destiny | Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus','Destiny · Boss')">
-          <img src="https://img.youtube.com/vi/NnnI7tgfkRc/maxresdefault.jpg" alt="Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Boss</div>
-          <div class="clip-duration">10:51</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="boss">
+        <button class="clip-thumb" type="button" data-clip="NnnI7tgfkRc" data-label="Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus" data-source="Destiny | Boss" aria-label="Play Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus">
+          <img src="https://img.youtube.com/vi/NnnI7tgfkRc/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/NnnI7tgfkRc/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">10:51</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus</div>
+          <p class="clip-title">Destiny 2 - Leviathan Raid - Final Boss - Emperor Calus</p>
           <div class="clip-meta">
+            <span class="clip-type">Boss</span>
             <span class="clip-date">Oct 25, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=NnnI7tgfkRc" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=NnnI7tgfkRc" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal reveal-delay-2" data-game="destiny" data-type="pve">
-        <div class="clip-thumb" onclick="openClip('5CAIdOYod7Q','Destiny | Destinjy 2 - Leviathan Raid - The Gauntlet','Destiny · PvE')">
-          <img src="https://img.youtube.com/vi/5CAIdOYod7Q/maxresdefault.jpg" alt="Destinjy 2 - Leviathan Raid - The Gauntlet" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">PvE</div>
-          <div class="clip-duration">8:31</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="pve">
+        <button class="clip-thumb" type="button" data-clip="5CAIdOYod7Q" data-label="Destinjy 2 - Leviathan Raid - The Gauntlet" data-source="Destiny | PvE" aria-label="Play Destinjy 2 - Leviathan Raid - The Gauntlet">
+          <img src="https://img.youtube.com/vi/5CAIdOYod7Q/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/5CAIdOYod7Q/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">8:31</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destinjy 2 - Leviathan Raid - The Gauntlet</div>
+          <p class="clip-title">Destinjy 2 - Leviathan Raid - The Gauntlet</p>
           <div class="clip-meta">
+            <span class="clip-type">PvE</span>
             <span class="clip-date">Oct 25, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=5CAIdOYod7Q" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=5CAIdOYod7Q" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
 
-      <div class="clip-card reveal" data-game="destiny" data-type="highlight">
-        <div class="clip-thumb" onclick="openClip('8Ncqr1Klfh4','Destiny | Destiny 2 - Dominus Ghaul “Our Darkest Hour”','Destiny · Highlight')">
-          <img src="https://img.youtube.com/vi/8Ncqr1Klfh4/maxresdefault.jpg" alt="Destiny 2 - Dominus Ghaul “Our Darkest Hour”" onerror="this.src='../img/games/destiny2.jpg'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">Destiny</div>
-          <div class="clip-type-badge">Highlight</div>
-          <div class="clip-duration">3:24</div>
-        </div>
+      <div class="clip-card" data-game="destiny" data-type="highlight">
+        <button class="clip-thumb" type="button" data-clip="8Ncqr1Klfh4" data-label="Destiny 2 - Dominus Ghaul “Our Darkest Hour”" data-source="Destiny | Highlight" aria-label="Play Destiny 2 - Dominus Ghaul “Our Darkest Hour”">
+          <img src="https://img.youtube.com/vi/8Ncqr1Klfh4/maxresdefault.jpg" data-fallback="https://img.youtube.com/vi/8Ncqr1Klfh4/hqdefault.jpg|../img/games/destiny2.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">3:24</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">Destiny 2 - Dominus Ghaul “Our Darkest Hour”</div>
+          <p class="clip-title">Destiny 2 - Dominus Ghaul “Our Darkest Hour”</p>
           <div class="clip-meta">
+            <span class="clip-type">Highlight</span>
             <span class="clip-date">Jun 17, 2017</span>
-            <div class="clip-links">
-              <a href="https://www.youtube.com/watch?v=8Ncqr1Klfh4" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <a class="clip-link" href="https://www.youtube.com/watch?v=8Ncqr1Klfh4" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>
@@ -1516,11 +1169,11 @@
   <p class="apx-bungie-attribution">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</p>
 </footer>
 
-<div class="clip-modal" id="clipModal">
+<div class="clip-modal" id="clipModal" role="dialog" aria-modal="true" aria-labelledby="clipLabel">
   <div class="clip-modal-inner">
-    <button class="clip-modal-close" onclick="closeClip()">&#10005; Close</button>
+    <button class="clip-modal-close" id="clipClose" type="button">Close</button>
     <div class="clip-modal-frame">
-      <iframe id="clipFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe id="clipFrame" title="Clip player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
     <div class="clip-modal-label" id="clipLabel"></div>
     <div class="clip-modal-source" id="clipSource"></div>
@@ -1529,45 +1182,63 @@
 
 <script src="../js/main.js?v=20261005-source-quality-1"></script>
 <script>
-  var activeGame='all', activeType='all';
-  function filterClips(btn, dim) {
-    var selector = dim === 'game' ? '.game-btn' : '.type-btn';
-    document.querySelectorAll(selector).forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    if (dim === 'game') activeGame = btn.dataset.game;
-    if (dim === 'type') activeType = btn.dataset.type;
-    var count = 0;
-    document.querySelectorAll('.game-section').forEach(function(sec) {
-      var gameMatch = activeGame === 'all' || sec.dataset.section === activeGame;
-      sec.classList.toggle('hidden', !gameMatch);
+  (function(){
+    var activeGame='all', activeType='all', lastThumb=null;
+    var modal=document.getElementById('clipModal'), frame=document.getElementById('clipFrame'), closeBtn=document.getElementById('clipClose');
+    function filterClips(btn){
+      var dim=btn.classList.contains('game-btn')?'game':'type';
+      document.querySelectorAll(dim==='game'?'.game-btn':'.type-btn').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+      btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+      if(dim==='game') activeGame=btn.dataset.game; else activeType=btn.dataset.type;
+      var count=0;
+      document.querySelectorAll('.clip-card').forEach(function(card){
+        var show=(activeGame==='all'||card.dataset.game===activeGame)&&(activeType==='all'||card.dataset.type===activeType);
+        card.classList.toggle('hidden',!show);
+        if(show) count++;
+      });
+      document.querySelectorAll('.game-section').forEach(function(sec){
+        sec.classList.toggle('hidden',sec.querySelectorAll('.clip-card:not(.hidden)').length===0);
+      });
+      document.getElementById('clipCount').textContent=count;
+    }
+    function openClip(thumb){
+      lastThumb=thumb;
+      frame.src='https://www.youtube.com/embed/'+encodeURIComponent(thumb.dataset.clip)+'?autoplay=1&rel=0';
+      document.getElementById('clipLabel').textContent=thumb.dataset.label;
+      document.getElementById('clipSource').textContent=thumb.dataset.source;
+      modal.classList.add('open');
+      document.body.style.overflow='hidden';
+      closeBtn.focus();
+    }
+    function closeClip(){
+      if(!modal.classList.contains('open')) return;
+      frame.src='';
+      modal.classList.remove('open');
+      document.body.style.overflow='';
+      if(lastThumb) lastThumb.focus();
+    }
+    document.addEventListener('click',function(e){
+      var chip=e.target.closest('.filter-btn'); if(chip){ filterClips(chip); return; }
+      var thumb=e.target.closest('.clip-thumb'); if(thumb){ openClip(thumb); return; }
+      if(e.target===modal||e.target===closeBtn) closeClip();
     });
-    document.querySelectorAll('.clip-card').forEach(function(card) {
-      var gameMatch = activeGame === 'all' || card.dataset.game === activeGame;
-      var typeMatch = activeType === 'all' || card.dataset.type === activeType;
-      card.classList.toggle('hidden', !gameMatch || !typeMatch);
-      if (gameMatch && typeMatch) count++;
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape') closeClip();
+      if(e.key==='Tab'&&modal.classList.contains('open')){ e.preventDefault(); closeBtn.focus(); }
     });
-    document.querySelectorAll('.game-section').forEach(function(sec) {
-      if (activeGame !== 'all') return;
-      var visible = sec.querySelectorAll('.clip-card:not(.hidden)').length;
-      sec.classList.toggle('hidden', visible === 0);
-    });
-    document.getElementById('clipCount').textContent = count;
-  }
-  function openClip(id, label, source) {
-    document.getElementById('clipFrame').src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
-    document.getElementById('clipLabel').textContent = label;
-    document.getElementById('clipSource').textContent = source;
-    document.getElementById('clipModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeClip() {
-    document.getElementById('clipFrame').src = '';
-    document.getElementById('clipModal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('clipModal').addEventListener('click', function(e){ if(e.target===this) closeClip(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeClip(); });
+    // Thumbnails: YouTube's full-size picture first; if a clip has none (YouTube answers with a
+    // tiny grey placeholder or an error) use its standard picture, then the game's own art.
+    function nextImage(img){
+      var list=(img.dataset.fallback||'').split('|').filter(Boolean);
+      if(!list.length) return;
+      img.src=list.shift();
+      img.dataset.fallback=list.join('|');
+    }
+    function check(img){ if(img.complete&&img.naturalWidth>0&&img.naturalWidth<=120) nextImage(img); }
+    document.addEventListener('error',function(e){ if(e.target.matches&&e.target.matches('.clip-thumb img')) nextImage(e.target); },true);
+    document.addEventListener('load',function(e){ if(e.target.matches&&e.target.matches('.clip-thumb img')) check(e.target); },true);
+    document.querySelectorAll('.clip-thumb img').forEach(function(img){ if(img.complete&&img.naturalWidth===0&&img.getAttribute('src')) nextImage(img); else check(img); });
+  })();
 </script>
 <script src="/js/ax-brand.js?v=20260929-brand-1" defer></script>
 </body>

@@ -1,0 +1,5 @@
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-clips-cards.mjs
+astrix-app/tools/test-clips-design.mjs
+pages/clips.html
+scripts/build_clips.py

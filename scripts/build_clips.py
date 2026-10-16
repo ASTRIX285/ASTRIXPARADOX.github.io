@@ -6,7 +6,7 @@ Rewrites only the clips block in pages/clips.html (between its markers)
 """
 
 import os, sys, json, re, urllib.request, urllib.parse
-from html import escape
+from html import escape, unescape
 from datetime import datetime
 
 # ── CONFIG ──────────────────────────────────────────────────
@@ -167,48 +167,70 @@ def fetch_durations(video_ids):
             durations[item['id']] = item['contentDetails']['duration']
     return durations
 
-def build_card(video, game_key, game_label, delay_class=''):
-    vid_id     = video['id']
-    title      = clean_text(video['title'])
-    date       = format_date(video['published'])
-    duration   = video['duration']
-    type_key   = detect_type(title)
-    type_label = BADGE_LABELS.get(type_key, 'Highlight')
-    thumb      = f'https://img.youtube.com/vi/{vid_id}/maxresdefault.jpg'
-    fallback   = fallback_for(game_key)
-    yt_url     = f'https://www.youtube.com/watch?v={vid_id}'
-    ml = f'{game_label} | {title}'.replace("'", "\\'")
-    ms = f'{game_label} · {type_label}'.replace("'", "\\'")
+# YouTube keeps private and deleted videos in a playlist with a stand-in title. They
+# cannot be played, so they never become cards.
+UNAVAILABLE = {'private video', 'deleted video'}
 
+def is_unavailable(title):
+    return title.strip().lower() in UNAVAILABLE
+
+def display_title(title, game_label):
+    """The title as a viewer reads it: the |Tag| that sorts the clip into a type and a
+    leading "Game -" that repeats the section name are dropped. Running it twice
+    changes nothing."""
+    title = re.sub(r'^\s*\|[^|]+\|\s*', '', clean_text(title))
+    title = re.sub(r'^[\s|-]+', '', title)
+    title = re.sub(r'^' + re.escape(game_label) + r'\s*[-:|]\s+', '', title)
+    return re.sub(r'\s{2,}', ' ', title).strip()
+
+def card_html(c):
+    """One clip card. The thumbnail is a button that opens the player; the game and type
+    sit under the picture so they never cover the art. No inline handlers: the page's
+    own script listens for clicks and image fallbacks."""
+    vid_id, label = c['id'], c['label']
+    title = display_title(c['title'], label)
+    type_label = BADGE_LABELS.get(c['type'], 'Highlight')
+    attr = lambda text: escape(text, quote=True)
+    thumb = f'https://img.youtube.com/vi/{vid_id}/maxresdefault.jpg'
+    fallbacks = f'https://img.youtube.com/vi/{vid_id}/hqdefault.jpg|{fallback_for(c["game"])}'
     return f'''
-      <div class="clip-card reveal{delay_class}" data-game="{game_key}" data-type="{type_key}">
-        <div class="clip-thumb" onclick="openClip('{vid_id}','{ml}','{ms}')">
-          <img src="{thumb}" alt="{title}" onerror="this.src='{fallback}'">
-          <div class="clip-thumb-overlay">
-            <div class="clip-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
-          </div>
-          <div class="clip-game-badge">{game_label}</div>
-          <div class="clip-type-badge">{type_label}</div>
-          <div class="clip-duration">{duration}</div>
-        </div>
+      <div class="clip-card" data-game="{c['game']}" data-type="{c['type']}">
+        <button class="clip-thumb" type="button" data-clip="{vid_id}" data-label="{attr(title)}" data-source="{attr(label)} | {type_label}" aria-label="Play {attr(title)}">
+          <img src="{thumb}" data-fallback="{fallbacks}" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="clip-play" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="clip-duration">{c['duration']}</span>
+        </button>
         <div class="clip-body">
-          <div class="clip-title">{title}</div>
+          <p class="clip-title">{escape(title, quote=False)}</p>
           <div class="clip-meta">
-            <span class="clip-date">{date}</span>
-            <div class="clip-links">
-              <a href="{yt_url}" target="_blank" class="clip-link">YouTube &#8599;</a>
-            </div>
+            <span class="clip-type">{type_label}</span>
+            <span class="clip-date">{c['date']}</span>
+            <a class="clip-link" href="https://www.youtube.com/watch?v={vid_id}" target="_blank" rel="noopener">Watch on YouTube</a>
           </div>
         </div>
       </div>'''
 
+def build_card(video, game_key, game_label):
+    title = video['title']
+    return card_html({'id': video['id'], 'title': title, 'label': game_label, 'game': game_key,
+                      'type': detect_type(title), 'date': format_date(video['published']),
+                      'duration': video['duration']})
+
+def _first(pattern, text, default=''):
+    m = re.search(pattern, text, re.S)
+    return m.group(1) if m else default
+
 def tidy_card(card, game_key, game_label):
-    """Bring a card kept from an earlier run up to the current rules: the fallback
-    image that exists for its game, the modal label with a bar, and no en or em
-    dashes. A fresh card already matches, so running this twice changes nothing."""
-    card = re.sub(r"onerror=\"this\.src='[^']*'\"", f"onerror=\"this.src='{fallback_for(game_key)}'\"", card)
-    card = card.replace(f"'{game_label} \u2014 ", f"'{game_label} | ")
-    return clean_text(card)
+    """Bring a card kept from an earlier run up to the current markup by reading its
+    clip data back out and rendering it again. Works on the older card format too,
+    and a card already in the current format comes out byte-identical."""
+    vid_id = _first(r'data-clip="([^"]+)"', card) or _first(r"openClip\('([^']+)'", card)
+    title = unescape(_first(r'<(?:p|div) class="clip-title">(.*?)</(?:p|div)>', card))
+    return card_html({'id': vid_id, 'title': title, 'label': game_label, 'game': game_key,
+                      'type': _first(r'data-type="([^"]+)"', card, 'highlight'),
+                      'date': _first(r'<span class="clip-date">(.*?)</span>', card),
+                      'duration': _first(r'<span class="clip-duration">(.*?)</span>', card)
+                                  or _first(r'<div class="clip-duration">(.*?)</div>', card)})
 
 def build_sections_html(sections):
     html = []
@@ -280,7 +302,9 @@ def existing_sections(text):
             end = card.find(grid_end)
             if end >= 0:
                 card = card[:end + len(card_close)]
-            cards.append(card)
+            title = _first(r'<(?:p|div) class="clip-title">(.*?)</(?:p|div)>', card)
+            if not is_unavailable(unescape(title)):
+                cards.append(card)
         sections.append({'game': game, 'label': labels.get(game, label_html), 'cards': cards})
     return sections
 
@@ -292,9 +316,9 @@ def build_game_chips(text):
     if not match:
         fail(f'The All chip is missing between {GAMES_START} and {GAMES_END}. Nothing was written.')
     classes = ' '.join(name for name in match.group(1).split() if name != 'active')
-    chips = [f'<button class="{classes} active" data-game="all" onclick="filterClips(this,\'game\')">All</button>']
+    chips = [f'<button class="{classes} active" data-game="all" aria-pressed="true">All</button>']
     for pl in PLAYLISTS:
-        chips.append(f'<button class="{classes}" data-game="{pl["game"]}" onclick="filterClips(this,\'game\')">{escape(pl["label"], quote=False)}</button>')
+        chips.append(f'<button class="{classes}" data-game="{pl["game"]}" aria-pressed="false">{escape(pl["label"], quote=False)}</button>')
     return ''.join('\n        ' + chip for chip in chips) + '\n        '
 
 def write_blocks(page, text, sections):
@@ -314,10 +338,9 @@ def fetch_sections(existing):
     print('Fetching playlists...')
     kept = {sec['game']: sec['cards'] for sec in existing}
     sections = []
-    delays = ['', ' reveal-delay-1', ' reveal-delay-2']
     for pl in PLAYLISTS:
         print(f'  > {pl["label"]}')
-        videos = fetch_playlist(pl['id'])
+        videos = [v for v in fetch_playlist(pl['id']) if not is_unavailable(v['title'])]
         if not videos:
             # An empty playlist on this run keeps the cards already on the page.
             if kept.get(pl['game']):
@@ -329,7 +352,7 @@ def fetch_sections(existing):
         for v in videos:
             v['duration'] = format_duration(durations.get(v['id'], ''))
         videos.sort(key=lambda v: v['published'], reverse=True)
-        cards = [build_card(v, pl['game'], pl['label'], delays[i % 3]) for i, v in enumerate(videos)]
+        cards = [build_card(v, pl['game'], pl['label']) for v in videos]
         sections.append({'game': pl['game'], 'label': pl['label'], 'cards': cards})
     return sections
 
