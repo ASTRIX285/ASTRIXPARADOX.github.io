@@ -305,8 +305,149 @@
           "region": "global",
           "reliability": "high",
           "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "dg-macros",
+          "title": "Macros guide",
+          "publisher": "Daeva Guides",
+          "url": "https://daevaguides.com/en/guides/macros",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "db-glad",
+          "title": "Gladiator guide",
+          "publisher": "dbaion2",
+          "url": "https://dbaion2.ru/en/guides/gayd-gladiator",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros",
+          "dg-macros",
+          "db-glad",
+          "tgw-gladiator-skills"
+        ],
+        "stackA": {
+          "label": "Burst",
+          "rows": [
+            {
+              "name": "Rage Burst",
+              "why": "Longest cooldown, fires first when ready. Opens a 10 s window where Overhead Slam is ready."
+            },
+            {
+              "name": "Overhead Slam",
+              "why": "Your hardest regular hit. Fires on every pass inside the Rage Burst window."
+            },
+            {
+              "name": "Mocking Blade",
+              "why": "Its knockdown makes Overhead Slam ready again."
+            },
+            {
+              "name": "Ankle Slice",
+              "why": "Only fires after a Focused Block parry, so it sits on top where it never blocks."
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Keen Strike",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackB": {
+          "label": "Sustain",
+          "rows": [
+            {
+              "name": "Blade Toss",
+              "why": "Lowers the target's Defence before the hits land."
+            },
+            {
+              "name": "Crushing Wave",
+              "why": "Area hit on a 20 s cooldown."
+            },
+            {
+              "name": "Sword Aura Rampage",
+              "why": "Only on a staggered target. Above the cooldown skills so it never blocks them.",
+              "noCooldown": true
+            },
+            {
+              "name": "Rending Blow",
+              "why": "Filler: always ready, so it sits last. Take its mobile option.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "opener": [
+          "Zikel's Blessing",
+          "Lunge Stance",
+          "Ruinous Blow"
+        ],
+        "ownKeys": [
+          {
+            "name": "Ruinous Blow",
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target. Press it to open, and again before Prepare for Battle runs out."
+          },
+          {
+            "name": "Zikel's Blessing",
+            "reason": "buff"
+          },
+          {
+            "name": "Lunge Stance",
+            "reason": "buff"
+          },
+          {
+            "name": "Focused Block",
+            "reason": "defensive",
+            "why": "Defensive: block at the moment you choose. Its parry opens Ankle Slice."
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Leaping Slam",
+            "reason": "dash"
+          },
+          {
+            "name": "Rush Strike",
+            "reason": "dash"
+          }
+        ],
+        "levelNotes": [
+          {
+            "text": "Once Overhead Slam and Rending Blow both reach skill Lv 16, some players let go of the main attack and run the macro alone. Test both on the dummy.",
+            "fromSkillLevel": 16
+          }
+        ]
+      }
     },
     {
       "id": "gladiator-tank",

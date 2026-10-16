@@ -48,6 +48,45 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Ruinous Blow by 1 s.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -98,8 +137,32 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "gladiator-overhead-slam",
@@ -145,6 +208,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Ready inside the Rage Burst window or after a knockdown.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "No cooldown.",
+          "skillLevel": 16,
+          "status": "reported"
         }
       ]
     },
@@ -187,6 +288,39 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Prepare for Battle for 20 s: more PvE damage and Critical Hit.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -234,8 +368,33 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      }
     },
     {
       "id": "gladiator-crushing-wave",
@@ -281,6 +440,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "A critical hit resets its cooldown.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -328,8 +519,33 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
     },
     {
       "id": "gladiator-mocking-blade",
@@ -375,6 +591,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Its knockdown makes Overhead Slam ready again.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -422,8 +670,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "templar-punishment",
@@ -469,8 +731,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "charged",
+        "status": "reported"
+      }
     },
     {
       "id": "templar-pummel",
@@ -519,8 +796,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "templar-warding-strike",
@@ -566,8 +857,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "templar-vicious-strike",
@@ -616,6 +921,35 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "confirmed"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Warding Strike by 2 s.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -699,6 +1033,45 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Insignia Explosion by 1 s.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -746,8 +1119,33 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      }
     },
     {
       "id": "assassin-insignia-explosion",
@@ -793,6 +1191,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Spends up to 5 Insignia.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 7 s instead of 10 s.",
+          "skillLevel": 16,
+          "status": "reported"
         }
       ]
     },
@@ -840,6 +1276,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only after a critical hit.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "No cooldown while Illusive Clone is up.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -890,6 +1364,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Engraves 1 Insignia.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -937,6 +1443,39 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "charged",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Hits hardest fully charged after Marking Shot's Precision.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -987,6 +1526,45 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 120 MP.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Deadshot by 1 s.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -1037,8 +1615,32 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "ranger-drill-dart",
@@ -1084,6 +1686,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Bleed, and MP back on a critical hit.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1131,6 +1765,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "7% more PvE damage and speed for 10 s.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 10 s instead of 20 s.",
+          "skillLevel": 16,
+          "status": "reported"
         }
       ]
     },
@@ -1173,8 +1845,33 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "movement",
+        "status": "reported"
+      }
     },
     {
       "id": "sorcerer-firestorm",
@@ -1220,6 +1917,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "Each fireball cuts Hellfire by 2 s.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -1267,6 +1996,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a target with Fire Mark, which Flame Arrow applies.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1314,6 +2075,39 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "charged",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "About seven times the damage fully charged than from a macro.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1364,6 +2158,39 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 100 MP and applies Fire Mark. Can reset Blaze.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1411,6 +2238,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Always a critical hit.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -1458,8 +2317,33 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
     },
     {
       "id": "sorcerer-winters-shackles",
@@ -1505,6 +2389,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "20% more PvE damage for 5 s.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 30 s instead of 45 s.",
+          "skillLevel": 16,
+          "status": "reported"
         }
       ]
     },
@@ -1555,6 +2477,45 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "opens",
+          "text": "2% more Attack per hit, up to 5 times.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -1605,8 +2566,32 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "spiritmaster-summon-fire-spirit",
@@ -1647,6 +2632,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "An element stack.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1689,6 +2706,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "An element stack, plus MP.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1734,6 +2783,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only with Four Elements.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1784,6 +2865,38 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only in a short window after a spirit skill.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -1831,6 +2944,44 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Damage over time that keeps your damage-over-time bonus running.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 8 s instead of 10 s.",
+          "skillLevel": 12,
+          "status": "reported"
         }
       ]
     },
@@ -1881,8 +3032,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-judgment-thunder",
@@ -1931,8 +3097,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-light-of-regeneration",
@@ -1978,8 +3158,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-healing-light",
@@ -2025,8 +3220,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-radiant-recovery",
@@ -2072,8 +3282,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-condemnation",
@@ -2119,6 +3344,28 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a target with Chain of Torment.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
     },
@@ -2166,8 +3413,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "charged",
+        "status": "reported"
+      }
     },
     {
       "id": "cleric-divine-aura",
@@ -2263,8 +3525,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "main-attack",
+        "status": "reported"
+      }
     },
     {
       "id": "chanter-dark-crush",
@@ -2310,8 +3587,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "chanter-incandescent-blow",
@@ -2360,8 +3651,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "chanter-spinning-strike",
@@ -2407,8 +3712,22 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "chanter-recuperation",
@@ -2454,8 +3773,23 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      }
     },
     {
       "id": "chanter-impactful-crush",
@@ -2501,8 +3835,3127 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "gladiator-ankle-slice",
+      "class": "Gladiator",
+      "name": "Ankle Slice",
+      "unlockLevel": 7,
+      "cooldownSeconds": 10,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only after a Focused Block parry.",
+          "skillLevel": null,
+          "status": "reported"
         }
       ]
+    },
+    {
+      "id": "gladiator-blade-toss",
+      "class": "Gladiator",
+      "name": "Blade Toss",
+      "unlockLevel": 22,
+      "cooldownSeconds": 20,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Target Defence 30% lower for 10 s.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-focused-block",
+      "class": "Gladiator",
+      "name": "Focused Block",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "gladiator-leaping-slam",
+      "class": "Gladiator",
+      "name": "Leaping Slam",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "gladiator-lunge-stance",
+      "class": "Gladiator",
+      "name": "Lunge Stance",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "gladiator-rage-burst",
+      "class": "Gladiator",
+      "name": "Rage Burst",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Opens a 10 s window where Overhead Slam is ready.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 30 s instead of 45 s.",
+          "skillLevel": 5,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-sword-aura-rampage",
+      "class": "Gladiator",
+      "name": "Sword Aura Rampage",
+      "unlockLevel": 5,
+      "cooldownSeconds": 0,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a staggered target.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cuts your cooldowns on hit.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-zikel-s-blessing",
+      "class": "Gladiator",
+      "name": "Zikel's Blessing",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-ambush",
+      "class": "Assassin",
+      "name": "Ambush",
+      "unlockLevel": 3,
+      "cooldownSeconds": 10,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Hits 30% harder from behind.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "opens",
+          "text": "Engraves 2 Insignia.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "assassin-defiance",
+      "class": "Assassin",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-evasion-stance",
+      "class": "Assassin",
+      "name": "Evasion Stance",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-flash-slice",
+      "class": "Assassin",
+      "name": "Flash Slice",
+      "unlockLevel": 8,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-illusive-clone",
+      "class": "Assassin",
+      "name": "Illusive Clone",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-infiltrate",
+      "class": "Assassin",
+      "name": "Infiltrate",
+      "unlockLevel": 10,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-savage-fang",
+      "class": "Assassin",
+      "name": "Savage Fang",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Engraves 5 Insignia at once.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "assassin-shadow-fall",
+      "class": "Assassin",
+      "name": "Shadow Fall",
+      "unlockLevel": 12,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-storm-rampage",
+      "class": "Assassin",
+      "name": "Storm Rampage",
+      "unlockLevel": 5,
+      "cooldownSeconds": 0,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a staggered target.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cuts all your cooldowns on hit.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "assassin-swift-contract",
+      "class": "Assassin",
+      "name": "Swift Contract",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "assassin-triniel-s-dagger",
+      "class": "Assassin",
+      "name": "Triniel's Dagger",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "Cuts all your cooldowns by 10% on hit.",
+          "skillLevel": 10,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-arrow-scattershot",
+      "class": "Ranger",
+      "name": "Arrow Scattershot",
+      "unlockLevel": 5,
+      "cooldownSeconds": 0,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a staggered target.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-arrow-storm",
+      "class": "Ranger",
+      "name": "Arrow Storm",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-bow-of-blessing",
+      "class": "Ranger",
+      "name": "Bow of Blessing",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-burst-arrow",
+      "class": "Ranger",
+      "name": "Burst Arrow",
+      "unlockLevel": 10,
+      "cooldownSeconds": 20,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a slowed or rooted target.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-defiance",
+      "class": "Ranger",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-explosion-trap",
+      "class": "Ranger",
+      "name": "Explosion Trap",
+      "unlockLevel": 8,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-explosive-arrow",
+      "class": "Ranger",
+      "name": "Explosive Arrow",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Hits 20% harder on a slowed target.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-griffon-arrow",
+      "class": "Ranger",
+      "name": "Griffon Arrow",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Fire damage over time.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-mother-nature-s-breath",
+      "class": "Ranger",
+      "name": "Mother Nature's Breath",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-snare-shot",
+      "class": "Ranger",
+      "name": "Snare Shot",
+      "unlockLevel": 1,
+      "cooldownSeconds": 15,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Slows the target for 5 s.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "opens",
+          "text": "The Slow lasts 7 s.",
+          "skillLevel": 16,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "ranger-supporting-fire",
+      "class": "Ranger",
+      "name": "Supporting Fire",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "ranger-vaizel-s-authority",
+      "class": "Ranger",
+      "name": "Vaizel's Authority",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-ranger-skills",
+          "title": "Ranger skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/ranger-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-arctic-armor",
+      "class": "Sorcerer",
+      "name": "Arctic Armor",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-cold-storm",
+      "class": "Sorcerer",
+      "name": "Cold Storm",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "A 7 s storm with Frostbite.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-defiance",
+      "class": "Sorcerer",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-delayed-explosion",
+      "class": "Sorcerer",
+      "name": "Delayed Explosion",
+      "unlockLevel": 22,
+      "cooldownSeconds": 30,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "The target takes 15% more from you for 4 s, then explodes.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-element-enhancement",
+      "class": "Sorcerer",
+      "name": "Element Enhancement",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "20% more Fire and Water damage for 10 s.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-fire-wall",
+      "class": "Sorcerer",
+      "name": "Fire Wall",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Burn over time.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-flame-scattershot",
+      "class": "Sorcerer",
+      "name": "Flame Scattershot",
+      "unlockLevel": 5,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-frost",
+      "class": "Sorcerer",
+      "name": "Frost",
+      "unlockLevel": 7,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-frost-burst",
+      "class": "Sorcerer",
+      "name": "Frost Burst",
+      "unlockLevel": 10,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-hibernation",
+      "class": "Sorcerer",
+      "name": "Hibernation",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-ice-chain",
+      "class": "Sorcerer",
+      "name": "Ice Chain",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "sorcerer-steel-barrier",
+      "class": "Sorcerer",
+      "name": "Steel Barrier",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-defiance",
+      "class": "Spiritmaster",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-enhance-spirit-s-benediction",
+      "class": "Spiritmaster",
+      "name": "Enhance: Spirit's Benediction",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-flame-blessing",
+      "class": "Spiritmaster",
+      "name": "Flame Blessing",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-jointstrike-corrode",
+      "class": "Spiritmaster",
+      "name": "Jointstrike: Corrode",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Spirit damage taken 10% higher for 20 s.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-jointstrike-destructive-attack",
+      "class": "Spiritmaster",
+      "name": "Jointstrike: Destructive Attack",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "charged",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-rapid-scattershot",
+      "class": "Spiritmaster",
+      "name": "Rapid Scattershot",
+      "unlockLevel": 5,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-soul-s-cry",
+      "class": "Spiritmaster",
+      "name": "Soul's Cry",
+      "unlockLevel": 12,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-summon-ancient-spirit",
+      "class": "Spiritmaster",
+      "name": "Summon: Ancient Spirit",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "spiritmaster-summon-earth-spirit",
+      "class": "Spiritmaster",
+      "name": "Summon: Earth Spirit",
+      "unlockLevel": 7,
+      "cooldownSeconds": 15,
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-spiritmaster-skills",
+          "title": "Spiritmaster skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/spiritmaster-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "An element stack, and it opens Dimensional Control.",
+          "skillLevel": null,
+          "status": "reported"
+        }
+      ]
+    },
+    {
+      "id": "templar-annihilate",
+      "class": "Templar",
+      "name": "Annihilate",
+      "unlockLevel": 12,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-debilitating-smash",
+      "class": "Templar",
+      "name": "Debilitating Smash",
+      "unlockLevel": 7,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-defiance",
+      "class": "Templar",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-doom-shield",
+      "class": "Templar",
+      "name": "Doom Shield",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-poach",
+      "class": "Templar",
+      "name": "Poach",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-shield-rush",
+      "class": "Templar",
+      "name": "Shield Rush",
+      "unlockLevel": 10,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-shield-smite",
+      "class": "Templar",
+      "name": "Shield Smite",
+      "unlockLevel": 3,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "templar-taunt",
+      "class": "Templar",
+      "name": "Taunt",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "cleric-chain-of-torment",
+      "class": "Cleric",
+      "name": "Chain of Torment",
+      "unlockLevel": 4,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "cleric-defiance",
+      "class": "Cleric",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "cleric-light-of-protection",
+      "class": "Cleric",
+      "name": "Light of Protection",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-defiance",
+      "class": "Chanter",
+      "name": "Defiance",
+      "unlockLevel": 16,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-obliterate",
+      "class": "Chanter",
+      "name": "Obliterate",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-power-of-the-storm",
+      "class": "Chanter",
+      "name": "Power of the Storm",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-rushing-smash",
+      "class": "Chanter",
+      "name": "Rushing Smash",
+      "unlockLevel": 1,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-sprint-mantra",
+      "class": "Chanter",
+      "name": "Sprint Mantra",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "toggle",
+        "status": "reported"
+      }
+    },
+    {
+      "id": "chanter-undefeated-mantra",
+      "class": "Chanter",
+      "name": "Undefeated Mantra",
+      "unlockLevel": 22,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
+      },
+      "summary": {
+        "pending": true,
+        "reason": "Not in the skill catalogue yet. Added for its macro use."
+      },
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "toggle",
+        "status": "reported"
+      }
     }
   ]
 }

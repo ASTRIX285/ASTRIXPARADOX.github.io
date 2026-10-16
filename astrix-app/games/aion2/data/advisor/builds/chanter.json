@@ -221,8 +221,87 @@
           "region": "global",
           "reliability": "high",
           "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Crush",
+          "rows": [
+            {
+              "name": "Dark Crush",
+              "why": "Fires first when ready. Most players start the line with it."
+            },
+            {
+              "name": "Spinning Strike",
+              "why": "Big area hit that boosts Critical Damage."
+            },
+            {
+              "name": "Impactful Crush",
+              "why": "Stun on a 15 s cooldown."
+            },
+            {
+              "name": "Incandescent Blow",
+              "why": "Filler: always ready, so it sits last.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Onslaught",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackBPending": {
+          "pending": true,
+          "reason": "No second line is sourced. Most players run one line; Onslaught, the other common step, is your main attack."
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Undefeated Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Sprint Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Power of the Storm",
+            "reason": "other"
+          },
+          {
+            "name": "Obliterate",
+            "reason": "stagger"
+          },
+          {
+            "name": "Recuperation",
+            "reason": "heal"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Rushing Smash",
+            "reason": "other"
+          }
+        ],
+        "levelNotes": []
+      }
     },
     {
       "id": "chanter-healer",
@@ -309,8 +388,87 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Crush",
+          "rows": [
+            {
+              "name": "Dark Crush",
+              "why": "Fires first when ready. Most players start the line with it."
+            },
+            {
+              "name": "Spinning Strike",
+              "why": "Big area hit that boosts Critical Damage."
+            },
+            {
+              "name": "Impactful Crush",
+              "why": "Stun on a 15 s cooldown."
+            },
+            {
+              "name": "Incandescent Blow",
+              "why": "Filler: always ready, so it sits last.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Onslaught",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackBPending": {
+          "pending": true,
+          "reason": "No second line is sourced. Most players run one line; Onslaught, the other common step, is your main attack."
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Undefeated Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Sprint Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Power of the Storm",
+            "reason": "other"
+          },
+          {
+            "name": "Obliterate",
+            "reason": "stagger"
+          },
+          {
+            "name": "Recuperation",
+            "reason": "heal"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Rushing Smash",
+            "reason": "other"
+          }
+        ],
+        "levelNotes": []
+      }
     },
     {
       "id": "chanter-dps",
@@ -449,8 +607,87 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Crush",
+          "rows": [
+            {
+              "name": "Dark Crush",
+              "why": "Fires first when ready. Most players start the line with it."
+            },
+            {
+              "name": "Spinning Strike",
+              "why": "Big area hit that boosts Critical Damage."
+            },
+            {
+              "name": "Impactful Crush",
+              "why": "Stun on a 15 s cooldown."
+            },
+            {
+              "name": "Incandescent Blow",
+              "why": "Filler: always ready, so it sits last.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Onslaught",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackBPending": {
+          "pending": true,
+          "reason": "No second line is sourced. Most players run one line; Onslaught, the other common step, is your main attack."
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Undefeated Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Sprint Mantra",
+            "reason": "toggle"
+          },
+          {
+            "name": "Power of the Storm",
+            "reason": "other"
+          },
+          {
+            "name": "Obliterate",
+            "reason": "stagger"
+          },
+          {
+            "name": "Recuperation",
+            "reason": "heal"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Rushing Smash",
+            "reason": "other"
+          }
+        ],
+        "levelNotes": []
+      }
     }
   ]
 }

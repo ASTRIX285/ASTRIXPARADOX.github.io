@@ -330,7 +330,12 @@
             "where": "Skill > Macro window",
             "note": "Confirmed in game: one macro holds up to 8 entries."
           }
-        ]
+        ],
+        "note": "Two guides say a macro holds 20 steps. Pending Miguel's recheck in game: is 8 the visible list or the hard cap?",
+        "recheck": {
+          "pending": true,
+          "reason": "Two guides say 20 steps. Miguel to check in game whether 8 is the visible list or the hard cap."
+        }
       },
       "text": "A macro runs its skills in the listed order, 1 then 2 and so on, with a short delay between each (10 ms by default; try about 50 ms on a laggy connection). Hold the key to run it; pressing any ready skill by hand interrupts it. Keep charged skills, movement and defensives on their own keys.",
       "setup": [
@@ -406,7 +411,613 @@
         "hold": true,
         "presets": 3,
         "presetNote": "Each of your 3 skill presets keeps its own macro, so set it up again on every preset you use."
-      }
+      },
+      "facts": [
+        {
+          "id": "step-is-key",
+          "status": "reported",
+          "text": "A macro step is a whole key: it fires that key's first ready skill, not one skill.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "mm-macro",
+              "title": "Macro trick for more damage",
+              "publisher": "mein-mmo",
+              "url": "https://mein-mmo.de/en/aion-2-macro-this-trick-instantly-increases-your-damage-while-you-only-hold-down-2-keys,1590032/",
+              "retrievedOn": "2026-10-06",
+              "region": "global",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "skip-on-cooldown",
+          "status": "reported",
+          "text": "A step whose skills are all on cooldown, short of MP or without a target is skipped. The macro does not wait.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "order-not-guaranteed",
+          "status": "reported",
+          "text": "The game warns that the order of steps is not guaranteed: the macro keeps trying to move on.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "reads-key-slot",
+          "status": "reported",
+          "text": "The macro reads the key, not the skill: change the skill on that key and the macro changes too.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "charged-stage-one",
+          "status": "reported",
+          "text": "A charged skill in a macro fires at its first charge stage only.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "db-macros",
+              "title": "Skill macros guide",
+              "publisher": "dbaion2",
+              "url": "https://dbaion2.ru/en/guides/makrosy-umeniy",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "toggles-switch-off",
+          "status": "reported",
+          "text": "A toggle (a mantra or an aura) in a macro switches itself off on the next pass.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "level-zero-costs-time",
+          "status": "reported",
+          "text": "A skill at level 0 still costs animation time in a macro. Only put levelled skills in.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "skill-queue",
+          "status": "disputed",
+          "text": "Skill Queue setting: some players turn it off because long and cooldown skills misfire with it on; others keep it on. Test both.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "mouse-bind-aion1",
+          "status": "reported",
+          "text": "Mouse buttons do not bind to the macro in AION 1 control mode.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "macro-rules",
+      "label": "How to build a macro",
+      "description": "The eight rules the Macro and Skill Bar screens follow (research record section 2). Pages read the rules from here.",
+      "record": "astrix-app/games/aion2/docs/MACRO-RESEARCH.md",
+      "layout": {
+        "status": "confirmed",
+        "text": "The right-hand block of the skill bar holds stack A, the main attack, then stack B. The macro has two entries, stack A and stack B, 10 ms delay each.",
+        "provenance": [
+          {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-16",
+            "gameVersion": "global launch (Oct 2026)",
+            "where": "Skill bar and Macro window, Templar",
+            "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+          }
+        ]
+      },
+      "rules": [
+        {
+          "id": "two-stacks",
+          "status": "confirmed",
+          "title": "Two stacks, two entries",
+          "text": "Build two damage stacks, one either side of your main attack, and make those two keys the macro's only entries. More entries mean each strong skill waits longer to come round again.",
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel",
+              "capturedOn": "2026-10-16",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Skill bar and Macro window, Templar",
+              "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "order-by-cooldown",
+          "status": "reported",
+          "title": "Order each stack by cooldown",
+          "text": "Row 0 holds the strongest skill with the longest cooldown, down to the shortest, with the no-cooldown filler on top. A no-cooldown skill low in the stack blocks everything above it.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "hold-basic",
+          "status": "reported",
+          "title": "Hold your main attack with the macro key",
+          "text": "Hold the macro key and your main attack together. The basic attack fills the gaps, gives MP and cuts each animation short. Inside the macro it fires less often and loses damage.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "mm-macro",
+              "title": "Macro trick for more damage",
+              "publisher": "mein-mmo",
+              "url": "https://mein-mmo.de/en/aion-2-macro-this-trick-instantly-increases-your-damage-while-you-only-hold-down-2-keys,1590032/",
+              "retrievedOn": "2026-10-06",
+              "region": "global",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "db-macros",
+              "title": "Skill macros guide",
+              "publisher": "dbaion2",
+              "url": "https://dbaion2.ru/en/guides/makrosy-umeniy",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "own-keys",
+          "status": "reported",
+          "title": "Keep these on their own keys",
+          "text": "Charged skills, toggles, dashes, long buffs and defensives stay off the macro, on their own keys.",
+          "kinds": [
+            {
+              "id": "charged",
+              "text": "Charged skills: a macro fires them at stage 1 only."
+            },
+            {
+              "id": "toggle",
+              "text": "Toggles (mantras and auras): a macro switches them off on the next pass."
+            },
+            {
+              "id": "dash",
+              "text": "Dashes and gap closers: they pull you out of position."
+            },
+            {
+              "id": "buff",
+              "text": "Long buffs and ultimates: wasted on trash, and they stall a short loop."
+            },
+            {
+              "id": "defensive",
+              "text": "Defensives, heals, crowd control breaks and dodges: you need them at a chosen moment."
+            }
+          ],
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "db-macros",
+              "title": "Skill macros guide",
+              "publisher": "dbaion2",
+              "url": "https://dbaion2.ru/en/guides/makrosy-umeniy",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "delay",
+          "status": "reported",
+          "title": "Delay 10 ms",
+          "text": "Leave the delay at 10 ms. Raise it to 40 to 50 ms only if skills fail to fire, more likely at 80 ms ping or more.",
+          "value": {
+            "delayMs": 10,
+            "slowMs": [
+              40,
+              50
+            ],
+            "pingMs": 80
+          },
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "lock-target",
+          "status": "reported",
+          "title": "Lock a target first",
+          "text": "Some skills will not fire without a target, so lock one before you hold the macro.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "ath-macros",
+              "title": "How to use macros and pick the right delay",
+              "publisher": "AllThingsHow",
+              "url": "https://allthings.how/aion-2-how-to-use-macros-and-pick-the-right-delay",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "test-dummy",
+          "status": "reported",
+          "title": "Test it on the training dummy",
+          "text": "Open Combat Analysis (Ctrl+X) at the training dummy. Run 20 s with the macro alone, then 20 s with the macro and your main attack held. Keep the higher number. Try Skill Queue on and off the same way.",
+          "steps": [
+            "20 s: the macro alone.",
+            "20 s: the macro with your main attack held.",
+            "Keep the setup with the higher total.",
+            "Try Skill Queue on and off the same way."
+          ],
+          "check": "Does Ctrl+X open Combat Analysis, and does it show total damage over a set time?",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "av-macros",
+              "title": "Most common macros by class",
+              "publisher": "AION2 Vault",
+              "url": "https://aion2vault.com/builds/macros",
+              "retrievedOn": "2026-10-14",
+              "region": "global",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "rebuild-45",
+          "status": "reported",
+          "title": "Rebuild at Lv 45",
+          "text": "Skill levels and Specialty picks change what a stack should hold, so build it again at Lv 45.",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "dg-macros",
+              "title": "Macros guide",
+              "publisher": "Daeva Guides",
+              "url": "https://daevaguides.com/en/guides/macros",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "db-glad",
+              "title": "Gladiator guide",
+              "publisher": "dbaion2",
+              "url": "https://dbaion2.ru/en/guides/gayd-gladiator",
+              "retrievedOn": "2026-10-16",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-16",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar and Macro window, Templar",
+          "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "dg-macros",
+          "title": "Macros guide",
+          "publisher": "Daeva Guides",
+          "url": "https://daevaguides.com/en/guides/macros",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
     }
   ]
 }

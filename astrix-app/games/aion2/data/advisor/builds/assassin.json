@@ -204,8 +204,132 @@
           "region": "global",
           "reliability": "high",
           "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "dg-macros",
+          "title": "Macros guide",
+          "publisher": "Daeva Guides",
+          "url": "https://daevaguides.com/en/guides/macros",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-assassin-skills",
+          "title": "Assassin skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/assassin-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros",
+          "dg-macros",
+          "tgw-assassin-skills"
+        ],
+        "stackA": {
+          "label": "Build",
+          "rows": [
+            {
+              "name": "Savage Fang",
+              "why": "Longest cooldown, fires first when ready: 5 Insignia at once."
+            },
+            {
+              "name": "Ambush",
+              "why": "Hits hardest from behind and adds 2 Insignia."
+            },
+            {
+              "name": "Storm Rampage",
+              "why": "Only on a staggered target. Above the cooldown skills so it never blocks them.",
+              "noCooldown": true
+            },
+            {
+              "name": "Savage Roar",
+              "why": "Filler: always ready, 1 Insignia each time, so it sits last.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Quick Slice",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackB": {
+          "label": "Spend",
+          "rows": [
+            {
+              "name": "Insignia Explosion",
+              "why": "Spends your Insignia right after Savage Fang."
+            },
+            {
+              "name": "Triniel's Dagger",
+              "why": "Long cooldown hit that cuts your other cooldowns."
+            },
+            {
+              "name": "Heart Gore",
+              "why": "Only after a critical hit. Above Insignia Explosion so it never blocks it."
+            }
+          ]
+        },
+        "opener": [
+          "Illusive Clone",
+          "Swift Contract"
+        ],
+        "ownKeys": [
+          {
+            "name": "Illusive Clone",
+            "reason": "buff",
+            "why": "Burst buff: press it with Swift Contract just before Savage Fang."
+          },
+          {
+            "name": "Swift Contract",
+            "reason": "buff",
+            "why": "Burst buff: press it with Illusive Clone just before Savage Fang."
+          },
+          {
+            "name": "Shadowstrike",
+            "reason": "dash"
+          },
+          {
+            "name": "Flash Slice",
+            "reason": "other"
+          },
+          {
+            "name": "Infiltrate",
+            "reason": "other"
+          },
+          {
+            "name": "Shadow Fall",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Evasion Stance",
+            "reason": "defensive"
+          }
+        ],
+        "levelNotes": []
+      }
     }
   ]
 }

@@ -230,8 +230,100 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Shield",
+          "rows": [
+            {
+              "name": "Doom Shield",
+              "why": "Fires first when ready. Most players start this stack with it."
+            },
+            {
+              "name": "Judgment",
+              "why": "Strong hit on a 5 s cooldown."
+            },
+            {
+              "name": "Shield Smite",
+              "why": "Next in the most common line."
+            },
+            {
+              "name": "Warding Strike",
+              "why": "Heals you and grants damage tolerance. Your main attack cuts its cooldown."
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Vicious Strike",
+          "why": "Held with the macro key: instant, no cooldown, usable while moving, MP back."
+        },
+        "stackB": {
+          "label": "Smash",
+          "rows": [
+            {
+              "name": "Debilitating Smash",
+              "why": "Fires first when ready. Most players start this stack with it."
+            },
+            {
+              "name": "Annihilate",
+              "why": "Next in the most common line."
+            },
+            {
+              "name": "Pummel",
+              "why": "Last in the most common line."
+            }
+          ]
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Punishment",
+            "reason": "charged"
+          },
+          {
+            "name": "Taunt",
+            "reason": "other",
+            "why": "Pulls enemies to you, so you choose when."
+          },
+          {
+            "name": "Poach",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Shield Rush",
+            "reason": "dash"
+          }
+        ],
+        "levelNotes": [],
+        "layoutProvenance": {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-16",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar and Macro window, Templar",
+          "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+        }
+      }
     },
     {
       "id": "templar-dps",
@@ -403,8 +495,100 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros"
+        ],
+        "stackA": {
+          "label": "Shield",
+          "rows": [
+            {
+              "name": "Doom Shield",
+              "why": "Fires first when ready. Most players start this stack with it."
+            },
+            {
+              "name": "Judgment",
+              "why": "Strong hit on a 5 s cooldown."
+            },
+            {
+              "name": "Shield Smite",
+              "why": "Next in the most common line."
+            },
+            {
+              "name": "Warding Strike",
+              "why": "Heals you and grants damage tolerance. Your main attack cuts its cooldown."
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Vicious Strike",
+          "why": "Held with the macro key: instant, no cooldown, usable while moving, MP back."
+        },
+        "stackB": {
+          "label": "Smash",
+          "rows": [
+            {
+              "name": "Debilitating Smash",
+              "why": "Fires first when ready. Most players start this stack with it."
+            },
+            {
+              "name": "Annihilate",
+              "why": "Next in the most common line."
+            },
+            {
+              "name": "Pummel",
+              "why": "Last in the most common line."
+            }
+          ]
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Punishment",
+            "reason": "charged"
+          },
+          {
+            "name": "Taunt",
+            "reason": "other",
+            "why": "Pulls enemies to you, so you choose when."
+          },
+          {
+            "name": "Poach",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Shield Rush",
+            "reason": "dash"
+          }
+        ],
+        "levelNotes": [],
+        "layoutProvenance": {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-16",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar and Macro window, Templar",
+          "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+        }
+      }
     }
   ]
 }

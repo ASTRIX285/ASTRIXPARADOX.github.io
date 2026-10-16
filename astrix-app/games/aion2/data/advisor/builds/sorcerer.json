@@ -264,8 +264,142 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "dg-macros",
+          "title": "Macros guide",
+          "publisher": "Daeva Guides",
+          "url": "https://daevaguides.com/en/guides/macros",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-sorcerer-skills",
+          "title": "Sorcerer skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/sorcerer-skills",
+          "retrievedOn": "2026-10-16",
+          "region": "not-stated",
+          "reliability": "medium"
         }
-      ]
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros",
+          "dg-macros",
+          "tgw-sorcerer-skills"
+        ],
+        "stackA": {
+          "label": "Fire",
+          "rows": [
+            {
+              "name": "Element Enhancement",
+              "why": "More Fire and Water damage for 10 s. A buff, kept in because it comes back with the other 60 s skills. Test it on its own key too."
+            },
+            {
+              "name": "Delayed Explosion",
+              "why": "The target takes more from you for 4 s, then explodes."
+            },
+            {
+              "name": "Fire Wall",
+              "why": "Burn over time on a 60 s cooldown."
+            },
+            {
+              "name": "Blaze",
+              "why": "Only with Fire Mark, which your main attack applies."
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Flame Arrow",
+          "why": "Held with the macro key: MP back, Fire Mark, and it can reset Blaze."
+        },
+        "stackB": {
+          "label": "Frost",
+          "rows": [
+            {
+              "name": "Winter's Shackles",
+              "why": "More PvE damage for 5 s."
+            },
+            {
+              "name": "Cold Storm",
+              "why": "A 7 s storm with Frostbite."
+            },
+            {
+              "name": "Bittercold Wind",
+              "why": "Short cooldown hit, a sure critical hit from skill Lv 12."
+            },
+            {
+              "name": "Firestorm",
+              "why": "Shortest cooldown, so it sits last."
+            }
+          ]
+        },
+        "opener": [],
+        "ownKeys": [
+          {
+            "name": "Wish of Concentration",
+            "reason": "buff"
+          },
+          {
+            "name": "Hellfire",
+            "reason": "charged",
+            "why": "Charged: charge it by hand inside Element Enhancement. A macro only fires stage 1."
+          },
+          {
+            "name": "Frost",
+            "reason": "other"
+          },
+          {
+            "name": "Frost Burst",
+            "reason": "other"
+          },
+          {
+            "name": "Flame Scattershot",
+            "reason": "other"
+          },
+          {
+            "name": "Ice Chain",
+            "reason": "other"
+          },
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Steel Barrier",
+            "reason": "other"
+          },
+          {
+            "name": "Arctic Armor",
+            "reason": "other"
+          },
+          {
+            "name": "Hibernation",
+            "reason": "other"
+          }
+        ],
+        "levelNotes": [
+          {
+            "text": "Element Enhancement, Fire Wall and Cold Storm come back together, so each burst stacks every buff."
+          }
+        ]
+      }
     }
   ]
 }
