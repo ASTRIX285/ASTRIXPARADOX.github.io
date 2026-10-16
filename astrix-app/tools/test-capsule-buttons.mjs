@@ -1,6 +1,6 @@
 // Reactor capsule buttons (design/capsule-buttons, Miguel 16 Oct 2026). Checks what the buttons look like
 // in a browser: pill shape in a graphite rim, glass core, lift on hover, the dial on headline actions,
-// the strobe on the rim, and the locked home stream section keeping its earlier notched buttons.
+// the strobe on the rim. The home stream section's buttons match too (Miguel, 16 Oct 2026); its markup stays locked.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -74,17 +74,23 @@ try{
  {
   const {context,page}=await open('/');
   const btn=page.locator('#axHero .ax-xhero-tab .btn-secondary');
-  await btn.hover();await page.waitForTimeout(600);
-  const hover=await look(page,'#axHero .ax-xhero-tab .btn-secondary');
+  // Re-hover until the pointer is really over it: the page can still be settling right after load.
+  let hover;
+  for(let tries=0;tries<6;tries++){
+   await btn.hover();await page.waitForTimeout(700);
+   hover=await look(page,'#axHero .ax-xhero-tab .btn-secondary');
+   if(Number(hover.transform.match(/-?[\d.]+(?=\)$)/)?.[0])<=-1.9&&/0\.45\) 0px 0px 26px/.test(hover.shadow))break;
+  }
   assert.ok(Number(hover.transform.match(/-?[\d.]+(?=\)$)/)?.[0])<=-1.9,'Hover lifts the capsule');
   assert.match(hover.shadow,/rgba\(230, 57, 31, 0\.45\) 0px 0px 26px/,'Hover brightens the glow');
   await context.close();
  }
- // The locked stream section keeps its earlier machined, notched buttons.
+ // The stream section's buttons match the rest of the site (Miguel, 16 Oct 2026). Only their look changes;
+ // test-home-xhero.mjs STREAM_LOCK keeps the section's markup byte for byte.
  {
   const {context,page}=await open('/');
-  const r=await page.evaluate(()=>[...document.querySelectorAll('#streamSection .btn-primary,#streamSection .btn-secondary')].map(e=>{const c=getComputedStyle(e);return {radius:c.borderTopLeftRadius,clip:c.clipPath,pad:c.paddingLeft}}));
-  assert.ok(r.length>0&&r.every(b=>b.radius==='0px'&&b.clip.startsWith('polygon')&&b.pad==='26px'),'Stream section buttons unchanged');
+  const r=await page.evaluate(()=>[...document.querySelectorAll('#streamSection :is(.btn-primary,.btn-secondary,.btn-facebook)')].map(e=>{const c=getComputedStyle(e);return {radius:parseFloat(c.borderTopLeftRadius),clip:c.clipPath,shadow:c.boxShadow,after:getComputedStyle(e,'::after').borderTopLeftRadius}}));
+  assert.ok(r.length>=6&&r.every(b=>b.radius>=20&&b.clip==='none'&&/rgb\(22, 22, 24\) 0px 0px 0px 3px/.test(b.shadow)&&b.after==='999px'),`Stream section buttons are capsules (${JSON.stringify(r[0])})`);
   await context.close();
  }
  // Reduced motion: no pulse, no lift animation needed.
@@ -94,5 +100,5 @@ try{
   assert.equal(r.afterAnim,'none','Reduced motion: strobe still');
   await context.close();
  }
- console.log('CAPSULE_BUTTONS=PASS 9 buttons at 1600 and 390: pill in graphite rim, glass gloss, strobe on the rim, dial on headline actions, hover lift, locked stream buttons unchanged, tool main actions capsule');
+ console.log('CAPSULE_BUTTONS=PASS 9 buttons at 1600 and 390: pill in graphite rim, glass gloss, strobe on the rim, dial on headline actions, hover lift, stream section buttons match, tool main actions capsule');
 }finally{await browser.close();server.close();}
