@@ -28,7 +28,7 @@
 .vault-selection-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.45rem;min-width:0}
 .vault-selection-slot{display:grid;align-items:center;gap:.5rem;padding:.35rem;border:1px solid rgba(138,138,137,.15);background:rgba(4,4,5,.66)}
 .vault-selection-slot img,.vault-selection-slot .vault-slot-empty{width:var(--apx-equipment-icon-size);height:var(--apx-equipment-icon-size);object-fit:cover;background:rgba(255,255,255,.035)}
-.vault-selection-slot .vault-slot-empty{display:grid;place-items:center;color:#5e5650}
+.vault-selection-slot .vault-slot-empty{display:grid;place-items:center;color:#5a5a5e}
 .vault-selection-slot span{min-width:0}.vault-selection-slot b,.vault-selection-slot small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vault-selection-slot b{font-size:.78rem}.vault-selection-slot small{color:var(--apx-muted);font-size:.68rem}
 .vault-evaluate{align-self:stretch;min-width:12.5rem;padding:.7rem 1rem;border:1px solid rgba(138,138,137,.68);color:#d6d6d5;background:linear-gradient(135deg,#7b0712,#2b080c);font:800 .63rem/1.2 bahnschrift-semicondensed,sans-serif;letter-spacing:.1em;cursor:pointer}

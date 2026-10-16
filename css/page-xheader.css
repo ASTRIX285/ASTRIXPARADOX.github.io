@@ -17,11 +17,11 @@
 #axPageHero .ax-ph-map{position:absolute;inset:0;z-index:-4;background:var(--forge-paradox-map-art) center/cover no-repeat}
 /* The map art has the name baked into its centre; the slabs would cut it in half, so a dark pool hides it. */
 #axPageHero .ax-ph-pool{position:absolute;inset:0;z-index:-3;pointer-events:none;
-  background:radial-gradient(ellipse 820px 280px at 50% 54%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,.7) 75%,rgba(14,12,9,0) 100%)}
+  background:radial-gradient(ellipse 820px 280px at 50% 54%,rgb(11,11,12) 0%,rgb(11,11,12) 50%,rgba(11,11,12,.7) 75%,rgba(11,11,12,0) 100%)}
 /* In a short header the slab edges run behind the headline, so a soft scrim over the slabs keeps the
    words clean while the strobe still reads through it and stays bright on the arms. */
 #axPageHero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(ellipse 640px 240px at 50% 50%,rgba(14,12,9,.72) 0%,rgba(14,12,9,.6) 50%,rgba(14,12,9,0) 100%)}
+  background:radial-gradient(ellipse 640px 240px at 50% 50%,rgba(11,11,12,.72) 0%,rgba(11,11,12,.6) 50%,rgba(11,11,12,0) 100%)}
 #axPageHero .ax-ph-scene{position:absolute;inset:0;z-index:-2;width:100%;height:100%}
 #axPageHero .ax-ph-scene--tall{display:none}
 #axPageHero .slab-top{stop-color:var(--ax-raised)}
@@ -47,9 +47,9 @@
   #axPageHero{min-height:420px}
   #axPageHero .ax-ph-scene--wide{display:none}
   #axPageHero .ax-ph-scene--tall{display:block}
-  #axPageHero .ax-ph-pool{background:radial-gradient(ellipse 260px 200px at 50% 56%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,0) 100%),
-    linear-gradient(180deg,rgba(14,12,9,0) 30%,rgb(14,12,9) 40%,rgb(14,12,9) 66%,rgba(14,12,9,0) 76%)}
-  #axPageHero::before{background:radial-gradient(ellipse 230px 200px at 50% 50%,rgba(14,12,9,.7) 0%,rgba(14,12,9,.55) 50%,rgba(14,12,9,0) 100%)}
+  #axPageHero .ax-ph-pool{background:radial-gradient(ellipse 260px 200px at 50% 56%,rgb(11,11,12) 0%,rgb(11,11,12) 50%,rgba(11,11,12,0) 100%),
+    linear-gradient(180deg,rgba(11,11,12,0) 30%,rgb(11,11,12) 40%,rgb(11,11,12) 66%,rgba(11,11,12,0) 76%)}
+  #axPageHero::before{background:radial-gradient(ellipse 230px 200px at 50% 50%,rgba(11,11,12,.7) 0%,rgba(11,11,12,.55) 50%,rgba(11,11,12,0) 100%)}
   #axPageHero .ax-ph-actions{flex-direction:column;align-self:stretch;max-width:320px;width:100%;margin-inline:auto}
   #axPageHero .ax-ph-actions>*{justify-content:center}
 }

@@ -1,7 +1,7 @@
 :root{
   --forge-paradox-map-art:image-set(
-    url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp") 1x,
-    url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp") 1.5x
+    url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-4k.webp?v=20261016-neutral-1") 1x,
+    url("/astrix-app/pages/journey/assets/maps/astrix-paradox-map-placeholder-6k.webp?v=20261016-neutral-1") 1.5x
   );
 }
 

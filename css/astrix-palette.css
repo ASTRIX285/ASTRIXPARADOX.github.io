@@ -4,9 +4,9 @@
 :root {
   color-scheme: dark;
   /* Brand colours taken from the AX logo. */
-  --apx-colour-canvas: #0e0c09;      /* Forge Black, the A */
-  --apx-colour-panel: #16140f;
-  --apx-colour-raised: #1f1c16;
+  --apx-colour-canvas: #0b0b0c;      /* Forge Black, the A */
+  --apx-colour-panel: #141416;
+  --apx-colour-raised: #1d1d20;
   --apx-colour-text: #ededeb;
   --apx-colour-secondary: #b9b9b8;
   --apx-colour-action: #ba1f12;      /* Ember Red, the arrow */
@@ -16,8 +16,8 @@
   --apx-colour-steel-dark: #6b6b6a;
   --apx-colour-focus: #d6d6d5;
   --apx-colour-success: #62d6ad;
-  --apx-colour-border: #2e2a22;
-  --apx-colour-border-strong: #4a4538;
+  --apx-colour-border: #2c2c30;
+  --apx-colour-border-strong: #46464c;
   --apx-notch: 10px;
 }
 

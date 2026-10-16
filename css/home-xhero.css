@@ -26,7 +26,7 @@ body.ax-brand.ax-map>section#axHero{
 #axHero .ax-xhero-map{position:absolute;inset:0;z-index:-4;background:var(--forge-paradox-map-art) center/cover no-repeat}
 /* A deep pool behind the words. It also hides the name baked into the centre of the map art. */
 #axHero .ax-xhero-pool{position:absolute;inset:0;z-index:-3;pointer-events:none;
-  background:radial-gradient(ellipse 720px 300px at 50% 50%,rgb(14,12,9) 0%,rgb(14,12,9) 50%,rgba(14,12,9,.7) 75%,rgba(14,12,9,0) 100%)}
+  background:radial-gradient(ellipse 720px 300px at 50% 50%,rgb(11,11,12) 0%,rgb(11,11,12) 50%,rgba(11,11,12,.7) 75%,rgba(11,11,12,0) 100%)}
 #axHero .ax-xhero-scene{position:absolute;inset:0;z-index:-2;width:100%;height:100%}
 #axHero .ax-xhero-scene--tall{display:none}
 #axHero .slab-top{stop-color:var(--ax-raised)}
@@ -82,7 +82,7 @@ body.ax-brand.ax-map>section#axUniverses{padding:120px clamp(16px,3vw,40px) 0!im
 #axUniverses .ax-slice-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;transition:opacity .3s ease}
 #axUniverses .ax-slice.is-open .ax-slice-art{opacity:1}
 #axUniverses .ax-slice::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(0deg,rgba(14,12,9,.96) 0%,rgba(14,12,9,.35) 55%,rgba(14,12,9,.1) 100%)}
+  background:linear-gradient(0deg,rgba(11,11,12,.96) 0%,rgba(11,11,12,.35) 55%,rgba(11,11,12,.1) 100%)}
 /* The selected slice wears the strobe stroke: left and bottom edges, brightest bottom-left, with a pulse. */
 #axUniverses .ax-slice.is-open::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
   background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/100% 1.5px no-repeat,
@@ -116,8 +116,8 @@ body.ax-brand.ax-map>section#axTools{padding:140px clamp(16px,5vw,80px) 0!import
 #axTools a.ax-tool:nth-child(1) .ax-tool-art{object-position:30% 50%}
 #axTools a.ax-tool:nth-child(2) .ax-tool-art{object-position:70% 50%}
 #axTools a.ax-tool::after{content:"";position:absolute;inset:0;pointer-events:none}
-#axTools a.ax-tool:nth-child(1)::after{background:linear-gradient(90deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.35) 55%)}
-#axTools a.ax-tool:nth-child(2)::after{background:linear-gradient(270deg,rgba(14,12,9,.95) 0%,rgba(14,12,9,.35) 55%)}
+#axTools a.ax-tool:nth-child(1)::after{background:linear-gradient(90deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.35) 55%)}
+#axTools a.ax-tool:nth-child(2)::after{background:linear-gradient(270deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.35) 55%)}
 #axTools .ax-tool-body{position:absolute;bottom:48px;z-index:1;display:flex;flex-direction:column;gap:14px;max-width:420px}
 #axTools a.ax-tool:nth-child(1) .ax-tool-body{left:48px;align-items:flex-start}
 #axTools a.ax-tool:nth-child(2) .ax-tool-body{right:48px;align-items:flex-end;text-align:right}
@@ -135,7 +135,7 @@ body.ax-brand.ax-map>section#axTools{padding:140px clamp(16px,5vw,80px) 0!import
 
 /* ---------- Closing panel ---------- */
 body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16px!important;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;
-  border-top:1px solid var(--ax-hairline);background:radial-gradient(700px 320px at 50% 100%,rgba(115,32,34,.35),transparent),rgba(14,12,9,.72)!important}
+  border-top:1px solid var(--ax-hairline);background:radial-gradient(700px 320px at 50% 100%,rgba(115,32,34,.35),transparent),rgba(11,11,12,.72)!important}
 #axCrew p.ax-crew-title{margin:0!important;font-family:var(--ax-home-display)!important;font-weight:700!important;font-size:clamp(36px,4.4vw,60px)!important;
   line-height:1!important;text-transform:uppercase!important;color:#f4f4f2!important;text-wrap:balance}
 #axCrew p.ax-crew-line{margin:0!important;max-width:560px;font:400 18px/1.55 var(--ax-font-body)!important;color:#c9c9c8!important}
@@ -150,7 +150,7 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   #axUniverses .ax-slice-name{left:16px;bottom:auto;top:50%;transform:translateY(-50%);writing-mode:horizontal-tb;font-size:20px;letter-spacing:.1em}
   #axUniverses .ax-slice-body{left:16px;right:16px;bottom:24px}
   #axUniverses p.ax-slice-line{font-size:16px!important}
-  #axUniverses .ax-slice.is-open::after{background:linear-gradient(0deg,rgba(14,12,9,.97) 0%,rgba(14,12,9,.75) 45%,rgba(14,12,9,.15) 100%)}
+  #axUniverses .ax-slice.is-open::after{background:linear-gradient(0deg,rgba(11,11,12,.97) 0%,rgba(11,11,12,.75) 45%,rgba(11,11,12,.15) 100%)}
 }
 
 /* ---------- Phone and small tablet ---------- */
@@ -160,8 +160,8 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   #axHero .ax-xhero-scene--tall{display:block}
   /* On a tall screen the map's baked-in name runs edge to edge at mid height: a dark band hides it. */
   #axHero .ax-xhero-pool{background:
-    radial-gradient(ellipse 240px 200px at 50% 36%,rgba(14,12,9,.96) 0%,rgba(14,12,9,.85) 50%,rgba(14,12,9,0) 100%),
-    linear-gradient(180deg,rgba(14,12,9,0) 36%,rgb(14,12,9) 44%,rgb(14,12,9) 57%,rgba(14,12,9,0) 65%)}
+    radial-gradient(ellipse 240px 200px at 50% 36%,rgba(11,11,12,.96) 0%,rgba(11,11,12,.85) 50%,rgba(11,11,12,0) 100%),
+    linear-gradient(180deg,rgba(11,11,12,0) 36%,rgb(11,11,12) 44%,rgb(11,11,12) 57%,rgba(11,11,12,0) 65%)}
   #axHero .ax-xhero-inner{top:36%}
   #axUniverses .ax-uni-all{white-space:nowrap;font-size:14px}
   #axHero .ax-xhero-tab{left:16px;right:16px;transform:none;flex-direction:column;padding:0 0 24px;background:none;box-shadow:none;clip-path:none}
@@ -175,7 +175,7 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   #axTools a.ax-tool{position:relative;inset:auto;height:340px}
   #axTools a.ax-tool:nth-child(1){clip-path:polygon(0 0,100% 0,100% 86%,0 100%)}
   #axTools a.ax-tool:nth-child(2){margin-top:-36px;clip-path:polygon(0 14%,100% 0,100% 100%,0 100%)}
-  #axTools a.ax-tool::after{background:linear-gradient(0deg,rgba(14,12,9,.96) 0%,rgba(14,12,9,.2) 65%)!important}
+  #axTools a.ax-tool::after{background:linear-gradient(0deg,rgba(11,11,12,.96) 0%,rgba(11,11,12,.2) 65%)!important}
   #axTools .ax-tool-body{left:20px!important;right:20px!important;align-items:flex-start!important;text-align:left!important;bottom:56px}
   #axTools a.ax-tool:nth-child(2) .ax-tool-body{bottom:24px}
   #axTools .ax-tool-line{font-size:16px}
@@ -201,7 +201,7 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   body.ax-brand.ax-map>section#axUniverses{padding:120px clamp(16px,3vw,40px) 0!important;background:transparent!important}
   body.ax-brand.ax-map>section#axTools{padding:140px clamp(16px,5vw,80px) 0!important;background:transparent!important}
   body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16px!important;
-    background:radial-gradient(700px 320px at 50% 100%,rgba(115,32,34,.35),transparent),rgba(14,12,9,.72)!important}
+    background:radial-gradient(700px 320px at 50% 100%,rgba(115,32,34,.35),transparent),rgba(11,11,12,.72)!important}
   body.ax-brand #axHero h1.ax-xhero-title{font-family:var(--ax-font-brand)!important;letter-spacing:0!important}
   body.ax-brand .ax-home-h2,body.ax-brand #axUniverses h3.ax-slice-title{font-family:var(--ax-home-display)!important;letter-spacing:.01em!important}
   body.ax-brand #axHero :is(.btn-primary,.btn-secondary):active,

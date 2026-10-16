@@ -6,10 +6,10 @@
   <title>Clips &amp; Highlights | ASTRIX PARADOX</title>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261005-live-immersion-1">
-  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1&amp;recovery=20261004-1">
+  <link rel="stylesheet" href="/css/astrix-brand.css?v=20261005-live-immersion-1&amp;neutral=20261016-1">
+  <link rel="stylesheet" href="/css/astrix-palette.css?v=20260917-approved-1&amp;gloss=20260926-1&amp;recovery=20261004-1&amp;neutral=20261016-1">
   <link rel="stylesheet" href="../css/style.css?v=20261005-stream-fit-1">
-  <link rel="stylesheet" href="../css/page-xheader.css?v=20261015-xheader-1">
+  <link rel="stylesheet" href="../css/page-xheader.css?v=20261015-xheader-1&amp;neutral=20261016-1">
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/favicon-32x32.png">
@@ -33,27 +33,27 @@
     .game-section.hidden{display:none}
     .game-section-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-top:8px}
     body .game-section-header .game-section-label{font:600 15px/1 var(--ax-font-body);letter-spacing:.2em;color:var(--white);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
-    .game-section-line{flex:1;height:1px;background:linear-gradient(to right,var(--ax-line-hi,#4a4538),transparent)}
-    .game-section-header .game-section-line:first-child{background:linear-gradient(to left,var(--ax-line-hi,#4a4538),transparent)}
+    .game-section-line{flex:1;height:1px;background:linear-gradient(to right,var(--ax-line-hi,#46464c),transparent)}
+    .game-section-header .game-section-line:first-child{background:linear-gradient(to left,var(--ax-line-hi,#46464c),transparent)}
     #clipsGrid{display:block}
     .game-section{margin-bottom:60px}
     /* Cards: the picture stays clean (only the play mark and the running time on it), the
        words sit underneath at a readable size. Visible at rest: no scroll reveal. */
     .clips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-    .clip-card{display:flex;flex-direction:column;background:var(--ax-panel);border:1px solid var(--ax-line,#2e2a22);overflow:hidden;position:relative;transition:border-color .2s ease}
+    .clip-card{display:flex;flex-direction:column;background:var(--ax-panel);border:1px solid var(--ax-line,#2c2c30);overflow:hidden;position:relative;transition:border-color .2s ease}
     .clip-card.hidden{display:none}
     .clip-thumb{display:block;width:100%;aspect-ratio:16/9;position:relative;margin:0;padding:0;border:0;background:var(--ax-black);cursor:pointer;overflow:hidden}
     .clip-thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .4s cubic-bezier(.23,1,.32,1)}
-    .clip-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(14,12,9,.55) 0%,rgba(14,12,9,0) 45%);pointer-events:none}
+    .clip-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(11,11,12,.55) 0%,rgba(11,11,12,0) 45%);pointer-events:none}
     .clip-play{position:absolute;left:50%;top:50%;z-index:1;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:var(--ax-ember);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.23,1,.32,1),background-color .2s ease}
     .clip-play svg{margin-left:4px;fill:#fff}
-    .clip-duration{position:absolute;right:10px;bottom:10px;z-index:1;font:600 13px/1 var(--ax-font-body);letter-spacing:.04em;color:#fff;background:rgba(14,12,9,.85);padding:5px 8px}
+    .clip-duration{position:absolute;right:10px;bottom:10px;z-index:1;font:600 13px/1 var(--ax-font-body);letter-spacing:.04em;color:#fff;background:rgba(11,11,12,.85);padding:5px 8px}
     .clip-thumb:active .clip-play{transform:scale(.94)}
     .clip-thumb:focus-visible{outline:2px solid var(--ax-ember-hi);outline-offset:-2px}
     .clip-body{display:flex;flex-direction:column;gap:12px;flex:1;padding:16px 18px 18px}
     .clip-title{margin:0;font:600 17px/1.35 var(--ax-font-body);color:var(--white);text-wrap:pretty}
     .clip-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:auto}
-    .clip-type{font:600 12px/1 var(--ax-font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--ax-ember-hi);border:1px solid var(--ax-line-hi,#4a4538);padding:5px 8px}
+    .clip-type{font:600 12px/1 var(--ax-font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--ax-ember-hi);border:1px solid var(--ax-line-hi,#46464c);padding:5px 8px}
     .clip-date{font:400 14px/1 var(--ax-font-body);color:#c9c9c8}
     .clip-link{margin-left:auto;font:600 13px/1 var(--ax-font-body);letter-spacing:.08em;text-transform:uppercase;color:#dcdcda;text-decoration:none;padding:10px 0}
     .clip-link:hover,.clip-link:focus-visible{color:var(--ax-ember-hi)}
@@ -62,23 +62,23 @@
       .clip-card:hover .clip-thumb img{transform:scale(1.03)}
       .clip-card:hover .clip-play{background:var(--ax-ember-hi)}
     }
-    .clip-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,12,9,.95);align-items:center;justify-content:center}
+    .clip-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,11,12,.95);align-items:center;justify-content:center}
     .clip-modal.open{display:flex}
     .clip-modal-inner{position:relative;width:92vw;max-width:1100px}
-    .clip-modal-close{position:absolute;top:-56px;right:0;min-height:44px;padding:0 16px;font:600 14px/1 var(--ax-font-body);letter-spacing:.1em;color:#dcdcda;background:none;border:1px solid var(--ax-line-hi,#4a4538);cursor:pointer;text-transform:uppercase}
+    .clip-modal-close{position:absolute;top:-56px;right:0;min-height:44px;padding:0 16px;font:600 14px/1 var(--ax-font-body);letter-spacing:.1em;color:#dcdcda;background:none;border:1px solid var(--ax-line-hi,#46464c);cursor:pointer;text-transform:uppercase}
     .clip-modal-close:hover,.clip-modal-close:focus-visible{color:#fff;border-color:var(--ax-ember-hi)}
     .clip-modal-close:active{transform:scale(.97)}
     .clip-modal-frame{position:relative;padding-top:56.25%;background:#000}
     .clip-modal-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
     .clip-modal-label{font:600 17px/1.4 var(--ax-font-body);color:#fff;text-align:center;margin-top:16px}
     .clip-modal-source{font:400 14px/1.4 var(--ax-font-body);letter-spacing:.08em;color:#c9c9c8;text-align:center;margin-top:6px;text-transform:uppercase}
-    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font:400 14px/1.4 var(--ax-font-body);letter-spacing:.08em;color:#c9c9c8;border-bottom:1px solid var(--ax-line,#2e2a22);margin-bottom:24px;flex-wrap:wrap;text-transform:uppercase}
+    .clips-stats{display:flex;gap:24px;align-items:center;padding:12px 0;font:400 14px/1.4 var(--ax-font-body);letter-spacing:.08em;color:#c9c9c8;border-bottom:1px solid var(--ax-line,#2c2c30);margin-bottom:24px;flex-wrap:wrap;text-transform:uppercase}
     .clips-stats span{color:var(--white)}
     @media (prefers-reduced-motion:reduce){.clip-thumb img,.clip-play{transition:none}.clip-card:hover .clip-thumb img{transform:none}}
     @media(max-width:768px){.clips-grid{grid-template-columns:1fr;gap:16px}.filter-wrap{padding:0 20px}.filter-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px 0}.filter-label{min-width:0;padding:0;margin:0;border-right:0}.filter-pills{padding:0}}
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
-  <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background">
+  <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background&amp;neutral=20261016-1">
 </head>
 <body class="ax-brand ax-map ax-stroke">
 <nav class="nav">

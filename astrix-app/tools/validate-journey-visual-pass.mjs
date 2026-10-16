@@ -48,7 +48,7 @@ const placeholderDetailMap=readFileSync(`${root}astrix-app/pages/journey/assets/
 assert.ok(html.includes('class="apx-destination-page journey-page"'),'Journey must own its large-screen visual scope');
 // Europa sourcing request: retain exact import checks with the new source audit cache tag.
 // Prompt 24: retain exact resource checks with the marker/readability cache tag.
-assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1&amp;card=20260926-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
+assert.ok(html.includes('href="./journey-2560-visual.css?v=20260920-director-2&amp;markers=20260925-24&amp;chestnote=20260925-25&amp;gloss=20260926-1&amp;back=20260926-1&amp;card=20260926-1&amp;neutral=20261016-1"'),'Journey must load the contained emblem and compact stats without stale page CSS');
 // Local preview request: exact live import remains required behind the host gate.
 assert.ok(plainOrStamped(html,'src="./journey-entry.mjs')&&plainOrStamped(journeyEntry,"import('./journey.mjs"),'Journey must retain its exact current live runtime through its gated entry');
 assert.match(journey,/const manifestReady=Promise\.resolve\(guardianManifest\)/,'Journey startup must not download the heavyweight Character and Build equipment manifest');
@@ -237,7 +237,7 @@ assert.match(heroCss,/var\(--character-emblem\) 28px center\/cover no-repeat/,'S
 assert.match(heroCss,/\.guardian-character-card__stat\{[^}]*min-height:32px[\s\S]*?\.guardian-character-card__stat \.guardian-stat-icon\{[^}]*width:var\(--apx-icon-stat,1\.25rem\);height:var\(--apx-icon-stat,1\.25rem\);flex:0 0 var\(--apx-icon-stat,1\.25rem\)[\s\S]*?\.guardian-character-card__stat b\{[^}]*font:800 13px/,'Shared Character-format stat cells, icons and values must use the shared enlarged contained treatment');
 assert.doesNotMatch(heroModule,/from ['"][^'"]*(?:guardian-bungie-profile|guardian-manifest-service|paradox-build)[^'"]*['"]|CLIENT_SECRET|API_KEY/,'Shared hero cards must not import or alter Character, manifest, Builder or secret internals');
 for(const page of mapBackgroundPages){
-  assert.ok(page.includes('astrix-paradox-background.css?v=20260830-global-map-background'),'Each approved page must load the shared ASTRIX PARADOX map background');
+  assert.ok(page.includes('astrix-paradox-background.css?v=20260830-global-map-background&amp;neutral=20261016-1'),'Each approved page must load the shared ASTRIX PARADOX map background');
 }
 for(const page of [vaultHtml,forgeLoaderHtml,loadoutHtml]){
   assert.ok(page.includes('forge-paradox-map-background'),'Vault, Forge Loader and Loadout must mount the shared map background layer');

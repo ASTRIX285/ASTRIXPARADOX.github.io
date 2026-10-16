@@ -86,7 +86,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   margin:0 auto;
   padding:46px;
   border:1px solid rgba(185,185,184,.24);
-  background:linear-gradient(145deg,rgba(18,14,14,.96),rgba(6,6,6,.96));
+  background:linear-gradient(145deg,rgba(16,16,18,.96),rgba(6,6,6,.96));
   box-shadow:0 30px 80px rgba(0,0,0,.46);
 }
 .mission-gate-card h1{margin:0;color:#d6d6d5;font:800 clamp(30px,4vw,54px)/1 bahnschrift-semicondensed,sans-serif}
@@ -285,7 +285,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 .mission-data-empty{margin:0 14px 14px;padding:16px;border:1px dashed rgba(185,185,184,.18);color:#77716a;background:rgba(185,185,184,.025);font-size:11px;text-align:center}
 .mission-text-action{display:block;margin:0 auto 13px;padding:6px 10px;border:0;background:transparent;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
-.mission-text-action:disabled{color:#58534e;cursor:not-allowed}
+.mission-text-action:disabled{color:#555559;cursor:not-allowed}
 
 .mission-evidence-list{padding:0 14px}
 .mission-evidence-row{
@@ -308,7 +308,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .mission-analyse-link{display:grid;min-height:26px;place-items:center;border:1px solid rgba(178,34,34,.44);color:#d5cfd6;background:rgba(139,0,0,.14);font:700 7px/1 bahnschrift-semicondensed,sans-serif;text-decoration:none}
 .mission-external-link{color:#716b72;text-decoration:none;text-align:center}
 .mission-history-action{display:block;margin:12px auto 14px;padding:9px 18px;border:1px solid rgba(185,185,184,.26);background:transparent;color:var(--apx-gold);font:700 7px/1 bahnschrift-semicondensed,sans-serif;letter-spacing:.08em;cursor:pointer}
-.mission-history-action:disabled{border-color:rgba(255,255,255,.08);color:#57514e;cursor:not-allowed}
+.mission-history-action:disabled{border-color:rgba(255,255,255,.08);color:#545458;cursor:not-allowed}
 
 .mission-current-form .mission-panel-heading{align-items:flex-start}
 .mission-chart-wrap{position:relative;margin:12px 12px 0;border:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.18)}
