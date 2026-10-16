@@ -36,6 +36,7 @@ astrix-app/shared/astrix-destination-ribbon.css
 astrix-app/shared/astrix-paradox-background.css
 astrix-app/shared/astrix-portal-loader.css
 astrix-app/shared/astrix-tool-shell.css
+astrix-app/tools/test-aetherium-pages.mjs
 astrix-app/tools/test-manual-build-editor.mjs
 astrix-app/tools/validate-journey-visual-pass.mjs
 css/astrix-brand.css
