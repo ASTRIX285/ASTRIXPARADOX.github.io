@@ -3359,15 +3359,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "50% lower MP cost"
+          "text": "50% lower MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 125 MP in place of 250.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Casts 20% faster, so more casts in a fight.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Cuts target healing received by 60% for 5s"
+          "text": "Cuts target healing received by 60% for 5s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Cuts the target's healing by 60% for 5 s: a PvP pick.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3408,6 +3441,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3419,9 +3462,49 @@
           "type": "cdCut",
           "text": "Each fireball cuts Hellfire by 2 s.",
           "skillLevel": 12,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Fire hit on a 5 s cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Each fireball cuts Hellfire by 2 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ],
+          "skillLevel": 12,
+          "needs": "Hellfire"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Hellfire",
+          "seconds": 2,
+          "skillLevel": 12,
+          "text": "Each fireball cuts Hellfire by 2 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 250
     },
     {
       "id": "sorcerer-blaze",
@@ -3438,15 +3521,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you for 3% of the damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% more MP restored"
+          "text": "50% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "150 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Adds delayed damage after 3s"
+          "text": "Adds delayed damage after 3s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A second hit 3 s later.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3487,6 +3603,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3498,9 +3624,67 @@
           "type": "condition",
           "text": "Only on a target with Fire Mark, which Flame Arrow applies.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Fire hit on a 5 s cooldown on a target with Fire Mark, which every Fire hit puts on.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 0.5,
+          "text": "Restores 100 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "fire-mark",
+          "text": "Fires only on a target with Fire Mark. Your Fire hits put it on.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Wish of Concentration",
+          "seconds": 3,
+          "skillLevel": 16,
+          "text": "Each hit cuts Wish of Concentration by 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      },
+      "mpCost": 0
     },
     {
       "id": "sorcerer-hellfire",
@@ -3517,15 +3701,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "30% faster skill speed"
+          "text": "30% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Charges and casts 30% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Fire damage over time for 10s"
+          "text": "Fire damage over time for 10s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Burns the target for 10 s after the hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "You can move while you charge it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3566,6 +3783,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3578,19 +3805,45 @@
           "type": "condition",
           "text": "About seven times the damage fully charged than from a macro.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "A charged Fire nuke on up to 4 enemies: your hardest hit. Charge it by hand.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Hellfire",
+          "seconds": 15,
+          "skillLevel": 16,
+          "text": "Its cooldown is 30 s in place of 45 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 32,
+        "10": 38
+      },
+      "mpCost": 200
     },
     {
       "id": "sorcerer-flame-arrow",
       "class": "Sorcerer",
       "name": "Flame Arrow",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Basic Fire attack on one target within 20m that restores MP.",
       "role": {
         "value": "filler",
@@ -3600,15 +3853,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you for 1% of the damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half again as many of its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3649,6 +3935,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3661,9 +3957,67 @@
           "type": "opens",
           "text": "Restores 100 MP and applies Fire Mark. Can reset Blaze.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A Fire hit, so it puts Fire Mark on the target and Blaze can fire.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "opens",
+          "target": "Blaze",
+          "via": "fire-mark",
+          "text": "Its Fire hit puts Fire Mark on the target for 5 s, so Blaze can fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "reset",
+          "target": "Blaze",
+          "skillLevel": 16,
+          "text": "Its follow-up Pyroclasm resets Blaze.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
     },
     {
       "id": "sorcerer-bittercold-wind",
@@ -3680,15 +4034,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Zone lasts 1s longer"
+          "text": "Zone lasts 1s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "The wind lasts 3 s in place of 2.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile cast"
+          "text": "Becomes a mobile cast",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "You can move while you cast it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Adds a pull effect"
+          "text": "Adds a pull effect",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Pulls the enemies in together.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3729,6 +4116,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3740,9 +4137,38 @@
           "type": "opens",
           "text": "Always a critical hit.",
           "skillLevel": 12,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Water hit on up to 4 enemies on a 15 s cooldown. It roots NPCs for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Frost",
+          "seconds": 1,
+          "skillLevel": 16,
+          "text": "Each hit cuts Frost by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      },
+      "mpCost": 150
     },
     {
       "id": "sorcerer-wish-of-concentration",
@@ -3759,15 +4185,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "10% lower MP cost"
+          "text": "10% lower MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Skills cost 10% less MP for 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "An extra 10% Attack"
+          "text": "An extra 10% Attack",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Attack +20% in place of +10%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+500 Max MP"
+          "text": "+500 Max MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "500 more Max MP for 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3808,13 +4267,52 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Attack +10% and Accuracy +100 for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 10,
+          "skillLevel": 16,
+          "text": "All your skill cooldowns 10 s shorter while it lasts.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 30,
+        "10": 36
+      },
+      "mpCost": 100
     },
     {
       "id": "sorcerer-winters-shackles",
@@ -3831,15 +4329,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "You can move while you cast it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "30% chance to Frost for 3s"
+          "text": "30% chance to Frost for 3s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Freezes NPC targets for 3 s, so Frost Burst can fire.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Damage boost for 5s on landing"
+          "text": "Damage boost for 5s on landing",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "+20% PvE damage for 5 s each time it lands.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3880,6 +4411,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3891,15 +4432,44 @@
           "type": "opens",
           "text": "20% more PvE damage for 5 s.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
           "text": "Cooldown 30 s instead of 45 s.",
           "skillLevel": 16,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A Water hit on up to 4 enemies on a 45 s cooldown. It slows them for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Winter's Shackles",
+          "seconds": 15,
+          "skillLevel": 16,
+          "text": "Its cooldown is 30 s in place of 45 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 26,
+        "10": 32
+      },
+      "mpCost": 200
     },
     {
       "id": "spiritmaster-cold-shock",
@@ -9548,14 +10118,8 @@
       "class": "Sorcerer",
       "name": "Arctic Armor",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 90,
+      "summary": "PvE damage taken 20% lower for 10s; part of the damage goes to your MP while MP is 50% or more.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -9581,13 +10145,36 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "20% less PvE damage taken for 10 s, and part of it goes to your MP while MP is 50% or more.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "sorcerer-cold-storm",
@@ -9595,10 +10182,7 @@
       "name": "Cold Storm",
       "unlockLevel": 22,
       "cooldownSeconds": 60,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Water damage and a slow on up to 4 enemies, then a 7s storm that leaves Frostbite.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -9624,6 +10208,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9635,27 +10229,85 @@
           "type": "opens",
           "text": "A 7 s storm with Frostbite.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Water hit, a slow, and a 7 s storm with a 10 s Frostbite on up to 4 enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 200
     },
     {
       "id": "sorcerer-defiance",
       "class": "Sorcerer",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Removes stun, knockdown, airborne, grab, frost and fear, then 5s of status effect immunity.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Curse: Old Tree chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Adds a follow-up that turns the target into a tree.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1000 Stamina",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Restores 1000 Stamina.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 20% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Restores 20% of your HP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Immunity lasts 2s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Takes 50% less PvE damage during the immunity"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9677,13 +10329,40 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Clears stun, knockdown, airborne, grab, frost and fear, then 5 s of immunity. Cooldown cuts do not touch it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 34,
+        "10": 40
+      },
+      "mpCost": 0
     },
     {
       "id": "sorcerer-delayed-explosion",
@@ -9691,10 +10370,7 @@
       "name": "Delayed Explosion",
       "unlockLevel": 22,
       "cooldownSeconds": 30,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Fire damage to a target after 4s; the target takes 15% more damage from you during the delay.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -9720,6 +10396,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9731,9 +10417,44 @@
           "type": "opens",
           "text": "The target takes 15% more from you for 4 s, then explodes.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A Fire hit after 4 s, and the target takes 15% more from you meanwhile. Cooldown 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 200,
+          "skillLevel": 5,
+          "text": "Restores 200 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Delayed Explosion",
+          "seconds": 10,
+          "skillLevel": 10,
+          "text": "Its cooldown is 20 s in place of 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "mpCost": 200
     },
     {
       "id": "sorcerer-element-enhancement",
@@ -9741,10 +10462,7 @@
       "name": "Element Enhancement",
       "unlockLevel": 22,
       "cooldownSeconds": 60,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Fire Attack and Water Attack +20% for 10s.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -9770,6 +10488,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9781,9 +10509,22 @@
           "type": "opens",
           "text": "20% more Fire and Water damage for 10 s.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Fire Attack and Water Attack +20% for 10 s: every Sorcerer hit is Fire or Water.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "sorcerer-fire-wall",
@@ -9791,10 +10532,7 @@
       "name": "Fire Wall",
       "unlockLevel": 22,
       "cooldownSeconds": 60,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "A wall of fire for 3s: Fire damage and a 10s burn on up to 4 enemies inside it.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -9820,6 +10558,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9831,27 +10579,85 @@
           "type": "opens",
           "text": "Burn over time.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Fire hit and a 10 s burn on up to 4 enemies. The burn grows when they move.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 200
     },
     {
       "id": "sorcerer-flame-scattershot",
       "class": "Sorcerer",
       "name": "Flame Scattershot",
       "unlockLevel": 5,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 0,
+      "summary": "Fire damage to a staggered target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you for 5% of the damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 120 MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Restores 120 MP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "You can move while you cast it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Hits cut all cooldowns by 1s"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9873,31 +10679,133 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Fire hit with no cooldown, on a staggered target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "skillLevel": 16,
+          "text": "Each hit cuts all your cooldowns by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      },
+      "mpCost": 0
     },
     {
       "id": "sorcerer-frost",
       "class": "Sorcerer",
       "name": "Frost",
       "unlockLevel": 7,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 30,
+      "summary": "Water damage to up to 4 enemies near a target within 20m; freezes NPC targets for 3s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Restores 200 MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Restores 200 MP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "5s shorter cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Its cooldown is 25 s in place of 30 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Landing Frost resets Frost Burst",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Frost Burst is ready again each time Frost lands.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "25% more Frost chance on players"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Frost lasts 1s longer"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9919,31 +10827,115 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A Water hit on up to 4 enemies on a 30 s cooldown. It freezes NPCs for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Frost Burst",
+          "via": "frost",
+          "text": "It freezes NPC targets for 3 s, so Frost Burst can fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 25,
+        "10": 31
+      },
+      "mpCost": 100
     },
     {
       "id": "sorcerer-frost-burst",
       "class": "Sorcerer",
       "name": "Frost Burst",
       "unlockLevel": 10,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 10,
+      "summary": "Water damage to up to 4 enemies near a frozen target within 20m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you for 7% of the damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "You can move while you cast it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "75% chance to knock back 2m",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Knocks enemies back 2 m.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion, lands as Critical Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "50% chance to reset its cooldown"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9965,27 +10957,77 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Fires only on a frozen target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A Water hit on up to 4 enemies on a 10 s cooldown, on a frozen target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "frost",
+          "text": "Fires only on a frozen target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        },
+        {
+          "type": "reset",
+          "target": null,
+          "skillLevel": 16,
+          "text": "A 50% chance to reset its own cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 28,
+        "10": 34
+      },
+      "mpCost": 0
     },
     {
       "id": "sorcerer-hibernation",
       "class": "Sorcerer",
       "name": "Hibernation",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 180,
+      "summary": "5s of immunity to damage and status effects.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -10011,31 +11053,99 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "5 s of immunity to damage and status effects.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "sorcerer-ice-chain",
       "class": "Sorcerer",
       "name": "Ice Chain",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 0,
+      "summary": "Water damage to up to 4 enemies near a target within 20m; slows them by 40% for 5s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "20% lower MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 96 MP in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Casts 20% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 12% more damage on fewer targets",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Up to 12% more damage when it hits fewer enemies.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Hits cut Winter's Shackles cooldown by 1s"
+        },
+        {
+          "skillLevel": 16,
+          "text": "5% chance to Frost for 2s on its follow-up"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -10057,27 +11167,60 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A Water hit on up to 4 enemies with no cooldown. It costs 120 MP and slows them by 40% for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Winter's Shackles",
+          "seconds": 1,
+          "skillLevel": 12,
+          "text": "Each hit cuts Winter's Shackles by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 120
     },
     {
       "id": "sorcerer-steel-barrier",
       "class": "Sorcerer",
       "name": "Steel Barrier",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 60,
+      "summary": "A shield of 16% of your max HP for 60s, with 10% less PvE damage taken while it holds.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -10103,13 +11246,36 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "A shield of 16% of your max HP and 10% less PvE damage taken for 60 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-sorcerer"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-defiance",

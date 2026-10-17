@@ -1,0 +1,1124 @@
+{
+ "source": {
+  "publisher": "questlog.gg",
+  "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+  "procedure": "daevanionPlanner.getDaevanionNodes",
+  "board": "Sorcerer Nezekan (questlog board 61)",
+  "retrievedOn": "2026-10-17",
+  "note": "Real node list in the adapted board shape (armory-adapter.mjs adaptDaevanionBoard). Nothing taken."
+ },
+ "nodes": [
+  {
+   "nodeId": 610033,
+   "boardId": 61,
+   "row": 3,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Unique",
+   "name": "Combat Speed",
+   "taken": false,
+   "effects": [],
+   "cost": 4
+  },
+  {
+   "nodeId": 610034,
+   "boardId": 61,
+   "row": 3,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610035,
+   "boardId": 61,
+   "row": 3,
+   "col": 5,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610037,
+   "boardId": 61,
+   "row": 3,
+   "col": 7,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Earth Robe",
+   "taken": false,
+   "effects": [
+    "Robe of Earth +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610038,
+   "boardId": 61,
+   "row": 3,
+   "col": 8,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610039,
+   "boardId": 61,
+   "row": 3,
+   "col": 9,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Wish of Concentration",
+   "taken": false,
+   "effects": [
+    "Wish of Concentration +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610041,
+   "boardId": 61,
+   "row": 3,
+   "col": 11,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Cold Snap",
+   "taken": false,
+   "effects": [
+    "Cold Snap +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610042,
+   "boardId": 61,
+   "row": 3,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610043,
+   "boardId": 61,
+   "row": 3,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Unique",
+   "name": "Cooldown Reduction",
+   "taken": false,
+   "effects": [],
+   "cost": 4
+  },
+  {
+   "nodeId": 610048,
+   "boardId": 61,
+   "row": 4,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610050,
+   "boardId": 61,
+   "row": 4,
+   "col": 5,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Flame Explosion",
+   "taken": false,
+   "effects": [
+    "Blaze +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610051,
+   "boardId": 61,
+   "row": 4,
+   "col": 6,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610052,
+   "boardId": 61,
+   "row": 4,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610054,
+   "boardId": 61,
+   "row": 4,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610055,
+   "boardId": 61,
+   "row": 4,
+   "col": 10,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610056,
+   "boardId": 61,
+   "row": 4,
+   "col": 11,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610058,
+   "boardId": 61,
+   "row": 4,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610063,
+   "boardId": 61,
+   "row": 5,
+   "col": 3,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Fire Mark",
+   "taken": false,
+   "effects": [
+    "Fire Mark +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610064,
+   "boardId": 61,
+   "row": 5,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610065,
+   "boardId": 61,
+   "row": 5,
+   "col": 5,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610067,
+   "boardId": 61,
+   "row": 5,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610068,
+   "boardId": 61,
+   "row": 5,
+   "col": 8,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Firestorm",
+   "taken": false,
+   "effects": [
+    "Firestorm +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610069,
+   "boardId": 61,
+   "row": 5,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610071,
+   "boardId": 61,
+   "row": 5,
+   "col": 11,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Winter's Shackles",
+   "taken": false,
+   "effects": [
+    "Winter's Shackles +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610072,
+   "boardId": 61,
+   "row": 5,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610073,
+   "boardId": 61,
+   "row": 5,
+   "col": 13,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Flame Robe",
+   "taken": false,
+   "effects": [
+    "Robe of Flame +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610079,
+   "boardId": 61,
+   "row": 6,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610082,
+   "boardId": 61,
+   "row": 6,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610084,
+   "boardId": 61,
+   "row": 6,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610086,
+   "boardId": 61,
+   "row": 6,
+   "col": 11,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610088,
+   "boardId": 61,
+   "row": 6,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610093,
+   "boardId": 61,
+   "row": 7,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610094,
+   "boardId": 61,
+   "row": 7,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610095,
+   "boardId": 61,
+   "row": 7,
+   "col": 5,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Ice Chain",
+   "taken": false,
+   "effects": [
+    "Ice Chain +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610096,
+   "boardId": 61,
+   "row": 7,
+   "col": 6,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610097,
+   "boardId": 61,
+   "row": 7,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610098,
+   "boardId": 61,
+   "row": 7,
+   "col": 8,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610099,
+   "boardId": 61,
+   "row": 7,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610100,
+   "boardId": 61,
+   "row": 7,
+   "col": 10,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Absorb Essence",
+   "taken": false,
+   "effects": [
+    "Absorb Essence +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610101,
+   "boardId": 61,
+   "row": 7,
+   "col": 11,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610102,
+   "boardId": 61,
+   "row": 7,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610103,
+   "boardId": 61,
+   "row": 7,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610108,
+   "boardId": 61,
+   "row": 8,
+   "col": 3,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Defiance",
+   "taken": false,
+   "effects": [
+    "Defiance +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610111,
+   "boardId": 61,
+   "row": 8,
+   "col": 6,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610113,
+   "boardId": 61,
+   "row": 8,
+   "col": 8,
+   "type": "Start",
+   "grade": null,
+   "name": "Nezekan - Start",
+   "taken": false,
+   "effects": [],
+   "cost": 0
+  },
+  {
+   "nodeId": 610115,
+   "boardId": 61,
+   "row": 8,
+   "col": 10,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610118,
+   "boardId": 61,
+   "row": 8,
+   "col": 13,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Flame Scattershot",
+   "taken": false,
+   "effects": [
+    "Flame Scattershot +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610123,
+   "boardId": 61,
+   "row": 9,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610124,
+   "boardId": 61,
+   "row": 9,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610125,
+   "boardId": 61,
+   "row": 9,
+   "col": 5,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610126,
+   "boardId": 61,
+   "row": 9,
+   "col": 6,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Flame Robe",
+   "taken": false,
+   "effects": [
+    "Robe of Flame +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610127,
+   "boardId": 61,
+   "row": 9,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610128,
+   "boardId": 61,
+   "row": 9,
+   "col": 8,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610129,
+   "boardId": 61,
+   "row": 9,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610130,
+   "boardId": 61,
+   "row": 9,
+   "col": 10,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610131,
+   "boardId": 61,
+   "row": 9,
+   "col": 11,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Flame Arrow",
+   "taken": false,
+   "effects": [
+    "Flame Arrow +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610132,
+   "boardId": 61,
+   "row": 9,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610133,
+   "boardId": 61,
+   "row": 9,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610138,
+   "boardId": 61,
+   "row": 10,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610140,
+   "boardId": 61,
+   "row": 10,
+   "col": 5,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610142,
+   "boardId": 61,
+   "row": 10,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610144,
+   "boardId": 61,
+   "row": 10,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610147,
+   "boardId": 61,
+   "row": 10,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610153,
+   "boardId": 61,
+   "row": 11,
+   "col": 3,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Absorb Essence",
+   "taken": false,
+   "effects": [
+    "Absorb Essence +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610154,
+   "boardId": 61,
+   "row": 11,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610155,
+   "boardId": 61,
+   "row": 11,
+   "col": 5,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Frost Burst",
+   "taken": false,
+   "effects": [
+    "Frost Burst +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610157,
+   "boardId": 61,
+   "row": 11,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610158,
+   "boardId": 61,
+   "row": 11,
+   "col": 8,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Bittercold Wind",
+   "taken": false,
+   "effects": [
+    "Bittercold Wind +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610159,
+   "boardId": 61,
+   "row": 11,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610161,
+   "boardId": 61,
+   "row": 11,
+   "col": 11,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max MP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610162,
+   "boardId": 61,
+   "row": 11,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610163,
+   "boardId": 61,
+   "row": 11,
+   "col": 13,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Earth Robe",
+   "taken": false,
+   "effects": [
+    "Robe of Earth +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610168,
+   "boardId": 61,
+   "row": 12,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610170,
+   "boardId": 61,
+   "row": 12,
+   "col": 5,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610171,
+   "boardId": 61,
+   "row": 12,
+   "col": 6,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610172,
+   "boardId": 61,
+   "row": 12,
+   "col": 7,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610174,
+   "boardId": 61,
+   "row": 12,
+   "col": 9,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Attack",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610175,
+   "boardId": 61,
+   "row": 12,
+   "col": 10,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Max HP",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610176,
+   "boardId": 61,
+   "row": 12,
+   "col": 11,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Frost",
+   "taken": false,
+   "effects": [
+    "Frost +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610178,
+   "boardId": 61,
+   "row": 12,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610183,
+   "boardId": 61,
+   "row": 13,
+   "col": 3,
+   "type": "Stat",
+   "grade": "Unique",
+   "name": "Cooldown Reduction",
+   "taken": false,
+   "effects": [],
+   "cost": 4
+  },
+  {
+   "nodeId": 610184,
+   "boardId": 61,
+   "row": 13,
+   "col": 4,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit Resist",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610185,
+   "boardId": 61,
+   "row": 13,
+   "col": 5,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Cold Snap",
+   "taken": false,
+   "effects": [
+    "Cold Snap +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610187,
+   "boardId": 61,
+   "row": 13,
+   "col": 7,
+   "type": "SkillLevel",
+   "grade": "Legend",
+   "name": "Skill Level Up - Hellfire",
+   "taken": false,
+   "effects": [
+    "Hellfire +1"
+   ],
+   "cost": 3
+  },
+  {
+   "nodeId": 610188,
+   "boardId": 61,
+   "row": 13,
+   "col": 8,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610189,
+   "boardId": 61,
+   "row": 13,
+   "col": 9,
+   "type": "SkillLevel",
+   "grade": "Rare",
+   "name": "Skill Level Up - Fire Mark",
+   "taken": false,
+   "effects": [
+    "Fire Mark +1"
+   ],
+   "cost": 2
+  },
+  {
+   "nodeId": 610191,
+   "boardId": 61,
+   "row": 13,
+   "col": 11,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Critical Hit",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610192,
+   "boardId": 61,
+   "row": 13,
+   "col": 12,
+   "type": "Stat",
+   "grade": "Common",
+   "name": "Defense",
+   "taken": false,
+   "effects": [],
+   "cost": 1
+  },
+  {
+   "nodeId": 610193,
+   "boardId": 61,
+   "row": 13,
+   "col": 13,
+   "type": "Stat",
+   "grade": "Unique",
+   "name": "Combat Speed",
+   "taken": false,
+   "effects": [],
+   "cost": 4
+  }
+ ]
+}

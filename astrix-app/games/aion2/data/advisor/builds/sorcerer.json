@@ -12,24 +12,8 @@
       "summary": "Ranged magic damage built around Firestorm feeding Hellfire. Keep your MP above 25 percent.",
       "coreSkills": [
         {
-          "name": "Flame Arrow",
-          "priority": 1,
-          "target": "Lv 8, then Mastery 11. The guide's skill level 16 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "MP filler.",
-          "refs": [
-            "ec-sorcerer"
-          ],
-          "targetProvenance": {
-            "kind": "in-game-capture",
-            "capturedBy": "Miguel",
-            "capturedOn": "2026-10-10",
-            "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 16\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
-          }
-        },
-        {
           "name": "Firestorm",
-          "priority": 2,
+          "priority": 1,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Each fireball cuts the Hellfire cooldown from skill Lv 12.",
           "refs": [
@@ -45,25 +29,8 @@
           }
         },
         {
-          "name": "Blaze",
-          "priority": 3,
-          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Core damage skill.",
-          "refs": [
-            "ec-sorcerer",
-            "mb-sorcerer"
-          ],
-          "targetProvenance": {
-            "kind": "in-game-capture",
-            "capturedBy": "Miguel",
-            "capturedOn": "2026-10-10",
-            "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
-          }
-        },
-        {
           "name": "Hellfire",
-          "priority": 4,
+          "priority": 2,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. Big AoE nuke.",
           "refs": [
@@ -79,8 +46,25 @@
           }
         },
         {
+          "name": "Blaze",
+          "priority": 3,
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "Core damage skill.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
+        },
+        {
           "name": "Wish of Concentration",
-          "priority": 5,
+          "priority": 4,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 12. Attack buff.",
           "refs": [
@@ -93,6 +77,23 @@
             "capturedOn": "2026-10-10",
             "where": "Skill > Mastery window",
             "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
+        },
+        {
+          "name": "Flame Arrow",
+          "priority": 5,
+          "target": "Lv 8, then Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "MP filler.",
+          "refs": [
+            "ec-sorcerer",
+            "mb-sorcerer"
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 16\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
           }
         },
         {
@@ -111,6 +112,16 @@
             "where": "Skill > Mastery window",
             "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
           }
+        },
+        {
+          "name": "Winter's Shackles",
+          "priority": 7,
+          "target": "Lv 11, the Mastery cap.",
+          "why": "+20% PvE damage for 5 s from its Lv 8 pick.",
+          "refs": [
+            "ql-builds-sorcerer",
+            "ql-db-sorcerer"
+          ]
         }
       ],
       "specialties": [
@@ -118,10 +129,25 @@
           "skill": "Firestorm",
           "picks": [
             {
+              "skillLevel": 8,
+              "pick": "Faster skill speed",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "20% faster skill speed"
+            },
+            {
               "skillLevel": 12,
               "pick": "Each fireball lowers the Hellfire cooldown",
               "refs": [
-                "ec-sorcerer"
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "More damage per fireball",
+              "refs": [
+                "ql-builds-sorcerer"
               ]
             }
           ]
@@ -130,10 +156,106 @@
           "skill": "Blaze",
           "picks": [
             {
+              "skillLevel": 8,
+              "pick": "Delayed damage after 3 s",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "Adds delayed damage after 3s"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Lands as Multi-Hit",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
               "skillLevel": 16,
               "pick": "Hits cut the Wish of Concentration cooldown",
               "refs": [
-                "ec-sorcerer"
+                "ql-builds-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Hellfire",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Faster skill speed",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "30% faster skill speed"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Ignores Block and Evasion, lands as Multi-Hit",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "15 s shorter cooldown",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Flame Arrow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "More Multi-Hit",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "50% Multi-Hit on hit"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "+5% Fire damage when Pyroclasm fires",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Pyroclasm resets Blaze",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Bittercold Wind",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "The wind lasts 1 s longer",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "Zone lasts 1s longer"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Ignores Block and Evasion, lands as Critical Hit",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Hits cut the Frost cooldown",
+              "refs": [
+                "ql-builds-sorcerer"
               ]
             }
           ]
@@ -145,14 +267,49 @@
               "skillLevel": 8,
               "pick": "An extra 10% Attack",
               "refs": [
-                "ec-sorcerer"
+                "ql-builds-sorcerer"
+              ],
+              "perk": "An extra 10% Attack"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "+10% Combat Speed",
+              "refs": [
+                "ql-builds-sorcerer"
               ]
             },
             {
               "skillLevel": 16,
               "pick": "All skill cooldowns 10 s shorter",
               "refs": [
-                "ec-sorcerer"
+                "ql-builds-sorcerer"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Winter's Shackles",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "PvE damage boost for 5 s",
+              "refs": [
+                "ql-builds-sorcerer"
+              ],
+              "perk": "Damage boost for 5s on landing"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Adds Winter's Illusion chain skill",
+              "refs": [
+                "ql-builds-sorcerer"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "15 s shorter cooldown",
+              "refs": [
+                "ql-builds-sorcerer"
               ]
             }
           ]
@@ -201,16 +358,20 @@
       },
       "daevanion": {
         "priorities": [
-          "Reach the Specialty thresholds on your core skills first",
-          "Nezekan nodes for Hellfire, Firestorm and Wish of Concentration"
+          "Firestorm +1 on Nezekan first: it is the node early plans take most",
+          "Hellfire, Blaze, Flame Arrow and Wish of Concentration +1 on every board you open"
         ],
         "skillNodes": [
-          "Hellfire",
           "Firestorm",
+          "Hellfire",
+          "Blaze",
+          "Flame Arrow",
           "Wish of Concentration"
         ],
         "refs": [
-          "ec-sorcerer"
+          "ec-sorcerer",
+          "mb-sorcerer",
+          "ql-daev-sorcerer"
         ]
       },
       "stats": {
@@ -294,6 +455,36 @@
           "retrievedOn": "2026-10-16",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-sorcerer",
+          "title": "Public Sorcerer skill builds (242 distinct of 914 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-sorcerer",
+          "title": "Sorcerer skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-sorcerer",
+          "title": "Public Sorcerer Daevanion plans (206 distinct of 341 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
@@ -304,7 +495,8 @@
           "tgw-sorcerer-skills"
         ],
         "stackA": {
-          "label": "Fire",
+          "label": "Fire stack",
+          "name": "Fire stack",
           "rows": [
             {
               "name": "Element Enhancement",
@@ -329,7 +521,8 @@
           "why": "Held with the macro key: MP back, Fire Mark, and it can reset Blaze."
         },
         "stackB": {
-          "label": "Frost",
+          "label": "Frost stack",
+          "name": "Frost stack",
           "rows": [
             {
               "name": "Winter's Shackles",
@@ -400,6 +593,167 @@
           }
         ],
         "verified": false
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first; survival, party buffs and MP count for a little.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 1,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-sorcerer",
+          "ql-db-sorcerer"
+        ],
+        "preferences": [
+          {
+            "id": "line-frost",
+            "kind": "line",
+            "skill": "Frost",
+            "count": "154 of 242 builds put Frost in a chain; 38 as Winter's Shackles, Bittercold Wind, Frost, Firestorm",
+            "why": "Some builds put Frost in the frost stack.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-frost-burst",
+            "kind": "line",
+            "skill": "Frost Burst",
+            "count": "177 of 242 builds put Frost Burst in a chain; 40 as Blaze then Frost Burst",
+            "why": "Some builds put Frost Burst with Blaze.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-ice-chain",
+            "kind": "line",
+            "skill": "Ice Chain",
+            "count": "64 of 242 builds put Ice Chain in a chain",
+            "why": "Some builds put Ice Chain in the macro as a filler.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-wish",
+            "kind": "line",
+            "skill": "Wish of Concentration",
+            "count": "101 of 242 builds put Wish of Concentration in a chain",
+            "why": "Some builds put Wish of Concentration in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-hellfire",
+            "kind": "line",
+            "skill": "Hellfire",
+            "count": "42 of 242 builds put Hellfire in a chain",
+            "why": "Some builds put Hellfire in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-element-enhancement",
+            "kind": "stigma",
+            "skill": "Element Enhancement",
+            "count": "225 of 242 builds; 93% of 150 top players",
+            "why": "Fire and Water Attack +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "mb-sorcerer"
+            ]
+          },
+          {
+            "id": "stigma-delayed-explosion",
+            "kind": "stigma",
+            "skill": "Delayed Explosion",
+            "count": "192 of 242 builds; 83% of 150 top players",
+            "why": "The target takes 15% more from you for 4 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "mb-sorcerer"
+            ]
+          },
+          {
+            "id": "stigma-fire-wall",
+            "kind": "stigma",
+            "skill": "Fire Wall",
+            "count": "177 of 242 builds; 76% of 150 top players",
+            "why": "A Fire hit and a 10 s burn on up to 4 enemies.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "mb-sorcerer"
+            ]
+          },
+          {
+            "id": "stigma-cold-storm",
+            "kind": "stigma",
+            "skill": "Cold Storm",
+            "count": "157 of 242 builds; 43% of 150 top players",
+            "why": "A Water hit and a 7 s storm on up to 4 enemies.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "mb-sorcerer"
+            ]
+          },
+          {
+            "id": "stigma-steel-barrier",
+            "kind": "stigma",
+            "skill": "Steel Barrier",
+            "count": "96 of 242 builds; 35% of 150 top players",
+            "why": "A shield and less damage taken for 60 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "mb-sorcerer"
+            ]
+          },
+          {
+            "id": "mastery-firestorm-first",
+            "kind": "mastery",
+            "skill": "Firestorm",
+            "count": "59 of 152 builds with a priority list put Firestorm first",
+            "why": "Firestorm levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer"
+            ]
+          },
+          {
+            "id": "mastery-hellfire-first",
+            "kind": "mastery",
+            "skill": "Hellfire",
+            "count": "22 of 152 builds put Hellfire first; one guide ranks it first",
+            "why": "Hellfire levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-sorcerer",
+              "ec-sorcerer"
+            ],
+            "from": 14
+          }
+        ]
       }
     }
   ]

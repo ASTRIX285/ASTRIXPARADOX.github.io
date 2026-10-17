@@ -1,0 +1,7 @@
+# feature/aetherium-level-sorcerer: The Aetherium's level planner guides the Sorcerer (DPS) from Lv 1 to 45: research record, Sorcerer skill values and synergies, the Sorcerer build's ascent record, tests.
+astrix-app/games/aion2/data/advisor/builds/sorcerer.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/sorcerer.md
+astrix-app/tools/fixtures/aion2/sorcerer-nezekan-board.json
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aetherium-level-sorcerer.mjs
