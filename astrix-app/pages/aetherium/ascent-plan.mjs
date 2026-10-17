@@ -196,8 +196,8 @@ function viewStatus(view, plan) {
   }
   if (view === 'macro') {
     if (!plan.macro || plan.macro.pending) return 'Not confirmed yet';
-    const count = plan.macro.entries.length;
-    return plan.macro.used ? `${count === 2 ? 'Stack A and stack B' : 'Stack A'} in Macro 1` : 'Nothing to add yet';
+    const names = plan.macro.entries.map(entry => entry.name ?? (entry.key === 'A' ? 'Stack A' : 'Stack B'));
+    return plan.macro.used ? `${names.map((name, index) => (index ? name.charAt(0).toLowerCase() + name.slice(1) : name)).join(' and ')} in Macro 1` : 'Nothing to add yet';
   }
   if (view === 'stats') return isPending(plan.stats) ? 'Not confirmed yet' : `First: ${plan.stats.order[0]}`;
   return '';
