@@ -759,7 +759,17 @@ function setupSummary(setup, { mastery, stigmas, daevanion, build, level, skillB
  */
 export const LEFT_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']);
 export const RIGHT_KEYS = Object.freeze(['A', 'LMB', 'B']);
+/**
+ * The order own keys are filled in, the way a player's hand sits (Miguel, in game, 17 Oct 2026): 1 to 4 sit right above
+ * Q and E, so 1 to 4 come first, then Q and E, then 5 to 8. A key that holds a stack of skills goes on Q or E first: they
+ * are easier to stack than 5 to 8.
+ */
+export const KEY_FILL = Object.freeze(['1', '2', '3', '4', 'Q', 'E', '5', '6', '7', '8', 'RMB']);
+export const STACK_KEYS = Object.freeze(['Q', 'E']);
 export const SKILL_BAR_KEYS = Object.freeze([...LEFT_KEYS, ...RIGHT_KEYS]);
+/** The skill every class has on Space bar (Miguel, in game, 17 Oct 2026): Defiance, the crowd control break. It never takes
+    a numbered key, a mouse button or a stack row; the bar shows it on Space. */
+export const SPACE_SKILL = 'Defiance';
 /** Rows on a key: 0 is nearest the key and fires first, 3 is the top. */
 export const STACK_ROWS = 4;
 /** The macro block's two stacks and the keys they sit on. */
@@ -896,7 +906,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
       const stack = block[id];
       if (!stack?.rows?.length) { stacks[key].pending = block[`${id}Pending`] ?? null; continue; }
       // A row the build leaves empty stays empty (the game skips it); the rows above keep their place.
-      const rows = stack.rows.slice(0, STACK_ROWS).map((row, index) => (!row?.empty && byName.has(row?.name) ? cell(row.name, { key, index, role: id, why: row.why, row }) : null)).filter(Boolean);
+      const rows = stack.rows.slice(0, STACK_ROWS).map((row, index) => (!row?.empty && row?.name !== SPACE_SKILL && byName.has(row?.name) ? cell(row.name, { key, index, role: id, why: row.why, row }) : null)).filter(Boolean);
       const top = rows.at(-1);
       put(key, rows, {
         label: stack.label ?? null,
@@ -912,18 +922,30 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     put('LMB', [{ ...cell(main.name, { key: 'LMB', index: 0, role: 'main', why: mainWhy }), locked: false }], { solo: true, reason: `The game keeps ${basic.name} on left click. Hold it with the macro key.` });
     // The left-hand block: the opener first, in its order, then every other own key grouped by reason.
     // An own key is one skill, or a small stack the build names (two movement skills on one key).
-    const namesOf = item => (Array.isArray(item.stack) ? item.stack.filter(name => byName.has(name)) : byName.has(item.name) ? [item.name] : []);
+    // Defiance is on Space bar for every class, so it never takes one of these keys; the keys after it move up one.
+    const namesOf = item => (Array.isArray(item.stack) ? item.stack.filter(name => byName.has(name) && name !== SPACE_SKILL) : byName.has(item.name) && item.name !== SPACE_SKILL ? [item.name] : []);
     // A reserved key (level planner: its skill comes later) keeps its place in the order and stays free.
-    const own = (block.ownKeys ?? []).filter(item => item.reserved || (namesOf(item).length && !namesOf(item).some(name => placed.has(name))));
+    const own = (block.ownKeys ?? []).filter(item => (item.reserved ? item.reserved.some(name => name !== SPACE_SKILL) : namesOf(item).length && !namesOf(item).some(name => placed.has(name))));
     const opener = block.opener ?? [];
     const first = item => namesOf(item).map(name => opener.indexOf(name)).filter(at => at >= 0).sort((a, b) => a - b)[0] ?? -1;
     const rank = item => (first(item) >= 0 ? first(item) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
     // The build's own order when it gives one (the keys a published bar uses), else the opener first, then by reason.
     const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => (block.ownKeysOrder === 'listed' ? a.index - b.index : rank(a) - rank(b) || a.index - b.index));
-    const keys = [...LEFT_KEYS];
+    // Keys by the hand: stacked own keys take Q and E first, then every key in its order takes the next free key.
+    const free = [...KEY_FILL];
+    const keyOf = new Map();
+    // A key's full stack as the build lists it, open or still to come, so it keeps Q or E at every level.
+    const fullSize = item => (item.reserved ?? [...(Array.isArray(item.stack) ? item.stack : [item.name]), ...(item.waiting ?? [])]).filter(name => name !== SPACE_SKILL).length;
+    for (const item of ordered.filter(entry => fullSize(entry) > 1)) {
+      const key = STACK_KEYS.find(name => free.includes(name));
+      if (!key) break;
+      free.splice(free.indexOf(key), 1);
+      keyOf.set(item, key);
+    }
+    for (const item of ordered) if (!keyOf.has(item)) keyOf.set(item, free.shift() ?? null);
     for (const item of ordered) {
-      const key = keys.shift();
-      if (item.reserved) { if (key) stacks[key].reserved = item.reserved.filter(name => byName.has(name)); continue; }
+      const key = keyOf.get(item);
+      if (item.reserved) { if (key) stacks[key].reserved = item.reserved.filter(name => byName.has(name) && name !== SPACE_SKILL); continue; }
       const why = item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
       const names = namesOf(item);
       if (!key) { for (const name of names) notOnBar.push({ name, icon: byName.get(name).icon, unlockLevel: byName.get(name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
@@ -939,6 +961,10 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   } else {
     put('LMB', [cell(basic.name, { key: 'LMB', index: 0, role: 'main', why: null })], { solo: true, reason: `The game keeps ${basic.name} on left click.` });
   }
+  // Space bar: Defiance, the same for every class. Before the level it opens it is in Comes later, never on the bar.
+  const spaceCell = byName.has(SPACE_SKILL) ? cell(SPACE_SKILL, { key: 'Space', index: 0, role: 'space', why: 'Every class has Defiance on Space bar.' }) : null;
+  const space = spaceCell && !spaceCell.locked ? spaceCell : null;
+  if (spaceCell) placed.add(SPACE_SKILL);
   // Other actives the build does not place, that the Daeva can use now: listed with the reason, never guessed onto a key.
   // A skill that waits for a level or a slot is in the Comes later strip instead.
   const waiting = new Set(later.map(item => item.name));
@@ -973,9 +999,9 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
   const result = {
     keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
-    notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null,
+    notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null, space,
     // Skills the plan puts on the bar once the Daeva can place them (the Comes later strip), soonest first.
-    later: later.map(item => ({ ...item, icon: byName.get(item.name)?.icon ?? null })),
+    later: later.map(item => ({ ...item, ...(item.name === SPACE_SKILL ? { where: 'Space bar', reason: `${item.reason ?? ''} It goes on Space bar.`.trim() } : {}), icon: byName.get(item.name)?.icon ?? null })),
     opener: (block?.opener ?? []).filter(name => placed.has(name)),
     // False for a class whose stacks are not checked against a published top-player build yet (the page tags them).
     verified: block ? block.verified !== false : null,
@@ -996,6 +1022,7 @@ export const keyPhrase = key => keyWords(key).replace(/^(Stack|Key)/, word => wo
  */
 function copySteps(bar) {
   const steps = [];
+  if (bar.space) steps.push({ key: 'Space', label: 'Space bar', space: true, rows: [{ row: 0, name: bar.space.name, locked: bar.space.locked, needsSlot: false, unlockLevel: bar.space.unlockLevel }], empty: [] });
   for (const key of [...LEFT_KEYS, 'A', 'B']) {
     const stack = bar.stacks[key];
     if (!stack.skills.length) continue;

@@ -1712,3 +1712,9 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:is(:hover,:focus-visib
 html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-g1):not(#ax-g2):not(#ax-g3):not(#ax-g4):not(#ax-g5):not(#ax-g6):not(#ax-g7):not(#ax-g8):not(#ax-g9){
   outline:2px solid var(--ae-strobe)!important;outline-offset:2px!important}
 }
+/* Space bar: Defiance on every class, its slot over a wide Space key, beside the bar's left edge. */
+.ae-bar-space{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:.375rem .75rem;margin-top:.5rem}
+.ae-bar-space .ae-bar-cell{grid-row:1/3;width:var(--bar-cell);height:var(--bar-cell)}
+.ae-bar-space .ae-keycap.is-space{justify-self:start;width:min(14rem,100%);height:2rem;min-height:0;font:700 .8125rem/1 var(--ae-font-ui);color:var(--ae-text);
+  background:var(--ae-bar-slate);border:1px solid var(--ae-bar-slate-line);border-radius:3px}
+.ae-bar-space-note{margin:0;font-size:.9375rem;line-height:1.4;color:var(--ae-text-muted)}

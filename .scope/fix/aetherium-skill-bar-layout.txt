@@ -1,12 +1,11 @@
-# fix/aetherium-skill-bar-layout: the Skill Bar in the game's order (1 to 8, Q, E, left click, right click with the main line, the second stack after it), rows 0 to 3 numbered, the key strip and slate slots.
+# fix/aetherium-skill-bar-layout: the Skill Bar in the game's order (1 to 8, Q, E, left click, right click with the main line, the second stack after it), Defiance on Space bar for every class, own keys filled 1 to 4 then Q and E then 5 to 8 with stacks on Q and E, rows numbered, the key strip and slate slots.
+astrix-app/games/aion2/engine/ascent-advisor.mjs
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
 astrix-app/pages/aetherium/ascent-plan.mjs
 astrix-app/tools/test-aetherium-ascent.mjs
 astrix-app/tools/test-aetherium-level-assassin.mjs
-astrix-app/tools/test-aetherium-level-cleric.mjs
-astrix-app/tools/test-aetherium-level-planner.mjs
-astrix-app/tools/test-aetherium-level-ranger.mjs
+astrix-app/tools/test-aion2-advisor.mjs
 hub/aetherium/ascent/daevanion/index.html
 hub/aetherium/ascent/index.html
 hub/aetherium/ascent/macro/index.html
@@ -17,7 +16,6 @@ hub/aetherium/ascent/stigma/index.html
 hub/aetherium/compare/index.html
 hub/aetherium/daevanion/index.html
 hub/aetherium/gear/equipment/index.html
-hub/aetherium/gear/index.html
 hub/aetherium/gear/titles/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html

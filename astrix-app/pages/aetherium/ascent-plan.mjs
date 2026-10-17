@@ -509,7 +509,9 @@ function copyList(bar) {
   const withGaps = step => [...step.rows, ...(step.empty ?? []).map(entry => ({ row: entry.row, gap: true }))].sort((a, b) => a.row - b.row);
   return `<details class="ae-copy" id="aeCopyBar" open>
     <summary class="ae-mskills-title">Copy this bar</summary>
-    <ol class="ae-copy-steps">${bar.copySteps.map(step => step.macro
+    <ol class="ae-copy-steps">${bar.copySteps.map(step => step.space
+      ? `<li data-copy-step="Space"><b>${esc(step.label)}</b> ${esc(step.rows[0].name)} <small>on every class${step.rows[0].locked ? `, from Lv ${esc(step.rows[0].unlockLevel)}` : ''}</small></li>`
+      : step.macro
       ? `<li class="is-macro" data-copy-step="macro">${esc(step.text)}</li>`
       : `<li data-copy-step="${esc(step.key)}"><b>${esc(step.label)}</b>${step.rows.length === 1 && !step.empty?.length ? ` ${esc(step.rows[0].name)}${step.rows[0].locked ? ` <small>from Lv ${esc(step.rows[0].unlockLevel)}</small>` : step.rows[0].needsSlot ? ' <small>needs a stigma slot</small>' : ''}` : `<ol class="ae-copy-rows">${withGaps(step).map(row).join('')}</ol>`}</li>`).join('')}</ol>
     <p class="ae-muted">Left click keeps ${esc(bar.mainAttack)}: the game sets it.</p>
@@ -520,6 +522,20 @@ function comesLater(bar) {
   if (!bar.later?.length) return '';
   return `<div class="ae-icon-group ae-later" id="aeComesLater"><p class="ae-mskills-title">Comes later</p>
     <ul class="ae-chiplist ae-later-list">${bar.later.map(item => `<li data-later-skill="${esc(item.name)}">${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.reason)}</small></span></li>`).join('')}</ul></div>`;
+}
+/** Space bar: Defiance on every class (Miguel, in game, 17 Oct 2026), drawn as its slot over a wide Space key. */
+function spaceKey(bar) {
+  const item = bar.space;
+  if (!item) return '';
+  const tip = `Space bar: ${item.name}.${item.locked ? ` From Lv ${item.unlockLevel}.` : ''} Every class has it on Space bar.`;
+  return `<div class="ae-bar-space" id="aeSpaceKey">
+      <span class="ae-bar-cell is-space${item.locked ? ' is-locked' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="space" data-bar-key="0:Space" data-tip="${esc(tip)}" aria-label="${esc(tip)}">
+        <span class="ae-mskill-name">${esc(item.name)}</span>${art(item.icon)}
+        ${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : item.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(item.skillLevel)}</span>` : ''}
+      </span>
+      <span class="ae-keycap is-space" aria-hidden="true">Space bar</span>
+      <p class="ae-bar-space-note">${esc(item.name)} is on Space bar for every class, never on a number key.</p>
+    </div>`;
 }
 function renderSkillBarScreen(plan) {
   const bar = plan.skillBar;
@@ -540,6 +556,7 @@ function renderSkillBarScreen(plan) {
             <ol class="ae-bar-rows" aria-hidden="true"><li>3</li><li>2</li><li>1</li><li>0</li></ol>
           </div>
         </div>
+        ${spaceKey(bar)}
       </div>
       ${firesNowPanel(plan)}
     </div>
@@ -566,7 +583,7 @@ function triggersHtml(item) {
 function barSkillCard(name, role, key = null) {
   const plan = state.plan;
   const stack = key ? plan.skillBar.stacks[key] : null;
-  const item = stack?.skills.find(skill => skill.name === name) ?? null;
+  const item = key === 'Space' ? plan.skillBar.space : stack?.skills.find(skill => skill.name === name) ?? null;
   const place = item ? `<p class="ae-card-line is-stack" data-place-line>${esc(placeLine(item))}</p>${item.condition ? `<p class="ae-card-line" data-condition>${esc(item.condition)}</p>` : ''}${item.needsSlot ? '<p class="ae-card-line" data-needs-slot>A stigma swap: it needs one of your four stigma slots before it fires.</p>' : ''}${triggersHtml(item)}` : '';
   const entry = [...plan.mastery.active, ...plan.mastery.passive].find(skill => skill.name === name);
   const index = plan.stigmas.slots?.findIndex(slot => slot.name === name) ?? -1;
