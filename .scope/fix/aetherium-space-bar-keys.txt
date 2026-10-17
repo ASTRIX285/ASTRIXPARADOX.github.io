@@ -1,0 +1,22 @@
+# fix/aetherium-space-bar-keys: Defiance on Space bar for every class; own keys filled 1 to 4, then Q and E, then 5 to 8, with stacked keys on Q and E (Miguel, in game, 17 Oct 2026).
+astrix-app/games/aion2/engine/ascent-advisor.mjs
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/ascent-plan.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aetherium-level-assassin.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/compare/index.html
+hub/aetherium/daevanion/index.html
+hub/aetherium/gear/equipment/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/gear/titles/index.html
+hub/aetherium/index.html
+hub/aetherium/skills/index.html
