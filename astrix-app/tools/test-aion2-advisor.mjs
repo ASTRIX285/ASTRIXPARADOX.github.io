@@ -906,7 +906,8 @@ check('Gladiator Lv 12 and Lv 41: the main line at Lv 41 is Rage Burst, Overhead
     const bar=buildAscentPlan({className:'Gladiator',role:'dps',level,data:data('Gladiator')}).skillBar;
     assert.deepEqual(bar.stacks.B.skills.map(skill=>[skill.name,skill.locked]),[[level<22?'Mocking Blade':'Rage Burst',false],['Overhead Slam',false],['Rending Blow',false]]);
     assert.deepEqual(bar.stacks.B.firesNow,[level<22?'Mocking Blade':'Rage Burst','Overhead Slam','Rending Blow']);
-    assert.equal(bar.stacks.B.nextUnlock,null,'Nothing locked on the bar');
+    assert.equal(bar.stacks.B.nextUnlock,level<22?22:null,'Until Lv 22 the line waits for Rage Burst');
+    assert.ok(bar.stacks.B.skills.every(skill=>!skill.locked),'Nothing locked on the bar');
     assert.deepEqual(bar.later.filter(item=>item.where!=='own key').map(item=>[item.name,item.unlockLevel]),level<22?[['Rage Burst',22]]:[]);
     const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills[0]?.name==='Ruinous Blow'||stack.reserved?.includes('Ruinous Blow'));
     assert.equal(ruinous.skills.length,level<14?0:1);

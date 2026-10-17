@@ -249,6 +249,9 @@ check('logic over copying: every rejected trend says why; the line trends with o
   assert.equal(byId['mastery-overhead-first'].used,true,'At 45 Overhead Slam is levelled first, as 58 of 100 builds do');
   // Early on the logic agrees with the levelling guides: Rending Blow first, before Rage Burst makes Overhead Slam strong.
   assert.equal(plan(12,'dps',null).setup.trends.find(item=>item.id==='mastery-keen-rending-early').used,true);
+  // Specialty: the DPS build's own Ruinous Blow Lv 8 pick (faster speed) loses to +30% crit, which is worth more damage.
+  const ruinous=p.skills.find(skill=>skill.name==='Ruinous Blow').picks.find(pick=>pick.skillLevel===8);
+  assert.deepEqual([ruinous.pick,ruinous.over],['+30% skill Critical Hit','Faster skill speed']);
   // Every choice carries a one-line reason: stigma slots, bar rows the planner placed, Mastery steps, Specialty picks.
   for(const [role,team] of CASES){
     const q=plan(45,role,team);
@@ -300,6 +303,173 @@ check('no class-specific code: the planner reads only data, and the other seven 
   assert.equal(setup.planned,false);
   assert.equal(setup.confirmed,false);
 });
+
+/* The screens (Playwright, a local static server, the Worker mocked from the fixtures: never NCSOFT, never the real Worker).
+   Every Ascent Plan screen and the Daeva Card show the setup for now and one Next at Lv N line; the Skill Bar and Copy this
+   bar list only what can be placed now, the rest in Comes later; level, role and team each change the screens; the 13px
+   floor and 44px targets hold on the new parts; no sideways scroll at 390. AE_SHOTS=<dir outside the repo> saves the
+   Skill Bar and Mastery at Lv 5, 22 and 45 for DPS and the main tank, at 1600 and 390. */
+if(process.env.AE_BROWSER!=='0'){
+  const {createServer}=await import('node:http');
+  const {readFile}=await import('node:fs/promises');
+  const {createRequire}=await import('node:module');
+  const {resolve,extname,sep}=await import('node:path');
+  const {fileURLToPath}=await import('node:url');
+  const require=createRequire(import.meta.url);
+  const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
+  const site=resolve(fileURLToPath(new URL('../../',import.meta.url)));
+  const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon'};
+  const server=createServer(async(req,res)=>{
+    const path=decodeURIComponent(new URL(req.url,'http://x').pathname);
+    let file=resolve(site,'.'+path);
+    if(!file.startsWith(site+sep)&&file!==site){res.writeHead(403).end();return;}
+    if(path.endsWith('/'))file=resolve(file,'index.html');
+    try {const body=await readFile(file);res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream'});res.end(body);}
+    catch {res.writeHead(404).end();}
+  });
+  await new Promise(done=>server.listen(0,'127.0.0.1',done));
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const WORKER='https://aion2-mock.invalid';
+  const info=fx('astrix285-info'),equipment=fx('astrix285-equipment'),board=fx('astrix285-daevanion-11');
+  info.profile.characterName='TESTDAEVA';
+  const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
+  const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
+  const browser=await chromium.launch();
+  const real=[];
+  const bcheck=async(name,fn)=>{try{await fn();console.log(`  ok   ${name}`);}catch(error){failed++;console.log(`  FAIL ${name}\n${error.stack}`);}};
+  async function open(path,{live=false,viewport={width:1600,height:1000}}={}){
+    const context=await browser.newContext({viewport});
+    await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
+      const response=await route.fetch();
+      const body=(await response.text()).replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,`export const AETHERIUM_WORKER_URL = ${live?`'${WORKER}'`:'null'};`);
+      await route.fulfill({response,body});
+    });
+    await context.route(`${WORKER}/**`,route=>{
+      const url=new URL(route.request().url());
+      const bodies={'/aion2/character':{info,equipment},'/aion2/daevanion':board};
+      const body=bodies[url.pathname];
+      if(!body)return route.fulfill({status:404,body:'{}'});
+      return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({...body,meta})});
+    });
+    await context.route(/playnccdn\.com/,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
+    await context.route(/plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
+    await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{real.push(route.request().url());return route.abort();});
+    // The first-visit guides stay closed so the screens are seen as a returning player sees them.
+    await context.addInitScript(()=>{try{localStorage.setItem('aetherium.guides.v1',JSON.stringify({plan:true,card:true}));}catch{}});
+    const page=await context.newPage();
+    const errors=[];
+    page.on('pageerror',error=>errors.push(error.message));
+    await page.goto(`${base}${path}`);
+    await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
+    if(path.includes('/ascent/'))await page.waitForFunction(()=>document.documentElement.dataset.aeBoards==='read',null,{timeout:15000});
+    return {page,context,errors};
+  }
+  const plain=async(page,selector)=>(await page.textContent(selector)).replace(/\s+/g,' ').trim();
+  const screen=(query,view)=>`/hub/aetherium/ascent/${view?`${view}/`:''}?${query}`;
+  const q=(level,role,team)=>`class=gladiator&role=${role}${team?`&team=${team}`:''}&level=${level}`;
+  const VIEWS=['','mastery','skill-bar','stigma','daevanion','macro','stats'];
+
+  await bcheck('every Ascent Plan screen shows the setup for now and one Next at Lv N line, with REPORTED tagged',async()=>{
+    for(const view of VIEWS){
+      const {page,context,errors}=await open(screen(q(5,'dps'),view));
+      assert.equal(await page.locator('#aeSetup').count(),1,`${view||'menu'}: the setup`);
+      assert.equal(await page.getAttribute('#aeSetup','data-setup-level'),'5');
+      assert.deepEqual(await page.$$eval('#aeSetup [data-setup]',items=>items.map(el=>el.dataset.setup)),['line','stigmas','mastery','daevanion','stats']);
+      assert.equal(await plain(page,'#aeSetup [data-setup="line"] dd'),'Mocking Blade, Overhead Slam, Rending Blow');
+      assert.equal(await plain(page,'#aeSetup [data-setup="stigmas"] dd'),'From Lv 22: Rage Burst');
+      assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
+      assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 10 Rush Strike joins the movement key\./);
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.deepEqual(errors,[]);
+      await context.close();
+    }
+  });
+
+  await bcheck('Skill Bar and Copy this bar: only what can be placed now; the rest in Comes later',async()=>{
+    for(const [level,role,team] of [[5,'dps',null],[22,'tank','main-tank'],[45,'dps',null]]){
+      const {page,context}=await open(screen(q(level,role,team),'skill-bar'));
+      assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked,#aeSkillBar .ae-lock').count(),0,`Lv ${level}: nothing locked on the bar`);
+      assert.doesNotMatch(await plain(page,'#aeCopyBar'),/from Lv|needs a stigma slot/,`Lv ${level}: the copy list`);
+      const later=await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill));
+      const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
+      assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
+      if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
+      else assert.ok(later.length>0);
+      // keys 1 to 8, then left click and the main line (the #511 layout)
+      assert.deepEqual(await page.$$eval('#aeLeftBlock [data-bar-col]',items=>items.map(el=>el.dataset.barCol)),['1','2','3','4','5','6','7','8']);
+      assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B']);
+      await context.close();
+    }
+  });
+
+  await bcheck('level, role and team each change the screens',async()=>{
+    const read=async query=>{
+      const {page,context}=await open(screen(query,'skill-bar'));
+      const out=await page.evaluate(()=>[document.querySelector('#aeSetup').innerText,[...document.querySelectorAll('#aeSkillBar [data-bar-skill]')].map(el=>el.dataset.barSkill).join(',')].join('|'));
+      await context.close();
+      return out;
+    };
+    const lv5=await read(q(5,'dps')),lv22=await read(q(22,'dps')),lv45=await read(q(45,'dps'));
+    assert.notEqual(lv5,lv22);assert.notEqual(lv22,lv45);
+    const tank=await read(q(22,'tank','main-tank')),off=await read(q(22,'tank','off-tank-templar'));
+    assert.notEqual(lv22,tank,'role');
+    assert.notEqual(tank,off,'team');
+    assert.match(tank,/Focused Block/);assert.match(off,/Rage Burst/);
+  });
+
+  await bcheck('Mastery says why each step comes first; Stigma says why each slot holds what it holds',async()=>{
+    const m=await open(screen(q(22,'tank','main-tank'),'mastery'));
+    const rows=await m.page.$$eval('#aeMasteryWhy li',items=>items.map(el=>el.dataset.masteryWhy));
+    assert.deepEqual(rows.slice(0,2),['Rending Blow','Experienced Counterstrike']);
+    assert.match(await plain(m.page,'#aeMasteryWhy li:nth-child(2)'),/party/);
+    await m.context.close();
+    const s=await open(screen(q(22,'tank','main-tank'),'stigma'));
+    assert.match(await plain(s.page,'#aeStigmaWhy [data-stigma-why="0"]'),/^Slot 1 Focused Block: .*party/);
+    assert.match(await plain(s.page,'#aeStigmaWhy [data-stigma-why="1"]'),/^Slot 2, Lv 27 Rage Burst/);
+    await s.context.close();
+  });
+
+  await bcheck('the Daeva Card shows the setup for now and one Next line; its first move is the plan\'s first move',async()=>{
+    const ref=`serverId=1308&characterId=${encodeURIComponent(info.profile.characterId)}&region=eu`;
+    const {page,context,errors}=await open(`/hub/aetherium/?${ref}`,{live:true});
+    await page.waitForSelector('#aeFirstMove.is-ready');
+    await page.waitForSelector('#aeCardSetup:not([hidden])');
+    const model=module.normaliseCharacter({info:fx('astrix285-info'),equipment},{region:'eu',capturedOn:'2026-10-05'});
+    const live=structuredClone(model);
+    live.daevanion=live.daevanion.map(item=>(item.id===11?{...item,nodes:adaptDaevanionBoard(board)}:item));
+    const expected=buildAscentPlan({className:'Gladiator',data:data('Gladiator'),model:live});
+    assert.equal(await plain(page,'#aeFirstMoveText'),expected.now[0].title,'The first move follows the plan');
+    assert.match(await plain(page,'#aeCardSetup'),/^Your setup at Lv 12/);
+    assert.equal(await plain(page,'#aeCardSetup [data-setup="line"] dd'),expected.setup.line[0].skills.join(', '));
+    assert.equal(await page.locator('#aeCardSetup #aeNextAt').count(),1);
+    assert.match(await plain(page,'#aeCardSetup #aeNextAt'),new RegExp(`^Next at Lv ${expected.nextAt.level} `));
+    assert.deepEqual(errors,[]);
+    await context.close();
+  });
+
+  await bcheck('new parts: nothing under 13px, 44px Comes later rows, no sideways scroll at 390',async()=>{
+    for(const width of [390,1600]){
+      const {page,context}=await open(screen(q(5,'tank','solo'),'skill-bar'),{viewport:{width,height:900}});
+      const sizes=await page.$$eval('#aeSetup, #aeSetup *, #aeComesLater, #aeComesLater *, #aeNextAt, #aeNextAt *',items=>items.filter(el=>el.textContent.trim()&&el.getClientRects().length).map(el=>[el.tagName,parseFloat(getComputedStyle(el).fontSize)]));
+      assert.ok(sizes.every(([,size])=>size>=13),`${width}: ${JSON.stringify(sizes.filter(([,size])=>size<13))}`);
+      const rows=await page.$$eval('#aeComesLater li',items=>items.map(el=>el.getBoundingClientRect().height));
+      assert.ok(rows.length&&rows.every(height=>height>=44),`${width}: Comes later rows ${rows}`);
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),`${width}: no sideways scroll`);
+      await context.close();
+    }
+  });
+
+  if(process.env.AE_SHOTS){
+    for(const [role,team,name] of [['dps',null,'dps'],['tank','main-tank','tank']])for(const level of [5,22,45])for(const view of ['skill-bar','mastery'])for(const width of [1600,390]){
+      const {page,context}=await open(screen(q(level,role,team),view),{viewport:{width,height:1000}});
+      await page.screenshot({path:resolve(process.env.AE_SHOTS,`${view}-${name}-lv${level}-${width}.png`),fullPage:true});
+      await context.close();
+    }
+  }
+  await browser.close();
+  server.close();
+  if(real.length){failed++;console.log(`  FAIL real network calls: ${real.join(', ')}`);}
+}
 
 if(failed){console.log(`AETHERIUM_LEVEL_PLANNER=FAIL ${failed}`);process.exitCode=1;}
 else console.log('AETHERIUM_LEVEL_PLANNER=PASS');

@@ -960,7 +960,11 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   for (const stack of Object.values(stacks)) {
     const waiting = stack.skills.filter(skill => skill.locked);
     stack.firesNow = stack.skills.filter(skill => !skill.locked && !skill.needsSlot && skill.learned !== false).map(skill => skill.name);
-    stack.nextUnlock = waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null;
+    // Level planner: a skill the Daeva cannot place yet is off the bar, in Comes later, under the stack it joins.
+    const joins = later.filter(item => item.unlockLevel && (item.where === stack.name || item.where === MACRO_STACKS.find(([, key]) => key === stack.key)?.[0]));
+    const levels = [...waiting.map(skill => skill.unlockLevel), ...joins.map(item => item.unlockLevel)];
+    stack.nextUnlock = levels.length ? Math.min(...levels) : null;
+    stack.joinsLater = joins.map(item => ({ name: item.name, unlockLevel: item.unlockLevel }));
   }
   const bars = Array.from({ length: STACK_ROWS }, (_, row) => Object.fromEntries(SKILL_BAR_KEYS.map(key => {
     const skill = stacks[key].skills.find(item => item.row === row) ?? null;

@@ -268,7 +268,7 @@ export function orderMastery(ctx, weights, { entries, cap, slotLevels, picks = n
     if (from !== null && from >= to) continue;
     // What the next slot's pick is worth: its values, and a synergy it opens only once its target is placeable.
     const pick = (picks.get(entry.name) ?? []).find(item => item.skillLevel === to) ?? null;
-    const pickValue = weights && pick?.values ? pick.values.reduce((sum, value) => sum + (weights.weights[value.key] ?? 0) * (value.needs && !placeable(value.needs) ? 0 : 1), 0) : 0;
+    const pickValue = weights && pick?.values ? pick.values.reduce((sum, value) => sum + (weights.weights[value.key] ?? 0) * (Number.isFinite(value.weight) ? value.weight : 1) * (value.needs && !placeable(value.needs) ? 0 : 1), 0) : 0;
     const near = !waitsFor(ctx, entry.name, to) && from !== null && nextSlot === to && to - from <= 2 ? NEAR_SLOT_BONUS : 0;
     const trend = key ? TREND_BONUS * (size - key.priority + 1) / size : 0;
     const score = own.score + pickValue + near + trend;
@@ -301,7 +301,7 @@ export function pickSpecialties(ctx, weights) {
     out.set(entry.skill, entry.picks.map(pick => {
       const options = perks.filter(perk => perk.skillLevel === pick.skillLevel && Array.isArray(perk.values));
       if (!weights || options.length < 2) return { ...pick, values: options.find(perk => perk.text === pick.perk)?.values ?? pick.values ?? null, why: pick.why ?? null };
-      const score = perk => perk.values.reduce((sum, value) => sum + (weights.weights[value.key] ?? 0), 0) + (perk.text === pick.perk ? TREND_BONUS : 0);
+      const score = perk => perk.values.reduce((sum, value) => sum + (weights.weights[value.key] ?? 0) * (Number.isFinite(value.weight) ? value.weight : 1), 0) + (perk.text === pick.perk ? TREND_BONUS : 0);
       const best = [...options].sort((a, b) => score(b) - score(a))[0];
       if (best.text === pick.perk) return { ...pick, values: best.values, why: best.values[0]?.text ?? pick.why ?? null };
       return { skillLevel: pick.skillLevel, pick: best.text, perk: best.text, values: best.values, refs: info.provenance?.map(source => source.ref).filter(Boolean) ?? [], why: best.values[0]?.text ?? null, over: pick.pick };

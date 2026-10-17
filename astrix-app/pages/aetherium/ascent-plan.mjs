@@ -400,7 +400,7 @@ const cooldownWords = item => (item.noCooldown ? 'no cooldown' : item.cooldownPe
 function stackSentence(stack) {
   const names = stack.skills.map(skill => skill.name);
   const key = keyName(stack.key);
-  if (!names.length) return `${key}: nothing on it. A free key.`;
+  if (!names.length) return stack.reserved?.length ? `${key}: kept free for ${stack.reserved.join(' and ')}, which comes later.` : `${key}: nothing on it. A free key.`;
   if (names.length === 1) return `${key}: ${names[0]}.${stack.reason ? ` ${stack.reason}` : ''}`;
   return `${key}: ${names[0]} fires when ready, otherwise ${names.slice(1).join(', then ')}.`;
 }
@@ -464,7 +464,7 @@ const unverifiedTag = bar => (bar?.verified === false ? '<span class="ae-tag is-
 function firesNowPanel(plan) {
   const bar = plan.skillBar;
   const rows = ['A', 'B'].map(key => bar.stacks[key]).filter(stack => stack.skills.length);
-  const later = stack => stack.skills.filter(skill => skill.locked).map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
+  const later = stack => [...stack.skills.filter(skill => skill.locked), ...(stack.joinsLater ?? [])].map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
   return `<section class="ae-fires-now" id="aeFiresNow" aria-labelledby="aeFiresNowTitle">
       <h2 class="ae-mskills-title" id="aeFiresNowTitle">What fires now at Lv ${esc(plan.level)}</h2>
       <ol class="ae-fires-list">${rows.map(stack => `<li data-fires-key="${esc(stack.key)}"><b>${esc(keyName(stack.key))}</b> <span>${stack.firesNow.length ? esc(stack.firesNow.join(', then ')) : 'Nothing yet'}${later(stack) ? ` <small>${esc(later(stack))}</small>` : ''}</span></li>`).join('')}</ol>
@@ -486,7 +486,7 @@ function copyList(bar) {
 function comesLater(bar) {
   if (!bar.later?.length) return '';
   return `<div class="ae-icon-group ae-later" id="aeComesLater"><p class="ae-mskills-title">Comes later</p>
-    <ul class="ae-chiplist ae-later-list">${bar.later.map(item => `<li data-later-skill="${esc(item.name)}">${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.unlockLevel ? `Lv ${item.unlockLevel}. ${item.reason}` : item.reason)}</small></span></li>`).join('')}</ul></div>`;
+    <ul class="ae-chiplist ae-later-list">${bar.later.map(item => `<li data-later-skill="${esc(item.name)}">${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.reason)}</small></span></li>`).join('')}</ul></div>`;
 }
 function renderSkillBarScreen(plan) {
   const bar = plan.skillBar;
