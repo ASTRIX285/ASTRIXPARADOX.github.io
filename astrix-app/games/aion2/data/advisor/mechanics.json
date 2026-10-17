@@ -251,13 +251,36 @@
     {
       "id": "enchant-pity",
       "label": "Enchant failure bonus",
-      "status": "unconfirmed",
+      "status": "confirmed",
+      "confirmedOn": "2026-10-17",
       "value": {
-        "perFailure": 5
+        "perFailure": 5,
+        "maxTries": "Derived, never stored: the chance at a step climbs by perFailure after each failure until it reaches 100, so the most tries a step can take is the failures to get from its enchant-rates chance to 100, plus the try that succeeds. The engine works it out (enhancement-advisor.mjs maxTries)."
       },
-      "text": "Each failed try above +10 adds 5 points to the chance of the next try at that step. A success resets it.",
-      "test": "Fail an enchant above +10, then check whether the chance shown for the same step went up by 5.",
+      "text": "Each failed try above +10 adds 5 points to the chance of the next try at that step.",
+      "parts": [
+        {
+          "id": "per-failure",
+          "status": "confirmed",
+          "text": "The Growth tab says Success Chance increases by 5.00% on failure."
+        },
+        {
+          "id": "resets-on-success",
+          "status": "unconfirmed",
+          "text": "A success resets the bonus for the next step.",
+          "test": "After a success above +10, check whether the next step's chance starts again from its base chance."
+        }
+      ],
+      "test": null,
       "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Enhancement window, Growth tab",
+          "note": "Miguel, in game, 17 Oct 2026: Unique gloves +11 to +12 show a 50% success chance and the line Success Chance increases by 5.00% on failure."
+        },
         {
           "kind": "community-guide",
           "ref": "ath-enhancement",

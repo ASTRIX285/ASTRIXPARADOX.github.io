@@ -1217,6 +1217,153 @@ await check('Gear grid click: the item card opens in place with What to do first
   await context.close();
 });
 
+/* Enhancement guide (feature/aetherium-enhancement-guide, 17 Oct 2026): each tile names its next tab in the game's
+   Enhancement window, the item card has an Enhance panel drawn like the window's five tabs, and a How enhancing works strip
+   holds one Do this next line. Lv 45 fixture with the role in the address. */
+const enhanceOf=page=>page.$$eval('#aeGear > li[data-slot-pos]',items=>Object.fromEntries(items.map(el=>{const mark=el.querySelector('.ae-emark');const tile=el.querySelector('.ae-gtile').getBoundingClientRect();const box=mark?.getBoundingClientRect();
+  return [el.dataset.slotPos,{enhance:el.dataset.enhance??null,word:mark?.querySelector('.ae-emark-word').textContent??null,icon:Boolean(mark?.querySelector('svg.ae-eicon path,svg.ae-eicon circle')),below:box?box.top>=tile.bottom:null,size:mark?parseFloat(getComputedStyle(mark).fontSize):null,
+    described:el.querySelector('button').getAttribute('aria-describedby'),said:mark?.querySelector('.ae-sr').textContent??null}];})));
+const openItem=async(page,pos)=>{await page.click(`#aeGear [data-slot-pos="${pos}"] button`);await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));};
+const enhanceText=page=>page.$eval('#aeEnhancePanel',el=>el.innerText.replace(/\s+/g,' '));
+await check('Enhance marks: each tile names its next tab with our icon and one word, under the tile, never over the art',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
+  await settled(page);
+  const by=await enhanceOf(page);
+  const want={1:'Growth',2:'Growth',17:'Growth',22:'Growth',3:'Stones',4:'Stones',5:'Stones',6:'Stones',7:'Stones',8:'Stones',19:'Stones',10:'Stones',11:'Stones',12:'Stones',13:'Stones',14:null,15:null};
+  for(const [pos,word] of Object.entries(want)){
+    assert.equal(by[pos].word,word,`slot ${pos}`);
+    if(!word)continue;
+    assert.ok(by[pos].icon,`slot ${pos}: our tab icon`);
+    assert.equal(by[pos].below,true,`slot ${pos}: the mark sits under the tile`);
+    assert.ok(by[pos].size>=13,`slot ${pos}: ${by[pos].size}px`);
+    assert.match(by[pos].described??'',/^aeEmark\d+$/,'The button is described by its mark');
+  }
+  assert.deepEqual([by[1].enhance,by[3].enhance],['growth','manastone']);
+  assert.equal(by[1].said,'Enhance next, Growth: Growth: +3 to +10.');
+  assert.equal(by[2].said,'Enhance next, Growth: Growth: +11 to +12.');
+  // A tap on the mark opens the item card too.
+  await page.click('#aeGear [data-slot-pos="2"] .ae-emark');
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');
+  await context.close();
+});
+await check('Enhance panel: the weapon and the guard, the window\'s five tabs with the next one lit, bars, weak lines, no cost numbers',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
+  await settled(page);
+  await openItem(page,2);
+  const tabs=await page.$$eval('#aeEnhancePanel [role="tab"]',items=>items.map(el=>[el.textContent.trim(),el.getAttribute('aria-selected'),el.classList.contains('is-next'),Boolean(el.querySelector('svg.ae-eicon'))]));
+  assert.deepEqual(tabs,[['Growth','true',true,true],['Manastone','false',false,true],['Theostone','false',false,true],['Soul Binding','false',false,true],['Transfer','false',false,true]]);
+  const tabSize=await page.$eval('#aeEnhancePanel [role="tab"]',el=>el.getBoundingClientRect().height);
+  assert.ok(tabSize>=44,`tab ${tabSize}px tall`);
+  let text=await enhanceText(page);
+  assert.match(text,/^Enhance Next: Growth: \+11 to \+12\. 50% now, at most 11 tries with the failure bonus\./);
+  assert.match(text,/Enhance \+11 of 15/);
+  assert.match(text,/Next step \+12: 50% now Most tries 11, with the failure bonus/);
+  assert.match(text,/Check the cost in the Growth tab\./);
+  // Soul Binding: the rate as a bar at 94.3%, each line with a bar, weak lines marked for a tank.
+  await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
+  assert.equal(await page.isVisible('#aeEpanel-soul-binding'),true);
+  assert.equal(await page.isHidden('#aeEpanel-growth'),true);
+  const rate=await page.$eval('#aeEpanel-soul-binding .is-rate .ae-ebar',el=>({now:el.getAttribute('aria-valuenow'),fill:el.querySelector('i').getBoundingClientRect().width/el.getBoundingClientRect().width}));
+  assert.equal(rate.now,'94.3');
+  near(Math.round(rate.fill*1000)/10,94.3,1.5,'The rate bar fills 94.3%');
+  const lines=await page.$$eval('#aeEpanel-soul-binding .ae-elines li',items=>items.map(el=>[el.querySelector('.ae-eline-name').firstChild.textContent.trim(),el.classList.contains('is-weak'),el.querySelector('.ae-ebar').className,el.querySelector('.ae-eline-value').textContent]));
+  assert.deepEqual(lines,[['Block',false,'ae-ebar is-unknown','37, range not in the data'],['MP',true,'ae-ebar is-unknown','112, range not in the data'],['Back Attack',true,'ae-ebar is-unknown','59, range not in the data']]);
+  text=await enhanceText(page);
+  assert.match(text,/MP Weak for tank/);
+  assert.match(text,/Lines for a tank: Block, HP, Accuracy\. Reported/);
+  // Manastone: four filled slots, each judged for a tank.
+  await page.keyboard.press('Home');
+  await page.focus('#aeEnhancePanel [data-etab="soul-binding"]');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.$eval('#aeEnhancePanel [aria-selected="true"]',el=>el.dataset.etab),'manastone','Arrow keys move between tabs');
+  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.etab),'manastone');
+  const stones=await page.$$eval('#aeEpanel-manastone .ae-estone',items=>items.map(el=>el.innerText.replace(/\s+/g,' ')));
+  assert.deepEqual(stones,['Slot 1 Accuracy Bonus +7 Fits','Slot 2 Defense +50 Fits','Slot 3 HP +50 Fits','Slot 4 Critical Hit Resist +10 Not for tank']);
+  // No cost numbers from guides anywhere in the panel.
+  for(const id of ['growth','manastone','theostone','soul-binding','transfer']){await page.click(`#aeEnhancePanel [data-etab="${id}"]`);const panel=await page.$eval(`#aeEpanel-${id}`,el=>el.innerText);assert.doesNotMatch(panel,/\d[\d,]*\s*(Kina|Enhance Stones?|Soul Codex|Soul Codices)|Kina\s*\d/i,`${id}: no cost numbers`);}
+  await page.keyboard.press('Escape');
+  // The weapon: Growth to +10 first; Theostone says what the data cannot.
+  await openItem(page,1);
+  text=await enhanceText(page);
+  assert.match(text,/^Enhance Next: Growth: \+3 to \+10\. Always succeeds\./);
+  await page.click('#aeEnhancePanel [data-etab="theostone"]');
+  const theo=await page.$eval('#aeEpanel-theostone',el=>el.innerText.replace(/\s+/g,' '));
+  assert.match(theo,/Theostone slots 1 Engraved Not confirmed yet/);
+  assert.match(theo,/A Stun or Root stone\. Reported/);
+  await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
+  const full=await page.$$eval('#aeEpanel-soul-binding .ae-elines .ae-ebar',items=>items.map(el=>[el.getAttribute('aria-valuenow'),Math.round(el.querySelector('i').getBoundingClientRect().width)===Math.round(el.getBoundingClientRect().width-2)]));
+  assert.ok(full.length===4&&full.every(([now,filled])=>now==='100'&&filled),'At 100% every line bar is full');
+  await shot(page,'enhance-weapon-tank',1600);
+  await context.close();
+  // DPS: the same guard, no line called weak (the record has no DPS lines for a guard), stones judged for DPS.
+  const dps=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'dps'})}`);
+  await settled(dps.page);
+  await openItem(dps.page,2);
+  await dps.page.click('#aeEnhancePanel [data-etab="soul-binding"]');
+  assert.equal(await dps.page.locator('#aeEpanel-soul-binding .ae-eline.is-weak').count(),0);
+  assert.match(await enhanceText(dps.page),/Which lines suit a DPS on this slot is not confirmed yet\. Not confirmed yet/);
+  await dps.page.click('#aeEnhancePanel [data-etab="manastone"]');
+  assert.equal(await dps.page.locator('#aeEpanel-manastone .ae-stat-tag.is-low').count(),4,'No guard stone suits a DPS');
+  await shot(dps.page,'enhance-guard-dps',1600);
+  await dps.context.close();
+});
+await check('How enhancing works: one Do this next line, one line per tab opening its full explanation, Confirmed and Reported tags',async()=>{
+  const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
+  await settled(page);
+  assert.equal(await plain(page,'#aeEnhanceNext'),'Do this next: Spiritforged Greatsword Growth: +3 to +10. Always succeeds.');
+  assert.equal(await page.locator('#aeEnhanceNext button').count(),1,'One thing at a time');
+  const rows=await page.$$eval('#aeEnhanceHow [data-ehow]',items=>items.map(el=>[el.dataset.ehow,el.querySelector('b').textContent,el.getBoundingClientRect().height>=44]));
+  assert.deepEqual(rows,[['growth','Growth',true],['manastone','Manastone',true],['theostone','Theostone',true],['soul-binding','Soul Binding',true],['transfer','Transfer',true],['order','The order',true]]);
+  await page.click('#aeEnhanceHow [data-ehow="growth"]');
+  await page.waitForSelector('#aeInfo:not([hidden])');
+  const growth=await page.$eval('#aeInfo',el=>el.innerText.replace(/\s+/g,' '));
+  for(const step of ['+11: 65% to start, at most 8 tries','+12: 50% to start, at most 11 tries','+13: 35% to start, at most 14 tries','+14: 25% to start, at most 16 tries','+15: 20% to start, at most 17 tries'])assert.ok(growth.includes(step),step);
+  assert.match(growth,/Confirmed/);
+  assert.match(growth,/Reported/);
+  assert.match(growth,/Check the cost in the Growth tab\./);
+  assert.doesNotMatch(growth,/\d[\d,]*\s*(Kina|Enhance Stones)|up to \d|a run|a boss/i,'Stone sources by name only, no numbers');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.ehow),'growth','Focus back on the line');
+  await page.click('#aeEnhanceHow [data-ehow="manastone"]');
+  const stones=await page.$eval('#aeInfo',el=>el.innerText.replace(/\s+/g,' '));
+  assert.match(stones,/Stones for a tank Reported HP, top 160 Defence, top 100 Block, top 20 Accuracy, top 15/);
+  assert.match(stones,/Whether one Engrave fills one slot or rerolls them all\. Not confirmed yet/);
+  await page.keyboard.press('Escape');
+  // Do this next opens the weapon's card.
+  await page.click('#aeEnhanceNext button');
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');
+  assert.match(await page.textContent('#aeInfo h3'),/Spiritforged Greatsword/);
+  await page.keyboard.press('Escape');
+  const all=await page.evaluate(()=>document.body.innerText);
+  assert.doesNotMatch(all,/Legend|armory|[–—]/,'No Legend grade, "armory" or dashes');
+  await context.close();
+});
+for(const width of [390,1600]){
+  await check(`Enhance at ${width}: no sideways scroll with marks, the strip and the panel open; tank and DPS shots`,async()=>{
+    for(const [role,extra] of [['tank',{role:'tank',team:'main-tank'}],['dps',{role:'dps'}]]){
+      const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,extra)}`,{viewport:{width,height:width===390?844:1000}});
+      await settled(page);
+      assert.ok(await overflowOf(page)<=0,`${width} ${role}: no sideways scroll`);
+      const panel=await boxOf(page,'#aeGearPanel .ae-panel');
+      const marks=await boxes(page,'#aeGear .ae-emark');
+      for(const mark of marks)assert.ok(mark.left>=panel.left&&mark.left+mark.width<=panel.right,`${width}: a mark stays inside the panel (${mark.left}, ${mark.width})`);
+      await shot(page,`enhance-gear-${role}`,width);
+      for(const pos of [1,2]){
+        await openItem(page,pos);
+        assert.ok(await overflowOf(page)<=0,`${width} ${role}: no sideways scroll with the card open`);
+        const card=await boxOf(page,'#aeInfo .ae-info-card'),tabs=await boxOf(page,'#aeEnhancePanel .ae-etabs');
+        assert.ok(tabs.right<=card.right+1&&tabs.left>=card.left-1,`${width}: the tabs fit the card`);
+        if(pos===2)await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
+        await page.$eval('#aeEnhancePanel',el=>el.scrollIntoView({block:'start'}));
+        await shot(page,`enhance-${pos===1?'weapon':'guard'}-${role}`,width);
+        await page.keyboard.press('Escape');
+      }
+      await context.close();
+    }
+  });
+}
+
 await check('Pet, wings and title: three tiles the size of the gear tiles beside the grid, hover names, click cards',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
   await settled(page);

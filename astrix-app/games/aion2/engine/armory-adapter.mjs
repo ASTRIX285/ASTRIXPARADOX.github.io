@@ -65,6 +65,47 @@ export function adaptProfile(info) {
   };
 }
 
+const number = value => {
+  const parsed = typeof value === 'number' ? value : Number.parseFloat(String(value ?? '').replace(/[^\d.+-]/g, ''));
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/**
+ * What one item detail says for the game's Enhancement window (docs/ENHANCEMENT.md section 0): the manastones engraved
+ * (magicStoneStat, absent when none is), the Theostone slot count (godStoneSlotCount), the Soul Binding rate and its
+ * lines (subStats: value, minValue, and max when the data has one; it has none so far) and the skill lines (subSkills).
+ * No item detail field says which Theostone is engraved, so theostone stays pending.
+ */
+export function enhanceFields(detail) {
+  const notSent = what => pending(`The official data sent no ${what} for this item.`);
+  return {
+    manastones: (Array.isArray(detail.magicStoneStat) ? detail.magicStoneStat : []).filter(stone => stone && typeof stone.name === 'string').map((stone, n) => ({
+      slot: Number.isInteger(stone.slotPos) ? stone.slotPos : n,
+      id: stone.id ?? null,
+      name: stone.name,
+      value: String(stone.value ?? ''),
+      grade: stone.grade ?? null
+    })),
+    theostoneSlots: Number.isInteger(detail.godStoneSlotCount) ? detail.godStoneSlotCount : notSent('Theostone slot count'),
+    theostone: pending('The official item data has no field for an engraved Theostone. Check the Theostone tab in game.'),
+    soulBindRate: number(detail.soulBindRate) ?? notSent('Soul Binding rate'),
+    bindLines: (Array.isArray(detail.subStats) ? detail.subStats : []).filter(row => row && typeof row.name === 'string').map(row => ({
+      id: row.id ?? null,
+      name: row.name,
+      text: String(row.value ?? ''),
+      value: number(row.value),
+      min: number(row.minValue),
+      max: number(row.maxValue)
+    })),
+    skillLines: (Array.isArray(detail.subSkills) ? detail.subSkills : []).filter(perk => perk && typeof perk.name === 'string').map(perk => ({ name: perk.name, level: Number.isFinite(perk.level) ? perk.level : null }))
+  };
+}
+const ENHANCE_NOT_READ = 'This comes from the item detail call, which has not been read for this slot.';
+const enhanceNotRead = () => ({
+  manastones: pending(ENHANCE_NOT_READ), theostoneSlots: pending(ENHANCE_NOT_READ), theostone: pending(ENHANCE_NOT_READ),
+  soulBindRate: pending(ENHANCE_NOT_READ), bindLines: pending(ENHANCE_NOT_READ), skillLines: pending(ENHANCE_NOT_READ)
+});
+
 /**
  * Gear from /api/character/equipment, one entry per known slot.
  * @param slots   Gear slot records (data/gear-slots.json): { slotPos, slotPosName, listed }. A slot with listed false
@@ -98,7 +139,8 @@ export function adaptGear(equipment, slots, items = {}) {
         : pending('Max enchant comes from the item detail call, which has not been read for this slot.'),
       manastoneSlots: sameItem && Number.isFinite(detail.magicStoneSlotCount)
         ? detail.magicStoneSlotCount
-        : pending('Manastone slot count comes from the item detail call, which has not been read for this slot.')
+        : pending('Manastone slot count comes from the item detail call, which has not been read for this slot.'),
+      ...(sameItem ? enhanceFields(detail) : enhanceNotRead())
     };
   };
   const gear = listed.map(slot => entry(slot.slotPos, slot.slotPosName, worn.get(slot.slotPos)));
@@ -156,7 +198,9 @@ export function adaptItemDetail(detail) {
     bonusStatSlots: Number.isFinite(detail.subStatCount) ? detail.subStatCount : 0,
     bonusStatsRandom: Boolean(detail.subStatRandom),
     appearance: detail.costumes?.[0] ?? null,
-    description: typeof detail.desc === 'string' && detail.desc.trim() ? detail.desc.trim() : null
+    description: typeof detail.desc === 'string' && detail.desc.trim() ? detail.desc.trim() : null,
+    // The Enhancement window's facts for this item (manastones, Theostone slots, Soul Binding rate and lines).
+    enhance: enhanceFields(detail)
   };
 }
 

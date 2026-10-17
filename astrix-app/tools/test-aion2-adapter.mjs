@@ -261,6 +261,38 @@ const lv45=adaptCharacter({info:lv45Raw.info,equipment:lv45Raw.equipment},{slots
   for(const bad of [['ASTRIX','285'].join(''),['AX','PARADOX'].join(''),'B-3zbauf5','profileimg.plaync.com'])assert.ok(!text.includes(bad),`fixture has no ${bad}`);
 }
 
+// Enhancement fields (feature/aetherium-enhancement-guide, 17 Oct 2026): from the item detail, the Lv 45 fixture.
+const lv45Items=fixture('lv45-items');
+const lv45Full=adaptCharacter({info:fixture('lv45-info'),equipment:fixture('lv45-equipment'),items:lv45Items},{slots,region:'eu',capturedOn:'2026-10-11'});
+{
+  const at=pos=>lv45Full.gear.find(slot=>slot.slotPos===pos);
+  const weapon=at(1),guard=at(2),helm=at(3),belt=at(17);
+  assert.deepEqual([weapon.maxEnchant,weapon.manastoneSlots,weapon.theostoneSlots,weapon.soulBindRate],[15,4,1,100]);
+  assert.deepEqual(weapon.manastones.map(stone=>[stone.slot,stone.id,stone.name,stone.value,stone.grade]),[[0,'HPMax','HP','+60','Rare'],[1,'Accuracy','Accuracy Bonus','+5','Common'],[2,'HPMax','HP','+30','Common'],[3,'ArmorDefense','Defense','+30','Rare']]);
+  assert.equal(weapon.theostone.pending,true,'No item detail field says which Theostone is engraved');
+  assert.deepEqual(weapon.bindLines[0],{id:'STR',name:'Might',text:'15',value:15,min:15,max:null},'value, minValue, and no max in the data');
+  assert.equal(guard.soulBindRate,94.3,'The rate is sent as a string and read as a number');
+  assert.deepEqual(guard.bindLines.map(line=>[line.name,line.value,line.min,line.max]),[['Block',37,null,null],['MP',112,null,null],['Back Attack',59,null,null]]);
+  assert.deepEqual(guard.skillLines,[{name:'Ankle Slice',level:1}]);
+  assert.deepEqual([helm.manastoneSlots,helm.manastones,helm.theostoneSlots.pending],[3,[],true],'No magicStoneStat: every slot empty; no godStoneSlotCount: pending');
+  assert.deepEqual([belt.manastoneSlots.pending,belt.bindLines,belt.skillLines],[true,[],[]],'The belt has no slot count, no lines');
+  assert.equal(at(8).bindLines.find(line=>line.name==='Perfect Resist').value,2,'"2%" reads as 2');
+  // No detail read: every enhance field is pending with a reason.
+  const unread=lv45.gear.find(slot=>slot.slotPos===1);
+  for(const field of ['manastones','theostoneSlots','theostone','soulBindRate','bindLines','skillLines'])assert.ok(unread[field].pending===true&&unread[field].reason.length>0,`${field} pending before the detail`);
+  // Missing and null values in a detail.
+  const odd=structuredClone(lv45Items['2']);
+  Object.assign(odd,{soulBindRate:null,magicStoneStat:null,subStats:null,subSkills:null,godStoneSlotCount:null});
+  const oddFields=adaptItemDetail(odd).enhance;
+  assert.deepEqual([oddFields.soulBindRate.pending,oddFields.manastones,oddFields.bindLines,oddFields.skillLines,oddFields.theostoneSlots.pending],[true,[],[],[],true]);
+  delete odd.soulBindRate;odd.magicStoneStat=[null,{id:'HPMax',value:'+5'},{id:'Block',name:'Block',value:'+20',slotPos:2}];
+  const oddAgain=adaptItemDetail(odd).enhance;
+  assert.equal(oddAgain.soulBindRate.pending,true,'Absent rate: pending');
+  assert.deepEqual(oddAgain.manastones,[{slot:2,id:'Block',name:'Block',value:'+20',grade:null}],'Rows with no name are dropped, the slot kept');
+  // The item card reads the same fields.
+  assert.deepEqual(adaptItemDetail(lv45Items['2']).enhance.bindLines.map(line=>line.name),['Block','MP','Back Attack']);
+}
+
 // Schemas (ajv is a dev dependency: npm install --prefix astrix-app)
 const require=createRequire(import.meta.url);
 let Ajv2020,addFormats;
@@ -279,6 +311,7 @@ if(Ajv2020){
   check('character',model,'ASTRIX285 model');
   check('character',bareModel,'Model with an empty slot');
   check('character',lv45,'Lv 45 model with titles, legion, Arcana and appearance');
+  check('character',lv45Full,'Lv 45 model with every item detail (enhancement fields)');
   slots.forEach(record=>check('gear-slot',record,`slot ${record.id}`));
   [...skills,...stigmas].forEach(record=>check('catalogue-skill',record,`skill ${record.name}`));
 }

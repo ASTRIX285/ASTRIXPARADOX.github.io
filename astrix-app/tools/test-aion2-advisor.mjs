@@ -14,6 +14,7 @@ import {AION2_CLASSES,ROLES,TEAMS,applyTeam,buildAscentPlan,daevanionMove,teamsF
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {classesWanting,combatNamesIn,indexStats,mostlyLow,rankPointStats,statOrder,statReason,subStatTag} from '../games/aion2/engine/stat-advisor.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
+import {enhancementPlan,maxTries,triesByStep} from '../games/aion2/engine/enhancement-advisor.mjs';
 import {affordable,explainNode,nodeCost,parseEffect,planDaevanionBoard,planRoleRoute,routePriorities,summariseBoard} from '../games/aion2/engine/daevanion-planner.mjs';
 
 const root=new URL('../',import.meta.url);
@@ -570,12 +571,121 @@ check('enchant rules in mechanics.json: rates, pity, carry and stones, each with
   assert.equal(rules['enchant-rates'].value.safeTo,10);
   assert.equal(rules['enchant-rates'].value.keepsLevel,true);
   assert.equal(rules['enchant-rates'].status,'confirmed');
-  assert.equal(rules['enchant-pity'].status,'unconfirmed');
+  // Enhancement guide (17 Oct 2026): Miguel saw "Success Chance increases by 5.00% on failure" in game, so the bonus is
+  // confirmed (was 'unconfirmed'); that it resets after a success stays a reported part with its test.
+  assert.equal(rules['enchant-pity'].status,'confirmed');
+  assert.ok(rules['enchant-pity'].provenance.some(source=>source.kind==='in-game-capture'&&source.capturedOn==='2026-10-17'&&/Growth/.test(source.where)));
+  assert.deepEqual(rules['enchant-pity'].parts.map(part=>[part.id,part.status]),[['per-failure','confirmed'],['resets-on-success','unconfirmed']]);
+  assert.ok(rules['enchant-pity'].parts[1].test,'The reset part keeps its in-game test');
   assert.equal(rules['enchant-pity'].value.perFailure,5);
   assert.deepEqual(rules['enchant-carry'].parts.map(part=>[part.id,part.status]),[['crafted-steps','confirmed'],['gear-transfer','unconfirmed']]);
   assert.equal(rules['enhance-stones'].status,'unconfirmed');
   assert.deepEqual(enchantSteps(9,12,rules['enchant-rates']).map(step=>step.rate),[100,65,50]);
 });
+
+/* Enhancement guide (feature/aetherium-enhancement-guide, 17 Oct 2026): what to do next in the game's Enhancement window,
+   item by item and overall, from the Lv 45 fixture with its item details (lv45-items.json) and the role. */
+{
+  const enhancement=json('games/aion2/data/advisor/enhancement.json');
+  const lv45Of=(items=fx('lv45-items'))=>module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment'),items},{region:'eu',capturedOn:'2026-10-11'});
+  const planFor=(role,model=lv45Of())=>enhancementPlan(model,role,45,{grades,progression,mechanics,enhancement});
+  const by=(plan,pos)=>plan.items.find(item=>item.slotPos===pos);
+  check('enhancement: max tries per step come from the rates and the failure bonus in the data, not the code',()=>{
+    assert.deepEqual(triesByStep(mechanics),{11:8,12:11,13:14,14:16,15:17});
+    assert.deepEqual([maxTries(65,5),maxTries(50,5),maxTries(35,5),maxTries(25,5),maxTries(20,5)],[8,11,14,16,17]);
+    assert.equal(maxTries(100,5),1,'A step that always succeeds takes one try');
+    assert.equal(maxTries(null,5),null,'Unknown chance: unknown tries');
+    assert.equal(maxTries(50,null),null,'Unknown bonus: unknown tries');
+    // Change the data and the answer follows.
+    const changed=structuredClone(mechanics);
+    changed.records.find(rule=>rule.id==='enchant-rates').value.rates['12']=60;
+    changed.records.find(rule=>rule.id==='enchant-pity').value.perFailure=10;
+    assert.equal(triesByStep(changed)[12],5);
+    assert.equal(planFor('tank').tries[12],11,'The plan carries the same numbers');
+  });
+  check('enhancement: Lv 45 tank, the weapon +3/15 gets Growth to +10 first, belt and amulet get Growth, one overall next step',()=>{
+    const plan=planFor('tank');
+    const weapon=by(plan,1);
+    assert.deepEqual([weapon.next.kind,weapon.next.tab,weapon.next.title,weapon.label],['growth','growth','Growth: +3 to +10','Growth']);
+    assert.match(weapon.next.why,/^Always succeeds\./);
+    assert.equal(weapon.steps.at(-1).tab,'theostone','The Theostone comes last on the weapon');
+    assert.deepEqual([by(plan,17).next.title,by(plan,17).label],['Growth: +6 to +10','Growth'],'Belt +6/10');
+    assert.deepEqual([by(plan,22).next.title,by(plan,22).label],['Growth: +9 to +10','Growth'],'Amulet +9/10');
+    assert.deepEqual(plan.next,{slotPos:1,name:'Spiritforged Greatsword',tab:'growth',title:'Growth: +3 to +10',why:weapon.next.why,kind:'growth'},'One overall next step: the weapon');
+    assert.equal(typeof plan.next.title,'string','Never a list of things at once');
+    // Growth to +10 comes before anything else on any item.
+    const firstRank=Math.min(...plan.items.filter(item=>item.next).map(item=>item.next.rank));
+    assert.equal(firstRank,1);
+  });
+  check('enhancement: the guard at 94.3% gets Soul Binding only after the Growth step ahead of it; weak lines named for the tank',()=>{
+    const guard=by(planFor('tank'),2);
+    assert.deepEqual(guard.steps.map(step=>step.kind),['growth-risky','soul-binding']);
+    assert.equal(guard.next.title,'Growth: +11 to +12');
+    assert.equal(guard.next.why,'50% now, at most 11 tries with the failure bonus. Check the cost in the Growth tab.');
+    assert.deepEqual(guard.steps[1].weak,['MP','Back Attack'],'Block suits a tank; MP and Back Attack are weak');
+    assert.equal(guard.steps[1].title,'Bind: reroll MP and Back Attack first');
+    assert.deepEqual(guard.lines.map(line=>[line.name,line.weak,line.percent]),[['Block',false,null],['MP',true,null],['Back Attack',true,null]],'No max in the data: no bar position, never a guess');
+    // DPS: the record has no DPS lines for a guard, so nothing is called weak.
+    const dps=by(planFor('dps'),2);
+    assert.deepEqual(dps.steps[1].weak,null);
+    assert.match(dps.steps[1].why,/Which lines suit a DPS on this slot is not confirmed yet\./);
+    // At 100% every line is maxed and there is no Bind step.
+    assert.ok(by(planFor('tank'),1).lines.every(line=>line.maxed&&line.percent===100));
+  });
+  check('enhancement: empty Unique manastone slots get the role\'s stones, and tank and DPS differ',()=>{
+    const items=fx('lv45-items');
+    delete items['2'].magicStoneStat;
+    const model=lv45Of(items);
+    const tank=by(planFor('tank',model),2),dps=by(planFor('dps',model),2);
+    assert.deepEqual(tank.steps.map(step=>step.kind),['manastone','growth-risky','soul-binding'],'Stones before the costly Growth step');
+    assert.equal(tank.label,'Stones');
+    assert.equal(tank.next.title,'Stones: fill 4 empty slots');
+    assert.deepEqual(tank.sockets.map(socket=>socket.best.name),['HP','Defence','Block','Accuracy']);
+    assert.deepEqual(dps.sockets.map(socket=>socket.best.name),['Front or Back Damage Boost','Weapon or Critical Damage Boost','Damage Boost','Attack']);
+    assert.notDeepEqual(tank.next.why,dps.next.why);
+    // Filled stones are judged for the role: the guard's own stones suit a tank, not a DPS.
+    const filled=by(planFor('tank'),2).sockets,dpsFilled=by(planFor('dps'),2).sockets;
+    assert.deepEqual(filled.map(socket=>socket.fits),[true,true,true,false],'Accuracy, Defence and HP fit a tank; Critical Hit Resist does not');
+    assert.ok(dpsFilled.every(socket=>socket.fits===false));
+    // A healer has no stone order in the record: said, never guessed.
+    const healer=by(planFor('healer',model),2);
+    assert.match(healer.next.why,/Which stones suit a healer is not confirmed yet\./);
+    // Epic pieces to replace: cheap stones only. Rare pieces to replace: no mark at all.
+    const helm=by(planFor('tank'),3);
+    assert.deepEqual([helm.label,helm.next.title],['Stones','Stones: fill 3 empty slots']);
+    assert.match(helm.next.why,/Cheap stones only: this piece is to be replaced\./);
+    assert.equal(by(planFor('tank'),14).mark,null);
+  });
+  check('enhancement: no detail read yet: Growth from the equipment list, no stones or Bind, never Done',()=>{
+    const bare=module.normaliseCharacter({info:fx('lv45-info'),equipment:fx('lv45-equipment')},{region:'eu',capturedOn:'2026-10-11'});
+    const plan=planFor('tank',bare);
+    assert.equal(by(plan,1).next.title,'Growth: +3 to +10');
+    assert.ok(plan.items.every(item=>item.partial),'Every item waits for its detail');
+    assert.ok(plan.items.every(item=>!item.steps.some(step=>['manastone','soul-binding','theostone'].includes(step.tab))));
+    assert.ok(!plan.items.some(item=>item.mark==='done'),'Nothing is called done before its detail is read');
+    // A Unique piece at +15 with full stones and 100%: Done (the weapon keeps its Theostone step).
+    const items=fx('lv45-items');
+    Object.assign(items['2'],{enchantLevel:15,levelValue:15,soulBindRate:'100'});
+    const equipment=fx('lv45-equipment');
+    equipment.equipment.equipmentList.find(item=>item.slotPos===2).enchantLevel=15;
+    const done=by(planFor('tank',module.normaliseCharacter({info:fx('lv45-info'),equipment,items},{region:'eu',capturedOn:'2026-10-11'})),2);
+    assert.deepEqual([done.mark,done.label,done.next],['done','Done',null]);
+  });
+  check('enhancement.json: five tabs in the game\'s order, every fact with a status, every record with provenance, no costs',()=>{
+    const records=Object.fromEntries(enhancement.records.map(record=>[record.id,record]));
+    assert.deepEqual(records.tabs.tabs.map(tab=>[tab.name,tab.short]),[['Growth','Growth'],['Manastone','Stones'],['Theostone','Theostone'],['Soul Binding','Bind'],['Transfer','Transfer']]);
+    for(const record of enhancement.records){
+      assert.ok(Array.isArray(record.provenance)&&record.provenance.length,`${record.id} provenance`);
+      assert.ok(['confirmed','reported','unknown'].includes(record.status),`${record.id} status`);
+      for(const fact of record.facts??[])assert.ok(['confirmed','reported','unknown'].includes(fact.status),`${record.id} ${fact.id}`);
+    }
+    assert.equal(records.order.steps.length,6);
+    const text=JSON.stringify(enhancement.records.map(({provenance,...record})=>record));
+    assert.doesNotMatch(text,/\d[\d,]*\s*Kina|Kina\s*\d/,'No Kina numbers');
+    assert.doesNotMatch(text,/Legend|ASTRIX285|AXPARADOX|armory/i,'No Legend grade, gamer tag or "armory" in the advice text');
+    assert.doesNotMatch(text,/[–—]/,'No dashes');
+  });
+}
 
 /* The Mastery cap (Miguel, in game, 10 Oct 2026): Mastery takes a skill to Lv 11 at most. The advisor never
    suggests a Mastery step past it; a skill at the cap points at its next +1 source instead. */
