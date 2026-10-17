@@ -1,0 +1,9 @@
+# feature/aetherium-level-assassin: the Assassin gets the level-by-level guidance the PR #512 planner gives the Gladiator (research record, Assassin values and synergies, ascent trends, main line re-checked against published builds, tests).
+astrix-app/games/aion2/data/advisor/builds/assassin.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/assassin.md
+astrix-app/games/aion2/docs/MACRO-RESEARCH.md
+astrix-app/tools/test-aetherium-level-assassin.mjs
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aion2-advisor.mjs

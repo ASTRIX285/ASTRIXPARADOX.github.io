@@ -871,10 +871,11 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   assert.equal(await templar.page.locator('.ae-bar-pending').count(),0,'No pending cooldown line for the Templar');
   assert.deepEqual(await templar.page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['A','LMB','B'],'Two stacks either side of the main attack');
   await templar.context.close();
-  // The four classes not checked against a published top-player build carry the tag on the Skill Bar and Macro screens.
+  // The classes not checked against a published top-player build carry the tag on the Skill Bar and Macro screens. The
+  // Assassin's main line was checked against published builds on 17 Oct 2026 (docs/level-guidance/assassin.md): no tag.
   for(const cls of ['assassin','ranger','sorcerer','spiritmaster'])for(const screen of ['skill-bar','macro']){
     const {page:p,context:c}=await open(ascent(`class=${cls}&level=45`,screen));
-    assert.equal(await p.locator('[data-status-tag="stacks-unverified"]').count(),1,`${cls} ${screen}: Not confirmed yet`);
+    assert.equal(await p.locator('[data-status-tag="stacks-unverified"]').count(),cls==='assassin'?0:1,`${cls} ${screen}: Not confirmed yet`);
     await c.close();
   }
   for(const screen of ['',...SCREENS]){

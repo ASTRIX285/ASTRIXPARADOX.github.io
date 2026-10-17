@@ -1063,7 +1063,8 @@ check('macro never holds more than 2 entries, stack A then stack B, at any level
 });
 // Role aware (17 Oct 2026): the record marks section 6's Gladiator design superseded (section 5 of the tank record); its check is above.
 const SECTION_6={
-  Assassin:{A:['Savage Fang','Ambush','Storm Rampage','Savage Roar'],main:'Quick Slice',B:['Insignia Explosion',"Triniel's Dagger",'Heart Gore'],opener:['Illusive Clone','Swift Contract'],own:['Illusive Clone','Swift Contract','Shadowstrike','Flash Slice','Infiltrate','Shadow Fall','Defiance','Evasion Stance']},
+  // Assassin (17 Oct 2026): section 6's two stacks are superseded by one main line checked against published builds (docs/level-guidance/assassin.md).
+  Assassin:{A:[],main:'Quick Slice',B:['Savage Fang','Insignia Explosion','Heart Gore','Savage Roar'],opener:['Illusive Clone','Swift Contract',"Triniel's Dagger"],own:['Illusive Clone','Swift Contract',"Triniel's Dagger",'Ambush','Whirlwind Slice','Storm Rampage','Shadow Fall','Defiance','Shadowstrike','Flash Slice','Infiltrate']},
   Ranger:{A:['Snare Shot','Gale Arrow','Drill Dart','Tempest Shot'],main:'Snipe',B:['Explosive Arrow','Burst Arrow','Griffon Arrow','Arrow Scattershot'],opener:["Vaizel's Authority",'Bow of Blessing','Supporting Fire'],own:['Deadshot','Marking Shot',"Vaizel's Authority",'Bow of Blessing','Supporting Fire','Arrow Storm','Explosion Trap','Defiance',"Mother Nature's Breath"]},
   Sorcerer:{A:['Element Enhancement','Delayed Explosion','Fire Wall','Blaze'],main:'Flame Arrow',B:["Winter's Shackles",'Cold Storm','Bittercold Wind','Firestorm'],opener:[],own:['Hellfire','Wish of Concentration','Frost','Frost Burst','Flame Scattershot','Ice Chain','Defiance','Steel Barrier','Arctic Armor','Hibernation']},
   Spiritmaster:{A:['Jointstrike: Curse','Summon: Earth Spirit','Summon: Water Spirit','Summon: Fire Spirit'],main:'Cold Shock',B:['Jointstrike: Corrode','Dimensional Control','Elemental Fusion','Combustion'],opener:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit'],own:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit','Jointstrike: Destructive Attack','Rapid Scattershot',"Soul's Cry",'Defiance']}
@@ -1085,7 +1086,8 @@ check('every DPS class matches section 6 of the research record: rows, main atta
     assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
     for(const key of bar.left.filter(item=>bar.stacks[item].reserved))assert.ok(bar.later.some(item=>bar.stacks[key].reserved.includes(item.name)),`${name}: a free key's skill is in Comes later`);
     assert.equal(plan.macro.blockStatus,'reported','Section 6 is REPORTED');
-    assert.equal(plan.macro.verified,false,'Not checked against a published top-player build: tagged on the page');
+    // The Assassin's main line was checked against published builds (docs/level-guidance/assassin.md): no tag.
+    assert.equal(plan.macro.verified,name==='Assassin','Not checked against a published top-player build: tagged on the page');
   }
 });
 // Templar level guidance (17 Oct 2026): Doom Shield is a 20 m dash, so it has its own key and Judgment leads stack A

@@ -9,26 +9,16 @@
       "main": true,
       "label": "Dagger burst DPS",
       "beginner": "low",
-      "summary": "Burst damage from behind. Build Insignia stacks, then cash them in with Insignia Explosion.",
+      "summary": "Burst damage from behind. Build Insignia, cash them in with Insignia Explosion, and let Heart Gore fire on every critical hit inside Illusive Clone.",
       "coreSkills": [
         {
-          "name": "Quick Slice",
-          "priority": 1,
-          "target": "Keep levelled for MP",
-          "why": "MP filler. At skill Lv 12 each hit cuts the Insignia Explosion cooldown.",
-          "refs": [
-            "mb-assassin",
-            "ezg-assassin"
-          ]
-        },
-        {
           "name": "Heart Gore",
-          "priority": 2,
+          "priority": 1,
           "target": "Mastery 11, then +4 from Daevanion nodes. The cooldown reset needs skill level 16: Mastery stops at 11 and the build names no other source",
-          "why": "Main hit, triggers on crits.",
+          "why": "Main hit: fires after a critical hit, and inside Illusive Clone it has no cooldown. 65 of 150 builds with a priority list level it first.",
           "refs": [
-            "mb-assassin",
-            "ezg-assassin"
+            "ql-builds-assassin",
+            "mb-assassin"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
@@ -40,12 +30,12 @@
         },
         {
           "name": "Insignia Explosion",
-          "priority": 3,
+          "priority": 2,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 needs more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 14. Spends 1 to 5 Insignia stacks and stuns.",
           "refs": [
-            "mb-assassin",
-            "ezg-assassin"
+            "ql-builds-assassin",
+            "mb-assassin"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
@@ -56,12 +46,23 @@
           }
         },
         {
-          "name": "Shadowstrike",
+          "name": "Quick Slice",
+          "priority": 3,
+          "target": "Keep levelled for MP",
+          "why": "MP filler: your held main attack, 100 MP a hit. At skill Lv 12 each hit cuts the Insignia Explosion cooldown.",
+          "refs": [
+            "ql-builds-assassin",
+            "mb-assassin"
+          ]
+        },
+        {
+          "name": "Savage Roar",
           "priority": 4,
           "target": "Keep levelled",
-          "why": "Teleport behind the target and stun.",
+          "why": "The always-ready filler at the end of your main line: 1 Insignia each time.",
           "refs": [
-            "mb-assassin"
+            "ql-builds-assassin",
+            "ql-daevanion-assassin"
           ]
         }
       ],
@@ -70,9 +71,25 @@
           "skill": "Heart Gore",
           "picks": [
             {
+              "skillLevel": 8,
+              "pick": "Absorbs HP on hit",
+              "perk": "Absorbs HP on hit",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Lands as Multi-Hit",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            },
+            {
               "skillLevel": 16,
               "pick": "Reset cooldown on a critical hit",
               "refs": [
+                "ql-builds-assassin",
                 "ezg-assassin"
               ]
             }
@@ -83,9 +100,51 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Keep 2 stacks after use",
+              "pick": "50% Multi-Hit",
+              "perk": "50% Multi-Hit on hit",
               "refs": [
-                "ezg-assassin"
+                "ql-builds-assassin"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Stun lasts 1 s longer",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "3 s shorter cooldown",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Quick Slice",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% Multi-Hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut the Insignia Explosion cooldown",
+              "refs": [
+                "ql-builds-assassin"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as a critical hit",
+              "refs": [
+                "ql-builds-assassin"
               ]
             }
           ]
@@ -95,9 +154,18 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Lower MP cost and faster skill speed",
+              "pick": "Faster skill speed",
+              "perk": "20% faster skill speed",
               "refs": [
+                "ql-builds-assassin",
                 "ezg-assassin"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut the Shadowstrike cooldown",
+              "refs": [
+                "ql-builds-assassin"
               ]
             }
           ]
@@ -124,6 +192,22 @@
         ],
         "alternatives": [
           {
+            "name": "Evasion Stance",
+            "why": "Popular swap: evades all damage for a moment and gives MP back.",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "name": "Throw Shadowblade",
+            "why": "Popular swap: a ranged hit that slows.",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
             "name": "Aerial Bind",
             "why": "Popular alternative.",
             "refs": [
@@ -134,21 +218,89 @@
         "confidence": "consensus",
         "refs": [
           "mb-assassin",
-          "ezg-assassin"
+          "ezg-assassin",
+          "ql-builds-assassin"
         ],
         "note": "Upgrade order: Triniel's Dagger to Lv 10, then Illusive Clone to Lv 20, then Swift Contract, then Savage Fang."
       },
       "daevanion": {
         "priorities": [
-          "Heart Gore +1 on Nezekan",
-          "Insignia Explosion +1 on Zikel"
+          "Skill +1 nodes: Heart Gore, Quick Slice, Insignia Explosion, Savage Roar",
+          "Rear Smite, Exploit Weakness and Assault Stance +1",
+          "Critical Damage Boost and Damage Boost",
+          "Combat Speed and Cooldown Reduction",
+          "Multi-Hit",
+          "Attack and Critical Hit"
         ],
         "skillNodes": [
           "Heart Gore",
-          "Insignia Explosion"
+          "Quick Slice",
+          "Insignia Explosion",
+          "Savage Roar"
         ],
+        "nodePriorities": [
+          {
+            "tier": 1,
+            "label": "Skill +1: Heart Gore, Quick Slice, Insignia Explosion, Savage Roar",
+            "skills": [
+              "Heart Gore",
+              "Quick Slice",
+              "Insignia Explosion",
+              "Savage Roar"
+            ],
+            "core": true
+          },
+          {
+            "tier": 2,
+            "label": "Rear Smite, Exploit Weakness and Assault Stance +1",
+            "skills": [
+              "Rear Smite",
+              "Exploit Weakness",
+              "Assault Stance"
+            ],
+            "core": true
+          },
+          {
+            "tier": 3,
+            "label": "Critical Damage Boost and Damage Boost",
+            "stats": [
+              "Critical Damage Boost",
+              "Damage Boost"
+            ],
+            "core": true
+          },
+          {
+            "tier": 4,
+            "label": "Combat Speed and Cooldown Reduction",
+            "stats": [
+              "Combat Speed",
+              "Cooldown Reduction"
+            ],
+            "core": false
+          },
+          {
+            "tier": 5,
+            "label": "Multi-Hit",
+            "stats": [
+              "Multi-Hit"
+            ],
+            "core": false
+          },
+          {
+            "tier": 6,
+            "label": "Attack and Critical Hit",
+            "stats": [
+              "Attack",
+              "Critical Hit"
+            ],
+            "core": false,
+            "countOnPath": true
+          }
+        ],
+        "status": "reported",
         "refs": [
-          "mb-assassin"
+          "mb-assassin",
+          "ql-daevanion-assassin"
         ]
       },
       "stats": {
@@ -170,7 +322,16 @@
           "ezg-assassin"
         ]
       },
-      "levelNotes": [],
+      "levelNotes": [
+        {
+          "from": 1,
+          "to": 21,
+          "text": "Hold Quick Slice for MP and press your main line. Heart Gore joins at Lv 4, Insignia Explosion at 14, Illusive Clone at 22.",
+          "refs": [
+            "ql-builds-assassin"
+          ]
+        }
+      ],
       "status": "sourced",
       "provenance": [
         {
@@ -190,7 +351,7 @@
           "title": "Assassin build (top player data)",
           "publisher": "MetaBot",
           "url": "https://metabot.gg/en/aion-2/classes/assassin/build",
-          "retrievedOn": "2026-10-06",
+          "retrievedOn": "2026-10-17",
           "region": "global",
           "reliability": "high"
         },
@@ -234,89 +395,115 @@
           "retrievedOn": "2026-10-16",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-assassin",
+          "title": "Public Assassin skill builds (248 distinct of 943 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daevanion-assassin",
+          "title": "Public Assassin Daevanion plans (230 distinct of 415 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
         "status": "reported",
+        "verified": true,
         "refs": [
+          "ql-builds-assassin",
           "av-macros",
           "dg-macros",
           "tgw-assassin-skills"
         ],
-        "stackA": {
-          "label": "Build",
+        "stackB": {
+          "label": "Main line",
+          "name": "Main line",
           "rows": [
             {
               "name": "Savage Fang",
-              "why": "Longest cooldown, fires first when ready: 5 Insignia at once."
+              "why": "Fires first when ready: 5 Insignia at once, right before Insignia Explosion."
             },
             {
-              "name": "Ambush",
-              "why": "Hits hardest from behind and adds 2 Insignia."
+              "name": "Insignia Explosion",
+              "why": "Spends your Insignia: up to 5 stacks for its hardest hit."
             },
             {
-              "name": "Storm Rampage",
-              "why": "Only on a staggered target. Above the cooldown skills so it never blocks them.",
-              "noCooldown": true
+              "name": "Heart Gore",
+              "why": "Only after a critical hit. Above the filler so it never blocks it."
             },
             {
               "name": "Savage Roar",
-              "why": "Filler: always ready, 1 Insignia each time, so it sits last.",
+              "why": "Always ready, so it sits last: 1 Insignia each time, and it fills every gap.",
               "noCooldown": true
             }
           ]
         },
         "mainAttack": {
           "name": "Quick Slice",
-          "why": "Held with the macro key: MP back, each animation cut short."
-        },
-        "stackB": {
-          "label": "Spend",
-          "rows": [
-            {
-              "name": "Insignia Explosion",
-              "why": "Spends your Insignia right after Savage Fang."
-            },
-            {
-              "name": "Triniel's Dagger",
-              "why": "Long cooldown hit that cuts your other cooldowns."
-            },
-            {
-              "name": "Heart Gore",
-              "why": "Only after a critical hit. Above Insignia Explosion so it never blocks it."
-            }
-          ]
+          "why": "Held with the macro key: 100 MP a hit, each animation cut short."
         },
         "opener": [
           "Illusive Clone",
-          "Swift Contract"
+          "Swift Contract",
+          "Triniel's Dagger"
         ],
+        "ownKeysOrder": "listed",
         "ownKeys": [
           {
             "name": "Illusive Clone",
             "reason": "buff",
-            "why": "Burst buff: press it with Swift Contract just before Savage Fang."
+            "why": "Burst buff: Heart Gore has no cooldown for 10 s. Press it with Swift Contract just before Savage Fang."
           },
           {
             "name": "Swift Contract",
             "reason": "buff",
-            "why": "Burst buff: press it with Illusive Clone just before Savage Fang."
+            "why": "Burst buff: Combat Speed +20% for 10 s. Press it with Illusive Clone."
           },
           {
-            "name": "Shadowstrike",
-            "reason": "dash"
+            "name": "Triniel's Dagger",
+            "reason": "other",
+            "why": "A hard hit, 30% harder from behind: press it from behind in your burst. At stigma Lv 10 it cuts all your cooldowns by 10%."
           },
           {
-            "name": "Flash Slice",
-            "reason": "other"
+            "name": "Ambush",
+            "reason": "other",
+            "why": "30% harder from behind: press it when you are behind the target."
           },
           {
-            "name": "Infiltrate",
-            "reason": "other"
+            "name": "Whirlwind Slice",
+            "reason": "other",
+            "why": "The main line is full: press it when it is ready."
+          },
+          {
+            "name": "Storm Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
             "name": "Shadow Fall",
-            "reason": "other"
+            "reason": "other",
+            "why": "Only on a stunned target: follow a stun from Shadowstrike or Insignia Explosion with it."
           },
           {
             "name": "Defiance",
@@ -324,12 +511,218 @@
             "why": "Clears crowd control: you need it at a chosen moment."
           },
           {
-            "name": "Evasion Stance",
-            "reason": "defensive"
+            "name": "Shadowstrike",
+            "reason": "dash",
+            "why": "Dash: it teleports you behind the target and stuns it. Savage Roar keeps its cooldown short."
+          },
+          {
+            "name": "Flash Slice",
+            "reason": "movement"
+          },
+          {
+            "name": "Infiltrate",
+            "reason": "movement"
           }
         ],
-        "levelNotes": [],
-        "verified": false
+        "levelNotes": []
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first; staying alive and MP count for a little. The Assassin has no party buffs.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 0,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-assassin",
+          "ql-db-assassin",
+          "mb-assassin"
+        ],
+        "preferences": [
+          {
+            "id": "line-quick-slice",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Quick Slice",
+            "count": "42 of 146 builds with a macro put Quick Slice in it",
+            "why": "Some builds put Quick Slice in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "line-illusive-clone",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Illusive Clone",
+            "count": "24 of 146 builds with a macro put Illusive Clone in it",
+            "why": "Some builds put Illusive Clone in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "line-ambush",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Ambush",
+            "count": "16 of 146 builds with a macro put Ambush in it",
+            "why": "Some builds put Ambush in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "line-whirlwind",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Whirlwind Slice",
+            "count": "16 of 146 builds with a macro put Whirlwind Slice in it",
+            "why": "Some builds put Whirlwind Slice in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "line-storm-rampage",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Storm Rampage",
+            "count": "14 of 146 builds with a macro put Storm Rampage in it; 6 run it as the whole macro (23 with copies)",
+            "why": "Some builds put Storm Rampage in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "line-triniel",
+            "kind": "line",
+            "stack": "stackB",
+            "skill": "Triniel's Dagger",
+            "count": "12 of 146 builds with a macro put Triniel's Dagger in it",
+            "why": "Some builds put Triniel's Dagger in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ]
+          },
+          {
+            "id": "stigma-illusive-clone",
+            "kind": "stigma",
+            "skill": "Illusive Clone",
+            "count": "234 of 248 builds; 95% of 150 top players",
+            "why": "Heart Gore has no cooldown for 10 s, and 20% extra damage.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "id": "stigma-swift-contract",
+            "kind": "stigma",
+            "skill": "Swift Contract",
+            "count": "217 of 248 builds; 90% of 150 top players",
+            "why": "Combat Speed +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "id": "stigma-savage-fang",
+            "kind": "stigma",
+            "skill": "Savage Fang",
+            "count": "187 of 248 builds; 77% of 150 top players",
+            "why": "5 Insignia at once for Insignia Explosion.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "id": "stigma-triniel",
+            "kind": "stigma",
+            "skill": "Triniel's Dagger",
+            "count": "208 of 248 builds; 71% of 150 top players",
+            "why": "A hard hit from behind; cuts all your cooldowns at stigma Lv 10.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "id": "stigma-evasion-stance",
+            "kind": "stigma",
+            "skill": "Evasion Stance",
+            "count": "107 of 248 builds; 39% of 150 top players",
+            "why": "Evades all damage for a moment and gives MP back.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin",
+              "mb-assassin"
+            ]
+          },
+          {
+            "id": "stigma-illusive-first",
+            "kind": "stigma",
+            "skill": "Illusive Clone",
+            "count": "12 of 16 levelling builds and 82 of 157 builds with a priority list name it as their first stigma",
+            "why": "Illusive Clone in the first slot.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "stigma-triniel-first",
+            "kind": "stigma",
+            "skill": "Triniel's Dagger",
+            "count": "36 of 157 builds with a priority list name it as their first stigma",
+            "why": "Triniel's Dagger in the first slot.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "mastery-quick-slice-early",
+            "kind": "mastery",
+            "skill": "Quick Slice",
+            "count": "12 of 16 levelling builds with a priority list put Quick Slice first",
+            "why": "Quick Slice first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ],
+            "to": 21
+          },
+          {
+            "id": "mastery-heart-gore-first",
+            "kind": "mastery",
+            "skill": "Heart Gore",
+            "count": "65 of 150 builds with a priority list put Heart Gore first",
+            "why": "Heart Gore levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-assassin"
+            ],
+            "from": 22
+          }
+        ]
       }
     }
   ]
