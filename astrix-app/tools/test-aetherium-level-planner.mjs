@@ -397,8 +397,8 @@ if(process.env.AE_BROWSER!=='0'){
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
       if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
       else assert.ok(later.length>0);
-      // keys 1 to 8, then left click and the main line (the #511 layout)
-      assert.deepEqual(await page.$$eval('#aeLeftBlock [data-bar-col]',items=>items.map(el=>el.dataset.barCol)),['1','2','3','4','5','6','7','8']);
+      // The game's order (Miguel, in game, 17 Oct 2026): keys 1 to 8, Q and E, then left click and the main line on right click.
+      assert.deepEqual(await page.$$eval('#aeLeftBlock [data-bar-col]',items=>items.map(el=>el.dataset.barCol)),['1','2','3','4','5','6','7','8','Q','E']);
       assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B']);
       await context.close();
     }

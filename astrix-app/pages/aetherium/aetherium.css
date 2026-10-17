@@ -34,6 +34,8 @@
   --ae-glow-cool:color-mix(in srgb,var(--ae-strobe) 12%,transparent);--ae-glow-warm:color-mix(in srgb,var(--ae-gold) 6%,transparent);
   /* Game colours for Daevanion nodes and the skill bar legend. */
   --ae-node-skill:#3f8fe0;--ae-node-passive:#2e9a62;--ae-node-corner:#e2742b;--ae-node-stat:#4a5470;
+  /* The game's own skill bar slots (Miguel's in-game shot, 17 Oct 2026): slate squares with a small sparkle where a slot is empty. */
+  --ae-bar-slate:#363e4c;--ae-bar-slate-line:#4b5568;--ae-bar-star:#dfe6f2;--ae-bar-star-dim:color-mix(in srgb,var(--ae-bar-star) 45%,transparent);
   --ae-bar:#1b2b3c;--ae-bar-line:#3d5a73;--ae-bar-dim:#172433;--ae-bar-dim-line:#2b4155;--ae-bar-main:#1d3142;--ae-bar-dot:#2a4256;--ae-bar-main-dot:#3c5f78;
   --ae-manual:#4fd1a5;--ae-stigma:#b07cff;--ae-warn:#ff7b8e;
   /* Item grade colours, the game's own (data/advisor/grades.json holds them with their status). On the dark panels they read at 4.5:1 or more. */
@@ -1666,4 +1668,47 @@ html body.aetherium-page .ae-btn:focus-visible:not(#ae-b1):not(#ae-b2):not(#ae-b
 .ae-roster-switch select.ae-btn{width:auto}
 @layer astrix-brand{
 html body.aetherium-page :is(.ae-menu-card,.ae-roster-open,.ae-board-btn).ae-btn:not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9):not(#ae-b10){border-radius:var(--ae-btn-card-radius)!important}
+}
+
+/* The Skill Bar as the game draws it (fix/aetherium-skill-bar-layout, Miguel, in game, 17 Oct 2026): one row of keys 1 to 8,
+   Q, E, then left click (the main attack, row 0 only), right click (the main line) and the second stack. Small gaps between
+   1 to 4, 5 to 8, Q and E, and the mouse keys; the row numbers 3 to 0 on the right; under each key the game's key strip,
+   the row 0 skill dimmed behind the key name. Empty slots are slate with a sparkle. */
+.ae-skillbar{--bar-cell:56px;--bar-cap:44px}
+@media (max-width:640px){.ae-skillbar{--bar-cell:44px}}
+.ae-skillbar .ae-bar-blocks{flex-direction:row;align-items:flex-end;gap:.75rem;width:max-content}
+.ae-bar-block.is-game{gap:.3125rem}
+.ae-bar-block.is-right.is-game{padding:0;background:none;border:0;clip-path:none}
+.ae-bar-block.is-game .ae-bar-col.is-group{margin-left:.5rem}
+.ae-bar-block.is-right.is-game .ae-bar-col.is-group{margin-left:0}
+.ae-bar-slot.is-none{display:block;width:var(--bar-cell);height:var(--bar-cell)}
+.ae-bar-rows{display:grid;grid-auto-rows:var(--bar-cell);gap:.3125rem;margin:0;padding:0 0 calc(var(--bar-cap) + .4375rem);list-style:none;
+  font:600 1.25rem/1 var(--ae-font-ui);color:var(--ae-text-muted);font-variant-numeric:tabular-nums}
+.ae-bar-rows li{display:grid;align-items:center}
+.ae-macro-main .ae-bar-rows{display:none}
+/* The key strip: the row 0 skill dimmed, the key name top left as in game. */
+.ae-bar-block.is-game .ae-keycap{position:relative;overflow:hidden;width:var(--bar-cell);height:var(--bar-cap);min-height:var(--bar-cap);padding:0;border-width:1px;border-radius:3px;
+  background:var(--ae-bar-slate);border-color:var(--ae-bar-slate-line)}
+.ae-keycap-art{position:absolute;inset:0;opacity:.35;pointer-events:none}
+.ae-keycap-art img{width:100%;height:100%;object-fit:cover;display:block}
+.ae-keycap-mark{position:relative;display:grid;place-items:center}
+.ae-keycap.has-art .ae-keycap-mark{position:absolute;top:3px;left:3px;min-width:1.125rem;height:1.125rem;padding:0 .1875rem;box-sizing:border-box;
+  font:700 .8125rem/1 var(--ae-font-ui);color:var(--ae-text);background:var(--ae-panel-solid);border-radius:2px}
+.ae-keycap.is-stack.has-art .ae-keycap-mark{right:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;justify-content:start;color:var(--ae-gold)}
+.ae-keycap.is-mouse.has-art .ae-keycap-mark svg{width:14px;height:14px}
+@layer astrix-brand{
+body.aetherium-page .ae-bar-block.is-game .ae-bar-cell.is-empty:not(.is-gap):not(#ax-g1):not(#ax-g2):not(#ax-g3):not(#ax-g4):not(#ax-g5):not(#ax-g6):not(#ax-g7):not(#ax-g8){
+  background:linear-gradient(90deg,transparent,var(--ae-bar-star-dim),transparent) center/18px 1px no-repeat,
+    linear-gradient(180deg,transparent,var(--ae-bar-star-dim),transparent) center/1px 24px no-repeat,
+    radial-gradient(circle,var(--ae-bar-star) 0 1.5px,transparent 3px),var(--ae-bar-slate)!important;
+  border-color:var(--ae-bar-slate-line)!important}
+}
+@layer astrix-brand{
+/* The key strip is the game's plain slate square, not a notched button. */
+html body.aetherium-page .ae-bar-block.is-game .ae-keycap:not(#ax-g1):not(#ax-g2):not(#ax-g3):not(#ax-g4):not(#ax-g5):not(#ax-g6):not(#ax-g7):not(#ax-g8):not(#ax-g9){
+  clip-path:none!important;border-radius:3px!important;background:var(--ae-bar-slate)!important;box-shadow:none!important;border:1px solid var(--ae-bar-slate-line)!important}
+html body.aetherium-page .ae-bar-block.is-game .ae-keycap:is(:hover,:focus-visible):not(#ax-g1):not(#ax-g2):not(#ax-g3):not(#ax-g4):not(#ax-g5):not(#ax-g6):not(#ax-g7):not(#ax-g8):not(#ax-g9){
+  border-color:var(--ae-gold)!important;box-shadow:inset 0 0 0 1px var(--ae-gold)!important}
+html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-g1):not(#ax-g2):not(#ax-g3):not(#ax-g4):not(#ax-g5):not(#ax-g6):not(#ax-g7):not(#ax-g8):not(#ax-g9){
+  outline:2px solid var(--ae-strobe)!important;outline-offset:2px!important}
 }
