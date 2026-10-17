@@ -688,7 +688,9 @@ check('Gladiator bar, DPS and tank: one main line right of left click (Rage Burs
     assert.equal(bar.stacks.A.skills.length,0,`${role}: no second stack`);
     assert.equal(bar.stacks.LMB.skills[0].name,'Keen Strike');
     const left=bar.left.map(key=>bar.stacks[key].skills.map(skill=>skill.name)).filter(list=>list.length);
-    assert.deepEqual(left,[['Defiance'],['Sword Aura Rampage'],["Zikel's Blessing"],[fourth],['Leaping Slam','Rush Strike'],['Ruinous Blow'],['Focused Block']],`${role} ${team}: own keys on keys 1 to 7 in the record's order`);
+    // Defiance on Space, where the game puts it (Miguel, 17 Oct 2026); the rest fill keys 1 to 6 in the record's order.
+    assert.deepEqual(left,[['Sword Aura Rampage'],["Zikel's Blessing"],[fourth],['Leaping Slam','Rush Strike'],['Ruinous Blow'],['Focused Block']],`${role} ${team}: own keys on keys 1 to 6`);
+    assert.deepEqual(bar.stacks.SPACE.skills.map(skill=>skill.name),['Defiance'],'Defiance on Space');
     assert.deepEqual(plan.macro.keys,['B'],'Macro 1 is the main line, one entry');
     assert.deepEqual(plan.macro.entries[0].skills.map(skill=>skill.name),['Rage Burst','Overhead Slam','Rending Blow']);
     assert.equal(plan.macro.verified,true,'Checked against a published top-player build: no Not confirmed yet tag');
@@ -853,7 +855,7 @@ check('every stacked key ends with a filler on its top row, or says why the buil
   assert.deepEqual(glad.fillers,['Keen Strike','Rending Blow','Sword Aura Rampage'],'Gladiator fillers: the rotation filler line, the key skill called "Main MP spender and filler", then a 0 s cooldown');
   assert.deepEqual(glad.stackFillers,['Rending Blow'],'Keen Strike stays on left click, so Rending Blow tops the main line');
   assert.equal(glad.stacks.B.fillerMissing,null);
-  assert.match(glad.stacks['5'].fillerMissing,/Its own key, not a macro entry/,'The movement key ends on Rush Strike, a cooldown skill, and says so');
+  assert.match(glad.stacks['4'].fillerMissing,/Its own key, not a macro entry/,'The movement key ends on Rush Strike, a cooldown skill, and says so');
   // Derived, never hard-coded: take Rending Blow's filler word and the record's no-cooldown away and the main line has no filler to end on, and says why.
   const noFiller=structuredClone(builds.Gladiator);
   noFiller.records[0].coreSkills.find(core=>core.name==='Rending Blow').why='Main MP spender.';
@@ -1040,7 +1042,7 @@ check('every DPS class matches section 6 of the research record: rows, main atta
     assert.equal(bar.stacks.LMB.skills[0].name,want.main,`${name} main attack`);
     assert.deepEqual(bar.opener,want.opener,`${name} opener`);
     assert.deepEqual(plan.macro.opener.map(item=>item.name),want.opener);
-    const own=bar.left.map(key=>bar.stacks[key].skills[0]?.name).filter(Boolean);
+    const own=[...bar.left,...bar.defaults].map(key=>bar.stacks[key].skills[0]?.name).filter(Boolean);
     assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
     assert.equal(plan.macro.blockStatus,'reported','Section 6 is REPORTED');
     assert.equal(plan.macro.verified,false,'Not checked against a published top-player build: tagged on the page');

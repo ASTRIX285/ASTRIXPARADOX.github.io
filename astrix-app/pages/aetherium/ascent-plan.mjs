@@ -358,7 +358,7 @@ function statusTag(item, id) {
 /* Skill Bar, as the game draws it: every key a column of four rows, row 0 at the bottom nearest the key label. The
    right-hand block is stack A, the main attack, stack B; the left-hand block holds every own-key skill, one per key, in
    the order a player uses them. Tap a skill for where it goes and why; tap a key for the whole stack in words. */
-const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click', A: 'Stack A', B: 'Stack B' };
+const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click', A: 'Stack A', B: 'Stack B', SPACE: 'Space' };
 const keyName = key => state.plan?.skillBar?.stacks?.[key]?.name ?? KEY_LABEL[key] ?? `Key ${key}`;
 const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3z" fill="currentColor"/></svg>';
 const OWN_LABEL = { buff: 'Buff', toggle: 'Toggle', charged: 'Charged', stagger: 'Stagger', other: 'Situational', defensive: 'Defensive', heal: 'Heal', dash: 'Dash', movement: 'Movement' };
@@ -391,7 +391,7 @@ const MOUSE_SVG = left => `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="
 function keyCap(key, stack) {
   const label = `${keyName(key)}. ${stackSentence(stack)}`;
   if (key === 'LMB' || key === 'RMB') return `<span class="ae-keycap is-mouse" role="button" tabindex="0" data-bar-keycap="${key}" data-tip="${esc(KEY_LABEL[key])}" aria-label="${esc(label)}">${MOUSE_SVG(key === 'LMB')}</span>`;
-  return `<span class="ae-keycap${key === 'A' || key === 'B' ? ' is-stack' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key === 'A' || key === 'B' ? keyName(key) : key)}</span>`;
+  return `<span class="ae-keycap${key === 'A' || key === 'B' ? ' is-stack' : ''}${key === 'SPACE' ? ' is-space' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key === 'A' || key === 'B' || key === 'SPACE' ? keyName(key) : key)}</span>`;
 }
 function barCell(item, key, row, stack) {
   const gap = !item && (stack.empty ?? []).find(entry => entry.row === row);
@@ -419,7 +419,8 @@ function barColumn(bar, key) {
 /** The right-hand block: stack A, the main attack, stack B, each stack with its label. The Macro screen draws only this. */
 function rightBlock(bar, { id = 'aeRightBlock' } = {}) {
   const head = key => key === 'LMB' ? '<span class="ae-block-head is-main">Main attack</span>' : `<span class="ae-block-head">${esc(keyName(key))}${bar.stacks[key].label && bar.stacks[key].label !== bar.stacks[key].name ? `<small>${esc(bar.stacks[key].label)}</small>` : ''}</span>`;
-  const keys = bar.right.filter(key => key === 'LMB' || bar.stacks[key].skills.length);
+  // Always stack A, left click, stack B, as in game: a stack the build leaves empty is drawn empty, never left out.
+  const keys = bar.right;
   const label = keys.map(key => (key === 'LMB' ? 'main attack' : keyName(key))).join(', ');
   return `<div class="ae-bar-block is-right" id="${id}" aria-label="Right-hand block: ${esc(label)}">
     ${keys.map(key => `<div class="ae-block-col" data-block-col="${esc(key)}">${head(key)}${barColumn(bar, key)}</div>`).join('')}
@@ -456,7 +457,9 @@ function renderSkillBarScreen(plan) {
   const chains = plan.chains?.chains ?? [];
   const chip = (name, icon, note) => `<li>${art(icon)}<span>${esc(name)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
   const used = bar.left.filter(key => bar.stacks[key].skills.length);
-  const leftKeys = bar.left.slice(0, Math.max(8, used.length));
+  // The keys 1 to 8 (more when the build needs them), then any key the game sets for a skill (Defiance on Space).
+  // As the game draws it: keys 1 to 8, Q and E always; right click only when the build uses it; then Space (Defiance).
+  const leftKeys = [...bar.left.filter(key => key !== 'RMB' || bar.stacks.RMB.skills.length), ...(bar.defaults ?? []).filter(key => bar.stacks[key].skills.length)];
   const pendingCooldowns = Object.values(bar.stacks).flatMap(stack => stack.skills).filter(skill => skill.cooldownPending && !skill.fixed);
   return `<div class="ae-skillbar">
     <div class="ae-bar-top">
@@ -678,7 +681,7 @@ function guideSteps(view, plan) {
       add(`${stackSentence(stack)}${now ? ` ${now}` : ''}`, `[data-bar-keycap="${key}"]`);
     }
     if (['A', 'B'].some(key => stacks[key].nextUnlock !== null)) add(`This is what your stacks fire at Lv ${plan.level}. Greyed skills join as you level.`, '#aeFiresNow');
-    const own = bar.left.map(key => stacks[key].skills[0]).filter(Boolean);
+    const own = [...bar.left, ...(bar.defaults ?? [])].map(key => stacks[key].skills[0]).filter(Boolean);
     if (own.length) add(`The left-hand block: one skill per key, in the order you use them${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it stays off the macro.`, '#aeLeftBlock');
     add('Copy it across key by key, then add stack A and stack B to Macro 1.', '#aeCopyBar');
     if (plan.chains?.chains?.length) add('Follow-up skills light up after their lead-in. Press them then.', '#aeFollowUps');

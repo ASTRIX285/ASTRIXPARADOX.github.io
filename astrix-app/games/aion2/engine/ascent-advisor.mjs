@@ -693,7 +693,9 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
  */
 export const LEFT_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']);
 export const RIGHT_KEYS = Object.freeze(['A', 'LMB', 'B']);
-export const SKILL_BAR_KEYS = Object.freeze([...LEFT_KEYS, ...RIGHT_KEYS]);
+/** Keys the game sets for a skill (progression.json default-keys: Defiance on the space bar, Miguel 17 Oct 2026). */
+export const DEFAULT_KEYS = Object.freeze(['SPACE']);
+export const SKILL_BAR_KEYS = Object.freeze([...LEFT_KEYS, ...DEFAULT_KEYS, ...RIGHT_KEYS]);
 /** Rows on a key: 0 is nearest the key and fires first, 3 is the top. */
 export const STACK_ROWS = 4;
 /** The macro block's two stacks and the keys they sit on. */
@@ -819,7 +821,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
       fixed: place.role === 'main' && name === basic.name
     };
   };
-  const stacks = Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, { key, side: LEFT_KEYS.includes(key) ? 'left' : 'right', skills: [], solo: false, reason: null, label: null, fillerMissing: null, pending: null }]));
+  const stacks = Object.fromEntries(SKILL_BAR_KEYS.map(key => [key, { key, side: RIGHT_KEYS.includes(key) ? 'right' : 'left', skills: [], solo: false, reason: null, label: null, fillerMissing: null, pending: null }]));
   const placed = new Set();
   const put = (key, entries, extra = {}) => { stacks[key] = { ...stacks[key], skills: entries, ...extra }; entries.forEach(item => placed.add(item.name)); };
 
@@ -845,6 +847,13 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     const mainWhy = (main.atLevel ?? []).filter(item => level >= item.from).at(-1)?.why ?? main.why;
     put('LMB', [{ ...cell(main.name, { key: 'LMB', index: 0, role: 'main', why: mainWhy }), locked: false }], { solo: true, reason: `The game keeps ${basic.name} on left click. Hold it with the macro key.` });
     // The left-hand block: the opener first, in its order, then every other own key grouped by reason.
+    // A skill the game puts on a key of its own (Defiance on Space) stays there; the own keys fill around it.
+    for (const fixedKey of facts['default-keys']?.value?.keys ?? []) {
+      if (!DEFAULT_KEYS.includes(fixedKey.key) || !byName.has(fixedKey.skill) || placed.has(fixedKey.skill)) continue;
+      const item = (block.ownKeys ?? []).find(own => own.name === fixedKey.skill) ?? null;
+      const why = `The game puts it on ${fixedKey.label ?? fixedKey.key} by default. ${item?.why ?? OWN_KEY_WHY[item?.reason ?? 'defensive']}`.trim();
+      put(fixedKey.key, [cell(fixedKey.skill, { key: fixedKey.key, index: 0, role: 'own', reason: item?.reason ?? 'defensive', why })], { solo: true, reason: why, defaultKey: true, label: fixedKey.label ?? null });
+    }
     // An own key is one skill, or a small stack the build names (two movement skills on one key).
     const namesOf = item => (Array.isArray(item.stack) ? item.stack.filter(name => byName.has(name)) : byName.has(item.name) ? [item.name] : []);
     const own = (block.ownKeys ?? []).filter(item => namesOf(item).length && !namesOf(item).some(name => placed.has(name)));
@@ -898,7 +907,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   })));
   const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
   const result = {
-    keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
+    keys: SKILL_BAR_KEYS, left: LEFT_KEYS, defaults: DEFAULT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
     notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null,
     opener: (block?.opener ?? []).filter(name => placed.has(name)),
     // False for a class whose stacks are not checked against a published top-player build yet (the page tags them).
@@ -910,7 +919,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   return result;
 }
 
-const keyWords = key => (key === 'A' ? 'Stack A' : key === 'B' ? 'Stack B' : key === 'LMB' ? 'Left click' : key === 'RMB' ? 'Right click' : `Key ${key}`);
+const keyWords = key => (key === 'A' ? 'Stack A' : key === 'B' ? 'Stack B' : key === 'LMB' ? 'Left click' : key === 'RMB' ? 'Right click' : key === 'SPACE' ? 'Space' : `Key ${key}`);
 /** Where a skill sits, in words: "stack A", "left click", "key 3". */
 export const keyPhrase = key => keyWords(key).replace(/^(Stack|Key)/, word => word.toLowerCase()).replace(/^Left click|^Right click/, words => words.toLowerCase());
 
@@ -920,7 +929,7 @@ export const keyPhrase = key => keyWords(key).replace(/^(Stack|Key)/, word => wo
  */
 function copySteps(bar) {
   const steps = [];
-  for (const key of [...LEFT_KEYS, 'A', 'B']) {
+  for (const key of [...LEFT_KEYS, ...DEFAULT_KEYS, 'A', 'B']) {
     const stack = bar.stacks[key];
     if (!stack.skills.length) continue;
     steps.push({ key, label: stack.name ?? keyWords(key), rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })), empty: stack.empty ?? [] });
@@ -1030,7 +1039,7 @@ function planMacro({ build, skillBar, mechanics, facts, level }) {
     const waiting = skills.filter(skill => skill.locked);
     return { entry: index + 1, key: stack.key, label: stack.label, name: stack.name ?? null, empty: stack.empty ?? [], delayMs, skills, firesNow: live.map(skill => skill.name), usable: live.length > 0, unlockLevel: live.length ? null : waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null, fillerMissing: stack.fillerMissing };
   });
-  const ownCells = LEFT_KEYS.flatMap(key => skillBar.stacks[key].skills);
+  const ownCells = [...LEFT_KEYS, ...DEFAULT_KEYS].flatMap(key => skillBar.stacks[key].skills);
   const groups = [];
   for (const skill of ownCells) {
     const id = skill.reason ?? 'other';

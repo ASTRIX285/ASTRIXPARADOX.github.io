@@ -1059,6 +1059,32 @@
           "reliability": "medium"
         }
       ]
+    },
+    {
+      "id": "default-keys",
+      "label": "Keys the game sets",
+      "status": "confirmed",
+      "confirmedOn": "2026-10-17",
+      "value": {
+        "keys": [
+          {
+            "key": "SPACE",
+            "label": "Space",
+            "skill": "Defiance"
+          }
+        ]
+      },
+      "text": "The game puts Defiance on the space bar by default, for every class.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Defiance is on the space bar by default."
+        }
+      ]
     }
   ]
 }
