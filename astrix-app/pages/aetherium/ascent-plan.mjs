@@ -236,6 +236,7 @@ function renderMenu(plan) {
       <h2 class="ae-section-title" id="aeNowTitle">Your next moves${plan.character ? '' : ` <small>at Lv ${esc(plan.level)}</small>`}</h2>
       <ol class="ae-quest-list">${quests.map(questCard).join('')}</ol>
     </section>` : ''}
+    ${setupStrip(plan)}
     <h2 class="ae-section-title ae-glance-title" id="aeGlanceTitle">Your plan at a glance</h2>
     <nav class="ae-menu" aria-label="Plan screens" aria-describedby="aeGlanceTitle">
       ${Object.entries(VIEWS).map(([view, info]) => `<a class="ae-menu-card" href="${esc(viewHref(view))}" data-view="${view}" title="${esc(info.blurb)}">
@@ -258,6 +259,36 @@ function renderMenu(plan) {
     <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>`;
 }
 
+/* The setup for now and the next change (level planner, games/aion2/engine/level-planner.mjs). Every screen and the menu
+   show it: what this Daeva runs at this level, and one "Next at Lv N" line with its reason. A build with no ascent
+   record runs on today's data and says so; a reported choice says Reported. */
+const reportedTag = status => (status === 'reported' ? '<span class="ae-tag is-reported" data-status-tag="reported">Reported</span>' : '');
+function nextAtLine(plan) {
+  const next = plan.nextAt;
+  if (!next) return `<p class="ae-next-at" id="aeNextAt"><b>Next</b> Nothing changes in your setup before Lv ${esc(plan.levelCap)}.</p>`;
+  return `<p class="ae-next-at" id="aeNextAt" data-next-level="${esc(next.level)}"><b>Next at Lv ${esc(next.level)}</b> ${esc(next.text)}${next.why ? ` <span class="ae-next-why">${esc(next.why)}</span>` : ''} ${reportedTag(next.status)}</p>`;
+}
+function setupStrip(plan) {
+  const s = plan.setup;
+  if (!s) return '';
+  const line = s.line.find(item => item.name) ?? s.line[0] ?? null;
+  const stigmas = s.stigmas.filter(slot => slot.open && slot.name);
+  const firstStigma = s.stigmas.find(slot => !slot.open);
+  const board = s.daevanion.board;
+  const items = [
+    ['line', line?.name ?? 'Macro', line ? line.skills.join(', ') : 'Nothing sourced yet'],
+    ['stigmas', 'Stigmas', stigmas.length ? stigmas.map(slot => slot.name).join(', ') : firstStigma ? `From Lv ${firstStigma.slotLevel}: ${firstStigma.name}` : 'None'],
+    ['mastery', 'Level next', s.mastery ? `${s.mastery.name} to Lv ${s.mastery.to}` : 'Nothing to level now'],
+    ['daevanion', 'Daevanion', board ? `${board.name}${s.daevanion.now.length ? `: +1 on ${s.daevanion.now.join(', ')}` : ''}` : s.daevanion.firstLevel ? `From Lv ${s.daevanion.firstLevel}` : 'None'],
+    ['stats', 'Stat focus', s.stats?.first ?? 'Not confirmed yet']
+  ];
+  return `<section class="ae-setup" id="aeSetup" aria-labelledby="aeSetupTitle" data-setup-level="${esc(s.level)}">
+    <h2 class="ae-setup-title" id="aeSetupTitle">Your setup at Lv ${esc(s.level)} ${s.planned ? reportedTag(s.status) : '<span class="ae-tag is-unconfirmed" data-status-tag="setup-unconfirmed">Not confirmed yet</span>'}</h2>
+    <dl class="ae-setup-list">${items.map(([id, label, value]) => `<div data-setup="${id}"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>
+    ${nextAtLine(plan)}
+  </section>`;
+}
+
 /** The frame every screen sits in: a game window with its title bar and the tabs to the other screens. */
 function gameWindow(view, plan, body) {
   return `<div class="ae-gw" data-view="${view}">
@@ -269,6 +300,7 @@ function gameWindow(view, plan, body) {
     </div>
     <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
     <p class="ae-gw-why" id="aeWhy">${esc(VIEWS[view].why)}</p>
+    ${setupStrip(plan)}
     <div class="ae-gw-body">${body}</div>
     <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>
   </div>`;
@@ -287,6 +319,7 @@ function renderStigmaScreen(plan) {
   return `<div class="ae-stg">
     ${plan.team ? `<p class="ae-stg-team" id="aeStigmaTeam" data-team="${esc(plan.team.id)}"><b>${esc(plan.team.label)}</b>${swap ? `: ${esc(swap.in)} in place of ${esc(swap.out)}. ${esc(swap.why)}` : '.'}</p>` : ''}
     <div class="ae-stg-row">${s.slots.map(slot).join('')}</div>
+    ${s.slots.some(item => item.why) ? `<ol class="ae-stg-why" id="aeStigmaWhy">${s.slots.map((item, index) => `<li data-stigma-why="${index}" class="${item.open ? '' : 'is-later'}"><b>Slot ${index + 1}${item.open ? '' : `, Lv ${esc(item.slotLevel)}`}</b> ${esc(item.name)}${item.why ? `: ${esc(item.why)}` : ''}</li>`).join('')}</ol>` : ''}
     <ul class="ae-legend-row is-centred" aria-label="Key"><li><span class="ae-lock is-key">${ICON.lock}<b>Lv 27</b></span>Grey: the slot opens when your character reaches that level</li>${now === null ? '' : '<li><span class="ae-mskill-bar">✓</span>Equipped now</li>'}</ul>
     <div class="ae-stg-lower">
       ${now === null ? '' : `<div class="ae-icon-group" id="aeStigmaNow"><p class="ae-mskills-title">Equipped now</p>${now.length
@@ -367,7 +400,7 @@ const cooldownWords = item => (item.noCooldown ? 'no cooldown' : item.cooldownPe
 function stackSentence(stack) {
   const names = stack.skills.map(skill => skill.name);
   const key = keyName(stack.key);
-  if (!names.length) return `${key}: nothing on it. A free key.`;
+  if (!names.length) return stack.reserved?.length ? `${key}: kept free for ${stack.reserved.join(' and ')}, which comes later.` : `${key}: nothing on it. A free key.`;
   if (names.length === 1) return `${key}: ${names[0]}.${stack.reason ? ` ${stack.reason}` : ''}`;
   return `${key}: ${names[0]} fires when ready, otherwise ${names.slice(1).join(', then ')}.`;
 }
@@ -431,7 +464,7 @@ const unverifiedTag = bar => (bar?.verified === false ? '<span class="ae-tag is-
 function firesNowPanel(plan) {
   const bar = plan.skillBar;
   const rows = ['A', 'B'].map(key => bar.stacks[key]).filter(stack => stack.skills.length);
-  const later = stack => stack.skills.filter(skill => skill.locked).map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
+  const later = stack => [...stack.skills.filter(skill => skill.locked), ...(stack.joinsLater ?? [])].map(skill => `${skill.name} from Lv ${skill.unlockLevel}`).join(', ');
   return `<section class="ae-fires-now" id="aeFiresNow" aria-labelledby="aeFiresNowTitle">
       <h2 class="ae-mskills-title" id="aeFiresNowTitle">What fires now at Lv ${esc(plan.level)}</h2>
       <ol class="ae-fires-list">${rows.map(stack => `<li data-fires-key="${esc(stack.key)}"><b>${esc(keyName(stack.key))}</b> <span>${stack.firesNow.length ? esc(stack.firesNow.join(', then ')) : 'Nothing yet'}${later(stack) ? ` <small>${esc(later(stack))}</small>` : ''}</span></li>`).join('')}</ol>
@@ -448,6 +481,12 @@ function copyList(bar) {
       : `<li data-copy-step="${esc(step.key)}"><b>${esc(step.label)}</b>${step.rows.length === 1 && !step.empty?.length ? ` ${esc(step.rows[0].name)}${step.rows[0].locked ? ` <small>from Lv ${esc(step.rows[0].unlockLevel)}</small>` : step.rows[0].needsSlot ? ' <small>needs a stigma slot</small>' : ''}` : `<ol class="ae-copy-rows">${withGaps(step).map(row).join('')}</ol>`}</li>`).join('')}</ol>
     <p class="ae-muted">Left click keeps ${esc(bar.mainAttack)}: the game sets it.</p>
   </details>`;
+}
+/** "Comes later": the skills the plan puts on the bar once this Daeva can place them, soonest first, each with when or why. */
+function comesLater(bar) {
+  if (!bar.later?.length) return '';
+  return `<div class="ae-icon-group ae-later" id="aeComesLater"><p class="ae-mskills-title">Comes later</p>
+    <ul class="ae-chiplist ae-later-list">${bar.later.map(item => `<li data-later-skill="${esc(item.name)}">${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.reason)}</small></span></li>`).join('')}</ul></div>`;
 }
 function renderSkillBarScreen(plan) {
   const bar = plan.skillBar;
@@ -473,6 +512,7 @@ function renderSkillBarScreen(plan) {
     </div>
     <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${['A', 'B'].filter(key => bar.stacks[key].skills.length).length === 2 ? 'Stack A and stack B sit either side of your main attack and go into your macro.' : `${esc(keyName(['A', 'B'].find(key => bar.stacks[key].skills.length) ?? 'B'))} sits beside your main attack and is your macro.`} Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''} ${unverifiedTag(bar)}</p>
     ${copyList(bar)}
+    ${comesLater(bar)}
     ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills ${ruleTag(plan.chains, 'chain-follow-up', { test: false })}</p>
       <ul class="ae-chiplist ae-followups">${chains.map(chain => chip(chain.followUp, plan.skillIcons[chain.followUp], chain.pending ? chain.pending.reason : `follow-up to ${chain.leadIns.join(' or ')}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}${chain.reach ? `. ${chain.reach.note}.` : ''}`)).join('')}</ul>
       <p class="ae-muted">Press a follow-up when it lights up.${plan.chains.confirmed ? '' : ` It goes above its lead-in in the stack once the chain rule is confirmed.${plan.chains.test ? ` <span class="ae-tag-test" data-rule-test="chain-follow-up">Check it in game: ${esc(plan.chains.test)}</span>` : ''}`}</p></div>` : ''}
@@ -772,6 +812,12 @@ function writePoints(boardId, value) {
 
 /* Mastery: laid out like the game's Mastery tab. Icons only, names on hover; tap a skill for its
    card: level, cooldown, what it does, why it matters, the three Specialty slots and all five perks. */
+/** The number on a skill tile: its place in the level order the plan gives (level planner), else the build's priority. */
+function rankOf(entry) {
+  if (!state.plan?.setup?.planned) return entry.priority;
+  const at = levelOrder(state.plan).findIndex(step => step.name === entry.name);
+  return at >= 0 ? at + 1 : null;
+}
 function masteryTile(entry) {
   const locked = entry.unlocked === false || entry.acquired === false;
   const onBar = entry.equipped === true && !locked;
@@ -779,7 +825,7 @@ function masteryTile(entry) {
   return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.priority ? ' is-key' : ''}" data-mastery="${esc(entry.name)}" data-tip="${esc(locked && entry.needLevel ? `${entry.name} · unlocks at Lv ${entry.needLevel}` : entry.skillLevel !== null ? `${entry.name} · skill Lv ${entry.skillLevel}` : entry.name)}"${onBar ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${locked && entry.needLevel ? `, unlocks at character level ${entry.needLevel}` : ''}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${onBar ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
     <span class="ae-mskill-name">${esc(entry.name)}</span>
     ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
-    ${entry.priority ? `<span class="ae-mskill-rank">${entry.priority}</span>` : ''}
+    ${rankOf(entry) ? `<span class="ae-mskill-rank">${rankOf(entry)}</span>` : ''}
     ${onBar ? '<span class="ae-mskill-bar" aria-hidden="true">●</span>' : offBar ? '<span class="ae-mskill-bar is-off" aria-hidden="true">!</span>' : ''}
     ${locked && entry.needLevel ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(entry.needLevel)}</b></span>` : entry.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(entry.skillLevel)}</span>` : ''}
   </span>`;
@@ -854,6 +900,7 @@ function renderMastery(plan) {
   const atCap = m.atCap ?? [];
   return `<div class="ae-mastery" id="aeMastery">
     ${levelOrder(plan).length ? `<div class="ae-icon-group ae-mspend" id="aeMasterySpend"><p class="ae-mskills-title">Level these next</p><div class="ae-icon-row">${levelOrder(plan).map(step => iconTile(step.name, icons[step.name], { big: true, badge: step.from !== null ? `${step.from}→${step.to}` : `→${step.to}`, attr: `data-mastery="${esc(step.name)}"`, tip: `${step.name}: ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`}` })).join('')}</div></div>` : ''}
+    ${levelOrder(plan).length ? `<ol class="ae-mwhy" id="aeMasteryWhy">${levelOrder(plan).slice(0, 4).map(step => `<li data-mastery-why="${esc(step.name)}"><b>${esc(step.name)}</b> ${esc(step.from !== null ? `Lv ${step.from} to ${step.to}` : `up to Lv ${step.to}`)}. ${esc(step.why ?? `It ${step.reason}.`)}</li>`).join('')}</ol>` : ''}
     ${atCap.length ? `<div class="ae-mspend ae-mcap" id="aeMasteryCap"><p class="ae-mskills-title">At the Mastery cap (${esc(m.cap)})</p><ul class="ae-mcap-list">${atCap.map(entry => `<li data-mastery-cap="${esc(entry.name)}">${iconTile(entry.name, icons[entry.name], { badge: String(entry.skillLevel), attr: `data-mastery="${esc(entry.name)}"`, tip: `${entry.name}: skill Lv ${entry.skillLevel}` })}<span><strong>${esc(entry.name)}</strong> is Lv ${esc(entry.skillLevel)}. Mastery stops at ${esc(entry.cap)}, so no more skill points go here.<br>Next +1: ${nextLevelHtml(entry.next)}</span></li>`).join('')}</ul></div>` : ''}
     <div class="ae-mskills">
       <p class="ae-mskills-title">Active</p>

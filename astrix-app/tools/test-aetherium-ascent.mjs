@@ -235,8 +235,10 @@ await check('macro reads like the game: one entry per stack, a delay after each,
   // Role aware (17 Oct 2026): the Gladiator's Macro 1 is its one main line (it was stack A and stack B); Templar keeps two.
   const {page,context}=await open(ascent('class=gladiator&role=dps&level=5','macro'));
   assert.deepEqual(await page.$$eval('.ae-macro-entry .ae-macro-skill',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Main line']);
-  assert.deepEqual(await page.$$eval('.ae-macro-entry[data-macro-entry="1"] .ae-macro-row',items=>items.map(el=>[el.dataset.tip,el.classList.contains('is-out')])),[['Rage Burst. From Lv 32',true],['Overhead Slam',false],['Rending Blow',false]]);
-  assert.equal(await plain(page,'#aeMacroLater'),'Joins later: Rage Burst Lv 32.');
+  // Level planner (17 Oct 2026): only what a Lv 5 Daeva can place is in the macro. Mocking Blade's knockdown opens Overhead
+  // Slam until Rage Burst, which joins at Lv 22 (stigma slot 1, the logic's first pick; it was slot 3 at Lv 32, greyed in place).
+  assert.deepEqual(await page.$$eval('.ae-macro-entry[data-macro-entry="1"] .ae-macro-row',items=>items.map(el=>[el.dataset.tip,el.classList.contains('is-out')])),[['Mocking Blade',false],['Overhead Slam',false],['Rending Blow',false]]);
+  assert.equal(await plain(page,'#aeMacroLater'),'Joins later: Rage Burst Lv 22.');
   assert.match(await plain(page,'#aeMacroRule'),/^Each entry fires its stack's first ready skill\. A step whose skills are all on cooldown, short of MP or without a target is skipped\. Not confirmed yet$/);
   assert.equal(await page.locator('#aeMacroRule [data-status-tag="skip-on-cooldown"]').count(),1,'Not confirmed yet');
   assert.doesNotMatch(await page.textContent('.ae-gw-body'),/Check in game/);
@@ -287,7 +289,9 @@ await check('Mastery: icon grid like the game, names on hover, a card with the d
   const tile='.ae-mskill-grid [data-mastery="Keen Strike"]';
   assert.equal(await plain(page,`${tile} .ae-mskill-lv`),'3');
   assert.match(await page.getAttribute(`${tile} img`,'src'),/ICON_GL_SKILL_002\.png$/,'The game icon');
-  assert.deepEqual(await page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>[el.dataset.mastery,el.querySelector('.ae-itile-badge').textContent])),[['Keen Strike','3→8'],['Rending Blow','3→8'],['Overhead Slam','2→8']]);
+  // Level planner (17 Oct 2026): the logic's order from the Daeva's own levels (Rending Blow first at Lv 12), each with its reason.
+  assert.deepEqual(await page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>[el.dataset.mastery,el.querySelector('.ae-itile-badge').textContent])),[['Rending Blow','3→8'],['Overhead Slam','2→8'],['Keen Strike','3→8']]);
+  assert.match(await plain(page,'#aeMasteryWhy [data-mastery-why="Rending Blow"]'),/^Rending Blow Lv 3 to 8. Train it as far as the game lets you: skill Lv 8 is sold from character Lv 19./);
   assert.equal(await page.getAttribute(tile,'data-equipped'),'true','Shows what is on the skill bar');
   assert.equal(await page.locator('.ae-mskill-grid [data-mastery="Ruinous Blow"] .ae-mskill-bar').count(),0,'A locked skill is never shown as on the bar');
   assert.equal(await plain(page,'.ae-mskill-grid [data-mastery="Ruinous Blow"] .ae-lock'),'Lv 14','Locked skill: padlock and the unlock level');
@@ -382,9 +386,14 @@ await check('Skill Bar: the game layout, Keen Strike set by the game on left cli
   assert.equal(await page.locator('[data-bar-key="0:LMB"] .ae-bar-pin').count(),1,'and set by the game');
   assert.equal(await page.locator('[data-bar-key="0:LMB"] .ae-lock').count(),0,'The basic attack is never shown locked');
   assert.equal(await page.getAttribute('[data-bar-key="0:LMB"] .ae-bar-pin','title'),'Set by the game');
-  assert.deepEqual(['1','2','3','4','5','6','7'].map(key=>main[key]?.[0]),['Defiance','Sword Aura Rampage',"Zikel's Blessing",'Lunge Stance','Leaping Slam','Ruinous Blow','Focused Block'],'The record\'s order');
+  // Level planner (17 Oct 2026): at Lv 23 only stigma slot 1 is open (Rage Burst), so the keys for Zikel's Blessing, Lunge
+  // Stance and Focused Block stay free in the record's order, and those three wait in Comes later with their slot level.
+  assert.deepEqual(['1','2','3','4','5','6','7'].map(key=>main[key]?.[0]),['Defiance','Sword Aura Rampage',undefined,undefined,'Leaping Slam','Ruinous Blow',undefined],'The record\'s order, free keys kept');
   assert.deepEqual(await col('5'),['Rush Strike','Leaping Slam'],'Movement shares key 5');
-  assert.equal(await page.locator('[data-bar-key="0:3"] .ae-lock').count(),1,"Zikel's Blessing slot locked until Lv 27");
+  assert.equal(await page.locator('#aeSkillBar .ae-lock').count(),0,'No locked skill on the bar');
+  assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>[el.dataset.laterSkill,el.querySelector('small').textContent])),[['Lunge Stance','Stigma slot 2 opens at Lv 27.'],["Zikel's Blessing",'Stigma slot 3 opens at Lv 32.'],['Focused Block','Stigma slot 4 opens at Lv 37.']]);
+  assert.match(await page.getAttribute('[data-bar-keycap="3"]','aria-label'),/kept free for Zikel's Blessing/);
+  assert.doesNotMatch(await plain(page,'#aeCopyBar'),/Zikel|Lunge|Focused|from Lv/,'Copy this bar lists only what goes on now');
   assert.match(await page.getAttribute('[data-bar-key="3:B"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
   assert.match(await plain(page,'.ae-guide'),/Your right-hand block: your main attack \(Keen Strike\) on left click, then the main line beside it\./);
   assert.match(await page.getAttribute('#aeRightBlock','class'),/ae-guide-target/);
@@ -394,8 +403,8 @@ await check('Skill Bar: the game layout, Keen Strike set by the game on left cli
   assert.match(await plain(page,'#aeInfo [data-triggers]'),/No cooldown\. From skill Lv 16/,'A skill Lv 16 trigger says so');
   assert.equal(await page.locator('#aeInfo [data-triggers] li.is-dim[data-trigger-level="16"]').count(),1,'and is dim without a Daeva at skill Lv 16');
   await page.keyboard.press('Escape');
-  await page.click('[data-bar-key="0:4"]');
-  assert.match(await plain(page,'#aeInfo'),/Lunge Stance.*Stigma · slot 1/);
+  await page.click('[data-bar-key="0:B"]');
+  assert.match(await plain(page,'#aeInfo'),/Rage Burst.*Stigma · slot 1/);
   assert.deepEqual(errors,[]);
   await context.close();
 });
@@ -481,8 +490,9 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   // Walkthrough fix (11 Oct 2026): one level order, so the level move is Keen Strike, the Mastery list's first skill.
   // Grade rule (11 Oct 2026): was 'Enchant 7 worn items above +0'. At Lv 12 the Common and Rare pieces go to their +5 cap.
   // Role aware (17 Oct 2026): the board is read, so the move names its next node for the role.
-  assert.deepEqual(steps,['Start Nezekan: Overhead Slam +1 next (7 steps)','Enchant 8 Rare and Common pieces to +5','Level Keen Strike (now Lv 3)']);
-  assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery'],'Each next move opens the screen that shows it');
+  // Level planner (17 Oct 2026): the level move is the logic's first step (Rending Blow), then the main line this Lv 12 bar can fire.
+  assert.deepEqual(steps,['Start Nezekan: Overhead Slam +1 next (7 steps)','Enchant 8 Rare and Common pieces to +5','Level Rending Blow (now Lv 3)','Set your main line: Mocking Blade, Overhead Slam, Rending Blow']);
+  assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery','skill-bar'],'Each next move opens the screen that shows it');
   // Walkthrough fix (11 Oct 2026): Show me on the enchant move opens the Gear page with the items it names ringed (the move's own id since the grade rule).
   assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#enchant-early$/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
@@ -608,18 +618,20 @@ await check('guided screen: game window, tabs to every screen, guide lights up e
   assert.equal(await page.isVisible('.ae-guide-text'),false,'The guide folds away');
   await page.click('[data-guide="show"]');
   assert.equal(await page.isVisible('.ae-guide-text'),true,'and comes back');
-  assert.match(await plain(page,'.ae-guide'),/Tip 1 of 5.*Slot 1: equip Lunge Stance\./);
+  // Level planner (17 Oct 2026): the logic fills slot 1 with Rage Burst (it opens Overhead Slam), slot 2 with Lunge Stance.
+  assert.match(await plain(page,'.ae-guide'),/Tip 1 of 5.*Slot 1: equip Rage Burst\./);
+  assert.match(await plain(page,'#aeStigmaWhy [data-stigma-why="0"]'),/^Slot 1 Rage Burst: Makes Overhead Slam ready on the target for 10 s\.$/);
   assert.equal(await page.getAttribute('[data-stigma="0"]','class').then(c=>c.includes('ae-guide-target')),true,'Slot 1 lit up');
   await page.click('[data-guide="next"]');
-  assert.match(await plain(page,'.ae-guide'),/Tip 2 of 5.*Slot 2: equip Zikel's Blessing\./);
+  assert.match(await plain(page,'.ae-guide'),/Tip 2 of 5.*Slot 2: equip Lunge Stance\./);
   assert.equal(await page.locator('.ae-guide-target').count(),1);
   assert.match(await page.getAttribute('[data-stigma="1"]','class'),/ae-guide-target/);
-  assert.match(await page.getAttribute('[data-stigma="1"] img','src'),/ICON_GL_SKILL_040\.png$/,"Zikel's Blessing shows its game icon");
+  assert.match(await page.getAttribute('[data-stigma="1"] img','src'),/ICON_GL_SKILL_024\.png$/,'Lunge Stance shows its game icon');
   await page.click('[data-stigma="1"]');
-  assert.match(await plain(page,'#aeInfo'),/Zikel's Blessing.*Stigma · slot 2.*Slot open\. Equip it\./);
+  assert.match(await plain(page,'#aeInfo'),/Lunge Stance.*Stigma · slot 2.*Slot open\. Equip it\./);
   await page.keyboard.press('Escape');
   await page.click('[data-guide="next"]');
-  assert.match(await plain(page,'.ae-guide'),/At Lv 32 slot 3 opens\. Put Rage Burst in it\./);
+  assert.match(await plain(page,'.ae-guide'),/At Lv 32 slot 3 opens\. Put Zikel's Blessing in it\./);
   await page.click('[data-guide="back"]');
   assert.match(await plain(page,'.ae-guide'),/Tip 2 of 5/);
   const box=await page.locator('.ae-guide').boundingBox();
@@ -976,17 +988,21 @@ const rectIn=(page,selector)=>page.$eval(selector,el=>{const r=el.getBoundingCli
 await check('Lv 12 walk: the main line in place with Rage Burst greyed, Ruinous Blow on its own key, what the main line fires now; one gold action',async()=>{
   const {page,context,errors}=await open(ascent(ref,'skill-bar'),{live:true});
   const col=key=>page.$$eval(`[data-bar-key$=":${key}"][data-bar-skill]`,cells=>cells.map(el=>[Number(el.dataset.barKey.split(':')[0]),el.dataset.barSkill]).sort((a,b)=>a[0]-b[0]).map(item=>item[1]));
-  assert.deepEqual(await col('B'),['Rage Burst','Overhead Slam','Rending Blow'],'Rows 0, 1 and 3 of the main line, locked ones in place');
-  assert.deepEqual(await col('6'),['Ruinous Blow'],'Key 6: Ruinous Blow, alone');
-  assert.match(await page.getAttribute('[data-bar-key="0:6"]','data-tip'),/Ruinous Blow\. From Lv 14\./,'Locked skill greyed with from Lv 14');
-  assert.match(await page.getAttribute('[data-bar-key="0:B"]','class'),/is-locked/,'Rage Burst greyed until its slot opens');
-  assert.match(await plain(page,'#aeFiresNow'),/^What fires now at Lv 12 Main line .*Rage Burst from Lv 32/);
+  // Level planner (17 Oct 2026): only what this Lv 12 Daeva can place is on the bar. Mocking Blade opens Overhead Slam in
+  // Rage Burst's row until Rage Burst comes at Lv 22; key 6 stays free for Ruinous Blow (Lv 14). Both wait in Comes later.
+  assert.deepEqual(await col('B'),['Mocking Blade','Overhead Slam','Rending Blow'],'Rows 0, 1 and 3 of the main line');
+  assert.deepEqual(await col('6'),[],'Key 6 kept free for Ruinous Blow');
+  assert.match(await page.getAttribute('[data-bar-keycap="6"]','aria-label'),/kept free for Ruinous Blow, which comes later/);
+  assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked').count(),0,'Nothing greyed on the bar');
+  assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill)).then(list=>list.slice(0,2)),['Ruinous Blow','Defiance']);
+  assert.ok((await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill))).includes('Rage Burst'));
+  assert.match(await plain(page,'#aeFiresNow'),/^What fires now at Lv 12 Main line Mocking Blade, then Overhead Slam, then Rending Blow Rage Burst from Lv 22/);
   await page.click('[data-bar-keycap="B"]');
-  assert.match(await plain(page,'#aeInfo [data-key-now]'),/^Until Lv 32, the main line fires /);
+  assert.match(await plain(page,'#aeInfo [data-key-now]'),/^Until Lv 22, the main line fires Mocking Blade, then Overhead Slam, then Rending Blow\./);
   await page.keyboard.press('Escape');
   let guide='';
   for(let i=0;i<8&&!/main line fires/.test(guide);i++){guide=await plain(page,'.ae-guide-text');if(!/main line fires/.test(guide))await page.click('#aeGuide [data-guide="next"]');}
-  assert.match(guide,/Until Lv 32, the main line fires /,'The guide says what the main line fires now');
+  assert.match(guide,/Until Lv 22, the main line fires /,'The guide says what the main line fires now');
   assert.doesNotMatch(await plain(page,'.ae-guide-count'),/step/i,'The guide counts tips, never steps');
   assert.equal(await goldCount(page),1,'One gold action: the Next');
   assert.deepEqual(errors,[]);
@@ -1029,8 +1045,9 @@ for(const width of [1600,390]){
     const {page,context}=await open(ascent('class=gladiator&role=dps&level=12','macro'),{viewport:{width,height:1000}});
     assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['B']);
     assert.match(await plain(page,'.ae-guide'),/Add the main line, 10 ms delay after it\./);
-    assert.match(await plain(page,'#aeMacroLater'),/Rage Burst Lv 32\.$/);
-    assert.equal(await page.locator('#aeMacroOpener li.is-locked').count(),3,'All three opener skills open later');
+    // Level planner (17 Oct 2026): Rage Burst joins at Lv 22; the three opener skills cannot be placed at Lv 12, so there is no opener yet.
+    assert.match(await plain(page,'#aeMacroLater'),/Rage Burst Lv 22\.$/);
+    assert.equal(await page.locator('#aeMacroOpener').count(),0,'No opener before its skills can be placed');
     if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,`macro-lv12-${width}.png`),fullPage:true});
     await context.close();
   });
@@ -1038,37 +1055,41 @@ for(const width of [1600,390]){
 await check('Skill Bar copy checklist: key by key, row by row, ending with the macro step; no skill in two places; locked skills dimmed in place',async()=>{
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=12','skill-bar'));
   const steps=await page.$$eval('#aeCopyBar .ae-copy-steps > li',items=>items.map(el=>el.dataset.copyStep));
-  assert.deepEqual(steps,['1','2','3','4','5','6','7','B','macro']);
+  // Level planner (17 Oct 2026): only keys with something to place at Lv 12 (free keys are skipped), and no row from a later level.
+  assert.deepEqual(steps,['2','5','B','macro']);
   assert.equal(await plain(page,'#aeCopyBar [data-copy-step="macro"]'),'Then add the main line to Macro 1.');
-  assert.deepEqual(await page.$$eval('#aeCopyBar [data-copy-step="B"] .ae-copy-rows li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Row 0 Rage Burst from Lv 32','Row 1 Overhead Slam','Row 2 leave it empty','Row 3 Rending Blow']);
+  assert.deepEqual(await page.$$eval('#aeCopyBar [data-copy-step="B"] .ae-copy-rows li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Row 0 Mocking Blade','Row 1 Overhead Slam','Row 2 leave it empty','Row 3 Rending Blow']);
+  assert.doesNotMatch(await plain(page,'#aeCopyBar'),/from Lv|needs a stigma slot/,'Nothing in the copy list waits for a level or a slot');
   const names=await page.$$eval('.ae-bar-blocks [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
   assert.equal(new Set(names).size,names.length,'No skill in two places');
-  const dim=await page.$$eval('.ae-bar-blocks .ae-bar-cell.is-locked',items=>items.map(el=>el.dataset.barSkill));
-  for(const name of ['Rage Burst','Ruinous Blow'])assert.ok(dim.includes(name),`${name} dimmed in its final place`);
-  assert.ok(!dim.includes('Overhead Slam')&&!dim.includes('Keen Strike'));
+  assert.equal(await page.locator('.ae-bar-blocks .ae-bar-cell.is-locked').count(),0,'Nothing dimmed: what waits is in Comes later');
+  for(const name of ['Rage Burst','Ruinous Blow'])assert.equal(await page.locator(`#aeComesLater [data-later-skill="${name}"]`).count(),1,`${name} in Comes later`);
   assert.deepEqual(errors,[]);
   await context.close();
 });
 await check('Lv 12 walk: one level order across the next moves, Mastery and its guide; macro lists the two stacks; Defiance waits on its own key',async()=>{
   const menu=await open(ascent(ref),{live:true});
   const level=(await menu.page.$$eval('.ae-quest-text strong',items=>items.map(el=>el.textContent))).find(text=>/^Level /.test(text));
-  assert.equal(level,'Level Keen Strike (now Lv 3)');
+  // Level planner (17 Oct 2026): the logic's first step is Rending Blow at Lv 12 (it was Keen Strike, the build's priority 1).
+  assert.equal(level,'Level Rending Blow (now Lv 3)');
   assert.equal(await goldCount(menu.page),1,'Menu: one gold action');
   await menu.context.close();
   const mastery=await open(ascent(ref,'mastery'),{live:true});
   const order=await mastery.page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>el.dataset.mastery));
-  assert.deepEqual(order,['Keen Strike','Rending Blow','Overhead Slam']);
-  assert.match(await plain(mastery.page,'.ae-guide-text'),/^Put skill points into Keen Strike: Lv 3 to 8\./,'The Mastery guide starts with the same skill');
+  assert.deepEqual(order,['Rending Blow','Overhead Slam','Keen Strike']);
+  assert.match(await plain(mastery.page,'.ae-guide-text'),/^Put skill points into Rending Blow: Lv 3 to 8\./,'The Mastery guide starts with the same skill');
   await mastery.context.close();
   const macro=await open(ascent(ref,'macro'),{live:true});
   assert.deepEqual(await macro.page.$$eval('.ae-macro-entry',items=>items.map(el=>el.dataset.macroKey)),['B'],'Macro 1 lists the main line once');
-  assert.match(await macro.page.getAttribute('#aeOwnKeys [data-bar-skill="Defiance"]','class'),/is-locked/,'Defiance (Lv 16) greyed on its own key');
+  // Level planner (17 Oct 2026): Defiance (Lv 16) is not on a Lv 12 bar at all; its key stays free and it waits in Comes later.
+  assert.equal(await macro.page.locator('#aeOwnKeys [data-bar-skill="Defiance"]').count(),0,'Defiance (Lv 16) not on a Lv 12 bar');
   assert.doesNotMatch(await plain(macro.page,'.ae-macro'),/Defiance/,'and never in the macro');
   await macro.context.close();
 });
 await check('Lv 41 walk: Wrath Wave equipped is a popular swap for Rage Burst, said once and not offered again',async()=>{
   const {page,context,errors}=await open(ascent(lv41Ref,'stigma'),{live:true});
-  assert.equal(await plain(page,'[data-stigma-line="Wrath Wave"]'),'Slot 3: Wrath Wave is a popular swap for Rage Burst. Keep it or switch to Rage Burst.');
+  // Level planner (17 Oct 2026): Rage Burst is slot 1 now (it was slot 3).
+  assert.equal(await plain(page,'[data-stigma-line="Wrath Wave"]'),'Slot 1: Wrath Wave is a popular swap for Rage Burst. Keep it or switch to Rage Burst.');
   const text=await page.evaluate(()=>document.body.innerText);
   assert.doesNotMatch(text,/Swap it for the stigmas below|Want a swap\? Wrath Wave/,'The screen never tells the player to swap Wrath Wave out, then offers it');
   assert.deepEqual(await page.$$eval('[data-alt]',items=>items.map(el=>el.dataset.alt)),['Blade Toss'],'Swaps: only the one not equipped');
@@ -1076,7 +1097,7 @@ await check('Lv 41 walk: Wrath Wave equipped is a popular swap for Rage Burst, s
   const guide=[];
   for(let i=0;i<8;i++){guide.push(await plain(page,'.ae-guide-text'));if(!await page.locator('#aeGuide [data-guide="next"]').count())break;await page.click('#aeGuide [data-guide="next"]');}
   assert.equal(guide.filter(line=>/Wrath Wave/.test(line)).length,1,'The guide says it once');
-  assert.ok(!guide.some(line=>/Slot 3: equip Rage Burst/.test(line)),'and does not also tell the player to equip Rage Burst in that slot');
+  assert.ok(!guide.some(line=>/Slot 1: equip Rage Burst/.test(line)),'and does not also tell the player to equip Rage Burst in that slot');
   assert.equal(await goldCount(page),1);
   assert.deepEqual(errors,[]);
   await context.close();

@@ -12,6 +12,7 @@
 
 import { nodeSkill, planRoleRoute, routePriorities } from './daevanion-planner.mjs';
 import { gearRows, rankPointStats, statChains } from './stat-advisor.mjs';
+import { orderMastery, pickSpecialties, planLevelSetup, weightsFor } from './level-planner.mjs';
 
 export const AION2_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
 
@@ -287,7 +288,7 @@ export function daevanionSkillNodes(build) {
   return (!isPending(build.daevanion) && build.daevanion.skillNodes) || (build.coreSkills ?? []).map(skill => skill.name);
 }
 
-function planBoards(build, level, model, facts, cap = null) {
+function planBoards(build, level, model, facts, cap = null, { points = null } = {}) {
   const boards = (facts['daevanion-boards']?.value ?? []).map(board => {
     const live = model?.daevanion?.find(item => item.id === board.id || item.name === board.name) ?? null;
     return {
@@ -304,7 +305,7 @@ function planBoards(build, level, model, facts, cap = null) {
   const budget = facts['daevanion-budget']?.value ?? null;
   const priorities = isPending(build.daevanion) ? [] : routePriorities(build.daevanion);
   // The route inside the budget, once a Daeva's boards have been read (every open board needs its nodes; else it stops there).
-  const roleRoute = model && priorities.length ? planRoleRoute({ boards, priorities, budget, cap, skills: daevanionSkillNodes(build) }) : null;
+  const roleRoute = model && priorities.length ? planRoleRoute({ boards, priorities, budget, cap, skills: daevanionSkillNodes(build), have: Number.isFinite(points) ? points : null }) : null;
   return {
     boards,
     budget: budget ? { points: budget.points, boardCost: budget.boardCost ?? {}, status: facts['daevanion-budget'].status ?? null } : null,
@@ -512,7 +513,7 @@ const namesOf = list => [...new Set(list.map(({ advice }) => advice.grade.name))
  * The ranked "do this now" list. Fixes read from the character come first (they are about this exact
  * character), then the build steps that apply at this level.
  */
-function nowList(level, build, skills, stigmas, boards, model, mastery = null, skillBar = null, { grades = null, progression = null } = {}) {
+function nowList(level, build, skills, stigmas, boards, model, mastery = null, skillBar = null, { grades = null, progression = null, setup = null } = {}) {
   const list = [];
   const push = (rank, title, detail, refs = [], kind = 'build', view = 'mastery', extra = {}) => list.push({ rank, title, detail, refs, kind, view, ...extra });
 
@@ -560,6 +561,12 @@ function nowList(level, build, skills, stigmas, boards, model, mastery = null, s
   for (const skill of skills) {
     const due = skill.picks.filter(pick => skill.skillLevel !== null && pick.skillLevel <= skill.skillLevel);
     if (due.length) push(45, `Pick ${skill.name} Specialty: ${due.map(pick => pick.pick).join(', ')}`, `Your ${skill.name} is Lv ${skill.skillLevel}, so ${due.length === 1 ? 'this perk is' : 'these perks are'} open.`, due.flatMap(pick => pick.refs));
+  }
+  // The main line for this level, when it is not yet the build's full line: the level planner put a stand-in in or left
+  // a skill out, so the bar to set up now differs from the one at the cap.
+  const line = skillBar?.stacks?.B?.skills?.length ? skillBar.stacks.B : skillBar?.stacks?.A;
+  if (setup?.planned && line?.skills?.length && (line.skills.some(skill => skill.standIn) || setup.later.some(item => item.where !== 'own key'))) {
+    push(47, `Set your ${String(line.name ?? 'stack').toLowerCase()}: ${line.skills.map(skill => skill.name).join(', ')}`, `What your Lv ${level} bar can fire now.${setup.later.length ? ` ${setup.later[0].name} joins ${setup.later[0].unlockLevel ? `at Lv ${setup.later[0].unlockLevel}` : 'later'}.` : ''}`, [], 'build', 'skill-bar', { key: line.key });
   }
   if (!stigmas.pending && stigmas.open) push(50, `Slot ${stigmas.slots.filter(slot => slot.open).map(slot => slot.name).join(', ')}`, `You have ${stigmas.open} stigma ${stigmas.open === 1 ? 'slot' : 'slots'} open at Lv ${level}.`, stigmas.refs, 'build', 'stigma');
   if (!model) {
@@ -611,8 +618,9 @@ function iconIndex(icons, className) {
  * @param {object} input.data       { progression, skills, builds } from data/advisor/ (builds for this class).
  * @param {object} [input.model]    The armory character model (armory-adapter.mjs), when one is loaded.
  * @param {string} [input.team]     main-tank, off-tank-templar or solo, for a build with team variants (TEAMS).
+ * @param {number} [input.daevanionPoints] The Daevanion points the player has to spend now (typed on the Daevanion screen).
  */
-export function buildAscentPlan({ className, role, team = null, level, data, model = null }) {
+export function buildAscentPlan({ className, role, team = null, level, data, model = null, daevanionPoints = null }) {
   if (!AION2_CLASSES.includes(className)) throw new TypeError(`Unknown AION 2 class: ${className}`);
   const facts = indexProgression(data.progression);
   const capRule = {
@@ -651,20 +659,33 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
   }
   const catalogue = skillIndex(data.skills, className);
   const mechanics = indexMechanics(data.mechanics, data.progression);
-  const skills = planSkills(build, catalogue, lvl, model, facts, capRule);
-  const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
-  const daevanion = planBoards(build, lvl, model, facts, capRule.cap);
-  const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons, capRule, daevanion.boards);
+  // The level planner (level-planner.mjs): the setup this Daeva can run at this level, from the skill levels they have.
+  // The build as the plan uses it here: the planner's stigma order, Specialty picks and the macro block for this level.
+  const ctx = { build, team: teamPlan?.id ?? null, catalogue, icons: gameIcons, level: lvl, model, facts, cap: levelCap(data.progression) };
+  const setup = planLevelSetup(ctx, { boards: facts['daevanion-boards']?.value ?? [] });
+  const picks = pickSpecialties(ctx, weightsFor(build, ctx.team));
+  const levelBuild = {
+    ...build,
+    stigmas: isPending(build.stigmas) ? build.stigmas : { ...build.stigmas, slots: build.stigmas.slots.map((slot, index) => ({ ...slot, name: setup.slots[index]?.name ?? slot.name, why: setup.slots[index]?.why ?? null, status: setup.slots[index]?.status ?? null })) },
+    specialties: (build.specialties ?? []).map(entry => ({ ...entry, picks: picks.get(entry.skill) ?? entry.picks })),
+    macro: setup.block ?? build.macro
+  };
+  const skills = planSkills(levelBuild, catalogue, lvl, model, facts, capRule);
+  const stigmas = planStigmas(levelBuild, lvl, model, facts, gameIcons);
+  const daevanion = planBoards(build, lvl, model, facts, capRule.cap, { points: daevanionPoints });
+  const mastery = planMastery(levelBuild, catalogue, lvl, model, facts, gameIcons, capRule, daevanion.boards, { ctx, picks, stigmaSet: setup.stigmaSet });
   const rotation = planRotation(build.rotation, catalogue, lvl, stigmas);
   const chains = planChains({ catalogue, className, mechanics });
   // A follow-up that opens above the Mastery cap says how the build gets there, or that it names no way (Reckless Strike: no Keen Strike node).
   for (const chain of chains.chains) chain.reach = chain.opensAt && chain.leadIns[0] ? reachSkillLevel(chain.leadIns[0], chain.opensAt, { ...capRule, nodeSkills: daevanionSkillNodes(build) }) : null;
-  const skillBar = planSkillStacks({ build, stigmas, gameIcons, catalogue, level: lvl, facts, mechanics, model, chains });
+  const skillBar = planSkillStacks({ build: levelBuild, stigmas, gameIcons, catalogue, level: lvl, facts, mechanics, model, chains, later: setup.later });
   for (const entry of [...mastery.active, ...mastery.passive]) entry.chains = chainsOf(chains, entry.name);
   return {
     ...base,
     pending: null,
-    now: nowList(lvl, build, skills, stigmas, daevanion, model, mastery, skillBar, { grades: data.grades ?? null, progression: data.progression }),
+    setup: setupSummary(setup, { mastery, stigmas, daevanion, build, level: lvl, skillBar, ctx }),
+    nextAt: setup.next,
+    now: nowList(lvl, levelBuild, skills, stigmas, daevanion, model, mastery, skillBar, { grades: data.grades ?? null, progression: data.progression, setup }),
     skills,
     stigmas,
     daevanion,
@@ -678,8 +699,53 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
     mastery,
     skillBar,
     chains,
-    macro: planMacro({ build, skillBar, mechanics, facts, level: lvl }),
+    macro: planMacro({ build: levelBuild, skillBar, mechanics, facts, level: lvl, later: setup.later }),
     mechanics
+  };
+}
+
+/**
+ * The setup for now, in one record every screen and the Daeva Card read: the main line, the stigmas in their slots, the
+ * first Mastery step, the Daevanion board to work on, the stat focus, what comes later, and the trends with the logic's
+ * verdict. planned is false for a build with no ascent record: the screens then say "Not confirmed yet".
+ */
+function setupSummary(setup, { mastery, stigmas, daevanion, build, level, skillBar }) {
+  const line = ['A', 'B'].map(key => skillBar?.stacks?.[key]).filter(stack => stack?.skills?.length).map(stack => ({ key: stack.key, name: stack.name ?? null, skills: stack.skills.map(skill => skill.name) }));
+  const open = (daevanion.boards ?? []).filter(board => board.open);
+  const tier = Array.isArray(daevanion.nodePriorities) && daevanion.nodePriorities.length ? daevanion.nodePriorities[0] : null;
+  const known = name => (skillBar ? [...Object.values(skillBar.stacks).flatMap(stack => stack.skills.map(skill => skill.name)), ...(mastery?.active ?? []).filter(entry => entry.unlocked !== false).map(entry => entry.name)] : []).includes(name);
+  const route = daevanion.roleRoute;
+  const board = route?.current ? open.find(item => item.id === route.current.id) ?? null : open[0] ?? null;
+  return {
+    level,
+    planned: setup.planned,
+    confirmed: setup.confirmed,
+    status: setup.status,
+    weights: setup.weights,
+    weightsWhy: setup.weightsWhy,
+    refs: setup.refs,
+    line,
+    mainAttack: skillBar?.mainAttack ?? null,
+    stigmas: stigmas.pending ? [] : stigmas.slots.map(slot => ({ slot: stigmas.slots.indexOf(slot) + 1, name: slot.name, open: slot.open, slotLevel: slot.slotLevel, why: slot.why ?? null, status: slot.status ?? null })),
+    mastery: (mastery?.spend ?? [])[0] ?? null,
+    daevanion: {
+      open: open.map(item => item.name),
+      board: board ? { id: board.id, name: board.name } : null,
+      firstLevel: daevanion.boards?.[0]?.unlockLevel ?? null,
+      // The first tier's skill nodes: the ones the Daeva has now, and the ones that wait for the skill.
+      now: tier?.skills ? tier.skills.filter(known) : [],
+      waits: tier?.skills ? tier.skills.filter(name => !known(name)) : [],
+      left: route?.known ? route.left : null,
+      have: route?.have ?? null
+    },
+    stats: isPending(build.stats) ? null : { first: build.stats.order[0], order: build.stats.order, status: build.stats.status ?? null },
+    later: skillBar?.later ?? [],
+    // Mastery trends against the planner's first step, in their level band.
+    trends: [...setup.trends, ...(build.ascent?.preferences ?? []).filter(pref => pref.kind === 'mastery' && level >= (pref.from ?? 1) && level <= (pref.to ?? Infinity)).map(pref => {
+      const first = (mastery?.spend ?? [])[0] ?? null;
+      const used = first?.name === pref.skill;
+      return { ...pref, used, verdict: used ? pref.why : first ? `${first.name} comes first now: ${first.why ?? 'it is worth more to this role and team.'}` : 'Nothing to level now.' };
+    })]
   };
 }
 
@@ -782,7 +848,7 @@ export function skillTriggers(info, skillLevel) {
   });
 }
 
-function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, mechanics, model = null, chains = null }) {
+function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, mechanics, model = null, chains = null, later = [] }) {
   const skills = [...gameIcons.values()];
   if (!skills.length) return null;
   const rule = ruleOf(mechanics, 'skill-stack');
@@ -847,7 +913,8 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     // The left-hand block: the opener first, in its order, then every other own key grouped by reason.
     // An own key is one skill, or a small stack the build names (two movement skills on one key).
     const namesOf = item => (Array.isArray(item.stack) ? item.stack.filter(name => byName.has(name)) : byName.has(item.name) ? [item.name] : []);
-    const own = (block.ownKeys ?? []).filter(item => namesOf(item).length && !namesOf(item).some(name => placed.has(name)));
+    // A reserved key (level planner: its skill comes later) keeps its place in the order and stays free.
+    const own = (block.ownKeys ?? []).filter(item => item.reserved || (namesOf(item).length && !namesOf(item).some(name => placed.has(name))));
     const opener = block.opener ?? [];
     const first = item => namesOf(item).map(name => opener.indexOf(name)).filter(at => at >= 0).sort((a, b) => a - b)[0] ?? -1;
     const rank = item => (first(item) >= 0 ? first(item) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
@@ -856,6 +923,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     const keys = [...LEFT_KEYS];
     for (const item of ordered) {
       const key = keys.shift();
+      if (item.reserved) { if (key) stacks[key].reserved = item.reserved.filter(name => byName.has(name)); continue; }
       const why = item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
       const names = namesOf(item);
       if (!key) { for (const name of names) notOnBar.push({ name, icon: byName.get(name).icon, unlockLevel: byName.get(name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
@@ -863,7 +931,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
       const stacked = cells.length > 1;
       const top = cells.at(-1);
       put(key, cells, {
-        solo: !stacked, ownStack: stacked, label: item.label ?? null, reason: why, opener: !stacked && opener.includes(names[0]) ? opener.indexOf(names[0]) + 1 : null,
+        solo: !stacked, ownStack: stacked, label: item.label ?? null, reason: why, reserved: item.waiting?.length ? item.waiting.filter(name => byName.has(name)) : null, opener: !stacked && opener.includes(names[0]) ? opener.indexOf(names[0]) + 1 : null,
         fillerMissing: stacked && !(top.noCooldown && !top.conditional) ? 'Its own key, not a macro entry: it fires the lowest ready skill when you press it.' : null
       });
     }
@@ -871,8 +939,10 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   } else {
     put('LMB', [cell(basic.name, { key: 'LMB', index: 0, role: 'main', why: null })], { solo: true, reason: `The game keeps ${basic.name} on left click.` });
   }
-  // Other actives the build does not place: listed with the reason, never guessed onto a key.
-  for (const skill of actives) if (!placed.has(skill.name) && !notOnBar.some(item => item.name === skill.name)) notOnBar.push({ name: skill.name, icon: skill.icon, unlockLevel: skill.needLevel, reason: 'Not in this build\'s bar. Swap it in if you like it.' });
+  // Other actives the build does not place, that the Daeva can use now: listed with the reason, never guessed onto a key.
+  // A skill that waits for a level or a slot is in the Comes later strip instead.
+  const waiting = new Set(later.map(item => item.name));
+  for (const skill of actives) if (!placed.has(skill.name) && !waiting.has(skill.name) && !(skill.needLevel > level) && !notOnBar.some(item => item.name === skill.name)) notOnBar.push({ name: skill.name, icon: skill.icon, unlockLevel: skill.needLevel, reason: 'Not in this build\'s bar. Swap it in if you like it.' });
 
   // A follow-up goes above its lead-in only once the chain rule is confirmed, only where the stack has a free row, under its filler.
   if (chains?.confirmed) {
@@ -890,7 +960,11 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   for (const stack of Object.values(stacks)) {
     const waiting = stack.skills.filter(skill => skill.locked);
     stack.firesNow = stack.skills.filter(skill => !skill.locked && !skill.needsSlot && skill.learned !== false).map(skill => skill.name);
-    stack.nextUnlock = waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null;
+    // Level planner: a skill the Daeva cannot place yet is off the bar, in Comes later, under the stack it joins.
+    const joins = later.filter(item => item.unlockLevel && (item.where === stack.name || item.where === MACRO_STACKS.find(([, key]) => key === stack.key)?.[0]));
+    const levels = [...waiting.map(skill => skill.unlockLevel), ...joins.map(item => item.unlockLevel)];
+    stack.nextUnlock = levels.length ? Math.min(...levels) : null;
+    stack.joinsLater = joins.map(item => ({ name: item.name, unlockLevel: item.unlockLevel }));
   }
   const bars = Array.from({ length: STACK_ROWS }, (_, row) => Object.fromEntries(SKILL_BAR_KEYS.map(key => {
     const skill = stacks[key].skills.find(item => item.row === row) ?? null;
@@ -900,6 +974,8 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   const result = {
     keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
     notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null,
+    // Skills the plan puts on the bar once the Daeva can place them (the Comes later strip), soonest first.
+    later: later.map(item => ({ ...item, icon: byName.get(item.name)?.icon ?? null })),
     opener: (block?.opener ?? []).filter(name => placed.has(name)),
     // False for a class whose stacks are not checked against a published top-player build yet (the page tags them).
     verified: block ? block.verified !== false : null,
@@ -1014,7 +1090,7 @@ function outOfMacro(skill, level) {
  * animation time) is out of the macro until it is ready, and says when. The main attack is held with the macro key and is
  * never an entry. Own keys come grouped by reason, the opener in order. Facts and rules come from progression.json.
  */
-function planMacro({ build, skillBar, mechanics, facts, level }) {
+function planMacro({ build, skillBar, mechanics, facts, level, later: waiting = [] }) {
   const rule = ruleOf(mechanics, 'macro-order');
   const maxEntries = macroMaxEntries(rule.facts);
   const rules = facts['macro-rules'] ?? null;
@@ -1048,7 +1124,8 @@ function planMacro({ build, skillBar, mechanics, facts, level }) {
     opener: skillBar.opener.map(name => ownCells.find(skill => skill.name === name)).filter(Boolean).map(skill => ({ name: skill.name, icon: skill.icon, key: skill.key, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })),
     ownKeys: groups,
     // What joins the macro later, soonest first: rows locked at this level, with the level.
-    later: entries.flatMap(entry => entry.skills.filter(skill => skill.locked).map(skill => ({ name: skill.name, key: entry.key, row: skill.row, unlockLevel: skill.unlockLevel }))).sort((a, b) => a.unlockLevel - b.unlockLevel),
+    // What joins the stacks later: the line skills the Daeva cannot place yet (the level planner), with the level when known.
+    later: waiting.filter(item => item.where !== 'own key').map(item => ({ name: item.name, key: null, row: null, unlockLevel: item.unlockLevel, reason: item.reason })),
     extras: skillBar.notOnBar.filter(item => item.extra),
     levelNotes: block.levelNotes ?? []
   };
@@ -1059,7 +1136,7 @@ function planMacro({ build, skillBar, mechanics, facts, level }) {
  * the build's key skills), each with its build priority, the Specialty picks for its three slots, all
  * five perks, and where the next skill points should go.
  */
-function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(), capRule = { cap: null, beyond: [], nodeBoards: 0 }, boards = []) {
+function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(), capRule = { cap: null, beyond: [], nodeBoards: 0 }, boards = [], planner = null) {
   const slotLevels = specialtySlotLevels(facts);
   const cap = capRule.cap;
   const core = new Map((build.coreSkills ?? []).map(skill => [skill.name, skill]));
@@ -1112,19 +1189,12 @@ function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(
   const byPriority = (a, b) => (a.priority ?? 99) - (b.priority ?? 99) || (a.needLevel ?? 0) - (b.needLevel ?? 0);
   const active = entries.filter(entry => entry.category === 'Active').sort(byPriority);
   const passive = entries.filter(entry => entry.category === 'Passive').sort((a, b) => (a.needLevel ?? 0) - (b.needLevel ?? 0));
-  // Skill points: key skills you have, below their target, highest priority first. Each step aims for
-  // the next Specialty slot or the target, whichever comes first.
-  // Never a step past the Mastery cap: a skill there is listed under atCap with its next +1 source instead.
-  const spend = active
-    .filter(entry => entry.priority !== null && entry.unlocked !== false && entry.goal && (cap === null || entry.skillLevel === null || entry.skillLevel < cap))
-    .map(entry => {
-      const from = entry.skillLevel ?? 1;
-      const nextSlot = slotLevels.find(slotLevel => slotLevel > from) ?? null;
-      const to = Math.min(nextSlot ? Math.min(nextSlot, entry.goal) : entry.goal, cap ?? Infinity);
-      const reason = nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : cap !== null && to === cap ? 'reaches the Mastery cap' : 'reaches the build target';
-      return { name: entry.name, from: entry.skillLevel, to, reason, priority: entry.priority };
-    })
-    .filter(step => step.from === null || step.from < step.to);
+  // Skill points: the level planner's order (level-planner.mjs orderMastery) over every skill the Daeva can level now,
+  // from the skill levels they have. Each step aims for the next Specialty slot or the target, whichever comes first,
+  // and never past the Mastery cap: a skill there is listed under atCap with its next +1 source instead.
+  const spend = planner
+    ? orderMastery(planner.ctx, weightsFor(build, planner.ctx.team), { entries: [...active, ...passive], cap, slotLevels, picks: planner.picks, stigmaSet: planner.stigmaSet })
+    : [];
   const atCap = cap === null ? [] : active
     .filter(entry => entry.priority !== null && entry.skillLevel !== null && entry.skillLevel >= cap)
     .map(entry => ({ name: entry.name, skillLevel: entry.skillLevel, cap, refs: entry.refs, next: nextLevelSource(entry.name, boards, capRule.beyond) }));

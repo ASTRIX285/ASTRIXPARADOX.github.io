@@ -476,7 +476,9 @@ await check('Skills page: ?tab=stigma opens Stigma; tabs keep the address; 13 st
   assert.equal(await page.locator('#aeSkillGrid .ae-mskill:not(.is-locked) .ae-mskill-lv').count(),3,'Three learned, each with its level');
   assert.equal(await page.locator('#aeSkillGrid .ae-mskill.is-locked .ae-lock').count(),10);
   assert.equal(await plain(page,'#aeSkillGrid .ae-mskill.is-locked .ae-lock'),'Lv 22','Locked: padlock and the level it unlocks at');
-  assert.equal(await plain(page,'#aeSkillTitle'),'Lunge Stance Lv. 1','The build\'s first stigma shows on load');
+  // Level planner (17 Oct 2026): the plan's first stigma slot is Rage Burst now (it opens Overhead Slam); it was Lunge Stance.
+  // This Daeva has not learned it, so the title carries no level.
+  assert.equal(await plain(page,'#aeSkillTitle'),'Rage Burst','The build\'s first stigma shows on load');
   await page.click('#aeSkillGrid .ae-mskill.is-locked');
   assert.match(await plain(page,'#aeSkillDetail .ae-card-status'),/Unlocks at Lv 22 with the quest The One Who Hears the Voice/);
   await page.click('[data-tab="mastery"]');

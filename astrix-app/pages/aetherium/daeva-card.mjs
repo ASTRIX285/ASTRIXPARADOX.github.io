@@ -108,6 +108,7 @@ function renderSummary() {
       <p class="ae-eyebrow" id="aeFirstMoveTitle">Your first move</p>
       <p class="ae-first-move-text" id="aeFirstMoveText">Working out your first move.</p>
       <a class="btn" id="aeFirstMoveGo" href="${esc(ascentUrl(state.ref, p.class))}" data-first-move hidden>Show me</a>
+      <div class="ae-card-setup" id="aeCardSetup" hidden></div>
     </section>
     <aside class="ae-guide" id="aeGuide" aria-label="Guide" aria-live="polite" hidden></aside>`;
   loadFirstMove().catch(() => {});
@@ -240,8 +241,30 @@ async function loadFirstMove() {
   go.textContent = move ? 'Show me' : 'Open Ascent Plan';
   if (move) { go.dataset.moveView = move.view; if (move.board) go.dataset.moveBoard = move.board; }
   go.hidden = false;
+  renderCardSetup(plan);
   strip.classList.add('is-ready');
   strip.dataset.move = move ? String(move.step) : 'none';
+}
+
+/* The setup for now and the next change, from the level planner: the main line, the stigmas, the next skill to level and
+   one "Next at Lv N" line with its reason. A build with no ascent record says it is not confirmed yet. */
+function renderCardSetup(plan) {
+  const box = $('#aeCardSetup');
+  if (!box) return;
+  const s = plan?.setup;
+  if (!s) { box.hidden = true; return; }
+  const line = s.line.find(item => item.name) ?? s.line[0] ?? null;
+  const stigmas = s.stigmas.filter(slot => slot.open && slot.name).map(slot => slot.name);
+  const next = plan.nextAt;
+  const tag = s.planned ? (s.status === 'reported' ? ' <span class="ae-tag is-reported">Reported</span>' : '') : ' <span class="ae-tag is-unconfirmed">Not confirmed yet</span>';
+  box.hidden = false;
+  box.innerHTML = `<p class="ae-setup-title">Your setup at Lv ${esc(s.level)}${tag}</p>
+    <dl class="ae-setup-list">
+      <div data-setup="line"><dt>${esc(line?.name ?? 'Macro')}</dt><dd>${esc(line ? line.skills.join(', ') : 'Nothing sourced yet')}</dd></div>
+      <div data-setup="stigmas"><dt>Stigmas</dt><dd>${esc(stigmas.length ? stigmas.join(', ') : (s.stigmas[0] ? `From Lv ${s.stigmas[0].slotLevel}` : 'None'))}</dd></div>
+      <div data-setup="mastery"><dt>Level next</dt><dd>${esc(s.mastery ? `${s.mastery.name} to Lv ${s.mastery.to}` : 'Nothing to level now')}</dd></div>
+    </dl>
+    <p class="ae-next-at" id="aeNextAt"${next ? ` data-next-level="${esc(next.level)}"` : ''}><b>${next ? `Next at Lv ${esc(next.level)}` : 'Next'}</b> ${esc(next ? `${next.text}${next.why ? ` ${next.why}` : ''}` : `Nothing changes in your setup before Lv ${plan.levelCap}.`)}</p>`;
 }
 
 /* The flow on this page: step 1. With a Daeva on the card, steps 2 and 3 open, the Next goes to step 2 (See your setup)
