@@ -1080,7 +1080,8 @@ check('every DPS class matches section 6 of the research record: rows, main atta
     assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
     for(const key of bar.left.filter(item=>bar.stacks[item].reserved))assert.ok(bar.later.some(item=>bar.stacks[key].reserved.includes(item.name)),`${name}: a free key's skill is in Comes later`);
     assert.equal(plan.macro.blockStatus,'reported','Section 6 is REPORTED');
-    assert.equal(plan.macro.verified,false,'Not checked against a published top-player build: tagged on the page');
+    // The Assassin's main line was checked against published builds (docs/level-guidance/assassin.md): no tag.
+    assert.equal(plan.macro.verified,name==='Assassin','Not checked against a published top-player build: tagged on the page');
   }
 });
 check('Templar: stack A has Doom Shield in row 0, stack B Debilitating Smash in row 0, Vicious Strike between them',()=>{
