@@ -400,11 +400,16 @@ await check('Skill Bar: the game layout, Keen Strike set by the game on left cli
   assert.equal(await page.getAttribute('[data-bar-key="0:LMB"] .ae-bar-pin','title'),'Set by the game');
   // Level planner (17 Oct 2026): at Lv 23 only stigma slot 1 is open (Rage Burst), so the keys for Zikel's Blessing, Lunge
   // Stance and Focused Block stay free in the record's order, and those three wait in Comes later with their slot level.
-  assert.deepEqual(['1','2','3','4','5','6','7'].map(key=>main[key]?.[0]),['Defiance','Sword Aura Rampage',undefined,undefined,'Leaping Slam','Ruinous Blow',undefined],'The record\'s order, free keys kept');
-  assert.deepEqual(await col('5'),['Rush Strike','Leaping Slam'],'Movement shares key 5');
+  // Keys by the hand (Miguel, in game, 17 Oct 2026): Defiance on Space bar; 1 to 4 in the record's order, the stacked
+  // movement key on Q, then E; free keys keep their place.
+  assert.deepEqual(['1','2','3','4','Q','E','5'].map(key=>main[key]?.[0]),['Sword Aura Rampage',undefined,undefined,'Ruinous Blow','Leaping Slam',undefined,undefined],'The record\'s order by the hand, free keys kept');
+  assert.equal(await page.getAttribute('#aeSpaceKey [data-bar-skill]','data-bar-skill'),'Defiance','Defiance on Space bar');
+  assert.equal(await page.locator('.ae-bar-blocks [data-bar-skill="Defiance"]').count(),0,'Defiance on no number key');
+  assert.match(await plain(page,'#aeCopyBar [data-copy-step="Space"]'),/^Space bar Defiance on every class$/);
+  assert.deepEqual(await col('Q'),['Rush Strike','Leaping Slam'],'Movement shares Q: stacks go on Q and E');
   assert.equal(await page.locator('#aeSkillBar .ae-lock').count(),0,'No locked skill on the bar');
   assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>[el.dataset.laterSkill,el.querySelector('small').textContent])),[['Lunge Stance','Stigma slot 2 opens at Lv 27.'],["Zikel's Blessing",'Stigma slot 3 opens at Lv 32.'],['Focused Block','Stigma slot 4 opens at Lv 37.']]);
-  assert.match(await page.getAttribute('[data-bar-keycap="3"]','aria-label'),/kept free for Zikel's Blessing/);
+  assert.match(await page.getAttribute('[data-bar-keycap="2"]','aria-label'),/kept free for Zikel's Blessing/);
   assert.doesNotMatch(await plain(page,'#aeCopyBar'),/Zikel|Lunge|Focused|from Lv/,'Copy this bar lists only what goes on now');
   assert.match(await page.getAttribute('[data-bar-key="3:B"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
   assert.match(await plain(page,'.ae-guide'),/After E: your main attack \(Keen Strike\) on left click\. The main line is on right click and is your macro\./);
@@ -913,15 +918,16 @@ await check('key panel: tap a key and the stack reads in plain words with each s
   assert.ok(parseFloat(await style(page,'#aeInfo [data-key-say]','font-size'))>=16);
   await page.keyboard.press('Escape');
   await page.click('[data-bar-keycap="1"]');
-  assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Key 1: Defiance\. Clears crowd control: you need it at a chosen moment\.$/);
+  assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Key 1: Sword Aura Rampage\. Use it in stagger windows: it only hits a staggered target\.$/);
   await page.keyboard.press('Escape');
   await page.click('[data-bar-keycap="LMB"]');
   assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Left click: Keen Strike\. The game keeps Keen Strike on left click\./);
   await page.keyboard.press('Escape');
-  await page.focus('[data-bar-keycap="5"]');
+  // Keys by the hand (17 Oct 2026): the movement stack is on Q.
+  await page.focus('[data-bar-keycap="Q"]');
   await page.keyboard.press('Enter');
-  assert.equal(await plain(page,'#aeInfoTitle'),'Key 5','Keyboard opens the panel too');
-  assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Key 5: Leaping Slam fires when ready, otherwise Rush Strike\.$/);
+  assert.equal(await plain(page,'#aeInfoTitle'),'Key Q','Keyboard opens the panel too');
+  assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Key Q: Leaping Slam fires when ready, otherwise Rush Strike\.$/);
   await context.close();
 });
 await check('chains come from the data and show on the skill card: lead-in, arrow, follow-up, marked not confirmed; Ankle Slice waits for its lead-ins',async()=>{
@@ -1009,10 +1015,11 @@ await check('Lv 12 walk: the main line in place with Rage Burst greyed, Ruinous 
   const {page,context,errors}=await open(ascent(ref,'skill-bar'),{live:true});
   const col=key=>page.$$eval(`[data-bar-key$=":${key}"][data-bar-skill]`,cells=>cells.map(el=>[Number(el.dataset.barKey.split(':')[0]),el.dataset.barSkill]).sort((a,b)=>a[0]-b[0]).map(item=>item[1]));
   // Level planner (17 Oct 2026): only what this Lv 12 Daeva can place is on the bar. Mocking Blade opens Overhead Slam in
-  // Rage Burst's row until Rage Burst comes at Lv 22; key 6 stays free for Ruinous Blow (Lv 14). Both wait in Comes later.
+  // Rage Burst's row until Rage Burst comes at Lv 22; key 4 stays free for Ruinous Blow (Lv 14). Both wait in Comes later.
   assert.deepEqual(await col('B'),['Mocking Blade','Overhead Slam','Rending Blow'],'Rows 0, 1 and 3 of the main line');
-  assert.deepEqual(await col('6'),[],'Key 6 kept free for Ruinous Blow');
-  assert.match(await page.getAttribute('[data-bar-keycap="6"]','aria-label'),/kept free for Ruinous Blow, which comes later/);
+  assert.deepEqual(await col('4'),[],'Key 4 kept free for Ruinous Blow');
+  assert.match(await page.getAttribute('[data-bar-keycap="4"]','aria-label'),/kept free for Ruinous Blow, which comes later/);
+  assert.equal(await page.locator('#aeSpaceKey').count(),0,'Defiance (Lv 16) not on Space yet: it waits in Comes later');
   assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked').count(),0,'Nothing greyed on the bar');
   assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill)).then(list=>list.slice(0,2)),['Ruinous Blow','Defiance']);
   assert.ok((await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill))).includes('Rage Burst'));
@@ -1076,7 +1083,7 @@ await check('Skill Bar copy checklist: key by key, row by row, ending with the m
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=12','skill-bar'));
   const steps=await page.$$eval('#aeCopyBar .ae-copy-steps > li',items=>items.map(el=>el.dataset.copyStep));
   // Level planner (17 Oct 2026): only keys with something to place at Lv 12 (free keys are skipped), and no row from a later level.
-  assert.deepEqual(steps,['2','5','B','macro']);
+  assert.deepEqual(steps,['1','Q','B','macro'],'Keys by the hand: key 1, the movement stack on Q, the main line');
   assert.equal(await plain(page,'#aeCopyBar [data-copy-step="macro"]'),'Then add the main line to Macro 1.');
   assert.deepEqual(await page.$$eval('#aeCopyBar [data-copy-step="B"] .ae-copy-rows li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Row 0 Mocking Blade','Row 1 Overhead Slam','Row 2 leave it empty','Row 3 Rending Blow']);
   assert.doesNotMatch(await plain(page,'#aeCopyBar'),/from Lv|needs a stigma slot/,'Nothing in the copy list waits for a level or a slot');

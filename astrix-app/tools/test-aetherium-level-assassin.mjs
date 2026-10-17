@@ -385,7 +385,8 @@ if(process.env.AE_BROWSER!=='0'){
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
       if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
       else assert.ok(later.length>0);
-      assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','RMB','B'],'Left click, Infiltrate on right click (its own key), then the main line in one more column');
+      assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'Left click, then the main line on right click (Defiance is on Space, so Infiltrate fits on a number key)');
+      assert.equal(await page.locator('[data-bar-keycap="B"].is-mouse').count(),1,'The main line on right click');
       assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),0,`Lv ${level}: no stacks-unverified tag`);
       assert.equal(await page.locator('#aeStackRule [data-status-tag="bar-layout"]').count(),1,`Lv ${level}: the layout is REPORTED, so it keeps its tag`);
       await context.close();
