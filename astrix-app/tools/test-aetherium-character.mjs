@@ -1355,6 +1355,7 @@ for(const width of [390,1600]){
         const card=await boxOf(page,'#aeInfo .ae-info-card'),tabs=await boxOf(page,'#aeEnhancePanel .ae-etabs');
         assert.ok(tabs.right<=card.right+1&&tabs.left>=card.left-1,`${width}: the tabs fit the card`);
         if(pos===2)await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
+        await page.$eval('#aeEnhancePanel',el=>el.scrollIntoView({block:'start'}));
         await shot(page,`enhance-${pos===1?'weapon':'guard'}-${role}`,width);
         await page.keyboard.press('Escape');
       }
