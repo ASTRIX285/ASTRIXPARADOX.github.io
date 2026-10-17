@@ -1,0 +1,8 @@
+# feature/aetherium-level-cleric: the level planner guides the Cleric from Lv 1 to 45 (healer and a published dps build): tooltip values and synergies, trends with the logic's verdict, research record. Data only, no planner change.
+astrix-app/games/aion2/data/advisor/builds/cleric.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/cleric.md
+astrix-app/tools/test-aetherium-level-cleric.mjs
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+astrix-app/tools/test-aetherium-ascent.mjs

@@ -3490,10 +3490,7 @@
       "class": "Cleric",
       "name": "Earth's Retribution",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Basic Earth attack on one target within 20m that restores MP.",
       "role": {
         "value": "filler",
@@ -3503,15 +3500,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "132 MP a hit in place of 110.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Discharge chain skill trigger chance +20%"
+          "text": "Discharge chain skill trigger chance +20%",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Discharge, its follow-up, comes more often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3542,12 +3572,77 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "main-attack",
         "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "Discharge cuts Bolt by 7 s when it lands.",
+          "skillLevel": 12,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 2,
+          "text": "Restores 110 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Earth damage on your target at 20 m.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 110,
+          "text": "Restores 110 MP a hit.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Bolt",
+          "seconds": 7,
+          "skillLevel": 12,
+          "text": "Discharge cuts Bolt by 7 s when it lands, once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -3555,10 +3650,7 @@
       "class": "Cleric",
       "name": "Judgment Thunder",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Wind AoE on up to 4 enemies around a target within 20m.",
       "role": {
         "value": "damage",
@@ -3568,15 +3660,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs a fifth less MP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to 12% more damage on a single boss.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Divine Punishment cuts enemy Combat Speed 10% for 5s"
+          "text": "Divine Punishment cuts enemy Combat Speed 10% for 5s",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "The enemy attacks 10% slower for 5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3607,11 +3732,37 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Wind damage on up to 4 enemies, always ready: it fills every gap in stack A.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -3629,15 +3780,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "+5% Defense while healing"
+          "text": "+5% Defense while healing",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Defense +5% while it heals.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "20% more healing at or below 50% HP"
+          "text": "20% more healing at or below 50% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals 20% more on anyone at half HP or less.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+5% Incoming Heal while healing"
+          "text": "+5% Incoming Heal while healing",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals on you land 5% harder while it runs.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3668,12 +3852,38 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "heal",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Heals you and the party within 40 m every 2 s for 30 s, and you can cast it on the move.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 25,
+        "10": 31
       }
     },
     {
@@ -3691,15 +3901,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Two extra consecutive uses"
+          "text": "Two extra consecutive uses",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1.5,
+              "text": "Cast it three times in a row before the cooldown.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "20% more healing at or below 50% HP"
+          "text": "20% more healing at or below 50% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals 20% more on anyone at half HP or less.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% chance to remove 1 debuff"
+          "text": "50% chance to remove 1 debuff",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Half the time it also clears a debuff.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3730,12 +3973,50 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "heal",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Heals you and the party member with the lowest HP within 40 m, every 6 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Healing Light",
+          "seconds": 2,
+          "skillLevel": 16,
+          "text": "2 s shorter cooldown once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 28,
+        "10": 34
       }
     },
     {
@@ -3753,15 +4034,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Removes up to 2 debuffs"
+          "text": "Removes up to 2 debuffs",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Clears two debuffs in place of one.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "One extra consecutive use"
+          "text": "One extra consecutive use",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Cast it twice in a row before the cooldown.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "3s shorter cooldown"
+          "text": "3s shorter cooldown",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Ready every 9 s in place of 12 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3792,12 +4106,50 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "heal",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Heals you and the party within 40 m and clears a debuff from each.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Radiant Recovery",
+          "seconds": 3,
+          "skillLevel": 8,
+          "text": "3 s shorter cooldown once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 30,
+        "10": 36
       }
     },
     {
@@ -3815,11 +4167,33 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Restores 100 MP on hit"
+          "text": "Restores 100 MP on hit",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "100 MP back on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to 12% more damage on a single boss.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
@@ -3854,6 +4228,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3865,9 +4249,53 @@
           "type": "condition",
           "text": "Only on a target with Chain of Torment.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
+        },
+        {
+          "type": "cdCut",
+          "text": "A critical hit resets its cooldown.",
+          "skillLevel": 12,
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Your main damage hit: Earth damage on the target with Chain of Torment and up to 3 more, every 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "Chain of Torment",
+          "text": "Fires only on a target with Chain of Torment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Condemnation",
+          "seconds": 3,
+          "skillLevel": 12,
+          "text": "A critical hit resets its cooldown, once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 26,
+        "10": 32
+      }
     },
     {
       "id": "cleric-bolt",
@@ -3888,11 +4316,33 @@
         },
         {
           "skillLevel": 8,
-          "text": "+300 skill Accuracy"
+          "text": "+300 skill Accuracy",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Misses less.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "30% faster skill speed"
+          "text": "30% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Charges and fires 30% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3923,12 +4373,38 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "charged",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Charged Wind burst on up to 4 enemies, with a big stagger hit (20 to 35).",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 32,
+        "10": 38
       }
     },
     {
@@ -3950,11 +4426,33 @@
         },
         {
           "skillLevel": 8,
-          "text": "Becomes an AoE skill"
+          "text": "Becomes an AoE skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hits up to 4 enemies, the same on one.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Aura attacks 50% faster"
+          "text": "Aura attacks 50% faster",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "The aura hits 50% more often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3975,8 +4473,50 @@
           "retrievedOn": "2026-10-06",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
-      ]
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A still aura beside you hits your target for 5 s, every 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Divine Aura",
+          "seconds": 10,
+          "skillLevel": 16,
+          "text": "10 s shorter cooldown once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      }
     },
     {
       "id": "chanter-onslaught",
@@ -7458,18 +7998,55 @@
       "class": "Cleric",
       "name": "Chain of Torment",
       "unlockLevel": 4,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
+      "cooldownSeconds": 20,
       "summary": {
         "pending": true,
         "reason": "Not in the skill catalogue yet. Added for its macro use."
       },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Slows the target for 5s"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Damage over time lasts 3s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Its damage over time runs 13 s in place of 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% chance to Knock Down for 3s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Cuts enemy damage tolerance a further 10% in PvE",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 2,
+              "text": "The target takes a further 10% more PvE damage from everyone.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion; damage over time ticks twice as often"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7481,11 +8058,66 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Opens Condemnation on the target for 10 s.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "The target takes 5% more PvE damage from the whole party for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Earth damage on up to 4 enemies and damage over time for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Condemnation",
+          "via": "debuff",
+          "text": "Condemnation fires only on a target with Chain of Torment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
       }
     },
     {
@@ -7493,18 +8125,44 @@
       "class": "Cleric",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
+      "cooldownSeconds": 60,
       "summary": {
         "pending": true,
         "reason": "Not in the skill catalogue yet. Added for its macro use."
       },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Blessing of Regeneration chain skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1,000 Stamina on use"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 10% HP on use",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 10% when you use it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Tenacity lasts 2s longer"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Big PvE and PvP damage tolerance during Tenacity"
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7516,12 +8174,38 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Clears stun, knockdown and fear and gives 5 s of status immunity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 34,
+        "10": 40
       }
     },
     {
@@ -7529,10 +8213,7 @@
       "class": "Cleric",
       "name": "Light of Protection",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
+      "cooldownSeconds": 5,
       "summary": {
         "pending": true,
         "reason": "Not in the skill catalogue yet. Added for its macro use."
@@ -7552,13 +8233,966 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "toggle",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "You deal 10.5% more PvE damage, all the time.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "The party nearby deals 10.5% more PvE damage too.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "You and the party take 10.5% less PvE damage, all the time.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "At stigma Lv 5 heals on you land 10% harder.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ],
+          "skillLevel": 5
+        }
+      ],
+      "synergies": [
+        {
+          "type": "clash",
+          "target": "Undefeated Mantra",
+          "text": "Its damage boost does not stack with the Chanter's Undefeated Mantra: only the higher skill level counts, and the Mantra wins a tie.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cleric-lightning-strike-scattershot",
+      "class": "Cleric",
+      "name": "Lightning Strike Scattershot",
+      "unlockLevel": 5,
+      "kind": "skill",
+      "cooldownSeconds": 0,
+      "summary": "Hits a staggered target within 20 m.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs 5% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 5% of the damage it deals.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 120 MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP back on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Usable while moving"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Each hit cuts all cooldowns by 1s"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        },
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts all cooldowns by 1 s.",
+          "skillLevel": 16,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits a staggered target, with no cooldown: press it in stagger windows.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "skillLevel": 16,
+          "text": "Each hit cuts all your cooldowns by 1 s, once you pick that perk.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      }
+    },
+    {
+      "id": "cleric-debilitating-mark",
+      "class": "Cleric",
+      "name": "Debilitating Mark",
+      "unlockLevel": 1,
+      "kind": "skill",
+      "cooldownSeconds": 10,
+      "summary": "Wind damage on up to 4 enemies; the enemy deals 5% less PvE damage and takes damage over time for 10 s.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Costs no MP and restores 150 MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Free to cast, and 150 MP back.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Target Defense 15% lower while its damage runs",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 1.5,
+              "text": "The target has 15% less Defense for the party for 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-cleric"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% chance to Stun for 3s"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Cuts enemy PvE damage a further 10%"
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion; damage over time ticks twice as often"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "The enemy deals 5% less PvE damage for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Wind damage on up to 4 enemies and damage over time for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
+    },
+    {
+      "id": "cleric-noble-aura",
+      "class": "Cleric",
+      "name": "Noble Aura",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "Summons an aura that follows you for 300 s and attacks your target every 2 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "An aura that follows you and hits your target every 2 s for 300 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "At stigma Lv 10 it hits harder on a target with Debilitating Mark.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ],
+          "skillLevel": 10,
+          "needs": "Debilitating Mark"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Noble Aura",
+          "seconds": 1,
+          "skillLevel": 20,
+          "text": "At stigma Lv 20 the aura attacks every 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cleric-earth-punishment",
+      "class": "Cleric",
+      "name": "Earth Punishment",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 30,
+      "summary": "Earth damage and damage over time for 10 s. From stigma Lv 5 Condemnation always crits on its target.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-cleric",
+          "title": "Public Cleric skill builds (307 distinct of 974 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Earth damage and damage over time for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "At stigma Lv 5 Condemnation always crits on its target, so with the crit reset Condemnation fires on every pass for 10 s.",
+          "status": "reported",
+          "refs": [
+            "ql-db-cleric",
+            "ql-builds-cleric"
+          ],
+          "skillLevel": 5,
+          "needs": "Condemnation"
+        },
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "At stigma Lv 10 and 15 Earth's Blessing gives the party Double Chance, Attack and Defense.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ],
+          "skillLevel": 10
+        }
+      ],
+      "synergies": [
+        {
+          "type": "crit",
+          "target": "Condemnation",
+          "skillLevel": 5,
+          "text": "From stigma Lv 5 Condemnation always lands as a critical hit on its target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Condemnation",
+          "seconds": 3,
+          "skillLevel": 5,
+          "status": "reported",
+          "refs": [
+            "ql-db-cleric",
+            "ql-builds-cleric"
+          ],
+          "text": "With Condemnation's crit reset (skill Lv 12 perk) Condemnation has no cooldown on that target for 10 s."
+        }
+      ]
+    },
+    {
+      "id": "cleric-summon-resurrection",
+      "class": "Cleric",
+      "name": "Summon Resurrection",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 120,
+      "summary": "Brings a fallen party member within 40 m back to life.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Brings a fallen party member within 40 m back to life.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-prayer-of-amplification",
+      "class": "Cleric",
+      "name": "Prayer of Amplification",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "Attack +20% for 10 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Attack +20% for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Your heals grow with Attack, so they grow too.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ],
+          "needs": "Healing Enhancement"
+        },
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "At stigma Lv 5 PvE damage +20% as well.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ],
+          "skillLevel": 5
+        }
+      ],
+      "synergies": [
+        {
+          "type": "amplify",
+          "target": "Empyrean Lord's Grace",
+          "skillLevel": 10,
+          "text": "At stigma Lv 10 Empyrean Lord's Grace counts 1.5 times while it runs.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "type": "amplify",
+          "target": "Earth's Grace",
+          "skillLevel": 15,
+          "text": "At stigma Lv 15 Earth's Grace counts 1.5 times while it runs.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cleric-absolution",
+      "class": "Cleric",
+      "name": "Absolution",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 90,
+      "summary": "Big heal for you and the party within 40 m that also clears 2 debuffs.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 3,
+          "text": "A big heal for you and the party within 40 m that clears 2 debuffs from each.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Absolution",
+          "seconds": 30,
+          "skillLevel": 5,
+          "text": "At stigma Lv 5 its cooldown is 60 s in place of 90 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cleric-benevolence",
+      "class": "Cleric",
+      "name": "Benevolence",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 90,
+      "summary": "Heals you and the party within 40 m every 2 s for 20 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Heals you and the party within 40 m every 2 s for 20 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-yustiels-power",
+      "class": "Cleric",
+      "name": "Yustiel's Power",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "You and the party within 40 m take 20% less PvE damage for 10 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "You and the party within 40 m take 20% less PvE damage for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-power-burst",
+      "class": "Cleric",
+      "name": "Power Burst",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "Earth damage on one target with a big stagger hit (50).",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Earth damage on one target with a big stagger hit (50).",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-salvation",
+      "class": "Cleric",
+      "name": "Salvation",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 150,
+      "summary": "You are immune to damage and status effects for 3 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma perks open by themselves at stigma Lv 5, 10, 15 and 20: see its values."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "You are immune to damage and status effects for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-healing-enhancement",
+      "class": "Cleric",
+      "name": "Healing Enhancement",
+      "unlockLevel": 11,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Raises your Heal Boost from your Attack.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive has no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "Your heals grow with your Attack.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 29,
+        "10": 35
       }
+    },
+    {
+      "id": "cleric-empyrean-lords-grace",
+      "class": "Cleric",
+      "name": "Empyrean Lord's Grace",
+      "unlockLevel": 9,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Critical Hit +100 and extra damage when an attack lands.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive has no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Critical Hit +100, and extra damage when an attack lands (once a second).",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 27,
+        "10": 33
+      }
+    },
+    {
+      "id": "cleric-earths-grace",
+      "class": "Cleric",
+      "name": "Earth's Grace",
+      "unlockLevel": 21,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Critical Damage Boost +10.5% and Accuracy +100.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive has no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Critical Damage Boost +10.5% and Accuracy +100.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
+    },
+    {
+      "id": "cleric-radiant-benediction",
+      "class": "Cleric",
+      "name": "Radiant Benediction",
+      "unlockLevel": 25,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Heals you and the party within 40 m when your attack lands, once every 5 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive has no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Your attacks heal you and the party within 40 m, once every 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-cleric"
+          ]
+        }
+      ],
+      "synergies": []
     },
     {
       "id": "chanter-defiance",

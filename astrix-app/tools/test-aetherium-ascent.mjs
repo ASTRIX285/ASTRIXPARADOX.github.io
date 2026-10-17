@@ -222,7 +222,8 @@ await check('level change re-plans and clamps to the cap',async()=>{
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/5 of 5 boards open/);
   assert.match(await plain(page,'.ae-menu-card[data-view="stigma"] .ae-menu-status'),/4 of 4 slots open/);
   // Macro builder (16 Oct 2026): Macro 1 is stack A and stack B, never more (it was three keys with Bolt, a charged skill).
-  assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/^Stack A and stack B in Macro 1$/);
+  // Level planner, Cleric (17 Oct 2026): the Cleric's stacks are named now (Next at Lv N says which stack a skill joins).
+  assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/^Thunder stack and torment stack in Macro 1$/);
   await page.click('.ae-menu-card[data-view="macro"]');
   await page.waitForFunction(()=>document.body.dataset.aeView==='macro'&&document.documentElement.dataset.aetheriumReady==='true');
   assert.match(page.url(),/\/ascent\/macro\/\?class=cleric&role=healer&level=45$/,'The card opens its own page and keeps the level');
