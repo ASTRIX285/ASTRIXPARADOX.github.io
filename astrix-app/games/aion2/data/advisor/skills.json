@@ -2948,19 +2948,63 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Earth Tremor hits stack +2% Attack, up to 5"
+          "text": "Earth Tremor hits stack +2% Attack, up to 5",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to +10% Attack while you keep casting.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
@@ -2997,6 +3041,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3017,7 +3071,54 @@
           "skillLevel": 12,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Water damage on one target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "buff",
+          "target": "Cold Shock",
+          "text": "From skill Lv 12, each Earth Tremor (its third hit) gives +2% Attack, up to 5 times.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-combustion",
@@ -3037,23 +3138,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 96 MP in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to 12% more damage on one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+100 skill Accuracy"
+          "text": "+100 skill Accuracy",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "+100 Accuracy on this skill.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Casts 20% faster, so more casts in a fight.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Adds Ashy Call chain skill"
+          "text": "Adds Ashy Call chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A follow-up hit after each Combustion.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3086,12 +3242,39 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Always ready, so it is the skill you cast most: Fire damage on up to 4 enemies for 120 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 120
     },
     {
       "id": "spiritmaster-summon-fire-spirit",
@@ -3103,15 +3286,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "50% lower MP cost"
+          "text": "50% lower MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs 75 MP in place of 150.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Fire Spirit gains 20% critical damage"
+          "text": "Fire Spirit gains 20% critical damage",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "+20% Fire Spirit critical damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra 10% chance for the spirit to use its skill"
+          "text": "Extra 10% chance for the spirit to use its skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "More spirit skills: more damage, more elements for Elemental Fusion, more Dimensional Control windows.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3119,7 +3335,18 @@
         },
         {
           "skillLevel": 16,
-          "text": "Fire Spirit stats +20%"
+          "text": "Fire Spirit stats +20%",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "+20% Fire Spirit stats.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3152,6 +3379,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3165,7 +3402,47 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Your damage spirit: its skill hits up to 4 enemies. Each skill level adds 2% to its Attack.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "feeds",
+          "target": "Elemental Fusion",
+          "via": "element",
+          "text": "Each spirit skill gives you one element: four make Elemental Fusion ready.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "feeds",
+          "target": "Dimensional Control",
+          "via": "window",
+          "text": "Each spirit skill makes Dimensional Control usable for a moment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 150
     },
     {
       "id": "spiritmaster-summon-water-spirit",
@@ -3177,15 +3454,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "50% lower MP cost"
+          "text": "50% lower MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs 75 MP in place of 150.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Water Spirit Attack +10%"
+          "text": "Water Spirit Attack +10%",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "+10% Water Spirit Attack.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra 10% chance for the spirit to use its skill"
+          "text": "Extra 10% chance for the spirit to use its skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "More spirit skills: more elements and Dimensional Control windows.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3193,7 +3503,18 @@
         },
         {
           "skillLevel": 16,
-          "text": "Water Spirit stats +20%"
+          "text": "Water Spirit stats +20%",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "+20% Water Spirit stats.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3226,6 +3547,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3239,7 +3570,56 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Each spirit hit restores 20 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Water damage on one target. Each skill level adds 2% to its Attack and Critical Hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "feeds",
+          "target": "Elemental Fusion",
+          "via": "element",
+          "text": "Each spirit skill gives you one element: four make Elemental Fusion ready.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "feeds",
+          "target": "Dimensional Control",
+          "via": "window",
+          "text": "Each spirit skill makes Dimensional Control usable for a moment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      },
+      "mpCost": 150
     },
     {
       "id": "spiritmaster-elemental-fusion",
@@ -3254,15 +3634,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Becomes an AoE skill"
+          "text": "Becomes an AoE skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hits a group, weaker on one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra damage 3s after hit"
+          "text": "Extra damage 3s after hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A second hit 3 s later.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+10 to all Element Boost on hit"
+          "text": "+10 to all Element Boost on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "+10 to every Element Boost when it lands.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3270,7 +3683,18 @@
         },
         {
           "skillLevel": 16,
-          "text": "25% chance to regain Four Elements"
+          "text": "25% chance to regain Four Elements",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "One cast in four is free: Four Elements comes straight back.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3303,6 +3727,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3316,7 +3750,35 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Your hardest regular hit, ready each time you hold Four Elements.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "four-elements",
+          "text": "Usable only with Four Elements: one element from each spirit skill, four in all.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 32,
+        "10": 38
+      },
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-dimensional-control",
@@ -3340,11 +3802,33 @@
         },
         {
           "skillLevel": 8,
-          "text": "Extra damage 3s after hit"
+          "text": "Extra damage 3s after hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A second hit 3 s later.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3385,6 +3869,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3398,7 +3892,54 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies and slows them.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "spirit-skill",
+          "text": "Usable only for a moment after a spirit uses its skill.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 26,
+        "10": 32
+      },
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-jointstrike-curse",
@@ -3415,23 +3956,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Curse lasts 2s longer"
+          "text": "Curse lasts 2s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Curse lasts 7 s in place of 5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "You can move while it runs, so the macro never roots you.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "2s shorter cooldown"
+          "text": "2s shorter cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Cooldown 8 s in place of 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Ignores Block and Evasion, lands as Critical Hit"
+          "text": "Ignores Block and Evasion, lands as Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Always lands, always a critical hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-spiritmaster"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3464,6 +4060,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3483,7 +4089,56 @@
           "skillLevel": 12,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Damage over time on up to 4 enemies, and your spirit joins the hit. It fires once in 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Cursed enemies deal 10% less damage to you for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Jointstrike: Curse",
+          "seconds": 2,
+          "text": "Cooldown 8 s in place of 10 s.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "feeds",
+          "target": "Consecutive Countercurrent",
+          "via": "damage-over-time",
+          "text": "Its damage over time lets Consecutive Countercurrent fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      },
+      "mpCost": 80
     },
     {
       "id": "cleric-earths-retribution",
@@ -6785,13 +7440,40 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Clears stun, knockdown, fear and more, then 5 s of immunity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 34,
+        "10": 40
+      },
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-enhance-spirit-s-benediction",
@@ -6831,13 +7513,56 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "+20% PvE Damage Boost for you and your spirit for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "+20% PvE Damage Tolerance and healing over time for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "buff",
+          "target": "Spirit Strike",
+          "text": "Spirit Strike's Damage Boost counts 1.5 times.",
+          "skillLevel": 10,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-flame-blessing",
@@ -6877,13 +7602,36 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "For 10 s, each hit has a 50% chance of extra damage, at most once a second.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-jointstrike-corrode",
@@ -6920,6 +7668,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -6933,7 +7691,42 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "For 20 s your spirits deal 10% more to the target, and it takes damage over time.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "buff",
+          "target": "Jointstrike: Corrode",
+          "text": "Spirit damage taken +15% more while Corrode lasts.",
+          "skillLevel": 5,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "feeds",
+          "target": "Consecutive Countercurrent",
+          "via": "damage-over-time",
+          "text": "Its damage over time lets Consecutive Countercurrent fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "mpCost": 200
     },
     {
       "id": "spiritmaster-jointstrike-destructive-attack",
@@ -6973,13 +7766,47 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "charged",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A big hit with your spirit, and heavy stagger damage.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Jointstrike: Curse",
+          "text": "Its first hit resets Jointstrike: Curse and Jointstrike: Corrode.",
+          "skillLevel": 20,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "mpCost": 200
     },
     {
       "id": "spiritmaster-rapid-scattershot",
@@ -7019,13 +7846,62 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "stagger",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits a staggered target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Usable only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "text": "Each hit cuts all cooldowns by 1 s.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      },
+      "mpCost": 0
     },
     {
       "id": "spiritmaster-soul-s-cry",
@@ -7065,13 +7941,49 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Fear on an NPC for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Damage on one target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 30,
+        "10": 36
+      },
+      "mpCost": 150
     },
     {
       "id": "spiritmaster-summon-ancient-spirit",
@@ -7111,13 +8023,58 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A fifth spirit for 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Elemental Fusion",
+          "via": "four-elements",
+          "text": "Each time it uses its skill you gain Four Elements, so Elemental Fusion is ready.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "buff",
+          "target": "Spirit's Descent",
+          "text": "Spirit's Descent lasts 30 s in place of 10 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "mpCost": 200
     },
     {
       "id": "spiritmaster-summon-earth-spirit",
@@ -7154,6 +8111,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -7167,7 +8134,342 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "The spirit draws Enmity, so it takes the hits.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Earth damage on one target. Each skill level adds 2% to its Defense and HP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "feeds",
+          "target": "Elemental Fusion",
+          "via": "element",
+          "text": "Each spirit skill gives you one element: four make Elemental Fusion ready.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        },
+        {
+          "type": "feeds",
+          "target": "Dimensional Control",
+          "via": "window",
+          "text": "Each spirit skill makes Dimensional Control usable for a moment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 25,
+        "10": 31
+      },
+      "mpCost": 150
+    },
+    {
+      "id": "spiritmaster-spirit-strike",
+      "class": "Spiritmaster",
+      "name": "Spirit Strike",
+      "unlockLevel": 1,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Raises PvE Damage Boost by 6% for you and your spirit.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "+6% PvE Damage Boost for you and your spirit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
+    },
+    {
+      "id": "spiritmaster-mental-focus",
+      "class": "Spiritmaster",
+      "name": "Mental Focus",
+      "unlockLevel": 15,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Raises your Mental-type chances by 11% and Double Chance a little.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "+11% to your Mental-type chances.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 33,
+        "10": 39
+      }
+    },
+    {
+      "id": "spiritmaster-element-unification",
+      "class": "Spiritmaster",
+      "name": "Element Unification",
+      "unlockLevel": 25,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Each spirit skill that lands gives you and your spirit +1.1% Critical Damage Boost for 10 s, up to 5 times.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Up to +5.5% Critical Damage Boost while your spirits keep casting.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 25,
+        "10": 25
+      }
+    },
+    {
+      "id": "spiritmaster-spirit-s-descent",
+      "class": "Spiritmaster",
+      "name": "Spirit's Descent",
+      "unlockLevel": 9,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "For 10 s after you summon a spirit, your hits have a 50% chance of extra damage.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Extra damage for 10 s after each summon (30 s after the Ancient Spirit).",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "summon",
+          "text": "Fires for 10 s after a summon.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 27,
+        "10": 33
+      }
+    },
+    {
+      "id": "spiritmaster-consecutive-countercurrent",
+      "class": "Spiritmaster",
+      "name": "Consecutive Countercurrent",
+      "unlockLevel": 17,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Hits on a target taking damage over time have a 50% chance of extra damage.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Extra damage on a target under Curse or Corrode.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "damage-over-time",
+          "text": "Fires only on a target taking damage over time.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "training": {
+        "8": 35,
+        "10": 41
+      }
+    },
+    {
+      "id": "spiritmaster-corrode-passive",
+      "class": "Spiritmaster",
+      "name": "Corrode",
+      "unlockLevel": 11,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Raises Critical Hit by 100; a critical hit has a 50% chance of extra damage.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "+100 Critical Hit and extra damage on critical hits.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-spiritmaster"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 29,
+        "10": 35
+      }
     },
     {
       "id": "templar-annihilate",

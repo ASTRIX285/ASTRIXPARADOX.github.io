@@ -12,23 +12,25 @@
       "summary": "Ranged magic damage with spirits that take the hits, which makes solo levelling easy.",
       "coreSkills": [
         {
-          "name": "Cold Shock",
-          "priority": 1,
-          "target": "Keep levelled for MP",
-          "why": "MP filler. From skill Lv 12 each hit adds a little attack.",
-          "refs": [
-            "mb-spiritmaster",
-            "ec-spiritmaster"
-          ]
-        },
-        {
           "name": "Combustion",
-          "priority": 2,
+          "priority": 1,
           "target": "Keep levelled",
           "why": "Core damage skill.",
           "refs": [
             "mb-spiritmaster",
-            "ec-spiritmaster"
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
+          ]
+        },
+        {
+          "name": "Cold Shock",
+          "priority": 2,
+          "target": "Keep levelled for MP",
+          "why": "MP filler. From skill Lv 12 each hit adds a little attack.",
+          "refs": [
+            "mb-spiritmaster",
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
           ]
         },
         {
@@ -38,17 +40,19 @@
           "why": "Your damage spirit. Keep a spirit out at all times.",
           "refs": [
             "mb-spiritmaster",
-            "ec-spiritmaster"
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
           ]
         },
         {
-          "name": "Jointstrike: Curse",
+          "name": "Elemental Fusion",
           "priority": 4,
           "target": "Keep levelled",
-          "why": "Core skill, used through your spirit.",
+          "why": "Unlocks at Lv 14. Cast it once you have 4 element stacks.",
           "refs": [
-            "mb-builds",
-            "ec-spiritmaster"
+            "mb-spiritmaster",
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
           ]
         },
         {
@@ -57,21 +61,158 @@
           "target": "Lv 8 first, then 10",
           "why": "Unlocks at Lv 8.",
           "refs": [
-            "ec-spiritmaster"
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
           ]
         },
         {
-          "name": "Elemental Fusion",
+          "name": "Jointstrike: Curse",
           "priority": 6,
           "target": "Keep levelled",
-          "why": "Unlocks at Lv 14. Cast it once you have 4 element stacks.",
+          "why": "Core skill, used through your spirit.",
           "refs": [
-            "mb-spiritmaster",
-            "ec-spiritmaster"
+            "mb-builds",
+            "ec-spiritmaster",
+            "ql-builds-spiritmaster"
           ]
         }
       ],
-      "specialties": [],
+      "specialties": [
+        {
+          "skill": "Combustion",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage when fewer targets hit",
+              "perk": "Up to 12% more damage when fewer targets hit",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "20% faster skill speed",
+              "perk": "20% faster skill speed",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Adds Ashy Call chain skill",
+              "perk": "Adds Ashy Call chain skill",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Cold Shock",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% Multi-Hit on hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Earth Tremor hits stack +2% Attack, up to 5",
+              "perk": "Earth Tremor hits stack +2% Attack, up to 5",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Summon: Fire Spirit",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Fire Spirit gains 20% critical damage",
+              "perk": "Fire Spirit gains 20% critical damage",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Fire Spirit stats +20%",
+              "perk": "Fire Spirit stats +20%",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Elemental Fusion",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+10 to all Element Boost on hit",
+              "perk": "+10 to all Element Boost on hit",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "25% chance to regain Four Elements",
+              "perk": "25% chance to regain Four Elements",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Dimensional Control",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Extra damage 3s after hit",
+              "perk": "Extra damage 3s after hit",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Jointstrike: Curse",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Becomes a mobile skill",
+              "perk": "Becomes a mobile skill",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "2s shorter cooldown",
+              "perk": "2s shorter cooldown",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as Critical Hit",
+              "perk": "Ignores Block and Evasion, lands as Critical Hit",
+              "refs": [
+                "ql-builds-spiritmaster"
+              ]
+            }
+          ]
+        }
+      ],
       "stigmas": {
         "slots": [
           {
@@ -98,6 +239,13 @@
             "refs": [
               "ec-spiritmaster",
               "mb-stigma"
+            ]
+          },
+          {
+            "name": "Jointstrike: Destructive Attack",
+            "why": "A charged hit for stagger. 19 of 72 four-stigma builds take it in place of Flame Blessing.",
+            "refs": [
+              "ql-builds-spiritmaster"
             ]
           }
         ],
@@ -238,6 +386,59 @@
           "retrievedOn": "2026-10-16",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-spiritmaster",
+          "title": "Public Spiritmaster skill builds (167 distinct of 878 read) and Daevanion plans (150 distinct of 298)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-spiritmaster",
+          "title": "Spiritmaster skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gg-spiritmaster",
+          "title": "Spiritmaster guide",
+          "publisher": "GAMES.GG",
+          "url": "https://games.gg/aion-2/guides/aion-2-spiritmaster-guide/",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-04"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gf-spiritmaster",
+          "title": "Spiritmaster build: skills, stigmas and pets",
+          "publisher": "GamesFuze",
+          "url": "https://gamesfuze.com/guides/aion-2-spiritmaster-build-best-skills-stigmas-and-pet-setup/",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-02"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mx-spiritmaster",
+          "title": "Spirit Master PvE guide",
+          "publisher": "MMOEXP",
+          "url": "https://www.mmoexp.com/News/aion-2-spirit-master-pve-guide-best-skills-macros-rotation-and-build.html",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "low",
+          "publishedOn": "2026-10-12"
         }
       ],
       "macro": {
@@ -248,6 +449,7 @@
           "tgw-spiritmaster-skills"
         ],
         "stackA": {
+          "name": "Spirit line",
           "label": "Spirits",
           "rows": [
             {
@@ -273,6 +475,7 @@
           "why": "Held with the macro key: MP back, each animation cut short."
         },
         "stackB": {
+          "name": "Main line",
           "label": "Spend",
           "rows": [
             {
@@ -334,7 +537,171 @@
           }
         ],
         "levelNotes": [],
-        "verified": false
+        "verified": false,
+        "ownKeysOrder": "listed"
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first. Your spirits take the hits, so survival and MP count for a little. The kit has no party buff.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 0,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-spiritmaster",
+          "ql-db-spiritmaster"
+        ],
+        "preferences": [
+          {
+            "id": "line-cold-shock",
+            "kind": "line",
+            "skill": "Cold Shock",
+            "count": "29 of 75 builds with a game macro put Cold Shock in it (147 with copies)",
+            "why": "Some builds put Cold Shock in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-benediction",
+            "kind": "line",
+            "skill": "Enhance: Spirit's Benediction",
+            "count": "15 of 75 builds with a game macro put Spirit's Benediction in it (24 with copies)",
+            "why": "Some builds put Spirit's Benediction in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ],
+            "stack": "stackB",
+            "from": 22
+          },
+          {
+            "id": "line-rapid-scattershot",
+            "kind": "line",
+            "skill": "Rapid Scattershot",
+            "count": "4 of 167 builds put Rapid Scattershot alone on the macro key",
+            "why": "Some builds put Rapid Scattershot in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ],
+            "stack": "stackB",
+            "from": 5
+          },
+          {
+            "id": "line-wind-spirit",
+            "kind": "line",
+            "skill": "Summon: Wind Spirit",
+            "count": "42 of 167 builds put Wind Spirit in a spirit stack",
+            "why": "Some builds put Wind Spirit in the spirit stack.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ],
+            "stack": "stackA",
+            "from": 10
+          },
+          {
+            "id": "stigma-ancient",
+            "kind": "stigma",
+            "skill": "Summon: Ancient Spirit",
+            "count": "148 of 167 builds; the first stigma in 29 of 71 priority lists; two guides rank it first",
+            "why": "Each time it uses its skill you gain Four Elements.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster",
+              "gg-spiritmaster",
+              "gf-spiritmaster"
+            ]
+          },
+          {
+            "id": "stigma-benediction",
+            "kind": "stigma",
+            "skill": "Enhance: Spirit's Benediction",
+            "count": "153 of 167 builds",
+            "why": "+20% PvE Damage Boost for you and your spirit for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ]
+          },
+          {
+            "id": "stigma-corrode",
+            "kind": "stigma",
+            "skill": "Jointstrike: Corrode",
+            "count": "141 of 167 builds",
+            "why": "Your spirits deal more to the target for 20 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ]
+          },
+          {
+            "id": "stigma-flame",
+            "kind": "stigma",
+            "skill": "Flame Blessing",
+            "count": "100 of 167 builds; 40 of 72 four-stigma builds run these four",
+            "why": "Extra damage on hits for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ]
+          },
+          {
+            "id": "stigma-destructive",
+            "kind": "stigma",
+            "skill": "Jointstrike: Destructive Attack",
+            "count": "74 of 167 builds; 19 of 72 four-stigma builds in place of Flame Blessing",
+            "why": "A charged hit for stagger.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ]
+          },
+          {
+            "id": "stigma-corrode-first",
+            "kind": "stigma",
+            "skill": "Jointstrike: Corrode",
+            "count": "One guide takes it first, to stigma Lv 5",
+            "why": "Jointstrike: Corrode in the first slot.",
+            "status": "reported",
+            "refs": [
+              "mx-spiritmaster"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "mastery-combustion-early",
+            "kind": "mastery",
+            "skill": "Combustion",
+            "count": "All four published levelling builds (Lv 20 to 45, three authors) and two guides list Combustion first",
+            "why": "Combustion first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster",
+              "gg-spiritmaster",
+              "gf-spiritmaster"
+            ],
+            "to": 21
+          },
+          {
+            "id": "mastery-fusion-first",
+            "kind": "mastery",
+            "skill": "Elemental Fusion",
+            "count": "22 of 71 builds with a priority list put it first (Combustion 21, Cold Shock 11)",
+            "why": "Elemental Fusion levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-spiritmaster"
+            ],
+            "from": 14
+          }
+        ]
       }
     }
   ]

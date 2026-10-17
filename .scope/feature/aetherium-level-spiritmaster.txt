@@ -1,0 +1,6 @@
+# feature/aetherium-level-spiritmaster: the level planner guides the Spiritmaster (DPS) from Lv 1 to 45: research record, skill values and synergies, the build's weights and trends, tests. Data and research only.
+astrix-app/games/aion2/data/advisor/builds/spiritmaster.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/spiritmaster.md
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aetherium-level-spiritmaster.mjs
