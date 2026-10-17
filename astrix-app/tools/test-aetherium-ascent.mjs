@@ -99,7 +99,12 @@ const lv41Ref=new URLSearchParams({serverId:'1316',characterId:lv41Info.profile.
 
 // Role aware (17 Oct 2026): the route reads every open board, so a board the character has finished (its count says all
 // nodes taken) comes back with every node taken; any other board is the Lv 12 fixture board.
+// Select buttons (fix/aetherium-select-buttons, 17 Oct 2026): on the Lv 45 Daeva, Azphel (board 16) is served the captured
+// Sorcerer Nezekan board (real nodes, questlog.gg), which has none of the Gladiator's priority nodes, as Azphel has none in game.
+const sorcererBoard=JSON.parse(await readFile(resolve(root,'astrix-app/tools/fixtures/aion2/sorcerer-nezekan-board.json'),'utf8'));
+const noPriorityBoard={nodeList:sorcererBoard.nodes.map(node=>({boardId:16,col:node.col,row:node.row,type:node.type,grade:node.grade,name:node.name,nodeId:node.nodeId,icon:'',open:node.taken?1:0,effectList:(node.effects??[]).map(desc=>({desc}))})),openSkillEffectList:[],openStatEffectList:[]};
 const boardFor=(characterInfo,boardId)=>{
+  if(characterInfo===lv45Info&&boardId===16)return noPriorityBoard;
   const listed=characterInfo?.daevanion?.boardList?.find(item=>item.id===boardId);
   if(listed&&listed.openNodeCount>=listed.totalNodeCount)return {...board,nodeList:board.nodeList.map(node=>node.type&&node.type!=='None'?{...node,open:1}:node)};
   return board;
@@ -693,9 +698,13 @@ await check('Show me opens the board the move names: one board at a time, Nezeka
   assert.equal(await page.getAttribute('[data-board-tab="12"]','aria-selected'),'true','Show me opened Zikel');
   assert.equal(await page.getAttribute('[data-board-tab="11"]','aria-selected'),'false');
   assert.equal(new URL(page.url()).searchParams.get('board'),'12');
-  assert.equal(await page.$eval('[data-board-tab="11"]',el=>el.closest('[data-board-group]').dataset.boardGroup),'done','Nezekan is Done for your role');
-  assert.equal(await page.$eval('[data-board-tab="12"]',el=>el.closest('[data-board-group]').dataset.boardGroup),'now');
-  assert.equal(await page.$eval('[data-board-tab="13"]',el=>el.closest('[data-board-group]').dataset.boardGroup),'later');
+  // Select buttons (17 Oct 2026): the group headings are gone; each board button carries its status and tag.
+  assert.equal(await page.getAttribute('[data-board-tab="11"]','data-board-status'),'done','Nezekan is done for your role');
+  assert.equal(await page.locator('[data-board-tab="11"] .ae-board-tick').count(),1,'Nezekan carries the tick');
+  assert.equal(await page.getAttribute('[data-board-tab="12"]','data-board-status'),'now');
+  assert.equal(await plain(page,'[data-board-tab="12"] [data-tag="now"]'),'Now','Zikel carries the Now tag');
+  assert.equal(await page.getAttribute('[data-board-tab="13"]','data-board-status'),'later');
+  assert.equal(await page.locator('[data-board-tab="13"] .ae-board-tag,[data-board-tab="13"] .ae-board-tick').count(),0,'Vaizel has no tag');
   assert.match(await plain(page,'#aeRouteSummary'),/Enter the points you have/,'Zikel has a route to take');
   assert.deepEqual(errors,[]);
   await context.close();
@@ -710,7 +719,7 @@ await check('Show me opens the board the move names for an Asmodian Daeva (Zikel
   assert.match(first.href,/&region=as&class=gladiator&role=dps&board=32$/);
   await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('.ae-quest[data-quest-view="daevanion"]')]);
   await page.waitForSelector('.ae-board-grid');
-  // Role aware: the tabs are grouped Now, Done for your role, Later, so they are compared in id order.
+  // The board buttons are compared in id order.
   assert.deepEqual(await page.$$eval('[data-board-tab]',tabs=>tabs.map(tab=>[Number(tab.dataset.boardTab),tab.getAttribute('aria-selected')]).sort((a,b)=>a[0]-b[0])),[[31,'false'],[32,'true'],[33,'false']],'Zikel (32) is open on the screen');
   assert.equal(new URL(page.url()).searchParams.get('board'),'32');
   assert.deepEqual(errors,[]);
@@ -1291,7 +1300,7 @@ await check('Stats screen: every chain stat has its own 20px icon, gold when Hig
 });
 
 /* Role aware (feature/aetherium-role-aware, 17 Oct 2026): role and team picked once per Daeva, in the address and the roster;
-   every screen follows them; the Daevanion route plans inside 415 points with Now, Done for your role and Later. */
+   every screen follows them; the Daevanion route plans inside 415 points (board buttons tagged Now, a tick or Not needed). */
 // The open() storage option writes the v1 roster (one list), which the page moves into the v2 roster on read.
 const rosterWith=extra=>({entries:[{name:TEST_NAME,serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:12,raceName:'Elyos',region:'eu',...extra}],active:`1308:${info.profile.characterId}`});
 await check('role and team: picked on the plan, saved with the Daeva, carried in the address, and used next time',async()=>{
@@ -1327,13 +1336,15 @@ await check('every screen changes with role and team',async()=>{
   assert.notEqual(await read(dps,'daevanion','#aeBoardFirst'),await read(main,'daevanion','#aeBoardFirst'),'Daevanion: the role\'s priorities');
   assert.notEqual(await read(dps,'mastery','#aeMastery'),await read(main,'mastery','#aeMastery'),'Mastery: the role\'s key skills');
 });
-await check('Daevanion: N of 415 points, tabs Now, Done for your role and Later with points each, the points box, the route summary',async()=>{
+await check('Daevanion: N of 415 points, board buttons with a points bar and tags (no group headings), the points box, the route summary',async()=>{
   const {page,context,errors}=await open(ascent(vaizelRef,'daevanion'),{live:true});
   await page.waitForSelector('.ae-board-grid');
   assert.match(await plain(page,'#aeBudget'),/^\d+ of 415 points\. This route takes \d+ more, \d+ left after it\./);
-  assert.deepEqual(await page.$$eval('[data-board-group] .ae-board-group-title',items=>items.map(el=>el.textContent)),['Now','Done for your role','Later']);
-  assert.match(await plain(page,'[data-board-tab="11"]'),/^Nezekan 134 of 134 points$/,`Each tab shows its points spent of the board total (${await plain(page,'[data-board-tab="11"]')})`);
-  assert.match(await plain(page,'[data-board-tab="12"]'),/^Zikel \d+ of 134 points$/);
+  // Select buttons (17 Oct 2026): no "Now", "Done for your role" or "Later" headings; the tags on the buttons say it.
+  assert.equal(await page.locator('.ae-board-group-title,[data-board-group]').count(),0,'No group headings');
+  assert.match(await plain(page,'[data-board-tab="11"]'),/^Nezekan 134 \/ 134$/,`Each button shows its points spent of the board total (${await plain(page,'[data-board-tab="11"]')})`);
+  assert.match(await plain(page,'[data-board-tab="12"]'),/^Zikel \d+ \/ 134 Now$/);
+  assert.equal(await page.$eval('[data-board-tab="11"] .ae-board-bar>span',el=>el.style.width),'100%','The bar is full on a spent board');
   assert.match(await plain(page,'[data-board-locked="14"]'),/Opens at Lv 40/,'A board not open yet sits under Later with its level');
   await page.fill('#aePoints','12');
   await page.waitForFunction(()=>/cover the next/.test(document.querySelector('#aeRouteSummary').textContent));
@@ -1348,6 +1359,116 @@ await check('Daevanion: N of 415 points, tabs Now, Done for your role and Later 
   assert.match(await plain(page,'#aeRouteTotal'),/Overhead Slam \+\d+ on this route: Lv \d+ with Mastery 11/);
   assert.deepEqual(errors,[]);
   await context.close();
+});
+
+/* ---------- Select buttons (fix/aetherium-select-buttons, 17 Oct 2026): everything a player picks is the one Aetherium
+   button, in AION 2's colours: navy with a pale-blue edge, gold when selected, a blue focus ring; boards say Now, a tick or Not needed. ---------- */
+const BTN_EDGE='rgb(111, 147, 191)',STROBE='rgb(79, 182, 255)';
+const buttonLooks=(page,selector)=>page.$$eval(selector,els=>els.map(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {text:(el.textContent||el.value||'').replace(/\s+/g,' ').trim().slice(0,30),cls:el.classList.contains('ae-btn'),visible:r.width>0&&r.height>0,height:r.height,clip:s.clipPath,shadow:s.boxShadow,color:s.color,bg:s.backgroundColor,selected:el.matches('[aria-selected="true"],[aria-pressed="true"],[aria-current="page"],[aria-current="true"]'),disabled:el.matches(':disabled,[aria-disabled="true"]')};}));
+/** Every element the selector finds is the shared button; at least one is on screen, 44px or taller, notched, with its edge; a selected one is gold. */
+async function assertButtons(page,selector,name){
+  const looks=await buttonLooks(page,selector);
+  assert.ok(looks.length>0,`${name}: found`);
+  for(const look of looks)assert.ok(look.cls,`${name} "${look.text}" uses the shared button (.ae-btn)`);
+  const shown=looks.filter(look=>look.visible);
+  assert.ok(shown.length>0,`${name}: one on screen`);
+  for(const look of shown){
+    assert.ok(look.height>=44,`${name} "${look.text}" is ${look.height}px tall`);
+    assert.match(look.clip,/^polygon\(/,`${name} "${look.text}" has notched corners`);
+    assert.notEqual(look.bg,'rgba(0, 0, 0, 0)',`${name} "${look.text}" is a filled button, not plain text`);
+    if(look.selected){assert.equal(look.color,GOLD,`${name} "${look.text}": selected in gold`);assert.ok(look.shadow.includes(GOLD),`${name} "${look.text}": a gold edge (${look.shadow})`);}
+    else if(look.disabled)assert.equal(look.color,'rgb(127, 140, 166)',`${name} "${look.text}": disabled reads dim`);
+    else assert.ok(look.shadow.includes(BTN_EDGE)||look.shadow.includes('rgb(185, 220, 255)'),`${name} "${look.text}": the pale-blue edge (${look.shadow})`);
+  }
+}
+/** Keyboard focus shows the blue ring. */
+async function assertFocusRing(page,selector,name){
+  await page.focus(selector);
+  await page.waitForTimeout(250);
+  const ring=await page.$eval(selector,el=>({visible:el.matches(':focus-visible'),shadow:getComputedStyle(el).boxShadow}));
+  assert.ok(ring.visible,`${name}: focus-visible`);
+  assert.ok(ring.shadow.includes(STROBE),`${name}: the blue focus ring shows (${ring.shadow})`);
+}
+await check('board buttons on the Lv 45 Daeva: icon, name, bar and count; exactly one Now; Azphel Not needed, never Done; selected gold; 44px; focus ring; picking one opens it',async()=>{
+  const {page,context,errors}=await open(ascent(ref45,'daevanion'),{live:true});
+  await page.waitForSelector('.ae-board-grid');
+  await assertButtons(page,'.ae-board-picks [data-board-tab]','board button');
+  assert.equal(await page.locator('[data-board-status="now"]').count(),1,'Exactly one Now board');
+  assert.equal(await page.locator('.ae-board-tag[data-tag="now"]').count(),1,'One Now tag');
+  assert.equal(await page.getAttribute('[data-board-tab="16"]','data-board-status'),'not-needed','Azphel has no priority nodes for the role: Not needed');
+  assert.equal(await plain(page,'[data-board-tab="16"] [data-tag="not-needed"]'),'Not needed');
+  assert.equal(await page.locator('[data-board-tab="16"] .ae-board-tick').count(),0,'Azphel is never ticked as Done');
+  assert.match(await plain(page,'[data-board-tab="16"]'),/^Azphel 0 \/ 232 Not needed$/);
+  for(const id of [11,12,13,14,16]){
+    assert.equal(await page.locator(`[data-board-tab="${id}"] img.ae-board-icon`).count(),1,`Board ${id} shows its official icon`);
+    assert.match(await page.getAttribute(`[data-board-tab="${id}"] img.ae-board-icon`,'src'),/playnccdn\.com\/static-aion2-gamedata\/resources\/UT_/,'The icon the official data names');
+  }
+  assert.equal(await page.$eval('[aria-selected="true"][data-board-tab]',el=>getComputedStyle(el).color),GOLD,'The selected board is gold');
+  await assertFocusRing(page,'[data-board-tab="13"]','board button');
+  await page.click('[data-board-tab="16"]');
+  await page.waitForFunction(()=>document.querySelector('[data-board-tab="16"]').getAttribute('aria-selected')==='true');
+  assert.equal(new URL(page.url()).searchParams.get('board'),'16','Picking a button opens that board');
+  await page.waitForFunction(()=>/0 of 232 points spent/.test(document.querySelector('.ae-route-meta')?.textContent??''));
+  assert.match(await plain(page,'.ae-route-meta'),/nodes for your role 0 of 0$/,'Azphel has no nodes for the role');
+  assert.doesNotMatch(await plain(page,'#aeRouteSummary'),/Done for your role/,'Never called done');
+  assert.deepEqual(errors,[]);
+  await context.close();
+  // At 390 the buttons wrap with no sideways scroll, and stay 44px tall.
+  const phone=await open(ascent(ref45,'daevanion'),{live:true,viewport:{width:390,height:844}});
+  await phone.page.waitForSelector('.ae-board-grid');
+  assert.ok(await phone.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No sideways scroll at 390');
+  const boxes=await phone.page.$$eval('.ae-board-picks .ae-board-btn',els=>els.map(el=>el.getBoundingClientRect()).map(r=>({left:r.left,right:r.right,height:r.height})));
+  assert.ok(boxes.every(box=>box.left>=0&&box.right<=390&&box.height>=44),`Every board button fits at 390 (${JSON.stringify(boxes)})`);
+  assert.ok(new Set(boxes.map(box=>Math.round(box.left))).size>=2,'Two buttons a row at 390');
+  await phone.context.close();
+});
+await check('every other selectable on the Aetherium pages is the shared button: screen tabs, pickers, roster, results, Compare, Gear Ledger cards, tip Back and Next',async()=>{
+  // Ascent Plan: the screen tabs, class and role pickers, the team picker, the tip buttons.
+  const plan=await open(ascent('class=gladiator&role=tank&team=main-tank&level=45','mastery'));
+  await plan.page.waitForSelector('.ae-gw-tabs a');
+  await assertButtons(plan.page,'.ae-gw-tabs a','Ascent Plan screen tab');
+  assert.equal(await plan.page.locator('.ae-gw-tabs a[aria-current="page"]').count(),1);
+  await assertButtons(plan.page,'.ae-guide-btn','tip button');
+  await assertFocusRing(plan.page,'.ae-gw-tabs a:not([aria-current])','screen tab');
+  await plan.context.close();
+  const menu=await open(ascent('class=gladiator&role=tank&team=main-tank&level=45'));
+  for(const id of ['#aeClass','#aeRole','#aeTeam'])await assertButtons(menu.page,id,`picker ${id}`);
+  await assertFocusRing(menu.page,'#aeRole','role picker');
+  await menu.context.close();
+  // Daeva Card: region and server pickers, the roster entry (the active one gold), the role picker.
+  const card=await open(`/hub/aetherium/?${ref}`,{live:true,storage:rosterWith({})});
+  for(const id of ['#aeRegion','#aeServer'])await assertButtons(card.page,id,`picker ${id}`);
+  await assertButtons(card.page,'.ae-roster-open','roster entry');
+  assert.equal(await card.page.$eval('.ae-roster-slot.is-active .ae-roster-open',el=>getComputedStyle(el).color),GOLD,'The active Daeva is gold');
+  assert.equal(await card.page.$eval('#aeCardRole',el=>el.classList.contains('ae-btn')),true,'The card role picker is the shared button');
+  await assertFocusRing(card.page,'.ae-roster-open','roster entry');
+  await card.context.close();
+  // Search results.
+  const found=await open('/hub/aetherium/',{live:true});
+  // Two matches, so the page lists them (one match opens straight away).
+  await found.page.route(`${WORKER}/aion2/search*`,route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({list:[search.list[0],{...search.list[0],serverId:1309,serverName:'Hithanya'}],pagination:search.pagination,meta})}));
+  await found.page.fill('#aeNameInput',TEST_NAME);
+  await found.page.click('#aeFind');
+  await found.page.waitForSelector('.ae-result');
+  await assertButtons(found.page,'.ae-result','search result');
+  await found.context.close();
+  // Compare pickers.
+  const compare=await open('/hub/aetherium/compare/',{live:true,storage:rosterWith({})});
+  await compare.page.waitForSelector('[data-compare-pick]');
+  await assertButtons(compare.page,'[data-compare-pick]','Compare picker');
+  await compare.context.close();
+  // Gear Ledger cards, and the tabs on the Skills and Daevanion pages.
+  const gear=await open(`/hub/aetherium/gear/?${ref}`,{live:true});
+  await assertButtons(gear.page,'#aeCards .ae-menu-card','Gear Ledger card');
+  await gear.context.close();
+  const skills=await open(`/hub/aetherium/skills/?${ref}`,{live:true});
+  await skills.page.waitForSelector('.ae-gw-tab');
+  await assertButtons(skills.page,'.ae-gw-tabs .ae-gw-tab','Skills tab');
+  await skills.context.close();
+  const dv=await open(`/hub/aetherium/daevanion/?${ref}`,{live:true});
+  await dv.page.waitForSelector('.ae-board-grid .ae-node');
+  await assertButtons(dv.page,'.ae-gw-tab','Daevanion page tab');
+  await dv.context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));

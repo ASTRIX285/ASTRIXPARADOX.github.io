@@ -198,12 +198,12 @@ function render({ model, source, ref }, advice) {
   document.title = 'Daevanion | Gear Ledger | The Aetherium | AION 2 | ASTRIX PARADOX';
   $('#aeStage').innerHTML = `<div class="ae-gw ae-dv-window" data-view="daevanion">
     ${windowBar({ title: 'Daevanion', model, ref })}
-    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Daevanion boards">${state.boards.map(board => `<button type="button" role="tab" class="ae-gw-tab${board.open ? '' : ' is-locked'}" data-board="${esc(board.id)}" aria-selected="${board.id === state.current}">${board.open ? '' : `<span class="ae-pad">${LOCK_ICON}</span>`}${esc(board.name)}${board.open && board.percent !== null ? `<span class="ae-tab-pct" data-board-percent="${esc(board.percent)}"></span>` : ''}</button>`).join('')}</div>
+    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Daevanion boards">${state.boards.map(board => `<button type="button" role="tab" class="ae-btn ae-gw-tab${board.open ? '' : ' is-locked'}" data-board="${esc(board.id)}" aria-selected="${board.id === state.current}">${board.open ? '' : `<span class="ae-pad">${LOCK_ICON}</span>`}${esc(board.name)}${board.open && board.percent !== null ? `<span class="ae-tab-pct" data-board-percent="${esc(board.percent)}"></span>` : ''}</button>`).join('')}</div>
     <div class="ae-gw-body">
       <div class="ae-dv">
         <section class="ae-dv-board" id="aeDvBoard" aria-live="polite"></section>
         <aside class="ae-dv-panel" id="aeDvPanel" aria-label="Node and board effect">
-          <div class="ae-dv-tabs" role="tablist" aria-label="Panel"><button type="button" role="tab" class="ae-gw-tab" data-panel="node" aria-selected="true">Node</button><button type="button" role="tab" class="ae-gw-tab" data-panel="effect" aria-selected="false">Board Effect</button></div>
+          <div class="ae-dv-tabs" role="tablist" aria-label="Panel"><button type="button" role="tab" class="ae-btn ae-gw-tab" data-panel="node" aria-selected="true">Node</button><button type="button" role="tab" class="ae-btn ae-gw-tab" data-panel="effect" aria-selected="false">Board Effect</button></div>
           <div class="ae-node-panel" id="aeDvPanelBody" aria-live="polite"></div>
           <a class="btn ae-dv-plan" id="aeDvPlan" href="${esc(ascentUrl(ref, model.profile.class, { screen: 'daevanion' }))}">Plan my route</a>
         </aside>

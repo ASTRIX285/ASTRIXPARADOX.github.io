@@ -34,7 +34,7 @@ const art = (src, glyph) => (src
 
 /* The badge says what it counts in words ("17 worn", "22 skills", "3 boards"), never a bare number. */
 function card({ view, href, name, status, blurb, count, noun, image }) {
-  return `<a class="ae-menu-card" href="${esc(href)}" data-view="${view}">
+  return `<a class="ae-btn ae-menu-card" href="${esc(href)}" data-view="${view}">
       <span class="ae-menu-art" data-fallback="${view}">${art(image, view)}</span>
       <span class="ae-menu-name">${esc(name)}</span>
       <span class="ae-menu-status">${esc(status)}</span>

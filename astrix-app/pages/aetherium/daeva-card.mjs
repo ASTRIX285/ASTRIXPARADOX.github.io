@@ -162,8 +162,8 @@ function renderRolePick(plan) {
   box.innerHTML = `<p class="ae-role-line"><span id="aeRoleLine">${esc([plan.className, plan.build.label, plan.team?.label].filter(Boolean).join(' · '))}</span>
       <button type="button" class="ae-linkish" id="aeRoleChange" aria-expanded="false" aria-controls="aeRoleForm">Change</button></p>
     <form class="ae-role-form" id="aeRoleForm" hidden>
-      <label class="ae-field"><span>Role</span><select id="aeCardRole">${roles.map(item => `<option value="${esc(item.role)}"${item.role === plan.role ? ' selected' : ''}>${esc(item.label)}: ${esc(item.buildLabel)}</option>`).join('')}</select></label>
-      <label class="ae-field" id="aeCardTeamField"${plan.team ? '' : ' hidden'}><span>Team</span><select id="aeCardTeam">${(plan.team?.options ?? []).map(option => `<option value="${esc(option.id)}"${option.id === plan.team.id ? ' selected' : ''}>${esc(option.label)}</option>`).join('')}</select></label>
+      <label class="ae-field"><span>Role</span><select class="ae-btn" id="aeCardRole">${roles.map(item => `<option value="${esc(item.role)}"${item.role === plan.role ? ' selected' : ''}>${esc(item.label)}: ${esc(item.buildLabel)}</option>`).join('')}</select></label>
+      <label class="ae-field" id="aeCardTeamField"${plan.team ? '' : ' hidden'}><span>Team</span><select class="ae-btn" id="aeCardTeam">${(plan.team?.options ?? []).map(option => `<option value="${esc(option.id)}"${option.id === plan.team.id ? ' selected' : ''}>${esc(option.label)}</option>`).join('')}</select></label>
       <button type="submit" class="btn">Save</button>
     </form>`;
 }
@@ -321,7 +321,7 @@ function renderRoster() {
     const active = key === current.active;
     const icon = classArt(entry.className);
     return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
-      <button type="button" class="ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
+      <button type="button" class="ae-btn ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
         ${icon ? `<img class="ae-roster-class" src="${esc(icon)}" alt="" width="40" height="40" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-roster-class" aria-hidden="true"></span>'}
         <span class="ae-roster-state">${active ? 'Active' : ''}</span>
         <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
@@ -363,7 +363,7 @@ function renderResults(rows) {
   if (!rows.length) { el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
   el.innerHTML = `<p class="ae-eyebrow">${rows.length} matches. Pick your Daeva</p><ul>${rows.map((row, index) => `
-    <li><button type="button" class="ae-result" data-result="${index}">
+    <li><button type="button" class="ae-btn ae-result" data-result="${index}">
       <strong>${esc(row.name)}</strong><span>Lv ${esc(row.level)} · ${esc(row.serverName)}</span>
     </button></li>`).join('')}</ul>`;
   el.querySelectorAll('[data-result]').forEach(button => button.addEventListener('click', () => {

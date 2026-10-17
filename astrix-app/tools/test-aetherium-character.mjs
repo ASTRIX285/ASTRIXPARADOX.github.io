@@ -1527,7 +1527,7 @@ await check('crisp window: hairline, two-layer shadow and the notched corner; ta
     assert.equal(win.radius,'0px',`${name}: squared window`);
     const notch=await lookOf(page,'.ae-gw','::before');
     assert.equal(notch.content,'""',`${name}: the window has its notched corner`);
-    const tabs=await page.$$eval('.ae-gw-tabs .ae-gw-tab',items=>items.map(el=>{const s=getComputedStyle(el),after=getComputedStyle(el,'::after');return {text:el.textContent.trim(),selected:el.getAttribute('aria-selected')==='true',color:s.color,bg:s.backgroundColor,radius:s.borderTopLeftRadius,height:el.getBoundingClientRect().height,strobe:after.animationName,size:parseFloat(s.fontSize),transition:s.transitionDuration};}));
+    const tabs=await page.$$eval('.ae-gw-tabs .ae-gw-tab',items=>items.map(el=>{const s=getComputedStyle(el),after=getComputedStyle(el,'::after');return {text:el.textContent.trim(),selected:el.getAttribute('aria-selected')==='true',color:s.color,bg:s.backgroundColor,shadow:s.boxShadow,radius:s.borderTopLeftRadius,height:el.getBoundingClientRect().height,strobe:after.animationName,size:parseFloat(s.fontSize),transition:s.transitionDuration};}));
     assert.equal(tabs.filter(t=>t.selected).length,1,`${name}: exactly one selected tab`);
     for(const tab of tabs){
       assert.ok(tab.height>=44,`${name} tab "${tab.text}" is ${tab.height}px tall`);
@@ -1536,19 +1536,20 @@ await check('crisp window: hairline, two-layer shadow and the notched corner; ta
       assert.match(tab.transition,/0\.15s/,`${name} tab "${tab.text}" animates over 150ms`);
       assert.equal(tab.size,13,`${name} tab "${tab.text}" is 13px`);
       if(tab.selected){assert.equal(tab.color,GOLD,`${name}: selected tab in gold`);assert.notEqual(tab.bg,'rgba(0, 0, 0, 0)',`${name}: selected tab is a dark box`);}
-      else assert.equal(tab.bg,'rgba(0, 0, 0, 0)',`${name} tab "${tab.text}" is plain text`);
+      // Select buttons (Miguel, 17 Oct 2026, replaces "plain text"): every tab is the Aetherium button, navy with the pale-blue edge.
+      else {assert.notEqual(tab.bg,'rgba(0, 0, 0, 0)',`${name} tab "${tab.text}" is a navy button`);assert.ok(tab.shadow.includes('rgb(111, 147, 191)'),`${name} tab "${tab.text}" has the pale-blue edge (${tab.shadow})`);}
     }
     const strip=await page.$eval('.ae-gw-tabs',el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderBottomWidth}));
     assert.notEqual(strip.bg,'rgba(0, 0, 0, 0)',`${name}: the tabs sit in one strip`);
     assert.equal(strip.border,'1px');
     await context.close();
   }
-  // The Ascent Plan screens: the current screen tab is the gold box, the others plain.
+  // The Ascent Plan screens: the current screen tab is the gold box, the others navy buttons with the pale-blue edge (select buttons, 17 Oct 2026).
   const ascent=await open(`/hub/aetherium/ascent/mastery/${refQuery(RICH,{class:'gladiator'})}`);
   await ascent.page.waitForSelector('.ae-gw-tabs a');
-  const links=await ascent.page.$$eval('.ae-gw-tabs a',items=>items.map(a=>({current:a.getAttribute('aria-current')==='page',color:getComputedStyle(a).color,bg:getComputedStyle(a).backgroundColor,height:a.getBoundingClientRect().height,radius:getComputedStyle(a).borderTopLeftRadius})));
+  const links=await ascent.page.$$eval('.ae-gw-tabs a',items=>items.map(a=>({current:a.getAttribute('aria-current')==='page',color:getComputedStyle(a).color,bg:getComputedStyle(a).backgroundColor,shadow:getComputedStyle(a).boxShadow,height:a.getBoundingClientRect().height,radius:getComputedStyle(a).borderTopLeftRadius})));
   assert.equal(links.filter(l=>l.current).length,1,'One current screen');
-  for(const link of links){assert.ok(link.height>=44);assert.equal(link.radius,'0px');if(link.current){assert.equal(link.color,GOLD);assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');}else assert.equal(link.bg,'rgba(0, 0, 0, 0)');}
+  for(const link of links){assert.ok(link.height>=44);assert.equal(link.radius,'0px');if(link.current){assert.equal(link.color,GOLD);assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');}else {assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');assert.ok(link.shadow.includes('rgb(111, 147, 191)'),`Screen tab edge (${link.shadow})`);}}
   await ascent.context.close();
 });
 
@@ -1561,7 +1562,9 @@ await check('crisp menu cards and buttons: notched bevelled tiles, accent ring o
   assert.match(card.transition,/0\.15s/,'Hover animates over 150ms');
   await page.hover('#aeCards .ae-menu-card');
   await page.waitForTimeout(250);
-  assert.equal((await lookOf(page,'#aeCards .ae-menu-card')).borderColor,GOLD,'Hover lifts the border to the accent');
+  // Select buttons (Miguel, 17 Oct 2026, replaces the gold hover border): hover lights the edge pale blue with a soft blue glow.
+  const lit=(await lookOf(page,'#aeCards .ae-menu-card')).shadow;
+  assert.ok(lit.includes('rgb(185, 220, 255)')&&/inset 0px 0px 14px|0px 0px 14px 0px inset/.test(lit),`Hover lights the edge with a blue glow (${lit})`);
   const badge=await lookOf(page,'#aeCards .ae-menu-badge');
   assert.ok(parseFloat(badge.radius)>=badge.height/2,'Count badges are pills');
   assert.ok(badge.size>=13,`Badge text is ${badge.size}px`);

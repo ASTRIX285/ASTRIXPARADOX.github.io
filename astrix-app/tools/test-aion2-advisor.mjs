@@ -1353,6 +1353,41 @@ check('tank: Defence and HP nodes on the way to a priority node count towards do
   let spent=route.spent;const at=route.steps.findIndex(step=>{spent+=step.cost;return /^(Defense|Max HP)$/.test(step.name);});
   assert.ok(at>=0&&spent<=415,`First Defence or HP node at step ${at+1}, ${spent} points`);
 });
+check('secondary nodes: routed after every priority node, tier by tier in the record\'s order, never past 415; one current board while budget remains; a board with no priority nodes is Not needed',()=>{
+  // Select buttons (fix/aetherium-select-buttons, 17 Oct 2026). Every board's priority nodes taken (the captured board stands
+  // in for Nezekan to Triniel); Azphel is the captured Sorcerer Nezekan board, which has none of the tank's priority nodes.
+  const tank=builds.Gladiator.records.find(build=>build.role==='tank');
+  const priorities=routePriorities(tank.daevanion);
+  const core=new Set(planDaevanionBoard({nodes:boardNodes,priorities,include:'core'}).route.map(step=>step.nodeId));
+  const sorcerer=json('tools/fixtures/aion2/sorcerer-nezekan-board.json').nodes;
+  const boards=[[11,'Nezekan'],[12,'Zikel'],[13,'Vaizel'],[14,'Triniel']].map(([id,name])=>({id,name,open:true,nodes:boardNodes.map(node=>({...node,taken:node.taken||core.has(node.nodeId)}))}));
+  boards.push({id:16,name:'Azphel',open:true,nodes:structuredClone(sorcerer)});
+  const budget={points:415,boardCost:{}};
+  const route=planRoleRoute({boards,priorities,budget});
+  assert.equal(route.boards.find(board=>board.name==='Azphel').status,'not-needed','Azphel is Not needed for the role, never Done');
+  assert.notEqual(route.boards.find(board=>board.name==='Azphel').status,'done');
+  assert.ok(route.steps.length>0&&route.steps.every(step=>step.kind==='spare'),'Every priority node taken: the route moves on to the secondary nodes');
+  const tiers=route.steps.map(step=>step.tier);
+  assert.ok(tiers.every((tier,index)=>index===0||tier>=tiers[index-1]),`Secondary tiers in the record's order (${[...new Set(tiers)].join(', ')})`);
+  assert.equal(tiers[0],priorities.find(tier=>!tier.core).tier,'Defence and HP first');
+  assert.ok(route.spent+route.plannedCost<=415,`Never past 415 (${route.spent} + ${route.plannedCost})`);
+  assert.equal(route.boards.filter(board=>board.status==='now').length,1,'Exactly one current board while budget remains');
+  assert.equal(route.current.id,route.steps[0].boardId,'The current board holds the next secondary node');
+  assert.equal(route.allPlanned,false);
+  // The points the player has cut the steps, never the current board.
+  const typed=planRoleRoute({boards,priorities,budget,have:0});
+  assert.deepEqual([typed.steps.length,typed.current.id],[0,route.current.id],'Points typed do not move the current board');
+  // A priority node left on Zikel: Zikel is current, and no secondary node comes before it.
+  const zikel=boards.map(board=>board.name==='Zikel'?{...board,nodes:boardNodes}:board);
+  const mixed=planRoleRoute({boards:zikel,priorities,budget});
+  assert.equal(mixed.current.name,'Zikel');
+  const lastCore=mixed.steps.map(step=>step.kind).lastIndexOf('core');
+  assert.ok(lastCore>=0&&mixed.steps.slice(0,lastCore).every(step=>step.kind==='core'),'Secondary nodes only after every priority node');
+  assert.equal(mixed.boards.filter(board=>board.status==='now').length,1);
+  // Budget spent: no current board, and every point is planned.
+  const spentAll=planRoleRoute({boards,priorities,budget:{points:route.spent,boardCost:{}}});
+  assert.deepEqual([spentAll.current,spentAll.allPlanned,spentAll.boards.filter(board=>board.status==='now').length],[null,true,0],'All 415 points planned: no Now board');
+});
 check('the Lv 45 fixture\'s first move names one board only, and its next node once the board is read',()=>{
   const plain=buildAscentPlan({className:'Gladiator',role:'tank',data:data('Gladiator'),model:lv45});
   const move=plain.now.find(item=>item.view==='daevanion');

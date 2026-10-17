@@ -38,9 +38,9 @@ function showStep(el, index, scroll = true) {
     </div>
     <span class="ae-guide-hide" role="button" tabindex="0" data-guide="hide" aria-label="Hide the guide">▾</span>
     <div class="ae-guide-nav">
-      <button type="button" class="ae-guide-btn" data-guide="back"${guide.index === 0 ? ' disabled' : ''}>Back</button>
-      ${guide.skip && !last ? '<button type="button" class="ae-guide-btn" data-guide="skip">Skip</button>' : ''}
-      <button type="button" class="ae-guide-btn is-next" data-guide="${last ? guide.doneAction : 'next'}">${last ? 'Done' : 'Next'}</button>
+      <button type="button" class="ae-btn ae-guide-btn" data-guide="back"${guide.index === 0 ? ' disabled' : ''}>Back</button>
+      ${guide.skip && !last ? '<button type="button" class="ae-btn ae-guide-btn" data-guide="skip">Skip</button>' : ''}
+      <button type="button" class="ae-btn ae-guide-btn is-next" data-guide="${last ? guide.doneAction : 'next'}">${last ? 'Done' : 'Next'}</button>
     </div>`;
 }
 

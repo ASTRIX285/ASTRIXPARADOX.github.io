@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261017-3">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261017-4">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/tools/fixtures/aion2/eu/servers.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
@@ -25,7 +25,7 @@
 
 "/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=46ccc96c1f",
 
-"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=afa4c97d0d",
+"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160",
 
 "/astrix-app/games/aion2/engine/level-planner.mjs":"/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1",
 
@@ -39,11 +39,11 @@
 
 "/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454",
 
-"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=4625e42e80",
+"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=abb196f217",
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
 
-"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=4c93c68209",
+"/astrix-app/pages/aetherium/daeva-card.mjs":"/astrix-app/pages/aetherium/daeva-card.mjs?v=0c34c25371",
 
 "/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad"
 }}
@@ -52,7 +52,7 @@
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=46ccc96c1f" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=afa4c97d0d" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1" data-head-hint>
 
@@ -66,14 +66,14 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=4625e42e80" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=abb196f217" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=4c93c68209" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/daeva-card.mjs?v=0c34c25371" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=4c93c68209"></script>
+  <script type="module" src="/astrix-app/pages/aetherium/daeva-card.mjs?v=0c34c25371"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system>
   <a class="ae-skip" href="#aeMain">Skip to the Daeva Card</a>
@@ -140,8 +140,8 @@
       <h1 id="aeSearchTitle">Type a character name. See your whole setup.</h1>
       <form class="ae-search-form" id="aeSearch" autocomplete="off">
         <label class="ae-field"><span>Character name</span><input id="aeNameInput" name="name" type="text" maxlength="24" spellcheck="false" placeholder="Type your in-game character name"></label>
-        <label class="ae-field"><span>Region</span><select id="aeRegion" name="region"><option value="eu">Europe</option></select></label>
-        <label class="ae-field"><span>Server</span><select id="aeServer" name="server"><option value="">Any server in Europe</option></select></label>
+        <label class="ae-field"><span>Region</span><select class="ae-btn" id="aeRegion" name="region"><option value="eu">Europe</option></select></label>
+        <label class="ae-field"><span>Server</span><select class="ae-btn" id="aeServer" name="server"><option value="">Any server in Europe</option></select></label>
         <button type="submit" class="ae-primary" id="aeFind">Find character</button>
       </form>
       <p class="ae-server-note" id="aeServerNote" hidden>Server list not available right now. Any server still works.</p>
@@ -170,7 +170,7 @@
     </section>
     <section aria-labelledby="aeRosterTitle">
       <div class="ae-roster-head"><h2 id="aeRosterTitle">Your Daevas</h2> <p class="ae-roster-count" id="aeRosterCount">0 of 8</p> <a class="btn ae-compare-link" id="aeCompareLink" href="/hub/aetherium/compare/" hidden>Compare two Daevas</a></div>
-      <div class="ae-roster-switch" id="aeRosterSwitchBox" hidden><label for="aeRosterSwitch">Show server</label> <select id="aeRosterSwitch" name="rosterServer"></select></div>
+      <div class="ae-roster-switch" id="aeRosterSwitchBox" hidden><label for="aeRosterSwitch">Show server</label> <select class="ae-btn" id="aeRosterSwitch" name="rosterServer"></select></div>
       <ul class="ae-roster" id="aeRoster"><li class="ae-loading ae-sk"><span class="ae-sr">Loading your Daevas.</span></li></ul>
       <p class="ae-roster-note">Up to 8 Daevas per server, added by name and saved on this device. The public data can't tell which characters share an account, so each server has its own list. The active Daeva sets the page colour by faction.</p>
     </section>
