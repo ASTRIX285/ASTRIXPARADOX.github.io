@@ -381,8 +381,14 @@ await check('Mastery cap: no step above 11, a capped skill links to its Daevanio
 await check('Skill Bar: the game layout, Keen Strike set by the game on left click, the main line beside it; own keys left to right',async()=>{
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=23','skill-bar'));
   // Role aware (17 Oct 2026): one main line, so no empty stack A is drawn.
-  assert.equal(await page.locator('.ae-bar-col').count(),10,'Keys 1 to 8 on the left, left click and the main line on the right');
+  // The game's order (Miguel, in game, 17 Oct 2026): 1 to 8, Q, E, left click (main attack), right click (main line).
+  assert.deepEqual(await page.$$eval('.ae-bar-blocks [data-bar-col]',items=>items.map(el=>el.dataset.barCol)),['1','2','3','4','5','6','7','8','Q','E','LMB','B'],'Keys 1 to 8, Q, E, left click, then the main line');
   assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'The main attack, then the main line');
+  assert.equal(await page.locator('[data-bar-col="LMB"] [data-bar-row]').count(),1,'Left click has row 0 only, as in game');
+  assert.equal(await page.locator('[data-bar-keycap="B"].is-mouse').count(),1,'The main line sits on right click');
+  assert.deepEqual(await page.$$eval('.ae-bar-rows li',items=>items.map(el=>el.textContent)),['3','2','1','0'],'Row numbers on the right');
+  const order=await page.$$eval('.ae-bar-blocks [data-bar-col]',items=>items.map(el=>el.getBoundingClientRect().left));
+  assert.ok(order.every((left,index)=>index===0||left>order[index-1]),'One row, left to right');
   const col=key=>page.$$eval(`[data-bar-col="${key}"] [data-bar-skill]`,cells=>cells.map(el=>el.dataset.barSkill));
   assert.deepEqual(await col('B'),['Rending Blow','Overhead Slam','Rage Burst'],'The main line, row 3 at the top down to row 0');
   assert.equal(await page.locator('[data-bar-gap="2:B"]').count(),1,'Row 2 drawn empty on purpose');
@@ -401,7 +407,7 @@ await check('Skill Bar: the game layout, Keen Strike set by the game on left cli
   assert.match(await page.getAttribute('[data-bar-keycap="3"]','aria-label'),/kept free for Zikel's Blessing/);
   assert.doesNotMatch(await plain(page,'#aeCopyBar'),/Zikel|Lunge|Focused|from Lv/,'Copy this bar lists only what goes on now');
   assert.match(await page.getAttribute('[data-bar-key="3:B"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
-  assert.match(await plain(page,'.ae-guide'),/Your right-hand block: your main attack \(Keen Strike\) on left click, then the main line beside it\./);
+  assert.match(await plain(page,'.ae-guide'),/After E: your main attack \(Keen Strike\) on left click\. The main line is on right click and is your macro\./);
   assert.match(await page.getAttribute('#aeRightBlock','class'),/ae-guide-target/);
   await page.click('[data-bar-key="1:B"]');
   assert.match(await plain(page,'#aeInfoTitle'),/Overhead Slam/,'Tap a cell for the skill card');
@@ -858,7 +864,7 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   assert.deepEqual(rows.map(r=>r[0]),['3','2','1','0'],'Rows 3 to 0, top to bottom');
   assert.ok(rows[3][1]>rows[0][1],'Row 0 is lowest');
   assert.ok((await box(page,'[data-bar-keycap="B"]')).top>=(await box(page,'[data-bar-col="B"] [data-bar-row="0"]')).bottom-0.5,'The key label sits under row 0');
-  assert.equal(await page.locator('.ae-bar-col [data-bar-keycap]').count(),10,'Every key is a button');
+  assert.equal(await page.locator('.ae-bar-col [data-bar-keycap]').count(),12,'Every key is a button: 1 to 8, Q, E, left click, right click');
   assert.ok((await box(page,'[data-bar-keycap="1"]')).height>=44,'Keycaps are 44px touch targets');
   assert.ok((await box(page,'[data-bar-keycap="B"]')).height>=44);
   assert.match(await plain(page,'#aeStackRule'),/Each key is a stack: press it and the lowest ready skill fires, row 0 first\./);
@@ -878,7 +884,8 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   const templar=await open(ascent('class=templar&level=45','skill-bar'));
   assert.equal(await templar.page.locator('.ae-bar-cell.is-cd-pending').count(),0,'No Templar cooldown left pending');
   assert.equal(await templar.page.locator('.ae-bar-pending').count(),0,'No pending cooldown line for the Templar');
-  assert.deepEqual(await templar.page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['A','LMB','B'],'Two stacks either side of the main attack');
+  assert.deepEqual(await templar.page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','A','B'],'Left click, the shield stack on right click, the smash stack in one more column');
+  assert.equal(await templar.page.locator('[data-bar-keycap="A"].is-mouse').count(),1,'Stack A on right click');
   await templar.context.close();
   // The classes not checked against a published top-player build carry the tag on the Skill Bar and Macro screens. The
   // Assassin's main line was checked against published builds on 17 Oct 2026 (docs/level-guidance/assassin.md): no tag.
@@ -942,7 +949,7 @@ await check('macro window: one entry for the main line, each row in place, the l
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=45','macro'));
   assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>[el.dataset.macroEntry,el.dataset.macroKey,[...el.querySelectorAll('.ae-macro-row')].map(row=>row.dataset.tip)])),[
     ['1','B',['Rage Burst','Overhead Slam','Rending Blow']]]);
-  assert.match(await plain(page,'#aeMacroCount'),/^One entry: the main line, beside your main attack\./);
+  assert.match(await plain(page,'#aeMacroCount'),/^One entry\. The main line is on right click and is your macro\./);
   assert.deepEqual(await page.$$eval('#aeMacroBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'The right-hand block above the window, no empty second stack');
   assert.equal(await plain(page,'#aeMacroHold p'),'Hold both. Your basic attack fills the gaps, gives MP and cuts each animation short.');
   assert.equal(await page.locator('#aeMacroHold [data-status-tag="hold-basic"]').count(),1,'REPORTED: Not confirmed yet');
@@ -954,7 +961,7 @@ await check('macro window: one entry for the main line, each row in place, the l
   await context.close();
   // A class with two stacks still shows two entries and the two-entry line.
   const templar=await open(ascent('class=templar&level=45','macro'));
-  assert.equal(await plain(templar.page,'#aeMacroCount'),'Two entries, one for each stack either side of your main attack.');
+  assert.equal(await plain(templar.page,'#aeMacroCount'),'Two entries, one for each stack. The shield stack is on right click and the smash stack sits next to it. Both go into your macro.');
   await templar.context.close();
 });
 await check('the in-game tests: the chain test where its rule is unconfirmed, the stack test not shown because the rule is confirmed; the macro shows the dummy test',async()=>{

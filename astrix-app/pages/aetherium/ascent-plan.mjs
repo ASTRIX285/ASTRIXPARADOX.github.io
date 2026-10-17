@@ -389,8 +389,8 @@ function statusTag(item, id) {
 }
 
 /* Skill Bar, as the game draws it: every key a column of four rows, row 0 at the bottom nearest the key label. The
-   right-hand block is stack A, the main attack, stack B; the left-hand block holds every own-key skill, one per key, in
-   the order a player uses them. Tap a skill for where it goes and why; tap a key for the whole stack in words. */
+   keys run 1 to 8, Q, E, then left click (the main attack, row 0 only), right click (the main line) and the second stack in
+   one more column (Miguel, in game, 17 Oct 2026). Own-key skills sit one per key, in the order a player uses them. Tap a skill for where it goes and why; tap a key for the whole stack in words. */
 const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click', A: 'Stack A', B: 'Stack B' };
 const keyName = key => state.plan?.skillBar?.stacks?.[key]?.name ?? KEY_LABEL[key] ?? `Key ${key}`;
 const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3z" fill="currentColor"/></svg>';
@@ -421,10 +421,17 @@ function placeLine(item) {
   return item.why ?? 'Own key.';
 }
 const MOUSE_SVG = left => `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="${left ? 'M12 2.9V10H5.9V9A6.1 6.1 0 0 1 12 2.9Z' : 'M12 2.9V10h6.1V9A6.1 6.1 0 0 0 12 2.9Z'}" fill="var(--ae-ice)"/><path d="M12 3v7M5.5 10h13" stroke="currentColor" stroke-width="1.4"/></svg>`;
-function keyCap(key, stack) {
-  const label = `${keyName(key)}. ${stackSentence(stack)}`;
-  if (key === 'LMB' || key === 'RMB') return `<span class="ae-keycap is-mouse" role="button" tabindex="0" data-bar-keycap="${key}" data-tip="${esc(KEY_LABEL[key])}" aria-label="${esc(label)}">${MOUSE_SVG(key === 'LMB')}</span>`;
-  return `<span class="ae-keycap${key === 'A' || key === 'B' ? ' is-stack' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key === 'A' || key === 'B' ? keyName(key) : key)}</span>`;
+/**
+ * A key's label under its column. On the Skill Bar screen (face) it is drawn as the game's key strip: the row 0 skill dimmed
+ * behind the key name (1 to 8, Q, E, or the mouse button). cap 'RMB' puts a macro stack on right click.
+ */
+function keyCap(key, stack, { face = null, cap = null } = {}) {
+  const on = cap ?? key;
+  const label = `${on === 'RMB' && cap ? `Right click, ${keyName(key)}` : keyName(key)}. ${stackSentence(stack)}`;
+  const behind = face?.icon ? `<span class="ae-keycap-art" aria-hidden="true">${art(face.icon)}</span>` : '';
+  if (on === 'LMB' || on === 'RMB') return `<span class="ae-keycap is-mouse${behind ? ' has-art' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" data-tip="${esc(cap ? `Right click: ${keyName(key)}` : KEY_LABEL[key])}" aria-label="${esc(label)}">${behind}<span class="ae-keycap-mark">${MOUSE_SVG(on === 'LMB')}</span>${cap ? `<span class="ae-sr">${esc(keyName(key))}</span>` : ''}</span>`;
+  const stacked = key === 'A' || key === 'B';
+  return `<span class="ae-keycap${stacked ? ' is-stack' : ''}${behind ? ' has-art' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${behind}<span class="ae-keycap-mark">${esc(stacked ? (face && stack.label ? stack.label : keyName(key)) : key)}</span></span>`;
 }
 function barCell(item, key, row, stack) {
   const gap = !item && (stack.empty ?? []).find(entry => entry.row === row);
@@ -442,21 +449,47 @@ function barCell(item, key, row, stack) {
   </span>`;
 }
 /** One key as the game draws it: rows 3 to 0 top to bottom, the key label underneath. */
-function barColumn(bar, key) {
+function barColumn(bar, key, { game = false, cap = null, group = false } = {}) {
   const stack = bar.stacks[key];
-  return `<div class="ae-bar-col${key === 'LMB' ? ' is-main' : ''}" data-bar-col="${esc(key)}">
-    ${[3, 2, 1, 0].map(row => `<span class="ae-bar-slot" data-bar-row="${row}">${barCell(bar.bars[row][key], key, row, stack)}</span>`).join('')}
-    ${keyCap(key, stack)}
+  // In game the main attack column on left click has row 0 only; the rows above it stay open space.
+  const only0 = game && key === 'LMB';
+  const slot = row => (only0 && row > 0 ? `<span class="ae-bar-slot is-none" aria-hidden="true"></span>` : `<span class="ae-bar-slot" data-bar-row="${row}">${barCell(bar.bars[row][key], key, row, stack)}</span>`);
+  return `<div class="ae-bar-col${key === 'LMB' ? ' is-main' : ''}${group ? ' is-group' : ''}" data-bar-col="${esc(key)}"${game ? ` data-block-col="${esc(key)}"` : ''}>
+    ${[3, 2, 1, 0].map(slot).join('')}
+    ${keyCap(key, stack, game ? { face: bar.bars[0][key], cap } : {})}
   </div>`;
 }
-/** The right-hand block: stack A, the main attack, stack B, each stack with its label. The Macro screen draws only this. */
-function rightBlock(bar, { id = 'aeRightBlock' } = {}) {
-  const head = key => key === 'LMB' ? '<span class="ae-block-head is-main">Main attack</span>' : `<span class="ae-block-head">${esc(keyName(key))}${bar.stacks[key].label && bar.stacks[key].label !== bar.stacks[key].name ? `<small>${esc(bar.stacks[key].label)}</small>` : ''}</span>`;
-  const keys = bar.right.filter(key => key === 'LMB' || bar.stacks[key].skills.length);
-  const label = keys.map(key => (key === 'LMB' ? 'main attack' : keyName(key))).join(', ');
-  return `<div class="ae-bar-block is-right" id="${id}" aria-label="Right-hand block: ${esc(label)}">
-    ${keys.map(key => `<div class="ae-block-col" data-block-col="${esc(key)}">${head(key)}${barColumn(bar, key)}</div>`).join('')}
-  </div>`;
+/** The game's own key order for the Skill Bar screen (Miguel, in game, 17 Oct 2026): 1 to 8, Q, E, left click, right click. */
+const GAME_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E']);
+/**
+ * The macro stacks in the game's bar: the main line on right click (the stack the build names "Main line", else stack A),
+ * the other stack in one more column after it (Miguel, 17 Oct 2026). A build that puts its own skill on right click keeps
+ * it there, and the main line moves to the next column.
+ */
+function macroColumns(bar) {
+  const stacks = ['A', 'B'].filter(key => bar.stacks[key].skills.length);
+  const main = stacks.find(key => bar.stacks[key].name === 'Main line') ?? stacks[0] ?? null;
+  const ownRight = Boolean(bar.stacks.RMB.skills.length || bar.stacks.RMB.reserved?.length);
+  return { main, second: stacks.find(key => key !== main) ?? null, ownRight };
+}
+/** Left click, right click and the second stack, as the game draws them after E. The guide lights this block. */
+function mouseBlock(bar, { id = 'aeRightBlock' } = {}) {
+  const { main, second, ownRight } = macroColumns(bar);
+  const cols = [barColumn(bar, 'LMB', { game: true, group: true })];
+  if (ownRight) cols.push(barColumn(bar, 'RMB', { game: true }));
+  if (main) cols.push(barColumn(bar, main, { game: true, cap: ownRight ? null : 'RMB' }));
+  if (second) cols.push(barColumn(bar, second, { game: true }));
+  const names = ['main attack on left click', ownRight ? `${keyName('RMB')}` : null, main ? `${keyName(main)}${ownRight ? '' : ' on right click'}` : null, second ? keyName(second) : null].filter(Boolean);
+  return `<div class="ae-bar-block is-right is-game" id="${id}" aria-label="${esc(names.join(', '))}">${cols.join('')}</div>`;
+}
+/** Where the macro stacks sit, in words: "The main line is on right click and is your macro." */
+function macroWhere(bar) {
+  const { main, second, ownRight } = macroColumns(bar);
+  if (!main) return '';
+  const name = key => (/^Stack /.test(keyName(key)) ? keyName(key) : `the ${keyName(key).toLowerCase()}`);
+  const cap = text => text[0].toUpperCase() + text.slice(1);
+  if (ownRight) return second ? `${cap(name(main))} and ${name(second)} sit after right click and go into your macro.` : `${cap(name(main))} sits after right click and is your macro.`;
+  return second ? `${cap(name(main))} is on right click and ${name(second)} sits next to it. Both go into your macro.` : `${cap(name(main))} is on right click and is your macro.`;
 }
 /** The tag for stacks not checked against a published top-player build yet (the build's macro block says verified: false). */
 const unverifiedTag = bar => (bar?.verified === false ? '<span class="ae-tag is-unconfirmed" data-status-tag="stacks-unverified">Not confirmed yet</span>' : '');
@@ -494,8 +527,7 @@ function renderSkillBarScreen(plan) {
   if (!bar.fromBlock) return `<p class="ae-callout">No bar layout is sourced for this build yet.</p>`;
   const chains = plan.chains?.chains ?? [];
   const chip = (name, icon, note) => `<li>${art(icon)}<span>${esc(name)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
-  const used = bar.left.filter(key => bar.stacks[key].skills.length);
-  const leftKeys = bar.left.slice(0, Math.max(8, used.length));
+  const groupStart = new Set(['5', 'Q']);
   const pendingCooldowns = Object.values(bar.stacks).flatMap(stack => stack.skills).filter(skill => skill.cooldownPending && !skill.fixed);
   return `<div class="ae-skillbar">
     <div class="ae-bar-top">
@@ -503,14 +535,15 @@ function renderSkillBarScreen(plan) {
         <p class="ae-bar-swipe" aria-hidden="true">Swipe the keys to see them all ›</p>
         <div class="ae-bar-scroll" id="aeSkillBar">
           <div class="ae-bar-blocks">
-            <div class="ae-bar-block is-left" id="aeLeftBlock" aria-label="Left-hand block: one skill per key">${leftKeys.map(key => barColumn(bar, key)).join('')}</div>
-            ${rightBlock(bar)}
+            <div class="ae-bar-block is-left is-game" id="aeLeftBlock" aria-label="Keys 1 to 8, Q and E: one skill per key">${GAME_KEYS.map(key => barColumn(bar, key, { game: true, group: groupStart.has(key) })).join('')}</div>
+            ${mouseBlock(bar)}
+            <ol class="ae-bar-rows" aria-hidden="true"><li>3</li><li>2</li><li>1</li><li>0</li></ol>
           </div>
         </div>
       </div>
       ${firesNowPanel(plan)}
     </div>
-    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${['A', 'B'].filter(key => bar.stacks[key].skills.length).length === 2 ? 'Stack A and stack B sit either side of your main attack and go into your macro.' : `${esc(keyName(['A', 'B'].find(key => bar.stacks[key].skills.length) ?? 'B'))} sits beside your main attack and is your macro.`} Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''} ${unverifiedTag(bar)}</p>
+    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${esc(macroWhere(bar))} Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''} ${unverifiedTag(bar)}</p>
     ${copyList(bar)}
     ${comesLater(bar)}
     ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills ${ruleTag(plan.chains, 'chain-follow-up', { test: false })}</p>
@@ -587,11 +620,11 @@ function renderMacroScreen(plan) {
   const test = macroRule(plan, 'test-dummy');
   return `<div class="ae-macro-screen">
     <div class="ae-macro-main">
-      ${rightBlock(bar, { id: 'aeMacroBlock' })}
+      ${mouseBlock(bar, { id: 'aeMacroBlock' })}
       <div class="ae-macro-window" id="aeMacroWindow">
         <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
         <ol class="ae-macro">${entries}</ol>
-        <p class="ae-macro-count" id="aeMacroCount">${m.entries.length === 2 ? 'Two entries, one for each stack either side of your main attack.' : `One entry: ${esc(keyName(m.entries[0]?.key ?? 'B').toLowerCase().replace(/^(?!stack)/, 'the '))}, beside your main attack.`} ${unverifiedTag(bar)}</p>
+        <p class="ae-macro-count" id="aeMacroCount">${m.entries.length === 2 ? 'Two entries, one for each stack.' : 'One entry.'} ${esc(macroWhere(bar))} ${unverifiedTag(bar)}</p>
       </div>
       <p class="ae-macro-skip" id="aeMacroRule">Each entry fires its stack's first ready skill. ${skip ? `${esc(skip.text.split('. ')[0])}. ${statusTag(skip, 'skip-on-cooldown')}` : ''}</p>
       ${later}
@@ -709,8 +742,7 @@ function guideSteps(view, plan) {
     const bar = plan.skillBar;
     if (!bar || !bar.fromBlock) return [];
     const stacks = bar.stacks;
-    const drawn = ['A', 'B'].filter(key => stacks[key].skills.length);
-    add(drawn.length === 2 ? `Your right-hand block: stack A, your main attack (${bar.mainAttack}) on left click, then stack B. These two stacks are your macro.` : `Your right-hand block: your main attack (${bar.mainAttack}) on left click, then ${keyName(drawn[0] ?? 'B').toLowerCase().replace(/^(?!stack)/, 'the ')} beside it. That is your macro.`, '#aeRightBlock');
+    add(`After E: your main attack (${bar.mainAttack}) on left click. ${macroWhere(bar)}`, '#aeRightBlock');
     for (const key of ['A', 'B']) {
       const stack = stacks[key];
       if (!stack.skills.length) continue;

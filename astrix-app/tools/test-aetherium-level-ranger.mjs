@@ -340,11 +340,13 @@ if(process.env.AE_BROWSER!=='0'){
       const later=await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill));
       const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
-      // The grid draws keys 1 to 8 and the right-hand block; a skill on Q, E or right click is in Copy this bar.
+      // The grid draws the game's keys, 1 to 8, Q, E, left and right click and the second stack (17 Oct 2026), so every
+      // planned skill is drawn.
       const planned=cells(plan(level).skillBar).map(cell=>cell.name);
       assert.ok(onBar.every(name=>planned.includes(name)),`Lv ${level}: ${onBar} not all in the plan`);
       const copy=await plain(page,'#aeCopyBar');
       for(const name of planned)assert.ok(onBar.includes(name)||copy.includes(name),`Lv ${level}: ${name} is neither drawn nor in Copy this bar`);
+      for(const name of planned)assert.ok(onBar.includes(name),`Lv ${level}: ${name} is drawn on the bar`);
       await context.close();
     }
   });
