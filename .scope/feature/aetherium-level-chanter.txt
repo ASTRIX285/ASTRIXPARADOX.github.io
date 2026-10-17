@@ -1,0 +1,6 @@
+# feature/aetherium-level-chanter: Chanter level guidance for the shared level planner (support, healer, DPS): research record, skill values and synergies, role weights and trends, tests.
+astrix-app/games/aion2/data/advisor/builds/chanter.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/chanter.md
+astrix-app/tools/test-aetherium-level-chanter.mjs
+astrix-app/tools/test-aetherium-level-planner.mjs

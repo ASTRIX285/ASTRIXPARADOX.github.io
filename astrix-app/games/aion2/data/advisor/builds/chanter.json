@@ -12,18 +12,8 @@
       "summary": "Party buffs with Undefeated Mantra, plus solid melee damage. Undefeated Mantra is in every build.",
       "coreSkills": [
         {
-          "name": "Onslaught",
-          "priority": 1,
-          "target": "Keep levelled for MP",
-          "why": "MP filler, usable on the move. Each hit cuts the Spinning Strike cooldown from skill Lv 12.",
-          "refs": [
-            "mb-chanter",
-            "ec-chanter"
-          ]
-        },
-        {
           "name": "Dark Crush",
-          "priority": 2,
+          "priority": 1,
           "target": "Keep levelled",
           "why": "Main hit. Top players put Daevanion points into it.",
           "refs": [
@@ -32,9 +22,29 @@
           ]
         },
         {
-          "name": "Incandescent Blow",
+          "name": "Onslaught",
+          "priority": 2,
+          "target": "Keep levelled for MP",
+          "why": "MP filler, usable on the move. Each hit cuts the Spinning Strike cooldown from skill Lv 12.",
+          "refs": [
+            "mb-chanter",
+            "ec-chanter"
+          ]
+        },
+        {
+          "name": "Spinning Strike",
           "priority": 3,
-          "target": "Lv 8, then Mastery 11. The guide's skill level 12 needs more: Mastery stops at 11 and the build names no other source",
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 14. The core buff skill.",
+          "refs": [
+            "ec-chanter",
+            "mb-builds"
+          ]
+        },
+        {
+          "name": "Incandescent Blow",
+          "priority": 4,
+          "target": "Lv 8, then Mastery 11, then +4 from Daevanion nodes",
           "why": "No-cooldown damage skill.",
           "refs": [
             "mb-chanter",
@@ -45,18 +55,8 @@
             "capturedBy": "Miguel",
             "capturedOn": "2026-10-10",
             "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 12\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 8 to 12\" is reworded against the cap: the build names its Daevanion node (+1 on each of four boards, 139 of 178 full plans take all four)."
           }
-        },
-        {
-          "name": "Spinning Strike",
-          "priority": 4,
-          "target": "Keep levelled",
-          "why": "Unlocks at Lv 14. The core buff skill.",
-          "refs": [
-            "ec-chanter",
-            "mb-builds"
-          ]
         },
         {
           "name": "Recuperation",
@@ -66,6 +66,15 @@
           "refs": [
             "ec-chanter"
           ]
+        },
+        {
+          "name": "Impactful Crush",
+          "target": "Keep levelled",
+          "why": "Stuns NPC targets and makes Dark Crush ready.",
+          "refs": [
+            "ql-builds-chanter"
+          ],
+          "priority": 6
         }
       ],
       "specialties": [
@@ -74,10 +83,85 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Always lands as a critical hit",
+              "pick": "Always lands as a Critical Hit",
+              "perk": "Always lands as a Critical Hit",
               "refs": [
-                "ec-chanter"
-              ]
+                "ql-builds-chanter"
+              ],
+              "count": "188 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Piercing Strike chain",
+              "perk": "Adds Piercing Strike chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "192 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "perk": "Removes the cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "174 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Onslaught",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% more Multi-Hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "138 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut Spinning Strike cooldown",
+              "perk": "Hits cut Spinning Strike cooldown by 1s",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "207 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Storm Chain chain",
+              "perk": "Adds Storm Chain chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "127 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Spinning Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "5 s shorter cooldown",
+              "perk": "5s shorter cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "190 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as a Critical Hit",
+              "perk": "Ignores Block and Evasion, lands as Critical Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "106 of 281"
             }
           ]
         },
@@ -86,10 +170,67 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Lower MP cost (early levels)",
+              "pick": "More damage on fewer targets",
+              "perk": "Up to 12% more damage when fewer targets hit",
               "refs": [
-                "ec-chanter"
-              ]
+                "ql-builds-chanter"
+              ],
+              "count": "199 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as Multi-Hit",
+              "perk": "Ignores Block and Evasion, lands as Multi-Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "119 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Impactful Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving",
+              "perk": "Becomes a mobile skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "160 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "30% faster skill speed",
+              "perk": "30% faster skill speed",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "166 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Recuperation",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Two uses in a row",
+              "perk": "Extra consecutive use, heal over time stacks twice",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "201 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Restores 5% more HP",
+              "perk": "Restores 5% more HP",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "130 of 281"
             }
           ]
         }
@@ -138,16 +279,20 @@
       },
       "daevanion": {
         "priorities": [
-          "Nezekan and Zikel first",
-          "Dark Crush +1",
-          "Onslaught +1"
+          "Dark Crush +1 on every board you open",
+          "Spinning Strike and Onslaught +1",
+          "Incandescent Blow and Recuperation +1"
         ],
         "skillNodes": [
           "Dark Crush",
-          "Onslaught"
+          "Spinning Strike",
+          "Onslaught",
+          "Incandescent Blow",
+          "Recuperation"
         ],
         "refs": [
-          "mb-chanter"
+          "mb-chanter",
+          "ql-daev-chanter"
         ]
       },
       "stats": {
@@ -231,38 +376,70 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-chanter",
+          "title": "Public Chanter skill builds (281 distinct of 940 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-chanter",
+          "title": "Public Chanter Daevanion plans (268 distinct of 444 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
-        "status": "reported",
+        "status": "confirmed",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-chanter"
         ],
         "stackA": {
           "label": "Crush",
           "rows": [
             {
               "name": "Dark Crush",
-              "why": "Fires first when ready. Most players start the line with it."
+              "why": "Fires first when ready. Impactful Crush, Spinning Strike and Marchutan's Wrath make it ready again, so it catches every reset."
             },
             {
               "name": "Spinning Strike",
-              "why": "Big area hit that boosts Critical Damage."
+              "why": "Critical Damage +15% for 30 s, stacking twice, and Dark Crush is ready for 2 s."
             },
             {
               "name": "Impactful Crush",
-              "why": "Stun on a 15 s cooldown."
+              "why": "Stuns NPC targets and makes Dark Crush ready for 2 s."
             },
             {
               "name": "Incandescent Blow",
               "why": "Filler: always ready, so it sits last.",
               "noCooldown": true
             }
-          ]
+          ],
+          "name": "Main line"
         },
         "mainAttack": {
           "name": "Onslaught",
-          "why": "Held with the macro key: MP back, each animation cut short."
+          "why": "Held with the macro key: 100 MP a hit, each animation cut short. 258 of 265 published bars keep it on left click."
         },
         "stackBPending": {
           "pending": true,
@@ -272,23 +449,47 @@
         "ownKeys": [
           {
             "name": "Undefeated Mantra",
-            "reason": "toggle"
+            "reason": "toggle",
+            "why": "Toggle: switch it on and leave it on. A macro would switch it off."
           },
           {
             "name": "Sprint Mantra",
-            "reason": "toggle"
+            "reason": "toggle",
+            "why": "Toggle: switch it on and leave it on."
           },
           {
             "name": "Power of the Storm",
-            "reason": "other"
+            "reason": "buff",
+            "why": "Burst buff for 10 s: press it at the start of a pull or a boss phase."
           },
           {
-            "name": "Obliterate",
-            "reason": "stagger"
+            "name": "Marchutan's Wrath",
+            "reason": "other",
+            "why": "A hard hit every 30 s that makes Dark Crush ready for 3 s: press it, and the macro fires Dark Crush next."
+          },
+          {
+            "name": "Heat Wave Blow",
+            "reason": "other",
+            "why": "A 10 s hit on a pack. The macro key holds four and is full."
+          },
+          {
+            "stack": [
+              "Tremor Crush",
+              "Wave Blow"
+            ],
+            "reason": "other",
+            "label": "Stun",
+            "why": "Tremor Crush stuns an NPC, then Wave Blow fires on the stunned target. 84 of 265 published bars share this key."
+          },
+          {
+            "name": "Gust Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
             "name": "Recuperation",
-            "reason": "heal"
+            "reason": "heal",
+            "why": "Heals you and the party and clears a debuff: you choose when."
           },
           {
             "name": "Defiance",
@@ -297,10 +498,157 @@
           },
           {
             "name": "Rushing Smash",
-            "reason": "other"
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target and gives 100 MP."
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "ownKeysOrder": "listed"
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Party buffs first, then damage; survival and MP count for a little.",
+        "weights": {
+          "damage": 2,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 3,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-chanter",
+          "ql-db-chanter"
+        ],
+        "preferences": [
+          {
+            "id": "line-marchutan",
+            "kind": "line",
+            "skill": "Marchutan's Wrath",
+            "count": "17 of 247 published bars put Marchutan's Wrath in the macro key; 4 of 144 macros",
+            "why": "Some builds put Marchutan's Wrath in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-heat-wave",
+            "kind": "line",
+            "skill": "Heat Wave Blow",
+            "count": "5 of 144 macros run Dark Crush then Heat Wave Blow",
+            "why": "Some builds put Heat Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-wave-blow",
+            "kind": "line",
+            "skill": "Wave Blow",
+            "count": "4 of 144 macros (8 with copies) run Wave Blow then Dark Crush",
+            "why": "Some builds put Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-onslaught",
+            "kind": "line",
+            "skill": "Onslaught",
+            "count": "8 of 144 macros (101 with copies) run Onslaught then Dark Crush",
+            "why": "Some builds put Onslaught in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-undefeated",
+            "kind": "stigma",
+            "skill": "Undefeated Mantra",
+            "count": "263 of 281 builds; 244 have it on the bar",
+            "why": "Party PvE damage and Damage Tolerance +10.5%, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-storm",
+            "kind": "stigma",
+            "skill": "Power of the Storm",
+            "count": "223 of 281 builds",
+            "why": "+20% Combat Speed and shorter cooldowns for you and the party.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-marchutan",
+            "kind": "stigma",
+            "skill": "Marchutan's Wrath",
+            "count": "207 of 281 builds",
+            "why": "A hard hit that makes Dark Crush ready.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-sprint",
+            "kind": "stigma",
+            "skill": "Sprint Mantra",
+            "count": "247 of 281 builds",
+            "why": "Heal on a hit, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-sprint-second",
+            "kind": "stigma",
+            "skill": "Sprint Mantra",
+            "count": "The guide's set slots Sprint Mantra second, at Lv 27",
+            "why": "Sprint Mantra in the second slot.",
+            "status": "reported",
+            "refs": [
+              "ec-chanter"
+            ],
+            "slot": 2
+          },
+          {
+            "id": "mastery-dark-crush-first",
+            "kind": "mastery",
+            "skill": "Dark Crush",
+            "count": "84 of 138 builds with a priority list put Dark Crush first; 10 of 18 levelling builds",
+            "why": "Dark Crush levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "from": 4
+          },
+          {
+            "id": "mastery-onslaught-early",
+            "kind": "mastery",
+            "skill": "Onslaught",
+            "count": "32 of 138 builds put Onslaught first",
+            "why": "Onslaught first before Dark Crush.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "to": 3
+          }
+        ]
       }
     },
     {
@@ -311,7 +659,7 @@
       "label": "Defensive support",
       "beginner": "medium",
       "status": "partial",
-      "summary": "A tankier Chanter that leans on shields and healing. Only the stigma set is confirmed so far.",
+      "summary": "Keeps the party alive: Healing Touch, a party shield and Barrier Spell, with Undefeated Mantra for party damage.",
       "coreSkills": [
         {
           "name": "Recuperation",
@@ -330,9 +678,193 @@
           "refs": [
             "ec-chanter"
           ]
+        },
+        {
+          "name": "Spinning Strike",
+          "target": "Keep levelled",
+          "why": "Critical Damage +15% for 30 s, stacking twice.",
+          "refs": [
+            "ql-builds-chanter"
+          ],
+          "priority": 3
+        },
+        {
+          "name": "Onslaught",
+          "target": "Keep levelled",
+          "why": "Main attack: 100 MP a hit.",
+          "refs": [
+            "ql-builds-chanter"
+          ],
+          "priority": 4
         }
       ],
-      "specialties": [],
+      "specialties": [
+        {
+          "skill": "Dark Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Always lands as a Critical Hit",
+              "perk": "Always lands as a Critical Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "188 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Piercing Strike chain",
+              "perk": "Adds Piercing Strike chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "192 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "perk": "Removes the cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "174 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Onslaught",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% more Multi-Hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "138 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut Spinning Strike cooldown",
+              "perk": "Hits cut Spinning Strike cooldown by 1s",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "207 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Storm Chain chain",
+              "perk": "Adds Storm Chain chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "127 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Spinning Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "5 s shorter cooldown",
+              "perk": "5s shorter cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "190 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as a Critical Hit",
+              "perk": "Ignores Block and Evasion, lands as Critical Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "106 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Incandescent Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "More damage on fewer targets",
+              "perk": "Up to 12% more damage when fewer targets hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "199 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as Multi-Hit",
+              "perk": "Ignores Block and Evasion, lands as Multi-Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "119 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Impactful Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving",
+              "perk": "Becomes a mobile skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "160 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "30% faster skill speed",
+              "perk": "30% faster skill speed",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "166 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Recuperation",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Two uses in a row",
+              "perk": "Extra consecutive use, heal over time stacks twice",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "201 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Restores 5% more HP",
+              "perk": "Restores 5% more HP",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "130 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "3 s shorter cooldown",
+              "perk": "3s shorter cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "84 of 281"
+            }
+          ]
+        }
+      ],
       "stigmas": {
         "slots": [
           {
@@ -352,12 +884,27 @@
             "name": "Barrier Spell"
           }
         ],
-        "alternatives": [],
+        "alternatives": [
+          {
+            "name": "Sprint Mantra",
+            "why": "34 of 41 healer builds slot it: heal on a hit, always on.",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "name": "Power of the Storm",
+            "why": "20 of 41 healer builds slot it.",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          }
+        ],
         "confidence": "single-source",
         "refs": [
           "ec-chanter"
         ],
-        "note": "Defensive set. The slot order is a suggestion."
+        "note": "Party survival set: Healing Touch, Impeding Authority and Barrier Spell beside Undefeated Mantra."
       },
       "daevanion": {
         "pending": true,
@@ -398,38 +945,60 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-chanter",
+          "title": "Public Chanter skill builds (281 distinct of 940 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
-        "status": "reported",
+        "status": "confirmed",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-chanter"
         ],
         "stackA": {
           "label": "Crush",
           "rows": [
             {
               "name": "Dark Crush",
-              "why": "Fires first when ready. Most players start the line with it."
+              "why": "Fires first when ready. Impactful Crush, Spinning Strike and Marchutan's Wrath make it ready again, so it catches every reset."
             },
             {
               "name": "Spinning Strike",
-              "why": "Big area hit that boosts Critical Damage."
+              "why": "Critical Damage +15% for 30 s, stacking twice, and Dark Crush is ready for 2 s."
             },
             {
               "name": "Impactful Crush",
-              "why": "Stun on a 15 s cooldown."
+              "why": "Stuns NPC targets and makes Dark Crush ready for 2 s."
             },
             {
               "name": "Incandescent Blow",
               "why": "Filler: always ready, so it sits last.",
               "noCooldown": true
             }
-          ]
+          ],
+          "name": "Main line"
         },
         "mainAttack": {
           "name": "Onslaught",
-          "why": "Held with the macro key: MP back, each animation cut short."
+          "why": "Held with the macro key: 100 MP a hit, each animation cut short. 258 of 265 published bars keep it on left click."
         },
         "stackBPending": {
           "pending": true,
@@ -439,23 +1008,47 @@
         "ownKeys": [
           {
             "name": "Undefeated Mantra",
-            "reason": "toggle"
+            "reason": "toggle",
+            "why": "Toggle: switch it on and leave it on. A macro would switch it off."
           },
           {
-            "name": "Sprint Mantra",
-            "reason": "toggle"
+            "name": "Healing Touch",
+            "reason": "heal",
+            "why": "A big party heal every 30 s: save it for a hit the party takes."
           },
           {
-            "name": "Power of the Storm",
-            "reason": "other"
+            "name": "Impeding Authority",
+            "reason": "defensive",
+            "why": "A party shield for 20 s: press it before a big hit."
           },
           {
-            "name": "Obliterate",
-            "reason": "stagger"
+            "name": "Barrier Spell",
+            "reason": "defensive",
+            "why": "For 3 s nobody drops below 10% HP: keep it for a wipe moment."
+          },
+          {
+            "name": "Heat Wave Blow",
+            "reason": "other",
+            "why": "A 10 s hit on a pack. The macro key holds four and is full."
+          },
+          {
+            "stack": [
+              "Tremor Crush",
+              "Wave Blow"
+            ],
+            "reason": "other",
+            "label": "Stun",
+            "why": "Tremor Crush stuns an NPC, then Wave Blow fires on the stunned target. 84 of 265 published bars share this key."
+          },
+          {
+            "name": "Gust Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
             "name": "Recuperation",
-            "reason": "heal"
+            "reason": "heal",
+            "why": "Heals you and the party and clears a debuff: you choose when."
           },
           {
             "name": "Defiance",
@@ -464,10 +1057,155 @@
           },
           {
             "name": "Rushing Smash",
-            "reason": "other"
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target and gives 100 MP."
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "ownKeysOrder": "listed"
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Keeping the party alive first, then party buffs; damage and MP count for a little.",
+        "weights": {
+          "damage": 1,
+          "enmity": 0,
+          "survival": 3,
+          "partyBuff": 2,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-chanter",
+          "ql-db-chanter"
+        ],
+        "preferences": [
+          {
+            "id": "line-marchutan",
+            "kind": "line",
+            "skill": "Marchutan's Wrath",
+            "count": "17 of 247 published bars put Marchutan's Wrath in the macro key; 4 of 144 macros",
+            "why": "Some builds put Marchutan's Wrath in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-heat-wave",
+            "kind": "line",
+            "skill": "Heat Wave Blow",
+            "count": "5 of 144 macros run Dark Crush then Heat Wave Blow",
+            "why": "Some builds put Heat Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-wave-blow",
+            "kind": "line",
+            "skill": "Wave Blow",
+            "count": "4 of 144 macros (8 with copies) run Wave Blow then Dark Crush",
+            "why": "Some builds put Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-onslaught",
+            "kind": "line",
+            "skill": "Onslaught",
+            "count": "8 of 144 macros (101 with copies) run Onslaught then Dark Crush",
+            "why": "Some builds put Onslaught in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-undefeated",
+            "kind": "stigma",
+            "skill": "Undefeated Mantra",
+            "count": "40 of 41 healer builds",
+            "why": "Party PvE damage and Damage Tolerance +10.5%, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-healing-touch",
+            "kind": "stigma",
+            "skill": "Healing Touch",
+            "count": "30 of 41 healer builds",
+            "why": "A big party heal every 30 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-sprint",
+            "kind": "stigma",
+            "skill": "Sprint Mantra",
+            "count": "34 of 41 healer builds",
+            "why": "Heal on a hit, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-storm",
+            "kind": "stigma",
+            "skill": "Power of the Storm",
+            "count": "20 of 41 healer builds",
+            "why": "Shorter cooldowns for you and the party.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-barrier",
+            "kind": "stigma",
+            "skill": "Barrier Spell",
+            "count": "12 of 41 healer builds",
+            "why": "Nobody drops below 10% HP for 3 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-impeding",
+            "kind": "stigma",
+            "skill": "Impeding Authority",
+            "count": "11 of 41 healer builds",
+            "why": "A party shield of 16% Max HP.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "mastery-dark-crush-first",
+            "kind": "mastery",
+            "skill": "Dark Crush",
+            "count": "12 of 20 healer builds with a priority list put Dark Crush first",
+            "why": "Dark Crush levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "from": 4
+          }
+        ]
       }
     },
     {
@@ -505,6 +1243,15 @@
           "refs": [
             "ec-chanter"
           ]
+        },
+        {
+          "name": "Incandescent Blow",
+          "target": "Keep levelled",
+          "why": "No cooldown: it fills the line.",
+          "refs": [
+            "ql-builds-chanter"
+          ],
+          "priority": 4
         }
       ],
       "specialties": [
@@ -513,10 +1260,154 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Always lands as a critical hit",
+              "pick": "Always lands as a Critical Hit",
+              "perk": "Always lands as a Critical Hit",
               "refs": [
-                "ec-chanter"
-              ]
+                "ql-builds-chanter"
+              ],
+              "count": "188 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Piercing Strike chain",
+              "perk": "Adds Piercing Strike chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "192 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "perk": "Removes the cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "174 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Onslaught",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% more Multi-Hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "138 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut Spinning Strike cooldown",
+              "perk": "Hits cut Spinning Strike cooldown by 1s",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "207 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Storm Chain chain",
+              "perk": "Adds Storm Chain chain skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "127 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Spinning Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "5 s shorter cooldown",
+              "perk": "5s shorter cooldown",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "190 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as a Critical Hit",
+              "perk": "Ignores Block and Evasion, lands as Critical Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "106 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Incandescent Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "More damage on fewer targets",
+              "perk": "Up to 12% more damage when fewer targets hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "199 of 281"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion, lands as Multi-Hit",
+              "perk": "Ignores Block and Evasion, lands as Multi-Hit",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "119 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Impactful Crush",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Usable while moving",
+              "perk": "Becomes a mobile skill",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "160 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "30% faster skill speed",
+              "perk": "30% faster skill speed",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "166 of 281"
+            }
+          ]
+        },
+        {
+          "skill": "Recuperation",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Two uses in a row",
+              "perk": "Extra consecutive use, heal over time stacks twice",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "201 of 281"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Restores 5% more HP",
+              "perk": "Restores 5% more HP",
+              "refs": [
+                "ql-builds-chanter"
+              ],
+              "count": "130 of 281"
             }
           ]
         }
@@ -540,7 +1431,22 @@
             "name": "Guardian Blessing"
           }
         ],
-        "alternatives": [],
+        "alternatives": [
+          {
+            "name": "Power of the Storm",
+            "why": "51 of 75 solo and damage builds slot it.",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "name": "Fracturing Blow",
+            "why": "27 of 75 solo and damage builds slot it.",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          }
+        ],
         "confidence": "single-source",
         "refs": [
           "ec-chanter"
@@ -549,15 +1455,19 @@
       },
       "daevanion": {
         "priorities": [
-          "Dark Crush +1",
-          "Onslaught +1"
+          "Dark Crush +1 on every board you open",
+          "Onslaught and Spinning Strike +1",
+          "Incandescent Blow +1"
         ],
         "skillNodes": [
           "Dark Crush",
-          "Onslaught"
+          "Onslaught",
+          "Spinning Strike",
+          "Incandescent Blow"
         ],
         "refs": [
-          "mb-chanter"
+          "mb-chanter",
+          "ql-daev-chanter"
         ]
       },
       "stats": {
@@ -617,38 +1527,70 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-chanter",
+          "title": "Public Chanter skill builds (281 distinct of 940 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-chanter",
+          "title": "Public Chanter Daevanion plans (268 distinct of 444 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
-        "status": "reported",
+        "status": "confirmed",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-chanter"
         ],
         "stackA": {
           "label": "Crush",
           "rows": [
             {
               "name": "Dark Crush",
-              "why": "Fires first when ready. Most players start the line with it."
+              "why": "Fires first when ready. Impactful Crush, Spinning Strike and Marchutan's Wrath make it ready again, so it catches every reset."
             },
             {
               "name": "Spinning Strike",
-              "why": "Big area hit that boosts Critical Damage."
+              "why": "Critical Damage +15% for 30 s, stacking twice, and Dark Crush is ready for 2 s."
             },
             {
               "name": "Impactful Crush",
-              "why": "Stun on a 15 s cooldown."
+              "why": "Stuns NPC targets and makes Dark Crush ready for 2 s."
             },
             {
               "name": "Incandescent Blow",
               "why": "Filler: always ready, so it sits last.",
               "noCooldown": true
             }
-          ]
+          ],
+          "name": "Main line"
         },
         "mainAttack": {
           "name": "Onslaught",
-          "why": "Held with the macro key: MP back, each animation cut short."
+          "why": "Held with the macro key: 100 MP a hit, each animation cut short. 258 of 265 published bars keep it on left click."
         },
         "stackBPending": {
           "pending": true,
@@ -658,23 +1600,47 @@
         "ownKeys": [
           {
             "name": "Undefeated Mantra",
-            "reason": "toggle"
+            "reason": "toggle",
+            "why": "Toggle: switch it on and leave it on. A macro would switch it off."
           },
           {
             "name": "Sprint Mantra",
-            "reason": "toggle"
+            "reason": "toggle",
+            "why": "Toggle: switch it on and leave it on."
           },
           {
             "name": "Power of the Storm",
-            "reason": "other"
+            "reason": "buff",
+            "why": "Burst buff for 10 s: press it at the start of a pull or a boss phase."
           },
           {
-            "name": "Obliterate",
-            "reason": "stagger"
+            "name": "Marchutan's Wrath",
+            "reason": "other",
+            "why": "A hard hit every 30 s that makes Dark Crush ready for 3 s: press it, and the macro fires Dark Crush next."
+          },
+          {
+            "name": "Heat Wave Blow",
+            "reason": "other",
+            "why": "A 10 s hit on a pack. The macro key holds four and is full."
+          },
+          {
+            "stack": [
+              "Tremor Crush",
+              "Wave Blow"
+            ],
+            "reason": "other",
+            "label": "Stun",
+            "why": "Tremor Crush stuns an NPC, then Wave Blow fires on the stunned target. 84 of 265 published bars share this key."
+          },
+          {
+            "name": "Gust Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
             "name": "Recuperation",
-            "reason": "heal"
+            "reason": "heal",
+            "why": "Heals you and the party and clears a debuff: you choose when."
           },
           {
             "name": "Defiance",
@@ -683,10 +1649,179 @@
           },
           {
             "name": "Rushing Smash",
-            "reason": "other"
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target and gives 100 MP."
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "ownKeysOrder": "listed"
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first, for solo play: no party to buff. Survival and MP count for a little.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 0,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-chanter",
+          "ql-db-chanter"
+        ],
+        "preferences": [
+          {
+            "id": "line-marchutan",
+            "kind": "line",
+            "skill": "Marchutan's Wrath",
+            "count": "17 of 247 published bars put Marchutan's Wrath in the macro key; 4 of 144 macros",
+            "why": "Some builds put Marchutan's Wrath in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-heat-wave",
+            "kind": "line",
+            "skill": "Heat Wave Blow",
+            "count": "5 of 144 macros run Dark Crush then Heat Wave Blow",
+            "why": "Some builds put Heat Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-wave-blow",
+            "kind": "line",
+            "skill": "Wave Blow",
+            "count": "4 of 144 macros (8 with copies) run Wave Blow then Dark Crush",
+            "why": "Some builds put Wave Blow in the macro line.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-onslaught",
+            "kind": "line",
+            "skill": "Onslaught",
+            "count": "8 of 144 macros (101 with copies) run Onslaught then Dark Crush",
+            "why": "Some builds put Onslaught in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-undefeated",
+            "kind": "stigma",
+            "skill": "Undefeated Mantra",
+            "count": "69 of 75 solo and damage builds",
+            "why": "+10.5% PvE damage for you, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-sprint",
+            "kind": "stigma",
+            "skill": "Sprint Mantra",
+            "count": "59 of 75 solo and damage builds",
+            "why": "Heal on a hit, always on.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-storm",
+            "kind": "stigma",
+            "skill": "Power of the Storm",
+            "count": "51 of 75 solo and damage builds",
+            "why": "+20% Combat Speed and shorter cooldowns for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-marchutan",
+            "kind": "stigma",
+            "skill": "Marchutan's Wrath",
+            "count": "41 of 75 solo and damage builds",
+            "why": "A hard hit that makes Dark Crush ready.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-guardian",
+            "kind": "stigma",
+            "skill": "Guardian Blessing",
+            "count": "37 of 75 solo and damage builds",
+            "why": "More Max HP for 120 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-fracturing",
+            "kind": "stigma",
+            "skill": "Fracturing Blow",
+            "count": "27 of 75 solo and damage builds",
+            "why": "A dash that cuts the target's Defence.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ]
+          },
+          {
+            "id": "stigma-sprint-second",
+            "kind": "stigma",
+            "skill": "Sprint Mantra",
+            "count": "The guide's set slots Sprint Mantra second, at Lv 27",
+            "why": "Sprint Mantra in the second slot.",
+            "status": "reported",
+            "refs": [
+              "ec-chanter"
+            ],
+            "slot": 2
+          },
+          {
+            "id": "mastery-dark-crush-first",
+            "kind": "mastery",
+            "skill": "Dark Crush",
+            "count": "84 of 138 builds with a priority list put Dark Crush first; 10 of 18 levelling builds",
+            "why": "Dark Crush levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "from": 4
+          },
+          {
+            "id": "mastery-onslaught-early",
+            "kind": "mastery",
+            "skill": "Onslaught",
+            "count": "32 of 138 builds put Onslaught first",
+            "why": "Onslaught first before Dark Crush.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-chanter"
+            ],
+            "to": 3
+          }
+        ]
       }
     }
   ]
