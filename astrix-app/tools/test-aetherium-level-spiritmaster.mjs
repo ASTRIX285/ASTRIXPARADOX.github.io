@@ -354,7 +354,9 @@ if(process.env.AE_BROWSER!=='0'){
       const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
       const later=await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill));
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
-      assert.equal(await page.locator('#aeNextAt').count(),level===45?0:1,'One Next line before the cap');
+      assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
+      if(level===45)assert.match(await plain(page,'#aeNextAt'),/Nothing changes in your setup/);
+      else assert.equal(await page.getAttribute('#aeNextAt','data-next-level'),String(plan(level).nextAt.level));
       const text=await page.evaluate(()=>document.body.innerText);
       assert.doesNotMatch(text,/[–—]/,'no dashes');
       assert.doesNotMatch(text,/questlog|MetaBot|MMOEXP|GamesFuze/i,'no source names');
