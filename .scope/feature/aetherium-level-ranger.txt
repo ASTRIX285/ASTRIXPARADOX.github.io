@@ -2,5 +2,4 @@
 astrix-app/games/aion2/data/advisor/builds/ranger.json
 astrix-app/games/aion2/data/advisor/skills.json
 astrix-app/games/aion2/docs/level-guidance/ranger.md
-astrix-app/tools/test-aetherium-level-planner.mjs
 astrix-app/tools/test-aetherium-level-ranger.mjs
