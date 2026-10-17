@@ -254,8 +254,10 @@ check('upcoming milestones are ahead of the level and in order',()=>{
 
 check('a manual plan lists skills to level and open stigma slots',()=>{
   const plan=buildAscentPlan({className:'Cleric',role:'healer',level:30,data:data('Cleric')});
-  assert.match(plan.now[0].title,/^Level your skills in this order: Earth's Retribution, Light of Regeneration, Condemnation/);
-  assert.equal(plan.now[1].title,'Slot Light of Protection, Noble Aura');
+  // Level planner, Cleric (17 Oct 2026): the healer levels its heals first and slots Absolution second (it was the build's
+  // own priority list: Earth's Retribution first, and Noble Aura second).
+  assert.match(plan.now[0].title,/^Level your skills in this order: Healing Light, Light of Regeneration, Radiant Recovery/);
+  assert.equal(plan.now[1].title,'Slot Light of Protection, Absolution');
   assert.ok(plan.now.every(item=>item.kind==='build'));
 });
 
@@ -274,7 +276,10 @@ check('pending role stays pending, unknown role falls back to the main role',()=
 check('roles list puts the main role first',()=>{
   assert.deepEqual(rolesFor(builds.Chanter).map(item=>item.role),['support','healer','dps']);
   assert.deepEqual(rolesFor(builds.Templar).map(item=>item.role),['tank','dps']);
-  assert.equal(pickBuild(builds.Cleric,'dps').role,'healer');
+  // Level planner, Cleric (17 Oct 2026): the Cleric has a dps build now, so the fallback is checked with a role it does not play.
+  assert.deepEqual(rolesFor(builds.Cleric).map(item=>item.role),['healer','dps']);
+  assert.equal(pickBuild(builds.Cleric,'dps').role,'dps');
+  assert.equal(pickBuild(builds.Cleric,'tank').role,'healer');
 });
 
 check('every class and role builds a plan at every level band',()=>{
@@ -776,7 +781,8 @@ check('chains come only from the data: Specialty perks that add a chain skill, a
     ['Keen Strike','Reckless Strike',16,'specialty'],['Overhead Slam','Upward Strike',8,'specialty'],['Defiance','Wrath Burst',8,'specialty'],['','Ankle Slice',null,'tooltip']]);
   assert.match(glad.chains[3].pending.reason,/two lead-in skills/);
   const cleric=buildAscentPlan({className:'Cleric',role:'healer',level:45,data:data('Cleric')}).chains.chains;
-  assert.deepEqual(cleric.map(chain=>[chain.leadIns[0],chain.followUp]),[["Earth's Retribution",'Discharge']]);
+  // Level planner, Cleric (17 Oct 2026): Defiance's Specialty perk from the tooltip adds the second Cleric chain.
+  assert.deepEqual(cleric.map(chain=>[chain.leadIns[0],chain.followUp]),[["Earth's Retribution",'Discharge'],['Defiance','Blessing of Regeneration']]);
   assert.deepEqual(buildAscentPlan({className:'Assassin',level:45,data:data('Assassin')}).chains.chains,[],'No chain in the Assassin data, so none shown');
   const keen=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')}).mastery.active.find(entry=>entry.name==='Keen Strike');
   assert.deepEqual(keen.chains.map(chain=>chain.followUp),['Reckless Strike'],'The skill card knows its chain');

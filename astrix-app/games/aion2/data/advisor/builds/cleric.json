@@ -47,8 +47,18 @@
           }
         },
         {
-          "name": "Healing Light",
+          "name": "Chain of Torment",
           "priority": 4,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 4. Opens Condemnation, and the target takes more damage from the whole party.",
+          "refs": [
+            "mb-cleric",
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "name": "Healing Light",
+          "priority": 5,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 16 and up need more: Mastery stops at 11 and the build names no other source",
           "why": "Unlocks at Lv 10. Heals you and the lowest-health ally at 40 m.",
           "refs": [
@@ -65,7 +75,7 @@
         },
         {
           "name": "Radiant Recovery",
-          "priority": 5,
+          "priority": 6,
           "target": "Keep levelled",
           "why": "Unlocks at Lv 12. Party heal that also cleanses.",
           "refs": [
@@ -83,14 +93,16 @@
               "pick": "Two extra uses in a row",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "Two extra consecutive uses"
             },
             {
               "skillLevel": 12,
               "pick": "Restores 2% more HP",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "Restores 2% more HP"
             }
           ]
         },
@@ -102,14 +114,16 @@
               "pick": "One extra use in a row",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "One extra consecutive use"
             },
             {
               "skillLevel": 8,
               "pick": "3 s shorter cooldown",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "3s shorter cooldown"
             }
           ]
         },
@@ -117,18 +131,70 @@
           "skill": "Condemnation",
           "picks": [
             {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage on one target",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Up to 12% more damage when fewer targets hit"
+            },
+            {
               "skillLevel": 12,
               "pick": "Cooldown resets on a critical hit",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "Cooldown resets on Critical Hit"
             },
             {
               "skillLevel": 16,
               "pick": "Lands as a multi-hit",
               "refs": [
                 "ec-cleric"
-              ]
+              ],
+              "perk": "Lands as Multi-Hit"
+            }
+          ]
+        },
+        {
+          "skill": "Light of Regeneration",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+5% Incoming Heal while healing",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "+5% Incoming Heal while healing"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Damage tolerance while healing",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Extra PvE and PvP damage tolerance while healing"
+            }
+          ]
+        },
+        {
+          "skill": "Chain of Torment",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Damage over time 3 s longer",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Damage over time lasts 3s longer"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Target takes a further 10% more PvE damage",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Cuts enemy damage tolerance a further 10% in PvE"
             }
           ]
         }
@@ -141,39 +207,55 @@
           },
           {
             "slotLevel": 27,
-            "name": "Noble Aura"
+            "name": "Absolution"
           },
           {
             "slotLevel": 32,
-            "name": "Earth Punishment"
+            "name": "Summon Resurrection"
           },
           {
             "slotLevel": 37,
-            "name": "Summon Resurrection"
+            "name": "Benevolence"
           }
         ],
         "alternatives": [
           {
-            "name": "Prayer of Amplification",
-            "why": "Common fourth pick.",
+            "name": "Noble Aura",
+            "why": "The most used after Light of Protection by top Clerics: free damage, no heal.",
             "refs": [
-              "ec-cleric"
+              "mb-cleric"
+            ]
+          },
+          {
+            "name": "Earth Punishment",
+            "why": "Makes Condemnation crit: damage, no heal.",
+            "refs": [
+              "mb-cleric",
+              "ql-db-cleric"
             ]
           },
           {
             "name": "Yustiel's Power",
-            "why": "Popular alternative.",
+            "why": "The party takes 20% less PvE damage for 10 s.",
             "refs": [
-              "mb-stigma"
+              "mb-stigma",
+              "ql-db-cleric"
+            ]
+          },
+          {
+            "name": "Prayer of Amplification",
+            "why": "Attack +20% for 10 s.",
+            "refs": [
+              "ec-cleric"
             ]
           }
         ],
         "confidence": "consensus",
         "refs": [
-          "mb-cleric",
-          "ec-cleric"
+          "ql-builds-cleric",
+          "mb-cleric"
         ],
-        "note": "Earth Punishment makes Condemnation always crit."
+        "note": "Builds tagged healer: Light of Protection 15, Summon Resurrection 12, Absolution 11, Benevolence 8 of 18 with four stigmas."
       },
       "daevanion": {
         "priorities": [
@@ -191,7 +273,8 @@
         ],
         "refs": [
           "mb-cleric",
-          "mb-daev"
+          "mb-daev",
+          "ql-daev-cleric"
         ]
       },
       "stats": {
@@ -291,21 +374,63 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-cleric",
+          "title": "Public Cleric skill builds (307 distinct of 974 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-cleric",
+          "title": "Public Cleric Daevanion plans (232 distinct of 378 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
         "status": "reported",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-cleric"
         ],
         "stackA": {
           "label": "Thunder",
           "rows": [
             {
+              "name": "Divine Aura",
+              "why": "A 30 s damage aura: it fires first when ready. 26 of 307 published builds stack it under Judgment Thunder.",
+              "status": "reported"
+            },
+            {
+              "name": "Debilitating Mark",
+              "why": "Every 10 s: the enemy deals 5% less PvE damage. Published builds stack it here too.",
+              "status": "reported"
+            },
+            {
               "name": "Judgment Thunder",
-              "why": "Most players run this alone as their line."
+              "why": "Always ready, so it sits last: it fills every gap."
             }
-          ]
+          ],
+          "name": "Thunder stack"
         },
         "mainAttack": {
           "name": "Earth's Retribution",
@@ -322,47 +447,836 @@
               "name": "Condemnation",
               "why": "Only on a target with Chain of Torment."
             }
-          ]
+          ],
+          "name": "Torment stack"
         },
-        "opener": [],
-        "extras": [
-          {
-            "name": "Divine Aura",
-            "why": "Some players add it to stack B. Test it on the dummy."
-          },
-          {
-            "name": "Debilitating Mark",
-            "why": "Some players add it to stack B. Test it on the dummy."
-          }
+        "opener": [
+          "Light of Protection"
         ],
+        "ownKeysOrder": "listed",
+        "extras": [],
         "ownKeys": [
+          {
+            "name": "Light of Protection",
+            "reason": "toggle",
+            "why": "Keep it on: you and the party deal more damage and take less. A macro would switch it off."
+          },
           {
             "name": "Bolt",
             "reason": "charged"
           },
           {
-            "name": "Healing Light",
-            "reason": "heal"
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
           },
           {
-            "name": "Light of Regeneration",
-            "reason": "heal"
+            "stack": [
+              "Light of Regeneration",
+              "Healing Light"
+            ],
+            "reason": "heal",
+            "label": "Heals",
+            "why": "One key for both heals: the heal over time fires when ready, Healing Light the rest of the time. 74 of 307 published builds do this."
           },
           {
             "name": "Radiant Recovery",
             "reason": "heal"
           },
           {
+            "name": "Absolution",
+            "reason": "heal",
+            "why": "Your big party heal: save it for a big hit."
+          },
+          {
+            "name": "Benevolence",
+            "reason": "heal"
+          },
+          {
+            "name": "Summon Resurrection",
+            "reason": "heal",
+            "why": "Brings a fallen party member back."
+          }
+        ],
+        "levelNotes": []
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Keep the party alive first; party buffs next; damage and MP count for a little.",
+        "weights": {
+          "damage": 1,
+          "enmity": 0,
+          "survival": 3,
+          "partyBuff": 2,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-cleric",
+          "ql-db-cleric"
+        ],
+        "preferences": [
+          {
+            "id": "line-earth-punishment",
+            "kind": "line",
+            "skill": "Earth Punishment",
+            "count": "27 of 307 builds stack Earth Punishment with Chain of Torment and Condemnation; 9 more",
+            "why": "Makes Condemnation crit on its target, so it sits on the same key as Condemnation.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-prayer",
+            "kind": "line",
+            "skill": "Prayer of Amplification",
+            "count": "48 of 307 builds stack Prayer of Amplification on the Condemnation key; 12 macros run it then Divine Aura",
+            "why": "Some builds put Prayer of Amplification in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-light-of-regeneration",
+            "kind": "line",
+            "skill": "Light of Regeneration",
+            "count": "21 of 307 builds stack Light of Regeneration on the Condemnation key; 7 macros",
+            "why": "Some builds put a heal in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-noble-aura",
+            "kind": "line",
+            "skill": "Noble Aura",
+            "count": "6 of 307 macros summon Noble Aura",
+            "why": "Some builds put Noble Aura in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-light-of-protection",
+            "kind": "stigma",
+            "skill": "Light of Protection",
+            "count": "15 of 18 healer builds with four stigmas; 87% of 151 top Clerics",
+            "why": "The party deals more damage and takes less, all the time.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "stigma-summon-resurrection",
+            "kind": "stigma",
+            "skill": "Summon Resurrection",
+            "count": "12 of 18 healer builds; 64% of top Clerics",
+            "why": "Brings a fallen party member back.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "stigma-absolution",
+            "kind": "stigma",
+            "skill": "Absolution",
+            "count": "11 of 18 healer builds; 23% of top Clerics",
+            "why": "A big party heal that clears debuffs.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "stigma-benevolence",
+            "kind": "stigma",
+            "skill": "Benevolence",
+            "count": "8 of 18 healer builds; 13% of top Clerics",
+            "why": "A party heal over time for 20 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "stigma-noble-aura",
+            "kind": "stigma",
+            "skill": "Noble Aura",
+            "count": "79% of top Clerics; 6 of 18 healer builds",
+            "why": "Free damage for 300 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "stigma-earth-punishment",
+            "kind": "stigma",
+            "skill": "Earth Punishment",
+            "count": "65% of top Clerics; 9 of 18 healer builds",
+            "why": "Makes Condemnation crit.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ]
+          },
+          {
+            "id": "mastery-condemnation-first",
+            "kind": "mastery",
+            "skill": "Condemnation",
+            "count": "14 of 45 healer builds rank Condemnation in their top three; a levelling guide levels it first",
+            "why": "Condemnation levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ],
+            "from": 8
+          },
+          {
+            "id": "mastery-regeneration-first",
+            "kind": "mastery",
+            "skill": "Light of Regeneration",
+            "count": "6 of 21 healer builds with a priority list put Light of Regeneration first",
+            "why": "Light of Regeneration levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "from": 7
+          }
+        ]
+      }
+    },
+    {
+      "id": "cleric-dps",
+      "class": "Cleric",
+      "role": "dps",
+      "main": false,
+      "label": "Damage",
+      "beginner": "high",
+      "summary": "Damage first, through Chain of Torment and Condemnation, with your own heals to stay up. Heals still grow with Attack.",
+      "roleRefs": [
+        "ql-builds-cleric"
+      ],
+      "coreSkills": [
+        {
+          "name": "Condemnation",
+          "priority": 1,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 8. Your main damage skill.",
+          "refs": [
+            "mb-cleric",
+            "ql-builds-cleric"
+          ]
+        },
+        {
+          "name": "Chain of Torment",
+          "priority": 2,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 4. Opens Condemnation, and the target takes more damage.",
+          "refs": [
+            "mb-cleric",
+            "ql-db-cleric"
+          ]
+        },
+        {
+          "name": "Judgment Thunder",
+          "priority": 3,
+          "target": "Keep levelled",
+          "why": "Always ready: it fills every gap in stack A.",
+          "refs": [
+            "ql-builds-cleric"
+          ]
+        },
+        {
+          "name": "Divine Aura",
+          "priority": 4,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 3. Free damage every 30 s.",
+          "refs": [
+            "mb-cleric",
+            "ql-builds-cleric"
+          ]
+        },
+        {
+          "name": "Bolt",
+          "priority": 5,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 14. Your charged burst.",
+          "refs": [
+            "ql-builds-cleric"
+          ]
+        },
+        {
+          "name": "Earth's Retribution",
+          "priority": 6,
+          "target": "Keep levelled for MP",
+          "why": "MP filler.",
+          "refs": [
+            "mb-cleric"
+          ]
+        },
+        {
+          "name": "Healing Light",
+          "priority": 7,
+          "target": "Keep levelled",
+          "why": "Unlocks at Lv 10. Keeps you up between pulls.",
+          "refs": [
+            "ql-builds-cleric"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Condemnation",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage on one target",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Up to 12% more damage when fewer targets hit"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Cooldown resets on a critical hit",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Cooldown resets on Critical Hit"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Lands as a multi-hit",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Lands as Multi-Hit"
+            }
+          ]
+        },
+        {
+          "skill": "Chain of Torment",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Damage over time 3 s longer",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Damage over time lasts 3s longer"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Target takes a further 10% more PvE damage",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Cuts enemy damage tolerance a further 10% in PvE"
+            }
+          ]
+        },
+        {
+          "skill": "Divine Aura",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Aura attacks 50% faster",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Aura attacks 50% faster"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Aura lasts 3 s longer",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Aura lasts 3s longer"
+            }
+          ]
+        },
+        {
+          "skill": "Judgment Thunder",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage on one target",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Up to 12% more damage when fewer targets hit"
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Divine Punishment fires one extra time",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Divine Punishment fires one extra time"
+            }
+          ]
+        },
+        {
+          "skill": "Bolt",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "30% faster skill speed",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "30% faster skill speed"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Up to 20% more damage on one target",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Up to 20% more damage when fewer targets hit"
+            }
+          ]
+        },
+        {
+          "skill": "Earth's Retribution",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Discharge comes more often",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Discharge chain skill trigger chance +20%"
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Discharge cuts Bolt by 7 s",
+              "refs": [
+                "ql-builds-cleric"
+              ],
+              "perk": "Landing Discharge cuts Bolt cooldown by 7s"
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Light of Protection"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Prayer of Amplification"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Noble Aura"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Earth Punishment"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Power Burst",
+            "why": "A big single hit with a big stagger hit.",
+            "refs": [
+              "mb-cleric",
+              "ql-db-cleric"
+            ]
+          },
+          {
+            "name": "Summon Resurrection",
+            "why": "Brings a fallen party member back.",
+            "refs": [
+              "ql-builds-cleric"
+            ]
+          }
+        ],
+        "confidence": "consensus",
+        "refs": [
+          "ql-builds-cleric",
+          "mb-cleric"
+        ],
+        "note": "Earth Punishment, Light of Protection, Noble Aura and Prayer of Amplification: 15 of 26 dps builds with four stigmas run exactly these."
+      },
+      "daevanion": {
+        "priorities": [
+          "Condemnation +1 on every board you open",
+          "Empyrean Lord's Grace, Divine Aura and Earth's Retribution +1",
+          "Bolt, Judgment Thunder and Chain of Torment +1"
+        ],
+        "skillNodes": [
+          "Condemnation",
+          "Divine Aura",
+          "Earth's Retribution",
+          "Bolt",
+          "Judgment Thunder",
+          "Chain of Torment"
+        ],
+        "refs": [
+          "ql-daev-cleric",
+          "mb-daev"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Attack (also raises healing)",
+          "Accuracy",
+          "Cooldown Reduction",
+          "Combat Speed",
+          "Critical Damage Boost",
+          "Survival"
+        ],
+        "refs": [
+          "ec-cleric"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Light of Protection",
+          "Noble Aura",
+          "Prayer of Amplification",
+          "Divine Aura",
+          "Chain of Torment",
+          "Earth Punishment",
+          "Condemnation",
+          "Judgment Thunder",
+          "Debilitating Mark",
+          "Condemnation",
+          "Bolt (fully charged, in stagger windows)"
+        ],
+        "filler": "Earth's Retribution for MP",
+        "manual": [
+          "Light of Regeneration",
+          "Healing Light",
+          "Radiant Recovery"
+        ],
+        "refs": [
+          "mb-cleric",
+          "ql-builds-cleric"
+        ]
+      },
+      "levelNotes": [],
+      "status": "sourced",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ec-cleric",
+          "title": "Cleric guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-cleric-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-06"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-cleric",
+          "title": "Cleric build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/cleric/build",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-cleric",
+          "title": "Cleric skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-cleric",
+          "title": "Public Cleric skill builds (307 distinct of 974 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-cleric",
+          "title": "Public Cleric Daevanion plans (232 distinct of 378 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macro": {
+        "status": "reported",
+        "refs": [
+          "av-macros",
+          "ql-builds-cleric"
+        ],
+        "stackA": {
+          "label": "Thunder",
+          "rows": [
+            {
+              "name": "Divine Aura",
+              "why": "A 30 s damage aura: it fires first when ready. 26 of 307 published builds stack it under Judgment Thunder.",
+              "status": "reported"
+            },
+            {
+              "name": "Debilitating Mark",
+              "why": "Every 10 s: the enemy deals 5% less PvE damage. Published builds stack it here too.",
+              "status": "reported"
+            },
+            {
+              "name": "Judgment Thunder",
+              "why": "Always ready, so it sits last: it fills every gap."
+            }
+          ],
+          "name": "Thunder stack"
+        },
+        "mainAttack": {
+          "name": "Earth's Retribution",
+          "why": "Held with the macro key: MP back, each animation cut short."
+        },
+        "stackB": {
+          "label": "Torment",
+          "rows": [
+            {
+              "name": "Chain of Torment",
+              "why": "Opens Condemnation, so it fires first."
+            },
+            {
+              "name": "Earth Punishment",
+              "why": "Makes Condemnation crit on its target, and the crit resets Condemnation. 27 of 307 published builds stack it here.",
+              "status": "reported"
+            },
+            {
+              "name": "Condemnation",
+              "why": "Only on a target with Chain of Torment."
+            }
+          ],
+          "name": "Torment stack"
+        },
+        "opener": [
+          "Light of Protection",
+          "Noble Aura",
+          "Prayer of Amplification"
+        ],
+        "ownKeysOrder": "listed",
+        "extras": [],
+        "ownKeys": [
+          {
             "name": "Light of Protection",
-            "reason": "other"
+            "reason": "toggle",
+            "why": "Keep it on: you and the party deal more damage and take less. A macro would switch it off."
+          },
+          {
+            "name": "Noble Aura",
+            "reason": "other",
+            "why": "Summon it once: it follows you and attacks for 300 s."
+          },
+          {
+            "name": "Prayer of Amplification",
+            "reason": "buff",
+            "why": "Burst buff: Attack +20% for 10 s. Press it before Condemnation."
+          },
+          {
+            "name": "Bolt",
+            "reason": "charged"
+          },
+          {
+            "name": "Lightning Strike Scattershot",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
             "name": "Defiance",
             "reason": "defensive",
             "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "stack": [
+              "Light of Regeneration",
+              "Healing Light"
+            ],
+            "reason": "heal",
+            "label": "Heals",
+            "why": "One key for both heals: the heal over time fires when ready, Healing Light the rest of the time. 74 of 307 published builds do this."
+          },
+          {
+            "name": "Radiant Recovery",
+            "reason": "heal"
           }
         ],
         "levelNotes": []
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first; survival, party buffs and MP count for a little.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 1,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-cleric",
+          "ql-db-cleric"
+        ],
+        "preferences": [
+          {
+            "id": "line-prayer",
+            "kind": "line",
+            "skill": "Prayer of Amplification",
+            "count": "48 of 307 builds stack Prayer of Amplification on the Condemnation key; 12 macros run it then Divine Aura",
+            "why": "Some builds put Prayer of Amplification in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-light-of-regeneration",
+            "kind": "line",
+            "skill": "Light of Regeneration",
+            "count": "21 of 307 builds stack Light of Regeneration on the Condemnation key; 7 macros",
+            "why": "Some builds put a heal in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-noble-aura",
+            "kind": "line",
+            "skill": "Noble Aura",
+            "count": "6 of 307 macros summon Noble Aura",
+            "why": "Some builds put Noble Aura in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "stigma-earth-punishment",
+            "kind": "stigma",
+            "skill": "Earth Punishment",
+            "count": "26 of 26 dps builds with four stigmas",
+            "why": "Makes Condemnation crit on its target.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ]
+          },
+          {
+            "id": "stigma-light-of-protection",
+            "kind": "stigma",
+            "skill": "Light of Protection",
+            "count": "22 of 26 dps builds",
+            "why": "You and the party deal more damage and take less, all the time.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ]
+          },
+          {
+            "id": "stigma-noble-aura",
+            "kind": "stigma",
+            "skill": "Noble Aura",
+            "count": "22 of 26 dps builds",
+            "why": "Free damage for 300 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ]
+          },
+          {
+            "id": "stigma-prayer",
+            "kind": "stigma",
+            "skill": "Prayer of Amplification",
+            "count": "20 of 26 dps builds",
+            "why": "Attack +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ]
+          },
+          {
+            "id": "stigma-earth-punishment-first",
+            "kind": "stigma",
+            "skill": "Earth Punishment",
+            "count": "6 of the 18 four-stigma dps builds that rank their stigmas put Earth Punishment first",
+            "why": "Earth Punishment in the first slot.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "mastery-condemnation-first",
+            "kind": "mastery",
+            "skill": "Condemnation",
+            "count": "17 of 52 dps builds rank Condemnation in their top three; a levelling guide levels it first",
+            "why": "Condemnation levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-cleric",
+              "mb-cleric"
+            ],
+            "from": 8
+          }
+        ]
       }
     }
   ]
