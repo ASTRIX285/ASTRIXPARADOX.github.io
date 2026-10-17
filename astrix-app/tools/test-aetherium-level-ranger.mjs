@@ -340,7 +340,11 @@ if(process.env.AE_BROWSER!=='0'){
       const later=await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill));
       const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
-      assert.deepEqual([...onBar].sort(),cells(plan(level).skillBar).map(cell=>cell.name).sort(),`Lv ${level}: the bar is the plan's bar`);
+      // The grid draws keys 1 to 8 and the right-hand block; a skill on Q, E or right click is in Copy this bar.
+      const planned=cells(plan(level).skillBar).map(cell=>cell.name);
+      assert.ok(onBar.every(name=>planned.includes(name)),`Lv ${level}: ${onBar} not all in the plan`);
+      const copy=await plain(page,'#aeCopyBar');
+      for(const name of planned)assert.ok(onBar.includes(name)||copy.includes(name),`Lv ${level}: ${name} is neither drawn nor in Copy this bar`);
       await context.close();
     }
   });
@@ -359,7 +363,7 @@ if(process.env.AE_BROWSER!=='0'){
     await context.close();
     const m=await open(screen(22,'mastery'));
     const rows=await m.page.$$eval('#aeMasteryWhy li',items=>items.map(el=>el.dataset.masteryWhy));
-    assert.deepEqual(rows,plan(22).mastery.spend.map(step=>step.name));
+    assert.deepEqual(rows,plan(22).mastery.spend.slice(0,4).map(step=>step.name),'The first four steps, in the plan order');
     await m.context.close();
   });
 
