@@ -1491,10 +1491,7 @@
       "class": "Assassin",
       "name": "Quick Slice",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Hits up to 4 nearby enemies and restores MP.",
       "role": {
         "value": "filler",
@@ -1504,15 +1501,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -1553,6 +1583,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -1565,15 +1605,74 @@
           "type": "opens",
           "text": "Restores 100 MP.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
           "text": "Each hit cuts Insignia Explosion by 1 s.",
           "skillLevel": 12,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "mpCost": 0,
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Your held main attack: hits up to 4 nearby enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Insignia Explosion",
+          "seconds": 1,
+          "text": "Each hit cuts Insignia Explosion by 1 s.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "opens",
+          "target": "Heart Gore",
+          "via": "crit",
+          "text": "Lands as a Critical Hit, so Heart Gore can fire after it.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
     },
     {
       "id": "assassin-shadowstrike",
@@ -1584,8 +1683,8 @@
       "summary": "Teleports behind a target within 20m, strikes, turns them around and stuns 3s.",
       "role": {
         "value": "movement",
-        "from": "build",
-        "quote": "Teleport behind the target"
+        "from": "summary",
+        "quote": "Teleports behind a target"
       },
       "specialties": [
         {
@@ -1639,12 +1738,60 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "dash",
         "status": "reported"
+      },
+      "mpCost": 150,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Teleports you behind the target and hits it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Stuns for 3 s, so the target stops attacking.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Shadow Fall",
+          "via": "stun",
+          "text": "Its stun lets Shadow Fall reach the target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -1662,15 +1809,38 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Adds a rotate effect"
+          "text": "Adds a rotate effect",
+          "values": []
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Keeps 2 Insignia stacks after detonating"
+          "text": "Keeps 2 Insignia stacks after detonating",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "The next one starts at 2 stacks. Savage Roar refills stacks fast, so it adds less.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -1711,6 +1881,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -1722,15 +1902,54 @@
           "type": "condition",
           "text": "Spends up to 5 Insignia.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
           "text": "Cooldown 7 s instead of 10 s.",
           "skillLevel": 16,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "mpCost": 200,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Hits up to 4 enemies and stuns: the more Insignia, the harder it hits, up to 5 stacks.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "insignia",
+          "spends": 5,
+          "text": "Spends your Insignia: damage and stun chance rise with each stack, up to 5.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Insignia Explosion",
+          "seconds": 3,
+          "text": "Cooldown 7 s in place of 10 s.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 32,
+        "10": 38
+      }
     },
     {
       "id": "assassin-heart-gore",
@@ -1747,15 +1966,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 0.7% of your HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Engraves 1 Insignia on hit"
+          "text": "Engraves 1 Insignia on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "One more Insignia for Insignia Explosion.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 20% more crit with fewer targets"
+          "text": "Up to 20% more crit with fewer targets",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to +20% Critical Hit on one target, so it fires again sooner.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -1796,6 +2048,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -1807,25 +2069,89 @@
           "type": "condition",
           "text": "Only after a critical hit.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
           "text": "No cooldown while Illusive Clone is up.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "mpCost": 0,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.75,
+          "text": "Fires after a critical hit: hits up to 4 enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 0.5,
+          "text": "Restores 100 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Inside Illusive Clone's 10 s it has no cooldown: it fires on every critical hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "needs": "Illusive Clone"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "crit",
+          "text": "Fires only after a critical hit.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "reset",
+          "target": "Heart Gore",
+          "text": "Its cooldown resets on a critical hit.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      }
     },
     {
       "id": "assassin-savage-roar",
       "class": "Assassin",
       "name": "Savage Roar",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Hits up to 4 nearby enemies and engraves 1 Insignia for 10s.",
       "role": {
         "value": "damage",
@@ -1835,15 +2161,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 96 MP in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Lands faster, so more hits in every window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "A little more damage on one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-assassin"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -1884,6 +2243,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -1895,9 +2264,49 @@
           "type": "opens",
           "text": "Engraves 1 Insignia.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         }
-      ]
+      ],
+      "mpCost": 120,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Always ready: hits up to 4 nearby enemies and engraves 1 Insignia.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "insignia",
+          "target": "Insignia Explosion",
+          "amount": 1,
+          "text": "Engraves 1 Insignia for 10 s: Insignia Explosion hits harder.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Shadowstrike",
+          "seconds": 1,
+          "text": "Each hit cuts Shadowstrike by 1 s.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
     },
     {
       "id": "ranger-deadshot",
@@ -5073,10 +5482,7 @@
       "name": "Ambush",
       "unlockLevel": 3,
       "cooldownSeconds": 10,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Hits a target within 4 m, 30% harder from behind.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5102,10 +5508,21 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
-        "value": "line",
+        "value": "own-key",
+        "reason": "other",
         "status": "reported"
       },
       "triggers": [
@@ -5113,29 +5530,52 @@
           "type": "condition",
           "text": "Hits 30% harder from behind.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "opens",
-          "text": "Engraves 2 Insignia.",
-          "skillLevel": null,
-          "status": "reported"
+          "text": "Engraves 2 Insignia on a back attack.",
+          "skillLevel": 8,
+          "status": "confirmed"
         }
-      ]
+      ],
+      "mpCost": 100,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits 30% harder from behind.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "insignia",
+          "target": "Insignia Explosion",
+          "amount": 2,
+          "text": "Engraves 2 Insignia on a back attack.",
+          "skillLevel": 8,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      }
     },
     {
       "id": "assassin-defiance",
       "class": "Assassin",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Clears stun, knockdown, airborne, grab, frost and fear and gives 5 s of status immunity.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5161,12 +5601,48 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Clears crowd control and gives 5 s of status immunity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "ignoresCdCut",
+          "text": "Cooldown cuts do not reach it.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 34,
+        "10": 40
       }
     },
     {
@@ -5174,14 +5650,8 @@
       "class": "Assassin",
       "name": "Evasion Stance",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 20,
+      "summary": "Evades all damage for a moment; restores 110 MP and stamina once on an evasion.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5207,27 +5677,63 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Evades all damage for a moment.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 110 MP and stamina once on an evasion.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 110,
+          "text": "Restores 110 MP and stamina once on an evasion.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ]
     },
     {
       "id": "assassin-flash-slice",
       "class": "Assassin",
       "name": "Flash Slice",
       "unlockLevel": 8,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 10,
+      "summary": "Moves you to the far side of a target within 4 m, hits up to 4 enemies and can blind.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5253,12 +5759,39 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "mpCost": 50,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 enemies and moves you past the target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 26,
+        "10": 32
       }
     },
     {
@@ -5266,14 +5799,8 @@
       "class": "Assassin",
       "name": "Illusive Clone",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 90,
+      "summary": "For 10 s Heart Gore has no cooldown and you deal 20% of your damage again as extra damage.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5299,27 +5826,77 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "mpCost": 200,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "For 10 s: Heart Gore has no cooldown, and you deal 20% of your damage again.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "+20% Critical Damage Boost for its 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "skillLevel": 10
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Heart Gore",
+          "seconds": 5,
+          "text": "Removes Heart Gore's cooldown for 10 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "boost",
+          "target": "Exploit Weakness",
+          "factor": 1.5,
+          "text": "Exploit Weakness counts 1.5 times for its 10 s.",
+          "skillLevel": 15,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ]
     },
     {
       "id": "assassin-infiltrate",
       "class": "Assassin",
       "name": "Infiltrate",
       "unlockLevel": 10,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 20,
+      "summary": "Moves you behind a target within 10 m and hits it; blinds after a Dodge or while flying.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5345,12 +5922,38 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Moves you behind the target and hits it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 28,
+        "10": 34
       }
     },
     {
@@ -5359,10 +5962,7 @@
       "name": "Savage Fang",
       "unlockLevel": 22,
       "cooldownSeconds": 60,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Hits up to 4 enemies within 4 m, 50 stagger damage, and engraves 5 Insignia at once.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5388,6 +5988,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -5399,7 +6009,42 @@
           "type": "opens",
           "text": "Engraves 5 Insignia at once.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
+        }
+      ],
+      "mpCost": 200,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.25,
+          "text": "Hits up to 4 enemies and engraves 5 Insignia at once: your next Insignia Explosion hits at full stacks.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "+10% PvE damage for 10 s after it hits.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "skillLevel": 15
+        }
+      ],
+      "synergies": [
+        {
+          "type": "insignia",
+          "target": "Insignia Explosion",
+          "amount": 5,
+          "text": "Engraves 5 Insignia at once: Insignia Explosion hits at full stacks.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
         }
       ]
     },
@@ -5408,14 +6053,8 @@
       "class": "Assassin",
       "name": "Shadow Fall",
       "unlockLevel": 12,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 20,
+      "summary": "Moves you to a stunned target within 10 m, hits it and knocks it down for 3 s.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5441,12 +6080,50 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "mpCost": 100,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits a stunned target and knocks it down for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stun",
+          "text": "Fires only on a stunned target (5% on Incapacitated Immunity).",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 30,
+        "10": 36
       }
     },
     {
@@ -5455,10 +6132,7 @@
       "name": "Storm Rampage",
       "unlockLevel": 5,
       "cooldownSeconds": 0,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Hits a staggered target within 4 m. No cooldown.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5484,10 +6158,21 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
-        "value": "line",
+        "value": "own-key",
+        "reason": "stagger",
         "status": "reported"
       },
       "triggers": [
@@ -5495,29 +6180,61 @@
           "type": "condition",
           "text": "Only on a staggered target.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
-          "text": "Cuts all your cooldowns on hit.",
-          "skillLevel": null,
-          "status": "reported"
+          "text": "Each hit cuts all your cooldowns by 1 s.",
+          "skillLevel": 16,
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "No cooldown, but it only hits a staggered target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "text": "Each hit cuts all your cooldowns by 1 s.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      }
     },
     {
       "id": "assassin-swift-contract",
       "class": "Assassin",
       "name": "Swift Contract",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Combat Speed +20% for 10 s.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5543,13 +6260,79 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "mpCost": 0,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Combat Speed +20% for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Your skills cost 20% less MP for its 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "skillLevel": 5
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Rear Smite counts 1.5 times for its 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "skillLevel": 10
+        }
+      ],
+      "synergies": [
+        {
+          "type": "boost",
+          "target": "Rear Smite",
+          "factor": 1.5,
+          "text": "Rear Smite counts 1.5 times for its 10 s.",
+          "skillLevel": 10,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "type": "boost",
+          "target": "Assault Stance",
+          "factor": 1.5,
+          "text": "Assault Stance counts 1.5 times for its 10 s.",
+          "skillLevel": 15,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ]
     },
     {
       "id": "assassin-triniel-s-dagger",
@@ -5557,10 +6340,7 @@
       "name": "Triniel's Dagger",
       "unlockLevel": 22,
       "cooldownSeconds": 45,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Hits a target within 4 m, 30% harder from behind, and slows the target's skill cooldowns.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -5586,10 +6366,21 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
-        "value": "line",
+        "value": "own-key",
+        "reason": "other",
         "status": "reported"
       },
       "triggers": [
@@ -5597,9 +6388,233 @@
           "type": "cdCut",
           "text": "Cuts all your cooldowns by 10% on hit.",
           "skillLevel": 10,
-          "status": "reported"
+          "status": "confirmed"
+        }
+      ],
+      "mpCost": 200,
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits 30% harder from behind.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Each hit cuts all your cooldowns by 10%.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ],
+          "skillLevel": 10
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "all",
+          "percent": 10,
+          "text": "Each hit cuts all your cooldowns by 10%.",
+          "skillLevel": 10,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
         }
       ]
+    },
+    {
+      "id": "assassin-whirlwind-slice",
+      "class": "Assassin",
+      "name": "Whirlwind Slice",
+      "unlockLevel": 7,
+      "cooldownSeconds": 10,
+      "summary": "Hits a target within 4 m with a chance to stun.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits one target, with a chance to stun.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 25,
+        "10": 31
+      }
+    },
+    {
+      "id": "assassin-exploit-weakness",
+      "class": "Assassin",
+      "name": "Exploit Weakness",
+      "unlockLevel": 6,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Passive: +100 Critical Hit; on a critical hit, a chance of +5.5% Attack and of clones that engrave Insignia.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "+100 Critical Hit, so Heart Gore fires more often; a chance of +5.5% Attack and of clones that engrave Insignia.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "crit",
+          "target": "Heart Gore",
+          "text": "More critical hits, so Heart Gore fires more often.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "training": {
+        "8": 24,
+        "10": 30
+      }
+    },
+    {
+      "id": "assassin-rear-smite",
+      "class": "Assassin",
+      "name": "Rear Smite",
+      "unlockLevel": 11,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Passive: +3% back attack damage, +3% PvE damage and +1.5% PvP damage.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "+3% back attack damage and +3% PvE damage.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 29,
+        "10": 35
+      }
+    },
+    {
+      "id": "assassin-assault-stance",
+      "class": "Assassin",
+      "name": "Assault Stance",
+      "unlockLevel": 13,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Passive: +6% Critical Damage Boost.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-assassin",
+          "title": "Assassin skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "+6% Critical Damage Boost.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-assassin"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 31,
+        "10": 37
+      }
     },
     {
       "id": "ranger-arrow-scattershot",

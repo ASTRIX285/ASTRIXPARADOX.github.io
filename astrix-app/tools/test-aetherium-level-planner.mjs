@@ -288,9 +288,11 @@ check('no class-specific code: the planner reads only data, and the other seven 
   for(const name of AION2_CLASSES.filter(item=>item!=='Gladiator'))for(const role of rolesFor(builds[name]))for(const level of LEVELS){
     const p=buildAscentPlan({className:name,role:role.role,level,data:data(name)});
     if(p.pending)continue;
-    assert.equal(p.setup.planned,false,`${name}: no ascent record yet`);
     assert.deepEqual(p.skillBar?.problems??[],[],`${name} ${role.role} Lv ${level}: bar checks`);
     for(const cell of p.skillBar?cells(p.skillBar):[])assert.equal(cell.locked,false,`${name} ${role.role} Lv ${level}: ${cell.name} locked`);
+    // A class with its own ascent record is planned, and its own test file checks it (Assassin: test-aetherium-level-assassin.mjs).
+    if(builds[name].records.some(build=>build.ascent)){assert.equal(p.setup.planned,true,`${name}: ascent record`);continue;}
+    assert.equal(p.setup.planned,false,`${name}: no ascent record yet`);
     const order=p.mastery.spend.map(step=>step.priority);
     assert.deepEqual(order,[...order].sort((a,b)=>a-b),`${name}: the build's own priority order`);
     // The stigma slots keep the build's order.

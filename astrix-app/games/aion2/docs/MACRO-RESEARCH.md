@@ -121,6 +121,8 @@ Opener: Zikel's Blessing, Lunge Stance, Ruinous Blow, then hold the macro and Ke
 Differs from our build data: Ruinous Blow leaves the stack for its own key; Rage Burst moves to row 0.
 
 ### Assassin
+SUPERSEDED 17 Oct 2026: published builds run one main line, Savage Fang / Insignia Explosion / Heart Gore / Savage Roar, with Quick Slice held. See level-guidance/assassin.md sections 2 and 4. The two-stack design below is kept for the record.
+
 | | Row 0 | Row 1 | Row 2 | Row 3 |
 |---|---|---|---|---|
 | Stack A (build) | Savage Fang (60 s): 5 Insignia at once | Ambush (10 s): +30% from behind, 2 Insignia | Storm Rampage (no cooldown): only on stagger, cuts all cooldowns | Savage Roar (no cooldown): 1 Insignia per step |
