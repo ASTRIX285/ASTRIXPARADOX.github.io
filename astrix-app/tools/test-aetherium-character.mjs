@@ -1531,7 +1531,8 @@ await check('crisp window: hairline, two-layer shadow and the notched corner; ta
     assert.equal(tabs.filter(t=>t.selected).length,1,`${name}: exactly one selected tab`);
     for(const tab of tabs){
       assert.ok(tab.height>=44,`${name} tab "${tab.text}" is ${tab.height}px tall`);
-      assert.equal(tab.radius,'0px',`${name} tab "${tab.text}" is squared`);
+      // Cylinder buttons (Miguel, 17 Oct 2026, replaces "squared"): every tab has fully rounded ends.
+      assert.ok(parseFloat(tab.radius)>=tab.height/2,`${name} tab "${tab.text}" is a cylinder (${tab.radius})`);
       assert.match(tab.strobe,/ax-stroke-pulse/,`${name} tab "${tab.text}" carries the strobe`);
       assert.match(tab.transition,/0\.15s/,`${name} tab "${tab.text}" animates over 150ms`);
       assert.equal(tab.size,13,`${name} tab "${tab.text}" is 13px`);
@@ -1549,16 +1550,17 @@ await check('crisp window: hairline, two-layer shadow and the notched corner; ta
   await ascent.page.waitForSelector('.ae-gw-tabs a');
   const links=await ascent.page.$$eval('.ae-gw-tabs a',items=>items.map(a=>({current:a.getAttribute('aria-current')==='page',color:getComputedStyle(a).color,bg:getComputedStyle(a).backgroundColor,shadow:getComputedStyle(a).boxShadow,height:a.getBoundingClientRect().height,radius:getComputedStyle(a).borderTopLeftRadius})));
   assert.equal(links.filter(l=>l.current).length,1,'One current screen');
-  for(const link of links){assert.ok(link.height>=44);assert.equal(link.radius,'0px');if(link.current){assert.equal(link.color,GOLD);assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');}else {assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');assert.ok(link.shadow.includes('rgb(111, 147, 191)'),`Screen tab edge (${link.shadow})`);}}
+  for(const link of links){assert.ok(link.height>=44);assert.ok(parseFloat(link.radius)>=link.height/2,`Screen tab is a cylinder (${link.radius})`);if(link.current){assert.equal(link.color,GOLD);assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');}else {assert.notEqual(link.bg,'rgba(0, 0, 0, 0)');assert.ok(link.shadow.includes('rgb(111, 147, 191)'),`Screen tab edge (${link.shadow})`);}}
   await ascent.context.close();
 });
 
 await check('crisp menu cards and buttons: notched bevelled tiles, accent ring on hover over 150ms, pills on counts, outline buttons with the notch and the strobe',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/${refQuery()}`);
   const card=await lookOf(page,'#aeCards .ae-menu-card');
-  assert.match(card.clip,/^polygon\(/,'Menu cards are notched');
+  // Cylinder buttons (Miguel, 17 Oct 2026, replaces the notch and the square corner): rounded, not clipped.
+  assert.equal(card.clip,'none','Menu cards are not notched');
   assert.match(card.shadow,/inset/,'Menu cards keep the raised bevel');
-  assert.equal(card.radius,'0px');
+  assert.ok(parseFloat(card.radius)>=20,`Menu cards have rounded ends (${card.radius})`);
   assert.match(card.transition,/0\.15s/,'Hover animates over 150ms');
   await page.hover('#aeCards .ae-menu-card');
   await page.waitForTimeout(250);

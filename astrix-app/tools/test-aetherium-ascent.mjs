@@ -1364,8 +1364,8 @@ await check('Daevanion: N of 415 points, board buttons with a points bar and tag
 /* ---------- Select buttons (fix/aetherium-select-buttons, 17 Oct 2026): everything a player picks is the one Aetherium
    button, in AION 2's colours: navy with a pale-blue edge, gold when selected, a blue focus ring; boards say Now, a tick or Not needed. ---------- */
 const BTN_EDGE='rgb(111, 147, 191)',STROBE='rgb(79, 182, 255)';
-const buttonLooks=(page,selector)=>page.$$eval(selector,els=>els.map(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {text:(el.textContent||el.value||'').replace(/\s+/g,' ').trim().slice(0,30),cls:el.classList.contains('ae-btn'),visible:r.width>0&&r.height>0,height:r.height,clip:s.clipPath,shadow:s.boxShadow,color:s.color,bg:s.backgroundColor,selected:el.matches('[aria-selected="true"],[aria-pressed="true"],[aria-current="page"],[aria-current="true"]'),disabled:el.matches(':disabled,[aria-disabled="true"]')};}));
-/** Every element the selector finds is the shared button; at least one is on screen, 44px or taller, notched, with its edge; a selected one is gold. */
+const buttonLooks=(page,selector)=>page.$$eval(selector,els=>els.map(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {text:(el.textContent||el.value||'').replace(/\s+/g,' ').trim().slice(0,30),cls:el.classList.contains('ae-btn'),visible:r.width>0&&r.height>0,height:r.height,clip:s.clipPath,radius:parseFloat(s.borderTopLeftRadius),shadow:s.boxShadow,color:s.color,bg:s.backgroundColor,selected:el.matches('[aria-selected="true"],[aria-pressed="true"],[aria-current="page"],[aria-current="true"]'),disabled:el.matches(':disabled,[aria-disabled="true"]')};}));
+/** Every element the selector finds is the shared button; at least one is on screen, 44px or taller, a cylinder with rounded ends, with its edge; a selected one is gold. */
 async function assertButtons(page,selector,name){
   const looks=await buttonLooks(page,selector);
   assert.ok(looks.length>0,`${name}: found`);
@@ -1374,7 +1374,9 @@ async function assertButtons(page,selector,name){
   assert.ok(shown.length>0,`${name}: one on screen`);
   for(const look of shown){
     assert.ok(look.height>=44,`${name} "${look.text}" is ${look.height}px tall`);
-    assert.match(look.clip,/^polygon\(/,`${name} "${look.text}" has notched corners`);
+    // Cylinder buttons (Miguel, 17 Oct 2026): rounded ends, never a square or notched corner. Tall cards round at 20px.
+    assert.equal(look.clip,'none',`${name} "${look.text}" is not clipped to a notch`);
+    assert.ok(look.radius>=Math.min(look.height/2,20),`${name} "${look.text}" has rounded cylinder ends (${look.radius}px on ${look.height}px)`);
     assert.notEqual(look.bg,'rgba(0, 0, 0, 0)',`${name} "${look.text}" is a filled button, not plain text`);
     if(look.selected){assert.equal(look.color,GOLD,`${name} "${look.text}": selected in gold`);assert.ok(look.shadow.includes(GOLD),`${name} "${look.text}": a gold edge (${look.shadow})`);}
     else if(look.disabled)assert.equal(look.color,'rgb(127, 140, 166)',`${name} "${look.text}": disabled reads dim`);
@@ -1393,6 +1395,8 @@ await check('board buttons on the Lv 45 Daeva: icon, name, bar and count; exactl
   const {page,context,errors}=await open(ascent(ref45,'daevanion'),{live:true});
   await page.waitForSelector('.ae-board-grid');
   await assertButtons(page,'.ae-board-picks [data-board-tab]','board button');
+  // The cylinder is lit from above: a light band at the top, shade at the bottom.
+  assert.match(await page.$eval('[data-board-tab="13"]',el=>getComputedStyle(el).backgroundImage),/^linear-gradient\(rgb\(29, 48, 82\) 0%, rgb\(23, 37, 63\) 42%, rgb\(11, 20, 40\) 100%\)$/,'Cylinder light on a board button');
   assert.equal(await page.locator('[data-board-status="now"]').count(),1,'Exactly one Now board');
   assert.equal(await page.locator('.ae-board-tag[data-tag="now"]').count(),1,'One Now tag');
   assert.equal(await page.getAttribute('[data-board-tab="16"]','data-board-status'),'not-needed','Azphel has no priority nodes for the role: Not needed');

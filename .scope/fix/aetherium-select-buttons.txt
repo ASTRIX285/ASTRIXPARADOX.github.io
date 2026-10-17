@@ -8,9 +8,11 @@ astrix-app/pages/aetherium/character-menu.mjs
 astrix-app/pages/aetherium/compare-page.mjs
 astrix-app/pages/aetherium/daeva-card.mjs
 astrix-app/pages/aetherium/daevanion-page.mjs
+astrix-app/pages/aetherium/gear-ledger.mjs
 astrix-app/pages/aetherium/skills-page.mjs
 astrix-app/tools/test-aetherium-ascent.mjs
 astrix-app/tools/test-aetherium-character.mjs
+astrix-app/tools/test-aetherium-pages.mjs
 astrix-app/tools/test-aion2-advisor.mjs
 hub/aetherium/ascent/daevanion/index.html
 hub/aetherium/ascent/index.html
