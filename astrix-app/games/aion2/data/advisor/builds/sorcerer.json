@@ -495,7 +495,7 @@
           "tgw-sorcerer-skills"
         ],
         "stackA": {
-          "label": "Fire",
+          "label": "Fire stack",
           "name": "Fire stack",
           "rows": [
             {
@@ -521,7 +521,7 @@
           "why": "Held with the macro key: MP back, Fire Mark, and it can reset Blaze."
         },
         "stackB": {
-          "label": "Frost",
+          "label": "Frost stack",
           "name": "Frost stack",
           "rows": [
             {
