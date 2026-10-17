@@ -1550,3 +1550,60 @@ body.aetherium-page #aeRoleChange{display:inline-flex;align-items:center;min-hei
 .ae-mwhy,.ae-stg-why{margin:.5rem 0 0;padding-left:1.25rem;display:grid;gap:.375rem;font-size:.9375rem;line-height:1.45;color:var(--ae-text-muted)}
 .ae-mwhy b,.ae-stg-why b{color:var(--ae-text)}
 .ae-stg-why li.is-later{color:var(--ae-text-dim)}
+
+/* Enhancement (feature/aetherium-enhancement-guide, 17 Oct 2026): the game's Enhancement window, item by item. A small
+   mark under each gear tile names its next tab; the item card has an Enhance panel drawn like the window's five tabs; the
+   Gear page has a How enhancing works strip with one Do this next line. Marks sit in the row gap, never over the art. */
+#aeGear{row-gap:1.875rem;padding-bottom:1.5rem}
+.ae-emark{position:absolute;left:50%;top:calc(100% + .25rem);transform:translateX(-50%);display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap;
+  font:700 .875rem/1.15 var(--ae-font-ui);letter-spacing:0;color:var(--ae-text-muted);cursor:pointer}
+.ae-eicon{width:.875rem;height:.875rem;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ae-emark[data-mark="growth"]{color:var(--ae-gold)}
+.ae-emark[data-mark="manastone"]{color:var(--ae-ice)}
+.ae-emark[data-mark="theostone"]{color:var(--ae-strobe-hi)}
+.ae-emark[data-mark="soul-binding"]{color:var(--ae-asmodian-hi)}
+.ae-emark[data-mark="done"]{color:var(--ae-manual)}
+@media (max-width:479px){.ae-emark .ae-eicon{display:none}}
+
+.ae-ehow{margin:1rem 0 0;padding:1rem 0 0;border-top:1px solid var(--ae-hairline)}
+.ae-ehow[hidden]{display:none}
+.ae-ehow .ae-section-title{margin:0 0 .5rem}
+.ae-enext{display:flex;flex-wrap:wrap;align-items:center;column-gap:.375rem;margin:0 0 .5rem;font-size:1rem;line-height:1.45;color:var(--ae-text)}
+.ae-enext b{color:var(--ae-gold);font-weight:700}
+.aetherium-page .ae-enext button.ae-linkish{display:inline-flex;align-items:center;min-height:2.75rem;font-weight:700}
+.ae-ehow-list{margin:0;padding:0;list-style:none;display:grid;gap:2px}
+.aetherium-page button.ae-linkish.ae-ehow-row{display:grid;grid-template-columns:1rem 6.5rem minmax(0,1fr);align-items:center;column-gap:.625rem;box-sizing:border-box;width:100%;
+  min-height:2.75rem;padding:.375rem .5rem;text-align:left;text-decoration:none;color:var(--ae-text);background:rgba(255,255,255,.02);transition:background-color var(--ae-ease)}
+.aetherium-page button.ae-linkish.ae-ehow-row:hover{background:rgba(255,255,255,.06)}
+.ae-ehow-row .ae-eicon{color:var(--ae-gold)}
+.ae-ehow-row b{font:700 .9375rem/1.2 var(--ae-font-ui);letter-spacing:0}
+.ae-ehow-row span{letter-spacing:0;font-size:.875rem;line-height:1.35;color:var(--ae-text-muted)}
+.ae-ehow-row.is-order b{grid-column:2}
+@media (max-width:479px){.aetherium-page button.ae-linkish.ae-ehow-row{grid-template-columns:1rem minmax(0,1fr)}.ae-ehow-row span{grid-column:2}.ae-ehow-row.is-order b,.ae-ehow-row.is-order span{grid-column:1/-1}}
+
+.ae-enhance{display:grid;gap:.625rem;margin:.75rem 0;padding:.75rem;background:var(--ae-well);border:1px solid var(--ae-hairline)}
+.ae-enhance .ae-item-sec{margin:0}
+.ae-enext-line{margin:0;font-size:.9375rem;line-height:1.45;color:var(--ae-text)}
+.ae-enext-line b{color:var(--ae-gold)}
+.ae-etabs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--ae-hairline);background:rgba(0,0,0,.25)}
+.aetherium-page .ae-etab{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:.375rem;padding:0 .625rem}
+.ae-etab .ae-eicon{color:var(--ae-text-dim)}
+.ae-etab.is-next .ae-eicon{color:var(--ae-gold)}
+.ae-epanel{display:grid;gap:.5rem}
+.ae-epanel[hidden]{display:none}
+.ae-epanel:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
+.ae-epanel-purpose{margin:0;font-size:.875rem;line-height:1.4;color:var(--ae-text-muted)}
+.ae-erows li{align-items:baseline}
+.ae-erows b{text-align:right}
+.ae-efacts{margin:0;padding:0 0 0 1.1rem;display:grid;gap:.375rem;font-size:.875rem;line-height:1.45;color:var(--ae-text)}
+.ae-efacts .ae-tag,.ae-enhance .ae-tag{margin-left:.25rem}
+.ae-elines{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
+.ae-eline{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:.25rem .75rem;font-size:.875rem;line-height:1.35}
+.ae-eline-value{font-weight:700;text-align:right;color:var(--ae-text)}
+.ae-eline .ae-ebar{grid-column:1/-1}
+.ae-ebar{display:block;height:.375rem;box-sizing:border-box;background:var(--ae-bar-dim);border:1px solid var(--ae-bar-dim-line);overflow:hidden}
+.ae-ebar i{display:block;height:100%;background:var(--ae-ice)}
+.ae-eline.is-rate .ae-ebar i{background:var(--ae-gold)}
+.ae-eline.is-weak .ae-ebar i{background:var(--ae-warn)}
+.ae-ebar.is-unknown{background:none;border-style:dashed;border-color:var(--ae-hairline-strong)}
+.ae-tag.is-confirmed{color:var(--ae-manual);background:color-mix(in srgb,var(--ae-manual) 10%,transparent);border:1px solid color-mix(in srgb,var(--ae-manual) 45%,transparent)}

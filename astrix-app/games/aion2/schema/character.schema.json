@@ -238,6 +238,169 @@
                 "type": "integer",
                 "minimum": 0,
                 "description": "exceedLevel from the equipment list; 0 when none."
+              },
+              "manastones": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "id",
+                        "name",
+                        "value",
+                        "grade"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "slot": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "grade": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Manastones engraved (magicStoneStat), one per filled slot. An empty list when the item detail sends none."
+              },
+              "theostoneSlots": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "godStoneSlotCount from the item detail."
+              },
+              "theostone": {
+                "$ref": "../../../platform/contracts/pending.schema.json",
+                "description": "The engraved Theostone. Always pending: no item detail field says which one is engraved."
+              },
+              "soulBindRate": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Soul Binding rate in percent (soulBindRate, sent as a string)."
+              },
+              "bindLines": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "name",
+                        "text",
+                        "value",
+                        "min",
+                        "max"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "min": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "max": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Soul Binding lines (subStats): value as sent, minValue, and max when the data has it (null: not sent)."
+              },
+              "skillLines": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "level"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Skill lines (subSkills): a skill and its +level."
               }
             }
           }
@@ -340,6 +503,169 @@
                       "null"
                     ],
                     "pattern": "^https://"
+                  },
+                  "manastones": {
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "slot",
+                            "id",
+                            "name",
+                            "value",
+                            "grade"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "slot": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "value": {
+                              "type": "string"
+                            },
+                            "grade": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ],
+                    "description": "Manastones engraved (magicStoneStat), one per filled slot. An empty list when the item detail sends none."
+                  },
+                  "theostoneSlots": {
+                    "oneOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ],
+                    "description": "godStoneSlotCount from the item detail."
+                  },
+                  "theostone": {
+                    "$ref": "../../../platform/contracts/pending.schema.json",
+                    "description": "The engraved Theostone. Always pending: no item detail field says which one is engraved."
+                  },
+                  "soulBindRate": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ],
+                    "description": "Soul Binding rate in percent (soulBindRate, sent as a string)."
+                  },
+                  "bindLines": {
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "name",
+                            "text",
+                            "value",
+                            "min",
+                            "max"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "min": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "max": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ],
+                    "description": "Soul Binding lines (subStats): value as sent, minValue, and max when the data has it (null: not sent)."
+                  },
+                  "skillLines": {
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "level"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "level": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "$ref": "../../../platform/contracts/pending.schema.json"
+                      }
+                    ],
+                    "description": "Skill lines (subSkills): a skill and its +level."
                   }
                 }
               }
@@ -759,6 +1085,169 @@
                 "type": "integer",
                 "minimum": 0,
                 "description": "exceedLevel from the equipment list; 0 when none."
+              },
+              "manastones": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "id",
+                        "name",
+                        "value",
+                        "grade"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "slot": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "grade": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Manastones engraved (magicStoneStat), one per filled slot. An empty list when the item detail sends none."
+              },
+              "theostoneSlots": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "godStoneSlotCount from the item detail."
+              },
+              "theostone": {
+                "$ref": "../../../platform/contracts/pending.schema.json",
+                "description": "The engraved Theostone. Always pending: no item detail field says which one is engraved."
+              },
+              "soulBindRate": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Soul Binding rate in percent (soulBindRate, sent as a string)."
+              },
+              "bindLines": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "name",
+                        "text",
+                        "value",
+                        "min",
+                        "max"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "min": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "max": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Soul Binding lines (subStats): value as sent, minValue, and max when the data has it (null: not sent)."
+              },
+              "skillLines": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "level"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "../../../platform/contracts/pending.schema.json"
+                  }
+                ],
+                "description": "Skill lines (subSkills): a skill and its +level."
               }
             }
           }

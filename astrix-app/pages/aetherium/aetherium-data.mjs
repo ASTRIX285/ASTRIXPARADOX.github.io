@@ -574,6 +574,13 @@ export function loadMechanics() {
   return advisorMechanics;
 }
 
+/** The Enhancement window record (data/advisor/enhancement.json): its tabs, role stones and lines. A small file, loaded once. */
+let advisorEnhancement;
+export function loadEnhancement() {
+  advisorEnhancement ??= getJson(`${ADVISOR}enhancement.json`).catch(error => { advisorEnhancement = undefined; throw error; });
+  return advisorEnhancement;
+}
+
 /** Game-wide facts only (boards, unlock levels): a small file, so the menu and Daevanion pages skip the skill catalogue. */
 export function loadProgression() {
   advisorProgression ??= getJson(`${ADVISOR}progression.json`).catch(error => { advisorProgression = undefined; throw error; });

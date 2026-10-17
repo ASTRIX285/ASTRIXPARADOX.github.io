@@ -7,11 +7,12 @@
  * Item details load in the background after first paint (at most 3 at a time, kept for the session).
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadEnhancement, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
 import { $, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel } from './aetherium-ui.mjs';
 import { renderStatsPanel } from './stats-panel.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
 import { buildFor, enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics, indexProgression } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { enhancementPlan, indexEnhancement, roleWords } from '/astrix-app/games/aion2/engine/enhancement-advisor.mjs';
 import { rankPointStats, subStatTag } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 
 /* The game's equipment window: row 1 weapons and armour, row 2 accessories and the two runes. Arcana have their own row. */
@@ -20,7 +21,7 @@ const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GL
 const ARCANA = ['ARCANA1', 'ARCANA2', 'ARCANA3', 'ARCANA4', 'ARCANA5'];
 const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
 const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
-const state = { looks: [], model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null };
+const state = { looks: [], model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null, enhancement: null, mechanics: null, plan: null };
 
 const adviceOf = slot => enchantAdvice(slot, { level: state.model.profile.level, grades: state.grades, progression: state.progression });
 const gradeOf = slot => gradeInfo(slot.grade, state.grades, slot.gradeName ?? null);
@@ -57,15 +58,17 @@ function tileHtml(slot, index) {
   const level = Number.isFinite(slot.itemLevel) ? `<b class="ae-gtile-lv" aria-hidden="true">${esc(slot.itemLevel)}</b>` : '';
   const exceed = exceedText(slot) ? `<b class="ae-gtile-ex" aria-hidden="true">E${esc(slot.exceed)}</b>` : '';
   const sign = mark === 'replace' ? `<span class="ae-gmark" aria-hidden="true">${CHEVRON}</span>` : mark === 'full' ? `<span class="ae-gmark" aria-hidden="true">${CHECK}</span>` : '';
-  return `<button type="button" class="ae-slot ae-gbtn" data-slot="${index}" data-grade="${esc(grade.id ?? '')}" aria-haspopup="dialog" aria-label="${esc(tileName(slot))}" data-gtip="${index}">
+  const next = enhanceMark(slot, index);
+  return `<button type="button" class="ae-slot ae-gbtn" data-slot="${index}" data-grade="${esc(grade.id ?? '')}" aria-haspopup="dialog" aria-label="${esc(tileName(slot))}"${next ? ` aria-describedby="aeEmark${index}"` : ''} data-gtip="${index}">
       ${gradeTile({ icon: slot.icon, grade: grade.id, enchant: slot.enchant, size: 88, extra: `${level}${exceed}${sign}` })}${tileWords(slot)}
-    </button>`;
+    </button>${next}`;
 }
 const cellOf = (key, worn) => {
   if (!worn) return `<li class="ae-gcell is-empty" data-slot-key="${esc(key)}"><span class="ae-gempty" role="img" aria-label="${esc(slotLabel(state.slotNames.get(key) ?? key))}: empty"></span></li>`;
   const { slot, index } = worn;
   const mark = markOf(slot);
-  return `<li class="ae-gcell" data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}" data-slot-key="${esc(key)}"${mark ? ` data-advice="${mark}"` : ''}>${tileHtml(slot, index)}</li>`;
+  const enhance = planOf(slot)?.mark;
+  return `<li class="ae-gcell" data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}" data-slot-key="${esc(key)}"${mark ? ` data-advice="${mark}"` : ''}${enhance ? ` data-enhance="${enhance}"` : ''}>${tileHtml(slot, index)}</li>`;
 };
 
 function renderGear() {
@@ -102,6 +105,21 @@ function refreshTile(index) {
   li.innerHTML = tileHtml(slot, index);
   const mark = markOf(slot);
   if (mark) li.dataset.advice = mark; else delete li.dataset.advice;
+  const enhance = planOf(slot)?.mark;
+  if (enhance) li.dataset.enhance = enhance; else delete li.dataset.enhance;
+}
+
+/** After an item detail lands the plan can change: every tile's mark and the Do this next line follow. */
+function refreshEnhance() {
+  state.plan = null;
+  for (const li of document.querySelectorAll('#aeGear li[data-gear-index]')) {
+    const index = Number(li.dataset.gearIndex);
+    const slot = state.model.gear[index];
+    const before = li.dataset.enhance ?? '';
+    const after = planOf(slot)?.mark ?? '';
+    if (before !== after || li.querySelector('.ae-emark')?.dataset.title !== (planOf(slot)?.next?.title ?? '')) refreshTile(index);
+  }
+  renderEnhanceStrip();
 }
 
 /** Keeps what an item detail adds on the slot itself (the tile and the rule read it there). */
@@ -113,6 +131,9 @@ function applyDetail(slot, detail) {
   if (detail.gradeName) slot.gradeName = detail.gradeName;
   // The detail's level is the item level the game's tooltip shows (ENDPOINTS.md, 11 Oct 2026). levelValue is the enchant level.
   if (Number.isFinite(detail.level)) slot.itemLevel = detail.level;
+  // The Enhancement window's facts for this item (manastones, Theostone slots, Soul Binding rate and lines).
+  if (detail.enhance) Object.assign(slot, detail.enhance);
+  state.plan = null;
 }
 
 /** The stats record's Arcana source line (stats.json source arcana), with its status. */
@@ -166,7 +187,7 @@ function adviceHtml(slot, rules) {
     for (const step of risky) lines.push(`<li>+${step.to}: ${step.rate === null ? 'chance not known yet' : `${step.rate}% chance`}</li>`);
     odds = `<div class="ae-item-block ae-odds"><p class="ae-item-sec">Chance of each step${rates?.confirmed ? '' : ` ${NOT_CONFIRMED(rates?.test)}`}</p><ul class="ae-odds-list">${lines.join('')}</ul>
       ${rates?.value?.keepsLevel ? '<p class="ae-card-line">A failure costs the attempt, never a level, and never breaks the item.</p>' : ''}
-      ${risky.length && pity ? `<p class="ae-card-line">Each failed try past +10 may add 5 points to the next try at that step. ${pity.confirmed ? '' : NOT_CONFIRMED(pity.test)}</p>` : ''}
+      ${risky.length && pity ? `<p class="ae-card-line">${pity.confirmed ? 'Each failed try past +10 adds 5 points to the next try at that step.' : `Each failed try past +10 may add 5 points to the next try at that step. ${NOT_CONFIRMED(pity.test)}`}</p>` : ''}
     </div>`;
   }
   const cost = advice.action === 'enchant'
@@ -223,6 +244,227 @@ function statusOf(advice) {
 }
 const chipsHtml = chips => (chips.filter(Boolean).length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : '');
 
+/* Enhancement (docs/ENHANCEMENT.md): the game's Enhancement window, item by item. The plan comes from the engine
+   (enhancement-advisor.mjs) with the role the player picked; each tile gets a small mark for its next tab, the item card an
+   Enhance panel drawn like the window's five tabs, and the page a How enhancing works strip with one Do this next line.
+   Facts carry their status: Confirmed, Reported (guides agree) or Not confirmed yet. No cost numbers: check them in game. */
+
+/* Our own icons for the five tabs, 16 by 16, stroke only. */
+const ENHANCE_ICONS = {
+  growth: '<path d="M8 13.5V3M3.5 7.5 8 3l4.5 4.5M3.5 13.5h9"/>',
+  manastone: '<path d="M8 1.75 13.25 7 8 14.25 2.75 7Z"/><path d="M2.75 7h10.5M8 1.75 6 7l2 7.25L10 7Z"/>',
+  theostone: '<path d="M9.25 1.5 3.5 9h4l-1 5.5L12.5 7h-4Z"/>',
+  'soul-binding': '<circle cx="6" cy="8" r="3.5"/><circle cx="10" cy="8" r="3.5"/>',
+  transfer: '<path d="M2.5 5.5h10M10 3l2.5 2.5L10 8M13.5 10.5h-10M6 8l-2.5 2.5L6 13"/>',
+  done: '<path d="M3 8.5l3.2 3.2L13 4.8"/>'
+};
+const enhanceIcon = id => `<svg class="ae-eicon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ENHANCE_ICONS[id] ?? ''}</svg>`;
+const STATUS_TAG = {
+  confirmed: '<span class="ae-tag is-confirmed">Confirmed</span>',
+  reported: '<span class="ae-tag is-reported">Reported</span>',
+  unknown: '<span class="ae-tag is-unconfirmed">Not confirmed yet</span>'
+};
+const statusTag = status => STATUS_TAG[status] ?? STATUS_TAG.unknown;
+const enhanceRecords = () => (state.enhancement ? indexEnhancement(state.enhancement) : null);
+
+/** The plan for this Daeva, worked out once and again whenever an item detail lands. null until the record has loaded. */
+function enhancePlan() {
+  if (!state.enhancement || !state.grades || !state.model) return null;
+  state.plan ??= enhancementPlan(state.model, state.build?.role ?? null, state.model.profile.level, { grades: state.grades, progression: state.progression, mechanics: state.mechanics, enhancement: state.enhancement });
+  return state.plan;
+}
+function planOf(slot) { return enhancePlan()?.items.find(item => item.slotPos === slot?.slotPos) ?? null; }
+
+/** The small mark under a tile: the next tab's icon and one word (Growth, Stones, Bind, Theostone, Done). */
+function enhanceMark(slot, index) {
+  const item = planOf(slot);
+  if (!item?.mark) return '';
+  const said = item.next ? `Enhance next, ${item.label}: ${item.next.title}.` : 'Enhance: nothing left to do on this item.';
+  return `<span class="ae-emark" id="aeEmark${index}" data-mark="${esc(item.mark)}" data-title="${esc(item.next?.title ?? '')}" aria-hidden="true">${enhanceIcon(item.mark)}<span class="ae-emark-word">${esc(item.label)}</span><span class="ae-sr">${esc(said)}</span></span>`;
+}
+
+/** One fact line with its status tag. */
+const factLine = fact => `<li><span>${esc(fact.text)}</span> ${statusTag(fact.status)}</li>`;
+const factsHtml = facts => (facts?.length ? `<ul class="ae-efacts">${facts.map(factLine).join('')}</ul>` : '');
+
+/** A bar for a value within its range: a meter when the range is known, a dashed empty track when it is not. */
+function barHtml(percent, label) {
+  if (!Number.isFinite(percent)) return `<span class="ae-ebar is-unknown" aria-hidden="true"></span>`;
+  const value = Math.max(0, Math.min(100, percent));
+  return `<span class="ae-ebar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}" aria-label="${esc(label)}"><i style="width:${value}%"></i></span>`;
+}
+
+/** The Growth tab for one item: +N of the cap, the next step's chance and the most tries, where to check the cost. */
+function growthPanel(slot, item) {
+  const advice = item.advice;
+  const cap = Number.isFinite(advice?.cap) ? advice.cap : null;
+  const step = item.steps.find(entry => entry.tab === 'growth') ?? null;
+  const rows = [`<li><span>Enhance</span><b>+${esc(advice?.from ?? slot.enchant)}${cap !== null ? ` of ${advice.about ? 'about ' : ''}${esc(cap)}` : ''}</b></li>`];
+  if (step?.kind === 'growth') rows.push(`<li><span>Next steps</span><b>+${esc(step.from + 1)} to +${esc(step.to)}: always succeeds</b></li>`);
+  if (step?.kind === 'growth-risky') {
+    rows.push(`<li><span>Next step</span><b>+${esc(step.to)}: ${Number.isFinite(step.rate) ? `${esc(step.rate)}% now` : 'chance not confirmed yet'}</b></li>`);
+    if (step.tries) rows.push(`<li><span>Most tries</span><b>${esc(step.tries)}, with the failure bonus</b></li>`);
+  }
+  const say = step ? '' : advice?.action === 'replace' ? '<p class="ae-card-line">No more Growth: replace this piece.</p>'
+    : advice?.action === 'full' ? '<p class="ae-card-line">At its cap.</p>' : advice?.action === 'done' ? `<p class="ae-card-line">${esc(advice.why)}</p>` : '';
+  return `<ul class="ae-advice-facts ae-erows">${rows.join('')}</ul>${say}<p class="ae-card-line">Check the cost in the Growth tab.</p>`;
+}
+
+/** The Manastone tab: each slot filled or empty, with the role's best stone for an empty one. */
+function stonesPanel(slot, item) {
+  if (isPending(slot.manastoneSlots) || isPending(slot.manastones)) return '<p class="ae-card-line">Reading this item\'s manastone slots.</p>';
+  if (!Number.isInteger(slot.manastoneSlots) || !slot.manastoneSlots) return '<p class="ae-card-line">No manastone slots on this item.</p>';
+  const accessory = /^(necklace|earring\d|ring\d|bracelet\d|amulet)$/i.test(String(slot.slot).replace(/[\s_]/g, ''));
+  const record = enhanceRecords()?.manastone;
+  const who = roleWords(state.build?.role ?? null);
+  const rows = item.sockets.map(socket => {
+    if (socket.filled) {
+      const fits = socket.fits === false ? ` <i class="ae-stat-tag is-low">Not for ${esc(who.replace(/^a /, ''))}</i>` : socket.fits ? ' <i class="ae-stat-tag is-useful">Fits</i>' : '';
+      return `<li class="ae-estone is-filled"><span>Slot ${socket.n + 1}</span><b>${esc(socket.stone.name)} ${esc(socket.stone.value)}${fits}</b></li>`;
+    }
+    const best = !accessory && socket.best ? `Best for ${esc(who)}: ${esc(socket.best.name)}${socket.best.top ? ` (top ${esc(socket.best.top)})` : ''}` : 'Empty';
+    return `<li class="ae-estone is-empty"><span>Slot ${socket.n + 1}</span><b>${best}</b></li>`;
+  }).join('');
+  const status = accessory ? statusTag(record?.accessories?.status ?? 'unknown') : isPending(item.stones) ? statusTag('unknown') : statusTag(item.stones.status);
+  const note = accessory ? esc(record?.accessories?.text ?? '') : isPending(item.stones) ? esc(item.stones.reason) : esc(item.stones.note ?? '');
+  return `<ul class="ae-advice-facts ae-erows">${rows}</ul><p class="ae-card-line">${note} ${status}</p>`;
+}
+
+/** The Theostone tab: the slot count from the data, what the role wants, and that the data never says what is engraved. */
+function theostonePanel(slot) {
+  if (isPending(slot.theostoneSlots)) return `<p class="ae-card-line">${esc(slot.theostoneSlots.reason)}</p>`;
+  if (!slot.theostoneSlots) return '<p class="ae-card-line">No Theostone slot on this item.</p>';
+  const weapon = /^main\s*hand$/i.test(String(slot.slot));
+  const advice = enhanceRecords()?.theostone?.roles?.[state.build?.role ?? ''];
+  const role = advice && !isPending(advice) ? `<p class="ae-card-line">${esc(advice.text)} ${statusTag(advice.status)}</p>` : `<p class="ae-card-line">Which Theostone suits ${esc(roleWords(state.build?.role ?? null))}: ${statusTag('unknown')}</p>`;
+  return `<ul class="ae-advice-facts ae-erows"><li><span>Theostone slots</span><b>${esc(slot.theostoneSlots)}</b></li><li><span>Engraved</span><b>${statusTag('unknown')}</b></li></ul>
+    <p class="ae-card-line">The official data does not say which Theostone is engraved. Check the Theostone tab in game.</p>
+    ${weapon ? `${role}<p class="ae-card-line">Do it last, on the weapon you will keep. ${statusTag('reported')}</p>` : `<p class="ae-card-line">Guides speak of the weapon only. ${statusTag('reported')}</p>`}`;
+}
+
+/** The Soul Binding tab: the rate as a bar, each line as a bar within its range, weak lines for the role marked. */
+function bindPanel(slot, item) {
+  if (isPending(slot.soulBindRate)) return `<p class="ae-card-line">${esc(slot.soulBindRate.reason)}</p>`;
+  const rate = slot.soulBindRate;
+  const who = roleWords(state.build?.role ?? null);
+  const lines = item.lines.map(line => {
+    const range = line.maxed ? `${esc(line.text)}, maxed` : Number.isFinite(line.max) ? `${esc(line.text)} of ${esc(line.max)}` : `${esc(line.text)}, range not in the data`;
+    return `<li class="ae-eline${line.weak ? ' is-weak' : ''}"><span class="ae-eline-name">${esc(line.name)}${line.weak ? ` <i class="ae-stat-tag is-low">Weak for ${esc(who.replace(/^a /, ''))}</i>` : ''}</span><span class="ae-eline-value">${range}</span>${barHtml(line.percent, `${line.name} within its range`)}</li>`;
+  }).join('');
+  const skills = Array.isArray(slot.skillLines) && slot.skillLines.length ? `<ul class="ae-efacts">${slot.skillLines.map(perk => `<li><span>${esc(perk.name)}</span> <b>+${esc(perk.level ?? '')}</b></li>`).join('')}</ul>` : '';
+  const linesNote = isPending(item.linesFor) ? `<p class="ae-card-line">${esc(item.linesFor.reason)} ${statusTag('unknown')}</p>` : `<p class="ae-card-line">Lines for ${esc(who)}: ${esc(item.linesFor.lines.map(entry => entry.name).join(', '))}. ${statusTag(item.linesFor.status)}</p>`;
+  return `<div class="ae-eline is-rate"><span class="ae-eline-name">Soul Binding rate</span><span class="ae-eline-value">${esc(rate)}%</span>${barHtml(rate, 'Soul Binding rate')}</div>
+    ${lines ? `<ul class="ae-elines">${lines}</ul>` : '<p class="ae-card-line">No Soul Binding lines on this item.</p>'}
+    ${skills}${linesNote}
+    <p class="ae-card-line">${rate >= 100 ? 'At 100% the lines are maxed.' : 'Fix weak lines first, then Bind. Check the cost in the Soul Binding tab.'}</p>`;
+}
+
+/** The Transfer tab: what moves and what is lost, with the status of each. */
+function transferPanel() {
+  return factsHtml(enhanceRecords()?.transfer?.facts?.filter(fact => fact.status !== 'unknown')) || '<p class="ae-card-line">Not confirmed yet.</p>';
+}
+
+/** The Enhance panel in the item card: the Next line, then the window's five tabs with the next one lit. */
+function enhanceHtml(slot) {
+  const item = planOf(slot);
+  const plan = enhancePlan();
+  if (!item || !plan) return '';
+  const lit = item.next?.tab ?? 'growth';
+  const next = item.next
+    ? `<b>Next:</b> ${esc(item.next.title)}. ${esc(item.next.why)}`
+    : item.mark === 'done' ? '<b>Next:</b> nothing. Every tab is done for this item.'
+      : item.advice?.action === 'replace' ? '<b>Next:</b> nothing to enhance. Replace it with a Unique piece.'
+        : item.partial ? '<b>Next:</b> reading this item\'s details.' : '<b>Next:</b> no enhance advice for this item yet.';
+  const panels = { growth: growthPanel(slot, item), manastone: stonesPanel(slot, item), theostone: theostonePanel(slot), 'soul-binding': bindPanel(slot, item), transfer: transferPanel() };
+  const tabs = plan.tabs.map(tab => `<button type="button" role="tab" class="ae-planner-tab ae-etab${tab.id === item.next?.tab ? ' is-next' : ''}" id="aeEtab-${esc(tab.id)}" data-etab="${esc(tab.id)}" aria-controls="aeEpanel-${esc(tab.id)}" aria-selected="${tab.id === lit}" tabindex="${tab.id === lit ? 0 : -1}">${enhanceIcon(tab.id)}<span>${esc(tab.name)}</span></button>`).join('');
+  const bodies = plan.tabs.map(tab => `<div class="ae-epanel" role="tabpanel" id="aeEpanel-${esc(tab.id)}" aria-labelledby="aeEtab-${esc(tab.id)}" tabindex="0"${tab.id === lit ? '' : ' hidden'}><p class="ae-epanel-purpose">${esc(tab.purpose)}</p>${panels[tab.id] ?? ''}</div>`).join('');
+  return `<section class="ae-enhance" id="aeEnhancePanel" aria-labelledby="aeEnhanceHead">
+      <p class="ae-item-sec" id="aeEnhanceHead">Enhance</p>
+      <p class="ae-enext-line">${next}</p>
+      <div class="ae-etabs" role="tablist" aria-label="Enhancement window">${tabs}</div>
+      ${bodies}
+    </section>`;
+}
+
+/** Tab switching in the Enhance panel: click, or the arrow keys, Home and End. */
+function selectEnhanceTab(id, focus = false) {
+  const card = $('#aeEnhancePanel');
+  if (!card) return;
+  for (const tab of card.querySelectorAll('[data-etab]')) {
+    const on = tab.dataset.etab === id;
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+    if (on && focus) tab.focus();
+  }
+  for (const panel of card.querySelectorAll('.ae-epanel')) panel.hidden = panel.id !== `aeEpanel-${id}`;
+}
+document.addEventListener('click', event => {
+  const tab = event.target.closest?.('#aeEnhancePanel [data-etab]');
+  if (tab) selectEnhanceTab(tab.dataset.etab);
+});
+document.addEventListener('keydown', event => {
+  const tab = event.target.closest?.('#aeEnhancePanel [data-etab]');
+  if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  const tabs = [...document.querySelectorAll('#aeEnhancePanel [data-etab]')];
+  const at = tabs.indexOf(tab);
+  const to = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (at + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+  event.preventDefault();
+  selectEnhanceTab(tabs[to].dataset.etab, true);
+});
+
+/** How enhancing works: one Do this next line for the whole Daeva, then one line per tab that opens the full explanation. */
+function renderEnhanceStrip() {
+  const box = $('#aeEnhance');
+  const plan = enhancePlan();
+  if (!box) return;
+  box.hidden = !plan;
+  if (!plan) return;
+  const next = plan.next;
+  const index = next ? state.model.gear.findIndex(slot => slot.slotPos === next.slotPos) : -1;
+  $('#aeEnhanceNext').innerHTML = next
+    ? `<b>Do this next:</b> <button type="button" class="ae-linkish" data-enext="${index}">${esc(next.name)}</button> <span>${esc(next.title)}. ${esc(next.why.split('. ')[0].replace(/\.$/, ''))}.</span>`
+    : '<b>Do this next:</b> nothing to enhance right now.';
+  if (!$('#aeEnhanceHow').childElementCount) {
+    $('#aeEnhanceHow').innerHTML = [...plan.tabs.map(tab => `<li><button type="button" class="ae-linkish ae-ehow-row" data-ehow="${esc(tab.id)}" aria-haspopup="dialog">${enhanceIcon(tab.id)}<b>${esc(tab.name)}</b><span>${esc(tab.purpose)}</span></button></li>`),
+      '<li><button type="button" class="ae-linkish ae-ehow-row is-order" data-ehow="order" aria-haspopup="dialog"><b>The order</b><span>What to do first, from levelling to the gear you keep.</span></button></li>'].join('');
+  }
+}
+
+/** The full explanation of one tab (or the order), every fact with its status. Names only for where things come from. */
+function openHow(id, from) {
+  hideTip();
+  const records = enhanceRecords();
+  const plan = enhancePlan();
+  if (!records || !plan) return;
+  const tab = plan.tabs.find(entry => entry.id === id);
+  const list = items => `<ul class="ae-odds-list">${items.map(text => `<li>${esc(text)}</li>`).join('')}</ul>`;
+  let body = '';
+  if (id === 'order') {
+    body = `<ol class="ae-efacts is-order">${records.order.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol><p class="ae-card-line">${statusTag(records.order.status)}</p>`;
+  } else if (id === 'growth') {
+    const rates = indexMechanics(state.mechanics, null)['enchant-rates']?.value?.rates ?? {};
+    const tries = Object.entries(plan.tries).map(([to, most]) => `+${to}: ${rates[to]}% to start, at most ${most} tries`);
+    const sources = records['enhance-stone-sources'];
+    body = `${factsHtml(records.growth.facts)}
+      <div class="ae-item-block"><p class="ae-item-sec">Most tries per step past +10</p>${list(tries)}<p class="ae-card-line">Worked out from the chance of each step and the failure bonus. ${statusTag('confirmed')}</p></div>
+      <div class="ae-item-block"><p class="ae-item-sec">Where Enhance Stones come from ${statusTag(sources.status)}</p>${list(sources.sources.map(source => source.name))}</div>`;
+  } else if (id === 'manastone') {
+    const stones = records.manastone.roles?.[state.build?.role ?? ''];
+    const role = stones && !isPending(stones)
+      ? `<div class="ae-item-block"><p class="ae-item-sec">Stones for ${esc(roleWords(state.build.role))} ${statusTag(stones.status)}</p>${list(stones.stones.map(stone => `${stone.name}, top ${stone.top}`))}${stones.note ? `<p class="ae-card-line">${esc(stones.note)}</p>` : ''}</div>`
+      : `<p class="ae-card-line">Which stones suit ${esc(roleWords(state.build?.role ?? null))}: ${statusTag('unknown')}</p>`;
+    body = `${factsHtml(records.manastone.facts)}${role}<p class="ae-card-line">${esc(records.manastone.accessories.text)} ${statusTag(records.manastone.accessories.status)}</p>`;
+  } else if (id === 'theostone') {
+    body = factsHtml(records.theostone.facts);
+  } else if (id === 'soul-binding') {
+    const codex = records['soul-binding'].codexSources;
+    body = `${factsHtml(records['soul-binding'].facts)}<div class="ae-item-block"><p class="ae-item-sec">Where Soul Codices come from ${statusTag(codex.status)}</p>${list(codex.list)}</div>`;
+  } else if (id === 'transfer') {
+    body = factsHtml(records.transfer.facts);
+  }
+  openInfo(infoCardHtml({ icon: null, iconHtml: tab ? enhanceIcon(tab.id) : enhanceIcon('growth'), title: tab?.name ?? 'The order', sub: 'Enhancement window', lines: tab ? [tab.purpose] : [], body }), from);
+}
+
 let rulesPromise = null;
 const loadRules = () => (rulesPromise ??= loadMechanics().then(mechanics => indexMechanics(mechanics, null)).catch(() => { rulesPromise = null; return {}; }));
 
@@ -245,15 +487,16 @@ async function selectSlot(index, from) {
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
-    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${chipsHtml([`+${slot.enchant}`, exceedText(slot)])}` }), from);
+    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${enhanceHtml(slot)}${chipsHtml([`+${slot.enchant}`, exceedText(slot)])}` }), from);
     return;
   }
   const d = result.detail;
   applyDetail(slot, d);
   refreshTile(index);
+  refreshEnhance();
   openInfo(infoCardHtml({
     ...head(d), status: statusOf(adviceOf(slot)),
-    body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${chipsHtml([exceedText(slot), Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
+    body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${enhanceHtml(slot)}${chipsHtml([exceedText(slot), Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
   }), document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
 }
 
@@ -282,7 +525,7 @@ function showTip(el) {
   const slot = state.model.gear[index];
   if (slot && state.later.has(slot)) {
     state.later.delete(slot);
-    loadItemDetail(state.model, slot).then(result => { applyDetail(slot, result.detail); refreshTile(index); }).catch(() => state.later.add(slot));
+    loadItemDetail(state.model, slot).then(result => { applyDetail(slot, result.detail); refreshTile(index); refreshEnhance(); }).catch(() => state.later.add(slot));
   }
 }
 function hideTip() { const box = $('#aeGearTip'); if (box) box.hidden = true; }
@@ -391,7 +634,7 @@ function openExtra(kind, from) {
 }
 
 function render(model, source, ref) {
-  Object.assign(state, { model, source, ref, selected: null, later: new Set() });
+  Object.assign(state, { model, source, ref, selected: null, later: new Set(), plan: null });
   const ring = ringOf(location.hash);
   state.ring = ring ? new Set(ring.slots) : null;
   // Came from Show me on a gear move: the back link returns to where it was pressed (the Ascent Plan's moves, or the
@@ -409,6 +652,11 @@ function render(model, source, ref) {
             <p class="ae-gear-legend" id="aeGearLegend"><span class="ae-legend-swatch" aria-hidden="true"></span>Gold pulse: enchant it. Tap any item for what to do.</p>
             <ul class="ae-ggrid" id="aeGear" aria-label="Equipped gear, in the game's order"></ul>
             <p class="ae-accessories" id="aeAccessories"></p>
+            <section class="ae-ehow" id="aeEnhance" aria-labelledby="aeEnhanceTitle" hidden>
+              <h3 class="ae-section-title" id="aeEnhanceTitle">How enhancing works</h3>
+              <p class="ae-enext" id="aeEnhanceNext"></p>
+              <ul class="ae-ehow-list" id="aeEnhanceHow"></ul>
+            </section>
             <div class="ae-arcana-block" id="aeArcanaBlock">
               <h3 class="ae-section-title" id="aeArcanaTitle">Arcana <small id="aeArcanaCount"></small></h3>
               <ul class="ae-ggrid is-arcana" id="aeArcana" aria-labelledby="aeArcanaTitle"></ul>
@@ -443,12 +691,19 @@ function render(model, source, ref) {
     </div>
   </div>`;
   renderGear();
+  renderEnhanceStrip();
   renderStats();
   renderExtras();
   showRing();
   const panel = $('#aeGearPanel');
   wireTips(panel);
   panel.addEventListener('click', event => {
+    const how = event.target.closest('[data-ehow]');
+    if (how) { openHow(how.dataset.ehow, how); return; }
+    const named = event.target.closest('[data-enext]');
+    if (named) { const tile = panel.querySelector(`[data-slot="${CSS.escape(named.dataset.enext)}"]`); selectSlot(Number(named.dataset.enext), tile ?? named).catch(error => console.error(error)); return; }
+    const mark = event.target.closest('.ae-emark');
+    if (mark) { const tile = mark.closest('li')?.querySelector('[data-slot]'); if (tile) selectSlot(Number(tile.dataset.slot), tile).catch(error => console.error(error)); return; }
     const look = event.target.closest('[data-look-open]');
     if (look) { openLook(Number(look.dataset.lookOpen), look); return; }
     const emptyArcana = event.target.closest('[data-arcana-empty]');
@@ -465,7 +720,7 @@ function render(model, source, ref) {
   const indexOf = new Map(worn.map(({ slot, index }) => [slot, index]));
   setTimeout(() => {
     preloadItemDetails(model, worn.map(({ slot }) => slot), {
-      onDetail: (slot, result) => { if (state.model !== model) return; applyDetail(slot, result.detail); refreshTile(indexOf.get(slot)); }
+      onDetail: (slot, result) => { if (state.model !== model) return; applyDetail(slot, result.detail); refreshTile(indexOf.get(slot)); refreshEnhance(); }
     }).then(later => { later.forEach(slot => state.later.add(slot)); })
       .catch(() => {})
       .finally(() => { if (state.model === model) document.documentElement.dataset.aeGearDetails = 'done'; });
@@ -474,10 +729,13 @@ function render(model, source, ref) {
 
 startCharacterPage({
   // The grade record and the game facts are small static files: they load while the official site answers.
-  prefetch: className => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); loadStats().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
+  prefetch: className => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); loadStats().catch(() => {}); loadEnhancement().catch(() => {}); loadMechanics().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
   async render({ model, source, ref }) {
-    const [catalogue, grades, progression, stats, builds] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null)]);
+    const [catalogue, grades, progression, stats, builds, enhancement, mechanics] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null), loadEnhancement().catch(() => null), loadMechanics().catch(() => null)]);
     state.stats = stats;
+    // The Enhancement window record and the enchant rules: without them the page simply has no enhance marks.
+    state.enhancement = enhancement;
+    state.mechanics = mechanics;
     // Tags follow the role the player picked for this Daeva (a Block roll is Useful for a tank), else the main role.
     state.build = builds ? buildFor(builds, rolePick(ref)) : null;
     state.slotNames = new Map(catalogue.slots.map(slot => [keyOf(slot.slotPosName), slot.slotPosName]));
