@@ -1,0 +1,6 @@
+# feature/aetherium-level-ranger: the level planner guides the Ranger (DPS) from Lv 1 to 45; research record, Ranger skill data and ascent record, tests. Data and research only: the planner and screens are unchanged.
+astrix-app/games/aion2/data/advisor/builds/ranger.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/ranger.md
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aetherium-level-ranger.mjs

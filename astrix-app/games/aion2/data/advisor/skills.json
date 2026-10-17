@@ -2876,7 +2876,7 @@
       "name": "Deadshot",
       "unlockLevel": 14,
       "cooldownSeconds": 20,
-      "summary": "Chargeable Wind shot on one target; 35% more damage while Precision is active.",
+      "summary": "Chargeable Wind shot on one target within 20m, up to 3 charge levels; 35% more damage while you have Precision.",
       "role": {
         "value": "charged",
         "from": "summary",
@@ -2885,23 +2885,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "No MP cost"
+          "text": "No MP cost",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs no MP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "30% faster skill speed"
+          "text": "30% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Charges and fires 30% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Charge it while you move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+          "text": "Ignores Block and Evasion, lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Never blocked or evaded, and always a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Extra damage on hit"
+          "text": "Extra damage on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "An extra hit of Wind damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -2934,6 +2989,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -2948,18 +3013,52 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Your hardest single hit: a charged shot on a 20 s cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "35% more damage with Marking Shot's Precision.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ],
+          "needs": "Marking Shot"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "Precision",
+          "text": "Hits 35% harder while you have Precision (Marking Shot).",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 32,
+        "10": 38
+      }
     },
     {
       "id": "ranger-snipe",
       "class": "Ranger",
       "name": "Snipe",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
-      "summary": "Basic Wind shot on one target within 20m that restores MP; usable while moving.",
+      "cooldownSeconds": 0,
+      "summary": "Wind shot on one target within 20m that restores 120 MP. No cooldown.",
       "role": {
         "value": "filler",
         "from": "build",
@@ -2968,23 +3067,79 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "144 MP a hit in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 0.7% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "50% more chance of a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Hits cut Deadshot cooldown by 1s"
+          "text": "Hits cut Deadshot cooldown by 1s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit cuts Deadshot's cooldown by 1 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Deadshot"
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Adds Tempest Arrow chain skill"
+          "text": "Adds Tempest Arrow chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A follow-up shot, Tempest Arrow.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3017,6 +3172,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3037,18 +3202,62 @@
           "skillLevel": 12,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1.5,
+          "text": "Restores 120 MP a hit with no cooldown: your MP comes from it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A single-target shot you can fire while moving.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Deadshot",
+          "seconds": 1,
+          "skillLevel": 12,
+          "text": "Each hit cuts Deadshot's cooldown by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "mp",
+          "target": "Snipe",
+          "text": "Restores 120 MP a hit (144 with its Lv 8 option).",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
     },
     {
       "id": "ranger-tempest-shot",
       "class": "Ranger",
       "name": "Tempest Shot",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
-      "summary": "Wind damage to up to 4 enemies around a target within 20m.",
+      "cooldownSeconds": 0,
+      "summary": "Wind damage to up to 4 enemies within 4m of a target within 20m. No cooldown.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -3057,15 +3266,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs 20% less MP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+10% skill Critical Hit"
+          "text": "+10% skill Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.4,
+              "text": "+10% Critical Hit on this skill.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Up to 12% more damage on fewer targets: a boss is one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -3073,7 +3315,18 @@
         },
         {
           "skillLevel": 16,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Fires 20% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3106,11 +3359,37 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Always ready: hits up to 4 enemies and fills every gap in the stack.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -3119,7 +3398,7 @@
       "name": "Drill Dart",
       "unlockLevel": 4,
       "cooldownSeconds": 5,
-      "summary": "Fire AoE around a target that applies Bleed and cuts healing received.",
+      "summary": "Fire damage to up to 4 enemies within 4m of a target; a 6 s Bleed that cuts healing received by 60%; 100 MP back on a Critical Hit.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -3128,23 +3407,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 3% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Bleed lasts 2s longer"
+          "text": "Bleed lasts 2s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Bleed lasts 8 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Fires 20% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Lands as Multi-Hit"
+          "text": "Lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Every hit is a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Fires Drill Dart one extra time"
+          "text": "Fires Drill Dart one extra time",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Fires twice per press.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3177,6 +3511,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3190,7 +3534,43 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A 5 s cooldown: hits up to 4 enemies and bleeds them for 6 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 0.5,
+          "text": "100 MP back on a Critical Hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "target": "Drill Dart",
+          "text": "Restores 100 MP on a Critical Hit.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      }
     },
     {
       "id": "ranger-gale-arrow",
@@ -3198,7 +3578,7 @@
       "name": "Gale Arrow",
       "unlockLevel": 7,
       "cooldownSeconds": 20,
-      "summary": "Wind AoE around a target; grants Gale buff for combat speed and damage.",
+      "summary": "Wind damage to up to 4 enemies; grants Gale for 10 s: +7% Combat Speed and +7% PvE damage.",
       "role": {
         "value": "buff",
         "from": "build",
@@ -3207,7 +3587,18 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Buff lasts 5s longer"
+          "text": "Buff lasts 5s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Gale lasts 15 s. Once skill Lv 16 cuts the cooldown to 10 s it adds nothing.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
@@ -3215,15 +3606,48 @@
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Fires while you move, so the stack never roots you.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Gale buff gets stronger when fewer targets hit"
+          "text": "Gale buff gets stronger when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Gale gives 9% to 15% in place of 7%, most on one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "10s shorter cooldown"
+          "text": "10s shorter cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Cooldown 10 s, the same as Gale lasts: it can stay up.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3256,6 +3680,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3275,7 +3709,35 @@
           "skillLevel": 16,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Gale: +7% Combat Speed and +7% PvE damage for 10 s, on a 20 s cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Gale Arrow",
+          "seconds": 10,
+          "skillLevel": 16,
+          "text": "Cooldown 10 s in place of 20 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 25,
+        "10": 31
+      }
     },
     {
       "id": "ranger-marking-shot",
@@ -3283,11 +3745,22 @@
       "name": "Marking Shot",
       "unlockLevel": 3,
       "cooldownSeconds": 10,
-      "summary": "Wind shot that repositions the caster and grants Precision (+300 Critical Hit) for 10s.",
+      "summary": "Wind shot that moves you in the direction you press and grants Precision for 10 s: +300 Critical Hit.",
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "+5% Perfect chance while active"
+          "text": "+5% Perfect chance while active",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Precision also gives +5% Perfect chance.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
@@ -3295,15 +3768,48 @@
         },
         {
           "skillLevel": 8,
-          "text": "Precision lasts 5s longer"
+          "text": "Precision lasts 5s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Precision lasts 15 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "One extra consecutive use"
+          "text": "One extra consecutive use",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Use it twice in a row.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Ignores Block and Evasion, lands as Critical Hit"
+          "text": "Ignores Block and Evasion, lands as Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Never blocked or evaded, always a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -3336,12 +3842,49 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "movement",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Precision: +300 Critical Hit for 10 s. It moves you, so it keeps its own key.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "buffs",
+          "target": "Deadshot",
+          "text": "Precision makes Deadshot hit 35% harder.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
       }
     },
     {
@@ -9541,14 +10084,84 @@
       "name": "Arrow Scattershot",
       "unlockLevel": 5,
       "cooldownSeconds": 0,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "summary": "Wind damage to a staggered target within 20m. No cooldown.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 5% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 120 MP on hit",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "120 MP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires while you move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Every hit is a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Hits cut all cooldowns by 1s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit cuts every cooldown by 1 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9570,6 +10183,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9583,25 +10206,82 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Fires only on a staggered target, so it sits on top of its stack and never blocks.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "skillLevel": 16,
+          "text": "Each hit cuts every cooldown by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      }
     },
     {
       "id": "ranger-arrow-storm",
       "class": "Ranger",
       "name": "Arrow Storm",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Wind damage to up to 4 enemies with 50 Stagger Gauge damage; a 50% chance to Stun (always on NPCs).",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Up to 20% more damage when more targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Up to 20% more on a group.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Slows for 10s on hit"
+        },
+        {
+          "skillLevel": 15,
+          "text": "Stun lasts 1s longer"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+25% Stun chance"
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -9623,31 +10303,116 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "stagger",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies, every 60 s, and fills the Stagger gauge fast.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "setsUp",
+          "target": "Arrow Scattershot",
+          "text": "Fills the Stagger gauge by 50: a staggered target lets Arrow Scattershot fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ]
     },
     {
       "id": "ranger-bow-of-blessing",
       "class": "Ranger",
       "name": "Bow of Blessing",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 120,
+      "summary": "Critical Hit +200 and Accuracy +100 for 10 s.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+50% Multi-Hit chance for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "+50% Multi-Hit chance in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Attack rises with Critical Hit for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Attack rises with your Critical Hit in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "+20% Critical Damage for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "+20% Critical Damage in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "+7% Double chance for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "+7% Double chance in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -9669,13 +10434,46 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Critical Hit +200 and Accuracy +100 for 10 s, every 120 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "buffs",
+          "target": "Hunter's Soul",
+          "text": "More Critical Hits: Hunter's Soul has a 50% chance to add Wind damage on each one.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ]
     },
     {
       "id": "ranger-burst-arrow",
@@ -9683,14 +10481,84 @@
       "name": "Burst Arrow",
       "unlockLevel": 10,
       "cooldownSeconds": 20,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "summary": "Wind damage to up to 4 enemies around a target that is slowed or rooted.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 10% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "50% more chance of a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires while you move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Up to 20% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Up to 20% more damage on fewer targets.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "25% chance to reset cooldown on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "A 25% chance to be ready again at once.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9712,6 +10580,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9725,25 +10603,97 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies on a slowed or rooted target.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "slow",
+          "text": "Fires only on a slowed or rooted target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 28,
+        "10": 34
+      }
     },
     {
       "id": "ranger-defiance",
       "class": "Ranger",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Removes Stun, Knockdown, Airborne, Grab, Frost and Fear and grants Tenacity (status immunity) for 5 s. Cooldown cuts do not apply.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Lightning Arrow chain skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1000 Stamina on use"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 20% HP on use",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you 20% HP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Tenacity lasts 2s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.3,
+              "text": "Immunity lasts 7 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "+50% PvE Damage Tolerance during Tenacity",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Takes half the PvE damage during Tenacity.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9765,12 +10715,49 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Breaks crowd control at a chosen moment.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "note",
+          "target": "Defiance",
+          "text": "Cooldown cuts do not apply to it.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 34,
+        "10": 40
       }
     },
     {
@@ -9778,18 +10765,63 @@
       "class": "Ranger",
       "name": "Explosion Trap",
       "unlockLevel": 8,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 20,
+      "summary": "A trap at your feet for 10 s: Earth damage to up to 4 enemies within 5m and a 40% chance to Stun for 3 s (always on NPCs).",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Pulls enemies on explosion"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Stun lasts 1s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.3,
+              "text": "Stun lasts 4 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Extra damage 3s after the hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "A second burst of damage 3 s later.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "+20% Stun chance"
+        },
+        {
+          "skillLevel": 16,
+          "text": "One extra consecutive use",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Set two traps.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -9811,12 +10843,47 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 enemies that step on it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Stuns NPCs that step on it for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 26,
+        "10": 32
       }
     },
     {
@@ -9825,14 +10892,71 @@
       "name": "Explosive Arrow",
       "unlockLevel": 22,
       "cooldownSeconds": 45,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "summary": "Fire damage to up to 4 enemies within 4m; 20% more damage to slowed or rooted targets.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Cooldown 15s shorter",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Cooldown 30 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "+10% more damage to slowed or rooted targets",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "30% more on a slowed target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Snare Shot"
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "Always lands as a Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Always a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "+20% more damage to slowed or rooted targets",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "50% more on a slowed target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Snare Shot"
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -9854,6 +10978,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9867,6 +11001,40 @@
           "skillLevel": null,
           "status": "reported"
         }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies, every 45 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.3,
+          "text": "20% more damage on a slowed target: Snare Shot slows.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ],
+          "needs": "Snare Shot"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "slow",
+          "bonus": true,
+          "text": "Hits 20% harder on a slowed or rooted target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
       ]
     },
     {
@@ -9875,14 +11043,69 @@
       "name": "Griffon Arrow",
       "unlockLevel": 22,
       "cooldownSeconds": 45,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "summary": "Fire damage to up to 4 enemies within 4m; Crimson Flames burn them for 10 s, more when they move.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires while you move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Burn lasts 5s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Crimson Flames last 15 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "Enhanced Crimson Flames: extra damage on hit while burning",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Extra damage on a burning target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "Burn ticks twice as often",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Crimson Flames tick every 0.5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -9904,6 +11127,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -9917,6 +11150,29 @@
           "skillLevel": null,
           "status": "reported"
         }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies and burns them for 10 s, every 45 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "setsUp",
+          "target": "Concentrated Fire",
+          "text": "A target taking damage over time lets Concentrated Fire add Wind damage (50% chance).",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
       ]
     },
     {
@@ -9924,18 +11180,48 @@
       "class": "Ranger",
       "name": "Mother Nature's Breath",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 90,
+      "summary": "For 6 s: +20% PvE Damage Tolerance, +200 Critical Hit Resist, and a 50% chance to turn 25% of damage taken into HP.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Removes damage over time and grants immunity to it",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Clears burns and bleeds and blocks new ones.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Vigilant Eye effect 1.5 times for the duration"
+        },
+        {
+          "skillLevel": 15,
+          "text": "Unyielding Resolve effect 1.5 times for the duration"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+20% more PvE Damage Tolerance",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "+40% PvE Damage Tolerance in place of 20%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -9957,13 +11243,35 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Takes 20% less PvE damage for 6 s and heals from hits taken.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": []
     },
     {
       "id": "ranger-snare-shot",
@@ -9971,14 +11279,73 @@
       "name": "Snare Shot",
       "unlockLevel": 1,
       "cooldownSeconds": 15,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "summary": "Earth damage to up to 4 enemies within 4m of a target; Slow, 40% less Move Speed for 5 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "+20% Move Speed reduction"
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires 20% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires while you move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Adds Shackling Arrow chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "A follow-up shot, Shackling Arrow.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Slow and Root last 2s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Slow lasts 7 s, so Burst Arrow and Explosive Arrow have longer to land.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -10000,6 +11367,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -10019,25 +11396,134 @@
           "skillLevel": 16,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Its Slow lets Burst Arrow fire.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ],
+          "needs": "Burst Arrow"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "setsUp",
+          "target": "Burst Arrow",
+          "text": "Slows up to 4 enemies for 5 s: Burst Arrow fires only on a slowed or rooted target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "setsUp",
+          "target": "Explosive Arrow",
+          "text": "Slows up to 4 enemies for 5 s: Explosive Arrow hits 20% harder on a slowed target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "setsUp",
+          "target": "Rooting Eye",
+          "text": "Slows the target: Rooting Eye has a 50% chance to add Wind damage on a slowed target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      }
     },
     {
       "id": "ranger-supporting-fire",
       "class": "Ranger",
       "name": "Supporting Fire",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 90,
+      "summary": "An orb fires beside you for 15 s: a 25% chance every 0.5 s to shoot for Wind damage and heal you 1.5% HP.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+25% shot chance",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Shoots twice as often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Lasts 15s longer",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "The orb lasts 30 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "Cooldown 30s shorter",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Cooldown 60 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "Shots always land as Critical Hits",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Every shot is a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -10059,31 +11545,116 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "An orb fires for 15 s, every 90 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.3,
+          "text": "Each shot heals you 1.5% HP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": []
     },
     {
       "id": "ranger-vaizel-s-authority",
       "class": "Ranger",
       "name": "Vaizel's Authority",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Attack +20% for 10 s.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+10% Perfect chance for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "+10% Perfect chance in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Focused Eye effect 1.5 times for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Focused Eye counts 1.5 times in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Focused Eye"
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "Hunter's Soul effect 1.5 times for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Hunter's Soul counts 1.5 times in the window.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Hunter's Soul"
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "50% chance to cut all cooldowns by 1s on a Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Critical Hits in the window can cut every cooldown by 1 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -10105,12 +11676,184 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Attack +20% for 10 s, every 60 s: your strongest damage buff.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "skillLevel": 20,
+          "text": "In the window, a Critical Hit has a 50% chance to cut every cooldown by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "buffs",
+          "target": "Focused Eye",
+          "skillLevel": 10,
+          "text": "Focused Eye counts 1.5 times in the window.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "type": "buffs",
+          "target": "Hunter's Soul",
+          "skillLevel": 15,
+          "text": "Hunter's Soul counts 1.5 times in the window.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ranger-suppressing-arrow",
+      "class": "Ranger",
+      "name": "Suppressing Arrow",
+      "unlockLevel": 12,
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "cooldownSeconds": 20,
+      "summary": "Wind damage to one target within 20m; Stuns NPC targets for 3 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "50% more chance of a Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Stun lasts 1s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.3,
+              "text": "Stun lasts 4 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.3,
+              "text": "Fires 20% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "+20% Stun chance"
+        },
+        {
+          "skillLevel": 16,
+          "text": "25% chance to reset cooldown on hit while you have Precision",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "With Precision, a 25% chance to be ready again at once.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-ranger"
+              ],
+              "needs": "Marking Shot"
+            }
+          ]
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A single-target hit on a 20 s cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.3,
+          "text": "Stuns an NPC for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-ranger"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 30,
+        "10": 36
       }
     },
     {

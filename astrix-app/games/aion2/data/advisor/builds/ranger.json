@@ -71,25 +71,110 @@
       ],
       "specialties": [
         {
-          "skill": "Gale Arrow",
+          "skill": "Deadshot",
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Usable while moving, for fights where you move a lot",
+              "pick": "30% faster skill speed",
+              "perk": "30% faster skill speed",
               "refs": [
-                "ec-ranger"
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Ignores Block and Evasion, lands as Multi-Hit",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Extra damage on hit",
+              "refs": [
+                "ql-builds-ranger"
               ]
             }
           ]
         },
         {
-          "skill": "Deadshot",
+          "skill": "Gale Arrow",
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Usable while moving, for fights where you move a lot",
+              "pick": "Becomes a mobile skill",
+              "perk": "Becomes a mobile skill",
               "refs": [
+                "ql-builds-ranger",
                 "ec-ranger"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Gale buff gets stronger when fewer targets hit",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "10s shorter cooldown",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Drill Dart",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "20% faster skill speed",
+              "perk": "20% faster skill speed",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Lands as Multi-Hit",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Fires Drill Dart one extra time",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Snipe",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% Multi-Hit on hit",
+              "perk": "50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut Deadshot cooldown by 1s",
+              "refs": [
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Adds Tempest Arrow chain skill",
+              "refs": [
+                "ql-builds-ranger"
               ]
             }
           ]
@@ -99,9 +184,17 @@
           "picks": [
             {
               "skillLevel": 8,
-              "pick": "Lower MP cost, if you run short of MP",
+              "pick": "Up to 12% more damage when fewer targets hit",
+              "perk": "Up to 12% more damage when fewer targets hit",
               "refs": [
-                "ec-ranger"
+                "ql-builds-ranger"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "20% faster skill speed",
+              "refs": [
+                "ql-builds-ranger"
               ]
             }
           ]
@@ -129,41 +222,83 @@
         "alternatives": [
           {
             "name": "Explosive Arrow",
-            "why": "Strong in boss fights and big pulls.",
+            "why": "Strong while you level and in big pulls: 20% more damage on a slowed target.",
+            "refs": [
+              "ql-builds-ranger",
+              "mb-stigma"
+            ]
+          },
+          {
+            "name": "Arrow Storm",
+            "why": "Fills the Stagger gauge fast in boss fights.",
             "refs": [
               "ec-ranger",
               "mb-stigma"
             ]
           },
           {
-            "name": "Arrow Storm",
-            "why": "Strong in boss fights and big pulls.",
+            "name": "Mother Nature's Breath",
+            "why": "Survival swap for hard fights: less PvE damage taken for 6 s.",
             "refs": [
-              "ec-ranger",
-              "mb-stigma"
+              "ql-builds-ranger"
             ]
           }
         ],
         "confidence": "top-player data",
         "refs": [
-          "mb-ranger"
+          "mb-ranger",
+          "ql-builds-ranger"
         ],
         "note": "Boss fight set: Bow of Blessing, Explosive Arrow, Griffon Arrow, Arrow Storm."
       },
       "daevanion": {
         "priorities": [
-          "Tempest Shot +1",
-          "Drill Dart, Snipe and Deadshot +1",
-          "Gale Arrow +1"
+          "Skill +1 nodes: Drill Dart, Deadshot, Snipe, Gale Arrow, Tempest Shot",
+          "Hunter's Soul, Hunter's Resolve and Focused Eye +1",
+          "Burst Arrow +1"
         ],
         "skillNodes": [
-          "Tempest Shot",
           "Drill Dart",
-          "Snipe",
           "Deadshot",
-          "Gale Arrow"
+          "Snipe",
+          "Gale Arrow",
+          "Tempest Shot"
         ],
+        "nodePriorities": [
+          {
+            "tier": 1,
+            "label": "Skill +1: Drill Dart, Deadshot, Snipe, Gale Arrow, Tempest Shot",
+            "skills": [
+              "Drill Dart",
+              "Deadshot",
+              "Snipe",
+              "Gale Arrow",
+              "Tempest Shot"
+            ],
+            "core": true
+          },
+          {
+            "tier": 2,
+            "label": "Hunter's Soul, Hunter's Resolve and Focused Eye +1",
+            "skills": [
+              "Hunter's Soul",
+              "Hunter's Resolve",
+              "Focused Eye"
+            ],
+            "core": true
+          },
+          {
+            "tier": 3,
+            "label": "Burst Arrow +1",
+            "skills": [
+              "Burst Arrow"
+            ],
+            "core": false
+          }
+        ],
+        "status": "reported",
         "refs": [
+          "ql-daev-ranger",
           "mb-ranger"
         ]
       },
@@ -256,6 +391,36 @@
           "retrievedOn": "2026-10-16",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-ranger",
+          "title": "Public Ranger skill builds (224 distinct of 934 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-ranger",
+          "title": "Public Ranger Daevanion plans (247 distinct of 482 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-ranger",
+          "title": "Ranger skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
@@ -263,7 +428,8 @@
         "refs": [
           "av-macros",
           "dg-macros",
-          "tgw-ranger-skills"
+          "tgw-ranger-skills",
+          "ql-builds-ranger"
         ],
         "stackA": {
           "label": "Set up",
@@ -285,7 +451,8 @@
               "why": "Filler: always ready, so it sits last.",
               "noCooldown": true
             }
-          ]
+          ],
+          "name": "Set-up stack"
         },
         "mainAttack": {
           "name": "Snipe",
@@ -311,7 +478,8 @@
               "why": "Only on a staggered target, so it sits on top where it never blocks.",
               "noCooldown": true
             }
-          ]
+          ],
+          "name": "Pay-off stack"
         },
         "opener": [
           "Vaizel's Authority",
@@ -363,7 +531,164 @@
           }
         ],
         "levelNotes": [],
-        "verified": false
+        "verified": false,
+        "ownKeysOrder": "listed"
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first; MP and survival count for a little. No Ranger skill buffs the party.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 0,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-ranger",
+          "ql-db-ranger"
+        ],
+        "preferences": [
+          {
+            "id": "line-vaizel",
+            "kind": "line",
+            "skill": "Vaizel's Authority",
+            "count": "11 of 224 builds (58 with copies) run Gale Arrow, Drill Dart, Vaizel's Authority as a macro",
+            "why": "Some builds put Vaizel's Authority in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-griffon",
+            "kind": "line",
+            "skill": "Griffon Arrow",
+            "count": "16 of 224 builds (112 with copies) run Griffon Arrow then Gale Arrow as a macro",
+            "why": "Some builds put Griffon Arrow in front of Gale Arrow.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "line-burst",
+            "kind": "line",
+            "skill": "Burst Arrow",
+            "count": "10 of 224 builds (55 with copies) run Gale Arrow, Drill Dart, Burst Arrow as a macro",
+            "why": "Some builds put Burst Arrow after Drill Dart.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "stigma-vaizel",
+            "kind": "stigma",
+            "skill": "Vaizel's Authority",
+            "count": "210 of 224 builds; first stigma in 94 of 112 priority lists",
+            "why": "Attack +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-bow",
+            "kind": "stigma",
+            "skill": "Bow of Blessing",
+            "count": "203 of 224 builds",
+            "why": "Critical Hit and Accuracy for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-supporting-fire",
+            "kind": "stigma",
+            "skill": "Supporting Fire",
+            "count": "189 of 224 builds",
+            "why": "An orb that fires for you.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-griffon",
+            "kind": "stigma",
+            "skill": "Griffon Arrow",
+            "count": "161 of 224 builds",
+            "why": "Fire damage over time on a group.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-explosive",
+            "kind": "stigma",
+            "skill": "Explosive Arrow",
+            "count": "136 of 224 builds; 11 of 12 levelling builds",
+            "why": "Explosive Arrow while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-mother-nature",
+            "kind": "stigma",
+            "skill": "Mother Nature's Breath",
+            "count": "50 of 224 builds",
+            "why": "A survival stigma.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ]
+          },
+          {
+            "id": "stigma-bow-second",
+            "kind": "stigma",
+            "skill": "Bow of Blessing",
+            "count": "Second stigma in 55 of 112 priority lists",
+            "why": "Bow of Blessing in the second slot.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "slot": 2
+          },
+          {
+            "id": "mastery-deadshot-first",
+            "kind": "mastery",
+            "skill": "Deadshot",
+            "count": "67 of 112 builds with a priority list put it first",
+            "why": "Deadshot levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "from": 14
+          },
+          {
+            "id": "mastery-drill-early",
+            "kind": "mastery",
+            "skill": "Drill Dart",
+            "count": "First or second in all 5 levelling priority lists; Deadshot is the other",
+            "why": "Drill Dart first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-ranger"
+            ],
+            "from": 4,
+            "to": 13
+          }
+        ]
       }
     }
   ]
