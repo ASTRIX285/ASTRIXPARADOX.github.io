@@ -275,7 +275,7 @@ check('logic over copying: every rejected trend says why',()=>{
   for(const skill of p.skills)for(const pick of skill.picks)assert.ok(pick.why||pick.refs?.length,`${skill.name} ${pick.pick}`);
 });
 
-check('the Skill Bar has no "Not confirmed yet" tag: the main line is checked against published builds',()=>{
+check('the stacks are checked against published builds (no stacks-unverified tag); the layout stays REPORTED',()=>{
   const p=plan(45);
   assert.equal(p.skillBar.verified,true);
   assert.equal(p.macro.verified,true);
@@ -375,7 +375,7 @@ if(process.env.AE_BROWSER!=='0'){
     }
   });
 
-  await bcheck('Skill Bar: only what can be placed now, the rest in Comes later; no Not confirmed yet tag',async()=>{
+  await bcheck('Skill Bar: only what can be placed now, the rest in Comes later; no stacks-unverified tag, the REPORTED layout tag stays',async()=>{
     for(const level of [5,22,45]){
       const {page,context}=await open(screen(level,'skill-bar'));
       assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked,#aeSkillBar .ae-lock').count(),0,`Lv ${level}: nothing locked on the bar`);
@@ -386,7 +386,8 @@ if(process.env.AE_BROWSER!=='0'){
       if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
       else assert.ok(later.length>0);
       assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'One main line beside the main attack');
-      assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),0,`Lv ${level}: no Not confirmed yet`);
+      assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),0,`Lv ${level}: no stacks-unverified tag`);
+      assert.equal(await page.locator('#aeStackRule [data-status-tag="bar-layout"]').count(),1,`Lv ${level}: the layout is REPORTED, so it keeps its tag`);
       await context.close();
     }
   });
