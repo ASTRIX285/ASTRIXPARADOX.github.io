@@ -279,7 +279,7 @@ function setupStrip(plan) {
     ['line', line?.name ?? 'Macro', line ? line.skills.join(', ') : 'Nothing sourced yet'],
     ['stigmas', 'Stigmas', stigmas.length ? stigmas.map(slot => slot.name).join(', ') : firstStigma ? `From Lv ${firstStigma.slotLevel}: ${firstStigma.name}` : 'None'],
     ['mastery', 'Level next', s.mastery ? `${s.mastery.name} to Lv ${s.mastery.to}` : 'Nothing to level now'],
-    ['daevanion', 'Daevanion', board ? `${board.name}${s.daevanion.now.length ? `: ${s.daevanion.now.join(', ')} +1` : ''}` : s.daevanion.firstLevel ? `From Lv ${s.daevanion.firstLevel}` : 'None'],
+    ['daevanion', 'Daevanion', board ? `${board.name}${s.daevanion.now.length ? `: +1 on ${s.daevanion.now.join(', ')}` : ''}` : s.daevanion.firstLevel ? `From Lv ${s.daevanion.firstLevel}` : 'None'],
     ['stats', 'Stat focus', s.stats?.first ?? 'Not confirmed yet']
   ];
   return `<section class="ae-setup" id="aeSetup" aria-labelledby="aeSetupTitle" data-setup-level="${esc(s.level)}">
@@ -812,6 +812,12 @@ function writePoints(boardId, value) {
 
 /* Mastery: laid out like the game's Mastery tab. Icons only, names on hover; tap a skill for its
    card: level, cooldown, what it does, why it matters, the three Specialty slots and all five perks. */
+/** The number on a skill tile: its place in the level order the plan gives (level planner), else the build's priority. */
+function rankOf(entry) {
+  if (!state.plan?.setup?.planned) return entry.priority;
+  const at = levelOrder(state.plan).findIndex(step => step.name === entry.name);
+  return at >= 0 ? at + 1 : null;
+}
 function masteryTile(entry) {
   const locked = entry.unlocked === false || entry.acquired === false;
   const onBar = entry.equipped === true && !locked;
@@ -819,7 +825,7 @@ function masteryTile(entry) {
   return `<span role="button" tabindex="0" class="ae-mskill${locked ? ' is-locked' : ''}${entry.priority ? ' is-key' : ''}" data-mastery="${esc(entry.name)}" data-tip="${esc(locked && entry.needLevel ? `${entry.name} · unlocks at Lv ${entry.needLevel}` : entry.skillLevel !== null ? `${entry.name} · skill Lv ${entry.skillLevel}` : entry.name)}"${onBar ? ' data-equipped="true"' : entry.equipped === false && !locked ? ' data-equipped="false"' : ''} aria-label="${esc(entry.name)}${locked && entry.needLevel ? `, unlocks at character level ${entry.needLevel}` : ''}${entry.skillLevel !== null ? `, skill Lv ${entry.skillLevel}` : ''}${onBar ? ', on your skill bar' : ''}${entry.priority ? `, build priority ${entry.priority}` : ''}">
     <span class="ae-mskill-name">${esc(entry.name)}</span>
     ${entry.icon ? `<img src="${esc(entry.icon)}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
-    ${entry.priority ? `<span class="ae-mskill-rank">${entry.priority}</span>` : ''}
+    ${rankOf(entry) ? `<span class="ae-mskill-rank">${rankOf(entry)}</span>` : ''}
     ${onBar ? '<span class="ae-mskill-bar" aria-hidden="true">●</span>' : offBar ? '<span class="ae-mskill-bar is-off" aria-hidden="true">!</span>' : ''}
     ${locked && entry.needLevel ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(entry.needLevel)}</b></span>` : entry.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(entry.skillLevel)}</span>` : ''}
   </span>`;

@@ -422,6 +422,9 @@ if(process.env.AE_BROWSER!=='0'){
     const rows=await m.page.$$eval('#aeMasteryWhy li',items=>items.map(el=>el.dataset.masteryWhy));
     assert.deepEqual(rows.slice(0,2),['Rending Blow','Experienced Counterstrike']);
     assert.match(await plain(m.page,'#aeMasteryWhy li:nth-child(2)'),/party/);
+    // The numbers on the skill tiles are the same order, not the build's old priority list.
+    const ranks=await m.page.$$eval('.ae-mskill-grid .ae-mskill',items=>items.filter(el=>el.querySelector('.ae-mskill-rank')).map(el=>[Number(el.querySelector('.ae-mskill-rank').textContent),el.dataset.mastery]).sort((x,y)=>x[0]-y[0]).map(item=>item[1]));
+    assert.deepEqual(ranks,plan(22,'tank','main-tank').mastery.spend.map(step=>step.name));
     await m.context.close();
     const s=await open(screen(q(22,'tank','main-tank'),'stigma'));
     assert.match(await plain(s.page,'#aeStigmaWhy [data-stigma-why="0"]'),/^Slot 1 Focused Block: .*party/);
