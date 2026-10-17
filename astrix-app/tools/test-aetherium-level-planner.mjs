@@ -285,7 +285,7 @@ check('data: every Gladiator skill has values and synergies with a status and re
 check('no class-specific code: the planner reads only data, and the other seven classes run on today\'s data',()=>{
   const source=readFileSync(new URL('games/aion2/engine/level-planner.mjs',root),'utf8');
   assert.doesNotMatch(source,/Gladiator|Templar|Assassin|Ranger|Sorcerer|Spiritmaster|Cleric|Chanter|Rage Burst|Overhead Slam|Mocking Blade/,'No class or skill names in the planner');
-  for(const name of AION2_CLASSES.filter(item=>item!=='Gladiator'))for(const role of rolesFor(builds[name]))for(const level of LEVELS){
+  for(const name of AION2_CLASSES.filter(item=>!builds[item].records.some(build=>build.ascent)))for(const role of rolesFor(builds[name]))for(const level of LEVELS){
     const p=buildAscentPlan({className:name,role:role.role,level,data:data(name)});
     if(p.pending)continue;
     assert.equal(p.setup.planned,false,`${name}: no ascent record yet`);
@@ -298,7 +298,7 @@ check('no class-specific code: the planner reads only data, and the other seven 
     if(slots&&!slots.pending)assert.deepEqual(p.stigmas.slots.map(slot=>slot.name),slots.slots.map(slot=>slot.name),`${name}: slot order`);
   }
   // planLevelSetup with no ascent record says it has no plan of its own.
-  const templar=builds.Templar.records.find(build=>build.main);
+  const templar={...builds.Templar.records.find(build=>build.main),ascent:undefined};
   const setup=planLevelSetup({build:templar,team:null,catalogue:new Map(),icons:new Map(),level:30,model:null,facts:{},cap:45});
   assert.equal(setup.planned,false);
   assert.equal(setup.confirmed,false);

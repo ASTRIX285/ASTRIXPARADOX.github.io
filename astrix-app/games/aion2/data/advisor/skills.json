@@ -1132,7 +1132,7 @@
       "name": "Judgment",
       "unlockLevel": 4,
       "cooldownSeconds": 5,
-      "summary": "Strong single target hit within 4m that raises Enmity.",
+      "summary": "Single target hit within 4 m that raises Enmity. Shield Smite, Warding Strike, Doom Shield and Shield Rush make it ready.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -1141,23 +1141,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs 1% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra damage against targets with Impact-type status"
+          "text": "Extra damage on a target with an Impact-type status",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Extra damage, only on a target with an Impact-type status.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra damage on hit"
+          "text": "Extra damage on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Extra damage on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Always lands as a Critical Hit"
+          "text": "Critical Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "Every hit is a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Removes the cooldown"
+          "text": "Remove cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "No cooldown: each shield skill makes it ready again at once.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -1180,12 +1235,108 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-templar",
+          "title": "Public Templar skill builds (287 distinct PvE of 951 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ec-templar",
+          "title": "Templar guide",
+          "publisher": "ExpCarry",
+          "url": "https://expcarry.com/aion-2-templar-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "medium",
+          "publishedOn": "2026-10-05"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Ready after a shield skill: Shield Smite, Warding Strike, Doom Shield or Shield Rush.",
+          "skillLevel": null,
+          "status": "reported"
+        },
+        {
+          "type": "cdCut",
+          "text": "No cooldown.",
+          "skillLevel": 16,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2.5,
+          "text": "Your main hit: it fires each time a shield skill makes it ready.",
+          "status": "reported",
+          "refs": [
+            "ql-db-templar",
+            "ql-builds-templar"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "trigger",
+          "text": "Fires once a shield skill has made it ready: Shield Smite, Warding Strike, Doom Shield or Shield Rush.",
+          "skillLevel": null,
+          "status": "reported",
+          "refs": [
+            "ql-db-templar",
+            "ql-builds-templar",
+            "ec-templar"
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Judgment",
+          "seconds": 5,
+          "text": "No cooldown once you pick Remove cooldown."
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      },
+      "mpCost": 0
     },
     {
       "id": "templar-punishment",
@@ -1202,23 +1353,67 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs 10% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you for 10% of the damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Applies damage over time on hit"
+          "text": "Damage over Time on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Damage over time for 3 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "30% faster skill speed"
+          "text": "+30% Skill Speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Charges and fires 30% faster.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Becomes a mobile skill"
+          "text": "Changes to mobile skill"
         },
         {
           "skillLevel": 16,
-          "text": "Ignores Block and Evasion, lands as Critical Hit"
+          "text": "Ignores Block and Evasion and lands as a Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "Never blocked or evaded, always a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -1241,24 +1436,57 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "charged",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A charged hit on up to 4 enemies at 20 m.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Executor for 20 s: Accuracy +200 and PvE damage +20%.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 32,
+        "10": 38
+      },
+      "mpCost": 200
     },
     {
       "id": "templar-pummel",
       "class": "Templar",
       "name": "Pummel",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
-      "summary": "Hits up to 4 nearby enemies, raises Enmity and deals light stagger damage.",
+      "cooldownSeconds": 0,
+      "summary": "Hits up to 4 nearby enemies and raises Enmity. No cooldown; costs 120 MP.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -1267,23 +1495,79 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "-20% MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 96 MP in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Punishing Strike absorbs HP"
+          "text": "Punishing Strike absorbs 3% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Its follow-up, Punishing Strike, heals you.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets are hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to 12% more damage on a single target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Hits cut Punishment cooldown by 1s"
+          "text": "-1s Punishment cooldown on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit takes 1 s off Punishment.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ],
+              "needs": "Punishment"
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Punishing Strike deals extra damage on hit"
+          "text": "Punishing Strike deals extra damage on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Its follow-up, Punishing Strike, hits harder.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -1306,12 +1590,68 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Punishment by 1 s.",
+          "skillLevel": 12,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 nearby enemies, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Punishment",
+          "seconds": 1,
+          "text": "Each hit cuts Punishment by 1 s."
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 120
     },
     {
       "id": "templar-warding-strike",
@@ -1328,23 +1668,88 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "5s shorter cooldown"
+          "text": "-5s cooldown",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Every 25 s: more Warding and more Judgment.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+100 Block during Warding"
+          "text": "+100 Block during Warding",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "More blocks while Warding is up.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            },
+            {
+              "key": "partyBuff",
+              "weight": 0.5,
+              "text": "More blocks set off Fury more often.",
+              "status": "reported",
+              "refs": [
+                "ql-db-templar"
+              ],
+              "needs": "Fury"
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Heal over time during Warding"
+          "text": "Heal over Time during Warding",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you every second while Warding is up.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Warding tolerance scales up with more targets hit"
+          "text": "Warding scales with targets hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Up to 40% PvE Damage Tolerance with more targets hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Party gains damage tolerance on skill use"
+          "text": "Party gains PvE Damage Tolerance on use",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 1.5,
+              "text": "The party gets PvE Damage Tolerance +10%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -1367,22 +1772,67 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Heals you and grants Warding: PvE Damage Tolerance +20% for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 enemies around you.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Judgment",
+          "via": "trigger",
+          "text": "Makes Judgment ready for 2 s."
+        }
+      ],
+      "training": {
+        "8": 26,
+        "10": 32
+      },
+      "mpCost": 200
     },
     {
       "id": "templar-vicious-strike",
       "class": "Templar",
       "name": "Vicious Strike",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
+      "cooldownSeconds": 0,
       "summary": "Hits up to 4 nearby enemies, raises Enmity and restores MP.",
       "role": {
         "value": "filler",
@@ -1392,19 +1842,64 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "+20% MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs 1% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "+50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Multi-Hit chance up by 50%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Hits cut Warding Strike cooldown by 2s"
+          "text": "-2s Warding Strike cooldown on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Each hit takes 2 s off Warding Strike, so its heal and Warding come round sooner.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ],
+              "needs": "Warding Strike"
+            }
+          ]
         },
         {
           "skillLevel": 16,
@@ -1431,6 +1926,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -1443,15 +1948,72 @@
           "type": "opens",
           "text": "Restores 100 MP.",
           "skillLevel": null,
-          "status": "reported"
+          "status": "confirmed"
         },
         {
           "type": "cdCut",
           "text": "Each hit cuts Warding Strike by 2 s.",
-          "skillLevel": null,
-          "status": "reported"
+          "skillLevel": 12,
+          "status": "confirmed"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 nearby enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP."
+        },
+        {
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Warding Strike",
+          "seconds": 2,
+          "text": "Each hit cuts Warding Strike by 2 s."
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
     },
     {
       "id": "templar-punishing-strike",
@@ -7174,18 +7736,85 @@
       "class": "Templar",
       "name": "Annihilate",
       "unlockLevel": 12,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 20,
+      "summary": "Heavy hit on a stunned or knocked-down target within 4 m; knocks NPCs down. 5% chance on a target with Incapacitated Immunity.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "+50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Multi-Hit chance up by 50%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+20% Knockdown Chance",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Knocks down more often (PvP).",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+100% damage to targets with Incapacitated Immunity",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Double damage on a target with Incapacitated Immunity.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "-10s cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "Every 10 s in place of 20 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Changes to AoE skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hits up to 4 enemies.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7197,30 +7826,139 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a stunned or knocked-down target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cooldown 10 s.",
+          "skillLevel": 12,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "A heavy hit on a stunned or knocked-down target. Shield Smite's stun opens it.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Annihilate",
+          "seconds": 10,
+          "text": "Cooldown 10 s in place of 20 s."
+        }
+      ],
+      "training": {
+        "8": 30,
+        "10": 36
+      },
+      "mpCost": 200
     },
     {
       "id": "templar-debilitating-smash",
       "class": "Templar",
       "name": "Debilitating Smash",
       "unlockLevel": 7,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 10,
+      "summary": "Hits up to 4 nearby enemies; on Block it lowers the target's Defense by 25% for 5 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "30% chance to inflict Stun for 3s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Stuns NPCs, so Annihilate can fire.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+3s Debilitate duration",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 0.5,
+              "text": "Defense down for 8 s in place of 5.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "-60% Incoming Heal during Debilitate"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion and lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Never blocked or evaded, always Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "25% chance to reset cooldown on Block",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Sometimes ready again at once.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7232,30 +7970,123 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 nearby enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 0.5,
+          "text": "Debilitate on Block: the target's Defense drops 25% for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": 8,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "stun",
+          "text": "Its skill Lv 8 stun option (always on NPCs) lets Annihilate fire."
+        }
+      ],
+      "training": {
+        "8": 25,
+        "10": 31
+      },
+      "mpCost": 0
     },
     {
       "id": "templar-defiance",
       "class": "Templar",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Clears Stun, Knockdown, Airborne, Grab, Frost and Fear, then grants status immunity for 5 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Capture chain skill"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1000 Stamina on use"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 20% HP on use",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals 20% HP on use.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "+2s Tenacity duration",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "7 s of status immunity.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "+50% PvE Damage Tolerance during Tenacity",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "PvE Damage Tolerance +50% while it lasts.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7267,31 +8098,88 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Clears crowd control and gives 5 s of status immunity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 34,
+        "10": 40
+      },
+      "mpCost": 0
     },
     {
       "id": "templar-doom-shield",
       "class": "Templar",
       "name": "Doom Shield",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 30,
+      "summary": "Dashes to a target within 20 m, hits and knocks NPCs down, shields you for 5% Max HP and makes Judgment ready for 3 s.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Resets Annihilate cooldown on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Annihilate is ready again on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "+200 Block for 5s on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Block +200 for 5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "Resets cooldown on defeating an enemy"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+25% Knockdown Chance"
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -7303,102 +8191,153 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
-        }
-      ],
-      "macroUse": {
-        "value": "line",
-        "status": "reported"
-      }
-    },
-    {
-      "id": "templar-poach",
-      "class": "Templar",
-      "name": "Poach",
-      "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
-      "kind": "skill",
-      "provenance": [
+        },
         {
           "kind": "community-guide",
-          "ref": "av-macros",
-          "title": "Most common macros by class",
-          "publisher": "AION2 Vault",
-          "url": "https://aion2vault.com/builds/macros",
-          "retrievedOn": "2026-10-14",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
           "region": "global",
-          "reliability": "medium"
-        }
-      ],
-      "macroUse": {
-        "value": "own-key",
-        "reason": "other",
-        "status": "reported"
-      }
-    },
-    {
-      "id": "templar-shield-rush",
-      "class": "Templar",
-      "name": "Shield Rush",
-      "unlockLevel": 10,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
-      "kind": "skill",
-      "provenance": [
-        {
-          "kind": "community-guide",
-          "ref": "av-macros",
-          "title": "Most common macros by class",
-          "publisher": "AION2 Vault",
-          "url": "https://aion2vault.com/builds/macros",
-          "retrievedOn": "2026-10-14",
-          "region": "global",
-          "reliability": "medium"
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "dash",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Dashes 20 m to the target, hits and knocks NPCs down.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "A shield of 5% Max HP for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Judgment",
+          "via": "trigger",
+          "text": "Makes Judgment ready for 3 s."
+        },
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "knockdown",
+          "text": "Its knockdown (always on NPCs) lets Annihilate fire."
+        },
+        {
+          "skillLevel": 5,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Annihilate",
+          "seconds": 20,
+          "text": "Stigma Lv 5: resets Annihilate on hit."
+        }
+      ],
+      "mpCost": 0
     },
     {
-      "id": "templar-shield-smite",
+      "id": "templar-poach",
       "class": "Templar",
-      "name": "Shield Smite",
-      "unlockLevel": 3,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "name": "Poach",
+      "unlockLevel": 1,
+      "cooldownSeconds": 15,
+      "summary": "Hits a target within 20 m and pulls it in front of you; roots NPCs for 2 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Moves to the target if it has Incapacitated Immunity",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Reaches a target it cannot pull.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "-20% Status Effect Resist for 5s on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "Resets cooldown on defeating an enemy",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Ready again after each kill while you level.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "10% Max HP Protective Shield",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "A shield of 10% Max HP on hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "50% chance to Stun for 3s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Stuns NPCs, so Annihilate can fire.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7410,30 +8349,394 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A hit at 20 m that pulls the target to you and roots NPCs for 2 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "stun",
+          "text": "Its skill Lv 16 option stuns NPCs, so Annihilate can fire."
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
+    },
+    {
+      "id": "templar-shield-rush",
+      "class": "Templar",
+      "name": "Shield Rush",
+      "unlockLevel": 10,
+      "cooldownSeconds": 20,
+      "summary": "After a Dodge or in flight, dashes to a target within 10 m, hits and stuns NPCs; makes Judgment ready for 2 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Restores 300 Stamina on hit"
+        },
+        {
+          "skillLevel": 8,
+          "text": "+10m range",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Reaches 20 m.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Changes to Charge Skill and deals AoE damage",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Hits up to 4 enemies when fully charged.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "-10s cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Every 10 s: more Judgment.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "+25% Stun Chance"
+        }
+      ],
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A dash after a Dodge or in flight that stuns NPCs.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Judgment",
+          "via": "trigger",
+          "text": "Makes Judgment ready for 2 s."
+        },
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "stun",
+          "text": "Its stun (always on NPCs) lets Annihilate fire."
+        }
+      ],
+      "training": {
+        "8": 28,
+        "10": 34
+      },
+      "mpCost": 0
+    },
+    {
+      "id": "templar-shield-smite",
+      "class": "Templar",
+      "name": "Shield Smite",
+      "unlockLevel": 3,
+      "cooldownSeconds": 10,
+      "summary": "Hits up to 4 nearby enemies and stuns NPCs for 3 s; makes Judgment ready for 2 s.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "+1s Stun duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Stun lasts 4 s: a longer window for Annihilate.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Removes MP cost and restores 200 MP on hit",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1.5,
+              "text": "Free to use, and 200 MP back on a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% chance to trigger Debilitating Smash on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half the time it sets off Debilitating Smash as well.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "-2s cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Every 8 s: more stuns and more Judgment.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "AoE Stun",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Stuns every enemy it hits.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "av-macros",
+          "title": "Most common macros by class",
+          "publisher": "AION2 Vault",
+          "url": "https://aion2vault.com/builds/macros",
+          "retrievedOn": "2026-10-14",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 nearby enemies and stuns NPCs for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Judgment",
+          "via": "trigger",
+          "text": "Makes Judgment ready for 2 s."
+        },
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "stun",
+          "text": "Its stun (always on NPCs) lets Annihilate fire."
+        },
+        {
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "Shield Smite",
+          "seconds": 2,
+          "text": "Cooldown 8 s in place of 10 s."
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      },
+      "mpCost": 100
     },
     {
       "id": "templar-taunt",
       "class": "Templar",
       "name": "Taunt",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 30,
+      "summary": "Hits a target within 20 m, raises Enmity and inflicts Shrink for 15 s: Accuracy -200 and Attack -10%.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Shrink also lowers PvE Damage Tolerance by 10%",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 1,
+              "text": "The target takes 10% more PvE damage from everyone.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "+10% Shrink Attack reduction",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 0.5,
+              "text": "The target's Attack drops 20%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "-5s cooldown"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+2s Taunt duration, +5s Shrink duration"
+        }
+      ],
       "kind": "stigma",
       "provenance": [
         {
@@ -7445,12 +8748,938 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "other",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "enmity",
+          "weight": 2,
+          "text": "Raises your Enmity on a target up to 20 m away.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "Shrink for 15 s: the target's Attack drops 10%, so everyone it hits takes less.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A hit at 20 m.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-flash-rampage",
+      "class": "Templar",
+      "name": "Flash Rampage",
+      "unlockLevel": 5,
+      "cooldownSeconds": 0,
+      "summary": "Hits a staggered target within 4 m and raises Enmity. No cooldown.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs 5% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 120 MP on hit",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP back on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Changes to mobile skill"
+        },
+        {
+          "skillLevel": 12,
+          "text": "Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Always lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "-1s to all skill cooldowns on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit takes 1 s off all your cooldowns.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      },
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        },
+        {
+          "type": "cdCut",
+          "text": "Cuts all your cooldowns by 1 s on hit.",
+          "skillLevel": 16,
+          "status": "confirmed"
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Fires on a staggered target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 0.5,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target."
+        },
+        {
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "text": "Each hit cuts all your cooldowns by 1 s."
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      },
+      "mpCost": 0
+    },
+    {
+      "id": "templar-shield-of-protection",
+      "class": "Templar",
+      "name": "Shield of Protection",
+      "unlockLevel": 22,
+      "cooldownSeconds": 20,
+      "summary": "Guarantees a Block and doubles Block damage reduction for a moment; 110 MP and stamina back once on the Block.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+1 consecutive use",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Two uses in a row.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "Changes to mobile skill"
+        },
+        {
+          "skillLevel": 15,
+          "text": "+20% Move Speed for 3s on Block"
+        },
+        {
+          "skillLevel": 20,
+          "text": "Restores 10% HP once on Block",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals 10% HP on the Block.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "A sure Block on a big hit, with Block damage reduction doubled.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "110 MP and stamina back on the Block.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "Its Block sets off Fury: you and the party get PvE damage +5.5% for 20 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "needs": "Fury"
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Fury",
+          "via": "block",
+          "text": "A sure Block sets off Fury."
+        },
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "mp",
+          "amount": 110,
+          "text": "Restores 110 MP and stamina once on the Block."
+        }
+      ],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-noble-armor",
+      "class": "Templar",
+      "name": "Noble Armor",
+      "unlockLevel": 22,
+      "cooldownSeconds": 120,
+      "summary": "Max HP +5.4% for 120 s and heals 5.4% of Max HP at once. Not removed by dispels.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+5% Defense for the duration",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Defense +5% for 120 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "x1.5 Insulting Roar effect",
+          "values": [
+            {
+              "key": "enmity",
+              "weight": 1,
+              "text": "Insulting Roar counts 1.5 times.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "x1.5 Fury effect",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 1,
+              "text": "Fury counts 1.5 times.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "+10% Incoming Heal for the duration"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "Max HP +5.4% for 120 s and heals 5.4% at once.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Stigma Lv 5 adds Defense +5%, which Battlefield Banner turns into Attack.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "skillLevel": 5,
+          "needs": "Battlefield Banner"
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Stigma Lv 10: Insulting Roar counts 1.5 times.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "skillLevel": 10
+        },
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "Stigma Lv 15: Fury counts 1.5 times.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "skillLevel": 15,
+          "needs": "Fury"
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": 10,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "boost",
+          "target": "Insulting Roar",
+          "text": "Insulting Roar counts 1.5 times for 120 s."
+        },
+        {
+          "skillLevel": 15,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "boost",
+          "target": "Fury",
+          "text": "Fury counts 1.5 times for 120 s."
+        }
+      ],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-battlefield-banner",
+      "class": "Templar",
+      "name": "Battlefield Banner",
+      "unlockLevel": 22,
+      "cooldownSeconds": 90,
+      "summary": "Attack up in proportion to your Defense for 10 s.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+10% Multi-Hit Chance for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Multi-Hit chance +10% for 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 10,
+          "text": "+10% Weapon Damage Boost for the duration",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Weapon damage +10% for 10 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "+20% Attack from Defense",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "More Attack from your Defense.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "-30s cooldown"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Attack up in proportion to your Defense for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-empyrean-lord-s-punishment",
+      "class": "Templar",
+      "name": "Empyrean Lord's Punishment",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": "A heavy hit on up to 4 enemies near a target within 20 m; stuns NPCs; 50 stagger gauge damage.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "Up to +20% damage when fewer targets are hit"
+        },
+        {
+          "skillLevel": 10,
+          "text": "+50 Stagger Gauge Damage"
+        },
+        {
+          "skillLevel": 15,
+          "text": "+10% PvE Damage Boost for 10s on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "PvE damage +10% for 10 s after it hits.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 20,
+          "text": "+25% Stun Chance"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "A heavy hit on up to 4 enemies at 20 m, with 50 stagger damage.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "opens",
+          "target": "Annihilate",
+          "via": "stun",
+          "text": "Its stun (always on NPCs) lets Annihilate fire."
+        }
+      ],
+      "mpCost": 200
+    },
+    {
+      "id": "templar-nezekan-s-shield",
+      "class": "Templar",
+      "name": "Nezekan's Shield",
+      "unlockLevel": 22,
+      "cooldownSeconds": 60,
+      "summary": "A shield of 41% Max HP for 3 s on you and party members within 40 m.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+20% all Element Tolerance during the shield"
+        },
+        {
+          "skillLevel": 10,
+          "text": "+2s shield duration",
+          "values": [
+            {
+              "key": "partyBuff",
+              "weight": 0.5,
+              "text": "The shield lasts 5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 15,
+          "text": "+20% PvE Damage Tolerance during the shield"
+        },
+        {
+          "skillLevel": 20,
+          "text": "Restores 20% Max HP when the shield ends"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "partyBuff",
+          "weight": 1.5,
+          "text": "A shield of 41% Max HP for 3 s on the party within 40 m.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "The same shield on you.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-executing-blade",
+      "class": "Templar",
+      "name": "Executing Blade",
+      "unlockLevel": 22,
+      "cooldownSeconds": 45,
+      "summary": "Hits up to 4 nearby enemies and lowers their Defense by 30% for 5 s; 20% more damage on a target with an Impact-type status.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "-15s cooldown"
+        },
+        {
+          "skillLevel": 10,
+          "text": "Inflicts Exposed for 5s on hit"
+        },
+        {
+          "skillLevel": 15,
+          "text": "Critical Hit on hit"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+30% damage on a target with an Impact-type status"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies and lowers their Defense by 30% for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 100
+    },
+    {
+      "id": "templar-second-skin",
+      "class": "Templar",
+      "name": "Second Skin",
+      "unlockLevel": 22,
+      "cooldownSeconds": 90,
+      "summary": "PvE Damage Tolerance +30% for 10 s.",
+      "specialties": [
+        {
+          "skillLevel": 5,
+          "text": "+10% all Element Tolerance"
+        },
+        {
+          "skillLevel": 10,
+          "text": "+20% Block for the duration"
+        },
+        {
+          "skillLevel": 15,
+          "text": "x1.5 Ironclad Defense effect"
+        },
+        {
+          "skillLevel": 20,
+          "text": "+20% PvE Damage Tolerance"
+        }
+      ],
+      "kind": "stigma",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "PvE Damage Tolerance +30% for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
+    },
+    {
+      "id": "templar-fury",
+      "class": "Templar",
+      "name": "Fury",
+      "unlockLevel": 21,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "On a Block, you and the party get PvE damage +5.5% for 20 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty options."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "A Block gives you and the party PvE damage +5.5% for 20 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ],
+          "type": "condition",
+          "needs": "block",
+          "text": "Fires on a Block."
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 21
+      }
+    },
+    {
+      "id": "templar-insulting-roar",
+      "class": "Templar",
+      "name": "Insulting Roar",
+      "unlockLevel": 17,
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Enmity Boost +100%; Attack +5.5% for 5 s on a front attack.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty options."
+      },
+      "kind": "skill",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "enmity",
+          "weight": 2,
+          "text": "Enmity Boost +100%: every hit holds the boss harder.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Attack +5.5% for 5 s on a front attack.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-templar"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 35,
+        "10": 41
       }
     },
     {
