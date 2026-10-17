@@ -10,7 +10,7 @@
  * stays pending with a reason. Nothing is invented here: the engine only selects and orders.
  */
 
-import { nodeSkill } from './daevanion-planner.mjs';
+import { nodeSkill, planRoleRoute, routePriorities } from './daevanion-planner.mjs';
 import { gearRows, rankPointStats, statChains } from './stat-advisor.mjs';
 
 export const AION2_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
@@ -129,10 +129,51 @@ export function rolesFor(builds) {
     .map(build => ({ role: build.role, label: ROLES[build.role], main: Boolean(build.main), status: build.status ?? 'sourced', buildLabel: build.label }));
 }
 
+/* Teams (17 Oct 2026). A build may define team variants (teamVariants): the team the player is in changes the build's
+   stigmas and swaps one own key. Rules live on the build as data; the engine only applies them. */
+export const TEAMS = Object.freeze({ 'main-tank': 'Main tank, no Templar', 'off-tank-templar': 'Off-tank, with a Templar', solo: 'Solo or levelling' });
+export const DEFAULT_TEAM = 'solo';
+
+/** The teams a build defines, in TEAMS order: [{ id, label, swap }]. Empty when the build has no team variants. */
+export function teamsFor(build) {
+  const variants = build?.teamVariants;
+  if (!variants || typeof variants !== 'object') return [];
+  return Object.keys(TEAMS).filter(id => variants[id]).map(id => ({ id, label: variants[id].label ?? TEAMS[id], swap: variants[id].swap ?? null }));
+}
+
+/**
+ * The build as played in a team: the variant's four stigmas in slot order, and its swap (out for in) on the own keys and
+ * the opener. Returns { build, team }; team is null for a build with no variants. An unknown team falls back to Solo.
+ */
+export function applyTeam(build, team) {
+  const variants = build?.teamVariants;
+  if (!variants || typeof variants !== 'object') return { build, team: null };
+  const id = variants[team] ? team : variants[DEFAULT_TEAM] ? DEFAULT_TEAM : Object.keys(variants)[0];
+  const variant = variants[id];
+  const out = structuredClone(build);
+  const swapName = name => (variant.swap && name === variant.swap.out ? variant.swap.in : name);
+  if (out.stigmas && !isPending(out.stigmas) && Array.isArray(variant.stigmas)) {
+    out.stigmas.slots = out.stigmas.slots.map((slot, index) => ({ ...slot, name: variant.stigmas[index] ?? slot.name }));
+    const inSlots = new Set(out.stigmas.slots.map(slot => slot.name));
+    out.stigmas.alternatives = (out.stigmas.alternatives ?? []).filter(alt => !inSlots.has(alt.name));
+  }
+  if (out.macro && typeof out.macro === 'object') {
+    out.macro.ownKeys = (out.macro.ownKeys ?? []).map(item => (Array.isArray(item.stack) ? { ...item, stack: item.stack.map(swapName) } : { ...item, name: swapName(item.name), ...(variant.swap && item.name === variant.swap.out ? { why: variant.swap.why } : {}) }));
+    out.macro.opener = (out.macro.opener ?? []).map(swapName);
+  }
+  return { build: out, team: { id, label: variant.label ?? TEAMS[id], swap: variant.swap ?? null, refs: variant.refs ?? [], options: teamsFor(build) } };
+}
+
 /** The build for a role, or the class's main build when the role is not one it plays. */
 export function pickBuild(builds, role) {
   const records = builds?.records ?? builds ?? [];
   return records.find(build => build.role === role) ?? records.find(build => build.main) ?? records[0] ?? null;
+}
+
+/** The build a page judges by: the role the player picked (else the class's main build), as played in their team. */
+export function buildFor(builds, { role = null, team = null } = {}) {
+  const picked = pickBuild(builds, role);
+  return picked ? applyTeam(picked, team).build : null;
 }
 
 /** The source list a build cites, keyed by ref, for footnotes. */
@@ -246,7 +287,7 @@ export function daevanionSkillNodes(build) {
   return (!isPending(build.daevanion) && build.daevanion.skillNodes) || (build.coreSkills ?? []).map(skill => skill.name);
 }
 
-function planBoards(build, level, model, facts) {
+function planBoards(build, level, model, facts, cap = null) {
   const boards = (facts['daevanion-boards']?.value ?? []).map(board => {
     const live = model?.daevanion?.find(item => item.id === board.id || item.name === board.name) ?? null;
     return {
@@ -260,12 +301,20 @@ function planBoards(build, level, model, facts) {
       nodes: Array.isArray(live?.nodes) ? live.nodes : null
     };
   });
+  const budget = facts['daevanion-budget']?.value ?? null;
+  const priorities = isPending(build.daevanion) ? [] : routePriorities(build.daevanion);
+  // The route inside the budget, once a Daeva's boards have been read (every open board needs its nodes; else it stops there).
+  const roleRoute = model && priorities.length ? planRoleRoute({ boards, priorities, budget, cap, skills: daevanionSkillNodes(build) }) : null;
   return {
     boards,
+    budget: budget ? { points: budget.points, boardCost: budget.boardCost ?? {}, status: facts['daevanion-budget'].status ?? null } : null,
+    nodePriorities: priorities,
+    roleRoute,
     priorities: isPending(build.daevanion) ? build.daevanion : build.daevanion.priorities,
     // Skills whose +1 nodes the board planner routes to first, in order (falls back to the core skills).
     skillNodes: daevanionSkillNodes(build),
     refs: isPending(build.daevanion) ? [] : build.daevanion.refs,
+    status: isPending(build.daevanion) ? null : build.daevanion.status ?? null,
     general: facts['daevanion-priority'] ?? null
   };
 }
@@ -470,20 +519,21 @@ function nowList(level, build, skills, stigmas, boards, model, mastery = null, s
   if (model) {
     // The gear moves come from the grade rule (gearMoves), the same one the Gear page flags tiles with.
     for (const move of gearMoves(model, { level, grades, progression })) push(move.rank, move.title, move.detail, [], 'armory', 'gear', { slots: move.slots, ring: move.ring, move: move.id });
-    // Only a board with nothing spent on it is offered. A board with any node taken (a finished one included) is never the move.
-    const openUnspent = boards.boards.filter(board => board.open && board.nodesTaken === 0);
-    // The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens the board it names.
-    if (openUnspent.length) push(20, `Spend points on the ${openUnspent.map(board => board.name).join(' and ')} Daevanion ${openUnspent.length === 1 ? 'board' : 'boards'}`, `${openUnspent.length === 1 ? 'It is' : 'They are'} open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.`, boards.refs, 'armory', 'daevanion', { board: openUnspent[0].id, boards: openUnspent.map(board => ({ id: board.id, name: board.name })) });
+    // One board only (Miguel, 17 Oct 2026): the role route's current board, one board at a time in route order, inside the
+    // budget. The move carries the character's own board id (Elyos 11 to 16, Asmodian 31 to 36), so Show me opens it.
+    const move = daevanionMove(boards);
+    if (move) push(20, move.title, move.detail, boards.refs, 'armory', 'daevanion', { board: move.board.id, boards: [{ id: move.board.id, name: move.board.name }] });
     if (!stigmas.pending && level >= stigmas.unlockLevel && stigmas.noneAcquired) push(15, 'Do the stigma quest', `You are Lv ${level} and no stigma is unlocked. Finish ${stigmas.quest ?? 'the stigma quest'} to open them.`, stigmas.refs, 'armory', 'stigma');
     // A skill the Daeva has but has not equipped, said by its place on the bar ("Put Overhead Slam above Rage Burst on stack A": row 1 sits above row 0).
     const placeOf = name => {
-      for (const stack of Object.values(skillBar?.stacks ?? {})) { const row = stack.skills.findIndex(item => item.name === name); if (row >= 0) return { key: stack.key, row, below: row ? stack.skills[row - 1].name : null }; }
+      for (const stack of Object.values(skillBar?.stacks ?? {})) { const at = stack.skills.findIndex(item => item.name === name); if (at >= 0) return { key: stack.key, row: stack.skills[at].row, below: at ? stack.skills[at - 1].name : null }; }
       return null;
     };
     for (const skill of skills) {
       if (!(skill.unlocked && skill.skillLevel !== null && skill.equipped === false)) continue;
       const place = placeOf(skill.name);
-      if (place) push(25, `Put ${skill.name}${place.below ? ` above ${place.below}` : ''} on ${keyPhrase(place.key)}`, place.below ? `You have it but it is not equipped. Row ${place.row} of ${keyPhrase(place.key)} in the build's bar.` : `You have it but it is not equipped. It goes on ${keyPhrase(place.key)}.`, skill.refs, 'armory', 'skill-bar', { key: place.key, row: place.row });
+      const where = skillBar?.stacks?.[place?.key]?.name ? `the ${skillBar.stacks[place.key].name.toLowerCase()}` : place ? keyPhrase(place.key) : null;
+      if (place) push(25, `Put ${skill.name}${place.below ? ` above ${place.below}` : ''} on ${where}`, place.below ? `You have it but it is not equipped. Row ${place.row} of ${where} in the build's bar.` : `You have it but it is not equipped. It goes on ${where}.`, skill.refs, 'armory', 'skill-bar', { key: place.key, row: place.row });
       else push(25, `Put ${skill.name} on your skill bar`, 'You have it but it is not equipped.', skill.refs, 'armory', 'mastery');
     }
   }
@@ -519,6 +569,32 @@ function nowList(level, build, skills, stigmas, boards, model, mastery = null, s
   return list.sort((a, b) => a.rank - b.rank).map(({ rank, ...item }, index) => ({ step: index + 1, ...item }));
 }
 
+/**
+ * The Daevanion move: the current board of the role route, and once that board has been read its next node and the
+ * steps to it ("Carry on with Nezekan: Overhead Slam +1 next (2 steps)"). Before a board is read the current board is the
+ * first open board, in route order, with nodes left; nothing is said about its nodes. Null when the budget is spent.
+ */
+export function daevanionMove(boards) {
+  const route = boards?.roleRoute ?? null;
+  if (route?.known && route.left !== null && route.spent >= route.budget) return null;
+  if (route?.current?.read) {
+    const steps = route.steps.filter(step => step.boardId === route.current.id);
+    const goal = steps.findIndex(step => step.target);
+    if (goal < 0) return null;
+    const board = boards.boards.find(item => item.id === route.current.id);
+    const text = steps[goal].effects?.[0] || steps[goal].name;
+    return { board, title: `${board.nodesTaken === 0 ? `Start ${board.name}` : `Carry on with ${board.name}`}: ${text} next (${goal + 1} ${goal ? 'steps' : 'step'})`, detail: `${board.name} is your board now. Work one board at a time: the route moves on once its nodes for your role are taken.` };
+  }
+  // Not read yet: the route's current board (a board read and done for the role, or finished by its counts, is skipped);
+  // with no route, the first open board in route order that still has nodes to take.
+  const board = route ? (route.current ? boards.boards.find(item => item.id === route.current.id) : null)
+    : boards?.boards?.find(item => item.open && (item.nodesTaken === null || item.nodesTotal === null || item.nodesTaken < item.nodesTotal));
+  if (!board) return null;
+  return board.nodesTaken
+    ? { board, title: `Carry on with ${board.name}`, detail: `Open ${board.name} to see your next node for your role. One board at a time.` }
+    : { board, title: `Spend points on the ${board.name} Daevanion board`, detail: `It is open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.` };
+}
+
 /** name -> { name, icon (full URL), category, needLevel } from data/advisor/icons/<class>.json. */
 function iconIndex(icons, className) {
   const record = (icons?.records ?? []).find(item => item.class === className);
@@ -534,8 +610,9 @@ function iconIndex(icons, className) {
  * @param {number} [input.level]    Character level. Taken from the model when one is given.
  * @param {object} input.data       { progression, skills, builds } from data/advisor/ (builds for this class).
  * @param {object} [input.model]    The armory character model (armory-adapter.mjs), when one is loaded.
+ * @param {string} [input.team]     main-tank, off-tank-templar or solo, for a build with team variants (TEAMS).
  */
-export function buildAscentPlan({ className, role, level, data, model = null }) {
+export function buildAscentPlan({ className, role, team = null, level, data, model = null }) {
   if (!AION2_CLASSES.includes(className)) throw new TypeError(`Unknown AION 2 class: ${className}`);
   const facts = indexProgression(data.progression);
   const capRule = {
@@ -546,8 +623,9 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   const gameIcons = iconIndex(data.icons, className);
   const lvl = clampLevel(model?.profile?.level ?? level ?? 1, data.progression);
   const roles = rolesFor(data.builds);
-  const build = pickBuild(data.builds, role);
-  if (!build) throw new TypeError(`No ${className} builds are loaded.`);
+  const picked = pickBuild(data.builds, role);
+  if (!picked) throw new TypeError(`No ${className} builds are loaded.`);
+  const { build, team: teamPlan } = applyTeam(picked, team);
   const roleUsed = build.role;
   const base = {
     className,
@@ -559,6 +637,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
     roleFallback: Boolean(role && role !== roleUsed),
     roles,
     build: { id: build.id, label: build.label, summary: build.summary, summaryRefs: build.roleRefs ?? [], main: Boolean(build.main), status: build.status ?? 'sourced', beginner: build.beginner ?? null },
+    team: teamPlan,
     sources: [...sourcesOf(build).values()],
     character: model ? { name: model.profile.name, level: model.profile.level, className: model.profile.class } : null,
     macroOrder: facts['macro-order'] ?? null,
@@ -574,7 +653,7 @@ export function buildAscentPlan({ className, role, level, data, model = null }) 
   const mechanics = indexMechanics(data.mechanics, data.progression);
   const skills = planSkills(build, catalogue, lvl, model, facts, capRule);
   const stigmas = planStigmas(build, lvl, model, facts, gameIcons);
-  const daevanion = planBoards(build, lvl, model, facts);
+  const daevanion = planBoards(build, lvl, model, facts, capRule.cap);
   const mastery = planMastery(build, catalogue, lvl, model, facts, gameIcons, capRule, daevanion.boards);
   const rotation = planRotation(build.rotation, catalogue, lvl, stigmas);
   const chains = planChains({ catalogue, className, mechanics });
@@ -749,28 +828,44 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     // The right-hand block: stack A, the main attack on left click, stack B, each row as the block lists it.
     for (const [id, key] of MACRO_STACKS) {
       const stack = block[id];
-      if (!stack?.rows?.length) { stacks[key].pending = block[`${id}Pending`] ?? { pending: true, reason: 'No line is sourced for this stack yet.' }; continue; }
-      const rows = stack.rows.filter(row => byName.has(row.name)).slice(0, STACK_ROWS).map((row, index) => cell(row.name, { key, index, role: id, why: row.why, row }));
+      if (!stack?.rows?.length) { stacks[key].pending = block[`${id}Pending`] ?? null; continue; }
+      // A row the build leaves empty stays empty (the game skips it); the rows above keep their place.
+      const rows = stack.rows.slice(0, STACK_ROWS).map((row, index) => (!row?.empty && byName.has(row?.name) ? cell(row.name, { key, index, role: id, why: row.why, row }) : null)).filter(Boolean);
       const top = rows.at(-1);
       put(key, rows, {
         label: stack.label ?? null,
+        name: stack.name ?? null,
+        empty: stack.rows.slice(0, STACK_ROWS).map((row, index) => (row?.empty ? { row: index, why: row.why ?? null } : null)).filter(Boolean),
         // A stack that does not end on a no-cooldown skill: the macro skips it when every row is on cooldown (macro-order facts).
         fillerMissing: rows.length > 1 && !(top.noCooldown && !top.conditional) ? 'No filler on top: when every skill here is on cooldown, the macro skips this entry and your held main attack fills the gap.' : null
       });
     }
     const main = block.mainAttack?.name && byName.has(block.mainAttack.name) ? block.mainAttack : { name: basic.name, why: null };
-    put('LMB', [cell(main.name, { key: 'LMB', index: 0, role: 'main', why: main.why })], { solo: true, reason: `The game keeps ${basic.name} on left click. Hold it with the macro key.` });
+    // The main attack's line can change with the level ("You can leave it alone" at 45 for a build that runs the macro alone).
+    const mainWhy = (main.atLevel ?? []).filter(item => level >= item.from).at(-1)?.why ?? main.why;
+    put('LMB', [{ ...cell(main.name, { key: 'LMB', index: 0, role: 'main', why: mainWhy }), locked: false }], { solo: true, reason: `The game keeps ${basic.name} on left click. Hold it with the macro key.` });
     // The left-hand block: the opener first, in its order, then every other own key grouped by reason.
-    const own = (block.ownKeys ?? []).filter(item => byName.has(item.name) && !placed.has(item.name));
+    // An own key is one skill, or a small stack the build names (two movement skills on one key).
+    const namesOf = item => (Array.isArray(item.stack) ? item.stack.filter(name => byName.has(name)) : byName.has(item.name) ? [item.name] : []);
+    const own = (block.ownKeys ?? []).filter(item => namesOf(item).length && !namesOf(item).some(name => placed.has(name)));
     const opener = block.opener ?? [];
-    const rank = item => (opener.includes(item.name) ? opener.indexOf(item.name) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
-    const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => rank(a) - rank(b) || a.index - b.index);
+    const first = item => namesOf(item).map(name => opener.indexOf(name)).filter(at => at >= 0).sort((a, b) => a - b)[0] ?? -1;
+    const rank = item => (first(item) >= 0 ? first(item) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
+    // The build's own order when it gives one (the keys a published bar uses), else the opener first, then by reason.
+    const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => (block.ownKeysOrder === 'listed' ? a.index - b.index : rank(a) - rank(b) || a.index - b.index));
     const keys = [...LEFT_KEYS];
     for (const item of ordered) {
       const key = keys.shift();
       const why = item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
-      if (!key) { notOnBar.push({ name: item.name, icon: byName.get(item.name).icon, unlockLevel: byName.get(item.name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
-      put(key, [cell(item.name, { key, index: 0, role: opener.includes(item.name) ? 'opener' : 'own', reason: item.reason, why })], { solo: true, reason: why, opener: opener.includes(item.name) ? opener.indexOf(item.name) + 1 : null });
+      const names = namesOf(item);
+      if (!key) { for (const name of names) notOnBar.push({ name, icon: byName.get(name).icon, unlockLevel: byName.get(name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
+      const cells = names.slice(0, STACK_ROWS).map((name, index) => cell(name, { key, index, role: opener.includes(name) ? 'opener' : 'own', reason: item.reason, why }));
+      const stacked = cells.length > 1;
+      const top = cells.at(-1);
+      put(key, cells, {
+        solo: !stacked, ownStack: stacked, label: item.label ?? null, reason: why, opener: !stacked && opener.includes(names[0]) ? opener.indexOf(names[0]) + 1 : null,
+        fillerMissing: stacked && !(top.noCooldown && !top.conditional) ? 'Its own key, not a macro entry: it fires the lowest ready skill when you press it.' : null
+      });
     }
     for (const extra of block.extras ?? []) if (byName.has(extra.name) && !placed.has(extra.name)) notOnBar.push({ name: extra.name, icon: byName.get(extra.name).icon, unlockLevel: byName.get(extra.name).needLevel, reason: extra.why, extra: true });
   } else {
@@ -798,7 +893,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     stack.nextUnlock = waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null;
   }
   const bars = Array.from({ length: STACK_ROWS }, (_, row) => Object.fromEntries(SKILL_BAR_KEYS.map(key => {
-    const skill = stacks[key].skills[row] ?? null;
+    const skill = stacks[key].skills.find(item => item.row === row) ?? null;
     return [key, skill ? { ...skill, key, row } : null];
   })));
   const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
@@ -806,6 +901,8 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
     notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null,
     opener: (block?.opener ?? []).filter(name => placed.has(name)),
+    // False for a class whose stacks are not checked against a published top-player build yet (the page tags them).
+    verified: block ? block.verified !== false : null,
     rule: { status: rule.status, confirmed: rule.confirmed, text: rule.text, rules: rule.rules ?? [] }, macroKey: facts['macro-order']?.value ? true : false
   };
   result.copySteps = copySteps(result);
@@ -826,10 +923,11 @@ function copySteps(bar) {
   for (const key of [...LEFT_KEYS, 'A', 'B']) {
     const stack = bar.stacks[key];
     if (!stack.skills.length) continue;
-    steps.push({ key, label: keyWords(key), rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })) });
+    steps.push({ key, label: stack.name ?? keyWords(key), rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })), empty: stack.empty ?? [] });
   }
   const entries = ['A', 'B'].filter(key => bar.stacks[key].skills.length);
-  if (entries.length) steps.push({ key: null, label: 'Macro 1', macro: true, text: entries.length === 2 ? 'Then add stack A and stack B to Macro 1.' : 'Then add stack A to Macro 1.' });
+  const named = key => (bar.stacks[key].name ? `the ${bar.stacks[key].name.toLowerCase()}` : keyWords(key).replace(/^Stack/, 'stack'));
+  if (entries.length) steps.push({ key: null, label: 'Macro 1', macro: true, text: entries.length === 2 ? `Then add ${named('A')} and ${named('B')} to Macro 1.` : `Then add ${named(entries[0])} to Macro 1.` });
   return steps;
 }
 
@@ -873,7 +971,7 @@ export function fillerProblems(skillBar) {
 export function stigmaKeyProblems(skillBar) {
   const problems = [];
   for (const stack of Object.values(skillBar?.stacks ?? {})) {
-    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key)) problems.push(`key ${stack.key}: ${stack.skills.length} skills, only stack A and stack B are stacks`);
+    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key) && !stack.ownStack) problems.push(`key ${stack.key}: ${stack.skills.length} skills, only stack A and stack B are stacks`);
     if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key) && stack.skills.some(skill => skill.stigma)) problems.push(`key ${stack.key}: a stigma in a stack (${stack.skills.filter(skill => skill.stigma).map(skill => skill.name).join(', ')})`);
   }
   return problems;
@@ -930,9 +1028,9 @@ function planMacro({ build, skillBar, mechanics, facts, level }) {
     const skills = stack.skills.map(skill => ({ name: skill.name, row: skill.row, icon: skill.icon, why: skill.why, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel, condition: skill.condition, triggers: skill.triggers, out: outOfMacro(skill, level), inMacro: outOfMacro(skill, level) === null }));
     const live = skills.filter(skill => skill.inMacro);
     const waiting = skills.filter(skill => skill.locked);
-    return { entry: index + 1, key: stack.key, label: stack.label, delayMs, skills, firesNow: live.map(skill => skill.name), usable: live.length > 0, unlockLevel: live.length ? null : waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null, fillerMissing: stack.fillerMissing };
+    return { entry: index + 1, key: stack.key, label: stack.label, name: stack.name ?? null, empty: stack.empty ?? [], delayMs, skills, firesNow: live.map(skill => skill.name), usable: live.length > 0, unlockLevel: live.length ? null : waiting.length ? Math.min(...waiting.map(skill => skill.unlockLevel)) : null, fillerMissing: stack.fillerMissing };
   });
-  const ownCells = LEFT_KEYS.map(key => skillBar.stacks[key].skills[0]).filter(Boolean);
+  const ownCells = LEFT_KEYS.flatMap(key => skillBar.stacks[key].skills);
   const groups = [];
   for (const skill of ownCells) {
     const id = skill.reason ?? 'other';
@@ -945,7 +1043,7 @@ function planMacro({ build, skillBar, mechanics, facts, level }) {
   return {
     ...base, ...empty, pending: null,
     status: rule.status, blockStatus: block.status ?? null,
-    entries, keys: entries.map(entry => entry.key), used: entries.filter(entry => entry.usable).length,
+    entries, keys: entries.map(entry => entry.key), used: entries.filter(entry => entry.usable).length, verified: skillBar.verified,
     mainAttack: main ? { name: main.name, icon: main.icon, why: main.why, triggers: main.triggers } : null,
     opener: skillBar.opener.map(name => ownCells.find(skill => skill.name === name)).filter(Boolean).map(skill => ({ name: skill.name, icon: skill.icon, key: skill.key, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })),
     ownKeys: groups,

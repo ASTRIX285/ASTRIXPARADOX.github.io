@@ -5,12 +5,12 @@
  * (what the taken nodes add up to, and what is left). It shows the character's board as it is: no route numbers.
  * First paint needs only /aion2/character; a board's nodes are read when its tab opens, one call per board, kept for the visit.
  */
-import { ArmoryUnavailable, ascentUrl, explain, loadBoard, loadDaevanionAdvice, prefetchDaevanionAdvice } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, loadBoard, loadDaevanionAdvice, prefetchDaevanionAdvice, rolePick } from './aetherium-data.mjs';
 import { $, esc } from './aetherium-ui.mjs';
 import { LOCK_ICON, failPage, startCharacterPage, windowBar } from './character-page.mjs';
 import { renderNext } from './aetherium-flow.mjs';
 import { KIND_LABEL, boardGridStyle, nodeImg, nodeTileHtml } from './daevanion-board.mjs';
-import { daevanionSkillNodes, indexProgression, pickBuild } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { buildFor, daevanionSkillNodes, indexProgression } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { nodeCost, planDaevanionBoard, summariseBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
 
 const state = { model: null, source: null, ref: null, className: 'Gladiator', boards: [], plan: null, current: null, results: new Map(), planned: null, nodes: null, selected: null, panel: 'node' };
@@ -190,7 +190,7 @@ async function showBoard(boardId) {
 }
 
 function render({ model, source, ref }, advice) {
-  const build = advice?.builds ? pickBuild(advice.builds, null) : null;
+  const build = advice?.builds ? buildFor(advice.builds, rolePick(ref)) : null;
   Object.assign(state, { model, source, ref, className: model.profile.class });
   state.plan = { daevanion: { skillNodes: build && build.status !== 'pending' ? daevanionSkillNodes(build) : [] } };
   state.boards = boardList(model, advice);

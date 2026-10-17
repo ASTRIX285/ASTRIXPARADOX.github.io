@@ -328,7 +328,8 @@
             "reason": "defensive"
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "verified": false
       }
     }
   ]

@@ -7,11 +7,11 @@
  * Item details load in the background after first paint (at most 3 at a time, kept for the session).
  * Skills and Daevanion boards have their own pages (see the character menu).
  */
-import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
 import { $, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel } from './aetherium-ui.mjs';
 import { renderStatsPanel } from './stats-panel.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
-import { enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics, indexProgression } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { buildFor, enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics, indexProgression } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { rankPointStats, subStatTag } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 
 /* The game's equipment window: row 1 weapons and armour, row 2 accessories and the two runes. Arcana have their own row. */
@@ -478,7 +478,8 @@ startCharacterPage({
   async render({ model, source, ref }) {
     const [catalogue, grades, progression, stats, builds] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null)]);
     state.stats = stats;
-    state.build = builds?.records?.find(build => build.main) ?? null;
+    // Tags follow the role the player picked for this Daeva (a Block roll is Useful for a tank), else the main role.
+    state.build = builds ? buildFor(builds, rolePick(ref)) : null;
     state.slotNames = new Map(catalogue.slots.map(slot => [keyOf(slot.slotPosName), slot.slotPosName]));
     state.grades = grades ? indexGrades(grades) : null;
     state.progression = progression;

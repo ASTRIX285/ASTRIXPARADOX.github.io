@@ -308,98 +308,51 @@
         },
         {
           "kind": "community-guide",
-          "ref": "av-macros",
-          "title": "Most common macros by class",
-          "publisher": "AION2 Vault",
-          "url": "https://aion2vault.com/builds/macros",
-          "retrievedOn": "2026-10-14",
+          "ref": "ql-gladiator",
+          "title": "Gladiator skill builds 9181 and 10896, Daevanion builds 3576 and 5406",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2",
+          "retrievedOn": "2026-10-17",
           "region": "global",
-          "reliability": "medium"
-        },
-        {
-          "kind": "community-guide",
-          "ref": "dg-macros",
-          "title": "Macros guide",
-          "publisher": "Daeva Guides",
-          "url": "https://daevaguides.com/en/guides/macros",
-          "retrievedOn": "2026-10-16",
-          "region": "not-stated",
-          "reliability": "medium"
-        },
-        {
-          "kind": "community-guide",
-          "ref": "db-glad",
-          "title": "Gladiator guide",
-          "publisher": "dbaion2",
-          "url": "https://dbaion2.ru/en/guides/gayd-gladiator",
-          "retrievedOn": "2026-10-16",
-          "region": "not-stated",
-          "reliability": "medium"
-        },
-        {
-          "kind": "community-guide",
-          "ref": "tgw-gladiator-skills",
-          "title": "Gladiator skills",
-          "publisher": "The Games Wiki",
-          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
-          "retrievedOn": "2026-10-16",
-          "region": "not-stated",
-          "reliability": "medium"
+          "reliability": "high"
         }
       ],
       "macro": {
-        "status": "reported",
+        "status": "confirmed",
+        "verified": true,
         "refs": [
-          "av-macros",
-          "dg-macros",
-          "db-glad",
-          "tgw-gladiator-skills"
+          "ql-gladiator"
         ],
-        "stackA": {
-          "label": "Burst",
+        "stackB": {
+          "label": "Main line",
+          "name": "Main line",
           "rows": [
             {
               "name": "Rage Burst",
-              "why": "Longest cooldown, fires first when ready. Opens a 10 s window where Overhead Slam is ready."
+              "why": "Fires first when ready. Opens a 10 s window where Overhead Slam is ready."
             },
             {
               "name": "Overhead Slam",
-              "why": "Your hardest regular hit. Fires on every pass inside the Rage Burst window."
+              "why": "Your hardest regular hit. Ready inside the Rage Burst window or after a knockdown."
             },
             {
-              "name": "Mocking Blade",
-              "why": "Its knockdown makes Overhead Slam ready again."
+              "empty": true,
+              "why": "Left empty in the published build."
             },
             {
-              "name": "Ankle Slice",
-              "why": "Only fires after a Focused Block parry, so it sits on top where it never blocks."
+              "name": "Rending Blow",
+              "why": "Always ready, so it sits last: it fills every gap and raises your Enmity.",
+              "noCooldown": true
             }
           ]
         },
         "mainAttack": {
           "name": "Keen Strike",
-          "why": "Held with the macro key: MP back, each animation cut short."
-        },
-        "stackB": {
-          "label": "Sustain",
-          "rows": [
+          "why": "Held with the macro key while you level: MP back, each animation cut short.",
+          "atLevel": [
             {
-              "name": "Blade Toss",
-              "why": "Lowers the target's Defence before the hits land."
-            },
-            {
-              "name": "Crushing Wave",
-              "why": "Area hit on a 20 s cooldown."
-            },
-            {
-              "name": "Sword Aura Rampage",
-              "why": "Only on a staggered target. Above the cooldown skills so it never blocks them.",
-              "noCooldown": true
-            },
-            {
-              "name": "Rending Blow",
-              "why": "Filler: always ready, so it sits last. Take its mobile option.",
-              "noCooldown": true
+              "from": 45,
+              "why": "You can leave it alone. The macro runs on its own once Overhead Slam and Rending Blow are Lv 16."
             }
           ]
         },
@@ -408,42 +361,50 @@
           "Lunge Stance",
           "Ruinous Blow"
         ],
+        "ownKeysOrder": "listed",
         "ownKeys": [
-          {
-            "name": "Ruinous Blow",
-            "reason": "dash",
-            "why": "Dash: it rushes you to the target. Press it to open, and again before Prepare for Battle runs out."
-          },
-          {
-            "name": "Zikel's Blessing",
-            "reason": "buff"
-          },
-          {
-            "name": "Lunge Stance",
-            "reason": "buff"
-          },
-          {
-            "name": "Focused Block",
-            "reason": "defensive",
-            "why": "Defensive: block at the moment you choose. Its parry opens Ankle Slice."
-          },
           {
             "name": "Defiance",
             "reason": "defensive",
             "why": "Clears crowd control: you need it at a chosen moment."
           },
           {
-            "name": "Leaping Slam",
-            "reason": "dash"
+            "name": "Sword Aura Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
           },
           {
-            "name": "Rush Strike",
-            "reason": "dash"
+            "name": "Zikel's Blessing",
+            "reason": "buff",
+            "why": "Burst buff: Attack +20% for 10 s. Press it with your other buff."
+          },
+          {
+            "name": "Lunge Stance",
+            "reason": "buff"
+          },
+          {
+            "stack": [
+              "Leaping Slam",
+              "Rush Strike"
+            ],
+            "reason": "movement",
+            "label": "Movement",
+            "why": "Both move you, so they share a key: Leaping Slam fires first, Rush Strike when it is on cooldown."
+          },
+          {
+            "name": "Ruinous Blow",
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target and gives Prepare for Battle for 20 s. Keen Strike keeps its cooldown short."
+          },
+          {
+            "name": "Focused Block",
+            "reason": "defensive",
+            "why": "Hold it on a boss swing: a parry gives MP, and a block gives the party a damage buff."
           }
         ],
         "levelNotes": [
           {
-            "text": "Once Overhead Slam and Rending Blow both reach skill Lv 16, some players let go of the main attack and run the macro alone. Test both on the dummy.",
+            "text": "With Overhead Slam and Rending Blow at skill Lv 16, top players run the macro alone: Rending Blow gives MP back on a critical hit.",
             "fromSkillLevel": 16
           }
         ]
@@ -454,36 +415,496 @@
       "class": "Gladiator",
       "role": "tank",
       "main": false,
-      "label": "Off-tank",
-      "beginner": "high",
-      "status": "pending",
-      "summary": "Gladiator can step in as a second tank thanks to its health pool, and Defiance clears stuns and knockdowns.",
-      "build": {
-        "pending": true,
-        "reason": "No source gives an off-tank Gladiator build yet (stigmas, stats or rotation). Use the DPS build until one is published."
-      },
+      "label": "Tank with damage",
+      "beginner": "medium",
+      "status": "sourced",
+      "summary": "Hold the boss with steady damage: the Gladiator has no taunt. Keep Keen Strike and Overhead Slam going, and parry boss swings with Focused Block to give the party a damage buff.",
       "roleRefs": [
-        "ah-glad",
-        "mb-classes"
+        "mb-gladiator",
+        "tgw-gladiator-skills"
       ],
+      "coreSkills": [
+        {
+          "name": "Overhead Slam",
+          "priority": 1,
+          "target": "Lv 11, then Daevanion nodes",
+          "why": "Your hardest hit and a big share of your Enmity.",
+          "refs": [
+            "ql-gladiator",
+            "tgw-gladiator-skills"
+          ]
+        },
+        {
+          "name": "Experienced Counterstrike",
+          "priority": 2,
+          "target": "Lv 11, then Daevanion nodes",
+          "why": "A block gives the party more PvE damage for 20 s. Top players level it second.",
+          "refs": [
+            "ql-gladiator",
+            "tgw-gladiator-skills"
+          ]
+        },
+        {
+          "name": "Rending Blow",
+          "priority": 3,
+          "target": "Lv 11, then Daevanion nodes",
+          "why": "Always ready: it raises your Enmity and gives Block while you use it.",
+          "refs": [
+            "ql-gladiator",
+            "tgw-gladiator-skills"
+          ]
+        },
+        {
+          "name": "Keen Strike",
+          "priority": 4,
+          "target": "Lv 11",
+          "why": "Held with the macro for Enmity and MP. Its hits cut Ruinous Blow's cooldown.",
+          "refs": [
+            "tgw-gladiator-skills"
+          ]
+        },
+        {
+          "name": "Ruinous Blow",
+          "priority": 5,
+          "target": "Lv 11",
+          "why": "Prepare for Battle: more PvE damage and Critical Hit for 20 s.",
+          "refs": [
+            "tgw-gladiator-skills",
+            "ql-gladiator"
+          ]
+        }
+      ],
+      "specialties": [
+        {
+          "skill": "Overhead Slam",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Upward Strike chain",
+              "refs": [
+                "ql-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Always lands as a critical hit",
+              "refs": [
+                "ql-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Remove cooldown",
+              "refs": [
+                "ql-gladiator"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Keen Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "50% Multi-Hit",
+              "refs": [
+                "ql-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Hits cut Ruinous Blow cooldown",
+              "refs": [
+                "ql-gladiator"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Rending Blow",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+200 Block while using it",
+              "refs": [
+                "ql-gladiator"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Restores MP on a critical hit",
+              "refs": [
+                "ql-gladiator"
+              ]
+            }
+          ]
+        }
+      ],
+      "stigmas": {
+        "slots": [
+          {
+            "slotLevel": 22,
+            "name": "Rage Burst"
+          },
+          {
+            "slotLevel": 27,
+            "name": "Zikel's Blessing"
+          },
+          {
+            "slotLevel": 32,
+            "name": "Lunge Stance"
+          },
+          {
+            "slotLevel": 37,
+            "name": "Focused Block"
+          }
+        ],
+        "alternatives": [
+          {
+            "name": "Wave Armor",
+            "why": "Main tank with no Templar: its specialty makes your parry buff 1.5 times stronger.",
+            "refs": [
+              "tgw-gladiator-skills"
+            ]
+          }
+        ],
+        "confidence": "top-player data",
+        "refs": [
+          "ql-gladiator",
+          "tgw-gladiator-skills"
+        ],
+        "note": "The team you play in decides one stigma."
+      },
+      "teamVariants": {
+        "main-tank": {
+          "label": "Main tank, no Templar",
+          "stigmas": [
+            "Rage Burst",
+            "Focused Block",
+            "Wave Armor",
+            "Zikel's Blessing"
+          ],
+          "swap": {
+            "out": "Lunge Stance",
+            "in": "Wave Armor",
+            "why": "No Templar in the group, so your parry buff counts. Wave Armor's specialty makes it 1.5 times stronger."
+          },
+          "refs": [
+            "tgw-gladiator-skills"
+          ]
+        },
+        "off-tank-templar": {
+          "label": "Off-tank, with a Templar",
+          "stigmas": [
+            "Rage Burst",
+            "Focused Block",
+            "Zikel's Blessing",
+            "Lunge Stance"
+          ],
+          "swap": {
+            "out": "Wave Armor",
+            "in": "Lunge Stance",
+            "why": "Your parry buff does not stack with the Templar's Fury."
+          },
+          "refs": [
+            "tgw-templar-skills",
+            "tgw-gladiator-skills"
+          ]
+        },
+        "solo": {
+          "label": "Solo or levelling",
+          "stigmas": [
+            "Rage Burst",
+            "Zikel's Blessing",
+            "Lunge Stance",
+            "Focused Block"
+          ],
+          "refs": [
+            "ql-gladiator"
+          ]
+        }
+      },
+      "daevanion": {
+        "priorities": [
+          "Skill +1 nodes: Overhead Slam, Rending Blow, Ruinous Blow, Keen Strike",
+          "Experienced Counterstrike and Attack Preparation +1",
+          "Damage Tolerance",
+          "Defence and HP",
+          "Multi-Hit",
+          "Cooldown Reduction"
+        ],
+        "skillNodes": [
+          "Overhead Slam",
+          "Rending Blow",
+          "Ruinous Blow",
+          "Keen Strike"
+        ],
+        "nodePriorities": [
+          {
+            "tier": 1,
+            "label": "Skill +1: Overhead Slam, Rending Blow, Ruinous Blow, Keen Strike",
+            "skills": [
+              "Overhead Slam",
+              "Rending Blow",
+              "Ruinous Blow",
+              "Keen Strike"
+            ],
+            "core": true
+          },
+          {
+            "tier": 2,
+            "label": "Experienced Counterstrike and Attack Preparation +1",
+            "skills": [
+              "Experienced Counterstrike",
+              "Attack Preparation"
+            ],
+            "core": true
+          },
+          {
+            "tier": 3,
+            "label": "Damage Tolerance",
+            "stats": [
+              "Damage Tolerance"
+            ],
+            "core": true
+          },
+          {
+            "tier": 4,
+            "label": "Defence and HP",
+            "stats": [
+              "Defense",
+              "Max HP"
+            ],
+            "core": false,
+            "countOnPath": true
+          },
+          {
+            "tier": 5,
+            "label": "Multi-Hit",
+            "stats": [
+              "Multi-Hit"
+            ],
+            "core": false
+          },
+          {
+            "tier": 6,
+            "label": "Cooldown Reduction",
+            "stats": [
+              "Cooldown Reduction"
+            ],
+            "core": false
+          }
+        ],
+        "status": "reported",
+        "refs": [
+          "mb-gladiator",
+          "ql-gladiator"
+        ]
+      },
+      "stats": {
+        "order": [
+          "Block (from Dexterity)",
+          "Attack (from Might)",
+          "HP (from Constitution)",
+          "Accuracy (from Precision)",
+          "Front Attack Damage Boost",
+          "Damage Tolerance"
+        ],
+        "status": "reported",
+        "manastones": {
+          "status": "confirmed",
+          "caps": [
+            {
+              "stat": "HP",
+              "cap": "+160"
+            },
+            {
+              "stat": "Defense",
+              "cap": "+100"
+            },
+            {
+              "stat": "Block",
+              "cap": "+20"
+            },
+            {
+              "stat": "Attack",
+              "cap": "+10"
+            }
+          ],
+          "advice": "Armour: Block and HP. Weapon: Attack.",
+          "refs": [
+            "tgw-stats"
+          ]
+        },
+        "refs": [
+          "mb-gladiator-stats",
+          "tgw-stats"
+        ]
+      },
+      "rotation": {
+        "steps": [
+          "Rage Burst",
+          "Overhead Slam",
+          "Rending Blow"
+        ],
+        "filler": "Keen Strike, held for Enmity and MP",
+        "manual": [
+          "Focused Block",
+          "Defiance"
+        ],
+        "refs": [
+          "ql-gladiator"
+        ]
+      },
+      "macro": {
+        "status": "confirmed",
+        "verified": true,
+        "refs": [
+          "ql-gladiator"
+        ],
+        "stackB": {
+          "label": "Main line",
+          "name": "Main line",
+          "rows": [
+            {
+              "name": "Rage Burst",
+              "why": "Fires first when ready. Opens a 10 s window where Overhead Slam is ready."
+            },
+            {
+              "name": "Overhead Slam",
+              "why": "Your hardest regular hit. Ready inside the Rage Burst window or after a knockdown."
+            },
+            {
+              "empty": true,
+              "why": "Left empty in the published build."
+            },
+            {
+              "name": "Rending Blow",
+              "why": "Always ready, so it sits last: it fills every gap and raises your Enmity.",
+              "noCooldown": true
+            }
+          ]
+        },
+        "mainAttack": {
+          "name": "Keen Strike",
+          "why": "Hold it with the macro key: your Enmity and MP come from it, and its hits cut Ruinous Blow's cooldown."
+        },
+        "opener": [
+          "Leaping Slam",
+          "Focused Block",
+          "Zikel's Blessing",
+          "Lunge Stance",
+          "Ruinous Blow"
+        ],
+        "ownKeysOrder": "listed",
+        "ownKeys": [
+          {
+            "name": "Defiance",
+            "reason": "defensive",
+            "why": "Clears crowd control: you need it at a chosen moment."
+          },
+          {
+            "name": "Sword Aura Rampage",
+            "reason": "stagger",
+            "why": "Use it in stagger windows: it only hits a staggered target."
+          },
+          {
+            "name": "Zikel's Blessing",
+            "reason": "buff",
+            "why": "Burst buff: Attack +20% for 10 s. Press it with your other buff."
+          },
+          {
+            "name": "Lunge Stance",
+            "reason": "buff"
+          },
+          {
+            "stack": [
+              "Leaping Slam",
+              "Rush Strike"
+            ],
+            "reason": "movement",
+            "label": "Movement",
+            "why": "Both move you, so they share a key: Leaping Slam fires first, Rush Strike when it is on cooldown."
+          },
+          {
+            "name": "Ruinous Blow",
+            "reason": "dash",
+            "why": "Dash: it rushes you to the target and gives Prepare for Battle for 20 s. Keen Strike keeps its cooldown short."
+          },
+          {
+            "name": "Focused Block",
+            "reason": "defensive",
+            "why": "Hold it on a boss swing: a parry gives MP, and a block gives the party a damage buff."
+          }
+        ],
+        "levelNotes": [
+          {
+            "text": "Parry a boss swing with Focused Block every 20 s for the party buff."
+          },
+          {
+            "text": "Test on the dummy whether the macro alone or with Keen Strike holds aggro better."
+          }
+        ]
+      },
+      "levelNotes": [],
       "provenance": [
         {
           "kind": "community-guide",
-          "ref": "ah-glad",
-          "title": "Gladiator class page",
-          "publisher": "aion2hub",
-          "url": "https://aion2hub.com/classes/gladiator",
-          "retrievedOn": "2026-10-06",
+          "ref": "ql-gladiator",
+          "title": "Gladiator skill builds 9181 and 10896, Daevanion builds 3576 and 5406",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2",
+          "retrievedOn": "2026-10-17",
           "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
           "reliability": "medium"
         },
         {
           "kind": "community-guide",
-          "ref": "mb-classes",
-          "title": "AION 2 classes",
+          "ref": "tgw-templar-skills",
+          "title": "Templar skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/templar-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-stats",
+          "title": "Character stats",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/character-stats",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-gladiator",
+          "title": "Gladiator build (top player data)",
           "publisher": "MetaBot",
-          "url": "https://metabot.gg/en/aion-2/classes",
-          "retrievedOn": "2026-10-06",
+          "url": "https://metabot.gg/en/aion-2/classes/gladiator/build",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-gladiator-stats",
+          "title": "Gladiator stats",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/gladiator/stats",
+          "retrievedOn": "2026-10-17",
           "region": "global",
           "reliability": "high"
         }

@@ -202,9 +202,21 @@ export async function preloadItemDetails(model, slots, { onDetail, budget = ITEM
   return later;
 }
 
-/** The node grid of one Daevanion board, loaded when the player opens it. Returns { nodes }. */
+/* Board grids are kept for the browser session (sessionStorage), keyed by Daeva, board and its taken count, so moving
+   between the Daeva Card, the plan and the Daevanion screen never reads a board twice; a node taken since is a new key. */
+const BOARD_CACHE_KEY = 'aetherium.boards.v1';
+const boardCacheKey = (model, board) => [model.source.region, model.profile.server.id, model.profile.characterId, board.id, board.nodesTaken ?? ''].join('|');
+function readBoardCache() {
+  try { return JSON.parse(sessionStorage.getItem(BOARD_CACHE_KEY) ?? '{}') ?? {}; } catch { return {}; }
+}
+
+/** The node grid of one Daevanion board, loaded when the player opens it (kept for the session). Returns { nodes }. */
 export async function loadBoard(model, board) {
+  const key = boardCacheKey(model, board);
+  const kept = readBoardCache()[key];
+  if (kept) return { nodes: adaptDaevanionBoard(kept) };
   const body = await worker('/aion2/daevanion', { serverId: model.profile.server.id, characterId: model.profile.characterId, boardId: board.id }, model.source.region);
+  try { sessionStorage.setItem(BOARD_CACHE_KEY, JSON.stringify({ ...readBoardCache(), [key]: body })); } catch { /* storage off or full: read again next time */ }
   return { nodes: adaptDaevanionBoard(body) };
 }
 
@@ -307,6 +319,18 @@ function writeStore(store) {
 const findIn = (store, key) => {
   for (const [id, bucket] of Object.entries(store.rosters)) {
     const entry = bucket.entries.find(item => rosterKey(item) === key);
+    if (entry) return { id, bucket, entry };
+  }
+  return null;
+};
+
+/** A saved Daeva by a page's reference: the link may carry the character id percent-encoded, the roster keeps it as the site sends it. */
+const plainId = id => { try { return decodeURIComponent(String(id)); } catch { return String(id); } };
+const findRef = (store, ref) => {
+  const found = findIn(store, rosterKey(ref));
+  if (found) return found;
+  for (const [id, bucket] of Object.entries(store.rosters)) {
+    const entry = bucket.entries.find(item => String(item.serverId) === String(ref.serverId) && plainId(item.characterId) === plainId(ref.characterId));
     if (entry) return { id, bucket, entry };
   }
   return null;
@@ -425,8 +449,33 @@ export const roster = {
   active() {
     const view = viewOf(readStore());
     return view.entries.find(item => rosterKey(item) === view.active) ?? null;
+  },
+  /** The role and team saved with a Daeva ({ role, team }, either may be null), or null when it is not saved. */
+  roleOf(ref) {
+    const found = ref ? findRef(readStore(), ref) : null;
+    return found ? { role: found.entry.role ?? null, team: found.entry.team ?? null } : null;
+  },
+  /** Saves the role and team the player picked for a saved Daeva. A Daeva not in the roster keeps them in the address only. */
+  setRole(ref, { role = null, team = null } = {}) {
+    const store = readStore();
+    const found = ref ? findRef(store, ref) : null;
+    if (!found) return false;
+    const index = found.bucket.entries.indexOf(found.entry);
+    found.bucket.entries[index] = { ...found.entry, role: role || null, team: team || null };
+    writeStore(store);
+    return true;
   }
 };
+
+/**
+ * The role and team for a page: the address first (role=, team=), then what the player saved with this Daeva, else
+ * nothing (the advisor then uses the class's main role and Solo or levelling).
+ */
+export function rolePick(ref = null, search = location.search) {
+  const params = new URLSearchParams(search);
+  const saved = ref ? roster.roleOf(ref) : null;
+  return { role: params.get('role') || saved?.role || null, team: params.get('team') || saved?.team || null };
+}
 
 /** A Daeva reference from the page URL (?serverId=&characterId=&region=), for bookmarkable links. A link with no region is Europe. */
 export function refFromUrl(search = location.search) {
@@ -482,9 +531,9 @@ export const skillsUrl = (ref, className = null, tab = 'mastery') => withQuery('
 export const daevanionPageUrl = (ref, className = null, boardId = null) => withQuery('/hub/aetherium/daevanion/', ref, { class: classSlug(className), board: boardId });
 
 /** The Ascent Plan link for a Daeva, or one of its screens (screen: 'daevanion', 'mastery' ...). The class (when known) lets the page fetch its builds while the site answers. */
-export function ascentUrl(ref, className = null, { screen = null, board = null } = {}) {
+export function ascentUrl(ref, className = null, { screen = null, board = null, role = null, team = null } = {}) {
   const path = `/hub/aetherium/ascent/${screen ? `${screen}/` : ''}`;
-  return ref ? withQuery(path, ref, { class: classSlug(className), board }) : path;
+  return ref ? withQuery(path, ref, { class: classSlug(className), role, team, board }) : path;
 }
 
 const ADVISOR = '/astrix-app/games/aion2/data/advisor/';

@@ -108,6 +108,8 @@ Method: every Lv 45 PvE skill's cooldown, MP, conditions and triggers, from theg
 Cross-class point: several triggers come from skill Lv 16 specialties. Mastery stops at 11 and Daevanion nodes add some, but gear also rolls skill levels (Miguel's gear shows "Impact Hit Lv +1", "Blood Absorption Lv +1"), so 16 is reachable on core skills. The page must show a Lv 16 trigger only when the Daeva's skill level reaches it.
 
 ### Gladiator
+SUPERSEDED 17 Oct 2026: top players run one main line, Rage Burst / Overhead Slam / (empty) / Rending Blow, as Macro 1. See aion2-gladiator-tank-hybrid-17oct2026.md section 5. The two-stack design below over-built the class. Treat the other four classes' designs as unverified until checked against a published top-player build the same way.
+
 | | Row 0 | Row 1 | Row 2 | Row 3 |
 |---|---|---|---|---|
 | Stack A (burst) | Rage Burst (45 s, 30 s at Lv 5): opens a 10 s window where Overhead Slam is ready | Overhead Slam (5 s; no cooldown at Lv 16): fires every A pass inside the window | Mocking Blade (20 s): knockdown makes Overhead Slam ready again | Ankle Slice (10 s): only after a Focused Block parry |

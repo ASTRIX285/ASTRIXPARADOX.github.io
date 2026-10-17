@@ -1086,6 +1086,26 @@ await check('Gear page item card: sub stat lines tagged High, Useful or Low for 
   await context.close();
 });
 
+await check('Gear tags follow the role the player picked: a Block roll is Low for DPS and High for the tank, from the address or the roster',async()=>{
+  const blockTag=async(page)=>{
+    await page.click('#aeGearPanel [data-slot-pos="10"] [data-slot]');
+    await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-rows.is-bonus'));
+    return page.$eval('#aeInfo .ae-item-rows.is-bonus li',el=>[el.querySelector('span').firstChild.textContent.trim(),el.dataset.lineTag]);
+  };
+  const dps=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'dps'})}`);
+  assert.deepEqual(await blockTag(dps.page),['Block','low'],'DPS: Block is not on its stat order');
+  await dps.context.close();
+  const tank=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
+  assert.deepEqual(await blockTag(tank.page),['Block','high'],'Tank: Block heads its stat order');
+  await tank.context.close();
+  // Saved with the Daeva (no role in the address): the roster's role is used.
+  const saved=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
+  await saved.page.evaluate(id=>{const key='aetherium.roster.v2';const store=JSON.parse(localStorage.getItem(key)??'null')??{rosters:{},active:null};store.rosters['eu:1308']={region:'eu',serverId:1308,serverName:'Test',entries:[{name:'TESTDAEVA',serverId:1308,serverName:'Test',characterId:id,className:'Gladiator',level:45,region:'eu',role:'tank',team:'main-tank'}]};localStorage.setItem(key,JSON.stringify(store));},LV45.characterId);
+  await saved.page.reload();
+  assert.deepEqual(await blockTag(saved.page),['Block','high'],'The role saved with this Daeva');
+  await saved.context.close();
+});
+
 await check('Gear grid: grade colour behind every worn tile (computed), empty slots dim with their name, Epic never Legend',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
   await settled(page);

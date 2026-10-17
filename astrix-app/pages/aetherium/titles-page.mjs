@@ -9,10 +9,10 @@
  * order, the same chain as the Gear page's stats), so a player sees which title is worth wearing.
  * First paint needs only /aion2/character; the stats record and the class's build are small static files.
  */
-import { loadBuilds, loadGrades, loadMechanics, loadStats } from './aetherium-data.mjs';
+import { loadBuilds, loadGrades, loadMechanics, loadStats, rolePick } from './aetherium-data.mjs';
 import { $, esc, isPending, number, TITLE_CATEGORY_NAMES } from './aetherium-ui.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
-import { gradeInfo, indexGrades, indexMechanics } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { buildFor, gradeInfo, indexGrades, indexMechanics } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { effectTag, indexStats, rankPointStats, statOrder } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 
 const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
@@ -108,7 +108,7 @@ startCharacterPage({
     const partOf = id => rule?.parts?.find(part => part.id === id) ?? null;
     const ruleStatus = id => partOf(id)?.status ?? 'unconfirmed';
     const ruleTag = id => (ruleStatus(id) === 'confirmed' ? '' : ' <span class="ae-tag is-unconfirmed">Not confirmed yet</span>');
-    const build = builds?.records?.find(item => item.main) ?? null;
+    const build = builds ? buildFor(builds, rolePick(ref)) : null;
     const index = stats ? indexStats(stats) : null;
     const rank = index && build ? rankPointStats(build, index) : null;
     render(model, ref, { grades: grades ? indexGrades(grades) : null, stats: index, build, rank, className: model.profile.class, ruleStatus, ruleTag });

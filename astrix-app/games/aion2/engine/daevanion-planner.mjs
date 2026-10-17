@@ -67,12 +67,35 @@ function pathTo(target, previous, owned) {
   return path;
 }
 
+/** True when a node is one a priority tier asks for: its skill +1 (tier.skills), its stat (tier.stats, by name) or its kind. */
+export function nodeMatches(node, tier) {
+  if (Array.isArray(tier.skills)) {
+    const skill = (nodeSkill(node) ?? '').toLowerCase();
+    return Boolean(skill) && tier.skills.some(name => String(name).toLowerCase() === skill);
+  }
+  if (Array.isArray(tier.stats)) {
+    const name = String(node.name ?? '').toLowerCase();
+    return node.type === 'Stat' && tier.stats.some(stat => name === String(stat).toLowerCase() || name.startsWith(`${String(stat).toLowerCase()} `));
+  }
+  if (Array.isArray(tier.kinds)) return tier.kinds.includes(nodeKind(node));
+  return false;
+}
+
+/** The priority tiers a build routes by: its own nodePriorities, else its key skill nodes, then the Unique corners. */
+export function routePriorities(daevanion) {
+  if (Array.isArray(daevanion?.nodePriorities) && daevanion.nodePriorities.length) return daevanion.nodePriorities;
+  const skills = daevanion?.skillNodes ?? [];
+  return [{ tier: 1, label: 'Key skill +1', skills, core: true }, { tier: 2, label: 'Core corner', kinds: ['unique'], core: false }];
+}
+
 /**
  * @param {object} input
- * @param {Array}  input.nodes       Board nodes (adaptDaevanionBoard).
+ * @param {Array}  input.nodes        Board nodes (adaptDaevanionBoard).
  * @param {Array}  [input.skillOrder] Skill names whose +1 nodes come first, in priority order.
+ * @param {Array}  [input.priorities] Priority tiers (routePriorities). When given, the route takes only the nodes these
+ *                                    tiers ask for, tier by tier; include 'core' keeps the core tiers only.
  */
-export function planDaevanionBoard({ nodes, skillOrder = [] }) {
+export function planDaevanionBoard({ nodes, skillOrder = [], priorities = null, include = 'all' }) {
   const usable = (nodes ?? []).filter(node => node.type && node.type !== 'None');
   const cells = new Map(usable.map(node => [key(node.row, node.col), node]));
   const start = usable.find(node => node.type === 'Start') ?? null;
@@ -86,8 +109,16 @@ export function planDaevanionBoard({ nodes, skillOrder = [] }) {
   const takenCount = usable.filter(node => node.taken && node.type !== 'Start').length;
 
   const wanted = skillOrder.map(name => String(name).toLowerCase());
-  const skillTargets = wanted.flatMap(name => usable.filter(node => (nodeSkill(node) ?? '').toLowerCase() === name).map(node => key(node.row, node.col)));
-  const uniqueTargets = usable.filter(node => nodeKind(node) === 'unique').map(node => key(node.row, node.col));
+  const tiers = priorities ? priorities.filter(tier => include === 'all' || tier.core) : null;
+  const skillTargets = tiers ? [] : wanted.flatMap(name => usable.filter(node => (nodeSkill(node) ?? '').toLowerCase() === name).map(node => key(node.row, node.col)));
+  const uniqueTargets = tiers ? [] : usable.filter(node => nodeKind(node) === 'unique').map(node => key(node.row, node.col));
+  // Role tiers: each tier's nodes, a skill tier in its listed order, a stat or kind tier nearest first.
+  const tierTargets = (tiers ?? []).map(tier => ({
+    tier,
+    ids: Array.isArray(tier.skills)
+      ? tier.skills.flatMap(name => usable.filter(node => nodeMatches(node, { skills: [name] })).map(node => key(node.row, node.col)))
+      : usable.filter(node => nodeMatches(node, tier)).map(node => key(node.row, node.col))
+  }));
 
   const route = [];
   const stepOf = new Map();
@@ -104,7 +135,23 @@ export function planDaevanionBoard({ nodes, skillOrder = [] }) {
     }
   };
 
-  if (start) {
+  if (start && tiers) {
+    for (const { tier, ids } of tierTargets) {
+      let left = ids.filter(id => !owned.has(id));
+      while (left.length) {
+        const previous = reachFrom(owned, cells);
+        const options = left.map(id => ({ id, path: pathTo(id, previous, owned) })).filter(option => option.path);
+        if (!options.length) break;
+        // A skill tier keeps its listed order; any other tier goes nearest first.
+        const best = Array.isArray(tier.skills) ? options[0] : options.sort((a, b) => a.path.length - b.path.length)[0];
+        const node = cells.get(best.id);
+        const from = route.length;
+        take(best.path, best.id, `${tier.label}: ${node.effects?.[0] || node.name}`);
+        route.slice(from).forEach(step => { step.tier = tier.tier; });
+        left = left.filter(id => id !== best.id && !owned.has(id));
+      }
+    }
+  } else if (start) {
     // Skill nodes in the guide's order.
     for (const target of skillTargets) {
       if (owned.has(target)) continue;
@@ -125,7 +172,18 @@ export function planDaevanionBoard({ nodes, skillOrder = [] }) {
   }
 
   const skillDone = skillTargets.filter(id => cells.get(id).taken).length;
+  const roleIds = tierTargets.flatMap(item => item.ids);
+  // A tier marked countOnPath (the tank's Defence and HP, Miguel 17 Oct 2026) counts towards done for the role where its
+  // nodes sit on the way to a core node: the route passes through them anyway.
+  const onPath = (priorities ?? []).filter(tier => tier.countOnPath);
+  const matchOf = step => onPath.find(tier => nodeMatches(cells.get(key(step.row, step.col)), tier)) ?? null;
+  const pathIds = onPath.length ? route.filter(step => !step.target && matchOf(step)).map(step => key(step.row, step.col)) : [];
+  for (const step of route) if (pathIds.includes(key(step.row, step.col))) step.onPathTier = matchOf(step).tier;
+  const coreIds = [...tierTargets.filter(item => item.tier.core).flatMap(item => item.ids), ...pathIds];
   return {
+    // Role route only: a board is done for the role once every node its core tiers ask for is taken.
+    doneForRole: tiers ? coreIds.every(id => cells.get(id).taken) : null,
+    roleTargets: tiers ? { core: coreIds.length, coreTaken: coreIds.filter(id => cells.get(id).taken).length, all: roleIds.length } : null,
     bounds,
     hasStart: Boolean(start),
     takenCount,
@@ -148,7 +206,7 @@ export function planDaevanionBoard({ nodes, skillOrder = [] }) {
         skill: nodeSkill(node),
         taken: Boolean(node.taken),
         step: stepOf.get(id) ?? null,
-        keySkill: skillTargets.includes(id)
+        keySkill: skillTargets.includes(id) || coreIds.includes(id)
       };
     })
   };
@@ -252,5 +310,93 @@ export function summariseBoard(nodes, plan = null) {
     skillEffects,
     statEffects,
     left: { keySkills, corners, count: open.length, points: open.reduce((total, node) => total + nodeCost(node), 0) }
+  };
+}
+
+/** Points a board costs in all: the budget fact's own figure when it has one, else its nodes added up. */
+const boardTotal = (board, plan, costs) => (Number.isFinite(costs?.[board.name]) ? costs[board.name] : plan?.pointsTotal ?? null);
+const skillOfEffect = effect => /^(.+?)\s*\+\d+$/.exec(String(effect ?? ''))?.[1] ?? null;
+
+/**
+ * The route for a role inside the Daevanion budget (Season 1: 415 points), across the boards in route order. Pure.
+ * boards: [{ id, name, open, unlockLevel, nodes|null }] in route order. priorities: routePriorities. budget: { points, boardCost }.
+ * Rules (Miguel, 17 Oct 2026): one board at a time in route order; a board is done for the role once the nodes its core
+ * tiers ask for are taken, and the route moves on; spare (non-core) nodes come only after every board is done for the
+ * role; nothing past the budget. An open board not read yet stops the route there, so it never guesses.
+ */
+export function planRoleRoute({ boards = [], priorities = [], budget = null, cap = null, skills: summarySkills = null }) {
+  const points = Number.isFinite(budget?.points) ? budget.points : null;
+  const open = boards.filter(board => board.open);
+  const read = open.filter(board => Array.isArray(board.nodes));
+  const plans = new Map(read.map(board => [board.id, planDaevanionBoard({ nodes: board.nodes, priorities, include: 'core' })]));
+  const spent = read.reduce((total, board) => total + plans.get(board.id).pointsSpent, 0);
+  const known = read.length === open.length;
+  let left = points === null ? Infinity : points - spent;
+  const steps = [];
+  let stopped = null;
+  const plan = (board, list, kind) => {
+    for (const step of list) {
+      if (step.cost > left) { stopped ??= { board: board.name, reason: 'budget' }; return false; }
+      left -= step.cost;
+      steps.push({ ...step, boardId: board.id, boardName: board.name, kind });
+    }
+    return true;
+  };
+  const finished = board => Number.isFinite(board.nodesTaken) && Number.isFinite(board.nodesTotal) && board.nodesTaken >= board.nodesTotal;
+  // Core pass, one board at a time. An open board not read yet stops it (the next node may be there), unless its counts
+  // say it is finished: nothing is left to take on it.
+  for (const board of open) {
+    if (!plans.has(board.id)) { if (finished(board)) continue; stopped ??= { board: board.name, reason: 'unread' }; break; }
+    if (!plan(board, plans.get(board.id).route, 'core')) break;
+  }
+  // Spare pass: the non-core tiers, board by board, only once every board is done for the role and points remain.
+  if (!stopped && known) {
+    for (const board of read) {
+      const taken = new Set(steps.filter(step => step.boardId === board.id).map(step => step.nodeId));
+      const after = board.nodes.map(node => (taken.has(node.nodeId) ? { ...node, taken: true } : node));
+      const spare = planDaevanionBoard({ nodes: after, priorities: priorities.filter(tier => !tier.core), include: 'all' }).route;
+      if (!plan(board, spare, 'spare')) break;
+    }
+  }
+  // The current board: the first open board, in route order, that is read and not done for the role, or not read yet and
+  // not finished by its counts (a finished board is never current).
+  const current = open.find(board => (plans.has(board.id) ? !plans.get(board.id).doneForRole : !finished(board))) ?? null;
+  const rows = boards.map(board => {
+    const p = plans.get(board.id) ?? null;
+    const status = !board.open ? 'later' : board === current ? 'now' : p?.doneForRole ? 'done' : 'later';
+    return {
+      id: board.id, name: board.name, open: Boolean(board.open), unlockLevel: board.unlockLevel ?? null, read: Boolean(p), status,
+      pointsSpent: p ? p.pointsSpent : null, pointsTotal: boardTotal(board, p, budget?.boardCost), doneForRole: p ? p.doneForRole : null,
+      coreLeft: p ? p.roleTargets.core - p.roleTargets.coreTaken : null, planned: steps.filter(step => step.boardId === board.id)
+    };
+  });
+  // What the planned route adds: each skill's level (the Mastery cap plus every +1 node, taken and planned), and stats.
+  const skillNames = [...new Set(summarySkills ?? priorities.flatMap(tier => tier.skills ?? []))];
+  const same = (a, b) => String(a ?? '').toLowerCase() === String(b ?? '').toLowerCase();
+  const takenOn = name => read.reduce((total, board) => total + board.nodes.filter(node => node.taken && same(nodeSkill(node), name)).length, 0);
+  const skills = skillNames.map(name => {
+    const gained = steps.filter(step => same(skillOfEffect(step.effects?.[0]) ?? (/Skill Level Up\s*-\s*(.+)$/.exec(step.name ?? '')?.[1]), name)).length;
+    const taken = takenOn(name);
+    const level = cap === null ? null : cap + taken + gained;
+    return { name, taken, gained, level, needsGearFor16: level !== null && level < 16 };
+  }).filter(item => item.taken || item.gained);
+  const stats = new Map();
+  for (const step of steps) {
+    if (step.kind && /Skill Level Up/.test(step.name ?? '')) continue;
+    for (const effect of step.effects ?? []) {
+      const parsed = parseEffect(effect);
+      if (!parsed || skillOfEffect(effect) && skillNames.some(name => same(name, skillOfEffect(effect)))) continue;
+      const id = `${parsed.name}|${parsed.unit}`;
+      const group = stats.get(id) ?? { name: parsed.name, unit: parsed.unit, total: 0 };
+      group.total = Math.round((group.total + parsed.value) * 1000) / 1000;
+      stats.set(id, group);
+    }
+  }
+  const plannedCost = steps.reduce((total, step) => total + step.cost, 0);
+  return {
+    budget: points, spent, known, plannedCost, left: points === null ? null : points - spent - plannedCost,
+    current: current ? { id: current.id, name: current.name, read: plans.has(current.id) } : null,
+    boards: rows, steps, stopped,
+    summary: { skills, stats: [...stats.values()].map(item => ({ ...item, text: `${item.name} ${item.total < 0 ? '-' : '+'}${Math.abs(item.total)}${item.unit}` })) }
   };
 }
