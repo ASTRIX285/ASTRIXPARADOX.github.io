@@ -3983,11 +3983,8 @@
       "class": "Chanter",
       "name": "Onslaught",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
-      "summary": "Hits up to 4 nearby enemies and restores MP.",
+      "cooldownSeconds": 0,
+      "summary": "Hits up to 4 enemies within 4 m and restores 100 MP a hit. No cooldown.",
       "role": {
         "value": "filler",
         "from": "build",
@@ -3996,23 +3993,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Restores 120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 0.7% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Lands as Multi-Hit 50% more often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Hits cut Spinning Strike cooldown by 1s"
+          "text": "Hits cut Spinning Strike cooldown by 1s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit cuts the Spinning Strike cooldown by 1 s, so its Critical Damage buff and Dark Crush window come back sooner.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Adds Storm Chain chain skill"
+          "text": "Adds Storm Chain chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Adds the Storm Chain follow-up hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4035,12 +4087,67 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "main-attack",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies, no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1.5,
+          "text": "Restores 100 MP a hit: your MP engine.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Spinning Strike",
+          "seconds": 1,
+          "skillLevel": 12,
+          "text": "Each hit cuts the Spinning Strike cooldown by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "Each hit cuts Spinning Strike by 1 s.",
+          "skillLevel": 12,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -4049,7 +4156,7 @@
       "name": "Dark Crush",
       "unlockLevel": 4,
       "cooldownSeconds": 5,
-      "summary": "Strong single target hit within 20m.",
+      "summary": "Hard hit on a target within 20 m. 5 s cooldown. 5 stagger damage.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -4058,23 +4165,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 0.7% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Extra damage against targets with Impact-type status"
+          "text": "Extra damage against targets with Impact-type status",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Extra damage on a target under an Impact-type effect.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Always lands as a Critical Hit"
+          "text": "Always lands as a Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "Every Dark Crush is a Critical Hit, so Spinning Strike's Critical Damage buff counts on every one.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Adds Piercing Strike chain skill"
+          "text": "Adds Piercing Strike chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Adds the Piercing Strike follow-up hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Removes the cooldown"
+          "text": "Removes the cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1.5,
+              "text": "No cooldown.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4097,11 +4259,57 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Your hardest regular hit, ready every 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Dark Crush",
+          "seconds": 5,
+          "skillLevel": 16,
+          "text": "No cooldown once you pick Removes the cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "cdCut",
+          "text": "No cooldown.",
+          "skillLevel": 16,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
       }
     },
     {
@@ -4109,11 +4317,8 @@
       "class": "Chanter",
       "name": "Incandescent Blow",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The skill page shows no cooldown. Usually a filler or a skill gated by stacks; check the tooltip in game."
-      },
-      "summary": "Hits up to 4 nearby enemies with light stagger damage.",
+      "cooldownSeconds": 0,
+      "summary": "Hits up to 4 enemies within 4 m. No cooldown. 2 stagger damage.",
       "role": {
         "value": "damage",
         "from": "build",
@@ -4122,23 +4327,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Costs 20% less MP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+200 Block while using the skill"
+          "text": "+200 Block while using the skill",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "+200 Block while you use it.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 12% more damage when fewer targets hit"
+          "text": "Up to 12% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Up to 12% more damage on one or two targets.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Bursting Blow lowers enemy Accuracy by 200 for 3s"
+          "text": "Bursting Blow lowers enemy Accuracy by 200 for 3s",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Its follow-up lowers the target's Accuracy by 200 for 3 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Ignores Block and Evasion, lands as Multi-Hit"
+          "text": "Ignores Block and Evasion, lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Ignores Block and Evasion and lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4161,11 +4421,38 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "No cooldown: it fills every gap in the line.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -4174,7 +4461,7 @@
       "name": "Spinning Strike",
       "unlockLevel": 14,
       "cooldownSeconds": 30,
-      "summary": "Big AoE hit that stacks Critical Damage Boost and briefly enables Dark Crush.",
+      "summary": "Hits up to 4 enemies near a target within 20 m: your Critical Damage +15% for 30 s, stacks twice. Dark Crush is ready for 2 s after it. 30 s cooldown.",
       "role": {
         "value": "buff",
         "from": "build",
@@ -4183,23 +4470,78 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "5s shorter cooldown"
+          "text": "5s shorter cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Cooldown 25 s: both Critical Damage stacks stay up and Dark Crush is ready more often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Adds Heal Boost, stacking to 20%"
+          "text": "Adds Heal Boost, stacking to 20%",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Your Heal Boost +10% for 30 s, stacks twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Up to 20% more damage when fewer targets hit"
+          "text": "Up to 20% more damage when fewer targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Up to 20% more damage on one or two targets.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "40% chance to Seal for 3s"
+          "text": "40% chance to Seal for 3s",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "40% Seal for 3 s (100% on NPC targets).",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "Ignores Block and Evasion, lands as Critical Hit"
+          "text": "Ignores Block and Evasion, lands as Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Ignores Block and Evasion and lands as a Critical Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4222,11 +4564,67 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Your Critical Damage +15% for 30 s, stacking twice, and Dark Crush is ready for 2 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Dark Crush",
+          "via": "reset",
+          "text": "Makes Dark Crush ready for 2 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "buff",
+          "target": "Dark Crush",
+          "text": "Critical Damage +15% a stack, two stacks: every Critical Hit Dark Crush hits harder.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Dark Crush is ready for 2 s after it.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 32,
+        "10": 38
       }
     },
     {
@@ -4235,32 +4633,87 @@
       "name": "Recuperation",
       "unlockLevel": 8,
       "cooldownSeconds": 15,
-      "summary": "Party heal within 40m that removes a debuff and adds a short heal over time.",
+      "summary": "Heals you and party members within 40 m, removes 1 debuff and heals over 8 s. 15 s cooldown.",
       "role": {
         "value": "heal",
         "from": "summary",
-        "quote": "Party heal"
+        "quote": "Heals you and party members"
       },
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Extra consecutive use, heal over time stacks twice"
+          "text": "Extra consecutive use, heal over time stacks twice",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Use it twice in a row; the heal over time stacks twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Removes up to 2 debuffs"
+          "text": "Removes up to 2 debuffs",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Removes 2 debuffs.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Healing lasts 4s longer"
+          "text": "Healing lasts 4s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heal over time lasts 12 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "Restores 5% more HP"
+          "text": "Restores 5% more HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Also restores 5% of Max HP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "3s shorter cooldown"
+          "text": "3s shorter cooldown",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Cooldown 12 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4283,12 +4736,39 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "heal",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "Heals you and the party within 40 m and clears a debuff.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 26,
+        "10": 32
       }
     },
     {
@@ -4297,32 +4777,87 @@
       "name": "Impactful Crush",
       "unlockLevel": 3,
       "cooldownSeconds": 15,
-      "summary": "Single target hit with 60% Stun chance (100% on NPCs); briefly enables Dark Crush.",
+      "summary": "Hits a target within 20 m: 60% Stun for 3 s, 100% on NPC targets. Dark Crush is ready for 2 s after it. 10 stagger damage.",
       "role": {
         "value": "damage",
         "from": "summary",
-        "quote": "Single target hit"
+        "quote": "Hits a target"
       },
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Becomes AoE damage"
+          "text": "Becomes AoE damage",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hits up to 4 enemies round the target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Stun lasts 1s longer"
+          "text": "Stun lasts 1s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Stun lasts 4 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Cast it on the move: the line no longer roots you.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
-          "text": "30% faster skill speed"
+          "text": "30% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "30% faster cast.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 16,
-          "text": "+20% Stun chance"
+          "text": "+20% Stun chance",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Stun chance 80% on players.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
         }
       ],
       "provenance": [
@@ -4345,11 +4880,68 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Stuns NPC targets every time and makes Dark Crush ready for 2 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Dark Crush",
+          "via": "reset",
+          "text": "Makes Dark Crush ready for 2 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "opens",
+          "target": "Wave Blow",
+          "via": "stun",
+          "text": "Stuns NPC targets every time, so Wave Blow can fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Dark Crush is ready for 2 s after it.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
       }
     },
     {
@@ -7565,18 +8157,85 @@
       "class": "Chanter",
       "name": "Defiance",
       "unlockLevel": 16,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Clears Stun, Knockdown, Airborne, Grab, Frost and Fear and gives status immunity for 5 s. Cooldown cuts do not touch it.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Adds Crushing Strike chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Adds the Crushing Strike follow-up hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 1000 Stamina",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Restores 1000 Stamina.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 10% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Restores 10% HP.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Immunity lasts 2s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Immunity lasts 7 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "PvE Damage Tolerance +50% while immune",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "PvE Damage Tolerance +50% while it lasts.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7588,12 +8247,50 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Breaks crowd control and makes you immune for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "noCdCut",
+          "target": "Defiance",
+          "text": "Cooldown cuts do not touch it.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 34,
+        "10": 40
       }
     },
     {
@@ -7601,17 +8298,11 @@
       "class": "Chanter",
       "name": "Obliterate",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 60,
+      "summary": "Hits up to 4 enemies round the target: 50% Knockdown, 100% on NPC targets. 50 stagger damage.",
       "specialties": {
         "pending": true,
-        "reason": "Not captured yet."
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
       },
       "kind": "stigma",
       "provenance": [
@@ -7624,12 +8315,39 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "stagger",
         "status": "reported"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A big hit with 50 stagger damage every 60 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
       }
     },
     {
@@ -7637,17 +8355,11 @@
       "class": "Chanter",
       "name": "Power of the Storm",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 120,
+      "summary": "Combat Speed +20% and cooldowns 20% shorter for you for 10 s; party members within 40 m get +20% Combat Speed and 10% shorter cooldowns.",
       "specialties": {
         "pending": true,
-        "reason": "Not captured yet."
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
       },
       "kind": "stigma",
       "provenance": [
@@ -7660,12 +8372,70 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
-        "reason": "other",
-        "status": "reported"
+        "reason": "buff",
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "+20% Combat Speed and 20% shorter cooldowns for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "The party gets +20% Combat Speed and 10% shorter cooldowns for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "Power of the Storm",
+          "seconds": 30,
+          "skillLevel": 5,
+          "text": "Cooldown 90 s at stigma Lv 5.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "noStack",
+          "target": "Earth's Blessing",
+          "text": "Party members with the Cleric's Earth's Blessing active do not get it.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
       }
     },
     {
@@ -7673,18 +8443,85 @@
       "class": "Chanter",
       "name": "Rushing Smash",
       "unlockLevel": 1,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
-      "specialties": {
-        "pending": true,
-        "reason": "Not captured yet."
-      },
+      "cooldownSeconds": 15,
+      "summary": "Rushes at a target within 20 m, hits up to 4 enemies and restores 100 MP. 10 stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Target Impact-type Resist down 20% for 5s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "The target takes Impact-type effects more easily for 5 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a charge skill, up to 200% more damage",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hold to charge for up to 200% more damage.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% chance to set off Heat Wave Blow",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "50% chance to set off a free Heat Wave Blow.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Resets its cooldown when it defeats an enemy",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Resets when it defeats an enemy: chain it through a pack.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Ignores Block and Evasion and lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
       "kind": "skill",
       "provenance": [
         {
@@ -7696,12 +8533,69 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
-        "reason": "other",
-        "status": "reported"
+        "reason": "dash",
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A dash that hits up to 4 enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 0.5,
+          "text": "Restores 100 MP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "triggers",
+          "target": "Heat Wave Blow",
+          "skillLevel": 8,
+          "text": "50% chance to set off Heat Wave Blow on a hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "reset",
+          "target": "Rushing Smash",
+          "skillLevel": 12,
+          "text": "Resets its own cooldown when it defeats an enemy.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 19,
+        "10": 25
       }
     },
     {
@@ -7709,17 +8603,11 @@
       "class": "Chanter",
       "name": "Sprint Mantra",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 5,
+      "summary": "Toggle: Move Speed +10.5% and a 15% chance on a hit to heal you and party members nearby.",
       "specialties": {
         "pending": true,
-        "reason": "Not captured yet."
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
       },
       "kind": "stigma",
       "provenance": [
@@ -7732,12 +8620,39 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "toggle",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "15% chance on a hit to heal you and the party nearby, always on.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
       }
     },
     {
@@ -7745,17 +8660,11 @@
       "class": "Chanter",
       "name": "Undefeated Mantra",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 5,
+      "summary": "Toggle: PvE damage and PvE Damage Tolerance +10.5% for you and party members nearby.",
       "specialties": {
         "pending": true,
-        "reason": "Not captured yet."
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
       },
       "kind": "stigma",
       "provenance": [
@@ -7768,13 +8677,1626 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "toggle",
-        "status": "reported"
+        "status": "confirmed"
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "+10.5% PvE damage for you, always on.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "+10.5% PvE damage for the party, always on. Not with the Cleric's Light of Protection: the higher level wins.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "+10.5% PvE Damage Tolerance for you and the party.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "noStack",
+          "target": "Light of Protection",
+          "text": "Does not stack with the Cleric's Light of Protection: the higher skill level applies; at the same level Undefeated Mantra does.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
       }
+    },
+    {
+      "id": "chanter-gust-rampage",
+      "class": "Chanter",
+      "name": "Gust Rampage",
+      "unlockLevel": 5,
+      "kind": "skill",
+      "cooldownSeconds": 0,
+      "summary": "Hits a staggered target within 4 m. No cooldown.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Absorbs 5% HP",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.5,
+              "text": "Heals you 5% HP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Restores 120 MP",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 0.5,
+              "text": "Restores 120 MP a hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Cast it on the move.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "Hits cut every cooldown by 1s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Each hit cuts every skill cooldown by 1 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Fires on a staggered target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "skillLevel": 16,
+          "text": "Each hit cuts every cooldown by 1 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-heat-wave-blow",
+      "class": "Chanter",
+      "name": "Heat Wave Blow",
+      "unlockLevel": 7,
+      "kind": "skill",
+      "cooldownSeconds": 10,
+      "summary": "Hits up to 4 enemies within 4 m: 40% Seal for 3 s, 100% on NPC targets. 10 stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "40% chance to Stun for 3s",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Adds a Stun (100% on NPC targets), so Wave Blow can fire.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+20% Seal chance",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Seal chance 60%.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Up to 20% more damage when more targets hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Up to 20% more damage on a pack.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Ignores Block and Evasion, lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Ignores Block and Evasion and lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "25% chance to reset its cooldown on Block",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "25% chance to reset its cooldown on Block.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies every 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Wave Blow",
+          "via": "stun",
+          "skillLevel": 8,
+          "text": "Its Stun pick stuns NPC targets every time, so Wave Blow can fire.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 25,
+        "10": 31
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-tremor-crush",
+      "class": "Chanter",
+      "name": "Tremor Crush",
+      "unlockLevel": 10,
+      "kind": "skill",
+      "cooldownSeconds": 20,
+      "summary": "Moves to a target within 10 m and hits it: 50% Stun for 3 s after a Dodge or while flying, 100% on NPC targets. 10 stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Restores 300 Stamina on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Restores 300 Stamina.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+10m range",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Reaches 20 m.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Lands as Multi-Hit 50% more often.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Adds Surging Strike chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Adds the Surging Strike follow-up hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "+25% Stun chance",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Stun chance 75% on players.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A short dash that hits and stuns.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Wave Blow",
+          "via": "stun",
+          "status": "reported",
+          "refs": [
+            "ql-db-chanter",
+            "ql-builds-chanter"
+          ],
+          "text": "Stuns NPC targets, so Wave Blow can fire. The tooltip ties the Stun to a Dodge or flying; whether NPCs need that too is not stated.",
+          "skillLevel": null
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 28,
+        "10": 34
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "movement",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-chanter",
+          "title": "Public Chanter skill builds (281 distinct of 940 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-wave-blow",
+      "class": "Chanter",
+      "name": "Wave Blow",
+      "unlockLevel": 12,
+      "kind": "skill",
+      "cooldownSeconds": 20,
+      "summary": "Hits a stunned target within 4 m and knocks it down for 3 s. 10 stagger damage.",
+      "specialties": [
+        {
+          "skillLevel": 8,
+          "text": "Lands as Multi-Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Lands as Multi-Hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "+6m range",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Reaches 10 m.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 8,
+          "text": "Knockdown lasts 1s longer",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 0.25,
+              "text": "Knockdown lasts 4 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 12,
+          "text": "Target deals 15% less PvE damage for 10s",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "The target deals 15% less PvE damage for 10 s: the whole party takes less. Not with the Cleric's Debilitating Mark.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        },
+        {
+          "skillLevel": 16,
+          "text": "5s shorter cooldown",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.25,
+              "text": "Cooldown 15 s.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-chanter"
+              ]
+            }
+          ]
+        }
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits a stunned target and knocks it down for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stun",
+          "text": "Fires only on a stunned target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "noStack",
+          "target": "Debilitating Mark",
+          "skillLevel": 12,
+          "text": "Its PvE damage cut does not apply together with the Cleric's Debilitating Mark.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "condition",
+          "text": "Fires only on a stunned target.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 30,
+        "10": 36
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-marchutans-wrath",
+      "class": "Chanter",
+      "name": "Marchutan's Wrath",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 30,
+      "summary": "Hits up to 4 enemies near a target within 20 m. Dark Crush is ready for 3 s after it.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A hard hit on up to 4 enemies every 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Dark Crush",
+          "via": "reset",
+          "text": "Makes Dark Crush ready for 3 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "type": "opens",
+          "target": "Wave Blow",
+          "via": "stun",
+          "skillLevel": 10,
+          "text": "From stigma Lv 10 it stuns NPC targets, so Wave Blow can fire.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "opens",
+          "text": "Dark Crush is ready for 3 s after it.",
+          "skillLevel": null,
+          "status": "confirmed"
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-healing-touch",
+      "class": "Chanter",
+      "name": "Healing Touch",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 30,
+      "summary": "A large heal for you and party members within 40 m. 30 s cooldown.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "A large heal for you and the party within 40 m every 30 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "heal",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-impeding-authority",
+      "class": "Chanter",
+      "name": "Impeding Authority",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 90,
+      "summary": "A shield of 16% Max HP for you and party members within 40 m for 20 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1.5,
+          "text": "A shield of 16% Max HP on you and the party for 20 s, every 90 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-barrier-spell",
+      "class": "Chanter",
+      "name": "Barrier Spell",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 180,
+      "summary": "For 3 s, the HP of you and party members within 40 m cannot fall below 10%. Some strong attacks get through.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "For 3 s nobody in the party within 40 m drops below 10% HP. Cooldown 180 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-guardian-blessing",
+      "class": "Chanter",
+      "name": "Guardian Blessing",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 120,
+      "summary": "Your Max HP +5.4% for 120 s and an instant 5.4% heal. Dispels do not remove it.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "+5.4% Max HP for 120 s and an instant heal, for you only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "buff",
+          "target": "Crossguard",
+          "skillLevel": 10,
+          "text": "From stigma Lv 10 it makes Crossguard 1.5 times as strong, and from Lv 15 Wind's Promise too.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-fracturing-blow",
+      "class": "Chanter",
+      "name": "Fracturing Blow",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 45,
+      "summary": "Rushes to a target within 20 m and hits it: its Defence -30% for 5 s; 20% more damage on a target under an Impact-type effect. 20 stagger damage.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.25,
+          "text": "A dash and hard hit every 45 s that cuts the target's Defence by 30% for 5 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "dash",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-winds-promise",
+      "class": "Chanter",
+      "name": "Wind's Promise",
+      "unlockLevel": 25,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your Critical Damage +5.7% and a 50% chance of extra damage on a Critical Hit.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Critical Damage +5.7% and a 50% chance of extra damage on every Critical Hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 25,
+        "10": 25
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-attack-preparation",
+      "class": "Chanter",
+      "name": "Attack Preparation",
+      "unlockLevel": 13,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your PvE damage +5.5%, Defence +2% and Accuracy +100.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "+5.5% PvE damage and +100 Accuracy.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.25,
+          "text": "+2% Defence.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 31,
+        "10": 37
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-earths-promise",
+      "class": "Chanter",
+      "name": "Earth's Promise",
+      "unlockLevel": 21,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your hits lower the target's PvE Damage Tolerance by 5.4% for 5 s (10 s cooldown).",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "Your hits lower the target's PvE Damage Tolerance by 5.4% for 5 s: the whole party hits harder.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "You hit that target harder too.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "noStack",
+          "target": "Chain of Torment",
+          "text": "Its Damage Tolerance cut does not apply together with the Cleric's Chain of Torment.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 21,
+        "10": 21
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-blessing-of-life",
+      "class": "Chanter",
+      "name": "Blessing of Life",
+      "unlockLevel": 1,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your Max HP +6.5% and Heal Boost from your Attack.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "+6.5% Max HP and stronger heals.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-protection-circle",
+      "class": "Chanter",
+      "name": "Protection Circle",
+      "unlockLevel": 9,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Every 10 hits give you and the party a shield of 3.1% Max HP for 10 s; a shield of your own below 50% HP.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Every 10 hits you land shield you and the party for 3.1% Max HP.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 27,
+        "10": 33
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-inspiring-spell",
+      "class": "Chanter",
+      "name": "Inspiring Spell",
+      "unlockLevel": 11,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your Critical Hit +100 and Perfect Chance +0.5%.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "+100 Critical Hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 29,
+        "10": 35
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-impact-hit",
+      "class": "Chanter",
+      "name": "Impact Hit",
+      "unlockLevel": 15,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your Impact-type Chance +11.2% and Double Chance +0.3%.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Your Impact-type effects land more often.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 33,
+        "10": 39
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-raging-spell",
+      "class": "Chanter",
+      "name": "Raging Spell",
+      "unlockLevel": 17,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Extra damage on a target under Stagger or an Impact-type effect (1 s cooldown).",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Extra damage on a staggered target or one under an Impact-type effect.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 35,
+        "10": 41
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-crossguard",
+      "class": "Chanter",
+      "name": "Crossguard",
+      "unlockLevel": 6,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Your Block +200 and a small heal on a Block (1 s cooldown).",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "+200 Block and a small heal on a Block.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 24,
+        "10": 30
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-survival-willpower",
+      "class": "Chanter",
+      "name": "Survival Willpower",
+      "unlockLevel": 23,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Status Effect Resist +17%; more Damage Tolerance for 5 s when you are stunned or knocked down.",
+      "specialties": {
+        "pending": true,
+        "reason": "A passive: no Specialty."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "+17% Status Effect Resist and more Damage Tolerance when crowd controlled.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 23,
+        "10": 23
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-focused-defense",
+      "class": "Chanter",
+      "name": "Focused Defense",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 20,
+      "summary": "Guarantees a Block and doubles Block damage reduction for a moment; a Block restores 110 MP and Stamina.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 1,
+          "text": "Hold it on a big swing: a guaranteed Block.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 0.5,
+          "text": "A Block gives 110 MP back.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "confirmed"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-ensnaring-mark",
+      "class": "Chanter",
+      "name": "Ensnaring Mark",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "Hits up to 4 enemies near a target within 20 m: 50% Seal for 5 s, 100% on NPC targets. Dark Crush is ready for 3 s after it.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A hit with a Seal every 60 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Dark Crush",
+          "via": "reset",
+          "text": "Makes Dark Crush ready for 3 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "chanter-assault-shock",
+      "class": "Chanter",
+      "name": "Assault Shock",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 120,
+      "summary": "Hits up to 4 enemies near a target within 20 m: 30% Stun for 3 s, 100% on NPC targets; Defence up to +20% by targets hit.",
+      "specialties": {
+        "pending": true,
+        "reason": "Stigma Specialties unlock by themselves at stigma Lv 5, 10, 15 and 20: nothing to pick."
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A hit on up to 4 enemies every 120 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        },
+        {
+          "key": "survival",
+          "weight": 0.5,
+          "text": "Defence up to +20% by the number of targets hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Wave Blow",
+          "via": "stun",
+          "text": "Stuns NPC targets every time, so Wave Blow can fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-chanter"
+          ]
+        }
+      ],
+      "triggers": [],
+      "training": {
+        "8": 22,
+        "10": 22
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "other",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-chanter",
+          "title": "Chanter skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
     },
     {
       "id": "gladiator-experienced-counterstrike",
