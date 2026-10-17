@@ -161,7 +161,7 @@
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
       }
     },
     {
@@ -232,7 +232,7 @@
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
       },
       "triggers": [
         {
@@ -462,10 +462,6 @@
           "reliability": "medium"
         }
       ],
-      "macroUse": {
-        "value": "line",
-        "status": "reported"
-      },
       "triggers": [
         {
           "type": "cdCut",
@@ -613,10 +609,6 @@
           "reliability": "medium"
         }
       ],
-      "macroUse": {
-        "value": "line",
-        "status": "reported"
-      },
       "triggers": [
         {
           "type": "opens",
@@ -3889,10 +3881,6 @@
           "reliability": "medium"
         }
       ],
-      "macroUse": {
-        "value": "line",
-        "status": "reported"
-      },
       "triggers": [
         {
           "type": "condition",
@@ -3939,10 +3927,6 @@
           "reliability": "medium"
         }
       ],
-      "macroUse": {
-        "value": "line",
-        "status": "reported"
-      },
       "triggers": [
         {
           "type": "opens",
@@ -3957,14 +3941,8 @@
       "class": "Gladiator",
       "name": "Focused Block",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 20,
+      "summary": "Held: blocks and parries frontal hits. Each parry gives 110 MP and stamina; each block takes 0.1 s off its cooldown.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -3996,7 +3974,21 @@
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "notes": [
+        {
+          "text": "Specialty: 10% HP back on a parry.",
+          "status": "confirmed"
+        },
+        {
+          "text": "An extra charge at stigma Lv 5.",
+          "status": "reported"
+        },
+        {
+          "text": "Some boss attacks go through it.",
+          "status": "reported"
+        }
+      ]
     },
     {
       "id": "gladiator-leaping-slam",
@@ -4096,10 +4088,7 @@
       "name": "Rage Burst",
       "unlockLevel": 22,
       "cooldownSeconds": 45,
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "summary": "Wounds the target: 10% more PvE damage, and Overhead Slam is ready for 10 s.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -4129,7 +4118,7 @@
       ],
       "macroUse": {
         "value": "line",
-        "status": "reported"
+        "status": "confirmed"
       },
       "triggers": [
         {
@@ -4184,8 +4173,9 @@
         }
       ],
       "macroUse": {
-        "value": "line",
-        "status": "reported"
+        "value": "own-key",
+        "reason": "stagger",
+        "status": "confirmed"
       },
       "triggers": [
         {
@@ -4207,14 +4197,8 @@
       "class": "Gladiator",
       "name": "Zikel's Blessing",
       "unlockLevel": 22,
-      "cooldownSeconds": {
-        "pending": true,
-        "reason": "The research record gives no cooldown for this skill. Check the tooltip in game."
-      },
-      "summary": {
-        "pending": true,
-        "reason": "Not in the skill catalogue yet. Added for its macro use."
-      },
+      "cooldownSeconds": 120,
+      "summary": "Attack +20% and Accuracy +100 for 10 s.",
       "specialties": {
         "pending": true,
         "reason": "Not captured yet."
@@ -6956,6 +6940,124 @@
         "reason": "toggle",
         "status": "reported"
       }
+    },
+    {
+      "id": "gladiator-experienced-counterstrike",
+      "class": "Gladiator",
+      "name": "Experienced Counterstrike",
+      "unlockLevel": 21,
+      "kind": "skill",
+      "cooldownSeconds": {
+        "pending": true,
+        "reason": "A passive: no cooldown of its own."
+      },
+      "summary": "Raises your front attack damage. A successful block gives the party more PvE damage for 20 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "partyBuff": {
+        "percentByRank": [
+          9,
+          13,
+          17
+        ],
+        "seconds": 20,
+        "stacksWithTemplarFury": false,
+        "status": "confirmed",
+        "facing": {
+          "status": "reported",
+          "text": "Needs you facing the boss."
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-templar-skills",
+          "title": "Templar skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/templar-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-wave-armor",
+      "class": "Gladiator",
+      "name": "Wave Armor",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 60,
+      "summary": "Damage over time on up to 4 targets for 20 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Unlock skill levels not captured yet."
+      },
+      "notes": [
+        {
+          "text": "Specialty: Experienced Counterstrike 1.5 times stronger (or Murderous Burst 1.5 times, or 10% damage reflect).",
+          "status": "confirmed"
+        }
+      ],
+      "macroUse": {
+        "value": "own-key",
+        "reason": "buff",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "gladiator-tenaciousness",
+      "class": "Gladiator",
+      "name": "Tenaciousness",
+      "unlockLevel": 22,
+      "kind": "stigma",
+      "cooldownSeconds": 150,
+      "summary": "3 s of immunity, then 50% more PvE damage tolerance for 3 s.",
+      "specialties": {
+        "pending": true,
+        "reason": "Not captured yet."
+      },
+      "macroUse": {
+        "value": "own-key",
+        "reason": "defensive",
+        "status": "reported"
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-gladiator-skills",
+          "title": "Gladiator skills",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/gladiator-skills",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
     }
   ]
 }

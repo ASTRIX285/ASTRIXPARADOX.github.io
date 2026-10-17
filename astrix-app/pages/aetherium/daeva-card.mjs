@@ -14,6 +14,7 @@ import {
   gearPageUrl,
   lastRegion,
   loadAdvisor,
+  loadBoard,
   loadCharacter,
   loadIntroArt,
   loadServers,
@@ -24,6 +25,7 @@ import {
   regionShort,
   regions,
   rememberRegion,
+  rolePick,
   roster,
   searchCharacters,
   titlesUrl
@@ -32,10 +34,10 @@ import { $, esc, introArtImg, markCharacterShown, markReady, number, setFaction,
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { nextStep, renderNext, renderStepBar } from './aetherium-flow.mjs';
 import { classArt } from './daevanion-board.mjs';
-import { AION2_CLASSES, buildAscentPlan } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { AION2_CLASSES, ROLES, TEAMS, buildAscentPlan, rolesFor } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { daevanionPercent } from '/astrix-app/games/aion2/engine/armory-adapter.mjs';
 
-const state = { model: null, source: null, ref: null, busy: false, retry: null, before: null };
+const state = { model: null, source: null, ref: null, busy: false, retry: null, before: null, data: null };
 
 /* The official AION 2 character pages (NCSOFT). The address of one character's own page is not confirmed yet (it needs a look at the
    official site), so the card links to the characters index. Official NCSOFT pages are the one outbound link the Aetherium allows. */
@@ -84,6 +86,7 @@ function renderSummary() {
         <ul class="ae-chips" aria-label="Character">
           <li>${esc(p.class)}</li><li class="ae-chip-faction">${esc(p.raceName)}</li><li>${esc(p.server.name)}</li><li>${esc(regionName(model.source.region))}</li><li>Lv ${esc(p.level)}</li>
         </ul>
+        <div class="ae-role-pick" id="aeRolePick" hidden></div>
         <dl class="ae-tiles">
           <div class="ae-tile"><dt>Combat power</dt><dd>${number(p.combatPower)}</dd></div>
           <div class="ae-tile"><dt>Item level</dt><dd>${isPending(p.itemLevel) ? '-' : number(p.itemLevel)}</dd></div>
@@ -141,11 +144,77 @@ function savedLevel(ref) {
 /* The first move: the Ascent Plan's top move for this Daeva, in one line, with a Show me that opens it. The plan data
    (small static files) loads once the card is on screen, so the card never waits for it. The move comes from the advisor only. */
 function moveHref(move, p) {
-  if (!move) return ascentUrl(state.ref, p.class);
+  if (!move) return ascentUrl(state.ref, p.class, rolePick(state.ref));
   // A gear move opens the Gear page with only the items it names ringed (#enchant-1:card); :card sends its back link here.
   if (move.view === 'gear') return `${gearPageUrl(state.ref)}${move.ring ? `#${move.ring}:card` : ''}`;
-  return ascentUrl(state.ref, p.class, { screen: move.view, board: move.view === 'daevanion' ? move.board ?? null : null });
+  const pick = rolePick(state.ref);
+  return ascentUrl(state.ref, p.class, { screen: move.view, board: move.view === 'daevanion' ? move.board ?? null : null, role: pick.role, team: pick.team });
 }
+/* Role and team (17 Oct 2026): the player picks the role they play for each saved Daeva, and the team when the build has
+   team variants. Saved with the Daeva in the roster and carried in the Ascent Plan links; every screen follows it. */
+function renderRolePick(plan) {
+  const box = $('#aeRolePick');
+  if (!box) return;
+  if (!plan) { box.hidden = true; return; }
+  box.hidden = false;
+  const roles = rolesFor(state.data?.builds).filter(item => item.status !== 'pending');
+  box.innerHTML = `<p class="ae-role-line"><span id="aeRoleLine">${esc([plan.className, plan.build.label, plan.team?.label].filter(Boolean).join(' · '))}</span>
+      <button type="button" class="ae-linkish" id="aeRoleChange" aria-expanded="false" aria-controls="aeRoleForm">Change</button></p>
+    <form class="ae-role-form" id="aeRoleForm" hidden>
+      <label class="ae-field"><span>Role</span><select id="aeCardRole">${roles.map(item => `<option value="${esc(item.role)}"${item.role === plan.role ? ' selected' : ''}>${esc(item.label)}: ${esc(item.buildLabel)}</option>`).join('')}</select></label>
+      <label class="ae-field" id="aeCardTeamField"${plan.team ? '' : ' hidden'}><span>Team</span><select id="aeCardTeam">${(plan.team?.options ?? []).map(option => `<option value="${esc(option.id)}"${option.id === plan.team.id ? ' selected' : ''}>${esc(option.label)}</option>`).join('')}</select></label>
+      <button type="submit" class="btn">Save</button>
+    </form>`;
+}
+function wireRolePick() {
+  const box = $('#aeRolePick');
+  if (!box || box.dataset.wired) return;
+  box.dataset.wired = 'true';
+  box.addEventListener('click', event => {
+    if (!event.target.closest('#aeRoleChange')) return;
+    const form = $('#aeRoleForm');
+    form.hidden = !form.hidden;
+    $('#aeRoleChange').setAttribute('aria-expanded', String(!form.hidden));
+    if (!form.hidden) $('#aeCardRole')?.focus();
+  });
+  box.addEventListener('change', event => {
+    // A new role shows its own teams (only builds with team variants have any).
+    if (event.target.id !== 'aeCardRole') return;
+    const plan = planFor(event.target.value, null);
+    const field = $('#aeCardTeamField');
+    field.hidden = !plan?.team;
+    $('#aeCardTeam').innerHTML = (plan?.team?.options ?? []).map(option => `<option value="${esc(option.id)}"${option.id === plan.team.id ? ' selected' : ''}>${esc(option.label)}</option>`).join('');
+  });
+  box.addEventListener('submit', event => {
+    event.preventDefault();
+    const role = $('#aeCardRole').value;
+    const team = $('#aeCardTeamField').hidden ? null : $('#aeCardTeam').value;
+    const pick = { role: Object.keys(ROLES).includes(role) ? role : null, team: Object.keys(TEAMS).includes(team) ? team : null };
+    // A saved Daeva keeps them in the roster; one not saved keeps them in this page's address.
+    const params = new URLSearchParams(location.search);
+    for (const [key, value] of Object.entries(pick)) { if (value) params.set(key, value); else params.delete(key); }
+    history.replaceState(null, '', `${location.pathname}?${params}`);
+    roster.setRole(state.ref, pick);
+    loadFirstMove().catch(() => {});
+  });
+}
+const planFor = (role, team) => {
+  const p = state.model.profile;
+  try { return buildAscentPlan({ className: p.class, role, team, level: p.level, data: state.data, model: state.model }); } catch { return null; }
+};
+/** Reads Daevanion boards until the role route's current board is read, so the move can name its next node. */
+async function readCurrentBoard(plan, pick) {
+  let current = plan;
+  for (let i = 0; current && i < state.model.daevanion.length; i += 1) {
+    const at = current.daevanion.roleRoute?.current;
+    const board = at && !at.read ? state.model.daevanion.find(item => item.id === at.id) : null;
+    if (!board || board.unreadable) break;
+    try { board.nodes = (await loadBoard(state.model, board)).nodes; } catch { board.unreadable = true; break; }
+    current = planFor(pick.role, pick.team);
+  }
+  return current;
+}
+
 async function loadFirstMove() {
   const { model, ref } = state;
   const p = model.profile;
@@ -154,10 +223,21 @@ async function loadFirstMove() {
   const strip = $('#aeFirstMove');
   if (!text || !go) return;
   let plan = null;
+  const pick = rolePick(ref);
   if (AION2_CLASSES.includes(p.class)) {
-    try { plan = buildAscentPlan({ className: p.class, role: null, level: p.level, data: await loadAdvisor(p.class), model }); } catch { plan = null; }
+    try {
+      state.data = await loadAdvisor(p.class);
+      plan = planFor(pick.role, pick.team);
+      // The move follows the chosen role; a Daevanion move names its board's next node once that board is read.
+      if (plan?.now?.[0]?.view === 'daevanion') plan = await readCurrentBoard(plan, pick);
+    } catch { plan = null; }
   }
   if (state.model !== model || state.ref !== ref) return; // another Daeva took the card meanwhile
+  renderRolePick(plan);
+  wireRolePick();
+  // The links carry the role and team only when the player saved them, so a shared link opens the same plan.
+  const links = { role: pick.role, team: pick.team };
+  if ($('#aeAscentLink')) $('#aeAscentLink').href = ascentUrl(state.ref, p.class, links);
   const move = plan?.now?.[0] ?? null;
   text.textContent = move ? move.title : plan ? 'Nothing to fix right now. Your plan has what comes next.' : 'Your plan could not load here. Open the Ascent Plan to see it.';
   go.href = moveHref(move, p);

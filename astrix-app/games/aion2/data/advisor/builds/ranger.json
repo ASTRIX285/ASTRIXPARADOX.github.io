@@ -362,7 +362,8 @@
             "why": "Moves you: keep it for when you mean to move. It grants Precision for Deadshot."
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "verified": false
       }
     }
   ]

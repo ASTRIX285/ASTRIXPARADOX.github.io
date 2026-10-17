@@ -333,7 +333,8 @@
             "why": "Clears crowd control: you need it at a chosen moment."
           }
         ],
-        "levelNotes": []
+        "levelNotes": [],
+        "verified": false
       }
     }
   ]

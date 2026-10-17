@@ -180,6 +180,47 @@
       ]
     },
     {
+      "id": "daevanion-budget",
+      "label": "Daevanion points",
+      "status": "confirmed",
+      "confirmedOn": "2026-10-17",
+      "value": {
+        "points": 415,
+        "season": 1,
+        "boardCost": {
+          "Nezekan": 134,
+          "Zikel": 134,
+          "Vaizel": 134,
+          "Triniel": 168,
+          "Azphel": 232
+        }
+      },
+      "text": "Season 1 gives 415 Daevanion points. The five boards cost 802 in all, so nobody completes them: plan inside 415.",
+      "record": "astrix-app/games/aion2/docs/GLADIATOR-TANK.md",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "ql-gladiator",
+          "title": "Gladiator skill builds 9181 and 10896, Daevanion builds 3576 and 5406",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-gladiator",
+          "title": "Gladiator build (top player data)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/gladiator/build",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
       "id": "daevanion-priority",
       "label": "Daevanion order",
       "value": [

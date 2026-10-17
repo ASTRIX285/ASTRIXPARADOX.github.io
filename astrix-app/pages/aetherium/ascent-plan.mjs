@@ -10,16 +10,16 @@
  * and gets the plan from static data alone, with no call to the official site. Advice comes from
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
-import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, roster, sourceLabel } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, rolePick, roster, sourceLabel } from './aetherium-data.mjs';
 import { $, esc, gradeTile, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, statIcon, wireDrawer } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { renderNext, renderStepBar } from './aetherium-flow.mjs';
-import { AION2_CLASSES, ROLES, buildAscentPlan, clampLevel, gradeInfo, levelOrder } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
+import { AION2_CLASSES, ROLES, TEAMS, buildAscentPlan, clampLevel, gradeInfo, levelOrder } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/aion2/engine/daevanion-planner.mjs';
 import { KIND_LABEL, boardGridStyle, nodeArt as boardNodeArt, nodeImg as boardNodeImg, nodeTileHtml } from './daevanion-board.mjs';
 
-const state = { model: null, source: null, ref: null, className: 'Gladiator', role: null, level: 1, data: null, plan: null };
-const planner = { boardId: null, nodes: new Map(), selected: null, board: null, split: null, observer: null };
+const state = { model: null, source: null, ref: null, className: 'Gladiator', role: null, team: null, level: 1, data: null, plan: null };
+const planner = { boardId: null, nodes: new Map(), failed: new Set(), selected: null, board: null, split: null, observer: null };
 const POINTS_KEY = 'aetherium.daevanionPoints.v1';
 
 const BEGINNER = { 'very high': 'Very easy to learn', high: 'Easy to learn', medium: 'Medium to learn', low: 'Hard to learn' };
@@ -42,12 +42,38 @@ function fillRoleSelect(roles, chosen) {
   }).join('');
 }
 
+/** The Team select, beside Role. Only a build that defines team variants shows it. */
+function ensureTeamField() {
+  if ($('#aeTeam')) return;
+  const role = $('#aeRole')?.closest('.ae-field');
+  if (!role) return;
+  role.insertAdjacentHTML('afterend', '<label class="ae-field" id="aeTeamField" hidden><span>Team</span><select id="aeTeam" name="team"></select></label>');
+}
+function fillTeamSelect(team) {
+  ensureTeamField();
+  const field = $('#aeTeamField');
+  if (!field) return;
+  field.hidden = !team;
+  $('#aeAscentForm')?.classList.toggle('has-team', Boolean(team));
+  if (!team) return;
+  $('#aeTeam').innerHTML = team.options.map(option => `<option value="${esc(option.id)}"${option.id === team.id ? ' selected' : ''}>${esc(option.label)}</option>`).join('');
+}
+
+/** The role line: class, the build as played, and the team when the build has team variants ("Gladiator · Tank with damage · Main tank, no Templar"). */
+const roleLine = plan => [plan.className, plan.build.label, plan.team?.label].filter(Boolean).join(' · ');
+
+/** Saves a role or team the player picked with the Daeva (roster), so every Aetherium page follows it. */
+function saveRole() {
+  if (state.model && state.ref) roster.setRole(state.ref, { role: state.role, team: state.team });
+}
+
 function readUrl() {
   const params = new URLSearchParams(location.search);
   const className = AION2_CLASSES.find(name => name.toLowerCase() === String(params.get('class') ?? '').toLowerCase());
   const role = Object.keys(ROLES).includes(params.get('role')) ? params.get('role') : null;
+  const team = Object.keys(TEAMS).includes(params.get('team')) ? params.get('team') : null;
   const level = params.has('level') ? Number(params.get('level')) : null;
-  return { className, role, level };
+  return { className, role, team, level };
 }
 
 /** Keeps the address bookmarkable: the Daeva link, or class, role and level for a manual plan. */
@@ -84,10 +110,10 @@ function setFormLock() {
    what to do there, one step at a time. Reasons stay short and show where they are needed. */
 const VIEWS = {
   mastery: { title: 'Mastery', window: 'Skill', blurb: 'Which skills to level and which Specialty perks to pick', why: 'Wisdom Stones level your skills. Put them into the skills your build uses most, in this order.' },
-  'skill-bar': { title: 'Skill Bar', window: 'Where to put your skills', blurb: 'Where each skill should go on your bars. This is the plan, not what is on them now.', why: 'Each key fires the lowest ready skill in its stack. Two stacks either side of your main attack make your macro; everything else gets its own key.' },
+  'skill-bar': { title: 'Skill Bar', window: 'Where to put your skills', blurb: 'Where each skill should go on your bars. This is the plan, not what is on them now.', why: 'Each key fires the lowest ready skill in its stack. The stacks beside your main attack make your macro; everything else gets its own key.' },
   stigma: { title: 'Stigma', window: 'Stigma', blurb: 'The four stigmas to slot, and good swaps', why: 'Stigmas are extra skills with their own keys. Four slots open as you level.' },
   daevanion: { title: 'Daevanion', window: 'Daevanion', blurb: 'Your boards with the route to take, node by node', why: 'Daevanion nodes add skill levels and stats. Each node has to touch one you already have.' },
-  macro: { title: 'Macro', window: 'Macro', blurb: 'Stack A and stack B in Macro 1', why: 'Two entries, one for each stack either side of your main attack. Hold the macro key and your main attack together.' },
+  macro: { title: 'Macro', window: 'Macro', blurb: 'Stack A and stack B in Macro 1', why: 'One entry for each stack beside your main attack. Hold the macro key and your main attack together.' },
   stats: { title: 'Stats', window: 'Stats', blurb: 'What to look for on gear and manastones', why: "The build's stat priority: when you choose between two items, favour the stat higher on this list." }
 };
 const VIEW = Object.hasOwn(VIEWS, document.body.dataset.aeView ?? '') ? document.body.dataset.aeView : 'menu';
@@ -113,9 +139,11 @@ function planQuery() {
     params.set('region', state.ref.region ?? 'eu');
     params.set('class', state.className.toLowerCase());
     if (state.role) params.set('role', state.role);
+    if (state.team) params.set('team', state.team);
   } else {
     params.set('class', state.className.toLowerCase());
     if (state.role) params.set('role', state.role);
+    if (state.team) params.set('team', state.team);
     params.set('level', state.level);
   }
   return params.toString();
@@ -236,7 +264,7 @@ function gameWindow(view, plan, body) {
     <div class="ae-gw-bar">
       <a class="ae-gw-back" href="${esc(viewHref('menu'))}"><span aria-hidden="true">‹</span> Plan</a>
       <h1 class="ae-gw-title" id="aeScreenTitle">${esc(VIEWS[view].window)}</h1>
-      <p class="ae-gw-who">${esc(plan.className)} · ${esc(plan.roleLabel)} · Lv ${esc(plan.level)}${plan.character ? ` · ${esc(plan.character.name)}` : ''}</p>
+      <p class="ae-gw-who" id="aeGwWho">${esc(plan.className)} · ${esc(plan.roleLabel)}${plan.team ? ` · ${esc(plan.team.label)}` : ''} · Lv ${esc(plan.level)}${plan.character ? ` · ${esc(plan.character.name)}` : ''}</p>
       ${state.source ? `<p class="ae-gw-source">${esc(sourceLabel(state.source))}</p>` : ''}
     </div>
     <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
@@ -255,7 +283,9 @@ function renderStigmaScreen(plan) {
     </span>`;
   const now = s.equippedNow;
   const BADGE = { keep: ['✓', 'keep'], swap: ['⇄', 'alt'], out: ['✕', 'swap'] };
+  const swap = plan.team?.swap ?? null;
   return `<div class="ae-stg">
+    ${plan.team ? `<p class="ae-stg-team" id="aeStigmaTeam" data-team="${esc(plan.team.id)}"><b>${esc(plan.team.label)}</b>${swap ? `: ${esc(swap.in)} in place of ${esc(swap.out)}. ${esc(swap.why)}` : '.'}</p>` : ''}
     <div class="ae-stg-row">${s.slots.map(slot).join('')}</div>
     <ul class="ae-legend-row is-centred" aria-label="Key"><li><span class="ae-lock is-key">${ICON.lock}<b>Lv 27</b></span>Grey: the slot opens when your character reaches that level</li>${now === null ? '' : '<li><span class="ae-mskill-bar">✓</span>Equipped now</li>'}</ul>
     <div class="ae-stg-lower">
@@ -329,7 +359,8 @@ function statusTag(item, id) {
    right-hand block is stack A, the main attack, stack B; the left-hand block holds every own-key skill, one per key, in
    the order a player uses them. Tap a skill for where it goes and why; tap a key for the whole stack in words. */
 const KEY_LABEL = { LMB: 'Left click', RMB: 'Right click', A: 'Stack A', B: 'Stack B' };
-const keyName = key => KEY_LABEL[key] ?? `Key ${key}`;
+const keyName = key => state.plan?.skillBar?.stacks?.[key]?.name ?? KEY_LABEL[key] ?? `Key ${key}`;
+const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3z" fill="currentColor"/></svg>';
 const OWN_LABEL = { buff: 'Buff', toggle: 'Toggle', charged: 'Charged', stagger: 'Stagger', other: 'Situational', defensive: 'Defensive', heal: 'Heal', dash: 'Dash', movement: 'Movement' };
 const cooldownWords = item => (item.noCooldown ? 'no cooldown' : item.cooldownPending ? 'cooldown not captured yet' : `${item.cooldownSeconds} s cooldown`);
 /** The stack of one key in plain words: "Stack A: Rage Burst fires when ready, otherwise Overhead Slam, then ..." */
@@ -346,14 +377,14 @@ function stackSentence(stack) {
  */
 function firesNowSentence(stack) {
   if (!stack.skills.length || stack.nextUnlock === null) return null;
-  const key = keyName(stack.key).replace(/^(Key|Stack)/, word => word.toLowerCase());
+  const key = stack.name ? `the ${stack.name.toLowerCase()}` : keyName(stack.key).replace(/^(Key|Stack)/, word => word.toLowerCase());
   if (!stack.firesNow.length) return `Until Lv ${stack.nextUnlock}, ${key} fires nothing yet.`;
   return `Until Lv ${stack.nextUnlock}, ${key} fires ${stack.firesNow.join(', then ')}.`;
 }
 /** Where a skill goes and why, one line: "Stack A row 0: Longest cooldown ..." or "Own key: charged ...". */
 function placeLine(item) {
   if (item.role === 'stackA' || item.role === 'stackB' || item.role === 'chain') return `${keyName(item.key)} row ${item.row}: ${item.why ?? (item.noCooldown ? 'Filler: always ready, so it sits last.' : 'In the stack by cooldown.')}`;
-  if (item.role === 'main') return `Main attack, between the stacks. ${item.why ?? 'Hold it with the macro key.'}`;
+  if (item.role === 'main') return `Main attack, set by the game on left click. ${item.why ?? 'Hold it with the macro key.'}`;
   return item.why ?? 'Own key.';
 }
 const MOUSE_SVG = left => `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="${left ? 'M12 2.9V10H5.9V9A6.1 6.1 0 0 1 12 2.9Z' : 'M12 2.9V10h6.1V9A6.1 6.1 0 0 0 12 2.9Z'}" fill="var(--ae-ice)"/><path d="M12 3v7M5.5 10h13" stroke="currentColor" stroke-width="1.4"/></svg>`;
@@ -363,13 +394,15 @@ function keyCap(key, stack) {
   return `<span class="ae-keycap${key === 'A' || key === 'B' ? ' is-stack' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${esc(key === 'A' || key === 'B' ? keyName(key) : key)}</span>`;
 }
 function barCell(item, key, row, stack) {
+  const gap = !item && (stack.empty ?? []).find(entry => entry.row === row);
+  if (gap) return `<span class="ae-bar-cell is-empty is-gap" data-bar-gap="${row}:${esc(key)}" title="${esc(`Row ${row} empty. ${gap.why ?? ''}`.trim())}" aria-label="${esc(`${keyName(key)}, row ${row}: left empty. ${gap.why ?? ''}`.trim())}" role="img"></span>`;
   if (!item) return `<span class="ae-bar-cell is-empty" aria-hidden="true"></span>`;
   const state = item.locked ? ` From Lv ${item.unlockLevel}.` : item.needsSlot ? ' Needs a stigma slot.' : item.learned === false ? ' Not learned yet.' : '';
-  const tip = `${keyName(key)}, row ${row}: ${item.name}.${state}`;
+  const tip = `${keyName(key)}, row ${row}: ${item.name}.${state}${item.fixed ? ' Set by the game.' : ''}`;
   const dim = item.locked || item.needsSlot || item.learned === false;
   return `<span class="ae-bar-cell is-${esc(item.role)}${dim ? ' is-locked' : ''}${stack.skills.length > 1 ? ' is-stacked' : ''}${item.cooldownPending ? ' is-cd-pending' : ''}" role="button" tabindex="0" data-bar-skill="${esc(item.name)}" data-bar-role="${esc(item.role)}" data-bar-key="${row}:${esc(key)}" data-tip="${esc(tip)}" aria-label="${esc(tip)}">
     <span class="ae-mskill-name">${esc(item.name)}</span>${art(item.icon)}
-    ${item.fixed ? `<span class="ae-bar-pin" aria-hidden="true">${ICON.lock}</span>` : ''}
+    ${item.fixed ? `<span class="ae-bar-pin" title="Set by the game" aria-hidden="true">${PIN}</span>` : ''}
     ${stack.opener ? `<span class="ae-bar-order" aria-hidden="true">${esc(stack.opener)}</span>` : ''}
     ${item.cooldownPending && !item.fixed ? '<span class="ae-bar-cdq" aria-hidden="true">?</span>' : ''}
     ${item.locked ? `<span class="ae-lock" aria-hidden="true">${ICON.lock}<b>Lv ${esc(item.unlockLevel)}</b></span>` : item.needsSlot ? '<span class="ae-lock is-slot" aria-hidden="true"><b>Slot</b></span>' : item.skillLevel !== null ? `<span class="ae-mskill-lv" aria-hidden="true">${esc(item.skillLevel)}</span>` : ''}
@@ -385,11 +418,15 @@ function barColumn(bar, key) {
 }
 /** The right-hand block: stack A, the main attack, stack B, each stack with its label. The Macro screen draws only this. */
 function rightBlock(bar, { id = 'aeRightBlock' } = {}) {
-  const head = key => key === 'LMB' ? '<span class="ae-block-head is-main">Main attack</span>' : `<span class="ae-block-head">${esc(keyName(key))}${bar.stacks[key].label ? `<small>${esc(bar.stacks[key].label)}</small>` : ''}</span>`;
-  return `<div class="ae-bar-block is-right" id="${id}" aria-label="Right-hand block: stack A, main attack, stack B">
-    ${bar.right.map(key => `<div class="ae-block-col" data-block-col="${esc(key)}">${head(key)}${barColumn(bar, key)}</div>`).join('')}
+  const head = key => key === 'LMB' ? '<span class="ae-block-head is-main">Main attack</span>' : `<span class="ae-block-head">${esc(keyName(key))}${bar.stacks[key].label && bar.stacks[key].label !== bar.stacks[key].name ? `<small>${esc(bar.stacks[key].label)}</small>` : ''}</span>`;
+  const keys = bar.right.filter(key => key === 'LMB' || bar.stacks[key].skills.length);
+  const label = keys.map(key => (key === 'LMB' ? 'main attack' : keyName(key))).join(', ');
+  return `<div class="ae-bar-block is-right" id="${id}" aria-label="Right-hand block: ${esc(label)}">
+    ${keys.map(key => `<div class="ae-block-col" data-block-col="${esc(key)}">${head(key)}${barColumn(bar, key)}</div>`).join('')}
   </div>`;
 }
+/** The tag for stacks not checked against a published top-player build yet (the build's macro block says verified: false). */
+const unverifiedTag = bar => (bar?.verified === false ? '<span class="ae-tag is-unconfirmed" data-status-tag="stacks-unverified">Not confirmed yet</span>' : '');
 /** The "What fires now" panel: what stack A and stack B fire at this level, and what joins them later. */
 function firesNowPanel(plan) {
   const bar = plan.skillBar;
@@ -402,12 +439,13 @@ function firesNowPanel(plan) {
 }
 /** "Copy this bar": key by key, row by row, in the order to drag them in game, ending with the macro step. */
 function copyList(bar) {
-  const row = item => `<li class="${item.locked || item.needsSlot ? 'is-later' : ''}"><span>Row ${esc(item.row)}</span> ${esc(item.name)}${item.locked ? ` <small>from Lv ${esc(item.unlockLevel)}</small>` : item.needsSlot ? ' <small>needs a stigma slot</small>' : ''}</li>`;
+  const row = item => item.gap ? `<li class="is-gap"><span>Row ${esc(item.row)}</span> <small>leave it empty</small></li>` : `<li class="${item.locked || item.needsSlot ? 'is-later' : ''}"><span>Row ${esc(item.row)}</span> ${esc(item.name)}${item.locked ? ` <small>from Lv ${esc(item.unlockLevel)}</small>` : item.needsSlot ? ' <small>needs a stigma slot</small>' : ''}</li>`;
+  const withGaps = step => [...step.rows, ...(step.empty ?? []).map(entry => ({ row: entry.row, gap: true }))].sort((a, b) => a.row - b.row);
   return `<details class="ae-copy" id="aeCopyBar" open>
     <summary class="ae-mskills-title">Copy this bar</summary>
     <ol class="ae-copy-steps">${bar.copySteps.map(step => step.macro
       ? `<li class="is-macro" data-copy-step="macro">${esc(step.text)}</li>`
-      : `<li data-copy-step="${esc(step.key)}"><b>${esc(step.label)}</b>${step.rows.length === 1 ? ` ${esc(step.rows[0].name)}${step.rows[0].locked ? ` <small>from Lv ${esc(step.rows[0].unlockLevel)}</small>` : step.rows[0].needsSlot ? ' <small>needs a stigma slot</small>' : ''}` : `<ol class="ae-copy-rows">${step.rows.map(row).join('')}</ol>`}</li>`).join('')}</ol>
+      : `<li data-copy-step="${esc(step.key)}"><b>${esc(step.label)}</b>${step.rows.length === 1 && !step.empty?.length ? ` ${esc(step.rows[0].name)}${step.rows[0].locked ? ` <small>from Lv ${esc(step.rows[0].unlockLevel)}</small>` : step.rows[0].needsSlot ? ' <small>needs a stigma slot</small>' : ''}` : `<ol class="ae-copy-rows">${withGaps(step).map(row).join('')}</ol>`}</li>`).join('')}</ol>
     <p class="ae-muted">Left click keeps ${esc(bar.mainAttack)}: the game sets it.</p>
   </details>`;
 }
@@ -433,7 +471,7 @@ function renderSkillBarScreen(plan) {
       </div>
       ${firesNowPanel(plan)}
     </div>
-    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. Stack A and stack B sit either side of your main attack and go into your macro. Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''}</p>
+    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${['A', 'B'].filter(key => bar.stacks[key].skills.length).length === 2 ? 'Stack A and stack B sit either side of your main attack and go into your macro.' : `${esc(keyName(['A', 'B'].find(key => bar.stacks[key].skills.length) ?? 'B'))} sits beside your main attack and is your macro.`} Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''} ${unverifiedTag(bar)}</p>
     ${copyList(bar)}
     ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills ${ruleTag(plan.chains, 'chain-follow-up', { test: false })}</p>
       <ul class="ae-chiplist ae-followups">${chains.map(chain => chip(chain.followUp, plan.skillIcons[chain.followUp], chain.pending ? chain.pending.reason : `follow-up to ${chain.leadIns.join(' or ')}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}${chain.reach ? `. ${chain.reach.note}.` : ''}`)).join('')}</ul>
@@ -467,8 +505,8 @@ function barSkillCard(name, role, key = null) {
 function keyPanel(key) {
   const plan = state.plan;
   const stack = plan.skillBar.stacks[key];
-  const cards = stack.skills.map((skill, row) => `<section class="ae-stack-card" data-stack-row="${row}">
-      <p class="ae-slot-label">Row ${row}${row === 0 ? ', fires first' : ''}: ${esc(cooldownWords(skill))}</p>
+  const cards = stack.skills.map((skill, index) => `<section class="ae-stack-card" data-stack-row="${skill.row ?? index}">
+      <p class="ae-slot-label">Row ${skill.row ?? index}${index === 0 ? ', fires first' : ''}: ${esc(cooldownWords(skill))}</p>
       ${barSkillCard(skill.name, skill.role, key).replace(/ id="aeInfoTitle"/, '')}
     </section>`).join('');
   return `<div class="ae-card-head"><div><h3 id="aeInfoTitle">${esc(keyName(key))}</h3><p>${stack.skills.length === 1 ? 'One skill on this key' : `${stack.skills.length} skills stacked, rows 0 to ${stack.skills.length - 1}`}</p></div></div>
@@ -488,7 +526,7 @@ function renderMacroScreen(plan) {
   const delay = m.delayMs;
   const entries = m.entries.map(entry => `<li class="ae-macro-entry" data-macro-entry="${entry.entry}" data-macro-key="${esc(entry.key)}">
       <span class="ae-macro-num">${entry.entry}</span>
-      <span class="ae-macro-skill"><b>${esc(keyName(entry.key))}</b>${entry.label ? ` <span class="ae-macro-of">${esc(entry.label)}</span>` : ''}${entry.usable ? '' : ` <small>From Lv ${esc(entry.unlockLevel)}</small>`}</span>
+      <span class="ae-macro-skill"><b>${esc(keyName(entry.key))}</b>${entry.label && entry.label !== entry.name ? ` <span class="ae-macro-of">${esc(entry.label)}</span>` : ''}${entry.usable ? '' : ` <small>From Lv ${esc(entry.unlockLevel)}</small>`}</span>
       <span class="ae-macro-rows" aria-label="${esc(`${keyName(entry.key)}, row 0 first: ${entry.skills.map(skill => skill.name).join(', ')}`)}">${entry.skills.map(skill => `<span class="ae-macro-row${skill.inMacro ? '' : ' is-out'}" data-macro-row="${skill.row}" data-tip="${esc(`${skill.name}${skill.out ? `. ${skill.out}` : ''}`)}">${art(plan.skillIcons[skill.name])}</span>`).join('')}</span>
     </li>
     <li class="ae-macro-delay" aria-label="Delay ${esc(delay)} ms"><span>Delay</span><b>${esc(delay)}</b><span>ms</span></li>`).join('');
@@ -513,7 +551,7 @@ function renderMacroScreen(plan) {
       <div class="ae-macro-window" id="aeMacroWindow">
         <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
         <ol class="ae-macro">${entries}</ol>
-        <p class="ae-macro-count" id="aeMacroCount">Two entries, one for each stack either side of your main attack.</p>
+        <p class="ae-macro-count" id="aeMacroCount">${m.entries.length === 2 ? 'Two entries, one for each stack either side of your main attack.' : `One entry: ${esc(keyName(m.entries[0]?.key ?? 'B').toLowerCase().replace(/^(?!stack)/, 'the '))}, beside your main attack.`} ${unverifiedTag(bar)}</p>
       </div>
       <p class="ae-macro-skip" id="aeMacroRule">Each entry fires its stack's first ready skill. ${skip ? `${esc(skip.text.split('. ')[0])}. ${statusTag(skip, 'skip-on-cooldown')}` : ''}</p>
       ${later}
@@ -570,7 +608,10 @@ function renderStatsScreen(plan) {
   const sp = plan.statPlan;
   if (isPending(s)) return `${pendingNote(s)}${sp ? `<p class="ae-muted" id="aeNoStatOrder">No stat order for this class yet. What each stat does is on the Gear page.</p>${gearRowsHtml(sp.gear)}` : ''}`;
   return `<ol class="ae-stat-ranks">${s.order.map((stat, index) => `<li data-stat-rank="${index + 1}"><span class="ae-stat-rank">${index + 1}</span><span class="ae-stat-rank-text"><strong>${esc(stat)}</strong>${sp?.chains ? statChainHtml(sp.chains[index], sp.live, sp.rank) : ''}</span></li>`).join('')}</ol>
-    <p class="ae-muted">Look for these, in this order, on gear, manastones and accessories.</p>
+    <p class="ae-muted">Look for these, in this order, on gear, manastones and accessories.${s.status && s.status !== 'confirmed' ? ` ${statusTag({ status: s.status }, 'stat-order')}` : ''}</p>
+    ${s.manastones ? `<section class="ae-manastones" id="aeManastones" aria-labelledby="aeManastonesTitle"><h3 class="ae-stats-group" id="aeManastonesTitle">Manastones</h3>
+      <ul class="ae-mana-caps">${s.manastones.caps.map(cap => `<li data-mana="${esc(cap.stat)}"><b>${esc(cap.stat)}</b> up to ${esc(cap.cap)}</li>`).join('')}</ul>
+      ${s.manastones.advice ? `<p>${esc(s.manastones.advice)}</p>` : ''}</section>` : ''}
     ${sp ? gearRowsHtml(sp.gear) : ''}
     <p class="ae-callout" id="aeStatsWhere">The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.</p>
     ${plan.character ? '' : `<p><a class="btn" id="aeGearLink" href="${esc(viewHref('gear'))}">Find your Daeva to see your gear</a></p>`}`;
@@ -578,12 +619,13 @@ function renderStatsScreen(plan) {
 
 function renderBoardsByHand(plan) {
   const d = plan.daevanion;
-  return `<ul class="ae-board-cards">${d.boards.map(board => `<li class="${board.open ? 'is-open' : 'is-locked'}" data-board-card="${esc(board.name)}">
+  return `${d.budget ? `<p class="ae-budget" id="aeBudget"><b>${esc(d.budget.points)}</b> points in Season 1. The boards cost ${esc(Object.values(d.budget.boardCost).reduce((a, b) => a + b, 0))} in all, so plan inside ${esc(d.budget.points)}.</p>` : ''}
+    <ul class="ae-board-cards">${d.boards.map(board => `<li class="${board.open ? 'is-open' : 'is-locked'}" data-board-card="${esc(board.name)}">
       <img src="${esc(nodeArt(board.open ? 'unique' : 'stat', board.open))}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       <span><strong>${esc(board.name)}</strong><small>${esc(board.focus)}</small></span>
       <b>${board.open ? 'Open' : `Lv ${esc(board.unlockLevel)}`}</b>
     </li>`).join('')}</ul>
-    ${isPending(d.priorities) ? pendingNote(d.priorities) : `<div class="ae-board-first" id="aeBoardFirst"><p class="ae-mskills-title">Take these first</p><ol class="ae-list">${d.priorities.map(item => `<li>${esc(item)}</li>`).join('')}</ol></div>`}
+    ${isPending(d.priorities) ? pendingNote(d.priorities) : `<div class="ae-board-first" id="aeBoardFirst"><p class="ae-mskills-title">Take these first ${d.status === 'reported' ? statusTag({ status: 'reported' }, 'node-priorities') : ''}</p><ol class="ae-list">${d.priorities.map(item => `<li>${esc(item)}</li>`).join('')}</ol></div>`}
     <p class="ae-callout">Find your Daeva and this screen draws your own boards with the route on them. <a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a></p>`;
 }
 
@@ -627,7 +669,8 @@ function guideSteps(view, plan) {
     const bar = plan.skillBar;
     if (!bar || !bar.fromBlock) return [];
     const stacks = bar.stacks;
-    add(`Your right-hand block: stack A, your main attack (${bar.mainAttack}) on left click, then stack B. These two stacks are your macro.`, '#aeRightBlock');
+    const drawn = ['A', 'B'].filter(key => stacks[key].skills.length);
+    add(drawn.length === 2 ? `Your right-hand block: stack A, your main attack (${bar.mainAttack}) on left click, then stack B. These two stacks are your macro.` : `Your right-hand block: your main attack (${bar.mainAttack}) on left click, then ${keyName(drawn[0] ?? 'B').toLowerCase().replace(/^(?!stack)/, 'the ')} beside it. That is your macro.`, '#aeRightBlock');
     for (const key of ['A', 'B']) {
       const stack = stacks[key];
       if (!stack.skills.length) continue;
@@ -643,8 +686,9 @@ function guideSteps(view, plan) {
   } else if (view === 'macro') {
     const m = plan.macro;
     if (!m || m.pending) return [];
-    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add ${m.entries.length === 2 ? 'stack A, then stack B' : 'stack A'}, ${m.delayMs} ms delay each.`, '#aeMacroWindow');
-    if (m.entries[0]) add(`Entry 1 is stack A: ${m.entries[0].skills.map(skill => skill.name).join(', ')}. It fires the first one that is ready.`, '[data-macro-entry="1"]');
+    const named = key => keyName(key).toLowerCase().replace(/^(?!stack)/, 'the ');
+    add(`In game, open Skill, then Macro. Pick macro slot 1 and press Add Macro. Add ${m.entries.map(entry => named(entry.key)).join(', then ')}, ${m.delayMs} ms delay ${m.entries.length === 2 ? 'each' : 'after it'}.`, '#aeMacroWindow');
+    if (m.entries[0]) add(`Entry 1 is ${named(m.entries[0].key)}: ${m.entries[0].skills.map(skill => skill.name).join(', ')}. It fires the first one that is ready.`, '[data-macro-entry="1"]');
     if (m.later.length) add('These join the stacks as you level. They sit in place already.', '#aeMacroLater');
     add(`Hold the macro key and your main attack, ${m.mainAttack?.name ?? plan.skillBar.mainAttack}, together.`, '#aeMacroHold');
     if (m.opener.length) add(`Before the macro: ${m.opener.map(item => item.name).join(', then ')}.`, '#aeMacroOpener');
@@ -670,7 +714,8 @@ function guideSteps(view, plan) {
     if (!planner.split) add('Type the points you have. They show at the top of your Daevanion screen in game.', '#aePoints');
     const route = planner.split ? planner.split.now.length ? planner.split.now : planner.split.later : board.route;
     for (const step of route.slice(0, 5)) add(`Node ${step.step} on your route: take ${step.effects[0] || step.name}. ${step.target ? step.reason : `It is on the way to ${step.targetName}.`}`, `.ae-node[data-node="${CSS.escape(String(step.nodeId))}"]`, () => selectNode(step.nodeId));
-    if (planner.split?.shortBy && planner.split.now.length) add(`That is all your points. Node ${planner.split.now.length + 1} needs ${planner.split.shortBy} more.`, '#aeRouteSummary');
+    if (planner.split?.shortBy && planner.split.now.length) add(`That is all your points. Step ${planner.split.now.length + 1} needs ${planner.split.shortBy} more.`, '#aeRouteSummary');
+    if (state.plan.daevanion.roleRoute?.known) add('This is what the whole route adds: your key skills\' levels and the stats.', '#aeRouteTotal');
   }
   return steps;
 }
@@ -832,18 +877,78 @@ document.addEventListener('error', event => {
   else if (!img.classList.contains('ae-node-art')) img.remove();
 }, true);
 
+/**
+ * Reads the boards the role route needs (one Worker call each, cached for the visit). 'all' reads every open board (the
+ * Daevanion screen: points over every board); 'current' reads until the route's current board is read (the menu's move).
+ */
+async function readRouteBoards(mode) {
+  const model = state.model;
+  if (!model || mode === 'none') return;
+  const open = model.daevanion.filter(board => board.open);
+  const read = async board => {
+    if (Array.isArray(board.nodes) || planner.failed.has(board.id)) return;
+    try {
+      board.nodes = planner.nodes.get(board.id) ?? (await loadBoard(model, board)).nodes;
+      planner.nodes.set(board.id, board.nodes);
+    } catch (error) {
+      if (!(error instanceof ArmoryUnavailable)) throw error;
+      planner.failed.add(board.id);
+    }
+  };
+  if (mode === 'all') { await Promise.all(open.map(read)); return; }
+  for (let i = 0; i < open.length; i += 1) {
+    const current = buildAscentPlan({ className: state.className, role: state.role, team: state.team, level: state.level, data: state.data, model }).daevanion.roleRoute?.current;
+    const board = current && !current.read ? open.find(item => item.id === current.id) : null;
+    if (!board || planner.failed.has(board.id)) return;
+    await read(board);
+  }
+}
+
+/** The budget line: points spent over every board read, of the Season 1 budget, and what the planned route takes. */
+function budgetLine(route, budget) {
+  if (!route || !budget) return '';
+  const unread = route.boards.filter(board => board.open && !board.read).map(board => board.name);
+  return `<p class="ae-budget" id="aeBudget"><b>${esc(route.spent)}</b> of ${esc(budget.points)} points${unread.length ? ` on the boards read so far (${esc(unread.join(', '))} not read yet)` : ''}. ${route.known ? `This route takes ${esc(route.plannedCost)} more${route.left !== null ? `, ${esc(route.left)} left after it` : ''}.` : ''} ${statusTag({ status: budget.status }, 'daevanion-budget')}</p>`;
+}
+const BOARD_GROUPS = [['now', 'Now'], ['done', 'Done for your role'], ['later', 'Later']];
+
 function renderPlannerShell(plan) {
   if (!state.model) return renderBoardsByHand(plan);
   const open = plan.daevanion.boards.filter(board => board.open);
   if (!open.length) return `<p class="ae-callout">No board is open yet. ${esc(plan.daevanion.boards[0]?.name ?? 'Nezekan')} opens at Lv ${esc(plan.daevanion.boards[0]?.unlockLevel ?? 12)}.</p>`;
-  if (!open.some(board => board.id === planner.boardId)) planner.boardId = open[0].id;
+  const route = plan.daevanion.roleRoute;
+  if (!open.some(board => board.id === planner.boardId)) planner.boardId = route?.current?.id ?? open[0].id;
+  const rows = route?.boards ?? open.map(board => ({ ...board, status: 'later', pointsSpent: null, pointsTotal: null }));
+  // An open board is a tab with its points spent of its total; a board not open yet is listed under Later with its level.
+  const tab = board => (board.open
+    ? `<button type="button" role="tab" class="ae-planner-tab" data-board-tab="${esc(board.id)}" data-board-status="${esc(board.status)}" aria-selected="${board.id === planner.boardId}"><span>${esc(board.name)}</span> <small>${board.pointsSpent !== null ? `${esc(board.pointsSpent)} of ${esc(board.pointsTotal ?? '?')} points` : 'Not read yet'}</small></button>`
+    : `<span class="ae-planner-tab is-locked" data-board-locked="${esc(board.id)}"><span>${esc(board.name)}</span> <small>Opens at Lv ${esc(board.unlockLevel)}</small></span>`);
   return `<div class="ae-planner" id="aePlanner">
+    ${budgetLine(route, plan.daevanion.budget)}
     <div class="ae-planner-head">
-      <div class="ae-planner-tabs" role="tablist" aria-label="Daevanion boards">${open.map(board => `<button type="button" role="tab" class="ae-planner-tab" data-board-tab="${esc(board.id)}" aria-selected="${board.id === planner.boardId}">${esc(board.name)}</button>`).join('')}</div>
+      <div class="ae-board-groups" role="tablist" aria-label="Daevanion boards">${BOARD_GROUPS.map(([status, label]) => {
+        const list = rows.filter(board => board.status === status);
+        return `<div class="ae-board-group" data-board-group="${status}"><p class="ae-board-group-title">${esc(label)}</p>${list.length ? list.map(tab).join('') : `<p class="ae-muted ae-board-none">${status === 'done' ? 'None yet' : 'None'}</p>`}</div>`;
+      }).join('')}</div>
       <label class="ae-field ae-points"><span>Points you have</span><input id="aePoints" type="number" inputmode="numeric" min="0" max="999" step="1" placeholder="Top of your Daevanion screen"></label>
     </div>
     <div id="aePlannerBody"><p class="ae-muted">Reading the board.</p></div>
+    ${routeSummaryHtml(plan)}
   </div>`;
+}
+
+/** What the planned route adds over every board: each key skill's level, with Lv 16 flagged as needing gear, and the stats. */
+function routeSummaryHtml(plan) {
+  const route = plan.daevanion.roleRoute;
+  if (!route || !route.known) return '';
+  const cap = plan.masteryCap;
+  const skills = route.summary.skills;
+  return `<section class="ae-route-total" id="aeRouteTotal" aria-labelledby="aeRouteTotalTitle">
+    <h3 class="ae-mskills-title" id="aeRouteTotalTitle">This route adds</h3>
+    ${skills.length ? `<ul class="ae-route-skills">${skills.map(skill => `<li data-route-skill="${esc(skill.name)}"><b>${esc(skill.name)}</b> +${esc(skill.gained)} on this route${skill.level !== null ? `: Lv ${esc(skill.level)} with Mastery ${esc(cap)}${skill.taken ? ` and the ${esc(skill.taken)} you have` : ''}${skill.needsGearFor16 ? `. Lv 16 needs +${esc(16 - skill.level)} from a gear roll` : ''}` : ''}.</li>`).join('')}</ul>` : ''}
+    ${route.summary.stats.length ? `<p class="ae-route-stats" id="aeRouteStats">${esc(route.summary.stats.map(stat => stat.text).join(', '))}</p>` : ''}
+    <p class="ae-muted">Node costs come from the board totals. Check each cost in game before you spend.</p>
+  </section>`;
 }
 
 async function showBoard(boardId) {
@@ -882,7 +987,13 @@ function renderBoardPlan() {
   const nodes = planner.nodes.get(planner.boardId);
   if (!body || !nodes) return;
   const plan = state.plan;
-  const board = planDaevanionBoard({ nodes, skillOrder: plan.daevanion.skillNodes });
+  const full = planDaevanionBoard({ nodes, priorities: plan.daevanion.nodePriorities, include: 'all' });
+  // The steps the role route plans on this board, inside the budget, numbered from 1 here.
+  const row = plan.daevanion.roleRoute?.boards.find(item => item.id === planner.boardId) ?? null;
+  let running = 0;
+  const planned = (row?.planned ?? []).map((step, index) => { running += step.cost; return { ...step, step: index + 1, totalCost: running }; });
+  const stepOf = new Map(planned.map(step => [step.nodeId, step.step]));
+  const board = { ...full, route: planned, tiles: full.tiles.map(tile => ({ ...tile, step: stepOf.get(tile.nodeId) ?? null })) };
   planner.board = board;
   const points = readPoints(planner.boardId);
   const split = points === '' ? null : affordable(board.route, points);
@@ -898,11 +1009,14 @@ function renderBoardPlan() {
       <span class="ae-pick-level">${step.step}</span>
       <span><strong>${esc(step.effects[0] || step.name)}</strong><small>${step.target ? 'Goal' : `To reach ${esc(step.targetName)}`} · ${step.cost} ${step.cost === 1 ? 'point' : 'points'}${split ? '' : ` · ${step.totalCost} in total`}</small></span>
     </li>`;
-  const summary = split
-    ? (split.now.length
-        ? `You can take the next <b>${split.now.length}</b> ${split.now.length === 1 ? 'node' : 'nodes'} now (${split.now.at(-1).totalCost} of your ${esc(points)} points).${split.shortBy ? ` Step ${split.now.length + 1} needs ${split.shortBy} more ${split.shortBy === 1 ? 'point' : 'points'}.` : ' That finishes the route on this board.'}`
-        : (board.route.length ? `Step 1 needs ${split.shortBy} more ${split.shortBy === 1 ? 'point' : 'points'}.` : 'The route on this board is done.'))
-    : 'Enter the points you have (top of your Daevanion screen) to see which steps you can take now.';
+  const done = row?.status === 'done';
+  const summary = !board.route.length
+    ? (done ? 'Done for your role: every node your role needs on this board is taken.' : row?.status === 'later' && plan.daevanion.roleRoute?.current ? `Later: carry on with ${esc(plan.daevanion.roleRoute.current.name)} first.` : 'Nothing on the route here inside your points budget.')
+    : split
+      ? (split.now.length
+          ? `Your ${esc(points)} ${Number(points) === 1 ? 'point covers' : 'points cover'} the next <b>${split.now.length}</b> ${split.now.length === 1 ? 'step' : 'steps'}.${split.shortBy ? ` Step ${split.now.length + 1} needs ${split.shortBy} more ${split.shortBy === 1 ? 'point' : 'points'}.` : ' That covers the route on this board.'}`
+          : `Step 1 needs ${split.shortBy} ${split.shortBy === 1 ? 'point' : 'points'}${Number(points) > 0 ? ` (${split.shortBy} more than you have)` : ''}.`)
+      : 'Enter the points you have (top of your Daevanion screen) to see which steps you can take now.';
   const list = split ? [...split.now, ...split.later.slice(0, 6)] : board.route.slice(0, 12);
   body.innerHTML = `
     <div class="ae-planner-grid">
@@ -920,9 +1034,9 @@ function renderBoardPlan() {
       <div class="ae-route">
         <aside class="ae-node-panel" id="aeNodePanel" aria-live="polite"></aside>
         <p class="ae-route-summary" id="aeRouteSummary">${summary}</p>
-        <p class="ae-muted ae-route-meta">${board.takenCount} of ${board.totalNodes} nodes taken · ${board.pointsSpent} of ${board.pointsTotal} points spent · key skill nodes ${board.targets.skillsTaken} of ${board.targets.skills}</p>
-        ${board.route.length ? `<ol class="ae-route-list">${list.map(stepItem).join('')}</ol>${board.route.length > list.length ? `<p class="ae-muted">${board.route.length - list.length} more steps after these. Tap any numbered node on the board to see it.</p>` : ''}` : '<p class="ae-muted">Every key skill node and corner on this board is taken.</p>'}
-        <p class="ae-muted">Key skill nodes first, then the four corners. Check each cost in game before you spend.</p>
+        <p class="ae-muted ae-route-meta">${board.takenCount} of ${board.totalNodes} nodes taken · ${board.pointsSpent} of ${row?.pointsTotal ?? board.pointsTotal} points spent · nodes for your role ${board.roleTargets?.coreTaken ?? 0} of ${board.roleTargets?.core ?? 0}</p>
+        ${board.route.length ? `<ol class="ae-route-list">${list.map(stepItem).join('')}</ol>${board.route.length > list.length ? `<p class="ae-muted">${board.route.length - list.length} more steps after these. Tap any numbered node on the board to see it.</p>` : ''}` : ''}
+        <p class="ae-muted">Your role's nodes first, one board at a time, inside your points. Check each cost in game before you spend.</p>
       </div>
     </div>`;
   drawFlow();
@@ -976,8 +1090,10 @@ function selectNode(nodeId) {
 }
 
 function renderPlan() {
-  const plan = buildAscentPlan({ className: state.className, role: state.role, level: state.level, data: state.data, model: state.model });
+  const plan = buildAscentPlan({ className: state.className, role: state.role, team: state.team, level: state.level, data: state.data, model: state.model });
   state.plan = plan;
+  state.team = plan.team?.id ?? null;
+  fillTeamSelect(plan.team);
   if (state.model && (VIEW === 'mastery' || VIEW === 'menu')) queueMicrotask(() => readCapBoards().catch(fail));
   state.role = plan.role;
   fillRoleSelect(plan.roles, plan.role);
@@ -986,7 +1102,7 @@ function renderPlan() {
   $('#aeLevel').max = plan.levelCap;
   // With a Daeva linked the "Planning for ..." line already names it, its class and level: say it once.
   $('#aeAscentFor').hidden = Boolean(plan.character);
-  $('#aeAscentFor').textContent = `${plan.className} · ${plan.roleLabel} · Lv ${plan.level}`;
+  $('#aeAscentFor').textContent = `${plan.className} · ${plan.roleLabel}${plan.team ? ` · ${plan.team.label}` : ''} · Lv ${plan.level}`;
   const fallback = plan.roleFallback ? `<p class="ae-callout">${esc(plan.className)} has no ${esc(ROLES[plan.roleRequested] ?? plan.roleRequested)} build, so this shows its main role.</p>` : '';
   writeUrl();
   if (VIEW !== 'menu') {
@@ -1008,6 +1124,7 @@ function renderPlan() {
       <div>
         <p class="ae-eyebrow">${esc(plan.roleLabel)}${plan.build.main ? ' · main role' : ''}</p>
         <h2 class="ae-plan-title">${esc(plan.className)}: ${esc(plan.build.label)}</h2>
+        <p class="ae-role-line" id="aeRoleLine">${esc(roleLine(plan))}</p>
         <p>${esc(plan.build.summary)}</p>
       </div>
       <ul class="ae-chips" aria-label="Build facts">
@@ -1027,6 +1144,7 @@ async function selectClass(className) {
   state.data = await loadAdvisor(className);
   // A new class starts on its own main role: the old class's role may be a side build here.
   state.role = null;
+  state.team = null;
   renderPlan();
   $('#aePlan').setAttribute('aria-busy', 'false');
 }
@@ -1053,7 +1171,9 @@ function wireForm() {
     else renderPlan();
   });
   $('#aeClass').addEventListener('change', event => selectClass(event.target.value).catch(fail));
-  $('#aeRole').addEventListener('change', event => { state.role = event.target.value; renderPlan(); });
+  $('#aeRole').addEventListener('change', event => { state.role = event.target.value; state.team = null; renderPlan(); saveRole(); });
+  ensureTeamField();
+  $('#aeTeam')?.addEventListener('change', event => { state.team = event.target.value; renderPlan(); saveRole(); });
   const levelChanged = event => {
     const value = clampLevel(event.target.value, state.data?.progression);
     if (value === state.level && String(event.target.value) === String(value)) return;
@@ -1124,7 +1244,10 @@ async function start() {
   const active = roster.active();
   // A Daeva link wins; otherwise a manual class link; otherwise the active roster Daeva.
   state.ref = linked ?? (fromUrl.className ? null : active ? { serverId: active.serverId, characterId: active.characterId, region: active.region } : null);
-  state.role = fromUrl.role;
+  // The role and team: the address first, else what the player saved with this Daeva.
+  const picked = rolePick(state.ref);
+  state.role = fromUrl.role ?? (Object.keys(ROLES).includes(picked.role) ? picked.role : null);
+  state.team = fromUrl.team ?? (Object.keys(TEAMS).includes(picked.team) ? picked.team : null);
   const wantedBoard = Number(new URLSearchParams(location.search).get('board'));
   if (Number.isInteger(wantedBoard) && wantedBoard > 0) planner.boardId = wantedBoard;
   const wantedNode = Number(new URLSearchParams(location.search).get('node'));
@@ -1148,6 +1271,8 @@ async function start() {
   setFormLock();
   state.data = await loadAdvisor(state.className);
   state.level = clampLevel(state.level, state.data.progression);
+  // The Daevanion screen reads every open board (points over all of them); the menu reads until its move's board is read.
+  await readRouteBoards(VIEW === 'daevanion' ? 'all' : VIEW === 'menu' ? 'current' : 'none').catch(() => {});
   renderPlan();
   if (state.model) markCharacterShown();
   markReady();

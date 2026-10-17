@@ -310,7 +310,9 @@ await check('live: search to summary uses search then one character call',async(
 await check('a saved roster Daeva skips the intro and opens its own card',async()=>{
   const mine=saved(TEST_NAME,1308,'Meslamtaeda','eu',{characterId:info.profile.characterId});
   const {page,context,calls}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([mine]))}});
-  assert.deepEqual(calls,['/aion2/character'],'Straight to the saved Daeva');
+  // Role aware (17 Oct 2026): the first move reads its Daevanion board after the card is on screen (one call at most).
+  assert.deepEqual(calls.filter(path=>path!=='/aion2/daevanion'),['/aion2/character'],'Straight to the saved Daeva');
+  assert.ok(calls.filter(path=>path==='/aion2/daevanion').length<=1,'At most one board read, for the first move');
   assert.equal(await page.isHidden('#aeIntro'),true,'No intro for a returning visitor');
   assert.equal(await page.isHidden('#aeClasses'),true);
   assert.equal(await page.isVisible('#aeSummary'),true);
@@ -350,12 +352,13 @@ await check('old demo roster entries are dropped on read; real entries are kept 
   assert.equal('demo' in kept,false,'The old flag is not written back');
   assert.equal(store.active,null,'The dropped entry is no longer the active Daeva');
   assert.equal(await page.isHidden('#aeIntro'),true,'With the example gone, the first real saved Daeva opens instead');
-  assert.deepEqual(calls,['/aion2/character'],'One read, for that real Daeva');
+  assert.deepEqual(calls.filter(path=>path!=='/aion2/daevanion'),['/aion2/character'],'One read, for that real Daeva');
+  assert.ok(calls.filter(path=>path==='/aion2/daevanion').length<=1,'At most one board read, for the first move');
   assert.doesNotMatch(await page.textContent('#aeRoster'),/OLDEXAMPLE|example/i);
   assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1);
   // The real Daeva's own card is on screen (mocked live data), so only the gamer tag and the example words are ruled out here.
   assert.doesNotMatch(await visibleText(page),new RegExp(`${GAMER_TAG}|Example data|example Daeva`,'i'),'No gamer tag or example on the page');
-  assert.ok(calls.every(path=>path==='/aion2/character'),`Only the active Daeva's read: ${calls}`);
+  assert.ok(calls.every(path=>path==='/aion2/character'||path==='/aion2/daevanion'),`Only the active Daeva's read, and its first move's board: ${calls}`);
   await context.close();
   // The old v1 list is filed the same way.
   const v1={entries:[real,oldDemo],active:keyOf(oldDemo)};
@@ -815,7 +818,7 @@ await check('a Daeva already on screen stays on a failed read; Try again on the 
   await load.page.waitForFunction(()=>document.querySelector('#aeName')?.textContent);
   assert.equal(await load.page.textContent('#aeName'),TEST_NAME);
   assert.equal(await load.page.isHidden('#aeIntro'),true);
-  assert.deepEqual(load.calls,['/aion2/character','/aion2/character'],'The same read, once more');
+  assert.deepEqual(load.calls.filter(path=>path!=='/aion2/daevanion'),['/aion2/character','/aion2/character'],'The same read, once more');
   await load.context.close();
 });
 
@@ -1053,6 +1056,37 @@ await check('after a Daeva loads: the first move strip under the card shows the 
   await Promise.all([page.waitForURL(/\/ascent\/daevanion\//),page.click('[data-first-move]')]);
   await page.waitForSelector('.ae-board-grid');
   assert.equal(await page.getAttribute(`[data-board-tab="${top.board}"]`,'aria-selected'),'true','Show me opened the board the move names');
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
+await check('Daeva Card role line: class, build and team under the class line; Change picks role and team, saves them and the first move follows',async()=>{
+  // A saved Daeva (the roster keeps the role and team with it).
+  const saved0={name:'TESTDAEVA',serverId:1308,serverName:'Meslamtaeda',characterId:info.profile.characterId,className:'Gladiator',level:12,raceName:'Elyos',region:'eu'};
+  const {page,context,errors}=await open(`/hub/aetherium/?${daevaRef}`,{live:true,storage:{entries:[saved0],active:`1308:${info.profile.characterId}`}});
+  await page.waitForSelector('#aeFirstMove.is-ready');
+  assert.equal(await plainText(page,'#aeRoleLine'),'Gladiator · Greatsword bruiser DPS','Main role by default, no team for a build without variants');
+  const chips=await page.$eval('#aeSummary .ae-chips',el=>el.getBoundingClientRect().bottom),line=await page.$eval('#aeRolePick',el=>el.getBoundingClientRect().top);
+  assert.ok(line>=chips-0.5,'The role line sits under the class line');
+  assert.equal(await page.isHidden('#aeRoleForm'),true);
+  assert.ok((await page.$eval('#aeRoleChange',el=>el.getBoundingClientRect().height))>=44,'Change is a 44px target');
+  await page.click('#aeRoleChange');
+  await page.selectOption('#aeCardRole','tank');
+  assert.equal(await page.isVisible('#aeCardTeamField'),true,'The tank build has teams');
+  await page.selectOption('#aeCardTeam','main-tank');
+  await page.click('#aeRoleForm button[type="submit"]');
+  await page.waitForFunction(()=>document.querySelector('#aeRoleLine')?.textContent.includes('Tank with damage'));
+  assert.equal(await plainText(page,'#aeRoleLine'),'Gladiator · Tank with damage · Main tank, no Templar');
+  const saved=await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('aetherium.roster.v2')).rosters).flatMap(bucket=>bucket.entries)[0]);
+  assert.deepEqual([saved.role,saved.team],['tank','main-tank'],'Saved with the Daeva');
+  assert.match(await page.getAttribute('#aeAscentLink','href'),/role=tank&team=main-tank/,'The Ascent Plan link carries them');
+  assert.match(await page.getAttribute('[data-first-move]','href'),/role=tank&team=main-tank/,'and so does Show me');
+  assert.doesNotMatch(await plainText(page,'#aeFirstMoveText'),/Spend points on the \w+ and /,'Never two boards at once');
+  assert.match(page.url(),/role=tank&team=main-tank/,'The shareable address carries them');
+  await page.goto(`${base}/hub/aetherium/?${daevaRef}`);
+  await page.waitForSelector('#aeFirstMove.is-ready');
+  await page.waitForFunction(()=>document.querySelector('#aeRoleLine')?.textContent.includes('Tank with damage'));
+  assert.equal(await plainText(page,'#aeRoleLine'),'Gladiator · Tank with damage · Main tank, no Templar','Remembered for this Daeva with no role in the address');
   assert.deepEqual(errors,[]);
   await context.close();
 });
@@ -1535,7 +1569,8 @@ const overflowX=page=>page.evaluate(()=>document.documentElement.scrollWidth-doc
 
 await check('Daeva Card: the legion line only with data, and the slim row (title effects set, Daevanion overall)',async()=>{
   const {page,context,calls,errors}=await open(`/hub/aetherium/?${refOf(L45)}`,{live:true});
-  assert.deepEqual(calls,['/aion2/character'],'First paint is still one character call');
+  // Role aware: the first move reads its board after first paint, so only character reads are counted for it.
+  assert.deepEqual(calls.filter(path=>path!=='/aion2/daevanion'),['/aion2/character'],'First paint is still one character call');
   assert.equal(await plainText(page,'#aeLegion'),'Legion TESTLEGION');
   assert.equal(await plainText(page,'#aeFacts [data-fact="titles"]'),'Title effects 3 of 3 set');
   assert.equal(await plainText(page,'#aeFacts [data-fact="daevanion"]'),'Daevanion 20% overall');
