@@ -376,7 +376,7 @@ function enhanceHtml(slot) {
       : item.advice?.action === 'replace' ? '<b>Next:</b> nothing to enhance. Replace it with a Unique piece.'
         : item.partial ? '<b>Next:</b> reading this item\'s details.' : '<b>Next:</b> no enhance advice for this item yet.';
   const panels = { growth: growthPanel(slot, item), manastone: stonesPanel(slot, item), theostone: theostonePanel(slot), 'soul-binding': bindPanel(slot, item), transfer: transferPanel() };
-  const tabs = plan.tabs.map(tab => `<button type="button" role="tab" class="ae-planner-tab ae-etab${tab.id === item.next?.tab ? ' is-next' : ''}" id="aeEtab-${esc(tab.id)}" data-etab="${esc(tab.id)}" aria-controls="aeEpanel-${esc(tab.id)}" aria-selected="${tab.id === lit}" tabindex="${tab.id === lit ? 0 : -1}">${enhanceIcon(tab.id)}<span>${esc(tab.name)}</span></button>`).join('');
+  const tabs = plan.tabs.map(tab => `<button type="button" role="tab" class="ae-btn ae-planner-tab ae-etab${tab.id === item.next?.tab ? ' is-next' : ''}" id="aeEtab-${esc(tab.id)}" data-etab="${esc(tab.id)}" aria-controls="aeEpanel-${esc(tab.id)}" aria-selected="${tab.id === lit}" tabindex="${tab.id === lit ? 0 : -1}">${enhanceIcon(tab.id)}<span>${esc(tab.name)}</span></button>`).join('');
   const bodies = plan.tabs.map(tab => `<div class="ae-epanel" role="tabpanel" id="aeEpanel-${esc(tab.id)}" aria-labelledby="aeEtab-${esc(tab.id)}" tabindex="0"${tab.id === lit ? '' : ' hidden'}><p class="ae-epanel-purpose">${esc(tab.purpose)}</p>${panels[tab.id] ?? ''}</div>`).join('');
   return `<section class="ae-enhance" id="aeEnhancePanel" aria-labelledby="aeEnhanceHead">
       <p class="ae-item-sec" id="aeEnhanceHead">Enhance</p>

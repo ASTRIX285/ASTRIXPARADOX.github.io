@@ -18,6 +18,18 @@
   --ae-astrix:#ba1f12;--ae-astrix-hi:#e6391f;
   /* The strobe on tabs, tiles and buttons runs in a bright blue on every Aetherium page, whatever the faction. */
   --ae-strobe:#4fb6ff;--ae-strobe-hi:#bfe6ff;
+  /* AION 2's own selector buttons (Miguel, 17 Oct 2026): a dark navy panel, a thin pale-blue edge, a soft blue glow when lit,
+     gold for the chosen item (as the game marks a selected macro set or tab). Used by the one Aetherium button (.ae-btn). */
+  --ae-btn-top:#17253f;--ae-btn-bottom:#0b1428;--ae-btn-lit-top:#1d3052;--ae-btn-glow-top:#26406a;
+  --ae-btn-edge:#6f93bf;--ae-btn-edge-hi:#b9dcff;--ae-btn-glow:color-mix(in srgb,var(--ae-strobe) 32%,transparent);
+  --ae-btn-ink:#dfe8f6;--ae-btn-ink-dim:#7f8ca6;
+  --ae-btn-gold:var(--ae-gold);--ae-btn-gold-glow:color-mix(in srgb,var(--ae-gold) 30%,transparent);
+  /* The cylinder (Miguel, 17 Oct 2026: "cylinder looking buttons, not the square ones"): fully rounded ends, lit from above
+     with a light band near the top and shade along the bottom. Tall cards keep the same light with a softer round. */
+  --ae-btn-radius:999px;--ae-btn-card-radius:1.25rem;
+  --ae-btn-cylinder:linear-gradient(180deg,var(--ae-btn-lit-top) 0%,var(--ae-btn-top) 42%,var(--ae-btn-bottom) 100%);
+  --ae-btn-cylinder-lit:linear-gradient(180deg,var(--ae-btn-glow-top) 0%,var(--ae-btn-lit-top) 45%,var(--ae-btn-bottom) 100%);
+  --ae-btn-shine:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45);
   /* Page light: a cool glow top left (the strobe blue at 12%) and a warm one top right (gold at 6%). */
   --ae-glow-cool:color-mix(in srgb,var(--ae-strobe) 12%,transparent);--ae-glow-warm:color-mix(in srgb,var(--ae-gold) 6%,transparent);
   /* Game colours for Daevanion nodes and the skill bar legend. */
@@ -110,6 +122,11 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
   font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;text-decoration:none;cursor:pointer;color:var(--ae-text)}
 .aetherium-page :is(button,a.btn).ae-primary{font-size:.8125rem;letter-spacing:.04em;text-transform:uppercase}
 .aetherium-page button:disabled{cursor:default}
+/* The one Aetherium button's size and type (looks: "The one Aetherium button" at the end). Low specificity, so a
+   component's own layout (menu cards, roster cards, board buttons) wins over it. */
+.ae-btn{position:relative;display:inline-flex;align-items:center;gap:.5rem;box-sizing:border-box;min-height:44px;padding:0 1.125rem;
+  font:700 .8125rem/1.2 var(--ae-font-ui);letter-spacing:.02em;text-decoration:none;text-align:left;cursor:pointer}
+.ae-btn:is(select){width:100%;padding-right:2.25rem;appearance:none;-webkit-appearance:none;font:600 1rem/1.2 var(--ae-font-ui)}
 
 /* Search */
 .ae-search h1{margin:0 0 18px;font:400 clamp(1.375rem,3.2vw,2.25rem)/1.15 var(--ax-font-brand);letter-spacing:.01em;color:var(--ae-text)}
@@ -1512,23 +1529,14 @@ body.aetherium-page .ae-bar-cell:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4)
 .ae-mana-caps{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem}
 .ae-mana-caps li{padding:.375rem .75rem;background:var(--ae-raised);border:1px solid var(--ae-hairline);font-size:.9375rem}
 .ae-manastones p{margin:0;font-size:1rem}
-/* Daevanion inside the Season 1 budget: Now, Done for your role, Later, each board with its points. */
+/* Daevanion inside the Season 1 budget: the budget line over the board buttons (see "The board selector" at the end). */
 .ae-budget{margin:0 0 .75rem;font-size:1rem;line-height:1.5;color:var(--ae-text)}
 .ae-budget b{font:700 1.25rem/1 var(--ae-font-ui);color:var(--ae-gold);font-variant-numeric:tabular-nums}
-.ae-board-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;flex:1 1 auto;min-width:0}
-.ae-board-group{display:flex;flex-wrap:wrap;align-content:flex-start;gap:.375rem}
-.ae-board-group-title{flex:1 0 100%;margin:0;font:700 .875rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
-.ae-board-group .ae-planner-tab{display:grid;justify-items:start;gap:.125rem;min-height:2.75rem}
-.ae-board-group .ae-planner-tab small{font-size:.8125rem;color:var(--ae-text-muted);font-variant-numeric:tabular-nums}
-.ae-board-group[data-board-group="now"] .ae-board-group-title{color:var(--ae-gold)}
-.ae-board-none{margin:0;font-size:.875rem}
 .ae-route-total{display:grid;gap:.5rem;margin-top:1rem;padding:.75rem .875rem;background:var(--ae-well);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch)}
 .ae-route-skills{margin:0;padding-left:1.25rem;display:grid;gap:.25rem;font-size:1rem;line-height:1.45}
 .ae-route-stats{margin:0;font-size:1rem;line-height:1.45}
 .ae-route-total p{margin:0}
-@media (max-width:720px){.ae-board-groups{grid-template-columns:minmax(0,1fr)}}
 body.aetherium-page .ae-bar-cell.is-gap:not(#ax-q1):not(#ax-q2):not(#ax-q3):not(#ax-q4):not(#ax-q5):not(#ax-q6):not(#ax-q7){background:var(--ae-bar-dim)!important;border:1px dashed var(--ae-hairline-strong)!important}
-.ae-board-group .ae-planner-tab.is-locked{display:grid;gap:.125rem;align-content:center;min-height:2.75rem;padding:0 .875rem;font:700 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-dim);border:1px dashed var(--ae-hairline-strong)}
 #aeTeamField[hidden]{display:none!important}
 .ae-role-pick[hidden],.ae-role-form[hidden],#aeCardTeamField[hidden]{display:none!important}
 body.aetherium-page #aeRoleChange{display:inline-flex;align-items:center;min-height:2.75rem!important;padding:0 .5rem!important}
@@ -1607,3 +1615,55 @@ body.aetherium-page #aeRoleChange{display:inline-flex;align-items:center;min-hei
 .ae-eline.is-weak .ae-ebar i{background:var(--ae-warn)}
 .ae-ebar.is-unknown{background:none;border-style:dashed;border-color:var(--ae-hairline-strong)}
 .ae-tag.is-confirmed{color:var(--ae-manual);background:color-mix(in srgb,var(--ae-manual) 10%,transparent);border:1px solid color-mix(in srgb,var(--ae-manual) 45%,transparent)}
+/* The one Aetherium button (fix/aetherium-select-buttons, 17 Oct 2026): everything a player picks on these pages, in AION 2's
+   own colours. Default navy with a pale-blue edge, hover lit with a soft blue glow, selected gold, disabled dim, a blue focus
+   ring on the keyboard. A cylinder: rounded ends, light along the top, shade along the bottom. The shell's blue strobe stays. */
+@layer astrix-brand{
+html body.aetherium-page .ae-btn:not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  color:var(--ae-btn-ink)!important;border:0!important;border-radius:var(--ae-btn-radius)!important;clip-path:none!important;
+  background:var(--ae-btn-cylinder) var(--ae-btn-bottom)!important;
+  box-shadow:var(--ae-bevel),inset 0 0 0 1px var(--ae-btn-edge),var(--ae-btn-shine)!important;
+  transition:color var(--ae-ease),background-color var(--ae-ease),box-shadow var(--ae-ease)!important;filter:none!important}
+/* A picker (a native select) keeps its menu; a drawn chevron in the edge colour says it opens. */
+html body.aetherium-page select.ae-btn:not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  background:linear-gradient(45deg,transparent 50%,var(--ae-btn-edge-hi) 50%) no-repeat calc(100% - 1.125rem) 50%/.375rem .375rem,
+    linear-gradient(135deg,var(--ae-btn-edge-hi) 50%,transparent 50%) no-repeat calc(100% - .75rem) 50%/.375rem .375rem,
+    var(--ae-btn-cylinder) var(--ae-btn-bottom)!important}
+html body.aetherium-page select.ae-btn option{background:var(--ae-panel-solid);color:var(--ae-text)}
+html body.aetherium-page .ae-btn:hover:not(:disabled):not([aria-disabled="true"]):not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  color:var(--ae-text)!important;box-shadow:var(--ae-bevel),inset 0 0 0 1px var(--ae-btn-edge-hi),inset 0 0 14px var(--ae-btn-glow),var(--ae-btn-shine)!important}
+html body.aetherium-page .ae-btn:not(select):hover:not(:disabled):not([aria-disabled="true"]):not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  background:var(--ae-btn-cylinder-lit) var(--ae-btn-bottom)!important}
+/* Selected, current or pressed: gold, as the game marks the chosen tab or macro set. */
+html body.aetherium-page .ae-btn:is([aria-selected="true"],[aria-pressed="true"],[aria-current="page"],[aria-current="true"],[aria-current="step"],.is-selected):not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  color:var(--ae-btn-gold)!important;background:var(--ae-btn-cylinder-lit) var(--ae-btn-lit-top)!important;
+  box-shadow:var(--ae-bevel),inset 0 0 0 1px var(--ae-btn-gold),inset 0 0 16px var(--ae-btn-gold-glow),var(--ae-btn-shine)!important}
+html body.aetherium-page .ae-btn:is(:disabled,[aria-disabled="true"]):not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  cursor:default;color:var(--ae-btn-ink-dim)!important;background:var(--ae-well)!important;border-radius:var(--ae-btn-radius)!important;box-shadow:inset 0 0 0 1px var(--ae-hairline)!important}
+/* The keyboard ring sits inside the notch, so the corners never cut it. */
+html body.aetherium-page .ae-btn:focus-visible:not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9){
+  outline:0!important;box-shadow:var(--ae-bevel),inset 0 0 0 2px var(--ae-strobe),inset 0 0 14px var(--ae-btn-glow)!important}
+}
+
+/* The board selector: one button per board in route order, wrapping in one row. Icon, name, points bar and its tag. */
+.ae-board-picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem;flex:1 1 100%;min-width:0}
+.aetherium-page .ae-board-btn{display:grid;grid-template-columns:2rem minmax(0,1fr);grid-template-rows:auto auto auto;align-items:center;gap:.25rem .625rem;
+  min-height:3.75rem;padding:.5rem 1rem;width:100%;align-content:center}
+.ae-board-icon{grid-row:1/-1;width:2rem;height:2rem;object-fit:contain;align-self:center}
+.ae-board-icon:is(span){background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline)}
+.ae-board-name{display:flex;align-items:center;gap:.375rem;min-width:0;font:700 .875rem/1.2 var(--ae-font-ui);overflow-wrap:anywhere}
+.ae-board-tick{flex:0 0 auto;width:1rem;height:1rem;color:var(--ae-btn-edge-hi)}
+.ae-board-bar{display:block;height:4px;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline)}
+.ae-board-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--ae-btn-edge),var(--ae-btn-edge-hi))}
+.ae-board-btn[aria-selected="true"] .ae-board-bar>span{background:linear-gradient(90deg,var(--ae-gold-bottom),var(--ae-gold-top))}
+.ae-board-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.25rem .5rem;min-width:0}
+.ae-board-meta small{font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted);font-variant-numeric:tabular-nums}
+.ae-board-tag{padding:.125rem .5rem;border-radius:var(--ae-pill);font:700 .8125rem/1.2 var(--ae-font-ui);white-space:nowrap}
+.ae-board-tag[data-tag="now"]{color:var(--ae-gold-ink);background:var(--ae-gold)}
+.ae-board-tag[data-tag="not-needed"]{color:var(--ae-text-dim);border:1px solid var(--ae-hairline-strong)}
+.ae-board-btn:disabled .ae-board-icon{opacity:.45}
+.ae-board-btn:disabled .ae-board-meta{grid-row:2/-1}
+.ae-roster-switch select.ae-btn{width:auto}
+@layer astrix-brand{
+html body.aetherium-page :is(.ae-menu-card,.ae-roster-open,.ae-board-btn).ae-btn:not(#ae-b1):not(#ae-b2):not(#ae-b3):not(#ae-b4):not(#ae-b5):not(#ae-b6):not(#ae-b7):not(#ae-b8):not(#ae-b9):not(#ae-b10){border-radius:var(--ae-btn-card-radius)!important}
+}

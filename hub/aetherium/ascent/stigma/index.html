@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261017-3">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261017-4">
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/progression.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/skills.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/advisor/mechanics.json" as="fetch" crossorigin>
@@ -26,7 +26,7 @@
 
 "/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=46ccc96c1f",
 
-"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=afa4c97d0d",
+"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160",
 
 "/astrix-app/games/aion2/engine/level-planner.mjs":"/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1",
 
@@ -40,11 +40,11 @@
 
 "/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454",
 
-"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=4625e42e80",
+"/astrix-app/pages/aetherium/aetherium-guide.mjs":"/astrix-app/pages/aetherium/aetherium-guide.mjs?v=abb196f217",
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
 
-"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=51a4ade73b",
+"/astrix-app/pages/aetherium/ascent-plan.mjs":"/astrix-app/pages/aetherium/ascent-plan.mjs?v=40b4e0d516",
 
 "/astrix-app/pages/aetherium/daevanion-board.mjs":"/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad"
 }}
@@ -53,7 +53,7 @@
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=46ccc96c1f" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=afa4c97d0d" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1" data-head-hint>
 
@@ -67,14 +67,14 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=4625e42e80" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-guide.mjs?v=abb196f217" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=51a4ade73b" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/ascent-plan.mjs?v=40b4e0d516" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=51a4ade73b"></script>
+  <script type="module" src="/astrix-app/pages/aetherium/ascent-plan.mjs?v=40b4e0d516"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-view="stigma">
   <a class="ae-skip" href="#aeMain">Skip to Stigma</a>
@@ -128,8 +128,8 @@
         <p class="ae-source" id="aeSource" hidden></p>
       </div>
       <form class="ae-ascent-form" id="aeAscentForm">
-        <label class="ae-field"><span>Class</span><select id="aeClass" name="class"></select></label>
-        <label class="ae-field"><span>Role</span><select id="aeRole" name="role"></select></label>
+        <label class="ae-field"><span>Class</span><select class="ae-btn" id="aeClass" name="class"></select></label>
+        <label class="ae-field"><span>Role</span><select class="ae-btn" id="aeRole" name="role"></select></label>
         <label class="ae-field"><span>Level</span><input id="aeLevel" name="level" type="number" inputmode="numeric" min="1" max="45" step="1" value="1"></label>
         <button class="btn" type="submit">Show plan</button>
       </form>

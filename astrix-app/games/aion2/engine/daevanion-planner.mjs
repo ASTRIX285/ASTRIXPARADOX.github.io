@@ -321,8 +321,11 @@ const skillOfEffect = effect => /^(.+?)\s*\+\d+$/.exec(String(effect ?? ''))?.[1
  * The route for a role inside the Daevanion budget (Season 1: 415 points), across the boards in route order. Pure.
  * boards: [{ id, name, open, unlockLevel, nodes|null }] in route order. priorities: routePriorities. budget: { points, boardCost }.
  * Rules (Miguel, 17 Oct 2026): one board at a time in route order; a board is done for the role once the nodes its core
- * tiers ask for are taken, and the route moves on; spare (non-core) nodes come only after every board is done for the
- * role; nothing past the budget, nor past the points the player has (have). An open board not read yet stops the route there, so it never guesses.
+ * tiers ask for are taken, and the route moves on; spare (secondary) nodes come only after every board is done for the
+ * role, tier by tier in the record's order across the boards; nothing past the budget, nor past the points the player
+ * has (have). An open board not read yet stops the route there, so it never guesses. A board with no core nodes for the
+ * role is not needed for it (never done). While budget points remain there is one current board: the first board not done
+ * for the role, else the board holding the next secondary node.
  */
 export function planRoleRoute({ boards = [], priorities = [], budget = null, cap = null, skills: summarySkills = null, have = null }) {
   const points = Number.isFinite(budget?.points) ? budget.points : null;
@@ -331,10 +334,10 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
   const plans = new Map(read.map(board => [board.id, planDaevanionBoard({ nodes: board.nodes, priorities, include: 'core' })]));
   const spent = read.reduce((total, board) => total + plans.get(board.id).pointsSpent, 0);
   const known = read.length === open.length;
+  // The whole route inside the budget first; the points the player has (have) cut it afterwards, so the current board
+  // does not depend on what they typed.
   let left = points === null ? Infinity : points - spent;
-  // The points the player has to spend now (typed on the Daevanion screen): the route never plans past them.
-  if (Number.isFinite(have)) left = Math.min(left, Math.max(0, have));
-  const steps = [];
+  let steps = [];
   let stopped = null;
   const plan = (board, list, kind) => {
     for (const step of list) {
@@ -351,21 +354,37 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
     if (!plans.has(board.id)) { if (finished(board)) continue; stopped ??= { board: board.name, reason: 'unread' }; break; }
     if (!plan(board, plans.get(board.id).route, 'core')) break;
   }
-  // Spare pass: the non-core tiers, board by board, only once every board is done for the role and points remain.
+  // Spare pass, once every board is done for the role and points remain: the secondary tiers in the record's order
+  // (the tank: Defence and HP, then Multi-Hit, then Cooldown Reduction), each tier across the boards in route order.
   if (!stopped && known) {
-    for (const board of read) {
-      const taken = new Set(steps.filter(step => step.boardId === board.id).map(step => step.nodeId));
-      const after = board.nodes.map(node => (taken.has(node.nodeId) ? { ...node, taken: true } : node));
-      const spare = planDaevanionBoard({ nodes: after, priorities: priorities.filter(tier => !tier.core), include: 'all' }).route;
-      if (!plan(board, spare, 'spare')) break;
+    const taken = new Map(read.map(board => [board.id, new Set(steps.filter(step => step.boardId === board.id).map(step => step.nodeId))]));
+    spare: for (const tier of priorities.filter(item => !item.core)) {
+      for (const board of read) {
+        const own = taken.get(board.id);
+        const after = board.nodes.map(node => (own.has(node.nodeId) ? { ...node, taken: true } : node));
+        const route = planDaevanionBoard({ nodes: after, priorities: [tier], include: 'all' }).route;
+        if (!plan(board, route, 'spare')) break spare;
+        route.forEach(step => own.add(step.nodeId));
+      }
     }
   }
+  const whole = steps;
+  // The points the player has to spend now (typed on the Daevanion screen): the route never plans past them.
+  if (Number.isFinite(have)) {
+    let room = Math.max(0, have);
+    const index = whole.findIndex(step => { if (step.cost > room) return true; room -= step.cost; return false; });
+    if (index >= 0) { steps = whole.slice(0, index); stopped = { board: whole[index].boardName, reason: 'budget' }; }
+  }
   // The current board: the first open board, in route order, that is read and not done for the role, or not read yet and
-  // not finished by its counts (a finished board is never current).
-  const current = open.find(board => (plans.has(board.id) ? !plans.get(board.id).doneForRole : !finished(board))) ?? null;
+  // not finished by its counts (a finished board is never current). Once every board is done for the role, the board
+  // holding the next secondary node, while points remain in the budget.
+  const core = open.find(board => (plans.has(board.id) ? !plans.get(board.id).doneForRole : !finished(board))) ?? null;
+  const nextSpare = core ? null : whole.find(step => step.kind === 'spare') ?? null;
+  const current = core ?? (nextSpare ? open.find(board => board.id === nextSpare.boardId) : null);
+  const notNeeded = p => Boolean(p && p.roleTargets.core === 0);
   const rows = boards.map(board => {
     const p = plans.get(board.id) ?? null;
-    const status = !board.open ? 'later' : board === current ? 'now' : p?.doneForRole ? 'done' : 'later';
+    const status = !board.open ? 'later' : board === current ? 'now' : notNeeded(p) ? 'not-needed' : p?.doneForRole ? 'done' : 'later';
     return {
       id: board.id, name: board.name, open: Boolean(board.open), unlockLevel: board.unlockLevel ?? null, read: Boolean(p), status,
       pointsSpent: p ? p.pointsSpent : null, pointsTotal: boardTotal(board, p, budget?.boardCost), doneForRole: p ? p.doneForRole : null,
@@ -398,6 +417,8 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
   return {
     budget: points, spent, known, plannedCost, have: Number.isFinite(have) ? have : null, left: points === null ? null : points - spent - plannedCost,
     current: current ? { id: current.id, name: current.name, read: plans.has(current.id) } : null,
+    // No current board: nothing more fits the budget, so every point of it is planned.
+    allPlanned: current === null && points !== null && open.length > 0,
     boards: rows, steps, stopped,
     summary: { skills, stats: [...stats.values()].map(item => ({ ...item, text: `${item.name} ${item.total < 0 ? '-' : '+'}${Math.abs(item.total)}${item.unit}` })) }
   };

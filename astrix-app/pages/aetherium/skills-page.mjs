@@ -178,7 +178,7 @@ function render({ model, ref }, data) {
   }
   $('#aeStage').innerHTML = `<div class="ae-gw ae-skills-window" data-view="skills">
     ${windowBar({ title: 'Skill', model, ref })}
-    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Skill tabs">${Object.entries(TABS).map(([key, label]) => `<button type="button" role="tab" class="ae-gw-tab" data-tab="${key}" aria-selected="${key === tabFromUrl()}">${label}</button>`).join('')}</div>
+    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Skill tabs">${Object.entries(TABS).map(([key, label]) => `<button type="button" role="tab" class="ae-btn ae-gw-tab" data-tab="${key}" aria-selected="${key === tabFromUrl()}">${label}</button>`).join('')}</div>
     <div class="ae-gw-body">
       <div class="ae-skills-layout">
         <aside class="ae-sdetail" id="aeSkillDetail" aria-live="polite"></aside>

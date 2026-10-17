@@ -56,7 +56,7 @@ function pickerHtml(side, current) {
   const options = saved.map(entry => ({ key: compareKey(entry), label: entryLabel(entry) }));
   if (current && !saved.some(entry => sameDaeva(entry, current))) options.unshift({ key: compareKey(current), label: 'Daeva from the link' });
   return `<label class="ae-field ae-cmp-pick"><span>${side === 'a' ? 'Left' : 'Right'}</span>
-      <select id="aeCmp-${side}" name="compare-${side}" data-compare-pick="${side}">
+      <select class="ae-btn" id="aeCmp-${side}" name="compare-${side}" data-compare-pick="${side}">
         <option value="">Pick a Daeva</option>
         ${options.map(option => `<option value="${esc(option.key)}"${current && option.key === compareKey(current) ? ' selected' : ''}>${esc(option.label)}</option>`).join('')}
       </select></label>`;

@@ -1356,14 +1356,21 @@ await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs,
   }
   for(const selector of ['.ae-tile','.ae-roster-open']){
     const look=await lookOf(page,selector);
-    assert.match(look.clip,/^polygon\(/,`${selector} is notched`);
+    // Cylinder buttons (Miguel, 17 Oct 2026): a roster entry is a rounded button; the stat tile keeps its notch.
+    if(selector==='.ae-roster-open')assert.ok(look.clip==='none'&&parseFloat(look.radius)>=20,`${selector} is a rounded cylinder (${look.clip}, ${look.radius})`);
+    else assert.match(look.clip,/^polygon\(/,`${selector} is notched`);
     assert.match(look.shadow,/inset 1px 1px 0px rgba\(255, 255, 255, 0\.07\), rgba\(0, 0, 0, 0\.45\) -1px -1px 0px inset|rgba\(255, 255, 255, 0\.07\) 1px 1px 0px 0px inset, rgba\(0, 0, 0, 0\.45\) -1px -1px 0px 0px inset/,`${selector} has the raised bevel (${look.shadow})`);
   }
   const notch=await lookOf(page,'.ae-panel','::before');
   assert.equal(notch.content,'""','The panel has its notched corner');
   assert.match(notch.image,/linear-gradient\(to (bottom left|left bottom)/,'drawn at the top-right corner');
   // Squared surfaces: no radius on bars, buttons, inputs, tabs, tiles and panels. Pills only on chips and counts.
-  for(const selector of ['.ae-panel','#aeFind','#aeAscentLink','#aeNameInput','#aeServer','.ae-roster-open','.ae-tile','#aeSource','[data-forge-destination-ribbon] a[aria-current="page"]','.ae-roster-remove','.ae-portrait','.ae-roster-class']){
+  // Cylinder buttons (Miguel, 17 Oct 2026): what a player picks (the server picker, a roster entry) is a rounded cylinder.
+  for(const selector of ['#aeServer','.ae-roster-open']){
+    const look=await lookOf(page,selector);
+    assert.ok(parseFloat(look.radius)>=Math.min(look.height/2,20),`${selector} is a cylinder (${look.radius} on ${look.height}px)`);
+  }
+  for(const selector of ['.ae-panel','#aeFind','#aeAscentLink','#aeNameInput','.ae-tile','#aeSource','[data-forge-destination-ribbon] a[aria-current="page"]','.ae-roster-remove','.ae-portrait','.ae-roster-class']){
     assert.equal((await lookOf(page,selector)).radius,'0px',`${selector} is squared`);
   }
   for(const selector of ['.ae-chips li','#aeRosterCount']){

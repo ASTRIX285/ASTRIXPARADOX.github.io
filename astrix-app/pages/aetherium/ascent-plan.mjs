@@ -47,7 +47,7 @@ function ensureTeamField() {
   if ($('#aeTeam')) return;
   const role = $('#aeRole')?.closest('.ae-field');
   if (!role) return;
-  role.insertAdjacentHTML('afterend', '<label class="ae-field" id="aeTeamField" hidden><span>Team</span><select id="aeTeam" name="team"></select></label>');
+  role.insertAdjacentHTML('afterend', '<label class="ae-field" id="aeTeamField" hidden><span>Team</span><select class="ae-btn" id="aeTeam" name="team"></select></label>');
 }
 function fillTeamSelect(team) {
   ensureTeamField();
@@ -239,13 +239,13 @@ function renderMenu(plan) {
     ${setupStrip(plan)}
     <h2 class="ae-section-title ae-glance-title" id="aeGlanceTitle">Your plan at a glance</h2>
     <nav class="ae-menu" aria-label="Plan screens" aria-describedby="aeGlanceTitle">
-      ${Object.entries(VIEWS).map(([view, info]) => `<a class="ae-menu-card" href="${esc(viewHref(view))}" data-view="${view}" title="${esc(info.blurb)}">
+      ${Object.entries(VIEWS).map(([view, info]) => `<a class="ae-btn ae-menu-card" href="${esc(viewHref(view))}" data-view="${view}" title="${esc(info.blurb)}">
         <span class="ae-menu-art" data-fallback="${view}">${viewArt(view, plan)}</span>
         <span class="ae-menu-name">${esc(info.title)}</span>
         <span class="ae-menu-status">${esc(viewStatus(view, plan))}</span>
         ${todo(view) ? `<span class="ae-menu-badge" aria-label="${todo(view)} to do">${todo(view)}</span>` : ''}
       </a>`).join('')}
-      <a class="ae-menu-card is-gear" href="${esc(viewHref('gear'))}" data-view="gear">
+      <a class="ae-btn ae-menu-card is-gear" href="${esc(viewHref('gear'))}" data-view="gear">
         <span class="ae-menu-art">${ICON.gear}</span>
         <span class="ae-menu-name">Gear</span>
         <span class="ae-menu-status">${plan.character ? 'Your worn items' : 'Find your Daeva'}</span>
@@ -298,7 +298,7 @@ function gameWindow(view, plan, body) {
       <p class="ae-gw-who" id="aeGwWho">${esc(plan.className)} · ${esc(plan.roleLabel)}${plan.team ? ` · ${esc(plan.team.label)}` : ''} · Lv ${esc(plan.level)}${plan.character ? ` · ${esc(plan.character.name)}` : ''}</p>
       ${state.source ? `<p class="ae-gw-source">${esc(sourceLabel(state.source))}</p>` : ''}
     </div>
-    <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
+    <nav class="ae-gw-tabs" aria-label="Plan screens">${Object.entries(VIEWS).map(([key, info]) => `<a class="ae-btn" href="${esc(viewHref(key))}" data-view="${key}"${key === view ? ' aria-current="page"' : ''}>${esc(info.title)}</a>`).join('')}</nav>
     <p class="ae-gw-why" id="aeWhy">${esc(VIEWS[view].why)}</p>
     ${setupStrip(plan)}
     <div class="ae-gw-body">${body}</div>
@@ -961,7 +961,24 @@ function budgetLine(route, budget) {
   const unread = route.boards.filter(board => board.open && !board.read).map(board => board.name);
   return `<p class="ae-budget" id="aeBudget"><b>${esc(route.spent)}</b> of ${esc(budget.points)} points${unread.length ? ` on the boards read so far (${esc(unread.join(', '))} not read yet)` : ''}. ${route.known ? `This route takes ${esc(route.plannedCost)} more${route.left !== null ? `, ${esc(route.left)} left after it` : ''}.` : ''} ${statusTag({ status: budget.status }, 'daevanion-budget')}</p>`;
 }
-const BOARD_GROUPS = [['now', 'Now'], ['done', 'Done for your role'], ['later', 'Later']];
+const BOARD_TICK = '<svg class="ae-board-tick" viewBox="0 0 16 16" role="img" aria-label="Done for your role"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/** One board button: its official icon, its name, its points spent of its total as a bar, and its tag (Now, a tick, Not needed). */
+function boardButton(board, icon) {
+  const art = icon ? `<img class="ae-board-icon" src="${esc(icon)}" alt="" width="32" height="32" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-board-icon" aria-hidden="true"></span>';
+  if (!board.open) {
+    return `<button type="button" class="ae-btn ae-planner-tab ae-board-btn" data-board-locked="${esc(board.id)}" disabled>${art}<span class="ae-board-name">${esc(board.name)}</span><span class="ae-board-meta"><small>Opens at Lv ${esc(board.unlockLevel)}</small></span></button>`;
+  }
+  const known = board.pointsSpent !== null && Number.isFinite(board.pointsTotal);
+  const share = known && board.pointsTotal > 0 ? Math.min(100, Math.round((board.pointsSpent / board.pointsTotal) * 100)) : 0;
+  const tag = board.status === 'now' ? '<span class="ae-board-tag" data-tag="now">Now</span>'
+    : board.status === 'not-needed' ? '<span class="ae-board-tag" data-tag="not-needed">Not needed</span>' : '';
+  return `<button type="button" role="tab" class="ae-btn ae-planner-tab ae-board-btn" data-board-tab="${esc(board.id)}" data-board-status="${esc(board.status)}" aria-selected="${board.id === planner.boardId}">
+      ${art}<span class="ae-board-name">${esc(board.name)}${board.status === 'done' ? BOARD_TICK : ''}</span>
+      <span class="ae-board-bar" aria-hidden="true"><span style="width:${share}%"></span></span>
+      <span class="ae-board-meta"><small>${known ? `${esc(board.pointsSpent)} / ${esc(board.pointsTotal)}` : 'Not read yet'}</small> ${tag}</span>
+    </button>`;
+}
 
 function renderPlannerShell(plan) {
   if (!state.model) return renderBoardsByHand(plan);
@@ -969,18 +986,14 @@ function renderPlannerShell(plan) {
   if (!open.length) return `<p class="ae-callout">No board is open yet. ${esc(plan.daevanion.boards[0]?.name ?? 'Nezekan')} opens at Lv ${esc(plan.daevanion.boards[0]?.unlockLevel ?? 12)}.</p>`;
   const route = plan.daevanion.roleRoute;
   if (!open.some(board => board.id === planner.boardId)) planner.boardId = route?.current?.id ?? open[0].id;
-  const rows = route?.boards ?? open.map(board => ({ ...board, status: 'later', pointsSpent: null, pointsTotal: null }));
-  // An open board is a tab with its points spent of its total; a board not open yet is listed under Later with its level.
-  const tab = board => (board.open
-    ? `<button type="button" role="tab" class="ae-planner-tab" data-board-tab="${esc(board.id)}" data-board-status="${esc(board.status)}" aria-selected="${board.id === planner.boardId}"><span>${esc(board.name)}</span> <small>${board.pointsSpent !== null ? `${esc(board.pointsSpent)} of ${esc(board.pointsTotal ?? '?')} points` : 'Not read yet'}</small></button>`
-    : `<span class="ae-planner-tab is-locked" data-board-locked="${esc(board.id)}"><span>${esc(board.name)}</span> <small>Opens at Lv ${esc(board.unlockLevel)}</small></span>`);
+  const rows = route?.boards ?? plan.daevanion.boards.map(board => ({ ...board, status: 'later', pointsSpent: null, pointsTotal: null }));
+  const icons = new Map((state.model.daevanion ?? []).map(board => [board.id, board.icon]));
+  // Every board is a button in route order; its tag says where it stands, so there are no group headings.
   return `<div class="ae-planner" id="aePlanner">
     ${budgetLine(route, plan.daevanion.budget)}
+    ${route?.allPlanned ? `<p class="ae-callout" id="aeAllPlanned">All ${esc(route.budget)} points planned.</p>` : ''}
     <div class="ae-planner-head">
-      <div class="ae-board-groups" role="tablist" aria-label="Daevanion boards">${BOARD_GROUPS.map(([status, label]) => {
-        const list = rows.filter(board => board.status === status);
-        return `<div class="ae-board-group" data-board-group="${status}"><p class="ae-board-group-title">${esc(label)}</p>${list.length ? list.map(tab).join('') : `<p class="ae-muted ae-board-none">${status === 'done' ? 'None yet' : 'None'}</p>`}</div>`;
-      }).join('')}</div>
+      <div class="ae-board-picks" role="tablist" aria-label="Daevanion boards">${rows.map(board => boardButton(board, icons.get(board.id))).join('')}</div>
       <label class="ae-field ae-points"><span>Points you have</span><input id="aePoints" type="number" inputmode="numeric" min="0" max="999" step="1" placeholder="Top of your Daevanion screen"></label>
     </div>
     <div id="aePlannerBody"><p class="ae-muted">Reading the board.</p></div>
@@ -1062,7 +1075,7 @@ function renderBoardPlan() {
     </li>`;
   const done = row?.status === 'done';
   const summary = !board.route.length
-    ? (done ? 'Done for your role: every node your role needs on this board is taken.' : row?.status === 'later' && plan.daevanion.roleRoute?.current ? `Later: carry on with ${esc(plan.daevanion.roleRoute.current.name)} first.` : 'Nothing on the route here inside your points budget.')
+    ? (done ? 'Done for your role: every node your role needs on this board is taken.' : row?.status === 'not-needed' ? 'Not needed for your role: this board has none of the nodes your role takes first.' : row?.status === 'later' && plan.daevanion.roleRoute?.current ? `Later: carry on with ${esc(plan.daevanion.roleRoute.current.name)} first.` : 'Nothing on the route here inside your points budget.')
     : split
       ? (split.now.length
           ? `Your ${esc(points)} ${Number(points) === 1 ? 'point covers' : 'points cover'} the next <b>${split.now.length}</b> ${split.now.length === 1 ? 'step' : 'steps'}.${split.shortBy ? ` Step ${split.now.length + 1} needs ${split.shortBy} more ${split.shortBy === 1 ? 'point' : 'points'}.` : ' That covers the route on this board.'}`
