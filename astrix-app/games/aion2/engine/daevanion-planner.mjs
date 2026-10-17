@@ -173,7 +173,13 @@ export function planDaevanionBoard({ nodes, skillOrder = [], priorities = null, 
 
   const skillDone = skillTargets.filter(id => cells.get(id).taken).length;
   const roleIds = tierTargets.flatMap(item => item.ids);
-  const coreIds = tierTargets.filter(item => item.tier.core).flatMap(item => item.ids);
+  // A tier marked countOnPath (the tank's Defence and HP, Miguel 17 Oct 2026) counts towards done for the role where its
+  // nodes sit on the way to a core node: the route passes through them anyway.
+  const onPath = (priorities ?? []).filter(tier => tier.countOnPath);
+  const matchOf = step => onPath.find(tier => nodeMatches(cells.get(key(step.row, step.col)), tier)) ?? null;
+  const pathIds = onPath.length ? route.filter(step => !step.target && matchOf(step)).map(step => key(step.row, step.col)) : [];
+  for (const step of route) if (pathIds.includes(key(step.row, step.col))) step.onPathTier = matchOf(step).tier;
+  const coreIds = [...tierTargets.filter(item => item.tier.core).flatMap(item => item.ids), ...pathIds];
   return {
     // Role route only: a board is done for the role once every node its core tiers ask for is taken.
     doneForRole: tiers ? coreIds.every(id => cells.get(id).taken) : null,
@@ -336,9 +342,11 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
     }
     return true;
   };
-  // Core pass, one board at a time. An open board not read yet stops it: the next node may be there.
+  const finished = board => Number.isFinite(board.nodesTaken) && Number.isFinite(board.nodesTotal) && board.nodesTaken >= board.nodesTotal;
+  // Core pass, one board at a time. An open board not read yet stops it (the next node may be there), unless its counts
+  // say it is finished: nothing is left to take on it.
   for (const board of open) {
-    if (!plans.has(board.id)) { stopped ??= { board: board.name, reason: 'unread' }; break; }
+    if (!plans.has(board.id)) { if (finished(board)) continue; stopped ??= { board: board.name, reason: 'unread' }; break; }
     if (!plan(board, plans.get(board.id).route, 'core')) break;
   }
   // Spare pass: the non-core tiers, board by board, only once every board is done for the role and points remain.
@@ -350,7 +358,9 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
       if (!plan(board, spare, 'spare')) break;
     }
   }
-  const current = open.find(board => plans.has(board.id) && !plans.get(board.id).doneForRole) ?? open.find(board => !plans.has(board.id)) ?? null;
+  // The current board: the first open board, in route order, that is read and not done for the role, or not read yet and
+  // not finished by its counts (a finished board is never current).
+  const current = open.find(board => (plans.has(board.id) ? !plans.get(board.id).doneForRole : !finished(board))) ?? null;
   const rows = boards.map(board => {
     const p = plans.get(board.id) ?? null;
     const status = !board.open ? 'later' : board === current ? 'now' : p?.doneForRole ? 'done' : 'later';

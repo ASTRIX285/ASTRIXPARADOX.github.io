@@ -19,7 +19,7 @@ import { affordable, explainNode, planDaevanionBoard } from '/astrix-app/games/a
 import { KIND_LABEL, boardGridStyle, nodeArt as boardNodeArt, nodeImg as boardNodeImg, nodeTileHtml } from './daevanion-board.mjs';
 
 const state = { model: null, source: null, ref: null, className: 'Gladiator', role: null, team: null, level: 1, data: null, plan: null };
-const planner = { boardId: null, nodes: new Map(), failed: new Set(), selected: null, board: null, split: null, observer: null };
+const planner = { boardId: null, nodes: new Map(), reading: new Map(), failed: new Set(), selected: null, board: null, split: null, observer: null };
 const POINTS_KEY = 'aetherium.daevanionPoints.v1';
 
 const BEGINNER = { 'very high': 'Very easy to learn', high: 'Easy to learn', medium: 'Medium to learn', low: 'Hard to learn' };
@@ -888,7 +888,7 @@ async function readRouteBoards(mode) {
   const read = async board => {
     if (Array.isArray(board.nodes) || planner.failed.has(board.id)) return;
     try {
-      board.nodes = planner.nodes.get(board.id) ?? (await loadBoard(model, board)).nodes;
+      board.nodes = planner.nodes.get(board.id) ?? (await readBoardOnce(model, board)).nodes;
       planner.nodes.set(board.id, board.nodes);
     } catch (error) {
       if (!(error instanceof ArmoryUnavailable)) throw error;
@@ -896,12 +896,16 @@ async function readRouteBoards(mode) {
     }
   };
   if (mode === 'all') { await Promise.all(open.map(read)); return; }
-  for (let i = 0; i < open.length; i += 1) {
-    const current = buildAscentPlan({ className: state.className, role: state.role, team: state.team, level: state.level, data: state.data, model }).daevanion.roleRoute?.current;
-    const board = current && !current.read ? open.find(item => item.id === current.id) : null;
-    if (!board || planner.failed.has(board.id)) return;
-    await read(board);
-  }
+  // The menu reads only the route's current board, as the Daeva Card does, so both name the same move.
+  const current = buildAscentPlan({ className: state.className, role: state.role, team: state.team, level: state.level, data: state.data, model }).daevanion.roleRoute?.current;
+  const board = current && !current.read ? open.find(item => item.id === current.id) : null;
+  if (board) await read(board);
+}
+
+/** One read per board for the visit, shared by the route reads and the board on screen (never two calls for one board). */
+function readBoardOnce(model, board) {
+  if (!planner.reading.has(board.id)) planner.reading.set(board.id, loadBoard(model, board).catch(error => { planner.reading.delete(board.id); throw error; }));
+  return planner.reading.get(board.id);
 }
 
 /** The budget line: points spent over every board read, of the Season 1 budget, and what the planned route takes. */
@@ -963,7 +967,7 @@ async function showBoard(boardId) {
     body.innerHTML = '<p class="ae-muted">Reading the board.</p>';
     const board = state.model.daevanion.find(item => item.id === boardId);
     let result;
-    try { result = await loadBoard(state.model, board); }
+    try { result = await readBoardOnce(state.model, board); }
     catch (error) {
       if (!(error instanceof ArmoryUnavailable)) throw error;
       result = { nodes: null, reason: explain(error, 'The official AION 2 site is not answering right now. Pick the board again in a minute.') };
@@ -1043,6 +1047,8 @@ function renderBoardPlan() {
   if (planner.observer) planner.observer.disconnect();
   if (typeof ResizeObserver === 'function') { planner.observer = new ResizeObserver(drawFlow); planner.observer.observe($('#aeBoardStage')); }
   const next = (split?.now[0] ?? split?.later[0] ?? board.route[0]);
+  // A selection the page made itself (not the player) follows the route when it is drawn again.
+  planner.auto = !planner.selected;
   selectNode(planner.selected ?? next?.nodeId ?? board.tiles.find(tile => tile.kind === 'start')?.nodeId);
   if (VIEW === 'daevanion') startGuide(VIEW, plan);
 }
@@ -1204,7 +1210,7 @@ function wireForm() {
     const tab = event.target.closest('[data-board-tab]');
     if (tab) { showBoard(Number(tab.dataset.boardTab)).catch(fail); return; }
     const node = event.target.closest('[data-node],[data-route-node]');
-    if (node) selectNode(node.dataset.node ?? node.dataset.routeNode);
+    if (node) { planner.auto = false; selectNode(node.dataset.node ?? node.dataset.routeNode); }
   });
   $('#aePlan').addEventListener('keydown', event => {
     const skill = event.target.closest?.('[data-mastery]');
@@ -1271,11 +1277,21 @@ async function start() {
   setFormLock();
   state.data = await loadAdvisor(state.className);
   state.level = clampLevel(state.level, state.data.progression);
-  // The Daevanion screen reads every open board (points over all of them); the menu reads until its move's board is read.
-  await readRouteBoards(VIEW === 'daevanion' ? 'all' : VIEW === 'menu' ? 'current' : 'none').catch(() => {});
   renderPlan();
   if (state.model) markCharacterShown();
   markReady();
+  // Never before first paint: the Daevanion screen reads every open board in parallel (points over all of them), the
+  // menu reads its move's current board; then the plan draws again. data-ae-boards="read" says the reads are done.
+  const mode = VIEW === 'daevanion' ? 'all' : VIEW === 'menu' ? 'current' : 'none';
+  if (state.model && mode !== 'none') {
+    readRouteBoards(mode).catch(() => {}).then(() => {
+      if (planner.auto) planner.selected = null;
+      if (state.model) renderPlan();
+      document.documentElement.dataset.aeBoards = 'read';
+      // The menu drew again with its move's board read: the first-visit guide comes back on the new page.
+      if (VIEW === 'menu') firstVisitGuide();
+    });
+  } else document.documentElement.dataset.aeBoards = 'read';
   firstVisitGuide();
 }
 

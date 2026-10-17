@@ -585,8 +585,10 @@ export function daevanionMove(boards) {
     const text = steps[goal].effects?.[0] || steps[goal].name;
     return { board, title: `${board.nodesTaken === 0 ? `Start ${board.name}` : `Carry on with ${board.name}`}: ${text} next (${goal + 1} ${goal ? 'steps' : 'step'})`, detail: `${board.name} is your board now. Work one board at a time: the route moves on once its nodes for your role are taken.` };
   }
-  // Not read yet: the first open board, in route order, that still has nodes to take (a finished board is never the move).
-  const board = boards?.boards?.find(item => item.open && (item.nodesTaken === null || item.nodesTotal === null || item.nodesTaken < item.nodesTotal));
+  // Not read yet: the route's current board (a board read and done for the role, or finished by its counts, is skipped);
+  // with no route, the first open board in route order that still has nodes to take.
+  const board = route ? (route.current ? boards.boards.find(item => item.id === route.current.id) : null)
+    : boards?.boards?.find(item => item.open && (item.nodesTaken === null || item.nodesTotal === null || item.nodesTaken < item.nodesTotal));
   if (!board) return null;
   return board.nodesTaken
     ? { board, title: `Carry on with ${board.name}`, detail: `Open ${board.name} to see your next node for your role. One board at a time.` }

@@ -167,6 +167,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
+  // Role aware (17 Oct 2026, ruling 7): the Daevanion boards are read after first paint; the checks read the settled page.
+  if(path.includes('/ascent/'))await page.waitForFunction(()=>document.documentElement.dataset.aeBoards==='read',null,{timeout:15000});
   return {page,context,calls,errors,requested};
 }
 const style=(page,selector,prop)=>page.$eval(selector,(el,p)=>getComputedStyle(el).getPropertyValue(p).trim(),prop);

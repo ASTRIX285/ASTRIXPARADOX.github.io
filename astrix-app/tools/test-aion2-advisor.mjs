@@ -1178,6 +1178,21 @@ check('Daevanion route: inside 415 points, by the role\'s priorities, one board 
   const dps=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:readBoards(lv45)}).daevanion.roleRoute;
   assert.notDeepEqual(dps.steps.filter(step=>step.target).slice(0,4).map(step=>step.effects[0]),first,'Another role, another route');
 });
+check('tank: Defence and HP nodes on the way to a priority node count towards done for the role, and come inside 415',()=>{
+  // Miguel, 17 Oct 2026 (ruling 4): for the tank only, the Defence and HP nodes the route passes through count towards done.
+  const tank=builds.Gladiator.records.find(build=>build.role==='tank');
+  assert.equal(tank.daevanion.nodePriorities.find(tier=>tier.label==='Defence and HP').countOnPath,true);
+  assert.ok(!builds.Gladiator.records.find(build=>build.role==='dps').daevanion.nodePriorities,'DPS has no such tier');
+  const board=planDaevanionBoard({nodes:boardNodes,priorities:routePriorities(tank.daevanion),include:'core'});
+  const onPath=board.route.filter(step=>step.onPathTier===4);
+  assert.ok(onPath.length>0,'Defence and HP on the way are marked');
+  assert.ok(onPath.every(step=>!step.target&&/^(Defense|Max HP)$/.test(step.name)));
+  assert.equal(board.roleTargets.core,board.route.filter(step=>step.target).length+onPath.length,'They count towards the board\'s role nodes');
+  // On the Lv 45 fixture (its board grids are not captured, so the captured board stands in for each), the first Defence or HP node comes well inside the budget.
+  const route=buildAscentPlan({className:'Gladiator',role:'tank',team:'main-tank',data:data('Gladiator'),model:readBoards(lv45)}).daevanion.roleRoute;
+  let spent=route.spent;const at=route.steps.findIndex(step=>{spent+=step.cost;return /^(Defense|Max HP)$/.test(step.name);});
+  assert.ok(at>=0&&spent<=415,`First Defence or HP node at step ${at+1}, ${spent} points`);
+});
 check('the Lv 45 fixture\'s first move names one board only, and its next node once the board is read',()=>{
   const plain=buildAscentPlan({className:'Gladiator',role:'tank',data:data('Gladiator'),model:lv45});
   const move=plain.now.find(item=>item.view==='daevanion');

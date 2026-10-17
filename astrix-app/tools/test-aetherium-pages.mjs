@@ -1036,6 +1036,7 @@ await check('after a Daeva loads: the first move strip under the card shows the 
   const strip=await page.$eval('#aeFirstMove',el=>({text:el.querySelector('#aeFirstMoveText').textContent,href:el.querySelector('[data-first-move]').getAttribute('href'),label:el.querySelector('[data-first-move]').textContent.trim(),view:el.querySelector('[data-first-move]').dataset.moveView,board:el.querySelector('[data-first-move]').dataset.moveBoard}));
   // The same Daeva's Ascent Plan: its top move is the strip's move.
   const plan=await open(`/hub/aetherium/ascent/?${daevaRef}`,{live:true});
+  await plan.page.waitForFunction(()=>document.documentElement.dataset.aeBoards==='read');
   const top=await plan.page.$eval('.ae-quest',el=>({title:el.querySelector('strong').textContent,board:el.dataset.questBoard,view:el.dataset.questView}));
   await plan.context.close();
   assert.equal(strip.text,top.title,'The strip says the plan\'s top move');

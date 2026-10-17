@@ -202,17 +202,13 @@ const planFor = (role, team) => {
   const p = state.model.profile;
   try { return buildAscentPlan({ className: p.class, role, team, level: p.level, data: state.data, model: state.model }); } catch { return null; }
 };
-/** Reads Daevanion boards until the role route's current board is read, so the move can name its next node. */
+/** Reads the role route's current Daevanion board, once (kept for the session), so the move can name its next node. */
 async function readCurrentBoard(plan, pick) {
-  let current = plan;
-  for (let i = 0; current && i < state.model.daevanion.length; i += 1) {
-    const at = current.daevanion.roleRoute?.current;
-    const board = at && !at.read ? state.model.daevanion.find(item => item.id === at.id) : null;
-    if (!board || board.unreadable) break;
-    try { board.nodes = (await loadBoard(state.model, board)).nodes; } catch { board.unreadable = true; break; }
-    current = planFor(pick.role, pick.team);
-  }
-  return current;
+  const at = plan.daevanion.roleRoute?.current;
+  const board = at && !at.read ? state.model.daevanion.find(item => item.id === at.id) : null;
+  if (!board) return plan;
+  try { board.nodes = (await loadBoard(state.model, board)).nodes; } catch { return plan; }
+  return planFor(pick.role, pick.team) ?? plan;
 }
 
 async function loadFirstMove() {

@@ -202,9 +202,21 @@ export async function preloadItemDetails(model, slots, { onDetail, budget = ITEM
   return later;
 }
 
-/** The node grid of one Daevanion board, loaded when the player opens it. Returns { nodes }. */
+/* Board grids are kept for the browser session (sessionStorage), keyed by Daeva, board and its taken count, so moving
+   between the Daeva Card, the plan and the Daevanion screen never reads a board twice; a node taken since is a new key. */
+const BOARD_CACHE_KEY = 'aetherium.boards.v1';
+const boardCacheKey = (model, board) => [model.source.region, model.profile.server.id, model.profile.characterId, board.id, board.nodesTaken ?? ''].join('|');
+function readBoardCache() {
+  try { return JSON.parse(sessionStorage.getItem(BOARD_CACHE_KEY) ?? '{}') ?? {}; } catch { return {}; }
+}
+
+/** The node grid of one Daevanion board, loaded when the player opens it (kept for the session). Returns { nodes }. */
 export async function loadBoard(model, board) {
+  const key = boardCacheKey(model, board);
+  const kept = readBoardCache()[key];
+  if (kept) return { nodes: adaptDaevanionBoard(kept) };
   const body = await worker('/aion2/daevanion', { serverId: model.profile.server.id, characterId: model.profile.characterId, boardId: board.id }, model.source.region);
+  try { sessionStorage.setItem(BOARD_CACHE_KEY, JSON.stringify({ ...readBoardCache(), [key]: body })); } catch { /* storage off or full: read again next time */ }
   return { nodes: adaptDaevanionBoard(body) };
 }
 

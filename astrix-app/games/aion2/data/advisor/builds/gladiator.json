@@ -675,7 +675,8 @@
               "Defense",
               "Max HP"
             ],
-            "core": false
+            "core": false,
+            "countOnPath": true
           },
           {
             "tier": 5,
