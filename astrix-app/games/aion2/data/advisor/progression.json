@@ -21,6 +21,22 @@
       ]
     },
     {
+      "id": "unique-gear-level",
+      "label": "Unique gear starts",
+      "value": 35,
+      "text": "Unique gear does not drop before Lv 35. Everything worn before then (Common, Rare, Epic) is replaced.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: you do not start getting Unique gear until Lv 35."
+        }
+      ]
+    },
+    {
       "id": "stigma-unlock",
       "label": "Stigmas unlock",
       "value": {

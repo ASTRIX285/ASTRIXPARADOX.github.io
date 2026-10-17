@@ -1168,7 +1168,7 @@ await check('Gear grid markers: a 2s gold pulse only on Enchant items, solid und
   await page.emulateMedia({reducedMotion:'reduce'});
   const still=await page.$eval('#aeGear [data-slot-pos="1"] .ae-gtile',el=>{const s=getComputedStyle(el,'::before');return [s.animationName,s.borderTopColor,s.opacity];});
   assert.deepEqual(still,['none','rgb(226, 181, 79)','1'],'Reduced motion: a solid gold edge');
-  assert.equal(await plain(page,'#aeGearLegend'),'Gold pulse: enchant it. Tap any item for what to do.');
+  assert.equal(await plain(page,'#aeGearLegend'),'Gold pulse: enchant it. Tap any item to see it; the Enhance tab says what to do.');
   assert.equal(await page.locator('#aeGearPanel [data-enchant-flag], #aeGearPanel .ae-flag').count(),0,'No ENCHANT buttons');
   await context.close();
   const full=await open(`/hub/aetherium/gear/equipment/${refQuery(FULL45)}`);
@@ -1194,32 +1194,54 @@ await check('Gear grid hover: a name tooltip with the name in its grade colour, 
   await context.close();
 });
 
-await check('Gear grid click: the item card opens in place with What to do first; Escape closes it and focus returns to the tile',async()=>{
+await check('Gear grid click: the item card is the game\'s tooltip (item only); Assess and enhance opens the Enhance tab on that piece; Escape closes it and focus returns to the tile',async()=>{
+  // Item tooltip (Miguel, 17 Oct 2026): the card looks like the game's item tooltip and shows the item only; what to do
+  // with it lives on the Enhance tab, one tap away.
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
   await settled(page);
   const before=page.url();
   await page.click('#aeGear [data-slot-pos="2"] button');
-  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
+  await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-tt .ae-item-enchant'));
   assert.equal(page.url(),before,'No navigation');
-  const order=await page.$eval('#aeInfoBody',el=>[...el.querySelectorAll('#aeAdvice,.ae-item-enchant,.ae-item-block:not(#aeAdvice .ae-item-block)')].map(node=>node.id||node.className));
-  assert.equal(order[0],'aeAdvice','What to do comes first');
-  const card=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
-  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in the Growth tab\./,/Not confirmed yet/])assert.match(card,part);
-  // Compact card (Miguel, 17 Oct 2026: "massive card for no reason"): one What to do box, each thing said once, no status
-  // strip repeating the move, the four facts in one row, the Enhancement window inside the box.
-  const whole=await page.$eval('#aeInfo .ae-info-card',el=>el.innerText.replace(/\s+/g,' '));
-  for(const said of ['Check the cost','Chance of each step','A failure costs the attempt','Enchant it to +15'])assert.equal(whole.split(said).length-1,1,`"${said}" is said once`);
-  assert.equal(await page.locator('#aeInfo .ae-card-status').count(),0,'No status strip repeating the move');
-  assert.equal(await page.locator('#aeAdvice #aeEnhancePanel').count(),1,'The Enhancement window sits inside What to do');
-  const facts=await page.$$eval('#aeAdvice .ae-advice-facts.is-row li',items=>items.map(el=>Math.round(el.getBoundingClientRect().top)));
-  assert.ok(facts.length===4&&new Set(facts).size===1,`Grade, cap, now and target on one row (${facts})`);
-  assert.match(await page.textContent('#aeInfo'),/Item level 36/);
+  const tt=await page.$eval('#aeInfo .ae-tt',el=>({grade:el.dataset.grade,head:getComputedStyle(el.querySelector('.ae-tt-head')).backgroundImage,name:getComputedStyle(el.querySelector('h3')).color,art:Boolean(el.querySelector('.ae-tt-art img')),text:el.innerText.replace(/\s+/g,' ')}));
+  assert.equal(tt.grade,'unique');
+  assert.match(tt.head,/^linear-gradient/,'The header is washed in the grade colour');
+  assert.equal(tt.name,'rgb(226, 181, 79)','The name in the grade colour');
+  assert.ok(tt.art,'The item art in the header');
+  assert.match(tt.text,/Unique .* Item Level 36/,'Grade, type and item level in the header');
+  assert.match(tt.text,/Soul Binding Rate 94\.3%/,`The Soul Binding rate with its bar (${tt.text})`);
+  assert.equal(await page.locator('#aeInfo .ae-tt-bind .ae-tt-bar i').count(),1);
+  assert.match(tt.text,/Required Level \d+/,'The required level at the foot');
+  assert.equal(await page.locator('#aeInfo #aeAdvice, #aeInfo #aeEnhancePanel, #aeInfo .ae-card-status').count(),0,'No advice inside the item card');
   await page.keyboard.press('Escape');
   assert.equal(await page.isHidden('#aeInfo'),true);
   assert.equal(await page.evaluate(()=>document.activeElement?.closest('li')?.dataset.slotPos),'2','Focus back on the tile');
+  // Assess and enhance: the Enhance tab opens on this piece, with its assessment and What to do.
+  await page.click('#aeGear [data-slot-pos="2"] button');
+  await page.waitForSelector('#aeInfo:not([hidden]) [data-enhance-item]');
+  await page.click('#aeInfo [data-enhance-item]');
+  await page.waitForSelector('#aeEnhanceDetail #aeAdvice');
+  assert.equal(await page.isHidden('#aeInfo'),true,'The card closes');
+  assert.equal(new URL(page.url()).searchParams.get('view'),'enhance');
+  assert.equal(new URL(page.url()).searchParams.get('item'),'2');
+  assert.equal(await page.getAttribute('#aeEnhanceList [data-slot-pos="2"] button','aria-pressed'),'true');
+  const card=await page.$eval('#aeEnhanceDetail #aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
+  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in the Growth tab\./,/Not confirmed yet/])assert.match(card,part);
+  const whole=await page.$eval('#aeEnhanceDetail',el=>el.innerText.replace(/\s+/g,' '));
+  for(const said of ['Check the cost','Chance of each step','A failure costs the attempt','Enchant it to +15'])assert.equal(whole.split(said).length-1,1,`"${said}" is said once`);
+  assert.equal(await page.locator('#aeAdvice #aeEnhancePanel').count(),1,'The Enhancement window sits inside What to do');
+  const facts=await page.$$eval('#aeAdvice .ae-advice-facts.is-row li',items=>items.map(el=>Math.round(el.getBoundingClientRect().top)));
+  assert.ok(facts.length===4&&new Set(facts).size===1,`Grade, cap, now and target on one row (${facts})`);
+  assert.match(await plain(page,'#aeAssess'),/^For your .* (Suits your class|Usable, but its rolls are weak for you)/,'The piece is judged for the class');
+  // A piece to replace: the assessment says so, with no Enhancement window repeating it.
+  await page.click('#aeEnhanceList [data-slot-pos="5"] button');
+  await page.waitForFunction(()=>/Replace it/.test(document.querySelector('#aeAssess')?.textContent??''));
+  assert.match(await plain(page,'#aeAssess'),/Replace it Do not enhance Epic gear\. Replace it with a Unique piece, from a drop or a craft\./);
+  assert.equal(await page.locator('#aeEnhanceDetail #aeAdvice').count(),0,'No What to do box repeating it');
+  await page.click('#aeGear [data-slot-pos="5"] button').catch(()=>{});
+  await page.click('[data-gear-tab="equipment"]');
   await page.click('#aeGear [data-slot-pos="5"] button');
-  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
-  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/What to do Replace it with a Unique piece/);
+  await page.waitForSelector('#aeInfo:not([hidden]) .ae-tt');
   await page.click('#aeInfo .ae-info-backdrop',{position:{x:5,y:5}});
   assert.equal(await page.isHidden('#aeInfo'),true,'A tap outside closes it');
   await context.close();
@@ -1231,13 +1253,15 @@ await check('Gear grid click: the item card opens in place with What to do first
 const enhanceOf=page=>page.$$eval('#aeGear > li[data-slot-pos]',items=>Object.fromEntries(items.map(el=>{const mark=el.querySelector('.ae-emark');const tile=el.querySelector('.ae-gtile').getBoundingClientRect();const box=mark?.getBoundingClientRect();
   return [el.dataset.slotPos,{enhance:el.dataset.enhance??null,word:mark?.querySelector('.ae-emark-word').textContent??null,icon:Boolean(mark?.querySelector('svg.ae-eicon path,svg.ae-eicon circle')),below:box?box.top>=tile.bottom:null,size:mark?parseFloat(getComputedStyle(mark).fontSize):null,
     described:el.querySelector('button').getAttribute('aria-describedby'),said:mark?.querySelector('.ae-sr').textContent??null}];})));
-const openItem=async(page,pos)=>{await page.click(`#aeGear [data-slot-pos="${pos}"] button`);await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));};
+// Enhance tab (Miguel, 17 Oct 2026): the Enhancement window lives on the Gear window's Enhance tab, one piece at a time.
+const openItem=async(page,pos)=>{if(await page.getAttribute('[data-gear-tab="enhance"]','aria-selected')!=='true')await page.click('[data-gear-tab="enhance"]');await page.click(`#aeEnhanceList [data-slot-pos="${pos}"] button`);await page.waitForFunction(p=>document.querySelector(`#aeEnhanceList [data-slot-pos="${p}"] button`)?.getAttribute('aria-pressed')==='true'&&document.querySelector('#aeEnhanceDetail #aeEnhancePanel'),pos);};
 const enhanceText=page=>page.$eval('#aeEnhancePanel',el=>el.innerText.replace(/\s+/g,' '));
 await check('Enhance marks: each tile names its next tab with our icon and one word, under the tile, never over the art',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
   await settled(page);
   const by=await enhanceOf(page);
-  const want={1:'Growth',2:'Growth',17:'Growth',22:'Growth',3:'Stones',4:'Stones',5:'Stones',6:'Stones',7:'Stones',8:'Stones',19:'Stones',10:'Stones',11:'Stones',12:'Stones',13:'Stones',14:null,15:null};
+  // Enhancement logic (Miguel, 18 Oct 2026): nothing is spent on Epic or lower, not even cheap stones, so those tiles carry no mark.
+  const want={1:'Growth',2:'Growth',17:'Growth',22:'Growth',3:null,4:null,5:null,6:null,7:null,8:null,19:null,10:null,11:null,12:null,13:null,14:null,15:null};
   for(const [pos,word] of Object.entries(want)){
     assert.equal(by[pos].word,word,`slot ${pos}`);
     if(!word)continue;
@@ -1246,12 +1270,12 @@ await check('Enhance marks: each tile names its next tab with our icon and one w
     assert.ok(by[pos].size>=13,`slot ${pos}: ${by[pos].size}px`);
     assert.match(by[pos].described??'',/^aeEmark\d+$/,'The button is described by its mark');
   }
-  assert.deepEqual([by[1].enhance,by[3].enhance],['growth','manastone']);
+  assert.deepEqual([by[1].enhance,by[3].enhance],['growth',null],'An Epic piece gets no enhance mark (Miguel, 18 Oct 2026)');
   assert.equal(by[1].said,'Enhance next, Growth: Growth: +3 to +10.');
   assert.equal(by[2].said,'Enhance next, Growth: Growth: +11 to +12.');
   // A tap on the mark opens the item card too.
   await page.click('#aeGear [data-slot-pos="2"] .ae-emark');
-  await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');
+  await page.waitForSelector('#aeInfo:not([hidden]) .ae-tt');
   await context.close();
 });
 await check('Enhance panel: the weapon and the guard, the window\'s five tabs with the next one lit, bars, weak lines, no cost numbers',async()=>{
@@ -1323,6 +1347,9 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
 await check('How enhancing works: one Do this next line, one line per tab opening its full explanation, Confirmed and Reported tags',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
   await settled(page);
+  // Enhance tab (17 Oct 2026): the strip lives on the Gear window's Enhance tab.
+  await page.click('[data-gear-tab="enhance"]');
+  await page.waitForSelector('#aeEnhanceView:not([hidden]) #aeEnhanceNext');
   assert.equal(await plain(page,'#aeEnhanceNext'),'Do this next: Spiritforged Greatsword Growth: +3 to +10. Always succeeds.');
   assert.equal(await page.locator('#aeEnhanceNext button').count(),1,'One thing at a time');
   const rows=await page.$$eval('#aeEnhanceHow [data-ehow]',items=>items.map(el=>[el.dataset.ehow,el.querySelector('b').textContent,el.getBoundingClientRect().height>=44]));
@@ -1342,11 +1369,16 @@ await check('How enhancing works: one Do this next line, one line per tab openin
   assert.match(stones,/Stones for a tank Reported HP, top 160 Defence, top 100 Block, top 20 Accuracy, top 15/);
   assert.match(stones,/Whether one Engrave fills one slot or rerolls them all\. Not confirmed yet/);
   await page.keyboard.press('Escape');
-  // Do this next opens the weapon's card.
+  // Do this next picks the weapon on the Enhance tab.
   await page.click('#aeEnhanceNext button');
-  await page.waitForSelector('#aeInfo:not([hidden]) #aeEnhancePanel');
-  assert.match(await page.textContent('#aeInfo h3'),/Spiritforged Greatsword/);
-  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.querySelector('#aeEnhanceList [data-slot-pos="1"] button')?.getAttribute('aria-pressed')==='true');
+  await page.waitForSelector('#aeEnhanceDetail #aeEnhanceName');
+  assert.match(await page.textContent('#aeEnhanceName'),/Spiritforged Greatsword/);
+  // What to enhance, and when (Miguel, 18 Oct 2026): at Lv 45 the level gate is passed: build the Unique pieces.
+  assert.match(await plain(page,'#aeEnhanceStage'),/^Lv 45: build your Unique pieces\. 2 Unique pieces to build\./);
+  assert.deepEqual(await page.$$eval('.ae-elogic-gate',items=>items.map(el=>[el.dataset.gate,el.classList.contains('is-lit')])),[['level',true],['grade',false],['slot',false]]);
+  assert.equal(await page.locator('#aeEnhancePrepare').count(),0,'No prepare path past Lv 35');
+  assert.deepEqual(await page.$$eval('.ae-elogic-steps li',items=>items.map(el=>el.dataset.stepTab)),['growth','growth','soul-binding','manastone','theostone','transfer']);
   const all=await page.evaluate(()=>document.body.innerText);
   assert.doesNotMatch(all,/Legend|armory|[–—]/,'No Legend grade, "armory" or dashes');
   await context.close();
@@ -1363,9 +1395,9 @@ for(const width of [390,1600]){
       await shot(page,`enhance-gear-${role}`,width);
       for(const pos of [1,2]){
         await openItem(page,pos);
-        assert.ok(await overflowOf(page)<=0,`${width} ${role}: no sideways scroll with the card open`);
-        const card=await boxOf(page,'#aeInfo .ae-info-card'),tabs=await boxOf(page,'#aeEnhancePanel .ae-etabs');
-        assert.ok(tabs.right<=card.right+1&&tabs.left>=card.left-1,`${width}: the tabs fit the card`);
+        assert.ok(await overflowOf(page)<=0,`${width} ${role}: no sideways scroll with the Enhance tab open`);
+        const card=await boxOf(page,'#aeEnhanceDetail'),tabs=await boxOf(page,'#aeEnhancePanel .ae-etabs');
+        assert.ok(tabs.right<=card.right+1&&tabs.left>=card.left-1,`${width}: the tabs fit the panel`);
         if(pos===2)await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
         await page.$eval('#aeEnhancePanel',el=>el.scrollIntoView({block:'start'}));
         await shot(page,`enhance-${pos===1?'weapon':'guard'}-${role}`,width);

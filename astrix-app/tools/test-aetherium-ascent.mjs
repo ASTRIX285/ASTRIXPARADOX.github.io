@@ -508,10 +508,11 @@ await check('with a Daeva link: armory fixes first, class and level locked, Elyo
   // Grade rule (11 Oct 2026): was 'Enchant 7 worn items above +0'. At Lv 12 the Common and Rare pieces go to their +5 cap.
   // Role aware (17 Oct 2026): the board is read, so the move names its next node for the role.
   // Level planner (17 Oct 2026): the level move is the logic's first step (Rending Blow), then the main line this Lv 12 bar can fire.
-  assert.deepEqual(steps,['Start Nezekan: Overhead Slam +1 next (7 steps)','Enchant 8 Rare and Common pieces to +5','Level Rending Blow (now Lv 3)','Set your main line: Mocking Blade, Overhead Slam, Rending Blow']);
+  // Enhancement logic (Miguel, 18 Oct 2026): no Unique gear before Lv 35, so the gear move says to save the stones and gather and craft.
+  assert.deepEqual(steps,['Start Nezekan: Overhead Slam +1 next (7 steps)','Save your Enhance Stones until Lv 35','Level Rending Blow (now Lv 3)','Set your main line: Mocking Blade, Overhead Slam, Rending Blow']);
   assert.deepEqual(await page.$$eval('.ae-quest',items=>items.map(el=>el.dataset.questView)),['daevanion','gear','mastery','skill-bar'],'Each next move opens the screen that shows it');
   // Walkthrough fix (11 Oct 2026): Show me on the enchant move opens the Gear page with the items it names ringed (the move's own id since the grade rule).
-  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#enchant-early$/);
+  assert.match(await page.getAttribute('.ae-quest[data-quest-view="gear"]','href'),/^\/hub\/aetherium\/gear\/equipment\/\?serverId=1308&characterId=[^#]+#save-stones$/);
   assert.match(await plain(page,'.ae-menu-card[data-view="daevanion"] .ae-menu-status'),/Nezekan: 0 \/ 88 nodes/);
   assert.match(page.url(),/serverId=1308&characterId=.*&role=dps$/);
   assert.match(page.url(),/[?&]region=eu&/,'The address carries the region');
@@ -1152,16 +1153,16 @@ await check('a step shows done only after a visit, per Daeva on this device; the
 
 // Grade rule (11 Oct 2026): was "the seven +0 items ringed" with the note "Ringed: the 7 worn items still at +0. Enchant them
 // in game." The move now names the eight Common and Rare pieces below their +5 cap, and the note says what the move says.
-await check('Show me on the enchant move opens the Gear page with the items it names ringed and in view',async()=>{
+await check('Show me on the save-stones move opens the Gear page with the pieces it names ringed and in view, none marked to enchant',async()=>{
   const {page,context}=await open(ascent(ref),{live:true});
   const title=await plain(page,'.ae-quest[data-quest-view="gear"] .ae-quest-text');
   const href=await page.getAttribute('.ae-quest[data-quest-view="gear"]','href');
   await page.goto(`${base}${href}`);
   await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true');
   await page.waitForSelector('#aeGear li.is-ringed');
-  assert.equal(await page.locator('#aeGear li.is-ringed').count(),8,'The eight items the move names');
-  // Gear grid (11 Oct 2026): was '.ae-flag' (the ENCHANT button, now removed). Each ringed tile carries the gold Enchant marker.
-  assert.equal(await page.locator('#aeGear li.is-ringed[data-advice="enchant"]').count(),8,'each with its Enchant marker');
+  assert.equal(await page.locator('#aeGear li.is-ringed').count(),8,'The eight pieces the move names');
+  // Enhancement logic (Miguel, 18 Oct 2026): a piece held before Lv 35 carries no enchant or replace marker.
+  assert.equal(await page.locator('#aeGear li.is-ringed[data-advice]').count(),0,'No marker on a held piece');
   assert.equal(await plain(page,'#aeGearRingNote'),title,'The line at the top says what the move says');
   assert.equal(await page.$eval('#aeGear li.is-ringed',el=>getComputedStyle(el).outlineStyle),'solid','The ring is drawn');
   await page.waitForTimeout(600);
@@ -1204,7 +1205,8 @@ await check('Show me on a Lv 45 gear move rings only the items it names, and the
   const before=page.url();
   // Gear grid (11 Oct 2026): was the REPLACE flag button; now the tile itself.
   await page.click('#aeGear [data-slot-pos="5"] button');
-  await page.waitForSelector('#aeInfo:not([hidden]) #aeAdvice');
+  // Item tooltip (17 Oct 2026): the card is the item; its advice is on the Enhance tab.
+  await page.waitForSelector('#aeInfo:not([hidden]) .ae-tt');
   assert.equal(page.url(),before,'No loop');
   await context.close();
 });
@@ -1487,6 +1489,35 @@ await check('every other selectable on the Aetherium pages is the shared button:
   await dv.page.waitForSelector('.ae-board-grid .ae-node');
   await assertButtons(dv.page,'.ae-gw-tab','Daevanion page tab');
   await dv.context.close();
+});
+
+/* ---------- Enhance tab (Miguel, 17 and 18 Oct 2026): what to enhance and when, the build options per class, each piece
+   assessed for the picked build. Before Lv 35 nothing is enhanced but the belt and amulet: gather and craft instead. ---------- */
+await check('Enhance tab at Lv 12: the prepare stage lit, gather and craft with the five professions, held pieces never enhanced, build options switch the judgement',async()=>{
+  const {page,context,errors}=await open(`/hub/aetherium/gear/equipment/?${ref}&view=enhance`,{live:true});
+  await page.waitForSelector('#aeEnhanceView:not([hidden]) #aeEnhanceStage');
+  assert.equal(await page.getAttribute('[data-gear-tab="enhance"]','aria-selected'),'true','The address opens the Enhance tab');
+  assert.equal(await page.isHidden('#aeGearPanel'),true);
+  assert.match(await plain(page,'#aeEnhanceStage'),/^Lv 12: Unique gear starts at Lv 35\. Save your stones and prepare\. 8 worn pieces to wear, not enhance\.$/);
+  assert.match(await plain(page,'.ae-elogic-gate.is-lit'),/Save and prepare: enhance nothing but the belt and amulet, and spend the time gathering materials and levelling your crafting/);
+  assert.deepEqual(await page.$$eval('#aeEnhancePrepare .ae-elogic-jobs b',items=>items.map(el=>el.textContent)),['Blacksmithing','Armorsmithing','Handicrafting','Alchemy','Cooking']);
+  assert.match(await plain(page,'#aeEnhancePrepare'),/Crafted Dragon Lord gear needs proficiency 55, is Unique/);
+  assert.match(await plain(page,'#aeEnhanceNext'),/^Do this next: gather materials and level your crafting until Lv 35\.$/);
+  // A held piece: the assessment says it, and no Enhancement window repeats it.
+  await page.waitForSelector('#aeAssess');
+  assert.match(await plain(page,'#aeAssess'),/Wear it, do not enhance it Wear it, but do not enhance it: no Unique gear drops before Lv 35/);
+  assert.equal(await page.locator('#aeEnhanceDetail #aeAdvice').count(),0);
+  // Build options for the class: pick Tank and the page judges by it, in the address too.
+  assert.deepEqual(await page.$$eval('[data-eoption-role]',items=>items.map(el=>[el.dataset.eoptionRole,el.getAttribute('aria-pressed')])),[['dps','true'],['tank','false']]);
+  await page.click('[data-eoption-role="tank"]');
+  await page.waitForFunction(()=>new URL(location.href).searchParams.get('role')==='tank');
+  assert.equal(await page.getAttribute('[data-eoption-role="tank"]','aria-pressed'),'true');
+  assert.match(await plain(page,'#aeClassNeeds'),/Block \(from Dexterity\)/,'The tank\'s stat order');
+  assert.ok(await page.locator('[data-eoption-team]').count()>=2,'The tank\'s team options');
+  assert.match(await plain(page,'#aeAssess'),/^For your Tank/);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No sideways scroll');
+  assert.deepEqual(errors,[]);
+  await context.close();
 });
 
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));

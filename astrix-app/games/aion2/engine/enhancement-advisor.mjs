@@ -7,7 +7,7 @@
  * grades.json (caps), mechanics.json (enchant-rates, enchant-pity), enhancement.json (tabs, role stones and lines).
  * The Growth step reads enchantAdvice, so a tile's enchant flag and its enhance mark never disagree.
  */
-import { enchantAdvice, gradeInfo, indexGrades, isPending } from './ascent-advisor.mjs';
+import { enchantAdvice, gradeInfo, indexGrades, isPending, uniqueGearLevel } from './ascent-advisor.mjs';
 
 const slotKey = slot => String(slot?.slot ?? '').toUpperCase().replace(/[\s_]/g, '');
 const OWN_RULE_SLOTS = /^(RUNE|ARCANA)\d*$/;
@@ -22,8 +22,8 @@ const ROLE_WORD = { tank: 'tank', dps: 'DPS', healer: 'healer', support: 'suppor
 /** 'a tank', 'a DPS' ... or 'your role' when no role is known. */
 export const roleWords = role => (Object.hasOwn(ROLE_WORD, role ?? '') ? `a ${ROLE_WORD[role]}` : 'your role');
 
-/** Step ranks: the order of the record, one step at a time. */
-export const STEP_RANK = Object.freeze({ growth: 1, manastone: 2, 'growth-risky': 3, 'soul-binding': 4, theostone: 5 });
+/** Step ranks, the order of the record (docs/ENHANCEMENT.md sections 6 and 9): Growth to +10, past +10, Soul Binding, manastones, Theostone. */
+export const STEP_RANK = Object.freeze({ growth: 1, 'growth-risky': 2, 'soul-binding': 3, manastone: 4, theostone: 5 });
 /** The one-word mark on a tile for each tab, and for an item with nothing left to do. */
 export const TAB_MARKS = Object.freeze({ growth: 'Growth', manastone: 'Stones', theostone: 'Theostone', 'soul-binding': 'Bind', transfer: 'Transfer', done: 'Done' });
 
@@ -110,9 +110,7 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
   const advice = enchantAdvice(slot, { level, grades: grades.index, progression: grades.progression });
   const grade = gradeInfo(slot.grade, grades.index, slot.gradeName ?? null);
   const uniqueOrder = grades.index.byCode.get('Unique')?.order?.value ?? Infinity;
-  const epicOrder = grades.index.byCode.get('Legend')?.order?.value ?? Infinity;
   const keeper = Number.isFinite(grade.order) && grade.order >= uniqueOrder;
-  const epic = grade.id === 'epic' || (Number.isFinite(grade.order) && grade.order >= epicOrder && !keeper);
   const key = slotKey(slot);
   const steps = [];
   const add = (kind, tab, title, why, extra = {}) => steps.push({ kind, tab, rank: STEP_RANK[kind], order: slotOrder(slot), title, why, ...extra });
@@ -122,20 +120,19 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
   if (advice?.action === 'enchant' && !advice.costly) {
     add('growth', 'growth', `Growth: +${advice.from} to +${advice.to}`, `Always succeeds. ${advice.why}`, { from: advice.from, to: advice.to, rate: 100, tries: 1 });
   }
-  // 2. Empty manastone slots on Epic or Unique gear: the role's stones (cheap ones on a piece to replace).
+  // 4. Empty manastone slots on keepers only (Miguel, 18 Oct 2026: nothing is spent on gear below Unique).
   const stones = roleStones(enhancement.manastone, role);
   const sockets = Number.isInteger(slot.manastoneSlots) && Array.isArray(slot.manastones) ? stoneSlots(slot, stones) : [];
   const empty = sockets.filter(socket => !socket.filled).length;
-  if ((keeper || epic) && empty) {
+  if (keeper && empty) {
     const accessory = ACCESSORY.test(key);
     const names = isPending(stones) ? [] : [...new Set(sockets.filter(socket => !socket.filled && socket.best).map(socket => socket.best.name))];
     const what = accessory
       ? (enhancement.manastone?.accessories?.text ?? 'Accessories take Soulstones.')
       : isPending(stones) ? `Which stones suit ${roleWords(role)} is not confirmed yet.` : `Engrave stones for ${roleWords(role)}: ${names.join(', ')}.`;
-    const why = advice?.action === 'replace' ? `${what} Cheap stones only: this piece is to be replaced.` : what;
-    add('manastone', 'manastone', `Stones: fill ${empty} empty ${empty === 1 ? 'slot' : 'slots'}`, why, { empty, status: accessory ? 'unknown' : isPending(stones) ? 'unknown' : stones.status });
+    add('manastone', 'manastone', `Stones: fill ${empty} empty ${empty === 1 ? 'slot' : 'slots'}`, what, { empty, status: accessory ? 'unknown' : isPending(stones) ? 'unknown' : stones.status });
   }
-  // 3. Keeper gear past +10: one step at a time, with its chance and the most tries the failure bonus allows.
+  // 2. Keeper gear past +10: one step at a time, with its chance and the most tries the failure bonus allows.
   if (advice?.action === 'enchant' && advice.costly) {
     const to = advice.from + 1;
     const rate = rules['enchant-rates']?.value?.rates?.[to] ?? null;
@@ -143,7 +140,7 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
     const odds = Number.isFinite(rate) ? `${rate}% now${most ? `, at most ${most} tries with the failure bonus` : ''}.` : 'The chance of this step is not confirmed yet.';
     add('growth-risky', 'growth', `Growth: +${advice.from} to +${to}`, `${odds} Check the cost in the Growth tab.`, { from: advice.from, to, rate, tries: most, cap: advice.cap });
   }
-  // 4. Soul Binding on keepers below 100%: reroll the role's weak lines first, then Bind.
+  // 3. Soul Binding on keepers below 100%: reroll the role's weak lines first, then Bind.
   const lines = roleLines(enhancement['soul-binding'], role, slot);
   const rows = bindLines(slot, lines);
   if (keeper && Number.isFinite(slot.soulBindRate) && slot.soulBindRate < 100) {
@@ -160,7 +157,7 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
   }
   steps.sort((a, b) => a.rank - b.rank);
   const next = steps[0] ?? null;
-  const replace = advice?.action === 'replace';
+  const replace = advice?.action === 'replace' || advice?.action === 'hold';
   const mark = next ? next.tab : (replace || partial || !advice?.action ? null : 'done');
   return {
     slotPos: slot.slotPos, slot: slot.slot, name: slot.name, grade, keeper, advice,
@@ -190,9 +187,13 @@ export function enhancementPlan(model, role, level, { grades = null, progression
   const all = items.flatMap(item => item.steps.map(step => ({ item, step })));
   all.sort((a, b) => a.step.rank - b.step.rank || a.step.order - b.step.order);
   const top = all[0] ?? null;
+  // The Daeva's stage in the decision logic (docs/ENHANCEMENT.md section 9): before Unique gear starts, prepare; after, build.
+  const uniqueFrom = uniqueGearLevel(progression);
   return {
     role,
     tries,
+    stage: { level, uniqueFrom, phase: level < uniqueFrom ? 'prepare' : 'build', keepers: items.filter(item => item.keeper).length, toReplace: items.filter(item => item.advice?.action === 'replace').length, toHold: items.filter(item => item.advice?.action === 'hold').length },
+    logic: records.logic ?? null,
     tabs: records.tabs?.tabs ?? [],
     items,
     next: top ? { slotPos: top.item.slotPos, name: top.item.name, tab: top.step.tab, title: top.step.title, why: top.step.why, kind: top.step.kind } : null

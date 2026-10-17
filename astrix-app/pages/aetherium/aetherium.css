@@ -1217,13 +1217,13 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-gtile img{width:100%;height:100%;object-fit:contain}
 .ae-gtile .ae-icon-empty{width:100%;height:100%}
 .ae-gtile-plus{position:absolute;right:3px;bottom:2px;padding:0 4px;font:800 .875rem/1.25 var(--ae-font-ui);color:var(--ae-text);background:color-mix(in srgb,var(--ae-page) 78%,transparent);border-radius:3px}
-.ae-gtile[data-grade="common"],.ae-grade-name[data-grade="common"],.ae-card-head[data-grade="common"]{--ae-g:var(--ae-grade-common)}
-.ae-gtile[data-grade="rare"],.ae-grade-name[data-grade="rare"],.ae-card-head[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}
-.ae-gtile[data-grade="epic"],.ae-grade-name[data-grade="epic"],.ae-card-head[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
-.ae-gtile[data-grade="unique"],.ae-grade-name[data-grade="unique"],.ae-card-head[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
-.ae-gtile[data-grade="heroic"],.ae-grade-name[data-grade="heroic"],.ae-card-head[data-grade="heroic"]{--ae-g:var(--ae-grade-heroic)}
-.ae-gtile[data-grade="mythic"],.ae-grade-name[data-grade="mythic"],.ae-card-head[data-grade="mythic"]{--ae-g:var(--ae-grade-mythic)}
-.ae-gtile[data-grade="special"],.ae-grade-name[data-grade="special"],.ae-card-head[data-grade="special"]{--ae-g:var(--ae-grade-special)}
+.ae-gtile[data-grade="common"],.ae-grade-name[data-grade="common"],.ae-card-head[data-grade="common"],.ae-tt[data-grade="common"]{--ae-g:var(--ae-grade-common)}
+.ae-gtile[data-grade="rare"],.ae-grade-name[data-grade="rare"],.ae-card-head[data-grade="rare"],.ae-tt[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}
+.ae-gtile[data-grade="epic"],.ae-grade-name[data-grade="epic"],.ae-card-head[data-grade="epic"],.ae-tt[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
+.ae-gtile[data-grade="unique"],.ae-grade-name[data-grade="unique"],.ae-card-head[data-grade="unique"],.ae-tt[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-gtile[data-grade="heroic"],.ae-grade-name[data-grade="heroic"],.ae-card-head[data-grade="heroic"],.ae-tt[data-grade="heroic"]{--ae-g:var(--ae-grade-heroic)}
+.ae-gtile[data-grade="mythic"],.ae-grade-name[data-grade="mythic"],.ae-card-head[data-grade="mythic"],.ae-tt[data-grade="mythic"]{--ae-g:var(--ae-grade-mythic)}
+.ae-gtile[data-grade="special"],.ae-grade-name[data-grade="special"],.ae-card-head[data-grade="special"],.ae-tt[data-grade="special"]{--ae-g:var(--ae-grade-special)}
 .ae-grade-name[data-grade]{color:var(--ae-g);font-weight:700}
 /* The item card's icon takes the same grade tile. */
 .ae-card-head[data-grade] .ae-card-icon{border-color:var(--ae-g);background-color:color-mix(in srgb,var(--ae-g) 26%,var(--ae-well));
@@ -1732,3 +1732,108 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-
 .ae-info-card .ae-card-chips{margin:0}
 .ae-info-card .ae-item-block{padding-top:6px}
 .ae-info-card .ae-item-desc{font-size:.875rem;color:var(--ae-text-muted)}
+
+/* The item card as the game's item tooltip (design/aetherium-item-tooltip, Miguel, 17 Oct 2026): a header washed in the
+   grade's colour with the name, grade and type, the item level and the art on the right; slate rows under it; the Soul
+   Binding rate with its bar; skill boosts in cyan; manastone sockets; the required level at the foot. */
+.ae-info-card:has(.ae-tt){padding:0;gap:0;width:min(400px,100%)}
+.ae-info-card:has(.ae-tt) .ae-info-close{z-index:2}
+.ae-tt{--ae-g:var(--ae-grade-common);display:grid}
+.ae-tt-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.75rem;padding:1rem 2.75rem 1rem 1rem;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--ae-g) 34%,var(--ae-panel-solid)) 0%,color-mix(in srgb,var(--ae-g) 12%,var(--ae-panel-solid)) 60%,var(--ae-panel-solid) 100%);
+  border-bottom:1px solid color-mix(in srgb,var(--ae-g) 40%,var(--ae-hairline))}
+.ae-tt-title{display:grid;gap:.125rem;min-width:0}
+.ae-tt-title h3{margin:0;font:700 1.375rem/1.2 var(--ae-font-ui);color:var(--ae-g);overflow-wrap:anywhere}
+.ae-tt-kind{margin:0;font:600 1rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-tt-level{margin:.25rem 0 0;display:grid;font:600 .9375rem/1.25 var(--ae-font-ui);color:var(--ae-text)}
+.ae-tt-level b{font:700 1.375rem/1.2 var(--ae-font-ui)}
+.ae-tt-art img{display:block;width:96px;height:96px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.ae-tt-body{display:grid;gap:.625rem;padding:.875rem 1rem}
+.ae-tt-rows{margin:0;padding:0 0 .625rem;list-style:none;display:grid;gap:.25rem;border-bottom:1px solid var(--ae-hairline)}
+.ae-tt-rows li{display:flex;justify-content:space-between;gap:.75rem;font:600 1rem/1.35 var(--ae-font-ui);color:var(--ae-text)}
+.ae-tt-rows b{font-weight:700;font-variant-numeric:tabular-nums}
+.ae-tt-rows em{font-style:normal;color:var(--ae-gold)}
+.ae-tt-bind{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.25rem .75rem;font:600 1rem/1.35 var(--ae-font-ui);color:var(--ae-ice)}
+.ae-tt-bind b{color:var(--ae-text)}
+.ae-tt-bar{grid-column:1/-1;display:block;height:4px;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline)}
+.ae-tt-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ae-ice),var(--ae-strobe-hi))}
+.ae-tt-perks{margin:0;padding:0 0 .625rem;list-style:none;display:grid;gap:.25rem;border-bottom:1px solid var(--ae-hairline)}
+.ae-tt-perks li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.5rem;font:600 1rem/1.35 var(--ae-font-ui)}
+.ae-tt-perks span{color:var(--ae-grade-special);text-decoration:underline;text-underline-offset:3px}
+.ae-tt-perks b{color:var(--ae-text)}
+.ae-tt-stones{margin:0;padding:0 0 .625rem;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.375rem .75rem;border-bottom:1px solid var(--ae-hairline)}
+.ae-tt-stones li{display:flex;align-items:center;gap:.5rem;min-width:0;font:600 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-tt-stones span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ae-tt-stones i{flex:0 0 auto;width:1.5rem;height:1.5rem;transform:rotate(45deg) scale(.8);background:var(--ae-raised);box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)}
+.ae-tt-note{margin:0;font-size:.875rem;color:var(--ae-text-muted)}
+.ae-tt-desc{display:grid;gap:.125rem}
+.ae-tt-foot{margin:0;padding:.625rem 1rem;font:700 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text);background:rgba(0,0,0,.3);border-top:1px solid var(--ae-hairline)}
+.ae-tt-actions{display:flex;padding:.75rem 1rem 1rem}
+.ae-tt-actions .ae-btn{flex:1 1 auto;justify-content:center}
+.ae-tt .ae-item-enchant{margin:0}
+
+/* The Enhance tab: the build options, what the build needs, then the gear on the left and the picked piece on the right. */
+.ae-eforge{display:grid;gap:var(--ae-gap)}
+.ae-eforge[hidden],.ae-gear-page[hidden]{display:none}
+.ae-eforge .ae-ehow{margin:0}
+.ae-eoptions{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .75rem}
+.ae-eoption{display:grid!important;justify-items:start;gap:.125rem;padding:.375rem 1.125rem!important}
+.ae-eoption small{font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-eneeds-list{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.75rem 1.25rem}
+.ae-eneeds-list div{display:grid;gap:.25rem;min-width:0}
+.ae-eneeds-list dt{font:700 .875rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-eneeds-list dd{margin:0;font-size:.9375rem;line-height:1.45;color:var(--ae-text)}
+.ae-eneeds-list ol{margin:0;padding-left:1.25rem}
+.ae-eneeds-list p{margin:0}
+.ae-eneeds-caps{display:flex;flex-wrap:wrap;gap:.375rem;margin-top:.25rem!important}
+.ae-eneeds-caps span{padding:.125rem .5rem;border-radius:var(--ae-pill);border:1px solid var(--ae-hairline-strong);font-size:.875rem}
+.ae-eforge-grid{display:grid;grid-template-columns:minmax(16rem,22rem) minmax(0,1fr);gap:var(--ae-gap);align-items:start}
+@media (max-width:899px){.ae-eforge-grid{grid-template-columns:minmax(0,1fr)}}
+.ae-eitems{margin:0;padding:0;list-style:none;display:grid;gap:.375rem}
+.aetherium-page .ae-eitem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.625rem;width:100%;min-height:3.5rem;padding:.375rem .875rem .375rem .5rem}
+.ae-eitem .ae-gtile{width:40px;height:40px}
+.ae-eitem-text{display:grid;gap:.125rem;min-width:0}
+.ae-eitem-name{font:700 .9375rem/1.2 var(--ae-font-ui);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ae-eitem-text small{font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-eitem-mark{display:inline-flex;align-items:center;gap:.25rem;font:700 .8125rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-eitem-mark .ae-eicon{width:16px;height:16px}
+.ae-eforge-detail{display:grid;gap:.75rem}
+.ae-eforge-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.75rem}
+.ae-eforge-head .ae-gtile{width:56px;height:56px}
+.ae-eforge-name{margin:0;font:700 1.25rem/1.2 var(--ae-font-ui);color:var(--ae-g,var(--ae-text))}
+.ae-eforge-head p{margin:.125rem 0 0;font-size:.875rem;color:var(--ae-text-muted)}
+@media (max-width:520px){.ae-eforge-head{grid-template-columns:auto minmax(0,1fr)}.ae-eforge-card{grid-column:1/-1}}
+.ae-assess{display:grid;gap:.375rem;padding:.75rem;background:var(--ae-well);border:1px solid var(--ae-hairline);border-left:3px solid var(--ae-ice)}
+.ae-assess.is-replace,.ae-assess.is-weak{border-left-color:var(--ae-warn)}
+.ae-assess.is-good{border-left-color:var(--ae-manual)}
+.ae-assess p{margin:0}
+.ae-assess-head{font:700 1.0625rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-assess-why,.ae-assess-look{margin:0;padding-left:1.1rem;display:grid;gap:.25rem;font-size:.9375rem;line-height:1.45;color:var(--ae-text)}
+.ae-assess-look b{color:var(--ae-text-muted);margin-right:.375rem}
+.ae-eforge-detail .ae-advice{margin:0}
+/* What to enhance, and when: the three gates with the Daeva's own stage lit, the prepare path before Lv 35, the steps. */
+.ae-elogic{display:grid;gap:.625rem}
+.ae-elogic-now{margin:0;padding:.5rem .75rem;font:700 1rem/1.4 var(--ae-font-ui);color:var(--ae-text);background:var(--ae-well);border-left:3px solid var(--ae-gold)}
+.ae-elogic-now[data-phase="prepare"]{border-left-color:var(--ae-ice)}
+.ae-elogic-gates{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.5rem;counter-reset:gate}
+.ae-elogic-gate{display:grid;gap:.25rem;padding:.625rem .75rem;background:rgba(0,0,0,.25);border:1px solid var(--ae-hairline);counter-increment:gate}
+.ae-elogic-gate b{font:700 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-elogic-gate b::before{content:counter(gate) ". ";color:var(--ae-text-muted)}
+.ae-elogic-gate span{font-size:.9375rem;line-height:1.45;color:var(--ae-text-muted)}
+.ae-elogic-gate.is-lit{border-color:var(--ae-gold);box-shadow:inset 0 0 12px color-mix(in srgb,var(--ae-gold) 18%,transparent)}
+.ae-elogic-gate.is-lit span{color:var(--ae-text)}
+.ae-elogic-prepare{display:grid;gap:.375rem;padding:.75rem;background:var(--ae-well);border:1px solid var(--ae-hairline);border-left:3px solid var(--ae-ice)}
+.ae-elogic-prepare p{margin:0}
+.ae-elogic-jobs{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.375rem}
+.ae-elogic-jobs li{display:grid;gap:.125rem;padding:.375rem .5rem;border:1px solid var(--ae-hairline)}
+.ae-elogic-jobs b{font:700 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-elogic-jobs span{font-size:.875rem;color:var(--ae-text-muted)}
+.ae-elogic-steps{margin:0;padding:0;list-style:none;display:grid;gap:.375rem;counter-reset:step}
+.ae-elogic-steps li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.5rem;align-items:start;font-size:.9375rem;line-height:1.45;color:var(--ae-text-muted);counter-increment:step}
+.ae-elogic-steps li .ae-eicon{width:16px;height:16px;margin-top:.2rem;color:var(--ae-ice)}
+.ae-elogic-steps b{color:var(--ae-text)}
+.ae-elogic-steps b::before{content:counter(step) ". "}
+.ae-elogic-except{color:var(--ae-text-muted)}
+.ae-elogic p{margin:0}
+.ae-tt-perks .is-empty span{color:var(--ae-text-dim);text-decoration:none}
+.ae-tt-perks .ae-perk-empty{display:block;width:20px;height:20px;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline)}

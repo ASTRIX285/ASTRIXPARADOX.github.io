@@ -120,8 +120,9 @@ check('ASTRIX285: armory fixes first, then the build',()=>{
   assert.equal(plan.character.name,'ASTRIX285');
   assert.deepEqual(plan.now.map(item=>item.title),[
     'Spend points on the Nezekan Daevanion board',
-    // Grade rule (11 Oct 2026): at Lv 12 the Common and Rare pieces go to their +5 cap, one move for all eight.
-    'Enchant 8 Rare and Common pieces to +5',
+    // Enhancement logic (Miguel, 18 Oct 2026): no Unique gear before Lv 35, so nothing is enhanced; one move says to save
+    // the stones and gather and level crafting instead (it replaces the 11 Oct "enchant to +5" move).
+    'Save your Enhance Stones until Lv 35',
     // Level planner (17 Oct 2026): the level move is still the Mastery list's first step; the logic now puts Rending Blow
     // first at Lv 12 (it was Keen Strike, the build's priority 1): its Lv 8 pick, Usable while moving, is worth more to a DPS.
     'Level Rending Blow (now Lv 3)',
@@ -448,13 +449,15 @@ check('no Daevanion move when every open board has nodes taken: a finished board
 // Grade rule (11 Oct 2026): was "the +0 worn slots" (needsEnchant). The move now lists the slots the grade rule enchants.
 check('the enchant move lists the worn slots the grade rule says to enchant, the rule the Gear page flags with',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
-  const move=plan.now.find(item=>/^Enchant \d+ .+ pieces to \+5$/.test(item.title));
-  const expected=astrix.gear.filter(slot=>enchantAdvice(slot,{level:12,grades,progression})?.action==='enchant').map(slot=>slot.slotPos);
-  assert.ok(expected.length>0,'The fixture wears items to enchant');
+  // Enhancement logic (Miguel, 18 Oct 2026): at Lv 12 nothing below Unique is enhanced; the save move lists every held piece.
+  const move=plan.now.find(item=>/^Save your Enhance Stones until Lv 35$/.test(item.title));
+  const expected=astrix.gear.filter(slot=>enchantAdvice(slot,{level:12,grades,progression})?.action==='hold').map(slot=>slot.slotPos);
+  assert.ok(expected.length>0,'The fixture wears pieces to hold');
   assert.deepEqual(move.slots,expected);
   assert.equal(move.ring,move.move,'Show me rings the move by its own id');
-  assert.ok(astrix.gear.filter(slot=>!slot.empty).every(slot=>enchantAdvice(slot,{level:12,grades,progression}).action==='enchant'),'At Lv 12 every Common and Rare item below +5 is enchanted');
-  assert.ok(astrix.gear.filter(slot=>!slot.empty).every(slot=>slot.enchant<5),'The fixture items are all below their +5 cap');
+  assert.match(move.detail,/Gather materials and level your crafting instead/,'It says what to do instead');
+  assert.ok(astrix.gear.filter(slot=>!slot.empty).every(slot=>enchantAdvice(slot,{level:12,grades,progression}).action==='hold'),'At Lv 12 every Common and Rare piece is held, never enchanted');
+  assert.ok(!plan.now.some(item=>/^Enchant /.test(item.title)),'No enchant move before Unique gear');
 });
 
 /* The grade rule (brief fix/aetherium-gear-enchant-context, 11 Oct 2026). Grades come from grades.json (the data's
@@ -497,17 +500,25 @@ check('Unique: enchant to +10 first (every step succeeds), then +15 only on the 
   assert.equal(advise({enchant:3}).about,true,'No item detail yet: the cap is the grade table\'s, said as about');
   assert.equal(advise({enchant:3,maxEnchant:15}).about,false,'The item\'s own max enchant wins');
 });
-check('Epic never above +5: always Replace with a Unique piece',()=>{
+check('Epic is never enhanced (Miguel, 18 Oct 2026): hold before Lv 35, Replace with a Unique piece from Lv 35',()=>{
   for(const enchant of [0,3,5])assert.deepEqual(pickAdvice(advise({grade:'Legend',enchant,maxEnchant:10})),['replace',enchant,null,false,'REPLACE']);
-  assert.match(advise({grade:'Legend'}).why,/do not enchant it past \+5/);
+  assert.match(advise({grade:'Legend'}).why,/^Do not enhance Epic gear\. Replace it with a Unique piece, from a drop or a craft\.$/);
+  for(const level of [1,20,34])assert.deepEqual(pickAdvice(advise({grade:'Legend',enchant:2,maxEnchant:10},level)),['hold',2,null,false,null],`Lv ${level}`);
+  assert.match(advise({grade:'Legend'},30).why,/no Unique gear drops before Lv 35/);
+  assert.equal(advise({grade:'Legend'},35).action,'replace','From Lv 35 it is replaced');
   assert.equal(advise({grade:'Legend'}).grade.name,'Epic');
 });
-check('Common and Rare: enchant to +5 early, Replace from Lv 20 (no progression cut-off yet)',()=>{
-  assert.equal(advise({grade:'Rare',enchant:0},19).action,'enchant');
-  assert.equal(advise({grade:'Rare',enchant:0},19).to,5);
-  assert.equal(advise({grade:'Common',enchant:2},12).to,5);
-  for(const grade of ['Common','Rare'])assert.equal(advise({grade,enchant:0},20).action,'replace',grade);
-  assert.equal(advise({grade:'Rare',enchant:5,maxEnchant:5},12).action,'full');
+check('Common and Rare are never enhanced (Miguel, 18 Oct 2026): hold before Lv 35 (gather and craft instead), Replace from Lv 35',()=>{
+  for(const grade of ['Common','Rare'])for(const level of [1,12,19,20,34]){
+    const advice=advise({grade,enchant:0},level);
+    assert.deepEqual([advice.action,advice.to,advice.flag],['hold',null,null],`${grade} Lv ${level}`);
+    assert.match(advice.why,/gather and level your crafting instead/);
+  }
+  for(const grade of ['Common','Rare'])assert.equal(advise({grade,enchant:0},35).action,'replace',grade);
+  assert.equal(advise({grade:'Rare',enchant:5,maxEnchant:5},12).action,'hold','Even at its cap: held, never called done');
+  // The level comes from the data (progression.json unique-gear-level), not the code.
+  assert.equal(progression.records.find(record=>record.id==='unique-gear-level').value,35);
+  assert.ok(progression.records.find(record=>record.id==='unique-gear-level').provenance.some(source=>source.kind==='in-game-capture'&&/Lv 35/.test(source.note)));
 });
 check('amulets and belts follow their own +10 cap at every grade',()=>{
   for(const slot of ['Amulet','Belt'])for(const grade of ['Rare','Legend','Unique']){
@@ -637,23 +648,22 @@ check('enchant rules in mechanics.json: rates, pity, carry and stones, each with
     delete items['2'].magicStoneStat;
     const model=lv45Of(items);
     const tank=by(planFor('tank',model),2),dps=by(planFor('dps',model),2);
-    assert.deepEqual(tank.steps.map(step=>step.kind),['manastone','growth-risky','soul-binding'],'Stones before the costly Growth step');
-    assert.equal(tank.label,'Stones');
-    assert.equal(tank.next.title,'Stones: fill 4 empty slots');
+    // Enhancement logic (18 Oct 2026, docs/ENHANCEMENT.md sections 6 and 9): past +10, then Soul Binding, then stones.
+    assert.deepEqual(tank.steps.map(step=>step.kind),['growth-risky','soul-binding','manastone'],'The record\'s order: past +10, Soul Binding, stones');
+    assert.equal(tank.steps.find(step=>step.kind==='manastone').title,'Stones: fill 4 empty slots');
     assert.deepEqual(tank.sockets.map(socket=>socket.best.name),['HP','Defence','Block','Accuracy']);
     assert.deepEqual(dps.sockets.map(socket=>socket.best.name),['Front or Back Damage Boost','Weapon or Critical Damage Boost','Damage Boost','Attack']);
-    assert.notDeepEqual(tank.next.why,dps.next.why);
+    assert.notDeepEqual(tank.steps.find(step=>step.kind==='manastone').why,dps.steps.find(step=>step.kind==='manastone').why);
     // Filled stones are judged for the role: the guard's own stones suit a tank, not a DPS.
     const filled=by(planFor('tank'),2).sockets,dpsFilled=by(planFor('dps'),2).sockets;
     assert.deepEqual(filled.map(socket=>socket.fits),[true,true,true,false],'Accuracy, Defence and HP fit a tank; Critical Hit Resist does not');
     assert.ok(dpsFilled.every(socket=>socket.fits===false));
     // A healer has no stone order in the record: said, never guessed.
     const healer=by(planFor('healer',model),2);
-    assert.match(healer.next.why,/Which stones suit a healer is not confirmed yet\./);
-    // Epic pieces to replace: cheap stones only. Rare pieces to replace: no mark at all.
+    assert.match(healer.steps.find(step=>step.kind==='manastone').why,/Which stones suit a healer is not confirmed yet\./);
+    // Epic pieces (Miguel, 18 Oct 2026): nothing is spent on them, not even cheap stones. No step, no mark.
     const helm=by(planFor('tank'),3);
-    assert.deepEqual([helm.label,helm.next.title],['Stones','Stones: fill 3 empty slots']);
-    assert.match(helm.next.why,/Cheap stones only: this piece is to be replaced\./);
+    assert.deepEqual([helm.label,helm.next,helm.steps.length],[null,null,0],'No stones on an Epic piece');
     assert.equal(by(planFor('tank'),14).mark,null);
   });
   check('enhancement: no detail read yet: Growth from the equipment list, no stones or Bind, never Done',()=>{
@@ -679,7 +689,15 @@ check('enchant rules in mechanics.json: rates, pity, carry and stones, each with
       assert.ok(['confirmed','reported','unknown'].includes(record.status),`${record.id} status`);
       for(const fact of record.facts??[])assert.ok(['confirmed','reported','unknown'].includes(fact.status),`${record.id} ${fact.id}`);
     }
-    assert.equal(records.order.steps.length,6);
+    // Enhancement logic (Miguel, 18 Oct 2026): the order opens with the Lv 35 save step and the no-Epic rule, then the six.
+    assert.equal(records.order.steps.length,8);
+    assert.match(records.order.steps[0],/^Before Lv 35 .*gather materials and level your crafting instead\.$/);
+    assert.match(records.order.steps[1],/^Epic, Rare and Common gear: never enhanced\./);
+    // The decision logic: three gates, six steps in the record's order, the belt and amulet exception, the prepare path.
+    assert.deepEqual(records.logic.gates.map(gate=>gate.id),['level','grade','slot']);
+    assert.deepEqual(records.logic.steps.map(step=>step.tab),['growth','growth','soul-binding','manastone','theostone','transfer']);
+    assert.deepEqual(records.logic.prepare.professions.map(item=>item.name),['Blacksmithing','Armorsmithing','Handicrafting','Alchemy','Cooking']);
+    assert.ok(records.logic.provenance.some(source=>source.kind==='in-game-capture'&&/Epic/.test(source.note)),'The no-Epic ruling is cited');
     const text=JSON.stringify(enhancement.records.map(({provenance,...record})=>record));
     assert.doesNotMatch(text,/\d[\d,]*\s*Kina|Kina\s*\d/,'No Kina numbers');
     assert.doesNotMatch(text,/Legend|ASTRIX285|AXPARADOX|armory/i,'No Legend grade, gamer tag or "armory" in the advice text');

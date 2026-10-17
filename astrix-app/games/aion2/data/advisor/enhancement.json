@@ -664,18 +664,168 @@
       ]
     },
     {
+      "id": "logic",
+      "label": "What to enhance, and when",
+      "status": "confirmed",
+      "text": "Enhancement is spent on Unique gear only. Unique gear starts at Lv 35; before that, save Enhance Stones, Kina and manastones. Epic, Rare and Common gear is never enhanced: a Unique piece replaces it. Belt and amulet are the exception: they use their own scrolls, not Enhance Stones, and go to +10 at every grade.",
+      "gates": [
+        {
+          "id": "level",
+          "question": "Has the Daeva reached the level Unique gear starts at?",
+          "no": "Save and prepare: enhance nothing but the belt and amulet, and spend the time gathering materials and levelling your crafting, so by Lv 35 you can farm and craft enough to succeed.",
+          "yes": "Build the Unique pieces, one at a time."
+        },
+        {
+          "id": "grade",
+          "question": "Is the piece Unique or better?",
+          "no": "Do not enhance it, not even with cheap stones. Replace it with a Unique piece.",
+          "yes": "It is a keeper: follow the steps below."
+        },
+        {
+          "id": "slot",
+          "question": "Which piece first?",
+          "answer": "The weapon, then the guard, then the armour, then the accessories."
+        }
+      ],
+      "steps": [
+        {
+          "tab": "growth",
+          "title": "Growth to +10",
+          "text": "Every step to +10 succeeds, and extraction gives the Enhance Stones back."
+        },
+        {
+          "tab": "growth",
+          "title": "Past +10, weapon then guard",
+          "text": "Each step can fail and costs a lot; the failure bonus caps the tries. Only the weapon and the guard."
+        },
+        {
+          "tab": "soul-binding",
+          "title": "Soul Binding",
+          "text": "Reroll the lines that are weak for your role first, then Bind towards 100%."
+        },
+        {
+          "tab": "manastone",
+          "title": "Manastones",
+          "text": "Top stones for your role in every slot. Only on keepers: Transfer loses them."
+        },
+        {
+          "tab": "theostone",
+          "title": "Theostone",
+          "text": "One proc stone on the weapon you keep, last."
+        },
+        {
+          "tab": "transfer",
+          "title": "Transfer",
+          "text": "When a better Unique drops for the slot: move the enhance level and Soul Binding across, then rebuild stones and Theostone."
+        }
+      ],
+      "exceptions": [
+        {
+          "slots": ["Belt", "Amulet"],
+          "text": "Belt and amulet use their own enhance scrolls, not Enhance Stones, and go to +10 at every grade."
+        }
+      ],
+      "prepare": {
+        "text": "Before Lv 35, gather all the time and level your crafting. By the time you are proficient you can farm the resources to build enough material to succeed.",
+        "why": "Crafted Dragon Lord gear needs proficiency 55, is Unique, and has one more Soul Binding line than dungeon drops.",
+        "whyStatus": "confirmed",
+        "professions": [
+          {
+            "name": "Blacksmithing",
+            "makes": "Weapons and guards",
+            "refines": "Orichalcum Ingots"
+          },
+          {
+            "name": "Armorsmithing",
+            "makes": "Helm, pauldrons, breastplate, gloves, greaves, boots and cloak",
+            "refines": "Leathers"
+          },
+          {
+            "name": "Handicrafting",
+            "makes": "Rings, earrings, necklaces, bracelets, bows and staffs",
+            "refines": "Wood and gem decorations"
+          },
+          {
+            "name": "Alchemy",
+            "makes": "Potions, serums, scrolls, Manastones and Soulstones",
+            "refines": "Magic Crystals"
+          },
+          {
+            "name": "Cooking",
+            "makes": "Buff food and drinks",
+            "refines": null
+          }
+        ],
+        "gather": {
+          "text": "Orichalcum Ore, wood, gems, herbs and Odyle (nearly every gear recipe needs Odyle). Every craft gives proficiency, success or not.",
+          "status": "confirmed"
+        },
+        "namesStatus": "reported",
+        "namesNote": "Profession names differ between sources; these are the global client names. Check the in-game crafting menu."
+      },
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: do not recommend enhancing even Epic gear; Unique gear starts at Lv 35. Before then, gather materials and level crafting (armour, weapons, food, jewellery) so you can farm enough material to succeed."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mob-endgame-gear",
+          "title": "Aion 2 Endgame Gear: Stats, Soul Binding and Transfers",
+          "publisher": "Mobalytics",
+          "url": "https://mobalytics.gg/gamebase/guides/aion-2-endgame-gear",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-enhancement",
+          "title": "AION 2 Enhancement Guide (Upgrading Your Gear)",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-enhancement-guide-upgrading-your-gear.html",
+          "retrievedOn": "2026-10-17",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "crafting-research",
+          "title": "AION 2 crafting and gathering research (docs/CRAFTING-RESEARCH.md)",
+          "publisher": "The Aetherium research record",
+          "retrievedOn": "2026-10-11",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
       "id": "order",
       "label": "The order to advise",
       "status": "reported",
       "steps": [
-        "While levelling: enhance to +10 only (every step succeeds, the stones come back on extraction). Belt and amulet to +10. Cheap manastones in empty slots. No Theostone.",
-        "Keeper gear (Unique you will hold): weapon first, then guard, past +10 one step at a time. The failure bonus means each step ends within a known number of tries.",
+        "Before Lv 35 (no Unique gear yet): enhance nothing but the belt and amulet (their own scrolls). Save Enhance Stones, Kina and manastones; gather materials and level your crafting instead.",
+        "Epic, Rare and Common gear: never enhanced. A Unique piece replaces it.",
+        "Each Unique piece: Growth to +10 first (every step succeeds, the stones come back on extraction). The weapon first, then the guard, then the armour.",
+        "Past +10: the weapon, then the guard, one step at a time. The failure bonus means each step ends within a known number of tries.",
         "Soul Binding on keepers: reroll weak lines first, then Bind.",
         "Top manastones for your role, on keepers only.",
         "Theostone on the weapon you will keep.",
-        "A better item for the same slot: Transfer, then rebuild the manastones and the Theostone."
+        "A better Unique for the same slot: Transfer, then rebuild the manastones and the Theostone."
       ],
       "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: no enhancing Epic; Unique gear from Lv 35."
+        },
         {
           "kind": "community-guide",
           "ref": "mob-endgame-gear",
