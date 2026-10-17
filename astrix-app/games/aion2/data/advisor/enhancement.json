@@ -794,11 +794,12 @@
         },
         {
           "kind": "community-guide",
-          "ref": "crafting-research",
-          "title": "AION 2 crafting and gathering research (docs/CRAFTING-RESEARCH.md)",
-          "publisher": "The Aetherium research record",
-          "retrievedOn": "2026-10-11",
-          "region": "global",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
           "reliability": "medium"
         }
       ]
