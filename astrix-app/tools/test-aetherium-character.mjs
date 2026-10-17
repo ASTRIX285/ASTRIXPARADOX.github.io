@@ -1204,7 +1204,15 @@ await check('Gear grid click: the item card opens in place with What to do first
   const order=await page.$eval('#aeInfoBody',el=>[...el.querySelectorAll('#aeAdvice,.ae-item-enchant,.ae-item-block:not(#aeAdvice .ae-item-block)')].map(node=>node.id||node.className));
   assert.equal(order[0],'aeAdvice','What to do comes first');
   const card=await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
-  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in your Enchant window\./,/Not confirmed yet/])assert.match(card,part);
+  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in the Growth tab\./,/Not confirmed yet/])assert.match(card,part);
+  // Compact card (Miguel, 17 Oct 2026: "massive card for no reason"): one What to do box, each thing said once, no status
+  // strip repeating the move, the four facts in one row, the Enhancement window inside the box.
+  const whole=await page.$eval('#aeInfo .ae-info-card',el=>el.innerText.replace(/\s+/g,' '));
+  for(const said of ['Check the cost','Chance of each step','A failure costs the attempt','Enchant it to +15'])assert.equal(whole.split(said).length-1,1,`"${said}" is said once`);
+  assert.equal(await page.locator('#aeInfo .ae-card-status').count(),0,'No status strip repeating the move');
+  assert.equal(await page.locator('#aeAdvice #aeEnhancePanel').count(),1,'The Enhancement window sits inside What to do');
+  const facts=await page.$$eval('#aeAdvice .ae-advice-facts.is-row li',items=>items.map(el=>Math.round(el.getBoundingClientRect().top)));
+  assert.ok(facts.length===4&&new Set(facts).size===1,`Grade, cap, now and target on one row (${facts})`);
   assert.match(await page.textContent('#aeInfo'),/Item level 36/);
   await page.keyboard.press('Escape');
   assert.equal(await page.isHidden('#aeInfo'),true);
@@ -1255,10 +1263,13 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   const tabSize=await page.$eval('#aeEnhancePanel [role="tab"]',el=>el.getBoundingClientRect().height);
   assert.ok(tabSize>=44,`tab ${tabSize}px tall`);
   let text=await enhanceText(page);
-  assert.match(text,/^Enhance Next: Growth: \+11 to \+12\. 50% now, at most 11 tries with the failure bonus\./);
-  assert.match(text,/Enhance \+11 of 15/);
-  assert.match(text,/Next step \+12: 50% now Most tries 11, with the failure bonus/);
+  // Compact card (17 Oct 2026): the move is What to do's head, so no Next line repeats it; the Growth tab says the chance
+  // of each step with the most tries once, and the cost once.
+  assert.match(text,/^Growth Manastone Theostone Soul Binding Transfer /);
+  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/^What to do Enchant it to \+15 .* Now \+11 /);
+  assert.match(text,/\+12: 50% chance, at most 11 tries/);
   assert.match(text,/Check the cost in the Growth tab\./);
+  assert.equal(await page.locator('#aeAdvice .ae-enext-line').count(),0,'No Next line repeating the move');
   // Soul Binding: the rate as a bar at 94.3%, each line with a bar, weak lines marked for a tank.
   await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
   assert.equal(await page.isVisible('#aeEpanel-soul-binding'),true);
@@ -1286,7 +1297,8 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   // The weapon: Growth to +10 first; Theostone says what the data cannot.
   await openItem(page,1);
   text=await enhanceText(page);
-  assert.match(text,/^Enhance Next: Growth: \+3 to \+10\. Always succeeds\./);
+  assert.match(await page.$eval('#aeAdvice',el=>el.innerText.replace(/\s+/g,' ')),/^What to do Enchant it to \+10 .* Now \+3 /);
+  assert.match(text,/\+4 to \+10: every step succeeds/);
   await page.click('#aeEnhancePanel [data-etab="theostone"]');
   const theo=await page.$eval('#aeEpanel-theostone',el=>el.innerText.replace(/\s+/g,' '));
   assert.match(theo,/Theostone slots 1 Engraved Not confirmed yet/);

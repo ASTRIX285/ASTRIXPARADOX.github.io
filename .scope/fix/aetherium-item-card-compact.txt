@@ -1,0 +1,20 @@
+# fix/aetherium-item-card-compact: the gear item card in one compact What to do box (move, why, grade, cap, now and target in one row, the Enhancement window inside), each thing said once, then the item (Miguel, 17 Oct 2026).
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/aetherium.css
+astrix-app/pages/aetherium/gear-ledger.mjs
+astrix-app/tools/test-aetherium-character.mjs
+astrix-app/tools/test-aetherium-pages.mjs
+hub/aetherium/ascent/daevanion/index.html
+hub/aetherium/ascent/index.html
+hub/aetherium/ascent/macro/index.html
+hub/aetherium/ascent/mastery/index.html
+hub/aetherium/ascent/skill-bar/index.html
+hub/aetherium/ascent/stats/index.html
+hub/aetherium/ascent/stigma/index.html
+hub/aetherium/compare/index.html
+hub/aetherium/daevanion/index.html
+hub/aetherium/gear/equipment/index.html
+hub/aetherium/gear/index.html
+hub/aetherium/gear/titles/index.html
+hub/aetherium/index.html
+hub/aetherium/skills/index.html

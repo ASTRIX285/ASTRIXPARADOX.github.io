@@ -158,52 +158,6 @@ function openArcanaEmpty(n, from) {
 
 const NOT_CONFIRMED = test => `<span class="ae-tag is-unconfirmed">Not confirmed yet</span>${test ? ` <span class="ae-tag-test">Check: ${esc(test)}</span>` : ''}`;
 
-/**
- * What to do, first in the item card: the grade rule's move, why, grade and cap, now and target, the chance of each next
- * step, that a failure never drops a level or breaks the item, the cost and where Enhance Stones come from.
- */
-function adviceHtml(slot, rules) {
-  const advice = adviceOf(slot);
-  if (!advice) return '';
-  const grade = advice.grade;
-  const rows = [];
-  const cap = Number.isFinite(advice.cap) ? `${advice.about ? 'about ' : ''}+${advice.cap}` : 'not known yet';
-  rows.push(`<li><span>Grade</span><b class="ae-grade-name"${grade.id ? ` data-grade="${esc(grade.id)}"` : ''}>${esc(grade.name)}</b></li>`);
-  rows.push(`<li><span>Enchant cap</span><b>${esc(cap)}</b></li>`);
-  rows.push(`<li><span>Now</span><b>+${esc(advice.from)}</b></li>`);
-  if (advice.action === 'enchant') rows.push(`<li><span>Target</span><b>+${esc(advice.to)}</b></li>`);
-  const head = { enchant: `Enchant it to +${advice.to}`, replace: 'Replace it with a Unique piece', full: 'Fully enchanted', done: `+${advice.from} is enough here` }[advice.action] ?? 'No advice yet';
-  const rates = rules['enchant-rates'];
-  const pity = rules['enchant-pity'];
-  const stones = rules['enhance-stones'];
-  const ownScroll = /^(amulet|belt)$/i.test(String(slot.slot));
-  let odds = '';
-  if (advice.action === 'enchant') {
-    const steps = enchantSteps(advice.from, advice.to, rates);
-    const safe = steps.filter(step => step.rate === 100);
-    const risky = steps.filter(step => step.rate !== 100);
-    const lines = [];
-    if (safe.length) lines.push(`<li>+${safe[0].to}${safe.length > 1 ? ` to +${safe.at(-1).to}` : ''}: every step succeeds</li>`);
-    for (const step of risky) lines.push(`<li>+${step.to}: ${step.rate === null ? 'chance not known yet' : `${step.rate}% chance`}</li>`);
-    odds = `<div class="ae-item-block ae-odds"><p class="ae-item-sec">Chance of each step${rates?.confirmed ? '' : ` ${NOT_CONFIRMED(rates?.test)}`}</p><ul class="ae-odds-list">${lines.join('')}</ul>
-      ${rates?.value?.keepsLevel ? '<p class="ae-card-line">A failure costs the attempt, never a level, and never breaks the item.</p>' : ''}
-      ${risky.length && pity ? `<p class="ae-card-line">${pity.confirmed ? 'Each failed try past +10 adds 5 points to the next try at that step.' : `Each failed try past +10 may add 5 points to the next try at that step. ${NOT_CONFIRMED(pity.test)}`}</p>` : ''}
-    </div>`;
-  }
-  const cost = advice.action === 'enchant'
-    ? `<div class="ae-item-block"><p class="ae-item-sec">Cost</p><p class="ae-card-line">${ownScroll ? 'It uses its own enhance scroll, not Enhance Stones. ' : ''}Check the cost in your Enchant window.${advice.costly ? ' Past +10 it is a big Kina and stone cost.' : ''}</p></div>`
-    : '';
-  const from = advice.action === 'enchant' && !ownScroll && Array.isArray(stones?.value?.from)
-    ? `<div class="ae-item-block"><p class="ae-item-sec">Where ${esc(stones.value.name)}s come from ${stones.confirmed ? '' : NOT_CONFIRMED(stones.test)}</p><ul class="ae-odds-list">${stones.value.from.map(place => `<li>${esc(place)}</li>`).join('')}</ul></div>`
-    : '';
-  return `<section class="ae-advice is-${esc(advice.action ?? 'none')}" id="aeAdvice" aria-labelledby="aeAdviceTitle">
-      <p class="ae-item-sec" id="aeAdviceTitle">What to do</p>
-      <p class="ae-advice-head">${esc(head)}</p>
-      <p class="ae-card-line ae-advice-why">${esc(advice.why)}</p>
-      <ul class="ae-advice-facts">${rows.join('')}</ul>
-      ${odds}${cost}${from}
-    </section>`;
-}
 
 /** Bonus stat lines, each tagged High, Useful or Low for this Daeva's class (stats.json and the class's stat order). */
 function subRows(list) {
@@ -233,15 +187,6 @@ function itemCardBody(slot, d) {
     ${d.description ? d.description.split('\n').map(line => `<p class="ae-card-line ae-item-desc">${esc(line)}</p>`).join('') : ''}`;
 }
 
-/** The card's status line, from the same rule as the marker. */
-function statusOf(advice) {
-  if (!advice) return null;
-  if (advice.action === 'enchant') return ['go', `Enchant it: ${advice.to - advice.from} more ${advice.to - advice.from === 1 ? 'level' : 'levels'} to +${advice.to}`];
-  if (advice.action === 'replace') return ['go', 'Replace it with a Unique piece'];
-  if (advice.action === 'full') return ['keep', 'Fully enchanted'];
-  if (advice.action === 'done') return ['keep', `+${advice.from} reached`];
-  return null;
-}
 const chipsHtml = chips => (chips.filter(Boolean).length ? `<ul class="ae-card-chips">${chips.filter(Boolean).map(chip => `<li>${esc(chip)}</li>`).join('')}</ul>` : '');
 
 /* Enhancement (docs/ENHANCEMENT.md): the game's Enhancement window, item by item. The plan comes from the engine
@@ -294,20 +239,37 @@ function barHtml(percent, label) {
   return `<span class="ae-ebar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}" aria-label="${esc(label)}"><i style="width:${value}%"></i></span>`;
 }
 
-/** The Growth tab for one item: +N of the cap, the next step's chance and the most tries, where to check the cost. */
-function growthPanel(slot, item) {
-  const advice = item.advice;
-  const cap = Number.isFinite(advice?.cap) ? advice.cap : null;
-  const step = item.steps.find(entry => entry.tab === 'growth') ?? null;
-  const rows = [`<li><span>Enhance</span><b>+${esc(advice?.from ?? slot.enchant)}${cap !== null ? ` of ${advice.about ? 'about ' : ''}${esc(cap)}` : ''}</b></li>`];
-  if (step?.kind === 'growth') rows.push(`<li><span>Next steps</span><b>+${esc(step.from + 1)} to +${esc(step.to)}: always succeeds</b></li>`);
-  if (step?.kind === 'growth-risky') {
-    rows.push(`<li><span>Next step</span><b>+${esc(step.to)}: ${Number.isFinite(step.rate) ? `${esc(step.rate)}% now` : 'chance not confirmed yet'}</b></li>`);
-    if (step.tries) rows.push(`<li><span>Most tries</span><b>${esc(step.tries)}, with the failure bonus</b></li>`);
+/**
+ * The Growth tab for one item, said once: the chance of each step to the target (with the most tries where the failure
+ * bonus caps them), that a failure never drops a level, the failure bonus past +10, the cost and where stones come from.
+ */
+function growthPanel(slot, item, rules) {
+  const advice = item?.advice ?? adviceOf(slot);
+  if (!advice) return '<p class="ae-card-line">No Growth advice for this item yet.</p>';
+  if (advice.action !== 'enchant') {
+    const say = { replace: 'No more Growth: replace this piece.', full: 'At its cap.', done: advice.why }[advice.action] ?? '';
+    return say ? `<p class="ae-card-line">${esc(say)}</p>` : '';
   }
-  const say = step ? '' : advice?.action === 'replace' ? '<p class="ae-card-line">No more Growth: replace this piece.</p>'
-    : advice?.action === 'full' ? '<p class="ae-card-line">At its cap.</p>' : advice?.action === 'done' ? `<p class="ae-card-line">${esc(advice.why)}</p>` : '';
-  return `<ul class="ae-advice-facts ae-erows">${rows.join('')}</ul>${say}<p class="ae-card-line">Check the cost in the Growth tab.</p>`;
+  const rates = rules['enchant-rates'];
+  const pity = rules['enchant-pity'];
+  const stones = rules['enhance-stones'];
+  const ownScroll = /^(amulet|belt)$/i.test(String(slot.slot));
+  const next = item?.steps?.find(entry => entry.tab === 'growth' && entry.kind === 'growth-risky') ?? null;
+  const steps = enchantSteps(advice.from, advice.to, rates);
+  const safe = steps.filter(step => step.rate === 100);
+  const risky = steps.filter(step => step.rate !== 100);
+  const lines = [];
+  if (safe.length) lines.push(`<li>+${safe[0].to}${safe.length > 1 ? ` to +${safe.at(-1).to}` : ''}: every step succeeds</li>`);
+  for (const step of risky) lines.push(`<li>+${step.to}: ${step.rate === null ? 'chance not known yet' : `${step.rate}% chance`}${next?.tries && next.to === step.to ? `, at most ${esc(next.tries)} tries` : ''}</li>`);
+  const fromList = !ownScroll && Array.isArray(stones?.value?.from)
+    ? `<p class="ae-card-line ae-efrom">${esc(stones.value.name)}s from ${esc(stones.value.from.join(', '))}. ${stones.confirmed ? '' : NOT_CONFIRMED(stones.test)}</p>`
+    : '';
+  return `<p class="ae-item-sec ae-odds-title">Chance of each step${rates?.confirmed ? '' : ` ${NOT_CONFIRMED(rates?.test)}`}</p>
+    <ul class="ae-odds-list">${lines.join('')}</ul>
+    ${rates?.value?.keepsLevel ? '<p class="ae-card-line">A failure costs the attempt, never a level, and never breaks the item.</p>' : ''}
+    ${risky.length && pity ? `<p class="ae-card-line">${pity.confirmed ? 'Each failed try past +10 adds 5 points to the next try at that step.' : `Each failed try past +10 may add 5 points to the next try at that step. ${NOT_CONFIRMED(pity.test)}`}</p>` : ''}
+    <p class="ae-card-line">${ownScroll ? 'It uses its own enhance scroll, not Enhance Stones. ' : ''}Check the cost in the Growth tab.${advice.costly ? ' Past +10 it is a big Kina and stone cost.' : ''}</p>
+    ${fromList}`;
 }
 
 /** The Manastone tab: each slot filled or empty, with the role's best stone for an empty one. */
@@ -364,25 +326,48 @@ function transferPanel() {
   return factsHtml(enhanceRecords()?.transfer?.facts?.filter(fact => fact.status !== 'unknown')) || '<p class="ae-card-line">Not confirmed yet.</p>';
 }
 
-/** The Enhance panel in the item card: the Next line, then the window's five tabs with the next one lit. */
-function enhanceHtml(slot) {
+/**
+ * What to do, first in the item card and compact (Miguel, 17 Oct 2026: "massive card for no reason"): the move and why,
+ * grade, cap, now and target in one row, then the Enhancement window's five tabs with the next one lit. The Growth tab
+ * holds the chance of each step and the cost; nothing in the card is said twice.
+ */
+function planBlock(slot, rules) {
+  const advice = adviceOf(slot);
   const item = planOf(slot);
   const plan = enhancePlan();
-  if (!item || !plan) return '';
-  const lit = item.next?.tab ?? 'growth';
-  const next = item.next
-    ? `<b>Next:</b> ${esc(item.next.title)}. ${esc(item.next.why)}`
-    : item.mark === 'done' ? '<b>Next:</b> nothing. Every tab is done for this item.'
-      : item.advice?.action === 'replace' ? '<b>Next:</b> nothing to enhance. Replace it with a Unique piece.'
-        : item.partial ? '<b>Next:</b> reading this item\'s details.' : '<b>Next:</b> no enhance advice for this item yet.';
-  const panels = { growth: growthPanel(slot, item), manastone: stonesPanel(slot, item), theostone: theostonePanel(slot), 'soul-binding': bindPanel(slot, item), transfer: transferPanel() };
-  const tabs = plan.tabs.map(tab => `<button type="button" role="tab" class="ae-btn ae-planner-tab ae-etab${tab.id === item.next?.tab ? ' is-next' : ''}" id="aeEtab-${esc(tab.id)}" data-etab="${esc(tab.id)}" aria-controls="aeEpanel-${esc(tab.id)}" aria-selected="${tab.id === lit}" tabindex="${tab.id === lit ? 0 : -1}">${enhanceIcon(tab.id)}<span>${esc(tab.name)}</span></button>`).join('');
-  const bodies = plan.tabs.map(tab => `<div class="ae-epanel" role="tabpanel" id="aeEpanel-${esc(tab.id)}" aria-labelledby="aeEtab-${esc(tab.id)}" tabindex="0"${tab.id === lit ? '' : ' hidden'}><p class="ae-epanel-purpose">${esc(tab.purpose)}</p>${panels[tab.id] ?? ''}</div>`).join('');
-  return `<section class="ae-enhance" id="aeEnhancePanel" aria-labelledby="aeEnhanceHead">
-      <p class="ae-item-sec" id="aeEnhanceHead">Enhance</p>
-      <p class="ae-enext-line">${next}</p>
-      <div class="ae-etabs" role="tablist" aria-label="Enhancement window">${tabs}</div>
-      ${bodies}
+  if (!advice && !item) return '';
+  const head = advice
+    ? { enchant: `Enchant it to +${advice.to}`, replace: 'Replace it with a Unique piece', full: 'Fully enchanted', done: `+${advice.from} is enough here` }[advice.action] ?? 'No advice yet'
+    : item?.next ? item.next.title : 'No advice yet';
+  const facts = [];
+  if (advice) {
+    const cap = Number.isFinite(advice.cap) ? `${advice.about ? 'about ' : ''}+${advice.cap}` : 'not known yet';
+    facts.push(`<li><span>Grade</span><b class="ae-grade-name"${advice.grade.id ? ` data-grade="${esc(advice.grade.id)}"` : ''}>${esc(advice.grade.name)}</b></li>`);
+    facts.push(`<li><span>Enchant cap</span><b>${esc(cap)}</b></li>`);
+    facts.push(`<li><span>Now</span><b>+${esc(advice.from)}</b></li>`);
+    if (advice.action === 'enchant') facts.push(`<li><span>Target</span><b>+${esc(advice.to)}</b></li>`);
+  }
+  // The Next line only when it says something new: a tab other than the Growth the head already names.
+  const reading = 'Reading this item' + String.fromCharCode(39) + 's details.';
+  const nextLine = item?.next && !(advice?.action === 'enchant' && item.next.tab === 'growth')
+    ? `<p class="ae-enext-line"><b>Next:</b> ${esc(item.next.title)}. ${esc(item.next.why)}</p>`
+    : !item?.next && item?.partial ? `<p class="ae-enext-line">${reading}</p>` : '';
+  let window = '';
+  if (item && plan) {
+    const lit = item.next?.tab ?? 'growth';
+    const panels = { growth: growthPanel(slot, item, rules), manastone: stonesPanel(slot, item), theostone: theostonePanel(slot), 'soul-binding': bindPanel(slot, item), transfer: transferPanel() };
+    const tabs = plan.tabs.map(tab => `<button type="button" role="tab" class="ae-btn ae-planner-tab ae-etab${tab.id === item.next?.tab ? ' is-next' : ''}" id="aeEtab-${esc(tab.id)}" data-etab="${esc(tab.id)}" aria-controls="aeEpanel-${esc(tab.id)}" aria-selected="${tab.id === lit}" tabindex="${tab.id === lit ? 0 : -1}">${enhanceIcon(tab.id)}<span>${esc(tab.name)}</span></button>`).join('');
+    const bodies = plan.tabs.map(tab => `<div class="ae-epanel" role="tabpanel" id="aeEpanel-${esc(tab.id)}" aria-labelledby="aeEtab-${esc(tab.id)}" tabindex="0"${tab.id === lit ? '' : ' hidden'}><p class="ae-epanel-purpose">${esc(tab.purpose)}</p>${panels[tab.id] ?? ''}</div>`).join('');
+    window = `<div class="ae-enhance" id="aeEnhancePanel" aria-label="Enhancement window"><div class="ae-etabs" role="tablist" aria-label="Enhancement window">${tabs}</div>${bodies}</div>`;
+  } else if (advice?.action === 'enchant') {
+    window = `<div class="ae-epanel">${growthPanel(slot, null, rules)}</div>`;
+  }
+  return `<section class="ae-advice is-${esc(advice?.action ?? 'none')}" id="aeAdvice" aria-labelledby="aeAdviceTitle">
+      <p class="ae-item-sec" id="aeAdviceTitle">What to do</p>
+      <p class="ae-advice-head">${esc(head)}</p>
+      ${advice?.why ? `<p class="ae-card-line ae-advice-why">${esc(advice.why)}</p>` : ''}
+      ${facts.length ? `<ul class="ae-advice-facts is-row">${facts.join('')}</ul>` : ''}
+      ${nextLine}${window}
     </section>`;
 }
 
@@ -477,7 +462,7 @@ async function selectSlot(index, from) {
     sub: [slotLabel(slot.slot), detail?.category, gradeOf(slot).name].filter(Boolean).join(' · ')
   });
   const rules = await loadRules();
-  openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}<p class="ae-card-line">Reading ${esc(slot.name)}.</p>` }), from);
+  openInfo(infoCardHtml({ ...head(null), body: `${arcanaNote(slot)}${planBlock(slot, rules)}<p class="ae-card-line">Reading ${esc(slot.name)}.</p>` }), from);
   let result;
   try {
     result = await loadItemDetail(state.model, slot);
@@ -487,7 +472,7 @@ async function selectSlot(index, from) {
   }
   if (state.selected !== index || $('#aeInfo')?.hidden) return;
   if (!result.detail) {
-    openInfo(infoCardHtml({ ...head(null), status: statusOf(adviceOf(slot)), lines: [result.reason], body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${enhanceHtml(slot)}${chipsHtml([`+${slot.enchant}`, exceedText(slot)])}` }), from);
+    openInfo(infoCardHtml({ ...head(null), lines: [result.reason], body: `${arcanaNote(slot)}${planBlock(slot, rules)}${chipsHtml([`+${slot.enchant}`, exceedText(slot)])}` }), from);
     return;
   }
   const d = result.detail;
@@ -495,8 +480,8 @@ async function selectSlot(index, from) {
   refreshTile(index);
   refreshEnhance();
   openInfo(infoCardHtml({
-    ...head(d), status: statusOf(adviceOf(slot)),
-    body: `${arcanaNote(slot)}${adviceHtml(slot, rules)}${enhanceHtml(slot)}${chipsHtml([exceedText(slot), Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
+    ...head(d),
+    body: `${arcanaNote(slot)}${planBlock(slot, rules)}${chipsHtml([exceedText(slot), Number.isFinite(d.level) ? `Item level ${d.level}` : null, d.equipLevel ? `Wear from Lv ${d.equipLevel}` : null, d.soulBindRate ? `Soul bind ${d.soulBindRate}%` : null])}${itemCardBody(slot, d)}`
   }), document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
 }
 
